@@ -231,6 +231,34 @@ void main() {
     expect(buttonItems.first.onPressed, isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/141764
+  testWidgets('zh-CN translation for look up label', (WidgetTester tester) async {
+    const Locale locale = Locale('zh');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+    expect(localizations, isA<CupertinoLocalizationZh>());
+    expect(localizations.lookUpButtonLabel, '查询');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/pull/151364
+  testWidgets('ko-KR translation for cut, copy, paste label in ButtonLabel', (WidgetTester tester) async {
+    const Locale locale = Locale('ko');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+    expect(localizations, isA<CupertinoLocalizationKo>());
+    expect(localizations.cutButtonLabel, '잘라내기');
+    expect(localizations.copyButtonLabel, '복사');
+    expect(localizations.pasteButtonLabel, '붙여넣기');
+  });
+
+  testWidgets('localizations.datePickerDayOfMonth uses the current locale for weekdays', (WidgetTester tester) async {
+    const Locale locale = Locale('zh');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+    expect(localizations, isA<CupertinoLocalizationZh>());
+    expect(localizations.datePickerDayOfMonth(1), '1日');
+    expect(localizations.datePickerDayOfMonth(1, 2), '周二 1日');
+  });
 }
 
 class _FakeEditableText extends EditableText {

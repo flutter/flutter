@@ -1001,7 +1001,7 @@ void main() {
     expect(table.column(2).last.runtimeType, isNot(toBeReplaced));
   });
 
-  testWidgets('Do not crash if a child that has not been layed out in a previous build is removed', (WidgetTester tester) async {
+  testWidgets('Do not crash if a child that has not been laid out in a previous build is removed', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/60488.
     Widget buildTable(Key key) {
       return Directionality(
@@ -1023,7 +1023,7 @@ void main() {
 
     await tester.pumpWidget(
       buildTable(const ValueKey<int>(1)),
-      null, EnginePhase.build, // Children are not layed out!
+      phase: EnginePhase.build, // Children are not laid out!
     );
 
     await tester.pumpWidget(
@@ -1079,7 +1079,7 @@ void main() {
     );
   });
 
-    testWidgets('Set defaultVerticalAlignment to intrisic height and check their heights', (WidgetTester tester) async {
+    testWidgets('Set defaultVerticalAlignment to intrinsic height and check their heights', (WidgetTester tester) async {
     final Widget table = Directionality(
       textDirection: TextDirection.ltr,
       child: Table(

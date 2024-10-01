@@ -41,7 +41,7 @@
   "drawerLabel": "ਨੈਵੀਗੇਸ਼ਨ ਮੀਨੂ",
   "popupMenuLabel": "ਪੌਪਅੱਪ ਮੀਨੂ",
   "dialogLabel": "ਵਿੰਡੋ",
-  "alertDialogLabel": "ਸੁਚੇਤਨਾ",
+  "alertDialogLabel": "ਅਲਰਟ",
   "searchFieldLabel": "ਖੋਜੋ",
   "reorderItemToStart": "ਸ਼ੁਰੂ ਵਿੱਚ ਲਿਜਾਓ",
   "reorderItemToEnd": "ਅੰਤ ਵਿੱਚ ਲਿਜਾਓ",
@@ -144,5 +144,7 @@
   "menuDismissLabel": "ਮੀਨੂ ਖਾਰਜ ਕਰੋ",
   "lookUpButtonLabel": "ਖੋਜੋ",
   "searchWebButtonLabel": "ਵੈੱਬ 'ਤੇ ਖੋਜੋ",
-  "shareButtonLabel": "ਸਾਂਝਾ ਕਰੋ..."
+  "shareButtonLabel": "ਸਾਂਝਾ ਕਰੋ",
+  "clearButtonTooltip": "ਲਿਖਤ ਕਲੀਅਰ ਕਰੋ",
+  "selectedDateLabel": "ਚੁਣਿਆ ਗਿਆ"
 }

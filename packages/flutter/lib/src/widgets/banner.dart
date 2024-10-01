@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -12,8 +17,12 @@ import 'framework.dart';
 
 const double _kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards
 const double _kHeight = 12.0; // height of banner
-const double _kBottomOffset = _kOffset + 0.707 * _kHeight; // offset plus sqrt(2)/2 * banner height
+const double _kBottomOffset = _kOffset + math.sqrt1_2 * _kHeight;
 const Rect _kRect = Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
+const BoxShadow _kShadow = BoxShadow(
+    color: Color(0x7F000000),
+    blurRadius: 6.0,
+  );
 
 const Color _kColor = Color(0xA0B71C1C);
 const TextStyle _kTextStyle = TextStyle(
@@ -63,6 +72,7 @@ class BannerPainter extends CustomPainter {
     required this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
+    this.shadow = _kShadow,
   }) : super(repaint: PaintingBinding.instance.systemFonts) {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
@@ -115,10 +125,12 @@ class BannerPainter extends CustomPainter {
   /// Defaults to bold, white text.
   final TextStyle textStyle;
 
-  static const BoxShadow _shadow = BoxShadow(
-    color: Color(0x7F000000),
-    blurRadius: 6.0,
-  );
+  /// The shadow properties for the banner.
+  ///
+  /// Use a [BoxShadow] object to define the shadow's color, blur radius,
+  /// and spread radius. These properties can be used to create different
+  /// shadow effects.
+  final BoxShadow shadow;
 
   bool _prepared = false;
   TextPainter? _textPainter;
@@ -139,7 +151,7 @@ class BannerPainter extends CustomPainter {
   }
 
   void _prepare() {
-    _paintShadow = _shadow.toPaint();
+    _paintShadow = shadow.toPaint();
     _paintBanner = Paint()
       ..color = color;
     _textPainter?.dispose();
@@ -178,64 +190,32 @@ class BannerPainter extends CustomPainter {
   bool hitTest(Offset position) => false;
 
   double _translationX(double width) {
-    switch (layoutDirection) {
-      case TextDirection.rtl:
-        switch (location) {
-          case BannerLocation.bottomEnd:
-            return _kBottomOffset;
-          case BannerLocation.topEnd:
-            return 0.0;
-          case BannerLocation.bottomStart:
-            return width - _kBottomOffset;
-          case BannerLocation.topStart:
-            return width;
-        }
-      case TextDirection.ltr:
-        switch (location) {
-          case BannerLocation.bottomEnd:
-            return width - _kBottomOffset;
-          case BannerLocation.topEnd:
-            return width;
-          case BannerLocation.bottomStart:
-            return _kBottomOffset;
-          case BannerLocation.topStart:
-            return 0.0;
-        }
-    }
+    return switch ((layoutDirection, location)) {
+      (TextDirection.rtl, BannerLocation.topStart)    => width,
+      (TextDirection.ltr, BannerLocation.topStart)    => 0.0,
+      (TextDirection.rtl, BannerLocation.topEnd)      => 0.0,
+      (TextDirection.ltr, BannerLocation.topEnd)      => width,
+      (TextDirection.rtl, BannerLocation.bottomStart) => width - _kBottomOffset,
+      (TextDirection.ltr, BannerLocation.bottomStart) => _kBottomOffset,
+      (TextDirection.rtl, BannerLocation.bottomEnd)   => _kBottomOffset,
+      (TextDirection.ltr, BannerLocation.bottomEnd)   => width - _kBottomOffset,
+    };
   }
 
   double _translationY(double height) {
-    switch (location) {
-      case BannerLocation.bottomStart:
-      case BannerLocation.bottomEnd:
-        return height - _kBottomOffset;
-      case BannerLocation.topStart:
-      case BannerLocation.topEnd:
-        return 0.0;
-    }
+    return switch (location) {
+      BannerLocation.bottomStart || BannerLocation.bottomEnd => height - _kBottomOffset,
+      BannerLocation.topStart    || BannerLocation.topEnd    => 0.0,
+    };
   }
 
   double get _rotation {
-    switch (layoutDirection) {
-      case TextDirection.rtl:
-        switch (location) {
-          case BannerLocation.bottomStart:
-          case BannerLocation.topEnd:
-            return -math.pi / 4.0;
-          case BannerLocation.bottomEnd:
-          case BannerLocation.topStart:
-            return math.pi / 4.0;
-        }
-      case TextDirection.ltr:
-        switch (location) {
-          case BannerLocation.bottomStart:
-          case BannerLocation.topEnd:
-            return math.pi / 4.0;
-          case BannerLocation.bottomEnd:
-          case BannerLocation.topStart:
-            return -math.pi / 4.0;
-        }
-    }
+    return math.pi / 4.0 * switch ((layoutDirection, location)) {
+      (TextDirection.rtl, BannerLocation.topStart || BannerLocation.bottomEnd) => 1,
+      (TextDirection.ltr, BannerLocation.topStart || BannerLocation.bottomEnd) => -1,
+      (TextDirection.rtl, BannerLocation.bottomStart || BannerLocation.topEnd) => -1,
+      (TextDirection.ltr, BannerLocation.bottomStart || BannerLocation.topEnd) => 1,
+    };
   }
 }
 
@@ -259,6 +239,7 @@ class Banner extends StatefulWidget {
     this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
+    this.shadow = _kShadow,
   });
 
   /// The widget to show behind the banner.
@@ -305,6 +286,13 @@ class Banner extends StatefulWidget {
   /// The style of the text shown on the banner.
   final TextStyle textStyle;
 
+  /// The shadow properties for the banner.
+  ///
+  /// Use a [BoxShadow] object to define the shadow's color, blur radius,
+  /// and spread radius. These properties can be used to create different
+  /// shadow effects.
+  final BoxShadow shadow;
+
   @override
   State<Banner> createState() => _BannerState();
 }
@@ -330,6 +318,7 @@ class _BannerState extends State<Banner> {
       layoutDirection: widget.layoutDirection ?? Directionality.of(context),
       color: widget.color,
       textStyle: widget.textStyle,
+      shadow: widget.shadow,
     );
 
     return CustomPaint(

@@ -11,6 +11,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../cache.dart';
+import '../convert.dart';
 import 'flutter_adapter_args.dart';
 import 'mixins.dart';
 
@@ -100,9 +101,9 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
     final String flutterRoot = fileSystem.path.join(flutterSdkRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui');
     orgDartlangSdkMappings[flutterRoot] = Uri.parse('org-dartlang-sdk:///flutter/lib/ui');
 
-    // The rest of the Dart SDK maps to /third_party/dart/sdk
+    // The rest of the Dart SDK maps to /flutter/third_party/dart/sdk
     final String dartRoot = fileSystem.path.join(flutterSdkRoot, 'bin', 'cache', 'pkg', 'sky_engine');
-    orgDartlangSdkMappings[dartRoot] = Uri.parse('org-dartlang-sdk:///third_party/dart/sdk');
+    orgDartlangSdkMappings[dartRoot] = Uri.parse('org-dartlang-sdk:///flutter/third_party/dart/sdk');
   }
 
   @override
@@ -111,7 +112,7 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
     // terminating, however for Flutter apps it may be running on a remote
     // device so it's not valid to terminate a process with that pid locally.
     // For attach, pids should never be collected as terminateRequest() should
-    // not terminate the debugee.
+    // not terminate the debugger.
   }
 
   /// Called by [disconnectRequest] to request that we forcefully shut down the app being run (or in the case of an attach, disconnect).
@@ -150,11 +151,11 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
     this.process = process;
 
     process.stdout.transform(ByteToLineTransformer()).listen(handleStdout);
-    process.stderr.listen(handleStderr);
+    process.stderr.transform(utf8.decoder).listen(handleStderr);
     unawaited(process.exitCode.then(handleExitCode));
   }
 
   void handleExitCode(int code);
-  void handleStderr(List<int> data);
+  void handleStderr(String data);
   void handleStdout(String data);
 }

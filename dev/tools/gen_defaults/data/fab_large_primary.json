@@ -1,5 +1,5 @@
 {
-  "version": "v0_162",
+  "version": "6_1_0",
 
   "md.comp.fab.primary.large.container.color": "primaryContainer",
   "md.comp.fab.primary.large.container.elevation": "md.sys.elevation.level3",
@@ -9,6 +9,9 @@
   "md.comp.fab.primary.large.container.width": 96.0,
   "md.comp.fab.primary.large.focus.container.elevation": "md.sys.elevation.level3",
   "md.comp.fab.primary.large.focus.icon.color": "onPrimaryContainer",
+  "md.comp.fab.primary.large.focus.indicator.color": "secondary",
+  "md.comp.fab.primary.large.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
+  "md.comp.fab.primary.large.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.fab.primary.large.focus.state-layer.color": "onPrimaryContainer",
   "md.comp.fab.primary.large.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
   "md.comp.fab.primary.large.hover.container.elevation": "md.sys.elevation.level4",

@@ -1,26 +1,22 @@
-def flutterPluginVersion = 'managed'
+def flutterPluginVersion = "managed"
 
-apply plugin: 'com.android.application'
+apply plugin: "com.android.application"
 
 android {
-    // Conditional for compatibility with AGP <4.2.
-    if (project.android.hasProperty("namespace")) {
-        namespace "{{androidIdentifier}}.host"
-    }
-
-    compileSdk {{compileSdkVersion}}
+    namespace = "{{androidIdentifier}}.host"
+    compileSdk = {{compileSdkVersion}}
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
-        applicationId "{{androidIdentifier}}.host"
-        minSdkVersion {{minSdkVersion}}
-        targetSdkVersion {{targetSdkVersion}}
-        versionCode 1
-        versionName "1.0"
+        applicationId = "{{androidIdentifier}}.host"
+        minSdk = {{minSdkVersion}}
+        targetSdk = {{targetSdkVersion}}
+        versionCode = 1
+        versionName = "1.0"
     }
 
     buildTypes {
@@ -30,15 +26,15 @@ android {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig = signingConfigs.debug
         }
     }
 
 }
 buildDir = new File(rootProject.projectDir, "../build/host")
 dependencies {
-    implementation project(':flutter')
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation(project(":flutter"))
+    implementation(fileTree(dir: "libs", include: ["*.jar"]))
+    implementation("androidx.appcompat:appcompat:1.0.2")
+    implementation("androidx.constraintlayout:constraintlayout:1.1.3")
 }

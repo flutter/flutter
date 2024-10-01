@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scroll_position.dart';
+library;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
@@ -62,6 +65,7 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
   });
 
   /// A delegate that provides the children for the [TwoDimensionalScrollView].
@@ -106,6 +110,11 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
 
   /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
+
+  /// {@macro flutter.widgets.scrollable.hitTestBehavior}
+  ///
+  /// This value applies to both axes.
+  final HitTestBehavior hitTestBehavior;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -172,6 +181,7 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
       diagonalDragBehavior: diagonalDragBehavior,
       viewportBuilder: buildViewport,
       dragStartBehavior: dragStartBehavior,
+      hitTestBehavior: hitTestBehavior,
     );
 
     final Widget scrollableResult = effectivePrimary
@@ -183,9 +193,9 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
       return NotificationListener<ScrollUpdateNotification>(
         child: scrollableResult,
         onNotification: (ScrollUpdateNotification notification) {
-          final FocusScopeNode focusScope = FocusScope.of(context);
-          if (notification.dragDetails != null && focusScope.hasFocus) {
-            focusScope.unfocus();
+          final FocusScopeNode currentScope = FocusScope.of(context);
+          if (notification.dragDetails != null && !currentScope.hasPrimaryFocus && currentScope.hasFocus) {
+            FocusManager.instance.primaryFocus?.unfocus();
           }
           return false;
         },

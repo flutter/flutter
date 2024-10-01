@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import '../framework/devices.dart';
@@ -37,9 +38,7 @@ TaskFunction createLinuxRunReleaseTest() {
 
 TaskFunction createMacOSRunDebugTest() {
   return DesktopRunOutputTest(
-    // TODO(cbracken): https://github.com/flutter/flutter/issues/87508#issuecomment-1043753201
-    // Switch to dev/integration_tests/ui once we have CocoaPods working on M1 Macs.
-    '${flutterDirectory.path}/examples/hello_world',
+    '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/main.dart',
     release: false,
     allowStderr: true,
@@ -48,9 +47,7 @@ TaskFunction createMacOSRunDebugTest() {
 
 TaskFunction createMacOSRunReleaseTest() {
   return DesktopRunOutputTest(
-    // TODO(cbracken): https://github.com/flutter/flutter/issues/87508#issuecomment-1043753201
-    // Switch to dev/integration_tests/ui once we have CocoaPods working on M1 Macs.
-    '${flutterDirectory.path}/examples/hello_world',
+    '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/main.dart',
     release: true,
     allowStderr: true,
@@ -86,7 +83,9 @@ class AndroidRunOutputTest extends RunOutputTask {
     print('uninstalling...');
     final Process uninstall = await startFlutter(
       'install',
-      options:  <String>['--suppress-analytics', '--uninstall-only', '-d', deviceId],
+      // TODO(andrewkolos): consider removing -v after
+      //  https://github.com/flutter/flutter/issues/153367 is troubleshot.
+      options:  <String>['--suppress-analytics', '--uninstall-only', '-d', deviceId, '-v'],
       isBot: false,
     );
     uninstall.stdout
@@ -138,7 +137,7 @@ class AndroidRunOutputTest extends RunOutputTask {
     _findNextMatcherInList(
       stdout,
       (String line) => line.contains('Built build/app/outputs/flutter-apk/$apk') &&
-        (!release || line.contains('MB).')),
+        (!release || line.contains('MB)')),
       'Built build/app/outputs/flutter-apk/$apk',
     );
 
@@ -173,12 +172,14 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
     }
   );
 
+  final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
+
   static final RegExp _buildOutput = RegExp(
     r'Building Windows application\.\.\.\s*\d+(\.\d+)?(ms|s)',
     multiLine: true,
   );
   static final RegExp _builtOutput = RegExp(
-    r'Built build\\windows\\x64\\runner\\(Debug|Release)\\\w+\.exe( \(\d+(\.\d+)?MB\))?\.',
+    r'Built build\\windows\\(x64|arm64)\\runner\\(Debug|Release)\\\w+\.exe( \(\d+(\.\d+)?MB\))?',
   );
 
   @override
@@ -197,15 +198,9 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
           return false;
         }
 
-        // Size information is only included in release builds.
-        final bool hasSize = line.contains('MB).');
-        if (release != hasSize) {
-          return false;
-        }
-
         return true;
       },
-      'Built build\\windows\\x64\\runner\\$buildMode\\app.exe',
+      '√ Built build\\windows\\$arch\\runner\\$buildMode\\ui.exe',
     );
   }
 }

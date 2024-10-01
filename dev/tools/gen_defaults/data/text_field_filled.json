@@ -1,10 +1,10 @@
 {
-  "version": "v0_162",
+  "version": "6_1_0",
 
   "md.comp.filled-text-field.active-indicator.color": "onSurfaceVariant",
   "md.comp.filled-text-field.active-indicator.height": 1.0,
   "md.comp.filled-text-field.caret.color": "primary",
-  "md.comp.filled-text-field.container.color": "surfaceVariant",
+  "md.comp.filled-text-field.container.color": "surfaceContainerHighest",
   "md.comp.filled-text-field.container.shape": "md.sys.shape.corner.extra-small.top",
   "md.comp.filled-text-field.disabled.active-indicator.color": "onSurface",
   "md.comp.filled-text-field.disabled.active-indicator.height": 1.0,
@@ -44,6 +44,7 @@
   "md.comp.filled-text-field.error.trailing-icon.color": "error",
   "md.comp.filled-text-field.focus.active-indicator.color": "primary",
   "md.comp.filled-text-field.focus.active-indicator.height": 2.0,
+  "md.comp.filled-text-field.focus.active-indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.filled-text-field.focus.input-text.color": "onSurface",
   "md.comp.filled-text-field.focus.label-text.color": "primary",
   "md.comp.filled-text-field.focus.leading-icon.color": "onSurfaceVariant",

@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(davidmartos96): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/142716
+// Fails with "flutter test --test-randomize-ordering-seed=20240201"
+@Tags(<String>['no-shuffle'])
+library;
+
 import 'dart:async';
 import 'dart:io';
 
@@ -12,7 +19,15 @@ import 'package:test/test.dart';
 
 void main() {
   final TokenLogger logger = tokenLogger;
+  // Required init with empty at least once to init late fields.
+  // Then we can use the `clear` method.
   logger.init(allTokens: <String, dynamic>{}, versionMap: <String, List<String>>{});
+
+  setUp(() {
+    // Cleanup the global token logger before each test, to not be tied to a particular
+    // test order.
+    logger.clear();
+  });
 
   test('Templates will append to the end of a file', () {
     final Directory tempDir = Directory.systemTemp.createTempSync('gen_defaults');
@@ -325,10 +340,69 @@ static final String tokenBar = 'foo';
       logger.log('foobar');
       logger.printTokensUsage(verbose: true);
 
-      expect(printLog, contains(errorColoredString('Token unavailable: baz')));
-      expect(printLog, contains(errorColoredString('Token unavailable: foobar')));
       expect(printLog, contains('❌ foo'));
       expect(printLog, contains('Tokens used: 0/1'));
+      expect(printLog, contains(errorColoredString('Some referenced tokens do not exist: 2')));
+      expect(printLog, contains('  baz'));
+      expect(printLog, contains('  foobar'));
+    }));
+
+    test("color function doesn't log when providing a default", overridePrint(() {
+      allTokens['color_foo_req'] = 'value';
+
+      // color_foo_opt is not available, but because it has a default value, it won't warn about it
+
+      TestColorTemplate('block', 'filename', allTokens).generate();
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains('✅ color_foo_req'));
+      expect(printLog, contains('Tokens used: 1/1'));
+    }));
+
+    test('color function logs when not providing a default', overridePrint(() {
+      // Nor color_foo_req or color_foo_opt are available, but only color_foo_req will be logged.
+      // This mimics a token being removed, but expected to exist.
+
+      TestColorTemplate('block', 'filename', allTokens).generate();
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains('Tokens used: 0/0'));
+      expect(printLog, contains(errorColoredString('Some referenced tokens do not exist: 1')));
+      expect(printLog, contains('  color_foo_req'));
+    }));
+
+    test('border function logs width token when available', overridePrint(() {
+      allTokens['border_foo.color'] = 'red';
+      allTokens['border_foo.width'] = 3.0;
+
+      TestBorderTemplate('block', 'filename', allTokens).generate();
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains('✅ border_foo.color'));
+      expect(printLog, contains('✅ border_foo.width'));
+      expect(printLog, contains('Tokens used: 2/2'));
+    }));
+
+    test('border function logs height token when width token not available', overridePrint(() {
+      allTokens['border_foo.color'] = 'red';
+      allTokens['border_foo.height'] = 3.0;
+
+      TestBorderTemplate('block', 'filename', allTokens).generate();
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains('✅ border_foo.color'));
+      expect(printLog, contains('✅ border_foo.height'));
+      expect(printLog, contains('Tokens used: 2/2'));
+    }));
+
+    test("border function doesn't log when width or height tokens not available", overridePrint(() {
+      allTokens['border_foo.color'] = 'red';
+
+      TestBorderTemplate('block', 'filename', allTokens).generate();
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains('✅ border_foo.color'));
+      expect(printLog, contains('Tokens used: 1/1'));
     }));
 
     test('can log and dump versions & tokens to a file', overridePrint(() {
@@ -367,5 +441,24 @@ class TestTemplate extends TokenTemplate {
   String generate() => '''
 static final String tokenFoo = '${getToken('foo')}';
 static final String tokenBar = '${getToken('bar')}';
+''';
+}
+
+class TestColorTemplate extends TokenTemplate {
+  TestColorTemplate(super.blockName, super.fileName, super.tokens);
+
+  @override
+  String generate() => '''
+static final Color color_1 = '${color('color_foo_req')}';
+static final Color color_2 = '${color('color_foo_opt', 'Colors.red')}';
+''';
+}
+
+class TestBorderTemplate extends TokenTemplate {
+  TestBorderTemplate(super.blockName, super.fileName, super.tokens);
+
+  @override
+  String generate() => '''
+static final BorderSide border = '${border('border_foo')}';
 ''';
 }

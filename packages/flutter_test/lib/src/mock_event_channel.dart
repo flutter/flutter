@@ -16,14 +16,14 @@ import 'package:flutter/services.dart';
 /// - [MockStreamHandlerEventSink.endOfStream] sends an end of stream event.
 abstract class MockStreamHandler {
   /// Create a new [MockStreamHandler].
-  MockStreamHandler();
+  const MockStreamHandler();
 
   /// Create a new inline [MockStreamHandler] with the given [onListen] and
   /// [onCancel] handlers.
-  factory MockStreamHandler.inline({
+  const factory MockStreamHandler.inline({
     required MockStreamHandlerOnListenCallback onListen,
     MockStreamHandlerOnCancelCallback? onCancel,
-  }) => _InlineMockStreamHandler(onListen: onListen, onCancel: onCancel);
+  }) = _InlineMockStreamHandler;
 
   /// Handler for the listen event.
   void onListen(Object? arguments, MockStreamHandlerEventSink events);
@@ -39,7 +39,7 @@ typedef MockStreamHandlerOnListenCallback = void Function(Object? arguments, Moc
 typedef MockStreamHandlerOnCancelCallback = void Function(Object? arguments);
 
 class _InlineMockStreamHandler extends MockStreamHandler {
-  _InlineMockStreamHandler({
+  const _InlineMockStreamHandler({
     required MockStreamHandlerOnListenCallback onListen,
     MockStreamHandlerOnCancelCallback? onCancel,
   })  : _onListenInline = onListen,

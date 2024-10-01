@@ -148,5 +148,7 @@
   "menuDismissLabel": "Respingeți meniul",
   "lookUpButtonLabel": "Privire în sus",
   "searchWebButtonLabel": "Căutați pe web",
-  "shareButtonLabel": "Trimiteți…"
+  "shareButtonLabel": "Trimiteți",
+  "clearButtonTooltip": "Ștergeți textul",
+  "selectedDateLabel": "Selectată"
 }

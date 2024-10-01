@@ -19,6 +19,7 @@ class TestPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Test',
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       theme: ThemeData(
         useMaterial3: useMaterial3,
         primarySwatch: Colors.blue,

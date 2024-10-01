@@ -39,7 +39,6 @@ name: example
 flutter:
   module: {}
   ''');
-    fileSystem.file('.packages').writeAsStringSync('\n');
     final FlutterProject flutterProject =
       FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final IOSDevice device = setUpIOSDevice(fileSystem);
@@ -53,7 +52,6 @@ flutter:
   testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').writeAsStringSync('\n');
     fileSystem.directory('ios').createSync();
     final FlutterProject flutterProject =
       FlutterProject.fromDirectory(fileSystem.currentDirectory);
@@ -69,7 +67,6 @@ flutter:
   testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').writeAsStringSync('\n');
     final FlutterProject flutterProject =
       FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final IOSDevice device = setUpIOSDevice(fileSystem);
@@ -106,6 +103,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     connectionInterface: DeviceConnectionInterface.attached,
     isConnected: true,
+    isPaired: true,
     devModeEnabled: true,
     isCoreDevice: false,
   );

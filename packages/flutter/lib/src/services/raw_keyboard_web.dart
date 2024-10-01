@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'hardware_keyboard.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_maps.g.dart';
@@ -131,30 +134,18 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(
-    ModifierKey key, {
-    KeyboardSide side = KeyboardSide.any,
-  }) {
-    switch (key) {
-      case ModifierKey.controlModifier:
-        return metaState & modifierControl != 0;
-      case ModifierKey.shiftModifier:
-        return metaState & modifierShift != 0;
-      case ModifierKey.altModifier:
-        return metaState & modifierAlt != 0;
-      case ModifierKey.metaModifier:
-        return metaState & modifierMeta != 0;
-      case ModifierKey.numLockModifier:
-        return metaState & modifierNumLock != 0;
-      case ModifierKey.capsLockModifier:
-        return metaState & modifierCapsLock != 0;
-      case ModifierKey.scrollLockModifier:
-        return metaState & modifierScrollLock != 0;
-      case ModifierKey.functionModifier:
-      case ModifierKey.symbolModifier:
-        // On Web, the browser doesn't report the state of the FN and SYM modifiers.
-        return false;
-    }
+  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
+    return switch (key) {
+      ModifierKey.controlModifier    => metaState & modifierControl != 0,
+      ModifierKey.shiftModifier      => metaState & modifierShift != 0,
+      ModifierKey.altModifier        => metaState & modifierAlt != 0,
+      ModifierKey.metaModifier       => metaState & modifierMeta != 0,
+      ModifierKey.numLockModifier    => metaState & modifierNumLock != 0,
+      ModifierKey.capsLockModifier   => metaState & modifierCapsLock != 0,
+      ModifierKey.scrollLockModifier => metaState & modifierScrollLock != 0,
+      // On Web, the browser doesn't report the state of the FN and SYM modifiers.
+      ModifierKey.functionModifier || ModifierKey.symbolModifier => false,
+    };
   }
 
   @override

@@ -47,9 +47,9 @@ void main() {
     late final FlutterError error;
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: Builder(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      Builder(
         builder: (BuildContext context) {
           try {
             MediaQuery.of(context);
@@ -111,9 +111,9 @@ void main() {
     bool tested = false;
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: Builder(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      Builder(
         builder: (BuildContext context) {
           final MediaQueryData? data = MediaQuery.maybeOf(context);
           expect(data, isNull);
@@ -164,7 +164,7 @@ void main() {
 
   testWidgets('MediaQueryData.fromView uses platformData if provided', (WidgetTester tester) async {
     const MediaQueryData platformData = MediaQueryData(
-      textScaleFactor: 1234,
+      textScaler: TextScaler.linear(1234),
       platformBrightness: Brightness.dark,
       accessibleNavigation: true,
       invertColors: true,
@@ -231,7 +231,7 @@ void main() {
 
   testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view, preserving platform-specific data', (WidgetTester tester) async {
     const MediaQueryData platformData = MediaQueryData(
-      textScaleFactor: 1234,
+      textScaler: TextScaler.linear(1234),
       platformBrightness: Brightness.dark,
       accessibleNavigation: true,
       invertColors: true,
@@ -287,9 +287,9 @@ void main() {
 
     late MediaQueryData data;
     MediaQueryData? outerData;
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: Builder(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      Builder(
         builder: (BuildContext context) {
           outerData = MediaQuery.maybeOf(context);
           return MediaQuery.fromView(
@@ -342,9 +342,9 @@ void main() {
     late MediaQueryData data;
     MediaQueryData? outerData;
     int rebuildCount = 0;
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: Builder(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      Builder(
         builder: (BuildContext context) {
           outerData = MediaQuery.maybeOf(context);
           return MediaQuery.fromView(
@@ -1530,10 +1530,4 @@ void main() {
       const _MediaQueryAspectCase(MediaQuery.maybeDisplayFeaturesOf, MediaQueryData(displayFeatures: <DisplayFeature>[DisplayFeature(bounds: Rect.zero, type: DisplayFeatureType.unknown, state: DisplayFeatureState.unknown)])),
     ]
   ));
-}
-
-Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
-  tester.binding.attachRootWidget(widget);
-  tester.binding.scheduleFrame();
-  return tester.binding.pump();
 }

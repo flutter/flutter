@@ -371,13 +371,10 @@ void main() {
     final ImageFilter filter = ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0, tileMode: TileMode.repeated);
     final BackdropFilterLayer layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
     final List<String> info = getDebugInfo(layer);
+
     expect(
       info,
-      contains(
-        isBrowser && !isCanvasKit
-          ? 'filter: ImageFilter.blur(1, 1, TileMode.repeated)'
-          : 'filter: ImageFilter.blur(${1.0}, ${1.0}, repeated)'
-      ),
+      contains('filter: ImageFilter.blur(${1.0}, ${1.0}, repeated)'),
     );
     expect(info, contains('blendMode: clear'));
   });
@@ -432,9 +429,6 @@ void main() {
     final PerformanceOverlayLayer layer = PerformanceOverlayLayer(
       overlayRect: Rect.zero,
       optionsMask: 0,
-      rasterizerThreshold: 0,
-      checkerboardRasterCacheImages: false,
-      checkerboardOffscreenLayers: false,
     );
     checkNeedsAddToScene(layer, () {
       layer.overlayRect = unitRect;
@@ -537,7 +531,7 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser && !isCanvasKit); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
+  }, skip: isBrowser && !isSkiaWeb); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
 
   test('ContainerLayer.toImageSync can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();
@@ -555,7 +549,7 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser && !isCanvasKit); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
+  }, skip: isBrowser && !isSkiaWeb); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
 
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);

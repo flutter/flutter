@@ -254,7 +254,7 @@ vars = {
         ]),
         FakeCommand(
           command: const <String>['git', 'checkout', candidateBranch, '--'],
-          onRun: () => createdCandidateBranch = true,
+          onRun: (_) => createdCandidateBranch = true,
         ),
         const FakeCommand(
           command: <String>['git', 'checkout', 'stable', '--'],
@@ -309,7 +309,7 @@ vars = {
         ]),
         FakeCommand(
           command: const <String>['git', 'checkout', candidateBranch, '--'],
-          onRun: () => createdCandidateBranch = true,
+          onRun: (_) => createdCandidateBranch = true,
         ),
         const FakeCommand(
           command: <String>['git', 'checkout', EngineRepository.defaultBranch],

@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -83,14 +84,22 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
       if (boolArg('cocoapods')) {
         produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
+      } else {
+        await _produceFlutterFramework(buildInfo, modeDirectory);
       }
 
-      // Build aot, create App.framework and copy FlutterMacOS.framework. Make XCFrameworks.
-      await _produceAppFramework(buildInfo, modeDirectory);
+      final Directory buildOutput = modeDirectory.childDirectory('macos');
+
+      // Build aot, create App.framework. Make XCFrameworks.
+      await _produceAppFramework(buildInfo, modeDirectory, buildOutput);
 
       // Build and copy plugins.
-      final Directory buildOutput = modeDirectory.childDirectory('macos');
-      await processPodsIfNeeded(project.macos, getMacOSBuildDirectory(), buildInfo.mode);
+      await processPodsIfNeeded(
+        project.macos,
+        getMacOSBuildDirectory(),
+        buildInfo.mode,
+        forceCocoaPodsOnly: true,
+      );
       if (boolArg('plugins') && hasPlugins(project)) {
         await _producePlugins(xcodeBuildConfiguration, buildOutput, modeDirectory);
       }
@@ -182,8 +191,8 @@ $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
-  s.documentation_url     = 'https://flutter.dev/docs'
+  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/FlutterMacOS.framework.zip' }
+  s.documentation_url     = 'https://docs.flutter.dev'
   s.osx.deployment_target = '10.14'
   s.vendored_frameworks   = 'FlutterMacOS.framework'
   s.prepare_command       = 'unzip FlutterMacOS.framework -d FlutterMacOS.framework'
@@ -200,15 +209,16 @@ end
   Future<void> _produceAppFramework(
     BuildInfo buildInfo,
     Directory outputBuildDirectory,
+    Directory macosBuildOutput,
   ) async {
     final Status status = globals.logger.startProgress(
-      ' ├─Building App.xcframework and FlutterMacOS.xcframework...',
+      ' ├─Building App.xcframework...',
     );
-
     try {
       final Environment environment = Environment(
         projectDir: globals.fs.currentDirectory,
-        outputDir: outputBuildDirectory,
+        packageConfigPath: packageConfigPath(),
+        outputDir: macosBuildOutput,
         buildDir: project.dartTool.childDirectory('flutter_build'),
         cacheDir: globals.cache.getRoot(),
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
@@ -251,7 +261,7 @@ end
       status.stop();
     }
 
-    final Directory appFramework = outputBuildDirectory.childDirectory('App.framework');
+    final Directory appFramework = macosBuildOutput.childDirectory('App.framework');
     await BuildFrameworkCommand.produceXCFramework(
       <Directory>[appFramework],
       'App',
@@ -259,18 +269,37 @@ end
       globals.processManager,
     );
     appFramework.deleteSync(recursive: true);
-    final Directory flutterFramework = outputBuildDirectory.childDirectory('FlutterMacOS.framework');
+  }
 
-    // If FlutterMacOS.podspec was generated, do not generate XCFramework.
-    if (!boolArg('cocoapods')) {
-      await BuildFrameworkCommand.produceXCFramework(
-        <Directory>[flutterFramework],
-        'FlutterMacOS',
-        outputBuildDirectory,
-        globals.processManager,
+  Future<void> _produceFlutterFramework(
+    BuildInfo buildInfo,
+    Directory modeDirectory,
+  ) async {
+    final Status status = globals.logger.startProgress(
+      ' ├─Copying FlutterMacOS.xcframework...',
+    );
+    final String engineCacheFlutterFrameworkDirectory = globals.artifacts!.getArtifactPath(
+      Artifact.flutterMacOSXcframework,
+      platform: TargetPlatform.darwin,
+      mode: buildInfo.mode,
+    );
+    final String flutterFrameworkFileName = globals.fs.path.basename(
+      engineCacheFlutterFrameworkDirectory,
+    );
+    final Directory flutterFrameworkCopy = modeDirectory.childDirectory(
+      flutterFrameworkFileName,
+    );
+
+    try {
+      // Copy xcframework engine cache framework to mode directory.
+      copyDirectory(
+        globals.fs.directory(engineCacheFlutterFrameworkDirectory),
+        flutterFrameworkCopy,
+        followLinks: false,
       );
+    } finally {
+      status.stop();
     }
-    flutterFramework.deleteSync(recursive: true);
   }
 
   Future<void> _producePlugins(

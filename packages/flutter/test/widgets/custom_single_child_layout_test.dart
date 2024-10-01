@@ -21,16 +21,18 @@ class TestSingleChildLayoutDelegate extends SingleChildLayoutDelegate {
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    assert(!RenderObject.debugCheckingIntrinsics);
-    constraintsFromGetConstraintsForChild = constraints;
+    if (!RenderObject.debugCheckingIntrinsics) {
+      constraintsFromGetConstraintsForChild = constraints;
+    }
     return const BoxConstraints(minWidth: 100.0, maxWidth: 150.0, minHeight: 200.0, maxHeight: 400.0);
   }
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    assert(!RenderObject.debugCheckingIntrinsics);
-    sizeFromGetPositionForChild = size;
-    childSizeFromGetPositionForChild = childSize;
+    if (!RenderObject.debugCheckingIntrinsics) {
+      sizeFromGetPositionForChild = size;
+      childSizeFromGetPositionForChild = childSize;
+    }
     return Offset.zero;
   }
 

@@ -32,7 +32,7 @@ class Foo extends SingleChildRenderObjectWidget {
 
 void main() {
   testWidgets('Stack parsing in non-normalized constraints error', (WidgetTester tester) async {
-    await tester.pumpWidget(const Foo(child: Placeholder()), Duration.zero, EnginePhase.layout);
+    await tester.pumpWidget(const Foo(child: Placeholder()), duration: Duration.zero, phase: EnginePhase.layout);
     final Object? exception = tester.takeException();
     final String text = exception.toString();
     expect(text, contains('BoxConstraints has non-normalized width constraints.'));

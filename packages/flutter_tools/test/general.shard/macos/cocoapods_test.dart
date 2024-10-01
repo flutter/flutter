@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
@@ -28,7 +29,7 @@ enum _StdioStream {
 }
 
 void main() {
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
   late CocoaPods cocoaPodsUnderTest;
   late BufferLogger logger;
@@ -329,12 +330,13 @@ void main() {
   group('Update xcconfig', () {
     testUsingContext('includes Pod config in xcconfig files, if the user manually added Pod dependencies without using Flutter plugins', () async {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
-      fileSystem.file(fileSystem.path.join('project', 'foo', '.packages'))
-        ..createSync(recursive: true)
-        ..writeAsStringSync('\n');
+      final File packageConfigFile = fileSystem.file(
+        fileSystem.path.join('project', '.dart_tool', 'package_config.json'),
+      );
+      packageConfigFile.createSync(recursive: true);
+      packageConfigFile.writeAsStringSync('{"configVersion":2,"packages":[]}');
       projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Custom Podfile');
       projectUnderTest.ios.podfileLock..createSync()..writeAsStringSync('Podfile.lock from user executed `pod install`');
-      projectUnderTest.packagesFile..createSync()..writeAsStringSync('');
       projectUnderTest.ios.xcodeConfigFor('Debug')
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing debug config');
@@ -457,6 +459,19 @@ void main() {
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
+    testUsingContext("doesn't throw, if using Swift Package Manager and Podfile is missing.", () async {
+      final FlutterProject projectUnderTest = setupProjectUnderTest();
+      final bool didInstall = await cocoaPodsUnderTest.processPods(
+        xcodeProject: projectUnderTest.ios,
+        buildMode: BuildMode.debug,
+      );
+      expect(didInstall, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+    });
+
     testUsingContext('throws, if specs repo is outdated.', () async {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
       pretendPodIsInstalled();
@@ -557,7 +572,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '15.0 as described at https://docs.flutter.dev/deployment/ios'
+          '15.0 as described at https://flutter.dev/to/ios-deploy'
         ),
       );
     });
@@ -617,7 +632,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '15.0 as described at https://docs.flutter.dev/deployment/ios'
+          '15.0 as described at https://flutter.dev/to/ios-deploy'
         ),
       );
     });
@@ -678,7 +693,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '15.0 as described at https://docs.flutter.dev/deployment/ios'
+          '15.0 as described at https://flutter.dev/to/ios-deploy'
         ),
       );
     });
@@ -742,7 +757,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target as "
-          'described at https://docs.flutter.dev/deployment/ios',
+          'described at https://flutter.dev/to/ios-deploy',
         ),
       );
       expect(
@@ -822,6 +837,75 @@ Specs satisfying the `GoogleMaps (~> 8.0)` dependency were found, but they requi
       );
     });
 
+    testUsingContext('throws if plugin has a dependency that requires a higher minimum macOS version', () async {
+      final FlutterProject projectUnderTest = setupProjectUnderTest();
+      pretendPodIsInstalled();
+      pretendPodVersionIs('100.0.0');
+      fileSystem.file(fileSystem.path.join('project', 'macos', 'Podfile'))
+        ..createSync()
+        ..writeAsStringSync('Existing Podfile');
+
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>['pod', 'install', '--verbose'],
+          workingDirectory: 'project/macos',
+          environment: <String, String>{
+            'COCOAPODS_DISABLE_STATS': 'true',
+            'LANG': 'en_US.UTF-8',
+          },
+          exitCode: 1,
+          // This is the (very slightly abridged) output from updating the
+          // minimum version of the GoogleMaps dependency in
+          // google_maps_flutter_ios without updating the minimum iOS version to
+          // match, as an example of a misconfigured plugin, but with the paths
+          // modified to simulate a macOS plugin.
+          stdout: '''
+Analyzing dependencies
+
+Inspecting targets to integrate
+  Using `ARCHS` setting to build architectures of target `Pods-Runner`: (``)
+  Using `ARCHS` setting to build architectures of target `Pods-RunnerTests`: (``)
+
+Fetching external sources
+-> Fetching podspec for `Flutter` from `Flutter`
+-> Fetching podspec for `google_maps_flutter_ios` from `.symlinks/plugins/google_maps_flutter_ios/macos`
+
+Resolving dependencies of `Podfile`
+  CDN: trunk Relative path: CocoaPods-version.yml exists! Returning local because checking is only performed in repo update
+  CDN: trunk Relative path: Specs/a/d/d/GoogleMaps/8.0.0/GoogleMaps.podspec.json exists! Returning local because checking is only performed in repo update
+[!] CocoaPods could not find compatible versions for pod "GoogleMaps":
+  In Podfile:
+    google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/macos`) was resolved to 0.0.1, which depends on
+      GoogleMaps (~> 8.0)
+
+Specs satisfying the `GoogleMaps (~> 8.0)` dependency were found, but they required a higher minimum deployment target.''',
+        ),
+      );
+
+      await expectLater(cocoaPodsUnderTest.processPods(
+        xcodeProject: projectUnderTest.macos,
+        buildMode: BuildMode.debug,
+      ), throwsToolExit());
+      expect(
+        logger.errorText,
+        contains(
+          'The pod "GoogleMaps" required by the plugin "google_maps_flutter_ios" '
+          "requires a higher minimum macOS deployment version than the plugin's "
+          'reported minimum version.'
+        ),
+      );
+      // The error should tell the user to contact the plugin author, as this
+      // case is hard for us to give exact advice on, and should only be
+      // possible if there's a mistake in the plugin's podspec.
+      expect(
+        logger.errorText,
+        contains(
+          'To build, remove the plugin "google_maps_flutter_ios", or contact '
+          "the plugin's developers for assistance.",
+        ),
+      );
+    });
+
     testUsingContext('throws if plugin requires higher minimum macOS version using "platform"', () async {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
       pretendPodIsInstalled();
@@ -878,7 +962,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '12.7 as described at https://docs.flutter.dev/deployment/macos'
+          '12.7 as described at https://flutter.dev/to/macos-deploy'
         ),
       );
     });
@@ -939,7 +1023,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '12.7 as described at https://docs.flutter.dev/deployment/macos'
+          '12.7 as described at https://flutter.dev/to/macos-deploy'
         ),
       );
     });
@@ -1380,7 +1464,11 @@ Specs satisfying the `$fakePluginName (from `Flutter/ephemeral/.symlinks/plugins
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({this.isInstalled = true, this.buildSettings = const <String, String>{}});
+  FakeXcodeProjectInterpreter({
+    this.isInstalled = true,
+    this.buildSettings = const <String, String>{},
+    this.version,
+  });
 
   @override
   final bool isInstalled;
@@ -1393,4 +1481,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   }) async => buildSettings;
 
   final Map<String, String> buildSettings;
+
+  @override
+  Version? version;
 }

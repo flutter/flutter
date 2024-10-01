@@ -190,6 +190,7 @@ void main() {
       ..onRelease = () {
         recognizedRelease = true;
       };
+      addTearDown(release.dispose);
 
     release.addPointer(down1);
     serial.addPointer(down1);
@@ -207,6 +208,7 @@ void main() {
       ..onRelease = () {
         recognizedRelease = true;
       };
+      addTearDown(release.dispose);
 
     serial.addPointer(down1);
     release.addPointer(down1);
@@ -220,6 +222,7 @@ void main() {
 
   testGesture('Fires cancel if competing recognizer declares victory', (GestureTester tester) {
     final WinningGestureRecognizer winner = WinningGestureRecognizer();
+    addTearDown(winner.dispose);
     winner.addPointer(down1);
     serial.addPointer(down1);
     tester.closeArena(1);
@@ -456,9 +459,7 @@ class ReleaseGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void handlePrimaryPointer(PointerEvent event) {
     if (event is PointerUpEvent) {
       resolve(GestureDisposition.accepted);
-      if (onRelease != null) {
-        onRelease!();
-      }
+      onRelease?.call();
     }
   }
 }

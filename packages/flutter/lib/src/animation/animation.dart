@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/scheduler.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
 
 import 'package:flutter/foundation.dart';
 
@@ -27,7 +30,31 @@ enum AnimationStatus {
   reverse,
 
   /// The animation is stopped at the end.
-  completed,
+  completed;
+
+  /// Whether the animation is stopped at the beginning.
+  bool get isDismissed => this == dismissed;
+
+  /// Whether the animation is stopped at the end.
+  bool get isCompleted => this == completed;
+
+  /// Whether the animation is running in either direction.
+  bool get isAnimating => switch (this) {
+    forward   || reverse   => true,
+    completed || dismissed => false,
+  };
+
+  /// {@template flutter.animation.AnimationStatus.isForwardOrCompleted}
+  /// Whether the current aim of the animation is toward completion.
+  ///
+  /// Specifically, returns `true` for [AnimationStatus.forward] or
+  /// [AnimationStatus.completed], and `false` for
+  /// [AnimationStatus.reverse] or [AnimationStatus.dismissed].
+  /// {@endtemplate}
+  bool get isForwardOrCompleted => switch (this) {
+    forward || completed => true,
+    reverse || dismissed => false,
+  };
 }
 
 /// Signature for listeners attached using [Animation.addStatusListener].
@@ -36,25 +63,85 @@ typedef AnimationStatusListener = void Function(AnimationStatus status);
 /// Signature for method used to transform values in [Animation.fromValueListenable].
 typedef ValueListenableTransformer<T> = T Function(T);
 
-/// An animation with a value of type `T`.
+/// A value which might change over time, moving forward or backward.
 ///
-/// An animation consists of a value (of type `T`) together with a status. The
-/// status indicates whether the animation is conceptually running from
-/// beginning to end or from the end back to the beginning, although the actual
-/// value of the animation might not change monotonically (e.g., if the
-/// animation uses a curve that bounces).
+/// An animation has a [value] (of type [T]) and a [status].
+/// The value conceptually lies on some path, and
+/// the status indicates how the value is currently moving along the path:
+/// forward, backward, or stopped at the end or the beginning.
+/// The path may double back on itself
+/// (e.g., if the animation uses a curve that bounces),
+/// so even when the animation is conceptually moving forward
+/// the value might not change monotonically.
 ///
-/// Animations also let other objects listen for changes to either their value
-/// or their status. These callbacks are called during the "animation" phase of
+/// Consumers of the animation can listen for changes to either the value
+/// or the status, with [addListener] and [addStatusListener].
+/// The listener callbacks are called during the "animation" phase of
 /// the pipeline, just prior to rebuilding widgets.
 ///
-/// To create a new animation that you can run forward and backward, consider
-/// using [AnimationController].
+/// An animation might move forward or backward on its own as time passes
+/// (like the opacity of a button that fades over a fixed duration
+/// once the user touches it),
+/// or it might be driven by the user
+/// (like the position of a slider that the user can drag back and forth),
+/// or it might do both
+/// (like a switch that snaps into place when released,
+/// or a [Dismissible] that responds to drag and fling gestures, etc.).
+/// The behavior is normally controlled by method calls on
+/// some underlying [AnimationController].
+/// When an animation is actively animating, it typically updates on
+/// each frame, driven by a [Ticker].
+///
+/// ## Using animations
+///
+/// For simple animation effects, consider using one of the
+/// [ImplicitlyAnimatedWidget] subclasses,
+/// like [AnimatedScale], [AnimatedOpacity], and many others.
+/// When an [ImplicitlyAnimatedWidget] suffices, there is
+/// no need to work with [Animation] or the rest of the classes
+/// discussed in this section.
+///
+/// Otherwise, typically an animation originates with an [AnimationController]
+/// (which is itself an [Animation<double>])
+/// created by a [State] that implements [TickerProvider].
+/// Further animations might be derived from that animation
+/// by using e.g. [Tween] or [CurvedAnimation].
+/// The animations might be used to configure an [AnimatedWidget]
+/// (using one of its many subclasses like [FadeTransition]),
+/// or their values might be used directly.
+///
+/// For example, the [AnimationController] may represent
+/// the abstract progress of the animation from 0.0 to 1.0;
+/// then a [CurvedAnimation] might apply an easing curve;
+/// and a [SizeTween] and [ColorTween] might each be applied to that
+/// to produce an [Animation<Size>] and an [Animation<Color>] that control
+/// a widget shrinking and changing color as the animation proceeds.
+///
+/// ## Performance considerations
+///
+/// Because the [Animation] keeps the same identity as the animation proceeds,
+/// it provides a convenient way for a [StatefulWidget] that orchestrates
+/// a complex animation to communicate the animation's progress to its
+/// various child widgets.  Consider having higher-level widgets in the tree
+/// pass lower-level widgets the [Animation] itself, rather than its value,
+/// in order to avoid rebuilding the higher-level widgets on each frame
+/// even while the animation is active.
+/// If the leaf widgets also ignore [value] and pass the whole
+/// [Animation] object to a render object (like [FadeTransition] does),
+/// they too might be able to avoid rebuild and even relayout, so that the
+/// only work needed on each frame of the animation is to repaint.
 ///
 /// See also:
 ///
-///  * [Tween], which can be used to create [Animation] subclasses that
-///    convert `Animation<double>`s into other kinds of [Animation]s.
+///  * [ImplicitlyAnimatedWidget] and its subclasses, which provide
+///    animation effects without the need to manually work with [Animation],
+///    [AnimationController], or even [State].
+///  * [AnimationController], an animation you can run forward and backward,
+///    stop, or set to a specific value.
+///  * [Tween], which can be used to convert [Animation<double>]s into
+///    other kinds of [Animation]s.
+///  * [AnimatedWidget] and its subclasses, which provide animation effects
+///    that can be controlled by an [Animation].
 abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -62,7 +149,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
 
   /// Create a new animation from a [ValueListenable].
   ///
-  /// The returned animation will always have an animations status of
+  /// The returned animation will always have an animation status of
   /// [AnimationStatus.forward]. The value of the provided listenable can
   /// be optionally transformed using the [transformer] function.
   ///
@@ -150,10 +237,20 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   T get value;
 
   /// Whether this animation is stopped at the beginning.
-  bool get isDismissed => status == AnimationStatus.dismissed;
+  bool get isDismissed => status.isDismissed;
 
   /// Whether this animation is stopped at the end.
-  bool get isCompleted => status == AnimationStatus.completed;
+  bool get isCompleted => status.isCompleted;
+
+  /// Whether this animation is running in either direction.
+  ///
+  /// By default, this value is equal to `status.isAnimating`, but
+  /// [AnimationController] overrides this method so that its output
+  /// depends on whether the controller is actively ticking.
+  bool get isAnimating => status.isAnimating;
+
+  /// {@macro flutter.animation.AnimationStatus.isForwardOrCompleted}
+  bool get isForwardOrCompleted => status.isForwardOrCompleted;
 
   /// Chains a [Tween] (or [CurveTween]) to this [Animation].
   ///
@@ -183,7 +280,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// {@end-tool}
   /// {@tool snippet}
   ///
-  /// The `_alignment.value` could then be used in a widget's build method, for
+  /// The `alignment1.value` could then be used in a widget's build method, for
   /// instance, to position a child using an [Align] widget such that the
   /// position of the child shifts over time from the top left to the top right.
   ///

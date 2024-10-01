@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'heroes.dart';
+/// @docImport 'overlay.dart';
+/// @docImport 'view.dart';
+library;
+
 import 'dart:collection' show HashMap;
 
 import 'package:flutter/foundation.dart';
@@ -320,7 +328,7 @@ class WidgetsApp extends StatefulWidget {
     this.home,
     Map<String, WidgetBuilder> this.routes = const <String, WidgetBuilder>{},
     this.builder,
-    this.title = '',
+    this.title,
     this.onGenerateTitle,
     this.textStyle,
     required this.color,
@@ -330,8 +338,6 @@ class WidgetsApp extends StatefulWidget {
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.showPerformanceOverlay = false,
-    this.checkerboardRasterCacheImages = false,
-    this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
@@ -419,7 +425,7 @@ class WidgetsApp extends StatefulWidget {
     this.routerConfig,
     this.backButtonDispatcher,
     this.builder,
-    this.title = '',
+    this.title,
     this.onGenerateTitle,
     this.onNavigationNotification,
     this.textStyle,
@@ -430,8 +436,6 @@ class WidgetsApp extends StatefulWidget {
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.showPerformanceOverlay = false,
-    this.checkerboardRasterCacheImages = false,
-    this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
@@ -661,7 +665,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [widgets.WidgetBuilder] is used to construct a [PageRoute] specified by
+  /// [WidgetBuilder] is used to construct a [PageRoute] specified by
   /// [pageRouteBuilder] to perform an appropriate transition, including [Hero]
   /// animations, to the new route.
   ///
@@ -706,7 +710,12 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.onNavigationNotification}
   /// The callback to use when receiving a [NavigationNotification].
   ///
-  /// By default this updates the engine with the navigation status.
+  /// By default this updates the engine with the navigation status and stops
+  /// bubbling the notification.
+  ///
+  /// See also:
+  ///
+  ///  * [NotificationListener.onNotification], which uses this callback.
   /// {@endtemplate}
   final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
 
@@ -819,7 +828,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// To provide a localized title instead, use [onGenerateTitle].
   /// {@endtemplate}
-  final String title;
+  final String? title;
 
   /// {@template flutter.widgets.widgetsApp.onGenerateTitle}
   /// If non-null this callback function is called to produce the app's
@@ -1003,18 +1012,8 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performance-overlay>
+  ///  * <https://flutter.dev/to/performance-overlay>
   final bool showPerformanceOverlay;
-
-  /// Checkerboards raster cache images.
-  ///
-  /// See [PerformanceOverlay.checkerboardRasterCacheImages].
-  final bool checkerboardRasterCacheImages;
-
-  /// Checkerboards layers rendered to offscreen bitmaps.
-  ///
-  /// See [PerformanceOverlay.checkerboardOffscreenLayers].
-  final bool checkerboardOffscreenLayers;
 
   /// Turns on an overlay that shows the accessibility information
   /// reported by the framework.
@@ -1190,6 +1189,10 @@ class WidgetsApp extends StatefulWidget {
 
   /// If true, forces the widget inspector to be visible.
   ///
+  /// Deprecated.
+  /// Use WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value
+  /// instead.
+  ///
   /// Overrides the `debugShowWidgetInspector` value set in [WidgetsApp].
   ///
   /// Used by the `debugShowWidgetInspector` debugging extension.
@@ -1198,14 +1201,21 @@ class WidgetsApp extends StatefulWidget {
   /// and view what widgets and render objects associated with it. An outline of
   /// the selected widget and some summary information is shown on device and
   /// more detailed information is shown in the IDE or DevTools.
+  @Deprecated(
+    'Use WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value instead. '
+    'This feature was deprecated after v3.20.0-14.0.pre.',
+  )
   static bool get debugShowWidgetInspectorOverride {
-    return _debugShowWidgetInspectorOverrideNotifier.value;
-  }
-  static set debugShowWidgetInspectorOverride(bool value) {
-    _debugShowWidgetInspectorOverrideNotifier.value = value;
+    return WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value;
   }
 
-  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier = ValueNotifier<bool>(false);
+  @Deprecated(
+    'Use WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value instead. '
+    'This feature was deprecated after v3.20.0-14.0.pre.',
+  )
+  static set debugShowWidgetInspectorOverride(bool value) {
+    WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value = value;
+  }
 
   /// If false, prevents the debug banner from being visible.
   ///
@@ -1349,7 +1359,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   AppLifecycleState? _appLifecycleState;
 
-  /// The default value for [onNavigationNotification].
+  /// The default value for [WidgetsApp.onNavigationNotification].
   ///
   /// Does nothing and stops bubbling if the app is detached. Otherwise, updates
   /// the platform with [NavigationNotification.canHandlePop] and stops
@@ -1358,9 +1368,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     switch (_appLifecycleState) {
       case null:
       case AppLifecycleState.detached:
-      case AppLifecycleState.inactive:
         // Avoid updating the engine when the app isn't ready.
         return true;
+      case AppLifecycleState.inactive:
       case AppLifecycleState.resumed:
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
@@ -1654,7 +1664,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           ),
           ErrorSpacer(),
           ErrorDescription(
-            'See https://flutter.dev/tutorials/internationalization/ for more '
+            'See https://flutter.dev/to/internationalization/ for more '
             "information about configuring an app's locale, supportedLocales, "
             'and localizationsDelegates parameters.',
           ),
@@ -1724,25 +1734,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     }
 
-    PerformanceOverlay? performanceOverlay;
-    // We need to push a performance overlay if any of the display or checkerboarding
-    // options are set.
     if (widget.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
-      performanceOverlay = PerformanceOverlay.allEnabled(
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-      );
-    } else if (widget.checkerboardRasterCacheImages || widget.checkerboardOffscreenLayers) {
-      performanceOverlay = PerformanceOverlay(
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-      );
-    }
-    if (performanceOverlay != null) {
       result = Stack(
         children: <Widget>[
           result,
-          Positioned(top: 0.0, left: 0.0, right: 0.0, child: performanceOverlay),
+          Positioned(top: 0.0, left: 0.0, right: 0.0, child: PerformanceOverlay.allEnabled()),
         ],
       );
     }
@@ -1755,7 +1751,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(() {
       result = ValueListenableBuilder<bool>(
-        valueListenable: WidgetsApp._debugShowWidgetInspectorOverrideNotifier,
+        valueListenable: WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier,
         builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
           if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
             return WidgetInspector(
@@ -1775,7 +1771,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       return true;
     }());
 
-    final Widget title;
+    final Widget? title;
     if (widget.onGenerateTitle != null) {
       title = Builder(
         // This Builder exists to provide a context below the Localizations widget.
@@ -1790,9 +1786,14 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           );
         },
       );
+    } else if (widget.title == null && kIsWeb) {
+      // Updating the <title /> element in the DOM is problematic in embedded
+      // and multiview modes as title should be managed by host apps.
+      // Refer to https://github.com/flutter/flutter/pull/152003 for more info.
+      title = null;
     } else {
       title = Title(
-        title: widget.title,
+        title: widget.title ?? '',
         color: widget.color.withOpacity(1.0),
         child: result,
       );
@@ -1827,7 +1828,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
                       child: Localizations(
                         locale: appLocale,
                         delegates: _localizationsDelegates.toList(),
-                        child: title,
+                        child: title ?? result,
                       ),
                     ),
                   ),

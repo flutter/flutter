@@ -88,10 +88,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
   static TestRenderingFlutterBinding ensureInitialized({ VoidCallback? onErrors }) {
-    if (_instance != null) {
-      return _instance!;
-    }
-    return TestRenderingFlutterBinding(onErrors: onErrors);
+    return _instance ?? TestRenderingFlutterBinding(onErrors: onErrors);
   }
 
   final List<FlutterErrorDetails> _errors = <FlutterErrorDetails>[];
@@ -232,7 +229,8 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
 /// The EnginePhase must not be [EnginePhase.build], since the rendering layer
 /// has no build phase.
 ///
-/// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
+/// If `onErrors` is not null, it is set as
+/// [TestRenderingFlutterBinding.onErrors].
 void layout(
   RenderBox box, { // If you want to just repump the last box, call pumpFrame().
   BoxConstraints? constraints,
@@ -259,7 +257,8 @@ void layout(
 
 /// Pumps a single frame.
 ///
-/// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
+/// If `onErrors` is not null, it is set as
+/// [TestRenderingFlutterBinding.onErrors].
 void pumpFrame({ EnginePhase phase = EnginePhase.layout, VoidCallback? onErrors }) {
   assert(TestRenderingFlutterBinding.instance.renderView.child != null); // call layout() first!
 

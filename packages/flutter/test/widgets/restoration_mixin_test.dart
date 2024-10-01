@@ -669,7 +669,7 @@ class _TestRestorableWidget extends StatefulWidget {
 class _TestRestorableWidgetState extends State<_TestRestorableWidget> with RestorationMixin {
   final _TestRestorableProperty property = _TestRestorableProperty(10);
   _TestRestorableProperty? additionalProperty;
-  bool _rerigisterAdditionalProperty = false;
+  bool _reregisterAdditionalProperty = false;
 
   final List<RestorationBucket?> restoreStateLog = <RestorationBucket?>[];
   final List<RestorationBucket?> toggleBucketLog = <RestorationBucket?>[];
@@ -678,7 +678,7 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     restoreStateLog.add(oldBucket);
     registerForRestoration(property, 'foo');
-    if (_rerigisterAdditionalProperty && additionalProperty != null) {
+    if (_reregisterAdditionalProperty && additionalProperty != null) {
       registerForRestoration(additionalProperty!, 'additional');
     }
   }
@@ -712,7 +712,7 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
   void registerAdditionalProperty({bool reregister = true}) {
     additionalProperty ??= _TestRestorableProperty(11);
     registerForRestoration(additionalProperty!, 'additional');
-    _rerigisterAdditionalProperty = reregister;
+    _reregisterAdditionalProperty = reregister;
   }
 
   void unregisterAdditionalProperty() {

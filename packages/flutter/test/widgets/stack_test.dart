@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
 
@@ -860,7 +861,9 @@ void main() {
     expect(tester.getRect(find.byType(SizedBox).at(8)), const Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
   });
 
-  testWidgets('Stack error messages', (WidgetTester tester) async {
+  testWidgets('Stack error messages',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       const Stack(),
     );
@@ -877,7 +880,7 @@ void main() {
     ));
     expect(
       exception, endsWith(
-      '← [root]"\n' // End of ownership chain.
+      '_ViewScope ← ⋯"\n' // End of ownership chain.
       'Typically, the Directionality widget is introduced by the MaterialApp or WidgetsApp widget at the '
       'top of your application widget tree. It determines the ambient reading direction and is used, for '
       'example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve '

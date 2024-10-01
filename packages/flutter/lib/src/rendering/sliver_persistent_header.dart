@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
@@ -152,12 +155,10 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
       return 0.0;
     }
     assert(child!.hasSize);
-    switch (constraints.axis) {
-      case Axis.vertical:
-        return child!.size.height;
-      case Axis.horizontal:
-        return child!.size.width;
-    }
+    return switch (constraints.axis) {
+      Axis.vertical => child!.size.height,
+      Axis.horizontal => child!.size.width,
+    };
   }
 
   bool _needsUpdateChild = true;
@@ -298,16 +299,12 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && geometry!.visible) {
-      switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-        case AxisDirection.up:
-          offset += Offset(0.0, geometry!.paintExtent - childMainAxisPosition(child!) - childExtent);
-        case AxisDirection.down:
-          offset += Offset(0.0, childMainAxisPosition(child!));
-        case AxisDirection.left:
-          offset += Offset(geometry!.paintExtent - childMainAxisPosition(child!) - childExtent, 0.0);
-        case AxisDirection.right:
-          offset += Offset(childMainAxisPosition(child!), 0.0);
-      }
+      offset += switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+        AxisDirection.up    => Offset(0.0, geometry!.paintExtent - childMainAxisPosition(child!) - childExtent),
+        AxisDirection.left  => Offset(geometry!.paintExtent - childMainAxisPosition(child!) - childExtent, 0.0),
+        AxisDirection.right => Offset(childMainAxisPosition(child!), 0.0),
+        AxisDirection.down  => Offset(0.0, childMainAxisPosition(child!)),
+      };
       context.paintChild(child!, offset);
     }
   }
@@ -354,7 +351,14 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
     }
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - constraints.scrollOffset;
+    final double cacheExtent = calculateCacheOffset(
+      constraints,
+      from: 0.0,
+      to: maxExtent,
+    );
+
     geometry = SliverGeometry(
+      cacheExtent: cacheExtent,
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),
       paintExtent: clampDouble(paintExtent, 0.0, constraints.remainingPaintExtent),
@@ -364,20 +368,9 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
     return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
   }
 
-
   @override
   void performLayout() {
-    final SliverConstraints constraints = this.constraints;
-    final double maxExtent = this.maxExtent;
     layoutChild(constraints.scrollOffset, maxExtent);
-    final double paintExtent = maxExtent - constraints.scrollOffset;
-    geometry = SliverGeometry(
-      scrollExtent: maxExtent,
-      paintOrigin: math.min(constraints.overlap, 0.0),
-      paintExtent: clampDouble(paintExtent, 0.0, constraints.remainingPaintExtent),
-      maxPaintExtent: maxExtent,
-      hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
-    );
     _childPosition = updateGeometry();
   }
 
@@ -446,17 +439,12 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
       ? MatrixUtils.transformRect(descendant.getTransformTo(this), rect ?? descendant.paintBounds)
       : rect;
 
-    Rect? newRect;
-    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      case AxisDirection.up:
-        newRect = _trim(localBounds, bottom: childExtent);
-      case AxisDirection.right:
-        newRect = _trim(localBounds, left: 0);
-      case AxisDirection.down:
-        newRect = _trim(localBounds, top: 0);
-      case AxisDirection.left:
-        newRect = _trim(localBounds, right: childExtent);
-    }
+    final Rect? newRect = switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      AxisDirection.up    => _trim(localBounds, bottom: childExtent),
+      AxisDirection.left  => _trim(localBounds, right: childExtent),
+      AxisDirection.right => _trim(localBounds, left: 0),
+      AxisDirection.down  => _trim(localBounds, top: 0),
+    };
 
     super.showOnScreen(
       descendant: this,

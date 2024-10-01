@@ -9,7 +9,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/user_messages.dart' hide userMessages;
+import '../base/user_messages.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 
@@ -125,8 +125,7 @@ class LocalEngineLocator {
   Future<String?> _findEngineSourceByPackageConfig(String? packagePath) async {
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       _fileSystem.file(
-        // TODO(zanderso): update to package_config
-        packagePath ?? _fileSystem.path.join('.packages'),
+        packagePath ?? findPackageConfigFileOrDefault(_fileSystem.currentDirectory),
       ),
       logger: _logger,
       throwOnError: false,

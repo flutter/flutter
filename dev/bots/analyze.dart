@@ -12,19 +12,20 @@ import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:collection/equality.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'allowlist.dart';
 import 'custom_rules/analyze.dart';
+import 'custom_rules/avoid_future_catcherror.dart';
 import 'custom_rules/no_double_clamp.dart';
 import 'custom_rules/no_stop_watches.dart';
+import 'custom_rules/render_box_intrinsics.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
-final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
-final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 final String flutterPackages = path.join(flutterRoot, 'packages');
 final String flutterExamples = path.join(flutterRoot, 'examples');
 
@@ -106,8 +107,11 @@ Future<void> run(List<String> arguments) async {
   printProgress('Debug mode instead of checked mode...');
   await verifyNoCheckedMode(flutterRoot);
 
-  printProgress('Links for creating GitHub issues');
+  printProgress('Links for creating GitHub issues...');
   await verifyIssueLinks(flutterRoot);
+
+  printProgress('Links to repositories...');
+  await verifyRepositoryLinks(flutterRoot);
 
   printProgress('Unexpected binaries...');
   await verifyNoBinaries(flutterRoot);
@@ -151,6 +155,9 @@ Future<void> run(List<String> arguments) async {
   printProgress('Taboo words...');
   await verifyTabooDocumentation(flutterRoot);
 
+  printProgress('Lint Kotlin files...');
+  await lintKotlinFiles(flutterRoot);
+
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
@@ -173,18 +180,29 @@ Future<void> run(List<String> arguments) async {
     // Only run the private lints when the code is free of type errors. The
     // lints are easier to write when they can assume, for example, there is no
     // inheritance cycles.
-    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp, noStopwatches];
+    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp, noStopwatches, renderBoxIntrinsicCalculation];
     final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the framework with the following rules:$ruleNames');
     await analyzeWithRules(flutterRoot, rules,
-      includePaths: <String>['packages/flutter/lib'],
-      excludePaths: <String>['packages/flutter/lib/fix_data'],
+      includePaths: const <String>['packages/flutter/lib'],
+      excludePaths: const <String>['packages/flutter/lib/fix_data'],
     );
     final List<AnalyzeRule> testRules = <AnalyzeRule>[noStopwatches];
     final String testRuleNames = testRules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the test folder with the following rules:$testRuleNames');
     await analyzeWithRules(flutterRoot, testRules,
       includePaths: <String>['packages/flutter/test'],
+    );
+    final List<AnalyzeRule> toolRules = <AnalyzeRule>[AvoidFutureCatchError()];
+    final String toolRuleNames = toolRules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the tool with the following rules:$toolRuleNames');
+    await analyzeWithRules(
+      flutterRoot,
+      toolRules,
+      includePaths: const <String>[
+        'packages/flutter_tools/lib',
+        'packages/flutter_tools/test',
+      ],
     );
   } else {
     printProgress('Skipped performing further analysis in the framework because "flutter analyze" finished with a non-zero exit code.');
@@ -242,6 +260,10 @@ Future<void> run(List<String> arguments) async {
   // Ensure gen_default links the correct files
   printProgress('Correct file names in gen_defaults.dart...');
   await verifyTokenTemplatesUpdateCorrectFiles(flutterRoot);
+
+  // Ensure material library files are up-to-date with the token template files.
+  printProgress('Material library files are up-to-date with token template files...');
+  await verifyMaterialFilesAreUpToDateWithTemplateFiles(flutterRoot, dart);
 
   // Ensure integration test files are up-to-date with the app template.
   printProgress('Up to date integration test template files...');
@@ -390,6 +412,78 @@ Future<void> verifyTokenTemplatesUpdateCorrectFiles(String workingDirectory) asy
   }
 }
 
+/// Verify Material library files are up-to-date with the token template files
+/// when running /dev/tools/gen_defaults/bin/gen_defaults.dart.
+Future<void> verifyMaterialFilesAreUpToDateWithTemplateFiles(String workingDirectory, String dartExecutable) async {
+  final List<String> errors = <String>[];
+  const String beginGeneratedComment = '// BEGIN GENERATED TOKEN PROPERTIES';
+
+  String getMaterialDirPath(List<String> lines) {
+    final String line = lines.firstWhere((String line) => line.contains('String materialLib'));
+    final String relativePath = line.substring(line.indexOf("'") + 1, line.lastIndexOf("'"));
+    return path.join(workingDirectory, relativePath);
+  }
+
+  String getFileName(String line) {
+    const String materialLibString = r"'$materialLib/";
+    final String leftClamp = line.substring(line.indexOf(materialLibString) + materialLibString.length);
+    return leftClamp.substring(0, leftClamp.indexOf("'"));
+  }
+
+  // Get the template generated code from the file.
+  List<String> getGeneratedCode(List<String> lines) {
+    return lines.skipWhile((String line) => !line.contains(beginGeneratedComment)).toList();
+  }
+
+  final String genDefaultsBinDir = '$workingDirectory/dev/tools/gen_defaults/bin';
+  final File file = File(path.join(genDefaultsBinDir, 'gen_defaults.dart'));
+  final List<String> lines = file.readAsLinesSync();
+  final String materialDirPath = getMaterialDirPath(lines);
+  final Map<String, List<String>> beforeGeneratedCode = <String, List<String>>{};
+  final Map<String, List<String>> afterGeneratedCode = <String, List<String>>{};
+
+  for (final String line in lines) {
+    if (line.contains('updateFile();')) {
+      final String fileName = getFileName(line);
+      final String filePath = path.join(materialDirPath, fileName);
+      final File file = File(filePath);
+      beforeGeneratedCode[fileName] = getGeneratedCode(file.readAsLinesSync());
+    }
+  }
+
+  // Run gen_defaults.dart to generate the token template files.
+  await runCommand(dartExecutable,
+    <String>['--enable-asserts', path.join('dev', 'tools', 'gen_defaults', 'bin', 'gen_defaults.dart')],
+    workingDirectory: workingDirectory,
+  );
+
+  for (final String line in lines) {
+    if (line.contains('updateFile();')) {
+      final String fileName = getFileName(line);
+      final String filePath = path.join(materialDirPath, fileName);
+      final File file = File(filePath);
+      afterGeneratedCode[fileName] = getGeneratedCode(file.readAsLinesSync());
+    }
+  }
+
+  // Compare the generated code before and after running gen_defaults.dart.
+  for (final String fileName in beforeGeneratedCode.keys) {
+    final List<String> before = beforeGeneratedCode[fileName]!;
+    final List<String> after = afterGeneratedCode[fileName]!;
+    if (!const IterableEquality<String>().equals(before, after)) {
+      errors.add('$fileName is not up-to-date with the token template file.');
+    }
+  }
+
+  // Fail if any errors.
+  if (errors.isNotEmpty) {
+    foundError(<String>[
+      ...errors,
+      '${bold}See: https://github.com/flutter/flutter/blob/main/dev/tools/gen_defaults to update the token template files.$reset',
+    ]);
+  }
+}
+
 /// Verify tool test files end in `_test.dart`.
 ///
 /// The test runner will only recognize files ending in `_test.dart` as tests to
@@ -470,7 +564,7 @@ Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches 
   }
   if (errors.isNotEmpty) {
     foundError(<String>[
-      '${bold}Do not use sync*/async* methods. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-syncasync for details.$reset',
+      '${bold}Do not use sync*/async* methods. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-syncasync for details.$reset',
       ...errors,
     ]);
   }
@@ -537,7 +631,7 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
   if (errors.isNotEmpty) {
     foundError(<String>[
       ...errors,
-      '${bold}See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter$reset',
+      '${bold}See: https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md$reset',
     ]);
   }
 }
@@ -609,7 +703,7 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
             message = messageMatch.namedGroup('message');
             final String firstChar = String.fromCharCode(message!.runes.first);
             if (firstChar.toUpperCase() != firstChar) {
-              throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
+              throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md';
             }
           } else {
             message += messageMatch.namedGroup('message')!;
@@ -656,7 +750,7 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
   if (errors.isNotEmpty) {
     foundError(<String>[
       ...errors,
-      '${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes$reset',
+      '${bold}See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes$reset',
     ]);
   }
 }
@@ -703,6 +797,9 @@ Future<void> _verifyNoMissingLicenseForExtension(
     final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
     if (contents.isEmpty) {
       continue; // let's not go down the /bin/true rabbit hole
+    }
+    if (path.basename(file.path) == 'Package.swift') {
+      continue;
     }
     if (!contents.startsWith(RegExp(header + licensePattern))) {
       errors.add(file.path);
@@ -788,7 +885,7 @@ Future<void> verifySkipTestComments(String workingDirectory) async {
   if (errors.isNotEmpty) {
     foundError(<String>[
       ...errors,
-      '\n${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#skipped-tests$reset',
+      '\n${bold}See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#skipped-tests$reset',
     ]);
   }
 }
@@ -815,9 +912,8 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    final String s = errors.length == 1 ? '' : 's';
     foundError(<String>[
-      '${bold}The following file$s import a test directly. Test utilities should be in their own file.$reset',
+      '${bold}The following file(s) import a test directly. Test utilities should be in their own file.$reset',
       ...errors,
     ]);
   }
@@ -1134,7 +1230,7 @@ String _bullets(String value) => ' * $value';
 Future<void> verifyIssueLinks(String workingDirectory) async {
   const String issueLinkPrefix = 'https://github.com/flutter/flutter/issues/new';
   const Set<String> stops = <String>{ '\n', ' ', "'", '"', r'\', ')', '>' };
-  assert(!stops.contains('.')); // instead of "visit https://foo." say "visit: https://", it copy-pastes better
+  assert(!stops.contains('.')); // instead of "visit https://foo." say "visit: https://foo", it copy-pastes better
   const String kGiveTemplates =
     'Prefer to provide a link either to $issueLinkPrefix/choose (the list of issue '
     'templates) or to a specific template directly ($issueLinkPrefix?template=...).\n';
@@ -1192,6 +1288,71 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
       } else if (url != '$issueLinkPrefix/choose') {
         problems.add('${file.path} contains $url, which the analyze.dart script is not sure how to handle.');
         suggestions.add('Update analyze.dart to handle the URLs above, or change them to the expected pattern.');
+      }
+      start = end;
+    }
+  }
+  assert(problems.isEmpty == suggestions.isEmpty);
+  if (problems.isNotEmpty) {
+    foundError(<String>[
+      ...problems,
+      ...suggestions,
+    ]);
+  }
+}
+
+Future<void> verifyRepositoryLinks(String workingDirectory) async {
+  const Set<String> stops = <String>{ '\n', ' ', "'", '"', r'\', ')', '>' };
+  assert(!stops.contains('.')); // instead of "visit https://foo." say "visit: https://foo", it copy-pastes better
+
+  // Repos whose default branch is still 'master'
+  const Set<String> repoExceptions = <String>{
+    'bdero/flutter-gpu-examples',
+    'chromium/chromium',
+    'clojure/clojure',
+    'dart-lang/test', // TODO(guidezpl): remove when https://github.com/dart-lang/test/issues/2209 is closed
+    'dart-lang/webdev',
+    'eseidelGoogle/bezier_perf',
+    'flutter/devtools', // TODO(guidezpl): remove when https://github.com/flutter/devtools/issues/7551 is closed
+    'flutter/flutter_gallery_assets', // TODO(guidezpl): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
+    'flutter/flutter-intellij', // TODO(guidezpl): remove when https://github.com/flutter/flutter-intellij/issues/7342 is closed
+    'flutter/platform_tests', // TODO(guidezpl): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
+    'flutter/web_installers',
+    'glfw/glfw',
+    'GoogleCloudPlatform/artifact-registry-maven-tools',
+    'material-components/material-components-android', // TODO(guidezpl): remove when https://github.com/material-components/material-components-android/issues/4144 is closed
+    'torvalds/linux',
+    'tpn/winsdk-10',
+  };
+
+  // See dev/bots/test/analyze-test-input/root/packages/foo/bad_repository_links.dart
+  // for examples of repository links that are not allowed.
+  final RegExp pattern = RegExp(r'^(https:\/\/(?:cs\.opensource\.google|github|raw\.githubusercontent|source\.chromium|([a-z0-9\-]+)\.googlesource)\.)');
+
+  final List<String> problems = <String>[];
+  final Set<String> suggestions = <String>{};
+  final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: 10).toList();
+  for (final File file in files) {
+    final Uint8List bytes = file.readAsBytesSync();
+    // We allow invalid UTF-8 here so that binaries don't trip us up.
+    // There's a separate test in this file that verifies that all text
+    // files are actually valid UTF-8 (see verifyNoBinaries below).
+    final String contents = utf8.decode(bytes, allowMalformed: true);
+    int start = 0;
+    while ((start = contents.indexOf('https://', start)) >= 0) { // Find all 'https://' links
+      int end = start + 8; // Length of 'https://'
+      while (end < contents.length && !stops.contains(contents[end])) {
+        end += 1;
+      }
+      final String url = contents.substring(start, end).replaceAll('\r', '');
+
+      if (pattern.hasMatch(url) && !repoExceptions.any(url.contains)) {
+        if (url.contains('master')) {
+          problems.add('${file.path} contains $url, which uses the banned "master" branch.');
+          suggestions.add('Change the URLs above to the expected pattern by '
+              'using the "main" branch if it exists, otherwise adding the '
+              'repository to the list of exceptions in analyze.dart.');
+        }
       }
       start = end;
     }
@@ -1663,7 +1824,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
         'to which you need access, you should consider how to fetch it from another repository;',
         'for example, the "assets-for-api-docs" repository is used for images in API docs.',
         'To add assets to flutter_tools templates, see the instructions in the wiki:',
-        'https://github.com/flutter/flutter/wiki/Managing-template-image-assets',
+        'https://github.com/flutter/flutter/blob/main/docs/tool/Managing-template-image-assets.md',
       ]);
     }
   }
@@ -1729,14 +1890,9 @@ Stream<File> _allFiles(String workingDirectory, String? extension, { required in
       if (_isGeneratedPluginRegistrant(entity)) {
         continue;
       }
-      if (path.basename(entity.path) == 'flutter_export_environment.sh') {
-        continue;
-      }
-      if (path.basename(entity.path) == 'gradlew.bat') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.DS_Store') {
-        continue;
+      switch (path.basename(entity.path)) {
+        case 'flutter_export_environment.sh' || 'gradlew.bat' || '.DS_Store':
+          continue;
       }
       if (extension == null || path.extension(entity.path) == '.$extension') {
         matches += 1;
@@ -1746,23 +1902,9 @@ Stream<File> _allFiles(String workingDirectory, String? extension, { required in
       if (File(path.join(entity.path, '.dartignore')).existsSync()) {
         continue;
       }
-      if (path.basename(entity.path) == '.git') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.idea') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.gradle') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.dart_tool') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.idea') {
-        continue;
-      }
-      if (path.basename(entity.path) == 'build') {
-        continue;
+      switch (path.basename(entity.path)) {
+        case '.git' || '.idea' || '.gradle' || '.dart_tool' || 'build':
+          continue;
       }
       pending.addAll(entity.listSync());
     }
@@ -1959,11 +2101,27 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
   }
   if (errors.isNotEmpty) {
     foundError(<String>[
-      '${bold}Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.$reset',
+      '${bold}Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.$reset',
       '${bold}In many cases these words can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.$reset',
-      '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-empty-prose for details.$reset',
+      '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-empty-prose for details.$reset',
       ...errors,
     ]);
+  }
+}
+
+Future<void> lintKotlinFiles(String workingDirectory) async {
+  const String baselineRelativePath = 'dev/bots/test/analyze-test-input/ktlint-baseline.xml';
+  const String editorConfigRelativePath = 'dev/bots/test/analyze-test-input/.editorconfig';
+  final EvalResult lintResult = await _evalCommand('ktlint',
+      <String>['--baseline=$flutterRoot/$baselineRelativePath', '--editorconfig=$flutterRoot/$editorConfigRelativePath'],
+      workingDirectory: workingDirectory);
+  if (lintResult.exitCode != 0) {
+    final String errorMessage = 'Found lint violations in Kotlin files:\n ${lintResult.stdout}\n\n'
+        'To reproduce this lint locally:\n'
+        '1. Identify the CIPD version tag used to resolve this particular version of ktlint (check the dependencies section of this shard in the ci.yaml). \n'
+        '2. Download that version from https://chrome-infra-packages.appspot.com/p/flutter/ktlint/linux-amd64/+/<version_tag>\n'
+        '3. From the repository root, run `<path_to_ktlint>/ktlint --editorconfig=$editorConfigRelativePath --baseline=$baselineRelativePath`';
+    foundError(<String>[errorMessage]);
   }
 }
 
@@ -2058,6 +2216,7 @@ Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
 const Set<String> kExecutableAllowlist = <String>{
   'bin/dart',
   'bin/flutter',
+  'bin/flutter-dev',
   'bin/internal/update_dart_sdk.sh',
 
   'dev/bots/accept_android_sdk_licenses.sh',

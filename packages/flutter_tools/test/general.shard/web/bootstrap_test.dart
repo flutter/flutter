@@ -138,36 +138,147 @@ void main() {
     expect(result, contains('el.setAttribute("data-main", \'foo.dart.js\');'));
   });
 
-  test('generateTestEntrypoint does not generate test config wrappers when testConfigPath is not passed', () {
+  test('generateTestEntrypoint generates proper imports and mappings for tests', () {
     final String result = generateTestEntrypoint(
-      relativeTestPath: 'relative_path.dart',
-      absolutePath: 'absolute_path.dart',
-      testConfigPath: null,
+      testInfos: <WebTestInfo>[
+        (entryPoint: 'foo.dart', goldensUri: Uri.parse('foo.dart'), configFile: null),
+        (entryPoint: 'bar.dart', goldensUri: Uri.parse('bar.dart'), configFile: 'bar_config.dart'),
+      ],
       languageVersion: LanguageVersion(2, 8),
     );
 
-    expect(result, isNot(contains('test_config.testExecutable')));
+    expect(result, contains("import 'org-dartlang-app:///foo.dart'"));
+    expect(result, contains("import 'org-dartlang-app:///bar.dart'"));
+    expect(result, contains("import 'org-dartlang-app:///bar_config.dart'"));
   });
 
-  test('generateTestEntrypoint generates test config wrappers when testConfigPath is passed', () {
-    final String result = generateTestEntrypoint(
-      relativeTestPath: 'relative_path.dart',
-      absolutePath: 'absolute_path.dart',
-      testConfigPath: 'test_config_path.dart',
-      languageVersion: LanguageVersion(2, 8),
-    );
+  group('Using the DDC module system', () {
+    test('generateDDCBootstrapScript embeds urls correctly', () {
+      final String result = generateDDCBootstrapScript(
+        entrypoint: 'foo/bar/main.js',
+        ddcModuleLoaderUrl: 'ddc_module_loader.js',
+        mapperUrl: 'mapper.js',
+        generateLoadingIndicator: true,
+      );
+      // ddc module loader js source is interpolated correctly.
+      expect(result, contains('"moduleLoader": "ddc_module_loader.js"'));
+      expect(result, contains('"src": "ddc_module_loader.js"'));
+      // stack trace mapper source is interpolated correctly.
+      expect(result, contains('"mapper": "mapper.js"'));
+      expect(result, contains('"src": "mapper.js"'));
+      // data-main is set to correct bootstrap module.
+      expect(result, contains('"src": "main_module.bootstrap.js"'));
+      expect(result, contains('"id": "data-main"'));
+    });
 
-    expect(result, contains('test_config.testExecutable'));
-  });
+    test('generateDDCBootstrapScript initializes configuration objects', () {
+      final String result = generateDDCBootstrapScript(
+        entrypoint: 'foo/bar/main.js',
+        ddcModuleLoaderUrl: 'ddc_module_loader.js',
+        mapperUrl: 'mapper.js',
+        generateLoadingIndicator: true,
+      );
+      // LoadConfiguration and DDCLoader objects must be constructed.
+      expect(result, contains(r'new window.$dartLoader.LoadConfiguration('));
+      expect(result, contains(r'new window.$dartLoader.DDCLoader('));
+      // Specific fields must be set on the LoadConfiguration.
+      expect(result, contains('.bootstrapScript ='));
+      expect(result, contains('.loadScriptFn ='));
+      // DDCLoader.nextAttempt must be invoked to begin loading.
+      expect(result, contains('nextAttempt()'));
+      // Proper window objects are initialized.
+      expect(result, contains(r'window.$dartLoader.loadConfig ='));
+      expect(result, contains(r'window.$dartLoader.loader ='));
+    });
 
-  test('generateTestEntrypoint embeds urls correctly', () {
-    final String result = generateTestEntrypoint(
-      relativeTestPath: 'relative_path.dart',
-      absolutePath: '/test/absolute_path.dart',
-      testConfigPath: null,
-      languageVersion: LanguageVersion(2, 8),
-    );
+    test('generateDDCBootstrapScript includes loading indicator', () {
+      final String result = generateDDCBootstrapScript(
+        entrypoint: 'foo/bar/main.js',
+        ddcModuleLoaderUrl: 'ddc_module_loader.js',
+        mapperUrl: 'mapper.js',
+        generateLoadingIndicator: true,
+      );
+      expect(result, contains('"flutter-loader"'));
+      expect(result, contains('"indeterminate"'));
+    });
 
-    expect(result, contains("Uri.parse('file:///test/absolute_path.dart')"));
+    test('generateDDCBootstrapScript does not include loading indicator', () {
+      final String result = generateDDCBootstrapScript(
+        entrypoint: 'foo/bar/main.js',
+        ddcModuleLoaderUrl: 'ddc_module_loader.js',
+        mapperUrl: 'mapper.js',
+        generateLoadingIndicator: false,
+      );
+      expect(result, isNot(contains('"flutter-loader"')));
+      expect(result, isNot(contains('"indeterminate"')));
+    });
+
+    // https://github.com/flutter/flutter/issues/107742
+    test('generateDDCBootstrapScript loading indicator does not trigger scrollbars', () {
+      final String result = generateDDCBootstrapScript(
+        entrypoint: 'foo/bar/main.js',
+        ddcModuleLoaderUrl: 'ddc_module_loader.js',
+        mapperUrl: 'mapper.js',
+        generateLoadingIndicator: true,
+      );
+
+      // See: https://regexr.com/6q0ft
+      final RegExp regex = RegExp(r'(?:\.flutter-loader\s*\{)[^}]+(?:overflow\:\s*hidden;)[^}]+}');
+
+      expect(result, matches(regex), reason: '.flutter-loader must have overflow: hidden');
+    });
+
+    test('generateDDCMainModule embeds the entrypoint correctly', () {
+      final String result = generateDDCMainModule(
+        entrypoint: 'main.js',
+        nullAssertions: false,
+        nativeNullAssertions: false,
+      );
+      // bootstrap main module has correct defined module.
+      expect(result, contains('let appName = "main.js"'));
+      expect(result, contains('let moduleName = "main.js"'));
+      expect(result, contains('dart_library.start(appName, uuid, moduleName, "main");'));
+    });
+
+    test('generateDDCMainModule embeds its exported main correctly', () {
+      final String result = generateDDCMainModule(
+        entrypoint: 'foo/bar/main.js',
+        nullAssertions: false,
+        nativeNullAssertions: false,
+        exportedMain: 'foo__bar__main'
+      );
+      // bootstrap main module has correct defined module.
+      expect(result, contains('let appName = "foo/bar/main.js"'));
+      expect(result, contains('let moduleName = "foo/bar/main.js"'));
+      expect(result, contains('dart_library.start(appName, uuid, moduleName, "foo__bar__main");'));
+    });
+
+    test('generateDDCMainModule includes null safety switches', () {
+      final String result = generateDDCMainModule(
+        entrypoint: 'main.js',
+        nullAssertions: true,
+        nativeNullAssertions: true,
+      );
+
+      expect(result, contains('''dart.nonNullAsserts(true);'''));
+      expect(result, contains('''dart.nativeNonNullAsserts(true);'''));
+    });
+
+    test('generateDDCMainModule can disable null safety switches', () {
+      final String result = generateDDCMainModule(
+        entrypoint: 'main.js',
+        nullAssertions: false,
+        nativeNullAssertions: false,
+      );
+
+      expect(result, contains('''dart.nonNullAsserts(false);'''));
+      expect(result, contains('''dart.nativeNonNullAsserts(false);'''));
+    });
+
+    test('generateTestBootstrapFileContents embeds urls correctly', () {
+      final String result = generateTestBootstrapFileContents('foo.dart.js', 'require.js', 'mapper.js');
+
+      expect(result, contains('el.setAttribute("data-main", \'foo.dart.js\');'));
+    });
   });
 }

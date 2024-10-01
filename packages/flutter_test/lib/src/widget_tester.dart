@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:fake_async/fake_async.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:matcher/matcher.dart';
+/// @docImport 'package:test_api/hooks.dart';
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -122,8 +128,8 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// When [experimentalLeakTesting] is set, it is used to leak track objects created
 /// during test execution.
 /// Otherwise [LeakTesting.settings] is used.
-/// Adjust [LeakTesting.settings] in flutter_test_config.dart
-/// (see https://github.com/flutter/flutter/blob/master/packages/flutter_test/lib/flutter_test.dart)
+/// Adjust [LeakTesting.settings] in `flutter_test_config.dart`
+/// (see https://flutter.dev/to/flutter-test-docs)
 /// for the entire package or folder, or in the test's main for a test file
 /// (don't use [setUp] or [setUpAll]).
 /// To turn off leak tracking just for one test, set [experimentalLeakTesting] to
@@ -174,11 +180,11 @@ void testWidgets(
         test_package.addTearDown(binding.postTest);
         return binding.runTest(
           () async {
-            binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
             debugResetSemanticsIdCounter();
             Object? memento;
             try {
               memento = await variant.setUp(value);
+              binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
               maybeSetupLeakTrackingForTest(experimentalLeakTesting, combinedDescription);
               await callback(tester);
             } finally {
@@ -581,15 +587,23 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// ```
   /// {@end-tool}
   ///
+  /// By default, the provided `widget` is rendered into [WidgetTester.view],
+  /// whose properties tests can modify to simulate different scenarios (e.g.
+  /// running on a large/small screen). Tests that want to control the
+  /// [FlutterView] into which content is rendered can set `wrapWithView` to
+  /// false and use [View] widgets in the provided `widget` tree to specify the
+  /// desired [FlutterView]s.
+  ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
   Future<void> pumpWidget(
-    Widget widget, [
+    Widget widget, {
     Duration? duration,
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-  ]) {
+    bool wrapWithView = true,
+  }) {
     return TestAsyncUtils.guard<void>(() {
-      binding.attachRootWidget(binding.wrapWithDefaultView(widget));
+      binding.attachRootWidget(wrapWithView ? binding.wrapWithDefaultView(widget) : widget);
       binding.scheduleFrame();
       return binding.pump(duration, phase);
     });
@@ -669,7 +683,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }());
 
     dynamic caughtException;
-    void handleError(dynamic error, StackTrace stackTrace) => caughtException ??= error;
+    StackTrace? stackTrace;
+    void handleError(dynamic error, StackTrace trace)  {
+      caughtException ??= error;
+      stackTrace ??= trace;
+    }
 
     await Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
     await idle();
@@ -677,7 +695,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     await idle();
 
     if (caughtException != null) {
-      throw caughtException as Object; // ignore: only_throw_errors, rethrowing caught exception.
+      Error.throwWithStackTrace(caughtException as Object, stackTrace!);
     }
   }
 
@@ -924,14 +942,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
         final Key? key = widget.key;
         if (key is ValueKey<dynamic>) {
-          String? keyLabel;
-          if (key is ValueKey<int> ||
-              key is ValueKey<double> ||
-              key is ValueKey<bool>) {
-            keyLabel = 'const ${key.runtimeType}(${key.value})';
-          } else if (key is ValueKey<String>) {
-            keyLabel = "const Key('${key.value}')";
-          }
+          final String? keyLabel = switch (key.value) {
+            int() || double() || bool() => 'const ${key.runtimeType}(${key.value})',
+            final String value => "const Key('$value')",
+            _ => null,
+          };
           if (keyLabel != null) {
             final Iterable<Element> matches = find.byKey(key).evaluate();
             if (matches.length == 1) {
@@ -1075,7 +1090,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   int? _lastRecordedSemanticsHandles;
 
   // TODO(goderbauer): Only use binding.debugOutstandingSemanticsHandles when deprecated binding.pipelineOwner is removed.
-  // ignore: deprecated_member_use
   int get _currentSemanticsHandles => binding.debugOutstandingSemanticsHandles + binding.pipelineOwner.debugOutstandingSemanticsHandles;
 
   void _recordNumberOfSemanticsHandles() {

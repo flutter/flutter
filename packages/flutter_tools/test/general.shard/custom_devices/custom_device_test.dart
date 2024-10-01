@@ -227,7 +227,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: testConfig.pingCommand,
-          onRun: () => pingCommandWasExecuted = true,
+          onRun: (_) => pingCommandWasExecuted = true,
           stdout: testConfigPingSuccessOutput
         ),
       ]),
@@ -297,7 +297,10 @@ void main() {
   testWithoutContext('CustomDevice.isSupportedForProject is true with editable host app', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
 
     final FlutterProject flutterProject = _setUpFlutterProject(fileSystem.currentDirectory);
 
@@ -318,7 +321,7 @@ void main() {
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
             FakeCommand(command: testConfig.uninstallCommand),
-            FakeCommand(command: testConfig.installCommand, onRun: () => bothCommandsWereExecuted = true),
+            FakeCommand(command: testConfig.installCommand, onRun: (_) => bothCommandsWereExecuted = true),
           ])
       );
 
@@ -522,7 +525,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: testConfig.screenshotCommand!,
-        onRun: () => screenshotCommandWasExecuted = true,
+        onRun: (_) => screenshotCommandWasExecuted = true,
       ),
     ]);
 
@@ -548,7 +551,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: testConfig.screenshotCommand!,
-        onRun: () => screenshotCommandWasExecuted = true,
+        onRun: (_) => screenshotCommandWasExecuted = true,
       ),
     ]);
 

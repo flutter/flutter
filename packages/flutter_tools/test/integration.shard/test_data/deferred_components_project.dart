@@ -107,14 +107,14 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   @override
   String get androidBuild => r'''
   buildscript {
-      ext.kotlin_version = '1.7.10'
+      ext.kotlin_version = '1.8.22'
       repositories {
           google()
           mavenCentral()
       }
 
       dependencies {
-          classpath 'com.android.tools.build:gradle:7.3.0'
+          classpath 'com.android.tools.build:gradle:8.1.0'
           classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
       }
   }
@@ -175,8 +175,18 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
   android {
+      namespace = "com.example.splitaot"
       compileSdk flutter.compileSdkVersion
       ndkVersion flutter.ndkVersion
+
+      compileOptions {
+          sourceCompatibility = JavaVersion.VERSION_1_8
+          targetCompatibility = JavaVersion.VERSION_1_8
+      }
+
+      kotlinOptions {
+          jvmTarget = JavaVersion.VERSION_1_8
+      }
 
       sourceSets {
           main.java.srcDirs += 'src/main/kotlin'
@@ -232,7 +242,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
 
   @override
   String get androidGradleProperties => '''
-  org.gradle.jvmargs=-Xmx4G
+  org.gradle.jvmargs=-Xmx4G -XX:MaxMetaspaceSize=2G -XX:+HeapDumpOnOutOfMemoryError
   android.useAndroidX=true
   android.enableJetifier=true
   android.enableR8=true
@@ -482,8 +492,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
 
   @override
   String get appManifest => r'''
-  <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.example.splitaot">
+  <manifest xmlns:android="http://schemas.android.com/apk/res/android">
       <!-- io.flutter.app.FlutterApplication is an android.app.Application that
            calls FlutterMain.startInitialization(this); in its onCreate method.
            In most cases you can leave this as-is, but you if you want to provide

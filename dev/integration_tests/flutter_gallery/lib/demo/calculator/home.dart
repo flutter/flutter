@@ -202,7 +202,7 @@ class KeyPad extends StatelessWidget {
             ),
             Expanded(
               child: Material(
-                color: themeData.colorScheme.background,
+                color: themeData.colorScheme.surface,
                 child: Column(
                   children: <Widget>[
                     CalcKey('\u232B', calcState!.handleDelTap),

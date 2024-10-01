@@ -70,7 +70,7 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
 
   final Map<ClassElement, bool> _isStopwatchClassElementCache = <ClassElement, bool>{};
 
-  bool _checkIfImplementsStopwatchRecurively(ClassElement classElement) {
+  bool _checkIfImplementsStopwatchRecursively(ClassElement classElement) {
     if (classElement.library.isDartCore) {
       return classElement.name == 'Stopwatch';
     }
@@ -80,11 +80,11 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
     });
   }
 
-  // The cached version, call this method instead of _checkIfImplementsStopwatchRecurively.
+  // The cached version, call this method instead of _checkIfImplementsStopwatchRecursively.
   bool _implementsStopwatch(ClassElement classElement) {
     return classElement.library.isDartCore
       ? classElement.name == 'Stopwatch'
-      :_isStopwatchClassElementCache.putIfAbsent(classElement, () => _checkIfImplementsStopwatchRecurively(classElement));
+      :_isStopwatchClassElementCache.putIfAbsent(classElement, () => _checkIfImplementsStopwatchRecursively(classElement));
   }
 
   bool _isInternal(LibraryElement libraryElement) {

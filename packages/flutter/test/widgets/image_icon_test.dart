@@ -30,6 +30,8 @@ void main() {
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(24.0)));
     expect(find.byType(Image), findsOneWidget);
+
+    imageCache.clear();
   });
 
   testWidgets('Icon opacity', (WidgetTester tester) async {
@@ -43,6 +45,8 @@ void main() {
     );
 
     expect(tester.widget<Image>(find.byType(Image)).color!.alpha, equals(128));
+
+    imageCache.clear();
   });
 
   testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {

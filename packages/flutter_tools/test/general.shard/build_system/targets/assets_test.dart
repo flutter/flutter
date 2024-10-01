@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -9,19 +10,24 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 
 void main() {
   late Environment environment;
   late FileSystem fileSystem;
+  late BufferLogger logger;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -32,7 +38,9 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       platform: FakePlatform(),
-      defines: <String, String>{},
+      defines: <String, String>{
+        kBuildMode: BuildMode.debug.cliName,
+      },
     );
     fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
     fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
@@ -41,8 +49,10 @@ void main() {
       .createSync(recursive: true);
     fileSystem.file('assets/wildcard/#bar.png')
       .createSync(recursive: true);
-    fileSystem.file('.packages')
-      .createSync();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
@@ -53,11 +63,26 @@ flutter:
     - assets/foo/bar.png
     - assets/wildcard/
 ''');
+    logger = BufferLogger.test();
   });
 
   testUsingContext('includes LICENSE file inputs in dependencies', () async {
-    fileSystem.file('.packages')
-      .writeAsStringSync('foo:file:///bar/lib');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "foo",
+      "rootUri": "file:///bar",
+      "packageUri": "lib/"
+    }
+  ]
+}
+''');
     fileSystem.file('bar/LICENSE')
       ..createSync(recursive: true)
       ..writeAsStringSync('THIS IS A LICENSE');
@@ -157,6 +182,251 @@ flutter:
     });
   });
 
+  testUsingContext('transforms assets declared with transformers', () async {
+    Cache.flutterRoot = Cache.defaultFlutterRoot(
+      platform: globals.platform,
+      fileSystem: fileSystem,
+      userMessages: UserMessages(),
+    );
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      processManager: globals.processManager,
+      artifacts: Artifacts.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: globals.platform,
+      defines: <String, String>{
+        kBuildMode: BuildMode.debug.cliName,
+      },
+    );
+
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
+
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
+name: example
+flutter:
+  assets:
+    - path: input.txt
+      transformers:
+        - package: my_capitalizer_transformer
+          args: ["-a", "-b", "--color", "green"]
+''');
+
+    fileSystem.file('input.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('abc');
+
+    await const CopyAssets().build(environment);
+
+    expect(logger.errorText, isEmpty);
+    expect(globals.processManager, hasNoRemainingExpectations);
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/input.txt'), exists);
+  }, overrides: <Type, Generator> {
+    Logger: () => logger,
+    FileSystem: () => fileSystem,
+    Platform: () => FakePlatform(),
+    ProcessManager: () => FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+            'run',
+            'my_capitalizer_transformer',
+            RegExp('--input=.*'),
+            RegExp('--output=.*'),
+            '-a',
+            '-b',
+            '--color',
+            'green',
+          ],
+          onRun: (List<String> args) {
+            final ArgResults parsedArgs = (ArgParser()
+                ..addOption('input')
+                ..addOption('output')
+                ..addOption('color')
+                ..addFlag('aaa', abbr: 'a')
+                ..addFlag('bbb', abbr: 'b'))
+              .parse(args);
+
+            expect(parsedArgs['aaa'], true);
+            expect(parsedArgs['bbb'], true);
+            expect(parsedArgs['color'], 'green');
+
+            final File input = fileSystem.file(parsedArgs['input'] as String);
+            expect(input, exists);
+            final String inputContents = input.readAsStringSync();
+            expect(inputContents, 'abc');
+            fileSystem.file(parsedArgs['output'])
+              ..createSync()
+              ..writeAsStringSync(inputContents.toUpperCase());
+          },
+        ),
+      ],
+    ),
+  });
+
+
+  testUsingContext('exits tool if an asset transformation fails', () async {
+    Cache.flutterRoot = Cache.defaultFlutterRoot(
+      platform: globals.platform,
+      fileSystem: fileSystem,
+      userMessages: UserMessages(),
+    );
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      processManager: globals.processManager,
+      artifacts: Artifacts.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: globals.platform,
+      defines: <String, String>{
+        kBuildMode: BuildMode.debug.cliName,
+      },
+    );
+
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
+
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
+name: example
+flutter:
+  assets:
+    - path: input.txt
+      transformers:
+        - package: my_transformer
+          args: ["-a", "-b", "--color", "green"]
+''');
+
+    await fileSystem.file('input.txt').create(recursive: true);
+
+    await expectToolExitLater(
+      const CopyAssets().build(environment),
+      startsWith('User-defined transformation of asset "input.txt" failed.\n'),
+    );
+    expect(globals.processManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator> {
+    Logger: () => logger,
+    FileSystem: () => fileSystem,
+    Platform: () => FakePlatform(),
+    ProcessManager: () => FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+            'run',
+            'my_transformer',
+            RegExp('--input=.*'),
+            RegExp('--output=.*'),
+            '-a',
+            '-b',
+            '--color',
+            'green',
+          ],
+          exitCode: 1,
+        ),
+      ],
+    ),
+  });
+
+  testUsingContext('asset transformation, per each asset, uses unique paths for temporary files', () async {
+    final List<String> inputFilePaths = <String>[];
+    final List<String> outputFilePaths = <String>[];
+
+    final FakeCommand transformerCommand = FakeCommand(
+      command: <Pattern>[
+        Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+        'run',
+        'my_capitalizer_transformer',
+        RegExp('--input=.*'),
+        RegExp('--output=.*'),
+      ],
+      onRun: (List<String> args) {
+        final ArgResults parsedArgs = (ArgParser()
+              ..addOption('input')
+              ..addOption('output'))
+            .parse(args);
+
+        final String input = parsedArgs['input'] as String;
+        final String output = parsedArgs['output'] as String;
+
+        inputFilePaths.add(input);
+        outputFilePaths.add(output);
+
+        fileSystem.file(output)
+          ..createSync()
+          ..writeAsStringSync('foo');
+      },
+    );
+
+    Cache.flutterRoot = Cache.defaultFlutterRoot(
+      platform: globals.platform,
+      fileSystem: fileSystem,
+      userMessages: UserMessages(),
+    );
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      processManager: FakeProcessManager.list(
+        <FakeCommand>[
+          transformerCommand,
+          transformerCommand,
+        ],
+      ),
+      artifacts: Artifacts.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: globals.platform,
+      defines: <String, String>{
+        kBuildMode: BuildMode.debug.cliName,
+      },
+    );
+
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
+
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
+  name: example
+  flutter:
+    assets:
+      - path: input.txt
+        transformers:
+          - package: my_capitalizer_transformer
+  ''');
+
+    fileSystem.file('input.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('abc');
+
+    fileSystem.directory('2x').childFile('input.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('def');
+
+    await const CopyAssets().build(environment);
+
+    expect(inputFilePaths.toSet(), hasLength(inputFilePaths.length));
+    expect(outputFilePaths.toSet(), hasLength(outputFilePaths.length));
+  }, overrides: <Type, Generator>{
+    Logger: () => logger,
+    FileSystem: () => fileSystem,
+    Platform: () => FakePlatform(),
+    ProcessManager: () => FakeProcessManager.empty(),
+  });
+
   testUsingContext('Throws exception if pubspec contains missing files', () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()
@@ -182,7 +452,7 @@ flutter:
       null,
       targetPlatform: TargetPlatform.android,
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
     ), isNull);
   });
 
@@ -193,7 +463,7 @@ flutter:
       'does_not_exist.sksl',
       targetPlatform: TargetPlatform.android,
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
     ), throwsException);
   });
 

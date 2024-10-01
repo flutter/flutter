@@ -71,7 +71,7 @@ class BuildArchitectureMigration extends ProjectMigrator {
   final Directory _buildDirectory;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     final Directory oldRunnerDirectory = _buildDirectory
       .parent
       .childDirectory('runner');

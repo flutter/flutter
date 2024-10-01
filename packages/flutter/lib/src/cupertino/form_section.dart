@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'form_row.dart';
+/// @docImport 'text_form_field_row.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -210,24 +214,29 @@ class CupertinoFormSection extends StatelessWidget {
             ),
             child: footer!);
 
-    return _type == CupertinoListSectionType.base
-        ? CupertinoListSection(
-            header: headerWidget,
-            footer: footerWidget,
-            margin: margin,
-            backgroundColor: backgroundColor,
-            decoration: decoration,
-            clipBehavior: clipBehavior,
-            hasLeading: false,
-            children: children)
-        : CupertinoListSection.insetGrouped(
-            header: headerWidget,
-            footer: footerWidget,
-            margin: margin,
-            backgroundColor: backgroundColor,
-            decoration: decoration,
-            clipBehavior: clipBehavior,
-            hasLeading: false,
-            children: children);
+    switch (_type) {
+      case CupertinoListSectionType.base:
+        return CupertinoListSection(
+          header: headerWidget,
+          footer: footerWidget,
+          margin: margin,
+          backgroundColor: backgroundColor,
+          decoration: decoration,
+          clipBehavior: clipBehavior,
+          hasLeading: false,
+          children: children,
+        );
+      case CupertinoListSectionType.insetGrouped:
+        return CupertinoListSection.insetGrouped(
+          header: headerWidget,
+          footer: footerWidget,
+          margin: margin,
+          backgroundColor: backgroundColor,
+          decoration: decoration,
+          clipBehavior: clipBehavior,
+          hasLeading: false,
+          children: children,
+        );
+    }
   }
 }

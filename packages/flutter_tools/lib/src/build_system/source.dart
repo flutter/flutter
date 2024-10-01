@@ -88,36 +88,32 @@ class SourceVisitor implements ResolvedFiles {
   void visitPattern(String pattern, bool optional) {
     // perform substitution of the environmental values and then
     // of the local values.
-    final List<String> segments = <String>[];
     final List<String> rawParts = pattern.split('/');
     final bool hasWildcard = rawParts.last.contains('*');
     String? wildcardFile;
     if (hasWildcard) {
       wildcardFile = rawParts.removeLast();
     }
-    // If the pattern does not start with an env variable, then we have nothing
-    // to resolve it to, error out.
-    switch (rawParts.first) {
-      case Environment.kProjectDirectory:
-        segments.addAll(
-          environment.fileSystem.path.split(environment.projectDir.resolveSymbolicLinksSync()));
-      case Environment.kBuildDirectory:
-        segments.addAll(environment.fileSystem.path.split(
-          environment.buildDir.resolveSymbolicLinksSync()));
-      case Environment.kCacheDirectory:
-        segments.addAll(
-          environment.fileSystem.path.split(environment.cacheDir.resolveSymbolicLinksSync()));
-      case Environment.kFlutterRootDirectory:
+    final List<String> segments = <String>[
+      ...environment.fileSystem.path.split(switch (rawParts.first) {
         // flutter root will not contain a symbolic link.
-        segments.addAll(
-          environment.fileSystem.path.split(environment.flutterRootDir.absolute.path));
-      case Environment.kOutputDirectory:
-        segments.addAll(
-          environment.fileSystem.path.split(environment.outputDir.resolveSymbolicLinksSync()));
-      default:
-        throw InvalidPatternException(pattern);
-    }
-    rawParts.skip(1).forEach(segments.add);
+        Environment.kFlutterRootDirectory => environment.flutterRootDir.absolute.path,
+        Environment.kProjectDirectory     => environment.projectDir.resolveSymbolicLinksSync(),
+        Environment.kWorkspaceDirectory   =>
+          environment.fileSystem.path.dirname(
+            environment.fileSystem.path.dirname(
+              environment.packageConfigPath,
+            ),
+          ),
+        Environment.kBuildDirectory       => environment.buildDir.resolveSymbolicLinksSync(),
+        Environment.kCacheDirectory       => environment.cacheDir.resolveSymbolicLinksSync(),
+        Environment.kOutputDirectory      => environment.outputDir.resolveSymbolicLinksSync(),
+        // If the pattern does not start with an env variable, then we have nothing
+        // to resolve it to, error out.
+        _ => throw InvalidPatternException(pattern),
+      }),
+      ...rawParts.skip(1),
+    ];
     final String filePath = environment.fileSystem.path.joinAll(segments);
     if (!hasWildcard) {
       if (optional && !environment.fileSystem.isFileSync(filePath)) {

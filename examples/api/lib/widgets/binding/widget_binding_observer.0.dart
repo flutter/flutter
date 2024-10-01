@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [WidgetBindingsObserver].
+/// Flutter code sample for [WidgetsBindingObserver].
 
 void main() => runApp(const WidgetBindingObserverExampleApp());
 

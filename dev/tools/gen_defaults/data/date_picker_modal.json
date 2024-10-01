@@ -1,11 +1,10 @@
 {
-  "version": "v0_162",
+  "version": "6_1_0",
 
-  "md.comp.date-picker.modal.container.color": "surface",
+  "md.comp.date-picker.modal.container.color": "surfaceContainerHigh",
   "md.comp.date-picker.modal.container.elevation": "md.sys.elevation.level3",
   "md.comp.date-picker.modal.container.height": 568.0,
   "md.comp.date-picker.modal.container.shape": "md.sys.shape.corner.extra-large",
-  "md.comp.date-picker.modal.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.date-picker.modal.container.width": 360.0,
   "md.comp.date-picker.modal.date.container.height": 40.0,
   "md.comp.date-picker.modal.date.container.shape": "md.sys.shape.corner.full",

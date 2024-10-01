@@ -47,13 +47,9 @@ class PersistentHashMap<K extends Object, V> {
   /// is not in the map.
   @pragma('dart2js:as:trust')
   V? operator[](K key) {
-    if (_root == null) {
-      return null;
-    }
-
     // Unfortunately can not use unsafeCast<V?>(...) here because it leads
     // to worse code generation on VM.
-    return _root.get(0, key, key.hashCode) as V?;
+    return _root?.get(0, key, key.hashCode) as V?;
   }
 }
 
@@ -65,7 +61,9 @@ abstract class _TrieNode {
   static const int hashBitsPerLevel = 5;
   static const int hashBitsPerLevelMask = (1 << hashBitsPerLevel) - 1;
 
+  @pragma('dart2js:tryInline')
   @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
   static int trieIndex(int hash, int bitIndex) {
     return (hash >>> bitIndex) & hashBitsPerLevelMask;
   }
@@ -118,7 +116,8 @@ class _FullNode extends _TrieNode {
 /// Instead of storing the full array of outgoing edges this node uses a
 /// compressed representation:
 ///
-///   * [_CompressedNode.occupied] has a bit set for indices which are occupied.
+///   * [_CompressedNode.occupiedIndices] has a bit set for indices which are
+///     occupied.
 ///   * furthermore, each occupied index can either be a `(key, value)` pair
 ///     representing an actual key/value mapping or a `(null, trieNode)` pair
 ///     representing a descendant node.
@@ -266,7 +265,9 @@ class _CompressedNode extends _TrieNode {
     return _FullNode(nodes);
   }
 
+  @pragma('dart2js:tryInline')
   @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
   int _compressedIndex(int bit) {
     return _bitCount(occupiedIndices & (bit - 1));
   }
@@ -351,8 +352,9 @@ class _HashCollisionNode extends _TrieNode {
 /// Returns number of bits set in a 32bit integer.
 ///
 /// dart2js safe because we work with 32bit integers.
-@pragma('vm:prefer-inline')
 @pragma('dart2js:tryInline')
+@pragma('vm:prefer-inline')
+@pragma('wasm:prefer-inline')
 int _bitCount(int n) {
   assert((n & 0xFFFFFFFF) == n);
   n = n - ((n >> 1) & 0x55555555);
@@ -367,8 +369,9 @@ int _bitCount(int n) {
 ///
 /// Caveat: do not replace with List.of or similar methods. They are
 /// considerably slower.
-@pragma('vm:prefer-inline')
 @pragma('dart2js:tryInline')
+@pragma('vm:prefer-inline')
+@pragma('wasm:prefer-inline')
 List<Object?> _copy(List<Object?> array) {
   final List<Object?> clone = _makeArray(array.length);
   for (int j = 0; j < array.length; j++) {
@@ -384,17 +387,19 @@ List<Object?> _copy(List<Object?> array) {
 /// (growable array instance pointing to a fixed array instance) and
 /// consequently fixed length arrays are faster to allocated, require less
 /// memory and are faster to access (less indirections).
-@pragma('vm:prefer-inline')
 @pragma('dart2js:tryInline')
+@pragma('vm:prefer-inline')
+@pragma('wasm:prefer-inline')
 List<Object?> _makeArray(int length) {
   return List<Object?>.filled(length, null);
 }
 
 /// This helper method becomes an no-op when compiled with dart2js on
 /// with high level of optimizations enabled.
-@pragma('dart2js:tryInline')
 @pragma('dart2js:as:trust')
+@pragma('dart2js:tryInline')
 @pragma('vm:prefer-inline')
+@pragma('wasm:prefer-inline')
 T _unsafeCast<T>(Object? o) {
   return o as T;
 }

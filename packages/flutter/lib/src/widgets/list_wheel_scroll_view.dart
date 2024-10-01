@@ -2,9 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'scroll_view.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 
@@ -423,8 +430,10 @@ class _FixedExtentScrollable extends Scrollable {
     super.physics,
     required this.itemExtent,
     required super.viewportBuilder,
+    required super.dragStartBehavior,
     super.restorationId,
     super.scrollBehavior,
+    super.hitTestBehavior,
   });
 
   final double itemExtent;
@@ -570,8 +579,10 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.restorationId,
     this.scrollBehavior,
+    this.dragStartBehavior = DragStartBehavior.start,
     required List<Widget> children,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective > 0),
@@ -603,8 +614,10 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.restorationId,
     this.scrollBehavior,
+    this.dragStartBehavior = DragStartBehavior.start,
     required this.childDelegate,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective > 0),
@@ -689,6 +702,11 @@ class ListWheelScrollView extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// {@macro flutter.widgets.scrollable.hitTestBehavior}
+  ///
+  /// Defaults to [HitTestBehavior.opaque].
+  final HitTestBehavior hitTestBehavior;
+
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
@@ -702,6 +720,9 @@ class ListWheelScrollView extends StatefulWidget {
   /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
   /// modified by default to not apply a [Scrollbar].
   final ScrollBehavior? scrollBehavior;
+
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
 
   @override
   State<ListWheelScrollView> createState() => _ListWheelScrollViewState();
@@ -754,7 +775,9 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
         physics: widget.physics,
         itemExtent: widget.itemExtent,
         restorationId: widget.restorationId,
+        hitTestBehavior: widget.hitTestBehavior,
         scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        dragStartBehavior: widget.dragStartBehavior,
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return ListWheelViewport(
             diameterRatio: widget.diameterRatio,

@@ -7,9 +7,10 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 class MockOnPressedFunction {
   int called = 0;
@@ -26,6 +27,17 @@ void main() {
   setUp(() {
     mockOnPressedFunction = MockOnPressedFunction();
   });
+
+  RenderObject getOverlayColor(WidgetTester tester) {
+    return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+  }
+
+  Finder findTooltipContainer(String tooltipText) {
+    return find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(Container),
+    );
+  }
 
   testWidgets('test icon is findable by key', (WidgetTester tester) async {
     const ValueKey<String> key = ValueKey<String>('icon-button');
@@ -407,45 +419,43 @@ void main() {
   });
 
   testWidgets('test tooltip', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
+    const String tooltipText = 'Test tooltip';
+    Widget buildIconButton({ String? tooltip }) {
+      return MaterialApp(
         theme: theme,
         home: Material(
           child: Center(
             child: IconButton(
               onPressed: mockOnPressedFunction.handler,
               icon: const Icon(Icons.ac_unit),
+              tooltip: tooltip,
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+
+    await tester.pumpWidget(buildIconButton());
 
     expect(find.byType(Tooltip), findsNothing);
 
     // Clear the widget tree.
     await tester.pumpWidget(Container(key: UniqueKey()));
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: Material(
-          child: Center(
-            child: IconButton(
-              onPressed: mockOnPressedFunction.handler,
-              icon: const Icon(Icons.ac_unit),
-              tooltip: 'Test tooltip',
-            ),
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(buildIconButton(tooltip: tooltipText));
 
     expect(find.byType(Tooltip), findsOneWidget);
-    expect(find.byTooltip('Test tooltip'), findsOneWidget);
+    expect(find.byTooltip(tooltipText), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Test tooltip'));
+    await tester.tap(find.byTooltip(tooltipText));
     expect(mockOnPressedFunction.called, 1);
+
+    // Hovering over the button should show the tooltip.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(IconButton)));
+    await tester.pump();
+
+    expect(findTooltipContainer(tooltipText), findsOneWidget);
   });
 
   testWidgets('IconButton AppBar size', (WidgetTester tester) async {
@@ -611,6 +621,7 @@ void main() {
           rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.hasEnabledState,
@@ -685,6 +696,7 @@ void main() {
                         TestSemantics(
                           actions: <SemanticsAction>[
                             SemanticsAction.tap,
+                            SemanticsAction.focus,
                           ],
                           flags: <SemanticsFlag>[
                             SemanticsFlag.hasEnabledState,
@@ -1222,10 +1234,6 @@ void main() {
       ),
     );
 
-    RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    }
-
     // Hovered.
     final Offset center = tester.getCenter(find.byType(IconButton));
     final TestGesture gesture = await tester.createGesture(
@@ -1234,12 +1242,12 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.12)));
+    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1249,7 +1257,7 @@ void main() {
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.12)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.1)));
 
     focusNode.dispose();
   });
@@ -1363,10 +1371,6 @@ void main() {
       ),
     );
 
-    RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    }
-
     // Hovered.
     final Offset center = tester.getCenter(find.byType(IconButton));
     final TestGesture gesture = await tester.createGesture(
@@ -1375,12 +1379,12 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onPrimary.withOpacity(0.12)));
+    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onPrimary.withOpacity(0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1390,7 +1394,7 @@ void main() {
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.12)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.1)));
 
     focusNode.dispose();
   });
@@ -1619,10 +1623,6 @@ void main() {
       ),
     );
 
-    RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    }
-
     // Hovered.
     final Offset center = tester.getCenter(find.byType(IconButton));
     final TestGesture gesture = await tester.createGesture(
@@ -1631,12 +1631,12 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.12)));
+    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1646,7 +1646,7 @@ void main() {
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.12)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.1)));
 
     focusNode.dispose();
   });
@@ -1875,10 +1875,6 @@ void main() {
       ),
     );
 
-    RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    }
-
     // Hovered.
     final Offset center = tester.getCenter(find.byType(IconButton));
     final TestGesture gesture = await tester.createGesture(
@@ -1887,12 +1883,12 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1902,7 +1898,7 @@ void main() {
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
 
     focusNode.dispose();
   });
@@ -2188,6 +2184,7 @@ void main() {
           TestSemantics.rootChild(
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
             ],
             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             transform: Matrix4.translationValues(356.0, 276.0, 0.0),
@@ -2586,6 +2583,156 @@ void main() {
     expect(box.size, equals(const Size(48, 48)));
   });
 
+  testWidgets('IconButton.styleFrom overlayColor overrides default overlay color', (WidgetTester tester) async {
+    const Color overlayColor = Color(0xffff0000);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: IconButton(
+              style: IconButton.styleFrom(overlayColor: overlayColor),
+              onPressed: () { },
+              icon: const Icon(Icons.add),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(
+      getOverlayColor(tester),
+      paints
+        ..rect(color: overlayColor.withOpacity(0.08))
+        ..rect(color: overlayColor.withOpacity(0.1)),
+    );
+    // Remove pressed and hovered states,
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.1)));
+  });
+
+  testWidgets('IconButton.styleFrom highlight, hover, focus colors overrides overlayColor', (WidgetTester tester) async {
+    const Color hoverColor = Color(0xff0000f2);
+    const Color highlightColor = Color(0xff0000f1);
+    const Color focusColor = Color(0xff0000f3);
+    const Color overlayColor = Color(0xffff0000);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: IconButton(
+              style: IconButton.styleFrom(
+                hoverColor: hoverColor,
+                highlightColor: highlightColor,
+                focusColor: focusColor,
+                overlayColor: overlayColor,
+              ),
+              onPressed: () { },
+              icon: const Icon(Icons.add),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: hoverColor));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(
+      getOverlayColor(tester),
+      paints
+        ..rect(color: hoverColor)
+        ..rect(color: highlightColor),
+    );
+    // Remove pressed and hovered states,
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: focusColor));
+  });
+
+  testWidgets('IconButton.styleFrom with transparent overlayColor', (WidgetTester tester) async {
+    const Color overlayColor = Colors.transparent;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: IconButton(
+              style: IconButton.styleFrom(overlayColor: overlayColor),
+              onPressed: () { },
+              icon: const Icon(Icons.add),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(
+      getOverlayColor(tester),
+      paints
+        ..rect(color: overlayColor)
+        ..rect(color: overlayColor),
+    );
+    // Remove pressed and hovered states,
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor));
+  });
+
   group('IconTheme tests in Material 3', () {
     testWidgets('IconTheme overrides default values in M3', (WidgetTester tester) async {
       // Theme's IconTheme
@@ -2811,6 +2958,78 @@ void main() {
 
       // No exception is thrown.
     });
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153544.
+  testWidgets('Tooltip is drawn when hovering within IconButton area but outside the Icon itself', (WidgetTester tester) async {
+    const String tooltipText = 'Test tooltip';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.favorite),
+              tooltip: tooltipText,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Verify that the tooltip is not shown initially.
+    expect(findTooltipContainer(tooltipText), findsNothing);
+
+    // Start hovering within IconButton area to show the tooltip.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+
+    final Offset topLeft = tester.getTopLeft(find.byType(Icon));
+    // Move the cursor just outside the Icon.
+    await gesture.moveTo(Offset(topLeft.dx - 1, topLeft.dy - 1));
+    await tester.pump();
+
+    // Verify that the tooltip is shown.
+    expect(findTooltipContainer(tooltipText), findsOneWidget);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153544.
+  testWidgets('Trigger Ink splash when hovering within layout bounds with tooltip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: ColoredBox(
+              color: const Color(0xFFFF0000),
+              child: IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.favorite),
+                tooltip: 'Test tooltip',
+                style: const ButtonStyle(
+                  overlayColor: WidgetStatePropertyAll<Color>(Color(0xFF00FF00)),
+                  padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(20)),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset topLeft = tester.getTopLeft(find.byType(ColoredBox));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(topLeft);
+    await gesture.down(topLeft);
+    await tester.pumpAndSettle();
+    expect(
+      getOverlayColor(tester),
+      paints
+        ..rect(color: const Color(0xFFFF0000)) // ColoredBox.
+        ..rect(color: const Color(0xFF00FF00)), // IconButton overlay.
+    );
   });
 }
 

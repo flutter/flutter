@@ -304,7 +304,7 @@ void main() {
       expect(artifact2.didUpdate, false);
       expect(
         logger.errorText,
-        contains('https://flutter.dev/community/china'),
+        contains('https://flutter.dev/to/china-setup'),
       );
     });
 
@@ -393,31 +393,42 @@ void main() {
     expect(operatingSystemUtils.chmods, <List<String>>[<String>['/.tmp_rand0/flutter_cache_test_artifact.rand0/bin_dir', 'a+r,a+x']]);
   });
 
-  testWithoutContext('EngineCachedArtifact removes unzipped FlutterMacOS.framework before replacing', () async {
-    final OperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
+  testWithoutContext('EngineCachedArtifact downloads package zip from expected URL', () async {
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
     final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
     final FakeSecondaryCache cache = FakeSecondaryCache()
       ..artifactDirectory = artifactDir
       ..downloadDir = downloadDir;
-
-    final Directory binDir = artifactDir.childDirectory('bin_dir')..createSync();
-    binDir.childFile('FlutterMacOS.framework.zip').createSync();
-    final Directory unzippedFramework = binDir.childDirectory('FlutterMacOS.framework');
-    final File staleFile = unzippedFramework.childFile('stale_file')..createSync(recursive: true);
-    artifactDir.childFile('unused_url_path').createSync();
+    artifactDir.childDirectory('pkg').createSync();
 
     final FakeCachedArtifact artifact = FakeCachedArtifact(
       cache: cache,
-      binaryDirs: <List<String>>[
-        <String>['bin_dir', 'unused_url_path'],
+      binaryDirs: <List<String>>[],
+      packageDirs: <String>[
+        'package_dir',
       ],
       requiredArtifacts: DevelopmentArtifact.universal,
     );
-    await artifact.updateInner(FakeArtifactUpdater(), fileSystem, operatingSystemUtils);
-    expect(unzippedFramework, exists);
-    expect(staleFile, isNot(exists));
+
+    Uri? packageUrl;
+    final ArtifactUpdater artifactUpdater = FakeArtifactUpdater()
+      ..onDownloadZipArchive = (String message, Uri url, Directory location) {
+        location.childDirectory('package_dir').createSync();
+        packageUrl = url;
+      };
+
+    await artifact.updateInner(artifactUpdater, fileSystem, operatingSystemUtils);
+    expect(packageUrl, isNotNull);
+    expect(packageUrl.toString(), 'https://storage.googleapis.com/flutter_infra_release/flutter/null/package_dir.zip');
+
+    final Directory dir = fileSystem.systemTempDirectory
+        .listSync(recursive: true)
+        .whereType<Directory>()
+        .singleWhereOrNull((Directory directory) => directory.basename == 'pkg')!;
+    expect(dir.path, artifactDir.childDirectory('pkg').path);
+    expect(dir.childDirectory('package_dir').existsSync(), isTrue);
   });
 
   testWithoutContext('Try to remove without a parent', () async {
@@ -615,7 +626,7 @@ void main() {
       expect(artifacts.getBinaryDirs(), <List<String>>[
         <String>['darwin-x64', 'darwin-arm64/font-subset.zip'],
         <String>['linux-arm64', 'linux-arm64/font-subset.zip'],
-        <String>['windows-x64', 'windows-x64/font-subset.zip'], // arm64 windows hosts are not supported now
+        <String>['windows-arm64', 'windows-arm64/font-subset.zip'],
       ]);
   });
 
@@ -898,7 +909,7 @@ void main() {
     handler.addError(webCacheDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', 2)));
 
     await expectLater(() => webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils()), throwsToolExit(
-      message: RegExp('The Flutter tool tried to delete the file or directory cache/bin/cache/flutter_web_sdk but was unable to'),
+      message: RegExp('Unable to delete file or directory at "cache/bin/cache/flutter_web_sdk"'),
     ));
   });
 
@@ -981,9 +992,6 @@ void main() {
 
     expect(await pubDependencies.isUpToDate(fileSystem), false); // no package config
 
-    fileSystem.file('packages/flutter_tools/.packages')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('\n');
     fileSystem.file('packages/flutter_tools/.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -1028,7 +1036,7 @@ void main() {
     expect(
       pub.invocations.first,
       predicate<FakePubInvocation>(
-        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.none,
+        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.failuresOnly,
         'Pub invoked with PubOutputMode.none',
       ),
     );

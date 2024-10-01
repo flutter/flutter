@@ -10,11 +10,7 @@ void main() {
   testWidgets('Show dialog', (WidgetTester tester) async {
     const String dialogTitle = 'Basic dialog title';
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.ShowDialogExampleApp(),
-        ),
-      ),
+      const example.ShowDialogExampleApp(),
     );
 
     expect(find.text(dialogTitle), findsNothing);

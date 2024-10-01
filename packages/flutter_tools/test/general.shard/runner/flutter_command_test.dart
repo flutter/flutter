@@ -27,7 +27,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
-import 'package:unified_analytics/src/enums.dart';
+import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -643,7 +643,7 @@ void main() {
     testUsingContext('use packagesPath to generate BuildInfo', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
       final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
-      expect(buildInfo.packagesPath, 'foo');
+      expect(buildInfo.packageConfigPath, 'foo');
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -695,6 +695,18 @@ void main() {
       await runner.run(<String>['dummy', '--no-assume-initialize-from-dill-up-to-date']);
       final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
       expect(buildInfo.assumeInitializeFromDillUpToDate, isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('sets useLocalCanvasKit in BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+      fileSystem.directory('engine/src/out/wasm_release').createSync(recursive: true);
+      await runner.run(<String>['--local-web-sdk=wasm_release', '--local-engine-src-path=engine/src', 'dummy']);
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.useLocalCanvasKit, isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -802,7 +814,6 @@ void main() {
       testUsingContext('parses values from JSON files and includes them in defines list', () async {
         fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('config1.json').writeAsString(
           '''
             {
@@ -852,7 +863,6 @@ void main() {
           .file(fileSystem.path.join('lib', 'main.dart'))
           .createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         fileSystem.file('.env').writeAsStringSync('''
             MY_VALUE=VALUE_FROM_ENV_FILE
           ''');
@@ -881,7 +891,6 @@ void main() {
             .file(fileSystem.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('.env').writeAsString('''
             # comment
             kInt=1
@@ -944,7 +953,6 @@ void main() {
             .file(fileSystem.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('.env').writeAsString('what is this');
 
         await dummyCommandRunner.run(<String>[
@@ -970,7 +978,6 @@ void main() {
             .file(fileSystem.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('.env').writeAsString('''
             # single line value
             name=piotrfleury
@@ -1003,7 +1010,6 @@ void main() {
             .file(fileSystem.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('.env').writeAsString('''
             kInt=1
             kDouble=1.1
@@ -1041,7 +1047,6 @@ void main() {
       testUsingContext('when files contain entries with duplicate keys, uses the value from the lattermost file', () async {
         fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('config1.json').writeAsString(
             '''
             {
@@ -1083,7 +1088,6 @@ void main() {
       testUsingContext('throws a ToolExit when the argued path points to a directory', () async {
         fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         fileSystem.directory('config').createSync();
 
         await dummyCommandRunner.run(<String>[
@@ -1103,7 +1107,6 @@ void main() {
       testUsingContext('throws a ToolExit when the given JSON file is malformed', () async {
         fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('config.json').writeAsString(
           '''
             {
@@ -1162,7 +1165,6 @@ void main() {
       testUsingContext("tool exits when FLUTTER_APP_FLAVOR is already set in user's environment", () async {
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
 
         final FakeDevice device = FakeDevice(
           'name',
@@ -1192,7 +1194,6 @@ void main() {
       testUsingContext('tool exits when FLUTTER_APP_FLAVOR is set in --dart-define or --dart-define-from-file', () async {
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         fileSystem.file('config.json')..createSync()..writeAsStringSync('{"FLUTTER_APP_FLAVOR": "strawberry"}');
 
         final FakeDevice device = FakeDevice(
@@ -1216,6 +1217,45 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('CLI option overrides default flavor from manifest', () async {
+        final File pubspec = fileSystem.file('pubspec.yaml');
+        await pubspec.create();
+        await pubspec.writeAsString('''
+name: test
+flutter:
+  default-flavor: foo
+        ''');
+
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.flavor, 'foo');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.empty(),
+      });
+
+      testUsingContext('tool loads default flavor from manifest, but cli overrides', () async {
+        final File pubspec = fileSystem.file('pubspec.yaml');
+        await pubspec.create();
+        await pubspec.writeAsString('''
+name: test
+flutter:
+  default-flavor: foo
+        ''');
+
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(commandFunction: () async {
+          return FlutterCommandResult.success();
+        },);
+        flutterCommand.usesFlavorOption();
+        final CommandRunner<void> runner =  createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--flavor', 'bar']);
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.flavor, 'bar');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.empty(),
       });
     });
   });

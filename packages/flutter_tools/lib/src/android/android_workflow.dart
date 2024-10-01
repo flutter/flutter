@@ -11,7 +11,8 @@ import '../base/context.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/user_messages.dart' hide userMessages;
+import '../base/process.dart';
+import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';
@@ -334,7 +335,7 @@ class AndroidLicenseValidator extends DoctorValidator {
         <String>[_androidSdk!.sdkManagerPath!, '--licenses'],
         environment: _java?.environment,
       );
-      process.stdin.write('n\n');
+      await ProcessUtils.writelnToStdinUnsafe(stdin: process.stdin, line: 'n');
       // We expect logcat streams to occasionally contain invalid utf-8,
       // see: https://github.com/flutter/flutter/pull/8864.
       final Future<void> output = process.stdout
@@ -349,7 +350,7 @@ class AndroidLicenseValidator extends DoctorValidator {
         .asFuture<void>();
       await Future.wait<void>(<Future<void>>[output, errors]);
       return status ?? LicensesAccepted.unknown;
-    } on ProcessException catch (e) {
+    } on IOException catch (e) {
       _logger.printTrace('Failed to run Android sdk manager: $e');
       return LicensesAccepted.unknown;
     }

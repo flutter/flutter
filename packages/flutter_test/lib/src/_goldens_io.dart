@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'matchers.dart';
+library;
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -54,8 +57,7 @@ import 'test_async_utils.dart';
 ///
 ///   * [GoldenFileComparator], the abstract class that [LocalFileComparator]
 ///   implements.
-///   * [matchesGoldenFile], the function from [flutter_test] that invokes the
-///    comparator.
+///   * [matchesGoldenFile], the function that invokes the comparator.
 class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutput {
   /// Creates a new [LocalFileComparator] for the specified [testFile].
   ///
@@ -175,18 +177,18 @@ mixin LocalComparisonOutput {
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
 Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
-  if (identical(test, master)) {
-    return ComparisonResult(
-      passed: true,
-      diffPercent: 0.0,
-    );
-  }
-
   if (test == null || master == null || test.isEmpty || master.isEmpty) {
     return ComparisonResult(
       passed: false,
       diffPercent: 1.0,
       error: 'Pixel test failed, null image provided.',
+    );
+  }
+
+  if (listEquals(test, master)) {
+    return ComparisonResult(
+      passed: true,
+      diffPercent: 0.0,
     );
   }
 
@@ -210,9 +212,11 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       error: 'Pixel test failed, image sizes do not match.\n'
         'Master Image: ${masterImage.width} X ${masterImage.height}\n'
         'Test Image: ${testImage.width} X ${testImage.height}',
+        diffs: <String, Image>{
+          'masterImage': masterImage,
+          'testImage': testImage,
+        },
     );
-    masterImage.dispose();
-    testImage.dispose();
     return result;
   }
 
@@ -260,7 +264,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       passed: false,
       diffPercent: diffPercent,
       error: 'Pixel test failed, '
-        '${(diffPercent * 100).toStringAsFixed(2)}% '
+        '${(diffPercent * 100).toStringAsFixed(2)}%, ${pixelDiffCount}px '
         'diff detected.',
       diffs:  <String, Image>{
         'masterImage' : masterImage,
@@ -290,6 +294,11 @@ ByteData _invert(ByteData imageBytes) {
 
 /// An unsupported [WebGoldenComparator] that exists for API compatibility.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
+  /// This is provided to prevent warnings from the analyzer.
+  DefaultWebGoldenComparator(Uri _) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
   @override
   Future<bool> compare(double width, double height, Uri golden) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');

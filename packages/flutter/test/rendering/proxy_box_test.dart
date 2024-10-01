@@ -1055,10 +1055,7 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
 
   @override
   OffsetLayer updateCompositedLayer({required covariant OffsetLayer? oldLayer}) {
-    if (offsetLayerFactory != null) {
-      return offsetLayerFactory!.call(oldLayer);
-    }
-    return super.updateCompositedLayer(oldLayer: oldLayer);
+    return offsetLayerFactory?.call(oldLayer) ?? super.updateCompositedLayer(oldLayer: oldLayer);
   }
 
   @override

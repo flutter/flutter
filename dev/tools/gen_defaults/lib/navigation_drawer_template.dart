@@ -26,7 +26,7 @@ class _${blockName}DefaultsM3 extends NavigationDrawerThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  Color? get backgroundColor => ${componentColor("md.comp.navigation-drawer.container")};
+  Color? get backgroundColor => ${componentColor("md.comp.navigation-drawer.modal.container")};
 
   @override
   Color? get surfaceTintColor => ${colorOrTransparent("md.comp.navigation-drawer.container.surface-tint-layer.color")};

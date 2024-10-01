@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'safe_area.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show DisplayFeature, DisplayFeatureState;
 
@@ -114,13 +120,10 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   }
 
   static Offset _fallbackAnchorPoint(BuildContext context) {
-    final TextDirection textDirection = Directionality.of(context);
-    switch (textDirection) {
-      case TextDirection.rtl:
-        return const Offset(double.maxFinite, 0);
-      case TextDirection.ltr:
-        return Offset.zero;
-    }
+    return switch (Directionality.of(context)) {
+      TextDirection.rtl => const Offset(double.maxFinite, 0),
+      TextDirection.ltr => Offset.zero,
+    };
   }
 
   /// Returns the areas of the screen that are obstructed by display features.

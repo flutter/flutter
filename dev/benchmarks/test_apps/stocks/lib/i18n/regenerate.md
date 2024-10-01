@@ -1,6 +1,6 @@
 # Regenerating the i18n files
 
-The files in this directory are used to generate `stock_strings.dart`,
+The arb files in this directory are used to generate `stock_strings.dart`,
 which contains the `StockStrings` class. This localizations class is
 used by the stocks application to look up localized message strings.
 The stocks app uses the [Dart `intl` package](https://github.com/dart-lang/intl).

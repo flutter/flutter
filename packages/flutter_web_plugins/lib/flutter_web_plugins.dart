@@ -12,7 +12,9 @@
 /// See also:
 ///
 ///  * [How to Write a Flutter Web Plugin](https://medium.com/flutter/how-to-write-a-flutter-web-plugin-5e26c689ea1), a Medium article
-///    describing how the `url_launcher` package was created using [flutter_web_plugins].
+///    describing how the `url_launcher` package was created using `flutter_web_plugins`.
+///
+/// @docImport 'src/plugin_registry.dart';
 library flutter_web_plugins;
 
 export 'src/navigation/url_strategy.dart';

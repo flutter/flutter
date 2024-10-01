@@ -1,8 +1,8 @@
 # Specify analysis options.
 #
-# For a list of lints, see: https://dart.dev/lints
+# For a list of lints, see: https://dart.dev/tools/linter-rules
 # For guidelines on configuring static analysis, see:
-# https://dart.dev/guides/language/analysis-options
+# https://dart.dev/tools/analysis
 #
 # There are other similar analysis options files in the flutter repos,
 # which should be kept in sync with this file:
@@ -20,8 +20,10 @@ analyzer:
     strict-inference: true
     strict-raw-types: true
   errors:
-    # allow self-reference to deprecated members (we do this because otherwise we have
-    # to annotate every member in every test, assert, etc, when we deprecate something)
+    # allow deprecated members (we do this because otherwise we have to annotate
+    # every member in every test, assert, etc, when we or the Dart SDK deprecates
+    # something (https://github.com/flutter/flutter/issues/143312)
+    deprecated_member_use: ignore
     deprecated_member_use_from_same_package: ignore
   exclude:
     - "bin/cache/**"
@@ -31,17 +33,18 @@ analyzer:
 linter:
   rules:
     # This list is derived from the list of all available lints located at
-    # https://github.com/dart-lang/linter/blob/main/example/all.yaml
+    # https://github.com/dart-lang/sdk/blob/main/pkg/linter/example/all.yaml
     - always_declare_return_types
     - always_put_control_body_on_new_line
     # - always_put_required_named_parameters_first # we prefer having parameters in the same order as fields https://github.com/flutter/flutter/issues/10219
     - always_specify_types
     # - always_use_package_imports # we do this commonly
     - annotate_overrides
+    - annotate_redeclares
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
     - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses # blocked on https://github.com/dart-lang/linter/issues/3023
-    # - avoid_catching_errors # blocked on https://github.com/dart-lang/linter/issues/3023
+    # - avoid_catching_errors # blocked on https://github.com/dart-lang/linter/issues/4998
     # - avoid_classes_with_only_static_members # we do this commonly for `abstract final class`es
     - avoid_double_and_int_checks
     - avoid_dynamic_calls
@@ -98,6 +101,7 @@ linter:
     - directives_ordering
     # - discarded_futures # too many false positives, similar to unawaited_futures
     # - do_not_use_environment # there are appropriate times to use the environment, especially in our tests and build logic
+    # - document_ignores # not yet tested
     - empty_catches
     - empty_constructor_bodies
     - empty_statements
@@ -110,6 +114,7 @@ linter:
     - implicit_call_tearoffs
     - implicit_reopen
     - invalid_case_patterns
+    - invalid_runtime_check_with_js_interop_types
     # - join_return_with_assignment # not required by flutter style
     - leading_newlines_in_multiline_strings
     - library_annotations
@@ -119,6 +124,7 @@ linter:
     # - lines_longer_than_80_chars # not required by flutter style
     - literal_only_boolean_expressions
     # - matching_super_parameters # blocked on https://github.com/dart-lang/language/issues/2509
+    - missing_code_block_language_in_doc_comment
     - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list
     - no_default_cases
@@ -135,6 +141,7 @@ linter:
     - null_check_on_nullable_type_parameter
     - null_closures
     # - omit_local_variable_types # opposite of always_specify_types
+    # - omit_obvious_local_variable_types # not yet tested
     # - one_member_abstracts # too many false positives
     - only_throw_errors # this does get disabled in a few places where we have legacy code that uses strings et al
     - overridden_fields
@@ -154,7 +161,7 @@ linter:
     # - prefer_constructors_over_static_methods # far too many false positives
     - prefer_contains
     # - prefer_double_quotes # opposite of prefer_single_quotes
-    # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
+    # - prefer_expression_function_bodies # conflicts with ./docs/contributing/Style-guide-for-Flutter-repo.md#consider-using--for-short-functions-and-methods
     - prefer_final_fields
     - prefer_final_in_for_each
     - prefer_final_locals
@@ -167,7 +174,7 @@ linter:
     - prefer_if_null_operators
     - prefer_initializing_formals
     - prefer_inlined_adds
-    # - prefer_int_literals # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#use-double-literals-for-double-constants
+    # - prefer_int_literals # conflicts with ./docs/contributing/Style-guide-for-Flutter-repo.md#use-double-literals-for-double-constants
     - prefer_interpolation_to_compose_strings
     - prefer_is_empty
     - prefer_is_not_empty
@@ -193,6 +200,7 @@ linter:
     - sort_constructors_first
     # - sort_pub_dependencies # prevents separating pinned transitive dependencies
     - sort_unnamed_constructors_first
+    # - specify_nonobvious_local_variable_types # not yet tested
     - test_types_in_equals
     - throw_in_finally
     - tighten_type_of_initializing_formals
@@ -200,6 +208,7 @@ linter:
     - type_init_formals
     - type_literal_in_constant_pattern
     # - unawaited_futures # too many false positives, especially with the way AnimationController works
+    # - unintended_html_in_doc_comment # blocked on https://github.com/dart-lang/linter/issues/5065
     - unnecessary_await_in_return
     - unnecessary_brace_in_string_interps
     - unnecessary_breaks
@@ -210,6 +219,7 @@ linter:
     # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
     - unnecessary_late
     - unnecessary_library_directive
+    # - unnecessary_library_name # blocked on https://github.com/dart-lang/lints/issues/181#issuecomment-2018919034
     - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_aware_operator_on_extension_on_nullable
@@ -246,5 +256,6 @@ linter:
     - use_super_parameters
     - use_test_throws_matchers
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
+    - use_truncating_division
     - valid_regexps
     - void_checks

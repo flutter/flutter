@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'box_border.dart';
+/// @docImport 'box_decoration.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -238,13 +244,7 @@ abstract class BorderRadiusGeometry {
     if (visual != null && logical != null) {
       return '$visual + $logical';
     }
-    if (visual != null) {
-      return visual;
-    }
-    if (logical != null) {
-      return logical;
-    }
-    return 'BorderRadius.zero';
+    return visual ?? logical ?? 'BorderRadius.zero';
   }
 
   @override

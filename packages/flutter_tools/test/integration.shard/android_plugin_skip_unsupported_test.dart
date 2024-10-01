@@ -105,7 +105,7 @@ void main() {
     final ProcessResult buildApkResult = await testUnsupportedPlugin(
         project: project, createAndroidPluginFolder: false);
     expect(buildApkResult.stderr.toString(),
-        isNot(contains('Please fix your settings.gradle.')));
+        isNot(contains('Please fix your settings.gradle')));
     expect(buildApkResult, const ProcessResultMatcher());
   });
 
@@ -116,7 +116,7 @@ void main() {
     final ProcessResult buildApkResult = await testUnsupportedPlugin(
         project: project, createAndroidPluginFolder: true);
     expect(buildApkResult.stderr.toString(),
-        isNot(contains('Please fix your settings.gradle.')));
+        isNot(contains('Please fix your settings.gradle')));
     expect(buildApkResult, const ProcessResultMatcher());
   });
 
@@ -131,7 +131,7 @@ void main() {
     final ProcessResult buildApkResult = await testUnsupportedPlugin(
         project: project, createAndroidPluginFolder: false);
     expect(buildApkResult.stderr.toString(),
-        isNot(contains('Please fix your settings.gradle.')));
+        isNot(contains('Please fix your settings.gradle')));
     expect(buildApkResult, const ProcessResultMatcher());
   });
 
@@ -147,7 +147,7 @@ void main() {
     final ProcessResult buildApkResult = await testUnsupportedPlugin(
         project: project, createAndroidPluginFolder: true);
     expect(buildApkResult.stderr.toString(),
-        isNot(contains('Please fix your settings.gradle.')));
+        isNot(contains('Please fix your settings.gradle')));
     expect(buildApkResult, const ProcessResultMatcher());
   });
 
@@ -167,7 +167,7 @@ void main() {
     expect(
       buildApkResult,
       const ProcessResultMatcher(
-          stderrPattern: 'Please fix your settings.gradle.'),
+          stderrPattern: 'Please fix your settings.gradle'),
     );
   });
 }

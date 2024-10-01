@@ -21,6 +21,7 @@ void main() {
       ));
 
       expect(MockHttpHeaders.headers['flutter'], <String>['flutter']);
+      imageCache.clear();
 
     }, createHttpClient: (SecurityContext? _) {
       return client;

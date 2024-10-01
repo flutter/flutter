@@ -37,6 +37,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
   MaterialPageRoute({
     required this.builder,
     super.settings,
+    super.requestFocus,
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
@@ -150,6 +151,8 @@ class MaterialPage<T> extends Page<T> {
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
     super.key,
+    super.canPop,
+    super.onPopInvoked,
     super.name,
     super.arguments,
     super.restorationId,

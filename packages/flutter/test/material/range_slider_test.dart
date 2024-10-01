@@ -9,6 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/105833
   testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
@@ -1657,7 +1659,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: const MediaQueryData(textScaleFactor: 2.0),
+                data: const MediaQueryData(textScaler: TextScaler.linear(2)),
                 child: Material(
                   child: Center(
                     child: Theme(
@@ -2044,8 +2046,8 @@ void main() {
       'divisions: 4',
       'labelStart: "lowerValue"',
       'labelEnd: "upperValue"',
-      'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
-      'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
+      'activeColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'inactiveColor: MaterialColor(primary value: ${const Color(0xff9e9e9e)})',
     ]);
   });
 
@@ -2610,4 +2612,36 @@ void main() {
     // No exception should be thrown.
     expect(tester.takeException(), null);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/141953.
+  testWidgets('Semantic nodes do not throw an error after clearSemantics', (WidgetTester tester) async {
+    SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: RangeSlider(
+            values: const RangeValues(40, 80),
+            max: 100,
+            onChanged: (RangeValues newValue) { },
+          ),
+        ),
+      ),
+    );
+
+    // Dispose the semantics to trigger clearSemantics.
+    semantics.dispose();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+
+    // Initialize the semantics again.
+    semantics = SemanticsTester(tester);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+
+    semantics.dispose();
+  }, semanticsEnabled: false);
 }

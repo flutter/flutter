@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'value_listenable_builder.dart';
+library;
+
 import 'dart:async' show StreamSubscription;
 
 import 'package:flutter/foundation.dart';
@@ -320,6 +323,20 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// a [Stream].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=MkKEWHfy99Y}
+///
+/// ## Managing the stream
+///
+/// The [stream] must have been obtained earlier, e.g. during [State.initState],
+/// [State.didUpdateWidget], or [State.didChangeDependencies]. It must not be
+/// created during the [State.build] or [StatelessWidget.build] method call when
+/// constructing the [StreamBuilder]. If the [stream] is created at the same
+/// time as the [StreamBuilder], then every time the [StreamBuilder]'s parent is
+/// rebuilt, the asynchronous task will be restarted.
+///
+/// A general guideline is to assume that every `build` method could get called
+/// every frame, and to treat omitted calls as an optimization.
+///
+/// ## Timing
 ///
 /// Widget rebuilding is scheduled by each interaction, using [State.setState],
 /// but is otherwise decoupled from the timing of the stream. The [builder]

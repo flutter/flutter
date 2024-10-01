@@ -13,11 +13,7 @@ export 'text_input.dart' show TextEditingValue, TextInputClient, TextInputConfig
 /// Each hint is pre-defined on at least one supported platform. See their
 /// documentation for their availability on each platform, and the platform
 /// values each autofill hint corresponds to.
-class AutofillHints {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  AutofillHints._();
-
+abstract final class AutofillHints {
   /// The input field expects an address locality (city/town).
   ///
   /// This hint will be translated to the below values on different platforms:
@@ -805,18 +801,21 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
     required this.allConfigurations,
     required TextInputConfiguration currentClientConfiguration,
-  }) : super(inputType: currentClientConfiguration.inputType,
-         obscureText: currentClientConfiguration.obscureText,
-         autocorrect: currentClientConfiguration.autocorrect,
-         smartDashesType: currentClientConfiguration.smartDashesType,
-         smartQuotesType: currentClientConfiguration.smartQuotesType,
-         enableSuggestions: currentClientConfiguration.enableSuggestions,
-         inputAction: currentClientConfiguration.inputAction,
-         textCapitalization: currentClientConfiguration.textCapitalization,
-         keyboardAppearance: currentClientConfiguration.keyboardAppearance,
-         actionLabel: currentClientConfiguration.actionLabel,
-         autofillConfiguration: currentClientConfiguration.autofillConfiguration,
-       );
+  }) : super(
+          viewId: currentClientConfiguration.viewId,
+          inputType: currentClientConfiguration.inputType,
+          obscureText: currentClientConfiguration.obscureText,
+          autocorrect: currentClientConfiguration.autocorrect,
+          smartDashesType: currentClientConfiguration.smartDashesType,
+          smartQuotesType: currentClientConfiguration.smartQuotesType,
+          enableSuggestions: currentClientConfiguration.enableSuggestions,
+          inputAction: currentClientConfiguration.inputAction,
+          textCapitalization: currentClientConfiguration.textCapitalization,
+          keyboardAppearance: currentClientConfiguration.keyboardAppearance,
+          actionLabel: currentClientConfiguration.actionLabel,
+          autofillConfiguration:
+              currentClientConfiguration.autofillConfiguration,
+        );
 
   final Iterable<TextInputConfiguration> allConfigurations;
 

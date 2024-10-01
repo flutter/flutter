@@ -45,7 +45,7 @@ import 'thumb_painter.dart';
 ///
 /// See also:
 ///
-///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/sliders/>
+///  * <https://developer.apple.com/design/human-interface-guidelines/sliders/>
 class CupertinoSlider extends StatefulWidget {
   /// Creates an iOS-style slider.
   ///
@@ -450,13 +450,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
   double get _trackLeft => _kPadding;
   double get _trackRight => size.width - _kPadding;
   double get _thumbCenter {
-    final double visualPosition;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        visualPosition = 1.0 - _value;
-      case TextDirection.ltr:
-        visualPosition = _value;
-    }
+    final double visualPosition = switch (textDirection) {
+      TextDirection.rtl => 1.0 - _value,
+      TextDirection.ltr => _value,
+    };
     return lerpDouble(_trackLeft + CupertinoThumbPainter.radius, _trackRight - CupertinoThumbPainter.radius, visualPosition)!;
   }
 
@@ -468,12 +465,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     if (isInteractive) {
       final double extent = math.max(_kPadding, size.width - 2.0 * (_kPadding + CupertinoThumbPainter.radius));
       final double valueDelta = details.primaryDelta! / extent;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          _currentDragValue -= valueDelta;
-        case TextDirection.ltr:
-          _currentDragValue += valueDelta;
-      }
+      _currentDragValue += switch (textDirection) {
+        TextDirection.rtl => -valueDelta,
+        TextDirection.ltr =>  valueDelta,
+      };
       onChanged!(_discretizedCurrentDragValue);
     }
   }
@@ -508,19 +503,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final double visualPosition;
-    final Color leftColor;
-    final Color rightColor;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        visualPosition = 1.0 - _position.value;
-        leftColor = _activeColor;
-        rightColor = trackColor;
-      case TextDirection.ltr:
-        visualPosition = _position.value;
-        leftColor = trackColor;
-        rightColor = _activeColor;
-    }
+    final (double visualPosition, Color leftColor, Color rightColor) = switch (textDirection) {
+      TextDirection.rtl => (1.0 - _position.value, _activeColor, trackColor),
+      TextDirection.ltr => (_position.value, trackColor, _activeColor),
+    };
 
     final double trackCenter = offset.dy + size.height / 2.0;
     final double trackLeft = offset.dx + _trackLeft;

@@ -2,8 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/gestures.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'editable_text.dart';
+/// @docImport 'gesture_detector.dart';
+/// @docImport 'implicit_animations.dart';
+/// @docImport 'transitions.dart';
+/// @docImport 'widget_span.dart';
+library;
+
+import 'dart:math';
 import 'dart:ui' as ui show TextHeightBehavior;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -11,6 +23,7 @@ import 'default_selection_style.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'media_query.dart';
+import 'selectable_region.dart';
 import 'selection_container.dart';
 
 // Examples can assume:
@@ -86,6 +99,10 @@ class DefaultTextStyle extends InheritedTheme {
   /// [DefaultTextStyle] using the [DefaultTextStyle.new] constructor directly.
   /// See the source below for an example of how to do this (since that's
   /// essentially what this constructor does).
+  ///
+  /// If a [textHeightBehavior] is provided, the existing configuration will be
+  /// replaced compeletely. To retain part of the original [textHeightBehavior],
+  /// manually obtain the ambient [DefaultTextStyle] using [DefaultTextStyle.of].
   static Widget merge({
     Key? key,
     TextStyle? style,
@@ -94,6 +111,7 @@ class DefaultTextStyle extends InheritedTheme {
     TextOverflow? overflow,
     int? maxLines,
     TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
     required Widget child,
   }) {
     return Builder(
@@ -107,6 +125,7 @@ class DefaultTextStyle extends InheritedTheme {
           overflow: overflow ?? parent.overflow,
           maxLines: maxLines ?? parent.maxLines,
           textWidthBasis: textWidthBasis ?? parent.textWidthBasis,
+          textHeightBehavior: textHeightBehavior ?? parent.textHeightBehavior,
           child: child,
         );
       },
@@ -653,30 +672,47 @@ class Text extends StatelessWidget {
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null)                         => MediaQuery.textScalerOf(context),
     };
-
-    Widget result = RichText(
-      textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
-      textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
-      locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
-      softWrap: softWrap ?? defaultTextStyle.softWrap,
-      overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
-      textScaler: textScaler,
-      maxLines: maxLines ?? defaultTextStyle.maxLines,
-      strutStyle: strutStyle,
-      textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-      selectionRegistrar: registrar,
-      selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
-      text: TextSpan(
-        style: effectiveTextStyle,
-        text: data,
-        children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-      ),
-    );
+    late Widget result;
     if (registrar != null) {
       result = MouseRegion(
         cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
-        child: result,
+        child: _SelectableTextContainer(
+          textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+          textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
+          locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
+          softWrap: softWrap ?? defaultTextStyle.softWrap,
+          overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+          textScaler: textScaler,
+          maxLines: maxLines ?? defaultTextStyle.maxLines,
+          strutStyle: strutStyle,
+          textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
+          textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+          selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
+          text: TextSpan(
+            style: effectiveTextStyle,
+            text: data,
+            children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+          ),
+        ),
+      );
+    } else {
+      result = RichText(
+        textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+        textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
+        locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
+        softWrap: softWrap ?? defaultTextStyle.softWrap,
+        overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+        textScaler: textScaler,
+        maxLines: maxLines ?? defaultTextStyle.maxLines,
+        strutStyle: strutStyle,
+        textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
+        textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+        selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
+        text: TextSpan(
+          style: effectiveTextStyle,
+          text: data,
+          children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+        ),
       );
     }
     if (semanticsLabel != null) {
@@ -711,5 +747,673 @@ class Text extends StatelessWidget {
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }
+  }
+}
+
+class _SelectableTextContainer extends StatefulWidget {
+  const _SelectableTextContainer({
+    required this.text,
+    required this.textAlign,
+    this.textDirection,
+    required this.softWrap,
+    required this.overflow,
+    required this.textScaler,
+    this.maxLines,
+    this.locale,
+    this.strutStyle,
+    required this.textWidthBasis,
+    this.textHeightBehavior,
+    required this.selectionColor,
+  });
+
+  final InlineSpan text;
+  final TextAlign textAlign;
+  final TextDirection? textDirection;
+  final bool softWrap;
+  final TextOverflow overflow;
+  final TextScaler textScaler;
+  final int? maxLines;
+  final Locale? locale;
+  final StrutStyle? strutStyle;
+  final TextWidthBasis textWidthBasis;
+  final ui.TextHeightBehavior? textHeightBehavior;
+  final Color selectionColor;
+
+  @override
+  State<_SelectableTextContainer> createState() => _SelectableTextContainerState();
+}
+
+class _SelectableTextContainerState extends State<_SelectableTextContainer> {
+  late final _SelectableTextContainerDelegate _selectionDelegate;
+  final GlobalKey _textKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _selectionDelegate = _SelectableTextContainerDelegate(_textKey);
+  }
+
+  @override
+  void dispose() {
+    _selectionDelegate.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectionContainer(
+      delegate: _selectionDelegate,
+      // Use [_RichText] wrapper so the underlying [RenderParagraph] can register
+      // its [Selectable]s to the [SelectionContainer] created by this widget.
+      child: _RichText(
+        textKey: _textKey,
+        textAlign: widget.textAlign,
+        textDirection: widget.textDirection,
+        locale: widget.locale,
+        softWrap: widget.softWrap,
+        overflow: widget.overflow,
+        textScaler: widget.textScaler,
+        maxLines: widget.maxLines,
+        strutStyle: widget.strutStyle,
+        textWidthBasis: widget.textWidthBasis,
+        textHeightBehavior: widget.textHeightBehavior,
+        selectionColor: widget.selectionColor,
+        text: widget.text,
+      ),
+    );
+  }
+}
+
+class _RichText extends StatelessWidget {
+  const _RichText({
+    this.textKey,
+    required this.text,
+    required this.textAlign,
+    this.textDirection,
+    required this.softWrap,
+    required this.overflow,
+    required this.textScaler,
+    this.maxLines,
+    this.locale,
+    this.strutStyle,
+    required this.textWidthBasis,
+    this.textHeightBehavior,
+    required this.selectionColor,
+  });
+
+  final GlobalKey? textKey;
+  final InlineSpan text;
+  final TextAlign textAlign;
+  final TextDirection? textDirection;
+  final bool softWrap;
+  final TextOverflow overflow;
+  final TextScaler textScaler;
+  final int? maxLines;
+  final Locale? locale;
+  final StrutStyle? strutStyle;
+  final TextWidthBasis textWidthBasis;
+  final ui.TextHeightBehavior? textHeightBehavior;
+  final Color selectionColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
+    return RichText(
+      key: textKey,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale,
+      softWrap: softWrap,
+      overflow: overflow,
+      textScaler: textScaler,
+      maxLines: maxLines,
+      strutStyle: strutStyle,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      selectionRegistrar: registrar,
+      selectionColor: selectionColor,
+      text: text,
+    );
+  }
+}
+
+// In practice some selectables like widgetspan shift several pixels. So when
+// the vertical position diff is within the threshold, compare the horizontal
+// position to make the compareScreenOrder function more robust.
+const double _kSelectableVerticalComparingThreshold = 3.0;
+
+class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+  _SelectableTextContainerDelegate(
+    GlobalKey textKey,
+  ) : _textKey = textKey;
+
+  final GlobalKey _textKey;
+  RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
+
+  @override
+  SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
+    final SelectionResult result = _handleSelectParagraph(event);
+    if (currentSelectionStartIndex != -1) {
+      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
+    }
+    if (currentSelectionEndIndex != -1) {
+      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
+    }
+    _updateLastEdgeEventsFromGeometries();
+    return result;
+  }
+
+  SelectionResult _handleSelectParagraph(SelectParagraphSelectionEvent event) {
+    if (event.absorb) {
+      for (int index = 0; index < selectables.length; index += 1) {
+        dispatchSelectionEventToChild(selectables[index], event);
+      }
+      currentSelectionStartIndex = 0;
+      currentSelectionEndIndex = selectables.length - 1;
+      return SelectionResult.next;
+    }
+
+    // First pass, if the position is on a placeholder then dispatch the selection
+    // event to the [Selectable] at the location and terminate.
+    for (int index = 0; index < selectables.length; index += 1) {
+      final bool selectableIsPlaceholder = !paragraph.selectableBelongsToParagraph(selectables[index]);
+      if (selectableIsPlaceholder && selectables[index].boundingBoxes.isNotEmpty) {
+        for (final Rect rect in selectables[index].boundingBoxes) {
+          final Rect globalRect = MatrixUtils.transformRect(selectables[index].getTransformTo(null), rect);
+          if (globalRect.contains(event.globalPosition)) {
+            currentSelectionStartIndex = currentSelectionEndIndex = index;
+            return dispatchSelectionEventToChild(selectables[index], event);
+          }
+        }
+      }
+    }
+
+    SelectionResult? lastSelectionResult;
+    bool foundStart = false;
+    int? lastNextIndex;
+    for (int index = 0; index < selectables.length; index += 1) {
+      if (!paragraph.selectableBelongsToParagraph(selectables[index])) {
+        if (foundStart) {
+          final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
+          final SelectionResult result = dispatchSelectionEventToChild(selectables[index], synthesizedEvent);
+          if (selectables.length - 1 == index) {
+            currentSelectionEndIndex = index;
+            _flushInactiveSelections();
+            return result;
+          }
+        }
+        continue;
+      }
+      final SelectionGeometry existingGeometry = selectables[index].value;
+      lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
+      if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
+        if (foundStart) {
+          currentSelectionEndIndex = index;
+        } else {
+          currentSelectionStartIndex = currentSelectionEndIndex = index;
+        }
+        return SelectionResult.next;
+      }
+      if (lastSelectionResult == SelectionResult.next) {
+        if (selectables[index].value == existingGeometry && !foundStart) {
+          lastNextIndex = index;
+        }
+        if (selectables[index].value != existingGeometry && !foundStart) {
+          assert(selectables[index].boundingBoxes.isNotEmpty);
+          assert(selectables[index].value.selectionRects.isNotEmpty);
+          final bool selectionAtStartOfSelectable = selectables[index].boundingBoxes[0].overlaps(selectables[index].value.selectionRects[0]);
+          int startIndex = 0;
+          if (lastNextIndex != null && selectionAtStartOfSelectable) {
+            startIndex = lastNextIndex + 1;
+          } else {
+            startIndex = lastNextIndex == null && selectionAtStartOfSelectable ? 0 : index;
+          }
+          for (int i = startIndex; i < index; i += 1) {
+            final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
+            dispatchSelectionEventToChild(selectables[i], synthesizedEvent);
+          }
+          currentSelectionStartIndex = startIndex;
+          foundStart = true;
+        }
+        continue;
+      }
+      if (index == 0 && lastSelectionResult == SelectionResult.previous) {
+        return SelectionResult.previous;
+      }
+      if (selectables[index].value != existingGeometry) {
+        if (!foundStart && lastNextIndex == null) {
+          currentSelectionStartIndex = 0;
+          for (int i = 0; i < index; i += 1) {
+            final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
+            dispatchSelectionEventToChild(selectables[i], synthesizedEvent);
+          }
+        }
+        currentSelectionEndIndex = index;
+        // Geometry has changed as a result of select paragraph, need to clear the
+        // selection of other selectables to keep selection in sync.
+        _flushInactiveSelections();
+      }
+      return SelectionResult.end;
+    }
+    assert(lastSelectionResult == null);
+    return SelectionResult.end;
+  }
+
+  /// Initializes the selection of the selectable children.
+  ///
+  /// The goal is to find the selectable child that contains the selection edge.
+  /// Returns [SelectionResult.end] if the selection edge ends on any of the
+  /// children. Otherwise, it returns [SelectionResult.previous] if the selection
+  /// does not reach any of its children. Returns [SelectionResult.next]
+  /// if the selection reaches the end of its children.
+  ///
+  /// Ideally, this method should only be called twice at the beginning of the
+  /// drag selection, once for start edge update event, once for end edge update
+  /// event.
+  SelectionResult _initSelection(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
+    assert((isEnd && currentSelectionEndIndex == -1) || (!isEnd && currentSelectionStartIndex == -1));
+    SelectionResult? finalResult;
+    // Begin the search for the selection edge at the opposite edge if it exists.
+    final bool hasOppositeEdge = isEnd ? currentSelectionStartIndex != -1 : currentSelectionEndIndex != -1;
+    int newIndex = switch ((isEnd, hasOppositeEdge)) {
+      (true, true) => currentSelectionStartIndex,
+      (true, false) => 0,
+      (false, true) => currentSelectionEndIndex,
+      (false, false) => 0,
+    };
+    bool? forward;
+    late SelectionResult currentSelectableResult;
+    // This loop sends the selection event to one of the following to determine
+    // the direction of the search.
+    //  - The opposite edge index if it exists.
+    //  - Index 0 if the opposite edge index does not exist.
+    //
+    // If the result is `SelectionResult.next`, this loop look backward.
+    // Otherwise, it looks forward.
+    //
+    // The terminate condition are:
+    // 1. the selectable returns end, pending, none.
+    // 2. the selectable returns previous when looking forward.
+    // 2. the selectable returns next when looking backward.
+    while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
+      currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
+      switch (currentSelectableResult) {
+        case SelectionResult.end:
+        case SelectionResult.pending:
+        case SelectionResult.none:
+          finalResult = currentSelectableResult;
+        case SelectionResult.next:
+          if (forward == false) {
+            newIndex += 1;
+            finalResult = SelectionResult.end;
+          } else if (newIndex == selectables.length - 1) {
+            finalResult = currentSelectableResult;
+          } else {
+            forward = true;
+            newIndex += 1;
+          }
+        case SelectionResult.previous:
+          if (forward ?? false) {
+            newIndex -= 1;
+            finalResult = SelectionResult.end;
+          } else if (newIndex == 0) {
+            finalResult = currentSelectableResult;
+          } else {
+            forward = false;
+            newIndex -= 1;
+          }
+      }
+    }
+    if (isEnd) {
+      currentSelectionEndIndex = newIndex;
+    } else {
+      currentSelectionStartIndex = newIndex;
+    }
+    _flushInactiveSelections();
+    return finalResult!;
+  }
+
+  SelectionResult _adjustSelection(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
+    assert(() {
+      if (isEnd) {
+        assert(currentSelectionEndIndex < selectables.length && currentSelectionEndIndex >= 0);
+        return true;
+      }
+      assert(currentSelectionStartIndex < selectables.length && currentSelectionStartIndex >= 0);
+      return true;
+    }());
+    SelectionResult? finalResult;
+    // Determines if the edge being adjusted is within the current viewport.
+    //  - If so, we begin the search for the new selection edge position at the
+    //    currentSelectionEndIndex/currentSelectionStartIndex.
+    //  - If not, we attempt to locate the new selection edge starting from
+    //    the opposite end.
+    //  - If neither edge is in the current viewport, the search for the new
+    //    selection edge position begins at 0.
+    //
+    // This can happen when there is a scrollable child and the edge being adjusted
+    // has been scrolled out of view.
+    final bool isCurrentEdgeWithinViewport = isEnd ? value.endSelectionPoint != null : value.startSelectionPoint != null;
+    final bool isOppositeEdgeWithinViewport = isEnd ? value.startSelectionPoint != null : value.endSelectionPoint != null;
+    int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
+      (true, true, true) => currentSelectionEndIndex,
+      (true, true, false) => currentSelectionEndIndex,
+      (true, false, true) => currentSelectionStartIndex,
+      (true, false, false) => 0,
+      (false, true, true) => currentSelectionStartIndex,
+      (false, true, false) => currentSelectionStartIndex,
+      (false, false, true) => currentSelectionEndIndex,
+      (false, false, false) => 0,
+    };
+    bool? forward;
+    late SelectionResult currentSelectableResult;
+    // This loop sends the selection event to one of the following to determine
+    // the direction of the search.
+    //  - currentSelectionEndIndex/currentSelectionStartIndex if the current edge
+    //    is in the current viewport.
+    //  - The opposite edge index if the current edge is not in the current viewport.
+    //  - Index 0 if neither edge is in the current viewport.
+    //
+    // If the result is `SelectionResult.next`, this loop look backward.
+    // Otherwise, it looks forward.
+    //
+    // The terminate condition are:
+    // 1. the selectable returns end, pending, none.
+    // 2. the selectable returns previous when looking forward.
+    // 2. the selectable returns next when looking backward.
+    while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
+      currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
+      switch (currentSelectableResult) {
+        case SelectionResult.end:
+        case SelectionResult.pending:
+        case SelectionResult.none:
+          finalResult = currentSelectableResult;
+        case SelectionResult.next:
+          if (forward == false) {
+            newIndex += 1;
+            finalResult = SelectionResult.end;
+          } else if (newIndex == selectables.length - 1) {
+            finalResult = currentSelectableResult;
+          } else {
+            forward = true;
+            newIndex += 1;
+          }
+        case SelectionResult.previous:
+          if (forward ?? false) {
+            newIndex -= 1;
+            finalResult = SelectionResult.end;
+          } else if (newIndex == 0) {
+            finalResult = currentSelectableResult;
+          } else {
+            forward = false;
+            newIndex -= 1;
+          }
+      }
+    }
+    if (isEnd) {
+      final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+      if (forward != null && ((!forwardSelection && forward && newIndex >= currentSelectionStartIndex) || (forwardSelection && !forward && newIndex <= currentSelectionStartIndex))) {
+        currentSelectionStartIndex = currentSelectionEndIndex;
+      }
+      currentSelectionEndIndex = newIndex;
+    } else {
+      final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+      if (forward != null && ((!forwardSelection && !forward && newIndex <= currentSelectionEndIndex) || (forwardSelection && forward && newIndex >= currentSelectionEndIndex))) {
+        currentSelectionEndIndex = currentSelectionStartIndex;
+      }
+      currentSelectionStartIndex = newIndex;
+    }
+    _flushInactiveSelections();
+    return finalResult!;
+  }
+
+  /// The compare function this delegate used for determining the selection
+  /// order of the [Selectable]s.
+  ///
+  /// Sorts the [Selectable]s by their top left [Rect].
+  @override
+  Comparator<Selectable> get compareOrder => _compareScreenOrder;
+
+  static int _compareScreenOrder(Selectable a, Selectable b) {
+    // Attempt to sort the selectables under a [_SelectableTextContainerDelegate]
+    // by the top left rect.
+    final Rect rectA = MatrixUtils.transformRect(
+      a.getTransformTo(null),
+      a.boundingBoxes.first,
+    );
+    final Rect rectB = MatrixUtils.transformRect(
+      b.getTransformTo(null),
+      b.boundingBoxes.first,
+    );
+    final int result = _compareVertically(rectA, rectB);
+    if (result != 0) {
+      return result;
+    }
+    return _compareHorizontally(rectA, rectB);
+  }
+
+  /// Compares two rectangles in the screen order solely by their vertical
+  /// positions.
+  ///
+  /// Returns positive if a is lower, negative if a is higher, 0 if their
+  /// order can't be determine solely by their vertical position.
+  static int _compareVertically(Rect a, Rect b) {
+    // The rectangles overlap so defer to horizontal comparison.
+    if ((a.top - b.top < _kSelectableVerticalComparingThreshold && a.bottom - b.bottom > - _kSelectableVerticalComparingThreshold) ||
+        (b.top - a.top < _kSelectableVerticalComparingThreshold && b.bottom - a.bottom > - _kSelectableVerticalComparingThreshold)) {
+      return 0;
+    }
+    if ((a.top - b.top).abs() > _kSelectableVerticalComparingThreshold) {
+      return a.top > b.top ? 1 : -1;
+    }
+    return a.bottom > b.bottom ? 1 : -1;
+  }
+
+  /// Compares two rectangles in the screen order by their horizontal positions
+  /// assuming one of the rectangles enclose the other rect vertically.
+  ///
+  /// Returns positive if a is lower, negative if a is higher.
+  static int _compareHorizontally(Rect a, Rect b) {
+    // a encloses b.
+    if (a.left - b.left < precisionErrorTolerance && a.right - b.right > - precisionErrorTolerance) {
+      return -1;
+    }
+    // b encloses a.
+    if (b.left - a.left < precisionErrorTolerance && b.right - a.right > - precisionErrorTolerance) {
+      return 1;
+    }
+    if ((a.left - b.left).abs() > precisionErrorTolerance) {
+      return a.left > b.left ? 1 : -1;
+    }
+    return a.right > b.right ? 1 : -1;
+  }
+
+  // From [SelectableRegion].
+
+  // Clears the selection on all selectables not in the range of
+  // currentSelectionStartIndex..currentSelectionEndIndex.
+  //
+  // If one of the edges does not exist, then this method will clear the selection
+  // in all selectables except the existing edge.
+  //
+  // If neither of the edges exist this method immediately returns.
+  void _flushInactiveSelections() {
+    if (currentSelectionStartIndex == -1 && currentSelectionEndIndex == -1) {
+      return;
+    }
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      final int skipIndex = currentSelectionStartIndex == -1 ? currentSelectionEndIndex : currentSelectionStartIndex;
+      selectables
+        .where((Selectable target) => target != selectables[skipIndex])
+        .forEach((Selectable target) => dispatchSelectionEventToChild(target, const ClearSelectionEvent()));
+      return;
+    }
+    final int skipStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int skipEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    for (int index = 0; index < selectables.length; index += 1) {
+      if (index >= skipStart && index <= skipEnd) {
+        continue;
+      }
+      dispatchSelectionEventToChild(selectables[index], const ClearSelectionEvent());
+    }
+  }
+
+  final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
+  final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
+
+  Offset? _lastStartEdgeUpdateGlobalPosition;
+  Offset? _lastEndEdgeUpdateGlobalPosition;
+
+  @override
+  void remove(Selectable selectable) {
+    _hasReceivedStartEvent.remove(selectable);
+    _hasReceivedEndEvent.remove(selectable);
+    super.remove(selectable);
+  }
+
+  void _updateLastEdgeEventsFromGeometries() {
+    if (currentSelectionStartIndex != -1 && selectables[currentSelectionStartIndex].value.hasSelection) {
+      final Selectable start = selectables[currentSelectionStartIndex];
+      final Offset localStartEdge = start.value.startSelectionPoint!.localPosition +
+          Offset(0, - start.value.startSelectionPoint!.lineHeight / 2);
+      _lastStartEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(start.getTransformTo(null), localStartEdge);
+    }
+    if (currentSelectionEndIndex != -1 && selectables[currentSelectionEndIndex].value.hasSelection) {
+      final Selectable end = selectables[currentSelectionEndIndex];
+      final Offset localEndEdge = end.value.endSelectionPoint!.localPosition +
+          Offset(0, -end.value.endSelectionPoint!.lineHeight / 2);
+      _lastEndEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(end.getTransformTo(null), localEndEdge);
+    }
+  }
+
+  @override
+  SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
+    final SelectionResult result = super.handleSelectAll(event);
+    for (final Selectable selectable in selectables) {
+      _hasReceivedStartEvent.add(selectable);
+      _hasReceivedEndEvent.add(selectable);
+    }
+    // Synthesize last update event so the edge updates continue to work.
+    _updateLastEdgeEventsFromGeometries();
+    return result;
+  }
+
+  /// Selects a word in a selectable at the location
+  /// [SelectWordSelectionEvent.globalPosition].
+  @override
+  SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
+    final SelectionResult result = super.handleSelectWord(event);
+    if (currentSelectionStartIndex != -1) {
+      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
+    }
+    if (currentSelectionEndIndex != -1) {
+      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
+    }
+    _updateLastEdgeEventsFromGeometries();
+    return result;
+  }
+
+  @override
+  SelectionResult handleClearSelection(ClearSelectionEvent event) {
+    final SelectionResult result = super.handleClearSelection(event);
+    _hasReceivedStartEvent.clear();
+    _hasReceivedEndEvent.clear();
+    _lastStartEdgeUpdateGlobalPosition = null;
+    _lastEndEdgeUpdateGlobalPosition = null;
+    return result;
+  }
+
+  @override
+  SelectionResult handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
+    if (event.type == SelectionEventType.endEdgeUpdate) {
+      _lastEndEdgeUpdateGlobalPosition = event.globalPosition;
+    } else {
+      _lastStartEdgeUpdateGlobalPosition = event.globalPosition;
+    }
+
+    if (event.granularity == TextGranularity.paragraph) {
+      if (event.type == SelectionEventType.endEdgeUpdate) {
+        return currentSelectionEndIndex == -1 ? _initSelection(event, isEnd: true) : _adjustSelection(event, isEnd: true);
+      }
+      return currentSelectionStartIndex == -1 ? _initSelection(event, isEnd: false) : _adjustSelection(event, isEnd: false);
+    }
+
+    return super.handleSelectionEdgeUpdate(event);
+  }
+
+  @override
+  void dispose() {
+    _hasReceivedStartEvent.clear();
+    _hasReceivedEndEvent.clear();
+    super.dispose();
+  }
+
+  @override
+  SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
+    switch (event.type) {
+      case SelectionEventType.startEdgeUpdate:
+        _hasReceivedStartEvent.add(selectable);
+        ensureChildUpdated(selectable);
+      case SelectionEventType.endEdgeUpdate:
+        _hasReceivedEndEvent.add(selectable);
+        ensureChildUpdated(selectable);
+      case SelectionEventType.clear:
+        _hasReceivedStartEvent.remove(selectable);
+        _hasReceivedEndEvent.remove(selectable);
+      case SelectionEventType.selectAll:
+      case SelectionEventType.selectWord:
+      case SelectionEventType.selectParagraph:
+        break;
+      case SelectionEventType.granularlyExtendSelection:
+      case SelectionEventType.directionallyExtendSelection:
+        _hasReceivedStartEvent.add(selectable);
+        _hasReceivedEndEvent.add(selectable);
+        ensureChildUpdated(selectable);
+    }
+    return super.dispatchSelectionEventToChild(selectable, event);
+  }
+
+  @override
+  void ensureChildUpdated(Selectable selectable) {
+    if (_lastEndEdgeUpdateGlobalPosition != null && _hasReceivedEndEvent.add(selectable)) {
+      final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forEnd(
+        globalPosition: _lastEndEdgeUpdateGlobalPosition!,
+      );
+      if (currentSelectionEndIndex == -1) {
+        handleSelectionEdgeUpdate(synthesizedEvent);
+      }
+      selectable.dispatchSelectionEvent(synthesizedEvent);
+    }
+    if (_lastStartEdgeUpdateGlobalPosition != null && _hasReceivedStartEvent.add(selectable)) {
+      final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forStart(
+          globalPosition: _lastStartEdgeUpdateGlobalPosition!,
+      );
+      if (currentSelectionStartIndex == -1) {
+        handleSelectionEdgeUpdate(synthesizedEvent);
+      }
+      selectable.dispatchSelectionEvent(synthesizedEvent);
+    }
+  }
+
+  @override
+  void didChangeSelectables() {
+    if (_lastEndEdgeUpdateGlobalPosition != null) {
+      handleSelectionEdgeUpdate(
+        SelectionEdgeUpdateEvent.forEnd(
+          globalPosition: _lastEndEdgeUpdateGlobalPosition!,
+        ),
+      );
+    }
+    if (_lastStartEdgeUpdateGlobalPosition != null) {
+      handleSelectionEdgeUpdate(
+        SelectionEdgeUpdateEvent.forStart(
+          globalPosition: _lastStartEdgeUpdateGlobalPosition!,
+        ),
+      );
+    }
+    final Set<Selectable> selectableSet = selectables.toSet();
+    _hasReceivedEndEvent.removeWhere((Selectable selectable) => !selectableSet.contains(selectable));
+    _hasReceivedStartEvent.removeWhere((Selectable selectable) => !selectableSet.contains(selectable));
+    super.didChangeSelectables();
   }
 }

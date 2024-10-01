@@ -25,6 +25,7 @@ import '../drive/drive_service.dart';
 import '../drive/web_driver_service.dart' show Browser;
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
+import '../macos/macos_ipad_device.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
 import '../web/web_device.dart';
@@ -71,7 +72,6 @@ class DriveCommand extends RunCommandBase {
     // to prevent a local network permission dialog on iOS 14+,
     // which cannot be accepted or dismissed in a CI environment.
     addPublishPort(enabledByDefault: false, verboseHelp: verboseHelp);
-    addMultidexOption();
     argParser
       ..addFlag('keep-app-running',
         help: 'Will keep the Flutter application running when done testing.\n'
@@ -136,8 +136,14 @@ class DriveCommand extends RunCommandBase {
       ..addOption('write-sksl-on-exit',
         help: 'Attempts to write an SkSL file when the drive process is finished '
               'to the provided file, overwriting it if necessary.')
-      ..addMultiOption('test-arguments', help: 'Additional arguments to pass to the '
-          'Dart VM running The test script.')
+      ..addMultiOption(
+        'test-arguments',
+        help: 'Additional arguments to pass to the Dart VM running The test script.\n\n'
+              'This can be used to opt-in to use "dart test" as a runner for the test script, '
+              'which allows, among other things, changing the reporter. For example, to opt-in '
+              'to the "expanded" reporter, pass both "test" and "--reporter=expanded".\n\n'
+              'Please leave feedback at <https://github.com/flutter/flutter/issues/152409>.',
+        )
       ..addOption('profile-memory', help: 'Launch devtools and profile application memory, writing '
           'The output data to the file path provided to this argument as JSON.',
           valueHelp: 'profile_memory.json')
@@ -223,6 +229,9 @@ class DriveCommand extends RunCommandBase {
       if (device is! AndroidDevice) {
         throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
       }
+      if (device is MacOSDesignedForIPadDevice) {
+        throwToolExit('Mac Designed for iPad is currently not supported for flutter drive.');
+      }
     }
     return super.validateCommand();
   }
@@ -252,8 +261,10 @@ class DriveCommand extends RunCommandBase {
       dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
     );
+    final File packageConfigFile = findPackageConfigFileOrDefault(_fileSystem.currentDirectory);
+
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      _fileSystem.file('.packages'),
+      packageConfigFile,
       logger: _logger,
       throwOnError: false,
     );
@@ -271,7 +282,6 @@ class DriveCommand extends RunCommandBase {
           buildInfo,
           device,
           debuggingOptions,
-          ipv6 ?? false,
           applicationBinary: applicationBinary,
           route: route,
           userIdentifier: userIdentifier,
@@ -281,8 +291,6 @@ class DriveCommand extends RunCommandBase {
               'trace-startup': traceStartup,
             if (web)
               '--no-launch-chrome': true,
-            if (boolArg('multidex'))
-              'multidex': true,
           }
         );
       } else {
@@ -294,7 +302,6 @@ class DriveCommand extends RunCommandBase {
           uri,
           device,
           debuggingOptions,
-          ipv6 ?? false,
         );
       }
 

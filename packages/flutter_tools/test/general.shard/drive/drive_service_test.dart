@@ -28,7 +28,6 @@ import '../../src/context.dart';
 import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 
-
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
   pauseEvent: vm_service.Event(
@@ -94,7 +93,7 @@ void main() {
     final Device device = FakeDevice(LaunchResult.failed());
 
     expect(
-      () => driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true),
+      () => driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true)),
       throwsToolExit(message: 'Application failed to start. Will not run test. Quitting.'),
     );
   });
@@ -105,7 +104,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -119,7 +118,7 @@ void main() {
     ))..failOnce = true;
 
     await expectLater(
-      () async => driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true),
+      () async => driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true)),
       returnsNormally,
     );
   });
@@ -130,7 +129,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -143,7 +142,7 @@ void main() {
       vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true));
     final int testResult = await driverService.startTest(
       'foo.test',
       <String>['--enable-experiment=non-nullable'],
@@ -160,7 +159,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -174,7 +173,7 @@ void main() {
       vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true));
     final int testResult = await driverService.startTest(
       'foo.test',
       <String>['--enable-experiment=non-nullable'],
@@ -193,7 +192,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -206,7 +205,7 @@ void main() {
       vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true));
     final int testResult = await driverService.startTest(
       'foo.test',
       <String>['--enable-experiment=non-nullable'],
@@ -224,7 +223,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', 'foo.test', '-rexpanded'],
+        command: <String>['dart', 'foo.test'],
         exitCode: 11,
         environment: <String, String>{
           'VM_SERVICE_URL': 'http://127.0.0.1:63426/1UasC_ihpXY=/',
@@ -238,7 +237,7 @@ void main() {
     final FakeDartDevelopmentService dds = device.dds as FakeDartDevelopmentService;
 
     expect(dds.started, false);
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, enableDds: false), true);
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, enableDds: false, ipv6: true));
     expect(dds.started, false);
 
     final int testResult = await driverService.startTest(
@@ -262,7 +261,7 @@ void main() {
       vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true));
     await driverService.stop();
 
     expect(device.didStopApp, true);
@@ -294,7 +293,7 @@ void main() {
       vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true));
     await driverService.stop(writeSkslOnExit: fileSystem.file('out.json'));
 
     expect(device.didStopApp, true);
@@ -328,7 +327,6 @@ void main() {
       Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
       device,
       DebuggingOptions.enabled(BuildInfo.debug),
-      false,
     );
     await driverService.stop();
   });
@@ -352,7 +350,6 @@ void main() {
       Uri.parse('ws://127.0.0.1:63426/1UasC_ihpXY=/ws/'),
       device,
       DebuggingOptions.enabled(BuildInfo.debug),
-      false,
     );
     await driverService.stop();
   });
@@ -376,7 +373,6 @@ void main() {
       Uri.parse('ws://127.0.0.1:63426/1UasC_ihpXY=/ws'),
       device,
       DebuggingOptions.enabled(BuildInfo.debug),
-      false,
     );
     await driverService.stop();
   });
@@ -400,7 +396,6 @@ void main() {
       Uri.parse('ws://127.0.0.1:63426/wsasC_ihpXY=/ws'),
       device,
       DebuggingOptions.enabled(BuildInfo.debug),
-      false,
     );
     await driverService.stop();
   });
@@ -417,7 +412,6 @@ void main() {
       Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
       device,
       DebuggingOptions.enabled(BuildInfo.debug),
-      false,
     );
     await driverService.stop();
   });
@@ -541,7 +535,9 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
-class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+class FakeDartDevelopmentService extends Fake
+    with DartDevelopmentServiceLocalOperationsMixin
+    implements DartDevelopmentService {
   bool started = false;
   bool disposed = false;
 
@@ -551,11 +547,14 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
+    FlutterDevice? device,
+    int? ddsPort,
     bool? ipv6,
     bool? disableServiceAuthCodes,
+    bool enableDevTools = false,
     bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {
     started = true;
   }
@@ -563,24 +562,5 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> shutdown() async {
     disposed = true;
-  }
-}
-
-class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
-  bool closed = false;
-  final Completer<void> _processStarted = Completer<void>();
-
-  @override
-  Future<void> launch(Uri vmServiceUri, {List<String>? additionalArguments}) {
-    _processStarted.complete();
-    return Completer<void>().future;
-  }
-
-  @override
-  Future<void> get processStart => _processStarted.future;
-
-  @override
-  Future<void> close() async {
-    closed = true;
   }
 }

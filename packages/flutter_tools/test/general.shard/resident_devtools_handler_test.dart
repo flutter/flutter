@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -61,6 +62,8 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
 void main() {
   Cache.flutterRoot = '';
 
+  (BufferLogger, Artifacts) getTestState() => (BufferLogger.test(), Artifacts.test());
+
   testWithoutContext('Does not serve devtools if launcher is null', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       null,
@@ -86,10 +89,11 @@ void main() {
   });
 
   testWithoutContext('Can use devtools with existing devtools URI', () async {
+    final (BufferLogger logger, Artifacts artifacts) = getTestState();
     final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
       processManager: FakeProcessManager.empty(),
-      dartExecutable: 'dart',
-      logger: BufferLogger.test(),
+      artifacts: artifacts,
+      logger: logger,
       botDetector: const FakeBotDetector(false),
     );
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
@@ -147,12 +151,6 @@ void main() {
         jsonResponse: isolate.toJson(),
         args: <String, Object>{
           'isolateId': '1',
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'streamCancel',
-        args: <String, Object>{
-          'streamId': 'Isolate',
         },
       ),
       listViews,
@@ -221,12 +219,6 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
-        method: 'streamCancel',
-        args: <String, Object>{
-          'streamId': 'Isolate',
-        },
-      ),
-      const FakeVmServiceRequest(
         method: 'ext.flutter.activeDevToolsServerAddress',
         args: <String, Object>{
           'value': 'http://localhost:8080',
@@ -264,14 +256,7 @@ void main() {
       ),
       const FakeVmServiceRequest(
         method: kListViewsMethod,
-        errorCode: RPCErrorCodes.kServiceDisappeared,
-      ),
-      const FakeVmServiceRequest(
-        method: 'streamCancel',
-        args: <String, Object>{
-          'streamId': 'Isolate',
-        },
-        errorCode: RPCErrorCodes.kServiceDisappeared,
+        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
       ),
     ], httpAddress: Uri.parse('http://localhost:1234'));
 
@@ -307,12 +292,6 @@ void main() {
           'isolateId': '1',
         },
       ),
-      const FakeVmServiceRequest(
-        method: 'streamCancel',
-        args: <String, Object>{
-          'streamId': 'Isolate',
-        },
-      ),
       listViews,
       listViews,
       const FakeVmServiceRequest(
@@ -340,14 +319,7 @@ void main() {
       ),
       const FakeVmServiceRequest(
         method: kListViewsMethod,
-        errorCode: RPCErrorCodes.kServiceDisappeared,
-      ),
-      const FakeVmServiceRequest(
-        method: 'streamCancel',
-        args: <String, Object>{
-          'streamId': 'Isolate',
-        },
-        errorCode: RPCErrorCodes.kServiceDisappeared,
+        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
       ),
     ], httpAddress: Uri.parse('http://localhost:5678'));
 
@@ -429,22 +401,6 @@ void main() {
   });
 }
 
-class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
-  @override
-  DevToolsServerAddress? activeDevToolsServer;
-
-  @override
-  Uri? devToolsUrl;
-
-  @override
-  Future<DevToolsServerAddress?> serve() async => null;
-
-  @override
-  Future<void> get ready => readyCompleter.future;
-
-  Completer<void> readyCompleter = Completer<void>()..complete();
-}
-
 class FakeResidentRunner extends Fake implements ResidentRunner {
   @override
   bool supportsServiceProtocol = true;
@@ -481,12 +437,14 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri, {
-    required Logger logger,
-    int? hostPort,
-    bool? ipv6,
+    Uri vmServiceUri, {
+    int? ddsPort,
     bool? disableServiceAuthCodes,
+    bool? ipv6,
+    bool enableDevTools = true,
     bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {
     started = true;
   }
@@ -495,7 +453,4 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   Future<void> shutdown() async {
     disposed = true;
   }
-
-  @override
-  void setExternalDevToolsUri(Uri uri) {}
 }

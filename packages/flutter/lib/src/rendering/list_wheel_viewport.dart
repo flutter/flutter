@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
@@ -247,18 +250,18 @@ class RenderListWheelViewport
   /// A value smaller than 1 means items at the edges of the cylinder are
   /// entirely contained inside the viewport.
   ///
-  /// A value larger than 1 means angles less than ±[pi] / 2 from the
+  /// A value larger than 1 means angles less than ±[math.pi] / 2 from the
   /// center of the cylinder are visible.
   ///
   /// The same number of children will be visible in the viewport regardless of
   /// the [diameterRatio]. The number of children visible is based on the
   /// viewport's length along the main axis divided by the children's
   /// [itemExtent]. Then the children are evenly distributed along the visible
-  /// angles up to ±[pi] / 2.
+  /// angles up to ±[math.pi] / 2.
   ///
   /// Just as it's impossible to stretch a paper to cover the an entire
   /// half of a cylinder's surface where the cylinder has the same diameter
-  /// as the paper's length, choosing a [diameterRatio] smaller than [pi]
+  /// as the paper's length, choosing a [diameterRatio] smaller than [math.pi]
   /// will leave same gaps between the children.
   ///
   /// Defaults to an arbitrary but aesthetically reasonable number of 2.0.
@@ -879,7 +882,7 @@ class RenderListWheelViewport
     // renderChildrenOutsideViewport is true. Otherwise, only children within
     // suitable angles (via _first/lastVisibleLayoutOffset) reach the paint
     // phase.
-    if (angle > math.pi / 2.0 || angle < -math.pi / 2.0) {
+    if (angle > math.pi / 2.0 || angle < -math.pi / 2.0 || angle.isNaN) {
       return;
     }
 
@@ -908,10 +911,10 @@ class RenderListWheelViewport
   // differently if it intersects with the magnifier.
   //
   // `center` controls how items that partially intersect the center magnifier
-  // are rendered. If `center` is false, items are only painted cynlindrically.
+  // are rendered. If `center` is false, items are only painted cylindrically.
   // If `center` is true, only the clipped magnifier items are painted.
   // If `center` is null, partially intersecting items are painted both as the
-  // magnifier and cynlidrical item, while non-intersecting items are painted
+  // magnifier and cylindrical item, while non-intersecting items are painted
   // only cylindrically.
   //
   // This property is used to lift the opacity that would be applied to each

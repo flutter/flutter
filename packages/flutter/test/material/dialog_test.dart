@@ -30,8 +30,9 @@ MaterialApp _buildAppWithDialog(
                   context: context,
                   traversalEdgeBehavior: traversalEdgeBehavior,
                   builder: (BuildContext context) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                    return MediaQuery.withClampedTextScaling(
+                      minScaleFactor: textScaleFactor,
+                      maxScaleFactor: textScaleFactor,
                       child: dialog,
                     );
                   },
@@ -110,6 +111,29 @@ void main() {
     expect(materialWidget.color, customColor);
   });
 
+  testWidgets('Dialog background defaults to ColorScheme.surfaceContainerHigh', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      colorScheme: ThemeData().colorScheme.copyWith(
+        surface: Colors.orange,
+        background: Colors.green,
+        surfaceContainerHigh: Colors.red,
+      )
+    );
+    const Dialog dialog = Dialog(
+      child: SizedBox(
+        width: 200,
+        height: 200
+      ),
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.color, theme.colorScheme.surfaceContainerHigh);
+  });
+
   testWidgets('Material2 - Dialog Defaults', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
@@ -144,7 +168,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material material3Widget = _getMaterialFromDialog(tester);
-    expect(material3Widget.color, material3Theme.colorScheme.surface);
+    expect(material3Widget.color, material3Theme.colorScheme.surfaceContainerHigh);
     expect(material3Widget.shape, _defaultM3DialogShape);
     expect(material3Widget.elevation, 6.0);
   });
@@ -1655,12 +1679,12 @@ void main() {
     // The default testing screen (800, 600)
     const Rect screenRect = Rect.fromLTRB(0.0, 0.0, 800.0, 600.0);
 
-    // Test with no padding
+    // Test with no padding.
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(),
         child: Dialog(
-          insetPadding: null,
+          insetPadding: EdgeInsets.zero,
           child: Placeholder(),
         ),
       ),
@@ -1668,7 +1692,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byType(Placeholder)), screenRect);
 
-    // Test with an insetPadding
+    // Test with an insetPadding.
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(),
@@ -1699,7 +1723,12 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.iOS),
         home: const AlertDialog(
           title: Text('title'),
-          content: Text('content'),
+          content: Column(
+            children: <Widget>[
+              Text('some content'),
+              Text('more content'),
+            ],
+          ),
           actions: <Widget>[ TextButton(onPressed: null, child: Text('action')) ],
         ),
       ),
@@ -1730,11 +1759,21 @@ void main() {
                         // node 4.
                         TestSemantics(
                           id: 6,
-                          label: 'content',
-                          textDirection: TextDirection.ltr,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 7,
+                              label: 'some content',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 8,
+                              label: 'more content',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
                         TestSemantics(
-                          id: 7,
+                          id: 9,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isButton,
                             SemanticsFlag.hasEnabledState,
@@ -2839,6 +2878,100 @@ void main() {
     expect(await nextFocus(), false);
     expect(okNode.hasFocus, false);
     expect(cancelNode.hasFocus, false);
+  });
+
+  testWidgets('Dialog.insetPadding is nullable', (WidgetTester tester) async {
+    const Dialog dialog = Dialog();
+    expect(dialog.insetPadding, isNull);
+  });
+
+  testWidgets('AlertDialog.insetPadding is nullable', (WidgetTester tester) async {
+    const AlertDialog alertDialog = AlertDialog();
+    expect(alertDialog.insetPadding, isNull);
+  });
+
+  testWidgets('SimpleDialog.insetPadding is nullable', (WidgetTester tester) async {
+    const SimpleDialog simpleDialog = SimpleDialog();
+    expect(simpleDialog.insetPadding, isNull);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153983.
+  testWidgets('Can pass a null value to AlertDialog.adaptive clip behavior', (WidgetTester tester) async {
+    for (final Clip? clipBehavior in <Clip?>[null, ...Clip.values]) {
+      AlertDialog.adaptive(clipBehavior: clipBehavior);
+    }
+  });
+
+  testWidgets('Setting DialogRoute.requestFocus to false does not request focus on the dialog', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    const String dialogText = 'Dialog Text';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              savedContext = context;
+              return TextField(focusNode: focusNode);
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    FocusNode? getTextFieldFocusNode() {
+      return tester.widget<Focus>(find.descendant(
+        of: find.byType(TextField),
+        matching: find.byType(Focus),
+      )).focusNode;
+    }
+
+    // Initially, there is no dialog and the text field has no focus.
+    expect(find.text(dialogText), findsNothing);
+    expect(getTextFieldFocusNode()?.hasFocus, false);
+
+    // Request focus on the text field.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(getTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up dialog.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      DialogRoute<void>(
+        context: savedContext,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The dialog is showing and the text field has lost focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getTextFieldFocusNode()?.hasFocus, false);
+
+    // Dismiss the dialog.
+    navigator.pop();
+    await tester.pump();
+
+    // The dialog is dismissed and the focus is shifted back to the text field.
+    expect(find.text(dialogText), findsNothing);
+    expect(getTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up dialog again with requestFocus to false.
+    navigator.push(
+      ModalBottomSheetRoute<void>(
+        requestFocus: false,
+        isScrollControlled: false,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The dialog is showing and the text field still has focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getTextFieldFocusNode()?.hasFocus, true);
   });
 }
 

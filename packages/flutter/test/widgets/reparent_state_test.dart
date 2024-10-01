@@ -19,15 +19,12 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child != null) {
-      return widget.child!;
-    }
-    return Container();
+    return widget.child ?? Container();
   }
 }
 
 class DeactivateLogger extends StatefulWidget {
-  const DeactivateLogger({ required Key key, required this.log }) : super(key: key);
+  const DeactivateLogger({ required Key super.key, required this.log });
 
   final List<String> log;
 

@@ -5,7 +5,7 @@ services on iOS using Swift. The equivalent version of this project in
 Objective C is found in examples/platform_channel.
 
 You can read more about
-[accessing platform and third-party services in Flutter](https://flutter.dev/platform-channels/).
+[accessing platform and third-party services in Flutter](https://flutter.dev/to/platform-channels/).
 
 ## iOS
 

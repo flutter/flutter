@@ -200,7 +200,7 @@ void main() {
   renderObjectToWidgetElement.moveRenderObjectChild(renderObject, object);
   renderObjectToWidgetElement.removeRenderObjectChild(renderObject);
 
-  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  // Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   ListWheelScrollView listWheelScrollView = ListWheelScrollView();
   listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.hardEdge);
   listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.none);
@@ -248,4 +248,44 @@ void main() {
 
   final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], child: const SizedBox());
   final Widget bodyValue = platformMenuBar.child;
+
+  // Changes made in https://github.com/flutter/flutter/pull/151367
+  final cupertinoSwitch =  CupertinoSwitch(
+    value: value,
+    onChanged: onChanged,
+    activeTrackColor: Colors.red,
+  );
+  Color? activeTrackColor =  cupertinoSwitch.activeTrackColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/151367
+  final cupertinoSwitch =  CupertinoSwitch(
+    value: value,
+    onChanged: onChanged,
+    inactiveTrackColor: Colors.red,
+  );
+  Color? inactiveTrackColor =  cupertinoSwitch.inactiveTrackColor;
+
+  // https://github.com/flutter/flutter/pull/152981
+  CupertinoCheckbox(fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      return CupertinoColors.white.withOpacity(0.5);
+    }
+    if (states.contains(WidgetState.selected)) {
+      return CupertinoDynamicColor.resolve(CupertinoDynamicColor.withBrightness(
+        color: CupertinoColors.activeBlue,
+        darkColor: Color.fromARGB(255, 50, 100, 215),
+      ), context);
+    }
+    return Colors.red;
+  }));
+  CupertinoCheckbox(activeColor: Colors.white, fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      return CupertinoColors.white.withOpacity(0.5);
+    }
+    if (states.contains(WidgetState.selected)) {
+      return Colors.white;
+    }
+    return Colors.red;
+  }));
+  CupertinoCheckbox(fillColor: WidgetStatePropertyAll(CupertinoColors.white));
 }

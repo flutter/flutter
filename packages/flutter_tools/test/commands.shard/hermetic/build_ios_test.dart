@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -70,8 +69,7 @@ final Platform notMacosPlatform = FakePlatform(
 );
 
 void main() {
-  late FileSystem fileSystem;
-  late TestUsage usage;
+  late MemoryFileSystem fileSystem;
   late FakeAnalytics fakeAnalytics;
   late BufferLogger logger;
   late FakeProcessManager processManager;
@@ -85,7 +83,6 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
-    usage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -101,7 +98,7 @@ void main() {
   // Sets up the minimal mock project files necessary to look like a Flutter project.
   void createCoreMockProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -117,7 +114,7 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
-  FakeCommand setUpRsyncCommand({void Function()? onRun}) {
+  FakeCommand setUpRsyncCommand({void Function(List<String> command)? onRun}) {
     return FakeCommand(
       command: const <String>[
         'rsync',
@@ -131,7 +128,7 @@ void main() {
     );
   }
 
-  FakeCommand setUpXCResultCommand({String stdout = '', void Function()? onRun}) {
+  FakeCommand setUpXCResultCommand({String stdout = '', void Function(List<String> command)? onRun}) {
     return FakeCommand(
       command: const <String>[
         'xcrun',
@@ -157,7 +154,7 @@ void main() {
     String? deviceId,
     int exitCode = 0,
     String? stdout,
-    void Function()? onRun,
+    void Function(List<String> command)? onRun,
   }) {
     return FakeCommand(
       command: <String>[
@@ -267,7 +264,7 @@ void main() {
       osUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
@@ -279,6 +276,36 @@ void main() {
     Platform: () => notMacosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+
+  testUsingContext('ios build outputs path and size when successful', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ios', '--no-pub']
+    );
+    expect(testLogger.statusText, contains(RegExp(r'✓ Built build/ios/iphoneos/Runner\.app \(\d+\.\d+MB\)')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: (_) {
+        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+      }),
+      setUpRsyncCommand(),
+    ]),
+    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -296,7 +323,7 @@ void main() {
 
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
@@ -335,7 +362,7 @@ void main() {
       xattrCommand,
       setUpFakeXcodeBuildHandler(
         disablePortPublication: true,
-        onRun: () {
+        onRun: (_) {
           fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
         },
       ),
@@ -366,7 +393,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(
-        onRun: () {
+        onRun: (_) {
           fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
         },
       ),
@@ -389,7 +416,7 @@ void main() {
 
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(customNaming: true, onRun: () {
+      setUpFakeXcodeBuildHandler(customNaming: true, onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
@@ -423,7 +450,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(deviceId: '1234', onRun: () {
+      setUpFakeXcodeBuildHandler(deviceId: '1234', onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
@@ -453,7 +480,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(simulator: true, onRun: () {
+      setUpFakeXcodeBuildHandler(simulator: true, onRun: (_) {
         fileSystem.directory('build/ios/Debug-iphonesimulator/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
@@ -483,7 +510,7 @@ void main() {
     createMinimalMockProjectFiles();
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(verbose: true, onRun: () {
+      setUpFakeXcodeBuildHandler(verbose: true, onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
@@ -511,7 +538,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
@@ -528,7 +555,7 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
-      setUpRsyncCommand(onRun: () => fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
+      setUpRsyncCommand(onRun: (_) => fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
     ]);
@@ -540,9 +567,6 @@ void main() {
 
     expect(logger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
     expect(logger.statusText, contains('dart devtools --appSizeBase='));
-    expect(usage.events, contains(
-      const TestUsageEvent('code-size-analysis', 'ios'),
-    ));
     expect(fakeAnalytics.sentEvents, contains(
       Event.codeSizeAnalysis(platform: 'ios')
     ));
@@ -552,7 +576,6 @@ void main() {
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-    Usage: () => usage,
     Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -591,14 +614,6 @@ void main() {
         const <String>['build', 'ios', '--no-pub']
       );
 
-      expect(usage.events, contains(
-        const TestUsageEvent(
-          'build', 'ios',
-          label:'plist-impeller-enabled',
-          parameters:CustomDimensions(),
-        ),
-      ));
-
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
           label: 'plist-impeller-enabled',
@@ -609,11 +624,11 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(onRun: () {
+        setUpFakeXcodeBuildHandler(onRun: (_) {
           fileSystem.directory('build/ios/Release-iphoneos/Runner.app')
             .createSync(recursive: true);
         }),
-        setUpRsyncCommand(onRun: () =>
+        setUpRsyncCommand(onRun: (_) =>
           fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
             ..createSync(recursive: true)
             ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
@@ -623,7 +638,6 @@ void main() {
         fileSystem: fileSystem,
         platform: macosPlatform,
       ),
-      Usage: () => usage,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       Analytics: () => fakeAnalytics,
     });
@@ -654,14 +668,6 @@ void main() {
         const <String>['build', 'ios', '--no-pub']
       );
 
-      expect(usage.events, contains(
-        const TestUsageEvent(
-          'build', 'ios',
-          label:'plist-impeller-disabled',
-          parameters:CustomDimensions(),
-        ),
-      ));
-
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
           label: 'plist-impeller-disabled',
@@ -672,11 +678,11 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(onRun: () {
+        setUpFakeXcodeBuildHandler(onRun: (_) {
           fileSystem.directory('build/ios/Release-iphoneos/Runner.app')
             .createSync(recursive: true);
         }),
-        setUpRsyncCommand(onRun: () =>
+        setUpRsyncCommand(onRun: (_) =>
           fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
             ..createSync(recursive: true)
             ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
@@ -686,7 +692,6 @@ void main() {
         fileSystem: fileSystem,
         platform: macosPlatform,
       ),
-      Usage: () => usage,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       FlutterProjectFactory: () => FlutterProjectFactory(
         fileSystem: fileSystem,
@@ -716,7 +721,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
         setUpXCResultCommand(),
@@ -751,7 +756,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }, stdout: 'Lots of spew from Xcode',
         ),
@@ -790,7 +795,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
@@ -860,7 +865,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
@@ -901,7 +906,7 @@ void main() {
         xattrCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -938,7 +943,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
@@ -977,13 +982,13 @@ void main() {
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           stdout: '$kConcurrentRunFailureMessage1 $kConcurrentRunFailureMessage2',
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).childFile('result.xcresult').createSync(recursive: true);
           }
         ),
         // The second xcodebuild is triggered due to above concurrent run failure message.
         setUpFakeXcodeBuildHandler(
-          onRun: () {
+          onRun: (_) {
             // If the file is not cleaned, throw an error, test failure.
             if (fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).existsSync()) {
               throwToolExit('xcresult bundle file existed.', exitCode: 2);
@@ -1025,7 +1030,7 @@ void main() {
           stdout: '''
 Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor
 ''',
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -1063,7 +1068,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         xattrCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -1115,7 +1120,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           stdout: '''
 Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor
 ''',
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -1141,7 +1146,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         xattrCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -1178,7 +1183,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         xattrCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -1217,7 +1222,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         xattrCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
@@ -1259,7 +1264,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           simulator: true,
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           },
         ),
@@ -1298,7 +1303,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           simulator: true,
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           },
         ),
@@ -1339,7 +1344,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           simulator: true,
           exitCode: 1,
-          onRun: () {
+          onRun: (_) {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           },
         ),

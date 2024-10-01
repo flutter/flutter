@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('MouseRegion detects mouse entries, exists, and location', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: example.MouseRegionApp()),
+      const example.MouseRegionApp(),
     );
 
     expect(find.text('0 Entries\n0 Exits'), findsOneWidget);

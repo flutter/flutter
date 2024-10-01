@@ -17,24 +17,15 @@ void main() {
 
   /// Builds test button items for each of the suggestions provided.
   List<ContextMenuButtonItem> buildSuggestionButtons(List<String> suggestions) {
-    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
-
-    for (final String suggestion in suggestions) {
-      buttonItems.add(ContextMenuButtonItem(
-        onPressed: () {},
-        label: suggestion,
-      ));
-    }
-
-    final ContextMenuButtonItem deleteButton =
+    return <ContextMenuButtonItem>[
+      for (final String suggestion in suggestions)
+        ContextMenuButtonItem(onPressed: () {}, label: suggestion),
       ContextMenuButtonItem(
         onPressed: () {},
         type: ContextMenuButtonType.delete,
         label: 'DELETE',
-    );
-    buttonItems.add(deleteButton);
-
-    return buttonItems;
+      ),
+    ];
   }
 
   /// Finds the container of the [SpellCheckSuggestionsToolbar] so that

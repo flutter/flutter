@@ -2,36 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
-import '../framework/task_result.dart';
 import '../framework/utils.dart';
-import '../versions/gallery.dart' show galleryVersion;
 import 'perf_tests.dart';
 
 class NewGalleryPerfTest extends PerfTest {
-  NewGalleryPerfTest(
-    this.galleryDir, {
+  NewGalleryPerfTest({
     String timelineFileName = 'transitions',
     String dartDefine = '',
     super.enableImpeller,
     super.timeoutSeconds,
     super.forceOpenGLES,
   }) : super(
-    galleryDir.path,
+    '${flutterDirectory.path}/dev/integration_tests/new_gallery',
     'test_driver/transitions_perf.dart',
     timelineFileName,
     dartDefine: dartDefine,
+    createPlatforms: <String>['android', 'ios', 'web'],
+    enableMergedPlatformThread: true,
   );
-
-  @override
-  Future<TaskResult> run() async {
-    // Manually roll the new gallery version for now. If the new gallery repo
-    // turns out to be updated frequently in the future, we can set up an auto
-    // roller to update this version.
-    await getNewGallery(galleryVersion, galleryDir);
-    return super.run();
-  }
-
-  final Directory galleryDir;
 }

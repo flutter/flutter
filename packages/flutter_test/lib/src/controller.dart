@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:io';
+///
+/// @docImport 'package:flutter/scheduler.dart';
+/// @docImport 'package:flutter_driver/flutter_driver.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'finders.dart';
+/// @docImport 'matchers.dart';
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -21,8 +32,6 @@ import 'window.dart';
 ///
 /// This value must be greater than [kTouchSlop].
 const double kDragSlopDefault = 20.0;
-
-const String _defaultPlatform = kIsWeb ? 'web' : 'android';
 
 // Finds the end index (exclusive) of the span at `startIndex`, or `endIndex` if
 // there are no other spans between `startIndex` and `endIndex`.
@@ -183,8 +192,14 @@ class SemanticsController {
     FlutterView? view,
   }) {
     TestAsyncUtils.guardSync();
-    assert(start == null || startNode == null, 'Cannot provide both start and startNode. Prefer startNode as start is deprecated.');
-    assert(end == null || endNode == null, 'Cannot provide both end and endNode. Prefer endNode as end is deprecated.');
+    assert(
+      start == null || startNode == null,
+      'Cannot provide both start and startNode. Prefer startNode as start is deprecated.',
+    );
+    assert(
+      end == null || endNode == null,
+      'Cannot provide both end and endNode. Prefer endNode as end is deprecated.',
+    );
 
     FlutterView? startView;
     if (start != null) {
@@ -197,8 +212,7 @@ class SemanticsController {
           'Specified view: $view'
         );
       }
-    }
-    if (startNode != null) {
+    } else if (startNode != null) {
       final SemanticsOwner owner = startNode.evaluate().single.owner!;
       final RenderView renderView = _controller.binding.renderViews.firstWhere(
         (RenderView render) => render.owner!.semanticsOwner == owner,
@@ -206,9 +220,9 @@ class SemanticsController {
       startView = renderView.flutterView;
       if (view != null && startView != view) {
         throw StateError(
-          'The end node is not part of the provided view.\n'
+          'The start node is not part of the provided view.\n'
           'Finder: ${startNode.toString(describeSelf: true)}\n'
-          'View of end node: $startView\n'
+          'View of start node: $startView\n'
           'Specified view: $view'
         );
       }
@@ -225,8 +239,7 @@ class SemanticsController {
           'Specified view: $view'
         );
       }
-    }
-    if (endNode != null) {
+    } else if (endNode != null) {
       final SemanticsOwner owner = endNode.evaluate().single.owner!;
       final RenderView renderView = _controller.binding.renderViews.firstWhere(
         (RenderView render) => render.owner!.semanticsOwner == owner,
@@ -261,32 +274,48 @@ class SemanticsController {
       traversal,
     );
 
-    int startIndex = 0;
-    int endIndex = traversal.length - 1;
+    // Setting the range
+    SemanticsNode? node;
+    String? errorString;
 
+    int startIndex;
     if (start != null) {
-      final SemanticsNode startNode = find(start);
-      startIndex = traversal.indexOf(startNode);
-      if (startIndex == -1) {
-        throw StateError(
-          'The expected starting node was not found.\n'
-          'Finder: ${start.toString(describeSelf: true)}\n\n'
-          'Expected Start Node: $startNode\n\n'
-          'Traversal: [\n  ${traversal.join('\n  ')}\n]');
-      }
+      node = find(start);
+      startIndex = traversal.indexOf(node);
+      errorString = start.toString(describeSelf: true);
+    } else if (startNode != null) {
+      node = startNode.evaluate().single;
+      startIndex = traversal.indexOf(node);
+      errorString = startNode.toString(describeSelf: true);
+    } else {
+      startIndex = 0;
+    }
+    if (startIndex == -1) {
+      throw StateError(
+        'The expected starting node was not found.\n'
+        'Finder: $errorString\n\n'
+        'Expected Start Node: $node\n\n'
+        'Traversal: [\n  ${traversal.join('\n  ')}\n]');
     }
 
+    int? endIndex;
     if (end != null) {
-      final SemanticsNode endNode = find(end);
-      endIndex = traversal.indexOf(endNode);
-      if (endIndex == -1) {
-        throw StateError(
-          'The expected ending node was not found.\n'
-          'Finder: ${end.toString(describeSelf: true)}\n\n'
-          'Expected End Node: $endNode\n\n'
-          'Traversal: [\n  ${traversal.join('\n  ')}\n]');
-      }
+      node = find(end);
+      endIndex = traversal.indexOf(node);
+      errorString = end.toString(describeSelf: true);
+    } else if (endNode != null) {
+      node = endNode.evaluate().single;
+      endIndex = traversal.indexOf(node);
+      errorString = endNode.toString(describeSelf: true);
     }
+    if (endIndex == -1) {
+      throw StateError(
+        'The expected ending node was not found.\n'
+        'Finder: $errorString\n\n'
+        'Expected End Node: $node\n\n'
+        'Traversal: [\n  ${traversal.join('\n  ')}\n]');
+    }
+    endIndex ??= traversal.length - 1;
 
     return traversal.getRange(startIndex, endIndex + 1);
   }
@@ -1936,9 +1965,9 @@ abstract class WidgetController {
   /// soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from
-  /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else.
+  /// [Platform.operatingSystem] to make the event appear to be from
+  /// that type of system. If not specified, defaults to "web" on web, and the
+  /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1962,7 +1991,7 @@ abstract class WidgetController {
   ///  - [sendKeyUpEvent] to simulate only a key up event.
   Future<bool> sendKeyEvent(
     LogicalKeyboardKey key, {
-    String platform = _defaultPlatform,
+    String? platform,
     String? character,
     PhysicalKeyboardKey? physicalKey
   }) async {
@@ -1978,9 +2007,9 @@ abstract class WidgetController {
   /// from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from
-  /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else.
+  /// [Platform.operatingSystem] to make the event appear to be from
+  /// that type of system. If not specified, defaults to "web" on web, and the
+  /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -2001,7 +2030,7 @@ abstract class WidgetController {
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
   Future<bool> sendKeyDownEvent(
     LogicalKeyboardKey key, {
-    String platform = _defaultPlatform,
+    String? platform,
     String? character,
     PhysicalKeyboardKey? physicalKey
   }) async {
@@ -2015,9 +2044,9 @@ abstract class WidgetController {
   /// not from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from
-  /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else. May not be null.
+  /// [Platform.operatingSystem] to make the event appear to be from
+  /// that type of system. If not specified, defaults to "web" on web, and the
+  /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -2032,7 +2061,7 @@ abstract class WidgetController {
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
   Future<bool> sendKeyUpEvent(
       LogicalKeyboardKey key, {
-        String platform = _defaultPlatform,
+        String? platform,
         PhysicalKeyboardKey? physicalKey
       }) async {
     // Internally wrapped in async guard.
@@ -2045,9 +2074,9 @@ abstract class WidgetController {
   /// from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
-  /// null.
+  /// [Platform.operatingSystem] to make the event appear to be from
+  /// that type of system. If not specified, defaults to "web" on web, and the
+  /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -2068,7 +2097,7 @@ abstract class WidgetController {
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
   Future<bool> sendKeyRepeatEvent(
       LogicalKeyboardKey key, {
-        String platform = _defaultPlatform,
+        String? platform,
         String? character,
         PhysicalKeyboardKey? physicalKey
       }) async {

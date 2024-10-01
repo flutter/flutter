@@ -29,7 +29,8 @@ final BuildInfo debugBuild = BuildInfo(
   treeShakeIcons: false,
   packageConfig: PackageConfig(<Package>[
     Package('test_api', Uri.parse('file:///test_api/')),
-  ])
+  ]),
+  packageConfigPath: '.dart_tool/package_config.json',
 );
 
 void main() {
@@ -41,7 +42,10 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('test/foo.dart').createSync(recursive: true);
-    fileSystem.file('.packages').createSync();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     residentCompiler = FakeResidentCompiler(fileSystem);
     logger = LoggingLogger();
   });
@@ -154,7 +158,22 @@ dependencies:
     sdk: flutter
   a_plugin: 1.0.0
 ''');
-      fileSystem.file('.packages').writeAsStringSync('a_plugin:/a_plugin/lib/');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "a_plugin",
+      "rootUri": "/a_plugin/",
+      "packageUri": "lib/"
+    }
+  ]
+}
+''');
       fakeDartPlugin.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync('''

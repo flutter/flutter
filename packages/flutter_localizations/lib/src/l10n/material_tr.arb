@@ -144,5 +144,7 @@
   "menuDismissLabel": "Menüyü kapat",
   "lookUpButtonLabel": "Ara",
   "searchWebButtonLabel": "Web'de Ara",
-  "shareButtonLabel": "Paylaş..."
+  "shareButtonLabel": "Paylaş",
+  "clearButtonTooltip": "Metni temizle",
+  "selectedDateLabel": "Seçili"
 }

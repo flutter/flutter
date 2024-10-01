@@ -19,6 +19,20 @@ def flutter_ios_podfile_setup; end
 # Same as flutter_ios_podfile_setup for macOS.
 def flutter_macos_podfile_setup; end
 
+# Determine whether the target depends on Flutter (including transitive dependency)
+def depends_on_flutter(target, engine_pod_name)
+  target.dependencies.any? do |dependency|
+    if dependency.name == engine_pod_name
+      return true
+    end
+
+    if depends_on_flutter(dependency.target, engine_pod_name)
+      return true
+    end
+  end
+  return false
+end
+
 # Add iOS build settings to pod targets.
 #
 # @example
@@ -68,8 +82,8 @@ def flutter_additional_ios_build_settings(target)
     # ARC code targeting iOS 8 does not build on Xcode 14.3. Force to at least iOS 9.
     build_configuration.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0' if force_to_arc_supported_min
 
-    # Skip other updates if it's not a Flutter plugin (transitive dependency).
-    next unless target.dependencies.any? { |dependency| dependency.name == 'Flutter' }
+    # Skip other updates if it does not depend on Flutter (including transitive dependency)
+    next unless depends_on_flutter(target, 'Flutter')
 
     # Bitcode is deprecated, Flutter.framework bitcode blob will have been stripped.
     build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
@@ -123,8 +137,8 @@ def flutter_additional_macos_build_settings(target)
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
   artifacts_dir = File.join('..', '..', '..', '..', 'bin', 'cache', 'artifacts', 'engine')
-  debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64'), __FILE__)
-  release_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64-release'), __FILE__)
+  debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64', 'FlutterMacOS.xcframework'), __FILE__)
+  release_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64-release', 'FlutterMacOS.xcframework'), __FILE__)
   application_path = File.dirname(defined_in_file.realpath) if respond_to?(:defined_in_file)
   # Find the local engine path, if any.
   local_engine = application_path.nil? ?
@@ -139,12 +153,20 @@ def flutter_additional_macos_build_settings(target)
     # ARC code targeting macOS 10.10 does not build on Xcode 14.3. Force to at least macOS 10.11.
     build_configuration.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.11' if force_to_arc_supported_min
 
-    # Skip other updates if it's not a Flutter plugin (transitive dependency).
-    next unless target.dependencies.any? { |dependency| dependency.name == 'FlutterMacOS' }
+    # Skip other updates if it does not depend on Flutter (including transitive dependency)
+    next unless depends_on_flutter(target, 'FlutterMacOS')
 
-    # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
-    configuration_engine_dir = local_engine || (build_configuration.type == :debug ? debug_framework_dir : release_framework_dir)
-    build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}\" $(inherited)"
+    if local_engine
+      configuration_engine_dir = File.expand_path(File.join(local_engine, 'FlutterMacOS.xcframework'), __FILE__)
+    else
+      # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
+      configuration_engine_dir = (build_configuration.type == :debug ? debug_framework_dir : release_framework_dir)
+    end
+    Dir.new(configuration_engine_dir).each_child do |xcframework_file|
+      if xcframework_file.start_with?('macos-') # Could be macos-arm64_x86_64, macos-arm64, macos-x86_64
+        build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
+      end
+    end
 
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
     # If the pod only supports a higher version, do not delete to correctly produce an error.
@@ -280,7 +302,10 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
   system('mkdir', '-p', symlink_plugins_dir)
 
   plugins_file = File.join(application_path, '..', '.flutter-plugins-dependencies')
-  plugin_pods = flutter_parse_plugins_file(plugins_file, platform)
+  dependencies_hash = flutter_parse_plugins_file(plugins_file)
+  plugin_pods = flutter_get_plugins_list(dependencies_hash, platform)
+  swift_package_manager_enabled = flutter_get_swift_package_manager_enabled(dependencies_hash)
+
   plugin_pods.each do |plugin_hash|
     plugin_name = plugin_hash['name']
     plugin_path = plugin_hash['path']
@@ -297,23 +322,41 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
     # Keep pod path relative so it can be checked into Podfile.lock.
     relative = flutter_relative_path_from_podfile(symlink)
 
+    # If Swift Package Manager is enabled and the plugin has a Package.swift,
+    # skip from installing as a pod.
+    swift_package_exists = File.exist?(File.join(relative, platform_directory, plugin_name, "Package.swift"))
+    next if swift_package_manager_enabled && swift_package_exists
+
+    # If a plugin is Swift Package Manager compatible but not CocoaPods compatible, skip it.
+    # The tool will print an error about it.
+    next if swift_package_exists && !File.exist?(File.join(relative, platform_directory, plugin_name + ".podspec"))
+
     pod plugin_name, path: File.join(relative, platform_directory)
   end
 end
 
-# .flutter-plugins-dependencies format documented at
-# https://flutter.dev/go/plugins-list-migration
-def flutter_parse_plugins_file(file, platform)
+def flutter_parse_plugins_file(file)
   file_path = File.expand_path(file)
   return [] unless File.exist? file_path
 
   dependencies_file = File.read(file)
-  dependencies_hash = JSON.parse(dependencies_file)
+  JSON.parse(dependencies_file)
+end
 
+# .flutter-plugins-dependencies format documented at
+# https://flutter.dev/go/plugins-list-migration
+def flutter_get_plugins_list(dependencies_hash, platform)
   # dependencies_hash.dig('plugins', 'ios') not available until Ruby 2.3
+  return [] unless dependencies_hash.any?
   return [] unless dependencies_hash.has_key?('plugins')
   return [] unless dependencies_hash['plugins'].has_key?(platform)
   dependencies_hash['plugins'][platform] || []
+end
+
+def flutter_get_swift_package_manager_enabled(dependencies_hash)
+  return false unless dependencies_hash.any?
+  return false unless dependencies_hash.has_key?('swift_package_manager_enabled')
+  dependencies_hash['swift_package_manager_enabled'] == true
 end
 
 def flutter_relative_path_from_podfile(path)

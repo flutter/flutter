@@ -46,7 +46,7 @@ void main() {
           await driver.scroll(list, 0.0, 300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
-      });
+      }, retainPriorEvents: true);
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile(summaryName, pretty: true);

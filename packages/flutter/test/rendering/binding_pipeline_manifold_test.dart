@@ -59,10 +59,7 @@ class MyTestRenderingFlutterBinding extends TestRenderingFlutterBinding {
   static MyTestRenderingFlutterBinding? _instance;
 
   static MyTestRenderingFlutterBinding ensureInitialized() {
-    if (_instance != null) {
-      return _instance!;
-    }
-    return MyTestRenderingFlutterBinding();
+    return _instance ?? MyTestRenderingFlutterBinding();
   }
 
   @override

@@ -47,7 +47,6 @@ import 'package:gen_defaults/radio_template.dart';
 import 'package:gen_defaults/search_bar_template.dart';
 import 'package:gen_defaults/search_view_template.dart';
 import 'package:gen_defaults/segmented_button_template.dart';
-import 'package:gen_defaults/slider_template.dart';
 import 'package:gen_defaults/snackbar_template.dart';
 import 'package:gen_defaults/surface_tint.dart';
 import 'package:gen_defaults/switch_template.dart';
@@ -86,9 +85,7 @@ Future<void> main(List<String> args) async {
     final Map<String, dynamic> tokenFileTokens = _readTokenFile(tokenFile as File);
     final String version = tokenFileTokens['version'] as String;
     tokenFileTokens.remove('version');
-    if (versionMap[version] == null) {
-      versionMap[version] = List<String>.empty(growable: true);
-    }
+    versionMap[version] ??= <String>[];
     versionMap[version]!.add(tokenFile.uri.pathSegments.last);
 
     tokens.addAll(tokenFileTokens);
@@ -145,7 +142,8 @@ Future<void> main(List<String> args) async {
   SearchViewTemplate('SearchView', '$materialLib/search_anchor.dart', tokens).updateFile();
   SegmentedButtonTemplate('md.comp.outlined-segmented-button', 'SegmentedButton', '$materialLib/segmented_button.dart', tokens).updateFile();
   SnackbarTemplate('md.comp.snackbar', 'Snackbar', '$materialLib/snack_bar.dart', tokens).updateFile();
-  SliderTemplate('md.comp.slider', 'Slider', '$materialLib/slider.dart', tokens).updateFile();
+  // TODO(QuncCccccc): uncomment `SliderTemplate` once `Slider` widget is updated to match the latest M3 specs.
+  // SliderTemplate('md.comp.slider', 'Slider', '$materialLib/slider.dart', tokens).updateFile();
   SurfaceTintTemplate('SurfaceTint', '$materialLib/elevation_overlay.dart', tokens).updateFile();
   SwitchTemplate('Switch', '$materialLib/switch.dart', tokens).updateFile();
   TimePickerTemplate('TimePicker', '$materialLib/time_picker.dart', tokens).updateFile();

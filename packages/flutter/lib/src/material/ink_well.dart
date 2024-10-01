@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'data_table.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'ink_decoration.dart';
+/// @docImport 'ink_ripple.dart';
+/// @docImport 'ink_splash.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 
@@ -11,7 +20,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
-import 'feedback.dart';
 import 'ink_highlight.dart';
 import 'material.dart';
 import 'material_state.dart';
@@ -395,14 +403,14 @@ class InkResponse extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Whether this ink response should be clipped its bounds.
@@ -511,12 +519,12 @@ class InkResponse extends StatelessWidget {
   /// This default null property can be used as an alternative to
   /// [focusColor], [hoverColor], [highlightColor], and
   /// [splashColor]. If non-null, it is resolved against one of
-  /// [MaterialState.focused], [MaterialState.hovered], and
-  /// [MaterialState.pressed]. It's convenient to use when the parent
-  /// widget can pass along its own MaterialStateProperty value for
+  /// [WidgetState.focused], [WidgetState.hovered], and
+  /// [WidgetState.pressed]. It's convenient to use when the parent
+  /// widget can pass along its own WidgetStateProperty value for
   /// the overlay color.
   ///
-  /// [MaterialState.pressed] triggers a ripple (an ink splash), per
+  /// [WidgetState.pressed] triggers a ripple (an ink splash), per
   /// the current Material Design spec. The [overlayColor] doesn't map
   /// a state to [highlightColor] because a separate highlight is not
   /// used by the current design guidelines. See
@@ -607,12 +615,12 @@ class InkResponse extends StatelessWidget {
 
   /// {@template flutter.material.inkwell.statesController}
   /// Represents the interactive "state" of this widget in terms of
-  /// a set of [MaterialState]s, like [MaterialState.pressed] and
-  /// [MaterialState.focused].
+  /// a set of [WidgetState]s, like [WidgetState.pressed] and
+  /// [WidgetState.focused].
   ///
   /// Classes based on this one can provide their own
-  /// [MaterialStatesController] to which they've added listeners.
-  /// They can also update the controller's [MaterialStatesController.value]
+  /// [WidgetStatesController] to which they've added listeners.
+  /// They can also update the controller's [WidgetStatesController.value]
   /// however, this may only be done when it's safe to call
   /// [State.setState], like in an event handler.
   /// {@endtemplate}
@@ -982,19 +990,13 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
     if (value) {
       if (highlight == null) {
-        Color? resolvedOverlayColor = widget.overlayColor?.resolve(statesController.value);
-        if (resolvedOverlayColor == null) {
-          // Use the backwards compatible defaults
-          final ThemeData theme = Theme.of(context);
-          switch (type) {
-            case _HighlightType.pressed:
-              resolvedOverlayColor = widget.highlightColor ?? theme.highlightColor;
-            case _HighlightType.focus:
-              resolvedOverlayColor = widget.focusColor ?? theme.focusColor;
-            case _HighlightType.hover:
-              resolvedOverlayColor = widget.hoverColor ?? theme.hoverColor;
-          }
-        }
+        final Color resolvedOverlayColor = widget.overlayColor?.resolve(statesController.value)
+          ?? switch (type) {
+            // Use the backwards compatible defaults
+            _HighlightType.pressed => widget.highlightColor ?? Theme.of(context).highlightColor,
+            _HighlightType.focus => widget.focusColor ?? Theme.of(context).focusColor,
+            _HighlightType.hover => widget.hoverColor ?? Theme.of(context).hoverColor,
+          };
         final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
         _highlights[type] = InkHighlight(
           controller: Material.of(context),
@@ -1032,13 +1034,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   void _updateHighlightsAndSplashes() {
     for (final InkHighlight? highlight in _highlights.values) {
-      if (highlight != null) {
-        highlight.customBorder = widget.customBorder;
-      }
+      highlight?.customBorder = widget.customBorder;
     }
-    if (_currentSplash != null) {
-      _currentSplash!.customBorder = widget.customBorder;
-    }
+    _currentSplash?.customBorder = widget.customBorder;
+
     if (_splashes != null && _splashes!.isNotEmpty) {
       for (final InteractiveInkFeature inkFeature in _splashes!) {
         inkFeature.customBorder = widget.customBorder;
@@ -1094,23 +1093,17 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool get _shouldShowFocus {
-    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
-    switch (mode) {
-      case NavigationMode.traditional:
-        return enabled && _hasFocus;
-      case NavigationMode.directional:
-        return _hasFocus;
-    }
+    return switch (MediaQuery.maybeNavigationModeOf(context)) {
+      NavigationMode.traditional || null => enabled && _hasFocus,
+      NavigationMode.directional => _hasFocus,
+    };
   }
 
   void updateFocusHighlights() {
-    final bool showFocus;
-    switch (FocusManager.instance.highlightMode) {
-      case FocusHighlightMode.touch:
-        showFocus = false;
-      case FocusHighlightMode.traditional:
-        showFocus = _shouldShowFocus;
-    }
+    final bool showFocus = switch (FocusManager.instance.highlightMode) {
+      FocusHighlightMode.touch => false,
+      FocusHighlightMode.traditional => _shouldShowFocus,
+    };
     updateHighlight(_HighlightType.focus, value: showFocus);
   }
 
@@ -1283,13 +1276,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
-    switch (mode) {
-      case NavigationMode.traditional:
-        return enabled && widget.canRequestFocus;
-      case NavigationMode.directional:
-        return true;
-    }
+    return switch (MediaQuery.maybeNavigationModeOf(context)) {
+      NavigationMode.traditional || null => enabled && widget.canRequestFocus,
+      NavigationMode.directional => true,
+    };
   }
 
   @override
@@ -1303,17 +1293,14 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
 
       final ThemeData theme = Theme.of(context);
-      switch (type) {
+      return switch (type) {
         // The pressed state triggers a ripple (ink splash), per the current
         // Material Design spec. A separate highlight is no longer used.
         // See https://material.io/design/interaction/states.html#pressed
-        case _HighlightType.pressed:
-          return widget.overlayColor?.resolve(pressed) ?? widget.highlightColor ?? theme.highlightColor;
-        case _HighlightType.focus:
-          return widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? theme.focusColor;
-        case _HighlightType.hover:
-          return widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? theme.hoverColor;
-      }
+        _HighlightType.pressed => widget.overlayColor?.resolve(pressed) ?? widget.highlightColor ?? theme.highlightColor,
+        _HighlightType.focus   => widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? theme.focusColor,
+        _HighlightType.hover   => widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? theme.hoverColor,
+      };
     }
     for (final _HighlightType type in _highlights.keys) {
       _highlights[type]?.color = getHighlightColorForType(type);

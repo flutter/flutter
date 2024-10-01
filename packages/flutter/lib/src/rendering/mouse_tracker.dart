@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'binding.dart';
+library;
+
 import 'dart:collection' show LinkedHashMap;
 import 'dart:ui';
 
@@ -300,7 +303,7 @@ class MouseTracker extends ChangeNotifier {
   /// The [updateWithEvent] is one of the two ways of updating mouse
   /// states, the other one being [updateAllDevices].
   void updateWithEvent(PointerEvent event, HitTestResult? hitTestResult) {
-    if (event.kind != PointerDeviceKind.mouse) {
+    if (event.kind != PointerDeviceKind.mouse && event.kind != PointerDeviceKind.stylus) {
       return;
     }
     if (event is PointerSignalEvent) {

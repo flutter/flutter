@@ -117,255 +117,769 @@ List<double> caretOffsetsForTextSpan(TextDirection textDirection, TextSpan text)
 }
 
 void main() {
-  test('TextPainter caret test', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+  group('caret', () {
+    test('TextPainter caret test', () {
+      final TextPainter painter = TextPainter()
+        ..textDirection = TextDirection.ltr;
 
-    String text = 'A';
-    checkCaretOffsetsLtr(text);
+      String text = 'A';
+      checkCaretOffsetsLtr(text);
 
-    painter.text = TextSpan(text: text);
-    painter.layout();
+      painter.text = TextSpan(text: text);
+      painter.layout();
 
-    Offset caretOffset = painter.getOffsetForCaret(
-      const ui.TextPosition(offset: 0),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, 0);
-    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
-    expect(caretOffset.dx, painter.width);
+      Offset caretOffset = painter.getOffsetForCaret(
+        const ui.TextPosition(offset: 0),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0);
+      caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
+      expect(caretOffset.dx, painter.width);
 
-    // Check that getOffsetForCaret handles a character that is encoded as a
-    // surrogate pair.
-    text = 'A\u{1F600}';
-    checkCaretOffsetsLtr(text);
-    painter.text = TextSpan(text: text);
-    painter.layout();
-    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
-    expect(caretOffset.dx, painter.width);
-    painter.dispose();
+      // Check that getOffsetForCaret handles a character that is encoded as a
+      // surrogate pair.
+      text = 'A\u{1F600}';
+      checkCaretOffsetsLtr(text);
+      painter.text = TextSpan(text: text);
+      painter.layout();
+      caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
+      expect(caretOffset.dx, painter.width);
+
+      /// Verify the handling of spaces by SkParagraph and TextPainter.
+      ///
+      /// Test characters that are in the Unicode-Zs category but are not treated as whitespace characters by SkParagraph.
+      /// The following character codes are intentionally excluded from the test target.
+      ///   * '\u{00A0}' (no-break space)
+      ///   * '\u{2007}' (figure space)
+      ///   * '\u{202F}' (narrow no-break space)
+      void verifyCharacterIsConsideredTrailingSpace(String character) {
+        final String reason = 'character: ${character.codeUnitAt(0).toRadixString(16)}';
+
+        text = 'A$character';
+        checkCaretOffsetsLtr(text);
+        painter.text = TextSpan(text: text);
+        painter.layout();
+        caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+        expect(caretOffset.dx, 0.0, reason: reason);
+        caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+        expect(caretOffset.dx, 14.0, reason: reason);
+        caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
+        expect(caretOffset.dx, painter.width, reason: reason);
+
+        painter.layout(maxWidth: 14.0);
+        final List<ui.LineMetrics> lines = painter.computeLineMetrics();
+        expect(lines.length, 1, reason: reason);
+        expect(lines.first.width, 14.0, reason: reason);
+      }
+
+      // Test with trailing space.
+      verifyCharacterIsConsideredTrailingSpace('\u{0020}');
+
+      // Test with trailing full-width space.
+      verifyCharacterIsConsideredTrailingSpace('\u{3000}');
+
+      // Test with trailing ogham space mark.
+      verifyCharacterIsConsideredTrailingSpace('\u{1680}');
+
+      // Test with trailing en quad.
+      verifyCharacterIsConsideredTrailingSpace('\u{2000}');
+
+      // Test with trailing em quad.
+      verifyCharacterIsConsideredTrailingSpace('\u{2001}');
+
+      // Test with trailing en space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2002}');
+
+      // Test with trailing em space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2003}');
+
+      // Test with trailing three-per-em space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2004}');
+
+      // Test with trailing four-per-em space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2005}');
+
+      // Test with trailing six-per-em space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2006}');
+
+      // Test with trailing punctuation space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2008}');
+
+      // Test with trailing thin space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2009}');
+
+      // Test with trailing hair space.
+      verifyCharacterIsConsideredTrailingSpace('\u{200A}');
+
+      // Test with trailing medium mathematical space(MMSP).
+      verifyCharacterIsConsideredTrailingSpace('\u{205F}');
+
+      painter.dispose();
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('TextPainter caret test with WidgetSpan', () {
+      // Regression test for https://github.com/flutter/flutter/issues/98458.
+      final TextPainter painter = TextPainter()
+        ..textDirection = TextDirection.ltr;
+
+      painter.text = const TextSpan(children: <InlineSpan>[
+        TextSpan(text: 'before'),
+        WidgetSpan(child: Text('widget')),
+        TextSpan(text: 'after'),
+      ]);
+      painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+        PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      ]);
+      painter.layout();
+      final Offset caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: painter.text!.toPlainText().length), ui.Rect.zero);
+      expect(caretOffset.dx, painter.width);
+      painter.dispose();
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('TextPainter null text test', () {
+      final TextPainter painter = TextPainter()
+        ..textDirection = TextDirection.ltr;
+
+      List<TextSpan> children = <TextSpan>[const TextSpan(text: 'B'), const TextSpan(text: 'C')];
+      painter.text = TextSpan(children: children);
+      painter.layout();
+
+      Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+      expect(caretOffset.dx, 0);
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+      expect(caretOffset.dx, painter.width / 2);
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
+      expect(caretOffset.dx, painter.width);
+
+      children = <TextSpan>[];
+      painter.text = TextSpan(children: children);
+      painter.layout();
+
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+      expect(caretOffset.dx, 0);
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+      expect(caretOffset.dx, 0);
+      painter.dispose();
+    });
+
+    test('TextPainter caret emoji test', () {
+      final TextPainter painter = TextPainter()
+        ..textDirection = TextDirection.ltr;
+
+      // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧👏<modifier>'
+      // One three-person family, one four-person family, one clapping hands (medium skin tone).
+      const String text = '👩‍👩‍👦👩‍👩‍👧‍👧👏🏽';
+      checkCaretOffsetsLtr(text);
+
+      painter.text = const TextSpan(text: text);
+      painter.layout(maxWidth: 10000);
+
+      expect(text.length, 23);
+
+      Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+      expect(caretOffset.dx, 0); // 👩‍
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: text.length), ui.Rect.zero);
+      expect(caretOffset.dx, painter.width);
+
+      // Two UTF-16 codepoints per emoji, one codepoint per zwj
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+      expect(caretOffset.dx, 42); // 👩‍
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
+      expect(caretOffset.dx, 42); // <zwj>
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 3), ui.Rect.zero);
+      expect(caretOffset.dx, 42); // 👩‍
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 4), ui.Rect.zero);
+      expect(caretOffset.dx, 42); // 👩‍
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 5), ui.Rect.zero);
+      expect(caretOffset.dx, 42); // <zwj>
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 6), ui.Rect.zero);
+      expect(caretOffset.dx, 42); // 👦
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 7), ui.Rect.zero);
+      expect(caretOffset.dx, 42); // 👦
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 8), ui.Rect.zero);
+      expect(caretOffset.dx, 42); // 👩‍
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 9), ui.Rect.zero);
+      expect(caretOffset.dx, 98); // 👩‍
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 10), ui.Rect.zero);
+      expect(caretOffset.dx, 98); // <zwj>
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 11), ui.Rect.zero);
+      expect(caretOffset.dx, 98); // 👩‍
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 12), ui.Rect.zero);
+      expect(caretOffset.dx, 98); // 👩‍
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 13), ui.Rect.zero);
+      expect(caretOffset.dx, 98); // <zwj>
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 14), ui.Rect.zero);
+      expect(caretOffset.dx, 98); // 👧‍
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 15), ui.Rect.zero);
+      expect(caretOffset.dx, 98); // 👧‍
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 16), ui.Rect.zero);
+      expect(caretOffset.dx, 98); // <zwj>
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 17), ui.Rect.zero);
+      expect(caretOffset.dx, 98); // 👧
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 18), ui.Rect.zero);
+      expect(caretOffset.dx, 98); // 👧
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 19), ui.Rect.zero);
+      expect(caretOffset.dx, 98); // 👏
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 20), ui.Rect.zero);
+      expect(caretOffset.dx, 126); // 👏
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 21), ui.Rect.zero);
+      expect(caretOffset.dx, 126); // <medium skin tone modifier>
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 22), ui.Rect.zero);
+      expect(caretOffset.dx, 126); // <medium skin tone modifier>
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 23), ui.Rect.zero);
+      expect(caretOffset.dx, 126); // end of string
+      painter.dispose();
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('TextPainter caret emoji tests: single, long emoji', () {
+      // Regression test for https://github.com/flutter/flutter/issues/50563
+      checkCaretOffsetsLtr('👩‍🚀');
+      checkCaretOffsetsLtr('👩‍❤️‍💋‍👩');
+      checkCaretOffsetsLtr('👨‍👩‍👦‍👦');
+      checkCaretOffsetsLtr('👨🏾‍🤝‍👨🏻');
+      checkCaretOffsetsLtr('👨‍👦');
+      checkCaretOffsetsLtr('👩‍👦');
+      checkCaretOffsetsLtr('🏌🏿‍♀️');
+      checkCaretOffsetsLtr('🏊‍♀️');
+      checkCaretOffsetsLtr('🏄🏻‍♂️');
+
+      // These actually worked even before #50563 was fixed (because
+      // their lengths in code units are powers of 2, namely 4 and 8).
+      checkCaretOffsetsLtr('🇺🇳');
+      checkCaretOffsetsLtr('👩‍❤️‍👨');
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('TextPainter caret emoji test: letters, then 1 emoji of 5 code units', () {
+      // Regression test for https://github.com/flutter/flutter/issues/50563
+      checkCaretOffsetsLtr('a👩‍🚀');
+      checkCaretOffsetsLtr('ab👩‍🚀');
+      checkCaretOffsetsLtr('abc👩‍🚀');
+      checkCaretOffsetsLtr('abcd👩‍🚀');
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('TextPainter caret zalgo test', () {
+      // Regression test for https://github.com/flutter/flutter/issues/98516
+      checkCaretOffsetsLtr('Z͉̳̺ͥͬ̾a̴͕̲̒̒͌̋ͪl̨͎̰̘͉̟ͤ̀̈̚͜g͕͔̤͖̟̒͝ͅo̵̡̡̼͚̐ͯ̅ͪ̆ͣ̚');
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('TextPainter caret Devanagari test', () {
+      // Regression test for https://github.com/flutter/flutter/issues/118403
+      checkCaretOffsetsLtrFromPieces(
+          <String>['प्रा', 'प्त', ' ', 'व', 'र्ण', 'न', ' ', 'प्र', 'व्रु', 'ति']);
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('TextPainter caret Devanagari test, full strength', () {
+      // Regression test for https://github.com/flutter/flutter/issues/118403
+      checkCaretOffsetsLtr('प्राप्त वर्णन प्रव्रुति');
+    }, skip: true); // https://github.com/flutter/flutter/issues/122478
+
+    test('TextPainter caret emoji test LTR: letters next to emoji, as separate TextBoxes', () {
+      // Regression test for https://github.com/flutter/flutter/issues/122477
+      // The trigger for this bug was to have SkParagraph report separate
+      // TextBoxes for the emoji and for the characters next to it.
+      // In normal usage on a real device, this can happen by simply typing
+      // letters and then an emoji, presumably because they get different fonts.
+      // In these tests, our single test font covers both letters and emoji,
+      // so we provoke the same effect by adding styles.
+      expect(caretOffsetsForTextSpan(
+          TextDirection.ltr,
+          const TextSpan(children: <TextSpan>[
+            TextSpan(text: '👩‍🚀', style: TextStyle()),
+            TextSpan(text: ' words', style: TextStyle(fontWeight: FontWeight.bold)),
+          ])),
+          <double>[0, 28, 28, 28, 28, 28, 42, 56, 70, 84, 98, 112]);
+      expect(caretOffsetsForTextSpan(
+          TextDirection.ltr,
+          const TextSpan(children: <TextSpan>[
+            TextSpan(text: 'words ', style: TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: '👩‍🚀', style: TextStyle()),
+          ])),
+          <double>[0, 14, 28, 42, 56, 70, 84, 112, 112, 112, 112, 112]);
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('TextPainter caret emoji test RTL: letters next to emoji, as separate TextBoxes', () {
+      // Regression test for https://github.com/flutter/flutter/issues/122477
+      expect(caretOffsetsForTextSpan(
+          TextDirection.rtl,
+          const TextSpan(children: <TextSpan>[
+            TextSpan(text: '👩‍🚀', style: TextStyle()),
+            TextSpan(text: ' מילים', style: TextStyle(fontWeight: FontWeight.bold)),
+          ])),
+          <double>[112, 84, 84, 84, 84, 84, 70, 56, 42, 28, 14, 0]);
+      expect(caretOffsetsForTextSpan(
+          TextDirection.rtl,
+          const TextSpan(children: <TextSpan>[
+            TextSpan(text: 'מילים ', style: TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: '👩‍🚀', style: TextStyle()),
+          ])),
+          <double>[112, 98, 84, 70, 56, 42, 28, 0, 0, 0, 0, 0]);
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('TextPainter caret center space test', () {
+      final TextPainter painter = TextPainter()
+        ..textDirection = TextDirection.ltr;
+
+      const String text = 'test text with space at end   ';
+      painter.text = const TextSpan(text: text);
+      painter.textAlign = TextAlign.center;
+      painter.layout();
+
+      Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+      expect(caretOffset.dx, 21);
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: text.length), ui.Rect.zero);
+      // The end of the line is 441, but the width is only 420, so the cursor is
+      // stopped there without overflowing.
+      expect(caretOffset.dx, painter.width);
+
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+      expect(caretOffset.dx, 35);
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
+      expect(caretOffset.dx, 49);
+      painter.dispose();
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('TextPainter caret height and line height', () {
+      final TextPainter painter = TextPainter()
+        ..textDirection = TextDirection.ltr
+        ..strutStyle = const StrutStyle(fontSize: 50.0);
+
+      const String text = 'A';
+      painter.text = const TextSpan(text: text, style: TextStyle(height: 1.0));
+      painter.layout();
+
+      final double caretHeight = painter.getFullHeightForCaret(
+        const ui.TextPosition(offset: 0),
+        ui.Rect.zero,
+      );
+      expect(caretHeight, 50.0);
+      painter.dispose();
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('upstream downstream makes no difference in the same line within the same bidi run', () {
+      final TextPainter painter = TextPainter(textDirection: TextDirection.ltr)
+        ..text = const TextSpan(text: 'aa')
+        ..layout();
+
+      final Rect largeRect = Offset.zero & const Size.square(5);
+      expect(
+        painter.getOffsetForCaret(const TextPosition(offset: 1), largeRect),
+        painter.getOffsetForCaret(const TextPosition(offset: 1, affinity: TextAffinity.upstream), largeRect),
+      );
+    });
+
+    test('trailing newlines', () {
+      const double fontSize = 14.0;
+      final TextPainter painter = TextPainter();
+      final Rect largeRect = Offset.zero & const Size.square(5);
+      String text =  'a    ';
+      painter
+        ..text = TextSpan(text: text)
+        ..textDirection = TextDirection.ltr
+        ..layout(minWidth: 1000.0, maxWidth: 1000.0);
+      expect(
+        painter.getOffsetForCaret(TextPosition(offset: text.length), largeRect).dx,
+        text.length * fontSize,
+      );
+
+      text =  'ل    ';
+      painter
+        ..text = TextSpan(text: text)
+        ..textDirection = TextDirection.rtl
+        ..layout(minWidth: 1000.0, maxWidth: 1000.0);
+      expect(
+        painter.getOffsetForCaret(TextPosition(offset: text.length), largeRect).dx,
+        1000 - text.length * fontSize - largeRect.width,
+      );
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('End of text caret when the text ends with +1 bidi level', () {
+      const double fontSize = 14.0;
+      final TextPainter painter = TextPainter();
+      final Rect largeRect = Offset.zero & const Size.square(5);
+      const String text =  'aل';
+      painter
+        ..text = const TextSpan(text: text)
+        ..textDirection = TextDirection.ltr
+        ..layout(minWidth: 1000.0, maxWidth: 1000.0);
+
+      expect(
+        painter.getOffsetForCaret(const TextPosition(offset: 0), largeRect).dx,
+        0.0,
+      );
+      expect(
+        painter.getOffsetForCaret(const TextPosition(offset: 1), largeRect).dx,
+        fontSize * 2 - largeRect.width,
+      );
+      expect(
+        painter.getOffsetForCaret(const TextPosition(offset: 2), largeRect).dx,
+        fontSize * 2,
+      );
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
+
+    test('handles newlines properly', () {
+      final TextPainter painter = TextPainter()
+        ..textDirection = TextDirection.ltr;
+
+      const double SIZE_OF_A = 14.0; // square size of "a" character
+      String text = 'aaa';
+      painter.text = TextSpan(text: text);
+      painter.layout();
+
+      // getOffsetForCaret in a plain one-line string is the same for either affinity.
+      int offset = 0;
+      painter.text = TextSpan(text: text);
+      painter.layout();
+      Offset caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, SIZE_OF_A * offset);
+      expect(caretOffset.dy, 0.0);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, SIZE_OF_A * offset);
+      expect(caretOffset.dy, 0.0);
+      offset = 1;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, SIZE_OF_A * offset);
+      expect(caretOffset.dy, 0.0);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, SIZE_OF_A * offset);
+      expect(caretOffset.dy, 0.0);
+      offset = 2;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, SIZE_OF_A * offset);
+      expect(caretOffset.dy, 0.0);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, SIZE_OF_A * offset);
+      expect(caretOffset.dy, 0.0);
+      offset = 3;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, SIZE_OF_A * offset);
+      expect(caretOffset.dy, 0.0);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, SIZE_OF_A * offset);
+      expect(caretOffset.dy, 0.0);
+
+      // For explicit newlines, getOffsetForCaret places the caret at the location
+      // indicated by offset regardless of affinity.
+      text = '\n\n';
+      painter.text = TextSpan(text: text);
+      painter.layout();
+      offset = 0;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, 0.0);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, 0.0);
+      offset = 1;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A);
+      offset = 2;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A * 2);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A * 2);
+
+      // getOffsetForCaret in an unwrapped string with explicit newlines is the
+      // same for either affinity.
+      text = '\naaa';
+      painter.text = TextSpan(text: text);
+      painter.layout();
+      offset = 0;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, 0.0);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, 0.0);
+      offset = 1;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A);
+
+      // When text wraps on its own, getOffsetForCaret disambiguates between the
+      // end of one line and start of next using affinity.
+      text = 'aaaaaaaa'; // Just enough to wrap one character down to second line
+      painter.text = TextSpan(text: text);
+      painter.layout(maxWidth: 100); // SIZE_OF_A * text.length > 100, so it wraps
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: text.length - 1),
+        ui.Rect.zero,
+      );
+      // When affinity is downstream, cursor is at beginning of second line
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: text.length - 1, affinity: ui.TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      // When affinity is upstream, cursor is at end of first line
+      expect(caretOffset.dx, 98.0);
+      expect(caretOffset.dy, 0.0);
+
+      // When given a string with a newline at the end, getOffsetForCaret puts
+      // the cursor at the start of the next line regardless of affinity
+      text = 'aaa\n';
+      painter.text = TextSpan(text: text);
+      painter.layout();
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: text.length),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A);
+      offset = text.length;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A);
+
+      // Given a one-line right aligned string, positioning the cursor at offset 0
+      // means that it appears at the "end" of the string, after the character
+      // that was typed first, at x=0.
+      painter.textAlign = TextAlign.right;
+      text = 'aaa';
+      painter.text = TextSpan(text: text);
+      painter.layout();
+      offset = 0;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, 0.0);
+      painter.textAlign = TextAlign.left;
+
+      // When given an offset after a newline in the middle of a string,
+      // getOffsetForCaret returns the start of the next line regardless of
+      // affinity.
+      text = 'aaa\naaa';
+      painter.text = TextSpan(text: text);
+      painter.layout();
+      offset = 4;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A);
+
+      // When given a string with multiple trailing newlines, places the caret
+      // in the position given by offset regardless of affinity.
+      text = 'aaa\n\n\n';
+      offset = 3;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, SIZE_OF_A * 3);
+      expect(caretOffset.dy, 0.0);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, SIZE_OF_A * 3);
+      expect(caretOffset.dy, 0.0);
+
+      offset = 4;
+      painter.text = TextSpan(text: text);
+      painter.layout();
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A);
+
+      offset = 5;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A * 2);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A * 2);
+
+      offset = 6;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A * 3);
+
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A * 3);
+
+      // When given a string with multiple leading newlines, places the caret in
+      // the position given by offset regardless of affinity.
+      text = '\n\n\naaa';
+      offset = 3;
+      painter.text = TextSpan(text: text);
+      painter.layout();
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A * 3);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A * 3);
+
+      offset = 2;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A * 2);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A * 2);
+
+      offset = 1;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy,SIZE_OF_A);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, SIZE_OF_A);
+
+      offset = 0;
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, 0.0);
+      caretOffset = painter.getOffsetForCaret(
+        ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0.0);
+      expect(caretOffset.dy, 0.0);
+      painter.dispose();
+    });
+
+    test('caret height reflects run height if strut is disabled', () {
+      const TextSpan span = TextSpan(text: 'M', style: TextStyle(fontSize: 128), children: <InlineSpan>[
+        TextSpan(text: 'M', style: TextStyle(fontSize: 32)),
+        TextSpan(text: 'M', style: TextStyle(fontSize: 64)),
+      ]);
+      final TextPainter painter = TextPainter()
+        ..textDirection = TextDirection.ltr
+        ..text = span
+        ..layout();
+
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 0, affinity: ui.TextAffinity.upstream), Rect.zero), 128.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 0), Rect.zero), 128.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 1, affinity: ui.TextAffinity.upstream), Rect.zero), 128.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 1), Rect.zero), 32.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 2, affinity: ui.TextAffinity.upstream), Rect.zero), 32.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 2), Rect.zero), 64.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 3, affinity: ui.TextAffinity.upstream), Rect.zero), 64.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 3), Rect.zero), 128.0);
+
+      painter.dispose();
+    });
   });
-
-  test('TextPainter caret test with WidgetSpan', () {
-    // Regression test for https://github.com/flutter/flutter/issues/98458.
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
-
-    painter.text = const TextSpan(children: <InlineSpan>[
-      TextSpan(text: 'before'),
-      WidgetSpan(child: Text('widget')),
-      TextSpan(text: 'after'),
-    ]);
-    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
-      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
-    ]);
-    painter.layout();
-    final Offset caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: painter.text!.toPlainText().length), ui.Rect.zero);
-    expect(caretOffset.dx, painter.width);
-    painter.dispose();
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
-
-  test('TextPainter null text test', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
-
-    List<TextSpan> children = <TextSpan>[const TextSpan(text: 'B'), const TextSpan(text: 'C')];
-    painter.text = TextSpan(children: children);
-    painter.layout();
-
-    Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
-    expect(caretOffset.dx, 0);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
-    expect(caretOffset.dx, painter.width / 2);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
-    expect(caretOffset.dx, painter.width);
-
-    children = <TextSpan>[];
-    painter.text = TextSpan(children: children);
-    painter.layout();
-
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
-    expect(caretOffset.dx, 0);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
-    expect(caretOffset.dx, 0);
-    painter.dispose();
-  });
-
-  test('TextPainter caret emoji test', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
-
-    // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧👏<modifier>'
-    // One three-person family, one four-person family, one clapping hands (medium skin tone).
-    const String text = '👩‍👩‍👦👩‍👩‍👧‍👧👏🏽';
-    checkCaretOffsetsLtr(text);
-
-    painter.text = const TextSpan(text: text);
-    painter.layout(maxWidth: 10000);
-
-    expect(text.length, 23);
-
-    Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
-    expect(caretOffset.dx, 0); // 👩‍
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: text.length), ui.Rect.zero);
-    expect(caretOffset.dx, painter.width);
-
-    // Two UTF-16 codepoints per emoji, one codepoint per zwj
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
-    expect(caretOffset.dx, 42); // 👩‍
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
-    expect(caretOffset.dx, 42); // <zwj>
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 3), ui.Rect.zero);
-    expect(caretOffset.dx, 42); // 👩‍
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 4), ui.Rect.zero);
-    expect(caretOffset.dx, 42); // 👩‍
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 5), ui.Rect.zero);
-    expect(caretOffset.dx, 42); // <zwj>
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 6), ui.Rect.zero);
-    expect(caretOffset.dx, 42); // 👦
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 7), ui.Rect.zero);
-    expect(caretOffset.dx, 42); // 👦
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 8), ui.Rect.zero);
-    expect(caretOffset.dx, 42); // 👩‍
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 9), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // 👩‍
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 10), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // <zwj>
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 11), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // 👩‍
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 12), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // 👩‍
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 13), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // <zwj>
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 14), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // 👧‍
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 15), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // 👧‍
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 16), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // <zwj>
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 17), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // 👧
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 18), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // 👧
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 19), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // 👏
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 20), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // 👏
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 21), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // <medium skin tone modifier>
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 22), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // <medium skin tone modifier>
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 23), ui.Rect.zero);
-    expect(caretOffset.dx, 126); // end of string
-    painter.dispose();
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
-
-  test('TextPainter caret emoji tests: single, long emoji', () {
-    // Regression test for https://github.com/flutter/flutter/issues/50563
-    checkCaretOffsetsLtr('👩‍🚀');
-    checkCaretOffsetsLtr('👩‍❤️‍💋‍👩');
-    checkCaretOffsetsLtr('👨‍👩‍👦‍👦');
-    checkCaretOffsetsLtr('👨🏾‍🤝‍👨🏻');
-    checkCaretOffsetsLtr('👨‍👦');
-    checkCaretOffsetsLtr('👩‍👦');
-    checkCaretOffsetsLtr('🏌🏿‍♀️');
-    checkCaretOffsetsLtr('🏊‍♀️');
-    checkCaretOffsetsLtr('🏄🏻‍♂️');
-
-    // These actually worked even before #50563 was fixed (because
-    // their lengths in code units are powers of 2, namely 4 and 8).
-    checkCaretOffsetsLtr('🇺🇳');
-    checkCaretOffsetsLtr('👩‍❤️‍👨');
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
-
-  test('TextPainter caret emoji test: letters, then 1 emoji of 5 code units', () {
-    // Regression test for https://github.com/flutter/flutter/issues/50563
-    checkCaretOffsetsLtr('a👩‍🚀');
-    checkCaretOffsetsLtr('ab👩‍🚀');
-    checkCaretOffsetsLtr('abc👩‍🚀');
-    checkCaretOffsetsLtr('abcd👩‍🚀');
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
-
-  test('TextPainter caret zalgo test', () {
-    // Regression test for https://github.com/flutter/flutter/issues/98516
-    checkCaretOffsetsLtr('Z͉̳̺ͥͬ̾a̴͕̲̒̒͌̋ͪl̨͎̰̘͉̟ͤ̀̈̚͜g͕͔̤͖̟̒͝ͅo̵̡̡̼͚̐ͯ̅ͪ̆ͣ̚');
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
-
-  test('TextPainter caret Devanagari test', () {
-    // Regression test for https://github.com/flutter/flutter/issues/118403
-    checkCaretOffsetsLtrFromPieces(
-        <String>['प्रा', 'प्त', ' ', 'व', 'र्ण', 'न', ' ', 'प्र', 'व्रु', 'ति']);
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
-
-  test('TextPainter caret Devanagari test, full strength', () {
-    // Regression test for https://github.com/flutter/flutter/issues/118403
-    checkCaretOffsetsLtr('प्राप्त वर्णन प्रव्रुति');
-  }, skip: true); // https://github.com/flutter/flutter/issues/122478
-
-  test('TextPainter caret emoji test LTR: letters next to emoji, as separate TextBoxes', () {
-    // Regression test for https://github.com/flutter/flutter/issues/122477
-    // The trigger for this bug was to have SkParagraph report separate
-    // TextBoxes for the emoji and for the characters next to it.
-    // In normal usage on a real device, this can happen by simply typing
-    // letters and then an emoji, presumably because they get different fonts.
-    // In these tests, our single test font covers both letters and emoji,
-    // so we provoke the same effect by adding styles.
-    expect(caretOffsetsForTextSpan(
-        TextDirection.ltr,
-        const TextSpan(children: <TextSpan>[
-          TextSpan(text: '👩‍🚀', style: TextStyle()),
-          TextSpan(text: ' words', style: TextStyle(fontWeight: FontWeight.bold)),
-        ])),
-        <double>[0, 28, 28, 28, 28, 28, 42, 56, 70, 84, 98, 112]);
-    expect(caretOffsetsForTextSpan(
-        TextDirection.ltr,
-        const TextSpan(children: <TextSpan>[
-          TextSpan(text: 'words ', style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: '👩‍🚀', style: TextStyle()),
-        ])),
-        <double>[0, 14, 28, 42, 56, 70, 84, 84, 84, 84, 84, 112]);
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
-
-  test('TextPainter caret emoji test RTL: letters next to emoji, as separate TextBoxes', () {
-    // Regression test for https://github.com/flutter/flutter/issues/122477
-    expect(caretOffsetsForTextSpan(
-        TextDirection.rtl,
-        const TextSpan(children: <TextSpan>[
-          TextSpan(text: '👩‍🚀', style: TextStyle()),
-          TextSpan(text: ' מילים', style: TextStyle(fontWeight: FontWeight.bold)),
-        ])),
-        <double>[112, 84, 84, 84, 84, 84, 70, 56, 42, 28, 14, 0]);
-    expect(caretOffsetsForTextSpan(
-        TextDirection.rtl,
-        const TextSpan(children: <TextSpan>[
-          TextSpan(text: 'מילים ', style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: '👩‍🚀', style: TextStyle()),
-        ])),
-        <double>[112, 98, 84, 70, 56, 42, 28, 28, 28, 28, 28, 0]);
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
-
-  test('TextPainter caret center space test', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
-
-    const String text = 'test text with space at end   ';
-    painter.text = const TextSpan(text: text);
-    painter.textAlign = TextAlign.center;
-    painter.layout();
-
-    Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
-    expect(caretOffset.dx, 21);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: text.length), ui.Rect.zero);
-    // The end of the line is 441, but the width is only 420, so the cursor is
-    // stopped there without overflowing.
-    expect(caretOffset.dx, painter.width);
-
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
-    expect(caretOffset.dx, 35);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
-    expect(caretOffset.dx, 49);
-    painter.dispose();
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
@@ -541,348 +1055,6 @@ void main() {
     painter.dispose();
   }, skip: true); // https://github.com/flutter/flutter/issues/13512
 
-  test('TextPainter handles newlines properly', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
-
-    const double SIZE_OF_A = 14.0; // square size of "a" character
-    String text = 'aaa';
-    painter.text = TextSpan(text: text);
-    painter.layout();
-
-    // getOffsetForCaret in a plain one-line string is the same for either affinity.
-    int offset = 0;
-    painter.text = TextSpan(text: text);
-    painter.layout();
-    Offset caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(SIZE_OF_A * offset, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(SIZE_OF_A * offset, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    offset = 1;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(SIZE_OF_A * offset, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(SIZE_OF_A * offset, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    offset = 2;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(SIZE_OF_A * offset, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(SIZE_OF_A * offset, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    offset = 3;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(SIZE_OF_A * offset, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(SIZE_OF_A * offset, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-
-    // For explicit newlines, getOffsetForCaret places the caret at the location
-    // indicated by offset regardless of affinity.
-    text = '\n\n';
-    painter.text = TextSpan(text: text);
-    painter.layout();
-    offset = 0;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    offset = 1;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
-    offset = 2;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A * 2, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A * 2, epsilon: 0.0001));
-
-    // getOffsetForCaret in an unwrapped string with explicit newlines is the
-    // same for either affinity.
-    text = '\naaa';
-    painter.text = TextSpan(text: text);
-    painter.layout();
-    offset = 0;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    offset = 1;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: ui.TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
-
-    // When text wraps on its own, getOffsetForCaret disambiguates between the
-    // end of one line and start of next using affinity.
-    text = 'aaaaaaaa'; // Just enough to wrap one character down to second line
-    painter.text = TextSpan(text: text);
-    painter.layout(maxWidth: 100); // SIZE_OF_A * text.length > 100, so it wraps
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: text.length - 1),
-      ui.Rect.zero,
-    );
-    // When affinity is downstream, cursor is at beginning of second line
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: text.length - 1, affinity: ui.TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    // When affinity is upstream, cursor is at end of first line
-    expect(caretOffset.dx, moreOrLessEquals(98.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-
-    // When given a string with a newline at the end, getOffsetForCaret puts
-    // the cursor at the start of the next line regardless of affinity
-    text = 'aaa\n';
-    painter.text = TextSpan(text: text);
-    painter.layout();
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: text.length),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
-    offset = text.length;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
-
-    // Given a one-line right aligned string, positioning the cursor at offset 0
-    // means that it appears at the "end" of the string, after the character
-    // that was typed first, at x=0.
-    painter.textAlign = TextAlign.right;
-    text = 'aaa';
-    painter.text = TextSpan(text: text);
-    painter.layout();
-    offset = 0;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    painter.textAlign = TextAlign.left;
-
-    // When given an offset after a newline in the middle of a string,
-    // getOffsetForCaret returns the start of the next line regardless of
-    // affinity.
-    text = 'aaa\naaa';
-    painter.text = TextSpan(text: text);
-    painter.layout();
-    offset = 4;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
-
-    // When given a string with multiple trailing newlines, places the caret
-    // in the position given by offset regardless of affinity.
-    text = 'aaa\n\n\n';
-    offset = 3;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(SIZE_OF_A * 3, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(SIZE_OF_A * 3, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-
-    offset = 4;
-    painter.text = TextSpan(text: text);
-    painter.layout();
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
-
-    offset = 5;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A * 2, epsilon: 0.001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A * 2, epsilon: 0.0001));
-
-    offset = 6;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A * 3, epsilon: 0.0001));
-
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A * 3, epsilon: 0.0001));
-
-    // When given a string with multiple leading newlines, places the caret in
-    // the position given by offset regardless of affinity.
-    text = '\n\n\naaa';
-    offset = 3;
-    painter.text = TextSpan(text: text);
-    painter.layout();
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A * 3, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A * 3, epsilon: 0.0001));
-
-    offset = 2;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A * 2, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A * 2, epsilon: 0.0001));
-
-    offset = 1;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy,moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
-
-    offset = 0;
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    caretOffset = painter.getOffsetForCaret(
-      ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
-      ui.Rect.zero,
-    );
-    expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
-    painter.dispose();
-  });
-
   test('TextPainter widget span', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
@@ -976,7 +1148,7 @@ void main() {
     expect(painter.inlinePlaceholderBoxes![12], const TextBox.fromLTRBD(300, 30, 351, 60, TextDirection.ltr));
     expect(painter.inlinePlaceholderBoxes![13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
     painter.dispose();
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/87540
+  }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87540
 
   // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
   test('TextPainter set TextHeightBehavior null test', () {
@@ -1051,24 +1223,7 @@ void main() {
     expect(lines[2].lineNumber, 2);
     expect(lines[3].lineNumber, 3);
     painter.dispose();
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/122066
-
-  test('TextPainter caret height and line height', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr
-      ..strutStyle = const StrutStyle(fontSize: 50.0);
-
-    const String text = 'A';
-    painter.text = const TextSpan(text: text, style: TextStyle(height: 1.0));
-    painter.layout();
-
-    final double caretHeight = painter.getFullHeightForCaret(
-      const ui.TextPosition(offset: 0),
-      ui.Rect.zero,
-    )!;
-    expect(caretHeight, 50.0);
-    painter.dispose();
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/122066
 
   group('TextPainter line-height', () {
     test('half-leading', () {
@@ -1190,7 +1345,7 @@ void main() {
       expect(glyphBox, newGlyphBox);
       painter.dispose();
     });
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/87543
+  }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87543
 
   test('TextPainter handles invalid UTF-16', () {
     FlutterErrorDetails? error;
@@ -1227,7 +1382,7 @@ void main() {
         ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
     painter.dispose();
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/87545
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87545
 
   test('TextPainter line metrics update after layout', () {
     final TextPainter painter = TextPainter()
@@ -1248,7 +1403,7 @@ void main() {
     lines = painter.computeLineMetrics();
     expect(lines.length, 1);
     painter.dispose();
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/62819
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/62819
 
   test('TextPainter throws with stack trace when accessing text layout', () {
     final TextPainter painter = TextPainter()
@@ -1320,7 +1475,7 @@ void main() {
       )),
     );
     painter.dispose();
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+  }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter does not require layout after providing identical placeholder dimensions', () {
     final TextPainter painter = TextPainter()
@@ -1357,13 +1512,19 @@ void main() {
       ))),
     );
     painter.dispose();
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+  }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter - debugDisposed', () {
     final TextPainter painter = TextPainter();
     expect(painter.debugDisposed, false);
     painter.dispose();
     expect(painter.debugDisposed, true);
+  });
+
+  test('TextPainter - asserts if disposed more than once', () {
+    final TextPainter painter = TextPainter()..dispose();
+    expect(painter.debugDisposed, isTrue);
+    expect(painter.dispose, throwsAssertionError);
   });
 
   test('TextPainter computeWidth', () {
@@ -1510,6 +1671,24 @@ void main() {
     painter.dispose();
   });
 
+  test('LongestLine TextPainter properly relayout when maxWidth changes.', () {
+    // Regression test for https://github.com/flutter/flutter/issues/142309.
+    final TextPainter painter = TextPainter()
+      ..textAlign = TextAlign.justify
+      ..textWidthBasis = TextWidthBasis.longestLine
+      ..textDirection = TextDirection.ltr
+      ..text = TextSpan(text: 'A' * 100, style: const TextStyle(fontSize: 10));
+
+    painter.layout(maxWidth: 1000);
+    expect(painter.width, 1000);
+
+    painter.layout(maxWidth: 100);
+    expect(painter.width, 100);
+
+    painter.layout(maxWidth: 1000);
+    expect(painter.width, 1000);
+  });
+
   test('TextPainter line breaking does not round to integers', () {
     const double fontSize = 1.25;
     const String text = '12345';
@@ -1526,7 +1705,99 @@ void main() {
       case final List<ui.LineMetrics> metrics:
         expect(metrics, hasLength(1));
     }
-  }, skip: kIsWeb && !isCanvasKit); // [intended] Browsers seem to always round font/glyph metrics.
+  }, skip: kIsWeb && !isSkiaWeb); // [intended] Browsers seem to always round font/glyph metrics.
+
+  group('strut style', () {
+    test('strut style applies when the span has no style', () {
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(),
+        strutStyle: strut,
+      )..layout();
+      expect(painter.height, 100);
+    });
+
+    test('strut style leading is a fontSize multiplier', () {
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, leading: 2);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(),
+        strutStyle: strut,
+      )..layout();
+      expect(painter.height, 100 + 20);
+      // Top leading + scaled ascent.
+      expect(painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 10 + 10 * 7.5);
+    });
+
+    test('strut no half leading + force strut height', () {
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(text: 'A', style: TextStyle(fontSize: 20)),
+        strutStyle: strut,
+      )..layout();
+      expect(painter.height, 100);
+      const double baseline = 75;
+      expect(
+        painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)),
+        const <ui.TextBox>[TextBox.fromLTRBD(0, baseline - 15, 20, baseline + 5, TextDirection.ltr)],
+      );
+    });
+
+    test('strut half leading + force strut height', () {
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true, leadingDistribution: TextLeadingDistribution.even);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(text: 'A', style: TextStyle(fontSize: 20)),
+        strutStyle: strut,
+      )..layout();
+      expect(painter.height, 100);
+      const double baseline = 45 + 7.5;
+      expect(
+        painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)),
+        const <ui.TextBox>[TextBox.fromLTRBD(0, baseline - 15, 20, baseline + 5, TextDirection.ltr)],
+      );
+    });
+
+   test('force strut height applies to widget spans', () {
+      const Size placeholderSize = Size(1000, 1000);
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const WidgetSpan(child: SizedBox()),
+        strutStyle: strut,
+      )
+      ..setPlaceholderDimensions(const <PlaceholderDimensions>[PlaceholderDimensions(size: placeholderSize, alignment: PlaceholderAlignment.bottom)])
+      ..layout();
+      expect(painter.height, 100);
+    });
+  }, skip: kIsWeb && !isSkiaWeb); // [intended] strut support for HTML renderer https://github.com/flutter/flutter/issues/32243.
+
+  test('getOffsetForCaret does not crash on decomposed characters', () {
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: const TextSpan(
+        text: '각',
+        style: TextStyle(fontSize: 10),
+      ),
+    )..layout(maxWidth: 1); // Force the jamo characters to soft wrap.
+    expect(
+      () => painter.getOffsetForCaret(const TextPosition(offset: 0), Rect.zero),
+      returnsNormally,
+    );
+  });
+
+  test('kTextHeightNone unsets the text height multiplier', () {
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: const TextSpan(
+        style: TextStyle(fontSize: 10, height: 1000),
+        children: <TextSpan>[TextSpan(text: 'A', style: TextStyle(height: kTextHeightNone))],
+      ),
+    )..layout();
+    expect(painter.height, 10);
+  });
 
   test('TextPainter dispatches memory events', () async {
     await expectLater(

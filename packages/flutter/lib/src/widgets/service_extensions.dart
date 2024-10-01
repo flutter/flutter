@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+/// @docImport 'package:flutter/foundation.dart';
+/// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'binding.dart';
+/// @docImport 'debug.dart';
+/// @docImport 'framework.dart';
+/// @docImport 'widget_inspector.dart';
+library;
+
 /// Service extension constants for the widgets library.
 ///
 /// These constants will be used when registering service extensions in the
@@ -123,11 +134,11 @@ enum WidgetInspectorServiceExtensions {
   structuredErrors,
 
   /// Name of service extension that, when called, will change the value of
-  /// [WidgetsApp.debugShowWidgetInspectorOverride], which controls whether the
+  /// [WidgetsBinding.debugShowWidgetInspectorOverride], which controls whether the
   /// on-device widget inspector is visible.
   ///
   /// See also:
-  /// * [WidgetsApp.debugShowWidgetInspectorOverride], which is the flag that
+  /// * [WidgetsBinding.debugShowWidgetInspectorOverride], which is the flag that
   ///   this service extension exposes.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
@@ -144,7 +155,22 @@ enum WidgetInspectorServiceExtensions {
   ///   extension is registered.
   trackRebuildDirtyWidgets,
 
+  /// Name of service extension that, when called, returns the mapping of
+  /// widget locations to ids.
+  ///
+  /// This service extension is only supported if
+  /// [WidgetInspectorService._widgetCreationTracked] is true.
+  ///
+  /// See also:
+  ///
+  /// * [trackRebuildDirtyWidgets], which toggles dispatching events that use
+  ///   these ids to efficiently indicate the locations of widgets.
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  widgetLocationIdMap,
+
   /// Name of service extension that, when called, determines whether
+  /// [WidgetInspectorService._trackRepaintWidgets], which determines whether
   /// a callback is invoked for every [RenderObject] painted each frame.
   ///
   /// See also:
@@ -350,6 +376,22 @@ enum WidgetInspectorServiceExtensions {
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   getRootWidget,
+
+  /// Name of service extension that, when called, will return the
+  /// [DiagnosticsNode] data for the root [Element] of the widget tree.
+  ///
+  /// If the parameter `isSummaryTree` is true, the tree will only include
+  /// [Element]s that were created by user code.
+  ///
+  /// If the parameter `withPreviews` is true, text previews will be included
+  /// for [Element]s with a corresponding [RenderObject] of type
+  /// [RenderParagraph].
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  getRootWidgetTree,
 
   /// Name of service extension that, when called, will return the
   /// [DiagnosticsNode] data for the root [Element] of the summary tree, which

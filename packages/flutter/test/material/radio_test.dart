@@ -205,7 +205,7 @@ void main() {
         ),
       ),
     ));
-    final bool isApple = defaultTargetPlatform == TargetPlatform.iOS ||
+    final bool isCupertino = defaultTargetPlatform == TargetPlatform.iOS ||
                          defaultTargetPlatform == TargetPlatform.macOS;
     expect(
       semantics,
@@ -217,10 +217,11 @@ void main() {
           SemanticsFlag.isEnabled,
           SemanticsFlag.isFocusable,
           SemanticsFlag.isChecked,
-          if (isApple) SemanticsFlag.isSelected,
+          if (isCupertino) SemanticsFlag.isSelected,
         ],
         actions: <SemanticsAction>[
           SemanticsAction.tap,
+          if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
         ],
       ),
     );
@@ -254,6 +255,7 @@ void main() {
           ],
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
         ),
       ],
@@ -284,6 +286,7 @@ void main() {
           ],
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
         ),
       ],
@@ -310,6 +313,7 @@ void main() {
             SemanticsFlag.isInMutuallyExclusiveGroup,
             SemanticsFlag.isFocusable,  // This flag is delayed by 1 frame.
           ],
+          actions: <SemanticsAction>[SemanticsAction.focus],
         ),
       ],
     ), ignoreRect: true, ignoreTransform: true));
@@ -979,6 +983,7 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
+    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -1213,6 +1218,7 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byKey(radioKey)));
     await tester.pumpAndSettle();
 
@@ -1287,12 +1293,13 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byKey(radioKey))),
-      paints..rect()..circle(color: theme.colorScheme.primary.withOpacity(0.12))..circle(color: focusedFillColor),
+      paints..rect()..circle(color: theme.colorScheme.primary.withOpacity(0.1))..circle(color: focusedFillColor),
     );
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byKey(radioKey)));
     await tester.pumpAndSettle();
 
@@ -1441,6 +1448,7 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(findRadio()));
     await tester.pumpAndSettle();
 
@@ -1763,7 +1771,7 @@ void main() {
 
     expect(
         Material.of(tester.element(find.byType(Radio<bool>))),
-        paints..circle(color: colors.onSurface.withOpacity(0.12))
+        paints..circle(color: colors.onSurface.withOpacity(0.1))
           ..circle(color: colors.primary.withOpacity(1))
     );
 
@@ -1774,7 +1782,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: colors.primary.withOpacity(0.12))..circle(color: colors.onSurfaceVariant.withOpacity(1))
+      paints..circle(color: colors.primary.withOpacity(0.1))..circle(color: colors.onSurfaceVariant.withOpacity(1))
     );
 
     // selected radio in focused state
@@ -1785,7 +1793,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: colors.primary.withOpacity(0.12))..circle(color: colors.primary.withOpacity(1))
+      paints..circle(color: colors.primary.withOpacity(0.1))..circle(color: colors.primary.withOpacity(1))
     );
 
     // unselected radio in focused state
@@ -1796,7 +1804,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: colors.onSurface.withOpacity(0.12))..circle(color: colors.onSurface.withOpacity(1))
+      paints..circle(color: colors.onSurface.withOpacity(0.1))..circle(color: colors.onSurface.withOpacity(1))
     );
 
     // selected radio in hovered state
@@ -1881,6 +1889,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
 
@@ -1947,6 +1956,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
 
@@ -1962,7 +1972,7 @@ void main() {
 
     expect(getRadioMaterial(tester),
       paints
-        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.12))
+        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.1))
         ..circle(color: theme.colorScheme.primary)
     );
     // Remove pressed and hovered states
@@ -1977,7 +1987,7 @@ void main() {
 
     expect(getRadioMaterial(tester),
       paints
-        ..circle(color: theme.colorScheme.primary.withOpacity(0.12))
+        ..circle(color: theme.colorScheme.primary.withOpacity(0.1))
         ..circle(color: theme.colorScheme.primary)
     );
     focusNode.dispose();

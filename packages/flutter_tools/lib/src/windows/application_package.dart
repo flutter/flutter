@@ -52,12 +52,10 @@ abstract class WindowsApp extends ApplicationPackage {
       globals.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
       return null;
     }
-    final List<FileSystemEntity> exeFilesFound = <FileSystemEntity>[];
-    for (final FileSystemEntity file in tempDir.listSync()) {
-      if (file.basename.endsWith('.exe')) {
-        exeFilesFound.add(file);
-      }
-    }
+    final List<FileSystemEntity> exeFilesFound = <FileSystemEntity>[
+      for (final FileSystemEntity file in tempDir.listSync())
+        if (file.basename.endsWith('.exe')) file,
+    ];
 
     if (exeFilesFound.isEmpty) {
       globals.printError('Cannot find .exe files in the zip archive.');
@@ -78,7 +76,7 @@ abstract class WindowsApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String executable(BuildMode buildMode);
+  String executable(BuildMode buildMode, TargetPlatform targetPlatform);
 }
 
 class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackage {
@@ -91,7 +89,7 @@ class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackag
   final String _executable;
 
   @override
-  String executable(BuildMode buildMode) => _executable;
+  String executable(BuildMode buildMode, TargetPlatform targetPlatform) => _executable;
 
   @override
   String get name => _executable;
@@ -108,10 +106,10 @@ class BuildableWindowsApp extends WindowsApp {
   final WindowsProject project;
 
   @override
-  String executable(BuildMode buildMode) {
+  String executable(BuildMode buildMode, TargetPlatform targetPlatform) {
     final String? binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
-        getWindowsBuildDirectory(TargetPlatform.windows_x64),
+        getWindowsBuildDirectory(targetPlatform),
         'runner',
         sentenceCase(buildMode.cliName),
         '$binaryName.exe',

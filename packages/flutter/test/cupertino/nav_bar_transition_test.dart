@@ -20,14 +20,14 @@ Future<void> startTransitionBetween(
   String? toTitle,
   TextDirection textDirection = TextDirection.ltr,
   CupertinoThemeData? theme,
-  double textScale = 1.0,
+  TextScaler textScaler = TextScaler.noScaling,
 }) async {
   await tester.pumpWidget(
     CupertinoApp(
       theme: theme,
       builder: (BuildContext context, Widget? navigator) {
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: textScale),
+          data: MediaQuery.of(context).copyWith(textScaler: textScaler),
           child: Directionality(
             textDirection: textDirection,
             child: navigator!,
@@ -59,26 +59,24 @@ Future<void> startTransitionBetween(
 }
 
 CupertinoPageScaffold? scaffoldForNavBar(Widget? navBar) {
-  if (navBar is CupertinoNavigationBar || navBar == null) {
-    return CupertinoPageScaffold(
-      navigationBar: navBar as CupertinoNavigationBar? ?? const CupertinoNavigationBar(),
-      child: const Placeholder(),
-    );
-  } else if (navBar is CupertinoSliverNavigationBar) {
-    return CupertinoPageScaffold(
-      child: CustomScrollView(
-        slivers: <Widget>[
+  switch (navBar) {
+    case CupertinoNavigationBar? _:
+      return CupertinoPageScaffold(
+        navigationBar: navBar ?? const CupertinoNavigationBar(),
+        child: const Placeholder(),
+      );
+    case CupertinoSliverNavigationBar():
+      return CupertinoPageScaffold(
+        child: CustomScrollView(slivers: <Widget>[
           navBar,
           // Add filler so it's scrollable.
-          const SliverToBoxAdapter(
-            child: Placeholder(fallbackHeight: 1000.0),
-          ),
-        ],
-      ),
-    );
+          const SliverToBoxAdapter(child: Placeholder(fallbackHeight: 1000.0)),
+        ]),
+      );
+    default:
+      assert(false, 'Unexpected nav bar type ${navBar.runtimeType}');
+      return null;
   }
-  assert(false, 'Unexpected nav bar type ${navBar.runtimeType}');
-  return null;
 }
 
 Finder flying(WidgetTester tester, Finder finder) {
@@ -216,7 +214,7 @@ void main() {
     // The transition's stack is ordered. The bottom middle is inserted first.
     final RenderParagraph bottomMiddle =
         tester.renderObject(flying(tester, find.text('Page 1')).first);
-    expect(bottomMiddle.text.style!.color, const Color(0xff000306));
+    expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff000306)));
     expect(bottomMiddle.text.style!.fontWeight, FontWeight.w600);
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
@@ -227,7 +225,7 @@ void main() {
     // are flipped.
     final RenderParagraph topBackLabel =
         tester.renderObject(flying(tester, find.text('Page 1')).last);
-    expect(topBackLabel.text.style!.color, const Color(0xff000306));
+    expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff000306)));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w600);
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
@@ -236,14 +234,14 @@ void main() {
 
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
-    expect(bottomMiddle.text.style!.color, const Color(0xff005ec5));
+    expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
     expect(bottomMiddle.text.style!.fontWeight, FontWeight.w400);
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
-    expect(topBackLabel.text.style!.color, const Color(0xff005ec5));
+    expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w400);
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
@@ -264,7 +262,7 @@ void main() {
     // The transition's stack is ordered. The bottom middle is inserted first.
     final RenderParagraph bottomMiddle =
         tester.renderObject(flying(tester, find.text('Page 1')).first);
-    expect(bottomMiddle.text.style!.color, const Color(0xfff8fbff));
+    expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xfff8fbff)));
     expect(bottomMiddle.text.style!.fontWeight, FontWeight.w600);
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
@@ -275,7 +273,7 @@ void main() {
     // are flipped.
     final RenderParagraph topBackLabel =
         tester.renderObject(flying(tester, find.text('Page 1')).last);
-    expect(topBackLabel.text.style!.color, const Color(0xfff8fbff));
+    expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xfff8fbff)));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w600);
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
@@ -284,14 +282,14 @@ void main() {
 
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
-    expect(bottomMiddle.text.style!.color, const Color(0xff409fff));
+    expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff409fff)));
     expect(bottomMiddle.text.style!.fontWeight, FontWeight.w400);
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
-    expect(topBackLabel.text.style!.color, const Color(0xff409fff));
+    expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff409fff)));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w400);
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
@@ -367,7 +365,7 @@ void main() {
       // The transition's stack is ordered. The bottom middle is inserted first.
       final RenderParagraph bottomMiddle =
           tester.renderObject(flying(tester, find.text('Page 1')).first);
-      expect(bottomMiddle.text.style!.color, const Color(0xff000306));
+      expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff000306)));
 
       expect(
         tester.getTopLeft(flying(tester, find.text('Page 1')).first),
@@ -381,7 +379,7 @@ void main() {
       // are flipped.
       final RenderParagraph topBackLabel =
           tester.renderObject(flying(tester, find.text('Page 1')).last);
-      expect(topBackLabel.text.style!.color, const Color(0xff000306));
+      expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff000306)));
       expect(
         tester.getTopLeft(flying(tester, find.text('Page 1')).last),
         const Offset(
@@ -419,7 +417,7 @@ void main() {
       // The transition's stack is ordered. The bottom middle is inserted first.
       final RenderParagraph bottomMiddle =
           tester.renderObject(flying(tester, find.text('Page 1')).first);
-      expect(bottomMiddle.text.style!.color, const Color(0xff000306));
+      expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff000306)));
       expect(
         tester.getTopLeft(flying(tester, find.text('Page 1')).first),
         const Offset(
@@ -432,7 +430,7 @@ void main() {
       // are flipped.
       final RenderParagraph topBackLabel =
           tester.renderObject(flying(tester, find.text('Page 1')).last);
-      expect(topBackLabel.text.style!.color, const Color(0xff000306));
+      expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff000306)));
       expect(
         tester.getTopLeft(flying(tester, find.text('Page 1')).last),
         const Offset(
@@ -465,7 +463,7 @@ void main() {
     expect(
       flying(
         tester,
-        find.byWidgetPredicate((Widget widget) => widget.key != null),
+        find.byWidgetPredicate((Widget widget) => widget.key != null && widget.key is GlobalKey),
       ),
       findsNothing,
     );
@@ -1118,7 +1116,7 @@ void main() {
     // The transition's stack is ordered. The bottom large title is inserted first.
     final RenderParagraph bottomLargeTitle =
         tester.renderObject(flying(tester, find.text('Page 1')).first);
-    expect(bottomLargeTitle.text.style!.color, const Color(0xff000306));
+    expect(bottomLargeTitle.text.style!.color, isSameColorAs(const Color(0xff000306)));
     expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w700);
     expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemDisplay');
     expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
@@ -1126,19 +1124,19 @@ void main() {
     // The top back label is styled exactly the same way.
     final RenderParagraph topBackLabel =
         tester.renderObject(flying(tester, find.text('Page 1')).last);
-    expect(topBackLabel.text.style!.color, const Color(0xff000306));
+    expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff000306)));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w700);
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemDisplay');
     expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
-    expect(bottomLargeTitle.text.style!.color, const Color(0xff005ec5));
+    expect(bottomLargeTitle.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
     expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w500);
     expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
 
-    expect(topBackLabel.text.style!.color, const Color(0xff005ec5));
+    expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w500);
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
@@ -1378,7 +1376,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(
-        749.863556146621704102,
+        721.4629859924316,
         13.5,
       ),
     );
@@ -1393,11 +1391,13 @@ void main() {
   });
 
   testWidgets('textScaleFactor is set to 1.0 on transition', (WidgetTester tester) async {
-    await startTransitionBetween(tester, fromTitle: 'Page 1', textScale: 99);
+    await startTransitionBetween(tester, fromTitle: 'Page 1', textScaler: const TextScaler.linear(99));
 
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(tester.firstWidget<RichText>(flying(tester, find.byType(RichText))).textScaleFactor, 1);
+    final TextScaler scaler = tester.firstWidget<RichText>(flying(tester, find.byType(RichText))).textScaler;
+    final List<double> fontSizes = List<double>.generate(100, (int index) => index / 3 + 1);
+    expect(fontSizes.map(scaler.scale), fontSizes);
   });
 
   testWidgets('Back swipe gesture cancels properly with transition', (WidgetTester tester) async {
@@ -1443,7 +1443,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(
-        350.231143206357955933,
+        351.52365279197693,
         13.5,
       ),
     );

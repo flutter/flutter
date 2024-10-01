@@ -182,17 +182,27 @@ void main() {
         equalsIgnoringHashCodes(
           'FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
           ' │ IN FOCUS PATH\n'
-          ' │ focusedChildren: FocusScopeNode#00000(Parent Scope Node [IN FOCUS\n'
-          ' │   PATH])\n'
+          ' │ focusedChildren: FocusScopeNode#00000(View Scope [IN FOCUS PATH])\n'
           ' │\n'
-          ' └─Child 1: FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
-          '   │ context: FocusScope\n'
+          ' └─Child 1: _FocusTraversalGroupNode#00000(FocusTraversalGroup [IN FOCUS PATH])\n'
+          '   │ context: Focus\n'
+          '   │ NOT FOCUSABLE\n'
           '   │ IN FOCUS PATH\n'
-          '   │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
           '   │\n'
-          '   └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
-          '       context: Focus\n'
-          '       PRIMARY FOCUS\n',
+          '   └─Child 1: FocusScopeNode#00000(View Scope [IN FOCUS PATH])\n'
+          '     │ context: _FocusScopeWithExternalFocusNode\n'
+          '     │ IN FOCUS PATH\n'
+          '     │ focusedChildren: FocusScopeNode#00000(Parent Scope Node [IN FOCUS\n'
+          '     │   PATH])\n'
+          '     │\n'
+          '     └─Child 1: FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
+          '       │ context: FocusScope\n'
+          '       │ IN FOCUS PATH\n'
+          '       │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
+          '       │\n'
+          '       └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
+          '           context: Focus\n'
+          '           PRIMARY FOCUS\n'
         ),
       );
 
@@ -730,9 +740,11 @@ void main() {
       expect(keyB.currentState!.focusNode.hasFocus, isFalse);
       expect(find.text('b'), findsOneWidget);
 
+      expect(FocusManager.instance.rootScope.descendants.length, equals(7));
       await tester.pumpWidget(Container());
-
-      expect(FocusManager.instance.rootScope.children, isEmpty);
+      expect(FocusManager.instance.rootScope.descendants.length, equals(2));
+      expect(FocusManager.instance.rootScope.descendants, isNot(contains(aScope)));
+      expect(FocusManager.instance.rootScope.descendants, isNot(contains(bScope)));
     });
 
     // By "pinned", it means kept in the tree by a GlobalKey.
@@ -1093,7 +1105,7 @@ void main() {
       await tester.pump();
 
       expect(rootNode.hasFocus, isTrue);
-      expect(rootNode, equals(firstElement.owner!.focusManager.rootScope));
+      expect(rootNode, equals(FocusManager.instance.rootScope.descendants.toList()[1]));
     });
 
     testWidgets('Can autofocus a node.', (WidgetTester tester) async {
@@ -1278,9 +1290,9 @@ void main() {
       expect(Focus.maybeOf(element1), isNull);
       expect(Focus.maybeOf(element2), isNull);
       expect(Focus.maybeOf(element3), isNull);
-      expect(Focus.of(element4).parent!.parent, equals(root));
-      expect(Focus.of(element5).parent!.parent, equals(root));
-      expect(Focus.of(element6).parent!.parent!.parent, equals(root));
+      expect(Focus.of(element4).parent!.parent!.parent!.parent, equals(root));
+      expect(Focus.of(element5).parent!.parent!.parent!.parent, equals(root));
+      expect(Focus.of(element6).parent!.parent!.parent!.parent!.parent, equals(root));
     });
     testWidgets('Can traverse Focus children.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
@@ -1492,8 +1504,9 @@ void main() {
       expect(node.hasFocus, isTrue);
 
       await tester.pumpWidget(Container());
-
-      expect(FocusManager.instance.rootScope.descendants, isEmpty);
+      // Even with no other focusable widgets, there will be the top level focus
+      // traversal and view focus nodes.
+      expect(FocusManager.instance.rootScope.descendants, hasLength(2));
     });
 
     testWidgets('Focus widgets set Semantics information about focus', (WidgetTester tester) async {
@@ -1964,12 +1977,68 @@ void main() {
       expect(keyEventHandled, isTrue);
     });
 
+    testWidgets('Focus does not update the focusNode attributes when the widget updates if withExternalFocusNode is used 2', (WidgetTester tester) async {
+      final TestExternalFocusNode focusNode = TestExternalFocusNode();
+      assert(!focusNode.isModified);
+      addTearDown(focusNode.dispose);
+
+      final Focus focusWidget = Focus.withExternalFocusNode(
+        focusNode: focusNode,
+        child: Container(),
+      );
+
+      await tester.pumpWidget(focusWidget);
+      expect(focusNode.isModified, isFalse);
+      await tester.pumpWidget(const SizedBox());
+    });
+
     testWidgets('Focus passes changes in attribute values to its focus node', (WidgetTester tester) async {
       await tester.pumpWidget(
         Focus(
           child: Container(),
         ),
       );
+    });
+
+    testWidgets('Focus widget gains input focus when it gains accessibility focus', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: Focus(
+            focusNode: focusNode,
+            child: const Text('Test'),
+          ),
+        ),
+      );
+
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                actions: <SemanticsAction>[SemanticsAction.focus],
+                label: 'Test',
+                textDirection: TextDirection.rtl,
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      );
+
+      expect(focusNode.hasFocus, isFalse);
+      semanticsOwner.performAction(1, SemanticsAction.focus);
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+      semantics.dispose();
     });
   });
 
@@ -2192,5 +2261,46 @@ class TestFocusState extends State<TestFocus> {
         ),
       ),
     );
+  }
+}
+
+class TestExternalFocusNode extends FocusNode {
+  TestExternalFocusNode();
+
+  bool isModified = false;
+
+  @override
+  FocusOnKeyEventCallback? get onKeyEvent => _onKeyEvent;
+  FocusOnKeyEventCallback? _onKeyEvent;
+  @override
+  set onKeyEvent(FocusOnKeyEventCallback? newValue) {
+    if (newValue != _onKeyEvent) {
+      _onKeyEvent = newValue;
+      isModified = true;
+    }
+  }
+
+  @override
+  set descendantsAreFocusable(bool newValue) {
+    super.descendantsAreFocusable = newValue;
+    isModified = true;
+  }
+
+  @override
+  set descendantsAreTraversable(bool newValue) {
+    super.descendantsAreTraversable = newValue;
+    isModified = true;
+  }
+
+  @override
+  set skipTraversal(bool newValue) {
+    super.skipTraversal = newValue;
+    isModified = true;
+  }
+
+  @override
+  set canRequestFocus(bool newValue) {
+    super.canRequestFocus = newValue;
+    isModified = true;
   }
 }

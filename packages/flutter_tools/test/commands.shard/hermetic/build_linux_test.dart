@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -53,7 +52,6 @@ void main() {
   late FakeProcessManager processManager;
   late ProcessUtils processUtils;
   late Logger logger;
-  late TestUsage usage;
   late Artifacts artifacts;
   late FakeAnalytics fakeAnalytics;
 
@@ -61,7 +59,6 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
     Cache.flutterRoot = _kTestFlutterRoot;
-    usage = TestUsage();
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
     processUtils = ProcessUtils(
@@ -77,7 +74,7 @@ void main() {
   // Creates the mock files necessary to look like a Flutter project.
   void setUpMockCoreProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -90,7 +87,7 @@ void main() {
   // Returns the command matching the build_linux call to cmake.
   FakeCommand cmakeCommand(String buildMode, {
     String target = 'x64',
-    void Function()? onRun,
+    void Function(List<String> command)? onRun,
   }) {
     return FakeCommand(
       command: <String>[
@@ -110,7 +107,7 @@ void main() {
   FakeCommand ninjaCommand(String buildMode, {
     Map<String, String>? environment,
     String target = 'x64',
-    void Function()? onRun,
+    void Function(List<String> command)? onRun,
     String stdout = '',
   }) {
     return FakeCommand(
@@ -141,7 +138,7 @@ void main() {
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--no-pub']
     ), throwsToolExit(message: 'No Linux desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://flutter.dev/to/add-desktop-support '
       'to learn about adding Linux support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
@@ -192,6 +189,35 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     FeatureFlags: () => TestFeatureFlags(),
+  });
+
+  testUsingContext('Linux build outputs path when successful', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release'),
+      ninjaCommand('release'),
+    ]);
+
+    setUpMockProjectFilesForBuild();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub']
+    );
+    expect(testLogger.statusText, contains('✓ Built build/linux/x64/release/bundle'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   });
 
   testUsingContext('Linux build invokes CMake and ninja, and writes temporary files', () async {
@@ -279,7 +305,7 @@ void main() {
     setUpMockProjectFilesForBuild();
     processManager.addCommands(<FakeCommand>[
       cmakeCommand('release'),
-      ninjaCommand('release', onRun: () {
+      ninjaCommand('release', onRun: (_) {
         throw ArgumentError();
       }),
     ]);
@@ -638,7 +664,7 @@ project(runner LANGUAGES CXX)
 set(BINARY_NAME "fizz_bar")
 ''');
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
     expect(getCmakeExecutableName(flutterProject.linux), 'fizz_bar');
@@ -694,7 +720,7 @@ set(BINARY_NAME "fizz_bar")
     setUpMockProjectFilesForBuild();
     processManager.addCommands(<FakeCommand>[
       cmakeCommand('release'),
-      ninjaCommand('release', onRun: () {
+      ninjaCommand('release', onRun: (_) {
         fileSystem.file('build/flutter_size_01/snapshot.linux-x64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -722,9 +748,6 @@ set(BINARY_NAME "fizz_bar")
 
     expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
     expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
-    expect(usage.events, contains(
-      const TestUsageEvent('code-size-analysis', 'linux'),
-    ));
     expect(fakeAnalytics.sentEvents, contains(
       Event.codeSizeAnalysis(platform: 'linux')
     ));
@@ -733,7 +756,6 @@ set(BINARY_NAME "fizz_bar")
     ProcessManager: () => processManager,
     Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-    Usage: () => usage,
     OperatingSystemUtils: () => FakeOperatingSystemUtils(),
     Analytics: () => fakeAnalytics,
   });
@@ -751,7 +773,7 @@ set(BINARY_NAME "fizz_bar")
     setUpMockProjectFilesForBuild();
     processManager.addCommands(<FakeCommand>[
       cmakeCommand('release', target: 'arm64'),
-      ninjaCommand('release', target: 'arm64', onRun: () {
+      ninjaCommand('release', target: 'arm64', onRun: (_) {
         fileSystem.file('build/flutter_size_01/snapshot.linux-arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -779,9 +801,6 @@ set(BINARY_NAME "fizz_bar")
 
     // check if libapp.so of "build/linux/arm64/release" directory can be referenced.
     expect(testLogger.statusText,  contains('libapp.so (Dart AOT)'));
-    expect(usage.events, contains(
-      const TestUsageEvent('code-size-analysis', 'linux'),
-    ));
     expect(fakeAnalytics.sentEvents, contains(
       Event.codeSizeAnalysis(platform: 'linux')
     ));
@@ -790,7 +809,6 @@ set(BINARY_NAME "fizz_bar")
     ProcessManager: () => processManager,
     Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-    Usage: () => usage,
     OperatingSystemUtils: () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
     Analytics: () => fakeAnalytics,
   });

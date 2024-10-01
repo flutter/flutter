@@ -18,15 +18,15 @@ void main() {
       ),
     ));
 
-    final Container container = _getCardContainer(tester);
+    final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
 
     expect(material.clipBehavior, Clip.none);
     expect(material.elevation, 1.0);
-    expect(container.margin, const EdgeInsets.all(4.0));
-    expect(material.color, colors.surface);
+    expect(padding.padding, const EdgeInsets.all(4.0));
+    expect(material.color, colors.surfaceContainerLow);
     expect(material.shadowColor, colors.shadow);
-    expect(material.surfaceTintColor, colors.surfaceTint); // Default primary color
+    expect(material.surfaceTintColor, Colors.transparent); // Don't use surface tint. Toned surface container is used instead.
     expect(material.shape, const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12.0)),
     ));
@@ -42,13 +42,13 @@ void main() {
       ),
     ));
 
-    final Container container = _getCardContainer(tester);
+    final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
 
     expect(material.clipBehavior, Clip.none);
     expect(material.elevation, 0.0);
-    expect(container.margin, const EdgeInsets.all(4.0));
-    expect(material.color, colors.surfaceVariant);
+    expect(padding.padding, const EdgeInsets.all(4.0));
+    expect(material.color, colors.surfaceContainerHighest);
     expect(material.shadowColor, colors.shadow);
     expect(material.surfaceTintColor, Colors.transparent);
     expect(material.shape, const RoundedRectangleBorder(
@@ -66,15 +66,15 @@ void main() {
       ),
     ));
 
-    final Container container = _getCardContainer(tester);
+    final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
 
     expect(material.clipBehavior, Clip.none);
     expect(material.elevation, 0.0);
-    expect(container.margin, const EdgeInsets.all(4.0));
+    expect(padding.padding, const EdgeInsets.all(4.0));
     expect(material.color, colors.surface);
     expect(material.shadowColor, colors.shadow);
-    expect(material.surfaceTintColor, colors.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.shape, RoundedRectangleBorder(
       side: BorderSide(color: colors.outlineVariant),
       borderRadius: const BorderRadius.all(Radius.circular(12.0)),
@@ -130,6 +130,7 @@ void main() {
                 textDirection: TextDirection.ltr,
                 actions: <SemanticsAction>[
                   SemanticsAction.tap,
+                  SemanticsAction.focus,
                 ],
                 flags: <SemanticsFlag>[
                   SemanticsFlag.hasEnabledState,
@@ -301,11 +302,11 @@ Material _getCardMaterial(WidgetTester tester) {
   );
 }
 
-Container _getCardContainer(WidgetTester tester) {
-  return tester.widget<Container>(
+Padding _getCardPadding(WidgetTester tester) {
+  return tester.widget<Padding>(
     find.descendant(
       of: find.byType(Card),
-      matching: find.byType(Container),
+      matching: find.byType(Padding),
     ),
   );
 }

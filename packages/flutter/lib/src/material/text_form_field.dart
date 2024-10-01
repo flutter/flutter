@@ -81,6 +81,13 @@ export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 /// ** See code in examples/api/lib/material/text_form_field/text_form_field.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to force an error text to the field after making
+/// an asynchronous call.
+///
+/// ** See code in examples/api/lib/material/text_form_field/text_form_field.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/text-fields.html>
@@ -88,7 +95,7 @@ export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 ///    integration.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://docs.flutter.dev/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///
@@ -101,9 +108,11 @@ class TextFormField extends FormField<String> {
   /// and [TextField.new], the constructor.
   TextFormField({
     super.key,
+    this.groupId = EditableText,
     this.controller,
     String? initialValue,
     FocusNode? focusNode,
+    super.forceErrorText,
     InputDecoration? decoration = const InputDecoration(),
     TextInputType? keyboardType,
     TextCapitalization textCapitalization = TextCapitalization.none,
@@ -142,6 +151,7 @@ class TextFormField extends FormField<String> {
     super.validator,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
+    bool? ignorePointers,
     double cursorWidth = 2.0,
     double? cursorHeight,
     Radius? cursorRadius,
@@ -202,6 +212,7 @@ class TextFormField extends FormField<String> {
            return UnmanagedRestorationScope(
              bucket: field.bucket,
              child: TextField(
+               groupId: groupId,
                restorationId: restorationId,
                controller: state._effectiveController,
                focusNode: focusNode,
@@ -238,6 +249,7 @@ class TextFormField extends FormField<String> {
                onSubmitted: onFieldSubmitted,
                inputFormatters: inputFormatters,
                enabled: enabled ?? decoration?.enabled ?? true,
+               ignorePointers: ignorePointers,
                cursorWidth: cursorWidth,
                cursorHeight: cursorHeight,
                cursorRadius: cursorRadius,
@@ -276,6 +288,9 @@ class TextFormField extends FormField<String> {
   /// If null, this widget will create its own [TextEditingController] and
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
+
+  /// {@macro flutter.widgets.editableText.groupId}
+  final Object groupId;
 
   /// {@template flutter.material.TextFormField.onChanged}
   /// Called when the user initiates a change to the TextField's

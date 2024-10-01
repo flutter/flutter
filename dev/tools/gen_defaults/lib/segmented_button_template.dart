@@ -120,31 +120,24 @@ class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
 
-  static MaterialStateProperty<Color?> resolveStateColor(Color? unselectedColor, Color? selectedColor){
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
-          return selectedColor?.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return selectedColor?.withOpacity(0.08);
-        }
-        if (states.contains(MaterialState.focused)) {
-          return selectedColor?.withOpacity(0.12);
-        }
-      } else {
-        if (states.contains(MaterialState.pressed)) {
-          return unselectedColor?.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return unselectedColor?.withOpacity(0.08);
-        }
-        if (states.contains(MaterialState.focused)) {
-          return unselectedColor?.withOpacity(0.12);
-        }
-      }
-      return Colors.transparent;
-    });
+  static WidgetStateProperty<Color?> resolveStateColor(
+    Color? unselectedColor,
+    Color? selectedColor,
+    Color? overlayColor,
+  ) {
+    final Color? selected = overlayColor ?? selectedColor;
+    final Color? unselected = overlayColor ?? unselectedColor;
+    return WidgetStateProperty<Color?>.fromMap(
+      <WidgetStatesConstraint, Color?>{
+        WidgetState.selected & WidgetState.pressed: selected?.withOpacity(0.1),
+        WidgetState.selected & WidgetState.hovered: selected?.withOpacity(0.08),
+        WidgetState.selected & WidgetState.focused: selected?.withOpacity(0.1),
+        WidgetState.pressed: unselected?.withOpacity(0.1),
+        WidgetState.hovered: unselected?.withOpacity(0.08),
+        WidgetState.focused: unselected?.withOpacity(0.1),
+        WidgetState.any: Colors.transparent,
+      },
+    );
   }
 }
 ''';

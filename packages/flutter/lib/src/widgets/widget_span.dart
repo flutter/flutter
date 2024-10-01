@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'editable_text.dart';
+/// @docImport 'text.dart';
+library;
+
 import 'dart:ui' as ui show ParagraphBuilder, PlaceholderAlignment;
 
 import 'package:flutter/foundation.dart';
@@ -353,22 +357,22 @@ class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixi
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return (child?.computeMaxIntrinsicHeight(width / scale) ?? 0.0) * scale;
+    return (child?.getMaxIntrinsicHeight(width / scale) ?? 0.0) * scale;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    return (child?.computeMaxIntrinsicWidth(height / scale) ?? 0.0) * scale;
+    return (child?.getMaxIntrinsicWidth(height / scale) ?? 0.0) * scale;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return (child?.computeMinIntrinsicHeight(width / scale) ?? 0.0) * scale;
+    return (child?.getMinIntrinsicHeight(width / scale) ?? 0.0) * scale;
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return (child?.computeMinIntrinsicWidth(height / scale) ?? 0.0) * scale;
+    return (child?.getMinIntrinsicWidth(height / scale) ?? 0.0) * scale;
   }
 
   @override
@@ -380,9 +384,15 @@ class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixi
   }
 
   @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final double? distance = child?.getDryBaseline(BoxConstraints(maxWidth: constraints.maxWidth / scale), baseline);
+    return distance == null ? null : scale * distance;
+  }
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     assert(!constraints.hasBoundedHeight);
-    final Size unscaledSize = child?.computeDryLayout(BoxConstraints(maxWidth: constraints.maxWidth / scale)) ?? Size.zero;
+    final Size unscaledSize = child?.getDryLayout(BoxConstraints(maxWidth: constraints.maxWidth / scale)) ?? Size.zero;
     return constraints.constrain(unscaledSize * scale);
   }
 

@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # For details regarding the *Flutter Fix* feature, see
-# https://flutter.dev/docs/development/tools/flutter-fix
+# https://flutter.dev/to/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -295,4 +295,113 @@ transforms:
     - kind: 'rename'
       newName: 'buildOverscrollIndicator'
 
+  # Changes made in https://github.com/flutter/flutter/pull/151367
+  - title: "Rename to 'activeTrackColor'"
+    date: 2024-07-15
+    element:
+      uris: [ 'cupertino.dart' ]
+      getter: 'activeColor'
+      inClass: 'CupertinoSwitch'
+    changes:
+      - kind: 'rename'
+        newName: 'activeTrackColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/151367
+  - title: "Migrate to 'activeTrackColor'"
+    date: 2024-07-15
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoSwitch'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'activeColor'
+        newName: 'activeTrackColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/151367
+  - title: "Rename to 'inactiveTrackColor'"
+    date: 2024-07-15
+    element:
+      uris: [ 'cupertino.dart' ]
+      getter: 'trackColor'
+      inClass: 'CupertinoSwitch'
+    changes:
+      - kind: 'rename'
+        newName: 'inactiveTrackColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/151367
+  - title: "Migrate to 'inactiveTrackColor'"
+    date: 2024-07-15
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoSwitch'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'trackColor'
+        newName: 'inactiveTrackColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/152981
+  - title: "Replace with 'fillColor'"
+    date: 2024-08-08
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoCheckbox'
+    oneOf:
+      - if: "fillColor == '' && activeColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 5
+            name: 'fillColor'
+            style: optional_named
+            argumentValue:
+              expression: "WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {\n
+                        if (states.contains(WidgetState.disabled)) {\n
+                          return CupertinoColors.white.withOpacity(0.5);\n
+                        }\n
+                        if (states.contains(WidgetState.selected)) {\n
+                          return {% activeColor %};\n
+                        }\n
+                        return {% inactiveColor %};\n
+                  })"
+              requiredIf: "inactiveColor != ''"
+          - kind: 'removeParameter'
+            name: inactiveColor
+      - if: "fillColor == '' && activeColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 5
+            name: 'fillColor'
+            style: optional_named
+            argumentValue:
+              expression: "WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {\n
+                        if (states.contains(WidgetState.disabled)) {\n
+                          return CupertinoColors.white.withOpacity(0.5);\n
+                        }\n
+                        if (states.contains(WidgetState.selected)) {\n
+                          return CupertinoDynamicColor.resolve(CupertinoDynamicColor.withBrightness(\n
+                            color: CupertinoColors.activeBlue,\n
+                            darkColor: Color.fromARGB(255, 50, 100, 215),\n
+                          ), context);\n
+                        }\n
+                        return {% inactiveColor %};\n
+                  })"
+              requiredIf: "inactiveColor != ''"
+          - kind: 'removeParameter'
+            name: inactiveColor
+      - if: "fillColor != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: inactiveColor
+    variables:
+      inactiveColor:
+        kind: fragment
+        value: 'arguments[inactiveColor]'
+      activeColor:
+        kind: fragment
+        value: 'arguments[activeColor]'
+      fillColor:
+        kind: fragment
+        value: 'arguments[fillColor]'
 # Before adding a new fix: read instructions at the top of this file.

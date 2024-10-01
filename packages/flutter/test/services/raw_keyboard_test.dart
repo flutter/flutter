@@ -30,7 +30,7 @@ void main() {
         await simulateKeyDownEvent(LogicalKeyboardKey.backquote, platform: platform);
         RawKeyboard.instance.removeListener(handleKey);
       }
-    });
+    }, variant: KeySimulatorTransitModeVariant.rawKeyData());
 
     testWidgets('No character is produced for non-printables', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'web', 'ios']) {
@@ -41,7 +41,7 @@ void main() {
         await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
         RawKeyboard.instance.removeListener(handleKey);
       }
-    });
+    }, variant: KeySimulatorTransitModeVariant.rawKeyData());
 
     testWidgets('keysPressed is maintained', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
@@ -147,7 +147,10 @@ void main() {
           expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
         }
       }
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61021
+    );
 
     testWidgets('keysPressed is correct when modifier is released before key', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
@@ -198,7 +201,10 @@ void main() {
         await simulateKeyUpEvent(LogicalKeyboardKey.keyA, platform: platform, physicalKey: PhysicalKeyboardKey.keyA);
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
       }
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/76741
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/76741
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on macOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -222,7 +228,10 @@ void main() {
           <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
         ),
       );
-    }, skip: isBrowser); // [intended] This is a macOS-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a macOS-specific test.
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on iOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -246,7 +255,10 @@ void main() {
           <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
         ),
       );
-    }, skip: isBrowser); // [intended] This is an iOS-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a iOS-specific test.
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on Windows', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -270,7 +282,10 @@ void main() {
           <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
         ),
       );
-    }, skip: isBrowser); // [intended] This is a Windows-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a Windows-specific test.
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on android', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -294,7 +309,10 @@ void main() {
           <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
         ),
       );
-    }, skip: isBrowser); // [intended] This is an Android-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is an Android-specific test.
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on fuchsia', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -318,7 +336,10 @@ void main() {
           <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
         ),
       );
-    }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a Fuchsia-specific test.
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on Linux GLFW', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -348,7 +369,10 @@ void main() {
           },
         ),
       );
-    }, skip: isBrowser); // [intended] This is a GLFW-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a GLFW-specific test.
+    );
 
     Future<void> simulateGTKKeyEvent(bool keyDown, int scancode, int keycode, int modifiers) async {
       final Map<String, dynamic> data = <String, dynamic>{
@@ -397,7 +421,10 @@ void main() {
           },
         ),
       );
-    }, skip: isBrowser); // [intended] This is a GTK-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a GTK-specific test.
+    );
 
     // Regression test for https://github.com/flutter/flutter/issues/114591 .
     //
@@ -414,7 +441,10 @@ void main() {
           },
         ),
       );
-    }, skip: isBrowser); // [intended] This is a GTK-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a GTK-specific test.
+    );
 
     // Regression test for https://github.com/flutter/flutter/issues/114591 .
     //
@@ -447,7 +477,10 @@ void main() {
           },
         ),
       );
-    }, skip: !isBrowser); // [intended] This is a Browser-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: !isBrowser, // [intended] This is a Browser-specific test.
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on web', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -572,7 +605,10 @@ void main() {
           },
         ),
       );
-    }, skip: isBrowser); // [intended] This is an Android-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a Android-specific test.
+    );
 
     testWidgets('sided modifiers without a side set return all sides on macOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -1013,7 +1049,6 @@ void main() {
         false);
       expect(logs, <int>[1, 3, 2]);
       logs.clear();
-    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Exceptions from RawKeyboard listeners are caught and reported', (WidgetTester tester) async {
@@ -2154,7 +2189,6 @@ void main() {
       expect(events, isEmpty);
       expect(lastHandled, true);
       expect(RawKeyboard.instance.keysPressed, isEmpty);
-    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
     test('data.toString', () {
@@ -2207,22 +2241,15 @@ void main() {
 
     // How modifiers are interpreted depends upon the keyCode for GLFW.
     int keyCodeForModifier(int modifier, {required bool isLeft}) {
-      switch (modifier) {
-        case GLFWKeyHelper.modifierAlt:
-          return isLeft ? 342 : 346;
-        case GLFWKeyHelper.modifierShift:
-          return isLeft ? 340 : 344;
-        case GLFWKeyHelper.modifierControl:
-          return isLeft ? 341 : 345;
-        case GLFWKeyHelper.modifierMeta:
-          return isLeft ? 343 : 347;
-        case GLFWKeyHelper.modifierNumericPad:
-          return 282;
-        case GLFWKeyHelper.modifierCapsLock:
-          return 280;
-        default:
-          return 65; // keyA
-      }
+      return switch (modifier) {
+        GLFWKeyHelper.modifierAlt     => isLeft ? 342 : 346,
+        GLFWKeyHelper.modifierShift   => isLeft ? 340 : 344,
+        GLFWKeyHelper.modifierControl => isLeft ? 341 : 345,
+        GLFWKeyHelper.modifierMeta    => isLeft ? 343 : 347,
+        GLFWKeyHelper.modifierNumericPad => 282,
+        GLFWKeyHelper.modifierCapsLock   => 280,
+        _ => 65, // keyA
+      };
     }
 
     test('modifier keys are recognized individually', () {
@@ -2439,22 +2466,15 @@ void main() {
 
     // How modifiers are interpreted depends upon the keyCode for GTK.
     int keyCodeForModifier(int modifier, {required bool isLeft}) {
-      switch (modifier) {
-        case GtkKeyHelper.modifierMod1:
-          return 65513;
-        case GtkKeyHelper.modifierShift:
-          return isLeft ? 65505 : 65506;
-        case GtkKeyHelper.modifierControl:
-          return isLeft ? 65507 : 65508;
-        case GtkKeyHelper.modifierMeta:
-          return isLeft ? 65515 : 65516;
-        case GtkKeyHelper.modifierMod2:
-          return 65407;
-        case GtkKeyHelper.modifierCapsLock:
-          return 65509;
-        default:
-          return 65; // keyA
-      }
+      return switch (modifier) {
+        GtkKeyHelper.modifierShift    => isLeft ? 65505 : 65506,
+        GtkKeyHelper.modifierControl  => isLeft ? 65507 : 65508,
+        GtkKeyHelper.modifierMeta     => isLeft ? 65515 : 65516,
+        GtkKeyHelper.modifierMod1     => 65513,
+        GtkKeyHelper.modifierMod2     => 65407,
+        GtkKeyHelper.modifierCapsLock => 65509,
+        _ => 65, // keyA
+      };
     }
 
     test('modifier keys are recognized individually', () {

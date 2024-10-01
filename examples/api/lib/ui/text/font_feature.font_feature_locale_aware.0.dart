@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.localeAware].
+/// Flutter code sample for [FontFeature.localeAware].
 
 void main() => runApp(const ExampleApp());
 

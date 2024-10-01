@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Flutter code sample for [Action.Action.overridable].
+/// Flutter code sample for [Action.overridable].
 
 void main() {
   runApp(

@@ -23,15 +23,14 @@ void main() {
     ValueNotifier<MagnifierInfo> magnifierInfo,
   ) async {
     final Future<void> magnifierShown = magnifierController.show(
-        context: context,
-        builder: (_) => CupertinoTextMagnifier(
-              controller: magnifierController,
-              magnifierInfo: magnifierInfo,
-            ));
-
-    WidgetsBinding.instance.scheduleFrame();
-    await tester.pumpAndSettle();
-
+      context: context,
+      builder: (BuildContext context) => CupertinoTextMagnifier(
+        controller: magnifierController,
+        magnifierInfo: magnifierInfo,
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
     await magnifierShown;
   }
 
@@ -262,6 +261,66 @@ void main() {
 
         expect(magnifierController.shown, true);
         expect(magnifierController.overlayEntry, isNotNull);
+      });
+    });
+
+    group('magnificationScale', () {
+      testWidgets('Throws assertion error when magnificationScale is zero', (WidgetTester tester) async {
+        expect(() => MaterialApp(
+          home: Scaffold(
+            body: CupertinoMagnifier(
+              magnificationScale: 0,
+            ),
+          ),
+        ), throwsAssertionError);
+      });
+
+      testWidgets('Throws assertion error when magnificationScale is negative', (WidgetTester tester) async {
+        expect(() => MaterialApp(
+          home: Scaffold(
+            body: CupertinoMagnifier(
+              magnificationScale: -1,
+            ),
+          ),
+        ), throwsAssertionError);
+      });
+
+      testWidgets('CupertinoMagnifier magnification scale defaults to 1', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(body: CupertinoMagnifier()),
+          ),
+        );
+
+        expect(
+          tester.widget(find.byType(RawMagnifier)),
+          isA<RawMagnifier>().having(
+            (RawMagnifier t) => t.magnificationScale,
+            'magnificationScale',
+            1,
+          ),
+        );
+      });
+
+      testWidgets('Magnification scale argument is passed to the RawMagnifier', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+              body: CupertinoMagnifier(
+                magnificationScale: 2,
+              ),
+            ),
+          ),
+        );
+
+        expect(
+          tester.widget(find.byType(RawMagnifier)),
+          isA<RawMagnifier>().having(
+            (RawMagnifier t) => t.magnificationScale,
+            'magnificationScale',
+            2,
+          ),
+        );
       });
     });
   });

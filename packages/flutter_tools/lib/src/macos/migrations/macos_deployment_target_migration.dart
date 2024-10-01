@@ -18,7 +18,7 @@ class MacOSDeploymentTargetMigration extends ProjectMigrator {
   final File _podfile;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     if (_xcodeProjectInfoFile.existsSync()) {
       processFileLines(_xcodeProjectInfoFile);
     } else {

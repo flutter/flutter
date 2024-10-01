@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show ValueListenable, defaultTargetPlatform;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -695,7 +695,7 @@ void main() {
 
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
-  testWidgets('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on iOS if word misspelled and text selection toolbar on additonal taps', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on iOS if word misspelled and text selection toolbar on additional taps', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
@@ -1175,8 +1175,8 @@ void main() {
     final Rect hitRect = tester.getRect(gestureDetector);
     final Rect textFieldRect = tester.getRect(find.byType(TextField));
 
-    expect(hitRect.size.width, lessThan(textFieldRect.size.width));
-    expect(hitRect.size.height, lessThan(textFieldRect.size.height));
+    expect(hitRect.size.width, lessThanOrEqualTo(textFieldRect.size.width));
+    expect(hitRect.size.height, lessThanOrEqualTo(textFieldRect.size.height));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   group('SelectionOverlay', () {
@@ -1474,11 +1474,15 @@ void main() {
 
     testWidgets('can show magnifier when no handles exist', (WidgetTester tester) async {
       final GlobalKey magnifierKey = GlobalKey();
+      Offset? builtGlobalGesturePosition;
+      Rect? builtFieldBounds;
       final SelectionOverlay selectionOverlay = await pumpApp(
         tester,
         magnifierConfiguration: TextMagnifierConfiguration(
           shouldDisplayHandlesInMagnifier: false,
           magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo>? notifier) {
+            builtGlobalGesturePosition =  notifier?.value.globalGesturePosition;
+            builtFieldBounds = notifier?.value.fieldBounds;
             return SizedBox.shrink(
               key: magnifierKey,
             );
@@ -1488,10 +1492,12 @@ void main() {
 
       expect(find.byKey(magnifierKey), findsNothing);
 
+      const Offset globalGesturePosition = Offset(10.0, 10.0);
+      final Rect fieldBounds = Offset.zero & const Size(200.0, 50.0);
       final MagnifierInfo info = MagnifierInfo(
-        globalGesturePosition: Offset.zero,
+        globalGesturePosition: globalGesturePosition,
         caretRect: Offset.zero & const Size(5.0, 20.0),
-        fieldBounds: Offset.zero & const Size(200.0, 50.0),
+        fieldBounds: fieldBounds,
         currentLineBoundaries: Offset.zero & const Size(200.0, 50.0),
       );
       selectionOverlay.showMagnifier(info);
@@ -1499,6 +1505,8 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byKey(magnifierKey), findsOneWidget);
+      expect(builtFieldBounds, fieldBounds);
+      expect(builtGlobalGesturePosition, globalGesturePosition);
 
       selectionOverlay.dispose();
       await tester.pumpAndSettle();
@@ -1724,7 +1732,7 @@ void main() {
       final LayerLink endHandleLayerLink = LayerLink();
       final LayerLink toolbarLayerLink = LayerLink();
 
-      final UniqueKey editableText = UniqueKey();
+      final UniqueKey editableTextKey = UniqueKey();
       final TextEditingController controller = TextEditingController();
       addTearDown(controller.dispose);
       final FocusNode focusNode = FocusNode();
@@ -1735,7 +1743,7 @@ void main() {
           key: column,
           children: <Widget>[
             FakeEditableText(
-              key: editableText,
+              key: editableTextKey,
               controller: controller,
               focusNode: focusNode,
             ),
@@ -1757,7 +1765,7 @@ void main() {
 
       return TextSelectionOverlay(
         value: TextEditingValue.empty,
-        renderObject: tester.state<EditableTextState>(find.byKey(editableText)).renderEditable,
+        renderObject: tester.state<EditableTextState>(find.byKey(editableTextKey)).renderEditable,
         context: tester.element(find.byKey(column)),
         onSelectionHandleTapped: () {},
         startHandleLayerLink: startHandleLayerLink,
@@ -1781,6 +1789,51 @@ void main() {
       );
     });
   });
+
+  testWidgets('Context menus', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'You make wine from sour grapes',
+    );
+    addTearDown(controller.dispose);
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(delegate: delegate);
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: provider.buildGestureDetector(
+          behavior: HitTestBehavior.translucent,
+          child: EditableText(
+            key: editableTextKey,
+            controller: controller,
+            focusNode: focusNode,
+            backgroundCursorColor: Colors.white,
+            cursorColor: Colors.white,
+            style: const TextStyle(),
+            contextMenuBuilder: (
+              BuildContext context,
+              EditableTextState editableTextState,
+            ) {
+              return const Placeholder();
+            },
+          ),
+        ),
+      ),
+    );
+
+    final Offset position = textOffsetToPosition(tester, 0);
+    expect(find.byType(Placeholder), findsNothing);
+    await tester.tapAt(position, buttons: kSecondaryMouseButton, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    expect(find.byType(Placeholder), findsOneWidget);
+  }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {
@@ -1963,14 +2016,17 @@ class TextSelectionControlsSpy extends TextSelectionControls {
 
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
-    switch (type) {
-      case TextSelectionHandleType.left:
-        return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: leftHandleKey));
-      case TextSelectionHandleType.right:
-        return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: rightHandleKey));
-      case TextSelectionHandleType.collapsed:
-        return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: collapsedHandleKey));
-    }
+    return ElevatedButton(
+      onPressed: onTap,
+      child: Text(
+        key: switch (type) {
+          TextSelectionHandleType.left      => leftHandleKey,
+          TextSelectionHandleType.right     => rightHandleKey,
+          TextSelectionHandleType.collapsed => collapsedHandleKey,
+        },
+        'height ${textLineHeight.toInt()}',
+      ),
+    );
   }
 
   @override

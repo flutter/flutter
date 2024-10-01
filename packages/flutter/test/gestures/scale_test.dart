@@ -18,9 +18,11 @@ void main() {
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
+    int? updatedPointerCount;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
+      updatedPointerCount = details.pointerCount;
     };
 
     double? updatedScale;
@@ -33,6 +35,7 @@ void main() {
       updatedVerticalScale = details.verticalScale;
       updatedFocalPoint = details.focalPoint;
       updatedDelta = details.focalPointDelta;
+      updatedPointerCount = details.pointerCount;
     };
 
     bool didEndScale = false;
@@ -56,6 +59,7 @@ void main() {
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -65,6 +69,7 @@ void main() {
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -77,9 +82,10 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, const Offset(20.0, 30.0));
     updatedDelta = null;
+    expect(updatedPointerCount, 1);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
-    expect(scale.pointerCount, 1);
 
     // Two-finger scaling
     final TestPointer pointer2 = TestPointer(2);
@@ -88,13 +94,13 @@ void main() {
     tap.addPointer(down2);
     tester.closeArena(2);
     tester.route(down2);
-    expect(scale.pointerCount, 2);
 
     expect(didEndScale, isTrue);
     didEndScale = false;
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didStartScale, isFalse);
 
     // Zoom in
@@ -107,10 +113,12 @@ void main() {
     expect(updatedHorizontalScale, 2.0);
     expect(updatedVerticalScale, 2.0);
     expect(updatedDelta, const Offset(-5.0, -5.0));
+    expect(updatedPointerCount, 2);
     updatedScale = null;
     updatedHorizontalScale = null;
     updatedVerticalScale = null;
     updatedDelta = null;
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -121,22 +129,26 @@ void main() {
     expect(updatedHorizontalScale, 0.5);
     expect(updatedVerticalScale, 0.5);
     expect(updatedDelta, const Offset(7.5, 7.5));
+    expect(updatedPointerCount, 2);
     expect(didTap, isFalse);
 
     // Horizontal scaling
     tester.route(pointer2.move(const Offset(0.0, 20.0)));
     expect(updatedHorizontalScale, 2.0);
     expect(updatedVerticalScale, 1.0);
+    expect(updatedPointerCount, 2);
 
     // Vertical scaling
     tester.route(pointer2.move(const Offset(10.0, 10.0)));
     expect(updatedHorizontalScale, 1.0);
     expect(updatedVerticalScale, 2.0);
     expect(updatedDelta, const Offset(5.0, -5.0));
+    expect(updatedPointerCount, 2);
     tester.route(pointer2.move(const Offset(15.0, 25.0)));
     updatedFocalPoint = null;
     updatedScale = null;
     updatedDelta = null;
+    updatedPointerCount = null;
 
     // Three-finger scaling
     final TestPointer pointer3 = TestPointer(3);
@@ -151,6 +163,7 @@ void main() {
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didStartScale, isFalse);
 
     // Zoom in
@@ -163,6 +176,8 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, const Offset(10.0, 10.0));
     updatedDelta = null;
+    expect(updatedPointerCount, 3);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -178,6 +193,8 @@ void main() {
     expect(updatedDelta!.dx, closeTo(-13.3, 0.1));
     expect(updatedDelta!.dy, closeTo(-13.3, 0.1));
     updatedDelta = null;
+    expect(updatedPointerCount, 3);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -200,6 +217,8 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, const Offset(-2.5, -2.5));
     updatedDelta = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
 
     // Continue rotating with two fingers
     tester.route(pointer3.move(const Offset(30.0, 40.0)));
@@ -216,6 +235,8 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, const Offset(-10.0, -10.0));
     updatedDelta = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
 
     tester.route(pointer2.up());
     expect(didStartScale, isFalse);
@@ -236,6 +257,8 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, const Offset(-10.0, -20.0));
     updatedDelta = null;
+    expect(updatedPointerCount, 1);
+    updatedPointerCount = null;
 
     // We are done
     tester.route(pointer3.up());
@@ -243,6 +266,7 @@ void main() {
     expect(updatedFocalPoint, isNull);
     expect(updatedScale, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isTrue);
     didEndScale = false;
     expect(didTap, isFalse);
@@ -438,9 +462,11 @@ void main() {
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
+    int? updatedPointerCount;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
+      updatedPointerCount = details.pointerCount;
     };
 
     double? updatedRotation;
@@ -449,6 +475,7 @@ void main() {
       updatedRotation = details.rotation;
       updatedFocalPoint = details.focalPoint;
       updatedDelta = details.focalPointDelta;
+      updatedPointerCount = details.pointerCount;
     };
 
     bool didEndScale = false;
@@ -486,6 +513,8 @@ void main() {
     updatedDelta = null;
     expect(updatedRotation, 0.0);
     updatedRotation = null;
+    expect(updatedPointerCount, 1);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -502,6 +531,7 @@ void main() {
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
     expect(updatedRotation, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didStartScale, isFalse);
 
     // Zoom in
@@ -514,6 +544,8 @@ void main() {
     updatedDelta = null;
     expect(updatedRotation, 0.0);
     updatedRotation = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -525,6 +557,8 @@ void main() {
     updatedDelta = null;
     expect(updatedRotation, math.pi);
     updatedRotation = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -541,6 +575,7 @@ void main() {
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
     expect(updatedRotation, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didStartScale, isFalse);
 
     // Zoom in
@@ -553,6 +588,8 @@ void main() {
     updatedDelta = null;
     expect(updatedRotation, 0.0);
     updatedRotation = null;
+    expect(updatedPointerCount, 3);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -568,6 +605,8 @@ void main() {
     updatedDelta = null;
     expect(updatedRotation, 0.0);
     updatedRotation = null;
+    expect(updatedPointerCount, 3);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -590,6 +629,8 @@ void main() {
     updatedDelta = null;
     expect(updatedRotation, 0.0);
     updatedRotation = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
 
     // Continue rotating with two fingers
     tester.route(pointer3.move(const Offset(30.0, 40.0)));
@@ -599,6 +640,8 @@ void main() {
     updatedDelta = null;
     expect(updatedRotation, - math.pi);
     updatedRotation = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
     tester.route(pointer3.move(const Offset(10.0, 20.0)));
     expect(updatedFocalPoint, const Offset(15.0, 25.0));
     updatedFocalPoint = null;
@@ -606,12 +649,15 @@ void main() {
     updatedDelta = null;
     expect(updatedRotation, 0.0);
     updatedRotation = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
 
     tester.route(pointer2.up());
     expect(didStartScale, isFalse);
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
     expect(updatedRotation, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isTrue);
     didEndScale = false;
     expect(didTap, isFalse);
@@ -622,6 +668,7 @@ void main() {
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
     expect(updatedRotation, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isFalse);
     didEndScale = false;
     expect(didTap, isFalse);
@@ -719,9 +766,11 @@ void main() {
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
+    int? updatedPointerCount;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
+      updatedPointerCount = details.pointerCount;
     };
 
     double? updatedScale;
@@ -734,6 +783,7 @@ void main() {
       updatedVerticalScale = details.verticalScale;
       updatedFocalPoint = details.focalPoint;
       updatedDelta = details.focalPointDelta;
+      updatedPointerCount = details.pointerCount;
     };
 
     bool didEndScale = false;
@@ -752,6 +802,7 @@ void main() {
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isFalse);
 
     // Panning.
@@ -760,6 +811,7 @@ void main() {
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isFalse);
 
     tester.route(pointer1.panZoomUpdate(Offset.zero, pan: const Offset(20.0, 30.0)));
@@ -771,6 +823,8 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, const Offset(20.0, 30.0));
     updatedDelta = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // Zoom in.
@@ -781,10 +835,12 @@ void main() {
     expect(updatedHorizontalScale, 2.0);
     expect(updatedVerticalScale, 2.0);
     expect(updatedDelta, Offset.zero);
+    expect(updatedPointerCount, 2);
     updatedScale = null;
     updatedHorizontalScale = null;
     updatedVerticalScale = null;
     updatedDelta = null;
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // Zoom out.
@@ -795,10 +851,12 @@ void main() {
     expect(updatedHorizontalScale, 1.0);
     expect(updatedVerticalScale, 1.0);
     expect(updatedDelta, Offset.zero);
+    expect(updatedPointerCount, 2);
     updatedScale = null;
     updatedHorizontalScale = null;
     updatedVerticalScale = null;
     updatedDelta = null;
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // We are done.
@@ -807,6 +865,7 @@ void main() {
     expect(updatedFocalPoint, isNull);
     expect(updatedScale, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isTrue);
     didEndScale = false;
 
@@ -821,9 +880,11 @@ void main() {
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
+    int? updatedPointerCount;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
+      updatedPointerCount = details.pointerCount;
     };
 
     double? updatedScale;
@@ -838,6 +899,7 @@ void main() {
       updatedFocalPoint = details.focalPoint;
       updatedDelta = details.focalPointDelta;
       updatedRotation = details.rotation;
+      updatedPointerCount = details.pointerCount;
     };
 
     bool didEndScale = false;
@@ -858,6 +920,7 @@ void main() {
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isFalse);
 
     // Panning starting with trackpad.
@@ -866,6 +929,7 @@ void main() {
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isFalse);
 
     tester.route(panZoomPointer.panZoomUpdate(Offset.zero, pan: const Offset(40, 40)));
@@ -877,6 +941,8 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, const Offset(40.0, 40.0));
     updatedDelta = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // Add a touch pointer.
@@ -898,6 +964,8 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, const Offset(-15, -15));
     updatedDelta = null;
+    expect(updatedPointerCount, 3);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // Add a second touch pointer.
@@ -925,6 +993,8 @@ void main() {
     updatedDelta = null;
     expect(updatedRotation, -math.pi / 4);
     updatedRotation = null;
+    expect(updatedPointerCount, 4);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // Change the scale and angle of the pan/zoom to test combining.
@@ -944,6 +1014,8 @@ void main() {
     updatedDelta = null;
     expect(updatedRotation, closeTo(math.pi / 12, 0.0001));
     updatedRotation = null;
+    expect(updatedPointerCount, 4);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // Move the pan/zoom origin to test combining.
@@ -957,6 +1029,8 @@ void main() {
     updatedDelta = null;
     expect(updatedRotation, closeTo(math.pi / 12, 0.0001));
     updatedRotation = null;
+    expect(updatedPointerCount, 4);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // We are done.
@@ -966,18 +1040,21 @@ void main() {
     didEndScale = false;
     expect(updatedScale, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didStartScale, isFalse);
     tester.route(touchPointer1.up());
     expect(updatedFocalPoint, isNull);
     expect(didEndScale, isFalse);
     expect(updatedScale, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didStartScale, isFalse);
     tester.route(touchPointer2.up());
     expect(didEndScale, isFalse);
     expect(updatedFocalPoint, isNull);
     expect(updatedScale, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didStartScale, isFalse);
 
     scale.dispose();
@@ -1178,9 +1255,11 @@ void main() {
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
+    int? updatedPointerCount;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
+      updatedPointerCount = details.pointerCount;
     };
 
     double? updatedScale;
@@ -1189,6 +1268,7 @@ void main() {
       updatedScale = details.scale;
       updatedFocalPoint = details.focalPoint;
       updatedDelta = details.focalPointDelta;
+      updatedPointerCount = details.pointerCount;
     };
 
     bool didEndScale = false;
@@ -1206,6 +1286,7 @@ void main() {
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isFalse);
 
     tester.route(start);
@@ -1215,6 +1296,8 @@ void main() {
     expect(updatedFocalPoint, Offset.zero);
     updatedFocalPoint = null;
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // Zoom in by scrolling up.
@@ -1226,6 +1309,8 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, Offset.zero);
     updatedDelta = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // A horizontal scroll should do nothing.
@@ -1237,6 +1322,8 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, Offset.zero);
     updatedDelta = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // End.
@@ -1245,6 +1332,7 @@ void main() {
     expect(updatedFocalPoint, isNull);
     expect(updatedScale, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isTrue);
     didEndScale = false;
 
@@ -1259,6 +1347,7 @@ void main() {
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isFalse);
 
     tester.route(start2);
@@ -1268,6 +1357,8 @@ void main() {
     expect(updatedFocalPoint, Offset.zero);
     updatedFocalPoint = null;
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // Zoom in by scrolling left.
@@ -1280,6 +1371,8 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, Offset.zero);
     updatedDelta = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // A vertical scroll should do nothing.
@@ -1291,6 +1384,8 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, Offset.zero);
     updatedDelta = null;
+    expect(updatedPointerCount, 2);
+    updatedPointerCount = null;
     expect(didEndScale, isFalse);
 
     // End.
@@ -1299,6 +1394,7 @@ void main() {
     expect(updatedFocalPoint, isNull);
     expect(updatedScale, isNull);
     expect(updatedDelta, isNull);
+    expect(updatedPointerCount, isNull);
     expect(didEndScale, isTrue);
     didEndScale = false;
 

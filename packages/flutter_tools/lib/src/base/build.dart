@@ -16,7 +16,7 @@ import 'process.dart';
 class SnapshotType {
   SnapshotType(this.platform, this.mode);
 
-  final TargetPlatform? platform;
+  final TargetPlatform platform;
   final BuildMode mode;
 
   @override
@@ -347,6 +347,7 @@ class AOTSnapshotter {
       TargetPlatform.linux_x64,
       TargetPlatform.linux_arm64,
       TargetPlatform.windows_x64,
+      TargetPlatform.windows_arm64,
     ].contains(platform);
   }
 }

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'selectable_text.dart';
+/// @docImport 'selection_area.dart';
+/// @docImport 'text_field.dart';
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 
@@ -150,6 +155,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     super.key,
     required VoidCallback onCopy,
     required VoidCallback onSelectAll,
+    required VoidCallback? onShare,
     required SelectionGeometry selectionGeometry,
     required this.anchors,
   }) : children = null,
@@ -157,6 +163,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
          selectionGeometry: selectionGeometry,
          onCopy: onCopy,
          onSelectAll: onSelectAll,
+         onShare: onShare,
        );
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
@@ -210,28 +217,18 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
       case TargetPlatform.windows:
         assert(debugCheckHasMaterialLocalizations(context));
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-        switch (buttonItem.type) {
-          case ContextMenuButtonType.cut:
-            return localizations.cutButtonLabel;
-          case ContextMenuButtonType.copy:
-            return localizations.copyButtonLabel;
-          case ContextMenuButtonType.paste:
-            return localizations.pasteButtonLabel;
-          case ContextMenuButtonType.selectAll:
-            return localizations.selectAllButtonLabel;
-          case ContextMenuButtonType.delete:
-            return localizations.deleteButtonTooltip.toUpperCase();
-          case ContextMenuButtonType.lookUp:
-            return localizations.lookUpButtonLabel;
-          case ContextMenuButtonType.searchWeb:
-            return localizations.searchWebButtonLabel;
-          case ContextMenuButtonType.share:
-            return localizations.shareButtonLabel;
-          case ContextMenuButtonType.liveTextInput:
-            return localizations.scanTextButtonLabel;
-          case ContextMenuButtonType.custom:
-            return '';
-        }
+        return switch (buttonItem.type) {
+          ContextMenuButtonType.cut       => localizations.cutButtonLabel,
+          ContextMenuButtonType.copy      => localizations.copyButtonLabel,
+          ContextMenuButtonType.paste     => localizations.pasteButtonLabel,
+          ContextMenuButtonType.selectAll => localizations.selectAllButtonLabel,
+          ContextMenuButtonType.delete    => localizations.deleteButtonTooltip.toUpperCase(),
+          ContextMenuButtonType.lookUp    => localizations.lookUpButtonLabel,
+          ContextMenuButtonType.searchWeb => localizations.searchWebButtonLabel,
+          ContextMenuButtonType.share     => localizations.shareButtonLabel,
+          ContextMenuButtonType.liveTextInput => localizations.scanTextButtonLabel,
+          ContextMenuButtonType.custom => '',
+        };
     }
   }
 
@@ -270,6 +267,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
           buttons.add(TextSelectionToolbarTextButton(
             padding: TextSelectionToolbarTextButton.getPadding(i, buttonItems.length),
             onPressed: buttonItem.onPressed,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(getButtonLabel(context, buttonItem)),
           ));
         }

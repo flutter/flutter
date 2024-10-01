@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'page_scaffold.dart';
+/// @docImport 'route.dart';
+/// @docImport 'tab_view.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'bottom_tab_bar.dart';
@@ -15,7 +22,7 @@ import 'theme.dart';
 /// [CupertinoTabController] controls, as well as the currently selected tab item of
 /// its [CupertinoTabBar].
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// This samples shows how [CupertinoTabController] can be used to switch tabs in
 /// [CupertinoTabScaffold].
 ///

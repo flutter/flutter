@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_driver/flutter_driver.dart';
+///
+/// @docImport 'integration_test_driver_extended.dart';
+library;
+
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:io' show HttpClient, SocketException, WebSocket;
@@ -75,7 +80,7 @@ If you're running the tests with Android instrumentation or XCTest, this means
 that you are not capturing test results properly! See the following link for
 how to set up the integration_test plugin:
 
-https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
+https://docs.flutter.dev/testing/integration-tests
 ''');
       }
     });
@@ -239,6 +244,11 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     results[description] ??= _success;
   }
 
+  // Do not paint a description label because it could show up in screenshots
+  // of the integration test.
+  @override
+  void setLabel(String value) {}
+
   vm.VmService? _vmService;
 
   /// Initialize the [vm.VmService] settings for the timeline.
@@ -312,8 +322,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// [reportData] with `reportKey`. The [reportData] contains extra information
   /// from the test other than test success/fail. It will be passed back to the
   /// host and be processed by the [ResponseDataCallback] defined in
-  /// [integration_test_driver.integrationDriver]. By default it will be written
-  /// to `build/integration_response_data.json` with the key `timeline`.
+  /// [integrationDriver]. By default it will be written to
+  /// `build/integration_response_data.json` with the key `timeline`.
   ///
   /// For tests with multiple calls of this method, `reportKey` needs to be a
   /// unique key, otherwise the later result will override earlier one. Tests

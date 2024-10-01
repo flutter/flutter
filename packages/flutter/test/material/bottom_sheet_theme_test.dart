@@ -67,11 +67,11 @@ void main() {
         .toList();
 
     expect(description, <String>[
-      'backgroundColor: Color(0xffffffff)',
+      'backgroundColor: ${const Color(0xffffffff)}',
       'elevation: 2.0',
-      'shadowColor: Color(0xff00ffff)',
+      'shadowColor: ${const Color(0xff00ffff)}',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
-      'dragHandleColor: Color(0xffffffff)',
+      'dragHandleColor: ${const Color(0xffffffff)}',
       'dragHandleSize: Size(20.0, 20.0)',
       'clipBehavior: Clip.antiAlias',
       'constraints: BoxConstraints(200.0<=w<=640.0, 0.0<=h<=Infinity)',
@@ -99,7 +99,7 @@ void main() {
     );
 
     final ThemeData theme = Theme.of(tester.element(find.byType(Scaffold)));
-    expect(material.color, theme.colorScheme.surface);
+    expect(material.color, theme.colorScheme.surfaceContainerLow);
     expect(material.elevation, 1.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28.0))));
     expect(material.clipBehavior, Clip.none);
@@ -273,7 +273,7 @@ void main() {
     );
     expect(material.elevation, 1.0);
     final ThemeData theme = Theme.of(tester.element(find.byType(Scaffold)));
-    expect(material.color, theme.colorScheme.surface);
+    expect(material.color, theme.colorScheme.surfaceContainerLow);
   });
 
   testWidgets("Material2 - Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (WidgetTester tester) async {

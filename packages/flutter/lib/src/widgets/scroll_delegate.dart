@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver.dart';
+/// @docImport 'spacer.dart';
+/// @docImport 'two_dimensional_scroll_view.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -656,10 +663,10 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// ```
   final List<Widget> children;
 
-  /// A map to cache key to index lookup for children.
-  ///
-  /// _keyToIndex[null] is used as current index during the lazy loading process
-  /// in [_findChildIndex]. _keyToIndex should never be used for looking up null key.
+  // A map to cache key to index lookup for children.
+  //
+  // _keyToIndex[null] is used as current index during the lazy loading process
+  // in [_findChildIndex]. _keyToIndex should never be used for looking up null key.
   final Map<Key?, int>? _keyToIndex;
 
   bool get _isConstantInstance => _keyToIndex == null;
@@ -885,6 +892,13 @@ Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
 ///   * [TwoDimensionalChildListDelegate], an concrete subclass of this that
 ///     uses a two dimensional array to layout children.
 abstract class TwoDimensionalChildDelegate extends ChangeNotifier {
+  /// Creates a delegate that supplies children for scrolling in two dimensions.
+  TwoDimensionalChildDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   /// Returns the child with the given [ChildVicinity], which is described in
   /// terms of x and y indices.
   ///
@@ -895,7 +909,7 @@ abstract class TwoDimensionalChildDelegate extends ChangeNotifier {
   /// widgets have changed, a new delegate must be provided, and the new
   /// delegate's [shouldRebuild] method must return true. Alternatively,
   /// calling [notifyListeners] will allow the same delegate to be used.
-  Widget? build(BuildContext context, ChildVicinity vicinity);
+  Widget? build(BuildContext context, covariant ChildVicinity vicinity);
 
   /// Called whenever a new instance of the child delegate class is
   /// provided.

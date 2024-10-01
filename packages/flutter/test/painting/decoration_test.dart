@@ -326,11 +326,10 @@ void main() {
     expect(call.positionalArguments[3], isA<Paint>());
     final Paint paint = call.positionalArguments[3] as Paint;
     expect(paint.colorFilter, colorFilter);
-    expect(paint.color, const Color(0x7F000000)); // 0.5 opacity
+    expect(paint.color, isSameColorAs(const Color(0x7F000000))); // 0.5 opacity
     expect(paint.filterQuality, FilterQuality.high);
     expect(paint.isAntiAlias, true);
-    // TODO(craiglabenz): change to true when https://github.com/flutter/flutter/issues/88909 is fixed
-    expect(paint.invertColors, !kIsWeb || isCanvasKit);
+    expect(paint.invertColors, isTrue);
   });
 
   test('DecorationImage.toString', () async {
@@ -342,7 +341,7 @@ void main() {
         opacity: 0.99,
         scale: 2.01,
       ).toString(),
-      'DecorationImage(SynchronousTestImageProvider(), Alignment.center, scale 2.0, opacity 1.0, FilterQuality.low)',
+      'DecorationImage(SynchronousTestImageProvider(), Alignment.center, scale 2.0, opacity 1.0, FilterQuality.medium)',
     );
   });
 
@@ -378,19 +377,24 @@ void main() {
     expect(error.diagnostics.length, 4);
     expect(error.diagnostics[2], isA<DiagnosticsProperty<DecorationImage>>());
     expect(error.diagnostics[3], isA<DiagnosticsProperty<ImageConfiguration>>());
-    expect(error.toStringDeep(),
+    expect(error.toStringDeep(wrapWidth: 640),
       'FlutterError\n'
-      '   DecorationImage.matchTextDirection can only be used when a\n'
-      '   TextDirection is available.\n'
-      '   When DecorationImagePainter.paint() was called, there was no text\n'
-      '   direction provided in the ImageConfiguration object to match.\n'
+      '   DecorationImage.matchTextDirection can only be used when a '
+      'TextDirection is available.\n'
+      '   When DecorationImagePainter.paint() was called, there was no text '
+      'direction provided in the ImageConfiguration object to match.\n'
       '   The DecorationImage was:\n'
-      '     DecorationImage(SynchronousTestImageProvider(),\n'
-      '     ColorFilter.mode(Color(0xff00ff00), BlendMode.src),\n'
-      '     BoxFit.contain, Alignment.center, centerSlice:\n'
-      '     Rect.fromLTRB(10.0, 20.0, 40.0, 60.0), ImageRepeat.repeatY,\n'
-      '     match text direction, scale 0.5, opacity 0.5,\n'
-      '     FilterQuality.low, invert colors, use anti-aliasing)\n'
+      '     DecorationImage(SynchronousTestImageProvider(), '
+      'ColorFilter.mode(${const Color(0xff00ff00)}, BlendMode.src), '
+      'BoxFit.contain, Alignment.center, '
+      'centerSlice: Rect.fromLTRB(10.0, 20.0, 40.0, 60.0), '
+      'ImageRepeat.repeatY, '
+      'match text direction, '
+      'scale 0.5, '
+      'opacity 0.5, '
+      'FilterQuality.medium, '
+      'invert colors, '
+      'use anti-aliasing)\n'
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n',
     );
@@ -491,17 +495,17 @@ void main() {
       BoxDecoration.lerp(
         const BoxDecoration(),
         const BoxDecoration(gradient: gradient),
-        0.25,
+        0.2,
       ),
-      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x40FFFFFF) ])),
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x33FFFFFF) ])),
     );
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
         const BoxDecoration(gradient: gradient),
-        0.75,
+        1/3,
       ),
-      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0xBFFFFFFF) ])),
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x55FFFFFF) ])),
     );
     expect(
       BoxDecoration.lerp(
@@ -813,4 +817,17 @@ void main() {
 
     info.dispose();
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+
+  test('BoxShadow.copyWith', () {
+    expect(const BoxShadow(), isNot(const BoxShadow(color: Color(0xFF112233))));
+    expect(const BoxShadow().copyWith(color: const Color(0xFF112233)), const BoxShadow(color: Color(0xFF112233)));
+    expect(const BoxShadow(), isNot(const BoxShadow(offset: Offset(1.0, 2.0))));
+    expect(const BoxShadow().copyWith(offset: const Offset(1.0, 2.0)), const BoxShadow(offset: Offset(1.0, 2.0)));
+    expect(const BoxShadow(), isNot(const BoxShadow(blurRadius: 123.0)));
+    expect(const BoxShadow().copyWith(blurRadius: 123.0), const BoxShadow(blurRadius: 123.0));
+    expect(const BoxShadow(), isNot(const BoxShadow(spreadRadius: 123.0)));
+    expect(const BoxShadow().copyWith(spreadRadius: 123.0), const BoxShadow(spreadRadius: 123.0));
+    expect(const BoxShadow(), isNot(const BoxShadow(blurStyle: BlurStyle.outer)));
+    expect(const BoxShadow().copyWith(blurStyle: BlurStyle.outer), const BoxShadow(blurStyle: BlurStyle.outer));
+  });
 }

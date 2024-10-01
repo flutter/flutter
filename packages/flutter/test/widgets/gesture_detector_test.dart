@@ -125,6 +125,40 @@ void main() {
     expect(didEndPan, isTrue);
   });
 
+  testWidgets('DragEndDetails returns the last known position', (WidgetTester tester) async {
+    Offset updateOffset = const Offset(10.0, 10.0);
+    const EdgeInsets paddingOffset = EdgeInsets.all(10.0);
+    Offset? endOffset;
+    Offset? globalEndOffset;
+
+    await tester.pumpWidget(
+      Padding(
+        padding: paddingOffset,
+        child: GestureDetector(
+          onPanStart: (DragStartDetails details) {
+          },
+          onPanUpdate: (DragUpdateDetails details) {
+            updateOffset += details.delta;
+          },
+          onPanEnd: (DragEndDetails details) {
+            endOffset = details.localPosition;
+            globalEndOffset = details.globalPosition;
+          },
+          child: Container(
+            color: const Color(0xFF00FF00),
+          ),
+        ),
+      ),
+    );
+
+    await tester.dragFrom(const Offset(20.0, 20.0), const Offset(30.0, 40.0));
+
+    expect(endOffset, isNotNull);
+    expect(updateOffset, endOffset);
+    // Make sure details.globalPosition works correctly.
+    expect(Offset(endOffset!.dx + paddingOffset.left, endOffset!.dy + paddingOffset.top), globalEndOffset);
+  });
+
   group('Tap', () {
     final ButtonVariant buttonVariant = ButtonVariant(
       values: <int>[kPrimaryButton, kSecondaryButton, kTertiaryButton],

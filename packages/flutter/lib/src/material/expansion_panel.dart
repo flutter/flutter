@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'divider_theme.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'expand_icon.dart';
+import 'icon_button.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'mergeable_material.dart';
@@ -80,6 +84,8 @@ class ExpansionPanel {
     this.isExpanded = false,
     this.canTapOnHeader = false,
     this.backgroundColor,
+    this.splashColor,
+    this.highlightColor,
   });
 
   /// The widget builder that builds the expansion panels' header.
@@ -94,6 +100,28 @@ class ExpansionPanel {
   ///
   /// Defaults to false.
   final bool isExpanded;
+
+  /// Defines the splash color of the panel if [canTapOnHeader] is true,
+  /// or the splash color of the expand/collapse IconButton if [canTapOnHeader]
+  /// is false.
+  ///
+  /// If [canTapOnHeader] is false, and [ThemeData.useMaterial3] is
+  /// true, this field will be ignored, as [IconButton.splashColor]
+  /// will be ignored, and you should use [highlightColor] instead.
+  ///
+  /// If this is null, then the icon button will use its default splash color
+  /// [ThemeData.splashColor], and the panel will use its default splash color
+  /// [ThemeData.splashColor] (if [canTapOnHeader] is true).
+  final Color? splashColor;
+
+  /// Defines the highlight color of the panel if [canTapOnHeader] is true, or
+  /// the highlight color of the expand/collapse IconButton if [canTapOnHeader]
+  /// is false.
+  ///
+  /// If this is null, then the icon button will use its default highlight color
+  /// [ThemeData.highlightColor], and the panel will use its default highlight
+  /// color [ThemeData.highlightColor] (if [canTapOnHeader] is true).
+  final Color? highlightColor;
 
   /// Whether tapping on the panel's header will expand/collapse it.
   ///
@@ -125,6 +153,8 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required super.body,
     super.canTapOnHeader,
     super.backgroundColor,
+    super.splashColor,
+    super.highlightColor,
   });
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -359,23 +389,27 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         _isChildExpanded(index),
       );
 
-      Widget expandIconContainer = Container(
-        margin: const EdgeInsetsDirectional.only(end: 8.0),
+      Widget expandIconPadded = Padding(
+        padding: const EdgeInsetsDirectional.only(end: 8.0),
         child: ExpandIcon(
           color: widget.expandIconColor,
+          disabledColor: child.canTapOnHeader ? widget.expandIconColor : null,
           isExpanded: _isChildExpanded(index),
           padding: _kExpandIconPadding,
+          splashColor: child.splashColor,
+          highlightColor: child.highlightColor,
           onPressed: !child.canTapOnHeader
               ? (bool isExpanded) => _handlePressed(isExpanded, index)
               : null,
         ),
       );
+
       if (!child.canTapOnHeader) {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-        expandIconContainer = Semantics(
+        expandIconPadded = Semantics(
           label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
           container: true,
-          child: expandIconContainer,
+          child: expandIconPadded,
         );
       }
       Widget header = Row(
@@ -391,12 +425,14 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               ),
             ),
           ),
-          expandIconContainer,
+          expandIconPadded,
         ],
       );
       if (child.canTapOnHeader) {
         header = MergeSemantics(
           child: InkWell(
+            splashColor: child.splashColor,
+            highlightColor: child.highlightColor,
             onTap: () => _handlePressed(_isChildExpanded(index), index),
             child: header,
           ),
@@ -410,7 +446,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
             children: <Widget>[
               header,
               AnimatedCrossFade(
-                firstChild: Container(height: 0.0),
+                firstChild: const LimitedBox(maxWidth: 0.0, child: SizedBox(width: double.infinity, height: 0)),
                 secondChild: child.body,
                 firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
                 secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),

@@ -163,26 +163,6 @@ void main() {
   RectangularSliderTrackShape(disabledThumbGapWidth: 2.0);
   RectangularSliderTrackShape(error: '');
 
-  // Changes made in https://github.com/flutter/flutter/pull/46115
-  const InputDecoration inputDecoration = InputDecoration(hasFloatingPlaceholder: true);
-  InputDecoration(hasFloatingPlaceholder: false);
-  InputDecoration();
-  InputDecoration(error: '');
-  InputDecoration.collapsed(hasFloatingPlaceholder: true);
-  InputDecoration.collapsed(hasFloatingPlaceholder: false);
-  InputDecoration.collapsed();
-  InputDecoration.collapsed(error: '');
-  inputDecoration.hasFloatingPlaceholder;
-  const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(hasFloatingPlaceholder: true);
-  InputDecorationTheme(hasFloatingPlaceholder: false);
-  InputDecorationTheme();
-  InputDecorationTheme(error: '');
-  inputDecorationTheme.hasFloatingPlaceholder;
-  inputDecorationTheme.copyWith(hasFloatingPlaceholder: false);
-  inputDecorationTheme.copyWith(hasFloatingPlaceholder: true);
-  inputDecorationTheme.copyWith();
-  inputDecorationTheme.copyWith(error: '');
-
   // Changes made in https://github.com/flutter/flutter/pull/79160
   Draggable draggable = Draggable();
   draggable = Draggable(dragAnchor: DragAnchor.child);
@@ -223,7 +203,7 @@ void main() {
   renderObjectToWidgetElement.moveChildRenderObject(renderObject, object);
   renderObjectToWidgetElement.removeChildRenderObject(renderObject);
 
-  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  // Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   ListWheelScrollView listWheelScrollView = ListWheelScrollView();
   listWheelScrollView = ListWheelScrollView(clipToSize: true);
   listWheelScrollView = ListWheelScrollView(clipToSize: false);
@@ -304,9 +284,10 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/111706
   Scrollbar scrollbar = Scrollbar(showTrackOnHover: true);
   bool nowShowing = scrollbar.showTrackOnHover;
-  ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(showTrackOnHover: nowShowing);
-  scrollbarTheme.copyWith(showTrackOnHover: nowShowing);
-  scrollbarTheme.showTrackOnHover;
+  // The 3 expressions below have `bulkApply` set to true thus can't be tested yet.
+  //ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(showTrackOnHover: nowShowing);
+  //scrollbarTheme.copyWith(showTrackOnHover: nowShowing);
+  //scrollbarTheme.showTrackOnHover;
 
   // Changes made in https://github.com/flutter/flutter/pull/114459
   MediaQuery.boldTextOverride(context);
@@ -318,11 +299,10 @@ void main() {
   );
   final Clip clip = details.clipBehavior;
 
-  // Changes made in https://github.com/flutter/flutter/pull/129942
-  // TODO(guidezpl): enable fix after https://github.com/dart-lang/sdk/issues/52902
-  // const Curve curve = standardEasing; expect Easing.legacy
-  // const Curve curve = accelerateEasing; expect Easing.legacyAccelerate
-  // const Curve curve = decelerateEasing; expect Easing.legacyDecelerate
+  // Changes made in https://github.com/flutter/flutter/pull/134417
+  const Curve curve = standardEasing;
+  const Curve curve = accelerateEasing;
+  const Curve curve = decelerateEasing;
 
   final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], body: const SizedBox());
   final Widget bodyValue = platformMenuBar.body;

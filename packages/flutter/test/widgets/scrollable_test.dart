@@ -109,6 +109,100 @@ void resetScrollOffset(WidgetTester tester) {
 }
 
 void main() {
+  testWidgets('hitTestBehavior is respected', (WidgetTester tester) async {
+    HitTestBehavior? getBehavior(Type of) {
+      final RawGestureDetector widget = tester.widget(find.descendant(
+        of: find.byType(of),
+        matching: find.byType(RawGestureDetector),
+      ));
+      return widget.behavior;
+    }
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SingleChildScrollView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(SingleChildScrollView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CustomScrollView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(CustomScrollView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(ListView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GridView.extent(
+          maxCrossAxisExtent: 1,
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(GridView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PageView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(PageView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListWheelScrollView(
+          itemExtent: 10,
+          hitTestBehavior: HitTestBehavior.translucent,
+          children: const <Widget>[],
+        ),
+      ),
+    );
+    expect(getBehavior(ListWheelScrollView), HitTestBehavior.translucent);
+  });
+
+  testWidgets(
+      'hitTestBehavior.translucent lets widgets underneath catch the hit',
+      (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    bool tapped = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => tapped = true,
+                child: SizedBox(key: key, height: 300),
+              ),
+            ),
+            const SingleChildScrollView(
+              hitTestBehavior: HitTestBehavior.translucent,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.tapAt(tester.getCenter(find.byKey(key)));
+    expect(tapped, isTrue);
+  });
+
   testWidgets('Flings on different platforms', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
@@ -358,6 +452,63 @@ void main() {
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
     expect(getScrollOffset(tester), 0.0);
   });
+
+  testWidgets('Engine is notified of ignored pointer signals (no scroll physics)', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, scrollable: false);
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+
+    bool allowedPlatformDefault = false;
+    await tester.sendEventToBinding(
+      testPointer.scroll(
+        const Offset(0.0, 20.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          allowedPlatformDefault = allowPlatformDefault;
+        },
+      ));
+
+    expect(allowedPlatformDefault, isTrue,
+      reason: 'Engine should be notified of ignored scroll pointer signals.');
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Engine is notified of rejected scroll events (wrong direction)', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+
+    // Horizontal input is accepted
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendEventToBinding(
+      testPointer.scroll(
+        const Offset(0.0, 10.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          fail('The engine should not be notified when the scroll is accepted.');
+        },
+      ));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+
+    // Vertical input not accepted
+    bool allowedPlatformDefault = false;
+    await tester.sendEventToBinding(
+      testPointer.scroll(
+        const Offset(0.0, 20.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          allowedPlatformDefault = allowPlatformDefault;
+        },
+      ));
+    expect(allowedPlatformDefault, isTrue,
+      reason: 'Engine should be notified when scroll is rejected by the scrollable.');
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('Holding scroll and Scroll pointer signal will update ScrollDirection.forward / ScrollDirection.reverse', (WidgetTester tester) async {
     ScrollDirection? lastUserScrollingDirection;

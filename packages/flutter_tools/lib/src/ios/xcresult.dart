@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import '../../src/base/process.dart';
 import '../../src/convert.dart' show json;
 import '../../src/macos/xcode.dart';
+import '../base/version.dart';
 import '../convert.dart';
 
 /// The generator of xcresults.
@@ -35,18 +36,22 @@ class XCResultGenerator {
 
   /// Generates the XCResult.
   ///
-  /// Calls `xcrun xcresulttool get --path <resultPath> --format json`,
+  /// Calls `xcrun xcresulttool get --legacy --path <resultPath> --format json`,
   /// then stores the useful information the json into an [XCResult] object.
   ///
   /// A`issueDiscarders` can be passed to discard any issues that matches the description of any [XCResultIssueDiscarder] in the list.
   Future<XCResult> generate(
       {List<XCResultIssueDiscarder> issueDiscarders =
           const <XCResultIssueDiscarder>[]}) async {
+    final Version? xcodeVersion = xcode.currentVersion;
     final RunResult result = await processUtils.run(
       <String>[
         ...xcode.xcrunCommand(),
         'xcresulttool',
         'get',
+        // See https://github.com/flutter/flutter/issues/151502
+        if (xcodeVersion != null && xcodeVersion >= Version(16, 0, 0))
+          '--legacy',
         '--path',
         resultPath,
         '--format',
@@ -74,10 +79,10 @@ class XCResultGenerator {
 
 /// The xcresult of an `xcodebuild` command.
 ///
-/// This is the result from an `xcrun xcresulttool get --path <resultPath> --format json` run.
+/// This is the result from an `xcrun xcresulttool get --legacy --path <resultPath> --format json` run.
 /// The result contains useful information such as build errors and warnings.
 class XCResult {
-  /// Parse the `resultJson` and stores useful informations in the returned `XCResult`.
+  /// Parse the `resultJson` and stores useful information in the returned `XCResult`.
   factory XCResult({required Map<String, Object?> resultJson, List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[]}) {
     final List<XCResultIssue> issues = <XCResultIssue>[];
 

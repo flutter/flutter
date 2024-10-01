@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'range_slider.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show Path, lerpDouble;
 
@@ -902,7 +905,7 @@ abstract class SliderComponentShape {
   /// The `textScaleFactor` argument can be used to determine whether the
   /// component should paint larger or smaller, depending on whether
   /// [textScaleFactor] is greater than 1 for larger, and between 0 and 1 for
-  /// smaller. It usually comes from [MediaQueryData.textScaleFactor].
+  /// smaller. It's usually computed from [MediaQueryData.textScaler].
   /// {@endtemplate}
   ///
   /// {@template flutter.material.SliderComponentShape.paint.sizeWithOverflow}
@@ -1117,6 +1120,11 @@ abstract class SliderTrackShape {
     bool isDiscrete,
     required TextDirection textDirection,
   });
+
+  /// Whether the track shape is rounded.
+  ///
+  /// This is used to determine the correct position of the thumb in relation to the track.
+  bool get isRounded => false;
 }
 
 /// Base class for [RangeSlider] thumb shapes.
@@ -1531,9 +1539,13 @@ mixin BaseSliderTrackShape {
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
     final double trackRight = trackLeft + parentBox.size.width - math.max(thumbWidth, overlayWidth);
     final double trackBottom = trackTop + trackHeight;
-    // If the parentBox'size less than slider's size the trackRight will be less than trackLeft, so switch them.
+    // If the parentBox's size less than slider's size the trackRight will be less than trackLeft, so switch them.
     return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
   }
+
+  /// Whether the track shape is rounded. This is used to determine the correct
+  /// position of the thumb in relation to the track. Defaults to false.
+  bool get isRounded => false;
 }
 
 /// A [Slider] track that's a simple rectangle.
@@ -1551,8 +1563,7 @@ mixin BaseSliderTrackShape {
 ///
 /// {@macro flutter.material.SliderTrackShape.paint.trackSegment}
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the rectangular slider track shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_slider_track_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the rectangular slider track shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_slider_track_shape.png)
 ///
 /// See also:
 ///
@@ -1597,16 +1608,10 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
-    final Paint leftTrackPaint;
-    final Paint rightTrackPaint;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftTrackPaint = activePaint;
-        rightTrackPaint = inactivePaint;
-      case TextDirection.rtl:
-        leftTrackPaint = inactivePaint;
-        rightTrackPaint = activePaint;
-    }
+    final (Paint leftTrackPaint, Paint rightTrackPaint) = switch (textDirection) {
+      TextDirection.ltr => (activePaint, inactivePaint),
+      TextDirection.rtl => (inactivePaint, activePaint),
+    };
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -1625,20 +1630,18 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
     }
 
-    final bool showSecondaryTrack = (secondaryOffset != null) &&
-        ((textDirection == TextDirection.ltr)
-            ? (secondaryOffset.dx > thumbCenter.dx)
-            : (secondaryOffset.dx < thumbCenter.dx));
+    final bool showSecondaryTrack = secondaryOffset != null && switch (textDirection) {
+      TextDirection.rtl => secondaryOffset.dx < thumbCenter.dx,
+      TextDirection.ltr => secondaryOffset.dx > thumbCenter.dx,
+    };
 
     if (showSecondaryTrack) {
       final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
       final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
-      final Rect secondaryTrackSegment = Rect.fromLTRB(
-        (textDirection == TextDirection.ltr) ? thumbCenter.dx : secondaryOffset.dx,
-        trackRect.top,
-        (textDirection == TextDirection.ltr) ? secondaryOffset.dx : thumbCenter.dx,
-        trackRect.bottom,
-      );
+      final Rect secondaryTrackSegment = switch (textDirection) {
+        TextDirection.rtl => Rect.fromLTRB(secondaryOffset.dx, trackRect.top, thumbCenter.dx, trackRect.bottom),
+        TextDirection.ltr => Rect.fromLTRB(thumbCenter.dx, trackRect.top, secondaryOffset.dx, trackRect.bottom),
+      };
       if (!secondaryTrackSegment.isEmpty) {
         context.canvas.drawRect(secondaryTrackSegment, secondaryTrackPaint);
       }
@@ -1661,8 +1664,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///
 /// {@macro flutter.material.SliderTrackShape.paint.trackSegment}
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the rounded rect slider track shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rounded_rect_slider_track_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the rounded rect slider track shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rounded_rect_slider_track_shape.png)
 ///
 /// See also:
 ///
@@ -1708,16 +1710,10 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
-    final Paint leftTrackPaint;
-    final Paint rightTrackPaint;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftTrackPaint = activePaint;
-        rightTrackPaint = inactivePaint;
-      case TextDirection.rtl:
-        leftTrackPaint = inactivePaint;
-        rightTrackPaint = activePaint;
-    }
+    final (Paint leftTrackPaint, Paint rightTrackPaint) = switch (textDirection) {
+      TextDirection.ltr => (activePaint, inactivePaint),
+      TextDirection.rtl => (inactivePaint, activePaint),
+    };
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -1728,39 +1724,45 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     );
     final Radius trackRadius = Radius.circular(trackRect.height / 2);
     final Radius activeTrackRadius = Radius.circular((trackRect.height + additionalActiveTrackHeight) / 2);
+    final bool isLTR = textDirection == TextDirection.ltr;
+    final bool isRTL = textDirection == TextDirection.rtl;
 
-    context.canvas.drawRRect(
-      RRect.fromLTRBAndCorners(
-        trackRect.left,
-        (textDirection == TextDirection.ltr) ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
-        thumbCenter.dx,
-        (textDirection == TextDirection.ltr) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
-        topLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius : trackRadius,
-        bottomLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius: trackRadius,
-      ),
-      leftTrackPaint,
-    );
-    context.canvas.drawRRect(
-      RRect.fromLTRBAndCorners(
-        thumbCenter.dx,
-        (textDirection == TextDirection.rtl) ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
-        trackRect.right,
-        (textDirection == TextDirection.rtl) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
-        topRight: (textDirection == TextDirection.rtl) ? activeTrackRadius : trackRadius,
-        bottomRight: (textDirection == TextDirection.rtl) ? activeTrackRadius : trackRadius,
-      ),
-      rightTrackPaint,
-    );
+    final bool drawInactiveTrack = thumbCenter.dx < (trackRect.right - (sliderTheme.trackHeight! / 2));
+    if (drawInactiveTrack) {
+      // Draw the inactive track segment.
+      context.canvas.drawRRect(
+        RRect.fromLTRBR(
+          thumbCenter.dx - (sliderTheme.trackHeight! / 2),
+          isRTL ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
+          trackRect.right,
+          isRTL ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
+          isLTR ? trackRadius : activeTrackRadius,
+        ),
+        rightTrackPaint,
+      );
+    }
+    final bool drawActiveTrack = thumbCenter.dx > (trackRect.left + (sliderTheme.trackHeight! / 2));
+    if (drawActiveTrack) {
+      // Draw the active track segment.
+      context.canvas.drawRRect(
+        RRect.fromLTRBR(
+          trackRect.left,
+          isLTR ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
+          thumbCenter.dx + (sliderTheme.trackHeight! / 2),
+          isLTR ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
+          isLTR ? activeTrackRadius : trackRadius,
+        ),
+        leftTrackPaint,
+      );
+    }
 
     final bool showSecondaryTrack = (secondaryOffset != null) &&
-        ((textDirection == TextDirection.ltr)
-            ? (secondaryOffset.dx > thumbCenter.dx)
-            : (secondaryOffset.dx < thumbCenter.dx));
+        (isLTR ? (secondaryOffset.dx > thumbCenter.dx) : (secondaryOffset.dx < thumbCenter.dx));
 
     if (showSecondaryTrack) {
       final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
       final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
-      if (textDirection == TextDirection.ltr) {
+      if (isLTR) {
         context.canvas.drawRRect(
           RRect.fromLTRBAndCorners(
             thumbCenter.dx,
@@ -1787,6 +1789,9 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       }
     }
   }
+
+  @override
+  bool get isRounded => true;
 }
 
 
@@ -1830,7 +1835,7 @@ mixin BaseRangeSliderTrackShape {
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
     final double trackRight = trackLeft + parentBox.size.width - math.max(thumbWidth, overlayWidth);
     final double trackBottom = trackTop + trackHeight;
-    // If the parentBox'size less than slider's size the trackRight will be less than trackLeft, so switch them.
+    // If the parentBox's size less than slider's size the trackRight will be less than trackLeft, so switch them.
     return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
   }
 }
@@ -1850,8 +1855,7 @@ mixin BaseRangeSliderTrackShape {
 ///
 /// {@macro flutter.material.RangeSliderTickMarkShape.paint.trackSegment}
 ///
-/// ![A range slider widget, consisting of 5 divisions and showing the rectangular range slider track shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_range_slider_track_shape.png)
+/// ![A range slider widget, consisting of 5 divisions and showing the rectangular range slider track shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_range_slider_track_shape.png)
 ///
 /// See also:
 ///
@@ -1895,16 +1899,10 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape with BaseRa
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation!)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
-    final Offset leftThumbOffset;
-    final Offset rightThumbOffset;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftThumbOffset = startThumbCenter;
-        rightThumbOffset = endThumbCenter;
-      case TextDirection.rtl:
-        leftThumbOffset = endThumbCenter;
-        rightThumbOffset = startThumbCenter;
-    }
+    final (Offset leftThumbOffset, Offset rightThumbOffset) = switch (textDirection) {
+      TextDirection.ltr => (startThumbCenter, endThumbCenter),
+      TextDirection.rtl => (endThumbCenter, startThumbCenter),
+    };
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -1944,8 +1942,7 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape with BaseRa
 ///
 /// {@macro flutter.material.RangeSliderTickMarkShape.paint.trackSegment}
 ///
-/// ![A range slider widget, consisting of 5 divisions and showing the rounded rect range slider track shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rounded_rect_range_slider_track_shape.png)
+/// ![A range slider widget, consisting of 5 divisions and showing the rounded rect range slider track shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rounded_rect_range_slider_track_shape.png)
 ///
 /// See also:
 ///
@@ -2001,16 +1998,10 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape with BaseRa
     final Paint inactivePaint = Paint()
       ..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
-    final Offset leftThumbOffset;
-    final Offset rightThumbOffset;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftThumbOffset = startThumbCenter;
-        rightThumbOffset = endThumbCenter;
-      case TextDirection.rtl:
-        leftThumbOffset = endThumbCenter;
-        rightThumbOffset = startThumbCenter;
-    }
+    final (Offset leftThumbOffset, Offset rightThumbOffset) = switch (textDirection) {
+      TextDirection.ltr => (startThumbCenter, endThumbCenter),
+      TextDirection.rtl => (endThumbCenter, startThumbCenter),
+    };
     final Size thumbSize = sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete);
     final double thumbRadius = thumbSize.width / 2;
     assert(thumbRadius > 0);
@@ -2072,8 +2063,7 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape with BaseRa
 ///   [SliderThemeData.disabledActiveTrackColor],
 ///   [SliderThemeData.disabledInactiveTrackColor].
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the round slider tick mark shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rounded_slider_tick_mark_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the round slider tick mark shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rounded_slider_tick_mark_shape.png)
 ///
 /// See also:
 ///
@@ -2120,18 +2110,12 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
     assert(sliderTheme.inactiveTickMarkColor != null);
     // The paint color of the tick mark depends on its position relative
     // to the thumb and the text direction.
-    Color? begin;
-    Color? end;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        final bool isTickMarkRightOfThumb = center.dx > thumbCenter.dx;
-        begin = isTickMarkRightOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
-        end = isTickMarkRightOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
-      case TextDirection.rtl:
-        final bool isTickMarkLeftOfThumb = center.dx < thumbCenter.dx;
-        begin = isTickMarkLeftOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
-        end = isTickMarkLeftOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
-    }
+    final double xOffset = center.dx - thumbCenter.dx;
+    final (Color? begin, Color? end) = switch (textDirection) {
+      TextDirection.ltr when xOffset > 0 => (sliderTheme.disabledInactiveTickMarkColor, sliderTheme.inactiveTickMarkColor),
+      TextDirection.rtl when xOffset < 0 => (sliderTheme.disabledInactiveTickMarkColor, sliderTheme.inactiveTickMarkColor),
+      TextDirection.ltr || TextDirection.rtl => (sliderTheme.disabledActiveTickMarkColor, sliderTheme.activeTickMarkColor),
+    };
     final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     // The tick marks are tiny circles that are the same height as the track.
@@ -2158,8 +2142,7 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 ///   [SliderThemeData.disabledActiveTrackColor],
 ///   [SliderThemeData.disabledInactiveTrackColor].
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the round range slider tick mark shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/round_range_slider_tick_mark_shape.png )
+/// ![A slider widget, consisting of 5 divisions and showing the round range slider tick mark shape.](https://flutter.github.io/assets-for-api-docs/assets/material/round_range_slider_tick_mark_shape.png)
 ///
 /// See also:
 ///
@@ -2203,13 +2186,10 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
     assert(sliderTheme.activeTickMarkColor != null);
     assert(sliderTheme.inactiveTickMarkColor != null);
 
-    final bool isBetweenThumbs;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        isBetweenThumbs = startThumbCenter.dx < center.dx && center.dx < endThumbCenter.dx;
-      case TextDirection.rtl:
-        isBetweenThumbs = endThumbCenter.dx < center.dx && center.dx < startThumbCenter.dx;
-    }
+    final bool isBetweenThumbs = switch (textDirection) {
+      TextDirection.ltr => startThumbCenter.dx < center.dx && center.dx < endThumbCenter.dx,
+      TextDirection.rtl => endThumbCenter.dx < center.dx && center.dx < startThumbCenter.dx,
+    };
     final Color? begin = isBetweenThumbs ? sliderTheme.disabledActiveTickMarkColor : sliderTheme.disabledInactiveTickMarkColor;
     final Color? end = isBetweenThumbs ? sliderTheme.activeTickMarkColor : sliderTheme.inactiveTickMarkColor;
     final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
@@ -2261,7 +2241,7 @@ class _EmptySliderTickMarkShape extends SliderTickMarkShape {
 ///
 /// This class is used to create a special instance of a [SliderComponentShape]
 /// that will not paint any component shape. A static reference is stored in
-/// [SliderTickMarkShape.noThumb] and [SliderTickMarkShape.noOverlay]. When this value
+/// [SliderComponentShape.noThumb] and [SliderComponentShape.noOverlay]. When this value
 /// is specified for [SliderThemeData.thumbShape], the thumb painting is
 /// skipped. When this value is specified for [SliderThemeData.overlayShape],
 /// the overlay painting is skipped.
@@ -2292,8 +2272,7 @@ class _EmptySliderComponentShape extends SliderComponentShape {
 ///
 /// There is a shadow for the resting, pressed, hovered, and focused state.
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the round slider thumb shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/round_slider_thumb_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the round slider thumb shape.](https://flutter.github.io/assets-for-api-docs/assets/material/round_slider_thumb_shape.png)
 ///
 /// See also:
 ///
@@ -2408,8 +2387,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 ///
 /// There is a shadow for the resting and pressed state.
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the round range slider thumb shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/round_range_slider_thumb_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the round range slider thumb shape.](https://flutter.github.io/assets-for-api-docs/assets/material/round_range_slider_thumb_shape.png)
 ///
 /// See also:
 ///
@@ -2582,8 +2560,7 @@ class RoundSliderOverlayShape extends SliderComponentShape {
 
 /// The default shape of a [Slider]'s value indicator.
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the rectangular slider value indicator shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_slider_value_indicator_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the rectangular slider value indicator shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_slider_value_indicator_shape.png)
 ///
 /// See also:
 ///
@@ -2641,8 +2618,7 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
 
 /// The default shape of a [RangeSlider]'s value indicators.
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the rectangular range slider value indicator shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_range_slider_value_indicator_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the rectangular range slider value indicator shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_range_slider_value_indicator_shape.png)
 ///
 /// See also:
 ///
@@ -2848,8 +2824,7 @@ class _RectangularSliderValueIndicatorPathPainter {
 /// A variant shape of a [Slider]'s value indicator . The value indicator is in
 /// the shape of an upside-down pear.
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the paddle slider value indicator shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/paddle_slider_value_indicator_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the paddle slider value indicator shape.](https://flutter.github.io/assets-for-api-docs/assets/material/paddle_slider_value_indicator_shape.png)
 ///
 /// See also:
 ///
@@ -2910,8 +2885,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
 /// A variant shape of a [RangeSlider]'s value indicators. The value indicator
 /// is in the shape of an upside-down pear.
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the paddle range slider value indicator shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/paddle_range_slider_value_indicator_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the paddle range slider value indicator shape.](https://flutter.github.io/assets-for-api-docs/assets/material/paddle_range_slider_value_indicator_shape.png)
 ///
 /// See also:
 ///
@@ -3520,7 +3494,6 @@ class _DropSliderValueIndicatorPathPainter {
       return;
     }
     assert(!sizeWithOverflow.isEmpty);
-
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale);
     final double horizontalShift = getHorizontalShift(
       parentBox: parentBox,

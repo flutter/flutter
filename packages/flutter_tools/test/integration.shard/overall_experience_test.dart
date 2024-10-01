@@ -66,15 +66,25 @@ void main() {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
   }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
-  testWithoutContext('flutter run handle SIGUSR1/2', () async {
+
+  testWithoutContext('flutter run handle SIGUSR1/2 run', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
     final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
     final String testDirectory = fileSystem.path.join(flutterRoot, 'dev', 'integration_tests', 'ui');
     final String testScript = fileSystem.path.join('lib', 'commands.dart');
     late int pid;
+    final List<String> command = <String>[
+      'run',
+      '-dflutter-tester',
+      '--report-ready',
+      '--pid-file',
+      pidFile,
+      '--no-devtools',
+      testScript,
+    ];
     try {
       final ProcessTestResult result = await runFlutter(
-        <String>['run', '-dflutter-tester', '--report-ready', '--pid-file', pidFile, '--no-devtools', testScript],
+        command,
         testDirectory,
         <Transition>[
           Multiple(<Pattern>['Flutter run key commands.', 'called paint'], handler: (String line) {
@@ -108,16 +118,22 @@ void main() {
         'called main',
         'called paint',
       ]);
-      expect(result.stdout.where((String line) => !line.startsWith('called ')), <Object>[
-        // logs start after we receive the response to sending SIGUSR1
-        'Performing hot reload...'.padRight(progressMessageWidth),
-        startsWith('Reloaded 0 libraries in '),
-        'Performing hot restart...'.padRight(progressMessageWidth),
-        startsWith('Restarted application in '),
-        '', // this newline is the one for after we hit "q"
-        'Application finished.',
-        'ready',
-      ]);
+      expect(
+        result.stdout.where((String line) => !line.startsWith('called ')),
+        <Object>[
+          // logs start after we receive the response to sending SIGUSR1
+          'Performing hot reload...'.padRight(progressMessageWidth),
+          startsWith('Reloaded 0 libraries in '),
+          'Performing hot restart...'.padRight(progressMessageWidth),
+          startsWith('Restarted application in '),
+          '', // this newline is the one for after we hit "q"
+          'Application finished.',
+          'ready',
+        ],
+        reason: 'stdout from command ${command.join(' ')} was unexpected, '
+          'full Stdout:\n\n${result.stdout.join('\n')}\n\n'
+          'Stderr:\n\n${result.stderr.join('\n')}',
+      );
       expect(result.exitCode, 0);
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
@@ -128,9 +144,16 @@ void main() {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
     final String testDirectory = fileSystem.path.join(flutterRoot, 'dev', 'integration_tests', 'ui');
     final String testScript = fileSystem.path.join('lib', 'commands.dart');
+    final List<String> command = <String>[
+      'run',
+      '-dflutter-tester',
+      '--report-ready',
+      '--no-devtools',
+      testScript,
+    ];
     try {
       final ProcessTestResult result = await runFlutter(
-        <String>['run', '-dflutter-tester', '--report-ready', '--no-devtools', testScript],
+        command,
         testDirectory,
         <Transition>[
           Multiple(<Pattern>['Flutter run key commands.', 'called main', 'called paint'], handler: (String line) {
@@ -171,23 +194,28 @@ void main() {
         // debugPaintSizeEnabled = false:
         'called paint',
       ]);
-      expect(result.stdout.where((String line) => !line.startsWith('called ')), <Object>[
-        // logs start after we receive the response to hitting "r"
-        'Performing hot reload...'.padRight(progressMessageWidth),
-        startsWith('Reloaded 0 libraries in '),
-        'ready',
-        '', // this newline is the one for after we hit "R"
-        'Performing hot restart...'.padRight(progressMessageWidth),
-        startsWith('Restarted application in '),
-        'ready',
-        '', // newline for after we hit "p" the first time
-        'ready',
-        '', // newline for after we hit "p" the second time
-        'ready',
-        '', // this newline is the one for after we hit "q"
-        'Application finished.',
-        'ready',
-      ]);
+      expect(
+        result.stdout.where((String line) => !line.startsWith('called ')), <Object>[
+          // logs start after we receive the response to hitting "r"
+          'Performing hot reload...'.padRight(progressMessageWidth),
+          startsWith('Reloaded 0 libraries in '),
+          'ready',
+          '', // this newline is the one for after we hit "R"
+          'Performing hot restart...'.padRight(progressMessageWidth),
+          startsWith('Restarted application in '),
+          'ready',
+          '', // newline for after we hit "p" the first time
+          'ready',
+          '', // newline for after we hit "p" the second time
+          'ready',
+          '', // this newline is the one for after we hit "q"
+          'Application finished.',
+          'ready',
+        ],
+        reason: 'stdout from command ${command.join(' ')} was unexpected, '
+          'full Stdout:\n\n${result.stdout.join('\n')}\n\n'
+          'Stderr:\n\n${result.stderr.join('\n')}',
+      );
       expect(result.exitCode, 0);
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
@@ -223,7 +251,7 @@ void main() {
         'A RenderFlex overflowed by 69200 pixels on the right.',
         '',
         'The relevant error-causing widget was:',
-        matches(RegExp(r'^  Row .+flutter/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
+        matches(RegExp(r'^  Row.+/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
         '',
         'To inspect this widget in Flutter DevTools, visit:',
         startsWith('http'),
@@ -250,6 +278,7 @@ void main() {
         '  crossAxisAlignment: center',
         '  textDirection: ltr',
         '  verticalDirection: down',
+        '  spacing: 0.0',
         '◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤',
         '════════════════════════════════════════════════════════════════════════════════════════════════════',
         '',
@@ -317,7 +346,6 @@ void main() {
       'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
       'M Write SkSL shaders to a unique file in the project directory.',
       'g Run source code generators.',
-      'j Dump frame raster stats for the current frame. (Unsupported for web)',
       'h Repeat this help message.',
       'd Detach (terminate "flutter run" but leave application running).',
       'c Clear the screen',

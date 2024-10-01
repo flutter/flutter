@@ -9,14 +9,62 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
+  testWidgets('DefaultTextStyle.merge correctly merges arguments', (WidgetTester tester) async {
+    DefaultTextStyle defaultTextStyle = const DefaultTextStyle.fallback();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DefaultTextStyle(
+          style: const TextStyle(color: Colors.black, fontSize: 20),
+          textAlign: TextAlign.left,
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+          textWidthBasis: TextWidthBasis.longestLine,
+          textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false),
+          child: DefaultTextStyle.merge(
+            style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+            softWrap: true,
+            overflow: TextOverflow.fade,
+            maxLines: 3,
+            textWidthBasis: TextWidthBasis.parent,
+            textHeightBehavior: const TextHeightBehavior(applyHeightToLastDescent: false),
+            child: Builder(
+              builder: (BuildContext context) {
+                defaultTextStyle = DefaultTextStyle.of(context);
+                return const Text('Text');
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(defaultTextStyle.style, const TextStyle(
+        color: Colors.red,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+    ));
+    expect(defaultTextStyle.textAlign, TextAlign.center);
+    expect(defaultTextStyle.softWrap, true);
+    expect(defaultTextStyle.overflow, TextOverflow.fade);
+    expect(defaultTextStyle.maxLines, 3);
+    expect(defaultTextStyle.textWidthBasis, TextWidthBasis.parent);
+    expect(defaultTextStyle.textHeightBehavior, const TextHeightBehavior(applyHeightToLastDescent: false));
+  });
+
   testWidgets('Text respects media query', (WidgetTester tester) async {
-    await tester.pumpWidget(const MediaQuery(
-      data: MediaQueryData(textScaleFactor: 1.3),
-      child: Center(
+    await tester.pumpWidget(MediaQuery.withClampedTextScaling(
+      minScaleFactor: 1.3,
+      maxScaleFactor: 1.3,
+      child: const Center(
         child: Text('Hello', textDirection: TextDirection.ltr),
       ),
     ));
@@ -95,7 +143,9 @@ void main() {
     expect(largeSize.height, equals(26.0));
   });
 
-  testWidgets("Text throws a nice error message if there's no Directionality", (WidgetTester tester) async {
+  testWidgets("Text throws a nice error message if there's no Directionality",
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(const Text('Hello'));
     final String message = tester.takeException().toString();
     expect(message, contains('Directionality'));
@@ -1732,6 +1782,42 @@ void main() {
     await tester.pump();
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
+  testWidgets('can set heading level', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    for (int level = 1; level <= 6; level++) {
+      await tester.pumpWidget(
+        Semantics(
+          headingLevel: 1,
+          child: Text(
+            'Heading level $level',
+            textDirection: TextDirection.ltr,
+          ),
+        )
+      );
+      final TestSemantics expectedSemantics = TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            label: 'Heading level $level',
+            headingLevel: 1,
+            textDirection: TextDirection.ltr,
+          ),
+        ],
+      );
+      expect(
+        semantics,
+        hasSemantics(
+          expectedSemantics,
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ),
+      );
+    }
+
+    semantics.dispose();
   });
 }
 

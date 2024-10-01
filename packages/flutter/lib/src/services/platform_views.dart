@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'message_codecs.dart';
+library;
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -660,40 +665,26 @@ class _AndroidMotionEventConverter {
   }
 
   static int sourceFor(PointerEvent event) {
-    int source = AndroidViewController.kInputDeviceSourceUnknown;
-    switch (event.kind) {
-      case PointerDeviceKind.touch:
-        source = AndroidViewController.kInputDeviceSourceTouchScreen;
-      case PointerDeviceKind.trackpad:
-        source = AndroidViewController.kInputDeviceSourceTouchPad;
-      case PointerDeviceKind.mouse:
-        source = AndroidViewController.kInputDeviceSourceMouse;
-      case PointerDeviceKind.stylus:
-      case PointerDeviceKind.invertedStylus:
-        source = AndroidViewController.kInputDeviceSourceStylus;
-      case PointerDeviceKind.unknown:
-        source = AndroidViewController.kInputDeviceSourceUnknown;
-    }
-    return source;
+    return switch (event.kind) {
+      PointerDeviceKind.touch          => AndroidViewController.kInputDeviceSourceTouchScreen,
+      PointerDeviceKind.trackpad       => AndroidViewController.kInputDeviceSourceTouchPad,
+      PointerDeviceKind.mouse          => AndroidViewController.kInputDeviceSourceMouse,
+      PointerDeviceKind.stylus         => AndroidViewController.kInputDeviceSourceStylus,
+      PointerDeviceKind.invertedStylus => AndroidViewController.kInputDeviceSourceStylus,
+      PointerDeviceKind.unknown        => AndroidViewController.kInputDeviceSourceUnknown,
+    };
   }
 
 
   AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
-    int toolType = AndroidPointerProperties.kToolTypeUnknown;
-    switch (event.kind) {
-      case PointerDeviceKind.touch:
-      case PointerDeviceKind.trackpad:
-        toolType = AndroidPointerProperties.kToolTypeFinger;
-      case PointerDeviceKind.mouse:
-        toolType = AndroidPointerProperties.kToolTypeMouse;
-      case PointerDeviceKind.stylus:
-        toolType = AndroidPointerProperties.kToolTypeStylus;
-      case PointerDeviceKind.invertedStylus:
-        toolType = AndroidPointerProperties.kToolTypeEraser;
-      case PointerDeviceKind.unknown:
-        toolType = AndroidPointerProperties.kToolTypeUnknown;
-    }
-    return AndroidPointerProperties(id: pointerId, toolType: toolType);
+    return AndroidPointerProperties(id: pointerId, toolType: switch (event.kind) {
+      PointerDeviceKind.touch          => AndroidPointerProperties.kToolTypeFinger,
+      PointerDeviceKind.trackpad       => AndroidPointerProperties.kToolTypeFinger,
+      PointerDeviceKind.mouse          => AndroidPointerProperties.kToolTypeMouse,
+      PointerDeviceKind.stylus         => AndroidPointerProperties.kToolTypeStylus,
+      PointerDeviceKind.invertedStylus => AndroidPointerProperties.kToolTypeEraser,
+      PointerDeviceKind.unknown        => AndroidPointerProperties.kToolTypeUnknown,
+    });
   }
 
   bool isSinglePointerAction(PointerEvent event) =>
@@ -793,12 +784,10 @@ abstract class AndroidViewController extends PlatformViewController {
       <PlatformViewCreatedCallback>[];
 
   static int _getAndroidDirection(TextDirection direction) {
-    switch (direction) {
-      case TextDirection.ltr:
-        return kAndroidLayoutDirectionLtr;
-      case TextDirection.rtl:
-        return kAndroidLayoutDirectionRtl;
-    }
+    return switch (direction) {
+      TextDirection.ltr => kAndroidLayoutDirectionLtr,
+      TextDirection.rtl => kAndroidLayoutDirectionRtl,
+    };
   }
 
   /// Creates a masked Android MotionEvent action value for an indexed pointer.
