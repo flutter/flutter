@@ -404,8 +404,16 @@ abstract class SelectBoundarySelectionEvent extends SelectionEvent {
 abstract class SelectMultiSelectableBoundarySelectionEvent extends SelectBoundarySelectionEvent {
   const SelectMultiSelectableBoundarySelectionEvent._(this.absorb, Offset globalPosition, SelectionEventType type) : super._(globalPosition, type);
 
-  /// Whether the selectable receiving the event should be absorbed into
-  /// an encompassing boundary.
+  /// Whether the [Selectable] receiving the event should be completely
+  /// absorbed into a boundary.
+  ///
+  /// For example, when [absorb] is set to true, and a [Selectable] that is inline
+  /// within a boundary receives this event, it should select all of its content,
+  /// and continue searching for the end of the boundary.
+  ///
+  /// When [absorb] is set to false, and a [Selectable] that is inline with a boundary
+  /// receives this event, it should find the end of the boundary relative to itself
+  /// and stop searching.
   final bool absorb;
 }
 
