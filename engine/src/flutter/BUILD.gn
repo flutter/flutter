@@ -153,6 +153,11 @@ group("flutter") {
     ]
   }
 
+  # Build the standalone Impeller library.
+  if (is_mac || is_linux || is_win || is_android) {
+    public_deps += [ "//flutter/impeller/toolkit/interop:library" ]
+  }
+
   if ((flutter_runtime_mode == "debug" || flutter_runtime_mode == "profile") &&
       (is_ios || is_android)) {
     public_deps += [ "//flutter/testing/scenario_app" ]
@@ -213,7 +218,6 @@ group("unittests") {
         "//flutter/impeller:impeller_dart_unittests",
         "//flutter/impeller:impeller_unittests",
         "//flutter/impeller/toolkit/interop:example",
-        "//flutter/impeller/toolkit/interop:library",
       ]
     }
 
