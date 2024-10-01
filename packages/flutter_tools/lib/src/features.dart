@@ -179,12 +179,18 @@ const Feature previewDevice = Feature(
   ),
 );
 
-/// Enable Swift Package Mangaer as a darwin dependency manager.
+/// Enable Swift Package Manager as a darwin dependency manager.
 const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'SWIFT_PACKAGE_MANAGER',
   master: FeatureChannelSetting(
+    available: true,
+  ),
+  beta: FeatureChannelSetting(
+    available: true,
+  ),
+  stable: FeatureChannelSetting(
     available: true,
   ),
 );
