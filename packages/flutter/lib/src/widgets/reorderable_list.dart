@@ -411,6 +411,7 @@ class ReorderableListState extends State<ReorderableList> {
             itemExtent: widget.itemExtent,
             prototypeItem: widget.prototypeItem,
             itemBuilder: widget.itemBuilder,
+            itemExtentBuilder: widget.itemExtentBuilder,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
             onReorderStart: widget.onReorderStart,
