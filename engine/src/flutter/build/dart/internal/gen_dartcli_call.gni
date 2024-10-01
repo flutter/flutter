@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/build/dart/dart.gni")
 import("//flutter/build/dart/internal/gen_executable_call.gni")
 import("//flutter/common/config.gni")
 
@@ -24,7 +25,11 @@ template("gen_dartcli_call") {
   if (is_win) {
     ext = ".exe"
   }
-  dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext")
+  if (flutter_prebuilt_dart_sdk) {
+    dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext")
+  } else {
+    dart = rebase_path("$root_out_dir/dart-sdk/bin/dart$ext")
+  }
 
   # Add default arguments to the Dart CLI.
   dart_args = []
