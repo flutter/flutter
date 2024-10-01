@@ -475,6 +475,97 @@ void main() {
     );
   });
 
+  testWidgets('Checkbox configures mouse cursor', (WidgetTester tester) async {
+    Widget buildApp({WidgetStateProperty<MouseCursor>? mouseCursor, bool enabled = true, bool value = true}) {
+      return CupertinoApp(
+        home: Center(
+          child: CupertinoCheckbox(
+            value: value,
+            onChanged: enabled ? (bool? value) {} : null,
+            mouseCursor: mouseCursor,
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp(value: false));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    await tester.pumpWidget(buildApp());
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test disabled checkbox.
+    await tester.pumpWidget(buildApp(enabled: false, value: false));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test mouse cursor can be configured.
+    await tester.pumpWidget(buildApp(mouseCursor: WidgetStateProperty.all(SystemMouseCursors.click)));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
+  testWidgets('Mouse cursor resolves in disabled/hovered/focused states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    addTearDown(focusNode.dispose);
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    MouseCursor getMouseCursor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        return SystemMouseCursors.forbidden;
+      }
+      if (states.contains(WidgetState.focused)){
+        return SystemMouseCursors.basic;
+      }
+      return SystemMouseCursors.click;
+    }
+
+    final WidgetStateProperty<MouseCursor> mouseCursor = WidgetStateProperty.resolveWith(getMouseCursor);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoCheckbox(
+            value: false,
+            onChanged: (bool? value) => true,
+            mouseCursor: mouseCursor,
+            focusNode: focusNode
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
+    await tester.pump();
+
+    // Test hovered case.
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test focused case.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test disabled case.
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoCheckbox(
+            value: true,
+            onChanged: null,
+            mouseCursor: mouseCursor,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+  });
+
   testWidgets('Checkbox default colors, and size in light mode', (WidgetTester tester) async {
     Widget buildCheckbox({bool value = true}) {
       return CupertinoApp(
