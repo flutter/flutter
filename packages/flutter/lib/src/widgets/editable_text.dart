@@ -5793,6 +5793,12 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
   bool get isActive => widget.focusNode.hasFocus;
 
   @override
+  Future<bool> performHandwritingGesture() async {
+    return true;
+  }
+
+  /*
+  @override
   bool performSelectionGesture(Rect selectionArea) {
     // TODO(justinmc): Works, but selects even if only a tiny corner of a
     // character is covered. I think by Android's definition, should have to
@@ -5805,6 +5811,7 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
     );
     return true;
   }
+  */
 
   // End ScribeClient.
 

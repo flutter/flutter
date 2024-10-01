@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'message_codec.dart';
 import 'system_channels.dart';
 
-/// An interface into Android stylus handwriting text input.
+/// An interface into Android's stylus handwriting text input.
 ///
 /// This is typically used by implemeting the methods in [ScribeClient] in a
 /// class, usually a [State], and setting an instance of it to [client]. The
@@ -115,6 +115,11 @@ class Scribe {
 
   Future<dynamic> _handleScribeInputInvocation(MethodCall methodCall) async {
     switch (methodCall.method) {
+      case 'ScribeClient.performHandwritingGesture':
+        assert(activeScribeClient != null);
+        print('Justin ScribeClient.performHandwritingGesture with args ${methodCall.arguments}');
+        // TODO(justinmc): Create enums and stuff to parse the argument.
+        return activeScribeClient!.performHandwritingGesture();
       case 'ScribeClient.performSelectionGesture':
         assert(activeScribeClient != null);
         final List<dynamic> args = methodCall.arguments as List<dynamic>;
@@ -125,14 +130,26 @@ class Scribe {
   }
 }
 
-// TODO(justinmc): How to reconcile this with Scribble? Something that implements both?
+/// An interface into Android's stylus handwriting text input.
+
+/// A mixin that to receive focus from the engine.
+///
+/// This is currently only used to handle UIIndirectScribbleInteraction.
 mixin ScribeClient {
   bool get isActive;
 
-  // TODO(justinmc): No implementation provided, so that means that anyone that
-  // mixes this in must provide an implementation. Is that right, and is that
-  // what we want here for avoiding breaking changes?
-  bool performSelectionGesture(Rect selectionArea);
+  // TODO(justinmc): Double check about providing an implementation and breaking
+  // changes. If you add a new method, will users break?
+  /// Called when Android receives a handwriting gesture.
+  ///
+  /// See also:
+  ///
+  ///  * Android's
+  ///    [InputConnection.performHandwritingGesture](https://developer.android.com/reference/android/view/inputmethod/InputConnection#performHandwritingGesture(android.view.inputmethod.HandwritingGesture,%20java.util.concurrent.Executor,%20java.util.function.IntConsumer))
+  ///    method, from which the engine calls through to this method.
+  Future<bool> performHandwritingGesture() {
+    throw UnimplementedError();
+  }
 
   // TODO(justinmc): Is there a cleaner way to adjust for the device pixel ratio?
   double get devicePixelRatio;
