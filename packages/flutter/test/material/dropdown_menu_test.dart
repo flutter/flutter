@@ -1375,7 +1375,7 @@ void main() {
     );
     item2material = tester.widget<Material>(button2Material);
     expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
   // Regression test for https://github.com/flutter/flutter/issues/152375.
   testWidgets('Down key and up key can navigate on desktop platforms when a label text contains '
