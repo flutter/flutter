@@ -735,18 +735,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     return result;
   }
 
-  void handleDirectionalFocus(DirectionalFocusIntent intent) {
-    switch (intent.direction) {
-      case TraversalDirection.left:
-      case TraversalDirection.right:
-        return;
-      case TraversalDirection.up:
-        handleUpKeyInvoke(intent);
-      case TraversalDirection.down:
-        handleDownKeyInvoke(intent);
-    }
-  }
-
   void handleUpKeyInvoke(_) {
     setState(() {
       if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
@@ -946,6 +934,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           shortcuts: const <ShortcutActivator, Intent>{
             SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
             SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+            SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
+            SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
           },
           child: _DropdownMenuBody(
             width: widget.width,
@@ -983,13 +973,24 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     return Actions(
       actions: <Type, Action<Intent>>{
-        DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(
-          onInvoke: handleDirectionalFocus,
+        _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(
+          onInvoke: handleUpKeyInvoke,
+        ),
+        _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(
+          onInvoke: handleDownKeyInvoke,
         ),
       },
       child: menuAnchor,
     );
   }
+}
+
+class _ArrowUpIntent extends Intent {
+  const _ArrowUpIntent();
+}
+
+class _ArrowDownIntent extends Intent {
+  const _ArrowDownIntent();
 }
 
 class _DropdownMenuBody extends MultiChildRenderObjectWidget {
