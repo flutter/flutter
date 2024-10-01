@@ -52,11 +52,34 @@ class Scribe {
 
   final Set<ScribeClient> _scribeClients = <ScribeClient>{};
 
+  /// Returns true if the InputMethodManager supports Scribe stylus handwriting
+  /// input.
+  ///
+  /// Call this before calling [startStylusHandwriting] to make sure it's
+  /// available.
+  ///
+  /// Supported on Android API 34 and above.
+  ///
+  /// See also:
+  ///
+  /// * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#isStylusHandwritingAvailable()],
+  ///   which is the corresponding API on Android.
+  static Future<bool?> isStylusHandwritingAvailable() {
+    return _instance._channel.invokeMethod<bool?>(
+      'Scribe.isStylusHandwritingAvailable',
+    );
+  }
+
   /// Tell Android to begin receiving stylus handwriting input.
   ///
   /// This is typically called after detecting the start of stylus input.
   ///
   /// Supported on Android API 33 and above.
+  ///
+  /// See also:
+  ///
+  /// * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#startStylusHandwriting(android.view.View)],
+  ///   which is the corresponding API on Android.
   static Future<void> startStylusHandwriting() {
     return _instance._channel.invokeMethod<void>(
       'Scribe.startStylusHandwriting',
@@ -120,12 +143,10 @@ class Scribe {
         print('Justin ScribeClient.performHandwritingGesture with args ${methodCall.arguments}');
         // TODO(justinmc): Create enums and stuff to parse the argument.
         return activeScribeClient!.performHandwritingGesture();
-      case 'ScribeClient.performSelectionGesture':
+      case 'ScribeClient.previewHandwritingGesture':
         assert(activeScribeClient != null);
-        final List<dynamic> args = methodCall.arguments as List<dynamic>;
-        assert(args.length == 1, 'ScribeClient.performSelectionGesture should send a single Rect as its args');
-        final Rect selectionArea = _getSelectionArea(args, activeScribeClient!.devicePixelRatio);
-        return activeScribeClient!.performSelectionGesture(selectionArea);
+        print('Justin ScribeClient.previewHandwritingGesture with args ${methodCall.arguments}');
+        return activeScribeClient!.previewHandwritingGesture();
     }
   }
 }
@@ -148,6 +169,10 @@ mixin ScribeClient {
   ///    [InputConnection.performHandwritingGesture](https://developer.android.com/reference/android/view/inputmethod/InputConnection#performHandwritingGesture(android.view.inputmethod.HandwritingGesture,%20java.util.concurrent.Executor,%20java.util.function.IntConsumer))
   ///    method, from which the engine calls through to this method.
   Future<bool> performHandwritingGesture() {
+    throw UnimplementedError();
+  }
+
+  void previewHandwritingGesture() {
     throw UnimplementedError();
   }
 

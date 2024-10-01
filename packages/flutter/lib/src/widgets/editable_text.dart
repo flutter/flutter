@@ -5794,7 +5794,13 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
 
   @override
   Future<bool> performHandwritingGesture() async {
+    print('justin EditableText.performHandwritingGesture.');
     return true;
+  }
+
+  @override
+  void previewHandwritingGesture() {
+    print('justin EditableText.previewHandwritingGesture.');
   }
 
   /*
@@ -5818,9 +5824,12 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
   void _handlePanDown(DragDownDetails details) {
   }
 
-  void _handlePointerDown(PointerDownEvent event) {
-    print('justin _handlePointerDown.');
+  void _handlePointerDown(PointerDownEvent event) async {
     if (event.kind != ui.PointerDeviceKind.stylus) {
+      return;
+    }
+
+    if (!(await Scribe.isStylusHandwritingAvailable() ?? false)) {
       return;
     }
 
