@@ -230,8 +230,7 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
         double childScrollOffset = 0.0;
         RenderSliver? current = childAfter(child as RenderSliver);
         while (current != null) {
-           childScrollOffset -= current.geometry!.scrollExtent;
-          }
+          childScrollOffset -= current.geometry!.scrollExtent;
           current = childAfter(current);
         }
         return childScrollOffset;
