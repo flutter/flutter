@@ -239,6 +239,7 @@ class CupertinoTextField extends StatefulWidget {
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
     this.clearButtonMode = OverlayVisibilityMode.never,
     this.clearButtonSemanticLabel,
     TextInputType? keyboardType,
@@ -367,6 +368,7 @@ class CupertinoTextField extends StatefulWidget {
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
     this.clearButtonMode = OverlayVisibilityMode.never,
     this.clearButtonSemanticLabel,
     TextInputType? keyboardType,
@@ -515,6 +517,13 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// Has no effect when [suffix] is null.
   final OverlayVisibilityMode suffixMode;
+
+  /// Controls the vertical alignment of the [prefix] and the [suffix] widget in relation to content.
+  ///
+  /// Defaults to [CrossAxisAlignment.center].
+  ///
+  /// Has no effect when both the [prefix] and [suffix] are null.
+  final CrossAxisAlignment crossAxisAlignment;
 
   /// Show an iOS-style clear button to clear the current text entry.
   ///
@@ -1213,28 +1222,31 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           (true, true) => widget.suffix ?? _buildClearButton(),
           (false, true) => _buildClearButton(),
         };
-        return Row(children: <Widget>[
-          // Insert a prefix at the front if the prefix visibility mode matches
-          // the current text state.
-          if (prefixWidget != null) prefixWidget,
-          // In the middle part, stack the placeholder on top of the main EditableText
-          // if needed.
-          Expanded(
-            child: Stack(
-              // Ideally this should be baseline aligned. However that comes at
-              // the cost of the ability to compute the intrinsic dimensions of
-              // this widget.
-              // See also https://github.com/flutter/flutter/issues/13715.
-              alignment: AlignmentDirectional.center,
-              textDirection: widget.textDirection,
-              children: <Widget>[
-                if (placeholder != null) placeholder,
-                editableText,
-              ],
+        return Row(
+          crossAxisAlignment: widget.crossAxisAlignment,
+          children: <Widget>[
+            // Insert a prefix at the front if the prefix visibility mode matches
+            // the current text state.
+            if (prefixWidget != null) prefixWidget,
+            // In the middle part, stack the placeholder on top of the main EditableText
+            // if needed.
+            Expanded(
+              child: Stack(
+                // Ideally this should be baseline aligned. However that comes at
+                // the cost of the ability to compute the intrinsic dimensions of
+                // this widget.
+                // See also https://github.com/flutter/flutter/issues/13715.
+                alignment: AlignmentDirectional.center,
+                textDirection: widget.textDirection,
+                children: <Widget>[
+                  if (placeholder != null) placeholder,
+                  editableText,
+                ],
+              ),
             ),
-          ),
-          if (suffixWidget != null) suffixWidget
-        ]);
+            if (suffixWidget != null) suffixWidget,
+          ],
+        );
       },
     );
   }

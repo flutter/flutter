@@ -11,6 +11,7 @@ import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -459,6 +460,15 @@ class FlutterPlatform extends PlatformPlugin {
     );
   }
 
+  void _handleStartedDevice(Uri? uri, int testCount) {
+    if (uri != null) {
+      globals.printTrace('test $testCount: VM Service uri is available at $uri');
+    } else {
+      globals.printTrace('test $testCount: VM Service uri is not available');
+    }
+    watcher?.handleStartedDevice(uri);
+  }
+
   Future<_AsyncError?> _startTest(
     String testPath,
     StreamChannel<dynamic> testHarnessChannel,
@@ -530,7 +540,16 @@ class FlutterPlatform extends PlatformPlugin {
       globals.printTrace('test $ourTestCount: starting test device');
       final TestDevice testDevice = _createTestDevice(ourTestCount);
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Run);
-      final Future<StreamChannel<String>> remoteChannelFuture = testDevice.start(mainDart!);
+      final Completer<StreamChannel<String>> remoteChannelCompleter = Completer<StreamChannel<String>>();
+      unawaited(asyncGuard(
+        () async {
+          final StreamChannel<String> channel = await testDevice.start(mainDart!);
+          remoteChannelCompleter.complete(channel);
+        },
+        onError: (Object err, StackTrace stackTrace) {
+          remoteChannelCompleter.completeError(err, stackTrace);
+        },
+      ));
       finalizers.add(() async {
         globals.printTrace('test $ourTestCount: ensuring test device is terminated.');
         await testDevice.kill();
@@ -545,15 +564,21 @@ class FlutterPlatform extends PlatformPlugin {
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
-          final Uri? processVmServiceUri = await testDevice.vmServiceUri;
-          if (processVmServiceUri != null) {
-            globals.printTrace('test $ourTestCount: VM Service uri is available at $processVmServiceUri');
-          } else {
-            globals.printTrace('test $ourTestCount: VM Service uri is not available');
-          }
-          watcher?.handleStartedDevice(processVmServiceUri);
+          final [Object? first, Object? _] = await Future.wait<Object?>(
+            <Future<Object?>>[
+              // This future may depend on [_handleStartedDevice] having been called
+              remoteChannelCompleter.future,
+              testDevice.vmServiceUri.then<void>((Uri? processVmServiceUri) {
+                _handleStartedDevice(processVmServiceUri, ourTestCount);
+              }),
+            ],
+            // If [remoteChannelCompleter.future] errors, we may never get the
+            // VM service URI, so erroring eagerly is necessary to avoid a
+            // deadlock.
+            eagerError: true,
+          );
+          final StreamChannel<String> remoteChannel = first! as StreamChannel<String>;
 
-          final StreamChannel<String> remoteChannel = await remoteChannelFuture;
           globals.printTrace('test $ourTestCount: connected to test device, now awaiting test result');
 
           await _pipeHarnessToRemote(
