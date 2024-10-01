@@ -1415,76 +1415,69 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     late final SelectionResult result;
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
-    switch (event.type) {
-      case SelectionEventType.startEdgeUpdate:
-      case SelectionEventType.endEdgeUpdate:
-        final SelectionEdgeUpdateEvent edgeUpdate = event as SelectionEdgeUpdateEvent;
+    switch (event) {
+      case SelectionEdgeUpdateEvent():
         final TextGranularity granularity = event.granularity;
 
         switch (granularity) {
           case TextGranularity.character:
-            result = _updateSelectionEdge(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
+            result = _updateSelectionEdge(event.globalPosition, isEnd: event.type == SelectionEventType.endEdgeUpdate);
           case TextGranularity.word:
             result = _updateSelectionEdgeByTextBoundary(
-              edgeUpdate.globalPosition,
-              isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate,
+              event.globalPosition,
+              isEnd: event.type == SelectionEventType.endEdgeUpdate,
               getTextBoundary: _getWordBoundaryAtPosition,
             );
           case TextGranularity.paragraph:
             result = _updateSelectionEdgeByMultiSelectableTextBoundary(
-              edgeUpdate.globalPosition,
-              isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate,
+              event.globalPosition,
+              isEnd: event.type == SelectionEventType.endEdgeUpdate,
               getTextBoundary: _getParagraphBoundaryAtPosition,
               getClampedTextBoundary: _getClampedParagraphBoundaryAtPosition,
             );
           case TextGranularity.line:
             result = _updateSelectionEdgeByMultiSelectableTextBoundary(
-              edgeUpdate.globalPosition,
-              isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate,
+              event.globalPosition,
+              isEnd: event.type == SelectionEventType.endEdgeUpdate,
               getTextBoundary: _getLineBoundaryAtPosition,
               getClampedTextBoundary: _getClampedLineBoundaryAtPosition,
             );
           case TextGranularity.document:
             assert(false, 'Moving the selection edge by document is not supported.');
         }
-      case SelectionEventType.clear:
+      case ClearSelectionEvent():
         result = _handleClearSelection();
-      case SelectionEventType.selectAll:
+      case SelectAllSelectionEvent():
         result = _handleSelectAll();
-      case SelectionEventType.selectWord:
-        final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
-        result = _handleSelectWord(selectWord.globalPosition);
-      case SelectionEventType.selectParagraph:
-        final SelectParagraphSelectionEvent selectParagraph = event as SelectParagraphSelectionEvent;
-        if (selectParagraph.absorb) {
+      case SelectWordSelectionEvent():
+        result = _handleSelectWord(event.globalPosition);
+      case SelectParagraphSelectionEvent():
+        if (event.absorb) {
           _handleSelectAll();
           result = SelectionResult.next;
           _selectableContainsOriginTextBoundary = true;
         } else {
-          result = _handleSelectParagraph(selectParagraph.globalPosition);
+          result = _handleSelectParagraph(event.globalPosition);
         }
-      case SelectionEventType.selectLine:
-        final SelectLineSelectionEvent selectLine = event as SelectLineSelectionEvent;
-        if (selectLine.absorb) {
+      case SelectLineSelectionEvent():
+        if (event.absorb) {
           _handleSelectAll();
           result = SelectionResult.next;
           _selectableContainsOriginTextBoundary = true;
         } else {
-          result = _handleSelectLine(selectLine.globalPosition);
+          result = _handleSelectLine(event.globalPosition);
         }
-      case SelectionEventType.granularlyExtendSelection:
-        final GranularlyExtendSelectionEvent granularlyExtendSelection = event as GranularlyExtendSelectionEvent;
+      case GranularlyExtendSelectionEvent():
         result = _handleGranularlyExtendSelection(
-          granularlyExtendSelection.forward,
-          granularlyExtendSelection.isEnd,
-          granularlyExtendSelection.granularity,
+          event.forward,
+          event.isEnd,
+          event.granularity,
         );
-      case SelectionEventType.directionallyExtendSelection:
-        final DirectionallyExtendSelectionEvent directionallyExtendSelection = event as DirectionallyExtendSelectionEvent;
+      case DirectionallyExtendSelectionEvent():
         result = _handleDirectionallyExtendSelection(
-          directionallyExtendSelection.dx,
-          directionallyExtendSelection.isEnd,
-          directionallyExtendSelection.direction,
+          event.dx,
+          event.isEnd,
+          event.direction,
         );
     }
 
