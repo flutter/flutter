@@ -414,10 +414,10 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
       WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
         return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-          ?? (states.contains(WidgetState.disabled)
-              ? SystemMouseCursors.basic
-              : kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic
-            );
+          ?? (kIsWeb && !states.contains(WidgetState.disabled)
+                ? SystemMouseCursors.click
+                : SystemMouseCursors.basic
+              );
       });
 
     return Semantics(
