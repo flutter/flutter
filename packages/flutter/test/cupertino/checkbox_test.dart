@@ -7,7 +7,6 @@
 //   machines.
 @Tags(<String>['reduced-test-set'])
 library;
-import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
