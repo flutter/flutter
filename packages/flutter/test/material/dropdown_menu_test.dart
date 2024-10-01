@@ -1135,7 +1135,7 @@ void main() {
       matching: find.byType(Material),
     ).last;
     expect(menuMaterial, findsOneWidget);
-  },);
+  });
 
   testWidgets('Down key can highlight the menu item on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
