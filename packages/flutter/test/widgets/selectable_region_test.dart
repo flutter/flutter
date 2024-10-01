@@ -2067,6 +2067,7 @@ void main() {
         ),
       );
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text(longText), matching: find.byType(RichText)));
+      // Triple-click.
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -2082,6 +2083,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 17));
 
+      // Drag.
       await gesture.moveTo(textOffsetToPosition(paragraph, 155));
       await tester.pumpAndSettle();
       expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 167));
@@ -2154,6 +2156,7 @@ void main() {
         ),
       );
       final RenderParagraph paragraphC = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('Text widget C.'), matching: find.byType(RichText)));
+      // Triple-click.
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraphC, 2), kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -2169,6 +2172,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(paragraphC.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
 
+      // Drag.
       await gesture.moveTo(textOffsetToPosition(paragraphC, 7));
       await tester.pump();
       expect(paragraphC.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
@@ -2206,6 +2210,7 @@ void main() {
         ),
       );
       final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('first text widget'), matching: find.byType(RichText)));
+      // Triple-click.
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -2221,6 +2226,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
 
+      // Drag.
       await gesture.moveTo(textOffsetToPosition(paragraph1, 14));
       await tester.pump();
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 25));
@@ -2274,6 +2280,7 @@ void main() {
         ),
       );
       final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('second text widget'), matching: find.byType(RichText)));
+      // Triple-click.
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 2), kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -2352,6 +2359,7 @@ void main() {
         ),
       );
       final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('Fine, thank you.'), matching: find.byType(RichText)));
+      // Triple-click.
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 18), kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -2367,6 +2375,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 17, extentOffset: 29));
 
+      // Drag.
       await gesture.moveTo(textOffsetToPosition(paragraph3, 4));
       await tester.pump();
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 29, extentOffset: 0));
