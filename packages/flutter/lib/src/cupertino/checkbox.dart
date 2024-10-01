@@ -154,7 +154,9 @@ class CupertinoCheckbox extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// Resolves in the following states:
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  ///
   ///  * [WidgetState.selected].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
@@ -162,8 +164,16 @@ class CupertinoCheckbox extends StatefulWidget {
   /// When [value] is null and [tristate] is true, [WidgetState.selected] is
   /// included as a state.
   ///
-  /// Defaults to [SystemMouseCursors.basic] in all states.
-  final WidgetStateProperty<MouseCursor>? mouseCursor;
+  /// If null, then [SystemMouseCursors.basic] is used when this checkbox is
+  /// disabled. When the checkbox is enabled, [SystemMouseCursors.click] is used
+  /// on Web, and [SystemMouseCursors.basic] is used on other platforms.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
+  ///    `WidgetStateProperty` which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [WidgetStateProperty].
+  final MouseCursor? mouseCursor;
 
   /// The color to use when this checkbox is checked.
   ///
@@ -401,12 +411,21 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           .withSaturation(kCupertinoFocusColorSaturation)
           .toColor();
 
+    final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
+      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
+        return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+          ?? (states.contains(WidgetState.disabled)
+              ? SystemMouseCursors.basic
+              : kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic
+            );
+      });
+
     return Semantics(
       label: widget.semanticLabel,
       checked: widget.value ?? false,
       mixed: widget.tristate ? widget.value == null : null,
       child: buildToggleable(
-        mouseCursor: widget.mouseCursor,
+        mouseCursor: effectiveMouseCursor,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         size: const Size.square(kMinInteractiveDimensionCupertino),

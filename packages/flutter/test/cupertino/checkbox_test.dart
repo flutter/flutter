@@ -476,7 +476,7 @@ void main() {
   });
 
   testWidgets('Checkbox configures mouse cursor', (WidgetTester tester) async {
-    Widget buildApp({WidgetStateProperty<MouseCursor>? mouseCursor, bool enabled = true, bool value = true}) {
+    Widget buildApp({MouseCursor? mouseCursor, bool enabled = true, bool value = true}) {
       return CupertinoApp(
         home: Center(
           child: CupertinoCheckbox(
@@ -503,7 +503,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     // Test mouse cursor can be configured.
-    await tester.pumpWidget(buildApp(mouseCursor: WidgetStateProperty.all(SystemMouseCursors.click)));
+    await tester.pumpWidget(buildApp(mouseCursor: SystemMouseCursors.click));
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
@@ -511,26 +511,13 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-
-    MouseCursor getMouseCursor(Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return SystemMouseCursors.forbidden;
-      }
-      if (states.contains(WidgetState.focused)){
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    }
-
-    final WidgetStateProperty<MouseCursor> mouseCursor = WidgetStateProperty.resolveWith(getMouseCursor);
-
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoCheckbox(
             value: false,
             onChanged: (bool? value) => true,
-            mouseCursor: mouseCursor,
+            mouseCursor: const CheckboxMouseCursor(),
             focusNode: focusNode
           ),
         ),
@@ -552,12 +539,12 @@ void main() {
 
     // Test disabled case.
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         home: Center(
           child: CupertinoCheckbox(
             value: true,
             onChanged: null,
-            mouseCursor: mouseCursor,
+            mouseCursor: CheckboxMouseCursor(),
           ),
         ),
       ),
@@ -974,4 +961,21 @@ void main() {
     await gesture2.up();
     await tester.pump();
   });
+}
+
+class CheckboxMouseCursor extends WidgetStateMouseCursor {
+  const CheckboxMouseCursor();
+  
+  @override
+  MouseCursor resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      return SystemMouseCursors.forbidden;
+    }
+    if (states.contains(WidgetState.focused)){
+      return SystemMouseCursors.basic;
+    }
+    return SystemMouseCursors.click;
+  }
+  @override
+  String get debugDescription => 'CheckboxMouseCursor()';
 }
