@@ -80,6 +80,8 @@ source_set("flutter_framework_source_arc") {
     "framework/Source/FlutterMetalLayer.mm",
     "framework/Source/FlutterOverlayView.h",
     "framework/Source/FlutterOverlayView.mm",
+    "framework/Source/FlutterPlatformPlugin.h",
+    "framework/Source/FlutterPlatformPlugin.mm",
     "framework/Source/FlutterPlatformViews_Internal.h",
     "framework/Source/FlutterPlatformViews_Internal.mm",
     "framework/Source/FlutterPluginAppLifeCycleDelegate.mm",
@@ -184,8 +186,6 @@ source_set("flutter_framework_source") {
     # To add new files in ARC, add them to the `flutter_framework_source_arc` target.
     "framework/Source/FlutterEngine.mm",
     "framework/Source/FlutterEngine_Internal.h",
-    "framework/Source/FlutterPlatformPlugin.h",
-    "framework/Source/FlutterPlatformPlugin.mm",
     "framework/Source/FlutterViewController.mm",
     "framework/Source/FlutterViewController_Internal.h",
     "framework/Source/accessibility_bridge.h",
