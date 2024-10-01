@@ -322,6 +322,15 @@ void fl_renderer_add_view(FlRenderer* self,
   g_hash_table_insert(priv->views, GINT_TO_POINTER(view_id), view);
 }
 
+void fl_renderer_remove_view(FlRenderer* self, FlutterViewId view_id) {
+  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
+      fl_renderer_get_instance_private(self));
+
+  g_return_if_fail(FL_IS_RENDERER(self));
+
+  g_hash_table_remove(priv->views, GINT_TO_POINTER(view_id));
+}
+
 void* fl_renderer_get_proc_address(FlRenderer* self, const char* name) {
   g_return_val_if_fail(FL_IS_RENDERER(self), NULL);
 
