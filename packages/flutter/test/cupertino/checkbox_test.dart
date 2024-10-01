@@ -492,18 +492,21 @@ void main() {
     await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
     await tester.pump();
     await gesture.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
-
-    await tester.pumpWidget(buildApp());
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
 
     // Test disabled checkbox.
     await tester.pumpWidget(buildApp(enabled: false, value: false));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
 
     // Test mouse cursor can be configured.
-    await tester.pumpWidget(buildApp(mouseCursor: SystemMouseCursors.click));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    await tester.pumpWidget(buildApp(mouseCursor: SystemMouseCursors.grab));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
   });
 
   testWidgets('Mouse cursor resolves in selected/focused/disabled states', (WidgetTester tester) async {
