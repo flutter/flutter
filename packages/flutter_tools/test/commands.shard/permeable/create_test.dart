@@ -838,9 +838,15 @@ void main() {
         <String>['--no-pub', '--template=plugin', '--project-name', 'xyz-xyz', '--platforms', 'android,ios',],
         <String>[],
       ),
-      allOf(
-        throwsToolExit(message: '"xyz-xyz" is not a valid Dart package name.'),
-        throwsToolExit(message: 'Try "xyz_xyz" instead.'),
+      throwsToolExit(message:
+        '"xyz-xyz" is not a valid Dart package name. Try "xyz_xyz" instead.\n'
+        '\n'
+        'The name should consist of lowercase words separated by underscores, '
+        '"like_this". Use only basic Latin letters and Arabic digits: [a-z0-9_], '
+        'and ensure the name is a valid Dart identifier (i.e. it does not start '
+        'with a digit and is not a reserved word).\n'
+        '\n'
+        'See https://dart.dev/tools/pub/pubspec#name for more information.'
       ),
     );
   });
@@ -3141,6 +3147,33 @@ void main() {
     final String buildGradleContent = await buildGradleFile.readAsString();
 
     expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
+  });
+
+  testUsingContext('Android FFI plugin contains 16kb page support', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '-t',
+      'plugin_ffi',
+      '--org',
+      'com.bar.foo',
+      '--platforms=android',
+      projectDir.path
+    ]);
+
+    final File cmakeLists =
+        globals.fs.file('${projectDir.path}/src/CMakeLists.txt');
+
+    expect(cmakeLists.existsSync(), true);
+
+    final String cmakeListsContent = await cmakeLists.readAsString();
+    const String expected16KbFlags = 'PRIVATE "-Wl,-z,max-page-size=16384")';
+    expect(cmakeListsContent, contains(expected16KbFlags));
   });
 
   testUsingContext('Android Kotlin plugin contains namespace', () async {
