@@ -1425,11 +1425,25 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           case TextGranularity.character:
             result = _updateSelectionEdge(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
           case TextGranularity.word:
-            result = _updateSelectionEdgeByTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getWordBoundaryAtPosition);
+            result = _updateSelectionEdgeByTextBoundary(
+              edgeUpdate.globalPosition,
+              isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate,
+              getTextBoundary: _getWordBoundaryAtPosition,
+            );
           case TextGranularity.paragraph:
-            result = _updateSelectionEdgeByMultiSelectableTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getParagraphBoundaryAtPosition, getClampedTextBoundary: _getClampedParagraphBoundaryAtPosition);
+            result = _updateSelectionEdgeByMultiSelectableTextBoundary(
+              edgeUpdate.globalPosition,
+              isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate,
+              getTextBoundary: _getParagraphBoundaryAtPosition,
+              getClampedTextBoundary: _getClampedParagraphBoundaryAtPosition,
+            );
           case TextGranularity.line:
-            result = _updateSelectionEdgeByMultiSelectableTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getLineBoundaryAtPosition, getClampedTextBoundary: _getClampedLineBoundaryAtPosition);
+            result = _updateSelectionEdgeByMultiSelectableTextBoundary(
+              edgeUpdate.globalPosition,
+              isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate,
+              getTextBoundary: _getLineBoundaryAtPosition,
+              getClampedTextBoundary: _getClampedLineBoundaryAtPosition,
+            );
           case TextGranularity.document:
             assert(false, 'Moving the selection edge by document is not supported.');
         }

@@ -2125,7 +2125,8 @@ void main() {
       expect(paragraph.selections[0], const TextSelection(baseOffset: 167, extentOffset: 0));
       await gesture.up();
     }, variant: TargetPlatformVariant.only(TargetPlatform.linux),
-       skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+       skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
 
     testWidgets('mouse can select multiple widgets on triple click drag when selecting inside a WidgetSpan on Linux', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
@@ -2182,7 +2183,8 @@ void main() {
 
       await gesture.up();
     }, variant: TargetPlatformVariant.only(TargetPlatform.linux),
-       skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+       skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
 
     testWidgets('mouse can select multiple widgets line-by-line with a triple click drag on Linux', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
@@ -2249,7 +2251,8 @@ void main() {
 
       await gesture.up();
     }, variant: TargetPlatformVariant.only(TargetPlatform.linux),
-       skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+       skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
 
     testWidgets('mouse can select multiple widgets line-by-line on triple click drag and return to origin paragraph on Linux', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
@@ -2326,7 +2329,8 @@ void main() {
 
       await gesture.up();
     }, variant: TargetPlatformVariant.only(TargetPlatform.linux),
-       skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+       skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
 
     testWidgets('mouse can reverse selection across multiple widgets line-by-line with a triple click drag on Linux', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
@@ -2380,7 +2384,8 @@ void main() {
 
       await gesture.up();
     }, variant: TargetPlatformVariant.only(TargetPlatform.linux),
-       skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+       skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
 
     testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
