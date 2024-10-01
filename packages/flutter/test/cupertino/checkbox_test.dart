@@ -499,10 +499,7 @@ void main() {
 
     // Test disabled checkbox.
     await tester.pumpWidget(buildApp(enabled: false, value: false));
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     // Test mouse cursor can be configured.
     await tester.pumpWidget(buildApp(mouseCursor: SystemMouseCursors.grab));
