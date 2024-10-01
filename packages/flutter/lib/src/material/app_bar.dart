@@ -218,6 +218,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.systemOverlayStyle,
     this.forceMaterialTransparency = false,
     this.clipBehavior,
+    this.hideOnScroll = false,
+    this.scrollThreshold = 100.0,
   }) : assert(elevation == null || elevation >= 0.0),
        preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height);
 
@@ -744,6 +746,22 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@macro flutter.material.Material.clipBehavior}
   final Clip? clipBehavior;
 
+  /// This boolean property determines whether the app bar should hide when the page is scrolled.
+ ///
+ /// If this property is set to true, the app bar will hide when scrolling up.
+ ///
+ /// If it is set to false, the app bar will remain visible while scrolling.
+ final bool hideOnScroll;
+
+
+  /// This double property defines the scroll range at which the app bar will start to appear or disappear.
+///
+/// The default value indicates how much vertical scroll is needed before the app bar starts hiding.
+///
+/// Users can modify this value to set their preferred scroll threshold.
+final double scrollThreshold;
+
+
   bool _getEffectiveCenterTitle(ThemeData theme) {
     bool platformCenter() {
       switch (theme.platform) {
@@ -770,6 +788,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 class _AppBarState extends State<AppBar> {
   ScrollNotificationObserverState? _scrollNotificationObserver;
   bool _scrolledUnder = false;
+  bool _isAppBarHidden = false;
+  final double _scrollOffset = 0.0;
 
   @override
   void didChangeDependencies() {
@@ -809,6 +829,14 @@ class _AppBarState extends State<AppBar> {
           // not be altered based on horizontal notifications of the same
           // predicate since it could be a 2D scroller.
           break;
+      }
+
+      if (widget.hideOnScroll) {
+        if (_scrollOffset > widget.scrollThreshold) {
+          _isAppBarHidden = true;
+        } else {
+          _isAppBarHidden = false;
+        }
       }
 
       if (_scrolledUnder != oldScrolledUnder) {
@@ -1149,29 +1177,39 @@ class _AppBarState extends State<AppBar> {
         theme.useMaterial3 ? const Color(0x00000000) : null,
       );
 
-    return Semantics(
-      container: true,
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: overlayStyle,
-        child: Material(
-          color: theme.useMaterial3 ? effectiveBackgroundColor : backgroundColor,
-          elevation: effectiveElevation,
-          type: widget.forceMaterialTransparency
-              ? MaterialType.transparency
-              : MaterialType.canvas,
-          shadowColor: widget.shadowColor
-            ?? appBarTheme.shadowColor
-            ?? defaults.shadowColor,
-          surfaceTintColor: widget.surfaceTintColor
-            ?? appBarTheme.surfaceTintColor
-            // M3 `defaults.surfaceTint` is Colors.transparent now. It is not used
-            // here because otherwise, it will cause breaking change for
-            // `scrolledUnderElevation`.
-            ?? (theme.useMaterial3 ? theme.colorScheme.surfaceTint : null),
-          shape: widget.shape ?? appBarTheme.shape ?? defaults.shape,
-          child: Semantics(
-            explicitChildNodes: true,
-            child: appBar,
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      height: _isAppBarHidden ? 0 : kToolbarHeight,
+
+      child: Semantics(
+        container: true,
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: overlayStyle,
+          child: Material(
+            color: theme.useMaterial3 ? effectiveBackgroundColor : backgroundColor,
+            elevation: effectiveElevation,
+            type: widget.forceMaterialTransparency
+                ? MaterialType.transparency
+                : MaterialType.canvas,
+            shadowColor: widget.shadowColor
+              ?? appBarTheme.shadowColor
+              ?? defaults.shadowColor,
+            surfaceTintColor: widget.surfaceTintColor
+              ?? appBarTheme.surfaceTintColor
+              // M3 `defaults.surfaceTint` is Colors.transparent now. It is not used
+              // here because otherwise, it will cause breaking change for
+              // `scrolledUnderElevation`.
+              ?? (theme.useMaterial3 ? theme.colorScheme.surfaceTint : null),
+            shape: widget.shape ?? appBarTheme.shape ?? defaults.shape,
+            child: Semantics(
+              explicitChildNodes: true,
+              child: AnimatedOpacity(
+                opacity: _isAppBarHidden ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 300),
+                child: appBar
+                ),
+            ),
           ),
         ),
       ),
