@@ -294,7 +294,7 @@ class CarouselView extends StatefulWidget {
 
   /// Determines whether an [InkWell] will cover each Carousel item.
   ///
-  /// If true (the default), tapping an item will create an ink splash
+  /// If true, tapping an item will create an ink splash
   /// as defined by the [ThemeData.splashFactory].
   ///
   /// Setting this to false allows the [children] to respond to user gestures.
