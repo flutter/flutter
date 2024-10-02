@@ -161,7 +161,8 @@ class AndroidDevices extends PollingDeviceDiscovery {
           }
         }
 
-        if (info case {'model': final String model}) {
+        final String? model = info['model'];
+        if (model != null) {
           info['model'] = cleanAdbDeviceName(model);
         }
 

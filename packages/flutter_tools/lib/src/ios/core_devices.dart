@@ -403,22 +403,22 @@ class IOSCoreDevice {
     ];
 
     _IOSCoreDeviceConnectionProperties? connectionProperties;
-    if (data case {'connectionProperties': final Map<String, Object?> data}) {
+    if (data case {'connectionProperties': final Map<String, Object?> connectionPropertiesData}) {
       connectionProperties = _IOSCoreDeviceConnectionProperties.fromBetaJson(
-        data,
+        connectionPropertiesData,
         logger: logger,
       );
     }
 
     IOSCoreDeviceProperties? deviceProperties;
-    if (data case {'deviceProperties': final Map<String, Object?> data}) {
-      deviceProperties = IOSCoreDeviceProperties.fromBetaJson(data);
+    if (data case {'deviceProperties': final Map<String, Object?> devicePropertiesData}) {
+      deviceProperties = IOSCoreDeviceProperties.fromBetaJson(devicePropertiesData);
     }
 
     _IOSCoreDeviceHardwareProperties? hardwareProperties;
-    if (data case {'hardwareProperties': final Map<String, Object?> data}) {
+    if (data case {'hardwareProperties': final Map<String, Object?> hardwarePropertiesData}) {
       hardwareProperties = _IOSCoreDeviceHardwareProperties.fromBetaJson(
-        data,
+        hardwarePropertiesData,
         logger: logger,
       );
     }
