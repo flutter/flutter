@@ -2106,7 +2106,7 @@ void main() {
       await tester.pumpWidget(boilerplate(menuChildren));
       expect(controller.text, TestMenu.mainMenu3.label);
 
-      // Open the menu
+      // Open the menu.
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pump();
 
