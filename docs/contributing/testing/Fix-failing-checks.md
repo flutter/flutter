@@ -10,10 +10,11 @@
 
 A **tree-status** failure indicates that the main branch has problems
 that should be addressed before anything else is merged in.
+The result of this check usually goes back and forth a few times each day,
+for a variety of reasons.
 
-The result of this check usually goes back and forth a few times each day:
-once [review requirements](../Tree-hygiene.md#getting-a-code-review) are met
-and all other checks are passing, adding the
+**What to do:** Once [review requirements](../Tree-hygiene.md#getting-a-code-review)
+are met and all other checks are passing, adding the
 [**`autosubmit`**](../../infra/Landing-Changes-With-Autosubmit.md) label
 signals a bot to merge the PR once the tree-status check succeeds.
 
@@ -27,10 +28,10 @@ A Google testing failure could be a flake ([see below](#flaking)), or it
 might be due to changes in the PR (See
 [Understanding Google Testing](../../infra/Understanding-Google-Testing.md)
 for more info).
-
 Google employees can view the test output and give feedback accordingly.
-If 2 weeks have gone by and nobody's looked into it, feel free to
-[reach out on Discord](../../Chat.md).
+
+**What to do:** If 2 weeks have gone by and nobody's looked into it,
+feel free to [reach out on Discord](../Chat.md).
 
 <br>
 
@@ -38,10 +39,11 @@ If 2 weeks have gone by and nobody's looked into it, feel free to
 
 ![ci.yaml validation](https://github.com/user-attachments/assets/545a55f8-5bde-460f-92dd-9d87788f9fe8)
 
-In order for each check to run smoothly, the [.ci.yaml](../../../.ci.yaml)
+In order for checks to run correctly, the [.ci.yaml](../../../.ci.yaml)
 file needs to stay in sync with the base branch.
 
-This check failure can be fixed by applying the latest changes from master.\
+**What to do:** This check failure can be fixed by applying the latest changes
+from master.\
 (The [Tree hygiene](../Tree-hygiene.md#using-git) page recommends updating
 via rebase, rather than a merge commit.)
 
@@ -49,12 +51,15 @@ via rebase, rather than a merge commit.)
 
 <br>
 
-### A bug in the PR
+## A bug in the PR
 
-If you've followed the steps for
-[setting up the framework dev environment](../../Setting-up-the-Framework-development-environment.md),
-most problems will be caught in static analysis, but oftentimes
-there are changes that inadvertently break expected behavior.
+Following the steps outlined in
+[setting up the framework dev environment](../../Setting-up-the-Framework-development-environment.md)
+makes it so most problems are caught in static analysis, but oftentimes a change
+still inadvertently breaks expected behavior.
+
+When this happens, usually the best way to find out what's wrong is to
+[**view the test output**](#view-the-test-output).
 
 If a **customer_testing** check is unsuccessful, it's a signal that something in the
 [Flutter customer test registry](https://github.com/flutter/tests/) has failed.
@@ -75,7 +80,7 @@ violated a [linter rule](https://dart.dev/lints/).
 
 <br>
 
-#### View the test output
+### View the test output
 
 Click on **Details** for the failing test, and then click
 **View more details on flutter-dashboard**.
