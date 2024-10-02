@@ -1316,26 +1316,25 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/154532.
-  testWidgets('Searching for non matching item does not crash', (WidgetTester tester) async {
+  testWidgets('Keyboard navigation does not throw when no entries match the filter', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
           enableFilter: true,
-          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
     ));
-
-    // Open the menu.
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
-    await tester.enterText(find.byType(TextField).first, 'Me');
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField).first, 'Meu');
-    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'No match');
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).first, 'No match 2');
+    await tester.pump();
     expect(tester.takeException(), isNull);
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Default search prioritises the current highlight on desktop platforms',
