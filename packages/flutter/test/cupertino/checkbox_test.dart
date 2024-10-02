@@ -7,10 +7,10 @@
 //   machines.
 @Tags(<String>['reduced-test-set'])
 library;
-import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -474,6 +474,80 @@ void main() {
     );
   });
 
+  testWidgets('Checkbox configures mouse cursor', (WidgetTester tester) async {
+    Widget buildApp({ MouseCursor? mouseCursor, bool enabled = true, bool value = true }) {
+      return CupertinoApp(
+        home: Center(
+          child: CupertinoCheckbox(
+            value: value,
+            onChanged: enabled ? (bool? value) {} : null,
+            mouseCursor: mouseCursor,
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp(value: false));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+
+    // Test disabled checkbox.
+    await tester.pumpWidget(buildApp(enabled: false, value: false));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test mouse cursor can be configured.
+    await tester.pumpWidget(buildApp(mouseCursor: SystemMouseCursors.grab));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+  });
+
+  testWidgets('Mouse cursor resolves in selected/focused/disabled states', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    addTearDown(focusNode.dispose);
+
+    Widget buildCheckbox({ required bool value, required bool enabled }) {
+      return CupertinoApp(
+        home: Center(
+          child: CupertinoCheckbox(
+            value: value,
+            onChanged: enabled ? (bool? value) => true : null,
+            mouseCursor: const _CheckboxMouseCursor(),
+            focusNode: focusNode
+          ),
+        ),
+      );
+    }
+
+    // Test unselected case.
+    await tester.pumpWidget(buildCheckbox(value: false, enabled: true));
+    final TestGesture gesture1 = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    addTearDown(gesture1.removePointer);
+    await gesture1.addPointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
+    await tester.pump();
+    await gesture1.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test selected case.
+    await tester.pumpWidget(buildCheckbox(value: true, enabled: true));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test focused case.
+    await tester.pumpWidget(buildCheckbox(value: true, enabled: true));
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    // Test disabled case.
+    await tester.pumpWidget(buildCheckbox(value: true, enabled: false));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+  });
+
   testWidgets('Checkbox default colors, and size in light mode', (WidgetTester tester) async {
     Widget buildCheckbox({bool value = true}) {
       return CupertinoApp(
@@ -882,4 +956,22 @@ void main() {
     await gesture2.up();
     await tester.pump();
   });
+}
+
+class _CheckboxMouseCursor extends WidgetStateMouseCursor {
+  const _CheckboxMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<WidgetState> states) {
+    return const WidgetStateProperty<MouseCursor>.fromMap(
+      <WidgetStatesConstraint, MouseCursor>{
+        WidgetState.disabled: SystemMouseCursors.forbidden,
+        WidgetState.focused: SystemMouseCursors.grab,
+        WidgetState.selected: SystemMouseCursors.click,
+        WidgetState.any: SystemMouseCursors.basic,
+      },
+    ).resolve(states);
+  }
+  @override
+  String get debugDescription => '_CheckboxMouseCursor()';
 }
