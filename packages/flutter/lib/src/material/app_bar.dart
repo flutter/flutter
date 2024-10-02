@@ -748,9 +748,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.actionsPadding}
   /// The padding between the [actions] and the end of the AppBar.
   ///
-  /// By default, the value of [AppBar.actionsPadding] is 0.0.
+  /// By default, the value of [AppBar.actionsPadding] is [EdgeInsets.zero].
   /// {@endtemplate}
-  final double? actionsPadding;
+  final EdgeInsetsGeometry? actionsPadding;
 
   bool _getEffectiveCenterTitle(ThemeData theme) {
     bool platformCenter() {
@@ -914,10 +914,10 @@ class _AppBarState extends State<AppBar> {
       ?? defaults.actionsIconTheme?.copyWith(color: actionForegroundColor)
       ?? overallIconTheme;
 
-    // TODO(Craftplacer): consider using 8.0 instead of 0.0 for Material 3 in the future
-    final double actionsPadding = widget.actionsPadding
+    // TODO(Craftplacer): consider using EdgeInsets.only(right: 8.0) instead of EdgeInsets.zero for Material 3 in the future, https://github.com/flutter/flutter/issues/155747
+    final EdgeInsetsGeometry actionsPadding = widget.actionsPadding
       ?? appBarTheme.actionsPadding
-      ?? 0.0;
+      ?? EdgeInsets.zero;
 
     TextStyle? toolbarTextStyle = widget.toolbarTextStyle
       ?? appBarTheme.toolbarTextStyle
@@ -1033,7 +1033,7 @@ class _AppBarState extends State<AppBar> {
     Widget? actions;
     if (widget.actions != null && widget.actions!.isNotEmpty) {
       actions = Padding(
-        padding: EdgeInsetsDirectional.only(end: actionsPadding),
+        padding: actionsPadding,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: theme.useMaterial3 ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
@@ -1274,7 +1274,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Clip? clipBehavior;
   final _SliverAppVariant variant;
   final bool accessibleNavigation;
-  final double? actionsPadding;
+  final EdgeInsetsGeometry? actionsPadding;
 
   @override
   double get minExtent => collapsedHeight;
@@ -1941,7 +1941,7 @@ class SliverAppBar extends StatefulWidget {
   /// {@macro flutter.material.appbar.actionsPadding}
   ///
   /// This property is used to configure an [AppBar].
-  final double? actionsPadding;
+  final EdgeInsetsGeometry? actionsPadding;
 
   final _SliverAppVariant _variant;
 

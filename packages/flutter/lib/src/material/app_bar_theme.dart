@@ -156,7 +156,7 @@ class AppBarTheme with Diagnosticable {
 
   /// Overrides the default value of [AppBar.actionsPadding]
   /// property in all descendant [AppBar] widgets.
-  final double? actionsPadding;
+  final EdgeInsetsGeometry? actionsPadding;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -177,7 +177,7 @@ class AppBarTheme with Diagnosticable {
     TextStyle? toolbarTextStyle,
     TextStyle? titleTextStyle,
     SystemUiOverlayStyle? systemOverlayStyle,
-    double? actionsPadding,
+    EdgeInsetsGeometry? actionsPadding,
   }) {
     assert(
       color == null || backgroundColor == null,
@@ -231,7 +231,7 @@ class AppBarTheme with Diagnosticable {
       toolbarTextStyle: TextStyle.lerp(a?.toolbarTextStyle, b?.toolbarTextStyle, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
       systemOverlayStyle: t < 0.5 ? a?.systemOverlayStyle : b?.systemOverlayStyle,
-      actionsPadding: lerpDouble(a?.actionsPadding, b?.actionsPadding, t),
+      actionsPadding: EdgeInsetsGeometry.lerp(a?.actionsPadding, b?.actionsPadding, t),
     );
   }
 
@@ -299,6 +299,6 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<double>('toolbarHeight', toolbarHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('toolbarTextStyle', toolbarTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('actionsPadding', actionsPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null));
   }
 }

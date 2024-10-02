@@ -3259,7 +3259,7 @@ void main() {
     final Key actionKey = UniqueKey();
     final Finder finder = find.byKey(actionKey);
 
-    Widget buildApp([double? actionsPadding]) {
+    Widget buildApp([EdgeInsetsGeometry? actionsPadding]) {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(
@@ -3277,7 +3277,7 @@ void main() {
     final Offset offsetA = tester.getTopRight(finder);
 
     // use theoretical Material 3 default
-    await tester.pumpWidget(buildApp(testActionsPadding));
+    await tester.pumpWidget(buildApp(const EdgeInsets.only(right: testActionsPadding)));
 
     final Offset offsetB = tester.getTopRight(finder);
 
