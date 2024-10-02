@@ -494,6 +494,7 @@ class ThemeData with Diagnosticable {
     bottomAppBarTheme ??= const BottomAppBarTheme();
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
+    // TODO(QuncCccccc): Clean it up once the type of `cardTheme` is changed to `CardThemeData`
     if (cardTheme != null) {
       if (cardTheme is CardTheme) {
         cardTheme = cardTheme.data;
@@ -1528,6 +1529,8 @@ class ThemeData with Diagnosticable {
     ButtonBarThemeData? buttonBarTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
+
+    // TODO(QuncCccccc): Clean it up once the type of `cardTheme` is changed to `CardThemeData`
     if (cardTheme != null) {
       if (cardTheme is CardTheme) {
         cardTheme = cardTheme.data;

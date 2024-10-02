@@ -245,24 +245,25 @@ void main() {
         shape: themeShape,
       ),
     );
-     await tester.pumpWidget(MaterialApp(
-        theme: themeData,
-        home: const Scaffold(
-          body: Card(
-            clipBehavior: clipBehavior,
-            color: color,
-            shadowColor: shadowColor,
-            elevation: elevation,
-            margin: margin,
-            shape: shape,
-            child: SizedBox(
-              width: 200,
-              height: 200,
-            ),
+
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: const Scaffold(
+        body: Card(
+          clipBehavior: clipBehavior,
+          color: color,
+          shadowColor: shadowColor,
+          elevation: elevation,
+          margin: margin,
+          shape: shape,
+          child: SizedBox(
+            width: 200,
+            height: 200,
           ),
         ),
-      )
-     );
+      ),
+    )
+    );
 
     final Padding cardMargin = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
