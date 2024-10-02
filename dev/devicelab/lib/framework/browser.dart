@@ -220,8 +220,9 @@ String _findSystemChromeExecutable() {
   // On some environments, such as the Dart HHH tester, Chrome resides in a
   // non-standard location and is provided via the following environment
   // variable.
-  if (io.Platform.environment case {'CHROME_EXECUTABLE': final String executable}) {
-    return executable;
+  final String? envExecutable = io.Platform.environment['CHROME_EXECUTABLE'];
+  if (envExecutable != null) {
+    return envExecutable;
   }
 
   if (io.Platform.isLinux) {

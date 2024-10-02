@@ -23,7 +23,8 @@ class HostAgent {
   Directory? get dumpDirectory {
     if (_dumpDirectory == null) {
       // Set in LUCI recipe.
-      if (_platform.environment case {'FLUTTER_LOGS_DIR': final String directoryPath}) {
+      final String? directoryPath = _platform.environment['FLUTTER_LOGS_DIR'];
+      if (directoryPath != null) {
         _dumpDirectory = _fileSystem.directory(directoryPath)..createSync(recursive: true);
         print('Found FLUTTER_LOGS_DIR dump directory ${_dumpDirectory?.path}');
       }

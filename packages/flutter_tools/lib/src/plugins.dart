@@ -199,7 +199,8 @@ class Plugin {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String? pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
     if (pluginClass != null) {
-      if (pluginYaml case {'androidPackage': final String androidPackage}) {
+      final String? androidPackage = pluginYaml['androidPackage'] as String?;
+      if (androidPackage != null) {
         platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
           name: name,
           package: androidPackage,
@@ -209,11 +210,13 @@ class Plugin {
         );
       }
 
-      platforms[IOSPlugin.kConfigKey] = IOSPlugin(
-        name: name,
-        classPrefix: pluginYaml['iosPrefix'] as String? ?? '',
-        pluginClass: pluginClass,
-      );
+      final String iosPrefix = pluginYaml['iosPrefix'] as String? ?? '';
+      platforms[IOSPlugin.kConfigKey] =
+          IOSPlugin(
+            name: name,
+            classPrefix: iosPrefix,
+            pluginClass: pluginClass,
+          );
     }
     return Plugin(
       name: name,

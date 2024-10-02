@@ -268,11 +268,12 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildInfo: buildInfo,
   );
   if (project.usesSwiftPackageManager) {
-    if (buildSettings case {'IPHONEOS_DEPLOYMENT_TARGET': final String target}) {
+    final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
+    if (iosDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
         platform: SupportedPlatform.ios,
         project: project.ios,
-        deploymentTarget: target,
+        deploymentTarget: iosDeploymentTarget,
       );
     }
   }

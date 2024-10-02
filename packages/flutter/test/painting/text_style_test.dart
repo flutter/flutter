@@ -72,8 +72,8 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
     final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
     final String itemAsString = item.toString();
-
-    if (matchState case {'missingProperty': final String property}) {
+    final String? property = matchState['missingProperty'] as String?;
+    if (property != null) {
       description.add("expect property: '$property'");
       final int propertyIndex = propertiesInOrder.indexOf(property);
       if (propertyIndex > 0) {

@@ -15,7 +15,8 @@ import 'binding.dart';
 
 /// Ensure the appropriate test binding is initialized.
 TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
-  if (environment ?? Platform.environment case {'FLUTTER_TEST': != 'false'}) {
+  environment ??= Platform.environment;
+  if (environment.containsKey('FLUTTER_TEST') && environment['FLUTTER_TEST'] != 'false') {
     return AutomatedTestWidgetsFlutterBinding.ensureInitialized();
   }
   return LiveTestWidgetsFlutterBinding.ensureInitialized();

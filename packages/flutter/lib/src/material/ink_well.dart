@@ -905,11 +905,13 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     if (widget.radius != oldWidget.radius ||
         widget.highlightShape != oldWidget.highlightShape ||
         widget.borderRadius != oldWidget.borderRadius) {
-      if (_highlights case {_HighlightType.hover: final InkHighlight hoverHighlight}) {
+      final InkHighlight? hoverHighlight = _highlights[_HighlightType.hover];
+      if (hoverHighlight != null) {
         hoverHighlight.dispose();
         updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
       }
-      if (_highlights case {_HighlightType.focus: final InkHighlight focusHighlight}) {
+      final InkHighlight? focusHighlight = _highlights[_HighlightType.focus];
+      if (focusHighlight != null) {
         focusHighlight.dispose();
         // Do not call updateFocusHighlights() here because it is called below
       }
