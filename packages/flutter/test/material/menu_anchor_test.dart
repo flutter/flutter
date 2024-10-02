@@ -2296,7 +2296,10 @@ void main() {
       // focus is on MenuAnchor.
       //
       // This test verifies that `MenuAnchor`'s shortcuts continues to work even
-      // when `WidgetsApp.shortcuts` contains almost nothing.
+      // when `WidgetsApp.shortcuts` contains nothing.
+
+      final FocusNode childNode = FocusNode(debugLabel: 'Dropdown Inkwell');
+      addTearDown(childNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2304,14 +2307,21 @@ void main() {
           // it.
           shortcuts: const <ShortcutActivator, Intent>{},
           home: Scaffold(
-            body: _CustomDropdownButton(
-              menuItems: List<Widget>.generate(3, (int i) =>
+            body: MenuAnchor(
+              childFocusNode: childNode,
+              menuChildren: List<Widget>.generate(3, (int i) =>
                 MenuItemButton(
                   child: Text('Submenu item $i'),
                   onPressed: () {},
                 )
               ),
-              child: const Text('Main button'),
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return InkWell(
+                  focusNode: childNode,
+                  onTap: controller.open,
+                  child: const Text('Main button'),
+                );
+              },
             ),
           ),
         ),
@@ -4832,50 +4842,4 @@ enum TestMenu {
   final String acceleratorLabel;
   // Strip the accelerator markers.
   String get label => MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel);
-}
-
-// A button that pops up a drop down menu when tapped.
-//
-// Used in a regression test for
-// https://github.com/flutter/flutter/issues/119532#issuecomment-2274705565.
-class _CustomDropdownButton extends StatefulWidget {
-  const _CustomDropdownButton({
-    required this.menuItems,
-    required this.child,
-  });
-
-  final List<Widget> menuItems;
-  final Widget child;
-
-  @override
-  State<_CustomDropdownButton> createState() => _CustomDropdownButtonState();
-}
-
-class _CustomDropdownButtonState extends State<_CustomDropdownButton> {
-  final WidgetStatesController _controller = WidgetStatesController();
-  final FocusNode childNode = FocusNode(debugLabel: 'Dropdown Inkwell');
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    childNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MenuAnchor(
-      childFocusNode: childNode,
-      builder: (BuildContext context, MenuController controller, Widget? child) {
-        return InkWell(
-          focusNode: childNode,
-          statesController: _controller,
-          onTap: controller.open,
-          child: child,
-        );
-      },
-      menuChildren: widget.menuItems,
-      child: widget.child,
-    );
-  }
 }
