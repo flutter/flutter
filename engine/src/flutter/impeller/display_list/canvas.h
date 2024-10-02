@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_AIKS_CANVAS_H_
-#define FLUTTER_IMPELLER_AIKS_CANVAS_H_
+#ifndef FLUTTER_IMPELLER_DISPLAY_LIST_CANVAS_H_
+#define FLUTTER_IMPELLER_DISPLAY_LIST_CANVAS_H_
 
 #include <deque>
 #include <functional>
@@ -11,9 +11,9 @@
 #include <optional>
 #include <vector>
 
-#include "impeller/aiks/image_filter.h"
-#include "impeller/aiks/paint.h"
 #include "impeller/core/sampler_descriptor.h"
+#include "impeller/display_list/image_filter.h"
+#include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
@@ -291,4 +291,4 @@ class Canvas {
 
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_AIKS_CANVAS_H_
+#endif  // FLUTTER_IMPELLER_DISPLAY_LIST_CANVAS_H_

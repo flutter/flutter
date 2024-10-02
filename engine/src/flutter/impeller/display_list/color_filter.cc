@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/aiks/color_filter.h"
+#include "impeller/display_list/color_filter.h"
 
 #include <utility>
 #include "impeller/entity/contents/filters/color_filter_contents.h"

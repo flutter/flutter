@@ -7,7 +7,7 @@
 
 #include "flutter/impeller/golden_tests/screenshot.h"
 #include "flutter/impeller/playground/playground_impl.h"
-#include "impeller/aiks/aiks_context.h"
+#include "impeller/display_list/aiks_context.h"
 
 namespace impeller {
 namespace testing {

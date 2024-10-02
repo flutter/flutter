@@ -4,7 +4,7 @@
 
 #include "impeller/display_list/dl_image_impeller.h"
 
-#include "impeller/aiks/aiks_context.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 
 namespace impeller {

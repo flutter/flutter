@@ -7,9 +7,9 @@
 
 #include <memory>
 
-#include "impeller/aiks/canvas.h"
-#include "impeller/aiks/paint.h"
 #include "impeller/core/sampler_descriptor.h"
+#include "impeller/display_list/canvas.h"
+#include "impeller/display_list/paint.h"
 
 namespace impeller {
 

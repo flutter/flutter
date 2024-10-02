@@ -20,7 +20,7 @@
 #include "flutter/shell/platform/embedder/embedder_external_texture_metal.h"
 #include "flutter/testing/autoreleasepool_test.h"
 #include "flutter/testing/testing.h"
-#include "impeller/aiks/aiks_context.h"                     // nogncheck
+#include "impeller/display_list/aiks_context.h"             // nogncheck
 #include "impeller/entity/mtl/entity_shaders.h"             // nogncheck
 #include "impeller/entity/mtl/framebuffer_blend_shaders.h"  // nogncheck
 #include "impeller/entity/mtl/modern_shaders.h"             // nogncheck

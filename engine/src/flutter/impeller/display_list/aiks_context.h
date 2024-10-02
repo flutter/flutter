@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_AIKS_AIKS_CONTEXT_H_
-#define FLUTTER_IMPELLER_AIKS_AIKS_CONTEXT_H_
+#ifndef FLUTTER_IMPELLER_DISPLAY_LIST_AIKS_CONTEXT_H_
+#define FLUTTER_IMPELLER_DISPLAY_LIST_AIKS_CONTEXT_H_
 
 #include <memory>
 
@@ -54,4 +54,4 @@ class AiksContext {
 
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_AIKS_AIKS_CONTEXT_H_
+#endif  // FLUTTER_IMPELLER_DISPLAY_LIST_AIKS_CONTEXT_H_

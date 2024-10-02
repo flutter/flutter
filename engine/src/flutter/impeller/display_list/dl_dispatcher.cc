@@ -12,9 +12,9 @@
 #include <vector>
 
 #include "flutter/fml/logging.h"
-#include "impeller/aiks/aiks_context.h"
-#include "impeller/aiks/color_filter.h"
 #include "impeller/core/formats.h"
+#include "impeller/display_list/aiks_context.h"
+#include "impeller/display_list/color_filter.h"
 #include "impeller/display_list/dl_atlas_geometry.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"

@@ -10,7 +10,7 @@
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_mask_filter.h"
-#include "flutter/impeller/aiks/aiks_unittests.h"
+#include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -18,7 +18,7 @@
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/scalar.h"
-#include "impeller/aiks/aiks_context.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/playground_test.h"

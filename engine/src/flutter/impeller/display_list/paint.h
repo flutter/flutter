@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_AIKS_PAINT_H_
-#define FLUTTER_IMPELLER_AIKS_PAINT_H_
+#ifndef FLUTTER_IMPELLER_DISPLAY_LIST_PAINT_H_
+#define FLUTTER_IMPELLER_DISPLAY_LIST_PAINT_H_
 
 #include <memory>
 
-#include "impeller/aiks/color_filter.h"
-#include "impeller/aiks/color_source.h"
-#include "impeller/aiks/image_filter.h"
+#include "impeller/display_list/color_filter.h"
+#include "impeller/display_list/color_source.h"
+#include "impeller/display_list/image_filter.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
@@ -125,4 +125,4 @@ struct Paint {
 
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_AIKS_PAINT_H_
+#endif  // FLUTTER_IMPELLER_DISPLAY_LIST_PAINT_H_

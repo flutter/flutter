@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_AIKS_COLOR_FILTER_H_
-#define FLUTTER_IMPELLER_AIKS_COLOR_FILTER_H_
+#ifndef FLUTTER_IMPELLER_DISPLAY_LIST_COLOR_FILTER_H_
+#define FLUTTER_IMPELLER_DISPLAY_LIST_COLOR_FILTER_H_
 
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/geometry/color.h"
@@ -178,4 +178,4 @@ class ComposedColorFilter final : public ColorFilter {
 
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_AIKS_COLOR_FILTER_H_
+#endif  // FLUTTER_IMPELLER_DISPLAY_LIST_COLOR_FILTER_H_

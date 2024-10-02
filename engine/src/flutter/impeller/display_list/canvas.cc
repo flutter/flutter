@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/aiks/canvas.h"
+#include "impeller/display_list/canvas.h"
 
 #include <memory>
 #include <optional>
@@ -10,8 +10,8 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "impeller/aiks/color_source.h"
-#include "impeller/aiks/image_filter.h"
+#include "impeller/display_list/color_source.h"
+#include "impeller/display_list/image_filter.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"

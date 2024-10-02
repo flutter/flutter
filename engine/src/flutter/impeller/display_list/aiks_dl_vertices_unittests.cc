@@ -5,7 +5,7 @@
 #include "display_list/dl_sampling_options.h"
 #include "display_list/dl_tile_mode.h"
 #include "display_list/dl_vertices.h"
-#include "flutter/impeller/aiks/aiks_unittests.h"
+#include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
