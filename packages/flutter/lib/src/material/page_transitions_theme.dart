@@ -305,7 +305,7 @@ class _ZoomPageTransition extends StatelessWidget {
           child: child,
         );
       },
-      child: ZoomPageTransitionsBuilder.snapshotAwareDelegatedTransition(
+      child: ZoomPageTransitionsBuilder._snapshotAwareDelegatedTransition(
         context,
         animation,
         secondaryAnimation,
@@ -716,15 +716,11 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   DelegatedTransitionBuilder? get delegatedTransition => (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child)
-      => snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting && this.allowSnapshotting, allowEnterRouteSnapshotting, backgroundColor);
+      => _snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting && this.allowSnapshotting, allowEnterRouteSnapshotting, backgroundColor);
 
-  /// A transition builder that takes into account the snapshotting properties of
-  /// [ZoomPageTransitionsBuilder].
-  ///
-  /// This is provided to the `delegatedTransition` of a [ModalRoute], to be
-  /// passed to the previous page route, when the current page is added to the
-  /// stack.
-  static Widget snapshotAwareDelegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child, bool allowSnapshotting, bool allowEnterRouteSnapshotting, Color? backgroundColor) {
+  // A transition builder that takes into account the snapshotting properties of
+  // ZoomPageTransitionsBuilder.
+  static Widget _snapshotAwareDelegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child, bool allowSnapshotting, bool allowEnterRouteSnapshotting, Color? backgroundColor) {
     final Color enterTransitionBackgroundColor = backgroundColor ?? Theme.of(context).colorScheme.surface;
     return DualTransitionBuilder(
       animation: ReverseAnimation(secondaryAnimation),

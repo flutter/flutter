@@ -144,6 +144,12 @@ class _AnimatedState extends State<AnimatedWidget> {
 
 /// Signature for a builder used to control a page's exit transition.
 ///
+/// When a new route enters the stack, the `animation` argument is typically
+/// used to control the entery and exit transition of the topmost route. The exit
+/// transition of the route just below the new route is controlled with the
+/// `secondaryAnimation`, which also controls the transition of the old route
+/// when the topmost route is popped off the stack.
+///
 /// Typically used as the argument for [ModalRoute.delegatedTransition].
 typedef DelegatedTransitionBuilder = Widget? Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child);
 
