@@ -748,7 +748,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.actionsPadding}
   /// The padding between the [actions] and the end of the AppBar.
   ///
-  /// By default, the value of [AppBar.actionsPadding] is [EdgeInsets.zero].
+  /// Defaults to zero.
   /// {@endtemplate}
   final EdgeInsetsGeometry? actionsPadding;
 

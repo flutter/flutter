@@ -3276,7 +3276,6 @@ void main() {
 
     final Offset offsetA = tester.getTopRight(finder);
 
-    // use theoretical Material 3 default
     await tester.pumpWidget(buildApp(const EdgeInsets.only(right: testActionsPadding)));
 
     final Offset offsetB = tester.getTopRight(finder);
