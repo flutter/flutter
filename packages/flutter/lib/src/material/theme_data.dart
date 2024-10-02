@@ -498,6 +498,7 @@ class ThemeData with Diagnosticable {
     chipTheme ??= const ChipThemeData();
     dataTableTheme ??= const DataTableThemeData();
     datePickerTheme ??= const DatePickerThemeData();
+    // TODO(QuncCccccc): Clean this up once the type of `dialogTheme` is changed to `DialogThemeData`
     if (dialogTheme != null) {
       if (dialogTheme is DialogTheme) {
         dialogTheme = dialogTheme.data;
@@ -1519,6 +1520,8 @@ class ThemeData with Diagnosticable {
     ButtonBarThemeData? buttonBarTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
+
+    // TODO(QuncCccccc): Clean this up once the type of `dialogTheme` is changed to `DialogThemeData`
     if (dialogTheme != null) {
       if (dialogTheme is DialogTheme) {
         dialogTheme = dialogTheme.data;
