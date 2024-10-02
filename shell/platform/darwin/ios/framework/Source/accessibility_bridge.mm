@@ -14,7 +14,7 @@
 
 #pragma GCC diagnostic error "-Wundeclared-selector"
 
-FLUTTER_ASSERT_NOT_ARC
+FLUTTER_ASSERT_ARC
 
 namespace flutter {
 namespace {
@@ -101,14 +101,13 @@ void AccessibilityBridge::UpdateSemantics(
     needsAnnouncement = [object nodeShouldTriggerAnnouncement:&node];
     [object setSemanticsNode:&node];
     NSUInteger newChildCount = node.childrenInTraversalOrder.size();
-    NSMutableArray* newChildren =
-        [[[NSMutableArray alloc] initWithCapacity:newChildCount] autorelease];
+    NSMutableArray* newChildren = [[NSMutableArray alloc] initWithCapacity:newChildCount];
     for (NSUInteger i = 0; i < newChildCount; ++i) {
       SemanticsObject* child = GetOrCreateObject(node.childrenInTraversalOrder[i], nodes);
       [newChildren addObject:child];
     }
     NSMutableArray* newChildrenInHitTestOrder =
-        [[[NSMutableArray alloc] initWithCapacity:newChildCount] autorelease];
+        [[NSMutableArray alloc] initWithCapacity:newChildCount];
     for (NSUInteger i = 0; i < newChildCount; ++i) {
       SemanticsObject* child = GetOrCreateObject(node.childrenInHitTestOrder[i], nodes);
       [newChildrenInHitTestOrder addObject:child];
@@ -117,7 +116,7 @@ void AccessibilityBridge::UpdateSemantics(
     object.childrenInHitTestOrder = newChildrenInHitTestOrder;
     if (!node.customAccessibilityActions.empty()) {
       NSMutableArray<FlutterCustomAccessibilityAction*>* accessibilityCustomActions =
-          [[[NSMutableArray alloc] init] autorelease];
+          [[NSMutableArray alloc] init];
       for (int32_t action_id : node.customAccessibilityActions) {
         flutter::CustomAccessibilityAction& action = actions_[action_id];
         if (action.overrideId != -1) {
@@ -128,9 +127,9 @@ void AccessibilityBridge::UpdateSemantics(
         NSString* label = @(action.label.data());
         SEL selector = @selector(onCustomAccessibilityAction:);
         FlutterCustomAccessibilityAction* customAction =
-            [[[FlutterCustomAccessibilityAction alloc] initWithName:label
-                                                             target:object
-                                                           selector:selector] autorelease];
+            [[FlutterCustomAccessibilityAction alloc] initWithName:label
+                                                            target:object
+                                                          selector:selector];
         customAction.uid = action_id;
         [accessibilityCustomActions addObject:customAction];
       }
@@ -143,14 +142,13 @@ void AccessibilityBridge::UpdateSemantics(
       // interrupting system notifications or other elements.
       // Expectation: roughly match the behavior of polite announcements on
       // Android.
-      NSString* announcement =
-          [[[NSString alloc] initWithUTF8String:object.node.label.c_str()] autorelease];
+      NSString* announcement = [[NSString alloc] initWithUTF8String:object.node.label.c_str()];
       UIAccessibilityPostNotification(
           UIAccessibilityAnnouncementNotification,
-          [[[NSAttributedString alloc] initWithString:announcement
-                                           attributes:@{
-                                             UIAccessibilitySpeechAttributeQueueAnnouncement : @YES
-                                           }] autorelease]);
+          [[NSAttributedString alloc] initWithString:announcement
+                                          attributes:@{
+                                            UIAccessibilitySpeechAttributeQueueAnnouncement : @YES
+                                          }]);
     }
   }
 
@@ -164,7 +162,7 @@ void AccessibilityBridge::UpdateSemantics(
       view_controller_.view.accessibilityElements =
           @[ [root accessibilityContainer] ?: [NSNull null] ];
     }
-    NSMutableArray<SemanticsObject*>* newRoutes = [[[NSMutableArray alloc] init] autorelease];
+    NSMutableArray<SemanticsObject*>* newRoutes = [[NSMutableArray alloc] init];
     [root collectRoutes:newRoutes];
     // Finds the last route that is not in the previous routes.
     for (SemanticsObject* route in newRoutes) {
@@ -255,7 +253,6 @@ static void ReplaceSemanticsObject(SemanticsObject* oldObject,
   FML_DCHECK(oldObject.node.id == newObject.uid);
   NSNumber* nodeId = @(oldObject.node.id);
   NSUInteger positionInChildlist = [oldObject.parent.children indexOfObject:oldObject];
-  [[oldObject retain] autorelease];
   oldObject.children = @[];
   [oldObject.parent replaceChildAtIndex:positionInChildlist withChild:newObject];
   [objects removeObjectForKey:nodeId];
@@ -267,22 +264,21 @@ static SemanticsObject* CreateObject(const flutter::SemanticsNode& node,
   if (node.HasFlag(flutter::SemanticsFlags::kIsTextField) &&
       !node.HasFlag(flutter::SemanticsFlags::kIsReadOnly)) {
     // Text fields are backed by objects that implement UITextInput.
-    return [[[TextInputSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id] autorelease];
+    return [[TextInputSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
   } else if (!node.HasFlag(flutter::SemanticsFlags::kIsInMutuallyExclusiveGroup) &&
              (node.HasFlag(flutter::SemanticsFlags::kHasToggledState) ||
               node.HasFlag(flutter::SemanticsFlags::kHasCheckedState))) {
-    return [[[FlutterSwitchSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id] autorelease];
+    return [[FlutterSwitchSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
   } else if (node.HasFlag(flutter::SemanticsFlags::kHasImplicitScrolling)) {
-    return [[[FlutterScrollableSemanticsObject alloc] initWithBridge:weak_ptr
-                                                                 uid:node.id] autorelease];
+    return [[FlutterScrollableSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
   } else if (node.IsPlatformViewNode()) {
-    return [[[FlutterPlatformViewSemanticsContainer alloc]
+    return [[FlutterPlatformViewSemanticsContainer alloc]
         initWithBridge:weak_ptr
                    uid:node.id
           platformView:weak_ptr->GetPlatformViewsController()->GetFlutterTouchInterceptingViewByID(
-                           node.platformViewId)] autorelease];
+                           node.platformViewId)];
   } else {
-    return [[[FlutterSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id] autorelease];
+    return [[FlutterSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
   }
 }
 
