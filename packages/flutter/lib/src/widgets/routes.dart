@@ -1408,9 +1408,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   ///  * [buildPage], which is used to describe the actual contents of the page,
   ///    and whose result is passed to the `child` argument of this method.
-  ///  * [buildFlexibleTransitions], which is used to wrap these transitions with
-  ///    one passed to the route from the route above this one in the navigation
-  ///    stack.
   Widget buildTransitions(
     BuildContext context,
     Animation<double> animation,
@@ -1463,7 +1460,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// The `receivedTransition` will use the above route's [delegatedTransition] in
   /// order to show the right route transition when the above route either enters
   /// or leaves the navigation stack. If not null, the `receivedTransition` will
-  /// wrap the route content through [buildFlexibleTransitions].
+  /// wrap the route content.
   @visibleForTesting
   DelegatedTransitionBuilder? receivedTransition;
 
