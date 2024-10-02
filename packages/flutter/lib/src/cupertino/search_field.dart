@@ -343,7 +343,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   TextEditingController get _effectiveController =>
       widget.controller ?? _controller!.value;
 
-  ScrollPosition? _ancestorScrollPosition;
+  ScrollNotificationObserverState? _scrollNotificationObserver;
   double _fadeExtent = 0.0;
   double? _maxHeight;
 
@@ -358,9 +358,9 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _ancestorScrollPosition?.removeListener(_onScroll);
-    _ancestorScrollPosition = Scrollable.maybeOf(context)?.position;
-    _ancestorScrollPosition?.addListener(_onScroll);
+    _scrollNotificationObserver?.removeListener(_handleScrollNotification);
+    _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
+    _scrollNotificationObserver?.addListener(_handleScrollNotification);
   }
 
   @override
@@ -384,7 +384,10 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
 
   @override
   void dispose() {
-    _ancestorScrollPosition?.removeListener(_onScroll);
+    if (_scrollNotificationObserver != null) {
+      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
+      _scrollNotificationObserver = null;
+    }
     super.dispose();
     if (widget.controller == null) {
       _controller?.dispose();
@@ -417,10 +420,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     }
   }
 
-  void _onScroll() {
-    if (_ancestorScrollPosition == null || !_ancestorScrollPosition!.hasPixels) {
-      return;
-    }
+  void _handleScrollNotification(ScrollNotification notification) {
     if (_maxHeight == null){
       _maxHeight ??= (context.findRenderObject() as RenderBox?)?.size.height;
     }
