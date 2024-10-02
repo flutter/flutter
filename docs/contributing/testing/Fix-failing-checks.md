@@ -54,7 +54,7 @@ via rebase, rather than a merge commit.)
 ## A bug in the PR
 
 Following the steps outlined in
-[setting up the framework dev environment](../../Setting-up-the-Framework-development-environment.md),
+[setting up the framework dev environment](../../Setting-up-the-Framework-development-environment.md)
 makes it so most problems are caught in static analysis, but oftentimes a change
 still inadvertently breaks expected behavior.
 
