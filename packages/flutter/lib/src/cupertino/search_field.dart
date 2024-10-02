@@ -345,7 +345,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
 
   ScrollPosition? _ancestorScrollPosition;
   double _fadeExtent = 0.0;
-  double _maxHeight = 0.0;
+  double? _maxHeight;
 
   @override
   void initState() {
@@ -353,10 +353,6 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     if (widget.controller == null) {
       _createLocalController();
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final RenderBox? searchFieldRenderBox = context.findRenderObject() as RenderBox?;
-      _maxHeight = searchFieldRenderBox?.size.height ?? 0.0;
-    });
   }
 
   @override
@@ -425,9 +421,14 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     if (_ancestorScrollPosition == null || !_ancestorScrollPosition!.hasPixels) {
       return;
     }
-    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-    final double currentHeight = renderBox?.size.height ?? 0.0;
-    setState(() { _fadeExtent = _calculateScrollOpacity(currentHeight, _maxHeight); });
+    if (_maxHeight == null){
+      _maxHeight ??= (context.findRenderObject() as RenderBox?)?.size.height;
+    }
+    else {
+      final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+      final double currentHeight = renderBox?.size.height ?? 0.0;
+      setState(() { _fadeExtent = _calculateScrollOpacity(currentHeight, _maxHeight!); });
+    }
   }
 
   static double _calculateScrollOpacity(double currentHeight, double maxHeight) {
