@@ -2298,22 +2298,17 @@ void main() {
       // This test verifies that `MenuAnchor`'s shortcuts continues to work even
       // when `WidgetsApp.shortcuts` contains almost nothing.
 
-      int? pressedItem;
       await tester.pumpWidget(
         MaterialApp(
-          // A minimal set of shortcuts that only contains 'enter' that is
-          // needed to verify which button is focused.
-          shortcuts: const <ShortcutActivator, Intent>{
-            SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
-          },
+          // Clear WidgetsApp.shortcuts to make sure MenuAnchor doesn't rely on
+          // it.
+          shortcuts: const <ShortcutActivator, Intent>{},
           home: Scaffold(
             body: _CustomDropdownButton(
               menuItems: List<Widget>.generate(3, (int i) =>
                 MenuItemButton(
                   child: Text('Submenu item $i'),
-                  onPressed: () {
-                    pressedItem = i;
-                  },
+                  onPressed: () {},
                 )
               ),
               child: const Text('Main button'),
@@ -2321,6 +2316,8 @@ void main() {
           ),
         ),
       );
+
+      listenForFocusChanges();
 
       // Open the drop down menu and focus on the MenuAnchor.
       await tester.tap(find.text('Main button'));
@@ -2330,17 +2327,13 @@ void main() {
       // Press arrowDown, and the first submenu button should be focused.
       // This is the critical part. It used to not work on Web.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Submenu item 0"))'));
 
       // Press arrowDown, and the second submenu button should be focused.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      await tester.pumpAndSettle();
-
-      // Press enter, and the second submenu button should be pressed.
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      await tester.pumpAndSettle();
-
-      expect(pressedItem, 1);
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Submenu item 1"))'));
     });
   });
 
