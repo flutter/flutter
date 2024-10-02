@@ -1432,6 +1432,25 @@ void _canvasTests() {
     ]);
   });
 
+  test('quickReject', () {
+    expect(canvas.quickReject(toSkRect(const ui.Rect.fromLTRB(1, 2, 3, 4))), isFalse);
+    canvas.save();
+    canvas.clipRect(
+      toSkRect(const ui.Rect.fromLTRB(10, 10, 20, 20)),
+      canvasKit.ClipOp.Intersect,
+      false,
+    );
+    expect(
+      canvas.quickReject(toSkRect(const ui.Rect.fromLTRB(5, 5, 15, 15))),
+      isFalse,
+    );
+    expect(
+      canvas.quickReject(toSkRect(const ui.Rect.fromLTRB(25, 25, 35, 35))),
+      isTrue,
+    );
+    canvas.restore();
+  });
+
   test('drawPicture', () {
     final SkPictureRecorder otherRecorder = SkPictureRecorder();
     final SkCanvas otherCanvas = otherRecorder
