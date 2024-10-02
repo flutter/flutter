@@ -1315,6 +1315,28 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/154532.
+  testWidgets('Searching for non matching item does not crash', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          enableFilter: true,
+          requestFocusOnTap: true,
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    // Open the menu.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).first, 'Me');
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Meu');
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Default search prioritises the current highlight on desktop platforms',
       (WidgetTester tester) async {
