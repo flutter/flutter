@@ -3793,6 +3793,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
 
   - name: Mac dart_plugin_registry_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/156053
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
