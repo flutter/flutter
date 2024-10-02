@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/painting/star_border/star_border.0.dart' as 
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('main ...', (WidgetTester tester) async {
+  testWidgets('Visibility of crucial widgets', (WidgetTester tester) async {
     await tester.pumpWidget(const example.StarBorderApp());
 
     expect(find.descendant(
@@ -39,6 +39,9 @@ void main() {
       of: find.byType(ListView),
       matching: find.byWidgetPredicate((Widget pre)=>pre is SelectableText && pre.data!.startsWith('Container(')),
     ), findsExactly(2));
+  });
+  testWidgets('When sliders move then ExampleBorder, polygonCode and starCode react', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.StarBorderApp());
 
     final Finder starFinder = find.byType(example.ExampleBorder).first;
     example.ExampleBorder exampleBorder = tester.widget<example.ExampleBorder>(starFinder);
@@ -53,27 +56,27 @@ void main() {
 
     const Offset offset = Offset(10, 0);
     await tester.drag(find.descendant(
-      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label=='Points'),
+      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label == 'Points'),
       matching: find.byType(Slider),
     ), offset);
     await tester.drag(find.descendant(
-      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label=='Inner Radius'),
+      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label == 'Inner Radius'),
       matching: find.byType(Slider),
     ), offset);
     await tester.drag(find.descendant(
-      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label=='Point Rounding'),
+      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label == 'Point Rounding'),
       matching: find.byType(Slider)
     ), offset);
     await tester.drag(find.descendant(
-      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label=='Valley Rounding'),
+      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label == 'Valley Rounding'),
       matching: find.byType(Slider)
     ), offset);
     await tester.drag(find.descendant(
-      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label=='Squash'),
+      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label == 'Squash'),
       matching: find.byType(Slider)
     ), offset);
     await tester.drag(find.descendant(
-      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label=='Rotation'),
+      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label == 'Rotation'),
       matching: find.byType(Slider)
     ), offset);
     await tester.pump();
@@ -110,6 +113,7 @@ void main() {
         pre.data!.contains('squash: ${exampleBorder.border.squash}'))
     ), findsOne);
 
+    // Test of a "Nearest" button
     expect(exampleBorder.border.points, isNot(exampleBorder.border.points.roundToDouble()));
     final Finder nearestFinder = find.widgetWithText(OutlinedButton, 'Nearest');
     expect(nearestFinder, findsOne);
@@ -118,6 +122,7 @@ void main() {
     exampleBorder = tester.widget<example.ExampleBorder>(starFinder);
     expect(exampleBorder.border.points, exampleBorder.border.points.roundToDouble());
 
+    // Test of a "Reset" button
     final Finder resetFinder = find.widgetWithText(ElevatedButton, 'Reset');
     expect(resetFinder, findsOne);
     await tester.tap(resetFinder);
