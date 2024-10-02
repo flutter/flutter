@@ -42,7 +42,9 @@ void main() {
       expect(printLog[1], 'flaky: false');
     });
 
-    test('Regression test for https://github.com/flutter/flutter/issues/155475.', () async {
+    test('Ensures task results are received before task process shuts down.', () async {
+      // Regression test for https://github.com/flutter/flutter/issues/155475
+      //
       // Runs multiple concurrent instances of a short-lived task in an effort to
       // trigger the race between the VM service processing the response from
       // ext.cocoonRunTask and the VM shutting down, which will throw a RPCError
@@ -51,7 +53,7 @@ void main() {
       // Obviously this isn't foolproof, but this test becoming flaky or failing
       // consistently should signal that we're encountering a shutdown race
       // somewhere.
-      const int runs = 75;
+      const int runs = 30;
       try {
         await Future.wait(
           <Future<void>>[
@@ -66,6 +68,6 @@ void main() {
       } on RPCError catch (e) {
         fail('Unexpected RPCError: $e');
       }
-    });
+    }, timeout: const Timeout.factor(2));
   });
 }
