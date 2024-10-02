@@ -1604,7 +1604,7 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   ///
   /// This is called just before [applyParentData] is invoked with the same
   /// [RenderObject] provided to that method.
-  static bool _isValidRenderObject<T extends ParentData>(RenderObject renderObject) {
+  bool _isValidRenderObject(RenderObject renderObject) {
     assert(T != dynamic);
     assert(T != ParentData);
     return renderObject.parentData is T;
@@ -6688,7 +6688,7 @@ abstract class RenderObjectElement extends Element {
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
-    if (ParentDataWidget._isValidRenderObject<ParentData>(renderObject)) {
+    if (parentDataWidget._isValidRenderObject(renderObject)) {
       parentDataWidget.applyParentData(renderObject);
     } else {
       // If it's not a valid render object, then don't show the ErrorWidget, or
