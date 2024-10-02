@@ -15,7 +15,8 @@ import 'package:package_config/package_config_types.dart';
 
 /// Mocks all logic instead of using `package:native_assets_builder`, which
 /// relies on doing process calls to `pub` and the local file system.
-class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunner {
+class FakeFlutterNativeAssetsBuildRunner
+    implements FlutterNativeAssetsBuildRunner {
   FakeFlutterNativeAssetsBuildRunner({
     this.hasPackageConfigResult = true,
     this.packagesWithNativeAssetsResult = const <Package>[],
@@ -23,7 +24,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     this.buildDryRunResult = const FakeFlutterNativeAssetsBuilderResult(),
     this.buildResult = const FakeFlutterNativeAssetsBuilderResult(),
     this.linkResult = const FakeFlutterNativeAssetsBuilderResult(),
-    this.linkDryRunResult = const FakeFlutterNativeAssetsBuilderResult(),
     CCompilerConfigImpl? cCompilerConfigResult,
     CCompilerConfigImpl? ndkCCompilerConfigImplResult,
   })  : cCompilerConfigResult = cCompilerConfigResult ?? CCompilerConfigImpl(),
@@ -34,7 +34,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   final native_assets_builder.BuildResult buildResult;
   final native_assets_builder.LinkResult linkResult;
   final native_assets_builder.BuildDryRunResult buildDryRunResult;
-  final native_assets_builder.LinkDryRunResult linkDryRunResult;
   final bool hasPackageConfigResult;
   final List<Package> packagesWithNativeAssetsResult;
   final CCompilerConfigImpl cCompilerConfigResult;
@@ -43,7 +42,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   int buildInvocations = 0;
   int buildDryRunInvocations = 0;
   int linkInvocations = 0;
-  int linkDryRunInvocations = 0;
   int hasPackageConfigInvocations = 0;
   int packagesWithNativeAssetsInvocations = 0;
   BuildModeImpl? lastBuildMode;
@@ -122,8 +120,7 @@ final class FakeFlutterNativeAssetsBuilderResult
     implements
         native_assets_builder.BuildResult,
         native_assets_builder.BuildDryRunResult,
-        native_assets_builder.LinkResult,
-        native_assets_builder.LinkDryRunResult {
+        native_assets_builder.LinkResult {
   const FakeFlutterNativeAssetsBuilderResult({
     this.assets = const <AssetImpl>[],
     this.assetsForLinking = const <String, List<AssetImpl>>{},

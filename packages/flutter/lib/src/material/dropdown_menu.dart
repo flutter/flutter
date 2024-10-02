@@ -807,6 +807,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     } else {
       filteredEntries = widget.dropdownMenuEntries;
     }
+    _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
 
     if (_enableSearch) {
       if (widget.searchCallback != null) {
