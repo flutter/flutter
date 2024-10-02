@@ -2626,6 +2626,10 @@ extension SkCanvasExtension on SkCanvas {
   List<dynamic> getLocalToDevice() => _getLocalToDevice().toObjectShallow as
       List<dynamic>;
 
+  @JS('quickReject')
+  external JSBoolean _quickReject(JSFloat32Array rect);
+  bool quickReject(Float32List rect) => _quickReject(rect.toJS).toDart;
+
   external JSVoid drawPicture(SkPicture picture);
 
   @JS('drawParagraph')

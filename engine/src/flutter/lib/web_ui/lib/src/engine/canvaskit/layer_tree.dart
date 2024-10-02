@@ -4,12 +4,12 @@
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart' show kProfileApplyFrame, kProfilePrerollFrame;
+import '../../engine.dart' show BitmapSize, kProfileApplyFrame, kProfilePrerollFrame;
 import '../profiler.dart';
-import '../vector_math.dart';
 import 'canvas.dart';
 import 'embedded_views.dart';
 import 'layer.dart';
+import 'layer_visitor.dart';
 import 'n_way_canvas.dart';
 import 'picture_recorder.dart';
 import 'raster_cache.dart';
@@ -31,11 +31,22 @@ class LayerTree {
   /// to raster. If [ignoreRasterCache] is `true`, then there will be no
   /// attempt to register pictures to cache.
   void preroll(Frame frame, {bool ignoreRasterCache = false}) {
-    final PrerollContext context = PrerollContext(
-      ignoreRasterCache ? null : frame.rasterCache,
-      frame.viewEmbedder,
+    final PrerollVisitor prerollVisitor = PrerollVisitor(frame.viewEmbedder);
+    rootLayer.accept(prerollVisitor);
+  }
+
+  /// Performs a paint pass with a recording canvas for each picture in the
+  /// tree. This paint pass is just used to measure the bounds for each picture
+  /// so we can optimize the total number of canvases required.
+  void measure(Frame frame, BitmapSize size, {bool ignoreRasterCache = false}) {
+    final MeasureVisitor measureVisitor = MeasureVisitor(
+      size,
+      frame.viewEmbedder!,
     );
-    rootLayer.preroll(context, Matrix4.identity());
+    if (rootLayer.needsPainting) {
+      rootLayer.accept(measureVisitor);
+    }
+    measureVisitor.dispose();
   }
 
   /// Paints the layer tree into the given [frame].
@@ -44,18 +55,15 @@ class LayerTree {
   /// not be used.
   void paint(Frame frame, {bool ignoreRasterCache = false}) {
     final CkNWayCanvas internalNodesCanvas = CkNWayCanvas();
-    internalNodesCanvas.addCanvas(frame.canvas);
     final Iterable<CkCanvas> overlayCanvases =
-        frame.viewEmbedder!.getOverlayCanvases();
+        frame.viewEmbedder!.getOptimizedCanvases();
     overlayCanvases.forEach(internalNodesCanvas.addCanvas);
-    final PaintContext context = PaintContext(
+    final PaintVisitor paintVisitor = PaintVisitor(
       internalNodesCanvas,
-      frame.canvas,
-      ignoreRasterCache ? null : frame.rasterCache,
-      frame.viewEmbedder,
+      frame.viewEmbedder!,
     );
     if (rootLayer.needsPainting) {
-      rootLayer.paint(context);
+      rootLayer.accept(paintVisitor);
     }
   }
 
@@ -65,15 +73,15 @@ class LayerTree {
   ui.Picture flatten(ui.Size size) {
     final CkPictureRecorder recorder = CkPictureRecorder();
     final CkCanvas canvas = recorder.beginRecording(ui.Offset.zero & size);
-    final PrerollContext prerollContext = PrerollContext(null, null);
-    rootLayer.preroll(prerollContext, Matrix4.identity());
+    final PrerollVisitor prerollVisitor = PrerollVisitor(null);
+    rootLayer.accept(prerollVisitor);
 
     final CkNWayCanvas internalNodesCanvas = CkNWayCanvas();
     internalNodesCanvas.addCanvas(canvas);
-    final PaintContext paintContext =
-        PaintContext(internalNodesCanvas, canvas, null, null);
+    final PaintVisitor paintVisitor =
+        PaintVisitor.forToImage(internalNodesCanvas, canvas);
     if (rootLayer.needsPainting) {
-      rootLayer.paint(paintContext);
+      rootLayer.accept(paintVisitor);
     }
     return recorder.endRecording();
   }
@@ -81,10 +89,7 @@ class LayerTree {
 
 /// A single frame to be rendered.
 class Frame {
-  Frame(this.canvas, this.rasterCache, this.viewEmbedder);
-
-  /// The canvas to render this frame to.
-  final CkCanvas canvas;
+  Frame(this.rasterCache, this.viewEmbedder);
 
   /// A cache of pre-rastered pictures.
   final RasterCache? rasterCache;
@@ -93,9 +98,12 @@ class Frame {
   final HtmlViewEmbedder? viewEmbedder;
 
   /// Rasterize the given layer tree into this frame.
-  bool raster(LayerTree layerTree, {bool ignoreRasterCache = false}) {
+  bool raster(LayerTree layerTree, BitmapSize size,
+      {bool ignoreRasterCache = false}) {
     timeAction<void>(kProfilePrerollFrame, () {
       layerTree.preroll(this, ignoreRasterCache: ignoreRasterCache);
+      layerTree.measure(this, size, ignoreRasterCache: ignoreRasterCache);
+      viewEmbedder?.optimizeRendering();
     });
     timeAction<void>(kProfileApplyFrame, () {
       layerTree.paint(this, ignoreRasterCache: ignoreRasterCache);
@@ -110,7 +118,7 @@ class CompositorContext {
   RasterCache? rasterCache;
 
   /// Acquire a frame using this compositor's settings.
-  Frame acquireFrame(CkCanvas canvas, HtmlViewEmbedder? viewEmbedder) {
-    return Frame(canvas, rasterCache, viewEmbedder);
+  Frame acquireFrame(HtmlViewEmbedder? viewEmbedder) {
+    return Frame(rasterCache, viewEmbedder);
   }
 }

@@ -361,6 +361,10 @@ class CkCanvas {
     skCanvas.translate(dx, dy);
   }
 
+  bool quickReject(ui.Rect rect) {
+    return skCanvas.quickReject(toSkRect(rect));
+  }
+
   Float32List getLocalToDevice() {
     final List<dynamic> list = skCanvas.getLocalToDevice();
     final Float32List matrix4 = Float32List(16);
