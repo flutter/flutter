@@ -1604,7 +1604,7 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   ///
   /// This is called just before [applyParentData] is invoked with the same
   /// [RenderObject] provided to that method.
-  bool debugIsValidRenderObject(RenderObject renderObject) {
+  static bool _isValidRenderObject<T extends ParentData>(RenderObject renderObject) {
     assert(T != dynamic);
     assert(T != ParentData);
     return renderObject.parentData is T;
@@ -6567,7 +6567,7 @@ abstract class RenderObjectElement extends Element {
     //    KeepAlive, and another ParentDataWidget with ParentData type
     //    TwoDimensionalViewportParentData or a subclass thereof.
     // The first and second cases are verified here. The third is verified in
-    // debugIsValidRenderObject.
+    // _isValidRenderObject.
 
     while (ancestor != null && ancestor is! RenderObjectElement) {
       if (ancestor is ParentDataElement<ParentData>) {
@@ -6688,7 +6688,7 @@ abstract class RenderObjectElement extends Element {
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
-    if (parentDataWidget.debugIsValidRenderObject(renderObject)) {
+    if (ParentDataWidget._isValidRenderObject<ParentData>(renderObject)) {
       parentDataWidget.applyParentData(renderObject);
     } else {
       // If it's not a valid render object, then don't show the ErrorWidget, or
