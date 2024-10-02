@@ -60,3 +60,7 @@ Future<void> execute() async {
   );
   printer.printToStdout();
 }
+
+Future<void> main() async {
+  return execute();
+}

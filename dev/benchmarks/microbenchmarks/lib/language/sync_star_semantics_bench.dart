@@ -117,3 +117,7 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpa
   assert(workingLabel != null);
   return result;
 }
+
+Future<void> main() async {
+  return execute();
+}

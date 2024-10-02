@@ -90,3 +90,7 @@ Future<void> execute(BenchmarkingBinding binding) async {
   }
   printer.printToStdout();
 }
+
+Future<void> main() async {
+  return execute(BenchmarkingBinding());
+}

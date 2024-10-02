@@ -89,3 +89,7 @@ int sumIterable(Iterable<int> values) {
   }
   return result;
 }
+
+Future<void> main() async {
+  return execute();
+}
