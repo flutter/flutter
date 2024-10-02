@@ -1316,8 +1316,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/154532.
-  testWidgets('Keyboard navigation does not throw when no entries match the filter',
-    (WidgetTester tester) async {
+  testWidgets('Keyboard navigation does not throw when no entries match the filter', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: DropdownMenu<TestMenu>(
