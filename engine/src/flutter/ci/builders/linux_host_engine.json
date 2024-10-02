@@ -1,4 +1,12 @@
 {
+    "_comment": [
+        "The builds defined in this file should not contain tests, ",
+        "and the file should not contain builds that are essentially tests. ",
+        "The only builds in this file should be the builds necessary to produce ",
+        "release artifacts. ",
+        "Tests to run on linux hosts should go in one of the other linux_ build ",
+        "definition files."
+    ],
     "builds": [
         {
             "archives": [
@@ -207,40 +215,6 @@
                         "--no-upload"
                     ]
                 }
-            ]
-        },
-        {
-            "archives": [
-            ],
-            "cas_archive": false,
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Linux"
-            ],
-            "gclient_variables": {
-                "download_android_deps": false,
-                "download_jdk": false,
-                "use_rbe": true
-            },
-            "gn": [
-                "--target-dir",
-                "ci/host_debug",
-                "--runtime-mode",
-                "debug",
-                "--no-prebuilt-dart-sdk",
-                "--build-embedder-examples",
-                "--rbe",
-                "--no-goma"
-            ],
-            "name": "ci/host_debug_no_prebuilt_dart_sdk",
-            "description": "Produces debug mode Linux host-side tooling for Linux without use of prebuilt dart sdk artifacts.",
-            "ninja": {
-                "config": "ci/host_debug",
-                "targets": [
-                    "default"
-                ]
-            },
-            "tests": [
             ]
         }
     ],
