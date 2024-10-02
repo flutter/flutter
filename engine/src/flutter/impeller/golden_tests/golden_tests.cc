@@ -12,7 +12,7 @@
 #include "display_list/dl_paint.h"
 #include "display_list/effects/dl_color_source.h"
 #include "flutter/fml/platform/darwin/scoped_nsautorelease_pool.h"
-#include "impeller/aiks/aiks_context.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"  // nogncheck
 #include "impeller/golden_tests/golden_digest.h"
 #include "impeller/golden_tests/metal_screenshot.h"

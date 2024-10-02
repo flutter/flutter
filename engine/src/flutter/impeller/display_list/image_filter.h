@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_AIKS_IMAGE_FILTER_H_
-#define FLUTTER_IMPELLER_AIKS_IMAGE_FILTER_H_
+#ifndef FLUTTER_IMPELLER_DISPLAY_LIST_IMAGE_FILTER_H_
+#define FLUTTER_IMPELLER_DISPLAY_LIST_IMAGE_FILTER_H_
 
-#include "impeller/aiks/color_filter.h"
 #include "impeller/core/sampler_descriptor.h"
+#include "impeller/display_list/color_filter.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/matrix.h"
@@ -235,4 +235,4 @@ class LocalMatrixImageFilter : public ImageFilter {
 
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_AIKS_IMAGE_FILTER_H_
+#endif  // FLUTTER_IMPELLER_DISPLAY_LIST_IMAGE_FILTER_H_

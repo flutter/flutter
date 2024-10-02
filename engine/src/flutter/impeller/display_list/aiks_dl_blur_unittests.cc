@@ -13,7 +13,7 @@
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "display_list/effects/dl_mask_filter.h"
-#include "flutter/impeller/aiks/aiks_unittests.h"
+#include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "gmock/gmock.h"
 #include "impeller/display_list/dl_dispatcher.h"

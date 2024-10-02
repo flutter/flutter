@@ -21,14 +21,14 @@
 #include "third_party/skia/include/core/SkSize.h"
 
 #if IMPELLER_SUPPORTS_RENDERING
-#include "flutter/impeller/aiks/aiks_context.h"  // nogncheck
-#include "flutter/impeller/renderer/context.h"   // nogncheck
-#else                                            // IMPELLER_SUPPORTS_RENDERING
+#include "flutter/impeller/display_list/aiks_context.h"  // nogncheck
+#include "flutter/impeller/renderer/context.h"           // nogncheck
+#else   // IMPELLER_SUPPORTS_RENDERING
 namespace impeller {
 class Context;
 class AiksContext;
 }  // namespace impeller
-#endif                                           // !IMPELLER_SUPPORTS_RENDERING
+#endif  // !IMPELLER_SUPPORTS_RENDERING
 
 class GrDirectContext;
 

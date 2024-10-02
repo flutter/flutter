@@ -7,7 +7,7 @@
 #include "display_list/dl_tile_mode.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_mask_filter.h"
-#include "flutter/impeller/aiks/aiks_unittests.h"
+#include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"

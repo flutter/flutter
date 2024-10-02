@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
-#include "impeller/aiks/aiks_context.h"
-#include "impeller/aiks/aiks_unittests.h"
-#include "impeller/aiks/canvas.h"
+#include "impeller/display_list/aiks_context.h"
+#include "impeller/display_list/aiks_unittests.h"
+#include "impeller/display_list/canvas.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/geometry/path_builder.h"
 
