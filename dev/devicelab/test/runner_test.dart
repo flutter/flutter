@@ -63,7 +63,7 @@ void main() {
           ],
           eagerError: true,
         );
-      } on RPCError catch(e) {
+      } on RPCError catch (e) {
         fail('Unexpected RPCError: $e');
       }
     });
