@@ -112,6 +112,8 @@ source_set("flutter_framework_source_arc") {
     "framework/Source/TextInputSemanticsObject.mm",
     "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h",
     "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.mm",
+    "framework/Source/accessibility_bridge.h",
+    "framework/Source/accessibility_bridge.mm",
     "framework/Source/connection_collection.h",
     "framework/Source/connection_collection.mm",
     "framework/Source/overlay_layer_pool.h",
@@ -188,8 +190,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterEngine_Internal.h",
     "framework/Source/FlutterViewController.mm",
     "framework/Source/FlutterViewController_Internal.h",
-    "framework/Source/accessibility_bridge.h",
-    "framework/Source/accessibility_bridge.mm",
     "platform_view_ios.h",
     "platform_view_ios.mm",
   ]
