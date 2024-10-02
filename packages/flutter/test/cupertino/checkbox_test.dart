@@ -963,16 +963,14 @@ class _CheckboxMouseCursor extends WidgetStateMouseCursor {
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
-    if (states.contains(WidgetState.disabled)) {
-      return SystemMouseCursors.forbidden;
-    }
-    if (states.contains(WidgetState.focused)) {
-      return SystemMouseCursors.grab;
-    }
-    if (states.contains(WidgetState.selected)) {
-      return SystemMouseCursors.click;
-    }
-    return SystemMouseCursors.basic;
+    return const WidgetStateProperty<MouseCursor>.fromMap(
+      <WidgetStatesConstraint, MouseCursor>{
+        WidgetState.disabled: SystemMouseCursors.forbidden,
+        WidgetState.focused: SystemMouseCursors.grab,
+        WidgetState.selected: SystemMouseCursors.click,
+        WidgetState.any: SystemMouseCursors.basic,
+      },
+    ).resolve(states);
   }
   @override
   String get debugDescription => '_CheckboxMouseCursor()';
