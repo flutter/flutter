@@ -10,9 +10,9 @@
 #include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/utils/dl_receiver_utils.h"
 #include "fml/logging.h"
-#include "impeller/aiks/aiks_context.h"
-#include "impeller/aiks/canvas.h"
-#include "impeller/aiks/paint.h"
+#include "impeller/display_list/aiks_context.h"
+#include "impeller/display_list/canvas.h"
+#include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/geometry/rect.h"
 

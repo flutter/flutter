@@ -5,7 +5,7 @@
 #include "impeller/display_list/dl_playground.h"
 
 #include "flutter/testing/testing.h"
-#include "impeller/aiks/aiks_context.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"

@@ -38,8 +38,8 @@
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 
 #if IMPELLER_SUPPORTS_RENDERING
-#include "impeller/aiks/aiks_context.h"           // nogncheck
 #include "impeller/core/formats.h"                // nogncheck
+#include "impeller/display_list/aiks_context.h"   // nogncheck
 #include "impeller/display_list/dl_dispatcher.h"  // nogncheck
 #endif
 

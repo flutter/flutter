@@ -9,7 +9,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/image/dl_image.h"
-#include "flutter/impeller/aiks/aiks_context.h"
+#include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/golden_tests/screenshot.h"
 #include "flutter/impeller/playground/playground.h"
 #include "flutter/impeller/renderer/render_target.h"

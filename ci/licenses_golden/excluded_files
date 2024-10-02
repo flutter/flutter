@@ -128,9 +128,6 @@
 ../../../flutter/impeller/.clang-format
 ../../../flutter/impeller/.gitignore
 ../../../flutter/impeller/README.md
-../../../flutter/impeller/aiks/aiks_unittests.cc
-../../../flutter/impeller/aiks/aiks_unittests.h
-../../../flutter/impeller/aiks/canvas_unittests.cc
 ../../../flutter/impeller/base/README.md
 ../../../flutter/impeller/base/allocation_size_unittests.cc
 ../../../flutter/impeller/base/base_unittests.cc
@@ -151,6 +148,9 @@
 ../../../flutter/impeller/display_list/aiks_dl_text_unittests.cc
 ../../../flutter/impeller/display_list/aiks_dl_unittests.cc
 ../../../flutter/impeller/display_list/aiks_dl_vertices_unittests.cc
+../../../flutter/impeller/display_list/aiks_unittests.cc
+../../../flutter/impeller/display_list/aiks_unittests.h
+../../../flutter/impeller/display_list/canvas_unittests.cc
 ../../../flutter/impeller/display_list/dl_golden_blur_unittests.cc
 ../../../flutter/impeller/display_list/dl_golden_unittests.cc
 ../../../flutter/impeller/display_list/dl_golden_unittests.h

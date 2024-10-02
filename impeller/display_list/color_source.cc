@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/aiks/color_source.h"
+#include "impeller/display_list/color_source.h"
 
 #include <memory>
 #include <variant>
 #include <vector>
 
-#include "impeller/aiks/paint.h"
 #include "impeller/core/sampler_descriptor.h"
+#include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
