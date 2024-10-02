@@ -86,12 +86,13 @@ class FileSystemUtils {
 
   /// Return the absolute path of the user's home directory.
   String? get homeDirPath {
-    switch (_platform) {
-      case Platform(isWindows: true, environment: {'USERPROFILE': final String path}):
-      case Platform(isWindows: false, environment: {'HOME': final String path}):
-        return _fileSystem.path.absolute(path);
+    String? path = _platform.isWindows
+      ? _platform.environment['USERPROFILE']
+      : _platform.environment['HOME'];
+    if (path != null) {
+      path = _fileSystem.path.absolute(path);
     }
-    return null;
+    return path;
   }
 }
 

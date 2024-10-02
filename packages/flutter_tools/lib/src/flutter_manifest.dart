@@ -201,11 +201,11 @@ class FlutterManifest {
       }
     }
 
-    // Pre-multi-platform plugin format
     late final YamlMap? plugin = _flutterDescriptor['plugin'] as YamlMap?;
 
     return switch (supportedPlatforms) {
       {'android': final YamlMap map} => map['package'] as String?,
+      // Pre-multi-platform plugin format
       null when isPlugin => plugin?['androidPackage'] as String?,
       _ => null,
     };
