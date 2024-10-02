@@ -1,6 +1,5 @@
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
-import 'package:process_runner/process_runner.dart';
 
 import 'environment.dart';
 import 'label.dart';
@@ -19,13 +18,15 @@ interface class Gn {
 
   final Environment _environment;
 
-  String get _gnPath => p.join(
-        _environment.engine.srcDir.path,
-        'flutter',
-        'third_party',
-        'gn',
-        _environment.platform.isWindows ? 'gn.exe' : 'gn',
-      );
+  String get _gnPath {
+    return p.join(
+      _environment.engine.srcDir.path,
+      'flutter',
+      'third_party',
+      'gn',
+      _environment.platform.isWindows ? 'gn.exe' : 'gn',
+    );
+  }
 
   /// Returns a list of build targets that match the given [pattern].
   ///
@@ -41,15 +42,14 @@ interface class Gn {
     String outDir,
     TargetPattern pattern,
   ) async {
-    final List<String> command = <String>[
+    final command = [
       _gnPath,
       'desc',
       '--format=json',
       outDir,
       pattern.toGnPattern(),
     ];
-    final ProcessRunnerResult process =
-        await _environment.processRunner.runProcess(
+    final process = await _environment.processRunner.runProcess(
       command,
       workingDirectory: _environment.engine.srcDir,
       failOk: true,
@@ -72,7 +72,7 @@ interface class Gn {
             'No targets matched the pattern `${pattern.toGnPattern()}`',
           );
         }
-        return <BuildTarget>[];
+        return [];
       }
 
       _environment.logger.fatal(
@@ -95,13 +95,13 @@ interface class Gn {
     return result
         .asMap()
         .entries
-        .map((MapEntry<String, Object?> entry) {
-          final String label = entry.key;
-          final Object? properties = entry.value;
+        .map((entry) {
+          final label = entry.key;
+          final properties = entry.value;
           if (properties is! Map<String, Object?>) {
             return null;
           }
-          final BuildTarget? target = BuildTarget._fromJson(
+          final target = BuildTarget._fromJson(
             label,
             JsonObject(properties),
           );
@@ -130,7 +130,7 @@ sealed class BuildTarget {
     final (
       String type,
       bool testOnly,
-    ) = json.map((JsonObject json) => (
+    ) = json.map((json) => (
           json.string('type'),
           json.boolean('testonly'),
         ));
