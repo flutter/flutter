@@ -4329,8 +4329,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           assert(rearrangeOverlay);
           entry.handleAdd(
             navigator: this,
-            previousPresent: _getRouteBefore(
-                index - 1, _RouteEntry.isPresentPredicate)?.route,
+            previousPresent: _getRouteBefore(index - 1, _RouteEntry.isPresentPredicate)?.route,
           );
           assert(entry.currentState == _RouteLifecycle.adding);
           continue;
