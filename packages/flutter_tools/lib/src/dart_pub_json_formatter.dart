@@ -29,9 +29,9 @@ class DartDependencyPackage {
       name: packageInfo['name'] as String? ?? '',
       version: packageInfo['version'] as String? ?? '',
       source: packageInfo['source'] as String? ?? '',
-      dependencies: switch (packageInfo['dependencies']) {
+      dependencies: switch (packageInfo['dependencies'] as List<Object?>?) {
         final List<Object?> list => list.map((Object? e) => '$e').toList(),
-        _ => <String>[],
+        null => <String>[],
       },
     );
   }
