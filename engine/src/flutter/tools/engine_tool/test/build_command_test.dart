@@ -17,17 +17,9 @@ import 'src/test_build_configs.dart';
 import 'utils.dart';
 
 void main() {
-  final cannedProcesses = [
-    CannedProcess(
-      (command) => command.contains('desc'),
-      stdout: fixtures.gnDescOutput(),
-    ),
-  ];
-
   test('can find host runnable build', () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
-      cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
@@ -61,7 +53,6 @@ void main() {
   test('build command invokes gn', () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
-      cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
@@ -96,7 +87,6 @@ void main() {
   test('build command invokes ninja', () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
-      cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
@@ -130,7 +120,6 @@ void main() {
   test('build command invokes generator', () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
-      cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
@@ -167,7 +156,6 @@ void main() {
   test('build command does not invoke tests', () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
-      cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
@@ -205,7 +193,6 @@ void main() {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
       withRbe: true,
-      cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
@@ -254,7 +241,6 @@ void main() {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
       withRbe: true,
-      cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
@@ -298,7 +284,6 @@ void main() {
   test('build command fails when rbe is enabled but not supported', () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
-      cannedProcesses: cannedProcesses,
       // Intentionally omit withRbe: true.
       // That means the //flutter/build/rbe directory will not be created.
     );
@@ -335,7 +320,6 @@ void main() {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
       withRbe: true,
-      cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
@@ -383,7 +367,6 @@ void main() {
       () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
-      cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
@@ -423,9 +406,7 @@ void main() {
   });
 
   test('mangleConfigName removes the OS and adds ci/ as needed', () {
-    final testEnv = TestEnvironment.withTestEngine(
-      cannedProcesses: cannedProcesses,
-    );
+    final testEnv = TestEnvironment.withTestEngine();
     addTearDown(testEnv.cleanup);
 
     final env = testEnv.environment;
@@ -434,9 +415,7 @@ void main() {
   });
 
   test('mangleConfigName throws when the input config name is malformed', () {
-    final testEnv = TestEnvironment.withTestEngine(
-      cannedProcesses: cannedProcesses,
-    );
+    final testEnv = TestEnvironment.withTestEngine();
     addTearDown(testEnv.cleanup);
 
     final env = testEnv.environment;
@@ -447,9 +426,7 @@ void main() {
   });
 
   test('demangleConfigName adds the OS and removes ci/ as needed', () {
-    final testEnv = TestEnvironment.withTestEngine(
-      cannedProcesses: cannedProcesses,
-    );
+    final testEnv = TestEnvironment.withTestEngine();
     addTearDown(testEnv.cleanup);
 
     final env = testEnv.environment;
@@ -467,9 +444,7 @@ void main() {
     final configs = <String, BuilderConfig>{
       'namespace_test_config': namespaceTestConfigs,
     };
-    final testEnv = TestEnvironment.withTestEngine(
-      cannedProcesses: cannedProcesses,
-    );
+    final testEnv = TestEnvironment.withTestEngine();
     addTearDown(testEnv.cleanup);
 
     final runner = ToolCommandRunner(
@@ -496,9 +471,7 @@ void main() {
     final configs = <String, BuilderConfig>{
       'namespace_test_config': namespaceTestConfigs,
     };
-    final testEnv = TestEnvironment.withTestEngine(
-      cannedProcesses: cannedProcesses,
-    );
+    final testEnv = TestEnvironment.withTestEngine();
     addTearDown(testEnv.cleanup);
 
     final runner = ToolCommandRunner(
@@ -519,7 +492,20 @@ void main() {
   test('build command invokes ninja with the specified target', () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
-      cannedProcesses: cannedProcesses,
+      cannedProcesses: [
+        CannedProcess(
+          (command) => command.contains('desc'),
+          stdout: convert.jsonEncode({
+            '//flutter/fml:fml_arc_unittests': {
+              'outputs': [
+                '//out/host_debug/fml_arc_unittests',
+              ],
+              'testonly': true,
+              'type': 'executable',
+            },
+          }),
+        ),
+      ],
     );
     addTearDown(testEnv.cleanup);
 
@@ -571,7 +557,34 @@ void main() {
   test('build command invokes ninja with all matched targets', () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
-      cannedProcesses: cannedProcesses,
+      cannedProcesses: [
+        CannedProcess(
+          (command) => command.contains('desc'),
+          stdout: convert.jsonEncode({
+            '//flutter/display_list:display_list_unittests': {
+              'outputs': [
+                '//out/host_debug/display_list_unittests',
+              ],
+              'testonly': true,
+              'type': 'executable',
+            },
+            '//flutter/flow:flow_unittests': {
+              'outputs': [
+                '//out/host_debug/flow_unittests',
+              ],
+              'testonly': true,
+              'type': 'executable',
+            },
+            '//flutter/fml:fml_arc_unittests': {
+              'outputs': [
+                '//out/host_debug/fml_arc_unittests',
+              ],
+              'testonly': true,
+              'type': 'executable',
+            },
+          }),
+        ),
+      ],
     );
     addTearDown(testEnv.cleanup);
 
@@ -623,18 +636,17 @@ void main() {
   });
 
   test('build command gracefully handles no matched targets', () async {
-    final cannedProcesses = [
-      CannedProcess(
-        (command) => command.contains('desc'),
-        stdout: fixtures.gnDescOutputEmpty(
-          gnPattern: 'testing/scenario_app:sceario_app',
-        ),
-        exitCode: 1,
-      ),
-    ];
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
-      cannedProcesses: cannedProcesses,
+      cannedProcesses: [
+        CannedProcess(
+          (command) => command.contains('desc'),
+          stdout: '''
+The input testing/scenario_app:sceario_app matches no targets, configs or files.
+''',
+          exitCode: 1,
+        ),
+      ],
     );
     addTearDown(testEnv.cleanup);
 
@@ -671,7 +683,6 @@ void main() {
 
   test('et help build line length is not too big', () async {
     final testEnv = TestEnvironment.withTestEngine(
-      cannedProcesses: cannedProcesses,
       verbose: true,
     );
     addTearDown(testEnv.cleanup);
@@ -699,7 +710,6 @@ void main() {
   test('verbose "et help build" contains CI builds', () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
-      cannedProcesses: cannedProcesses,
       verbose: true,
     );
     addTearDown(testEnv.cleanup);
@@ -740,7 +750,6 @@ void main() {
   test('non-verbose "et help build" does not contain ci builds', () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
-      cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:ffi' show Abi;
 
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:logging/logging.dart' as log;
 import 'package:test/test.dart';
 
-import 'fixtures.dart' as fixtures;
 import 'src/test_build_configs.dart';
 import 'utils.dart';
 
@@ -17,19 +17,11 @@ void main() {
     return logs.map((log.LogRecord r) => r.message).toList();
   }
 
-  final cannedProcesses = <CannedProcess>[
-    CannedProcess(
-      (command) => command.contains('desc'),
-      stdout: fixtures.gnDescOutput(),
-    ),
-  ];
-
   test('query command returns builds for the host platform.', () async {
     final testEnvironment = TestEnvironment.withTestEngine(
       // Intentionally use the default parameter to make it explicit.
       // ignore: avoid_redundant_argument_values
       abi: Abi.linuxX64,
-      cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnvironment.cleanup);
 
@@ -132,7 +124,6 @@ void main() {
       // Intentionally use the default parameter to make it explicit.
       // ignore: avoid_redundant_argument_values
       abi: Abi.linuxX64,
-      cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnvironment.cleanup);
 
@@ -206,9 +197,7 @@ void main() {
   });
 
   test('query command with --all returns all builds.', () async {
-    final testEnvironment = TestEnvironment.withTestEngine(
-      cannedProcesses: cannedProcesses,
-    );
+    final testEnvironment = TestEnvironment.withTestEngine();
     addTearDown(testEnvironment.cleanup);
 
     final linuxBuilders1 = TestBuilderConfig();
@@ -313,7 +302,34 @@ void main() {
 
   test('query targets', () async {
     final testEnvironment = TestEnvironment.withTestEngine(
-      cannedProcesses: cannedProcesses,
+      cannedProcesses: [
+        CannedProcess(
+          (command) => command.contains('desc'),
+          stdout: jsonEncode({
+            '//flutter/display_list:display_list_unittests': {
+              'outputs': [
+                '//out/host_debug/display_list_unittests',
+              ],
+              'testonly': true,
+              'type': 'executable',
+            },
+            '//flutter/flow:flow_unittests': {
+              'outputs': [
+                '//out/host_debug/flow_unittests',
+              ],
+              'testonly': true,
+              'type': 'executable',
+            },
+            '//flutter/fml:fml_arc_unittests': {
+              'outputs': [
+                '//out/host_debug/fml_arc_unittests',
+              ],
+              'testonly': true,
+              'type': 'executable',
+            },
+          }),
+        ),
+      ],
     );
     addTearDown(testEnvironment.cleanup);
 
