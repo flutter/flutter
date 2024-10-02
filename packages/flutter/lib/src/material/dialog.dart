@@ -230,7 +230,7 @@ class Dialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final DialogThemeData dialogTheme = DialogTheme.of(context).data;
+    final DialogThemeData dialogTheme = DialogTheme.of(context);
     final EdgeInsets effectivePadding = MediaQuery.viewInsetsOf(context)
       + (insetPadding ?? dialogTheme.insetPadding ?? _defaultInsetPadding);
     final DialogThemeData defaults = theme.useMaterial3
@@ -720,7 +720,7 @@ class AlertDialog extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
 
-    final DialogThemeData dialogTheme = DialogTheme.of(context).data;
+    final DialogThemeData dialogTheme = DialogTheme.of(context);
     final DialogThemeData defaults = theme.useMaterial3 ? _DialogDefaultsM3(context) : _DialogDefaultsM2(context);
 
     String? label = semanticLabel;
@@ -1235,7 +1235,7 @@ class SimpleDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
-    final TextStyle defaultTextStyle = titleTextStyle ?? DialogTheme.of(context).data.titleTextStyle ?? theme.textTheme.titleLarge!;
+    final TextStyle defaultTextStyle = titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.titleLarge!;
     final double fontSize = defaultTextStyle.fontSize ?? kDefaultFontSize;
     final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
     final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
@@ -1445,7 +1445,7 @@ Future<T?> showDialog<T>({
     builder: builder,
     barrierColor: barrierColor
       ?? DialogTheme.of(context).barrierColor
-      ?? Theme.of(context).dialogTheme.data.barrierColor
+      ?? Theme.of(context).dialogTheme.barrierColor
       ?? Colors.black54,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
