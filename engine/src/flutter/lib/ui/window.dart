@@ -1059,6 +1059,13 @@ enum Brightness {
 final SingletonFlutterWindow window = SingletonFlutterWindow._();
 
 /// Additional data available on each flutter frame.
+///
+/// See also:
+///
+///  * [Window.frameData] and [PlatformDispatcher.frameData], which expose the
+///    frame data for the current frame.
+///  * [PlatformDispatcher.onFrameDataChanged], which notifies listeners when
+///    a window's frame data has changed.
 class FrameData {
   const FrameData._({this.frameNumber = -1});
 
