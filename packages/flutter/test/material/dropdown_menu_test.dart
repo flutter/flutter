@@ -1137,12 +1137,13 @@ void main() {
     expect(menuMaterial, findsOneWidget);
   });
 
-  testWidgets('Down key can highlight the menu item on desktop platforms', (WidgetTester tester) async {
+  testWidgets('Down key can highlight the menu item while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           trailingIcon: const Icon(Icons.ac_unit),
           dropdownMenuEntries: menuChildren,
         ),
@@ -1177,14 +1178,15 @@ void main() {
     );
     item0material = tester.widget<Material>(button0Material);
     expect(item0material.color, Colors.transparent); // the previous item should not be highlighted.
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
-  testWidgets('Up key can highlight the menu item on desktop platforms', (WidgetTester tester) async {
+  testWidgets('Up key can highlight the menu item while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1219,16 +1221,17 @@ void main() {
 
     item5material = tester.widget<Material>(button5Material);
     expect(item5material.color, Colors.transparent); // the previous item should not be highlighted.
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
-  testWidgets('Down key and up key can navigate on desktop platforms '
-      'when a label text contains another label text', (WidgetTester tester) async {
+  testWidgets('Down key and up key can navigate while focused when a label text '
+      'contains another label text', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: const Scaffold(
         body: DropdownMenu<int>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: <DropdownMenuEntry<int>>[
             DropdownMenuEntry<int>(
               value: 0,
@@ -1290,7 +1293,7 @@ void main() {
     item0Material = tester.widget<Material>(button0Material);
     expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
 
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/151878.
   testWidgets('Searching for non matching item does not crash',
@@ -1338,13 +1341,14 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
-  testWidgets('Default search prioritises the current highlight on desktop platforms',
+  testWidgets('Default search prioritises the current highlight while focused',
       (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1374,16 +1378,17 @@ void main() {
     );
     item2material = tester.widget<Material>(button2Material);
     expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/152375.
-  testWidgets('Down key and up key can navigate on desktop platforms when a label text contains '
+  testWidgets('Down key and up key can navigate while focused when a label text contains '
       'another label text using customized search algorithm', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<int>(
+          requestFocusOnTap: true,
           searchCallback: (List<DropdownMenuEntry<int>> entries, String query) {
             if (query.isEmpty) {
               return null;
@@ -1454,15 +1459,16 @@ void main() {
     item0Material = tester.widget<Material>(button0Material);
     expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
 
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/152375.
-  testWidgets('Searching can hightlight entry after keyboard navigation', (WidgetTester tester) async {
+  testWidgets('Searching can hightlight entry after keyboard navigation while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1482,15 +1488,16 @@ void main() {
     );
     final Material itemMaterial = tester.widget<Material>(buttonMaterial);
     expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   testWidgets('The text input should match the label of the menu item '
-      'while pressing down key on desktop platforms', (WidgetTester tester) async {
+      'when pressing down key while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1513,15 +1520,16 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 2'), findsOneWidget);
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   testWidgets('The text input should match the label of the menu item '
-      'while pressing up key on desktop platforms', (WidgetTester tester) async {
+      'when pressing up key while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1544,9 +1552,9 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 3'), findsOneWidget);
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
-  testWidgets('Disabled button will be skipped while pressing up/down key on desktop platforms', (WidgetTester tester) async {
+  testWidgets('Disabled button will be skipped while pressing up/down key while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
@@ -1560,6 +1568,7 @@ void main() {
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuWithDisabledItems,
         ),
       ),
@@ -1588,7 +1597,7 @@ void main() {
     );
     final Material item3Material = tester.widget<Material>(button3Material);
     expect(item3Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   testWidgets('Searching is enabled by default on mobile platforms if initialSelection is non null', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
@@ -1637,12 +1646,13 @@ void main() {
     expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Highlight can move up/down starting from the searching result on desktop platforms', (WidgetTester tester) async {
+  testWidgets('Highlight can move up/down starting from the searching result while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1683,7 +1693,7 @@ void main() {
     );
     final Material item5Material = tester.widget<Material>(button5Material);
     expect(item5Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   testWidgets('Filtering is disabled by default', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();

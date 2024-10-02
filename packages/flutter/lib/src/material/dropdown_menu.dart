@@ -365,7 +365,8 @@ class DropdownMenu<T> extends StatefulWidget {
   ///    virtual keyboard will not appear.
   ///
   ///  * On desktop platforms, acts as if set to true; the dropdown takes the
-  ///    focus when activated.
+  ///    focus when activated. This also enables keyboard navigation through
+  ///    menu items.
   ///
   /// Set this to true or false explicitly to override the default behavior.
   ///
