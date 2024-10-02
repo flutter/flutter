@@ -71,8 +71,6 @@ class AppStateModel extends Model {
   // Removes an item from the cart.
   void removeItemFromCart(int productId) {
     switch (_productsInCart[productId]) {
-      case null:
-        return;
       case 1:
         _productsInCart.remove(productId);
       case final int value:
