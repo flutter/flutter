@@ -914,10 +914,9 @@ class _AppBarState extends State<AppBar> {
       ?? defaults.actionsIconTheme?.copyWith(color: actionForegroundColor)
       ?? overallIconTheme;
 
-    // TODO(Craftplacer): consider using EdgeInsets.only(right: 8.0) instead of EdgeInsets.zero for Material 3 in the future, https://github.com/flutter/flutter/issues/155747
     final EdgeInsetsGeometry actionsPadding = widget.actionsPadding
       ?? appBarTheme.actionsPadding
-      ?? EdgeInsets.zero;
+      ?? defaults.actionsPadding!;
 
     TextStyle? toolbarTextStyle = widget.toolbarTextStyle
       ?? appBarTheme.toolbarTextStyle
@@ -2395,6 +2394,9 @@ class _AppBarDefaultsM2 extends AppBarTheme {
 
   @override
   TextStyle? get titleTextStyle => _theme.textTheme.titleLarge;
+
+  @override
+  EdgeInsets? get actionsPadding => EdgeInsets.zero;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - AppBar
@@ -2447,6 +2449,12 @@ class _AppBarDefaultsM3 extends AppBarTheme {
 
   @override
   TextStyle? get titleTextStyle => _textTheme.titleLarge;
+  
+  // TODO(Craftplacer): Consider using EdgeInsets.only(right: 8.0) instead of
+  // EdgeInsets.zero for Material 3 in the future,
+  // https://github.com/flutter/flutter/issues/155747
+  @override
+  EdgeInsets? get actionsPadding => EdgeInsets.zero; 
 }
 
 // Variant configuration
