@@ -7,6 +7,14 @@ part of dart.ui;
 typedef VoidCallback = void Function();
 
 /// Signature for [PlatformDispatcher.onBeginFrame].
+///
+/// The `duration` argument is the point at which the current frame interval
+/// began, expressed as a duration since some epoch. The epoch in all
+/// frames will be the same, but it may not match [DateTime]'s epoch.
+///
+/// For any two frames `a` and `b` such that the frame number of `a` is less
+/// than the frame number of `b`, the duration argument for `a` will be less
+/// than or equal to the duration argument for `b`.
 typedef FrameCallback = void Function(Duration duration);
 
 /// Signature for [PlatformDispatcher.onReportTimings].
