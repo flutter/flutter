@@ -1078,7 +1078,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                         child: ListenableBuilder(
                           listenable: _listenable, // immutable
                           builder: (BuildContext context, Widget? child) {
-                            return widget.route.buildFlexibleTransitions(
+                            return widget.route._buildFlexibleTransitions(
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,
@@ -1464,34 +1464,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// order to show the right route transition when the above route either enters
   /// or leaves the navigation stack. If not null, the `receivedTransition` will
   /// wrap the route content through [buildFlexibleTransitions].
+  @visibleForTesting
   DelegatedTransitionBuilder? receivedTransition;
 
-  /// Wraps the transitions of this route with a [DelegatedTransitionBuilder], when
-  /// [receivedTransition] is not null.
-  ///
-  /// This allows the current route to sync its exit transition with the
-  /// entrance transition of the incoming route, as well as the exit animation
-  /// when the above route is popped.
-  ///
-  /// {@tool dartpad}
-  /// This sample shows an app that uses three different page transitions, a
-  /// Material Zoom transition, the standard Cupertino sliding transition, and a
-  /// custom vertical transition. All of the page routes are able to inform the
-  /// previous page how to transition off the screen to sync with the new page.
-  ///
-  /// ** See code in examples/api/lib/widgets/routes/flexible_route_transitions.0.dart **
-  /// {@end-tool}
-  ///
-  /// {@tool dartpad}
-  /// This sample shows an app that uses the same transitions as the previous
-  /// sample, this time in a [MaterialApp.router].
-  ///
-  /// ** See code in examples/api/lib/widgets/routes/flexible_route_transitions.1.dart **
-  /// {@end-tool}
-  ///
-  /// Override this method if more granular control of how the [receivedTransition]
-  /// is used for the transitions of a route is needed.
-  Widget buildFlexibleTransitions(
+  // Wraps the transitions of this route with a DelegatedTransitionBuilder, when
+  // _receivedTransition is not null.
+  Widget _buildFlexibleTransitions(
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,

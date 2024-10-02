@@ -142,7 +142,7 @@ class _AnimatedState extends State<AnimatedWidget> {
   Widget build(BuildContext context) => widget.build(context);
 }
 
-/// Signature for a page transition's secondary transition builder.
+/// Signature for a builder used to control a page's exit transition.
 ///
 /// Typically used as the argument for [ModalRoute.delegatedTransition].
 typedef DelegatedTransitionBuilder = Widget? Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child);

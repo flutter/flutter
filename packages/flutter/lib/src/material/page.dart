@@ -194,8 +194,7 @@ class MaterialPage<T> extends Page<T> {
 
   @override
   Route<T> createRoute(BuildContext context) {
-    final _PageBasedMaterialPageRoute<T> route = _PageBasedMaterialPageRoute<T>(page: this, allowSnapshotting: allowSnapshotting);
-    return route;
+    return _PageBasedMaterialPageRoute<T>(page: this, allowSnapshotting: allowSnapshotting);
   }
 }
 
