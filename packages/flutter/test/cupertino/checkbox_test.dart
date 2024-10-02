@@ -475,7 +475,7 @@ void main() {
   });
 
   testWidgets('Checkbox configures mouse cursor', (WidgetTester tester) async {
-    Widget buildApp({MouseCursor? mouseCursor, bool enabled = true, bool value = true}) {
+    Widget buildApp({ MouseCursor? mouseCursor, bool enabled = true, bool value = true }) {
       return CupertinoApp(
         home: Center(
           child: CupertinoCheckbox(
@@ -507,11 +507,11 @@ void main() {
   });
 
   testWidgets('Mouse cursor resolves in selected/focused/disabled states', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     addTearDown(focusNode.dispose);
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    Widget buildCheckbox({required bool value, required bool enabled}) {
+    Widget buildCheckbox({ required bool value, required bool enabled }) {
       return CupertinoApp(
         home: Center(
           child: CupertinoCheckbox(

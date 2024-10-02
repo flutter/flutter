@@ -2236,7 +2236,7 @@ void main() {
   });
 
   testWidgets('Checkbox.adaptive respects Checkbox.mouseCursor on iOS/macOS', (WidgetTester tester) async {
-    Widget buildApp({MouseCursor? mouseCursor}) {
+    Widget buildApp({ MouseCursor? mouseCursor }) {
       return MaterialApp(
         home: Material(
           child: Checkbox.adaptive(
