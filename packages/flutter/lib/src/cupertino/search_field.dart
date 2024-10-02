@@ -421,7 +421,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
-    if (_maxHeight == null){
+    if (_maxHeight == null) {
       _maxHeight ??= (context.findRenderObject() as RenderBox?)?.size.height;
     }
     else {
