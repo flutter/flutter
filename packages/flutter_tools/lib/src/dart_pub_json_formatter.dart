@@ -26,8 +26,8 @@ class DartDependencyPackage {
         dependencies: dependencies,
       );
     }
-    if (packageInfo case {'dependencies': final List<dynamic> list}) {
-      dependencies = <String>[for (final dynamic e in list) '$e'];
+    if (packageInfo case {'dependencies': final List<Object?> list}) {
+      dependencies = <String>[for (final Object? e in list) '$e'];
     }
     return DartDependencyPackage(
       name: packageInfo['name'] as String? ?? '',

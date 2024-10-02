@@ -165,10 +165,12 @@ class FlutterManifest {
   ///   licenses:
   ///     - assets/foo_license.txt
   /// ```
-  List<String> get additionalLicenses => <String>[
-    if (_flutterDescriptor case {'licenses': final YamlList list})
-      for (final dynamic item in list) '$item',
-  ];
+  List<String> get additionalLicenses {
+    return <String>[
+      if (_flutterDescriptor case {'licenses': final YamlList list})
+        for (final Object? item in list) '$item',
+    ];
+  }
 
   /// True if this manifest declares a Flutter module project.
   ///
