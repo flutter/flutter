@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_devicelab/framework/runner.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'common.dart';
 
@@ -39,6 +40,32 @@ void main() {
       expect(printLog.length, 2);
       expect(printLog[0], 'Consistently failed across all 3 executions.');
       expect(printLog[1], 'flaky: false');
+    });
+
+    test('Regression test for https://github.com/flutter/flutter/issues/155475.', () async {
+      // Runs multiple concurrent instances of a short-lived task in an effort to
+      // trigger the race between the VM service processing the response from
+      // ext.cocoonRunTask and the VM shutting down, which will throw a RPCError
+      // with a "Service connection disposed" message.
+      //
+      // Obviously this isn't foolproof, but this test becoming flaky or failing
+      // consistently should signal that we're encountering a shutdown race
+      // somewhere.
+      const int runs = 75;
+      try {
+        await Future.wait(
+          <Future<void>>[
+            for (int i = 0; i < runs; ++i)
+              runTasks(
+                <String>['smoke_test_success'],
+                isolateParams: isolateParams,
+              ),
+          ],
+          eagerError: true,
+        );
+      } on RPCError catch(e) {
+        fail('Unexpected RPCError: $e');
+      }
     });
   });
 }

@@ -279,9 +279,6 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
 
   while (true) {
     try {
-      // Make sure VM server is up by successfully opening and closing a socket.
-      await (await WebSocket.connect(url)).close();
-
       // Look up the isolate.
       final VmService client = await vmServiceConnectUri(url);
       VM vm = await client.getVM();
