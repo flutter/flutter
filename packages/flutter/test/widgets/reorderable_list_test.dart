@@ -927,7 +927,6 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/155936
     const int itemCount = 5;
     const List<double> items = <double>[10.0, 20.0, 30.0, 40.0, 50.0];
-    final Map<int, double> itemExtents = <int, double>{};
 
     void handleReorder(int fromIndex, int toIndex) {
       if (toIndex > fromIndex) {
@@ -942,17 +941,12 @@ void main() {
         home: ReorderableList(
           itemBuilder: (BuildContext context, int index) => SizedBox(
             key: ValueKey<double>(items[index]),
-            width: 100,
-            height: items[index],
+            child: Text('Item $index'),
           ),
           itemCount: itemCount,
           onReorder: handleReorder,
           itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
-            final double extent = items[index];
-
-            itemExtents[index] = extent;
-
-            return extent;
+            return items[index];
           },
         ),
       ),
@@ -964,6 +958,11 @@ void main() {
       2: 30.0,
       3: 40.0,
       4: 50.0,
+    };
+
+    final Map<int, double> itemExtents = <int, double>{
+      for (int i = 0; i < itemCount; i++)
+        i: tester.getSize(find.text('Item $i')).height,
     };
 
     expect(const MapEquality<int, double>().equals(itemExtents, expectedExtents), isTrue);
