@@ -30,6 +30,7 @@ class SK_API_AVAILABLE_CA_METAL_LAYER IOSSurfaceMetalImpeller final
  private:
   fml::scoped_nsobject<CAMetalLayer> layer_;
   const std::shared_ptr<impeller::Context> impeller_context_;
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
   bool is_valid_ = false;
 
   // |IOSSurface|
