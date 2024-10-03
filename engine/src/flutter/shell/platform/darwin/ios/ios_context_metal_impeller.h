@@ -9,7 +9,6 @@
 #include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.h"
 #include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #include "flutter/shell/platform/darwin/ios/ios_context.h"
-#include "impeller/aiks/aiks_context.h"
 
 namespace impeller {
 
@@ -35,7 +34,6 @@ class IOSContextMetalImpeller final : public IOSContext {
 
  private:
   fml::scoped_nsobject<FlutterDarwinContextMetalImpeller> darwin_context_metal_impeller_;
-  std::shared_ptr<impeller::AiksContext> aiks_context_;
 
   // |IOSContext|
   sk_sp<GrDirectContext> CreateResourceContext() override;
@@ -50,9 +48,6 @@ class IOSContextMetalImpeller final : public IOSContext {
 
   // |IOSContext|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
-
-  // |IOSContext|
-  std::shared_ptr<impeller::AiksContext> GetAiksContext() const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSContextMetalImpeller);
 };
