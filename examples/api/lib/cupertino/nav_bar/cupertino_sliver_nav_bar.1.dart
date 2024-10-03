@@ -100,12 +100,8 @@ class NextPage extends StatelessWidget {
             ),
             middle: const Text('Contacts Group'),
             largeTitle: const Text('Family'),
-            drawer: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-              child: CupertinoSearchTextField(),
-            ),
+            drawer: CupertinoSliverNavigationBar.searchField,
             drawerMode: drawerMode,
-            drawerHeight: 51.0,
           ),
           const SliverFillRemaining(
             child: Column(

@@ -19,6 +19,7 @@ import 'constants.dart';
 import 'icons.dart';
 import 'page_scaffold.dart';
 import 'route.dart';
+import 'search_field.dart';
 import 'theme.dart';
 
 /// Modes that determine when to display the navigation bar's drawer.
@@ -722,14 +723,17 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.stretch = false,
     this.drawer,
     this.drawerMode = NavigationDrawerMode.none,
-    this.drawerHeight = _kNavBarDrawerHeight,
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
          'true.',
        ),
-       assert (drawer != null || drawerMode == NavigationDrawerMode.none);
+       assert (
+        drawer != null || drawerMode == NavigationDrawerMode.none,
+        'A drawer must be provided if drawerMode is set to a value other than '
+        'NavigationDrawerMode.none.',
+       );
 
   /// The navigation bar's title.
   ///
@@ -821,22 +825,24 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.CupertinoNavigationBar.heroTag}
   final Object heroTag;
 
-  /// A widget to place under the large title or static navigation bar if there
-  /// is no large title.
+  /// A widget to place at the bottom of the large title or static navigation
+  /// bar if there is no large title.
   ///
-  /// Typically, this is a CupertinoSearchTextField.
-  final Widget? drawer;
+  /// Only widgets that implement [PreferredSizeWidget] can be used at the
+  /// bottom of a navigation bar.
+  ///
+  /// See also:
+  ///
+  ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
+  final PreferredSizeWidget? drawer;
 
   /// Modes that determine when to display the navigation bar's drawer.
   ///
+  /// A [drawer] must be provided if this is set to
+  /// [NavigationDrawerMode.automatic] or [NavigationDrawerMode.always].
+  ///
   /// Defaults to [NavigationDrawerMode.none].
   final NavigationDrawerMode drawerMode;
-
-  /// The height of the [drawer].
-  ///
-  /// Defaults to 50.0, which is the height of a CupertinoSearchTextField with
-  /// padding.
-  final double drawerHeight;
 
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor?.alpha == 0xFF;
@@ -852,6 +858,10 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///
   /// Defaults to `false`.
   final bool stretch;
+
+  /// The default [drawer], which is a [CupertinoSearchTextField] with some
+  /// padding.
+  static PreferredSizeWidget searchField = const _SearchableCupertinoNavigationBar();
 
   @override
   State<CupertinoSliverNavigationBar> createState() => _CupertinoSliverNavigationBarState();
@@ -906,7 +916,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
           drawer: widget.drawer ?? const SizedBox.shrink(),
           drawerMode: widget.drawerMode,
-          drawerHeight: widget.drawerMode != NavigationDrawerMode.none ? widget.drawerHeight : 0.0,
+          drawerHeight: widget.drawer != null && widget.drawerMode != NavigationDrawerMode.none ? widget.drawer!.preferredSize.height : 0.0,
         ),
       ),
     );
@@ -2711,4 +2721,19 @@ Widget _navBarHeroFlightShuttleBuilder(
         topNavBar: fromNavBar,
       );
   }
+}
+
+class _SearchableCupertinoNavigationBar extends StatelessWidget implements PreferredSizeWidget {
+  const _SearchableCupertinoNavigationBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      child: CupertinoSearchTextField(),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(50.0);
 }
