@@ -32,11 +32,11 @@ template("gen_dartcli_call") {
   }
 
   # Add default arguments to the Dart CLI.
+  # TODO(https://github.com/flutter/flutter/issues/156171): --suppress-analytics
   dart_args = []
   if (defined(invoker.args)) {
     dart_args += invoker.args
   }
-  dart_args += [ "--suppress-analytics" ]
 
   # Actually generate the shell script.
   gen_executable_call(target_name) {
@@ -46,6 +46,8 @@ template("gen_dartcli_call") {
                            [
                              "cwd",
                              "output",
+                             "testonly",
+                             "visibility",
                            ])
   }
 }
