@@ -63,8 +63,4 @@ std::shared_ptr<impeller::Context> IOSContext::GetImpellerContext() const {
   return nullptr;
 }
 
-std::shared_ptr<impeller::AiksContext> IOSContext::GetAiksContext() const {
-  return nullptr;
-}
-
 }  // namespace flutter

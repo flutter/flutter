@@ -8,7 +8,6 @@
 #import <QuartzCore/QuartzCore.h>
 #include "flow/surface.h"
 #include "flow/surface_frame.h"
-#include "impeller/aiks/aiks_context.h"
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/make_copyable.h"
@@ -22,13 +21,14 @@ static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
 
 namespace flutter {
 
-GPUSurfaceMetalImpeller::GPUSurfaceMetalImpeller(
-    GPUSurfaceMetalDelegate* delegate,
-    const std::shared_ptr<impeller::AiksContext>& context,
-    bool render_to_surface)
+GPUSurfaceMetalImpeller::GPUSurfaceMetalImpeller(GPUSurfaceMetalDelegate* delegate,
+                                                 const std::shared_ptr<impeller::Context>& context,
+                                                 bool render_to_surface)
     : delegate_(delegate),
       render_target_type_(delegate->GetRenderTargetType()),
-      aiks_context_(context),
+      aiks_context_(
+          std::make_shared<impeller::AiksContext>(context,
+                                                  impeller::TypographerContextSkia::Make())),
       render_to_surface_(render_to_surface) {
   // If this preference is explicitly set, we allow for disabling partial repaint.
   NSNumber* disablePartialRepaint =
@@ -167,14 +167,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         impeller::IRect cull_rect = surface->coverage();
         SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
         surface->SetFrameBoundary(surface_frame.submit_info().frame_boundary);
-
-        const bool reset_host_buffer = surface_frame.submit_info().frame_boundary;
         auto render_result =
             impeller::RenderToOnscreen(aiks_context->GetContentContext(),         //
                                        surface->GetTargetRenderPassDescriptor(),  //
                                        display_list,                              //
                                        sk_cull_rect,                              //
-                                       /*reset_host_buffer=*/reset_host_buffer    //
+                                       /*reset_host_buffer=*/true                 //
             );
         if (!render_result) {
           return false;
