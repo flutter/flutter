@@ -7,6 +7,9 @@
 #include "flutter/impeller/renderer/backend/metal/formats_mtl.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
+#include "impeller/display_list/aiks_context.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
+#include "impeller/typographer/typographer_context.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -17,8 +20,9 @@ IOSSurfaceMetalImpeller::IOSSurfaceMetalImpeller(const fml::scoped_nsobject<CAMe
     : IOSSurface(context),
       GPUSurfaceMetalDelegate(MTLRenderTargetType::kCAMetalLayer),
       layer_(layer),
-      impeller_context_(context ? context->GetImpellerContext() : nullptr) {
-  if (!impeller_context_) {
+      impeller_context_(context ? context->GetImpellerContext() : nullptr),
+      aiks_context_(context ? context->GetAiksContext() : nullptr) {
+  if (!impeller_context_ || !aiks_context_) {
     return;
   }
   is_valid_ = true;
@@ -41,8 +45,8 @@ void IOSSurfaceMetalImpeller::UpdateStorageSizeIfNecessary() {
 std::unique_ptr<Surface> IOSSurfaceMetalImpeller::CreateGPUSurface(GrDirectContext*) {
   impeller_context_->UpdateOffscreenLayerPixelFormat(
       impeller::FromMTLPixelFormat(layer_.get().pixelFormat));
-  return std::make_unique<GPUSurfaceMetalImpeller>(this,              //
-                                                   impeller_context_  //
+  return std::make_unique<GPUSurfaceMetalImpeller>(this,          //
+                                                   aiks_context_  //
   );
 }
 
