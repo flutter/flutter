@@ -15,6 +15,7 @@
 #include "impeller/toolkit/interop/impeller.h"
 #include "impeller/toolkit/interop/object.h"
 #include "impeller/toolkit/interop/paint.h"
+#include "impeller/toolkit/interop/paragraph.h"
 #include "impeller/toolkit/interop/path.h"
 #include "impeller/toolkit/interop/texture.h"
 
@@ -105,6 +106,8 @@ class DisplayListBuilder final
                        const Paint* paint);
 
   void DrawDisplayList(const DisplayList& dl, Scalar opacity);
+
+  void DrawParagraph(const Paragraph& paragraph, Point point);
 
   ScopedObject<DisplayList> Build();
 

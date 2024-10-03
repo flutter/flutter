@@ -18,10 +18,14 @@
 #include "impeller/toolkit/interop/mask_filter.h"
 #include "impeller/toolkit/interop/object.h"
 #include "impeller/toolkit/interop/paint.h"
+#include "impeller/toolkit/interop/paragraph.h"
+#include "impeller/toolkit/interop/paragraph_builder.h"
+#include "impeller/toolkit/interop/paragraph_style.h"
 #include "impeller/toolkit/interop/path.h"
 #include "impeller/toolkit/interop/path_builder.h"
 #include "impeller/toolkit/interop/surface.h"
 #include "impeller/toolkit/interop/texture.h"
+#include "impeller/toolkit/interop/typography_context.h"
 
 namespace impeller::interop {
 
@@ -38,10 +42,14 @@ DEFINE_PEER_GETTER(DisplayListBuilder, ImpellerDisplayListBuilder);
 DEFINE_PEER_GETTER(ImageFilter, ImpellerImageFilter);
 DEFINE_PEER_GETTER(MaskFilter, ImpellerMaskFilter);
 DEFINE_PEER_GETTER(Paint, ImpellerPaint);
+DEFINE_PEER_GETTER(Paragraph, ImpellerParagraph);
+DEFINE_PEER_GETTER(ParagraphBuilder, ImpellerParagraphBuilder);
+DEFINE_PEER_GETTER(ParagraphStyle, ImpellerParagraphStyle);
 DEFINE_PEER_GETTER(Path, ImpellerPath);
 DEFINE_PEER_GETTER(PathBuilder, ImpellerPathBuilder);
 DEFINE_PEER_GETTER(Surface, ImpellerSurface);
 DEFINE_PEER_GETTER(Texture, ImpellerTexture);
+DEFINE_PEER_GETTER(TypographyContext, ImpellerTypographyContext);
 
 static std::string GetVersionAsString(uint32_t version) {
   std::stringstream stream;
@@ -453,8 +461,8 @@ IMPELLER_EXTERN_C
 ImpellerTexture ImpellerTextureCreateWithContentsNew(
     ImpellerContext context,
     const ImpellerTextureDescriptor* descriptor,
-    const ImpellerMapping* IMPELLER_NONNULL contents,
-    void* IMPELLER_NULLABLE contents_on_release_user_data) {
+    const ImpellerMapping* contents,
+    void* contents_on_release_user_data) {
   TextureDescriptor desc;
   desc.storage_mode = StorageMode::kDevicePrivate;
   desc.type = TextureType::kTexture2D;
@@ -815,6 +823,225 @@ void ImpellerPaintSetImageFilter(ImpellerPaint paint,
 void ImpellerPaintSetMaskFilter(ImpellerPaint paint,
                                 ImpellerMaskFilter mask_filter) {
   GetPeer(paint)->SetMaskFilter(*GetPeer(mask_filter));
+}
+
+IMPELLER_EXTERN_C ImpellerParagraphStyle ImpellerParagraphStyleNew() {
+  return Create<ParagraphStyle>().Leak();
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleRetain(ImpellerParagraphStyle paragraph_style) {
+  ObjectBase::SafeRetain(paragraph_style);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleRelease(ImpellerParagraphStyle paragraph_style) {
+  ObjectBase::SafeRelease(paragraph_style);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetForeground(ImpellerParagraphStyle paragraph_style,
+                                         ImpellerPaint paint) {
+  GetPeer(paragraph_style)->SetForeground(Ref(GetPeer(paint)));
+}
+
+IMPELLER_EXTERN_C void ImpellerParagraphStyleSetBackground(
+    ImpellerParagraphStyle paragraph_style,
+    ImpellerPaint paint) {
+  GetPeer(paragraph_style)->SetBackground(Ref(GetPeer(paint)));
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetFontWeight(ImpellerParagraphStyle paragraph_style,
+                                         ImpellerFontWeight weight) {
+  GetPeer(paragraph_style)->SetFontWeight(ToTxtType(weight));
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetFontStyle(ImpellerParagraphStyle paragraph_style,
+                                        ImpellerFontStyle style) {
+  GetPeer(paragraph_style)->SetFontStyle(ToTxtType(style));
+}
+
+static std::string ReadString(const char* string) {
+  if (string == nullptr) {
+    return "";
+  }
+  return std::string{string};
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetFontFamily(ImpellerParagraphStyle paragraph_style,
+                                         const char* family_name) {
+  GetPeer(paragraph_style)->SetFontFamily(ReadString(family_name));
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetFontSize(ImpellerParagraphStyle paragraph_style,
+                                       float size) {
+  GetPeer(paragraph_style)->SetFontSize(size);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetHeight(ImpellerParagraphStyle paragraph_style,
+                                     float height) {
+  GetPeer(paragraph_style)->SetHeight(height);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetTextAlignment(
+    ImpellerParagraphStyle paragraph_style,
+    ImpellerTextAlignment align) {
+  GetPeer(paragraph_style)->SetTextAlignment(ToTxtType(align));
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetTextDirection(
+    ImpellerParagraphStyle paragraph_style,
+    ImpellerTextDirection direction) {
+  GetPeer(paragraph_style)->SetTextDirection(ToTxtType(direction));
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetMaxLines(ImpellerParagraphStyle paragraph_style,
+                                       uint32_t max_lines) {
+  GetPeer(paragraph_style)->SetMaxLines(max_lines);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetLocale(ImpellerParagraphStyle paragraph_style,
+                                     const char* locale) {
+  GetPeer(paragraph_style)->SetLocale(ReadString(locale));
+}
+
+IMPELLER_EXTERN_C
+void ImpellerDisplayListBuilderDrawParagraph(ImpellerDisplayListBuilder builder,
+                                             ImpellerParagraph paragraph,
+                                             const ImpellerPoint* point) {
+  GetPeer(builder)->DrawParagraph(*GetPeer(paragraph), ToImpellerType(*point));
+}
+
+IMPELLER_EXTERN_C ImpellerParagraphBuilder ImpellerParagraphBuilderNew(
+    ImpellerTypographyContext context) {
+  auto builder = Create<ParagraphBuilder>(*GetPeer(context));
+  if (!builder->IsValid()) {
+    VALIDATION_LOG << "Could not create valid paragraph builder.";
+    return nullptr;
+  }
+  return builder.Leak();
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphBuilderRetain(
+    ImpellerParagraphBuilder paragraph_builder) {
+  ObjectBase::SafeRetain(paragraph_builder);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphBuilderRelease(
+    ImpellerParagraphBuilder paragraph_builder) {
+  ObjectBase::SafeRelease(paragraph_builder);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphBuilderPushStyle(
+    ImpellerParagraphBuilder paragraph_builder,
+    ImpellerParagraphStyle style) {
+  GetPeer(paragraph_builder)->PushStyle(*GetPeer(style));
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphBuilderPopStyle(
+    ImpellerParagraphBuilder paragraph_builder) {
+  GetPeer(paragraph_builder)->PopStyle();
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphBuilderAddText(ImpellerParagraphBuilder paragraph_builder,
+                                     const uint8_t* data,
+                                     uint32_t length) {
+  if (data == nullptr) {
+    length = 0;
+  }
+  if (length == 0) {
+    return;
+  }
+  GetPeer(paragraph_builder)->AddText(data, length);
+}
+
+IMPELLER_EXTERN_C ImpellerParagraph ImpellerParagraphBuilderBuildParagraphNew(
+    ImpellerParagraphBuilder paragraph_builder,
+    float width) {
+  return GetPeer(paragraph_builder)->Build(width).Leak();
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphRetain(ImpellerParagraph paragraph) {
+  ObjectBase::SafeRetain(paragraph);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphRelease(ImpellerParagraph paragraph) {
+  ObjectBase::SafeRelease(paragraph);
+}
+
+IMPELLER_EXTERN_C
+float ImpellerParagraphGetMaxWidth(ImpellerParagraph paragraph) {
+  return GetPeer(paragraph)->GetMaxWidth();
+}
+
+IMPELLER_EXTERN_C
+float ImpellerParagraphGetHeight(ImpellerParagraph paragraph) {
+  return GetPeer(paragraph)->GetHeight();
+}
+
+IMPELLER_EXTERN_C
+float ImpellerParagraphGetLongestLineWidth(ImpellerParagraph paragraph) {
+  return GetPeer(paragraph)->GetLongestLineWidth();
+}
+
+IMPELLER_EXTERN_C
+float ImpellerParagraphGetMinInstrinsicWidth(ImpellerParagraph paragraph) {
+  return GetPeer(paragraph)->GetMinIntrinsicWidth();
+}
+
+IMPELLER_EXTERN_C
+float ImpellerParagraphGetMaxInstrinsicWidth(ImpellerParagraph paragraph) {
+  return GetPeer(paragraph)->GetMaxInstrinsicWidth();
+}
+
+IMPELLER_EXTERN_C
+float ImpellerParagraphGetIdeographicBaseline(ImpellerParagraph paragraph) {
+  return GetPeer(paragraph)->GetIdeographicBaseline();
+}
+
+IMPELLER_EXTERN_C
+float ImpellerParagraphGetAlphabeticBaseline(ImpellerParagraph paragraph) {
+  return GetPeer(paragraph)->GetAlphabeticBaseline();
+}
+
+IMPELLER_EXTERN_C
+uint32_t ImpellerParagraphGetLineCount(ImpellerParagraph paragraph) {
+  return GetPeer(paragraph)->GetLineCount();
+}
+
+IMPELLER_EXTERN_C ImpellerTypographyContext ImpellerTypographyContextNew() {
+  auto context = Create<TypographyContext>();
+  if (!context->IsValid()) {
+    VALIDATION_LOG << "Could not create typography context.";
+    return nullptr;
+  }
+  return Create<TypographyContext>().Leak();
+}
+
+IMPELLER_EXTERN_C
+void ImpellerTypographyContextRetain(ImpellerTypographyContext context) {
+  ObjectBase::SafeRetain(context);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerTypographyContextRelease(ImpellerTypographyContext context) {
+  ObjectBase::SafeRelease(context);
 }
 
 }  // namespace impeller::interop

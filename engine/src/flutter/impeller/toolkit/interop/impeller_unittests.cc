@@ -9,9 +9,13 @@
 #include "impeller/toolkit/interop/formats.h"
 #include "impeller/toolkit/interop/impeller.h"
 #include "impeller/toolkit/interop/paint.h"
+#include "impeller/toolkit/interop/paragraph.h"
+#include "impeller/toolkit/interop/paragraph_builder.h"
+#include "impeller/toolkit/interop/paragraph_style.h"
 #include "impeller/toolkit/interop/playground_test.h"
 #include "impeller/toolkit/interop/surface.h"
 #include "impeller/toolkit/interop/texture.h"
+#include "impeller/toolkit/interop/typography_context.h"
 
 namespace impeller::interop::testing {
 
@@ -100,6 +104,68 @@ TEST_P(InteropPlaygroundTest, CanDrawImage) {
                                         nullptr);
   auto dl = Adopt<DisplayList>(
       ImpellerDisplayListBuilderCreateDisplayListNew(builder.GetC()));
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        ImpellerSurfaceDrawDisplayList(surface.GetC(), dl.GetC());
+        return true;
+      }));
+}
+
+TEST_P(InteropPlaygroundTest, CanCreateParagraphs) {
+  // Create a typography context.
+  auto type_context = Adopt<TypographyContext>(ImpellerTypographyContextNew());
+  ASSERT_TRUE(type_context);
+
+  // Create a builder.
+  auto builder =
+      Adopt<ParagraphBuilder>(ImpellerParagraphBuilderNew(type_context.GetC()));
+  ASSERT_TRUE(builder);
+
+  // Create a paragraph style with the font size and foreground and background
+  // colors.
+  auto style = Adopt<ParagraphStyle>(ImpellerParagraphStyleNew());
+  ASSERT_TRUE(style);
+  ImpellerParagraphStyleSetFontSize(style.GetC(), 150.0f);
+
+  {
+    auto paint = Adopt<Paint>(ImpellerPaintNew());
+    ASSERT_TRUE(paint);
+    ImpellerColor color = {1.0, 0.0, 0.0, 1.0};
+    ImpellerPaintSetColor(paint.GetC(), &color);
+    ImpellerParagraphStyleSetForeground(style.GetC(), paint.GetC());
+  }
+
+  {
+    auto paint = Adopt<Paint>(ImpellerPaintNew());
+    ASSERT_TRUE(paint);
+    ImpellerColor color = {1.0, 1.0, 1.0, 1.0};
+    ImpellerPaintSetColor(paint.GetC(), &color);
+    ImpellerParagraphStyleSetBackground(style.GetC(), paint.GetC());
+  }
+
+  // Push the style onto the style stack.
+  ImpellerParagraphBuilderPushStyle(builder.GetC(), style.GetC());
+  std::string text = "the ⚡️ quick ⚡️ brown 🦊 fox jumps over the lazy dog 🐶.";
+
+  // Add the paragraph text data.
+  ImpellerParagraphBuilderAddText(builder.GetC(),
+                                  reinterpret_cast<const uint8_t*>(text.data()),
+                                  text.size());
+
+  // Layout and build the paragraph.
+  auto paragraph = Adopt<Paragraph>(
+      ImpellerParagraphBuilderBuildParagraphNew(builder.GetC(), 1200.0f));
+  ASSERT_TRUE(paragraph);
+
+  // Create a display list with just the paragraph drawn into it.
+  auto dl_builder =
+      Adopt<DisplayListBuilder>(ImpellerDisplayListBuilderNew(nullptr));
+  ImpellerPoint point = {20, 20};
+  ImpellerDisplayListBuilderDrawParagraph(dl_builder.GetC(), paragraph.GetC(),
+                                          &point);
+  auto dl = Adopt<DisplayList>(
+      ImpellerDisplayListBuilderCreateDisplayListNew(dl_builder.GetC()));
+
   ASSERT_TRUE(
       OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
         ImpellerSurfaceDrawDisplayList(surface.GetC(), dl.GetC());

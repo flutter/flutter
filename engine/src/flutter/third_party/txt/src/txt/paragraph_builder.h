@@ -59,8 +59,14 @@ class ParagraphBuilder {
   virtual const TextStyle& PeekStyle() = 0;
 
   // Adds text to the builder. Forms the proper runs to use the upper-most style
-  // on the style_stack_;
+  // on the style stack.
   virtual void AddText(const std::u16string& text) = 0;
+
+  // Adds text to the builder. Forms the proper runs to use the upper-most style
+  // on the style stack.
+  //
+  // Data must be in UTF-8 encoding.
+  virtual void AddText(const uint8_t* utf8_data, size_t byte_length) = 0;
 
   // Pushes the information required to leave an open space, where Flutter may
   // draw a custom placeholder into.
