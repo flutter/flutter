@@ -1484,16 +1484,20 @@ void TextFrameDispatcher::drawDisplayList(
   bool old_has_image_filter = has_image_filter_;
   has_image_filter_ = false;
 
-  Rect local_cull_bounds = GetCurrentLocalCullingBounds();
-  if (local_cull_bounds.IsMaximum()) {
+  if (matrix_.HasPerspective()) {
     display_list->Dispatch(*this);
-  } else if (!local_cull_bounds.IsEmpty()) {
-    IRect cull_rect = IRect::RoundOut(local_cull_bounds);
-    display_list->Dispatch(*this, SkIRect::MakeLTRB(cull_rect.GetLeft(),   //
-                                                    cull_rect.GetTop(),    //
-                                                    cull_rect.GetRight(),  //
-                                                    cull_rect.GetBottom()  //
-                                                    ));
+  } else {
+    Rect local_cull_bounds = GetCurrentLocalCullingBounds();
+    if (local_cull_bounds.IsMaximum()) {
+      display_list->Dispatch(*this);
+    } else if (!local_cull_bounds.IsEmpty()) {
+      IRect cull_rect = IRect::RoundOut(local_cull_bounds);
+      display_list->Dispatch(*this, SkIRect::MakeLTRB(cull_rect.GetLeft(),   //
+                                                      cull_rect.GetTop(),    //
+                                                      cull_rect.GetRight(),  //
+                                                      cull_rect.GetBottom()  //
+                                                      ));
+    }
   }
 
   restore();

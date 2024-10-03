@@ -452,6 +452,30 @@ TEST_P(AiksTest, CanRenderTextWithLargePerspectiveTransform) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderTextWithPerspectiveTransformInSublist) {
+  DisplayListBuilder text_builder;
+  ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), text_builder, "Hello world",
+                                     "Roboto-Regular.ttf"));
+  auto text_display_list = text_builder.Build();
+
+  DisplayListBuilder builder;
+
+  Matrix matrix = Matrix::MakeRow(2.0, 0.0, 0.0, 0.0,  //
+                                  0.0, 2.0, 0.0, 0.0,  //
+                                  0.0, 0.0, 1.0, 0.0,  //
+                                  0.0, 0.002, 0.0, 1.0);
+
+  DlPaint save_paint;
+  SkRect window_bounds =
+      SkRect::MakeXYWH(0, 0, GetWindowSize().width, GetWindowSize().height);
+  builder.SaveLayer(&window_bounds, &save_paint);
+  builder.Transform(SkM44::ColMajor(matrix.m));
+  builder.DrawDisplayList(text_display_list, 1.0f);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 // This currently renders solid blue, as the support for text color sources was
 // moved into DLDispatching. Path data requires the SkTextBlobs which are not
 // used in impeller::TextFrames.
