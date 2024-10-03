@@ -113,8 +113,9 @@ PointerDataDispatcherMaker ShellTestPlatformViewMetal::GetDispatcherMaker() {
 // |PlatformView|
 std::unique_ptr<Surface> ShellTestPlatformViewMetal::CreateRenderingSurface() {
   if (GetSettings().enable_impeller) {
-    return std::make_unique<GPUSurfaceMetalImpeller>(this,
-                                                     [metal_context_->impeller_context() context]);
+    auto context = [metal_context_->impeller_context() context];
+    return std::make_unique<GPUSurfaceMetalImpeller>(
+        this, std::make_shared<impeller::AiksContext>(context, nullptr));
   }
   return std::make_unique<GPUSurfaceMetalSkia>(this, [metal_context_->context() mainContext]);
 }

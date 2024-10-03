@@ -7,10 +7,12 @@
 
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
 #include "gtest/gtest.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/entity/mtl/entity_shaders.h"
 #include "impeller/entity/mtl/framebuffer_blend_shaders.h"
 #include "impeller/entity/mtl/modern_shaders.h"
 #include "impeller/renderer/backend/metal/context_mtl.h"
+#include "impeller/typographer/typographer_context.h"
 
 namespace flutter {
 namespace testing {
@@ -64,15 +66,16 @@ TEST(GPUSurfaceMetalImpeller, InvalidImpellerContextCreatesCausesSurfaceToBeInva
 
 TEST(GPUSurfaceMetalImpeller, CanCreateValidSurface) {
   auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
-  auto surface = std::make_shared<GPUSurfaceMetalImpeller>(delegate.get(), CreateImpellerContext());
+  auto surface = std::make_shared<GPUSurfaceMetalImpeller>(
+      delegate.get(), std::make_shared<impeller::AiksContext>(CreateImpellerContext(), nullptr));
 
   ASSERT_TRUE(surface->IsValid());
 }
 
 TEST(GPUSurfaceMetalImpeller, AcquireFrameFromCAMetalLayerNullChecksDrawable) {
   auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
-  std::shared_ptr<Surface> surface =
-      std::make_shared<GPUSurfaceMetalImpeller>(delegate.get(), CreateImpellerContext());
+  std::shared_ptr<Surface> surface = std::make_shared<GPUSurfaceMetalImpeller>(
+      delegate.get(), std::make_shared<impeller::AiksContext>(CreateImpellerContext(), nullptr));
 
   ASSERT_TRUE(surface->IsValid());
 
@@ -83,8 +86,8 @@ TEST(GPUSurfaceMetalImpeller, AcquireFrameFromCAMetalLayerNullChecksDrawable) {
 TEST(GPUSurfaceMetalImpeller, AcquireFrameFromCAMetalLayerDoesNotRetainThis) {
   auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
   delegate->SetDevice();
-  std::unique_ptr<Surface> surface =
-      std::make_unique<GPUSurfaceMetalImpeller>(delegate.get(), CreateImpellerContext());
+  std::unique_ptr<Surface> surface = std::make_unique<GPUSurfaceMetalImpeller>(
+      delegate.get(), std::make_shared<impeller::AiksContext>(CreateImpellerContext(), nullptr));
 
   ASSERT_TRUE(surface->IsValid());
 
@@ -97,14 +100,13 @@ TEST(GPUSurfaceMetalImpeller, AcquireFrameFromCAMetalLayerDoesNotRetainThis) {
   ASSERT_TRUE(frame->Submit());
 }
 
-// Because each overlay surface gets its own HostBuffer, we always need to reset.
-TEST(GPUSurfaceMetalImpeller, DoesNotResetHostBufferBasedOnFrameBoundary) {
+TEST(GPUSurfaceMetalImpeller, ResetHostBufferBasedOnFrameBoundary) {
   auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
   delegate->SetDevice();
 
   auto context = CreateImpellerContext();
-  std::unique_ptr<Surface> surface =
-      std::make_unique<GPUSurfaceMetalImpeller>(delegate.get(), context);
+  std::unique_ptr<Surface> surface = std::make_unique<GPUSurfaceMetalImpeller>(
+      delegate.get(), std::make_shared<impeller::AiksContext>(context, nullptr));
 
   ASSERT_TRUE(surface->IsValid());
 
@@ -116,13 +118,13 @@ TEST(GPUSurfaceMetalImpeller, DoesNotResetHostBufferBasedOnFrameBoundary) {
   frame->set_submit_info({.frame_boundary = false});
 
   ASSERT_TRUE(frame->Submit());
-  EXPECT_EQ(host_buffer.GetStateForTest().current_frame, 1u);
+  EXPECT_EQ(host_buffer.GetStateForTest().current_frame, 0u);
 
   frame = surface->AcquireFrame(SkISize::Make(100, 100));
   frame->set_submit_info({.frame_boundary = true});
 
   ASSERT_TRUE(frame->Submit());
-  EXPECT_EQ(host_buffer.GetStateForTest().current_frame, 2u);
+  EXPECT_EQ(host_buffer.GetStateForTest().current_frame, 1u);
 }
 
 #ifdef IMPELLER_DEBUG
@@ -131,18 +133,19 @@ TEST(GPUSurfaceMetalImpeller, CreatesImpellerCaptureScope) {
   delegate->SetDevice();
 
   auto context = CreateImpellerContext();
+  auto aiks_context = std::make_shared<impeller::AiksContext>(context, nullptr);
 
   EXPECT_FALSE(context->GetCaptureManager()->CaptureScopeActive());
 
   std::unique_ptr<Surface> surface =
-      std::make_unique<GPUSurfaceMetalImpeller>(delegate.get(), context);
+      std::make_unique<GPUSurfaceMetalImpeller>(delegate.get(), aiks_context);
   auto frame_1 = surface->AcquireFrame(SkISize::Make(100, 100));
   frame_1->set_submit_info({.frame_boundary = false});
 
   EXPECT_TRUE(context->GetCaptureManager()->CaptureScopeActive());
 
   std::unique_ptr<Surface> surface_2 =
-      std::make_unique<GPUSurfaceMetalImpeller>(delegate.get(), context);
+      std::make_unique<GPUSurfaceMetalImpeller>(delegate.get(), aiks_context);
   auto frame_2 = surface->AcquireFrame(SkISize::Make(100, 100));
   frame_2->set_submit_info({.frame_boundary = true});
 

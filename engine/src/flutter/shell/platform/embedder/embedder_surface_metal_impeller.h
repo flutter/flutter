@@ -12,6 +12,7 @@
 #include "flutter/shell/platform/embedder/embedder_external_view_embedder.h"
 #include "flutter/shell/platform/embedder/embedder_surface.h"
 #include "fml/concurrent_message_loop.h"
+#include "impeller/display_list/aiks_context.h"
 
 namespace impeller {
 class Context;
@@ -41,6 +42,7 @@ class EmbedderSurfaceMetalImpeller final : public EmbedderSurface,
   MetalDispatchTable metal_dispatch_table_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
   std::shared_ptr<impeller::Context> context_;
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
 
   // |EmbedderSurface|
   bool IsValid() const override;

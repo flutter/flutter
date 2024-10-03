@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/ios_context_metal_impeller.h"
+
 #include "flutter/impeller/entity/mtl/entity_shaders.h"
 #import "flutter/shell/platform/darwin/ios/ios_external_texture_metal.h"
+#include "impeller/display_list/aiks_context.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -13,7 +16,12 @@ namespace flutter {
 IOSContextMetalImpeller::IOSContextMetalImpeller(
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
     : darwin_context_metal_impeller_(fml::scoped_nsobject<FlutterDarwinContextMetalImpeller>{
-          [[FlutterDarwinContextMetalImpeller alloc] init:is_gpu_disabled_sync_switch]}) {}
+          [[FlutterDarwinContextMetalImpeller alloc] init:is_gpu_disabled_sync_switch]}) {
+  if (darwin_context_metal_impeller_.get().context) {
+    aiks_context_ = std::make_shared<impeller::AiksContext>(
+        darwin_context_metal_impeller_.get().context, impeller::TypographerContextSkia::Make());
+  }
+}
 
 IOSContextMetalImpeller::~IOSContextMetalImpeller() = default;
 
@@ -37,6 +45,11 @@ sk_sp<GrDirectContext> IOSContextMetalImpeller::CreateResourceContext() {
 // |IOSContext|
 std::shared_ptr<impeller::Context> IOSContextMetalImpeller::GetImpellerContext() const {
   return darwin_context_metal_impeller_.get().context;
+}
+
+// |IOSContext|
+std::shared_ptr<impeller::AiksContext> IOSContextMetalImpeller::GetAiksContext() const {
+  return aiks_context_;
 }
 
 // |IOSContext|

@@ -12,10 +12,13 @@
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/entity/mtl/entity_shaders.h"
 #include "impeller/entity/mtl/framebuffer_blend_shaders.h"
 #include "impeller/entity/mtl/modern_shaders.h"
 #include "impeller/renderer/backend/metal/context_mtl.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
+#include "impeller/typographer/typographer_context.h"
 
 FLUTTER_ASSERT_NOT_ARC
 
@@ -60,9 +63,13 @@ std::unique_ptr<Surface> EmbedderSurfaceMetalImpeller::CreateGPUSurface()
   if (!IsValid()) {
     return nullptr;
   }
+  if (!aiks_context_) {
+    aiks_context_ =
+        std::make_shared<impeller::AiksContext>(context_, impeller::TypographerContextSkia::Make());
+  }
 
   const bool render_to_surface = !external_view_embedder_;
-  auto surface = std::make_unique<GPUSurfaceMetalImpeller>(this, context_, render_to_surface);
+  auto surface = std::make_unique<GPUSurfaceMetalImpeller>(this, aiks_context_, render_to_surface);
 
   if (!surface->IsValid()) {
     return nullptr;
