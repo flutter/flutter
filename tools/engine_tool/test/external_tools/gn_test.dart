@@ -7,7 +7,7 @@ import 'package:engine_tool/src/label.dart';
 import 'package:engine_tool/src/logger.dart';
 import 'package:test/test.dart';
 
-import 'utils.dart';
+import '../utils.dart';
 
 void main() {
   test('gn.desc handles a non-zero exit code', () async {
