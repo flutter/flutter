@@ -1323,6 +1323,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           enableFilter: true,
           dropdownMenuEntries: menuChildren,
         ),
@@ -1337,10 +1338,10 @@ void main() {
     await tester.enterText(find.byType(TextField).first, 'No match 2');
     await tester.pump();
     expect(tester.takeException(), isNull);
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
-  testWidgets('Default search prioritises the current highlight while focused',
+  testWidgets('Default search prioritises the current highlight',
       (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
