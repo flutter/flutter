@@ -82,8 +82,8 @@ class FakeVersionExtractor extends Fake implements VersionExtractor {
   FakeVersionExtractor({required this.mockData});
   FakeVersionExtractor.win11Pro() : this(mockData: <String, String>{
     'Caption': '11 Pro',
-    'ReleaseId': '23H2',
-    'DisplayVersion': '2009'});
+    'ReleaseId': '2009',
+    'DisplayVersion': '23H2'});
 
   final Map<String, String> mockData;
 
