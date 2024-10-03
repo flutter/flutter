@@ -2808,16 +2808,14 @@ class Navigator extends StatefulWidget {
     BuildContext context, {
     bool rootNavigator = false,
   }) {
-    // Handles the case where the input context is a navigator element.
     NavigatorState? navigator;
-    if (context is StatefulElement && context.state is NavigatorState) {
-      navigator = context.state as NavigatorState;
+    if (context case StatefulElement(:final NavigatorState state)) {
+      navigator = state;
     }
-    if (rootNavigator) {
-      navigator = context.findRootAncestorStateOfType<NavigatorState>() ?? navigator;
-    } else {
-      navigator = navigator ?? context.findAncestorStateOfType<NavigatorState>();
-    }
+
+    navigator = rootNavigator
+        ? context.findRootAncestorStateOfType<NavigatorState>() ?? navigator
+        : navigator ?? context.findAncestorStateOfType<NavigatorState>();
 
     assert(() {
       if (navigator == null) {
@@ -2858,17 +2856,14 @@ class Navigator extends StatefulWidget {
     BuildContext context, {
     bool rootNavigator = false,
   }) {
-    // Handles the case where the input context is a navigator element.
     NavigatorState? navigator;
-    if (context is StatefulElement && context.state is NavigatorState) {
-      navigator = context.state as NavigatorState;
+    if (context case StatefulElement(:final NavigatorState state)) {
+      navigator = state;
     }
-    if (rootNavigator) {
-      navigator = context.findRootAncestorStateOfType<NavigatorState>() ?? navigator;
-    } else {
-      navigator = navigator ?? context.findAncestorStateOfType<NavigatorState>();
-    }
-    return navigator;
+
+    return rootNavigator
+        ? context.findRootAncestorStateOfType<NavigatorState>() ?? navigator
+        : navigator ?? context.findAncestorStateOfType<NavigatorState>();
   }
 
   /// Turn a route name into a set of [Route] objects.

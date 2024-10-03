@@ -94,15 +94,10 @@ mixin CreateFinderFactory {
   }
 
   Finder _createPageBackFinder() {
-    return find.byElementPredicate((Element element) {
-      final Widget widget = element.widget;
-      if (widget is Tooltip) {
-        return widget.message == 'Back';
-      }
-      if (widget is CupertinoNavigationBarBackButton) {
-        return true;
-      }
-      return false;
+    return find.byElementPredicate((Element element) => switch (element.widget) {
+      Tooltip(message: 'Back') => true,
+      CupertinoNavigationBarBackButton() => true,
+      _ => false,
     }, description: 'Material or Cupertino back button');
   }
 

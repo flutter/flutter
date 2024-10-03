@@ -1456,10 +1456,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
           ..textDirection = initialDirection
           ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
         switch (info.recognizer) {
-          case TapGestureRecognizer(onTap: final VoidCallback? onTap):
-          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? onTap):
-            if (onTap != null) {
-              configuration.onTap = onTap;
+          case TapGestureRecognizer(onTap: final VoidCallback? handler):
+          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
+            if (handler != null) {
+              configuration.onTap = handler;
               configuration.isLink = true;
             }
           case LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):

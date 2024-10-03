@@ -302,14 +302,14 @@ DevFSContent? processSkSLBundle(String? bundlePath, {
     throw Exception('SkSL bundle was invalid');
   }
 
-  final String? parsedPlatform = bundle['platform'] as String?;
-  TargetPlatform? bundleTargetPlatform;
-  if (parsedPlatform != null) {
-    bundleTargetPlatform = getTargetPlatformForName(parsedPlatform);
-  }
-  if (bundleTargetPlatform == null || bundleTargetPlatform != targetPlatform) {
+  final TargetPlatform? bundlePlatform = switch (bundle['platform'] as String?) {
+    final String platform => getTargetPlatformForName(platform),
+    null => null,
+  };
+
+  if (bundlePlatform != targetPlatform) {
     logger.printError(
-      'The SkSL bundle was created for $bundleTargetPlatform, but the current '
+      'The SkSL bundle was created for $bundlePlatform, but the current '
       'platform is $targetPlatform. This may lead to less efficient shader '
       'caching.'
     );

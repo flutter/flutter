@@ -851,8 +851,8 @@ class FlutterVmService {
         ? <String, Object>{'value': platform}
         : <String, String>{},
     );
-    if (result != null && result['value'] is String) {
-      return result['value']! as String;
+    if (result case {'value': final String value}) {
+      return value;
     }
     return 'unknown';
   }

@@ -16,31 +16,23 @@ class DartDependencyPackage {
   });
 
   factory DartDependencyPackage.fromHashMap(dynamic packageInfo) {
-    String name = '';
-    String version = '';
-    String source = '';
-    List<dynamic> dependencies = <dynamic>[];
-
-    if (packageInfo is LinkedHashMap) {
-      final LinkedHashMap<String, dynamic> info = packageInfo as LinkedHashMap<String, dynamic>;
-      if (info.containsKey('name')) {
-        name = info['name'] as String;
-      }
-      if (info.containsKey('version')) {
-        version = info['version'] as String;
-      }
-      if (info.containsKey('source')) {
-        source = info['source'] as String;
-      }
-      if (info.containsKey('dependencies')) {
-        dependencies = info['dependencies'] as List<dynamic>;
-      }
+    if (packageInfo is! LinkedHashMap) {
+      return DartDependencyPackage(
+        name: '',
+        version: '',
+        source: '',
+        dependencies: <String>[],
+      );
     }
+
     return DartDependencyPackage(
-      name: name,
-      version: version,
-      source: source,
-      dependencies: dependencies.map((dynamic e) => e.toString()).toList(),
+      name: packageInfo['name'] as String? ?? '',
+      version: packageInfo['version'] as String? ?? '',
+      source: packageInfo['source'] as String? ?? '',
+      dependencies: switch (packageInfo['dependencies'] as List<Object?>?) {
+        final List<Object?> list => list.map((Object? e) => '$e').toList(),
+        null => <String>[],
+      },
     );
   }
 

@@ -355,35 +355,18 @@ class Alignment extends AlignmentGeometry {
   Alignment resolve(TextDirection? direction) => this;
 
   static String _stringify(double x, double y) {
-    if (x == -1.0 && y == -1.0) {
-      return 'Alignment.topLeft';
-    }
-    if (x == 0.0 && y == -1.0) {
-      return 'Alignment.topCenter';
-    }
-    if (x == 1.0 && y == -1.0) {
-      return 'Alignment.topRight';
-    }
-    if (x == -1.0 && y == 0.0) {
-      return 'Alignment.centerLeft';
-    }
-    if (x == 0.0 && y == 0.0) {
-      return 'Alignment.center';
-    }
-    if (x == 1.0 && y == 0.0) {
-      return 'Alignment.centerRight';
-    }
-    if (x == -1.0 && y == 1.0) {
-      return 'Alignment.bottomLeft';
-    }
-    if (x == 0.0 && y == 1.0) {
-      return 'Alignment.bottomCenter';
-    }
-    if (x == 1.0 && y == 1.0) {
-      return 'Alignment.bottomRight';
-    }
-    return 'Alignment(${x.toStringAsFixed(1)}, '
-                     '${y.toStringAsFixed(1)})';
+    return switch ((x, y)) {
+      (-1.0, -1.0) => 'Alignment.topLeft',
+      ( 0.0, -1.0) => 'Alignment.topCenter',
+      ( 1.0, -1.0) => 'Alignment.topRight',
+      (-1.0,  0.0) => 'Alignment.centerLeft',
+      ( 0.0,  0.0) => 'Alignment.center',
+      ( 1.0,  0.0) => 'Alignment.centerRight',
+      (-1.0,  1.0) => 'Alignment.bottomLeft',
+      ( 0.0,  1.0) => 'Alignment.bottomCenter',
+      ( 1.0,  1.0) => 'Alignment.bottomRight',
+      _ => 'Alignment(${x.toStringAsFixed(1)}, ${y.toStringAsFixed(1)})',
+    };
   }
 
   @override
@@ -550,35 +533,18 @@ class AlignmentDirectional extends AlignmentGeometry {
   }
 
   static String _stringify(double start, double y) {
-    if (start == -1.0 && y == -1.0) {
-      return 'AlignmentDirectional.topStart';
-    }
-    if (start == 0.0 && y == -1.0) {
-      return 'AlignmentDirectional.topCenter';
-    }
-    if (start == 1.0 && y == -1.0) {
-      return 'AlignmentDirectional.topEnd';
-    }
-    if (start == -1.0 && y == 0.0) {
-      return 'AlignmentDirectional.centerStart';
-    }
-    if (start == 0.0 && y == 0.0) {
-      return 'AlignmentDirectional.center';
-    }
-    if (start == 1.0 && y == 0.0) {
-      return 'AlignmentDirectional.centerEnd';
-    }
-    if (start == -1.0 && y == 1.0) {
-      return 'AlignmentDirectional.bottomStart';
-    }
-    if (start == 0.0 && y == 1.0) {
-      return 'AlignmentDirectional.bottomCenter';
-    }
-    if (start == 1.0 && y == 1.0) {
-      return 'AlignmentDirectional.bottomEnd';
-    }
-    return 'AlignmentDirectional(${start.toStringAsFixed(1)}, '
-                                '${y.toStringAsFixed(1)})';
+    return switch ((start, y)) {
+      (-1.0, -1.0) => 'AlignmentDirectional.topStart',
+      ( 0.0, -1.0) => 'AlignmentDirectional.topCenter',
+      ( 1.0, -1.0) => 'AlignmentDirectional.topEnd',
+      (-1.0,  0.0) => 'AlignmentDirectional.centerStart',
+      ( 0.0,  0.0) => 'AlignmentDirectional.center',
+      ( 1.0,  0.0) => 'AlignmentDirectional.centerEnd',
+      (-1.0,  1.0) => 'AlignmentDirectional.bottomStart',
+      ( 0.0,  1.0) => 'AlignmentDirectional.bottomCenter',
+      ( 1.0,  1.0) => 'AlignmentDirectional.bottomEnd',
+      _ => 'AlignmentDirectional(${start.toStringAsFixed(1)}, ${y.toStringAsFixed(1)})',
+    };
   }
 
   @override

@@ -931,16 +931,10 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     required ChildLayouter layoutChild,
     required _ChildBaselineGetter getBaseline,
   }) {
-    final RenderBox? counter = this.counter;
-    Size counterSize;
-    final double counterAscent;
-    if (counter != null) {
-      counterSize = layoutChild(counter, constraints);
-      counterAscent = getBaseline(counter, constraints);
-    } else {
-      counterSize = Size.zero;
-      counterAscent = 0.0;
-    }
+    final (Size counterSize, double counterAscent) = switch (counter) {
+      final RenderBox box => (layoutChild(box, constraints), getBaseline(box, constraints)),
+      null => (Size.zero, 0.0),
+    };
 
     final BoxConstraints helperErrorConstraints = constraints.deflate(EdgeInsets.only(left: counterSize.width));
     final double helperErrorHeight = layoutChild(helperError, helperErrorConstraints).height;

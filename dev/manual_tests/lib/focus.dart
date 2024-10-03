@@ -108,20 +108,15 @@ class _FocusDemoState extends State<FocusDemo> {
           return KeyEventResult.handled;
         }
       }
-      if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-        node.focusInDirection(TraversalDirection.left);
-        return KeyEventResult.handled;
-      }
-      if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-        node.focusInDirection(TraversalDirection.right);
-        return KeyEventResult.handled;
-      }
-      if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-        node.focusInDirection(TraversalDirection.up);
-        return KeyEventResult.handled;
-      }
-      if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-        node.focusInDirection(TraversalDirection.down);
+      final TraversalDirection? direction = switch (event.logicalKey) {
+        LogicalKeyboardKey.arrowLeft  => TraversalDirection.left,
+        LogicalKeyboardKey.arrowRight => TraversalDirection.right,
+        LogicalKeyboardKey.arrowUp    => TraversalDirection.up,
+        LogicalKeyboardKey.arrowDown  => TraversalDirection.down,
+        _ => null,
+      };
+      if (direction != null) {
+        node.focusInDirection(direction);
         return KeyEventResult.handled;
       }
     }
