@@ -4,6 +4,14 @@
 
 import("//flutter/impeller/tools/impeller.gni")
 
+embed_blob("embedded_icu_data") {
+  symbol_name = "embedded_icu_data"
+  blob = "//flutter/third_party/icu/flutter/icudtl.dat"
+  hdr = "$target_gen_dir/embedded_icu_data.h"
+  cc = "$target_gen_dir/embedded_icu_data.cc"
+  deps = []
+}
+
 impeller_component("interop") {
   sources = [
     "color_filter.cc",
@@ -29,6 +37,12 @@ impeller_component("interop") {
     "object.h",
     "paint.cc",
     "paint.h",
+    "paragraph.cc",
+    "paragraph.h",
+    "paragraph_builder.cc",
+    "paragraph_builder.h",
+    "paragraph_style.cc",
+    "paragraph_style.h",
     "path.cc",
     "path.h",
     "path_builder.cc",
@@ -37,16 +51,21 @@ impeller_component("interop") {
     "surface.h",
     "texture.cc",
     "texture.h",
+    "typography_context.cc",
+    "typography_context.h",
   ]
 
-  deps = [
+  public_deps = [
     "../../base",
     "../../display_list",
     "../../entity",
     "../../renderer/backend",
     "//flutter/display_list",
     "//flutter/fml",
+    "//flutter/third_party/txt",
   ]
+
+  deps = [ ":embedded_icu_data" ]
 }
 
 impeller_component("library") {

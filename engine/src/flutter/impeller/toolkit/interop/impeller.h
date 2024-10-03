@@ -57,7 +57,7 @@ IMPELLER_EXTERN_C_BEGIN
 
 #define IMPELLER_VERSION_VARIANT 1
 #define IMPELLER_VERSION_MAJOR 1
-#define IMPELLER_VERSION_MINOR 0
+#define IMPELLER_VERSION_MINOR 1
 #define IMPELLER_VERSION_PATCH 0
 
 #define IMPELLER_VERSION                                                  \
@@ -87,10 +87,14 @@ IMPELLER_DEFINE_HANDLE(ImpellerDisplayListBuilder);
 IMPELLER_DEFINE_HANDLE(ImpellerImageFilter);
 IMPELLER_DEFINE_HANDLE(ImpellerMaskFilter);
 IMPELLER_DEFINE_HANDLE(ImpellerPaint);
+IMPELLER_DEFINE_HANDLE(ImpellerParagraph);
+IMPELLER_DEFINE_HANDLE(ImpellerParagraphBuilder);
+IMPELLER_DEFINE_HANDLE(ImpellerParagraphStyle);
 IMPELLER_DEFINE_HANDLE(ImpellerPath);
 IMPELLER_DEFINE_HANDLE(ImpellerPathBuilder);
 IMPELLER_DEFINE_HANDLE(ImpellerSurface);
 IMPELLER_DEFINE_HANDLE(ImpellerTexture);
+IMPELLER_DEFINE_HANDLE(ImpellerTypographyContext);
 
 //------------------------------------------------------------------------------
 // Signatures
@@ -192,6 +196,37 @@ typedef enum ImpellerColorSpace {
   kImpellerColorSpaceExtendedSRGB,
   kImpellerColorSpaceDisplayP3,
 } ImpellerColorSpace;
+
+typedef enum ImpellerFontWeight {
+  kImpellerFontWeight100,  // Thin
+  kImpellerFontWeight200,  // Extra-Light
+  kImpellerFontWeight300,  // Light
+  kImpellerFontWeight400,  // Normal/Regular
+  kImpellerFontWeight500,  // Medium
+  kImpellerFontWeight600,  // Semi-bold
+  kImpellerFontWeight700,  // Bold
+  kImpellerFontWeight800,  // Extra-Bold
+  kImpellerFontWeight900,  // Black
+} ImpellerFontWeight;
+
+typedef enum ImpellerFontStyle {
+  kImpellerFontStyleNormal,
+  kImpellerFontStyleItalic,
+} ImpellerFontStyle;
+
+typedef enum ImpellerTextAlignment {
+  kImpellerTextAlignmentLeft,
+  kImpellerTextAlignmentRight,
+  kImpellerTextAlignmentCenter,
+  kImpellerTextAlignmentJustify,
+  kImpellerTextAlignmentStart,
+  kImpellerTextAlignmentEnd,
+} ImpellerTextAlignment;
+
+typedef enum ImpellerTextDirection {
+  kImpellerTextDirectionRTL,
+  kImpellerTextDirectionLTR,
+} ImpellerTextDirection;
 
 //------------------------------------------------------------------------------
 // Non-opaque structs
@@ -755,6 +790,12 @@ void ImpellerDisplayListBuilderDrawDisplayList(
     ImpellerDisplayList IMPELLER_NONNULL display_list,
     float opacity);
 
+IMPELLER_EXPORT
+void ImpellerDisplayListBuilderDrawParagraph(
+    ImpellerDisplayListBuilder IMPELLER_NONNULL builder,
+    ImpellerParagraph IMPELLER_NONNULL paragraph,
+    const ImpellerPoint* IMPELLER_NONNULL point);
+
 //------------------------------------------------------------------------------
 // Display List Builder: Drawing Textures
 //------------------------------------------------------------------------------
@@ -775,6 +816,167 @@ void ImpellerDisplayListBuilderDrawTextureRect(
     const ImpellerRect* IMPELLER_NONNULL dst_rect,
     ImpellerTextureSampling sampling,
     ImpellerPaint IMPELLER_NULLABLE paint);
+
+//------------------------------------------------------------------------------
+// Typography Context
+//------------------------------------------------------------------------------
+
+IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerTypographyContext IMPELLER_NULLABLE
+ImpellerTypographyContextNew();
+
+IMPELLER_EXPORT
+void ImpellerTypographyContextRetain(
+    ImpellerTypographyContext IMPELLER_NULLABLE context);
+
+IMPELLER_EXPORT
+void ImpellerTypographyContextRelease(
+    ImpellerTypographyContext IMPELLER_NULLABLE context);
+
+//------------------------------------------------------------------------------
+// Paragraph Style
+//------------------------------------------------------------------------------
+
+IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerParagraphStyle IMPELLER_NULLABLE
+ImpellerParagraphStyleNew();
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleRetain(
+    ImpellerParagraphStyle IMPELLER_NULLABLE paragraph_style);
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleRelease(
+    ImpellerParagraphStyle IMPELLER_NULLABLE paragraph_style);
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetForeground(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    ImpellerPaint IMPELLER_NONNULL paint);
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetBackground(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    ImpellerPaint IMPELLER_NONNULL paint);
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetFontWeight(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    ImpellerFontWeight weight);
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetFontStyle(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    ImpellerFontStyle style);
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetFontFamily(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    const char* IMPELLER_NONNULL family_name);
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetFontSize(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    float size);
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetHeight(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    float height);
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetTextAlignment(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    ImpellerTextAlignment align);
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetTextDirection(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    ImpellerTextDirection direction);
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetMaxLines(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    uint32_t max_lines);
+
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetLocale(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    const char* IMPELLER_NONNULL locale);
+
+//------------------------------------------------------------------------------
+// Paragraph Builder
+//------------------------------------------------------------------------------
+
+IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerParagraphBuilder IMPELLER_NULLABLE
+ImpellerParagraphBuilderNew(ImpellerTypographyContext IMPELLER_NONNULL context);
+
+IMPELLER_EXPORT
+void ImpellerParagraphBuilderRetain(
+    ImpellerParagraphBuilder IMPELLER_NULLABLE paragraph_builder);
+
+IMPELLER_EXPORT
+void ImpellerParagraphBuilderRelease(
+    ImpellerParagraphBuilder IMPELLER_NULLABLE paragraph_builder);
+
+IMPELLER_EXPORT
+void ImpellerParagraphBuilderPushStyle(
+    ImpellerParagraphBuilder IMPELLER_NONNULL paragraph_builder,
+    ImpellerParagraphStyle IMPELLER_NONNULL style);
+
+IMPELLER_EXPORT
+void ImpellerParagraphBuilderPopStyle(
+    ImpellerParagraphBuilder IMPELLER_NONNULL paragraph_builder);
+
+IMPELLER_EXPORT
+void ImpellerParagraphBuilderAddText(
+    ImpellerParagraphBuilder IMPELLER_NONNULL paragraph_builder,
+    const uint8_t* IMPELLER_NULLABLE data,
+    uint32_t length);
+
+IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerParagraph IMPELLER_NULLABLE
+ImpellerParagraphBuilderBuildParagraphNew(
+    ImpellerParagraphBuilder IMPELLER_NONNULL paragraph_builder,
+    float width);
+
+//------------------------------------------------------------------------------
+// Paragraph
+//------------------------------------------------------------------------------
+
+IMPELLER_EXPORT
+void ImpellerParagraphRetain(ImpellerParagraph IMPELLER_NULLABLE paragraph);
+
+IMPELLER_EXPORT
+void ImpellerParagraphRelease(ImpellerParagraph IMPELLER_NULLABLE paragraph);
+
+IMPELLER_EXPORT
+float ImpellerParagraphGetMaxWidth(
+    ImpellerParagraph IMPELLER_NONNULL paragraph);
+
+IMPELLER_EXPORT
+float ImpellerParagraphGetHeight(ImpellerParagraph IMPELLER_NONNULL paragraph);
+
+IMPELLER_EXPORT
+float ImpellerParagraphGetLongestLineWidth(
+    ImpellerParagraph IMPELLER_NONNULL paragraph);
+
+IMPELLER_EXPORT
+float ImpellerParagraphGetMinInstrinsicWidth(
+    ImpellerParagraph IMPELLER_NONNULL paragraph);
+
+IMPELLER_EXPORT
+float ImpellerParagraphGetMaxInstrinsicWidth(
+    ImpellerParagraph IMPELLER_NONNULL paragraph);
+
+IMPELLER_EXPORT
+float ImpellerParagraphGetIdeographicBaseline(
+    ImpellerParagraph IMPELLER_NONNULL paragraph);
+
+IMPELLER_EXPORT
+float ImpellerParagraphGetAlphabeticBaseline(
+    ImpellerParagraph IMPELLER_NONNULL paragraph);
+
+IMPELLER_EXPORT
+uint32_t ImpellerParagraphGetLineCount(
+    ImpellerParagraph IMPELLER_NONNULL paragraph);
 
 IMPELLER_EXTERN_C_END
 

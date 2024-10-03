@@ -176,4 +176,13 @@ void DisplayListBuilder::DrawTextureRect(const Texture& texture,
   );
 }
 
+void DisplayListBuilder::DrawParagraph(const Paragraph& paragraph,
+                                       Point point) {
+  const auto& handle = paragraph.GetHandle();
+  if (!handle) {
+    return;
+  }
+  handle->Paint(&builder_, point.x, point.y);
+}
+
 }  // namespace impeller::interop
