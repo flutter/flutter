@@ -51,8 +51,7 @@ ParagraphBuilderSkia::ParagraphBuilderSkia(
     const bool impeller_enabled)
     : base_style_(style.GetTextStyle()), impeller_enabled_(impeller_enabled) {
   builder_ = skt::ParagraphBuilder::make(
-      TxtToSkia(style),
-      font_collection->CreateSktFontCollection(),
+      TxtToSkia(style), font_collection->CreateSktFontCollection(),
       SkUnicodes::ICU::Make());
 }
 
@@ -74,6 +73,11 @@ const TextStyle& ParagraphBuilderSkia::PeekStyle() {
 
 void ParagraphBuilderSkia::AddText(const std::u16string& text) {
   builder_->addText(text);
+}
+
+void ParagraphBuilderSkia::AddText(const uint8_t* utf8_data,
+                                   size_t byte_length) {
+  builder_->addText(reinterpret_cast<const char*>(utf8_data), byte_length);
 }
 
 void ParagraphBuilderSkia::AddPlaceholder(PlaceholderRun& span) {
