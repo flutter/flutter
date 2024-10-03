@@ -637,11 +637,6 @@ class FlutterPlugin implements Plugin<Project> {
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
         List<String> platforms = getTargetPlatforms().collect()
-        // Debug mode includes x86 and x64, which are commonly used in emulators.
-        if (flutterBuildMode == "debug" && !useLocalEngine()) {
-            platforms.add("android-x86")
-            platforms.add("android-x64")
-        }
         platforms.each { platform ->
             String arch = PLATFORM_ARCH_MAP[platform].replace("-", "_")
             // Add the `libflutter.so` dependency.
@@ -1423,7 +1418,7 @@ class FlutterPlugin implements Plugin<Project> {
                         filename += "-${buildModeFor(variant.buildType)}"
                         project.copy {
                             from new File("$outputDirectoryStr/${output.outputFileName}")
-                            into new File("${project.buildDir}/outputs/flutter-apk")
+                            into new File("${project.layout.buildDirectory.dir("outputs/flutter-apk").get()}")
                             rename {
                                 return "${filename}.apk"
                             }
@@ -1431,7 +1426,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
                 // Copy the native assets created by build.dart and placed here by flutter assemble.
-                String nativeAssetsDir = "${project.buildDir}/../native_assets/android/jniLibs/lib/"
+                String nativeAssetsDir = "${project.layout.buildDirectory.dir("../native_assets/android/jniLibs/lib").get()}/"
                 project.android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             }
             configurePlugins(project)
