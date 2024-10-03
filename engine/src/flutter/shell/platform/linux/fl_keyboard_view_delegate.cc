@@ -39,14 +39,13 @@ FlBinaryMessenger* fl_keyboard_view_delegate_get_messenger(
   return FL_KEYBOARD_VIEW_DELEGATE_GET_IFACE(self)->get_messenger(self);
 }
 
-void fl_keyboard_view_delegate_redispatch_event(
-    FlKeyboardViewDelegate* self,
-    std::unique_ptr<FlKeyEvent> event) {
+void fl_keyboard_view_delegate_redispatch_event(FlKeyboardViewDelegate* self,
+                                                FlKeyEvent* event) {
   g_return_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(self));
   g_return_if_fail(event != nullptr);
 
-  return FL_KEYBOARD_VIEW_DELEGATE_GET_IFACE(self)->redispatch_event(
-      self, std::move(event));
+  return FL_KEYBOARD_VIEW_DELEGATE_GET_IFACE(self)->redispatch_event(self,
+                                                                     event);
 }
 
 void fl_keyboard_view_delegate_subscribe_to_layout_change(
