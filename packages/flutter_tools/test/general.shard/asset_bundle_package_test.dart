@@ -57,10 +57,25 @@ $assetsSection
 ''');
   }
 
-  void writePackagesFile(String packages) {
-    globals.fs.file('.packages')
-      ..createSync()
-      ..writeAsStringSync(packages);
+void writePackageConfigFile(Map<String, String> packages) {
+    globals.fs.directory('.dart_tool').childFile('package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(
+        json.encode(<String, dynamic>{
+          'packages': <dynamic>[
+            ...packages.entries.map((MapEntry<String, String> entry) {
+              return <String, dynamic>{
+                'name': entry.key,
+                'rootUri': '../${entry.value}',
+                'packageUri': 'lib/',
+                'languageVersion': '3.2',
+              };
+            }),
+          ],
+          'configVersion': 2,
+        },
+      ),
+    );
   }
 
   Map<Object, Object> assetManifestBinToJson(Map<Object, Object> manifest) {
@@ -78,7 +93,7 @@ $assetsSection
   ) async {
 
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(packageConfigPath: '.packages');
+    await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
 
     for (final String packageName in packages) {
       for (final String asset in assets) {
@@ -134,11 +149,11 @@ $assetsSection
   group('AssetBundle assets from packages', () {
     testUsingContext('No assets are bundled when the package has no assets', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packageConfigPath: '.packages');
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
       expect(bundle.entries.keys, unorderedEquals(
         <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
       const String expectedAssetManifest = '{}';
@@ -157,14 +172,14 @@ $assetsSection
 
     testUsingContext('No assets are bundled when the package has an asset that is not listed', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
       final List<String> assets = <String>['a/foo'];
       writeAssets('p/p/', assets);
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packageConfigPath: '.packages');
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
       expect(bundle.entries.keys, unorderedEquals(
         <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
       const String expectedAssetManifest = '{}';
@@ -184,7 +199,7 @@ $assetsSection
     testUsingContext('One asset is bundled when the package has and lists one '
       'asset its pubspec', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
 
       final List<String> assets = <String>['a/foo'];
       writePubspecFile(
@@ -221,7 +236,7 @@ $assetsSection
         'test',
         assets: assetEntries,
       );
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
       final List<String> assets = <String>['a/foo'];
@@ -246,7 +261,7 @@ $assetsSection
     testUsingContext('One asset and its variant are bundled when the package '
       'has an asset and a variant, and lists the asset in its pubspec', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',
@@ -283,7 +298,7 @@ $assetsSection
         'test',
         assets: <String>['packages/test_package/a/foo'],
       );
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',
@@ -312,7 +327,7 @@ $assetsSection
     testUsingContext('Two assets are bundled when the package has and lists '
       'two assets in its pubspec', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
 
       final List<String> assets = <String>['a/foo', 'a/bar'];
       writePubspecFile(
@@ -351,7 +366,7 @@ $assetsSection
         'test',
          assets: assetEntries,
       );
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
 
       final List<String> assets = <String>['a/foo', 'a/bar'];
       writePubspecFile(
@@ -384,7 +399,12 @@ $assetsSection
         'pubspec.yaml',
         'test',
       );
-      writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
+      writePackageConfigFile(
+        <String, String>{
+          'test_package': 'p/p/',
+          'test_package2': 'p2/p/',
+        },
+      );
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',
@@ -431,7 +451,12 @@ $assetsSection
         'test',
         assets: assetEntries,
       );
-      writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
+      writePackageConfigFile(
+        <String, String>{
+          'test_package': 'p/p/',
+          'test_package2': 'p2/p/',
+        },
+      );
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',
@@ -472,7 +497,12 @@ $assetsSection
         'pubspec.yaml',
         'test',
       );
-      writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
+      writePackageConfigFile(
+        <String, String>{
+          'test_package': 'p/p/',
+          'test_package2': 'p2/p/',
+        },
+      );
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',
@@ -506,7 +536,7 @@ $assetsSection
 
   testUsingContext('Asset paths can contain URL reserved characters', () async {
     writePubspecFile('pubspec.yaml', 'test');
-    writePackagesFile('test_package:p/p/lib/');
+    writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
 
     final List<String> assets = <String>['a/foo', 'a/foo [x]'];
     writePubspecFile(
@@ -538,7 +568,7 @@ $assetsSection
   group('AssetBundle assets from scanned paths', () {
     testUsingContext('Two assets are bundled when scanning their directory', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
 
       final List<String> assetsOnDisk = <String>['a/foo', 'a/bar'];
       final List<String> assetsOnManifest = <String>['a/'];
@@ -571,7 +601,7 @@ $assetsSection
 
     testUsingContext('Two assets are bundled when listing one and scanning second directory', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
 
       final List<String> assetsOnDisk = <String>['a/foo', 'abc/bar'];
       final List<String> assetOnManifest = <String>['a/foo', 'abc/'];
@@ -604,7 +634,7 @@ $assetsSection
 
     testUsingContext('One asset is bundled with variant, scanning wrong directory', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
 
       final List<String> assetsOnDisk = <String>['a/foo','a/b/foo','a/bar'];
       final List<String> assetOnManifest = <String>['a','a/bar']; // can't list 'a' as asset, should be 'a/'
@@ -618,7 +648,7 @@ $assetsSection
       writeAssets('p/p/', assetsOnDisk);
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packageConfigPath: '.packages');
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
 
       expect(bundle.entries['AssetManifest.json'], isNull,
         reason: 'Invalid pubspec.yaml should not generate AssetManifest.json'  );
@@ -631,7 +661,7 @@ $assetsSection
   group('AssetBundle assets from scanned paths with MemoryFileSystem', () {
     testUsingContext('One asset is bundled with variant, scanning directory', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
 
       final List<String> assetsOnDisk = <String>['a/foo','a/2x/foo'];
       final List<String> assetOnManifest = <String>['a/',];
@@ -661,7 +691,7 @@ $assetsSection
 
     testUsingContext('No asset is bundled with variant, no assets or directories are listed', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
 
       final List<String> assetsOnDisk = <String>['a/foo', 'a/2x/foo'];
       final List<String> assetOnManifest = <String>[];
@@ -687,7 +717,7 @@ $assetsSection
 
     testUsingContext('Expect error generating manifest, wrong non-existing directory is listed', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
 
       final List<String> assetOnManifest = <String>['c/'];
 
@@ -698,7 +728,7 @@ $assetsSection
       );
 
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(packageConfigPath: '.packages');
+    await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),

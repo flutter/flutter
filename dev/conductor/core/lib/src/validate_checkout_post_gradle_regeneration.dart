@@ -13,7 +13,7 @@ sealed class CheckoutStatePostGradleRegeneration {
       return const NoDiff();
     }
 
-    final List<String> changes = gitStatusOutput.trim().split('\n');
+    final List<String> changes = gitStatusOutput.split('\n');
     final List<String> changedPaths = <String>[];
     for (final String line in changes) {
       final RegExpMatch? match = pattern.firstMatch(line);

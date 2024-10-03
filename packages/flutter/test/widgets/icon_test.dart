@@ -358,7 +358,6 @@ void main() {
     expect(const IconData(123).toString(), 'IconData(U+0007B)');
   });
 
-
   testWidgets('Fill, weight, grade, and optical size variations are passed', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -441,6 +440,27 @@ void main() {
       const FontVariation('GRAD', 8.0),
       const FontVariation('opsz', 9.0)
     ]);
+  });
+
+  testWidgets("TextStyle's blendMode should bind in foreground property", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: IconTheme(
+            data: IconThemeData(opacity: 0.5),
+            child: Icon(
+              IconData(0x41),
+              blendMode: BlendMode.clear,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RichText richText = tester.firstWidget(find.byType(RichText));
+    expect(richText.text.style?.color, isNull);
+    expect(richText.text.style?.foreground?.blendMode, BlendMode.clear);
   });
 
   test('Throws if given invalid values', () {

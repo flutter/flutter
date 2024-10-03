@@ -645,7 +645,6 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       final MemoryFileSystem fs = MemoryFileSystem.test();
       final FakeFlutterProject project = FakeFlutterProject(fileSystem: fs);
       project.ios.podfile.createSync(recursive: true);
-      project.directory.childFile('.packages').createSync(recursive: true);
       project.manifest = FakeFlutterManifest();
       createFakePlugins(project, fs, <String>['plugin_1_name', 'plugin_2_name']);
       fs.systemTempDirectory.childFile('cache/plugin_1_name/ios/plugin_1_name/Package.swift')

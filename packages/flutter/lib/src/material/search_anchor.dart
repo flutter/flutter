@@ -8,6 +8,7 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
 import 'back_button.dart';
 import 'button_style.dart';
 import 'color_scheme.dart';
@@ -186,6 +187,7 @@ class SearchAnchor extends StatefulWidget {
     TextInputAction? textInputAction,
     TextInputType? keyboardType,
     EdgeInsets scrollPadding,
+    EditableTextContextMenuBuilder contextMenuBuilder,
   }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
@@ -1053,6 +1055,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.textInputAction,
     super.keyboardType,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
+    EditableTextContextMenuBuilder contextMenuBuilder = SearchBar._defaultContextMenuBuilder,
   }) : super(
     viewHintText: viewHintText ?? barHintText,
     headerHeight: viewHeaderHeight,
@@ -1087,6 +1090,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
         textInputAction: textInputAction,
         keyboardType: keyboardType,
         scrollPadding: scrollPadding,
+        contextMenuBuilder: contextMenuBuilder,
       );
     }
   );
@@ -1208,6 +1212,7 @@ class SearchBar extends StatefulWidget {
     this.textInputAction,
     this.keyboardType,
     this.scrollPadding = const EdgeInsets.all(20.0),
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1356,6 +1361,23 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollPadding}
   final EdgeInsets scrollPadding;
 
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [AdaptiveTextSelectionToolbar], which is built by default.
+  ///  * [BrowserContextMenu], which allows the browser's context menu on web to
+  ///    be disabled and Flutter-rendered context menus to appear.
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
+
   @override
   State<SearchBar> createState() => _SearchBarState();
 }
@@ -1497,6 +1519,7 @@ class _SearchBarState extends State<SearchBar> {
                           textInputAction: widget.textInputAction,
                           keyboardType: widget.keyboardType,
                           scrollPadding: widget.scrollPadding,
+                          contextMenuBuilder: widget.contextMenuBuilder,
                         ),
                       ),
                     ),

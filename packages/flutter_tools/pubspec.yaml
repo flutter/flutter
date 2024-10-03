@@ -13,7 +13,7 @@ dependencies:
   archive: 3.6.1
   args: 2.5.0
   browser_launcher: 1.1.2
-  dds: 4.2.6
+  dds: 4.2.7
   dwds: 24.1.0
   completion: 1.0.1
   coverage: 1.9.2
@@ -52,7 +52,7 @@ dependencies:
   http_multi_server: 3.2.1
   convert: 3.1.1
   async: 2.11.0
-  unified_analytics: 6.1.2
+  unified_analytics: 6.1.3
 
   cli_config: 0.2.0
   graphs: 2.3.2
@@ -122,4 +122,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 9ff3
+# PUBSPEC CHECKSUM: 40f5

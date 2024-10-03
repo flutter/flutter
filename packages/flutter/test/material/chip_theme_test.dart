@@ -136,17 +136,17 @@ void main() {
         .toList();
 
     expect(description, equalsIgnoringHashCodes(<String>[
-      'color: WidgetStatePropertyAll(Color(0xfffffff0))',
-      'backgroundColor: Color(0xfffffff1)',
-      'deleteIconColor: Color(0xfffffff2)',
-      'disabledColor: Color(0xfffffff3)',
-      'selectedColor: Color(0xfffffff4)',
-      'secondarySelectedColor: Color(0xfffffff5)',
-      'shadowColor: Color(0xfffffff6)',
-      'surfaceTintColor: Color(0xfffffff7)',
-      'selectedShadowColor: Color(0xfffffff8)',
+      'color: WidgetStatePropertyAll(${const Color(0xfffffff0)})',
+      'backgroundColor: ${const Color(0xfffffff1)}',
+      'deleteIconColor: ${const Color(0xfffffff2)}',
+      'disabledColor: ${const Color(0xfffffff3)}',
+      'selectedColor: ${const Color(0xfffffff4)}',
+      'secondarySelectedColor: ${const Color(0xfffffff5)}',
+      'shadowColor: ${const Color(0xfffffff6)}',
+      'surfaceTintColor: ${const Color(0xfffffff7)}',
+      'selectedShadowColor: ${const Color(0xfffffff8)}',
       'showCheckmark: true',
-      'checkMarkColor: Color(0xfffffff9)',
+      'checkMarkColor: ${const Color(0xfffffff9)}',
       'labelPadding: EdgeInsets.all(1.0)',
       'padding: EdgeInsets.all(2.0)',
       'side: BorderSide(width: 10.0)',
@@ -156,7 +156,7 @@ void main() {
       'brightness: dark',
       'elevation: 5.0',
       'pressElevation: 6.0',
-      'iconTheme: IconThemeData#00000(color: Color(0xffffff10))',
+      'iconTheme: IconThemeData#00000(color: ${const Color(0xffffff10)})',
       'avatarBoxConstraints: BoxConstraints(unconstrained)',
       'deleteIconBoxConstraints: BoxConstraints(unconstrained)',
     ]));
@@ -636,115 +636,115 @@ void main() {
 
     final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5)!;
     const Color middleGrey = Color(0xff7f7f7f);
-    expect(lerp.backgroundColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.deleteIconColor, equals(middleGrey.withAlpha(0xde)));
-    expect(lerp.disabledColor, equals(middleGrey.withAlpha(0x0c)));
-    expect(lerp.selectedColor, equals(middleGrey.withAlpha(0x3d)));
-    expect(lerp.secondarySelectedColor, equals(middleGrey.withAlpha(0x3d)));
-    expect(lerp.shadowColor, equals(middleGrey));
-    expect(lerp.surfaceTintColor, equals(middleGrey));
-    expect(lerp.selectedShadowColor, equals(middleGrey));
+    expect(lerp.backgroundColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.deleteIconColor, isSameColorAs(middleGrey.withAlpha(0xde)));
+    expect(lerp.disabledColor, isSameColorAs(middleGrey.withAlpha(0x0c)));
+    expect(lerp.selectedColor, isSameColorAs(middleGrey.withAlpha(0x3d)));
+    expect(lerp.secondarySelectedColor, isSameColorAs(middleGrey.withAlpha(0x3d)));
+    expect(lerp.shadowColor, isSameColorAs(middleGrey));
+    expect(lerp.surfaceTintColor, isSameColorAs(middleGrey));
+    expect(lerp.selectedShadowColor, isSameColorAs(middleGrey));
     expect(lerp.showCheckmark, equals(true));
     expect(lerp.labelPadding, equals(const EdgeInsets.all(4.0)));
     expect(lerp.padding, equals(const EdgeInsets.all(3.0)));
-    expect(lerp.side!.color, equals(middleGrey));
+    expect(lerp.side!.color, isSameColorAs(middleGrey));
     expect(lerp.shape, isA<BeveledRectangleBorder>());
-    expect(lerp.labelStyle?.color, equals(middleGrey.withAlpha(0xde)));
-    expect(lerp.secondaryLabelStyle?.color, equals(middleGrey.withAlpha(0xde)));
+    expect(lerp.labelStyle?.color, isSameColorAs(middleGrey.withAlpha(0xde)));
+    expect(lerp.secondaryLabelStyle?.color, isSameColorAs(middleGrey.withAlpha(0xde)));
     expect(lerp.brightness, equals(Brightness.light));
     expect(lerp.elevation, 3.0);
     expect(lerp.pressElevation, 7.0);
-    expect(lerp.checkmarkColor, equals(middleGrey));
+    expect(lerp.checkmarkColor, isSameColorAs(middleGrey));
     expect(lerp.iconTheme, const IconThemeData(size: 24.0));
 
     expect(ChipThemeData.lerp(null, null, 0.25), isNull);
 
     final ChipThemeData lerpANull25 = ChipThemeData.lerp(null, chipThemeWhite, 0.25)!;
-    expect(lerpANull25.backgroundColor, equals(Colors.black.withAlpha(0x08)));
-    expect(lerpANull25.deleteIconColor, equals(Colors.black.withAlpha(0x38)));
-    expect(lerpANull25.disabledColor, equals(Colors.black.withAlpha(0x03)));
-    expect(lerpANull25.selectedColor, equals(Colors.black.withAlpha(0x0f)));
-    expect(lerpANull25.secondarySelectedColor, equals(Colors.white.withAlpha(0x0f)));
-    expect(lerpANull25.shadowColor, equals(Colors.white.withAlpha(0x40)));
-    expect(lerpANull25.surfaceTintColor, equals(Colors.white.withAlpha(0x40)));
-    expect(lerpANull25.selectedShadowColor, equals(Colors.white.withAlpha(0x40)));
+    expect(lerpANull25.backgroundColor, isSameColorAs(Colors.black.withAlpha(0x08)));
+    expect(lerpANull25.deleteIconColor, isSameColorAs(Colors.black.withAlpha(0x38)));
+    expect(lerpANull25.disabledColor, isSameColorAs(Colors.black.withAlpha(0x03)));
+    expect(lerpANull25.selectedColor, isSameColorAs(Colors.black.withAlpha(0x0f)));
+    expect(lerpANull25.secondarySelectedColor, isSameColorAs(Colors.white.withAlpha(0x0f)));
+    expect(lerpANull25.shadowColor, isSameColorAs(Colors.white.withAlpha(0x40)));
+    expect(lerpANull25.surfaceTintColor, isSameColorAs(Colors.white.withAlpha(0x40)));
+    expect(lerpANull25.selectedShadowColor, isSameColorAs(Colors.white.withAlpha(0x40)));
     expect(lerpANull25.showCheckmark, equals(true));
     expect(lerpANull25.labelPadding, equals(const EdgeInsets.only(top: 2.0, bottom: 2.0)));
     expect(lerpANull25.padding, equals(const EdgeInsets.all(0.5)));
-    expect(lerpANull25.side!.color, equals(Colors.white.withAlpha(0x3f)));
+    expect(lerpANull25.side!.color, isSameColorAs(Colors.white.withAlpha(0x3f)));
     expect(lerpANull25.shape, isA<BeveledRectangleBorder>());
-    expect(lerpANull25.labelStyle?.color, equals(Colors.black.withAlpha(0x38)));
-    expect(lerpANull25.secondaryLabelStyle?.color, equals(Colors.white.withAlpha(0x38)));
+    expect(lerpANull25.labelStyle?.color, isSameColorAs(Colors.black.withAlpha(0x38)));
+    expect(lerpANull25.secondaryLabelStyle?.color, isSameColorAs(Colors.white.withAlpha(0x38)));
     expect(lerpANull25.brightness, equals(Brightness.light));
     expect(lerpANull25.elevation, 1.25);
     expect(lerpANull25.pressElevation, 2.5);
-    expect(lerpANull25.checkmarkColor, equals(Colors.white.withAlpha(0x40)));
+    expect(lerpANull25.checkmarkColor, isSameColorAs(Colors.white.withAlpha(0x40)));
     expect(lerpANull25.iconTheme, const IconThemeData(size: 5.5));
 
     final ChipThemeData lerpANull75 = ChipThemeData.lerp(null, chipThemeWhite, 0.75)!;
-    expect(lerpANull75.backgroundColor, equals(Colors.black.withAlpha(0x17)));
-    expect(lerpANull75.deleteIconColor, equals(Colors.black.withAlpha(0xa7)));
-    expect(lerpANull75.disabledColor, equals(Colors.black.withAlpha(0x09)));
-    expect(lerpANull75.selectedColor, equals(Colors.black.withAlpha(0x2e)));
-    expect(lerpANull75.secondarySelectedColor, equals(Colors.white.withAlpha(0x2e)));
-    expect(lerpANull75.shadowColor, equals(Colors.white.withAlpha(0xbf)));
-    expect(lerpANull75.surfaceTintColor, equals(Colors.white.withAlpha(0xbf)));
-    expect(lerpANull75.selectedShadowColor, equals(Colors.white.withAlpha(0xbf)));
+    expect(lerpANull75.backgroundColor, isSameColorAs(Colors.black.withAlpha(0x17)));
+    expect(lerpANull75.deleteIconColor, isSameColorAs(Colors.black.withAlpha(0xa7)));
+    expect(lerpANull75.disabledColor, isSameColorAs(Colors.black.withAlpha(0x09)));
+    expect(lerpANull75.selectedColor, isSameColorAs(Colors.black.withAlpha(0x2e)));
+    expect(lerpANull75.secondarySelectedColor, isSameColorAs(Colors.white.withAlpha(0x2e)));
+    expect(lerpANull75.shadowColor, isSameColorAs(Colors.white.withAlpha(0xbf)));
+    expect(lerpANull75.surfaceTintColor, isSameColorAs(Colors.white.withAlpha(0xbf)));
+    expect(lerpANull75.selectedShadowColor, isSameColorAs(Colors.white.withAlpha(0xbf)));
     expect(lerpANull75.showCheckmark, equals(true));
     expect(lerpANull75.labelPadding, equals(const EdgeInsets.only(top: 6.0, bottom: 6.0)));
     expect(lerpANull75.padding, equals(const EdgeInsets.all(1.5)));
-    expect(lerpANull75.side!.color, equals(Colors.white.withAlpha(0xbf)));
+    expect(lerpANull75.side!.color, isSameColorAs(Colors.white.withAlpha(0xbf)));
     expect(lerpANull75.shape, isA<BeveledRectangleBorder>());
-    expect(lerpANull75.labelStyle?.color, equals(Colors.black.withAlpha(0xa7)));
-    expect(lerpANull75.secondaryLabelStyle?.color, equals(Colors.white.withAlpha(0xa7)));
+    expect(lerpANull75.labelStyle?.color, isSameColorAs(Colors.black.withAlpha(0xa7)));
+    expect(lerpANull75.secondaryLabelStyle?.color, isSameColorAs(Colors.white.withAlpha(0xa7)));
     expect(lerpANull75.brightness, equals(Brightness.light));
     expect(lerpANull75.elevation, 3.75);
     expect(lerpANull75.pressElevation, 7.5);
-    expect(lerpANull75.checkmarkColor, equals(Colors.white.withAlpha(0xbf)));
+    expect(lerpANull75.checkmarkColor, isSameColorAs(Colors.white.withAlpha(0xbf)));
     expect(lerpANull75.iconTheme, const IconThemeData(size: 16.5));
 
     final ChipThemeData lerpBNull25 = ChipThemeData.lerp(chipThemeBlack, null, 0.25)!;
-    expect(lerpBNull25.backgroundColor, equals(Colors.white.withAlpha(0x17)));
-    expect(lerpBNull25.deleteIconColor, equals(Colors.white.withAlpha(0xa7)));
-    expect(lerpBNull25.disabledColor, equals(Colors.white.withAlpha(0x09)));
-    expect(lerpBNull25.selectedColor, equals(Colors.white.withAlpha(0x2e)));
-    expect(lerpBNull25.secondarySelectedColor, equals(Colors.black.withAlpha(0x2e)));
-    expect(lerpBNull25.shadowColor, equals(Colors.black.withAlpha(0xbf)));
-    expect(lerpBNull25.surfaceTintColor, equals(Colors.black.withAlpha(0xbf)));
-    expect(lerpBNull25.selectedShadowColor, equals(Colors.black.withAlpha(0xbf)));
+    expect(lerpBNull25.backgroundColor, isSameColorAs(Colors.white.withAlpha(0x17)));
+    expect(lerpBNull25.deleteIconColor, isSameColorAs(Colors.white.withAlpha(0xa7)));
+    expect(lerpBNull25.disabledColor, isSameColorAs(Colors.white.withAlpha(0x09)));
+    expect(lerpBNull25.selectedColor, isSameColorAs(Colors.white.withAlpha(0x2e)));
+    expect(lerpBNull25.secondarySelectedColor, isSameColorAs(Colors.black.withAlpha(0x2e)));
+    expect(lerpBNull25.shadowColor, isSameColorAs(Colors.black.withAlpha(0xbf)));
+    expect(lerpBNull25.surfaceTintColor, isSameColorAs(Colors.black.withAlpha(0xbf)));
+    expect(lerpBNull25.selectedShadowColor, isSameColorAs(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull25.showCheckmark, equals(false));
     expect(lerpBNull25.labelPadding, equals(const EdgeInsets.only(left: 6.0, right: 6.0)));
     expect(lerpBNull25.padding, equals(const EdgeInsets.all(3.0)));
-    expect(lerpBNull25.side!.color, equals(Colors.black.withAlpha(0x3f)));
+    expect(lerpBNull25.side!.color, isSameColorAs(Colors.black.withAlpha(0x3f)));
     expect(lerpBNull25.shape, isA<StadiumBorder>());
-    expect(lerpBNull25.labelStyle?.color, equals(Colors.white.withAlpha(0xa7)));
-    expect(lerpBNull25.secondaryLabelStyle?.color, equals(Colors.black.withAlpha(0xa7)));
+    expect(lerpBNull25.labelStyle?.color, isSameColorAs(Colors.white.withAlpha(0xa7)));
+    expect(lerpBNull25.secondaryLabelStyle?.color, isSameColorAs(Colors.black.withAlpha(0xa7)));
     expect(lerpBNull25.brightness, equals(Brightness.dark));
     expect(lerpBNull25.elevation, 0.75);
     expect(lerpBNull25.pressElevation, 3.0);
-    expect(lerpBNull25.checkmarkColor, equals(Colors.black.withAlpha(0xbf)));
+    expect(lerpBNull25.checkmarkColor, isSameColorAs(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull25.iconTheme, const IconThemeData(size: 19.5));
 
     final ChipThemeData lerpBNull75 = ChipThemeData.lerp(chipThemeBlack, null, 0.75)!;
-    expect(lerpBNull75.backgroundColor, equals(Colors.white.withAlpha(0x08)));
-    expect(lerpBNull75.deleteIconColor, equals(Colors.white.withAlpha(0x38)));
-    expect(lerpBNull75.disabledColor, equals(Colors.white.withAlpha(0x03)));
-    expect(lerpBNull75.selectedColor, equals(Colors.white.withAlpha(0x0f)));
-    expect(lerpBNull75.secondarySelectedColor, equals(Colors.black.withAlpha(0x0f)));
-    expect(lerpBNull75.shadowColor, equals(Colors.black.withAlpha(0x40)));
-    expect(lerpBNull75.surfaceTintColor, equals(Colors.black.withAlpha(0x40)));
-    expect(lerpBNull75.selectedShadowColor, equals(Colors.black.withAlpha(0x40)));
+    expect(lerpBNull75.backgroundColor, isSameColorAs(Colors.white.withAlpha(0x08)));
+    expect(lerpBNull75.deleteIconColor, isSameColorAs(Colors.white.withAlpha(0x38)));
+    expect(lerpBNull75.disabledColor, isSameColorAs(Colors.white.withAlpha(0x03)));
+    expect(lerpBNull75.selectedColor, isSameColorAs(Colors.white.withAlpha(0x0f)));
+    expect(lerpBNull75.secondarySelectedColor, isSameColorAs(Colors.black.withAlpha(0x0f)));
+    expect(lerpBNull75.shadowColor, isSameColorAs(Colors.black.withAlpha(0x40)));
+    expect(lerpBNull75.surfaceTintColor, isSameColorAs(Colors.black.withAlpha(0x40)));
+    expect(lerpBNull75.selectedShadowColor, isSameColorAs(Colors.black.withAlpha(0x40)));
     expect(lerpBNull75.showCheckmark, equals(true));
     expect(lerpBNull75.labelPadding, equals(const EdgeInsets.only(left: 2.0, right: 2.0)));
     expect(lerpBNull75.padding, equals(const EdgeInsets.all(1.0)));
-    expect(lerpBNull75.side!.color, equals(Colors.black.withAlpha(0xbf)));
+    expect(lerpBNull75.side!.color, isSameColorAs(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull75.shape, isA<StadiumBorder>());
-    expect(lerpBNull75.labelStyle?.color, equals(Colors.white.withAlpha(0x38)));
-    expect(lerpBNull75.secondaryLabelStyle?.color, equals(Colors.black.withAlpha(0x38)));
+    expect(lerpBNull75.labelStyle?.color, isSameColorAs(Colors.white.withAlpha(0x38)));
+    expect(lerpBNull75.secondaryLabelStyle?.color, isSameColorAs(Colors.black.withAlpha(0x38)));
     expect(lerpBNull75.brightness, equals(Brightness.light));
     expect(lerpBNull75.elevation, 0.25);
     expect(lerpBNull75.pressElevation, 1.0);
-    expect(lerpBNull75.checkmarkColor, equals(Colors.black.withAlpha(0x40)));
+    expect(lerpBNull75.checkmarkColor, isSameColorAs(Colors.black.withAlpha(0x40)));
     expect(lerpBNull75.iconTheme, const IconThemeData(size: 6.5));
   });
 

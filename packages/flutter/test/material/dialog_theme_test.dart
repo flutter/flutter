@@ -154,17 +154,17 @@ void main() {
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
         .map((DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[
-      'backgroundColor: Color(0xff123456)',
+      'backgroundColor: ${const Color(0xff123456)}',
       'elevation: 8.0',
-      'shadowColor: Color(0xff000001)',
-      'surfaceTintColor: Color(0xff000002)',
+      'shadowColor: ${const Color(0xff000001)}',
+      'surfaceTintColor: ${const Color(0xff000002)}',
       'shape: BeveledRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(20.5))',
       'alignment: Alignment.bottomLeft',
-      'iconColor: Color(0xff654321)',
-      'titleTextStyle: TextStyle(inherit: true, color: Color(0xffffffff))',
-      'contentTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
+      'iconColor: ${const Color(0xff654321)}',
+      'titleTextStyle: TextStyle(inherit: true, color: ${const Color(0xffffffff)})',
+      'contentTextStyle: TextStyle(inherit: true, color: ${const Color(0xff000000)})',
       'actionsPadding: EdgeInsets.all(8.0)',
-      'barrierColor: Color(0xff000005)',
+      'barrierColor: ${const Color(0xff000005)}',
       'insetPadding: EdgeInsets.all(20.0)',
       'clipBehavior: Clip.antiAlias'
     ]);

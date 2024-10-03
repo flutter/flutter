@@ -83,7 +83,6 @@ void main() {
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();
     fileSystem.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
-    fileSystem.currentDirectory.childFile('.packages').writeAsBytesSync(<int>[0]);
     fileSystem.currentDirectory.childFile('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[0]);
