@@ -14,6 +14,12 @@ float IPGaussian(float x, float sigma) {
   return exp(-0.5f * x * x / variance) / (kSqrtTwoPi * sigma);
 }
 
+/// Equivalent to `IPGaussian(float x, float sigma)` but executed 4x.
+vec4 IPGaussian(vec4 x, float sigma) {
+  float variance = sigma * sigma;
+  return exp(-0.5f * x * x / variance) / (kSqrtTwoPi * sigma);
+}
+
 /// Gaussian distribution function.
 float16_t IPHalfGaussian(float16_t x, float16_t sigma) {
   float16_t variance = sigma * sigma;
@@ -53,6 +59,12 @@ f16vec2 IPVec2GaussianIntegral(f16vec2 x, float16_t sigma) {
 
 /// Simpler (but less accurate) approximation of the Gaussian integral.
 vec2 IPVec2FastGaussianIntegral(vec2 x, float sigma) {
+  return 1.0 / (1.0 + exp(-kSqrtThree / sigma * x));
+}
+
+/// Equivalent to `IPVec2FastGaussianIntegral(vec2 x, float sigma)` but operated
+/// 4x instead of 2x.
+vec4 IPVec4FastGaussianIntegral(vec4 x, float sigma) {
   return 1.0 / (1.0 + exp(-kSqrtThree / sigma * x));
 }
 
