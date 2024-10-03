@@ -320,7 +320,8 @@ class ThemeData with Diagnosticable {
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
     DatePickerThemeData? datePickerTheme,
-    DialogTheme? dialogTheme,
+    // TODO(QuncCccccc): Change the parameter type to DialogThemeData
+    Object? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
     DropdownMenuThemeData? dropdownMenuTheme,
@@ -497,7 +498,15 @@ class ThemeData with Diagnosticable {
     chipTheme ??= const ChipThemeData();
     dataTableTheme ??= const DataTableThemeData();
     datePickerTheme ??= const DatePickerThemeData();
-    dialogTheme ??= const DialogTheme();
+    // TODO(QuncCccccc): Clean this up once the type of `dialogTheme` is changed to `DialogThemeData`
+    if (dialogTheme != null) {
+      if (dialogTheme is DialogTheme) {
+        dialogTheme = dialogTheme.data;
+      } else if (dialogTheme is! DialogThemeData) {
+        throw ArgumentError('dialogTheme must be either a DialogThemeData or a DialogTheme');
+      }
+    }
+    dialogTheme ??= const DialogThemeData();
     dividerTheme ??= const DividerThemeData();
     drawerTheme ??= const DrawerThemeData();
     dropdownMenuTheme ??= const DropdownMenuThemeData();
@@ -590,7 +599,7 @@ class ThemeData with Diagnosticable {
       chipTheme: chipTheme,
       dataTableTheme: dataTableTheme,
       datePickerTheme: datePickerTheme,
-      dialogTheme: dialogTheme,
+      dialogTheme: dialogTheme as DialogThemeData,
       dividerTheme: dividerTheme,
       drawerTheme: drawerTheme,
       dropdownMenuTheme: dropdownMenuTheme,
@@ -1276,7 +1285,7 @@ class ThemeData with Diagnosticable {
   final DatePickerThemeData datePickerTheme;
 
   /// A theme for customizing the shape of a dialog.
-  final DialogTheme dialogTheme;
+  final DialogThemeData dialogTheme;
 
   /// A theme for customizing the color, thickness, and indents of [Divider]s,
   /// [VerticalDivider]s, etc.
@@ -1462,7 +1471,8 @@ class ThemeData with Diagnosticable {
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
     DatePickerThemeData? datePickerTheme,
-    DialogTheme? dialogTheme,
+    // TODO(QuncCccccc): Change the parameter type to DialogThemeData
+    Object? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
     DropdownMenuThemeData? dropdownMenuTheme,
@@ -1510,6 +1520,15 @@ class ThemeData with Diagnosticable {
     ButtonBarThemeData? buttonBarTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
+
+    // TODO(QuncCccccc): Clean this up once the type of `dialogTheme` is changed to `DialogThemeData`
+    if (dialogTheme != null) {
+      if (dialogTheme is DialogTheme) {
+        dialogTheme = dialogTheme.data;
+      } else if (dialogTheme is! DialogThemeData) {
+        throw ArgumentError('dialogTheme must be either a DialogThemeData or a DialogTheme');
+      }
+    }
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
@@ -1571,7 +1590,7 @@ class ThemeData with Diagnosticable {
       chipTheme: chipTheme ?? this.chipTheme,
       dataTableTheme: dataTableTheme ?? this.dataTableTheme,
       datePickerTheme: datePickerTheme ?? this.datePickerTheme,
-      dialogTheme: dialogTheme ?? this.dialogTheme,
+      dialogTheme: dialogTheme as DialogThemeData? ?? this.dialogTheme,
       dividerTheme: dividerTheme ?? this.dividerTheme,
       drawerTheme: drawerTheme ?? this.drawerTheme,
       dropdownMenuTheme: dropdownMenuTheme ?? this.dropdownMenuTheme,
@@ -1764,7 +1783,7 @@ class ThemeData with Diagnosticable {
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t)!,
       dataTableTheme: DataTableThemeData.lerp(a.dataTableTheme, b.dataTableTheme, t),
       datePickerTheme: DatePickerThemeData.lerp(a.datePickerTheme, b.datePickerTheme, t),
-      dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
+      dialogTheme: DialogThemeData.lerp(a.dialogTheme, b.dialogTheme, t),
       dividerTheme: DividerThemeData.lerp(a.dividerTheme, b.dividerTheme, t),
       drawerTheme: DrawerThemeData.lerp(a.drawerTheme, b.drawerTheme, t)!,
       dropdownMenuTheme: DropdownMenuThemeData.lerp(a.dropdownMenuTheme, b.dropdownMenuTheme, t),
@@ -2062,7 +2081,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DataTableThemeData>('dataTableTheme', dataTableTheme, defaultValue: defaultData.dataTableTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DatePickerThemeData>('datePickerTheme', datePickerTheme, defaultValue: defaultData.datePickerTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<DialogThemeData>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DrawerThemeData>('drawerTheme', drawerTheme, defaultValue: defaultData.drawerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DropdownMenuThemeData>('dropdownMenuTheme', dropdownMenuTheme, defaultValue: defaultData.dropdownMenuTheme, level: DiagnosticLevel.debug));
