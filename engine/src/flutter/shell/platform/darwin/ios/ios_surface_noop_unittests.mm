@@ -14,6 +14,7 @@
 #import "flutter/lib/ui/window/platform_message_response.h"
 #import "flutter/shell/common/thread_host.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/ios_context_noop.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -22,7 +23,8 @@ FLUTTER_ASSERT_ARC
 
 @implementation IOSSurfaceNoopTest
 - (void)testCreateSurface {
-  flutter::IOSSurfaceNoop noop(nullptr);
+  auto context = std::make_shared<flutter::IOSContextNoop>();
+  flutter::IOSSurfaceNoop noop(context);
 
   XCTAssertTrue(noop.IsValid());
   XCTAssertTrue(!!noop.CreateGPUSurface());
