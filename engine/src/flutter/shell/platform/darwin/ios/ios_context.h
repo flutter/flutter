@@ -15,7 +15,6 @@
 #include "flutter/fml/synchronization/sync_switch.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
-#include "impeller/aiks/aiks_context.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace impeller {
@@ -140,8 +139,6 @@ class IOSContext {
   virtual sk_sp<GrDirectContext> GetMainContext() const = 0;
 
   virtual std::shared_ptr<impeller::Context> GetImpellerContext() const;
-
-  virtual std::shared_ptr<impeller::AiksContext> GetAiksContext() const;
 
  protected:
   explicit IOSContext();
