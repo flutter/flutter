@@ -48,7 +48,7 @@ FakeProcessLister failure() {
 const ValidationResult validWindows11ValidationResult = ValidationResult(
   ValidationType.success,
   <ValidationMessage>[],
-  statusInfo: 'Microsoft Windows 11 Pro 23H2 (2009)',
+  statusInfo: '11 Pro, 23H2, 2009',
 );
 
 /// The expected validation result object for
@@ -81,9 +81,9 @@ const ValidationResult getProcessFailed = ValidationResult(
 class FakeVersionExtractor extends Fake implements VersionExtractor {
   FakeVersionExtractor({required this.mockData});
   FakeVersionExtractor.win11Pro() : this(mockData: <String, String>{
-    'OsName': 'Microsoft Windows 11 Pro',
-    'OSDisplayVersion': '23H2',
-    'WindowsVersion': '2009'});
+    'Caption': '11 Pro',
+    'ReleaseId': '23H2',
+    'DisplayVersion': '2009'});
 
   final Map<String, String> mockData;
 

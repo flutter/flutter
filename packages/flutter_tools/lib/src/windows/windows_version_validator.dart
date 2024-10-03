@@ -8,7 +8,6 @@ import 'package:process/process.dart';
 
 import '../base/io.dart';
 import '../base/os.dart';
-import '../convert.dart';
 import '../doctor_validator.dart';
 
 /// Flutter only supports development on Windows host machines version 10 and greater.
