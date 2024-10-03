@@ -187,5 +187,17 @@ TEST(MatrixTest, GetMaxBasisXYWithLargeAndSmallScalingFactorNonScaleTranslate) {
   EXPECT_TRUE(std::isinf(m.GetMaxBasisLengthXY()));
 }
 
+TEST(MatrixTest, TranslateWithPerspective) {
+  Matrix m = Matrix::MakeRow(1.0, 0.0, 0.0, 10.0,  //
+                             0.0, 1.0, 0.0, 20.0,  //
+                             0.0, 0.0, 1.0, 0.0,   //
+                             0.0, 2.0, 0.0, 30.0);
+  Matrix result = m.Translate({100, 200});
+  EXPECT_TRUE(MatrixNear(result, Matrix::MakeRow(1.0, 0.0, 0.0, 110.0,  //
+                                                 0.0, 1.0, 0.0, 220.0,  //
+                                                 0.0, 0.0, 1.0, 0.0,    //
+                                                 0.0, 2.0, 0.0, 430.0)));
+}
+
 }  // namespace testing
 }  // namespace impeller
