@@ -29,9 +29,6 @@ enum NavigationBarBottomMode {
 
   /// Always display the bottom regardless of the scroll activity.
   always,
-
-  /// Never display the bottom.
-  none,
 }
 
 /// Standard iOS navigation bar height without the status bar.
@@ -718,18 +715,46 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.heroTag = _defaultHeroTag,
     this.stretch = false,
     this.bottom,
-    this.bottomMode = NavigationBarBottomMode.none,
+    this.bottomMode = NavigationBarBottomMode.automatic,
+  }) : assert(
+         automaticallyImplyTitle || largeTitle != null,
+         'No largeTitle has been provided but automaticallyImplyTitle is also '
+         'false. Either provide a largeTitle or set automaticallyImplyTitle to '
+         'true.',
+       );
+
+  /// Create a navigation bar for scrolling lists with [bottom] set to a
+  /// [CupertinoSearchTextField] with padding.
+  ///
+  /// If [automaticallyImplyTitle] is false, then the [largeTitle] argument is
+  /// required.
+  const CupertinoSliverNavigationBar.search({
+    super.key,
+    this.largeTitle,
+    this.leading,
+    this.automaticallyImplyLeading = true,
+    this.automaticallyImplyTitle = true,
+    this.alwaysShowMiddle = true,
+    this.previousPageTitle,
+    this.middle,
+    this.trailing,
+    this.border = _kDefaultNavBarBorder,
+    this.backgroundColor,
+    this.automaticBackgroundVisibility = true,
+    this.enableBackgroundFilterBlur = true,
+    this.brightness,
+    this.padding,
+    this.transitionBetweenRoutes = true,
+    this.heroTag = _defaultHeroTag,
+    this.stretch = false,
+    this.bottomMode = NavigationBarBottomMode.automatic,
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
          'true.',
        ),
-       assert (
-        bottom != null || bottomMode == NavigationBarBottomMode.none,
-        'A bottom must be provided if bottomMode is set to a value other than '
-        'NavigationBarBottomMode.none.',
-       );
+       bottom = const _NavigationBarSearchField();
 
   /// The navigation bar's title.
   ///
@@ -834,10 +859,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 
   /// Modes that determine when to display the navigation bar's bottom.
   ///
-  /// A [bottom] must be provided if this is set to
-  /// [NavigationBarBottomMode.automatic] or [NavigationBarBottomMode.always].
-  ///
-  /// Defaults to [NavigationBarBottomMode.none].
+  /// Defaults to [NavigationBarBottomMode.automatic].
   final NavigationBarBottomMode bottomMode;
 
   /// True if the navigation bar's background color has no transparency.
@@ -854,10 +876,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///
   /// Defaults to `false`.
   final bool stretch;
-
-  /// The default [bottom], which is a [CupertinoSearchTextField] with some
-  /// padding.
-  static PreferredSizeWidget searchField = const _SearchableCupertinoNavigationBar();
 
   @override
   State<CupertinoSliverNavigationBar> createState() => _CupertinoSliverNavigationBarState();
@@ -912,7 +930,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
           bottom: widget.bottom ?? const SizedBox.shrink(),
           bottomMode: widget.bottomMode,
-          bottomHeight: widget.bottom != null && widget.bottomMode != NavigationBarBottomMode.none ? widget.bottom!.preferredSize.height : 0.0,
+          bottomHeight: widget.bottom != null ? widget.bottom!.preferredSize.height : 0.0,
         ),
       ),
     );
@@ -2719,8 +2737,8 @@ Widget _navBarHeroFlightShuttleBuilder(
   }
 }
 
-class _SearchableCupertinoNavigationBar extends StatelessWidget implements PreferredSizeWidget {
-  const _SearchableCupertinoNavigationBar();
+class _NavigationBarSearchField extends StatelessWidget implements PreferredSizeWidget {
+  const _NavigationBarSearchField();
 
   @override
   Widget build(BuildContext context) {

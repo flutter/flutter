@@ -89,7 +89,7 @@ class NextPage extends StatelessWidget {
     return CupertinoPageScaffold(
       child: CustomScrollView(
         slivers: <Widget>[
-          CupertinoSliverNavigationBar(
+          CupertinoSliverNavigationBar.search(
             backgroundColor: CupertinoColors.systemYellow,
             border: Border(
               bottom: BorderSide(
@@ -100,7 +100,6 @@ class NextPage extends StatelessWidget {
             ),
             middle: const Text('Contacts Group'),
             largeTitle: const Text('Family'),
-            bottom: CupertinoSliverNavigationBar.searchField,
             bottomMode: bottomMode,
           ),
           const SliverFillRemaining(
