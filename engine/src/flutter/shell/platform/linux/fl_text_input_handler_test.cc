@@ -184,9 +184,8 @@ static void send_key_event(FlTextInputHandler* handler,
   GdkEvent* gdk_event = gdk_event_new(GDK_KEY_PRESS);
   gdk_event->key.keyval = keyval;
   gdk_event->key.state = state;
-  FlKeyEvent* key_event = fl_key_event_new_from_gdk_event(gdk_event);
+  g_autoptr(FlKeyEvent) key_event = fl_key_event_new_from_gdk_event(gdk_event);
   fl_text_input_handler_filter_keypress(handler, key_event);
-  fl_key_event_dispose(key_event);
 }
 
 TEST(FlTextInputHandlerTest, MessageHandler) {

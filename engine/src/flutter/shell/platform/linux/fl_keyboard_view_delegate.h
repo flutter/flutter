@@ -46,8 +46,7 @@ struct _FlKeyboardViewDelegateInterface {
 
   FlBinaryMessenger* (*get_messenger)(FlKeyboardViewDelegate* delegate);
 
-  void (*redispatch_event)(FlKeyboardViewDelegate* delegate,
-                           std::unique_ptr<FlKeyEvent> event);
+  void (*redispatch_event)(FlKeyboardViewDelegate* delegate, FlKeyEvent* event);
 
   void (*subscribe_to_layout_change)(FlKeyboardViewDelegate* delegate,
                                      KeyboardLayoutNotifier notifier);
@@ -103,13 +102,10 @@ FlBinaryMessenger* fl_keyboard_view_delegate_get_messenger(
  *
  * Handles `FlKeyboardHandler`'s request to insert a GDK event to the system for
  * redispatching.
- *
- * The ownership of event will be transferred to the view delegate. The view
- * delegate is responsible to call fl_key_event_dispose.
  */
 void fl_keyboard_view_delegate_redispatch_event(
     FlKeyboardViewDelegate* delegate,
-    std::unique_ptr<FlKeyEvent> event);
+    FlKeyEvent* event);
 
 void fl_keyboard_view_delegate_subscribe_to_layout_change(
     FlKeyboardViewDelegate* delegate,

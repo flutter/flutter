@@ -297,16 +297,16 @@ static uint64_t apply_id_plane(uint64_t logical_id, uint64_t plane) {
   return (logical_id & kValueMask) | plane;
 }
 
-static uint64_t event_to_physical_key(const FlKeyEvent* event) {
-  auto found = xkb_to_physical_key_map.find(event->keycode);
+static uint64_t event_to_physical_key(FlKeyEvent* event) {
+  auto found = xkb_to_physical_key_map.find(fl_key_event_get_keycode(event));
   if (found != xkb_to_physical_key_map.end()) {
     return found->second;
   }
-  return apply_id_plane(event->keycode, kGtkPlane);
+  return apply_id_plane(fl_key_event_get_keycode(event), kGtkPlane);
 }
 
-static uint64_t event_to_logical_key(const FlKeyEvent* event) {
-  guint keyval = event->keyval;
+static uint64_t event_to_logical_key(FlKeyEvent* event) {
+  guint keyval = fl_key_event_get_keyval(event);
   auto found = gtk_keyval_to_logical_key_map.find(keyval);
   if (found != gtk_keyval_to_logical_key_map.end()) {
     return found->second;
@@ -319,14 +319,15 @@ static uint64_t event_to_logical_key(const FlKeyEvent* event) {
   return apply_id_plane(keyval, kGtkPlane);
 }
 
-static uint64_t event_to_timestamp(const FlKeyEvent* event) {
-  return kMicrosecondsPerMillisecond * static_cast<double>(event->time);
+static uint64_t event_to_timestamp(FlKeyEvent* event) {
+  return kMicrosecondsPerMillisecond *
+         static_cast<double>(fl_key_event_get_time(event));
 }
 
-// Returns a newly accocated UTF-8 string from event->keyval that must be
-// freed later with g_free().
-static char* event_to_character(const FlKeyEvent* event) {
-  gunichar unicodeChar = gdk_keyval_to_unicode(event->keyval);
+// Returns a newly accocated UTF-8 string from fl_key_event_get_keyval(event)
+// that must be freed later with g_free().
+static char* event_to_character(FlKeyEvent* event) {
+  gunichar unicodeChar = gdk_keyval_to_unicode(fl_key_event_get_keyval(event));
   glong items_written;
   gchar* result = g_ucs4_to_utf8(&unicodeChar, 1, NULL, &items_written, NULL);
   if (items_written == 0) {
@@ -790,11 +791,11 @@ static void fl_key_embedder_responder_handle_event_impl(
   const uint64_t physical_key = corrected_modifier_physical_key(
       self->modifier_bit_to_checked_keys, physical_key_from_event, logical_key);
   const double timestamp = event_to_timestamp(event);
-  const bool is_down_event = event->is_press;
+  const bool is_down_event = fl_key_event_get_is_press(event);
 
   SyncStateLoopContext sync_state_context;
   sync_state_context.self = self;
-  sync_state_context.state = event->state;
+  sync_state_context.state = fl_key_event_get_state(event);
   sync_state_context.timestamp = timestamp;
   sync_state_context.is_down = is_down_event;
   sync_state_context.event_logical_key = logical_key;

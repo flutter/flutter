@@ -11,6 +11,7 @@
 
 #include "flutter/shell/platform/linux/fl_key_channel_responder.h"
 #include "flutter/shell/platform/linux/fl_key_embedder_responder.h"
+#include "flutter/shell/platform/linux/fl_keyboard_pending_event.h"
 #include "flutter/shell/platform/linux/key_mapping.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
@@ -23,12 +24,6 @@ static constexpr char kChannelName[] = "flutter/keyboard";
 static constexpr char kGetKeyboardStateMethod[] = "getKeyboardState";
 
 /* Declarations of private classes */
-
-G_DECLARE_FINAL_TYPE(FlKeyboardPendingEvent,
-                     fl_keyboard_pending_event,
-                     FL,
-                     KEYBOARD_PENDING_EVENT,
-                     GObject);
 
 #define FL_TYPE_KEYBOARD_HANDLER_USER_DATA \
   fl_keyboard_handler_user_data_get_type()
@@ -94,10 +89,10 @@ void debug_format_layout_data(std::string& debug_layout_data,
 
 }  // namespace
 
-static uint64_t get_logical_key_from_layout(const FlKeyEvent* event,
+static uint64_t get_logical_key_from_layout(FlKeyEvent* event,
                                             const DerivedLayout& layout) {
-  guint8 group = event->group;
-  guint16 keycode = event->keycode;
+  guint8 group = fl_key_event_get_group(event);
+  guint16 keycode = fl_key_event_get_keycode(event);
   if (keycode >= kLayoutSize) {
     return 0;
   }
@@ -107,93 +102,6 @@ static uint64_t get_logical_key_from_layout(const FlKeyEvent* event,
     return found_group_layout->second[keycode];
   }
   return 0;
-}
-
-/* Define FlKeyboardPendingEvent */
-
-/**
- * FlKeyboardPendingEvent:
- * A record for events that have been received by the handler, but
- * dispatched to other objects, whose results have yet to return.
- *
- * This object is used by both the "pending_responds" list and the
- * "pending_redispatches" list.
- */
-
-struct _FlKeyboardPendingEvent {
-  GObject parent_instance;
-
-  // The target event.
-  //
-  // This is freed by #FlKeyboardPendingEvent if not null.
-  std::unique_ptr<FlKeyEvent> event;
-
-  // Self-incrementing ID attached to an event sent to the framework.
-  //
-  // Used to identify pending responds.
-  uint64_t sequence_id;
-  // The number of responders that haven't replied.
-  size_t unreplied;
-  // Whether any replied responders reported true (handled).
-  bool any_handled;
-
-  // A value calculated out of critical event information that can be used
-  // to identify redispatched events.
-  uint64_t hash;
-};
-
-G_DEFINE_TYPE(FlKeyboardPendingEvent, fl_keyboard_pending_event, G_TYPE_OBJECT)
-
-static void fl_keyboard_pending_event_dispose(GObject* object) {
-  // Redundant, but added so that we don't get a warning about unused function
-  // for FL_IS_KEYBOARD_PENDING_EVENT.
-  g_return_if_fail(FL_IS_KEYBOARD_PENDING_EVENT(object));
-
-  FlKeyboardPendingEvent* self = FL_KEYBOARD_PENDING_EVENT(object);
-  if (self->event != nullptr) {
-    fl_key_event_dispose(self->event.release());
-  }
-  G_OBJECT_CLASS(fl_keyboard_pending_event_parent_class)->dispose(object);
-}
-
-static void fl_keyboard_pending_event_class_init(
-    FlKeyboardPendingEventClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = fl_keyboard_pending_event_dispose;
-}
-
-static void fl_keyboard_pending_event_init(FlKeyboardPendingEvent* self) {}
-
-// Calculates a unique ID for a given FlKeyEvent object to use for
-// identification of responses from the framework.
-static uint64_t fl_keyboard_handler_get_event_hash(FlKeyEvent* event) {
-  // Combine the event timestamp, the type of event, and the hardware keycode
-  // (scan code) of the event to come up with a unique id for this event that
-  // can be derived solely from the event data itself, so that we can identify
-  // whether or not we have seen this event already.
-  guint64 type =
-      static_cast<uint64_t>(event->is_press ? GDK_KEY_PRESS : GDK_KEY_RELEASE);
-  guint64 keycode = static_cast<uint64_t>(event->keycode);
-  return (event->time & 0xffffffff) | ((type & 0xffff) << 32) |
-         ((keycode & 0xffff) << 48);
-}
-
-// Create a new FlKeyboardPendingEvent by providing the target event,
-// the sequence ID, and the number of responders that will reply.
-//
-// This will acquire the ownership of the event.
-static FlKeyboardPendingEvent* fl_keyboard_pending_event_new(
-    std::unique_ptr<FlKeyEvent> event,
-    uint64_t sequence_id,
-    size_t to_reply) {
-  FlKeyboardPendingEvent* self = FL_KEYBOARD_PENDING_EVENT(
-      g_object_new(fl_keyboard_pending_event_get_type(), nullptr));
-
-  self->event = std::move(event);
-  self->sequence_id = sequence_id;
-  self->unreplied = to_reply;
-  self->any_handled = false;
-  self->hash = fl_keyboard_handler_get_event_hash(self->event.get());
-  return self;
 }
 
 /* Define FlKeyboardHandlerUserData */
@@ -299,60 +207,6 @@ struct _FlKeyboardHandler {
 
 G_DEFINE_TYPE(FlKeyboardHandler, fl_keyboard_handler, G_TYPE_OBJECT);
 
-static void fl_keyboard_handler_dispose(GObject* object);
-
-static void fl_keyboard_handler_class_init(FlKeyboardHandlerClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = fl_keyboard_handler_dispose;
-}
-
-static void fl_keyboard_handler_init(FlKeyboardHandler* self) {
-  self->derived_layout = std::make_unique<DerivedLayout>();
-
-  self->keycode_to_goals =
-      std::make_unique<std::map<uint16_t, const LayoutGoal*>>();
-  self->logical_to_mandatory_goals =
-      std::make_unique<std::map<uint64_t, const LayoutGoal*>>();
-  for (const LayoutGoal& goal : layout_goals) {
-    (*self->keycode_to_goals)[goal.keycode] = &goal;
-    if (goal.mandatory) {
-      (*self->logical_to_mandatory_goals)[goal.logical_key] = &goal;
-    }
-  }
-
-  self->responder_list = g_ptr_array_new_with_free_func(g_object_unref);
-
-  self->pending_responds = g_ptr_array_new();
-  self->pending_redispatches = g_ptr_array_new_with_free_func(g_object_unref);
-
-  self->last_sequence_id = 1;
-}
-
-static void fl_keyboard_handler_dispose(GObject* object) {
-  FlKeyboardHandler* self = FL_KEYBOARD_HANDLER(object);
-
-  if (self->view_delegate != nullptr) {
-    fl_keyboard_view_delegate_subscribe_to_layout_change(self->view_delegate,
-                                                         nullptr);
-    g_object_remove_weak_pointer(
-        G_OBJECT(self->view_delegate),
-        reinterpret_cast<gpointer*>(&(self->view_delegate)));
-    self->view_delegate = nullptr;
-  }
-
-  self->derived_layout.reset();
-  self->keycode_to_goals.reset();
-  self->logical_to_mandatory_goals.reset();
-
-  g_ptr_array_free(self->responder_list, TRUE);
-  g_ptr_array_set_free_func(self->pending_responds, g_object_unref);
-  g_ptr_array_free(self->pending_responds, TRUE);
-  g_ptr_array_free(self->pending_redispatches, TRUE);
-
-  G_OBJECT_CLASS(fl_keyboard_handler_parent_class)->dispose(object);
-}
-
-/* Implement FlKeyboardHandler */
-
 // This is an exact copy of g_ptr_array_find_with_equal_func.  Somehow CI
 // reports that can not find symbol g_ptr_array_find_with_equal_func, despite
 // the fact that it runs well locally.
@@ -377,22 +231,21 @@ static gboolean g_ptr_array_find_with_equal_func1(GPtrArray* haystack,
   return FALSE;
 }
 
-// Compare a #FlKeyboardPendingEvent with the given sequence_id. The needle
-// should be a pointer to uint64_t sequence_id.
-static gboolean compare_pending_by_sequence_id(
-    gconstpointer pending,
-    gconstpointer needle_sequence_id) {
-  uint64_t sequence_id = *reinterpret_cast<const uint64_t*>(needle_sequence_id);
-  return static_cast<const FlKeyboardPendingEvent*>(pending)->sequence_id ==
-         sequence_id;
+// Compare a #FlKeyboardPendingEvent with the given sequence_id.
+static gboolean compare_pending_by_sequence_id(gconstpointer a,
+                                               gconstpointer b) {
+  FlKeyboardPendingEvent* pending =
+      FL_KEYBOARD_PENDING_EVENT(const_cast<gpointer>(a));
+  uint64_t sequence_id = *reinterpret_cast<const uint64_t*>(b);
+  return fl_keyboard_pending_event_get_sequence_id(pending) == sequence_id;
 }
 
-// Compare a #FlKeyboardPendingEvent with the given hash. The #needle should be
-// a pointer to uint64_t hash.
-static gboolean compare_pending_by_hash(gconstpointer pending,
-                                        gconstpointer needle_hash) {
-  uint64_t hash = *reinterpret_cast<const uint64_t*>(needle_hash);
-  return static_cast<const FlKeyboardPendingEvent*>(pending)->hash == hash;
+// Compare a #FlKeyboardPendingEvent with the given hash.
+static gboolean compare_pending_by_hash(gconstpointer a, gconstpointer b) {
+  FlKeyboardPendingEvent* pending =
+      FL_KEYBOARD_PENDING_EVENT(const_cast<gpointer>(a));
+  uint64_t hash = *reinterpret_cast<const uint64_t*>(b);
+  return fl_keyboard_pending_event_get_hash(pending) == hash;
 }
 
 // Try to remove a pending event from `pending_redispatches` with the target
@@ -431,22 +284,22 @@ static void responder_handle_event_callback(bool handled,
   FlKeyboardPendingEvent* pending = FL_KEYBOARD_PENDING_EVENT(
       g_ptr_array_index(self->pending_responds, result_index));
   g_return_if_fail(pending != nullptr);
-  g_return_if_fail(pending->unreplied > 0);
-  pending->unreplied -= 1;
-  pending->any_handled = pending->any_handled || handled;
+  fl_keyboard_pending_event_mark_replied(pending, handled);
   // All responders have replied.
-  if (pending->unreplied == 0) {
+  if (fl_keyboard_pending_event_is_complete(pending)) {
     g_object_unref(user_data_ptr);
     gpointer removed =
         g_ptr_array_remove_index_fast(self->pending_responds, result_index);
     g_return_if_fail(removed == pending);
-    bool should_redispatch = !pending->any_handled &&
-                             !fl_keyboard_view_delegate_text_filter_key_press(
-                                 self->view_delegate, pending->event.get());
+    bool should_redispatch =
+        !fl_keyboard_pending_event_get_any_handled(pending) &&
+        !fl_keyboard_view_delegate_text_filter_key_press(
+            self->view_delegate, fl_keyboard_pending_event_get_event(pending));
     if (should_redispatch) {
       g_ptr_array_add(self->pending_redispatches, pending);
-      fl_keyboard_view_delegate_redispatch_event(self->view_delegate,
-                                                 std::move(pending->event));
+      fl_keyboard_view_delegate_redispatch_event(
+          self->view_delegate,
+          FL_KEY_EVENT(fl_keyboard_pending_event_get_event(pending)));
     } else {
       g_object_unref(pending);
     }
@@ -466,11 +319,11 @@ static uint16_t convert_key_to_char(FlKeyboardViewDelegate* view_delegate,
 // Make sure that Flutter has derived the layout for the group of the event,
 // if the event contains a goal keycode.
 static void guarantee_layout(FlKeyboardHandler* self, FlKeyEvent* event) {
-  guint8 group = event->group;
+  guint8 group = fl_key_event_get_group(event);
   if (self->derived_layout->find(group) != self->derived_layout->end()) {
     return;
   }
-  if (self->keycode_to_goals->find(event->keycode) ==
+  if (self->keycode_to_goals->find(fl_key_event_get_keycode(event)) ==
       self->keycode_to_goals->end()) {
     return;
   }
@@ -541,7 +394,7 @@ static void guarantee_layout(FlKeyboardHandler* self, FlKeyEvent* event) {
 }
 
 // Returns the keyboard pressed state.
-FlMethodResponse* get_keyboard_state(FlKeyboardHandler* self) {
+static FlMethodResponse* get_keyboard_state(FlKeyboardHandler* self) {
   g_autoptr(FlValue) result = fl_value_new_map();
 
   GHashTable* pressing_records =
@@ -580,6 +433,67 @@ static void method_call_handler(FlMethodChannel* channel,
   if (!fl_method_call_respond(method_call, response, &error)) {
     g_warning("Failed to send method call response: %s", error->message);
   }
+}
+
+// The loop body to dispatch an event to a responder.
+static void dispatch_to_responder(gpointer responder_data,
+                                  gpointer foreach_data_ptr) {
+  DispatchToResponderLoopContext* context =
+      reinterpret_cast<DispatchToResponderLoopContext*>(foreach_data_ptr);
+  FlKeyResponder* responder = FL_KEY_RESPONDER(responder_data);
+  fl_key_responder_handle_event(
+      responder, context->event, responder_handle_event_callback,
+      context->user_data, context->specified_logical_key);
+}
+
+static void fl_keyboard_handler_dispose(GObject* object) {
+  FlKeyboardHandler* self = FL_KEYBOARD_HANDLER(object);
+
+  if (self->view_delegate != nullptr) {
+    fl_keyboard_view_delegate_subscribe_to_layout_change(self->view_delegate,
+                                                         nullptr);
+    g_object_remove_weak_pointer(
+        G_OBJECT(self->view_delegate),
+        reinterpret_cast<gpointer*>(&(self->view_delegate)));
+    self->view_delegate = nullptr;
+  }
+
+  self->derived_layout.reset();
+  self->keycode_to_goals.reset();
+  self->logical_to_mandatory_goals.reset();
+
+  g_ptr_array_free(self->responder_list, TRUE);
+  g_ptr_array_set_free_func(self->pending_responds, g_object_unref);
+  g_ptr_array_free(self->pending_responds, TRUE);
+  g_ptr_array_free(self->pending_redispatches, TRUE);
+
+  G_OBJECT_CLASS(fl_keyboard_handler_parent_class)->dispose(object);
+}
+
+static void fl_keyboard_handler_class_init(FlKeyboardHandlerClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = fl_keyboard_handler_dispose;
+}
+
+static void fl_keyboard_handler_init(FlKeyboardHandler* self) {
+  self->derived_layout = std::make_unique<DerivedLayout>();
+
+  self->keycode_to_goals =
+      std::make_unique<std::map<uint16_t, const LayoutGoal*>>();
+  self->logical_to_mandatory_goals =
+      std::make_unique<std::map<uint64_t, const LayoutGoal*>>();
+  for (const LayoutGoal& goal : layout_goals) {
+    (*self->keycode_to_goals)[goal.keycode] = &goal;
+    if (goal.mandatory) {
+      (*self->logical_to_mandatory_goals)[goal.logical_key] = &goal;
+    }
+  }
+
+  self->responder_list = g_ptr_array_new_with_free_func(g_object_unref);
+
+  self->pending_responds = g_ptr_array_new();
+  self->pending_redispatches = g_ptr_array_new_with_free_func(g_object_unref);
+
+  self->last_sequence_id = 1;
 }
 
 FlKeyboardHandler* fl_keyboard_handler_new(
@@ -624,17 +538,6 @@ FlKeyboardHandler* fl_keyboard_handler_new(
   return self;
 }
 
-// The loop body to dispatch an event to a responder.
-static void dispatch_to_responder(gpointer responder_data,
-                                  gpointer foreach_data_ptr) {
-  DispatchToResponderLoopContext* context =
-      reinterpret_cast<DispatchToResponderLoopContext*>(foreach_data_ptr);
-  FlKeyResponder* responder = FL_KEY_RESPONDER(responder_data);
-  fl_key_responder_handle_event(
-      responder, context->event, responder_handle_event_callback,
-      context->user_data, context->specified_logical_key);
-}
-
 gboolean fl_keyboard_handler_handle_event(FlKeyboardHandler* self,
                                           FlKeyEvent* event) {
   g_return_val_if_fail(FL_IS_KEYBOARD_HANDLER(self), FALSE);
@@ -643,18 +546,17 @@ gboolean fl_keyboard_handler_handle_event(FlKeyboardHandler* self,
 
   guarantee_layout(self, event);
 
-  uint64_t incoming_hash = fl_keyboard_handler_get_event_hash(event);
+  uint64_t incoming_hash = fl_key_event_hash(event);
   if (fl_keyboard_handler_remove_redispatched(self, incoming_hash)) {
     return FALSE;
   }
 
   FlKeyboardPendingEvent* pending = fl_keyboard_pending_event_new(
-      std::unique_ptr<FlKeyEvent>(event), ++self->last_sequence_id,
-      self->responder_list->len);
+      event, ++self->last_sequence_id, self->responder_list->len);
 
   g_ptr_array_add(self->pending_responds, pending);
-  FlKeyboardHandlerUserData* user_data =
-      fl_keyboard_handler_user_data_new(self, pending->sequence_id);
+  FlKeyboardHandlerUserData* user_data = fl_keyboard_handler_user_data_new(
+      self, fl_keyboard_pending_event_get_sequence_id(pending));
   DispatchToResponderLoopContext data{
       .event = event,
       .specified_logical_key =
