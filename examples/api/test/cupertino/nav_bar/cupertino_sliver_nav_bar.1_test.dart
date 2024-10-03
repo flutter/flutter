@@ -56,7 +56,7 @@ void main() {
     // Large title and search field are hidden and middle title is visible.
     expect(tester.getBottomLeft(find.text('Contacts Group').first).dy, 30.5);
     expect(tester.getBottomLeft(find.text('Family').first).dy, 36.0 + 8.0); // Static part + _kNavBarBottomPadding.
-    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 104.0);
+    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 52.0);
   });
 
   testWidgets('Search field is always shown in bottom always mode', (WidgetTester tester) async {

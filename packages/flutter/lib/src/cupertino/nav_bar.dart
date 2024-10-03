@@ -857,7 +857,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
   final PreferredSizeWidget? bottom;
 
-  /// Modes that determine when to display the navigation bar's bottom.
+  /// Modes that determine when to display the navigation bar's [bottom].
   ///
   /// Defaults to [NavigationBarBottomMode.automatic].
   final NavigationBarBottomMode bottomMode;
@@ -1080,7 +1080,6 @@ class _LargeTitleNavigationBarSliverDelegate
                     Positioned(
                       left: 0.0,
                       right: 0.0,
-                      top: persistentHeight + _kNavBarLargeTitleHeightExtension,
                       bottom: 0.0,
                       child: SizedBox(
                         height: bottomHeight * (1.0 - bottomShrinkFactor),
