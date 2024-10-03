@@ -627,7 +627,8 @@ static gboolean fl_text_input_handler_filter_keypress_default(
   }
 
   if (gtk_im_context_filter_keypress(
-          priv->im_context, reinterpret_cast<GdkEventKey*>(event->origin))) {
+          priv->im_context,
+          reinterpret_cast<GdkEventKey*>(fl_key_event_get_origin(event)))) {
     return TRUE;
   }
 
@@ -639,11 +640,11 @@ static gboolean fl_text_input_handler_filter_keypress_default(
   gboolean do_action = FALSE;
   // Handle navigation keys.
   gboolean changed = FALSE;
-  if (event->is_press) {
-    switch (event->keyval) {
+  if (fl_key_event_get_is_press(event)) {
+    switch (fl_key_event_get_keyval(event)) {
       case GDK_KEY_End:
       case GDK_KEY_KP_End:
-        if (event->state & GDK_SHIFT_MASK) {
+        if (fl_key_event_get_state(event) & GDK_SHIFT_MASK) {
           changed = priv->text_model->SelectToEnd();
         } else {
           changed = priv->text_model->MoveCursorToEnd();
@@ -662,7 +663,7 @@ static gboolean fl_text_input_handler_filter_keypress_default(
         break;
       case GDK_KEY_Home:
       case GDK_KEY_KP_Home:
-        if (event->state & GDK_SHIFT_MASK) {
+        if (fl_key_event_get_state(event) & GDK_SHIFT_MASK) {
           changed = priv->text_model->SelectToBeginning();
         } else {
           changed = priv->text_model->MoveCursorToBeginning();

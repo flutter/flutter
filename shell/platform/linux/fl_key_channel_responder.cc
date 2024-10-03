@@ -212,9 +212,11 @@ static void fl_key_channel_responder_handle_event(
   g_return_if_fail(event != nullptr);
   g_return_if_fail(callback != nullptr);
 
-  const gchar* type = event->is_press ? kTypeValueDown : kTypeValueUp;
-  int64_t scan_code = event->keycode;
-  int64_t unicode_scarlar_values = gdk_keyval_to_unicode(event->keyval);
+  const gchar* type =
+      fl_key_event_get_is_press(event) ? kTypeValueDown : kTypeValueUp;
+  int64_t scan_code = fl_key_event_get_keycode(event);
+  int64_t unicode_scarlar_values =
+      gdk_keyval_to_unicode(fl_key_event_get_keyval(event));
 
   // For most modifier keys, GTK keeps track of the "pressed" state of the
   // modifier keys. Flutter uses this information to keep modifier keys from
@@ -239,20 +241,21 @@ static void fl_key_channel_responder_handle_event(
   // interactions (for example, if shift-lock is on, tab traversal is broken).
 
   // Remove lock states from state mask.
-  guint state = event->state & ~(GDK_LOCK_MASK | GDK_MOD2_MASK);
+  guint state =
+      fl_key_event_get_state(event) & ~(GDK_LOCK_MASK | GDK_MOD2_MASK);
 
   static bool shift_lock_pressed = FALSE;
   static bool caps_lock_pressed = FALSE;
   static bool num_lock_pressed = FALSE;
-  switch (event->keyval) {
+  switch (fl_key_event_get_keyval(event)) {
     case GDK_KEY_Num_Lock:
-      num_lock_pressed = event->is_press;
+      num_lock_pressed = fl_key_event_get_is_press(event);
       break;
     case GDK_KEY_Caps_Lock:
-      caps_lock_pressed = event->is_press;
+      caps_lock_pressed = fl_key_event_get_is_press(event);
       break;
     case GDK_KEY_Shift_Lock:
-      shift_lock_pressed = event->is_press;
+      shift_lock_pressed = fl_key_event_get_is_press(event);
       break;
   }
 
@@ -269,7 +272,7 @@ static void fl_key_channel_responder_handle_event(
   fl_value_set_string_take(message, kToolkitKey,
                            fl_value_new_string(kGtkToolkit));
   fl_value_set_string_take(message, kKeyCodeKey,
-                           fl_value_new_int(event->keyval));
+                           fl_value_new_int(fl_key_event_get_keyval(event)));
   fl_value_set_string_take(message, kModifiersKey, fl_value_new_int(state));
   if (unicode_scarlar_values != 0) {
     fl_value_set_string_take(message, kUnicodeScalarValuesKey,
