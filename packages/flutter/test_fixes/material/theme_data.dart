@@ -237,4 +237,11 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/131455
   ThemeData themeData = ThemeData.copyWith(useMaterial3: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/155072
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(dialogBackgroundColor: Colors.orange);
+  themeData = ThemeData.raw(dialogBackgroundColor: Colors.orange);
+  themeData = themeData.copyWith(dialogBackgroundColor: Colors.orange);
+  themeData.dialogBackgroundColor; // Removing field reference not supported.
 }
