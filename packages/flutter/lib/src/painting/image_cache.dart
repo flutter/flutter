@@ -417,6 +417,8 @@ class ImageCache {
         sizeBytes = info.sizeBytes;
         info.dispose();
       }
+
+      ////
       final _CachedImage image = _CachedImage(
         result!,
         sizeBytes: sizeBytes,
