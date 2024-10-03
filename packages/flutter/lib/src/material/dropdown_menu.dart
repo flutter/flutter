@@ -43,12 +43,6 @@ typedef FilterCallback<T> = List<DropdownMenuEntry<T>> Function(List<DropdownMen
 /// Used by [DropdownMenu.searchCallback].
 typedef SearchCallback<T> = int? Function(List<DropdownMenuEntry<T>> entries, String query);
 
-// Navigation shortcuts to move the selected menu items up or down.
-final Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent> {
-  LogicalKeySet(LogicalKeyboardKey.arrowUp): const _ArrowUpIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowDown): const _ArrowDownIntent(),
-};
-
 const double _kMinimumWidth = 112.0;
 
 const double _kDefaultHorizontalPadding = 12.0;
@@ -944,14 +938,22 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           return textField;
         }
 
-        return _DropdownMenuBody(
-          width: widget.width,
-          children: <Widget>[
-            textField,
-            ..._initialMenu!.map((Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item)),
-            trailingButton,
-            leadingButton,
-          ],
+        return Shortcuts(
+          shortcuts: const <ShortcutActivator, Intent>{
+            SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+            SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+            SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
+            SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
+          },
+          child: _DropdownMenuBody(
+            width: widget.width,
+            children: <Widget>[
+              textField,
+              ..._initialMenu!.map((Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item)),
+              trailingButton,
+              leadingButton,
+            ],
+          ),
         );
       },
     );
@@ -977,23 +979,27 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       );
     }
 
-    return Shortcuts(
-      shortcuts: _kMenuTraversalShortcuts,
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(
-            onInvoke: handleUpKeyInvoke,
-          ),
-          _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(
-            onInvoke: handleDownKeyInvoke,
-          ),
-        },
-        child: menuAnchor,
-      ),
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(
+          onInvoke: handleUpKeyInvoke,
+        ),
+        _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(
+          onInvoke: handleDownKeyInvoke,
+        ),
+      },
+      child: menuAnchor,
     );
   }
 }
 
+
+// `DropdownMenu` dispatches these private intents on arrow up/down keys.
+// They are needed instead of the typical `DirectionalFocusIntent`s because
+// `DropdownMenu` does not really navigate the focus tree upon arrow up/down
+// keys: the focus stays on the text field and the menu items are given fake
+// highlights as if they are focused. Using `DirectionalFocusIntent`s will cause
+// the action to be processed by `EditableText`.
 class _ArrowUpIntent extends Intent {
   const _ArrowUpIntent();
 }

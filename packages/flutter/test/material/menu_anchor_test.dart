@@ -2285,6 +2285,66 @@ void main() {
       expect(opened, isEmpty);
       expect(closed, isNotEmpty);
     });
+
+    // Regression test for
+    // https://github.com/flutter/flutter/issues/119532#issuecomment-2274705565.
+    testWidgets('Shortcuts of MenuAnchor do not rely on WidgetsApp.shortcuts', (WidgetTester tester) async {
+      // MenuAnchor used to rely on WidgetsApp.shortcuts for menu navigation,
+      // which is a problem for Web because the Web uses a special set of
+      // default shortcuts that define arrow keys as scrolling instead of
+      // traversing, and therefore arrow keys won't enter submenus when the
+      // focus is on MenuAnchor.
+      //
+      // This test verifies that `MenuAnchor`'s shortcuts continues to work even
+      // when `WidgetsApp.shortcuts` contains nothing.
+
+      final FocusNode childNode = FocusNode(debugLabel: 'Dropdown Inkwell');
+      addTearDown(childNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          // Clear WidgetsApp.shortcuts to make sure MenuAnchor doesn't rely on
+          // it.
+          shortcuts: const <ShortcutActivator, Intent>{},
+          home: Scaffold(
+            body: MenuAnchor(
+              childFocusNode: childNode,
+              menuChildren: List<Widget>.generate(3, (int i) =>
+                MenuItemButton(
+                  child: Text('Submenu item $i'),
+                  onPressed: () {},
+                )
+              ),
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return InkWell(
+                  focusNode: childNode,
+                  onTap: controller.open,
+                  child: const Text('Main button'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      // Open the drop down menu and focus on the MenuAnchor.
+      await tester.tap(find.text('Main button'));
+      await tester.pumpAndSettle();
+      expect(find.text('Submenu item 0'), findsOneWidget);
+
+      // Press arrowDown, and the first submenu button should be focused.
+      // This is the critical part. It used to not work on Web.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Submenu item 0"))'));
+
+      // Press arrowDown, and the second submenu button should be focused.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Submenu item 1"))'));
+    });
   });
 
   group('Accelerators', () {
