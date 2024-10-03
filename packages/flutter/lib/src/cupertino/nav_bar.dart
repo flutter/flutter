@@ -22,15 +22,15 @@ import 'route.dart';
 import 'search_field.dart';
 import 'theme.dart';
 
-/// Modes that determine when to display the navigation bar's drawer.
-enum NavigationDrawerMode {
-  /// Enable hiding the drawer in response to scrolling.
+/// Modes that determine when to display the navigation bar's bottom.
+enum NavigationBarBottomMode {
+  /// Enable hiding the bottom in response to scrolling.
   automatic,
 
-  /// Always display the drawer regardless of the scroll activity.
+  /// Always display the bottom regardless of the scroll activity.
   always,
 
-  /// Never display the drawer.
+  /// Never display the bottom.
   none,
 }
 
@@ -681,7 +681,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows how to add a drawer (typically a
+/// This example shows how to add a bottom (typically a
 /// [CupertinoSearchTextField]) to a [CupertinoSliverNavigationBar].
 ///
 /// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_sliver_nav_bar.1.dart **
@@ -717,8 +717,8 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
     this.stretch = false,
-    this.drawer,
-    this.drawerMode = NavigationDrawerMode.none,
+    this.bottom,
+    this.bottomMode = NavigationBarBottomMode.none,
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
@@ -726,9 +726,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
          'true.',
        ),
        assert (
-        drawer != null || drawerMode == NavigationDrawerMode.none,
-        'A drawer must be provided if drawerMode is set to a value other than '
-        'NavigationDrawerMode.none.',
+        bottom != null || bottomMode == NavigationBarBottomMode.none,
+        'A bottom must be provided if bottomMode is set to a value other than '
+        'NavigationBarBottomMode.none.',
        );
 
   /// The navigation bar's title.
@@ -830,15 +830,15 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// See also:
   ///
   ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
-  final PreferredSizeWidget? drawer;
+  final PreferredSizeWidget? bottom;
 
-  /// Modes that determine when to display the navigation bar's drawer.
+  /// Modes that determine when to display the navigation bar's bottom.
   ///
-  /// A [drawer] must be provided if this is set to
-  /// [NavigationDrawerMode.automatic] or [NavigationDrawerMode.always].
+  /// A [bottom] must be provided if this is set to
+  /// [NavigationBarBottomMode.automatic] or [NavigationBarBottomMode.always].
   ///
-  /// Defaults to [NavigationDrawerMode.none].
-  final NavigationDrawerMode drawerMode;
+  /// Defaults to [NavigationBarBottomMode.none].
+  final NavigationBarBottomMode bottomMode;
 
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor?.alpha == 0xFF;
@@ -855,7 +855,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// Defaults to `false`.
   final bool stretch;
 
-  /// The default [drawer], which is a [CupertinoSearchTextField] with some
+  /// The default [bottom], which is a [CupertinoSearchTextField] with some
   /// padding.
   static PreferredSizeWidget searchField = const _SearchableCupertinoNavigationBar();
 
@@ -910,9 +910,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
           enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
-          drawer: widget.drawer ?? const SizedBox.shrink(),
-          drawerMode: widget.drawerMode,
-          drawerHeight: widget.drawer != null && widget.drawerMode != NavigationDrawerMode.none ? widget.drawer!.preferredSize.height : 0.0,
+          bottom: widget.bottom ?? const SizedBox.shrink(),
+          bottomMode: widget.bottomMode,
+          bottomHeight: widget.bottom != null && widget.bottomMode != NavigationBarBottomMode.none ? widget.bottom!.preferredSize.height : 0.0,
         ),
       ),
     );
@@ -937,9 +937,9 @@ class _LargeTitleNavigationBarSliverDelegate
     required this.alwaysShowMiddle,
     required this.stretchConfiguration,
     required this.enableBackgroundFilterBlur,
-    required this.drawer,
-    required this.drawerMode,
-    required this.drawerHeight,
+    required this.bottom,
+    required this.bottomMode,
+    required this.bottomHeight,
   });
 
   final _NavigationBarStaticComponentsKeys keys;
@@ -956,15 +956,15 @@ class _LargeTitleNavigationBarSliverDelegate
   final double persistentHeight;
   final bool alwaysShowMiddle;
   final bool enableBackgroundFilterBlur;
-  final Widget drawer;
-  final NavigationDrawerMode drawerMode;
-  final double drawerHeight;
+  final Widget bottom;
+  final NavigationBarBottomMode bottomMode;
+  final double bottomHeight;
 
   @override
-  double get minExtent => persistentHeight + (drawerMode == NavigationDrawerMode.always ? drawerHeight: 0.0);
+  double get minExtent => persistentHeight + (bottomMode == NavigationBarBottomMode.always ? bottomHeight: 0.0);
 
   @override
-  double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension + drawerHeight;
+  double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension + bottomHeight;
 
   @override
   OverScrollHeaderStretchConfiguration? stretchConfiguration;
@@ -974,8 +974,8 @@ class _LargeTitleNavigationBarSliverDelegate
     final double largeTitleThreshold = maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
     final bool showLargeTitle = shrinkOffset < largeTitleThreshold;
 
-    // Calculate how much the drawer should shrink.
-    final double drawerShrinkFactor = clampDouble(shrinkOffset / drawerHeight, 0, 1);
+    // Calculate how much the bottom should shrink.
+    final double bottomShrinkFactor = clampDouble(shrinkOffset / bottomHeight, 0, 1);
 
     final double shrinkAnimationValue = clampDouble(
       (shrinkOffset - largeTitleThreshold - _kNavBarScrollUnderAnimationExtent) / _kNavBarScrollUnderAnimationExtent,
@@ -1019,8 +1019,8 @@ class _LargeTitleNavigationBarSliverDelegate
                     top: persistentHeight,
                     left: 0.0,
                     right: 0.0,
-                    bottom: drawerMode == NavigationDrawerMode.automatic
-                      ? drawerHeight * (1.0 - drawerShrinkFactor)
+                    bottom: bottomMode == NavigationBarBottomMode.automatic
+                      ? bottomHeight * (1.0 - bottomShrinkFactor)
                       : 0.0,
                     child: ClipRect(
                       child: Padding(
@@ -1058,21 +1058,21 @@ class _LargeTitleNavigationBarSliverDelegate
                     top: 0.0,
                     child: persistentNavigationBar,
                   ),
-                  if (drawerMode == NavigationDrawerMode.automatic)
+                  if (bottomMode == NavigationBarBottomMode.automatic)
                     Positioned(
                       left: 0.0,
                       right: 0.0,
                       top: persistentHeight + _kNavBarLargeTitleHeightExtension,
                       bottom: 0.0,
                       child: SizedBox(
-                        height: drawerHeight * (1.0 - drawerShrinkFactor),
-                        child: ClipRect(child: drawer),
+                        height: bottomHeight * (1.0 - bottomShrinkFactor),
+                        child: ClipRect(child: bottom),
                       ),
                     ),
                 ],
               ),
             ),
-            if (drawerMode == NavigationDrawerMode.always) drawer,
+            if (bottomMode == NavigationBarBottomMode.always) bottom,
           ],
         ),
       ),
@@ -1121,9 +1121,9 @@ class _LargeTitleNavigationBarSliverDelegate
         || alwaysShowMiddle != oldDelegate.alwaysShowMiddle
         || heroTag != oldDelegate.heroTag
         || enableBackgroundFilterBlur != oldDelegate.enableBackgroundFilterBlur
-        || drawer != oldDelegate.drawer
-        || drawerMode != oldDelegate.drawerMode
-        || drawerHeight != oldDelegate.drawerHeight;
+        || bottom != oldDelegate.bottom
+        || bottomMode != oldDelegate.bottomMode
+        || bottomHeight != oldDelegate.bottomHeight;
   }
 }
 

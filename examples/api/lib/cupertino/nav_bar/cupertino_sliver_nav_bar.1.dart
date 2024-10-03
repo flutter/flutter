@@ -51,7 +51,7 @@ class SliverNavBarExample extends StatelessWidget {
                         ),
                       );
                     },
-                    child: const Text('Drawer Automatic mode'),
+                    child: const Text('Bottom Automatic mode'),
                   ),
                   CupertinoButton.filled(
                     onPressed: () {
@@ -60,13 +60,13 @@ class SliverNavBarExample extends StatelessWidget {
                         CupertinoPageRoute<Widget>(
                           builder: (BuildContext context) {
                             return const NextPage(
-                              drawerMode: NavigationDrawerMode.always,
+                              bottomMode: NavigationBarBottomMode.always,
                             );
                           },
                         ),
                       );
                     },
-                    child: const Text('Drawer Always mode'),
+                    child: const Text('Bottom Always mode'),
                   ),
                 ],
               ),
@@ -79,9 +79,9 @@ class SliverNavBarExample extends StatelessWidget {
 }
 
 class NextPage extends StatelessWidget {
-  const NextPage({super.key, this.drawerMode = NavigationDrawerMode.automatic});
+  const NextPage({super.key, this.bottomMode = NavigationBarBottomMode.automatic});
 
-  final NavigationDrawerMode drawerMode;
+  final NavigationBarBottomMode bottomMode;
 
   @override
   Widget build(BuildContext context) {
@@ -100,8 +100,8 @@ class NextPage extends StatelessWidget {
             ),
             middle: const Text('Contacts Group'),
             largeTitle: const Text('Family'),
-            drawer: CupertinoSliverNavigationBar.searchField,
-            drawerMode: drawerMode,
+            bottom: CupertinoSliverNavigationBar.searchField,
+            bottomMode: bottomMode,
           ),
           const SliverFillRemaining(
             child: Column(
