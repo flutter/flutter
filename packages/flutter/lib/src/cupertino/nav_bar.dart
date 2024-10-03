@@ -59,10 +59,6 @@ const double _kNavBarBottomPadding = 8.0;
 
 const double _kNavBarBackButtonTapWidth = 50.0;
 
-/// The height of a CupertinoSearchTextField with padding, used as the default
-/// height of a navigation bar's drawer.
-const double _kNavBarDrawerHeight = 50.0;
-
 /// Title text transfer fade.
 const Duration _kNavBarTitleFadeDuration = Duration(milliseconds: 150);
 
