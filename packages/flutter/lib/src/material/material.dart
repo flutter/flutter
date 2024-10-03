@@ -82,7 +82,7 @@ typedef MaterialInkController = SplashController;
   'This feature was deprecated after v3.26.0-0.1.pre.',
 )
 extension MaterialInkMethods on MaterialInkController {
-  /// Adds an [InkFeature], such as an [InkSplash] or an [InkHighlight].
+  /// Add an [InkFeature], such as an [InkSplash] or an [InkHighlight].
   ///
   /// The ink feature will paint as part of this controller.
   @Deprecated(
@@ -116,7 +116,7 @@ extension MaterialInkMethods on MaterialInkController {
 /// Most user interface elements are either conceptually printed on a piece of
 /// material or themselves made of material. Material reacts to user input using
 /// [InkSplash] and [InkHighlight] effects. To trigger a reaction on the
-/// material, use a [SplashController] obtained via [Material.of].
+/// material, use a [MaterialInkController] obtained via [Material.of].
 ///
 /// In general, the features of a [Material] should not change over time (e.g. a
 /// [Material] should not change its [color], [shadowColor] or [type]).
@@ -354,7 +354,7 @@ class Material extends StatelessWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// SplashController? splashController = Material.maybeOf(context);
+  /// MaterialInkController? inkController = Material.maybeOf(context);
   /// ```
   ///
   /// This method can be expensive (it walks the element tree).
@@ -363,7 +363,7 @@ class Material extends StatelessWidget {
   ///
   /// * [Splash.maybeOf], which is identical to this method.
   /// * [Material.of], which is similar to this method, but asserts if
-  ///   no [SplashController] ancestor is found.
+  ///   no [Material] ancestor is found.
   static SplashController? maybeOf(BuildContext context) => Splash.maybeOf(context);
 
   /// The ink controller from the closest instance of [Material] that encloses
@@ -375,7 +375,7 @@ class Material extends StatelessWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// SplashController splashController = Material.of(context);
+  /// MaterialInkController inkController = Material.of(context);
   /// ```
   ///
   /// This method can be expensive (it walks the element tree).
@@ -385,11 +385,11 @@ class Material extends StatelessWidget {
   /// * [Splash.of], which is identical to this method.
   /// * [Material.maybeOf], which is similar to this method, but returns null if
   ///   no [Material] ancestor is found.
-  static SplashController of(BuildContext context) {
-    final SplashController? controller = maybeOf(context);
+  static MaterialInkController of(BuildContext context) {
+    final MaterialInkController? controller = maybeOf(context);
     assert(() {
       if (controller == null) {
-        if (LookupBoundary.debugIsHidingAncestorRenderObjectOfType<SplashController>(context)) {
+        if (LookupBoundary.debugIsHidingAncestorRenderObjectOfType<MaterialInkController>(context)) {
           throw FlutterError(
             'Material.of() was called with a context that does not have access to a Material widget.\n'
             'The context provided to Material.of() does have a Material widget ancestor, but it is '
@@ -530,7 +530,7 @@ class Material extends StatelessWidget {
 ///
 /// To add an ink feature to a piece of [Material], obtain the
 /// [MaterialInkController] via [Material.of] and call
-/// [MaterialInkController.addInkFeature].
+/// [MaterialInkMethods.addInkFeature].
 @Deprecated(
   'Use Splash instead. '
   'Splash effects no longer rely on a MaterialInkController. '

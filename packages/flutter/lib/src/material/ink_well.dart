@@ -28,14 +28,14 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// An ink feature that displays a color [Splash] in response to a user
+/// An ink feature that displays a [color] "splash" in response to a user
 /// gesture that can be confirmed or canceled.
 ///
-/// Subclasses call `confirm` when an input gesture is recognized. For
+/// Subclasses call [confirm] when an input gesture is recognized. For
 /// example a press event might trigger an ink feature that's confirmed
 /// when the corresponding up event is seen.
 ///
-/// Subclasses call `cancel` when an input gesture is aborted before it
+/// Subclasses call [cancel] when an input gesture is aborted before it
 /// is recognized. For example a press event might trigger an ink feature
 /// that's canceled when the pointer is dragged out of the reference
 /// box.
@@ -63,8 +63,8 @@ abstract class InteractiveInkFeature extends Splash with CirclePainter {
   });
 }
 
-/// An encapsulation of a [Splash] constructor used by [InkWell],
-/// [InkResponse], and [ThemeData].
+/// An encapsulation of an [InteractiveInkFeature] constructor used by
+/// [InkWell], [InkResponse], and [ThemeData].
 ///
 /// Interactive ink feature implementations should provide a static const
 /// `splashFactory` value that's an instance of this class. The `splashFactory`
@@ -80,11 +80,10 @@ abstract class InteractiveInkFeature extends Splash with CirclePainter {
   'This feature was deprecated after v3.26.0-0.1.pre.',
 )
 abstract class InteractiveInkFeatureFactory implements SplashFactoryBase {
-  /// [InteractiveInkFeatureFactory] subclasses should provide a
-  /// const constructor.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   ///
-  /// There is no benefit to extending this class, but an abstract `const`
-  /// constructor is included for backward compatibility.
+  /// Subclasses should provide a const constructor.
   @Deprecated(
     'Use SplashFactory instead. '
     '"Splash effects" no longer rely on a MaterialInkController. '
@@ -94,7 +93,8 @@ abstract class InteractiveInkFeatureFactory implements SplashFactoryBase {
 
   /// The factory method.
   ///
-  /// Subclasses should override this method to return a [Splash] instance.
+  /// Subclasses should override this method to return a new instance of an
+  /// [InteractiveInkFeature].
   @factory
   @override
   InteractiveInkFeature create({
