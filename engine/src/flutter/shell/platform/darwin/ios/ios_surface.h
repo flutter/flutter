@@ -18,10 +18,6 @@
 
 namespace flutter {
 
-// Returns true if the app explicitly specified to use the iOS view embedding
-// mechanism which is still in a release preview.
-bool IsIosEmbeddedViewsPreviewEnabled();
-
 class IOSSurface {
  public:
   static std::unique_ptr<IOSSurface> Create(std::shared_ptr<IOSContext> context,
