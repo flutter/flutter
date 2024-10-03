@@ -155,6 +155,8 @@ abstract class SearchDelegate<T> {
     this.searchFieldDecorationTheme,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
+    this.autocorrect = true,
+    this.enableSuggestions = true,
   }) : assert(searchFieldStyle == null || searchFieldDecorationTheme == null);
 
   /// Suggestions shown in the body of the search page while the user types a
@@ -364,6 +366,12 @@ abstract class SearchDelegate<T> {
   ///
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
+
+  /// {@macro flutter.widgets.editableText.autocorrect}
+  final bool autocorrect;
+
+  /// {@macro flutter.services.TextInputConfiguration.enableSuggestions}
+  final bool enableSuggestions;
 
   /// The text input action configuring the soft keyboard to a particular action
   /// button.
@@ -619,6 +627,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
               focusNode: focusNode,
               style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
               textInputAction: widget.delegate.textInputAction,
+              autocorrect: widget.delegate.autocorrect,
+              enableSuggestions: widget.delegate.enableSuggestions,
               keyboardType: widget.delegate.keyboardType,
               onSubmitted: (String _) => widget.delegate.showResults(context),
               decoration: InputDecoration(hintText: searchFieldLabel),
