@@ -4,5 +4,12 @@ plugins {
 }
 
 dependencies {
-    compileOnly("com.android.tools.build:gradle:7.4.0")
+    implementation("com.android.tools.build:gradle:7.4.0")
+
+    testImplementation(kotlin("test"))
+    testImplementation("org.mockito:mockito-core:4.8.0")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
