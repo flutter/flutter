@@ -23,7 +23,7 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/139260
   - title: "Migrate to focusNode.enclosingScope!"
     date: 2023-11-29
     element:

@@ -443,4 +443,11 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/131455
   ThemeData themeData = ThemeData.copyWith();
+
+  // Changes made in https://github.com/flutter/flutter/pull/155072
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(dialogTheme: const DialogTheme(backgroundColor: Colors.orange);
+  themeData = ThemeData.raw(dialogTheme: const DialogTheme(backgroundColor: Colors.orange);
+  themeData = themeData.copyWith(dialogTheme: const DialogTheme(backgroundColor: Colors.orange);
+  themeData.dialogBackgroundColor; // Removing field reference not supported.
 }
