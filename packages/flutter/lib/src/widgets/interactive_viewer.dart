@@ -85,6 +85,7 @@ class InteractiveViewer extends StatefulWidget {
     this.transformationController,
     this.alignment,
     this.trackpadScrollCausesScale = false,
+    this.transformChild = true,
     required Widget this.child,
   }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
@@ -129,6 +130,7 @@ class InteractiveViewer extends StatefulWidget {
     this.alignment,
     this.trackpadScrollCausesScale = false,
     required InteractiveViewerWidgetBuilder this.builder,
+    this.transformChild = true,
   }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
        assert(minScale.isFinite),
@@ -146,6 +148,9 @@ class InteractiveViewer extends StatefulWidget {
        ),
        constrained = false,
        child = null;
+
+  /// Transform the child by applying a transformation matrix.
+  final bool transformChild;
 
   /// The alignment of the child's origin, relative to the size of the box.
   final Alignment? alignment;
@@ -1114,6 +1119,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         constrained: widget.constrained,
         matrix: _transformer.value,
         alignment: widget.alignment,
+        transformChild: widget.transformChild,
         child: widget.child!,
       );
     } else {
@@ -1130,6 +1136,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
             constrained: widget.constrained,
             alignment: widget.alignment,
             matrix: matrix,
+            transformChild: widget.transformChild,
             child: widget.builder!(
               context,
               _transformViewport(matrix, Offset.zero & constraints.biggest),
@@ -1165,6 +1172,7 @@ class _InteractiveViewerBuilt extends StatelessWidget {
     required this.constrained,
     required this.matrix,
     required this.alignment,
+    required this.transformChild,
   });
 
   final Widget child;
@@ -1173,17 +1181,22 @@ class _InteractiveViewerBuilt extends StatelessWidget {
   final bool constrained;
   final Matrix4 matrix;
   final Alignment? alignment;
+  final bool transformChild;
 
   @override
   Widget build(BuildContext context) {
-    Widget child = Transform(
-      transform: matrix,
-      alignment: alignment,
-      child: KeyedSubtree(
-        key: childKey,
-        child: this.child,
-      ),
+   Widget child = KeyedSubtree(
+      key: childKey,
+      child: this.child,
     );
+
+    if (transformChild) {
+      child = Transform(
+        transform: matrix,
+        alignment: alignment,
+        child: child,
+      );
+    }
 
     if (!constrained) {
       child = OverflowBox(
