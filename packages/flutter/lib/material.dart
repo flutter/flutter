@@ -193,3 +193,6 @@ export 'src/material/tooltip_visibility.dart';
 export 'src/material/typography.dart';
 export 'src/material/user_accounts_drawer_header.dart';
 export 'widgets.dart';
+
+///
+void create({bool containedInkWell = true, bool containedSplash = true}) {}

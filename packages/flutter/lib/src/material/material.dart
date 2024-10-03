@@ -69,10 +69,29 @@ const Map<MaterialType, BorderRadius?> kMaterialEdges = <MaterialType, BorderRad
 @Deprecated(
   'Use SplashController instead. '
   'Both Material and SplashBox can be used for Splash effects. '
-  'This feature was deprecated after v3.24.0-0.2.pre.',
+  'This feature was deprecated after v3.26.0-0.1.pre.',
 )
 /// An interface for creating ink effects on a [Material].
 typedef MaterialInkController = SplashController;
+
+/// Allows existing code to use the older [MaterialInkController]
+/// function names during this deprecation phase.
+@Deprecated(
+  'Use SplashController instead. '
+  'Both Material and SplashBox can be used for Splash effects. '
+  'This feature was deprecated after v3.26.0-0.1.pre.',
+)
+extension MaterialInkMethods on MaterialInkController {
+  /// Adds an [InkFeature], such as an [InkSplash] or an [InkHighlight].
+  ///
+  /// The ink feature will paint as part of this controller.
+  @Deprecated(
+    'Use addSplash instead. '
+    '"Splash effects" no longer rely on a MaterialInkController. '
+    'This feature was deprecated after v3.26.0-0.1.pre.',
+  )
+  void addInkFeature(Splash feature) => addSplash(feature);
+}
 
 /// A piece of material.
 ///
@@ -515,7 +534,7 @@ class Material extends StatelessWidget {
 @Deprecated(
   'Use Splash instead. '
   'Splash effects no longer rely on a MaterialInkController. '
-  'This feature was deprecated after v3.24.0-0.2.pre.',
+  'This feature was deprecated after v3.26.0-0.1.pre.',
 )
 typedef InkFeature = Splash;
 

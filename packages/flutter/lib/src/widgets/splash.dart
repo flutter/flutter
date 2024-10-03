@@ -237,89 +237,6 @@ abstract class Splash {
     controller.markNeedsPaint();
   }
 
-  /// Draws a [Splash] on the provided [Canvas].
-  ///
-  /// The [transform] argument is the [Matrix4] transform that typically
-  /// shifts the coordinate space of the canvas to the space in which
-  /// the circle is to be painted.
-  ///
-  /// If a [customBorder] is provided, then it (along with the [textDirection])
-  /// will be used to create a clipping path.
-  ///
-  /// Otherwise, the [clipCallback] clips the splash to a [RRect] (created by
-  /// applying the [borderRadius] to its result).
-  ///
-  /// If both [customBorder] and [clipCallback] are null, no clipping takes place.
-  ///
-  /// For examples on how the function is used, see [InkSplash] and [InkRipple].
-  @protected
-  void paintCircle({
-    required Canvas canvas,
-    required Matrix4 transform,
-    required Paint paint,
-    required Offset center,
-    required double radius,
-    TextDirection? textDirection,
-    ShapeBorder? customBorder,
-    BorderRadius borderRadius = BorderRadius.zero,
-    RectCallback? clipCallback,
-  }) {
-    final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
-    canvas.save();
-    if (originOffset == null) {
-      canvas.transform(transform.storage);
-    } else {
-      canvas.translate(originOffset.dx, originOffset.dy);
-    }
-    if (clipCallback != null) {
-      final Rect rect = clipCallback();
-      if (customBorder != null) {
-        canvas.clipPath(customBorder.getOuterPath(rect, textDirection: textDirection));
-      } else if (borderRadius != BorderRadius.zero) {
-        canvas.clipRRect(RRect.fromRectAndCorners(
-          rect,
-          topLeft: borderRadius.topLeft, topRight: borderRadius.topRight,
-          bottomLeft: borderRadius.bottomLeft, bottomRight: borderRadius.bottomRight,
-        ));
-      } else {
-        canvas.clipRect(rect);
-      }
-    }
-    canvas.drawCircle(center, radius, paint);
-    canvas.restore();
-  }
-
-  /// Draws an ink circle on the provided [Canvas].
-  @protected
-  @Deprecated(
-    'Use paintCircle instead. '
-    '"Splash effects" no longer rely on a MaterialInkController. '
-    'This feature was deprecated after v3.24.0-0.2.pre.',
-  )
-  void paintInkCircle({
-    required Canvas canvas,
-    required Matrix4 transform,
-    required Paint paint,
-    required Offset center,
-    required double radius,
-    TextDirection? textDirection,
-    ShapeBorder? customBorder,
-    BorderRadius borderRadius = BorderRadius.zero,
-    RectCallback? clipCallback,
-  }) {
-    return paintCircle(
-      canvas: canvas,
-      transform: transform,
-      paint: paint,
-      center: center,
-      radius: radius,
-      textDirection: textDirection,
-      customBorder: customBorder,
-      borderRadius: borderRadius,
-      clipCallback: clipCallback,
-    );
-  }
-
   /// Determines the appropriate transformation using [getPaintTransform].
   ///
   /// Then, [paintFeature] creates the [Splash] within the [referenceBox].
@@ -357,6 +274,34 @@ abstract class Splash {
   String toString() => describeIdentity(this);
 }
 
+/// An interface to help with migrating [SplashFactory]
+/// away from the material design system.
+///
+/// This class will soon be removed, along with [InteractiveInkFeatureFactory],
+/// leaving a single [SplashFactory] interface.
+@Deprecated(
+  'Use SplashFactory instead. '
+  'This type exists temporarily, to aid with migration to the SplashFactory API. '
+  'This feature was deprecated after v3.26.0-0.1.pre.',
+)
+abstract interface class SplashFactoryBase {
+  /// The factory method.
+  ///
+  /// Subclasses should override this method to return a [Splash] instance.
+  @factory
+  Splash create({
+    required SplashController controller,
+    required RenderBox referenceBox,
+    required Offset position,
+    required Color color,
+    required TextDirection textDirection,
+    RectCallback? rectCallback,
+    BorderRadius? borderRadius,
+    ShapeBorder? customBorder,
+    double? radius,
+    VoidCallback? onRemoved,
+  });
+}
 
 /// An encapsulation of a [Splash] constructor used by some other widgets.
 ///
@@ -367,17 +312,12 @@ abstract class Splash {
 ///
 ///  * [InkSplash.splashFactory]
 ///  * [InkRipple.splashFactory]
-abstract class SplashFactory {
-  /// SplashFactory subclasses should provide a const constructor.
-  ///
-  /// There is no benefit to extending this class, but an abstract `const`
-  /// constructor is included for backward compatibility.
-  const SplashFactory();
-
+abstract interface class SplashFactory implements SplashFactoryBase {
   /// The factory method.
   ///
   /// Subclasses should override this method to return a [Splash] instance.
   @factory
+  @override
   Splash create({
     required SplashController controller,
     required RenderBox referenceBox,
@@ -410,16 +350,6 @@ abstract interface class SplashController implements RenderBox {
 
   /// Used by this controller's [splashes] to drive their animations.
   TickerProvider get vsync;
-
-  /// Adds an [InkFeature], such as an [InkSplash] or an [InkHighlight].
-  ///
-  /// The ink feature will paint as part of this controller.
-  @Deprecated(
-    'Use addSplash instead. '
-    '"Splash effects" no longer rely on a MaterialInkController. '
-    'This feature was deprecated after v3.24.0-0.2.pre.',
-  )
-  void addInkFeature(Splash feature);
 
   /// Adds a [Splash], such as an [InkSplash] or an [InkHighlight].
   ///
@@ -591,7 +521,7 @@ class _RenderInkFeatures extends RenderProxyBox implements SplashController {
   @Deprecated(
     'Use debugSplashes instead. '
     'Splash effects are no longer exclusive to Material design. '
-    'This feature was deprecated after v3.24.0-0.2.pre.',
+    'This feature was deprecated after v3.26.0-0.1.pre.',
   )
   List<Splash> get debugInkFeatures => splashes;
 
@@ -603,9 +533,6 @@ class _RenderInkFeatures extends RenderProxyBox implements SplashController {
     splashes.add(splash);
     markNeedsPaint();
   }
-
-  @override
-  void addInkFeature(Splash feature) => addSplash(feature);
 
   @override
   void removeSplash(Splash splash) {

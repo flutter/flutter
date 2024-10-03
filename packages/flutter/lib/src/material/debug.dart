@@ -33,7 +33,7 @@ import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 @Deprecated(
   'Use debugCheckSplash instead. '
   'With the addition of SplashBox, a Material widget is no longer required. '
-  'This feature was deprecated after v3.24.0-0.2.pre.',
+  'This feature was deprecated after v3.26.0-0.1.pre.',
 )
 bool debugCheckHasMaterial(BuildContext context) => debugCheckSplash(context);
 

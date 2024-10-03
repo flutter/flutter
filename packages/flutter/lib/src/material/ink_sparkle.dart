@@ -382,13 +382,14 @@ class InkSparkle extends InteractiveInkFeature {
   /// Transforms the canvas for an ink feature to be painted on the [canvas].
   ///
   /// This should be called before painting ink features that do not use
-  /// [paintInkCircle].
+  /// [CirclePainter.paintInkCircle].
   ///
   /// The [transform] argument is the [Matrix4] transform that typically
   /// shifts the coordinate space of the canvas to the space in which
   /// the ink feature is to be painted.
   ///
-  /// For examples on how the function is used, see [InkSparkle] and [paintInkCircle].
+  /// For examples on how the function is used, see [InkSparkle] and
+  /// [CirclePainter.paintInkCircle].
   void _transformCanvas({
     required Canvas canvas,
     required Matrix4 transform,
@@ -404,7 +405,7 @@ class InkSparkle extends InteractiveInkFeature {
   /// Clips the canvas for an ink feature to be painted on the [canvas].
   ///
   /// This should be called before painting ink features with [paintFeature]
-  /// that do not use [paintInkCircle].
+  /// that do not use [CirclePainter.paintInkCircle].
   ///
   /// The [clipCallback] is the callback used to obtain the [Rect] used for clipping
   /// the ink effect.

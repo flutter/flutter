@@ -28,7 +28,7 @@ version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/149963
   - title: "Replace 'MaterialInkController' with 'SplashController'"
-    date: 2024-02-01
+    date: 2024-10-02
     element:
       uris: [ 'material.dart' ]
       class: 'MaterialInkController'
@@ -38,7 +38,7 @@ transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/149963
   - title: "Replace 'debugCheckHasMaterial' with 'debugCheckSplash'"
-    date: 2024-02-01
+    date: 2024-10-02
     element:
       uris: [ 'material.dart' ]
       function: 'debugCheckHasMaterial'
@@ -48,7 +48,7 @@ transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/149963
   - title: "Replace 'InkFeature' with 'Splash'"
-    date: 2024-02-01
+    date: 2024-10-02
     element:
       uris: [ 'material.dart' ]
       class: 'InkFeature'
@@ -58,7 +58,7 @@ transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/149963
   - title: "Replace 'InteractiveInkFeature' with 'Splash'"
-    date: 2024-02-01
+    date: 2024-10-02
     element:
       uris: [ 'material.dart' ]
       class: 'InteractiveInkFeature'
@@ -68,7 +68,7 @@ transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/149963
   - title: "Replace 'InteractiveInkFeatureFactory' with 'SplashFactory'"
-    date: 2024-02-01
+    date: 2024-10-02
     element:
       uris: [ 'material.dart' ]
       class: 'InteractiveInkFeatureFactory'

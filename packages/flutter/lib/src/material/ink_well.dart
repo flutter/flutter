@@ -43,11 +43,25 @@ import 'theme.dart';
 /// The [InkWell] and [InkResponse] widgets generate instances of this
 /// class.
 @Deprecated(
-  'Use InteractiveSplash instead. '
-  '"Splash effects" no longer rely on a MaterialInkController. '
-  'This feature was deprecated after v3.24.0-0.2.pre.',
+  'Use Splash instead. '
+  'CirclePainter can be mixed in to implement the paintInkCircle() method. '
+  'This feature was deprecated after v3.26.0-0.1.pre.',
 )
-typedef InteractiveInkFeature = Splash;
+abstract class InteractiveInkFeature extends Splash with CirclePainter {
+  /// Creates an InteractiveInkFeature.
+  @Deprecated(
+    'Use Splash instead. '
+    'CirclePainter can be mixed in to implement the paintInkCircle() method. '
+    'This feature was deprecated after v3.26.0-0.1.pre.',
+  )
+  InteractiveInkFeature({
+    required super.controller,
+    required super.referenceBox,
+    super.color,
+    super.customBorder,
+    super.onRemoved,
+  });
+}
 
 /// An encapsulation of a [Splash] constructor used by [InkWell],
 /// [InkResponse], and [ThemeData].
@@ -63,9 +77,95 @@ typedef InteractiveInkFeature = Splash;
 @Deprecated(
   'Use SplashFactory instead. '
   '"Splash effects" no longer rely on a MaterialInkController. '
-  'This feature was deprecated after v3.24.0-0.2.pre.',
+  'This feature was deprecated after v3.26.0-0.1.pre.',
 )
-typedef InteractiveInkFeatureFactory = SplashFactory;
+abstract class InteractiveInkFeatureFactory implements SplashFactoryBase {
+  /// [InteractiveInkFeatureFactory] subclasses should provide a
+  /// const constructor.
+  ///
+  /// There is no benefit to extending this class, but an abstract `const`
+  /// constructor is included for backward compatibility.
+  @Deprecated(
+    'Use SplashFactory instead. '
+    '"Splash effects" no longer rely on a MaterialInkController. '
+    'This feature was deprecated after v3.26.0-0.1.pre.',
+  )
+  const InteractiveInkFeatureFactory();
+
+  /// The factory method.
+  ///
+  /// Subclasses should override this method to return a [Splash] instance.
+  @factory
+  @override
+  InteractiveInkFeature create({
+    required SplashController controller,
+    required RenderBox referenceBox,
+    required Offset position,
+    required Color color,
+    required TextDirection textDirection,
+    bool containedInkWell = false,
+    RectCallback? rectCallback,
+    BorderRadius? borderRadius,
+    ShapeBorder? customBorder,
+    double? radius,
+    VoidCallback? onRemoved,
+  });
+}
+
+/// Paints circles for ink splashes.
+mixin CirclePainter on Splash {
+  /// Draws a [Splash] on the provided [Canvas].
+  ///
+  /// The [transform] argument is the [Matrix4] transform that typically
+  /// shifts the coordinate space of the canvas to the space in which
+  /// the circle is to be painted.
+  ///
+  /// If a [customBorder] is provided, then it (along with the [textDirection])
+  /// will be used to create a clipping path.
+  ///
+  /// Otherwise, the [clipCallback] clips the splash to a [RRect] (created by
+  /// applying the [borderRadius] to its result).
+  ///
+  /// If both [customBorder] and [clipCallback] are null, no clipping takes place.
+  ///
+  /// For examples on how the function is used, see [InkSplash] and [InkRipple].
+  @protected
+  void paintInkCircle({
+    required Canvas canvas,
+    required Matrix4 transform,
+    required Paint paint,
+    required Offset center,
+    required double radius,
+    TextDirection? textDirection,
+    ShapeBorder? customBorder,
+    BorderRadius borderRadius = BorderRadius.zero,
+    RectCallback? clipCallback,
+  }) {
+    final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
+    canvas.save();
+    if (originOffset == null) {
+      canvas.transform(transform.storage);
+    } else {
+      canvas.translate(originOffset.dx, originOffset.dy);
+    }
+    if (clipCallback != null) {
+      final Rect rect = clipCallback();
+      if (customBorder != null) {
+        canvas.clipPath(customBorder.getOuterPath(rect, textDirection: textDirection));
+      } else if (borderRadius != BorderRadius.zero) {
+        canvas.clipRRect(RRect.fromRectAndCorners(
+          rect,
+          topLeft: borderRadius.topLeft, topRight: borderRadius.topRight,
+          bottomLeft: borderRadius.bottomLeft, bottomRight: borderRadius.bottomRight,
+        ));
+      } else {
+        canvas.clipRect(rect);
+      }
+    }
+    canvas.drawCircle(center, radius, paint);
+    canvas.restore();
+  }
+}
 
 abstract class _ParentInkResponseState {
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value);
