@@ -404,6 +404,10 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
+    // Establish a dependency on the ModalRoute.
+    // This registers the widget to be notified when the route changes.
+    // Even if we don't use the route here, it will still be notified
+    // when the route changes.
     ModalRoute.of(context);
 
     return RenderTapRegion(
