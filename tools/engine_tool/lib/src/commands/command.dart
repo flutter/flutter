@@ -68,3 +68,29 @@ void addConcurrencyOption(ArgParser parser) {
     help: 'Specify the concurrency level to use for the ninja build.',
   );
 }
+
+/// Adds the --rbe and --exec-stragey flags.
+void addRbeOptions(ArgParser parser, Environment environment) {
+  parser.addFlag(
+    rbeFlag,
+    defaultsTo: environment.hasRbeConfigInTree(),
+    help: 'RBE is enabled by default when available.',
+  );
+  parser.addOption(
+    buildStrategyFlag,
+    allowed: [
+      buildStrategyFlagValueAuto,
+      buildStrategyFlagValueLocal,
+      buildStrategyFlagValueRemote,
+    ],
+    allowedHelp: {
+      buildStrategyFlagValueAuto:
+          'If RBE is enabled, use remote builds, otherwise fallback to local builds.',
+      buildStrategyFlagValueLocal:
+          'Use local builds regardless of RBE being enabled.',
+      buildStrategyFlagValueRemote:
+          'Use RBE builds, and fail if they are not available instead of falling back.'
+    },
+    defaultsTo: buildStrategyFlagValueAuto,
+  );
+}
