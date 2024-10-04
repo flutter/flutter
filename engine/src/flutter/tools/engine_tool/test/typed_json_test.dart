@@ -188,6 +188,33 @@ void main() {
     });
   });
 
+  group('JsonObject.objectOrNull', () {
+    test('returns object value', () {
+      const jsonObject = JsonObject({
+        'key': {'nestedKey': 'nestedValue'}
+      });
+      expect(
+        jsonObject.objectOrNull('key'),
+        const JsonObject({'nestedKey': 'nestedValue'}),
+      );
+    });
+
+    test('returns null due to missing key', () {
+      const jsonObject = JsonObject({
+        'key': {'nestedKey': 'nestedValue'}
+      });
+      expect(jsonObject.objectOrNull('missing'), isNull);
+    });
+
+    test('throws due to wrong type', () {
+      const jsonObject = JsonObject({'key': 'value'});
+      expect(
+        () => jsonObject.objectOrNull('key'),
+        throwsA(const isInstanceOf<InvalidTypeJsonReadException>()),
+      );
+    });
+  });
+
   group('JsonObject.map', () {
     test('returns multiple fields', () {
       final (String name, int age, bool isStudent) =

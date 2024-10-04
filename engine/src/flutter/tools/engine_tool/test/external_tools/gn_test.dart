@@ -126,4 +126,41 @@ void main() {
       isTrue,
     );
   });
+
+  test('parses a dart_test action as an executable', () async {
+    final testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: [
+        CannedProcess(
+          (List<String> command) => command.contains('desc'),
+          stdout: '''
+            {
+              "//foo/bar:baz_test": {
+                "outputs": ["//out/host_debug/foo/bar/baz_test"],
+                "testonly": true,
+                "type": "action",
+                "metadata": {
+                  "action_type": ["dart_test"]
+                }
+              }
+            }
+          ''',
+        ),
+      ],
+    );
+    addTearDown(testEnv.cleanup);
+
+    final gn = Gn.fromEnvironment(testEnv.environment);
+    final targets = await gn.desc('out/Release', TargetPattern('//foo', 'bar'));
+    expect(targets, hasLength(1));
+
+    final testTarget = targets.single;
+    expect(
+      testTarget,
+      ExecutableBuildTarget(
+        label: Label('//foo/bar', 'baz_test'),
+        testOnly: true,
+        executable: 'out/host_debug/foo/bar/baz_test',
+      ),
+    );
+  });
 }

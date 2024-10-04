@@ -226,6 +226,44 @@ extension type const JsonObject(Map<String, Object?> _object) {
     throw e;
   }
 
+  JsonObject? _getObjectOrNull(String key) {
+    final Object? value = _object[key];
+    if (value == null && !_object.containsKey(key)) {
+      return null;
+    } else if (value is! Map<String, Object?>) {
+      _error(InvalidTypeJsonReadException(
+        this,
+        key,
+        expected: Map<String, Object?>,
+        actual: value.runtimeType,
+      ));
+      return const JsonObject({});
+    } else {
+      return JsonObject(value);
+    }
+  }
+
+  JsonObject _getObject(String key) {
+    final JsonObject? result = _getObjectOrNull(key);
+    if (result == null) {
+      _error(MissingKeyJsonReadException(this, key));
+      return const JsonObject({});
+    }
+    return result;
+  }
+
+  /// Returns the value at the given [key] as a [JsonObject].
+  ///
+  /// Throws a [JsonReadException] if the value is not found or cannot be cast.
+  JsonObject object(String key) => _getObject(key);
+
+  /// Returns the value at the given [key] as a [JsonObject].
+  ///
+  /// If the value is not found, returns `null`.
+  ///
+  /// Throws a [JsonReadException] if the value cannot be cast.
+  JsonObject? objectOrNull(String key) => _getObjectOrNull(key);
+
   /// Returns the result of applying the given [mapper] to this JSON object.
   ///
   /// Any exception that otherwise would be thrown by the mapper is caught

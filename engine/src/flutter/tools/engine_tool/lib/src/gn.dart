@@ -123,6 +123,36 @@ sealed class BuildTarget {
     required this.testOnly,
   });
 
+  factory BuildTarget._parseFromAction(
+    String label, {
+    required bool testOnly,
+    required JsonObject json,
+  }) {
+    final metadata = json.objectOrNull('metadata');
+    if (metadata != null) {
+      final actionTypes = metadata.stringListOrNull('action_type');
+      if (actionTypes != null && actionTypes.contains('dart_test')) {
+        final String executable;
+        final outputs = json.stringListOrNull('outputs');
+        if (outputs == null || outputs.isEmpty) {
+          throw StateError('Expected at least one output for $label');
+        }
+
+        // Remove the leading // from the path.
+        executable = outputs.first.substring(2);
+        return ExecutableBuildTarget(
+          label: Label.parseGn(label),
+          testOnly: testOnly,
+          executable: executable,
+        );
+      }
+    }
+    return ActionBuildTarget(
+      label: Label.parseGn(label),
+      testOnly: testOnly,
+    );
+  }
+
   /// Returns a build target from JSON originating from `gn desc --format=json`.
   ///
   /// If the JSON is not a supported build target, returns `null`.
@@ -145,8 +175,11 @@ sealed class BuildTarget {
           label: Label.parseGn(label),
           testOnly: testOnly,
         ),
-      'action' =>
-        ActionBuildTarget(label: Label.parseGn(label), testOnly: testOnly),
+      'action' => BuildTarget._parseFromAction(
+          label,
+          testOnly: testOnly,
+          json: json,
+        ),
       _ => null,
     };
   }

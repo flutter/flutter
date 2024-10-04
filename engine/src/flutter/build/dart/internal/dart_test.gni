@@ -27,6 +27,9 @@ template("dart_test") {
       invoker.main_dart,
     ]
     cwd = rebase_path(cwd)
+    metadata = {
+      action_type = [ "dart_test" ]
+    }
     testonly = true
     forward_variables_from(invoker,
                            [
