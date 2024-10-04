@@ -845,17 +845,26 @@ void main() {
 
     // Make sure the first listener can be called re-entrantly
     final ImageInfo imageInfo = ImageInfo(image: image10x10);
-    listeners[1].onImage(imageInfo.clone(), false);
-    listeners[1].onImage(imageInfo.clone(), false);
+    final ImageInfo clone1 = imageInfo.clone();
+    final ImageInfo clone2 = imageInfo.clone();
+    final ImageInfo clone3 = imageInfo.clone();
+    final ImageInfo clone4 = imageInfo.clone();
+
+    listeners[1].onImage(clone1, false);
+    listeners[1].onImage(clone2, false);
 
     // Make sure the second listener can be called re-entrantly.
-    final ImageInfo image1 = imageInfo.clone();
-    listeners[0].onImage(image1, false);
-    listeners[0].onImage(imageInfo.clone(), false);
+    listeners[0].onImage(clone3, false);
+    listeners[0].onImage(clone4, false);
 
     imageInfo.dispose();
-    // image1.dispose();
     imageStreamCompleter.dispose();
+    // clone1.dispose();
+    // clone2.dispose();
+    // clone3.dispose();
+    // clone4.dispose();
+    imageCache.clear();
+    await tester.pumpWidget(Placeholder());
     imageCache.clear();
   });
 
