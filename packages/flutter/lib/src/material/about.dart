@@ -213,8 +213,9 @@ void showAboutDialog({
   );
 }
 
-/// Displays an [AboutDialog], which describes the application and provides a
-/// button to show licenses for software used by the application.
+/// Displays either a Material or Cupertino [AboutDialog] depending on platform,
+/// which describes the application and provides a button to show licenses
+/// for software used by the application.
 ///
 /// The arguments correspond to the properties on [AboutDialog].
 ///
