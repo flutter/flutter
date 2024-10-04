@@ -13,6 +13,7 @@
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/size.h"
 #include "flutter/shell/common/snapshot_controller.h"
+#include "impeller/entity/contents/runtime_effect_contents.h"
 #include "impeller/renderer/render_target.h"
 
 namespace flutter {

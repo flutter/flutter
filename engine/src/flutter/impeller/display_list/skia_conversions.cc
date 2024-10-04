@@ -166,5 +166,40 @@ void ConvertStops(const flutter::DlGradientColorSourceBase* gradient,
   }
 }
 
+impeller::SamplerDescriptor ToSamplerDescriptor(
+    const flutter::DlImageSampling options) {
+  impeller::SamplerDescriptor desc;
+  switch (options) {
+    case flutter::DlImageSampling::kNearestNeighbor:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kNearest;
+      desc.mip_filter = impeller::MipFilter::kBase;
+      desc.label = "Nearest Sampler";
+      break;
+    case flutter::DlImageSampling::kLinear:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
+      desc.mip_filter = impeller::MipFilter::kBase;
+      desc.label = "Linear Sampler";
+      break;
+    case flutter::DlImageSampling::kCubic:
+    case flutter::DlImageSampling::kMipmapLinear:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
+      desc.mip_filter = impeller::MipFilter::kLinear;
+      desc.label = "Mipmap Linear Sampler";
+      break;
+  }
+  return desc;
+}
+
+Matrix ToMatrix(const SkMatrix& m) {
+  return Matrix{
+      // clang-format off
+      m[0], m[3], 0, m[6],
+      m[1], m[4], 0, m[7],
+      0,    0,    1, 0,
+      m[2], m[5], 0, m[8],
+      // clang-format on
+  };
+}
+
 }  // namespace skia_conversions
 }  // namespace impeller
