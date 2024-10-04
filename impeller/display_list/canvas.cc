@@ -8,10 +8,11 @@
 #include <optional>
 #include <utility>
 
+#include "display_list/effects/dl_color_source.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "impeller/display_list/color_source.h"
 #include "impeller/display_list/image_filter.h"
+#include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"
@@ -21,7 +22,6 @@
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
-#include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/save_layer_utils.h"
@@ -36,8 +36,7 @@ namespace {
 static std::shared_ptr<Contents> CreateContentsForGeometryWithFilters(
     const Paint& paint,
     std::shared_ptr<Geometry> geometry) {
-  std::shared_ptr<ColorSourceContents> contents =
-      paint.color_source.GetContents(paint);
+  std::shared_ptr<ColorSourceContents> contents = paint.CreateContents();
 
   // Attempt to apply the color filter on the CPU first.
   // Note: This is not just an optimization; some color sources rely on
@@ -65,7 +64,8 @@ static std::shared_ptr<Contents> CreateContentsForGeometryWithFilters(
   // Image input types will directly set their color filter,
   // if any. See `TiledTextureContents.SetColorFilter`.
   if (needs_color_filter &&
-      paint.color_source.GetType() != ColorSource::Type::kImage) {
+      (!paint.color_source ||
+       paint.color_source->type() != flutter::DlColorSourceType::kImage)) {
     std::shared_ptr<ColorFilter> color_filter = paint.GetColorFilter();
     contents_copy = color_filter->WrapWithGPUColorFilter(
         FilterInput::Make(std::move(contents_copy)),
@@ -80,41 +80,6 @@ static std::shared_ptr<Contents> CreateContentsForGeometryWithFilters(
   }
 
   return contents_copy;
-}
-
-struct GetTextureColorSourceDataVisitor {
-  GetTextureColorSourceDataVisitor() {}
-
-  std::optional<ImageData> operator()(const LinearGradientData& data) {
-    return std::nullopt;
-  }
-
-  std::optional<ImageData> operator()(const RadialGradientData& data) {
-    return std::nullopt;
-  }
-
-  std::optional<ImageData> operator()(const ConicalGradientData& data) {
-    return std::nullopt;
-  }
-
-  std::optional<ImageData> operator()(const SweepGradientData& data) {
-    return std::nullopt;
-  }
-
-  std::optional<ImageData> operator()(const ImageData& data) { return data; }
-
-  std::optional<ImageData> operator()(const RuntimeEffectData& data) {
-    return std::nullopt;
-  }
-
-  std::optional<ImageData> operator()(const std::monostate& data) {
-    return std::nullopt;
-  }
-};
-
-static std::optional<ImageData> GetImageColorSourceData(
-    const ColorSource& color_source) {
-  return std::visit(GetTextureColorSourceDataVisitor{}, color_source.GetData());
 }
 
 static std::shared_ptr<Contents> CreatePathContentsWithFilters(
@@ -484,8 +449,9 @@ void Canvas::DrawPaint(const Paint& paint) {
 bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
                                      Size corner_radii,
                                      const Paint& paint) {
-  if (paint.color_source.GetType() != ColorSource::Type::kColor ||
-      paint.style != Paint::Style::kFill) {
+  if (paint.color_source &&
+      (paint.color_source->type() != flutter::DlColorSourceType::kColor ||
+       paint.style != Paint::Style::kFill)) {
     return false;
   }
 
@@ -847,7 +813,8 @@ static bool UseColorSourceContents(
     return false;
   }
   if (vertices->HasTextureCoordinates() &&
-      (paint.color_source.GetType() == ColorSource::Type::kColor)) {
+      (!paint.color_source ||
+       paint.color_source->type() == flutter::DlColorSourceType::kColor)) {
     return true;
   }
   return !vertices->HasTextureCoordinates();
@@ -859,7 +826,8 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   // Override the blend mode with kDestination in order to match the behavior
   // of Skia's SK_LEGACY_IGNORE_DRAW_VERTICES_BLEND_WITH_NO_SHADER flag, which
   // is enabled when the Flutter engine builds Skia.
-  if (paint.color_source.GetType() == ColorSource::Type::kColor) {
+  if (!paint.color_source ||
+      paint.color_source->type() == flutter::DlColorSourceType::kColor) {
     blend_mode = BlendMode::kDestination;
   }
 
@@ -887,16 +855,29 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
 
   // If there is a texture, use this directly. Otherwise render the color
   // source to a texture.
-  if (std::optional<ImageData> maybe_image_data =
-          GetImageColorSourceData(paint.color_source)) {
-    const ImageData& image_data = maybe_image_data.value();
+  if (paint.color_source &&
+      paint.color_source->type() == flutter::DlColorSourceType::kImage) {
+    const flutter::DlImageColorSource* image_color_source =
+        paint.color_source->asImage();
+    FML_DCHECK(image_color_source &&
+               image_color_source->image()->impeller_texture());
+    auto texture = image_color_source->image()->impeller_texture();
+    auto x_tile_mode = static_cast<Entity::TileMode>(
+        image_color_source->horizontal_tile_mode());
+    auto y_tile_mode =
+        static_cast<Entity::TileMode>(image_color_source->vertical_tile_mode());
+    auto sampler_descriptor =
+        skia_conversions::ToSamplerDescriptor(image_color_source->sampling());
+    auto effect_transform =
+        skia_conversions::ToMatrix(image_color_source->matrix());
+
     auto contents = std::make_shared<VerticesSimpleBlendContents>();
     contents->SetBlendMode(blend_mode);
     contents->SetAlpha(paint.color.alpha);
     contents->SetGeometry(vertices);
-    contents->SetEffectTransform(image_data.effect_transform);
-    contents->SetTexture(image_data.texture);
-    contents->SetTileMode(image_data.x_tile_mode, image_data.y_tile_mode);
+    contents->SetEffectTransform(effect_transform);
+    contents->SetTexture(texture);
+    contents->SetTileMode(x_tile_mode, y_tile_mode);
 
     entity.SetContents(paint.WithFilters(std::move(contents)));
     AddRenderEntityToCurrentPass(entity);

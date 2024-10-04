@@ -28,8 +28,6 @@ impeller_component("display_list") {
     "canvas.h",
     "color_filter.cc",
     "color_filter.h",
-    "color_source.cc",
-    "color_source.h",
     "dl_atlas_geometry.cc",
     "dl_atlas_geometry.h",
     "dl_dispatcher.cc",

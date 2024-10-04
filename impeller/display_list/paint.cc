@@ -6,14 +6,30 @@
 
 #include <memory>
 
+#include "display_list/effects/dl_color_source.h"
+#include "display_list/geometry/dl_path.h"
+#include "fml/logging.h"
+#include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/color_source_contents.h"
+#include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/gaussian_blur_filter_contents.h"
+#include "impeller/entity/contents/linear_gradient_contents.h"
+#include "impeller/entity/contents/radial_gradient_contents.h"
+#include "impeller/entity/contents/runtime_effect_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
+#include "impeller/entity/contents/sweep_gradient_contents.h"
+#include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/entity/geometry/geometry.h"
 
 namespace impeller {
+
+using DlScalar = flutter::DlScalar;
+using DlPoint = flutter::DlPoint;
+using DlRect = flutter::DlRect;
+using DlIRect = flutter::DlIRect;
+using DlPath = flutter::DlPath;
 
 /// A color matrix which inverts colors.
 // clang-format off
@@ -27,9 +43,213 @@ constexpr ColorMatrix kColorInversion = {
 };
 // clang-format on
 
+std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
+  if (color_source == nullptr) {
+    auto contents = std::make_shared<SolidColorContents>();
+    contents->SetColor(color);
+    return contents;
+  }
+
+  switch (color_source->type()) {
+    case flutter::DlColorSourceType::kLinearGradient: {
+      const flutter::DlLinearGradientColorSource* linear =
+          color_source->asLinearGradient();
+      FML_DCHECK(linear);
+      auto start_point = skia_conversions::ToPoint(linear->start_point());
+      auto end_point = skia_conversions::ToPoint(linear->end_point());
+      std::vector<Color> colors;
+      std::vector<float> stops;
+      skia_conversions::ConvertStops(linear, colors, stops);
+
+      auto tile_mode = static_cast<Entity::TileMode>(linear->tile_mode());
+      auto effect_transform = skia_conversions::ToMatrix(linear->matrix());
+
+      auto contents = std::make_shared<LinearGradientContents>();
+      contents->SetOpacityFactor(color.alpha);
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetEndPoints(start_point, end_point);
+      contents->SetTileMode(tile_mode);
+      contents->SetEffectTransform(effect_transform);
+
+      std::array<Point, 2> bounds{start_point, end_point};
+      auto intrinsic_size = Rect::MakePointBounds(bounds.begin(), bounds.end());
+      if (intrinsic_size.has_value()) {
+        contents->SetColorSourceSize(intrinsic_size->GetSize());
+      }
+      return contents;
+    }
+    case flutter::DlColorSourceType::kRadialGradient: {
+      const flutter::DlRadialGradientColorSource* radialGradient =
+          color_source->asRadialGradient();
+      FML_DCHECK(radialGradient);
+      auto center = skia_conversions::ToPoint(radialGradient->center());
+      auto radius = radialGradient->radius();
+      std::vector<Color> colors;
+      std::vector<float> stops;
+      skia_conversions::ConvertStops(radialGradient, colors, stops);
+
+      auto tile_mode =
+          static_cast<Entity::TileMode>(radialGradient->tile_mode());
+      auto effect_transform =
+          skia_conversions::ToMatrix(radialGradient->matrix());
+
+      auto contents = std::make_shared<RadialGradientContents>();
+      contents->SetOpacityFactor(color.alpha);
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetCenterAndRadius(center, radius);
+      contents->SetTileMode(tile_mode);
+      contents->SetEffectTransform(effect_transform);
+
+      auto radius_pt = Point(radius, radius);
+      std::array<Point, 2> bounds{center + radius_pt, center - radius_pt};
+      auto intrinsic_size = Rect::MakePointBounds(bounds.begin(), bounds.end());
+      if (intrinsic_size.has_value()) {
+        contents->SetColorSourceSize(intrinsic_size->GetSize());
+      }
+      return contents;
+    }
+    case flutter::DlColorSourceType::kConicalGradient: {
+      const flutter::DlConicalGradientColorSource* conical_gradient =
+          color_source->asConicalGradient();
+      FML_DCHECK(conical_gradient);
+      Point center = skia_conversions::ToPoint(conical_gradient->end_center());
+      DlScalar radius = conical_gradient->end_radius();
+      Point focus_center =
+          skia_conversions::ToPoint(conical_gradient->start_center());
+      DlScalar focus_radius = conical_gradient->start_radius();
+      std::vector<Color> colors;
+      std::vector<float> stops;
+      skia_conversions::ConvertStops(conical_gradient, colors, stops);
+
+      auto tile_mode =
+          static_cast<Entity::TileMode>(conical_gradient->tile_mode());
+      auto effect_transform =
+          skia_conversions::ToMatrix(conical_gradient->matrix());
+
+      std::shared_ptr<ConicalGradientContents> contents =
+          std::make_shared<ConicalGradientContents>();
+      contents->SetOpacityFactor(color.alpha);
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetCenterAndRadius(center, radius);
+      contents->SetTileMode(tile_mode);
+      contents->SetEffectTransform(effect_transform);
+      contents->SetFocus(focus_center, focus_radius);
+
+      auto radius_pt = Point(radius, radius);
+      std::array<Point, 2> bounds{center + radius_pt, center - radius_pt};
+      auto intrinsic_size = Rect::MakePointBounds(bounds.begin(), bounds.end());
+      if (intrinsic_size.has_value()) {
+        contents->SetColorSourceSize(intrinsic_size->GetSize());
+      }
+      return contents;
+    }
+    case flutter::DlColorSourceType::kSweepGradient: {
+      const flutter::DlSweepGradientColorSource* sweepGradient =
+          color_source->asSweepGradient();
+      FML_DCHECK(sweepGradient);
+
+      auto center = skia_conversions::ToPoint(sweepGradient->center());
+      auto start_angle = Degrees(sweepGradient->start());
+      auto end_angle = Degrees(sweepGradient->end());
+      std::vector<Color> colors;
+      std::vector<float> stops;
+      skia_conversions::ConvertStops(sweepGradient, colors, stops);
+
+      auto tile_mode =
+          static_cast<Entity::TileMode>(sweepGradient->tile_mode());
+      auto effect_transform =
+          skia_conversions::ToMatrix(sweepGradient->matrix());
+
+      auto contents = std::make_shared<SweepGradientContents>();
+      contents->SetOpacityFactor(color.alpha);
+      contents->SetCenterAndAngles(center, start_angle, end_angle);
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetEffectTransform(effect_transform);
+
+      return contents;
+    }
+    case flutter::DlColorSourceType::kImage: {
+      const flutter::DlImageColorSource* image_color_source =
+          color_source->asImage();
+      FML_DCHECK(image_color_source &&
+                 image_color_source->image()->impeller_texture());
+      auto texture = image_color_source->image()->impeller_texture();
+      auto x_tile_mode = static_cast<Entity::TileMode>(
+          image_color_source->horizontal_tile_mode());
+      auto y_tile_mode = static_cast<Entity::TileMode>(
+          image_color_source->vertical_tile_mode());
+      auto sampler_descriptor =
+          skia_conversions::ToSamplerDescriptor(image_color_source->sampling());
+      auto effect_transform =
+          skia_conversions::ToMatrix(image_color_source->matrix());
+
+      auto contents = std::make_shared<TiledTextureContents>();
+      contents->SetOpacityFactor(color.alpha);
+      contents->SetTexture(texture);
+      contents->SetTileModes(x_tile_mode, y_tile_mode);
+      contents->SetSamplerDescriptor(sampler_descriptor);
+      contents->SetEffectTransform(effect_transform);
+      if (color_filter) {
+        TiledTextureContents::ColorFilterProc filter_proc =
+            [color_filter = color_filter](FilterInput::Ref input) {
+              return color_filter->WrapWithGPUColorFilter(
+                  std::move(input), ColorFilterContents::AbsorbOpacity::kNo);
+            };
+        contents->SetColorFilter(filter_proc);
+      }
+      contents->SetColorSourceSize(Size::Ceil(texture->GetSize()));
+      return contents;
+    }
+    case flutter::DlColorSourceType::kRuntimeEffect: {
+      const flutter::DlRuntimeEffectColorSource* runtime_effect_color_source =
+          color_source->asRuntimeEffect();
+      auto runtime_stage =
+          runtime_effect_color_source->runtime_effect()->runtime_stage();
+      auto uniform_data = runtime_effect_color_source->uniform_data();
+      auto samplers = runtime_effect_color_source->samplers();
+
+      std::vector<RuntimeEffectContents::TextureInput> texture_inputs;
+
+      for (auto& sampler : samplers) {
+        if (sampler == nullptr) {
+          return nullptr;
+        }
+        auto* image = sampler->asImage();
+        if (!sampler->asImage()) {
+          return nullptr;
+        }
+        FML_DCHECK(image->image()->impeller_texture());
+        texture_inputs.push_back({
+            .sampler_descriptor =
+                skia_conversions::ToSamplerDescriptor(image->sampling()),
+            .texture = image->image()->impeller_texture(),
+        });
+      }
+
+      auto contents = std::make_shared<RuntimeEffectContents>();
+      contents->SetOpacityFactor(color.alpha);
+      contents->SetRuntimeStage(std::move(runtime_stage));
+      contents->SetUniformData(std::move(uniform_data));
+      contents->SetTextureInputs(std::move(texture_inputs));
+      return contents;
+    }
+    case flutter::DlColorSourceType::kColor: {
+      auto contents = std::make_shared<SolidColorContents>();
+      contents->SetColor(color);
+      return contents;
+    }
+  }
+  FML_UNREACHABLE();
+}
+
 std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
     const std::shared_ptr<Geometry>& geometry) const {
-  auto contents = color_source.GetContents(*this);
+  auto contents = CreateContents();
 
   // Attempt to apply the color filter on the CPU first.
   // Note: This is not just an optimization; some color sources rely on
@@ -105,7 +325,8 @@ std::shared_ptr<Contents> Paint::WithColorFilter(
     ColorFilterContents::AbsorbOpacity absorb_opacity) const {
   // Image input types will directly set their color filter,
   // if any. See `TiledTextureContents.SetColorFilter`.
-  if (color_source.GetType() == ColorSource::Type::kImage) {
+  if (color_source &&
+      color_source->type() == flutter::DlColorSourceType::kImage) {
     return input;
   }
 
