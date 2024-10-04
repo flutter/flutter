@@ -46,6 +46,7 @@ template("gen_dartcli_call") {
                            [
                              "cwd",
                              "output",
+                             "metadata",
                              "testonly",
                              "visibility",
                            ])
