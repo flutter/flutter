@@ -1054,6 +1054,7 @@ void main() {
     expect(tappedInside, isEmpty);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/153093.
   testWidgets('TapRegion should register and unregister correctly on push and pop', (WidgetTester tester) async {
     const ValueKey<String> tapRegion1Key = ValueKey<String>('TapRegion');
     const ValueKey<String> tapRegion2Key = ValueKey<String>('TapRegion2');
@@ -1064,47 +1065,51 @@ void main() {
     final TapRegion tapRegion1 = TapRegion(
       key: tapRegion1Key,
       onTapOutside: (PointerEvent event) {
-        count1++;
+        count1 += 1;
       },
-      child: Container(
-        width: 100,
-        height: 100,
-        color: Colors.red,
-      ),
+      behavior: HitTestBehavior.opaque,
+      child: const SizedBox.square(dimension: 100),
     );
 
     final TapRegion tapRegion2 = TapRegion(
       key: tapRegion2Key,
       onTapOutside: (PointerEvent event) {
-        count2++;
+        count2 += 1;
       },
-      child: Container(
-        width: 100,
-        height: 100,
-        color: Colors.red,
-      ),
+      behavior: HitTestBehavior.opaque,
+      child: const SizedBox.square(dimension: 100),
     );
 
-    Widget buildPage(Widget body, {FloatingActionButton? fab}) {
+    Widget buildPage(Widget body, {FloatingActionButton? floatingActionButton}) {
       return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.blue,
-          title: const Text('Test Page'),
-        ),
         body: Center(child: body),
-        floatingActionButton: fab,
+        floatingActionButton: floatingActionButton,
       );
     }
+
+    Future<void> tapOutside(WidgetTester tester, Finder regionFinder) async {
+    // Find the RenderBox of the region.
+    final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
+    final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
+
+    await tester.tapAt(outsidePoint);
+    await tester.pump();
+}
+
 
     await tester.pumpWidget(
       MaterialApp(
         home: buildPage(
           tapRegion1,
-          fab: FloatingActionButton(
+          floatingActionButton: FloatingActionButton(
             onPressed: () {
               Navigator.push(
                 tester.element(find.byType(FloatingActionButton)),
-                MaterialPageRoute<Widget>(builder: (BuildContext context) => buildPage(tapRegion2)),
+                 MaterialPageRoute<void>(
+                  builder: (BuildContext context) => Scaffold(
+                    body: Center(child: tapRegion2),
+                  ),
+                ),
               );
             },
             child: const Icon(Icons.add),
@@ -1137,13 +1142,4 @@ void main() {
     expect(count1, 3);
     expect(count2, 1);
   });
-}
-
-Future<void> tapOutside(WidgetTester tester, Finder regionFinder) async {
-  // Find the RenderBox of the region.
-  final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
-  final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
-
-  await tester.tapAt(outsidePoint);
-  await tester.pump();
 }
