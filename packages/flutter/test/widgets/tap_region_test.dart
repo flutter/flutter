@@ -1081,7 +1081,7 @@ void main() {
     );
 
     Future<void> tapOutside(WidgetTester tester, Finder regionFinder) async {
-    // Find the RenderBox of the region.
+      // Find the RenderBox of the region.
       final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
       final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
 
