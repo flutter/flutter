@@ -66,5 +66,14 @@ TEST(CapabilitiesTest, DefaultGlyphAtlasFormat) {
   EXPECT_EQ(mutated->GetDefaultGlyphAtlasFormat(), PixelFormat::kA8UNormInt);
 }
 
+TEST(CapabilitiesTest, MaxRenderPassAttachmentSize) {
+  auto defaults = CapabilitiesBuilder().Build();
+  EXPECT_EQ(defaults->GetMaximumRenderPassAttachmentSize(), ISize(1, 1));
+  auto mutated = CapabilitiesBuilder()
+                     .SetMaximumRenderPassAttachmentSize({100, 100})
+                     .Build();
+  EXPECT_EQ(mutated->GetMaximumRenderPassAttachmentSize(), ISize(100, 100));
+}
+
 }  // namespace testing
 }  // namespace impeller

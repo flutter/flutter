@@ -1509,5 +1509,30 @@ TEST_P(AiksTest, PipelineBlendSingleParameter) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Creates an image matrix filter that scales large content such that it would
+// exceed the max texture size. See
+// https://github.com/flutter/flutter/issues/128912
+TEST_P(AiksTest, MassiveScalingMatrixImageFilter) {
+  if (GetBackend() == PlaygroundBackend::kVulkan) {
+    GTEST_SKIP() << "Swiftshader is running out of memory on this example.";
+  }
+  DisplayListBuilder builder(SkRect::MakeSize(SkSize::Make(1000, 1000)));
+
+  auto filter = DlMatrixImageFilter::Make(SkMatrix::Scale(0.001, 0.001),
+                                          DlImageSampling::kLinear);
+
+  DlPaint paint;
+  paint.setImageFilter(filter);
+  builder.SaveLayer(nullptr, &paint);
+  {
+    DlPaint paint;
+    paint.setColor(DlColor::kRed());
+    builder.DrawRect(SkRect::MakeLTRB(0, 0, 100000, 100000), paint);
+  }
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

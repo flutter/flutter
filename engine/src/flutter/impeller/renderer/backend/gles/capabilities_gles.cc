@@ -205,4 +205,8 @@ PixelFormat CapabilitiesGLES::GetDefaultGlyphAtlasFormat() const {
   return default_glyph_atlas_format_;
 }
 
+ISize CapabilitiesGLES::GetMaximumRenderPassAttachmentSize() const {
+  return max_texture_size;
+}
+
 }  // namespace impeller
