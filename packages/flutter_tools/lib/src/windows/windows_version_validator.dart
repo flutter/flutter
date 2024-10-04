@@ -137,7 +137,7 @@ class VersionExtractor {
 
     String? caption;
     if (getProcessesResult.exitCode == 0) {
-      String? output = getProcessesResult.stdout as String?;
+      final String? output = getProcessesResult.stdout as String?;
       if (output != null) {
         final List<String> parts = output.split('\n');
         if (parts.length >= 2) {
@@ -146,7 +146,7 @@ class VersionExtractor {
       }
     }
 
-    return {
+    return <String, String?>{
       'Caption': caption,
       'ReleaseId': readRegistryValue(HKEY_LOCAL_MACHINE, CURRENT_VERSION_KEY, 'ReleaseId'),
       'DisplayVersion': readRegistryValue(HKEY_LOCAL_MACHINE, CURRENT_VERSION_KEY, 'DisplayVersion'),
@@ -184,15 +184,15 @@ typedef RegQueryValueExDart = int Function(
 typedef RegCloseKeyNative = Int32 Function(IntPtr hKey);
 typedef RegCloseKeyDart = int Function(int hKey);
 
-base class KEY_VALUE_BASIC_INFORMATION extends Struct {
+base class KeyValueBasicInformation extends Struct {
   @Uint32()
-  external int TitleIndex;
+  external int titleIndex;
   @Uint32()
-  external int Type;
+  external int type;
   @Uint32()
-  external int NameLength;
+  external int nameLength;
   @Uint32()
-  external int DataLength;
+  external int dataLength;
 }
 
 const int HKEY_LOCAL_MACHINE = 0x80000002;
@@ -202,39 +202,39 @@ const int REG_DWORD = 4;
 const String CURRENT_VERSION_KEY = r'SOFTWARE\Microsoft\Windows NT\CurrentVersion';
 
 String? readRegistryValue(int hKey, String subKey, String valueName) {
-  final advapi32 = DynamicLibrary.open('advapi32.dll');
-  final RegOpenKeyExDart RegOpenKeyEx = advapi32.lookupFunction<RegOpenKeyExNative, RegOpenKeyExDart>('RegOpenKeyExW');
-  final RegQueryValueExDart RegQueryValueEx = advapi32.lookupFunction<RegQueryValueExNative, RegQueryValueExDart>('RegQueryValueExW');
-  final RegCloseKeyDart RegCloseKey = advapi32.lookupFunction<RegCloseKeyNative, RegCloseKeyDart>('RegCloseKey');
+  final DynamicLibrary advapi32 = DynamicLibrary.open('advapi32.dll');
+  final RegOpenKeyExDart regOpenKeyEx = advapi32.lookupFunction<RegOpenKeyExNative, RegOpenKeyExDart>('RegOpenKeyExW');
+  final RegQueryValueExDart regQueryValueEx = advapi32.lookupFunction<RegQueryValueExNative, RegQueryValueExDart>('RegQueryValueExW');
+  final RegCloseKeyDart regCloseKey = advapi32.lookupFunction<RegCloseKeyNative, RegCloseKeyDart>('RegCloseKey');
 
   final Pointer<Utf16> subKeyPtr = subKey.toNativeUtf16();
   final Pointer<Utf16> valueNamePtr = valueName.toNativeUtf16();
   final Pointer<IntPtr> hSubKeyPtr = calloc<IntPtr>();
 
-  final openResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE, subKeyPtr, 0, KEY_READ, hSubKeyPtr);
+  final int openResult = regOpenKeyEx(HKEY_LOCAL_MACHINE, subKeyPtr, 0, KEY_READ, hSubKeyPtr);
   if (openResult != 0) {
     calloc.free(hSubKeyPtr);
     return null;
   }
 
-  final hSubKey = hSubKeyPtr.value;
+  final int hSubKey = hSubKeyPtr.value;
 
   final Pointer<Int32> dataSizePtr = calloc<Int32>();
   final Pointer<Int32> typePtr = calloc<Int32>();
-  RegQueryValueEx(hSubKey, valueNamePtr, nullptr, typePtr, nullptr, dataSizePtr);
-  final dataSize = dataSizePtr.value;
+  regQueryValueEx(hSubKey, valueNamePtr, nullptr, typePtr, nullptr, dataSizePtr);
+  final int dataSize = dataSizePtr.value;
 
   final Pointer<Uint8> dataPtr = calloc<Uint8>(dataSize);
-  RegQueryValueEx(hSubKey, valueNamePtr, nullptr, typePtr, dataPtr.cast(), dataSizePtr);
+  regQueryValueEx(hSubKey, valueNamePtr, nullptr, typePtr, dataPtr.cast(), dataSizePtr);
 
-  String? result = null;
+  String? result;
   if (typePtr.value == REG_SZ) {
     result = dataPtr.cast<Utf16>().toDartString(length: dataSize ~/ 2);
   } else if (typePtr.value == REG_DWORD) {
     result = dataPtr.cast<Uint32>().value.toString();
   }
 
-  RegCloseKey(hSubKey);
+  regCloseKey(hSubKey);
   calloc.free(subKeyPtr);
   calloc.free(valueNamePtr);
   calloc.free(hSubKeyPtr);
