@@ -2012,8 +2012,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             ),
             _initThumbDragGestureRecognizer,
           );
-      case null:
-        return gestures;
     }
 
     gestures[_TrackTapGestureRecognizer] =
