@@ -315,7 +315,8 @@ class ThemeData with Diagnosticable {
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonThemeData? buttonTheme,
-    CardTheme? cardTheme,
+    // TODO(QuncCccccc): Change the parameter type to CardThemeData
+    Object? cardTheme,
     CheckboxThemeData? checkboxTheme,
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
@@ -493,7 +494,15 @@ class ThemeData with Diagnosticable {
     bottomAppBarTheme ??= const BottomAppBarTheme();
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
-    cardTheme ??= const CardTheme();
+    // TODO(QuncCccccc): Clean it up once the type of `cardTheme` is changed to `CardThemeData`
+    if (cardTheme != null) {
+      if (cardTheme is CardTheme) {
+        cardTheme = cardTheme.data;
+      } else if (cardTheme is! CardThemeData) {
+        throw ArgumentError('cardTheme must be either a CardThemeData or a CardTheme');
+      }
+    }
+    cardTheme ??= const CardThemeData();
     checkboxTheme ??= const CheckboxThemeData();
     chipTheme ??= const ChipThemeData();
     dataTableTheme ??= const DataTableThemeData();
@@ -594,7 +603,7 @@ class ThemeData with Diagnosticable {
       bottomNavigationBarTheme: bottomNavigationBarTheme,
       bottomSheetTheme: bottomSheetTheme,
       buttonTheme: buttonTheme,
-      cardTheme: cardTheme,
+      cardTheme: cardTheme as CardThemeData,
       checkboxTheme: checkboxTheme,
       chipTheme: chipTheme,
       dataTableTheme: dataTableTheme,
@@ -1266,7 +1275,7 @@ class ThemeData with Diagnosticable {
   /// The colors and styles used to render [Card].
   ///
   /// This is the value returned from [CardTheme.of].
-  final CardTheme cardTheme;
+  final CardThemeData cardTheme;
 
   /// A theme for customizing the appearance and layout of [Checkbox] widgets.
   final CheckboxThemeData checkboxTheme;
@@ -1466,7 +1475,7 @@ class ThemeData with Diagnosticable {
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonThemeData? buttonTheme,
-    CardTheme? cardTheme,
+    Object? cardTheme,
     CheckboxThemeData? checkboxTheme,
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
@@ -1520,6 +1529,15 @@ class ThemeData with Diagnosticable {
     ButtonBarThemeData? buttonBarTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
+
+    // TODO(QuncCccccc): Clean it up once the type of `cardTheme` is changed to `CardThemeData`
+    if (cardTheme != null) {
+      if (cardTheme is CardTheme) {
+        cardTheme = cardTheme.data;
+      } else if (cardTheme is! CardThemeData) {
+        throw ArgumentError('cardTheme must be either a CardThemeData or a CardTheme');
+      }
+    }
 
     // TODO(QuncCccccc): Clean this up once the type of `dialogTheme` is changed to `DialogThemeData`
     if (dialogTheme != null) {
@@ -1585,7 +1603,7 @@ class ThemeData with Diagnosticable {
       bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
       buttonTheme: buttonTheme ?? this.buttonTheme,
-      cardTheme: cardTheme ?? this.cardTheme,
+      cardTheme: cardTheme as CardThemeData? ?? this.cardTheme,
       checkboxTheme: checkboxTheme ?? this.checkboxTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       dataTableTheme: dataTableTheme ?? this.dataTableTheme,
@@ -1778,7 +1796,7 @@ class ThemeData with Diagnosticable {
       bottomNavigationBarTheme: BottomNavigationBarThemeData.lerp(a.bottomNavigationBarTheme, b.bottomNavigationBarTheme, t),
       bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t)!,
       buttonTheme: t < 0.5 ? a.buttonTheme : b.buttonTheme,
-      cardTheme: CardTheme.lerp(a.cardTheme, b.cardTheme, t),
+      cardTheme: CardThemeData.lerp(a.cardTheme, b.cardTheme, t),
       checkboxTheme: CheckboxThemeData.lerp(a.checkboxTheme, b.checkboxTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t)!,
       dataTableTheme: DataTableThemeData.lerp(a.dataTableTheme, b.dataTableTheme, t),
@@ -2076,7 +2094,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ButtonThemeData>('buttonTheme', buttonTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<CardTheme>('cardTheme', cardTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<CardThemeData>('cardTheme', cardTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<CheckboxThemeData>('checkboxTheme', checkboxTheme, defaultValue: defaultData.checkboxTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DataTableThemeData>('dataTableTheme', dataTableTheme, defaultValue: defaultData.dataTableTheme, level: DiagnosticLevel.debug));

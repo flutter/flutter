@@ -2707,7 +2707,7 @@ void main() {
           backgroundColor: const Color(0xffffff00)
         ),
       ),
-      cardTheme: const CardTheme(color: Color(0xff00ffff)),
+      cardTheme: const CardThemeData(color: Color(0xff00ffff)),
     );
     Widget buildSearchAnchor() {
       return MaterialApp(

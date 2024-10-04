@@ -60,7 +60,7 @@ class ThemedCard extends SingleChildRenderObjectWidget {
 
   @override
   RenderPhysicalShape createRenderObject(BuildContext context) {
-    final CardThemeData cardTheme = CardTheme.of(context).data;
+    final CardThemeData cardTheme = CardTheme.of(context);
 
     return RenderPhysicalShape(
       clipper: ShapeBorderClipper(shape: cardTheme.shape ?? const RoundedRectangleBorder()),
@@ -73,7 +73,7 @@ class ThemedCard extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
-    final CardThemeData cardTheme = CardTheme.of(context).data;
+    final CardThemeData cardTheme = CardTheme.of(context);
 
     renderObject
       ..clipper = ShapeBorderClipper(shape: cardTheme.shape ?? const RoundedRectangleBorder())
