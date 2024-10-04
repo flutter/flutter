@@ -30,11 +30,7 @@ final class BuildCommand extends CommandBase {
       builds,
     );
     addConcurrencyOption(argParser);
-    argParser.addFlag(
-      rbeFlag,
-      defaultsTo: environment.hasRbeConfigInTree(),
-      help: 'RBE is enabled by default when available.',
-    );
+    addRbeOptions(argParser, environment);
     argParser.addFlag(
       ltoFlag,
       help: 'Whether LTO should be enabled for a build. Default is disabled',
@@ -110,6 +106,7 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
       extraGnArgs: extraGnArgs,
       targets: allTargets.toList(),
       enableRbe: useRbe,
+      rbeConfig: makeRbeConfig(argResults![buildStrategyFlag] as String),
     );
   }
 }

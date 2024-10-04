@@ -41,12 +41,7 @@ final class RunCommand extends CommandBase {
       defaultsTo: '',
     );
     addConcurrencyOption(argParser);
-    argParser.addFlag(
-      rbeFlag,
-      defaultsTo: environment.hasRbeConfigInTree(),
-      help: 'RBE is enabled by default when available.',
-    );
-
+    addRbeOptions(argParser, environment);
     _flutterTool = flutterTool ?? FlutterTool.fromEnvironment(environment);
   }
 
@@ -186,6 +181,7 @@ See `flutter run --help` for a listing
       concurrency: concurrency,
       extraGnArgs: extraGnArgs,
       enableRbe: useRbe,
+      rbeConfig: makeRbeConfig(argResults![buildStrategyFlag] as String),
     );
     if (r != 0) {
       throw FatalError('Failed to build host (${hostBuild.name})');
@@ -200,6 +196,7 @@ See `flutter run --help` for a listing
         extraGnArgs: extraGnArgs,
         enableRbe: useRbe,
         targets: buildTargetsForShell,
+        rbeConfig: makeRbeConfig(argResults![buildStrategyFlag] as String),
       );
       if (r != 0) {
         throw FatalError('Failed to build target (${targetBuild.name})');
