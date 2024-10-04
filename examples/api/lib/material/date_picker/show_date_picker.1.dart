@@ -33,9 +33,9 @@ class _DatePickerExampleState extends State<DatePickerExample>{
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      initialDate: DateTime(2021, 7, 25),
+      firstDate: DateTime(2021),
+      lastDate: DateTime(2022),
     );
     if (pickedDate != null && pickedDate != selectedDate) {
       setState(() {
