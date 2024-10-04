@@ -330,6 +330,13 @@ class _DummyTapRecognizer extends GestureArenaMember {
 /// regions in the group will act as one.
 ///
 /// If there is no [TapRegionSurface] ancestor, [TapRegion] will do nothing.
+///
+/// [TapRegion] calls [ModalRoute.of(context)] in its methods to establish
+/// a dependency on the current route. This ensures that the widget updates its
+/// behavior when the route's state changes, enabling or disabling the [onTapOutside]
+/// handler appropriately. We disable `onTapOutside` in both the [createRenderObject]
+/// and [updateRenderObject] methods to prevent inactive widgets from responding to
+/// tap events in scenarios where multiple routes are built but not displayed.
 class TapRegion extends SingleChildRenderObjectWidget {
   /// Creates a const [TapRegion].
   ///
@@ -408,14 +415,14 @@ class TapRegion extends SingleChildRenderObjectWidget {
     // This registers the widget to be notified when the route changes.
     // Even if we don't use the route here, it will still be notified
     // when the route changes.
-    ModalRoute.of(context);
+    final ModalRoute<Object?>? route = ModalRoute.of(context);
 
     return RenderTapRegion(
       registry: TapRegionRegistry.maybeOf(context),
       enabled: enabled,
       consumeOutsideTaps: consumeOutsideTaps,
       behavior: behavior,
-      onTapOutside: onTapOutside,
+      onTapOutside: (route?.isCurrent ?? true) ? onTapOutside : null,
       onTapInside: onTapInside,
       groupId: groupId,
       debugLabel: debugLabel,
