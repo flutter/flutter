@@ -202,10 +202,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implement
   @override
   void unregisterTapRegion(RenderTapRegion region) {
     assert(_tapRegionDebug('Region $region unregistered.'));
-    if (!_registeredRegions.contains(region)) {
-      assert(_tapRegionDebug('Region $region was not registered.'));
-      return;
-    }
+    assert(_registeredRegions.contains(region));
     _registeredRegions.remove(region);
     if (region.groupId != null) {
       assert(_groupIdToRegions.containsKey(region.groupId));
