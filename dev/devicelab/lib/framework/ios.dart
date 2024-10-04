@@ -85,14 +85,10 @@ Future<void> testWithNewIOSSimulator(
   final String? iosKey = decodeResult.keys
       .where((String key) => key.contains('iphoneos'))
       .firstOrNull;
-  final Object? iosDetails = decodeResult[iosKey];
-  String? runtimeBuildForSelectedXcode;
-  if (iosDetails != null && iosDetails is Map<String, Object?>) {
-    final Object? preferredBuild = iosDetails['preferredBuild'];
-    if (preferredBuild is String) {
-      runtimeBuildForSelectedXcode = preferredBuild;
-    }
-  }
+  final String? runtimeBuildForSelectedXcode = switch (decodeResult[iosKey]) {
+    {'preferredBuild': final String build} => build,
+    _ => null,
+  };
 
   String? iOSSimRuntime;
 
