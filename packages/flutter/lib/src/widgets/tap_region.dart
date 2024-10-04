@@ -12,11 +12,10 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'editable_text.dart';
 import 'framework.dart';
-import 'navigator.dart';
+import 'routes.dart';
 
 // Enable if you want verbose logging about tap region changes.
 const bool _kDebugTapRegion = false;
@@ -145,74 +144,6 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
     BuildContext context,
     RenderProxyBoxWithHitTestBehavior renderObject,
   ) {}
-}
-
-/// A navigator observer that listens for push and pop events and updates the
-/// registered tap regions in the navigator's context.
-///
-/// This observer is used by the [TapRegionSurface] to clear the registered tap
-/// regions when a new route is pushed, and to re-register the tap regions when
-/// a route is popped.
-class TapRegionNavigatorObserver extends NavigatorObserver {
-  /// Creates a [TapRegionNavigatorObserver].
-  TapRegionNavigatorObserver();
-
-  @override
-  void didPush(Route<Object?> route, Route<Object?>? previousRoute) {
-    super.didPush(route, previousRoute);
-    final TapRegionRegistry? registry = _getRegistry(route);
-    registry?.clear();
-  }
-
-  @override
-  void didPop(Route<Object?> route, Route<Object?>? previousRoute) {
-    super.didPop(route, previousRoute);
-    if (previousRoute != null) {
-      final TapRegionRegistry? registry = _getRegistry(previousRoute);
-      if (registry != null) {
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          _registerTapRegions(previousRoute, registry);
-        });
-      }
-    }
-  }
-
-  TapRegionRegistry? _getRegistry(Route<Object?> route) {
-    final BuildContext? context = route.navigator?.context;
-    if (context == null){
-      return null;
-    }
-    return TapRegionRegistry.maybeOf(context);
-  }
-
-  void _registerTapRegions(Route<Object?> route, TapRegionRegistry registry) {
-    final BuildContext? context = route.navigator?.context;
-    if (context == null) {
-      return;
-    }
-    final List<RenderTapRegion> regions = _findTapRegionsInElementTree(context);
-
-    for (final RenderTapRegion region in regions) {
-      // Only register the region if it's not already registered.
-      if (!registry.registeredRegions.contains(region)) {
-        registry.registerTapRegion(region);
-      }
-    }
-  }
-
-  List<RenderTapRegion> _findTapRegionsInElementTree(BuildContext context) {
-    final List<RenderTapRegion> regions = <RenderTapRegion>[];
-
-    void visitor(Element element) {
-      if (element.renderObject case final RenderTapRegion region) {
-        regions.add(region);
-      }
-      element.visitChildren(visitor);
-    }
-
-    context.visitChildElements(visitor);
-    return regions;
-  }
 }
 
 /// A render object that provides notification of a tap inside or outside of a
@@ -492,6 +423,8 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
+    ModalRoute.of(context);
+
     return RenderTapRegion(
       registry: TapRegionRegistry.maybeOf(context),
       enabled: enabled,
@@ -506,12 +439,14 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, covariant RenderTapRegion renderObject) {
+    final ModalRoute<Object?>? route = ModalRoute.of(context);
+
     renderObject
       ..registry = TapRegionRegistry.maybeOf(context)
       ..enabled = enabled
       ..behavior = behavior
       ..groupId = groupId
-      ..onTapOutside = onTapOutside
+      ..onTapOutside = (route?.isCurrent ?? true) ? onTapOutside : null
       ..onTapInside = onTapInside;
     if (!kReleaseMode) {
       renderObject.debugLabel = debugLabel;
