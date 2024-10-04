@@ -1221,6 +1221,46 @@ void main() {
     expect(item5material.color, Colors.transparent); // the previous item should not be highlighted.
   }, variant: TargetPlatformVariant.desktop());
 
+  testWidgets('Left and right keys can move text field selection', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
+          enableFilter: true,
+          filterCallback: (List<DropdownMenuEntry<TestMenu>> entries, String filter) {
+            return entries.where((DropdownMenuEntry<TestMenu> element) => element.label.contains(filter)).toList();
+          },
+          dropdownMenuEntries: menuChildren,
+          controller: controller,
+        ),
+      ),
+    ));
+
+    // Open the menu.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextField).first, 'example');
+    await tester.pumpAndSettle();
+    expect(controller.text, 'example');
+    expect(controller.selection, const TextSelection.collapsed(offset: 7));
+
+    // Press left key, the caret should move left.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection.collapsed(offset: 6));
+
+    // Press Right key, the caret should move right.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection.collapsed(offset: 7));
+  }, variant: TargetPlatformVariant.desktop());
+
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Down key and up key can navigate on desktop platforms '
       'when a label text contains another label text', (WidgetTester tester) async {
@@ -1314,6 +1354,27 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/154532.
+  testWidgets('Keyboard navigation does not throw when no entries match the filter', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          enableFilter: true,
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).first, 'No match');
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).first, 'No match 2');
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.desktop());
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Default search prioritises the current highlight on desktop platforms',
@@ -1973,6 +2034,135 @@ void main() {
     final Material itemMaterial = tester.widget<Material>(buttonMaterial);
     expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12));
   });
+
+  testWidgets(
+    'When the initial selection matches a menu entry, the text field displays the corresponding value',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                initialSelection: TestMenu.mainMenu3,
+                dropdownMenuEntries: menuChildren,
+                controller: controller,
+              ),
+            );
+          }
+        ),
+      ));
+
+      expect(controller.text, TestMenu.mainMenu3.label);
+    },
+  );
+
+  testWidgets(
+    'Text field is empty when the initial selection does not match any menu entries',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                initialSelection: TestMenu.mainMenu3,
+                // Use a menu entries which does not contain TestMenu.mainMenu3.
+                dropdownMenuEntries: menuChildren.getRange(0, 1).toList(),
+                controller: controller,
+              ),
+            );
+          }
+        ),
+      ));
+
+      expect(controller.text, isEmpty);
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/155660.
+  testWidgets('Updating the menu entries refreshes the initial selection', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    Widget boilerplate(List<DropdownMenuEntry<TestMenu>> entries) {
+      return MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                initialSelection: TestMenu.mainMenu3,
+                dropdownMenuEntries: entries,
+                controller: controller,
+              ),
+            );
+          }
+        ),
+      );
+    }
+
+    // The text field should be empty when the initial selection does not match
+    // any menu items.
+    await tester.pumpWidget(boilerplate(menuChildren.getRange(0, 1).toList()));
+    expect(controller.text, '');
+
+    // When the menu entries is updated the initial selection should be rematched.
+    await tester.pumpWidget(boilerplate(menuChildren));
+    expect(controller.text, TestMenu.mainMenu3.label);
+
+    // Update the entries with none matching the initial selection.
+    await tester.pumpWidget(boilerplate(menuChildren.getRange(0, 1).toList()));
+    expect(controller.text, '');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/155660.
+  testWidgets(
+    'Updating the menu entries refreshes the initial selection only if the current selection is no more valid',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      Widget boilerplate(List<DropdownMenuEntry<TestMenu>> entries) {
+        return MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                body: DropdownMenu<TestMenu>(
+                  initialSelection: TestMenu.mainMenu3,
+                  dropdownMenuEntries: entries,
+                  controller: controller,
+                ),
+              );
+            }
+          ),
+        );
+      }
+
+      await tester.pumpWidget(boilerplate(menuChildren));
+      expect(controller.text, TestMenu.mainMenu3.label);
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      // Select another item.
+      final Finder item2 = find.widgetWithText(MenuItemButton, 'Item 2').last;
+      await tester.tap(item2);
+      await tester.pumpAndSettle();
+      expect(controller.text, TestMenu.mainMenu2.label);
+
+      // Update the menu entries with another instance of list containing the
+      // same entries.
+      await tester.pumpWidget(boilerplate(
+        List<DropdownMenuEntry<TestMenu>>.from(menuChildren)
+      ));
+      expect(controller.text, TestMenu.mainMenu2.label);
+    },
+  );
 
   testWidgets('The default text input field should not be focused on mobile platforms '
       'when it is tapped', (WidgetTester tester) async {

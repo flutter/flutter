@@ -1,4 +1,4 @@
-This wiki is for [Framework](https://github.com/flutter/flutter) CI, and is not applicable to other repositories like Engine, Packages. The integration test is referred to an end-to-end target/test presented in [Flutter build dashboard](https://flutter-dashboard.appspot.com/#/build), which is an one-on-one mapping to the entries listed in the [.ci.yaml](https://github.com/flutter/flutter/blob/main/.ci.yaml) file.
+This wiki is for [Framework](https://github.com/flutter/flutter) CI, and is not applicable to other repositories like Engine, Packages. The integration test is referred to an end-to-end target/test presented in [Flutter build dashboard](https://flutter-dashboard.appspot.com/#/build), which is a one-on-one mapping to the entries listed in the [.ci.yaml](https://github.com/flutter/flutter/blob/main/.ci.yaml) file.
 
 ## Overview
 Types of integration tests (based on how they are being executed):
@@ -32,7 +32,7 @@ There is an overlap happens between `DeviceLab` and `Shard`: a single shard test
 Most likely, we can fit a new integration test to existing types, like `DeviceLab`, `Shard` or other case-by-case tests that use their own **`recipes`** in addition to `DeviceLab` and `Shard`, e.g. firebaselab, packaging, docs, etc. If your new test doesn't fit in any of these (very rarely), it may need a new recipe.
 
 > [!NOTE]
-> **`Recipes`** are just python scripts detailing steps to setup env. and execute corresponding test harness. Different recipes basically mean different test harness with different environment setup.
+> **`Recipes`** are just python scripts detailing steps to set up env. and execute corresponding test harness. Different recipes basically mean different test harness with different environment setup.
 
 For the two main types (`DeviceLab`/`Shard`):
 * if a new integration test needs a physical device, it should be under `DeviceLab`
