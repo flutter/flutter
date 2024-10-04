@@ -39,7 +39,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('Contacts Group').first).dy, 30.5);
     expect(tester.getBottomLeft(find.text('Family').first).dy, 88.0);
     expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 104.0);
-    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 137.0);
+    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 138.0);
 
     await tester.fling(find.text('Drag me up'), bottomDragUp, 50.0);
     await tester.pumpAndSettle();
@@ -72,10 +72,9 @@ void main() {
 
     // Middle, large title, and search field are visible.
     expect(tester.getBottomLeft(find.text('Contacts Group').first).dy, 30.5);
-    expect(tester.getTopLeft(find.text('Family').first).dy, 54.0);
     expect(tester.getBottomLeft(find.text('Family').first).dy, 88.0);
     expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 104.0);
-    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 137.0);
+    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 138.0);
 
     await tester.fling(find.text('Drag me up'), titleDragUp, 50.0);
     await tester.pumpAndSettle();
@@ -84,7 +83,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('Contacts Group').first).dy, 30.5);
     expect(tester.getBottomLeft(find.text('Family').first).dy, 36.0 + 8.0); // Static part + _kNavBarBottomPadding.
     expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 52.0);
-    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 85.0);
+    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 86.0);
   });
 
   testWidgets('CupertinoSliverNavigationBar with previous route has back button', (WidgetTester tester) async {

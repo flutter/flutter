@@ -1083,7 +1083,7 @@ class _LargeTitleNavigationBarSliverDelegate
                       bottom: 0.0,
                       child: SizedBox(
                         height: bottomHeight * (1.0 - bottomShrinkFactor),
-                        child: ClipRect(child: bottom),
+                        child: bottom,
                       ),
                     ),
                 ],
@@ -2743,10 +2743,13 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
   Widget build(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-      child: CupertinoSearchTextField(),
+      child: SizedBox(
+        height: 34.0,
+        child: CupertinoSearchTextField()
+      ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(49.0);
+  Size get preferredSize => const Size.fromHeight(50.0);
 }
