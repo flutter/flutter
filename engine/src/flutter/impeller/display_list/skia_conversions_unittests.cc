@@ -5,12 +5,93 @@
 #include "display_list/dl_color.h"
 #include "display_list/dl_tile_mode.h"
 #include "flutter/testing/testing.h"
+#include "impeller/core/formats.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/geometry/scalar.h"
+#include "include/core/SkMatrix.h"
 #include "include/core/SkRRect.h"
 
 namespace impeller {
 namespace testing {
+
+TEST(SkiaConversionTest, ToMatrixTranslate) {
+  SkMatrix sk_matrix = SkMatrix::Translate(100, 100);
+  Matrix matrix = skia_conversions::ToMatrix(sk_matrix);
+
+  EXPECT_EQ(matrix.m[12], 100);
+  EXPECT_EQ(matrix.m[13], 100);
+  EXPECT_TRUE(matrix.IsTranslationScaleOnly());
+
+  matrix.m[12] = 0;
+  matrix.m[13] = 0;
+
+  EXPECT_TRUE(matrix.IsIdentity());
+}
+
+TEST(SkiaConversionTest, ToMatrixScale) {
+  SkMatrix sk_matrix = SkMatrix::Scale(2, 2);
+  Matrix matrix = skia_conversions::ToMatrix(sk_matrix);
+
+  EXPECT_EQ(matrix.m[0], 2);
+  EXPECT_EQ(matrix.m[5], 2);
+  EXPECT_TRUE(matrix.IsTranslationScaleOnly());
+
+  matrix.m[0] = 1;
+  matrix.m[5] = 1;
+
+  EXPECT_TRUE(matrix.IsIdentity());
+}
+
+TEST(SkiaConversionTest, ToMatrixRotate) {
+  SkMatrix sk_matrix = SkMatrix::RotateDeg(90);
+  Matrix matrix = skia_conversions::ToMatrix(sk_matrix);
+
+  EXPECT_EQ(matrix.vec[0], Vector4(0, 1, 0, 0));
+  EXPECT_EQ(matrix.vec[1], Vector4(-1, 0, 0, 0));
+  EXPECT_EQ(matrix.vec[2], Vector4(0, 0, 1, 0));
+  EXPECT_EQ(matrix.vec[3], Vector4(0, 0, 0, 1));
+  EXPECT_FALSE(matrix.IsTranslationScaleOnly());
+}
+
+TEST(SkiaConversionTest, ToMatrixSkew) {
+  SkMatrix sk_matrix = SkMatrix::Skew(2, 2);
+  Matrix matrix = skia_conversions::ToMatrix(sk_matrix);
+
+  EXPECT_EQ(matrix.vec[0], Vector4(1, 2, 0, 0));
+  EXPECT_EQ(matrix.vec[1], Vector4(2, 1, 0, 0));
+  EXPECT_EQ(matrix.vec[2], Vector4(0, 0, 1, 0));
+  EXPECT_EQ(matrix.vec[3], Vector4(0, 0, 0, 1));
+  EXPECT_FALSE(matrix.IsTranslationScaleOnly());
+}
+
+TEST(SkiaConversionTest, ToSamplerDescriptor) {
+  EXPECT_EQ(skia_conversions::ToSamplerDescriptor(
+                flutter::DlImageSampling::kNearestNeighbor)
+                .min_filter,
+            impeller::MinMagFilter::kNearest);
+  EXPECT_EQ(skia_conversions::ToSamplerDescriptor(
+                flutter::DlImageSampling::kNearestNeighbor)
+                .mip_filter,
+            impeller::MipFilter::kBase);
+
+  EXPECT_EQ(
+      skia_conversions::ToSamplerDescriptor(flutter::DlImageSampling::kLinear)
+          .min_filter,
+      impeller::MinMagFilter::kLinear);
+  EXPECT_EQ(
+      skia_conversions::ToSamplerDescriptor(flutter::DlImageSampling::kLinear)
+          .mip_filter,
+      impeller::MipFilter::kBase);
+
+  EXPECT_EQ(skia_conversions::ToSamplerDescriptor(
+                flutter::DlImageSampling::kMipmapLinear)
+                .min_filter,
+            impeller::MinMagFilter::kLinear);
+  EXPECT_EQ(skia_conversions::ToSamplerDescriptor(
+                flutter::DlImageSampling::kMipmapLinear)
+                .mip_filter,
+            impeller::MipFilter::kLinear);
+}
 
 TEST(SkiaConversionsTest, SkPointToPoint) {
   for (int x = -100; x < 100; x += 4) {

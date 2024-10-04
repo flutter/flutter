@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include "display_list/effects/dl_color_source.h"
 #include "flutter/fml/logging.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/aiks_context.h"
@@ -23,7 +24,6 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
-#include "impeller/entity/contents/runtime_effect_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
@@ -178,43 +178,6 @@ static BlendMode ToBlendMode(flutter::DlBlendMode mode) {
   FML_UNREACHABLE();
 }
 
-static Entity::TileMode ToTileMode(flutter::DlTileMode tile_mode) {
-  switch (tile_mode) {
-    case flutter::DlTileMode::kClamp:
-      return Entity::TileMode::kClamp;
-    case flutter::DlTileMode::kRepeat:
-      return Entity::TileMode::kRepeat;
-    case flutter::DlTileMode::kMirror:
-      return Entity::TileMode::kMirror;
-    case flutter::DlTileMode::kDecal:
-      return Entity::TileMode::kDecal;
-  }
-}
-
-static impeller::SamplerDescriptor ToSamplerDescriptor(
-    const flutter::DlImageSampling options) {
-  impeller::SamplerDescriptor desc;
-  switch (options) {
-    case flutter::DlImageSampling::kNearestNeighbor:
-      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kNearest;
-      desc.mip_filter = impeller::MipFilter::kBase;
-      desc.label = "Nearest Sampler";
-      break;
-    case flutter::DlImageSampling::kLinear:
-      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
-      desc.mip_filter = impeller::MipFilter::kBase;
-      desc.label = "Linear Sampler";
-      break;
-    case flutter::DlImageSampling::kCubic:
-    case flutter::DlImageSampling::kMipmapLinear:
-      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
-      desc.mip_filter = impeller::MipFilter::kLinear;
-      desc.label = "Mipmap Linear Sampler";
-      break;
-  }
-  return desc;
-}
-
 static impeller::SamplerDescriptor ToSamplerDescriptor(
     const flutter::DlFilterMode options) {
   impeller::SamplerDescriptor desc;
@@ -231,17 +194,6 @@ static impeller::SamplerDescriptor ToSamplerDescriptor(
       break;
   }
   return desc;
-}
-
-static Matrix ToMatrix(const SkMatrix& m) {
-  return Matrix{
-      // clang-format off
-      m[0], m[3], 0, m[6],
-      m[1], m[4], 0, m[7],
-      0,    0,    1, 0,
-      m[2], m[5], 0, m[8],
-      // clang-format on
-  };
 }
 
 // |flutter::DlOpReceiver|
@@ -326,170 +278,14 @@ void DlDispatcherBase::setStrokeJoin(flutter::DlStrokeJoin join) {
   }
 }
 
-static std::optional<ColorSource::Type> ToColorSourceType(
-    flutter::DlColorSourceType type) {
-  switch (type) {
-    case flutter::DlColorSourceType::kColor:
-      return ColorSource::Type::kColor;
-    case flutter::DlColorSourceType::kImage:
-      return ColorSource::Type::kImage;
-    case flutter::DlColorSourceType::kLinearGradient:
-      return ColorSource::Type::kLinearGradient;
-    case flutter::DlColorSourceType::kRadialGradient:
-      return ColorSource::Type::kRadialGradient;
-    case flutter::DlColorSourceType::kConicalGradient:
-      return ColorSource::Type::kConicalGradient;
-    case flutter::DlColorSourceType::kSweepGradient:
-      return ColorSource::Type::kSweepGradient;
-    case flutter::DlColorSourceType::kRuntimeEffect:
-      return ColorSource::Type::kRuntimeEffect;
-  }
-}
-
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::setColorSource(const flutter::DlColorSource* source) {
   AUTO_DEPTH_WATCHER(0u);
 
-  if (!source) {
-    paint_.color_source = ColorSource::MakeColor();
-    return;
-  }
-
-  std::optional<ColorSource::Type> type = ToColorSourceType(source->type());
-
-  if (!type.has_value()) {
-    FML_LOG(ERROR) << "Requested ColorSourceType::kUnknown";
-    paint_.color_source = ColorSource::MakeColor();
-    return;
-  }
-
-  switch (type.value()) {
-    case ColorSource::Type::kColor: {
-      const flutter::DlColorColorSource* color = source->asColor();
-
-      paint_.color_source = ColorSource::MakeColor();
-      setColor(color->color());
-      FML_DCHECK(color);
-      return;
-    }
-    case ColorSource::Type::kLinearGradient: {
-      const flutter::DlLinearGradientColorSource* linear =
-          source->asLinearGradient();
-      FML_DCHECK(linear);
-      auto start_point = skia_conversions::ToPoint(linear->start_point());
-      auto end_point = skia_conversions::ToPoint(linear->end_point());
-      std::vector<Color> colors;
-      std::vector<float> stops;
-      skia_conversions::ConvertStops(linear, colors, stops);
-
-      auto tile_mode = ToTileMode(linear->tile_mode());
-      auto matrix = ToMatrix(linear->matrix());
-
-      paint_.color_source = ColorSource::MakeLinearGradient(
-          start_point, end_point, std::move(colors), std::move(stops),
-          tile_mode, matrix);
-      return;
-    }
-    case ColorSource::Type::kConicalGradient: {
-      const flutter::DlConicalGradientColorSource* conical_gradient =
-          source->asConicalGradient();
-      FML_DCHECK(conical_gradient);
-      Point center = skia_conversions::ToPoint(conical_gradient->end_center());
-      DlScalar radius = conical_gradient->end_radius();
-      Point focus_center =
-          skia_conversions::ToPoint(conical_gradient->start_center());
-      DlScalar focus_radius = conical_gradient->start_radius();
-      std::vector<Color> colors;
-      std::vector<float> stops;
-      skia_conversions::ConvertStops(conical_gradient, colors, stops);
-
-      auto tile_mode = ToTileMode(conical_gradient->tile_mode());
-      auto matrix = ToMatrix(conical_gradient->matrix());
-
-      paint_.color_source = ColorSource::MakeConicalGradient(
-          center, radius, std::move(colors), std::move(stops), focus_center,
-          focus_radius, tile_mode, matrix);
-      return;
-    }
-    case ColorSource::Type::kRadialGradient: {
-      const flutter::DlRadialGradientColorSource* radialGradient =
-          source->asRadialGradient();
-      FML_DCHECK(radialGradient);
-      auto center = skia_conversions::ToPoint(radialGradient->center());
-      auto radius = radialGradient->radius();
-      std::vector<Color> colors;
-      std::vector<float> stops;
-      skia_conversions::ConvertStops(radialGradient, colors, stops);
-
-      auto tile_mode = ToTileMode(radialGradient->tile_mode());
-      auto matrix = ToMatrix(radialGradient->matrix());
-      paint_.color_source =
-          ColorSource::MakeRadialGradient(center, radius, std::move(colors),
-                                          std::move(stops), tile_mode, matrix);
-      return;
-    }
-    case ColorSource::Type::kSweepGradient: {
-      const flutter::DlSweepGradientColorSource* sweepGradient =
-          source->asSweepGradient();
-      FML_DCHECK(sweepGradient);
-
-      auto center = skia_conversions::ToPoint(sweepGradient->center());
-      auto start_angle = Degrees(sweepGradient->start());
-      auto end_angle = Degrees(sweepGradient->end());
-      std::vector<Color> colors;
-      std::vector<float> stops;
-      skia_conversions::ConvertStops(sweepGradient, colors, stops);
-
-      auto tile_mode = ToTileMode(sweepGradient->tile_mode());
-      auto matrix = ToMatrix(sweepGradient->matrix());
-      paint_.color_source = ColorSource::MakeSweepGradient(
-          center, start_angle, end_angle, std::move(colors), std::move(stops),
-          tile_mode, matrix);
-      return;
-    }
-    case ColorSource::Type::kImage: {
-      const flutter::DlImageColorSource* image_color_source = source->asImage();
-      FML_DCHECK(image_color_source &&
-                 image_color_source->image()->impeller_texture());
-      auto texture = image_color_source->image()->impeller_texture();
-      auto x_tile_mode = ToTileMode(image_color_source->horizontal_tile_mode());
-      auto y_tile_mode = ToTileMode(image_color_source->vertical_tile_mode());
-      auto desc = ToSamplerDescriptor(image_color_source->sampling());
-      auto matrix = ToMatrix(image_color_source->matrix());
-      paint_.color_source = ColorSource::MakeImage(texture, x_tile_mode,
-                                                   y_tile_mode, desc, matrix);
-      return;
-    }
-    case ColorSource::Type::kRuntimeEffect: {
-      const flutter::DlRuntimeEffectColorSource* runtime_effect_color_source =
-          source->asRuntimeEffect();
-      auto runtime_stage =
-          runtime_effect_color_source->runtime_effect()->runtime_stage();
-      auto uniform_data = runtime_effect_color_source->uniform_data();
-      auto samplers = runtime_effect_color_source->samplers();
-
-      std::vector<RuntimeEffectContents::TextureInput> texture_inputs;
-
-      for (auto& sampler : samplers) {
-        if (sampler == nullptr) {
-          return;
-        }
-        auto* image = sampler->asImage();
-        if (!sampler->asImage()) {
-          UNIMPLEMENTED;
-          return;
-        }
-        FML_DCHECK(image->image()->impeller_texture());
-        texture_inputs.push_back({
-            .sampler_descriptor = ToSamplerDescriptor(image->sampling()),
-            .texture = image->image()->impeller_texture(),
-        });
-      }
-
-      paint_.color_source = ColorSource::MakeRuntimeEffect(
-          runtime_stage, uniform_data, texture_inputs);
-      return;
-    }
+  if (!source || source->type() == flutter::DlColorSourceType::kColor) {
+    paint_.color_source = nullptr;
+  } else {
+    paint_.color_source = source;
   }
 }
 
@@ -587,7 +383,7 @@ static std::shared_ptr<ImageFilter> ToImageFilter(
       auto blur = filter->asBlur();
       auto sigma_x = Sigma(blur->sigma_x());
       auto sigma_y = Sigma(blur->sigma_y());
-      auto tile_mode = ToTileMode(blur->tile_mode());
+      auto tile_mode = static_cast<Entity::TileMode>(blur->tile_mode());
       return ImageFilter::MakeBlur(
           sigma_x, sigma_y, FilterContents::BlurStyle::kNormal, tile_mode);
     }
@@ -614,8 +410,9 @@ static std::shared_ptr<ImageFilter> ToImageFilter(
     case flutter::DlImageFilterType::kMatrix: {
       auto matrix_filter = filter->asMatrix();
       FML_DCHECK(matrix_filter);
-      auto matrix = ToMatrix(matrix_filter->matrix());
-      auto desc = ToSamplerDescriptor(matrix_filter->sampling());
+      auto matrix = skia_conversions::ToMatrix(matrix_filter->matrix());
+      auto desc =
+          skia_conversions::ToSamplerDescriptor(matrix_filter->sampling());
       return ImageFilter::MakeMatrix(matrix, desc);
     }
     case flutter::DlImageFilterType::kCompose: {
@@ -660,7 +457,7 @@ static std::shared_ptr<ImageFilter> ToImageFilter(
         return nullptr;
       }
 
-      auto matrix = ToMatrix(local_matrix_filter->matrix());
+      auto matrix = skia_conversions::ToMatrix(local_matrix_filter->matrix());
       return ImageFilter::MakeLocalMatrix(matrix, *image_filter);
     }
   }
@@ -1110,11 +907,12 @@ void DlDispatcherBase::drawImageRect(
     SrcRectConstraint constraint = SrcRectConstraint::kFast) {
   AUTO_DEPTH_WATCHER(1u);
 
-  GetCanvas().DrawImageRect(image->impeller_texture(),  // image
-                            src,                        // source rect
-                            dst,                        // destination rect
-                            render_with_attributes ? paint_ : Paint(),  // paint
-                            ToSamplerDescriptor(sampling)  // sampling
+  GetCanvas().DrawImageRect(
+      image->impeller_texture(),                       // image
+      src,                                             // source rect
+      dst,                                             // destination rect
+      render_with_attributes ? paint_ : Paint(),       // paint
+      skia_conversions::ToSamplerDescriptor(sampling)  // sampling
   );
 }
 
@@ -1146,15 +944,16 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                                  bool render_with_attributes) {
   AUTO_DEPTH_WATCHER(1u);
 
-  auto geometry = DlAtlasGeometry(atlas->impeller_texture(),           //
-                                  xform,                               //
-                                  tex,                                 //
-                                  colors,                              //
-                                  static_cast<size_t>(count),          //
-                                  ToBlendMode(mode),                   //
-                                  ToSamplerDescriptor(sampling),       //
-                                  skia_conversions::ToRect(cull_rect)  //
-  );
+  auto geometry =
+      DlAtlasGeometry(atlas->impeller_texture(),                        //
+                      xform,                                            //
+                      tex,                                              //
+                      colors,                                           //
+                      static_cast<size_t>(count),                       //
+                      ToBlendMode(mode),                                //
+                      skia_conversions::ToSamplerDescriptor(sampling),  //
+                      skia_conversions::ToRect(cull_rect)               //
+      );
   auto atlas_contents = std::make_shared<AtlasContents>();
   atlas_contents->SetGeometry(&geometry);
 
