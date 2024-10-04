@@ -50,12 +50,6 @@ abstract class TapRegionRegistry {
   /// Unregister the given [RenderTapRegion] with the registry.
   void unregisterTapRegion(RenderTapRegion region);
 
-  /// Clear all registered regions.
-  void clear();
-
-  /// The set of registered regions.
-  Set<RenderTapRegion> get registeredRegions;
-
   /// Allows finding of the nearest [TapRegionRegistry], such as a
   /// [RenderTapRegionSurface].
   ///
@@ -221,16 +215,6 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implement
       }
     }
   }
-
-  @override
-  void clear() {
-    assert(_tapRegionDebug('Clearing all registered regions.'));
-    _registeredRegions.clear();
-    _groupIdToRegions.clear();
-  }
-
-  @override
-  Set<RenderTapRegion> get registeredRegions => _registeredRegions;
 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
