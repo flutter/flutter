@@ -464,6 +464,11 @@ bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
     return false;
   }
 
+  // The current rrect blur math doesn't work on ovals.
+  if (fabsf(corner_radii.width - corner_radii.height) > kEhCloseEnough) {
+    return false;
+  }
+
   // For symmetrically mask blurred solid RRects, absorb the mask blur and use
   // a faster SDF approximation.
 
