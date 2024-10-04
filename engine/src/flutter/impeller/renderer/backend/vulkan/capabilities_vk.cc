@@ -558,6 +558,10 @@ bool CapabilitiesVK::SetPhysicalDevice(
           .get<vk::PhysicalDeviceImageCompressionControlFeaturesEXT>()
           .imageCompressionControl;
 
+  max_render_pass_attachment_size_ =
+      ISize{device_properties_.limits.maxFramebufferWidth,
+            device_properties_.limits.maxFramebufferHeight};
+
   return true;
 }
 
@@ -710,6 +714,10 @@ CapabilitiesVK::GetSupportedFRCRate(CompressionType compression_type,
 
 bool CapabilitiesVK::SupportsTriangleFan() const {
   return true;
+}
+
+ISize CapabilitiesVK::GetMaximumRenderPassAttachmentSize() const {
+  return max_render_pass_attachment_size_;
 }
 
 }  // namespace impeller

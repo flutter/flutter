@@ -1107,6 +1107,13 @@ void Canvas::SaveLayer(const Paint& paint,
     return SkipUntilMatchingRestore(total_content_depth);
   }
 
+  // When there are scaling filters present, these contents may exceed the
+  // maximum texture size. Perform a clamp here, which may cause rendering
+  // artifacts.
+  subpass_size = subpass_size.Min(renderer_.GetContext()
+                                      ->GetCapabilities()
+                                      ->GetMaximumRenderPassAttachmentSize());
+
   // Backdrop filter state, ignored if there is no BDF.
   std::shared_ptr<FilterContents> backdrop_filter_contents;
   Point local_position = {0, 0};

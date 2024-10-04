@@ -32,6 +32,8 @@ class DebugAllocatorStats {
   std::atomic<size_t> size_ = 0;
 };
 
+ISize DeviceMaxTextureSizeSupported(id<MTLDevice> device);
+
 class AllocatorMTL final : public Allocator {
  public:
   AllocatorMTL();

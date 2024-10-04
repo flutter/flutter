@@ -52,7 +52,7 @@ static bool DeviceHasUnifiedMemoryArchitecture(id<MTLDevice> device) {
   FML_UNREACHABLE();
 }
 
-static ISize DeviceMaxTextureSizeSupported(id<MTLDevice> device) {
+ISize DeviceMaxTextureSizeSupported(id<MTLDevice> device) {
   // Since Apple didn't expose API for us to get the max texture size, we have
   // to use hardcoded data from
   // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
