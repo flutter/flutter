@@ -2739,17 +2739,20 @@ Widget _navBarHeroFlightShuttleBuilder(
 class _NavigationBarSearchField extends StatelessWidget implements PreferredSizeWidget {
   const _NavigationBarSearchField();
 
+  static const double padding = 8.0;
+  static const double searchFieldHeight = 35.0;
+
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: padding, vertical: padding),
       child: SizedBox(
-        height: 34.0,
+        height: searchFieldHeight,
         child: CupertinoSearchTextField()
       ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(50.0);
+  Size get preferredSize => const Size.fromHeight(searchFieldHeight + padding * 2);
 }
