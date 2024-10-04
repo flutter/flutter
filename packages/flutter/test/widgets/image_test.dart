@@ -864,8 +864,6 @@ void main() {
     // clone3.dispose();
     // clone4.dispose();
     imageCache.clear();
-    await tester.pumpWidget(Placeholder());
-    imageCache.clear();
   });
 
   testWidgets('Precache completes with onError on error', (WidgetTester tester) async {
