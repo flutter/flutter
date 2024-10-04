@@ -319,6 +319,11 @@ constexpr TPoint<T> operator/(const TSize<U>& s, const TPoint<T>& p) {
   return {static_cast<T>(s.width) / p.x, static_cast<T>(s.height) / p.y};
 }
 
+template <class T>
+constexpr TPoint<T> operator-(const TPoint<T>& p, T v) {
+  return {p.x - v, p.y - v};
+}
+
 using Point = TPoint<Scalar>;
 using IPoint = TPoint<int64_t>;
 using IPoint32 = TPoint<int32_t>;
