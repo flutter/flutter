@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 }
 
 apply plugin: "com.android.library"
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+apply plugin: "dev.flutter.flutter-gradle-plugin"
 
 group = "{{androidIdentifier}}"
 version = "1.0"
