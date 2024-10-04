@@ -32,11 +32,7 @@ final class TestCommand extends CommandBase {
       builds,
     );
     addConcurrencyOption(argParser);
-    argParser.addFlag(
-      rbeFlag,
-      defaultsTo: environment.hasRbeConfigInTree(),
-      help: 'RBE is enabled by default when available.',
-    );
+    addRbeOptions(argParser, environment);
   }
 
   /// List of compatible builds.
@@ -102,7 +98,8 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
     // Make sure there is at least one test target.
     final List<ExecutableBuildTarget> testTargets = buildTargets
         .whereType<ExecutableBuildTarget>()
-        .where((ExecutableBuildTarget t) => t.testOnly).toList();
+        .where((ExecutableBuildTarget t) => t.testOnly)
+        .toList();
 
     if (testTargets.isEmpty) {
       environment.logger.error('No test targets found');
@@ -115,6 +112,7 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
       concurrency: concurrency,
       targets: testTargets.map((BuildTarget target) => target.label).toList(),
       enableRbe: useRbe,
+      rbeConfig: makeRbeConfig(argResults![buildStrategyFlag] as String),
     );
     if (buildExitCode != 0) {
       return buildExitCode;
