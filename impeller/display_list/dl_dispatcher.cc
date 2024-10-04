@@ -1368,7 +1368,12 @@ std::shared_ptr<Texture> DisplayListToTexture(
     const sk_sp<flutter::DisplayList>& display_list,
     ISize size,
     AiksContext& context,
-    bool reset_host_buffer) {
+    bool reset_host_buffer,
+    bool generate_mips) {
+  int mip_count = 1;
+  if (generate_mips) {
+    mip_count = size.MipCount();
+  }
   // Do not use the render target cache as the lifecycle of this texture
   // will outlive a particular frame.
   impeller::RenderTargetAllocator render_target_allocator =
@@ -1379,7 +1384,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
     target = render_target_allocator.CreateOffscreenMSAA(
         *context.GetContext(),  // context
         size,                   // size
-        /*mip_count=*/1,
+        /*mip_count=*/mip_count,
         "Picture Snapshot MSAA",  // label
         impeller::RenderTarget::
             kDefaultColorAttachmentConfigMSAA  // color_attachment_config
@@ -1388,7 +1393,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
     target = render_target_allocator.CreateOffscreen(
         *context.GetContext(),  // context
         size,                   // size
-        /*mip_count=*/1,
+        /*mip_count=*/mip_count,
         "Picture Snapshot",  // label
         impeller::RenderTarget::
             kDefaultColorAttachmentConfig  // color_attachment_config

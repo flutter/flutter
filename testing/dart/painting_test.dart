@@ -114,4 +114,41 @@ void main() {
       'ImageFilter.matrix($data, FilterQuality.medium)',
     );
   });
+
+  test('Picture.toImage generates mip maps', () async {
+    // Draw a grid of red and blue squares. When averaged together via
+    // mip maps, this should result in a purplish color. If there are no
+    // mip maps, the original red and blue colors will be preserved regardless
+    // of scale or number of pixels.
+    late final Image image;
+    {
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 20; j++) {
+          final Color color = (i + j).isEven ? const Color(0xFFFF0000) : const Color(0xFF0000FF);
+          canvas.drawRect(Rect.fromLTWH(i * 5, j * 5, 5, 5), Paint()..color = color);
+        }
+      }
+      final Picture picture = recorder.endRecording();
+      image = await picture.toImage(100, 100);
+    }
+
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.save();
+    canvas.scale(0.25, 0.25);
+    canvas.drawImage(image, Offset.zero, Paint()..filterQuality = FilterQuality.medium);
+    canvas.restore();
+
+    final Picture picture = recorder.endRecording();
+    final Image resultImage = await picture.toImage(10, 10);
+    final ByteData data = (await resultImage.toByteData())!;
+
+    final Int32List colors = data.buffer.asInt32List();
+    for (int i = 0; i < colors.length; i++) {
+      expect(colors[i], isNot(const Color(0xFFFF0000)));
+      expect(colors[i], isNot(const Color(0xFF0000FF)));
+    }
+  });
 }
