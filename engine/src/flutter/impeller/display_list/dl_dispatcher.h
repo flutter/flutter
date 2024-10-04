@@ -370,7 +370,8 @@ std::shared_ptr<Texture> DisplayListToTexture(
     const sk_sp<flutter::DisplayList>& display_list,
     ISize size,
     AiksContext& context,
-    bool reset_host_buffer = true);
+    bool reset_host_buffer = true,
+    bool generate_mips = false);
 
 /// Render the provided display list to the render target.
 bool RenderToOnscreen(ContentContext& context, RenderTarget render_target,
