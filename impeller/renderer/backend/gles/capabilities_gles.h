@@ -122,6 +122,8 @@ class CapabilitiesGLES final
   // |Capabilities|
   PixelFormat GetDefaultGlyphAtlasFormat() const override;
 
+  ISize GetMaximumRenderPassAttachmentSize() const override;
+
  private:
   bool supports_framebuffer_fetch_ = false;
   bool supports_decal_sampler_address_mode_ = false;
