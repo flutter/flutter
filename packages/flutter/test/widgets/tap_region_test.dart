@@ -1080,27 +1080,19 @@ void main() {
       child: const SizedBox.square(dimension: 100),
     );
 
-    Widget buildPage(Widget body, {FloatingActionButton? floatingActionButton}) {
-      return Scaffold(
-        body: Center(child: body),
-        floatingActionButton: floatingActionButton,
-      );
-    }
-
     Future<void> tapOutside(WidgetTester tester, Finder regionFinder) async {
     // Find the RenderBox of the region.
-    final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
-    final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
+      final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
+      final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
 
-    await tester.tapAt(outsidePoint);
-    await tester.pump();
-}
-
+      await tester.tapAt(outsidePoint);
+      await tester.pump();
+    }
 
     await tester.pumpWidget(
       MaterialApp(
-        home: buildPage(
-          tapRegion1,
+        home: Scaffold(
+          body: Center(child: tapRegion1),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
               Navigator.push(
