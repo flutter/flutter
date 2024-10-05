@@ -1330,7 +1330,8 @@ class CanvasCompareTester {
                      [=](const SkSetupContext& ctx) {
                        sk_backdrop_setup(ctx);
                        ctx.canvas->saveLayer(SkCanvas::SaveLayerRec(
-                           nullptr, nullptr, sk_backdrop.get(), 0));
+                           nullptr, nullptr, sk_backdrop.get(),
+                           SkTileMode::kDecal, nullptr, 0));
                        sk_content_setup(ctx);
                      },
                      [=](const DlSetupContext& ctx) {
@@ -1345,7 +1346,8 @@ class CanvasCompareTester {
                      [=](const SkSetupContext& ctx) {
                        sk_backdrop_setup(ctx);
                        ctx.canvas->saveLayer(SkCanvas::SaveLayerRec(
-                           &layer_bounds, nullptr, sk_backdrop.get(), 0));
+                           &layer_bounds, nullptr, sk_backdrop.get(),
+                           SkTileMode::kDecal, nullptr, 0));
                        sk_content_setup(ctx);
                      },
                      [=](const DlSetupContext& ctx) {
@@ -1362,7 +1364,8 @@ class CanvasCompareTester {
                        sk_backdrop_setup(ctx);
                        ctx.canvas->clipRect(layer_bounds);
                        ctx.canvas->saveLayer(SkCanvas::SaveLayerRec(
-                           nullptr, nullptr, sk_backdrop.get(), 0));
+                           nullptr, nullptr, sk_backdrop.get(),
+                           SkTileMode::kDecal, nullptr, 0));
                        sk_content_setup(ctx);
                      },
                      [=](const DlSetupContext& ctx) {
