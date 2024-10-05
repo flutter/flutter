@@ -38,6 +38,9 @@ const Duration _kTransitionDuration = Duration(milliseconds: 167);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
 
+/// Callback for building the error widget.
+typedef InputErrorBuilder = Widget Function(String? errorText);
+
 typedef _SubtextSize = ({ double ascent, double bottomHeight, double subtextHeight });
 typedef _ChildBaselineGetter = double Function(RenderBox child, BoxConstraints constraints);
 
@@ -292,6 +295,7 @@ class _HelperError extends StatefulWidget {
     this.helperMaxLines,
     this.error,
     this.errorText,
+    this.errorBuilder,
     this.errorStyle,
     this.errorMaxLines,
   });
@@ -303,6 +307,7 @@ class _HelperError extends StatefulWidget {
   final int? helperMaxLines;
   final Widget? error;
   final String? errorText;
+  final InputErrorBuilder? errorBuilder;
   final TextStyle? errorStyle;
   final int? errorMaxLines;
 
@@ -409,7 +414,9 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
             begin: const Offset(0.0, -0.25),
             end: Offset.zero,
           ).evaluate(_controller.view),
-          child: widget.error ?? Text(
+          child: widget.error
+              ?? widget.errorBuilder?.call(widget.errorText)
+              ?? Text(
             widget.errorText!,
             style: widget.errorStyle,
             textAlign: widget.textAlign,
@@ -2361,6 +2368,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       helperMaxLines: decoration.helperMaxLines,
       error: decoration.error,
       errorText: decoration.errorText,
+      errorBuilder: decoration.errorBuilder,
       errorStyle: _getErrorStyle(themeData, defaults),
       errorMaxLines: decoration.errorMaxLines,
     );
@@ -2584,6 +2592,7 @@ class InputDecoration {
     this.maintainHintHeight = true,
     this.error,
     this.errorText,
+    this.errorBuilder,
     this.errorStyle,
     this.errorMaxLines,
     this.floatingLabelBehavior,
@@ -2624,7 +2633,8 @@ class InputDecoration {
        assert(!(helper != null && helperText != null), 'Declaring both helper and helperText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
-       assert(!(error != null && errorText != null), 'Declaring both error and errorText is not supported.');
+       assert(!(error != null && errorText != null), 'Declaring both error and errorText is not supported.'),
+       assert(!(error != null && errorBuilder != null), 'Declaring both error and errorBuilder is not supported.');
 
   /// Defines an [InputDecorator] that is the same size as the input field.
   ///
@@ -2671,6 +2681,7 @@ class InputDecoration {
        helperMaxLines = null,
        error = null,
        errorText = null,
+       errorBuilder = null,
        errorStyle = null,
        errorMaxLines = null,
        isDense = false,
@@ -2949,6 +2960,18 @@ class InputDecoration {
   ///
   /// Only one of [error] and [errorText] can be specified.
   final String? errorText;
+
+
+  /// Callback for building the error widget.
+  ///
+  /// If non-null, [errorText] will be passed to this builder,
+  /// and the returned widget will be displayed in place of [error].
+  ///
+  /// Use [errorBuilder] instead of [error] if you need to show the
+  /// validator error but at the same time also customize the error widget.
+  ///
+  /// Only one of [error] or [errorBuilder] can be specified.
+  final InputErrorBuilder? errorBuilder;
 
   /// {@template flutter.material.inputDecoration.errorStyle}
   /// The style to use for the [InputDecoration.errorText].
@@ -3615,6 +3638,7 @@ class InputDecoration {
     bool? maintainHintHeight,
     Widget? error,
     String? errorText,
+    InputErrorBuilder? errorBuilder,
     TextStyle? errorStyle,
     int? errorMaxLines,
     FloatingLabelBehavior? floatingLabelBehavior,
@@ -3671,6 +3695,7 @@ class InputDecoration {
       maintainHintHeight: maintainHintHeight ?? this.maintainHintHeight,
       error: error ?? this.error,
       errorText: errorText ?? this.errorText,
+      errorBuilder: errorBuilder ?? this.errorBuilder,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
