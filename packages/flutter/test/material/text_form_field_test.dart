@@ -399,7 +399,7 @@ void main() {
                 return 'validation error';
               },
               decoration: InputDecoration(
-                errorBuilder: (String? errorText) {
+                errorBuilder: (String errorText) {
                   return Text('**$errorText**');
                 },
               ),
