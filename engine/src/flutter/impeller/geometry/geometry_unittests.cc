@@ -330,21 +330,6 @@ TEST(GeometryTest, MatrixTransformDirection) {
   }
 }
 
-TEST(GeometryTest, MatrixGetMaxBasisLength) {
-  {
-    auto m = Matrix::MakeScale({3, 1, 1});
-    ASSERT_EQ(m.GetMaxBasisLength(), 3);
-
-    m = m * Matrix::MakeSkew(0, 4);
-    ASSERT_EQ(m.GetMaxBasisLength(), 5);
-  }
-
-  {
-    auto m = Matrix::MakeScale({-3, 4, 2});
-    ASSERT_EQ(m.GetMaxBasisLength(), 4);
-  }
-}
-
 TEST(GeometryTest, MatrixGetMaxBasisLengthXY) {
   {
     auto m = Matrix::MakeScale({3, 1, 1});
