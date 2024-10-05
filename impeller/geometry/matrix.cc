@@ -193,15 +193,6 @@ Scalar Matrix::GetDeterminant() const {
   return b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 }
 
-Scalar Matrix::GetMaxBasisLength() const {
-  Scalar max = 0;
-  for (int i = 0; i < 3; i++) {
-    max = std::max(max,
-                   e[i][0] * e[i][0] + e[i][1] * e[i][1] + e[i][2] * e[i][2]);
-  }
-  return std::sqrt(max);
-}
-
 /*
  *  Adapted for Impeller from Graphics Gems:
  *  http://www.realtimerendering.com/resources/GraphicsGems/gemsii/unmatrix.c
