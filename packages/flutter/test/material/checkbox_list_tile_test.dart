@@ -1268,11 +1268,11 @@ void main() {
   });
 
   testWidgets('CheckboxListTile renders with default scale', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: CheckboxListTile(
           value: false,
-          onChanged: (_) {},
+          onChanged: null,
         ),
       ),
     ));
@@ -1290,11 +1290,11 @@ void main() {
   testWidgets('CheckboxListTile respects checkboxScaleFactor', (WidgetTester tester) async {
     const double scale = 1.5;
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: CheckboxListTile(
           value: false,
-          onChanged: (_) {},
+          onChanged: null,
           checkboxScaleFactor: scale,
         ),
       ),
