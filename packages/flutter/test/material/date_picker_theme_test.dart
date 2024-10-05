@@ -428,14 +428,18 @@ void main() {
     expect(day24Shape.side.width, datePickerTheme.todayBorder?.width);
 
     // Test the day overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final BuildContext context = tester.element(find.byType(DatePickerDialog));
+    final SplashController controller = Material.of(context);
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text('25')));
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..circle(color: datePickerTheme.dayOverlayColor?.resolve(<MaterialState>{})));
+    expect(
+      controller,
+      paints..circle(color: datePickerTheme.dayOverlayColor?.resolve(const <WidgetState>{})),
+    );
 
     // Show the year selector.
 
@@ -461,7 +465,10 @@ void main() {
     // Test the year overlay color.
     await gesture.moveTo(tester.getCenter(find.text('2024')));
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..rect(color: datePickerTheme.yearOverlayColor?.resolve(<MaterialState>{})));
+    expect(
+      controller,
+      paints..rect(color: datePickerTheme.yearOverlayColor?.resolve(const <WidgetState>{})),
+    );
 
     final ButtonStyle cancelButtonStyle = actionButtonStyle(tester, 'Cancel');
     expect(cancelButtonStyle.toString(), equalsIgnoringHashCodes(datePickerTheme.cancelButtonStyle.toString()));
@@ -563,19 +570,26 @@ void main() {
     expect(selectedDate.style?.fontSize, datePickerTheme.rangePickerHeaderHeadlineStyle?.fontSize);
 
     // Test the day overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final BuildContext context = tester.element(find.byType(DateRangePickerDialog));
+    final SplashController controller = Material.of(context);
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text('16')));
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..circle(color: datePickerTheme.dayOverlayColor?.resolve(<MaterialState>{})));
+    expect(
+      controller,
+      paints..circle(color: datePickerTheme.dayOverlayColor?.resolve(const <WidgetState>{})),
+    );
 
     // Test the range selection overlay color.
     await gesture.moveTo(tester.getCenter(find.text('18')));
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..circle(color: datePickerTheme.rangeSelectionOverlayColor?.resolve(<MaterialState>{})));
+    expect(
+      controller,
+      paints..circle(color: datePickerTheme.rangeSelectionOverlayColor?.resolve(const <WidgetState>{})),
+    );
   });
 
   testWidgets('Material2 - DateRangePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
@@ -624,19 +638,26 @@ void main() {
     expect(selectedDate.style?.fontSize, datePickerTheme.rangePickerHeaderHeadlineStyle?.fontSize);
 
     // Test the day overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final BuildContext context = tester.element(find.byType(DateRangePickerDialog));
+    final SplashController controller = Material.of(context);
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text('16')));
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..circle(color: datePickerTheme.dayOverlayColor?.resolve(<MaterialState>{})));
+    expect(
+      controller,
+      paints..circle(color: datePickerTheme.dayOverlayColor?.resolve(const <WidgetState>{})),
+    );
 
     // Test the range selection overlay color.
     await gesture.moveTo(tester.getCenter(find.text('18')));
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..circle(color: datePickerTheme.rangeSelectionOverlayColor?.resolve(<MaterialState>{})));
+    expect(
+      controller,
+      paints..circle(color: datePickerTheme.rangeSelectionOverlayColor?.resolve(const <WidgetState>{})),
+    );
   });
 
   testWidgets('Dividers use DatePickerThemeData.dividerColor', (WidgetTester tester) async {
@@ -777,7 +798,8 @@ void main() {
     );
 
     // Test the hover overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final BuildContext context = tester.element(find.byType(DatePickerDialog));
+    final SplashController controller = Material.of(context);
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
@@ -785,9 +807,8 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.text('20')));
     await tester.pumpAndSettle();
     expect(
-      inkFeatures,
-      paints
-        ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered})),
+      controller,
+      paints..circle(color: dayOverlayColor.resolve(<WidgetState>{WidgetState.hovered})),
     );
 
     // Test the pressed overlay color.
@@ -796,7 +817,7 @@ void main() {
     if (kIsWeb) {
       // An extra circle is painted on the web for the hovered state.
       expect(
-        inkFeatures,
+        controller,
         paints
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
@@ -804,7 +825,7 @@ void main() {
       );
     } else {
       expect(
-        inkFeatures,
+        controller,
         paints
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
@@ -822,9 +843,8 @@ void main() {
 
     // Test the focused overlay color.
     expect(
-      inkFeatures,
-      paints
-        ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.focused})),
+      controller,
+      paints..circle(color: dayOverlayColor.resolve(<WidgetState>{WidgetState.focused})),
     );
   });
 
@@ -870,7 +890,8 @@ void main() {
     );
 
     // Test the hover overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final BuildContext context = tester.element(find.byType(DatePickerDialog));
+    final SplashController controller = Material.of(context);
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
@@ -878,7 +899,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.text('2022')));
     await tester.pumpAndSettle();
     expect(
-      inkFeatures,
+      controller,
       paints
         ..rect(color: yearOverlayColor.resolve(<MaterialState>{MaterialState.hovered})),
     );
@@ -887,7 +908,7 @@ void main() {
     await gesture.down(tester.getCenter(find.text('2022')));
     await tester.pumpAndSettle();
     expect(
-      inkFeatures,
+      controller,
       paints
         ..rect(color: yearOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
         ..rect(color: yearOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
@@ -904,7 +925,7 @@ void main() {
 
     // Test the focused overlay color.
     expect(
-      inkFeatures,
+      controller,
       paints
         ..rect(color: yearOverlayColor.resolve(<MaterialState>{MaterialState.focused})),
     );
@@ -949,7 +970,8 @@ void main() {
     );
 
     // Test the hover overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final BuildContext context = tester.element(find.byType(DateRangePickerDialog));
+    final SplashController controller = Material.of(context);
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
@@ -957,7 +979,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.text('18')));
     await tester.pumpAndSettle();
     expect(
-      inkFeatures,
+      controller,
       paints
         ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.hovered})),
     );
@@ -968,7 +990,7 @@ void main() {
     if (kIsWeb) {
       // An extra circle is painted on the web for the hovered state.
       expect(
-        inkFeatures,
+        controller,
         paints
           ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
@@ -976,7 +998,7 @@ void main() {
       );
     } else {
       expect(
-        inkFeatures,
+        controller,
         paints
           ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),

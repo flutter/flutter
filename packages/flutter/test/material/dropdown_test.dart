@@ -4052,8 +4052,10 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(DropdownButtonFormField<String>)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rrect(rrect: RRect.fromLTRBR(0.0, 276.0, 800.0, 324.0, const Radius.circular(radius))));
+    expect(
+      Material.of(tester.element(find.byType(DropdownButtonFormField<String>))),
+      paints..rrect(rrect: RRect.fromLTRBR(0.0, 276.0, 800.0, 324.0, const Radius.circular(radius))),
+    );
 
     await tester.tap(find.text('One'));
     await tester.pumpAndSettle();

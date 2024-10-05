@@ -119,8 +119,8 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(MaterialButton)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect(color: hoverColor));
+    final BuildContext context = tester.element(find.text('button'));
+    expect(Material.of(context), paints..rect(color: hoverColor));
   });
 
   testWidgets('Does MaterialButton work with focus', (WidgetTester tester) async {
@@ -143,8 +143,8 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect(color: focusColor));
+    final BuildContext context = tester.element(find.text('button'));
+    expect(Material.of(context), paints..rect(color: focusColor));
 
     focusNode.dispose();
   });
@@ -183,6 +183,10 @@ void main() {
     );
     await tester.pumpAndSettle();
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    SplashController splashController() {
+      final BuildContext context = tester.element(find.text('button'));
+      return Material.of(context);
+    }
 
     // Base elevation
     Material material = tester.widget<Material>(rawButtonMaterial);
@@ -192,8 +196,7 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     material = tester.widget<Material>(rawButtonMaterial);
-    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect(color: focusColor));
+    expect(splashController(), paints..rect(color: focusColor));
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(material.elevation, equals(focusElevation));
 
@@ -204,8 +207,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(MaterialButton)));
     await tester.pumpAndSettle();
     material = tester.widget<Material>(rawButtonMaterial);
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect(color: focusColor)..rect(color: hoverColor));
+    expect(splashController(), paints..rect(color: focusColor)..rect(color: hoverColor));
     expect(material.elevation, equals(hoverElevation));
     await gesture.removePointer();
     gesture = null;
@@ -215,8 +217,7 @@ void main() {
     addTearDown(gesture2.removePointer);
     await tester.pumpAndSettle();
     material = tester.widget<Material>(rawButtonMaterial);
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect(color: focusColor)..rect(color: highlightColor));
+    expect(splashController(), paints..rect(color: focusColor)..rect(color: highlightColor));
     expect(material.elevation, equals(highlightElevation));
     await gesture2.up();
 
