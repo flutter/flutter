@@ -61,6 +61,8 @@ impeller::SamplerDescriptor ToSamplerDescriptor(
 
 Matrix ToMatrix(const SkMatrix& m);
 
+BlendMode ToBlendMode(flutter::DlBlendMode mode);
+
 /// @brief Convert display list colors + stops into impeller colors and stops,
 /// taking care to ensure that the stops monotonically increase from 0.0 to 1.0.
 ///
