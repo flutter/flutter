@@ -39,7 +39,7 @@ const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
 
 /// Callback for building the error widget.
-typedef InputErrorBuilder = Widget Function(String? errorText);
+typedef InputErrorBuilder = Widget Function(String errorText);
 
 typedef _SubtextSize = ({ double ascent, double bottomHeight, double subtextHeight });
 typedef _ChildBaselineGetter = double Function(RenderBox child, BoxConstraints constraints);
@@ -415,7 +415,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
             end: Offset.zero,
           ).evaluate(_controller.view),
           child: widget.error
-              ?? widget.errorBuilder?.call(widget.errorText)
+              ?? widget.errorBuilder?.call(widget.errorText!)
               ?? Text(
             widget.errorText!,
             style: widget.errorStyle,
