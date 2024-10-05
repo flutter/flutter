@@ -1,4 +1,4 @@
-Signature: 8ca99ee3a687689610cec32f8c46146f
+Signature: 778ac4bcf3164f5e4cedfe74d6bacbb0
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -13295,8 +13295,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/client.fidl + ..
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/constants.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/server.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/types.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.config/specs.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.config/value.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/capability.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/child.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/collection.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -13477,8 +13475,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/client.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/server.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/types.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.config/specs.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.config/value.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/capability.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/child.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/collection.fidl
@@ -13690,8 +13686,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/overview.fidl + ../../../
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.config/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.config/resolved.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.resolution/component.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.resolution/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14037,8 +14031,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/overview.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.config/overview.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.config/resolved.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.resolution/component.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.resolution/overview.fidl

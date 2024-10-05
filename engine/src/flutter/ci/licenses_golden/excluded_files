@@ -3316,7 +3316,6 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.castwindow/meta.json
-../../../fuchsia/sdk/linux/fidl/fuchsia.component.config/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.resolution/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runner/meta.json
