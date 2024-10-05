@@ -70,8 +70,11 @@ void DlSkCanvasDispatcher::saveLayer(const DlRect& bounds,
     const sk_sp<SkImageFilter> sk_backdrop = ToSk(backdrop);
     const SkRect* sl_bounds =
         options.bounds_from_caller() ? &ToSkRect(bounds) : nullptr;
-    canvas_->saveLayer(
-        SkCanvas::SaveLayerRec(sl_bounds, paint, sk_backdrop.get(), 0));
+    SkCanvas::SaveLayerRec params(sl_bounds, paint, sk_backdrop.get(), 0);
+    if (sk_backdrop && backdrop->asBlur()) {
+      params.fBackdropTileMode = ToSk(backdrop->asBlur()->tile_mode());
+    }
+    canvas_->saveLayer(params);
     // saveLayer will apply the current opacity on behalf of the children
     // so they will inherit an opaque opacity.
     save_opacity(SK_Scalar1);
