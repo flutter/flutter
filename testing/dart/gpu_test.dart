@@ -479,9 +479,19 @@ void main() async {
       state.renderPass.draw();
     }
 
+    // Draw the green rectangle.
+    // Defaults to clockwise winding order. So frontface culling should not
+    // impact the green triangle.
     state.renderPass.setCullMode(gpu.CullMode.frontFace);
     drawTriangle(Colors.lime);
+
+    // Backface cull a red triangle.
     state.renderPass.setCullMode(gpu.CullMode.backFace);
+    drawTriangle(Colors.red);
+
+    // Invert the winding mode and frontface cull a red rectangle.
+    state.renderPass.setWindingOrder(gpu.WindingOrder.counterClockwise);
+    state.renderPass.setCullMode(gpu.CullMode.frontFace);
     drawTriangle(Colors.red);
 
     state.commandBuffer.submit();

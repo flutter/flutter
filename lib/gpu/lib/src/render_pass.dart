@@ -262,6 +262,10 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     _setCullMode(cullMode.index);
   }
 
+  void setWindingOrder(WindingOrder windingOrder) {
+    _setWindingOrder(windingOrder.index);
+  }
+
   void draw() {
     if (!_draw()) {
       throw Exception("Failed to append draw");
@@ -415,6 +419,10 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Int)>(
       symbol: 'InternalFlutterGpu_RenderPass_SetCullMode')
   external void _setCullMode(int cullMode);
+
+  @Native<Void Function(Pointer<Void>, Int)>(
+      symbol: 'InternalFlutterGpu_RenderPass_SetWindingOrder')
+  external void _setWindingOrder(int windingOrder);
 
   @Native<Bool Function(Pointer<Void>)>(
       symbol: 'InternalFlutterGpu_RenderPass_Draw')
