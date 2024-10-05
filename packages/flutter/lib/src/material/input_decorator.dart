@@ -3805,6 +3805,7 @@ class InputDecoration {
         && other.maintainHintHeight == maintainHintHeight
         && other.error == error
         && other.errorText == errorText
+        && other.errorBuilder == errorBuilder
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
         && other.floatingLabelBehavior == floatingLabelBehavior
@@ -3864,6 +3865,7 @@ class InputDecoration {
       maintainHintHeight,
       error,
       errorText,
+      errorBuilder,
       errorStyle,
       errorMaxLines,
       floatingLabelBehavior,
@@ -3921,6 +3923,7 @@ class InputDecoration {
       if (!maintainHintHeight) 'maintainHintHeight: false',
       if (error != null) 'error: "$error"',
       if (errorText != null) 'errorText: "$errorText"',
+      if (errorBuilder != null) 'errorBuilder: "$errorBuilder"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
       if (floatingLabelBehavior != null) 'floatingLabelBehavior: $floatingLabelBehavior',
