@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "display_list/dl_blend_mode.h"
 #include "display_list/dl_color.h"
 #include "display_list/dl_tile_mode.h"
 #include "flutter/testing/testing.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/skia_conversions.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/scalar.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkRRect.h"
@@ -289,6 +291,14 @@ TEST(SkiaConversionsTest, IsNearlySimpleRRect) {
     EXPECT_FALSE(skia_conversions::IsNearlySimpleRRect(rrect))
         << "values[" << i << "] == " << test.values[i];
     test.values[i] = save;
+  }
+}
+
+TEST(SkiaConversionsTest, BlendMode) {
+  for (auto i = 0; i < static_cast<int>(flutter::DlBlendMode::kLastMode); i++) {
+    EXPECT_EQ(
+        skia_conversions::ToBlendMode(static_cast<flutter::DlBlendMode>(i)),
+        static_cast<BlendMode>(i));
   }
 }
 

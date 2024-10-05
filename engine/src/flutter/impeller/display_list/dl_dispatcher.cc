@@ -114,70 +114,6 @@ struct DepthWatcher {
 #define UNIMPLEMENTED \
   FML_DLOG(ERROR) << "Unimplemented detail in " << __FUNCTION__;
 
-static BlendMode ToBlendMode(flutter::DlBlendMode mode) {
-  switch (mode) {
-    case flutter::DlBlendMode::kClear:
-      return BlendMode::kClear;
-    case flutter::DlBlendMode::kSrc:
-      return BlendMode::kSource;
-    case flutter::DlBlendMode::kDst:
-      return BlendMode::kDestination;
-    case flutter::DlBlendMode::kSrcOver:
-      return BlendMode::kSourceOver;
-    case flutter::DlBlendMode::kDstOver:
-      return BlendMode::kDestinationOver;
-    case flutter::DlBlendMode::kSrcIn:
-      return BlendMode::kSourceIn;
-    case flutter::DlBlendMode::kDstIn:
-      return BlendMode::kDestinationIn;
-    case flutter::DlBlendMode::kSrcOut:
-      return BlendMode::kSourceOut;
-    case flutter::DlBlendMode::kDstOut:
-      return BlendMode::kDestinationOut;
-    case flutter::DlBlendMode::kSrcATop:
-      return BlendMode::kSourceATop;
-    case flutter::DlBlendMode::kDstATop:
-      return BlendMode::kDestinationATop;
-    case flutter::DlBlendMode::kXor:
-      return BlendMode::kXor;
-    case flutter::DlBlendMode::kPlus:
-      return BlendMode::kPlus;
-    case flutter::DlBlendMode::kModulate:
-      return BlendMode::kModulate;
-    case flutter::DlBlendMode::kScreen:
-      return BlendMode::kScreen;
-    case flutter::DlBlendMode::kOverlay:
-      return BlendMode::kOverlay;
-    case flutter::DlBlendMode::kDarken:
-      return BlendMode::kDarken;
-    case flutter::DlBlendMode::kLighten:
-      return BlendMode::kLighten;
-    case flutter::DlBlendMode::kColorDodge:
-      return BlendMode::kColorDodge;
-    case flutter::DlBlendMode::kColorBurn:
-      return BlendMode::kColorBurn;
-    case flutter::DlBlendMode::kHardLight:
-      return BlendMode::kHardLight;
-    case flutter::DlBlendMode::kSoftLight:
-      return BlendMode::kSoftLight;
-    case flutter::DlBlendMode::kDifference:
-      return BlendMode::kDifference;
-    case flutter::DlBlendMode::kExclusion:
-      return BlendMode::kExclusion;
-    case flutter::DlBlendMode::kMultiply:
-      return BlendMode::kMultiply;
-    case flutter::DlBlendMode::kHue:
-      return BlendMode::kHue;
-    case flutter::DlBlendMode::kSaturation:
-      return BlendMode::kSaturation;
-    case flutter::DlBlendMode::kColor:
-      return BlendMode::kColor;
-    case flutter::DlBlendMode::kLuminosity:
-      return BlendMode::kLuminosity;
-  }
-  FML_UNREACHABLE();
-}
-
 static impeller::SamplerDescriptor ToSamplerDescriptor(
     const flutter::DlFilterMode options) {
   impeller::SamplerDescriptor desc;
@@ -289,37 +225,11 @@ void DlDispatcherBase::setColorSource(const flutter::DlColorSource* source) {
   }
 }
 
-static std::shared_ptr<ColorFilter> ToColorFilter(
-    const flutter::DlColorFilter* filter) {
-  if (filter == nullptr) {
-    return nullptr;
-  }
-  switch (filter->type()) {
-    case flutter::DlColorFilterType::kBlend: {
-      auto dl_blend = filter->asBlend();
-      auto blend_mode = ToBlendMode(dl_blend->mode());
-      auto color = skia_conversions::ToColor(dl_blend->color());
-      return ColorFilter::MakeBlend(blend_mode, color);
-    }
-    case flutter::DlColorFilterType::kMatrix: {
-      const flutter::DlMatrixColorFilter* dl_matrix = filter->asMatrix();
-      impeller::ColorMatrix color_matrix;
-      dl_matrix->get_matrix(color_matrix.array);
-      return ColorFilter::MakeMatrix(color_matrix);
-    }
-    case flutter::DlColorFilterType::kSrgbToLinearGamma:
-      return ColorFilter::MakeSrgbToLinear();
-    case flutter::DlColorFilterType::kLinearToSrgbGamma:
-      return ColorFilter::MakeLinearToSrgb();
-  }
-  return nullptr;
-}
-
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::setColorFilter(const flutter::DlColorFilter* filter) {
   AUTO_DEPTH_WATCHER(0u);
 
-  paint_.color_filter = ToColorFilter(filter);
+  paint_.color_filter = filter;
 }
 
 // |flutter::DlOpReceiver|
@@ -333,7 +243,7 @@ void DlDispatcherBase::setInvertColors(bool invert) {
 void DlDispatcherBase::setBlendMode(flutter::DlBlendMode dl_mode) {
   AUTO_DEPTH_WATCHER(0u);
 
-  paint_.blend_mode = ToBlendMode(dl_mode);
+  paint_.blend_mode = skia_conversions::ToBlendMode(dl_mode);
 }
 
 static FilterContents::BlurStyle ToBlurStyle(flutter::DlBlurStyle blur_style) {
@@ -372,102 +282,11 @@ void DlDispatcherBase::setMaskFilter(const flutter::DlMaskFilter* filter) {
   }
 }
 
-static std::shared_ptr<ImageFilter> ToImageFilter(
-    const flutter::DlImageFilter* filter) {
-  if (filter == nullptr) {
-    return nullptr;
-  }
-
-  switch (filter->type()) {
-    case flutter::DlImageFilterType::kBlur: {
-      auto blur = filter->asBlur();
-      auto sigma_x = Sigma(blur->sigma_x());
-      auto sigma_y = Sigma(blur->sigma_y());
-      auto tile_mode = static_cast<Entity::TileMode>(blur->tile_mode());
-      return ImageFilter::MakeBlur(
-          sigma_x, sigma_y, FilterContents::BlurStyle::kNormal, tile_mode);
-    }
-    case flutter::DlImageFilterType::kDilate: {
-      auto dilate = filter->asDilate();
-      FML_DCHECK(dilate);
-      if (dilate->radius_x() < 0 || dilate->radius_y() < 0) {
-        return nullptr;
-      }
-      auto radius_x = Radius(dilate->radius_x());
-      auto radius_y = Radius(dilate->radius_y());
-      return ImageFilter::MakeDilate(radius_x, radius_y);
-    }
-    case flutter::DlImageFilterType::kErode: {
-      auto erode = filter->asErode();
-      FML_DCHECK(erode);
-      if (erode->radius_x() < 0 || erode->radius_y() < 0) {
-        return nullptr;
-      }
-      auto radius_x = Radius(erode->radius_x());
-      auto radius_y = Radius(erode->radius_y());
-      return ImageFilter::MakeErode(radius_x, radius_y);
-    }
-    case flutter::DlImageFilterType::kMatrix: {
-      auto matrix_filter = filter->asMatrix();
-      FML_DCHECK(matrix_filter);
-      auto matrix = skia_conversions::ToMatrix(matrix_filter->matrix());
-      auto desc =
-          skia_conversions::ToSamplerDescriptor(matrix_filter->sampling());
-      return ImageFilter::MakeMatrix(matrix, desc);
-    }
-    case flutter::DlImageFilterType::kCompose: {
-      auto compose = filter->asCompose();
-      FML_DCHECK(compose);
-      auto outer_dl_filter = compose->outer();
-      auto inner_dl_filter = compose->inner();
-      auto outer_filter = ToImageFilter(outer_dl_filter.get());
-      auto inner_filter = ToImageFilter(inner_dl_filter.get());
-      if (!outer_filter) {
-        return inner_filter;
-      }
-      if (!inner_filter) {
-        return outer_filter;
-      }
-      FML_DCHECK(outer_filter && inner_filter);
-
-      return ImageFilter::MakeCompose(*inner_filter, *outer_filter);
-    }
-    case flutter::DlImageFilterType::kColorFilter: {
-      auto color_filter_image_filter = filter->asColorFilter();
-      FML_DCHECK(color_filter_image_filter);
-      auto color_filter =
-          ToColorFilter(color_filter_image_filter->color_filter().get());
-      if (!color_filter) {
-        return nullptr;
-      }
-      // When color filters are used as image filters, set the color filter's
-      // "absorb opacity" flag to false. For image filters, the snapshot
-      // opacity needs to be deferred until the result of the filter chain is
-      // being blended with the layer.
-      return ImageFilter::MakeFromColorFilter(*color_filter);
-    }
-    case flutter::DlImageFilterType::kLocalMatrix: {
-      auto local_matrix_filter = filter->asLocalMatrix();
-      FML_DCHECK(local_matrix_filter);
-      auto internal_filter = local_matrix_filter->image_filter();
-      FML_DCHECK(internal_filter);
-
-      auto image_filter = ToImageFilter(internal_filter.get());
-      if (!image_filter) {
-        return nullptr;
-      }
-
-      auto matrix = skia_conversions::ToMatrix(local_matrix_filter->matrix());
-      return ImageFilter::MakeLocalMatrix(matrix, *image_filter);
-    }
-  }
-}
-
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::setImageFilter(const flutter::DlImageFilter* filter) {
   AUTO_DEPTH_WATCHER(0u);
 
-  paint_.image_filter = ToImageFilter(filter);
+  paint_.image_filter = filter;
 }
 
 // |flutter::DlOpReceiver|
@@ -497,8 +316,7 @@ void DlDispatcherBase::saveLayer(const DlRect& bounds,
   }
 
   GetCanvas().SaveLayer(
-      paint, impeller_bounds, ToImageFilter(backdrop), promise,
-      total_content_depth,
+      paint, impeller_bounds, backdrop, promise, total_content_depth,
       // Unbounded content can still have user specified bounds that require a
       // saveLayer to be created to perform the clip.
       options.can_distribute_opacity() && !options.content_is_unbounded());
@@ -674,7 +492,7 @@ void DlDispatcherBase::drawColor(flutter::DlColor color,
 
   Paint paint;
   paint.color = skia_conversions::ToColor(color);
-  paint.blend_mode = ToBlendMode(dl_mode);
+  paint.blend_mode = skia_conversions::ToBlendMode(dl_mode);
   GetCanvas().DrawPaint(paint);
 }
 
@@ -950,7 +768,7 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                       tex,                                              //
                       colors,                                           //
                       static_cast<size_t>(count),                       //
-                      ToBlendMode(mode),                                //
+                      skia_conversions::ToBlendMode(mode),              //
                       skia_conversions::ToSamplerDescriptor(sampling),  //
                       skia_conversions::ToRect(cull_rect)               //
       );
@@ -1117,7 +935,8 @@ static bool RequiresReadbackForBlends(
     const ContentContext& renderer,
     flutter::DlBlendMode max_root_blend_mode) {
   return !renderer.GetDeviceCapabilities().SupportsFramebufferFetch() &&
-         ToBlendMode(max_root_blend_mode) > Entity::kLastPipelineBlendMode;
+         skia_conversions::ToBlendMode(max_root_blend_mode) >
+             Entity::kLastPipelineBlendMode;
 }
 
 CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
@@ -1143,7 +962,7 @@ void CanvasDlDispatcher::drawVertices(
 
   GetCanvas().DrawVertices(
       std::make_shared<DlVerticesGeometry>(vertices, renderer_),
-      ToBlendMode(dl_mode), paint_);
+      skia_conversions::ToBlendMode(dl_mode), paint_);
 }
 
 //// Text Frame Dispatcher

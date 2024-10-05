@@ -7,7 +7,9 @@
 
 #include <memory>
 
+#include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
+#include "display_list/effects/dl_image_filter.h"
 #include "impeller/display_list/color_filter.h"
 #include "impeller/display_list/image_filter.h"
 #include "impeller/entity/contents/color_source_contents.h"
@@ -55,7 +57,8 @@ struct Paint {
 
     std::shared_ptr<FilterContents> CreateMaskBlur(
         std::shared_ptr<ColorSourceContents> color_source_contents,
-        const std::shared_ptr<ColorFilter>& color_filter) const;
+        const flutter::DlColorFilter* color_filter,
+        bool invert_colors) const;
 
     std::shared_ptr<FilterContents> CreateMaskBlur(
         std::shared_ptr<TextureContents> texture_contents) const;
@@ -68,6 +71,8 @@ struct Paint {
 
   Color color = Color::Black();
   const flutter::DlColorSource* color_source = nullptr;
+  const flutter::DlColorFilter* color_filter = nullptr;
+  const flutter::DlImageFilter* image_filter = nullptr;
 
   Scalar stroke_width = 0.0;
   Cap stroke_cap = Cap::kButt;
@@ -77,11 +82,7 @@ struct Paint {
   BlendMode blend_mode = BlendMode::kSourceOver;
   bool invert_colors = false;
 
-  std::shared_ptr<ImageFilter> image_filter;
-  std::shared_ptr<ColorFilter> color_filter;
   std::optional<MaskBlurDescriptor> mask_blur_descriptor;
-
-  std::shared_ptr<ColorFilter> GetColorFilter() const;
 
   /// @brief      Wrap this paint's configured filters to the given contents.
   /// @param[in]  input           The contents to wrap with paint's filters.
@@ -101,9 +102,6 @@ struct Paint {
   std::shared_ptr<Contents> WithFiltersForSubpassTarget(
       std::shared_ptr<Contents> input,
       const Matrix& effect_transform = Matrix()) const;
-
-  std::shared_ptr<Contents> CreateContentsForGeometry(
-      const std::shared_ptr<Geometry>& geometry) const;
 
   /// @brief   Whether this paint has a color filter that can apply opacity
   bool HasColorFilter() const;

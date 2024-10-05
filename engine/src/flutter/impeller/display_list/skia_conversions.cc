@@ -201,5 +201,69 @@ Matrix ToMatrix(const SkMatrix& m) {
   };
 }
 
+BlendMode ToBlendMode(flutter::DlBlendMode mode) {
+  switch (mode) {
+    case flutter::DlBlendMode::kClear:
+      return BlendMode::kClear;
+    case flutter::DlBlendMode::kSrc:
+      return BlendMode::kSource;
+    case flutter::DlBlendMode::kDst:
+      return BlendMode::kDestination;
+    case flutter::DlBlendMode::kSrcOver:
+      return BlendMode::kSourceOver;
+    case flutter::DlBlendMode::kDstOver:
+      return BlendMode::kDestinationOver;
+    case flutter::DlBlendMode::kSrcIn:
+      return BlendMode::kSourceIn;
+    case flutter::DlBlendMode::kDstIn:
+      return BlendMode::kDestinationIn;
+    case flutter::DlBlendMode::kSrcOut:
+      return BlendMode::kSourceOut;
+    case flutter::DlBlendMode::kDstOut:
+      return BlendMode::kDestinationOut;
+    case flutter::DlBlendMode::kSrcATop:
+      return BlendMode::kSourceATop;
+    case flutter::DlBlendMode::kDstATop:
+      return BlendMode::kDestinationATop;
+    case flutter::DlBlendMode::kXor:
+      return BlendMode::kXor;
+    case flutter::DlBlendMode::kPlus:
+      return BlendMode::kPlus;
+    case flutter::DlBlendMode::kModulate:
+      return BlendMode::kModulate;
+    case flutter::DlBlendMode::kScreen:
+      return BlendMode::kScreen;
+    case flutter::DlBlendMode::kOverlay:
+      return BlendMode::kOverlay;
+    case flutter::DlBlendMode::kDarken:
+      return BlendMode::kDarken;
+    case flutter::DlBlendMode::kLighten:
+      return BlendMode::kLighten;
+    case flutter::DlBlendMode::kColorDodge:
+      return BlendMode::kColorDodge;
+    case flutter::DlBlendMode::kColorBurn:
+      return BlendMode::kColorBurn;
+    case flutter::DlBlendMode::kHardLight:
+      return BlendMode::kHardLight;
+    case flutter::DlBlendMode::kSoftLight:
+      return BlendMode::kSoftLight;
+    case flutter::DlBlendMode::kDifference:
+      return BlendMode::kDifference;
+    case flutter::DlBlendMode::kExclusion:
+      return BlendMode::kExclusion;
+    case flutter::DlBlendMode::kMultiply:
+      return BlendMode::kMultiply;
+    case flutter::DlBlendMode::kHue:
+      return BlendMode::kHue;
+    case flutter::DlBlendMode::kSaturation:
+      return BlendMode::kSaturation;
+    case flutter::DlBlendMode::kColor:
+      return BlendMode::kColor;
+    case flutter::DlBlendMode::kLuminosity:
+      return BlendMode::kLuminosity;
+  }
+  FML_UNREACHABLE();
+}
+
 }  // namespace skia_conversions
 }  // namespace impeller

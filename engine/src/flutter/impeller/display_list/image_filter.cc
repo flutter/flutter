@@ -3,206 +3,107 @@
 // found in the LICENSE file.
 
 #include "impeller/display_list/image_filter.h"
+#include "fml/logging.h"
+#include "impeller/display_list/color_filter.h"
+#include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 
 namespace impeller {
 
-/*******************************************************************************
- ******* ImageFilter
- ******************************************************************************/
+std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
+                                          const FilterInput::Ref& input) {
+  FML_DCHECK(filter);
 
-ImageFilter::ImageFilter() = default;
+  switch (filter->type()) {
+    case flutter::DlImageFilterType::kBlur: {
+      auto blur_filter = filter->asBlur();
+      FML_DCHECK(blur_filter);
 
-ImageFilter::~ImageFilter() = default;
+      return FilterContents::MakeGaussianBlur(
+          input,                                                    //
+          Sigma(blur_filter->sigma_x()),                            //
+          Sigma(blur_filter->sigma_y()),                            //
+          static_cast<Entity::TileMode>(blur_filter->tile_mode()),  //
+          FilterContents::BlurStyle::kNormal                        //
+      );
+    }
+    case flutter::DlImageFilterType::kDilate: {
+      auto dilate_filter = filter->asDilate();
+      FML_DCHECK(dilate_filter);
 
-std::shared_ptr<ImageFilter> ImageFilter::MakeBlur(
-    Sigma sigma_x,
-    Sigma sigma_y,
-    FilterContents::BlurStyle blur_style,
-    Entity::TileMode tile_mode) {
-  return std::make_shared<BlurImageFilter>(sigma_x, sigma_y, blur_style,
-                                           tile_mode);
-}
+      return FilterContents::MakeMorphology(
+          input,                              //
+          Radius(dilate_filter->radius_x()),  //
+          Radius(dilate_filter->radius_y()),  //
+          FilterContents::MorphType::kDilate  //
+      );
+    }
+    case flutter::DlImageFilterType::kErode: {
+      auto erode_filter = filter->asErode();
+      FML_DCHECK(erode_filter);
 
-std::shared_ptr<ImageFilter> ImageFilter::MakeDilate(Radius radius_x,
-                                                     Radius radius_y) {
-  return std::make_shared<DilateImageFilter>(radius_x, radius_y);
-}
+      return FilterContents::MakeMorphology(
+          input,                             //
+          Radius(erode_filter->radius_x()),  //
+          Radius(erode_filter->radius_y()),  //
+          FilterContents::MorphType::kErode  //
+      );
+    }
+    case flutter::DlImageFilterType::kMatrix: {
+      auto matrix_filter = filter->asMatrix();
+      FML_DCHECK(matrix_filter);
 
-std::shared_ptr<ImageFilter> ImageFilter::MakeErode(Radius radius_x,
-                                                    Radius radius_y) {
-  return std::make_shared<ErodeImageFilter>(radius_x, radius_y);
-}
+      auto matrix = skia_conversions::ToMatrix(matrix_filter->matrix());
+      auto desc =
+          skia_conversions::ToSamplerDescriptor(matrix_filter->sampling());
+      return FilterContents::MakeMatrixFilter(input, matrix, desc);
+    }
+    case flutter::DlImageFilterType::kLocalMatrix: {
+      auto matrix_filter = filter->asLocalMatrix();
+      FML_DCHECK(matrix_filter);
+      FML_DCHECK(matrix_filter->image_filter());
 
-std::shared_ptr<ImageFilter> ImageFilter::MakeMatrix(
-    const Matrix& matrix,
-    SamplerDescriptor sampler_descriptor) {
-  return std::make_shared<MatrixImageFilter>(matrix,
-                                             std::move(sampler_descriptor));
-}
+      auto matrix = skia_conversions::ToMatrix(matrix_filter->matrix());
+      return FilterContents::MakeLocalMatrixFilter(
+          FilterInput::Make(
+              WrapInput(matrix_filter->image_filter().get(), input)),
+          matrix);
+    }
+    case flutter::DlImageFilterType::kColorFilter: {
+      auto image_color_filter = filter->asColorFilter();
+      FML_DCHECK(image_color_filter);
+      auto color_filter = image_color_filter->color_filter();
+      FML_DCHECK(color_filter);
 
-std::shared_ptr<ImageFilter> ImageFilter::MakeCompose(
-    const ImageFilter& inner,
-    const ImageFilter& outer) {
-  return std::make_shared<ComposeImageFilter>(inner, outer);
-}
+      // When color filters are used as image filters, set the color filter's
+      // "absorb opacity" flag to false. For image filters, the snapshot
+      // opacity needs to be deferred until the result of the filter chain is
+      // being blended with the layer.
+      return WrapWithGPUColorFilter(color_filter.get(), input,
+                                    ColorFilterContents::AbsorbOpacity::kNo);
+    }
+    case flutter::DlImageFilterType::kCompose: {
+      auto compose = filter->asCompose();
+      FML_DCHECK(compose);
 
-std::shared_ptr<ImageFilter> ImageFilter::MakeFromColorFilter(
-    const ColorFilter& color_filter) {
-  return std::make_shared<ColorImageFilter>(color_filter);
-}
+      auto outer_dl_filter = compose->outer();
+      auto inner_dl_filter = compose->inner();
+      if (!outer_dl_filter) {
+        return WrapInput(inner_dl_filter.get(), input);
+      }
+      if (!inner_dl_filter) {
+        return WrapInput(outer_dl_filter.get(), input);
+      }
+      FML_DCHECK(outer_dl_filter && inner_dl_filter);
 
-std::shared_ptr<ImageFilter> ImageFilter::MakeLocalMatrix(
-    const Matrix& matrix,
-    const ImageFilter& internal_filter) {
-  return std::make_shared<LocalMatrixImageFilter>(matrix, internal_filter);
-}
-
-std::shared_ptr<FilterContents> ImageFilter::GetFilterContents() const {
-  return WrapInput(FilterInput::Make(Rect()));
-}
-
-/*******************************************************************************
- ******* BlurImageFilter
- ******************************************************************************/
-
-BlurImageFilter::BlurImageFilter(Sigma sigma_x,
-                                 Sigma sigma_y,
-                                 FilterContents::BlurStyle blur_style,
-                                 Entity::TileMode tile_mode)
-    : sigma_x_(sigma_x),
-      sigma_y_(sigma_y),
-      blur_style_(blur_style),
-      tile_mode_(tile_mode) {}
-
-BlurImageFilter::~BlurImageFilter() = default;
-
-std::shared_ptr<FilterContents> BlurImageFilter::WrapInput(
-    const FilterInput::Ref& input) const {
-  return FilterContents::MakeGaussianBlur(input, sigma_x_, sigma_y_, tile_mode_,
-                                          blur_style_);
-}
-
-std::shared_ptr<ImageFilter> BlurImageFilter::Clone() const {
-  return std::make_shared<BlurImageFilter>(*this);
-}
-
-/*******************************************************************************
- ******* DilateImageFilter
- ******************************************************************************/
-
-DilateImageFilter::DilateImageFilter(Radius radius_x, Radius radius_y)
-    : radius_x_(radius_x), radius_y_(radius_y) {}
-
-DilateImageFilter::~DilateImageFilter() = default;
-
-std::shared_ptr<FilterContents> DilateImageFilter::WrapInput(
-    const FilterInput::Ref& input) const {
-  return FilterContents::MakeMorphology(input, radius_x_, radius_y_,
-                                        FilterContents::MorphType::kDilate);
-}
-
-std::shared_ptr<ImageFilter> DilateImageFilter::Clone() const {
-  return std::make_shared<DilateImageFilter>(*this);
-}
-
-/*******************************************************************************
- ******* ErodeImageFilter
- ******************************************************************************/
-
-ErodeImageFilter::ErodeImageFilter(Radius radius_x, Radius radius_y)
-    : radius_x_(radius_x), radius_y_(radius_y) {}
-
-ErodeImageFilter::~ErodeImageFilter() = default;
-
-std::shared_ptr<FilterContents> ErodeImageFilter::WrapInput(
-    const FilterInput::Ref& input) const {
-  return FilterContents::MakeMorphology(input, radius_x_, radius_y_,
-                                        FilterContents::MorphType::kErode);
-}
-
-std::shared_ptr<ImageFilter> ErodeImageFilter::Clone() const {
-  return std::make_shared<ErodeImageFilter>(*this);
-}
-
-/*******************************************************************************
- ******* MatrixImageFilter
- ******************************************************************************/
-
-MatrixImageFilter::MatrixImageFilter(const Matrix& matrix,
-                                     SamplerDescriptor sampler_descriptor)
-    : matrix_(matrix), sampler_descriptor_(std::move(sampler_descriptor)) {}
-
-MatrixImageFilter::~MatrixImageFilter() = default;
-
-std::shared_ptr<FilterContents> MatrixImageFilter::WrapInput(
-    const FilterInput::Ref& input) const {
-  return FilterContents::MakeMatrixFilter(input, matrix_, sampler_descriptor_);
-}
-
-std::shared_ptr<ImageFilter> MatrixImageFilter::Clone() const {
-  return std::make_shared<MatrixImageFilter>(*this);
-}
-
-/*******************************************************************************
- ******* ComposeImageFilter
- ******************************************************************************/
-
-ComposeImageFilter::ComposeImageFilter(const ImageFilter& inner,
-                                       const ImageFilter& outer)
-    : inner_(inner.Clone()), outer_(outer.Clone()) {}
-
-ComposeImageFilter::~ComposeImageFilter() = default;
-
-std::shared_ptr<FilterContents> ComposeImageFilter::WrapInput(
-    const FilterInput::Ref& input) const {
-  return outer_->WrapInput(FilterInput::Make(inner_->WrapInput(input)));
-}
-
-std::shared_ptr<ImageFilter> ComposeImageFilter::Clone() const {
-  return std::make_shared<ComposeImageFilter>(*this);
-}
-
-/*******************************************************************************
- ******* ColorImageFilter
- ******************************************************************************/
-
-ColorImageFilter::ColorImageFilter(const ColorFilter& color_filter)
-    : color_filter_(color_filter.Clone()) {}
-
-ColorImageFilter::~ColorImageFilter() = default;
-
-std::shared_ptr<FilterContents> ColorImageFilter::WrapInput(
-    const FilterInput::Ref& input) const {
-  return color_filter_->WrapWithGPUColorFilter(
-      input, ColorFilterContents::AbsorbOpacity::kNo);
-}
-
-std::shared_ptr<ImageFilter> ColorImageFilter::Clone() const {
-  return std::make_shared<ColorImageFilter>(*this);
-}
-
-/*******************************************************************************
- ******* LocalMatrixImageFilter
- ******************************************************************************/
-
-LocalMatrixImageFilter::LocalMatrixImageFilter(
-    const Matrix& matrix,
-    const ImageFilter& internal_filter)
-    : matrix_(matrix), internal_filter_(internal_filter.Clone()) {}
-
-LocalMatrixImageFilter::~LocalMatrixImageFilter() = default;
-
-std::shared_ptr<FilterContents> LocalMatrixImageFilter::WrapInput(
-    const FilterInput::Ref& input) const {
-  return FilterContents::MakeLocalMatrixFilter(
-      FilterInput::Make(internal_filter_->WrapInput(input)), matrix_);
-}
-
-std::shared_ptr<ImageFilter> LocalMatrixImageFilter::Clone() const {
-  return std::make_shared<LocalMatrixImageFilter>(*this);
+      return WrapInput(
+          outer_dl_filter.get(),
+          FilterInput::Make(WrapInput(inner_dl_filter.get(), input)));
+    }
+  }
+  FML_UNREACHABLE();
 }
 
 }  // namespace impeller
