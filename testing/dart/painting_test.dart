@@ -8,6 +8,8 @@ import 'dart:ui';
 import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'goldens.dart';
+
 typedef CanvasCallback = void Function(Canvas canvas);
 
 void main() {
@@ -105,6 +107,91 @@ void main() {
     image.dispose();
     whitePicture.dispose();
     redClippedPicture.dispose();
+  });
+
+  Image backdropBlurWithTileMode(TileMode tileMode) {
+    Picture makePicture(CanvasCallback callback) {
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      callback(canvas);
+      return recorder.endRecording();
+    }
+
+    const double rectSize = 10;
+    const int count = 50;
+    const double imgSize = rectSize * count;
+
+    final Picture blueGreenGridPicture = makePicture((Canvas canvas) {
+      const Color white = Color(0xFFFFFFFF);
+      const Color purple = Color(0xFFFF00FF);
+      const Color blue = Color(0xFF0000FF);
+      const Color green = Color(0xFF00FF00);
+      const Color yellow = Color(0xFFFFFF00);
+      const Color red = Color(0xFFFF0000);
+      canvas.drawColor(white, BlendMode.src);
+      for (int i = 0; i < count; i++) {
+        for (int j = 0; j < count; j++) {
+          final bool rectOdd = (i + j) & 1 == 0;
+          final Color fg = (i < count / 2)
+            ? ((j < count / 2) ? green : blue)
+            : ((j < count / 2) ? yellow : red);
+          canvas.drawRect(Rect.fromLTWH(i * rectSize, j * rectSize, rectSize, rectSize),
+                          Paint()..color = rectOdd ? fg : white);
+        }
+      }
+      canvas.drawRect(const Rect.fromLTWH(0, 0, imgSize, 1), Paint()..color = purple);
+      canvas.drawRect(const Rect.fromLTWH(0, 0, 1, imgSize), Paint()..color = purple);
+      canvas.drawRect(const Rect.fromLTWH(0, imgSize - 1, imgSize, 1), Paint()..color = purple);
+      canvas.drawRect(const Rect.fromLTWH(imgSize - 1, 0, 1, imgSize), Paint()..color = purple);
+    });
+
+    final SceneBuilder sceneBuilder = SceneBuilder();
+    sceneBuilder.addPicture(Offset.zero, blueGreenGridPicture);
+    sceneBuilder.pushBackdropFilter(ImageFilter.blur(sigmaX: 20, sigmaY: 20, tileMode: tileMode));
+
+    final Scene scene = sceneBuilder.build();
+    final Image image = scene.toImageSync(imgSize.round(), imgSize.round());
+
+    scene.dispose();
+    blueGreenGridPicture.dispose();
+
+    return image;
+  }
+
+  test('BackdropFilter with Blur honors TileMode.decal', () async {
+    final Image image = backdropBlurWithTileMode(TileMode.decal);
+
+    final ImageComparer comparer = await ImageComparer.create();
+    await comparer.addGoldenImage(image, 'dart_ui_backdrop_filter_blur_decal_tile_mode.png');
+
+    image.dispose();
+  });
+
+  test('BackdropFilter with Blur honors TileMode.clamp', () async {
+    final Image image = backdropBlurWithTileMode(TileMode.clamp);
+
+    final ImageComparer comparer = await ImageComparer.create();
+    await comparer.addGoldenImage(image, 'dart_ui_backdrop_filter_blur_clamp_tile_mode.png');
+
+    image.dispose();
+  });
+
+  test('BackdropFilter with Blur honors TileMode.mirror', () async {
+    final Image image = backdropBlurWithTileMode(TileMode.mirror);
+
+    final ImageComparer comparer = await ImageComparer.create();
+    await comparer.addGoldenImage(image, 'dart_ui_backdrop_filter_blur_mirror_tile_mode.png');
+
+    image.dispose();
+  });
+
+  test('BackdropFilter with Blur honors TileMode.repeated', () async {
+    final Image image = backdropBlurWithTileMode(TileMode.repeated);
+
+    final ImageComparer comparer = await ImageComparer.create();
+    await comparer.addGoldenImage(image, 'dart_ui_backdrop_filter_blur_repeated_tile_mode.png');
+
+    image.dispose();
   });
 
   test('ImageFilter.matrix defaults to FilterQuality.medium', () {
