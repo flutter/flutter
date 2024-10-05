@@ -567,6 +567,15 @@ void InternalFlutterGpu_RenderPass_SetCullMode(
   pipeline_descriptor.SetCullMode(flutter::gpu::ToImpellerCullMode(cull_mode));
 }
 
+void InternalFlutterGpu_RenderPass_SetWindingOrder(
+    flutter::gpu::RenderPass* wrapper,
+    int winding_order) {
+  impeller::PipelineDescriptor& pipeline_descriptor =
+      wrapper->GetPipelineDescriptor();
+  pipeline_descriptor.SetWindingOrder(
+      flutter::gpu::ToImpellerWindingOrder(winding_order));
+}
+
 bool InternalFlutterGpu_RenderPass_Draw(flutter::gpu::RenderPass* wrapper) {
   return wrapper->Draw();
 }
