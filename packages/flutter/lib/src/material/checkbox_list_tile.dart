@@ -475,11 +475,9 @@ class CheckboxListTile extends StatelessWidget {
   // the default value to true.
   final bool internalAddSemanticForOnTap;
 
-  /// Defines the scale for [Transform.scale].
+  /// Controls the scaling factor applied to the [Checkbox] within the [CheckboxListTile].
   ///
-  /// Controls the scaling factor applied to the `Checkbox` within the [CheckboxListTile].
-  ///
-  /// If a value is not provided, a default of `1.0` will be used.
+  /// Defaults to 1.0.
   final double checkboxScaleFactor;
 
   /// {@macro flutter.material.checkbox.semanticLabel}
