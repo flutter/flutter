@@ -1888,6 +1888,120 @@ void main() {
       expect(largeTitleFinder.hitTestable(), findsOneWidget);
     },
   );
+
+  testWidgets('CupertinoSliverNavigationBar.search automatic mode', (WidgetTester tester) async {
+    const double persistentHeight = 44.0;
+    const double largeTitleHeight = 44.0;
+    const double bottomHeight = 51.0;
+    final ScrollController controller = ScrollController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar.search(
+                largeTitle: Text('Large title'),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.offset, 0.0);
+
+    final Finder largeTitleFinder = find.ancestor(
+      of: find.text('Large title').first,
+      matching: find.byType(Padding),
+    ).first;
+    final Finder bottomFinder = find.ancestor(
+      of: find.byType(CupertinoSearchTextField),
+      matching: find.byType(Padding),
+    ).first;
+
+    // The persistent navigation bar, large title, and search field are all
+    // visible.
+    expect(tester.getTopLeft(largeTitleFinder).dy, persistentHeight);
+    expect(tester.getBottomLeft(largeTitleFinder).dy, persistentHeight + largeTitleHeight);
+    expect(tester.getTopLeft(bottomFinder).dy, 96.0);
+    expect(tester.getBottomLeft(bottomFinder).dy, 96.0 + bottomHeight);
+
+    // Scroll the length of the navigation bar search text field.
+    controller.jumpTo(bottomHeight);
+    await tester.pumpAndSettle();
+
+    // The search field is hidden, but the large title remains visible.
+    expect(tester.getBottomLeft(largeTitleFinder).dy, persistentHeight + largeTitleHeight);
+    expect(tester.getBottomLeft(bottomFinder).dy - tester.getTopLeft(bottomFinder).dy, 0.0);
+
+    // Scroll until the large title scrolls under the persistent navigation bar.
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, -400.0), 10.0);
+    await tester.pumpAndSettle();
+
+    // The large title and search field are both hidden.
+    expect(tester.getBottomLeft(largeTitleFinder).dy - tester.getTopLeft(bottomFinder).dy, 0.0);
+    expect(tester.getBottomLeft(bottomFinder).dy - tester.getTopLeft(bottomFinder).dy, 0.0);
+
+    controller.dispose();
+  });
+
+  testWidgets('CupertinoSliverNavigationBar.search always mode', (WidgetTester tester) async {
+    const double persistentHeight = 44.0;
+    const double largeTitleHeight = 44.0;
+    const double bottomHeight = 51.0;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar.search(
+                largeTitle: Text('Large title'),
+                bottomMode: NavigationBarBottomMode.always,
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder largeTitleFinder = find.ancestor(
+      of: find.text('Large title').first,
+      matching: find.byType(Padding),
+    ).first;
+    final Finder bottomFinder = find.ancestor(
+      of: find.byType(CupertinoSearchTextField),
+      matching: find.byType(Padding),
+    ).first;
+
+    // The persistent navigation bar, large title, and search field are all
+    // visible.
+    expect(tester.getTopLeft(largeTitleFinder).dy, persistentHeight);
+    expect(tester.getBottomLeft(largeTitleFinder).dy, persistentHeight + largeTitleHeight);
+    expect(tester.getTopLeft(bottomFinder).dy, 96.0);
+    expect(tester.getBottomLeft(bottomFinder).dy, 96.0 + bottomHeight);
+
+    // Scroll until the large title scrolls under the persistent navigation bar.
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, -400.0), 10.0);
+    await tester.pumpAndSettle();
+
+    // Only the large title is hidden.
+    expect(tester.getBottomLeft(largeTitleFinder).dy - tester.getTopLeft(bottomFinder).dy, 0.0);
+    expect(tester.getTopLeft(bottomFinder).dy, persistentHeight);
+    expect(tester.getBottomLeft(bottomFinder).dy, persistentHeight + bottomHeight);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
