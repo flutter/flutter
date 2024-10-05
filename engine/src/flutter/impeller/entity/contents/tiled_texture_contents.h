@@ -7,13 +7,11 @@
 
 #include <functional>
 #include <memory>
-#include <vector>
 
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/entity.h"
-#include "impeller/geometry/path.h"
 #include "impeller/renderer/capabilities.h"
 
 namespace impeller {

@@ -11,8 +11,8 @@
 #include <optional>
 #include <vector>
 
+#include "display_list/effects/dl_image_filter.h"
 #include "impeller/core/sampler_descriptor.h"
-#include "impeller/display_list/image_filter.h"
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/entity.h"
@@ -132,7 +132,7 @@ class Canvas {
   void SaveLayer(
       const Paint& paint,
       std::optional<Rect> bounds = std::nullopt,
-      const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr,
+      const flutter::DlImageFilter* backdrop_filter = nullptr,
       ContentBoundsPromise bounds_promise = ContentBoundsPromise::kUnknown,
       uint32_t total_content_depth = kMaxDepth,
       bool can_distribute_opacity = false);
