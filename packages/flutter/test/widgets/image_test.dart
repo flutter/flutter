@@ -859,10 +859,6 @@ void main() {
 
     imageInfo.dispose();
     imageStreamCompleter.dispose();
-    // clone1.dispose();
-    // clone2.dispose();
-    // clone3.dispose();
-    // clone4.dispose();
     imageCache.clear();
   });
 
