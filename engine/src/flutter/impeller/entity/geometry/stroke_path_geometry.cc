@@ -581,7 +581,7 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   Scalar stroke_width = std::max(stroke_width_, min_size);
 
   auto& host_buffer = renderer.GetTransientsBuffer();
-  auto scale = entity.GetTransform().GetMaxBasisLength();
+  auto scale = entity.GetTransform().GetMaxBasisLengthXY();
 
   PositionWriter position_writer;
   auto polyline = renderer.GetTessellator()->CreateTempPolyline(path_, scale);

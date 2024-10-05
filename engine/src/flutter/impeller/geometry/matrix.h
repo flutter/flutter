@@ -295,8 +295,6 @@ struct Matrix {
 
   Scalar GetDeterminant() const;
 
-  Scalar GetMaxBasisLength() const;
-
   constexpr Scalar GetMaxBasisLengthXY() const {
     // The full basis computation requires computing the squared scaling factor
     // for translate/scale only matrices. This substantially limits the range of
