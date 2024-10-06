@@ -56,7 +56,7 @@ class AndroidStudio {
 
     Version? version;
     if (versionString != null) {
-      version = Version.parse(versionString);
+      version = _parseVersion(versionString);
     }
 
     String? pathsSelectorValue;
@@ -563,6 +563,38 @@ the configured path by running this command: flutter config --android-studio-dir
         _validationMessages.add('Unable to determine bundled Java version.');
       }
     }
+  }
+
+  static Version? _parseVersion(String? text) {
+    Match? match;
+    // Example string fort EAP: EAP AI-242.21829.142.2422.12358220
+    // We try to capture 2422 here.
+    final RegExp intellijPattern = RegExp(r'EAP\s+[A-Z]{2}-\d+\.\d+\.\d+\.(\d+)\.\d+');
+    match = intellijPattern.firstMatch(text ?? '');
+
+    if (match == null) {
+      return Version.parse(text);
+    }
+
+    final String? matched = match.group(1);
+
+    // length of 4 is because that how version is encrypted: first two digits
+    // for year (part of major version), third for minor version, fourth for patch.
+    if (matched == null || matched.length != 4) {
+      return null;
+    }
+
+    Version? result;
+    try {
+      final int major = int.parse('20${matched[0]}${matched[1]}');
+      final int minor = int.parse(matched[2]);
+      final int patch = int.parse(matched[3]);
+      result = Version(major, minor, patch);
+    } on FormatException {
+      return null;
+    }
+
+    return result;
   }
 
   @override
