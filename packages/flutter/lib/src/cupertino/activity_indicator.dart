@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -292,7 +293,7 @@ class _CupertinoLinearActivityIndicator extends CustomPainter {
       const BorderRadius.horizontal(left: Radius.circular(100)).toRRect(
         Offset.zero &
             Size(
-              progress.clamp(0.0, 1.0) * size.width,
+              clampDouble(progress, 0.0, 1.0) * size.width,
               size.height,
             ),
       ),
