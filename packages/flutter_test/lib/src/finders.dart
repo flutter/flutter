@@ -470,8 +470,8 @@ class CommonFinders {
 
   /// Finds a standard "back" button.
   ///
-  /// A common element on many user interfaces is the "back" button. This is the
-  /// button which takes the user back to the previous page/screen/state.
+  /// A common element on many user interfaces is the "back" button. This is
+  /// the button which takes the user back to the previous page/screen/state.
   ///
   /// It is useful in tests to be able to find these buttons, both for tapping
   /// them or verifying their existence, but because different platforms and
@@ -555,27 +555,10 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
-    if (!SemanticsBinding.instance.semanticsEnabled) {
-      throw StateError('Semantics are not enabled. '
-                       'Make sure to call tester.ensureSemantics() before using '
-                       'this finder, and call dispose on its return value after.');
-    }
-    return byElementPredicate(
-      (Element element) {
-        // Multiple elements can have the same renderObject - we want the "owner"
-        // of the renderObject, i.e. the RenderObjectElement.
-        if (element is! RenderObjectElement) {
-          return false;
-        }
-        final String? semanticsLabel = element.renderObject.debugSemantics?.label;
-        if (semanticsLabel == null) {
-          return false;
-        }
-        return label is RegExp
-            ? label.hasMatch(semanticsLabel)
-            : label == semanticsLabel;
-      },
+  Finder bySemanticsLabel(Pattern pattern, {bool skipOffstage = true}) {
+    return _bySemanticsProperty(
+      pattern,
+      (SemanticsNode? semantics) => semantics?.label,
       skipOffstage: skipOffstage,
     );
   }
@@ -596,7 +579,19 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder bySemanticsIdentifier(Pattern identifier, {bool skipOffstage = true}) {
+  Finder bySemanticsIdentifier(Pattern pattern, {bool skipOffstage = true}) {
+    return _bySemanticsProperty(
+      pattern,
+      (SemanticsNode? semantics) => semantics?.identifier,
+      skipOffstage: skipOffstage,
+    );
+  }
+
+  Finder _bySemanticsProperty(
+    Pattern pattern,
+    String? Function(SemanticsNode?) propertyGetter,
+    {bool skipOffstage = true}
+  ) {
     if (!SemanticsBinding.instance.semanticsEnabled) {
       throw StateError(
         'Semantics are not enabled. '
@@ -611,13 +606,13 @@ class CommonFinders {
         if (element is! RenderObjectElement) {
           return false;
         }
-        final String? semanticsIdentifier = element.renderObject.debugSemantics?.identifier;
-        if (semanticsIdentifier == null) {
+        final String? propertyValue = propertyGetter(element.renderObject.debugSemantics);
+        if (propertyValue == null) {
           return false;
         }
-        return identifier is RegExp
-            ? identifier.hasMatch(semanticsIdentifier)
-            : identifier == semanticsIdentifier;
+        return pattern is RegExp
+            ? pattern.hasMatch(propertyValue)
+            : pattern == propertyValue;
       },
       skipOffstage: skipOffstage,
     );
