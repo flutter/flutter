@@ -165,20 +165,20 @@ String generateDateFormattingLogic(Message message) {
         );
       }
       if (placeholder.hasValidDateFormat) {
+        // 'format' can contain a number of date time formats separated by `dateFormatPartsDelimeter`.
+        // The first format is the main format, and the rest are added formats.
         final List<String> formatParts = placeholderFormat.split(dateFormatPartsDelimiter);
         final String mainFormat = formatParts.first;
-        final List<String> addFormats = formatParts.skip(1).toList();
+        final List<String> addedFormats = formatParts.skip(1).toList();
 
-        // 'format' can contain a number of date time formats separated by dateFormatPartsDelimeter.
-        // The first format is the main format, and the rest are additional formats.
-        final String addedFormatsString = addFormats.map((String addFormat) {
+        final String addedFormatsString = addedFormats.map((String addFormat) {
           return dateFormatAddFormatTemplate.replaceAll('@(format)', addFormat);
         }).join();
 
         return dateFormatTemplate
           .replaceAll('@(placeholder)', placeholder.name)
           .replaceAll('@(format)', mainFormat)
-          .replaceAll('@(addFormats)', addedFormatsString);
+          .replaceAll('@(addedFormats)', addedFormatsString);
       }
       return dateFormatCustomTemplate
         .replaceAll('@(placeholder)', placeholder.name)

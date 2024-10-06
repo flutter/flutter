@@ -133,6 +133,7 @@ void main() {
       '#l10n 75 (she)\n'
       '#l10n 76 (6/26/2023)\n'
       '#l10n 77 (5:23:00 AM)\n'
+      '#l10n 78 (10/6/2024 11:29:48 PM and Tuesday, July 4, 2000 12:54:32 3rd quarter)\n'
       '#l10n 78 (--- es ---)\n'
       '#l10n 79 (ES - Hello world)\n'
       '#l10n 80 (ES - Hello _NEWLINE_ World)\n'
