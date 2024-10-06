@@ -200,6 +200,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.radioScaleFactor = 1.0,
     this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false,
@@ -240,6 +241,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.radioScaleFactor = 1.0,
     this.useCupertinoCheckmarkStyle = false,
     this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.adaptive,
@@ -468,43 +470,54 @@ class RadioListTile<T> extends StatelessWidget {
   /// Defaults to false.
   final bool useCupertinoCheckmarkStyle;
 
+  /// Controls the scaling factor applied to the [Radio] within the [RadioListTile].
+  ///
+  /// Defaults to 1.0.
+  final double radioScaleFactor;
+
   @override
   Widget build(BuildContext context) {
     final Widget control;
     switch (_radioType) {
       case _RadioType.material:
         control = ExcludeFocus(
-          child: Radio<T>(
-            value: value,
-            groupValue: groupValue,
-            onChanged: onChanged,
-            toggleable: toggleable,
-            activeColor: activeColor,
-            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-            autofocus: autofocus,
-            fillColor: fillColor,
-            mouseCursor: mouseCursor,
-            hoverColor: hoverColor,
-            overlayColor: overlayColor,
-            splashRadius: splashRadius,
+          child: Transform.scale(
+            scale: radioScaleFactor,
+            child: Radio<T>(
+              value: value,
+              groupValue: groupValue,
+              onChanged: onChanged,
+              toggleable: toggleable,
+              activeColor: activeColor,
+              materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+              autofocus: autofocus,
+              fillColor: fillColor,
+              mouseCursor: mouseCursor,
+              hoverColor: hoverColor,
+              overlayColor: overlayColor,
+              splashRadius: splashRadius,
+            ),
           ),
         );
       case _RadioType.adaptive:
         control = ExcludeFocus(
-          child: Radio<T>.adaptive(
-            value: value,
-            groupValue: groupValue,
-            onChanged: onChanged,
-            toggleable: toggleable,
-            activeColor: activeColor,
-            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-            autofocus: autofocus,
-            fillColor: fillColor,
-            mouseCursor: mouseCursor,
-            hoverColor: hoverColor,
-            overlayColor: overlayColor,
-            splashRadius: splashRadius,
-            useCupertinoCheckmarkStyle: useCupertinoCheckmarkStyle,
+          child: Transform.scale(
+            scale: radioScaleFactor,
+            child: Radio<T>.adaptive(
+              value: value,
+              groupValue: groupValue,
+              onChanged: onChanged,
+              toggleable: toggleable,
+              activeColor: activeColor,
+              materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+              autofocus: autofocus,
+              fillColor: fillColor,
+              mouseCursor: mouseCursor,
+              hoverColor: hoverColor,
+              overlayColor: overlayColor,
+              splashRadius: splashRadius,
+              useCupertinoCheckmarkStyle: useCupertinoCheckmarkStyle,
+            ),
           ),
         );
     }
