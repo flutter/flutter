@@ -205,6 +205,7 @@ class CheckboxListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.checkboxSemanticLabel,
+    this.checkboxScaleFactor = 1.0,
     this.internalAddSemanticForOnTap = false,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null),
@@ -250,6 +251,7 @@ class CheckboxListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.checkboxSemanticLabel,
+    this.checkboxScaleFactor = 1.0,
     this.internalAddSemanticForOnTap = false,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null),
@@ -473,6 +475,11 @@ class CheckboxListTile extends StatelessWidget {
   // the default value to true.
   final bool internalAddSemanticForOnTap;
 
+  /// Controls the scaling factor applied to the [Checkbox] within the [CheckboxListTile].
+  ///
+  /// Defaults to 1.0.
+  final double checkboxScaleFactor;
+
   /// {@macro flutter.material.checkbox.semanticLabel}
   final String? checkboxSemanticLabel;
 
@@ -497,44 +504,50 @@ class CheckboxListTile extends StatelessWidget {
     switch (_checkboxType) {
       case _CheckboxType.material:
         control = ExcludeFocus(
-          child: Checkbox(
-            value: value,
-            onChanged: enabled ?? true ? onChanged : null,
-            mouseCursor: mouseCursor,
-            activeColor: activeColor,
-            fillColor: fillColor,
-            checkColor: checkColor,
-            hoverColor: hoverColor,
-            overlayColor: overlayColor,
-            splashRadius: splashRadius,
-            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-            autofocus: autofocus,
-            tristate: tristate,
-            shape: checkboxShape,
-            side: side,
-            isError: isError,
-            semanticLabel: checkboxSemanticLabel,
+          child: Transform.scale(
+            scale: checkboxScaleFactor,
+            child: Checkbox(
+              value: value,
+              onChanged: enabled ?? true ? onChanged : null,
+              mouseCursor: mouseCursor,
+              activeColor: activeColor,
+              fillColor: fillColor,
+              checkColor: checkColor,
+              hoverColor: hoverColor,
+              overlayColor: overlayColor,
+              splashRadius: splashRadius,
+              materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+              autofocus: autofocus,
+              tristate: tristate,
+              shape: checkboxShape,
+              side: side,
+              isError: isError,
+              semanticLabel: checkboxSemanticLabel,
+            ),
           ),
         );
       case _CheckboxType.adaptive:
         control = ExcludeFocus(
-          child: Checkbox.adaptive(
-            value: value,
-            onChanged: enabled ?? true ? onChanged : null,
-            mouseCursor: mouseCursor,
-            activeColor: activeColor,
-            fillColor: fillColor,
-            checkColor: checkColor,
-            hoverColor: hoverColor,
-            overlayColor: overlayColor,
-            splashRadius: splashRadius,
-            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-            autofocus: autofocus,
-            tristate: tristate,
-            shape: checkboxShape,
-            side: side,
-            isError: isError,
-            semanticLabel: checkboxSemanticLabel,
+          child: Transform.scale(
+            scale: checkboxScaleFactor,
+            child: Checkbox.adaptive(
+              value: value,
+              onChanged: enabled ?? true ? onChanged : null,
+              mouseCursor: mouseCursor,
+              activeColor: activeColor,
+              fillColor: fillColor,
+              checkColor: checkColor,
+              hoverColor: hoverColor,
+              overlayColor: overlayColor,
+              splashRadius: splashRadius,
+              materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+              autofocus: autofocus,
+              tristate: tristate,
+              shape: checkboxShape,
+              side: side,
+              isError: isError,
+              semanticLabel: checkboxSemanticLabel,
+            ),
           ),
         );
     }
