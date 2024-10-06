@@ -72,6 +72,8 @@ const Set<String> validDateFormats = <String>{
   's',
 };
 
+const String dateFormatPartsDelimiter = '+';
+
 // The set of number formats that can be automatically localized.
 //
 // The localizations generation tool makes use of the intl library's
@@ -252,7 +254,7 @@ class Placeholder {
   bool get requiresNumFormatting => <String>['int', 'num', 'double'].contains(type) && format != null;
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
-  bool get hasValidDateFormat => validDateFormats.contains(format);
+  bool get hasValidDateFormat => format?.split(dateFormatPartsDelimiter).every(validDateFormats.contains) ?? false;
 
   static String? _stringAttribute(
     String resourceId,
