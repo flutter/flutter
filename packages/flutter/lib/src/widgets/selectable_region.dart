@@ -662,6 +662,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
               return;
             }
+            clearSelection();
             _collapseSelectionAt(offset: details.globalPosition);
             _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
         }
@@ -3122,12 +3123,17 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
   SelectableRegionState selectableRegionState,
 );
 
+enum SelectionListenerStatus {
+  changed,
+  finalized,
+}
+
 /// Signature for the callback that reports when the user changes the selection
 /// under a [SelectionListener].
 ///
 /// The [selectionDetails] object provides information about the active selection
 /// contained under the [SelectionListener] this callback is provided to.
-typedef SelectionListenerSelectionChangedCallback = void Function(SelectionDetails selectionDetails);
+typedef SelectionListenerStatusCallback = void Function(SelectionListenerStatus status);
 
 /// A [SelectionContainer] that allows the user to listen to selection changes
 /// for the child subtree it wraps under a [SelectionArea] or [SelectableRegion].
@@ -3158,13 +3164,11 @@ class SelectionListener extends StatefulWidget {
   /// Create a new [SelectionListener] widget.
   const SelectionListener({
     super.key,
-    required this.onSelectionChanged,
+    required this.controller,
     required this.child,
   });
 
-  /// Called when the user changes the selection of children [Selectable]s
-  /// registered to its local [SelectionRegistrar].
-  final SelectionListenerSelectionChangedCallback onSelectionChanged;
+  final SelectionListenerController controller;
 
   /// The child widget this selection listener applies to.
   ///
@@ -3176,13 +3180,13 @@ class SelectionListener extends StatefulWidget {
 }
 
 class _SelectionListenerState extends State<SelectionListener> {
-  late final _SelectionListenerDelegate _selectionDelegate = _SelectionListenerDelegate(onSelectionChanged: widget.onSelectionChanged);
+  late final _SelectionListenerDelegate _selectionDelegate = _SelectionListenerDelegate(controller: widget.controller);
 
   @override
   void didUpdateWidget(SelectionListener oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.onSelectionChanged != widget.onSelectionChanged) {
-      _selectionDelegate.onSelectionChanged = widget.onSelectionChanged;
+    if (oldWidget.controller != widget.controller) {
+      _selectionDelegate.setController(widget.controller);
     }
   }
 
@@ -3202,28 +3206,39 @@ class _SelectionListenerState extends State<SelectionListener> {
 }
 
 class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
-  _SelectionListenerDelegate({required this.onSelectionChanged});
+  _SelectionListenerDelegate({
+    required SelectionListenerController controller,
+  }) : _controller = controller {
+    _controller._registerSelectionListenerDelegate(this);
+  }
 
-  SelectionListenerSelectionChangedCallback onSelectionChanged;
+  SelectionListenerController _controller;
+  void setController(SelectionListenerController newController) {
+    _controller = newController;
+    _controller._registerSelectionListenerDelegate(this);
+  }
 
-  SelectionDetails? _lastFinalizedDetails;
+  bool _lastEventChangedGeometry = false;
+
+  @override
+  void dispose() {
+    _controller._unregisterSelectionListenerDelegate();
+    super.dispose();
+  }
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
     final SelectionGeometry lastSelectionGeometry = value;
     final SelectionResult result = super.dispatchSelectionEvent(event);
     if (lastSelectionGeometry != value) {
-      onSelectionChanged.call(_getDetails());
-    }
-    // A selection finalized selection event will not affect the selection
-    // geometry, so we compare the selection details at the last finalized event
-    // to determine if we should call our onSelectionChanged callback.
-    if (event is SelectionFinalizedSelectionEvent) {
-      final SelectionDetails currentFinalizedDetails = _getDetails();
-      if (_lastFinalizedDetails != currentFinalizedDetails) {
-        onSelectionChanged.call(currentFinalizedDetails);
-        _lastFinalizedDetails = currentFinalizedDetails;
-      }
+      _lastEventChangedGeometry = true;
+      _controller.notifyListeners();
+    } else if (event is SelectionFinalizedSelectionEvent && _lastEventChangedGeometry) {
+      debugPrint('finalized');
+      _controller.notifyListeners();
+      _lastEventChangedGeometry = false;
+    } else {
+      _lastEventChangedGeometry = false;
     }
     return result;
   }
@@ -3236,6 +3251,28 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
       localStartOffset: range.startOffset,
       localEndOffset: range.endOffset,
     );
+  }
+}
+
+final class SelectionListenerController extends ChangeNotifier {
+  _SelectionListenerDelegate? _selectionDelegate;
+
+  SelectionDetails get value => _selectionDelegate?._getDetails() ?? (throw Exception('Selection client has not been registered to this controller.'));
+
+  SelectionStatus get selectionStatus => _selectionDelegate?.value.status ?? (throw Exception('Selection client has not been registered to this controller.'));
+
+  @override
+  void dispose() {
+    _unregisterSelectionListenerDelegate();
+    super.dispose();
+  }
+
+  void _registerSelectionListenerDelegate(_SelectionListenerDelegate selectionListenerDelegate) {
+    _selectionDelegate = selectionListenerDelegate;
+  }
+
+  void _unregisterSelectionListenerDelegate() {
+    _selectionDelegate = null;
   }
 }
 
