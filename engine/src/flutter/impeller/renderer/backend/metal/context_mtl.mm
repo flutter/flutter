@@ -383,7 +383,7 @@ void ContextMTL::StoreTaskForGPU(const fml::closure& task,
                                  const fml::closure& failure) {
   tasks_awaiting_gpu_.push_back(PendingTasks{task, failure});
   while (tasks_awaiting_gpu_.size() > kMaxTasksAwaitingGPU) {
-    PendingTasks front = std::move(tasks_awaiting_gpu_.front());
+    const PendingTasks& front = tasks_awaiting_gpu_.front();
     if (front.failure) {
       front.failure();
     }
