@@ -25,9 +25,16 @@ import 'theme.dart';
 /// Modes that determine when to display the navigation bar's bottom.
 enum NavigationBarBottomMode {
   /// Enable hiding the bottom in response to scrolling.
+  ///
+  /// As scrolling starts, the large title stays pinned while the bottom resizes
+  /// until it is completely flattened. Then, the large title scrolls under the
+  /// persistent navigation bar.
   automatic,
 
   /// Always display the bottom regardless of the scroll activity.
+  ///
+  /// When scrolled, the bottom stays pinned while the large title scrolls under
+  /// the persistent navigation bar.
   always,
 }
 
@@ -983,7 +990,7 @@ class _LargeTitleNavigationBarSliverDelegate
   final double bottomHeight;
 
   @override
-  double get minExtent => persistentHeight + (bottomMode == NavigationBarBottomMode.always ? bottomHeight: 0.0);
+  double get minExtent => persistentHeight + (bottomMode == NavigationBarBottomMode.always ? bottomHeight : 0.0);
 
   @override
   double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension + bottomHeight;
