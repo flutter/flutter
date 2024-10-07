@@ -1557,6 +1557,15 @@ class ThemeData with Diagnosticable {
         throw ArgumentError('dialogTheme must be either a DialogThemeData or a DialogTheme');
       }
     }
+
+    // TODO(QuncCccccc): Clean this up once the type of `tabBarTheme` is changed to `TabBarThemeData`
+    if (tabBarTheme != null) {
+      if (tabBarTheme is TabBarTheme) {
+        tabBarTheme = tabBarTheme.data;
+      } else if (tabBarTheme is! TabBarThemeData) {
+        throw ArgumentError('tabBarTheme must be either a TabBarThemeData or a TabBarTheme');
+      }
+    }
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
