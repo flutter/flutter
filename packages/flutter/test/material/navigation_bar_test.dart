@@ -1145,7 +1145,9 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(NavigationIndicator).last));
     await tester.pumpAndSettle();
 
-    final SplashController controller = Material.of(tester.element(find.text('AC')));
+    // This test extracts the controller from the allRenderObjects iterable
+    // in order to prevent some wonkiness when running via skwasm.
+    final RenderObject controller = tester.allRenderObjects.firstWhere((RenderObject object) => object is SplashController);
 
     // Test hovered state.
     expect(
