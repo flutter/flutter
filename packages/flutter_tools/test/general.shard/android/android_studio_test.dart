@@ -261,6 +261,7 @@ void main() {
         homeMac,
         'Library',
         'Application Support',
+        'Google',
         'AndroidStudioPreview2022.3',
       )));
       expect(studio.validationMessages, <String>['Java version 123']);
