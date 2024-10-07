@@ -342,13 +342,11 @@ class FlutterDevice {
       if (completer.isCompleted) {
         return;
       }
-
       globals.printTrace('Successfully connected to service protocol: $vmServiceUri');
 
-      await (await device!.getLogReader(app: package))
-          .provideVmService(service!);
-
       vmService = service;
+      await (await device!.getLogReader(app: package))
+          .provideVmService(vmService!);
       completer.complete();
       await subscription.cancel();
     }, onError: (dynamic error) {
