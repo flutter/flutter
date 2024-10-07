@@ -1,8 +1,8 @@
 def scriptFile = getClass().protectionDomain.codeSource.location.toURI()
 def flutterProjectRoot = new File(scriptFile).parentFile.parentFile
 
-gradle.include ":flutter"
-gradle.project(":flutter").projectDir = new File(flutterProjectRoot, ".android/Flutter")
+include ":flutter"
+project(":flutter").projectDir = new File(flutterProjectRoot, ".android/Flutter")
 
 def localPropertiesFile = new File(flutterProjectRoot, ".android/local.properties")
 def properties = new Properties()
@@ -13,4 +13,4 @@ localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
 
 def flutterSdkPath = properties.getProperty("flutter.sdk")
 assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
-gradle.apply from: "$flutterSdkPath/packages/flutter_tools/gradle/module_plugin_loader.gradle"
+apply from: "$flutterSdkPath/packages/flutter_tools/gradle/module_plugin_loader.gradle"
