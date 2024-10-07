@@ -348,7 +348,8 @@ class ThemeData with Diagnosticable {
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
     SwitchThemeData? switchTheme,
-    TabBarThemeData? tabBarTheme,
+    // TODO(QuncCccccc): Change the parameter type to TabBarThemeData
+    Object? tabBarTheme,
     TextButtonThemeData? textButtonTheme,
     TextSelectionThemeData? textSelectionTheme,
     TimePickerThemeData? timePickerTheme,
@@ -541,6 +542,14 @@ class ThemeData with Diagnosticable {
     sliderTheme ??= const SliderThemeData();
     snackBarTheme ??= const SnackBarThemeData();
     switchTheme ??= const SwitchThemeData();
+    // TODO(QuncCccccc): Clean this up once the type of `tabBarTheme` is changed to `TabBarThemeData`
+    if (tabBarTheme != null) {
+      if (tabBarTheme is TabBarTheme) {
+        tabBarTheme = tabBarTheme.data;
+      } else if (tabBarTheme is! TabBarThemeData) {
+        throw ArgumentError('tabBarTheme must be either a TabBarThemeData or a TabBarTheme');
+      }
+    }
     tabBarTheme ??= const TabBarThemeData();
     textButtonTheme ??= const TextButtonThemeData();
     textSelectionTheme ??= const TextSelectionThemeData();
@@ -634,7 +643,7 @@ class ThemeData with Diagnosticable {
       sliderTheme: sliderTheme,
       snackBarTheme: snackBarTheme,
       switchTheme: switchTheme,
-      tabBarTheme: tabBarTheme,
+      tabBarTheme: tabBarTheme as TabBarThemeData,
       textButtonTheme: textButtonTheme,
       textSelectionTheme: textSelectionTheme,
       timePickerTheme: timePickerTheme,
@@ -1507,7 +1516,8 @@ class ThemeData with Diagnosticable {
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
     SwitchThemeData? switchTheme,
-    TabBarThemeData? tabBarTheme,
+    // TODO(QuncCccccc): Change the parameter type to TabBarThemeData
+    Object? tabBarTheme,
     TextButtonThemeData? textButtonTheme,
     TextSelectionThemeData? textSelectionTheme,
     TimePickerThemeData? timePickerTheme,
@@ -1634,7 +1644,7 @@ class ThemeData with Diagnosticable {
       sliderTheme: sliderTheme ?? this.sliderTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
       switchTheme: switchTheme ?? this.switchTheme,
-      tabBarTheme: tabBarTheme ?? this.tabBarTheme,
+      tabBarTheme: tabBarTheme as TabBarThemeData? ?? this.tabBarTheme,
       textButtonTheme: textButtonTheme ?? this.textButtonTheme,
       textSelectionTheme: textSelectionTheme ?? this.textSelectionTheme,
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
