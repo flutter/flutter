@@ -992,6 +992,7 @@ class Home extends StatelessWidget {
               "${localizations.selectInPlural(gender: 'female', count: 1)}",
               '${localizations.datetime1(today: DateTime(2023, 6, 26))}',
               '${localizations.datetime2(current: DateTime(2023, 6, 26, 5, 23))}',
+              '${localizations.datetimeAddedFormats(firstDate: DateTime(2024, 10, 6, 23, 29, 48), secondDate: DateTime(2000, 7, 4, 12, 54, 32))}',
             ]);
           },
         ),
