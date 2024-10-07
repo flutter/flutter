@@ -3,4 +3,4 @@
 // found in the LICENSE file.
 
 include ':SampleApp'
-apply from: settingsDir.parentFile.toString() + 'hello/.android/include_flutter.groovy'
+apply from: settingsDir.parentFile.toString() + '/hello/.android/include_flutter.groovy'
