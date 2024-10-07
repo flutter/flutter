@@ -149,7 +149,82 @@ class InteractiveViewer extends StatefulWidget {
        constrained = false,
        child = null;
 
-  /// Transform the child by applying a transformation matrix.
+  /// When laying out the child InteractiveViewer applies a transform based on the current
+  /// [Matrix4] defined in the [TransformationController] and will translate all the hit tests as well.
+  ///
+  /// Due to the way gestures work in Flutter if a child is in an negative offset of it's parent then
+  /// hit tests are skipped. For example you could have a Stack with clip none and negative offset
+  /// for the [Positioned] widget.
+  ///
+  /// ```dart
+  /// InteractiveViewer(
+  ///   child: Stack(
+  ///     clipBehavior: Clip.none,
+  ///     children: [
+  ///       Positioned(
+  ///         top: -20,
+  ///         left: -20,
+  ///         child: InkWell(
+  ///           onTap: () => print('A clicked'),
+  ///           child: Text('A'),
+  ///         ),
+  ///       ),
+  ///       Positioned(
+  ///         top: 50,
+  ///         left: 20,
+  ///         child: InkWell(
+  ///           onTap: () => print('B clicked'),
+  ///           child: Text('B'),
+  ///         ),
+  ///       ),
+  ///     ],
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// In the above example 'B' can receive hit tests, but 'A' will not register any interactions. This happens
+  /// for [Stack], [CustomMultiChildLayout], or any widget that can position children irregardless
+  /// if the parent is [InteractiveViewer].
+  ///
+  /// This is fine for non interactive elements and in most cases having `transformChild` set to [true] will be
+  /// the desired behavior.
+  ///
+  /// However if you need hit tests for all children you can set `transformChild` to [false] and
+  /// handle child transforms manually.
+  ///
+  /// ```dart
+  /// final controller = TransformationController();
+  /// final children = [...];
+  /// ...
+  /// InteractiveViewer.builder(
+  ///   controller: controller,
+  ///   transformChild: false,
+  ///   builder: (context, quad) => Stack(
+  ///     clipBehavior: Clip.none,
+  ///     children: [
+  ///      for (final child in children)
+  ///       (){
+  ///          final matrix = controller.value;
+  ///          final rect = MatrixUtils.transformRect(matrix, child.rect);
+  ///          return Positioned(
+  ///            top: rect.dy,
+  ///            left: rect.dx,
+  ///            child: Container(
+  ///              width: rect.width,
+  ///              height: rect.height,
+  ///              child: InkWell(
+  ///                onTap: () => print('Child clicked'),
+  ///                child: Text('Child'),
+  ///             ),
+  ///           ),
+  ///         );
+  ///       }(),
+  ///     ],
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// Now the child will never exceed the bounds of the parent and always stay static preserving hit tests.
   final bool transformChild;
 
   /// The alignment of the child's origin, relative to the size of the box.
