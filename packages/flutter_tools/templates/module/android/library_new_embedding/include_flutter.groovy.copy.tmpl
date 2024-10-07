@@ -1,5 +1,5 @@
-def scriptFile = getClass().protectionDomain.codeSource.location.toURI()
-def flutterProjectRoot = new File(scriptFile).parentFile.parentFile
+def scriptFile = buildscript.sourceFile
+def flutterProjectRoot = scriptFile.parentFile.parentFile
 
 include ":flutter"
 project(":flutter").projectDir = new File(flutterProjectRoot, ".android/Flutter")
