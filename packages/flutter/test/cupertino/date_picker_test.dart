@@ -260,7 +260,7 @@ void main() {
     });
   });
 
-  testWidgets('showDayOfWeek is supported only in date mode', (WidgetTester tester) async {
+  testWidgets('showDayOfWeek is only supported in date mode', (WidgetTester tester) async {
     expect(
       () => CupertinoDatePicker(
         mode: CupertinoDatePickerMode.date,
@@ -276,7 +276,11 @@ void main() {
         onDateTimeChanged: (_) {},
         showDayOfWeek: true,
       ),
-      throwsAssertionError,
+      throwsA(isA<AssertionError>().having(
+      (e) => e.message,
+      'message',
+      contains('showDayOfWeek is only supported in date mode'),
+      )),
     );
 
     expect(
@@ -285,7 +289,11 @@ void main() {
         onDateTimeChanged: (_) {},
         showDayOfWeek: true,
       ),
-      throwsAssertionError,
+      throwsA(isA<AssertionError>().having(
+      (e) => e.message,
+      'message',
+      contains('showDayOfWeek is only supported in date mode'),
+      )),
     );
 
     expect(
@@ -293,7 +301,11 @@ void main() {
         onDateTimeChanged: (_) {},
         showDayOfWeek: true,
       ),
-      throwsAssertionError,
+      throwsA(isA<AssertionError>().having(
+      (e) => e.message,
+      'message',
+      contains('showDayOfWeek is only supported in date mode'),
+      )),
     );
   });
 
