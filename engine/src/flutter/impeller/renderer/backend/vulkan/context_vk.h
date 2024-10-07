@@ -219,9 +219,6 @@ class ContextVK final : public Context,
 
   void Setup(Settings settings);
 
-  std::unique_ptr<CommandEncoderFactoryVK> CreateGraphicsCommandEncoderFactory()
-      const;
-
   ContextVK(const ContextVK&) = delete;
 
   ContextVK& operator=(const ContextVK&) = delete;

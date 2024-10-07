@@ -13,7 +13,6 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h"
-#include "flutter/impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"
 #include "flutter/impeller/toolkit/android/hardware_buffer.h"
@@ -57,8 +56,8 @@ static bool SetTextureLayout(const ContextVK& context,
     return false;
   }
   command_buffer->SetLabel("GLVKTextureLayoutUpdateCB");
-  const auto& encoder = CommandBufferVK::Cast(*command_buffer).GetEncoder();
-  const auto command_buffer_vk = encoder->GetCommandBuffer();
+  const CommandBufferVK& encoder = CommandBufferVK::Cast(*command_buffer);
+  const auto command_buffer_vk = encoder.GetCommandBuffer();
 
   BarrierVK barrier;
   barrier.cmd_buffer = command_buffer_vk;
@@ -75,7 +74,7 @@ static bool SetTextureLayout(const ContextVK& context,
     return false;
   }
 
-  encoder->EndCommandBuffer();
+  encoder.EndCommandBuffer();
 
   vk::SubmitInfo submit_info;
   submit_info.setCommandBuffers(command_buffer_vk);

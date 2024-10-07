@@ -15,7 +15,6 @@
 #include "impeller/core/texture.h"
 #include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
-#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -81,7 +80,7 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     const std::shared_ptr<CommandBufferVK>& command_buffer) const {
   BarrierVK barrier;
   barrier.new_layout = vk::ImageLayout::eGeneral;
-  barrier.cmd_buffer = command_buffer->GetEncoder()->GetCommandBuffer();
+  barrier.cmd_buffer = command_buffer->GetCommandBuffer();
   barrier.src_access = vk::AccessFlagBits::eShaderRead;
   barrier.src_stage = vk::PipelineStageFlagBits::eFragmentShader;
   barrier.dst_access = vk::AccessFlagBits::eColorAttachmentWrite |
@@ -148,15 +147,12 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
       render_target_.GetColorAttachments().find(0u)->second.resolve_texture;
 
   const auto& vk_context = ContextVK::Cast(*context);
-  const std::shared_ptr<CommandEncoderVK>& encoder =
-      command_buffer_->GetEncoder();
-  command_buffer_vk_ = encoder->GetCommandBuffer();
-  render_target_.IterateAllAttachments(
-      [&encoder](const auto& attachment) -> bool {
-        encoder->Track(attachment.texture);
-        encoder->Track(attachment.resolve_texture);
-        return true;
-      });
+  command_buffer_vk_ = command_buffer_->GetCommandBuffer();
+  render_target_.IterateAllAttachments([&](const auto& attachment) -> bool {
+    command_buffer_->Track(attachment.texture);
+    command_buffer_->Track(attachment.resolve_texture);
+    return true;
+  });
 
   SharedHandleVK<vk::RenderPass> recycled_render_pass;
   SharedHandleVK<vk::Framebuffer> recycled_framebuffer;
@@ -186,7 +182,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
     return;
   }
 
-  if (!encoder->Track(framebuffer) || !encoder->Track(render_pass_)) {
+  if (!command_buffer_->Track(framebuffer) ||
+      !command_buffer_->Track(render_pass_)) {
     is_valid_ = false;
     return;
   }
@@ -329,7 +326,7 @@ void RenderPassVK::SetPipeline(
 // |RenderPass|
 void RenderPassVK::SetCommandLabel(std::string_view label) {
 #ifdef IMPELLER_DEBUG
-  command_buffer_->GetEncoder()->PushDebugGroup(label);
+  command_buffer_->PushDebugGroup(label);
   has_label_ = true;
 #endif  // IMPELLER_DEBUG
 }
@@ -377,7 +374,7 @@ bool RenderPassVK::SetVertexBuffer(VertexBuffer buffer) {
     return false;
   }
 
-  if (!command_buffer_->GetEncoder()->Track(buffer.vertex_buffer.buffer)) {
+  if (!command_buffer_->Track(buffer.vertex_buffer.buffer)) {
     return false;
   }
 
@@ -406,7 +403,7 @@ bool RenderPassVK::SetVertexBuffer(VertexBuffer buffer) {
       return false;
     }
 
-    if (!command_buffer_->GetEncoder()->Track(index_buffer)) {
+    if (!command_buffer_->Track(index_buffer)) {
       return false;
     }
 
@@ -460,9 +457,8 @@ fml::Status RenderPassVK::Draw() {
   const auto& context_vk = ContextVK::Cast(*context_);
   const auto& pipeline_vk = PipelineVK::Cast(*pipeline_);
 
-  auto descriptor_result =
-      command_buffer_->GetEncoder()->AllocateDescriptorSets(
-          pipeline_vk.GetDescriptorSetLayout(), context_vk);
+  auto descriptor_result = command_buffer_->AllocateDescriptorSets(
+      pipeline_vk.GetDescriptorSetLayout(), context_vk);
   if (!descriptor_result.ok()) {
     return fml::Status(fml::StatusCode::kAborted,
                        "Could not allocate descriptor sets.");
@@ -511,7 +507,7 @@ fml::Status RenderPassVK::Draw() {
 
 #ifdef IMPELLER_DEBUG
   if (has_label_) {
-    command_buffer_->GetEncoder()->PopDebugGroup();
+    command_buffer_->PopDebugGroup();
   }
 #endif  // IMPELLER_DEBUG
   has_label_ = false;
@@ -560,7 +556,7 @@ bool RenderPassVK::BindResource(size_t binding,
     return false;
   }
 
-  if (!command_buffer_->GetEncoder()->Track(device_buffer)) {
+  if (!command_buffer_->Track(device_buffer)) {
     return false;
   }
 
@@ -597,7 +593,7 @@ bool RenderPassVK::BindResource(ShaderStage stage,
   const TextureVK& texture_vk = TextureVK::Cast(*texture);
   const SamplerVK& sampler_vk = SamplerVK::Cast(*sampler);
 
-  if (!command_buffer_->GetEncoder()->Track(texture)) {
+  if (!command_buffer_->Track(texture)) {
     return false;
   }
 
@@ -622,7 +618,7 @@ bool RenderPassVK::BindResource(ShaderStage stage,
 }
 
 bool RenderPassVK::OnEncodeCommands(const Context& context) const {
-  command_buffer_->GetEncoder()->GetCommandBuffer().endRenderPass();
+  command_buffer_->GetCommandBuffer().endRenderPass();
 
   // If this render target will be consumed by a subsequent render pass,
   // perform a layout transition to a shader read state.

@@ -13,10 +13,7 @@
 #include "fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
-#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
-
-#include "vulkan/vulkan.hpp"
 
 namespace impeller {
 
@@ -62,7 +59,7 @@ void GPUTracerVK::InitializeQueryPool(const ContextVK& context) {
       return;
     }
     trace_states_[i].query_pool = std::move(pool);
-    buffer_vk.GetEncoder()->GetCommandBuffer().resetQueryPool(
+    buffer_vk.GetCommandBuffer().resetQueryPool(
         trace_states_[i].query_pool.get(), 0, kPoolSize);
   }
   if (!context.GetCommandQueue()->Submit({buffer}).ok()) {
