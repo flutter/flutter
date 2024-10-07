@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:vm_service/src/vm_service.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../application_package.dart';
 import '../base/common.dart' show throwToolExit;
@@ -1116,10 +1116,8 @@ class AdbLogReader extends DeviceLogReader {
   Stream<String> get logLines => _linesController.stream;
 
   @override
-  Future<void> provideVmService(FlutterVmService? connectedVmService) async {
-    // TODO for review: could connectedVmService ever be null? If it could be
-    // should we throw a separate exception for this?
-    final VM? vm = await connectedVmService?.getVmGuarded();
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {
+    final VM? vm = await connectedVmService.getVmGuarded();
     if (vm == null) {
       _logger.printError('An error occurred when setting up filtering for adb logs. '
         'Unable to communicate with the VM service.');

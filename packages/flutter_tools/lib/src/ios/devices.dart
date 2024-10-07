@@ -1305,7 +1305,6 @@ class IOSDeviceLogReader extends DeviceLogReader {
   @override
   Future<void> provideVmService(FlutterVmService? connectedVmService) async {
     if (connectedVmService != null) {
-      // TODO for reviewer: I wonder if not awaiting this beforehand was a bug?
       await _listenToUnifiedLoggingEvents(connectedVmService);
       _connectedVmService = connectedVmService;
     }
