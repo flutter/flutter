@@ -555,9 +555,9 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder bySemanticsLabel(Pattern pattern, {bool skipOffstage = true}) {
+  Finder bySemanticsLabel(Pattern label, {bool skipOffstage = true}) {
     return _bySemanticsProperty(
-      pattern,
+      label,
       (SemanticsNode? semantics) => semantics?.label,
       skipOffstage: skipOffstage,
     );
@@ -579,9 +579,9 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder bySemanticsIdentifier(Pattern pattern, {bool skipOffstage = true}) {
+  Finder bySemanticsIdentifier(Pattern identifier, {bool skipOffstage = true}) {
     return _bySemanticsProperty(
-      pattern,
+      identifier,
       (SemanticsNode? semantics) => semantics?.identifier,
       skipOffstage: skipOffstage,
     );
