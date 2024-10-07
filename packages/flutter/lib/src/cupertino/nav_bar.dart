@@ -715,12 +715,16 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.heroTag = _defaultHeroTag,
     this.stretch = false,
     this.bottom,
-    this.bottomMode = NavigationBarBottomMode.automatic,
+    this.bottomMode,
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
          'true.',
+       ),
+       assert(
+         bottomMode == null || bottom != null,
+         'A bottomMode was provided without a corresponding bottom.',
        );
 
   /// Create a navigation bar for scrolling lists with [bottom] set to a
@@ -859,8 +863,8 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 
   /// Modes that determine when to display the navigation bar's [bottom].
   ///
-  /// Defaults to [NavigationBarBottomMode.automatic].
-  final NavigationBarBottomMode bottomMode;
+  /// Defaults to [NavigationBarBottomMode.automatic] if a [bottom] is provided.
+  final NavigationBarBottomMode? bottomMode;
 
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor?.alpha == 0xFF;
@@ -929,7 +933,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
           enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
           bottom: widget.bottom ?? const SizedBox.shrink(),
-          bottomMode: widget.bottomMode,
+          bottomMode: widget.bottomMode ?? NavigationBarBottomMode.automatic,
           bottomHeight: widget.bottom != null ? widget.bottom!.preferredSize.height : 0.0,
         ),
       ),

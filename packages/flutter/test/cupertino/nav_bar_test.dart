@@ -2002,6 +2002,40 @@ void main() {
     expect(tester.getTopLeft(bottomFinder).dy, persistentHeight);
     expect(tester.getBottomLeft(bottomFinder).dy, persistentHeight + bottomHeight);
   });
+
+  testWidgets('Disallows providing a bottomMode without a corresponding bottom', (WidgetTester tester) async {
+    expect(
+      () => const CupertinoSliverNavigationBar(
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(10.0),
+          child: Placeholder(),
+        ),
+        bottomMode: NavigationBarBottomMode.automatic,
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => const CupertinoSliverNavigationBar(
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(10.0),
+          child: Placeholder(),
+        ),
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoSliverNavigationBar(
+        bottomMode: NavigationBarBottomMode.automatic,
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError e) => e.message,
+        'message',
+        contains('A bottomMode was provided without a corresponding bottom.'),
+      )),
+    );
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
