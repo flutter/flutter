@@ -4,4 +4,4 @@
 
 include ':app'
 rootProject.name = "Multiple Flutters"
-apply from: settingsDir.parentFile.toString() + '/module/.android/include_flutter.groovy'
+apply from: "${settingsDir.parentFile}/module/.android/include_flutter.groovy"
