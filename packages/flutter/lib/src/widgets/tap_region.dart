@@ -331,8 +331,8 @@ class _DummyTapRecognizer extends GestureArenaMember {
 ///
 /// If there is no [TapRegionSurface] ancestor, [TapRegion] will do nothing.
 ///
-/// [TapRegion] calls [ModalRoute.of] to establish a dependency on the current route,
-/// so that [onTapOutside] isn't called after the user navigates to a different page.
+/// [TapRegion] is aware of the [Route]s in the [Navigator], so that [onTapOutside]
+/// isn't called after the user navigates to a different page.
 class TapRegion extends SingleChildRenderObjectWidget {
   /// Creates a const [TapRegion].
   ///
@@ -407,14 +407,14 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    final ModalRoute<Object?>? route = ModalRoute.of(context);
+    final bool isCurrent = ModalRoute.isCurrentOf(context) ?? true;
 
     return RenderTapRegion(
       registry: TapRegionRegistry.maybeOf(context),
       enabled: enabled,
       consumeOutsideTaps: consumeOutsideTaps,
       behavior: behavior,
-      onTapOutside: (route?.isCurrent ?? true) ? onTapOutside : null,
+      onTapOutside: isCurrent ? onTapOutside : null,
       onTapInside: onTapInside,
       groupId: groupId,
       debugLabel: debugLabel,
@@ -423,14 +423,14 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, covariant RenderTapRegion renderObject) {
-    final ModalRoute<Object?>? route = ModalRoute.of(context);
+    final bool isCurrent = ModalRoute.isCurrentOf(context) ?? true;
 
     renderObject
       ..registry = TapRegionRegistry.maybeOf(context)
       ..enabled = enabled
       ..behavior = behavior
       ..groupId = groupId
-      ..onTapOutside = (route?.isCurrent ?? true) ? onTapOutside : null
+      ..onTapOutside = isCurrent ? onTapOutside : null
       ..onTapInside = onTapInside;
     if (!kReleaseMode) {
       renderObject.debugLabel = debugLabel;
