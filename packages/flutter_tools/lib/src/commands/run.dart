@@ -655,6 +655,10 @@ class RunCommand extends RunCommandBase {
       throwToolExit('--wasm is only supported on the web platform');
     }
 
+    if (webRenderer.isDeprecated) {
+      globals.logger.printWarning(webRenderer.deprecationWarning);
+    }
+
     if (webRenderer == WebRendererMode.skwasm && !useWasm) {
       throwToolExit('Skwasm renderer requires --wasm');
     }
