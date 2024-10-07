@@ -48,7 +48,14 @@ bool SurfaceControl::RemoveFromParent() const {
 }
 
 bool SurfaceControl::IsAvailableOnPlatform() {
-  return GetProcTable().IsValid() &&
+  auto api_level = android_get_device_api_level();
+
+  // Technically SurfaceControl is supported on API 29 but I've observed
+  // enough reported bugs that I'm bumping the constraint to 30. If
+  // we had more time to test all of these older devices maybe we could
+  // figure out what the problem is.
+  // https://github.com/flutter/flutter/issues/155877
+  return api_level >= 30 && GetProcTable().IsValid() &&
          GetProcTable().ASurfaceControl_createFromWindow.IsAvailable();
 }
 
