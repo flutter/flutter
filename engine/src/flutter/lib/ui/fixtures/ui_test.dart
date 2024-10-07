@@ -395,6 +395,45 @@ Future<void> toByteDataRetries() async {
 }
 
 @pragma('vm:entry-point')
+Future<void> toByteDataRetryOverflows() async {
+  final PictureRecorder pictureRecorder = PictureRecorder();
+  final Canvas canvas = Canvas(pictureRecorder);
+  final Paint paint = Paint()
+    ..color = Color.fromRGBO(255, 255, 255, 1.0)
+    ..style = PaintingStyle.fill;
+  final Offset c = Offset(50.0, 50.0);
+  canvas.drawCircle(c, 25.0, paint);
+  final Picture picture = pictureRecorder.endRecording();
+  List<Image> images = [];
+  // This number must be bigger than impeller::Context::kMaxTasksAwaitingGPU.
+  int numJobs = 100;
+  for (int i = 0; i < numJobs; ++i) {
+    images.add(await picture.toImage(100, 100));
+  }
+  List<Future<ByteData?>> dataFutures = [];
+  _turnOffGPU(true);
+  for (Image image in images) {
+    dataFutures.add(image.toByteData());
+  }
+  Future<void>.delayed(Duration(milliseconds: 10), () {
+    _turnOffGPU(false);
+  });
+
+  ByteData? result;
+  for (Future<ByteData?> future in dataFutures) {
+    try {
+      ByteData? byteData = await future;
+      if (byteData != null) {
+        result = byteData;
+      }
+    } catch (_) {
+      // Ignore errors from unavailable gpu.
+    }
+  }
+  _validateNotNull(result);
+}
+
+@pragma('vm:entry-point')
 Future<void> toImageRetries() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
@@ -414,6 +453,40 @@ Future<void> toImageRetries() async {
   } catch (error) {
     _validateNotNull(null);
   }
+}
+
+@pragma('vm:entry-point')
+Future<void> toImageRetryOverflows() async {
+  final PictureRecorder pictureRecorder = PictureRecorder();
+  final Canvas canvas = Canvas(pictureRecorder);
+  final Paint paint = Paint()
+    ..color = Color.fromRGBO(255, 255, 255, 1.0)
+    ..style = PaintingStyle.fill;
+  final Offset c = Offset(50.0, 50.0);
+  canvas.drawCircle(c, 25.0, paint);
+  final Picture picture = pictureRecorder.endRecording();
+  _turnOffGPU(true);
+  List<Future<Image>> imageFutures = [];
+  // This number must be bigger than impeller::Context::kMaxTasksAwaitingGPU.
+  int numJobs = 100;
+  for (int i = 0; i < numJobs; i++) {
+    imageFutures.add(picture.toImage(100, 100));
+  }
+  Future<void>.delayed(Duration(milliseconds: 10), () {
+    _turnOffGPU(false);
+  });
+  late Image result;
+  bool didSeeImage = false;
+  for (Future<Image> future in imageFutures) {
+    try {
+      Image image = await future;
+      result = image;
+      didSeeImage = true;
+    } catch (_) {
+      // Ignore gpu not available errors.
+    }
+  }
+  _validateNotNull(didSeeImage ? result : null);
 }
 
 @pragma('vm:entry-point')
