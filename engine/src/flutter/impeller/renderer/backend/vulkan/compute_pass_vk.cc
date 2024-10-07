@@ -42,7 +42,7 @@ void ComputePassVK::OnSetLabel(const std::string& label) {
 // |RenderPass|
 void ComputePassVK::SetCommandLabel(std::string_view label) {
 #ifdef IMPELLER_DEBUG
-  command_buffer_->GetEncoder()->PushDebugGroup(label);
+  command_buffer_->PushDebugGroup(label);
   has_label_ = true;
 #endif  // IMPELLER_DEBUG
 }
@@ -52,14 +52,13 @@ void ComputePassVK::SetPipeline(
     const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) {
   const auto& pipeline_vk = ComputePipelineVK::Cast(*pipeline);
   const vk::CommandBuffer& command_buffer_vk =
-      command_buffer_->GetEncoder()->GetCommandBuffer();
+      command_buffer_->GetCommandBuffer();
   command_buffer_vk.bindPipeline(vk::PipelineBindPoint::eCompute,
                                  pipeline_vk.GetPipeline());
   pipeline_layout_ = pipeline_vk.GetPipelineLayout();
 
-  auto descriptor_result =
-      command_buffer_->GetEncoder()->AllocateDescriptorSets(
-          pipeline_vk.GetDescriptorSetLayout(), ContextVK::Cast(*context_));
+  auto descriptor_result = command_buffer_->AllocateDescriptorSets(
+      pipeline_vk.GetDescriptorSetLayout(), ContextVK::Cast(*context_));
   if (!descriptor_result.ok()) {
     return;
   }
@@ -87,7 +86,7 @@ fml::Status ComputePassVK::Compute(const ISize& grid_size) {
   context_vk.GetDevice().updateDescriptorSets(descriptor_write_offset_,
                                               write_workspace_.data(), 0u, {});
   const vk::CommandBuffer& command_buffer_vk =
-      command_buffer_->GetEncoder()->GetCommandBuffer();
+      command_buffer_->GetCommandBuffer();
 
   command_buffer_vk.bindDescriptorSets(
       vk::PipelineBindPoint::eCompute,  // bind point
@@ -117,7 +116,7 @@ fml::Status ComputePassVK::Compute(const ISize& grid_size) {
 
 #ifdef IMPELLER_DEBUG
   if (has_label_) {
-    command_buffer_->GetEncoder()->PopDebugGroup();
+    command_buffer_->PopDebugGroup();
   }
   has_label_ = false;
 #endif  // IMPELLER_DEBUG
@@ -157,7 +156,7 @@ bool ComputePassVK::BindResource(
   const TextureVK& texture_vk = TextureVK::Cast(*texture);
   const SamplerVK& sampler_vk = SamplerVK::Cast(*sampler);
 
-  if (!command_buffer_->GetEncoder()->Track(texture)) {
+  if (!command_buffer_->Track(texture)) {
     return false;
   }
 
@@ -190,7 +189,7 @@ bool ComputePassVK::BindResource(size_t binding,
     return false;
   }
 
-  if (!command_buffer_->GetEncoder()->Track(device_buffer)) {
+  if (!command_buffer_->Track(device_buffer)) {
     return false;
   }
 
@@ -224,7 +223,7 @@ void ComputePassVK::AddBufferMemoryBarrier() {
   barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
   barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
 
-  command_buffer_->GetEncoder()->GetCommandBuffer().pipelineBarrier(
+  command_buffer_->GetCommandBuffer().pipelineBarrier(
       vk::PipelineStageFlagBits::eComputeShader,
       vk::PipelineStageFlagBits::eComputeShader, {}, 1, &barrier, 0, {}, 0, {});
 }
@@ -235,7 +234,7 @@ void ComputePassVK::AddTextureMemoryBarrier() {
   barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
   barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
 
-  command_buffer_->GetEncoder()->GetCommandBuffer().pipelineBarrier(
+  command_buffer_->GetCommandBuffer().pipelineBarrier(
       vk::PipelineStageFlagBits::eComputeShader,
       vk::PipelineStageFlagBits::eComputeShader, {}, 1, &barrier, 0, {}, 0, {});
 }
@@ -255,7 +254,7 @@ bool ComputePassVK::EncodeCommands() const {
   barrier.dstAccessMask =
       vk::AccessFlagBits::eIndexRead | vk::AccessFlagBits::eVertexAttributeRead;
 
-  command_buffer_->GetEncoder()->GetCommandBuffer().pipelineBarrier(
+  command_buffer_->GetCommandBuffer().pipelineBarrier(
       vk::PipelineStageFlagBits::eComputeShader,
       vk::PipelineStageFlagBits::eVertexInput, {}, 1, &barrier, 0, {}, 0, {});
 

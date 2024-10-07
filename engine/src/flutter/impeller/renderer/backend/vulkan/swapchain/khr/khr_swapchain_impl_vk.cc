@@ -8,7 +8,6 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
-#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
@@ -399,9 +398,8 @@ bool KHRSwapchainImplVK::Present(
     return false;
   }
 
-  auto vk_final_cmd_buffer = CommandBufferVK::Cast(*sync->final_cmd_buffer)
-                                 .GetEncoder()
-                                 ->GetCommandBuffer();
+  auto vk_final_cmd_buffer =
+      CommandBufferVK::Cast(*sync->final_cmd_buffer).GetCommandBuffer();
   {
     BarrierVK barrier;
     barrier.new_layout = vk::ImageLayout::ePresentSrcKHR;

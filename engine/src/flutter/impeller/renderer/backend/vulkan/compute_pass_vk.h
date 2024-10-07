@@ -5,7 +5,8 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_COMPUTE_PASS_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_COMPUTE_PASS_VK_H_
 
-#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
+#include "impeller/renderer/backend/vulkan/pipeline_vk.h"
+#include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/compute_pass.h"
 
 namespace impeller {

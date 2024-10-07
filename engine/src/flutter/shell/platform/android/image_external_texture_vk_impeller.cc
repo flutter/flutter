@@ -11,7 +11,6 @@
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h"
-#include "flutter/impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"
 #include "flutter/impeller/toolkit/android/hardware_buffer.h"
 
@@ -74,7 +73,7 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
         impeller::CommandBufferVK::Cast(*buffer);
 
     impeller::BarrierVK barrier;
-    barrier.cmd_buffer = buffer_vk.GetEncoder()->GetCommandBuffer();
+    barrier.cmd_buffer = buffer_vk.GetCommandBuffer();
     barrier.src_access = impeller::vk::AccessFlagBits::eColorAttachmentWrite |
                          impeller::vk::AccessFlagBits::eTransferWrite;
     barrier.src_stage =

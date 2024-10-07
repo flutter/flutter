@@ -6,7 +6,6 @@
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "fml/synchronization/waitable_event.h"
-#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 #include "impeller/renderer/command_buffer.h"
 
@@ -20,11 +19,7 @@ TEST(CommandEncoderVKTest, DeleteEncoderAfterThreadDies) {
   {
     auto context = MockVulkanContextBuilder().Build();
     called_functions = GetMockVulkanFunctions(context->GetDevice());
-    std::shared_ptr<CommandEncoderVK> encoder;
-    std::thread thread([&] {
-      CommandEncoderFactoryVK factory(context);
-      encoder = factory.Create();
-    });
+    std::thread thread([&] { context->CreateCommandBuffer(); });
     thread.join();
     context->Shutdown();
   }
