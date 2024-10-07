@@ -1436,6 +1436,35 @@ void main() {
       );
     });
 
+    testWidgets('transformChild set to false does not translate child', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformChild: false,
+                transformationController: transformationController,
+                child: SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final child = find.byType(SizedBox);
+      var rect = tester.getRect(child);
+
+      expect(rect.topLeft, Offset(300, 200));
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await scrollAt(center, tester, const Offset(0.0, -20.0));
+      await tester.pumpAndSettle();
+
+      rect = tester.getRect(child);
+
+      expect(rect.topLeft, Offset(300, 200));
+    });
+
     testWidgets('builder can change widgets that are off-screen', (WidgetTester tester) async {
       const double childHeight = 10.0;
       await tester.pumpWidget(
@@ -1903,39 +1932,6 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.9984509673751225));
       await tester.pump(const Duration(seconds: 10));
       expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.9984509673751225));
-    });
-  });
-
-  group('transformChild set to false', () {
-    testWidgets('Can scale with mouse', (WidgetTester tester) async {
-      final childKey = UniqueKey();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                transformChild: false,
-                transformationController: transformationController,
-                child: SizedBox(key: childKey, width: 200.0, height: 200.0),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final child = find.byKey(childKey);
-      var childCenter = tester.getCenter(child);
-
-      expect(childCenter, Offset(100, 100));
-
-      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
-      await scrollAt(center, tester, const Offset(0.0, -20.0));
-      await tester.pumpAndSettle();
-
-      childCenter = tester.getCenter(child);
-
-      expect(childCenter, Offset(100, 100));
     });
   });
 
