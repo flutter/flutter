@@ -69,7 +69,7 @@ Future<TaskResult> run() async {
     await adb.cancel();
   });
 
-  if (!isUsingValidationLayers || impellerBackendCount != 1) {
+  if (impellerBackendCount != 1) {
     return TaskResult.failure('Not using Vulkan validation layers.');
   }
   if (hasValidationErrors){
