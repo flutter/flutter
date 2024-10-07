@@ -5,7 +5,6 @@
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
-#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 
@@ -64,13 +63,13 @@ bool TextureVK::OnSetContents(const uint8_t* contents,
     return false;
   }
 
-  const auto encoder = CommandBufferVK::Cast(*cmd_buffer).GetEncoder();
+  auto& cmd_buffer_vk = CommandBufferVK::Cast(*cmd_buffer);
 
-  if (!encoder->Track(staging_buffer) || !encoder->Track(source_)) {
+  if (!cmd_buffer_vk.Track(staging_buffer) || !cmd_buffer_vk.Track(source_)) {
     return false;
   }
 
-  const auto& vk_cmd_buffer = encoder->GetCommandBuffer();
+  const auto& vk_cmd_buffer = cmd_buffer_vk.GetCommandBuffer();
 
   BarrierVK barrier;
   barrier.cmd_buffer = vk_cmd_buffer;

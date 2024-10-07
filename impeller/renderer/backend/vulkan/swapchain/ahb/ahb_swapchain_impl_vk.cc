@@ -8,7 +8,6 @@
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
-#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_formats.h"
@@ -210,9 +209,9 @@ AHBSwapchainImplVK::SubmitSignalForPresentReady(
     return nullptr;
   }
   command_buffer->SetLabel("AHBSubmitSignalForPresentReadyCB");
-  const auto& encoder = CommandBufferVK::Cast(*command_buffer).GetEncoder();
+  CommandBufferVK& command_buffer_vk = CommandBufferVK::Cast(*command_buffer);
 
-  const auto command_encoder_vk = encoder->GetCommandBuffer();
+  const auto command_encoder_vk = command_buffer_vk.GetCommandBuffer();
 
   BarrierVK barrier;
   barrier.cmd_buffer = command_encoder_vk;
@@ -226,9 +225,9 @@ AHBSwapchainImplVK::SubmitSignalForPresentReady(
     return nullptr;
   }
 
-  encoder->Track(fence->GetSharedHandle());
+  command_buffer_vk.Track(fence->GetSharedHandle());
 
-  if (!encoder->EndCommandBuffer()) {
+  if (!command_buffer_vk.EndCommandBuffer()) {
     return nullptr;
   }
 

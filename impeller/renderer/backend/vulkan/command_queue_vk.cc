@@ -8,7 +8,6 @@
 
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
-#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 #include "impeller/renderer/backend/vulkan/tracked_objects_vk.h"
@@ -40,14 +39,13 @@ fml::Status CommandQueueVK::Submit(
   vk_buffers.reserve(buffers.size());
   tracked_objects.reserve(buffers.size());
   for (const std::shared_ptr<CommandBuffer>& buffer : buffers) {
-    auto encoder = CommandBufferVK::Cast(*buffer).GetEncoder();
-    if (!encoder->EndCommandBuffer()) {
+    CommandBufferVK& command_buffer = CommandBufferVK::Cast(*buffer);
+    if (!command_buffer.EndCommandBuffer()) {
       return fml::Status(fml::StatusCode::kCancelled,
                          "Failed to end command buffer.");
     }
-    tracked_objects.push_back(encoder->tracked_objects_);
-    vk_buffers.push_back(encoder->GetCommandBuffer());
-    encoder->Reset();
+    vk_buffers.push_back(command_buffer.GetCommandBuffer());
+    tracked_objects.push_back(std::move(command_buffer.tracked_objects_));
   }
 
   auto context = context_.lock();
