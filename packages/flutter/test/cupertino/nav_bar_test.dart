@@ -1889,7 +1889,7 @@ void main() {
     },
   );
 
-  testWidgets('CupertinoSliverNavigationBar.search automatic mode', (WidgetTester tester) async {
+  testWidgets('NavigationBarBottomMode.automatic mode for bottom', (WidgetTester tester) async {
     const double persistentHeight = 44.0;
     const double largeTitleHeight = 44.0;
     const double bottomHeight = 10.0;
@@ -1953,7 +1953,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('CupertinoSliverNavigationBar.search always mode', (WidgetTester tester) async {
+  testWidgets('NavigationBarBottomMode.always mode for bottom', (WidgetTester tester) async {
     const double persistentHeight = 44.0;
     const double largeTitleHeight = 44.0;
     const double bottomHeight = 10.0;
@@ -2005,7 +2005,7 @@ void main() {
     expect(tester.getBottomLeft(bottomFinder).dy, persistentHeight + bottomHeight);
   });
 
-  testWidgets('Disallows providing a bottomMode without a corresponding bottom', (WidgetTester tester) async {
+  testWidgets('Disallow providing a bottomMode without a corresponding bottom', (WidgetTester tester) async {
     expect(
       () => const CupertinoSliverNavigationBar(
         bottom: PreferredSize(
