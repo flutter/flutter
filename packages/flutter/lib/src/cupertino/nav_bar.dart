@@ -1093,7 +1093,7 @@ class _LargeTitleNavigationBarSliverDelegate
                 ],
               ),
             ),
-            if (bottomMode == NavigationBarBottomMode.always) bottom,
+            if (bottomMode == NavigationBarBottomMode.always) SizedBox(height: bottomHeight, child: bottom),
           ],
         ),
       ),
