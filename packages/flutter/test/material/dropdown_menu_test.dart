@@ -3415,6 +3415,43 @@ void main() {
       tester.getRect(find.byType(TextField).first).bottom,
     );
   });
+
+  testWidgets('DropdownMenu with expandedInsets can be aligned', (WidgetTester tester) async {
+    Widget buildMenuAnchor({ AlignmentGeometry alignment = Alignment.topCenter }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Row(
+            children: <Widget>[
+              Expanded(
+                child: Align(
+                  alignment: alignment,
+                  child: DropdownMenu<TestMenu>(
+                    expandedInsets: const EdgeInsets.all(16),
+                    dropdownMenuEntries: menuChildren,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildMenuAnchor());
+
+    Offset textFieldPosition = tester.getTopLeft(find.byType(TextField));
+    expect(textFieldPosition, equals(const Offset(16.0, 0.0)));
+
+    await tester.pumpWidget(buildMenuAnchor(alignment: Alignment.center));
+
+    textFieldPosition = tester.getTopLeft(find.byType(TextField));
+    expect(textFieldPosition, equals(const Offset(16.0, 272.0)));
+
+    await tester.pumpWidget(buildMenuAnchor(alignment: Alignment.bottomCenter));
+
+    textFieldPosition = tester.getTopLeft(find.byType(TextField));
+    expect(textFieldPosition, equals(const Offset(16.0, 544.0)));
+  });
 }
 
 enum TestMenu {

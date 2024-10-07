@@ -972,10 +972,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             ),
           ),
         ),
-        child: Align(
-          alignment: AlignmentDirectional.topStart,
-          child: menuAnchor,
-        ),
+        child: menuAnchor,
       );
     }
 
