@@ -7,17 +7,138 @@
 #include <iomanip>
 #include <sstream>
 #include <string_view>
+#include <unordered_map>
 
 #include "flutter/fml/build_config.h"
 
 namespace impeller {
 
-/// Non functional Vulkan driver, see:
-/// https://github.com/flutter/flutter/issues/154103
-///
-/// Reports "VK_INCOMPLETE" when compiling certain entity shader with
-/// vkCreateGraphicsPipelines, which is not a valid return status.
-constexpr std::string_view kAdreno630 = "Adreno (TM) 630";
+const std::unordered_map<std::string_view, AdrenoGPU> kAdrenoVersions = {
+    // X
+    // Note: I don't know if these strings actually match as there don't seem to
+    // be any android devices that use these GPUs.
+    {"X185", AdrenoGPU::kAdrenoX185},
+    {"X145", AdrenoGPU::kAdrenoX145},
+    // 700
+    {"750", AdrenoGPU::kAdreno750},
+    {"740", AdrenoGPU::kAdreno740},
+    {"735", AdrenoGPU::kAdreno735},
+    {"721", AdrenoGPU::kAdreno732},
+    {"730", AdrenoGPU::kAdreno730},
+    {"725", AdrenoGPU::kAdreno725},
+    {"720", AdrenoGPU::kAdreno720},
+    {"710", AdrenoGPU::kAdreno710},
+    {"702", AdrenoGPU::kAdreno702},
+
+    // 600
+    {"695", AdrenoGPU::kAdreno695},
+    {"690", AdrenoGPU::kAdreno690},
+    {"685", AdrenoGPU::kAdreno685},
+    {"680", AdrenoGPU::kAdreno680},
+    {"675", AdrenoGPU::kAdreno675},
+    {"663", AdrenoGPU::kAdreno663},
+    {"660", AdrenoGPU::kAdreno660},
+    {"650", AdrenoGPU::kAdreno650},
+    {"644", AdrenoGPU::kAdreno644},
+    {"643L", AdrenoGPU::kAdreno643L},
+    {"642", AdrenoGPU::kAdreno642},
+    {"642L", AdrenoGPU::kAdreno642L},
+    {"640", AdrenoGPU::kAdreno640},
+    {"630", AdrenoGPU::kAdreno630},
+    {"620", AdrenoGPU::kAdreno620},
+    {"619", AdrenoGPU::kAdreno619},
+    {"619L", AdrenoGPU::kAdreno619L},
+    {"618", AdrenoGPU::kAdreno618},
+    {"616", AdrenoGPU::kAdreno616},
+    {"615", AdrenoGPU::kAdreno615},
+    {"613", AdrenoGPU::kAdreno613},
+    {"612", AdrenoGPU::kAdreno612},
+    {"610", AdrenoGPU::kAdreno610},
+    {"608", AdrenoGPU::kAdreno608},
+    {"605", AdrenoGPU::kAdreno605},
+    // 500
+    {"540", AdrenoGPU::kAdreno540},
+    {"530", AdrenoGPU::kAdreno530},
+    {"512", AdrenoGPU::kAdreno512},
+    {"510", AdrenoGPU::kAdreno510},
+    {"509", AdrenoGPU::kAdreno509},
+    {"508", AdrenoGPU::kAdreno508},
+    {"506", AdrenoGPU::kAdreno506},
+    {"505", AdrenoGPU::kAdreno505},
+    {"504", AdrenoGPU::kAdreno504},
+};
+
+const std::unordered_map<std::string_view, MaliGPU> kMaliVersions = {
+    // 5th Gen.
+    {"G925", MaliGPU::kG925},
+    {"G725", MaliGPU::kG725},
+    {"G625", MaliGPU::kG625},
+    {"G720", MaliGPU::kG720},
+    {"G620", MaliGPU::kG620},
+
+    // Valhall
+    // Note: there is an Immortalis-G715 a Mali-G715
+    {"G715", MaliGPU::kG715},
+    {"G615", MaliGPU::kG615},
+    {"G710", MaliGPU::kG710},
+    {"G610", MaliGPU::kG610},
+    {"G510", MaliGPU::kG510},
+    {"G310", MaliGPU::kG310},
+    {"G78", MaliGPU::kG78},
+    {"G68", MaliGPU::kG68},
+    {"G77", MaliGPU::kG77},
+    {"G57", MaliGPU::kG57},
+
+    // Bifrost
+    {"G76", MaliGPU::kG76},
+    {"G72", MaliGPU::kG72},
+    {"G52", MaliGPU::kG52},
+    {"G71", MaliGPU::kG71},
+    {"G51", MaliGPU::kG51},
+    {"G31", MaliGPU::kG31},
+
+    // These might be Vulkan 1.0 Only.
+    {"T880", MaliGPU::kT880},
+    {"T860", MaliGPU::kT860},
+    {"T830", MaliGPU::kT830},
+    {"T820", MaliGPU::kT820},
+    {"T760", MaliGPU::kT760},
+};
+
+AdrenoGPU GetAdrenoVersion(std::string_view version) {
+  /// The format that Adreno names follow is "Adreno (TM) VERSION".
+  auto paren_pos = version.find("Adreno (TM) ");
+  if (paren_pos == std::string::npos) {
+    return AdrenoGPU::kUnknown;
+  }
+  auto version_string = version.substr(paren_pos + 12);
+  const auto& result = kAdrenoVersions.find(version_string);
+  if (result == kAdrenoVersions.end()) {
+    return AdrenoGPU::kUnknown;
+  }
+  return result->second;
+}
+
+MaliGPU GetMaliVersion(std::string_view version) {
+  // These names are usually Mali-VERSION or Mali-Version-EXTRA_CRAP.
+  auto dash_pos = version.find("Mali-");
+  if (dash_pos == std::string::npos) {
+    return MaliGPU::kUnknown;
+  }
+  auto version_string_with_trailing = version.substr(dash_pos + 5);
+  // Remove any trailing crap if present.
+  auto more_dash_pos = version_string_with_trailing.find("-");
+  if (more_dash_pos != std::string::npos) {
+    version_string_with_trailing =
+        version_string_with_trailing.substr(0, more_dash_pos);
+  }
+
+  const auto& result = kMaliVersions.find(version_string_with_trailing);
+  if (result == kMaliVersions.end()) {
+    return MaliGPU::kUnknown;
+  }
+  return result->second;
+}
 
 constexpr VendorVK IdentifyVendor(uint32_t vendor) {
   // Check if the vendor has a PCI ID:
@@ -131,6 +252,17 @@ DriverInfoVK::DriverInfoVK(const vk::PhysicalDevice& device) {
   if (props.deviceName.data() != nullptr) {
     driver_name_ = props.deviceName.data();
   }
+
+  switch (vendor_) {
+    case VendorVK::kQualcomm:
+      adreno_gpu_ = GetAdrenoVersion(driver_name_);
+      break;
+    case VendorVK::kARM:
+      mali_gpu_ = GetMaliVersion(driver_name_);
+      break;
+    default:
+      break;
+  }
 }
 
 DriverInfoVK::~DriverInfoVK() = default;
@@ -197,8 +329,20 @@ bool DriverInfoVK::IsEmulator() const {
 }
 
 bool DriverInfoVK::IsKnownBadDriver() const {
-  if (vendor_ == VendorVK::kQualcomm && driver_name_ == kAdreno630) {
-    return true;
+  if (adreno_gpu_.has_value()) {
+    auto adreno = adreno_gpu_.value();
+    switch (adreno) {
+      // see:
+      // https://github.com/flutter/flutter/issues/154103
+      //
+      // Reports "VK_INCOMPLETE" when compiling certain entity shader with
+      // vkCreateGraphicsPipelines, which is not a valid return status.
+      // See https://github.com/flutter/flutter/issues/155185 .
+      case AdrenoGPU::kAdreno630:
+        return true;
+      default:
+        return false;
+    }
   }
   return false;
 }
