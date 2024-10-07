@@ -66,7 +66,7 @@ Optionally, if you are working with a fork of the engine, add that as a Git remo
 git -C src/flutter remote add origin <your_git_fork_location>
 ```
 
-The "Engine Tool" called `et` is useful when working with the engine. It is located in the `flutter/bin` directory in the source checkout. Add this to your `$PATH` in your `.rc`.
+The "Engine Tool" called `et` is useful when working with the engine. It is located in the `flutter/bin` directory in the engine source checkout. Add this to your `$PATH` in your `.rc`.
 
 ### Additional Steps for Web Engine
 
