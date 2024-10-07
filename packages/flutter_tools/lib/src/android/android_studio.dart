@@ -589,13 +589,8 @@ the configured path by running this command: flutter config --android-studio-dir
     final int? patch = int.tryParse(matched[3]);
     if (major == null || minor == null || patch == null) {
       return null;
-if (major == null || minor == null || patch == null) {
-  return null;
-}
-
-return Version(major, minor, patch);
-      return Version(major, minor, patch);
     }
+    return Version(major, minor, patch);
   }
 
   @override
