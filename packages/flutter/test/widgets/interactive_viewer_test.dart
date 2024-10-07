@@ -1906,6 +1906,39 @@ void main() {
     });
   });
 
+  group('transformChild set to false', () {
+    testWidgets('Can scale with mouse', (WidgetTester tester) async {
+      final childKey = UniqueKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformChild: false,
+                transformationController: transformationController,
+                child: SizedBox(key: childKey, width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final child = find.byKey(childKey);
+      var childCenter = tester.getCenter(child);
+
+      expect(childCenter, Offset(100, 100));
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await scrollAt(center, tester, const Offset(0.0, -20.0));
+      await tester.pumpAndSettle();
+
+      childCenter = tester.getCenter(child);
+
+      expect(childCenter, Offset(100, 100));
+    });
+  });
+
   group('getNearestPointOnLine', () {
     test('does not modify parameters', () {
       final Vector3 point = Vector3(5.0, 5.0, 0.0);
