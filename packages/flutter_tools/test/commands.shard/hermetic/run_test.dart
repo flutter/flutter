@@ -1096,11 +1096,26 @@ void main() {
     });
   });
 
-  testUsingContext('Flutter run catches service has disappear errors and throws a tool exit', () async {
+  testUsingContext('Flutter run catches catches errors due to vm service disconnection and throws a tool exit', () async {
     final FakeResidentRunner residentRunner = FakeResidentRunner();
-    residentRunner.rpcError = RPCError('flutter._listViews', RPCErrorCodes.kServiceDisappeared, '');
+    residentRunner.rpcError = RPCError(
+      'flutter._listViews',
+      RPCErrorCodes.kServiceDisappeared,
+      '',
+    );
     final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
     command.fakeResidentRunner = residentRunner;
+
+    await expectToolExitLater(createTestCommandRunner(command).run(<String>[
+      'run',
+      '--no-pub',
+    ]), contains('Lost connection to device.'));
+
+    residentRunner.rpcError = RPCError(
+      'flutter._listViews',
+      RPCErrorCodes.kServerError,
+      'Service connection disposed.',
+    );
 
     await expectToolExitLater(createTestCommandRunner(command).run(<String>[
       'run',
