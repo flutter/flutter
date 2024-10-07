@@ -58,7 +58,10 @@ class Scribe {
   /// Call this before calling [startStylusHandwriting] to make sure it's
   /// available.
   ///
-  /// Supported on Android API 34 and above.
+  /// Supported on Android API 34 and above. If this method is called on a lower
+  /// API version, the Future will resolve with an error. If it's possible that
+  /// this method will be called on a device other than Android API 34+,
+  /// consider wrapping the call in a try/catch block.
   ///
   /// See also:
   ///
