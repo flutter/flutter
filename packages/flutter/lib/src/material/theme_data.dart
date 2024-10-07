@@ -250,7 +250,7 @@ class ThemeData with Diagnosticable {
   ///
   ///  * [ThemeData.from], which creates a ThemeData from a [ColorScheme].
   ///  * [ThemeData.light], which creates the default light theme.
-  ///  * [ThemeData.dark], which creates the deafult dark theme.
+  ///  * [ThemeData.dark], which creates the default dark theme.
   ///  * [ColorScheme.fromSeed], which is used to create a [ColorScheme] from a seed color.
   factory ThemeData({
     // For the sanity of the reader, make sure these properties are in the same
@@ -315,12 +315,14 @@ class ThemeData with Diagnosticable {
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonThemeData? buttonTheme,
-    CardTheme? cardTheme,
+    // TODO(QuncCccccc): Change the parameter type to CardThemeData
+    Object? cardTheme,
     CheckboxThemeData? checkboxTheme,
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
     DatePickerThemeData? datePickerTheme,
-    DialogTheme? dialogTheme,
+    // TODO(QuncCccccc): Change the parameter type to DialogThemeData
+    Object? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
     DropdownMenuThemeData? dropdownMenuTheme,
@@ -492,12 +494,28 @@ class ThemeData with Diagnosticable {
     bottomAppBarTheme ??= const BottomAppBarTheme();
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
-    cardTheme ??= const CardTheme();
+    // TODO(QuncCccccc): Clean it up once the type of `cardTheme` is changed to `CardThemeData`
+    if (cardTheme != null) {
+      if (cardTheme is CardTheme) {
+        cardTheme = cardTheme.data;
+      } else if (cardTheme is! CardThemeData) {
+        throw ArgumentError('cardTheme must be either a CardThemeData or a CardTheme');
+      }
+    }
+    cardTheme ??= const CardThemeData();
     checkboxTheme ??= const CheckboxThemeData();
     chipTheme ??= const ChipThemeData();
     dataTableTheme ??= const DataTableThemeData();
     datePickerTheme ??= const DatePickerThemeData();
-    dialogTheme ??= const DialogTheme();
+    // TODO(QuncCccccc): Clean this up once the type of `dialogTheme` is changed to `DialogThemeData`
+    if (dialogTheme != null) {
+      if (dialogTheme is DialogTheme) {
+        dialogTheme = dialogTheme.data;
+      } else if (dialogTheme is! DialogThemeData) {
+        throw ArgumentError('dialogTheme must be either a DialogThemeData or a DialogTheme');
+      }
+    }
+    dialogTheme ??= const DialogThemeData();
     dividerTheme ??= const DividerThemeData();
     drawerTheme ??= const DrawerThemeData();
     dropdownMenuTheme ??= const DropdownMenuThemeData();
@@ -585,12 +603,12 @@ class ThemeData with Diagnosticable {
       bottomNavigationBarTheme: bottomNavigationBarTheme,
       bottomSheetTheme: bottomSheetTheme,
       buttonTheme: buttonTheme,
-      cardTheme: cardTheme,
+      cardTheme: cardTheme as CardThemeData,
       checkboxTheme: checkboxTheme,
       chipTheme: chipTheme,
       dataTableTheme: dataTableTheme,
       datePickerTheme: datePickerTheme,
-      dialogTheme: dialogTheme,
+      dialogTheme: dialogTheme as DialogThemeData,
       dividerTheme: dividerTheme,
       drawerTheme: drawerTheme,
       dropdownMenuTheme: dropdownMenuTheme,
@@ -1257,7 +1275,7 @@ class ThemeData with Diagnosticable {
   /// The colors and styles used to render [Card].
   ///
   /// This is the value returned from [CardTheme.of].
-  final CardTheme cardTheme;
+  final CardThemeData cardTheme;
 
   /// A theme for customizing the appearance and layout of [Checkbox] widgets.
   final CheckboxThemeData checkboxTheme;
@@ -1276,7 +1294,7 @@ class ThemeData with Diagnosticable {
   final DatePickerThemeData datePickerTheme;
 
   /// A theme for customizing the shape of a dialog.
-  final DialogTheme dialogTheme;
+  final DialogThemeData dialogTheme;
 
   /// A theme for customizing the color, thickness, and indents of [Divider]s,
   /// [VerticalDivider]s, etc.
@@ -1457,12 +1475,13 @@ class ThemeData with Diagnosticable {
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonThemeData? buttonTheme,
-    CardTheme? cardTheme,
+    Object? cardTheme,
     CheckboxThemeData? checkboxTheme,
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
     DatePickerThemeData? datePickerTheme,
-    DialogTheme? dialogTheme,
+    // TODO(QuncCccccc): Change the parameter type to DialogThemeData
+    Object? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
     DropdownMenuThemeData? dropdownMenuTheme,
@@ -1510,6 +1529,24 @@ class ThemeData with Diagnosticable {
     ButtonBarThemeData? buttonBarTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
+
+    // TODO(QuncCccccc): Clean it up once the type of `cardTheme` is changed to `CardThemeData`
+    if (cardTheme != null) {
+      if (cardTheme is CardTheme) {
+        cardTheme = cardTheme.data;
+      } else if (cardTheme is! CardThemeData) {
+        throw ArgumentError('cardTheme must be either a CardThemeData or a CardTheme');
+      }
+    }
+
+    // TODO(QuncCccccc): Clean this up once the type of `dialogTheme` is changed to `DialogThemeData`
+    if (dialogTheme != null) {
+      if (dialogTheme is DialogTheme) {
+        dialogTheme = dialogTheme.data;
+      } else if (dialogTheme is! DialogThemeData) {
+        throw ArgumentError('dialogTheme must be either a DialogThemeData or a DialogTheme');
+      }
+    }
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
@@ -1566,12 +1603,12 @@ class ThemeData with Diagnosticable {
       bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
       buttonTheme: buttonTheme ?? this.buttonTheme,
-      cardTheme: cardTheme ?? this.cardTheme,
+      cardTheme: cardTheme as CardThemeData? ?? this.cardTheme,
       checkboxTheme: checkboxTheme ?? this.checkboxTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       dataTableTheme: dataTableTheme ?? this.dataTableTheme,
       datePickerTheme: datePickerTheme ?? this.datePickerTheme,
-      dialogTheme: dialogTheme ?? this.dialogTheme,
+      dialogTheme: dialogTheme as DialogThemeData? ?? this.dialogTheme,
       dividerTheme: dividerTheme ?? this.dividerTheme,
       drawerTheme: drawerTheme ?? this.drawerTheme,
       dropdownMenuTheme: dropdownMenuTheme ?? this.dropdownMenuTheme,
@@ -1759,12 +1796,12 @@ class ThemeData with Diagnosticable {
       bottomNavigationBarTheme: BottomNavigationBarThemeData.lerp(a.bottomNavigationBarTheme, b.bottomNavigationBarTheme, t),
       bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t)!,
       buttonTheme: t < 0.5 ? a.buttonTheme : b.buttonTheme,
-      cardTheme: CardTheme.lerp(a.cardTheme, b.cardTheme, t),
+      cardTheme: CardThemeData.lerp(a.cardTheme, b.cardTheme, t),
       checkboxTheme: CheckboxThemeData.lerp(a.checkboxTheme, b.checkboxTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t)!,
       dataTableTheme: DataTableThemeData.lerp(a.dataTableTheme, b.dataTableTheme, t),
       datePickerTheme: DatePickerThemeData.lerp(a.datePickerTheme, b.datePickerTheme, t),
-      dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
+      dialogTheme: DialogThemeData.lerp(a.dialogTheme, b.dialogTheme, t),
       dividerTheme: DividerThemeData.lerp(a.dividerTheme, b.dividerTheme, t),
       drawerTheme: DrawerThemeData.lerp(a.drawerTheme, b.drawerTheme, t)!,
       dropdownMenuTheme: DropdownMenuThemeData.lerp(a.dropdownMenuTheme, b.dropdownMenuTheme, t),
@@ -2057,12 +2094,12 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ButtonThemeData>('buttonTheme', buttonTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<CardTheme>('cardTheme', cardTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<CardThemeData>('cardTheme', cardTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<CheckboxThemeData>('checkboxTheme', checkboxTheme, defaultValue: defaultData.checkboxTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DataTableThemeData>('dataTableTheme', dataTableTheme, defaultValue: defaultData.dataTableTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DatePickerThemeData>('datePickerTheme', datePickerTheme, defaultValue: defaultData.datePickerTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<DialogThemeData>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DrawerThemeData>('drawerTheme', drawerTheme, defaultValue: defaultData.drawerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DropdownMenuThemeData>('dropdownMenuTheme', dropdownMenuTheme, defaultValue: defaultData.dropdownMenuTheme, level: DiagnosticLevel.debug));

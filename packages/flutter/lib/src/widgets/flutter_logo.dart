@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'basic.dart';
+import 'framework.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
+import 'implicit_animations.dart';
 
 /// The Flutter logo, in widget form. This widget respects the [IconTheme].
 /// For guidelines on using the Flutter logo, visit https://flutter.dev/brand.

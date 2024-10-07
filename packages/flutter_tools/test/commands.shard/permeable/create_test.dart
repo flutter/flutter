@@ -1686,6 +1686,36 @@ void main() {
     expect(displayName, 'My Project');
   });
 
+  testUsingContext('should not show --ios-language deprecation warning issue for Swift', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--ios-language=swift', projectDir.path]);
+    expect(logger.warningText, contains('The "ios-language" option is deprecated and will be removed in a future Flutter release.'));
+    expect(logger.warningText, isNot(contains('https://github.com/flutter/flutter/issues/148586')));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
+  testUsingContext('should show --ios-language deprecation warning issue for Objective-C', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--ios-language=objc', projectDir.path]);
+    expect(logger.warningText, contains('The "ios-language" option is deprecated and will be removed in a future Flutter release.'));
+    expect(logger.warningText, contains('https://github.com/flutter/flutter/issues/148586'));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
   testUsingContext('has correct content and formatting with macOS app template', () async {
     Cache.flutterRoot = '../..';
 
@@ -3147,6 +3177,33 @@ void main() {
     final String buildGradleContent = await buildGradleFile.readAsString();
 
     expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
+  });
+
+  testUsingContext('Android FFI plugin contains 16kb page support', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '-t',
+      'plugin_ffi',
+      '--org',
+      'com.bar.foo',
+      '--platforms=android',
+      projectDir.path
+    ]);
+
+    final File cmakeLists =
+        globals.fs.file('${projectDir.path}/src/CMakeLists.txt');
+
+    expect(cmakeLists.existsSync(), true);
+
+    final String cmakeListsContent = await cmakeLists.readAsString();
+    const String expected16KbFlags = 'PRIVATE "-Wl,-z,max-page-size=16384")';
+    expect(cmakeListsContent, contains(expected16KbFlags));
   });
 
   testUsingContext('Android Kotlin plugin contains namespace', () async {
