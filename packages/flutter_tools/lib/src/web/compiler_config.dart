@@ -115,7 +115,7 @@ class JsCompilerConfig extends WebCompilerConfig {
         if (buildMode != BuildMode.release) '--no-minify',
         ...toSharedCommandOptions(buildMode),
         '-O$optimizationLevel',
-        if (dumpInfo) '--dump-info',
+        if (dumpInfo) '--stage=dump-info-all',
         if (noFrequencyBasedMinification) '--no-frequency-based-minification',
         if (csp) '--csp',
       ];
