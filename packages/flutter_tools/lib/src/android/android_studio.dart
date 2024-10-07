@@ -584,17 +584,14 @@ the configured path by running this command: flutter config --android-studio-dir
       return null;
     }
 
-    Version? result;
-    try {
-      final int major = int.parse('20${matched[0]}${matched[1]}');
-      final int minor = int.parse(matched[2]);
-      final int patch = int.parse(matched[3]);
-      return Version(major, minor, patch);
-    } on FormatException {
+    final int? major = int.tryParse('20${matched[0]}${matched[1]}');
+    final int? minor = int.tryParse(matched[2]);
+    final int? patch = int.tryParse(matched[3]);
+    if (major == null || minor == null || patch == null) {
       return null;
+    } else {
+      return Version(major, minor, patch);
     }
-
-    return result;
   }
 
   @override
