@@ -140,7 +140,6 @@
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/hello_world__memory.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_android__compile.dart @andrewkolos @flutter/tool
-/dev/devicelab/bin/tasks/hello_world_impeller.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/home_scroll_perf__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle__benchmark.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart @stuartmorgan @flutter/plugin
