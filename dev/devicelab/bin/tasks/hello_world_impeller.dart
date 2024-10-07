@@ -20,7 +20,7 @@ Future<TaskResult> run() async {
   final Directory appDir =
       dir(path.join(flutterDirectory.path, 'examples/hello_world'));
 
-  bool isUsingValidationLayers = false;
+  Completer<void> isUsingValidationLayers = Completer<void>();
   bool hasValidationErrors = false;
   int impellerBackendCount = 0;
   final Completer<void> didReceiveBackendMessage = Completer<void>();
@@ -40,7 +40,7 @@ Future<TaskResult> run() async {
         }
         if (data.contains(
             'Using the Impeller rendering backend (Vulkan with Validation Layers)')) {
-          isUsingValidationLayers = true;
+          isUsingValidationLayers.complete();
         }
         // "ImpellerValidationBreak" comes from the engine:
         // https://github.com/flutter/engine/blob/4160ebacdae2081d6f3160432f5f0dd87dbebec1/impeller/base/validation.cc#L40
@@ -61,6 +61,7 @@ Future<TaskResult> run() async {
     );
 
     await didReceiveBackendMessage.future;
+    await isUsingValidationLayers.future;
     // Since we are waiting for the lack of errors, there is no determinate
     // amount of time we can wait.
     await Future<void>.delayed(const Duration(seconds: 30));
