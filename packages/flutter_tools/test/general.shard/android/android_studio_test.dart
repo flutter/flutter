@@ -131,6 +131,7 @@ void main() {
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
+      expect(studio.version, equals(Version(4, 1, null)));
       expect(studio, isNotNull);
       expect(studio.pluginsPath, equals(fileSystem.path.join(
         homeMac,
@@ -173,6 +174,7 @@ void main() {
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
+      expect(studio.version, equals(Version(2020, 3, null)));
       expect(studio, isNotNull);
       expect(studio.pluginsPath, equals(fileSystem.path.join(
         homeMac,
@@ -215,6 +217,7 @@ void main() {
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
+      expect(studio.version, equals(Version(3, 3, null)));
       expect(studio, isNotNull);
       expect(studio.pluginsPath, equals(fileSystem.path.join(
         homeMac,
@@ -256,6 +259,7 @@ void main() {
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
+      expect(studio.version, equals(Version(2022, 3, 1)));
       expect(studio, isNotNull);
       expect(studio.pluginsPath, equals(fileSystem.path.join(
         homeMac,
