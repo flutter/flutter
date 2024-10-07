@@ -82,7 +82,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 
 @implementation FlutterPlatformPlugin
 
-- (instancetype)initWithEngine:(FlutterEngine*)engine {
+- (instancetype)initWithEngine:(fml::WeakNSObject<FlutterEngine>)engine {
   FML_DCHECK(engine) << "engine must be set";
   self = [super init];
 

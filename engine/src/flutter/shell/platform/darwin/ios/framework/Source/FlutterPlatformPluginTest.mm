@@ -37,12 +37,15 @@ FLUTTER_ASSERT_ARC
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
 
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
   [engine runWithEntrypoint:nil];
 
   XCTestExpectation* invokeExpectation =
       [self expectationWithDescription:@"Web search launched with escaped search term"];
 
-  FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+  FlutterPlatformPlugin* plugin =
+      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakNSObject()];
   FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
 
   FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"SearchWeb.invoke"
@@ -68,12 +71,15 @@ FLUTTER_ASSERT_ARC
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
 
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
   [engine runWithEntrypoint:nil];
 
   XCTestExpectation* invokeExpectation =
       [self expectationWithDescription:@"Web search launched with non escaped search term"];
 
-  FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+  FlutterPlatformPlugin* plugin =
+      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakNSObject()];
   FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
 
   FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"SearchWeb.invoke"
@@ -97,6 +103,8 @@ FLUTTER_ASSERT_ARC
 - (void)testLookUpCallInitiated {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [engine runWithEntrypoint:nil];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
 
   XCTestExpectation* presentExpectation =
       [self expectationWithDescription:@"Look Up view controller presented"];
@@ -106,7 +114,8 @@ FLUTTER_ASSERT_ARC
                                                                                        bundle:nil];
   FlutterViewController* mockEngineViewController = OCMPartialMock(engineViewController);
 
-  FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+  FlutterPlatformPlugin* plugin =
+      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakNSObject()];
   FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
 
   FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"LookUp.invoke"
@@ -125,6 +134,8 @@ FLUTTER_ASSERT_ARC
 - (void)testShareScreenInvoked {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [engine runWithEntrypoint:nil];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
 
   XCTestExpectation* presentExpectation =
       [self expectationWithDescription:@"Share view controller presented"];
@@ -138,7 +149,8 @@ FLUTTER_ASSERT_ARC
                    animated:YES
                  completion:nil]);
 
-  FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+  FlutterPlatformPlugin* plugin =
+      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakNSObject()];
   FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
 
   FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"Share.invoke"
@@ -157,6 +169,8 @@ FLUTTER_ASSERT_ARC
 - (void)testShareScreenInvokedOnIPad {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [engine runWithEntrypoint:nil];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
 
   XCTestExpectation* presentExpectation =
       [self expectationWithDescription:@"Share view controller presented on iPad"];
@@ -173,7 +187,8 @@ FLUTTER_ASSERT_ARC
   id mockTraitCollection = OCMClassMock([UITraitCollection class]);
   OCMStub([mockTraitCollection userInterfaceIdiom]).andReturn(UIUserInterfaceIdiomPad);
 
-  FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+  FlutterPlatformPlugin* plugin =
+      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakNSObject()];
   FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
 
   FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"Share.invoke"
@@ -192,7 +207,10 @@ FLUTTER_ASSERT_ARC
 - (void)testClipboardHasCorrectStrings {
   [UIPasteboard generalPasteboard].string = nil;
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
-  FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
+  FlutterPlatformPlugin* plugin =
+      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakNSObject()];
 
   XCTestExpectation* setStringExpectation = [self expectationWithDescription:@"setString"];
   FlutterResult resultSet = ^(id result) {
@@ -228,7 +246,10 @@ FLUTTER_ASSERT_ARC
 - (void)testClipboardSetDataToNullDoNotCrash {
   [UIPasteboard generalPasteboard].string = nil;
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
-  FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
+  FlutterPlatformPlugin* plugin =
+      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakNSObject()];
 
   XCTestExpectation* setStringExpectation = [self expectationWithDescription:@"setData"];
   FlutterResult resultSet = ^(id result) {
@@ -259,7 +280,10 @@ FLUTTER_ASSERT_ARC
       [[UINavigationController alloc] initWithRootViewController:flutterViewController];
   UITabBarController* tabBarController = [[UITabBarController alloc] init];
   tabBarController.viewControllers = @[ navigationController ];
-  FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
+  FlutterPlatformPlugin* plugin =
+      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakNSObject()];
 
   id navigationControllerMock = OCMPartialMock(navigationController);
   OCMStub([navigationControllerMock popViewControllerAnimated:YES]);
@@ -279,9 +303,12 @@ FLUTTER_ASSERT_ARC
 
 - (void)testWhetherDeviceHasLiveTextInputInvokeCorrectly {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
   XCTestExpectation* invokeExpectation =
       [self expectationWithDescription:@"isLiveTextInputAvailableInvoke"];
-  FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+  FlutterPlatformPlugin* plugin =
+      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakNSObject()];
   FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
   FlutterMethodCall* methodCall =
       [FlutterMethodCall methodCallWithMethodName:@"LiveText.isLiveTextInputAvailable"
@@ -304,6 +331,8 @@ FLUTTER_ASSERT_ARC
     [engine runWithEntrypoint:nil];
     FlutterViewController* flutterViewController =
         [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+    std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+        std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
     XCTAssertFalse(flutterViewController.prefersStatusBarHidden);
 
     // Update to hidden.
@@ -342,6 +371,8 @@ FLUTTER_ASSERT_ARC
     [engine runWithEntrypoint:nil];
     FlutterViewController* flutterViewController =
         [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+    std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+        std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
     XCTAssertFalse(flutterViewController.prefersStatusBarHidden);
 
     // Update to hidden.
@@ -389,6 +420,8 @@ FLUTTER_ASSERT_ARC
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
 
   // Update to hidden.
   FlutterPlatformPlugin* plugin = [engine platformPlugin];
@@ -438,6 +471,8 @@ FLUTTER_ASSERT_ARC
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
   XCTAssertFalse(flutterViewController.prefersStatusBarHidden);
 
   FlutterPlatformPlugin* plugin = [engine platformPlugin];
