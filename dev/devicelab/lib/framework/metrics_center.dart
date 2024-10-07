@@ -12,14 +12,12 @@ import 'package:metrics_center/metrics_center.dart';
 ///
 /// It supports both token and credential authentications.
 Future<FlutterDestination> connectFlutterDestination() async {
-  const String kTokenPath = 'TOKEN_PATH';
-  const String kGcpProject = 'GCP_PROJECT';
   final Map<String, String> env = Platform.environment;
   final bool isTesting = env['IS_TESTING'] == 'true';
-  if (env.containsKey(kTokenPath) && env.containsKey(kGcpProject)) {
+  if (env case {'TOKEN_PATH': final String path, 'GCP_PROJECT': final String project}) {
     return FlutterDestination.makeFromAccessToken(
-      File(env[kTokenPath]!).readAsStringSync(),
-      env[kGcpProject]!,
+      File(path).readAsStringSync(),
+      project,
       isTesting: isTesting,
     );
   }
