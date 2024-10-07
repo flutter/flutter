@@ -114,7 +114,7 @@ class CustomDeviceLogReader extends DeviceLogReader {
   Stream<String> get logLines => logLinesController.stream;
 
   @override
-  Future<void> provideVmService(FlutterVmService? connectedVmService) async { }
+  Future<void> provideVmService(FlutterVmService connectedVmService) async { }
 }
 
 /// A [DevicePortForwarder] that uses commands to forward / unforward a port.

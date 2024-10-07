@@ -1470,7 +1470,7 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   void dispose() { }
 
   @override
-  Future<void> provideVmService(FlutterVmService? connectedVmService) async {}
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {}
 }
 
 /// Append --null_assertions to any existing Dart VM flags if

@@ -1025,7 +1025,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   @override
-  Future<void> provideVmService(FlutterVmService? connectedVmService) async { }
+  Future<void> provideVmService(FlutterVmService connectedVmService) async { }
 }
 
 class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {

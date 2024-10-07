@@ -387,5 +387,5 @@ class DesktopLogReader extends DeviceLogReader {
   }
 
   @override
-  Future<void> provideVmService(FlutterVmService? connectedVmService) async { }
+  Future<void> provideVmService(FlutterVmService connectedVmService) async { }
 }

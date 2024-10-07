@@ -520,7 +520,7 @@ class _ProxiedLogReader extends DeviceLogReader {
   }
 
   @override
-  Future<void> provideVmService(FlutterVmService? connectedVmService) async { }
+  Future<void> provideVmService(FlutterVmService connectedVmService) async { }
 }
 
 /// A port forwarded by a [ProxiedPortForwarder].

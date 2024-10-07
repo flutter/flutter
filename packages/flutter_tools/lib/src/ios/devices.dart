@@ -1303,11 +1303,9 @@ class IOSDeviceLogReader extends DeviceLogReader {
   FlutterVmService? _connectedVmService;
 
   @override
-  Future<void> provideVmService(FlutterVmService? connectedVmService) async {
-    if (connectedVmService != null) {
-      await _listenToUnifiedLoggingEvents(connectedVmService);
-      _connectedVmService = connectedVmService;
-    }
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {
+    await _listenToUnifiedLoggingEvents(connectedVmService);
+    _connectedVmService = connectedVmService;
   }
 
   static const int minimumUniversalLoggingSdkVersion = 13;
