@@ -36,7 +36,7 @@ class _CupertinoMagnifierExampleState extends State<CupertinoMagnifierExample> {
         middle: Text('CupertinoMagnifier Sample'),
       ),
       child: Center(
-          child: Column(
+        child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text('Drag on the logo!'),
