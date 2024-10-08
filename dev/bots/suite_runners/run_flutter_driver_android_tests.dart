@@ -71,7 +71,9 @@ Future<void> _runFlutterDriver({
   if (failed) {
     final CommandResult resultL = await runCommand(crashreport, <String>['-l']);
     if (resultL.exitCode != 0) {
-      throw StateError('Failed to run crash report tool: ${resultL.flattenedStderr}',);
+      throw StateError(
+        'Failed to run crash report tool: ${resultL.flattenedStderr}',
+      );
     }
     if (resultL.flattenedStdout?.isEmpty ?? true) {
       print('No crash reports found');
@@ -82,7 +84,9 @@ Future<void> _runFlutterDriver({
     }
     final CommandResult resultU = await runCommand(crashreport, <String>['-u']);
     if (resultU.exitCode != 0) {
-      throw StateError('Failed to run crash report tool: ${resultU.flattenedStderr}',);
+      throw StateError(
+        'Failed to run crash report tool: ${resultU.flattenedStderr}',
+      );
     }
     if (resultU.flattenedStdout?.isEmpty ?? true) {
       print('No crash reports uploaded');
@@ -95,7 +99,13 @@ Future<void> _runFlutterDriver({
 
 String _findCrashReportTool() {
   final String executable;
-  if (io.Platform.isMacOS) {
+  if (io.Platform.environment['ANDROID_HOME'] case final String androidHome) {
+    executable = path.join(
+      androidHome,
+      'emulator',
+      'crashreport',
+    );
+  } else if (io.Platform.isMacOS) {
     executable = path.join(
       io.Platform.environment['HOME']!,
       'Library',
