@@ -12,7 +12,7 @@ import '../../project.dart';
 /// created with --template plugin_ffi.
 ///
 /// ```cmake
-/// if(ANDROID)
+/// if (ANDROID)
 ///   # Support Android 15 16k page size.
 ///   target_link_options({{projectName}} PRIVATE "-Wl,-z,max-page-size=16384")
 /// endif()
@@ -53,7 +53,7 @@ class CmakeAndroid16kPagesMigration extends ProjectMigrator {
 
     final String linkerFlags = '''
 
-if(ANDROID)
+if (ANDROID)
   # Support Android 15 16k page size.
   target_link_options($projectName PRIVATE "-Wl,-z,max-page-size=16384")
 endif()

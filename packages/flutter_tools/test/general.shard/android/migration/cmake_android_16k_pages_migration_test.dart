@@ -50,7 +50,7 @@ set_target_properties(my_plugin PROPERTIES
 
 target_compile_definitions(my_plugin PUBLIC DART_SHARED_LIB)
 
-if(ANDROID)
+if (ANDROID)
   # Support Android 15 16k page size.
   target_link_options(my_plugin PRIVATE "-Wl,-z,max-page-size=16384")
 endif()
