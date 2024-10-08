@@ -5,6 +5,7 @@
 /// @docImport 'editable_text.dart';
 /// @docImport 'scroll_view.dart';
 /// @docImport 'table.dart';
+/// @docImport 'package:flutter/widgets.dart';
 library;
 
 import 'dart:math' as math;
@@ -150,11 +151,11 @@ class InteractiveViewer extends StatefulWidget {
        child = null;
 
   /// When laying out the child, InteractiveViewer applies a transform based on the current
-  /// Matrix4 defined in the TransformationController and will translate all the hit tests as well.
+  /// [Matrix4] defined in the [TransformationController] and will translate all the hit tests as well.
   ///
   /// Due to the way gestures work in Flutter if a child is in an negative offset of it's parent then
-  /// hit tests are skipped. For example you could have a Stack with Clip.none and negative offset
-  /// for the Positioned widget.
+  /// hit tests are skipped. For example you could have a [Stack] with [Clip.none] and negative offset
+  /// for the [Positioned] widget.
   ///
   /// ```dart
   /// InteractiveViewer(
@@ -183,7 +184,7 @@ class InteractiveViewer extends StatefulWidget {
   /// ```
   ///
   /// In the above example 'B' can receive hit tests, but 'A' will not register any interactions. This happens
-  /// for Stack, CustomMultiChildLayout, or any widget that can position children irregardless
+  /// for [Stack], [CustomMultiChildLayout], or any widget that can position children irregardless
   /// if the parent is InteractiveViewer.
   ///
   /// This is fine for non interactive elements and in most cases having transformChild set to true will be
