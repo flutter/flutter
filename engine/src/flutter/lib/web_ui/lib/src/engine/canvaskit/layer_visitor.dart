@@ -329,9 +329,7 @@ class MeasureVisitor extends LayerVisitor {
     measuringCanvas.save();
     measuringCanvas.translate(opacity.offset.dx, opacity.offset.dy);
 
-    final ui.Rect saveLayerBounds = opacity.paintBounds.shift(-opacity.offset);
-
-    measuringCanvas.saveLayer(saveLayerBounds, paint);
+    measuringCanvas.saveLayer(ui.Rect.largest, paint);
     measureChildren(opacity);
     // Restore twice: once for the translate and once for the saveLayer.
     measuringCanvas.restore();
@@ -567,9 +565,7 @@ class PaintVisitor extends LayerVisitor {
     nWayCanvas.save();
     nWayCanvas.translate(opacity.offset.dx, opacity.offset.dy);
 
-    final ui.Rect saveLayerBounds = opacity.paintBounds.shift(-opacity.offset);
-
-    nWayCanvas.saveLayer(saveLayerBounds, paint);
+    nWayCanvas.saveLayer(ui.Rect.largest, paint);
     paintChildren(opacity);
     // Restore twice: once for the translate and once for the saveLayer.
     nWayCanvas.restore();
