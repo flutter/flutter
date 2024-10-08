@@ -31,7 +31,7 @@ class _CupertinoMagnifierExampleState extends State<CupertinoMagnifierExample> {
 
   @override
   Widget build(BuildContext context) {
-    return  CupertinoPageScaffold(
+    return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoMagnifier Sample'),
       ),
