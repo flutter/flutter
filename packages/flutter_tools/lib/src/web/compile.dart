@@ -202,7 +202,7 @@ enum WebRendererMode implements CliEnum {
   /// Returns whether the WebRendererMode is considered deprecated or not.
   ///
   /// Deprecated modes: auto, html.
-  bool get isDeprecated => switch(this) {
+  bool get isDeprecated => switch (this) {
         auto => true,
         canvaskit => false,
         html => true,
