@@ -6,45 +6,53 @@ import 'package:flutter/cupertino.dart';
 
 /// Flutter code sample for [CupertinoTextMagnifier].
 
-void main() => runApp(const TextMagnifierExampleApp(text: 'Hello world!'));
+void main() => runApp(const CupertinoTextMagnifierApp());
 
-class TextMagnifierExampleApp extends StatefulWidget {
-  const TextMagnifierExampleApp({
-    super.key,
-    required this.text,
-  });
-
-
-  final String text;
+class CupertinoTextMagnifierApp extends StatelessWidget {
+  const CupertinoTextMagnifierApp({super.key});
 
   @override
-  State<TextMagnifierExampleApp> createState() => _TextMagnifierExampleAppState();
+  Widget build(BuildContext context) {
+    return const CupertinoApp(
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: CupertinoTextMagnifierExampleApp(),
+    );
+  }
 }
 
-class _TextMagnifierExampleAppState extends State<TextMagnifierExampleApp> {
+class CupertinoTextMagnifierExampleApp extends StatefulWidget {
+  const CupertinoTextMagnifierExampleApp({
+    super.key,
+  });
+
+  @override
+  State<CupertinoTextMagnifierExampleApp> createState() =>
+      _CupertinoTextMagnifierExampleAppState();
+}
+
+class _CupertinoTextMagnifierExampleAppState
+    extends State<CupertinoTextMagnifierExampleApp> {
   final MagnifierController _controller = MagnifierController();
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
-      theme: const CupertinoThemeData(brightness: Brightness.light),
-      home: CupertinoPageScaffold(
-        navigationBar: const CupertinoNavigationBar(
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoTextMagnifier Sample'),
       ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 48.0),
-          child: Center(
-            child: CupertinoTextField(
-              magnifierConfiguration: TextMagnifierConfiguration(
-                magnifierBuilder: (_, __, ValueNotifier<MagnifierInfo> magnifierInfo) {
-                  return CupertinoTextMagnifier(
-                    controller: _controller,
-                    magnifierInfo: magnifierInfo,
-                  );
-                },
-              ),
-              controller: TextEditingController(text: widget.text),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 48.0),
+        child: Center(
+          child: CupertinoTextField(
+            magnifierConfiguration: TextMagnifierConfiguration(
+              magnifierBuilder:
+                  (_, __, ValueNotifier<MagnifierInfo> magnifierInfo) {
+                return CupertinoTextMagnifier(
+                  controller: _controller,
+                  magnifierInfo: magnifierInfo,
+                );
+              },
             ),
+            controller: TextEditingController(text: 'Hello world!'),
           ),
         ),
       ),
