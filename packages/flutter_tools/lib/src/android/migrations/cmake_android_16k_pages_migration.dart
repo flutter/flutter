@@ -51,6 +51,7 @@ class CmakeAndroid16kPagesMigration extends ProjectMigrator {
  PUBLIC DART_SHARED_LIB)
 ''';
 
+    /// Relevant template: templates/plugin_ffi/src.tmpl/CMakeLists.txt.tmpl
     final String linkerFlags = '''
 
 if (ANDROID)
@@ -59,9 +60,7 @@ if (ANDROID)
 endif()
 ''';
 
-    String updated = original;
-
-    updated = original.replaceFirst(
+    final String updated = original.replaceFirst(
       before,
       '$before$linkerFlags',
     );
