@@ -232,7 +232,7 @@ static void DrawGlyph(SkCanvas* canvas,
     glyph_paint.setStrokeWidth(prop->stroke_width * scaled_font.scale);
     glyph_paint.setStrokeCap(ToSkiaCap(prop->stroke_cap));
     glyph_paint.setStrokeJoin(ToSkiaJoin(prop->stroke_join));
-    glyph_paint.setStrokeMiter(prop->stroke_miter * scaled_font.scale);
+    glyph_paint.setStrokeMiter(prop->stroke_miter);
   }
   canvas->save();
   canvas->translate(glyph.subpixel_offset.x, glyph.subpixel_offset.y);
@@ -388,7 +388,7 @@ static Rect ComputeGlyphSize(const SkFont& font,
     glyph_paint.setStrokeWidth(glyph.properties->stroke_width * scale);
     glyph_paint.setStrokeCap(ToSkiaCap(glyph.properties->stroke_cap));
     glyph_paint.setStrokeJoin(ToSkiaJoin(glyph.properties->stroke_join));
-    glyph_paint.setStrokeMiter(glyph.properties->stroke_miter * scale);
+    glyph_paint.setStrokeMiter(glyph.properties->stroke_miter);
   }
   font.getBounds(&glyph.glyph.index, 1, &scaled_bounds, &glyph_paint);
 
