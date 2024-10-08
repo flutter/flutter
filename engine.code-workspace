@@ -163,6 +163,24 @@
         }
       },
       {
+        "name": "shell_unittests_arm64",
+        "pattern": "../out/host_debug_unopt_arm64/shell_unittests",
+        "runTask": {
+          "before": [
+            "shell_unittests_arm64"
+          ]
+        }
+      },
+      {
+        "name": "ui_unittests_arm64",
+        "pattern": "../out/host_debug_unopt_arm64/ui_unittests",
+        "runTask": {
+          "before": [
+            "ui_unittests_arm64"
+          ]
+        }
+      },
+      {
         "name": "impeller_golden_tests_arm64",
         "pattern": "../out/host_debug_unopt_arm64/impeller_golden_tests",
         "runTask": {
@@ -289,6 +307,60 @@
           "-c",
           "host_debug_unopt_arm64",
           "//flutter/display_list:display_list_unittests"
+        ]
+      },
+      {
+        "type": "shell",
+        "command": "./flutter/bin/et",
+        "options": {
+          "cwd": "${workspaceFolder}/.."
+        },
+        "problemMatcher": [
+          "$gcc"
+        ],
+        "presentation": {
+          "echo": true,
+          "reveal": "silent",
+          "focus": false,
+          "panel": "shared",
+          "clear": true
+        },
+        "group": {
+          "kind": "build"
+        },
+        "label": "shell_unittests_arm64",
+        "args": [
+          "build",
+          "-c",
+          "host_debug_unopt_arm64",
+          "//flutter/shell:shell_unittests"
+        ]
+      },
+      {
+        "type": "shell",
+        "command": "./flutter/bin/et",
+        "options": {
+          "cwd": "${workspaceFolder}/.."
+        },
+        "problemMatcher": [
+          "$gcc"
+        ],
+        "presentation": {
+          "echo": true,
+          "reveal": "silent",
+          "focus": false,
+          "panel": "shared",
+          "clear": true
+        },
+        "group": {
+          "kind": "build"
+        },
+        "label": "ui_unittests_arm64",
+        "args": [
+          "build",
+          "-c",
+          "host_debug_unopt_arm64",
+          "//flutter/lib/ui:ui_unittests"
         ]
       },
       {
