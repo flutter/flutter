@@ -211,7 +211,7 @@ enum WebRendererMode implements CliEnum {
 
   /// Returns a consistent deprecation warning for the WebRendererMode.
   String get deprecationWarning =>
-    'The HTML Renderer is being deprecated. Stop using "--web-renderer=$name".'
+    'The HTML Renderer is deprecated. Do not use "--web-renderer=$name".'
     '\nSee: https://docs.flutter.dev/to/web-html-renderer-deprecation';
 
   @override
