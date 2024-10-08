@@ -44,7 +44,7 @@ class FilterContents : public Contents {
       Sigma sigma_y,
       Entity::TileMode tile_mode = Entity::TileMode::kDecal,
       BlurStyle mask_blur_style = BlurStyle::kNormal,
-      const std::shared_ptr<Geometry>& mask_geometry = nullptr);
+      const Geometry* mask_geometry = nullptr);
 
   static std::shared_ptr<FilterContents> MakeBorderMaskBlur(
       FilterInput::Ref input,

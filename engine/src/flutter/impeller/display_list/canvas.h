@@ -197,23 +197,6 @@ class Canvas {
       SamplerDescriptor sampler = {},
       SourceRectConstraint src_rect_constraint = SourceRectConstraint::kFast);
 
-  void ClipPath(
-      const Path& path,
-      Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
-
-  void ClipRect(
-      const Rect& rect,
-      Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
-
-  void ClipOval(
-      const Rect& bounds,
-      Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
-
-  void ClipRRect(
-      const Rect& rect,
-      const Size& corner_radii,
-      Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
-
   void DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                      Point position,
                      const Paint& paint);
@@ -224,6 +207,9 @@ class Canvas {
 
   void DrawAtlas(const std::shared_ptr<AtlasContents>& atlas_contents,
                  const Paint& paint);
+
+  void ClipGeometry(std::unique_ptr<Geometry> geometry,
+                    Entity::ClipOperation clip_op);
 
   void EndReplay();
 
@@ -246,6 +232,11 @@ class Canvas {
   std::optional<Rect> initial_cull_rect_;
   std::vector<LazyRenderingConfig> render_passes_;
   std::vector<SaveLayerState> save_layer_state_;
+
+  // All geometry objects created for regular draws can be stack allocated,
+  // but clip geometries must be cached for record/replay for backdrop filters
+  // and so must be kept alive longer.
+  std::vector<std::unique_ptr<Geometry>> clip_geometry_;
 
   uint64_t current_depth_ = 0u;
 
@@ -271,12 +262,14 @@ class Canvas {
 
   void Reset();
 
+  void AddRenderEntityWithFiltersToCurrentPass(Entity& entity,
+                                               const Geometry* geometry,
+                                               const Paint& paint,
+                                               bool reuse_depth = false);
+
   void AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth = false);
 
   void AddClipEntityToCurrentPass(Entity& entity);
-
-  void ClipGeometry(const std::shared_ptr<Geometry>& geometry,
-                    Entity::ClipOperation clip_op);
 
   void RestoreClip();
 

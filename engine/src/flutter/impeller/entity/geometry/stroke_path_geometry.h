@@ -19,7 +19,7 @@ class StrokePathGeometry final : public Geometry {
                      Cap stroke_cap,
                      Join stroke_join);
 
-  ~StrokePathGeometry();
+  ~StrokePathGeometry() override;
 
   Scalar GetStrokeWidth() const;
 

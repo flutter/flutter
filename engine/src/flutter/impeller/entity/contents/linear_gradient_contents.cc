@@ -107,17 +107,17 @@ bool LinearGradientContents::FastLinearGradient(const ContentContext& renderer,
   using VS = FastGradientPipeline::VertexShader;
   using FS = FastGradientPipeline::FragmentShader;
 
-  Geometry& geometry = *GetGeometry();
-  bool force_stencil = !geometry.IsAxisAlignedRect();
+  const Geometry* geometry = GetGeometry();
+  bool force_stencil = !geometry->IsAxisAlignedRect();
 
   auto geom_callback = [&](const ContentContext& renderer, const Entity& entity,
                            RenderPass& pass,
-                           const Geometry& geometry) -> GeometryResult {
+                           const Geometry* geometry) -> GeometryResult {
     // We already know this is an axis aligned rectangle, so the coverage will
     // be approximately the same as the geometry. For non axis-algined
     // rectangles, we can force stencil then cover (not done here). We give an
     // identity transform to avoid double transforming the gradient.
-    std::optional<Rect> maybe_rect = geometry.GetCoverage(Matrix());
+    std::optional<Rect> maybe_rect = geometry->GetCoverage(Matrix());
     if (!maybe_rect.has_value()) {
       return {};
     }

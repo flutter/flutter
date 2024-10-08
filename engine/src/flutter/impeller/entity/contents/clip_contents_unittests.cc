@@ -37,7 +37,8 @@ TEST_P(EntityTest, ClipContentsOptimizesFullScreenIntersectClips) {
 
   auto contents = std::make_shared<ClipContents>();
   contents->SetClipOperation(Entity::ClipOperation::kIntersect);
-  contents->SetGeometry(Geometry::MakeCover());
+  auto geom = Geometry::MakeCover();
+  contents->SetGeometry(geom.get());
 
   Entity entity;
   entity.SetContents(std::move(contents));

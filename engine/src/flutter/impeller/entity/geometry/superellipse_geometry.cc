@@ -21,6 +21,8 @@ SuperellipseGeometry::SuperellipseGeometry(const Point& center,
       alpha_(alpha),
       beta_(beta) {}
 
+SuperellipseGeometry::~SuperellipseGeometry() {}
+
 GeometryResult SuperellipseGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,

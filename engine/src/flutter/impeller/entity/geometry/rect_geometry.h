@@ -13,7 +13,7 @@ class RectGeometry final : public Geometry {
  public:
   explicit RectGeometry(Rect rect);
 
-  ~RectGeometry() = default;
+  ~RectGeometry() override;
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
@@ -31,13 +31,7 @@ class RectGeometry final : public Geometry {
 
  private:
   Rect rect_;
-
-  RectGeometry(const RectGeometry&) = delete;
-
-  RectGeometry& operator=(const RectGeometry&) = delete;
 };
-
-static_assert(std::is_trivially_destructible<RectGeometry>::value);
 
 }  // namespace impeller
 

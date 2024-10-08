@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_GEOMETRY_LINE_GEOMETRY_H_
 #define FLUTTER_IMPELLER_ENTITY_GEOMETRY_LINE_GEOMETRY_H_
 
-#include <type_traits>
 #include "impeller/entity/geometry/geometry.h"
 
 namespace impeller {
@@ -14,7 +13,7 @@ class LineGeometry final : public Geometry {
  public:
   explicit LineGeometry(Point p0, Point p1, Scalar width, Cap cap);
 
-  ~LineGeometry() = default;
+  ~LineGeometry() override;
 
   static Scalar ComputePixelHalfWidth(const Matrix& transform,
                                       Scalar width,
@@ -69,8 +68,6 @@ class LineGeometry final : public Geometry {
 
   LineGeometry& operator=(const LineGeometry&) = delete;
 };
-
-static_assert(std::is_trivially_destructible<LineGeometry>::value);
 
 }  // namespace impeller
 

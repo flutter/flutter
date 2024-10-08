@@ -505,7 +505,7 @@ Entity ApplyClippedBlurStyle(Entity::ClipOperation clip_operation,
                              const std::shared_ptr<FilterInput>& input,
                              const Snapshot& input_snapshot,
                              Entity blur_entity,
-                             const std::shared_ptr<Geometry>& geometry) {
+                             const Geometry* geometry) {
   auto clip_contents = std::make_shared<ClipContents>();
   clip_contents->SetClipOperation(clip_operation);
   clip_contents->SetGeometry(geometry);
@@ -544,7 +544,7 @@ Entity ApplyBlurStyle(FilterContents::BlurStyle blur_style,
                       const std::shared_ptr<FilterInput>& input,
                       const Snapshot& input_snapshot,
                       Entity blur_entity,
-                      const std::shared_ptr<Geometry>& geometry,
+                      const Geometry* geometry,
                       Vector2 source_space_scalar) {
   switch (blur_style) {
     case FilterContents::BlurStyle::kNormal:
@@ -599,7 +599,7 @@ GaussianBlurFilterContents::GaussianBlurFilterContents(
     Scalar sigma_y,
     Entity::TileMode tile_mode,
     BlurStyle mask_blur_style,
-    const std::shared_ptr<Geometry>& mask_geometry)
+    const Geometry* mask_geometry)
     : sigma_(sigma_x, sigma_y),
       tile_mode_(tile_mode),
       mask_blur_style_(mask_blur_style),

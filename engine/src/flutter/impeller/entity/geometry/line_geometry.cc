@@ -12,6 +12,8 @@ LineGeometry::LineGeometry(Point p0, Point p1, Scalar width, Cap cap)
   FML_DCHECK(width >= 0);
 }
 
+LineGeometry::~LineGeometry() = default;
+
 Scalar LineGeometry::ComputePixelHalfWidth(const Matrix& transform,
                                            Scalar width,
                                            bool msaa) {

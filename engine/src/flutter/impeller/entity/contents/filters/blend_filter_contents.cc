@@ -21,6 +21,7 @@
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/geometry/color.h"
@@ -626,8 +627,8 @@ static std::optional<Entity> PipelineBlend(
 
     if (foreground_color.has_value()) {
       auto contents = std::make_shared<SolidColorContents>();
-      contents->SetGeometry(
-          Geometry::MakeRect(Rect::MakeSize(pass.GetRenderTargetSize())));
+      RectGeometry geom(Rect::MakeSize(pass.GetRenderTargetSize()));
+      contents->SetGeometry(&geom);
       contents->SetColor(foreground_color.value());
 
       Entity foreground_entity;

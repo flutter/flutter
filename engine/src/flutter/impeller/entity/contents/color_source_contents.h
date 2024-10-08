@@ -43,12 +43,12 @@ class ColorSourceContents : public Contents {
   //----------------------------------------------------------------------------
   /// @brief  Set the geometry that this contents will use to render.
   ///
-  void SetGeometry(std::shared_ptr<Geometry> geometry);
+  void SetGeometry(const Geometry* geometry);
 
   //----------------------------------------------------------------------------
   /// @brief  Get the geometry that this contents will use to render.
   ///
-  const std::shared_ptr<Geometry>& GetGeometry() const;
+  const Geometry* GetGeometry() const;
 
   //----------------------------------------------------------------------------
   /// @brief  Set the effect transform for this color source.
@@ -110,14 +110,14 @@ class ColorSourceContents : public Contents {
       std::function<GeometryResult(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass,
-                                   const Geometry& geom)>;
+                                   const Geometry* geom)>;
 
   static GeometryResult DefaultCreateGeometryCallback(
       const ContentContext& renderer,
       const Entity& entity,
       RenderPass& pass,
-      const Geometry& geom) {
-    return geom.GetPositionBuffer(renderer, entity, pass);
+      const Geometry* geom) {
+    return geom->GetPositionBuffer(renderer, entity, pass);
   }
 
   /// @brief Whether the entity should be treated as non-opaque due to stroke
@@ -137,7 +137,8 @@ class ColorSourceContents : public Contents {
     auto options = OptionsFromPassAndEntity(pass, entity);
 
     GeometryResult::Mode geometry_mode = GetGeometry()->GetResultMode();
-    Geometry& geometry = *GetGeometry();
+    bool do_cover_draw = false;
+    Rect cover_area = {};
 
     bool is_stencil_then_cover =
         geometry_mode == GeometryResult::Mode::kNonZero ||
@@ -200,11 +201,19 @@ class ColorSourceContents : public Contents {
       if (!maybe_cover_area.has_value()) {
         return true;
       }
-      geometry = RectGeometry(maybe_cover_area.value());
+      do_cover_draw = true;
+      cover_area = maybe_cover_area.value();
     }
 
-    GeometryResult geometry_result =
-        create_geom_callback(renderer, entity, pass, geometry);
+    GeometryResult geometry_result;
+    if (do_cover_draw) {
+      RectGeometry geom(cover_area);
+      geometry_result = create_geom_callback(renderer, entity, pass, &geom);
+    } else {
+      geometry_result =
+          create_geom_callback(renderer, entity, pass, GetGeometry());
+    }
+
     if (geometry_result.vertex_buffer.vertex_count == 0u) {
       return true;
     }
@@ -260,7 +269,7 @@ class ColorSourceContents : public Contents {
   }
 
  private:
-  std::shared_ptr<Geometry> geometry_;
+  const Geometry* geometry_ = nullptr;
   Matrix inverse_matrix_;
   Scalar opacity_ = 1.0;
   Scalar inherited_opacity_ = 1.0;
