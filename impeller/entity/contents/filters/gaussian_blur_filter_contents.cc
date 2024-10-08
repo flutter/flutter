@@ -74,6 +74,9 @@ Vector2 ExtractScale(const Matrix& matrix) {
 struct BlurInfo {
   /// The scalar that is used to get from source space to unrotated local space.
   Vector2 source_space_scalar;
+  /// The translation that is used to get from  source space to unrotated local
+  /// space.
+  Vector2 source_space_offset;
   /// Sigma when considering an entity's scale and the effect transform.
   Vector2 scaled_sigma;
   /// Blur radius in source pixels based on scaled_sigma.
@@ -95,6 +98,8 @@ BlurInfo CalculateBlurInfo(const Entity& entity,
   // applied to the result of the blur as part of the result's transform.
   const Vector2 source_space_scalar =
       ExtractScale(entity.GetTransform().Basis());
+  const Vector2 source_space_offset =
+      Vector2(entity.GetTransform().m[12], entity.GetTransform().m[13]);
 
   Vector2 scaled_sigma =
       (effect_transform.Basis() * Matrix::MakeScale(source_space_scalar) *  //
@@ -110,6 +115,7 @@ BlurInfo CalculateBlurInfo(const Entity& entity,
       (Matrix::MakeScale(source_space_scalar) * padding).Abs();
   return {
       .source_space_scalar = source_space_scalar,
+      .source_space_offset = source_space_offset,
       .scaled_sigma = scaled_sigma,
       .blur_radius = blur_radius,
       .padding = padding,
@@ -545,7 +551,8 @@ Entity ApplyBlurStyle(FilterContents::BlurStyle blur_style,
                       const Snapshot& input_snapshot,
                       Entity blur_entity,
                       const Geometry* geometry,
-                      Vector2 source_space_scalar) {
+                      Vector2 source_space_scalar,
+                      Vector2 source_space_offset) {
   switch (blur_style) {
     case FilterContents::BlurStyle::kNormal:
       return blur_entity;
@@ -563,9 +570,11 @@ Entity ApplyBlurStyle(FilterContents::BlurStyle blur_style,
           Entity::FromSnapshot(input_snapshot, entity.GetBlendMode());
       Entity result;
       Matrix blurred_transform = blur_entity.GetTransform();
-      Matrix snapshot_transform = entity.GetTransform() *  //
-                                  Matrix::MakeScale(1.f / source_space_scalar) *
-                                  input_snapshot.transform;
+      Matrix snapshot_transform =
+          entity.GetTransform() *  //
+          Matrix::MakeScale(1.f / source_space_scalar) *
+          Matrix::MakeTranslation(-1 * source_space_offset) *
+          input_snapshot.transform;
       result.SetContents(Contents::MakeAnonymous(
           fml::MakeCopyable([blur_entity = blur_entity.Clone(),
                              blurred_transform, snapshot_transform,
@@ -697,11 +706,13 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   Entity snapshot_entity = entity.Clone();
   snapshot_entity.SetTransform(
+      Matrix::MakeTranslation(blur_info.source_space_offset) *
       Matrix::MakeScale(blur_info.source_space_scalar));
 
   std::optional<Rect> source_expanded_coverage_hint;
   if (expanded_coverage_hint.has_value()) {
     source_expanded_coverage_hint = expanded_coverage_hint->TransformBounds(
+        Matrix::MakeTranslation(blur_info.source_space_offset) *
         Matrix::MakeScale(blur_info.source_space_scalar) *
         entity.GetTransform().Invert());
   }
@@ -717,9 +728,11 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     Entity result =
         Entity::FromSnapshot(input_snapshot.value(),
                              entity.GetBlendMode());  // No blur to render.
-    result.SetTransform(entity.GetTransform() *
-                        Matrix::MakeScale(1.f / blur_info.source_space_scalar) *
-                        input_snapshot->transform);
+    result.SetTransform(
+        entity.GetTransform() *
+        Matrix::MakeScale(1.f / blur_info.source_space_scalar) *
+        Matrix::MakeTranslation(-1 * blur_info.source_space_offset) *
+        input_snapshot->transform);
     return result;
   }
 
@@ -827,7 +840,8 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
                .transform =
                    entity.GetTransform() *                                   //
                    Matrix::MakeScale(1.f / blur_info.source_space_scalar) *  //
-                   downsample_pass_args.transform *                          //
+                   Matrix::MakeTranslation(-1 * blur_info.source_space_offset) *
+                   downsample_pass_args.transform *  //
                    Matrix::MakeScale(1 / downsample_pass_args.effective_scalar),
                .sampler_descriptor = sampler_desc,
                .opacity = input_snapshot->opacity},
@@ -835,7 +849,8 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   return ApplyBlurStyle(mask_blur_style_, entity, inputs[0],
                         input_snapshot.value(), std::move(blur_output_entity),
-                        mask_geometry_, blur_info.source_space_scalar);
+                        mask_geometry_, blur_info.source_space_scalar,
+                        blur_info.source_space_offset);
 }
 
 Scalar GaussianBlurFilterContents::CalculateBlurRadius(Scalar sigma) {

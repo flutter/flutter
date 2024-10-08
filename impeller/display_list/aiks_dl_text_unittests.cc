@@ -300,6 +300,7 @@ TEST_P(AiksTest, CanRenderEmojiTextFrame) {
 TEST_P(AiksTest, CanRenderEmojiTextFrameWithBlur) {
   DisplayListBuilder builder;
 
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
