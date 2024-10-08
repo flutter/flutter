@@ -4,10 +4,11 @@
 
 import 'dart:io' show ProcessStartMode;
 
+import 'package:collection/collection.dart';
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:meta/meta.dart';
-import 'package:process_runner/process_runner.dart';
 
+import '../build_plan.dart';
 import '../build_utils.dart';
 import '../flutter_tool_interop/device.dart';
 import '../flutter_tool_interop/flutter_tool.dart';
@@ -15,7 +16,6 @@ import '../flutter_tool_interop/target_platform.dart';
 import '../label.dart';
 import '../logger.dart';
 import 'command.dart';
-import 'flags.dart';
 
 /// The root 'run' command.
 final class RunCommand extends CommandBase {
@@ -27,21 +27,12 @@ final class RunCommand extends CommandBase {
     super.usageLineLength,
     @visibleForTesting FlutterTool? flutterTool,
   }) {
-    // When printing the help/usage for this command, only list all builds
-    // when the --verbose flag is supplied.
-    final bool includeCiBuilds = environment.verbose || !help;
-    builds = runnableBuilds(environment, configs, includeCiBuilds);
-    debugCheckBuilds(builds);
-    // We default to nothing in order to automatically detect attached devices
-    // and select an appropriate target from them.
-    addConfigOption(
-      environment,
+    builds = BuildPlan.configureArgParser(
       argParser,
-      builds,
-      defaultsTo: '',
+      environment,
+      configs: configs,
+      help: help,
     );
-    addConcurrencyOption(argParser);
-    addRbeOptions(argParser, environment);
     _flutterTool = flutterTool ?? FlutterTool.fromEnvironment(environment);
   }
 
@@ -64,17 +55,15 @@ See `flutter run --help` for a listing
 ''';
 
   Build? _findTargetBuild(String configName) {
-    final String demangledName = demangleConfigName(environment, configName);
-    return builds
-        .where((Build build) => build.name == demangledName)
-        .firstOrNull;
+    final demangledName = demangleConfigName(environment, configName);
+    return builds.firstWhereOrNull((build) => build.name == demangledName);
   }
 
   Build? _findHostBuild(Build? targetBuild) {
     if (targetBuild == null) {
       return null;
     }
-    final String mangledName = mangleConfigName(environment, targetBuild.name);
+    final mangledName = mangleConfigName(environment, targetBuild.name);
     if (mangledName.contains('host_')) {
       return targetBuild;
     }
@@ -94,13 +83,13 @@ See `flutter run --help` for a listing
 
   String _getDeviceId() {
     if (argResults!.rest.contains('-d')) {
-      final int index = argResults!.rest.indexOf('-d') + 1;
+      final index = argResults!.rest.indexOf('-d') + 1;
       if (index < argResults!.rest.length) {
         return argResults!.rest[index];
       }
     }
     if (argResults!.rest.contains('--device-id')) {
-      final int index = argResults!.rest.indexOf('--device-id') + 1;
+      final index = argResults!.rest.indexOf('--device-id') + 1;
       if (index < argResults!.rest.length) {
         return argResults!.rest[index];
       }
@@ -110,7 +99,7 @@ See `flutter run --help` for a listing
 
   String _getMode() {
     // Sniff the build mode from the args that will be passed to flutter run.
-    String mode = 'debug';
+    var mode = 'debug';
     if (argResults!.rest.contains('--profile')) {
       mode = 'profile';
     } else if (argResults!.rest.contains('--release')) {
@@ -124,92 +113,59 @@ See `flutter run --help` for a listing
     return RunTarget.detectAndSelect(devices, idPrefix: _getDeviceId());
   })();
 
-  Future<String> _selectTargetConfig() async {
-    final configName = argResults![configFlag] as String;
-    if (configName.isNotEmpty) {
-      return configName;
-    }
-    final target = await _runTarget;
-    if (target == null) {
-      return 'host_debug';
-    }
-
-    final result = target.buildConfigFor(_getMode());
-    environment.logger.status('Building to run on $result');
-    return result;
-  }
-
   @override
   Future<int> run() async {
     if (!environment.processRunner.processManager.canRun('flutter')) {
       throw FatalError('Cannot find the "flutter" command in your PATH');
     }
 
-    final configName = await _selectTargetConfig();
-    final targetBuild = _findTargetBuild(configName);
-    if (targetBuild == null) {
-      throw FatalError('Could not find build $configName');
-    }
-
-    final hostBuild = _findHostBuild(targetBuild);
-    if (hostBuild == null) {
-      throw FatalError('Could not find host build for $configName');
-    }
-
-    final useRbe = argResults!.flag(rbeFlag);
-    if (useRbe && !environment.hasRbeConfigInTree()) {
-      throw FatalError('RBE was requested but no RBE config was found');
-    }
-
-    final extraGnArgs = [
-      if (!useRbe) '--no-rbe',
-    ];
     final target = await _runTarget;
+    final plan = BuildPlan.fromArgResults(
+      argResults!,
+      environment,
+      builds: builds,
+      defaultBuild: () => target?.buildConfigFor(_getMode()),
+    );
+
+    final hostBuild = _findHostBuild(plan.build);
+    if (hostBuild == null) {
+      throw FatalError('Could not find host build for ${plan.build.name}');
+    }
+
     final buildTargetsForShell = target?.buildTargetsForShell ?? [];
 
-    final concurrency = int.tryParse(argResults![concurrencyFlag] as String);
-    if (concurrency == null || concurrency < 0) {
-      throw FatalError(
-        '--$concurrencyFlag (-j) must specify a positive integer.',
-      );
-    }
-
     // First build the host.
-    int r = await runBuild(
+    var r = await runBuild(
       environment,
       hostBuild,
-      concurrency: concurrency,
-      extraGnArgs: extraGnArgs,
-      enableRbe: useRbe,
-      rbeConfig: makeRbeConfig(argResults![buildStrategyFlag] as String),
+      concurrency: plan.concurrency ?? 0,
+      extraGnArgs: plan.toGnArgs(),
+      enableRbe: plan.useRbe,
+      rbeConfig: plan.toRbeConfig(),
     );
     if (r != 0) {
       throw FatalError('Failed to build host (${hostBuild.name})');
     }
 
     // Now build the target if it isn't the same.
-    if (hostBuild.name != targetBuild.name) {
+    if (hostBuild.name != plan.build.name) {
       r = await runBuild(
         environment,
-        targetBuild,
-        concurrency: concurrency,
-        extraGnArgs: extraGnArgs,
-        enableRbe: useRbe,
+        plan.build,
+        concurrency: plan.concurrency ?? 0,
+        extraGnArgs: plan.toGnArgs(),
+        enableRbe: plan.useRbe,
         targets: buildTargetsForShell,
-        rbeConfig: makeRbeConfig(argResults![buildStrategyFlag] as String),
+        rbeConfig: plan.toRbeConfig(),
       );
       if (r != 0) {
-        throw FatalError('Failed to build target (${targetBuild.name})');
+        throw FatalError('Failed to build target (${plan.build.name})');
       }
     }
 
-    final String mangledBuildName =
-        mangleConfigName(environment, targetBuild.name);
-
-    final String mangledHostBuildName =
-        mangleConfigName(environment, hostBuild.name);
-
-    final List<String> command = <String>[
+    final mangledBuildName = mangleConfigName(environment, plan.build.name);
+    final mangledHostBuildName = mangleConfigName(environment, hostBuild.name);
+    final command = <String>[
       'flutter',
       'run',
       '--local-engine-src-path',
@@ -223,8 +179,7 @@ See `flutter run --help` for a listing
 
     // TODO(johnmccutchan): Be smart and if the user requested a profile
     // config, add the '--profile' flag when invoking flutter run.
-    final ProcessRunnerResult result =
-        await environment.processRunner.runProcess(
+    final result = await environment.processRunner.runProcess(
       command,
       runInShell: true,
       startMode: ProcessStartMode.inheritStdio,
