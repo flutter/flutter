@@ -12,7 +12,7 @@ import 'package:flutter/widgets.dart';
 /// finger may be blocking the point of interest, like a selection handle.
 ///
 /// {@tool dartpad}
-/// This sample demonstrates what a CupertinoTextMagnifier is, and how it can be used.
+/// This sample demonstrates how to use [CupertinoTextMagnifier].
 ///
 /// ** See code in examples/api/lib/widgets/magnifier/cupertino_text_magnifier.0.dart **
 /// {@end-tool}
