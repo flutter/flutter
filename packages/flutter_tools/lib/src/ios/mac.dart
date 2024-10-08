@@ -56,7 +56,7 @@ const String kConcurrentRunFailureMessage2 = 'there are two concurrent builds ru
 String missingPlatformInstructions(String simulatorVersion) => '''
 ════════════════════════════════════════════════════════════════════════════════
 $simulatorVersion is not installed. To download and install the platform, open
-Xcode, select Xcode > Settings > Platforms, and click the GET button for the
+Xcode, select Xcode > Settings > Components, and click the GET button for the
 required platform.
 
 For more information, please visit:
