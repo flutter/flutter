@@ -102,6 +102,18 @@ class DropdownMenuEntry<T> {
   final ButtonStyle? style;
 }
 
+/// Defines the behavior for closing the dropdown menu when an item is selected.
+enum CloseBehavior {
+  /// Closes all open menus in the widget tree.
+  all,
+
+  /// Closes only the current dropdown menu.
+  self,
+
+  /// Does not close any menus.
+  none,
+}
+
 /// A dropdown menu that can be opened from a [TextField]. The selected
 /// menu item is displayed in that field.
 ///
@@ -172,6 +184,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.alignmentOffset,
     required this.dropdownMenuEntries,
     this.inputFormatters,
+    this.closeBehavior = CloseBehavior.all,
   }) : assert(filterCallback == null || enableFilter);
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -473,6 +486,19 @@ class DropdownMenu<T> extends StatefulWidget {
   /// {@macro flutter.material.MenuAnchor.alignmentOffset}
   final Offset? alignmentOffset;
 
+  /// Defines the behavior for closing the dropdown menu when an item is selected.
+  ///
+  /// The close behavior can be set to:
+  /// * [CloseBehavior.all]: Closes all open menus in the widget tree.
+  /// * [CloseBehavior.self]: Closes only the current dropdown menu.
+  /// * [CloseBehavior.none]: Does not close any menus.
+  ///
+  /// This property allows fine-grained control over the menu's closing behavior,
+  /// which can be useful for creating nested or complex menu structures.
+  ///
+  /// Defaults to [CloseBehavior.all].
+  final CloseBehavior closeBehavior;
+
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
@@ -722,6 +748,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         style: effectiveStyle,
         leadingIcon: entry.leadingIcon,
         trailingIcon: entry.trailingIcon,
+        closeOnActivate: widget.closeBehavior == CloseBehavior.all,
         onPressed: entry.enabled && widget.enabled
           ? () {
               _localTextEditingController?.value = TextEditingValue(
@@ -731,6 +758,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               currentHighlight = widget.enableSearch ? i : null;
               widget.onSelected?.call(entry.value);
               _enableFilter = false;
+              if (widget.closeBehavior == CloseBehavior.self) {
+                _controller.close();
+              }
             }
           : null,
         requestFocusOnHover: false,
