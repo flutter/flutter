@@ -818,11 +818,41 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 // lose their own states.
 class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar> {
   late _NavigationBarStaticComponentsKeys keys;
+  ScrollableState? _scrollableState;
 
   @override
   void initState() {
     super.initState();
     keys = _NavigationBarStaticComponentsKeys();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
+    _scrollableState = Scrollable.maybeOf(context);
+    _scrollableState?.position.isScrollingNotifier.addListener(_handleScrollChange);
+  }
+
+  @override
+  void dispose() {
+    if (_scrollableState?.position != null) {
+      _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
+    }
+    super.dispose();
+  }
+
+  void _handleScrollChange() {
+    final ScrollController? controller = _scrollableState?.widget.controller;
+    if (controller!.offset > 0.0 && controller.offset < _kNavBarLargeTitleHeightExtension) {
+      controller.position.animateTo(
+        controller.offset > _kNavBarLargeTitleHeightExtension / 2
+          ? _kNavBarLargeTitleHeightExtension
+          : 0.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   @override
