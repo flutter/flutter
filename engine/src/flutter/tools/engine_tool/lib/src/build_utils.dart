@@ -7,7 +7,6 @@ import 'dart:io' as io;
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:path/path.dart' as p;
 
-import 'commands/flags.dart';
 import 'environment.dart';
 import 'label.dart';
 import 'logger.dart';
@@ -118,20 +117,6 @@ String mangleConfigName(Environment env, String name) {
 ///   web_tests/artifacts -> web_tests/artifacts
 String demangleConfigName(Environment env, String name) {
   return _doNotMangle(env, name) ? name : '${_osPrefix(env)}$name';
-}
-
-/// Make an RbeConfig.
-RbeConfig makeRbeConfig(String execStrategy) {
-  switch (execStrategy) {
-    case buildStrategyFlagValueAuto:
-      return const RbeConfig();
-    case buildStrategyFlagValueLocal:
-      return const RbeConfig(execStrategy: RbeExecStrategy.local);
-    case buildStrategyFlagValueRemote:
-      return const RbeConfig(execStrategy: RbeExecStrategy.remote);
-    default:
-      throw FatalError('Unknown RBE execution strategy "$execStrategy"');
-  }
 }
 
 /// Build the build target in the environment.

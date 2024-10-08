@@ -4,11 +4,8 @@
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:engine_build_configs/engine_build_configs.dart';
 
-import '../build_utils.dart';
 import '../environment.dart';
-import 'flags.dart';
 
 /// The base class that all commands and subcommands should inherit from.
 abstract base class CommandBase extends Command<int> {
@@ -33,64 +30,4 @@ abstract base class CommandBase extends Command<int> {
   void printUsage() {
     environment.logger.status(usage);
   }
-}
-
-/// Adds the -c (--config) option to the parser.
-void addConfigOption(
-  Environment environment,
-  ArgParser parser,
-  List<Build> builds, {
-  String defaultsTo = 'host_debug',
-}) {
-  parser.addOption(
-    configFlag,
-    abbr: 'c',
-    defaultsTo: defaultsTo,
-    help: 'Specify the build config to use. Run "et help build --verbose" to '
-        'see the full list of runnable configurations.',
-    allowed: <String>[
-      for (final Build config in builds)
-        mangleConfigName(environment, config.name),
-    ],
-    allowedHelp: <String, String>{
-      for (final Build config in builds)
-        mangleConfigName(environment, config.name): config.description,
-    },
-  );
-}
-
-/// Adds the -j option to the parser.
-void addConcurrencyOption(ArgParser parser) {
-  parser.addOption(
-    concurrencyFlag,
-    abbr: 'j',
-    defaultsTo: '0',
-    help: 'Specify the concurrency level to use for the ninja build.',
-  );
-}
-
-/// Adds the --rbe and --exec-stragey flags.
-void addRbeOptions(ArgParser parser, Environment environment) {
-  parser.addFlag(
-    rbeFlag,
-    defaultsTo: environment.hasRbeConfigInTree(),
-    help: 'RBE is enabled by default when available.',
-  );
-  parser.addOption(
-    buildStrategyFlag,
-    allowed: [
-      buildStrategyFlagValueAuto,
-      buildStrategyFlagValueLocal,
-      buildStrategyFlagValueRemote,
-    ],
-    allowedHelp: {
-      buildStrategyFlagValueAuto:
-          'If RBE is enabled, use remote builds, otherwise fallback to local builds.',
-      buildStrategyFlagValueLocal:
-          'Use local builds regardless of RBE being enabled.',
-      buildStrategyFlagValueRemote:
-          'Use RBE builds, and fail if they are not available instead of falling back.'
-    },
-    defaultsTo: buildStrategyFlagValueAuto,
-  );
 }

@@ -4,6 +4,7 @@
 
 import 'package:engine_build_configs/engine_build_configs.dart';
 
+import '../build_plan.dart';
 import '../build_utils.dart';
 import '../gn.dart';
 import '../label.dart';
@@ -139,26 +140,17 @@ final class QueryTargetsCommand extends CommandBase {
     required this.configs,
     super.help = false,
   }) {
-    // When printing the help/usage for this command, only list all builds
-    // when the --verbose flag is supplied.
-    final bool includeCiBuilds = environment.verbose || !help;
-    builds = runnableBuilds(environment, configs, includeCiBuilds);
-    debugCheckBuilds(builds);
-    addConfigOption(
-      environment,
+    builds = BuildPlan.configureArgParser(
       argParser,
-      builds,
+      environment,
+      configs: configs,
+      help: help,
     );
     argParser.addFlag(
       testOnlyFlag,
       abbr: 't',
       help: 'Filter build targets to only include tests',
       negatable: false,
-    );
-    argParser.addFlag(
-      rbeFlag,
-      defaultsTo: environment.hasRbeConfigInTree(),
-      help: 'RBE is enabled by default when available.',
     );
   }
 
@@ -180,41 +172,36 @@ et query targets //flutter/fml/...  # List all targets under `//flutter/fml`
 
   @override
   Future<int> run() async {
-    final String configName = argResults![configFlag] as String;
-    final bool testOnly = argResults![testOnlyFlag] as bool;
-    final bool useRbe = argResults![rbeFlag] as bool;
-    if (useRbe && !environment.hasRbeConfigInTree()) {
-      environment.logger.error('RBE was requested but no RBE config was found');
-      return 1;
-    }
-    final String demangledName = demangleConfigName(environment, configName);
-    final Build? build =
-        builds.where((Build build) => build.name == demangledName).firstOrNull;
-    if (build == null) {
-      environment.logger.error('Could not find config $configName');
-      return 1;
-    }
+    final plan = BuildPlan.fromArgResults(
+      argResults!,
+      environment,
+      builds: builds,
+    );
 
-    if (!await ensureBuildDir(environment, build, enableRbe: useRbe)) {
+    if (!await ensureBuildDir(
+      environment,
+      plan.build,
+      enableRbe: plan.useRbe,
+    )) {
       return 1;
     }
 
     // Builds only accept labels as arguments, so convert patterns to labels.
     // TODO(matanlurey): Can be optimized in cases where wildcards are not used.
-    final Gn gn = Gn.fromEnvironment(environment);
+    final gn = Gn.fromEnvironment(environment);
 
     // TODO(matanlurey): Discuss if we want to just require '//...'.
     // For now this retains the existing behavior.
-    List<String> patterns = argResults!.rest;
+    var patterns = argResults!.rest;
     if (patterns.isEmpty) {
-      patterns = <String>['//...'];
+      patterns = ['//...'];
     }
 
-    final Set<BuildTarget> allTargets = <BuildTarget>{};
-    for (final String pattern in patterns) {
-      final TargetPattern target = TargetPattern.parse(pattern);
-      final List<BuildTarget> targets = await gn.desc(
-        'out/${build.ninja.config}',
+    final allTargets = <BuildTarget>{};
+    for (final pattern in patterns) {
+      final target = TargetPattern.parse(pattern);
+      final targets = await gn.desc(
+        'out/${plan.build.ninja.config}',
         target,
       );
       allTargets.addAll(targets);
@@ -225,7 +212,8 @@ et query targets //flutter/fml/...  # List all targets under `//flutter/fml`
       return 1;
     }
 
-    for (final BuildTarget target in allTargets) {
+    final testOnly = argResults!.flag(testOnlyFlag);
+    for (final target in allTargets) {
       if (testOnly && (!target.testOnly || target is! ExecutableBuildTarget)) {
         continue;
       }

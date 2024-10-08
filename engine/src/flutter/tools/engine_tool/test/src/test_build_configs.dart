@@ -26,6 +26,7 @@ final class TestBuilderConfig {
     required String name,
     required TestDroneDimension dimension,
     bool enableRbe = false,
+    bool? enableLto,
     String description = 'A default description.',
     String? targetDir,
     (String, List<String>)? generatorTask,
@@ -39,6 +40,7 @@ final class TestBuilderConfig {
       'gclient_variables': <String, Object?>{},
       'gn': [
         if (enableRbe) '--rbe',
+        if (enableLto == false) '--no-lto',
       ],
       'name': name,
       'description': description,
