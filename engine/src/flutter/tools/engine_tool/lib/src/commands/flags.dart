@@ -11,18 +11,10 @@
 // an --everything flag.
 
 // Keep this list alphabetized.
-const String allFlag = 'all';
-const String builderFlag = 'builder';
-const String concurrencyFlag = 'concurrency';
-const String configFlag = 'config';
-const String dryRunFlag = 'dry-run';
-const String buildStrategyFlag = 'build-strategy';
-const String buildStrategyFlagValueAuto = 'auto';
-const String buildStrategyFlagValueLocal = 'local';
-const String buildStrategyFlagValueRemote = 'remote';
-const String ltoFlag = 'lto';
-const String quietFlag = 'quiet';
-const String rbeFlag = 'rbe';
-const String runTestsFlag = 'run-tests';
-const String verboseFlag = 'verbose';
-const String testOnlyFlag = 'testonly';
+const allFlag = 'all';
+const builderFlag = 'builder';
+const dryRunFlag = 'dry-run';
+const quietFlag = 'quiet';
+const runTestsFlag = 'run-tests';
+const verboseFlag = 'verbose';
+const testOnlyFlag = 'testonly';

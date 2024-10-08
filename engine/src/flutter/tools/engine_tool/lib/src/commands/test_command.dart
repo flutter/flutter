@@ -4,13 +4,13 @@
 
 import 'package:engine_build_configs/engine_build_configs.dart';
 
+import '../build_plan.dart';
 import '../build_utils.dart';
 import '../gn.dart';
 import '../label.dart';
 import '../proc_utils.dart';
 import '../worker_pool.dart';
 import 'command.dart';
-import 'flags.dart';
 
 /// The root 'test' command.
 final class TestCommand extends CommandBase {
@@ -21,18 +21,12 @@ final class TestCommand extends CommandBase {
     super.help = false,
     super.usageLineLength,
   }) {
-    // When printing the help/usage for this command, only list all builds
-    // when the --verbose flag is supplied.
-    final bool includeCiBuilds = environment.verbose || !help;
-    builds = runnableBuilds(environment, configs, includeCiBuilds);
-    debugCheckBuilds(builds);
-    addConfigOption(
-      environment,
+    builds = BuildPlan.configureArgParser(
       argParser,
-      builds,
+      environment,
+      configs: configs,
+      help: help,
     );
-    addConcurrencyOption(argParser);
-    addRbeOptions(argParser, environment);
   }
 
   /// List of compatible builds.
@@ -51,40 +45,29 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
 
   @override
   Future<int> run() async {
-    final String configName = argResults![configFlag] as String;
-    final bool useRbe = argResults![rbeFlag] as bool;
-    if (useRbe && !environment.hasRbeConfigInTree()) {
-      environment.logger.error('RBE was requested but no RBE config was found');
-      return 1;
-    }
-    final String demangledName = demangleConfigName(environment, configName);
-    final Build? build =
-        builds.where((Build build) => build.name == demangledName).firstOrNull;
-    if (build == null) {
-      environment.logger.error('Could not find config $configName');
-      return 1;
-    }
+    final plan = BuildPlan.fromArgResults(
+      argResults!,
+      environment,
+      builds: builds,
+    );
 
-    final String dashJ = argResults![concurrencyFlag] as String;
-    final int? concurrency = int.tryParse(dashJ);
-    if (concurrency == null || concurrency < 0) {
-      environment.logger.error('-j must specify a positive integer.');
-      return 1;
-    }
-
-    if (!await ensureBuildDir(environment, build, enableRbe: useRbe)) {
+    if (!await ensureBuildDir(
+      environment,
+      plan.build,
+      enableRbe: plan.useRbe,
+    )) {
       return 1;
     }
 
     // Builds only accept labels as arguments, so convert patterns to labels.
-    final Gn gn = Gn.fromEnvironment(environment);
+    final gn = Gn.fromEnvironment(environment);
 
     // Figure out what targets the user wants to build.
-    final Set<BuildTarget> buildTargets = <BuildTarget>{};
-    for (final String pattern in argResults!.rest) {
-      final TargetPattern target = TargetPattern.parse(pattern);
-      final List<BuildTarget> found = await gn.desc(
-        'out/${build.ninja.config}',
+    final buildTargets = <BuildTarget>{};
+    for (final pattern in argResults!.rest) {
+      final target = TargetPattern.parse(pattern);
+      final found = await gn.desc(
+        'out/${plan.build.ninja.config}',
         target,
       );
       buildTargets.addAll(found);
@@ -96,7 +79,7 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
     }
 
     // Make sure there is at least one test target.
-    final List<ExecutableBuildTarget> testTargets = buildTargets
+    final testTargets = buildTargets
         .whereType<ExecutableBuildTarget>()
         .where((ExecutableBuildTarget t) => t.testOnly)
         .toList();
@@ -106,24 +89,24 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
       return 1;
     }
 
-    final int buildExitCode = await runBuild(
+    final buildExitCode = await runBuild(
       environment,
-      build,
-      concurrency: concurrency,
-      targets: testTargets.map((BuildTarget target) => target.label).toList(),
-      enableRbe: useRbe,
-      rbeConfig: makeRbeConfig(argResults![buildStrategyFlag] as String),
+      plan.build,
+      concurrency: plan.concurrency ?? 0,
+      targets: testTargets.map((target) => target.label).toList(),
+      enableRbe: plan.useRbe,
+      rbeConfig: plan.toRbeConfig(),
     );
     if (buildExitCode != 0) {
       return buildExitCode;
     }
-    final WorkerPool workerPool = WorkerPool(
+    final workerPool = WorkerPool(
       environment,
       ProcessTaskProgressReporter(environment),
     );
-    final Set<ProcessTask> tasks = <ProcessTask>{};
-    for (final ExecutableBuildTarget target in testTargets) {
-      final List<String> commandLine = <String>[target.executable];
+    final tasks = <ProcessTask>{};
+    for (final target in testTargets) {
+      final commandLine = <String>[target.executable];
       tasks.add(ProcessTask(
         target.label.toString(),
         environment,

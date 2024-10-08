@@ -4,11 +4,11 @@
 
 import 'package:engine_build_configs/engine_build_configs.dart';
 
+import '../build_plan.dart';
 import '../build_utils.dart';
 import '../gn.dart';
 import '../label.dart';
 import 'command.dart';
-import 'flags.dart';
 
 /// The root 'build' command.
 final class BuildCommand extends CommandBase {
@@ -19,21 +19,11 @@ final class BuildCommand extends CommandBase {
     super.help = false,
     super.usageLineLength,
   }) {
-    // When printing the help/usage for this command, only list all builds
-    // when the --verbose flag is supplied.
-    final bool includeCiBuilds = environment.verbose || !help;
-    builds = runnableBuilds(environment, configs, includeCiBuilds);
-    debugCheckBuilds(builds);
-    addConfigOption(
-      environment,
+    builds = BuildPlan.configureArgParser(
       argParser,
-      builds,
-    );
-    addConcurrencyOption(argParser);
-    addRbeOptions(argParser, environment);
-    argParser.addFlag(
-      ltoFlag,
-      help: 'Whether LTO should be enabled for a build. Default is disabled',
+      environment,
+      configs: configs,
+      help: help,
     );
   }
 
@@ -53,60 +43,43 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
 
   @override
   Future<int> run() async {
-    final String configName = argResults![configFlag] as String;
-    final bool useRbe = argResults![rbeFlag] as bool;
-    if (useRbe && !environment.hasRbeConfigInTree()) {
-      environment.logger.error('RBE was requested but no RBE config was found');
-      return 1;
-    }
-    final bool useLto = argResults![ltoFlag] as bool;
-    final String demangledName = demangleConfigName(environment, configName);
-    final Build? build =
-        builds.where((Build build) => build.name == demangledName).firstOrNull;
-    if (build == null) {
-      environment.logger.error('Could not find config $configName');
-      return 1;
-    }
+    final plan = BuildPlan.fromArgResults(
+      argResults!,
+      environment,
+      builds: builds,
+    );
 
-    final String dashJ = argResults![concurrencyFlag] as String;
-    final int? concurrency = int.tryParse(dashJ);
-    if (concurrency == null || concurrency < 0) {
-      environment.logger.error('-j must specify a positive integer.');
-      return 1;
-    }
-
-    final List<String> extraGnArgs = <String>[
-      if (!useRbe) '--no-rbe',
-      if (useLto) '--lto' else '--no-lto',
-    ];
-
-    final List<String> commandLineTargets = argResults!.rest;
+    final commandLineTargets = argResults!.rest;
     if (commandLineTargets.isNotEmpty &&
-        !await ensureBuildDir(environment, build, enableRbe: useRbe)) {
+        !await ensureBuildDir(
+          environment,
+          plan.build,
+          enableRbe: plan.useRbe,
+        )) {
       return 1;
     }
 
     // Builds only accept labels as arguments, so convert patterns to labels.
     // TODO(matanlurey): Can be optimized in cases where wildcards are not used.
-    final Gn gn = Gn.fromEnvironment(environment);
-    final Set<Label> allTargets = <Label>{};
-    for (final String pattern in commandLineTargets) {
-      final TargetPattern target = TargetPattern.parse(pattern);
-      final List<BuildTarget> targets = await gn.desc(
-        'out/${build.ninja.config}',
+    final gn = Gn.fromEnvironment(environment);
+    final allTargets = <Label>{};
+    for (final pattern in commandLineTargets) {
+      final target = TargetPattern.parse(pattern);
+      final targets = await gn.desc(
+        'out/${plan.build.ninja.config}',
         target,
       );
-      allTargets.addAll(targets.map((BuildTarget target) => target.label));
+      allTargets.addAll(targets.map((target) => target.label));
     }
 
     return runBuild(
       environment,
-      build,
-      concurrency: concurrency,
-      extraGnArgs: extraGnArgs,
+      plan.build,
+      concurrency: plan.concurrency ?? 0,
+      extraGnArgs: plan.toGnArgs(),
       targets: allTargets.toList(),
-      enableRbe: useRbe,
-      rbeConfig: makeRbeConfig(argResults![buildStrategyFlag] as String),
+      enableRbe: plan.useRbe,
+      rbeConfig: plan.toRbeConfig(),
     );
   }
 }

@@ -281,41 +281,6 @@ void main() {
     );
   });
 
-  test('build command fails when rbe is enabled but not supported', () async {
-    final testEnv = TestEnvironment.withTestEngine(
-      abi: Abi.macosArm64,
-      // Intentionally omit withRbe: true.
-      // That means the //flutter/build/rbe directory will not be created.
-    );
-    addTearDown(testEnv.cleanup);
-
-    final builder = TestBuilderConfig();
-    builder.addBuild(
-      name: 'ci/android_debug_rbe_arm64',
-      dimension: TestDroneDimension.mac,
-      enableRbe: true,
-    );
-    final runner = ToolCommandRunner(
-      environment: testEnv.environment,
-      configs: {
-        'mac_test_config': builder.buildConfig(
-          path: 'ci/builders/mac_test_config.json',
-        ),
-      },
-    );
-    final result = await runner.run([
-      'build',
-      '--config',
-      'ci/android_debug_rbe_arm64',
-      '--rbe',
-    ]);
-    expect(result, equals(1));
-    expect(
-      testEnv.testLogs.map((LogRecord r) => r.message).join(),
-      contains('RBE was requested but no RBE config was found'),
-    );
-  });
-
   test('build command does not run rbe when disabled', () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
