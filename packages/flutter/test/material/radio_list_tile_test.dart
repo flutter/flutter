@@ -1601,14 +1601,12 @@ void main() {
       ),
     ));
 
-    final Transform widget = tester.widget(
-      find.ancestor(
-        of: find.byType(Radio<bool>),
-        matching: find.byType(Transform),
-      ),
+    final Finder widget = find.ancestor(
+      of: find.byType(Radio<bool>),
+      matching: find.byType(Transform),
     );
 
-    expect(widget.transform.getMaxScaleOnAxis(), 1.0);
+    expect(widget, findsNothing);
   });
 
   testWidgets('RadioListTile respects radioScaleFactor',
