@@ -28,7 +28,7 @@ class SuperellipseGeometry final : public Geometry {
                                 Scalar alpha,
                                 Scalar beta);
 
-  ~SuperellipseGeometry() = default;
+  ~SuperellipseGeometry() override;
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;

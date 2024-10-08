@@ -18,7 +18,7 @@ class FillPathGeometry final : public Geometry {
   explicit FillPathGeometry(const Path& path,
                             std::optional<Rect> inner_rect = std::nullopt);
 
-  ~FillPathGeometry() = default;
+  ~FillPathGeometry() override;
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;

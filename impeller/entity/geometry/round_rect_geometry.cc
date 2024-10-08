@@ -9,6 +9,8 @@ namespace impeller {
 RoundRectGeometry::RoundRectGeometry(const Rect& bounds, const Size& radii)
     : bounds_(bounds), radii_(radii) {}
 
+RoundRectGeometry::~RoundRectGeometry() = default;
+
 GeometryResult RoundRectGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,

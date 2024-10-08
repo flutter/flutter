@@ -15,7 +15,7 @@ class CoverGeometry final : public Geometry {
  public:
   CoverGeometry();
 
-  ~CoverGeometry() = default;
+  ~CoverGeometry() override = default;
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
@@ -35,8 +35,6 @@ class CoverGeometry final : public Geometry {
 
   CoverGeometry& operator=(const CoverGeometry&) = delete;
 };
-
-static_assert(std::is_trivially_destructible<CoverGeometry>::value);
 
 }  // namespace impeller
 

@@ -55,12 +55,11 @@ GaussianBlurPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
 /// Note: This will replace `DirectionalGaussianBlurFilterContents`.
 class GaussianBlurFilterContents final : public FilterContents {
  public:
-  explicit GaussianBlurFilterContents(
-      Scalar sigma_x,
-      Scalar sigma_y,
-      Entity::TileMode tile_mode,
-      BlurStyle mask_blur_style,
-      const std::shared_ptr<Geometry>& mask_geometry);
+  explicit GaussianBlurFilterContents(Scalar sigma_x,
+                                      Scalar sigma_y,
+                                      Entity::TileMode tile_mode,
+                                      BlurStyle mask_blur_style,
+                                      const Geometry* mask_geometry = nullptr);
 
   Scalar GetSigmaX() const { return sigma_.x; }
   Scalar GetSigmaY() const { return sigma_.y; }
@@ -117,7 +116,7 @@ class GaussianBlurFilterContents final : public FilterContents {
   const Vector2 sigma_ = Vector2(0.0, 0.0);
   const Entity::TileMode tile_mode_;
   const BlurStyle mask_blur_style_;
-  std::shared_ptr<Geometry> mask_geometry_;
+  const Geometry* mask_geometry_ = nullptr;
 };
 
 }  // namespace impeller

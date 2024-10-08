@@ -25,6 +25,7 @@
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
@@ -430,7 +431,7 @@ void DlDispatcherBase::clipRect(const DlRect& rect,
                                 bool is_aa) {
   AUTO_DEPTH_WATCHER(0u);
 
-  GetCanvas().ClipRect(rect, ToClipOperation(clip_op));
+  GetCanvas().ClipGeometry(Geometry::MakeRect(rect), ToClipOperation(clip_op));
 }
 
 // |flutter::DlOpReceiver|
@@ -439,7 +440,8 @@ void DlDispatcherBase::clipOval(const DlRect& bounds,
                                 bool is_aa) {
   AUTO_DEPTH_WATCHER(0u);
 
-  GetCanvas().ClipOval(bounds, ToClipOperation(clip_op));
+  GetCanvas().ClipGeometry(Geometry::MakeOval(bounds),
+                           ToClipOperation(clip_op));
 }
 
 // |flutter::DlOpReceiver|
@@ -450,15 +452,20 @@ void DlDispatcherBase::clipRRect(const SkRRect& rrect,
 
   auto clip_op = ToClipOperation(sk_op);
   if (rrect.isRect()) {
-    GetCanvas().ClipRect(skia_conversions::ToRect(rrect.rect()), clip_op);
+    GetCanvas().ClipGeometry(
+        Geometry::MakeRect(skia_conversions::ToRect(rrect.rect())), clip_op);
   } else if (rrect.isOval()) {
-    GetCanvas().ClipOval(skia_conversions::ToRect(rrect.rect()), clip_op);
+    GetCanvas().ClipGeometry(
+        Geometry::MakeOval(skia_conversions::ToRect(rrect.rect())), clip_op);
   } else if (rrect.isSimple()) {
-    GetCanvas().ClipRRect(skia_conversions::ToRect(rrect.rect()),
-                          skia_conversions::ToSize(rrect.getSimpleRadii()),
-                          clip_op);
+    GetCanvas().ClipGeometry(
+        Geometry::MakeRoundRect(
+            skia_conversions::ToRect(rrect.rect()),
+            skia_conversions::ToSize(rrect.getSimpleRadii())),
+        clip_op);
   } else {
-    GetCanvas().ClipPath(skia_conversions::ToPath(rrect), clip_op);
+    GetCanvas().ClipGeometry(
+        Geometry::MakeFillPath(skia_conversions::ToPath(rrect)), clip_op);
   }
 }
 
@@ -470,17 +477,19 @@ void DlDispatcherBase::clipPath(const DlPath& path, ClipOp sk_op, bool is_aa) {
 
   DlRect rect;
   if (path.IsRect(&rect)) {
-    GetCanvas().ClipRect(rect, clip_op);
+    GetCanvas().ClipGeometry(Geometry::MakeRect(rect), clip_op);
   } else if (path.IsOval(&rect)) {
-    GetCanvas().ClipOval(rect, clip_op);
+    GetCanvas().ClipGeometry(Geometry::MakeOval(rect), clip_op);
   } else {
     SkRRect rrect;
     if (path.IsSkRRect(&rrect) && rrect.isSimple()) {
-      GetCanvas().ClipRRect(skia_conversions::ToRect(rrect.rect()),
-                            skia_conversions::ToSize(rrect.getSimpleRadii()),
-                            clip_op);
+      GetCanvas().ClipGeometry(
+          Geometry::MakeRoundRect(
+              skia_conversions::ToRect(rrect.rect()),
+              skia_conversions::ToSize(rrect.getSimpleRadii())),
+          clip_op);
     } else {
-      GetCanvas().ClipPath(path.GetPath(), clip_op);
+      GetCanvas().ClipGeometry(Geometry::MakeFillPath(path.GetPath()), clip_op);
     }
   }
 }
