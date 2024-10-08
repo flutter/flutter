@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 
+/// Flutter code sample for [CupertinoTextMagnifier].
 
 void main() => runApp(const TextMagnifierExampleApp(text: 'Hello world!'));
 
