@@ -38,6 +38,19 @@ abstract class Renderer {
         useCanvasKit = FlutterConfiguration.useSkia;
       }
 
+      // Warn users in development that anything other than canvaskit is deprecated.
+      assert(() {
+        if (!useCanvasKit) {
+          // The user requested 'html' or 'auto' either in the command-line or JS.
+          final String requested =
+            configuration.requestedRendererType ??
+            (FlutterConfiguration.flutterWebAutoDetect ? 'auto' : 'html');
+          printWarning(
+            'The HTML Renderer is being deprecated. Stop using the "$requested" renderer mode.'
+            '\nSee: https://docs.flutter.dev/to/web-html-renderer-deprecation');
+        }
+        return true;
+      }());
       return useCanvasKit ? CanvasKitRenderer() : HtmlRenderer();
     }
   }
