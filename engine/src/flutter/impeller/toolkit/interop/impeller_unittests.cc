@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
+#include "impeller/base/allocation.h"
+#include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/toolkit/interop/context.h"
 #include "impeller/toolkit/interop/dl.h"
 #include "impeller/toolkit/interop/dl_builder.h"
@@ -95,6 +97,73 @@ TEST_P(InteropPlaygroundTest, CanDrawImage) {
   desc.mip_count = 1u;
   auto texture = Adopt<Texture>(ImpellerTextureCreateWithContentsNew(
       context.GetC(), &desc, &mapping, nullptr));
+  ASSERT_TRUE(texture);
+  auto builder =
+      Adopt<DisplayListBuilder>(ImpellerDisplayListBuilderNew(nullptr));
+  ImpellerPoint point = {100, 100};
+  ImpellerDisplayListBuilderDrawTexture(builder.GetC(), texture.GetC(), &point,
+                                        kImpellerTextureSamplingLinear,
+                                        nullptr);
+  auto dl = Adopt<DisplayList>(
+      ImpellerDisplayListBuilderCreateDisplayListNew(builder.GetC()));
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        ImpellerSurfaceDrawDisplayList(surface.GetC(), dl.GetC());
+        return true;
+      }));
+}
+
+TEST_P(InteropPlaygroundTest, CanCreateOpenGLImage) {
+  auto context = GetInteropContext();
+
+  auto impeller_context = context->GetContext();
+
+  if (impeller_context->GetBackendType() !=
+      impeller::Context::BackendType::kOpenGLES) {
+    GTEST_SKIP() << "This test works with OpenGL handles is only suitable for "
+                    "that backend.";
+    return;
+  }
+
+  const auto& gl_context = ContextGLES::Cast(*impeller_context);
+  const auto& gl = gl_context.GetReactor()->GetProcTable();
+
+  constexpr ISize external_texture_size = {200, 300};
+
+  Allocation texture_data;
+  ASSERT_TRUE(
+      texture_data.Truncate(Bytes{external_texture_size.Area() * 4u}, false));
+
+  const auto kClearColor = Color::Fuchsia().ToR8G8B8A8();
+
+  for (size_t i = 0; i < external_texture_size.Area() * 4u; i += 4u) {
+    memcpy(texture_data.GetBuffer() + i, kClearColor.data(), 4);
+  }
+
+  GLuint external_texture = GL_NONE;
+  gl.GenTextures(1u, &external_texture);
+  ASSERT_NE(external_texture, 0u);
+  gl.BindTexture(GL_TEXTURE_2D, external_texture);
+  gl.TexImage2D(GL_TEXTURE_2D,                 //
+                0,                             //
+                GL_RGBA,                       //
+                external_texture_size.width,   //
+                external_texture_size.height,  //
+                0,                             //
+                GL_RGBA,                       //
+                GL_UNSIGNED_BYTE,              //
+                texture_data.GetBuffer()       //
+  );
+
+  ImpellerTextureDescriptor desc = {};
+  desc.pixel_format = ImpellerPixelFormat::kImpellerPixelFormatRGBA8888;
+  desc.size = {external_texture_size.width, external_texture_size.height};
+  desc.mip_count = 1u;
+  auto texture = Adopt<Texture>(ImpellerTextureCreateWithOpenGLTextureHandleNew(
+      context.GetC(),   //
+      &desc,            //
+      external_texture  //
+      ));
   ASSERT_TRUE(texture);
   auto builder =
       Adopt<DisplayListBuilder>(ImpellerDisplayListBuilderNew(nullptr));
