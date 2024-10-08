@@ -149,6 +149,9 @@ class BuildWebCommand extends BuildSubCommand {
     final bool sourceMaps = boolArg('source-maps');
 
     final List<WebCompilerConfig> compilerConfigs;
+    if (webRenderer != null && webRenderer.isDeprecated) {
+      globals.logger.printWarning(webRenderer.deprecationWarning);
+    }
     if (boolArg(FlutterOptions.kWebWasmFlag)) {
       if (webRenderer != null) {
         throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');
