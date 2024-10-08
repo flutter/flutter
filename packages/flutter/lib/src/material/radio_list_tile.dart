@@ -477,49 +477,50 @@ class RadioListTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control;
+    Widget control;
     switch (_radioType) {
       case _RadioType.material:
         control = ExcludeFocus(
-          child: Transform.scale(
-            scale: radioScaleFactor,
-            child: Radio<T>(
-              value: value,
-              groupValue: groupValue,
-              onChanged: onChanged,
-              toggleable: toggleable,
-              activeColor: activeColor,
-              materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-              autofocus: autofocus,
-              fillColor: fillColor,
-              mouseCursor: mouseCursor,
-              hoverColor: hoverColor,
-              overlayColor: overlayColor,
-              splashRadius: splashRadius,
-            ),
+          child: Radio<T>(
+            value: value,
+            groupValue: groupValue,
+            onChanged: onChanged,
+            toggleable: toggleable,
+            activeColor: activeColor,
+            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+            autofocus: autofocus,
+            fillColor: fillColor,
+            mouseCursor: mouseCursor,
+            hoverColor: hoverColor,
+            overlayColor: overlayColor,
+            splashRadius: splashRadius,
           ),
         );
       case _RadioType.adaptive:
         control = ExcludeFocus(
-          child: Transform.scale(
-            scale: radioScaleFactor,
-            child: Radio<T>.adaptive(
-              value: value,
-              groupValue: groupValue,
-              onChanged: onChanged,
-              toggleable: toggleable,
-              activeColor: activeColor,
-              materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-              autofocus: autofocus,
-              fillColor: fillColor,
-              mouseCursor: mouseCursor,
-              hoverColor: hoverColor,
-              overlayColor: overlayColor,
-              splashRadius: splashRadius,
-              useCupertinoCheckmarkStyle: useCupertinoCheckmarkStyle,
-            ),
+          child: Radio<T>.adaptive(
+            value: value,
+            groupValue: groupValue,
+            onChanged: onChanged,
+            toggleable: toggleable,
+            activeColor: activeColor,
+            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+            autofocus: autofocus,
+            fillColor: fillColor,
+            mouseCursor: mouseCursor,
+            hoverColor: hoverColor,
+            overlayColor: overlayColor,
+            splashRadius: splashRadius,
+            useCupertinoCheckmarkStyle: useCupertinoCheckmarkStyle,
           ),
         );
+    }
+
+    if (radioScaleFactor != 1.0) {
+      control = Transform.scale(
+        scale: radioScaleFactor,
+        child: control,
+      );
     }
 
     final ListTileThemeData listTileTheme = ListTileTheme.of(context);
