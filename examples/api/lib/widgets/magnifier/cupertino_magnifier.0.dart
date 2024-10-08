@@ -4,6 +4,8 @@
 
 import 'package:flutter/cupertino.dart';
 
+/// Flutter code sample for [CupertinoMagnifier].
+
 void main() => runApp(const CupertinoMagnifierApp());
 
 class CupertinoMagnifierApp extends StatelessWidget {
