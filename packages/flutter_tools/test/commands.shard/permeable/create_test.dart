@@ -3202,6 +3202,9 @@ void main() {
     expect(cmakeLists.existsSync(), true);
 
     final String cmakeListsContent = await cmakeLists.readAsString();
+    // If we ever change the flags, this should be accounted for in the
+    // migration as well:
+    // lib/src/android/migrations/cmake_android_16k_pages_migration.dart
     const String expected16KbFlags = 'PRIVATE "-Wl,-z,max-page-size=16384")';
     expect(cmakeListsContent, contains(expected16KbFlags));
   });
