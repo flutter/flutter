@@ -149,15 +149,23 @@ String _findCrashReportTool() {
   }
   final io.File file = io.File(executable);
   if (!file.existsSync()) {
-    // List files in the parent directory to help with debugging.
-    final io.Directory parent = io.Directory(path.dirname(executable));
-    if (parent.existsSync()) {
-      print('Files in ${parent.path}:');
-      for (final io.FileSystemEntity entity in parent.listSync()) {
-        print('  ${entity.path}');
-      }
-    }
+    _exploreParentDirStructure(executable);
     throw StateError('Could not find crash report tool at $executable');
   }
   return executable;
+}
+
+/// Finds the first parent directory that exists and prints the structure.
+void _exploreParentDirStructure(String startAt) {
+  io.Directory? current = io.Directory(startAt);
+  while (current != null) {
+    if (current.existsSync()) {
+      print('Files in ${current.path}:');
+      for (final io.FileSystemEntity entity in current.listSync()) {
+        print('  ${entity.path}');
+      }
+      break;
+    }
+    current = current.parent;
+  }
 }
