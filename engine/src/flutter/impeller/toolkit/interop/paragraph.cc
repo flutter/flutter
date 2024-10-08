@@ -27,7 +27,7 @@ Scalar Paragraph::GetMinIntrinsicWidth() const {
   return paragraph_->GetMinIntrinsicWidth();
 }
 
-Scalar Paragraph::GetMaxInstrinsicWidth() const {
+Scalar Paragraph::GetMaxIntrinsicWidth() const {
   return paragraph_->GetMaxIntrinsicWidth();
 }
 

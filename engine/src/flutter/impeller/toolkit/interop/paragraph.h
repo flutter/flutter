@@ -31,7 +31,7 @@ class Paragraph final
 
   Scalar GetMinIntrinsicWidth() const;
 
-  Scalar GetMaxInstrinsicWidth() const;
+  Scalar GetMaxIntrinsicWidth() const;
 
   Scalar GetIdeographicBaseline() const;
 
