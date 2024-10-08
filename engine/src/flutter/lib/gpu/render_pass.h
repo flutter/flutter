@@ -252,6 +252,11 @@ extern void InternalFlutterGpu_RenderPass_SetCullMode(
     int cull_mode);
 
 FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_SetPrimitiveType(
+    flutter::gpu::RenderPass* wrapper,
+    int primitive_type);
+
+FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_SetWindingOrder(
     flutter::gpu::RenderPass* wrapper,
     int winding_order);
