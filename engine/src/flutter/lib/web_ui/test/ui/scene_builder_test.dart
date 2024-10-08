@@ -223,7 +223,7 @@ Future<void> testMain() async {
           region: region);
     });
 
-    test('blur image filter layer', () async {
+    test('image filter layer', () async {
       final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
       sceneBuilder.pushImageFilter(ui.ImageFilter.blur(
         sigmaX: 5.0,
@@ -237,23 +237,6 @@ Future<void> testMain() async {
 
       await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_image_filter.png', region: region);
-    });
-
-    test('matrix image filter layer', () async {
-      final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
-      sceneBuilder.pushOffset(50.0, 50.0);
-
-      final Matrix4 matrix = Matrix4.rotationZ(math.pi / 18);
-      final ui.ImageFilter matrixFilter = ui.ImageFilter.matrix(toMatrix64(matrix.storage));
-      sceneBuilder.pushImageFilter(matrixFilter);
-      sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
-        canvas.drawRect(
-          region,
-          ui.Paint()..color = const ui.Color(0xFF00FF00)
-        );
-      }));
-      await renderScene(sceneBuilder.build());
-      await matchGoldenFile('scene_builder_matrix_image_filter.png', region: region);
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/154303

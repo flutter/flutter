@@ -135,7 +135,4 @@ class EngineColorFilter implements SceneImageFilter, ui.ColorFilter {
         return 'ColorFilter.srgbToLinearGamma()';
     }
   }
-
-  @override
-  Matrix4? get transform => null;
 }
