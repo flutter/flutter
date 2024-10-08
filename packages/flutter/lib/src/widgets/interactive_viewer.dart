@@ -158,29 +158,38 @@ class InteractiveViewer extends StatefulWidget {
   /// for the [Positioned] widget.
   ///
   /// ```dart
-  /// InteractiveViewer(
-  ///   child: Stack(
-  ///     clipBehavior: Clip.none,
-  ///     children: [
-  ///       Positioned(
-  ///         top: -20,
-  ///         left: -20,
-  ///         child: InkWell(
-  ///           onTap: () => print('A clicked'),
-  ///           child: Text('A'),
-  ///         ),
+  /// import 'package:flutter/widgets.dart';
+  ///
+  /// class Example extends StatelessWidget {
+  ///   const Example({super.key});
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return InteractiveViewer(
+  ///       child: Stack(
+  ///         clipBehavior: Clip.none,
+  ///         children: [
+  ///           Positioned(
+  ///             top: -20,
+  ///             left: -20,
+  ///             child: InkWell(
+  ///               onTap: () => print('A clicked'),
+  ///               child: const Text('A'),
+  ///             ),
+  ///           ),
+  ///           Positioned(
+  ///             top: 50,
+  ///             left: 20,
+  ///             child: InkWell(
+  ///               onTap: () => print('B clicked'),
+  ///               child: const Text('B'),
+  ///             ),
+  ///           ),
+  ///         ],
   ///       ),
-  ///       Positioned(
-  ///         top: 50,
-  ///         left: 20,
-  ///         child: InkWell(
-  ///           onTap: () => print('B clicked'),
-  ///           child: Text('B'),
-  ///         ),
-  ///       ),
-  ///     ],
-  ///   ),
-  /// )
+  ///     );
+  ///   }
+  /// }
   /// ```
   ///
   /// In the above example 'B' can receive hit tests, but 'A' will not register any interactions. This happens
@@ -194,35 +203,50 @@ class InteractiveViewer extends StatefulWidget {
   /// handle child transforms manually.
   ///
   /// ```dart
-  /// final controller = TransformationController();
-  /// final children = [...];
-  /// ...
-  /// InteractiveViewer.builder(
-  ///   controller: controller,
-  ///   transformChild: false,
-  ///   builder: (context, quad) => Stack(
-  ///     clipBehavior: Clip.none,
-  ///     children: [
-  ///      for (final child in children)
-  ///       (){
-  ///          final matrix = controller.value;
-  ///          final rect = MatrixUtils.transformRect(matrix, child.rect);
-  ///          return Positioned(
-  ///            top: rect.dy,
-  ///            left: rect.dx,
-  ///            child: Container(
-  ///              width: rect.width,
-  ///              height: rect.height,
-  ///              child: InkWell(
-  ///                onTap: () => print('Child clicked'),
-  ///                child: Text('Child'),
-  ///             ),
-  ///           ),
+  /// import 'package:flutter/widgets.dart';
+  /// import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad;
+  ///
+  /// typedef Node = ({Rect rect, Widget child});
+  ///
+  /// class Example extends StatelessWidget {
+  ///   const Example({
+  ///     super.key,
+  ///     required this.controller,
+  ///     required this.nodes,
+  ///   });
+  ///
+  ///   final TransformationController controller;
+  ///   final List<Node> nodes;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return InteractiveViewer.builder(
+  ///       controller: controller,
+  ///       transformChild: false,
+  ///       builder: (BuildContext context, Quad quad) {
+  ///         final Matrix4 matrix = controller.value;
+  ///         return Stack(
+  ///           clipBehavior: Clip.none,
+  ///           children: nodes.map((Node node) {
+  ///                final Rect rect = MatrixUtils.transformRect(matrix, node.rect);
+  ///                return Positioned(
+  ///                  top: rect.dy,
+  ///                  left: rect.dx,
+  ///                  child: Container(
+  ///                    width: rect.width,
+  ///                    height: rect.height,
+  ///                    child: GestureDetector(
+  ///                      onTap: () => print('Node clicked'),
+  ///                      child: node.child,
+  ///                   ),
+  ///                 ),
+  ///               );
+  ///           }).toList(),
   ///         );
-  ///       }(),
-  ///     ],
-  ///   ),
-  /// )
+  ///       },
+  ///     );
+  ///   }
+  /// }
   /// ```
   ///
   /// Now the child will never exceed the bounds of the parent and always stay static preserving hit tests.
