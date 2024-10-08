@@ -57,7 +57,7 @@ IMPELLER_EXTERN_C_BEGIN
 
 #define IMPELLER_VERSION_VARIANT 1
 #define IMPELLER_VERSION_MAJOR 1
-#define IMPELLER_VERSION_MINOR 1
+#define IMPELLER_VERSION_MINOR 2
 #define IMPELLER_VERSION_PATCH 0
 
 #define IMPELLER_VERSION                                                  \
@@ -479,6 +479,13 @@ ImpellerTextureCreateWithContentsNew(
     const ImpellerTextureDescriptor* IMPELLER_NONNULL descriptor,
     const ImpellerMapping* IMPELLER_NONNULL contents,
     void* IMPELLER_NULLABLE contents_on_release_user_data);
+
+IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerTexture IMPELLER_NULLABLE
+ImpellerTextureCreateWithOpenGLTextureHandleNew(
+    ImpellerContext IMPELLER_NONNULL context,
+    const ImpellerTextureDescriptor* IMPELLER_NONNULL descriptor,
+    uint64_t handle  // transfer-in ownership
+);
 
 IMPELLER_EXPORT
 void ImpellerTextureRetain(ImpellerTexture IMPELLER_NULLABLE texture);
