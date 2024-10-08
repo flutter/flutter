@@ -51,6 +51,7 @@ void main() {
     expect(find.text(example.MenuBarApp.kMessage), findsOneWidget);
     expect(find.text('Last Selected: Show Message'), findsOneWidget);
   });
+
   testWidgets('Shortcuts work', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MenuBarApp(),
