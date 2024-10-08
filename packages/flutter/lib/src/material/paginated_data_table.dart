@@ -122,6 +122,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.controller,
     this.primary,
     this.headingRowColor,
+    this.dividerThickness,
     this.showEmptyRows = true,
   }) : assert(actions == null || (header != null)),
        assert(columns.isNotEmpty),
@@ -238,6 +239,17 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// The index of the first row to display when the widget is first created.
   final int? initialFirstRowIndex;
+
+
+  /// {@template flutter.material.dataTable.dividerThickness}
+  /// The width of the divider that appears between [TableRow]s.
+  ///
+  /// Must be greater than or equal to zero.
+  /// {@endtemplate}
+  ///
+  /// If null, [DataTableThemeData.dividerThickness] is used. This value
+  /// defaults to 1.0.
+  final double? dividerThickness;
 
   /// Invoked when the user switches to another page.
   ///
@@ -610,6 +622,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     sortColumnIndex: widget.sortColumnIndex,
                     sortAscending: widget.sortAscending,
                     onSelectAll: widget.onSelectAll,
+                    dividerThickness: widget.dividerThickness,
                     // Make sure no decoration is set on the DataTable
                     // from the theme, as its already wrapped in a Card.
                     decoration: const BoxDecoration(),
