@@ -168,11 +168,11 @@ class InteractiveViewer extends StatefulWidget {
   ///     return InteractiveViewer(
   ///       child: Stack(
   ///         clipBehavior: Clip.none,
-  ///         children: [
+  ///         children: <Widget>[
   ///           Positioned(
   ///             top: -20,
   ///             left: -20,
-  ///             child: InkWell(
+  ///             child: GestureDetector(
   ///               onTap: () => print('A clicked'),
   ///               child: const Text('A'),
   ///             ),
@@ -180,7 +180,7 @@ class InteractiveViewer extends StatefulWidget {
   ///           Positioned(
   ///             top: 50,
   ///             left: 20,
-  ///             child: InkWell(
+  ///             child: GestureDetector(
   ///               onTap: () => print('B clicked'),
   ///               child: const Text('B'),
   ///             ),
@@ -221,7 +221,7 @@ class InteractiveViewer extends StatefulWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return InteractiveViewer.builder(
-  ///       controller: controller,
+  ///       transformationController: controller,
   ///       transformChild: false,
   ///       builder: (BuildContext context, Quad quad) {
   ///         final Matrix4 matrix = controller.value;
@@ -229,17 +229,12 @@ class InteractiveViewer extends StatefulWidget {
   ///           clipBehavior: Clip.none,
   ///           children: nodes.map((Node node) {
   ///                final Rect rect = MatrixUtils.transformRect(matrix, node.rect);
-  ///                return Positioned(
-  ///                  top: rect.dy,
-  ///                  left: rect.dx,
-  ///                  child: Container(
-  ///                    width: rect.width,
-  ///                    height: rect.height,
-  ///                    child: GestureDetector(
-  ///                      onTap: () => print('Node clicked'),
-  ///                      child: node.child,
-  ///                   ),
-  ///                 ),
+  ///                return Positioned.fromRect(
+  ///                  rect: rect,
+  ///                  child: GestureDetector(
+  ///                    onTap: () => print('Node clicked'),
+  ///                    child: node.child,
+  ///                  ),
   ///               );
   ///           }).toList(),
   ///         );
