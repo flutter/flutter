@@ -57,7 +57,7 @@ void main() {
     }
   });
 
-  testWidgets('FlexibleSpaceBarSettings provides settings to a FlexibleSpaceBar', (WidgetTester tester) async {
+  testWidgets('Material3 - FlexibleSpaceBarSettings provides settings to a FlexibleSpaceBar', (WidgetTester tester) async {
     const double minExtent = 100.0;
     const double initExtent = 200.0;
     const double maxExtent = 300.0;
@@ -243,7 +243,7 @@ void main() {
     expect(backgroundOpacity.opacity, 1.0);
   });
 
-  testWidgets('Collapsed FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
+  testWidgets('Material3 - Collapsed FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const double expandedHeight = 200;
     await tester.pumpWidget(
@@ -773,7 +773,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/14227
-  testWidgets('FlexibleSpaceBar sets width constraints for the title', (WidgetTester tester) async {
+  testWidgets('Material3 - FlexibleSpaceBar sets width constraints for the title', (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     late double width;
@@ -867,7 +867,7 @@ void main() {
     );
   });
 
-  testWidgets('FlexibleSpaceBar sets constraints for the title - override expandedTitleScale', (WidgetTester tester) async {
+  testWidgets('Material3 - FlexibleSpaceBar sets constraints for the title - override expandedTitleScale', (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     const double expandedTitleScale = 3.0;
@@ -1004,7 +1004,7 @@ void main() {
     );
   });
 
-  testWidgets('FlexibleSpaceBar scaled title', (WidgetTester tester) async {
+  testWidgets('Material3 - FlexibleSpaceBar scaled title', (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     await tester.pumpWidget(
@@ -1123,7 +1123,7 @@ void main() {
     );
   });
 
-  testWidgets('FlexibleSpaceBar scaled title - override expandedTitleScale', (WidgetTester tester) async {
+  testWidgets('Material3 - FlexibleSpaceBar scaled title - override expandedTitleScale', (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     const double expandedTitleScale = 3.0;
@@ -1248,7 +1248,7 @@ void main() {
     );
   });
 
-  testWidgets('FlexibleSpaceBar titlePadding defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - FlexibleSpaceBar titlePadding defaults', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
@@ -1346,7 +1346,7 @@ void main() {
     expect(getTitleBottomLeft(), const Offset(72.0, 16.0));
   });
 
-  testWidgets('FlexibleSpaceBar titlePadding override', (WidgetTester tester) async {
+  testWidgets('Material3 - FlexibleSpaceBar titlePadding override', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
