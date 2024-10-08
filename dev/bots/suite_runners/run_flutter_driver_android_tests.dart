@@ -150,6 +150,8 @@ String _findCrashReportTool() {
   final io.File file = io.File(executable);
   if (!file.existsSync()) {
     _exploreParentDirStructure(executable);
+    // Look at the root of the entire file system.
+    _recursivelySearchForCrashReport('/');
     throw StateError('Could not find crash report tool at $executable');
   }
   return executable;
@@ -167,5 +169,26 @@ void _exploreParentDirStructure(String startAt) {
       break;
     }
     current = current.parent;
+  }
+}
+
+void _recursivelySearchForCrashReport(String startAt) {
+  if (io.Platform.isLinux) {
+    final io.ProcessResult result = io.Process.runSync(
+      'find',
+      <String>[
+        startAt,
+        '-name',
+        'crashreport',
+      ],
+    );
+    if (result.exitCode != 0) {
+      throw StateError('Failed to find crash report tool: ${result.stderr}');
+    }
+    print(result.stdout);
+  } else {
+    throw UnsupportedError(
+      'Unsupported platform: ${io.Platform.operatingSystem}',
+    );
   }
 }
