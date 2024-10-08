@@ -60,6 +60,7 @@ class _CupertinoMagnifierExampleState extends State<CupertinoMagnifierExample> {
                       left: dragGesturePosition.dx - magnifierRadius,
                       top: dragGesturePosition.dy - magnifierRadius,
                       child: const CupertinoMagnifier(
+                        magnificationScale: 1.5,
                         borderRadius: BorderRadius.all(Radius.circular(magnifierRadius)),
                         additionalFocalPointOffset: Offset(0, -magnifierRadius),
                       ),
