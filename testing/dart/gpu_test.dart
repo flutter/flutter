@@ -499,4 +499,48 @@ void main() async {
     final ui.Image image = state.renderTexture.asImage();
     await comparer.addGoldenImage(image, 'flutter_gpu_test_cull_mode.png');
   }, skip: !impellerEnabled);
+
+  // Renders a hexagon using line strip primitive type.
+  test('Can render hollow hexagon using line strip primitive type', () async {
+    final state = createSimpleRenderPass();
+
+    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    // Configure blending with defaults (just to test the bindings).
+    state.renderPass.setColorBlendEnable(true);
+    state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
+
+    // Set primitive type
+    state.renderPass.setPrimitiveType(gpu.PrimitiveType.lineStrip);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(float32(<double>[
+     1.0,  0.0,
+     0.5,  0.8,
+    -0.5,  0.8,
+    -1.0,  0.0,
+    -0.5, -0.8,
+     0.5, -0.8,
+     1.0,  0.0
+    ]));
+    final gpu.BufferView vertInfoData = transients.emplace(float32(<double>[
+      1, 0, 0, 0, // mvp
+      0, 1, 0, 0, // mvp
+      0, 0, 1, 0, // mvp
+      0, 0, 0, 1, // mvp
+      0, 1, 0, 1, // color
+    ]));
+    state.renderPass.bindVertexBuffer(vertices, 7);
+
+    final gpu.UniformSlot vertInfo =
+        pipeline.vertexShader.getUniformSlot('VertInfo');
+    state.renderPass.bindUniform(vertInfo, vertInfoData);
+    state.renderPass.draw();
+
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_hexgon_line_strip.png');
+  }, skip: !impellerEnabled);
 }
