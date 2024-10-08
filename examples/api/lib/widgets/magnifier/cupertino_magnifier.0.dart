@@ -39,7 +39,7 @@ class _CupertinoMagnifierExampleState extends State<CupertinoMagnifierExample> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-               const Text('Drag on the logo!'),
+              const Text('Drag on the logo!'),
               RepaintBoundary(
                 child: Stack(
                   children: <Widget>[
