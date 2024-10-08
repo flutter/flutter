@@ -17,6 +17,8 @@ CircleGeometry::CircleGeometry(const Point& center, Scalar radius)
   FML_DCHECK(radius >= 0);
 }
 
+CircleGeometry::~CircleGeometry() = default;
+
 CircleGeometry::CircleGeometry(const Point& center,
                                Scalar radius,
                                Scalar stroke_width)

@@ -17,7 +17,7 @@ class RoundRectGeometry final : public Geometry {
  public:
   explicit RoundRectGeometry(const Rect& bounds, const Size& radii);
 
-  ~RoundRectGeometry() = default;
+  ~RoundRectGeometry() override;
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;

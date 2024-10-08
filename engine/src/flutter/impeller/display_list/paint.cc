@@ -24,6 +24,7 @@
 #include "impeller/entity/contents/sweep_gradient_contents.h"
 #include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/rect_geometry.h"
 
 namespace impeller {
 
@@ -340,7 +341,8 @@ std::shared_ptr<Contents> Paint::WithColorFilter(
 }
 
 std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
-    std::shared_ptr<TextureContents> texture_contents) const {
+    std::shared_ptr<TextureContents> texture_contents,
+    RectGeometry* rect_geom) const {
   Scalar expand_amount = GaussianBlurFilterContents::CalculateBlurRadius(
       GaussianBlurFilterContents::ScaleSigma(sigma.sigma));
   texture_contents->SetSourceRect(
@@ -348,11 +350,12 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   auto mask = std::make_shared<SolidColorContents>();
   mask->SetColor(Color::White());
   std::optional<Rect> coverage = texture_contents->GetCoverage({});
-  std::shared_ptr<Geometry> geometry;
+  Geometry* geometry = nullptr;
   if (coverage) {
     texture_contents->SetDestinationRect(
         coverage.value().Expand(expand_amount, expand_amount));
-    geometry = Geometry::MakeRect(coverage.value());
+    *rect_geom = RectGeometry(coverage.value());
+    geometry = rect_geom;
   }
   mask->SetGeometry(geometry);
   auto descriptor = texture_contents->GetSamplerDescriptor();
@@ -370,7 +373,8 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
 std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     std::shared_ptr<ColorSourceContents> color_source_contents,
     const flutter::DlColorFilter* color_filter,
-    bool invert_colors) const {
+    bool invert_colors,
+    RectGeometry* rect_geom) const {
   // If it's a solid color then we can just get  away with doing one Gaussian
   // blur. The color filter will always be applied on the CPU.
   if (color_source_contents->IsSolidColor()) {
@@ -399,8 +403,8 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   if (!expanded_local_bounds.has_value()) {
     expanded_local_bounds = Rect();
   }
-  color_source_contents->SetGeometry(
-      Geometry::MakeRect(*expanded_local_bounds));
+  *rect_geom = RectGeometry(expanded_local_bounds.value());
+  color_source_contents->SetGeometry(rect_geom);
   std::shared_ptr<Contents> color_contents = color_source_contents;
 
   /// 4. Apply the user set color filter on the GPU, if applicable.
