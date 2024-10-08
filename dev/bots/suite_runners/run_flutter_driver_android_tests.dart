@@ -149,6 +149,14 @@ String _findCrashReportTool() {
   }
   final io.File file = io.File(executable);
   if (!file.existsSync()) {
+    // List files in the parent directory to help with debugging.
+    final io.Directory parent = io.Directory(path.dirname(executable));
+    if (parent.existsSync()) {
+      print('Files in ${parent.path}:');
+      for (final io.FileSystemEntity entity in parent.listSync()) {
+        print('  ${entity.path}');
+      }
+    }
     throw StateError('Could not find crash report tool at $executable');
   }
   return executable;
