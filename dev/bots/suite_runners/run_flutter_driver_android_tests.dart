@@ -99,7 +99,19 @@ Future<void> _runFlutterDriver({
 
 String _findCrashReportTool() {
   final String executable;
-  if (io.Platform.environment['ANDROID_HOME'] case final String androidHome) {
+  if (io.Platform.environment['LUCI_CI'] == 'True') {
+    // Would have been fetched and installed by CIPD, and not on the PATH.
+    final String? adbPath = io.Platform.environment['ADB_PATH'];
+    if (adbPath == null) {
+      throw StateError('Expected ADB_PATH to be set by LUCI');
+    }
+    executable = path.join(
+      // Parent directory, i.e. the folder that contains platforms/ and platform-tools/.
+      path.dirname(adbPath),
+      'emulator',
+      'crashreport',
+    );
+  } else if (io.Platform.environment['ANDROID_HOME'] case final String androidHome) {
     executable = path.join(
       androidHome,
       'emulator',
