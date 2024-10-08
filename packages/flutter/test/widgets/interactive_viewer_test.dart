@@ -1444,17 +1444,17 @@ void main() {
               child: InteractiveViewer(
                 transformChild: false,
                 transformationController: transformationController,
-                child: SizedBox(width: 200.0, height: 200.0),
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ),
           ),
         ),
       );
 
-      final child = find.byType(SizedBox);
-      var rect = tester.getRect(child);
+      final Finder child = find.byType(SizedBox);
+      Rect rect = tester.getRect(child);
 
-      expect(rect.topLeft, Offset(300, 200));
+      expect(rect.topLeft, const Offset(300, 200));
 
       final Offset center = tester.getCenter(find.byType(InteractiveViewer));
       await scrollAt(center, tester, const Offset(0.0, -20.0));
@@ -1462,7 +1462,7 @@ void main() {
 
       rect = tester.getRect(child);
 
-      expect(rect.topLeft, Offset(300, 200));
+      expect(rect.topLeft, const Offset(300, 200));
     });
 
     testWidgets('builder can change widgets that are off-screen', (WidgetTester tester) async {
