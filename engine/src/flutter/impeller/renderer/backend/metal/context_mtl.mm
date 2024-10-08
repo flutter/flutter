@@ -381,21 +381,39 @@ id<MTLCommandBuffer> ContextMTL::CreateMTLCommandBuffer(
 
 void ContextMTL::StoreTaskForGPU(const fml::closure& task,
                                  const fml::closure& failure) {
-  tasks_awaiting_gpu_.push_back(PendingTasks{task, failure});
-  while (tasks_awaiting_gpu_.size() > kMaxTasksAwaitingGPU) {
-    const PendingTasks& front = tasks_awaiting_gpu_.front();
-    if (front.failure) {
-      front.failure();
+  std::vector<PendingTasks> failed_tasks;
+  {
+    Lock lock(tasks_awaiting_gpu_mutex_);
+    tasks_awaiting_gpu_.push_back(PendingTasks{task, failure});
+    int32_t failed_task_count =
+        tasks_awaiting_gpu_.size() - kMaxTasksAwaitingGPU;
+    if (failed_task_count > 0) {
+      failed_tasks.reserve(failed_task_count);
+      failed_tasks.insert(failed_tasks.end(),
+                          std::make_move_iterator(tasks_awaiting_gpu_.begin()),
+                          std::make_move_iterator(tasks_awaiting_gpu_.begin() +
+                                                  failed_task_count));
+      tasks_awaiting_gpu_.erase(
+          tasks_awaiting_gpu_.begin(),
+          tasks_awaiting_gpu_.begin() + failed_task_count);
     }
-    tasks_awaiting_gpu_.pop_front();
+  }
+  for (const PendingTasks& task : failed_tasks) {
+    if (task.failure) {
+      task.failure();
+    }
   }
 }
 
 void ContextMTL::FlushTasksAwaitingGPU() {
-  for (const auto& task : tasks_awaiting_gpu_) {
+  std::deque<PendingTasks> tasks_awaiting_gpu;
+  {
+    Lock lock(tasks_awaiting_gpu_mutex_);
+    std::swap(tasks_awaiting_gpu, tasks_awaiting_gpu_);
+  }
+  for (const auto& task : tasks_awaiting_gpu) {
     task.task();
   }
-  tasks_awaiting_gpu_.clear();
 }
 
 ContextMTL::SyncSwitchObserver::SyncSwitchObserver(ContextMTL& parent)
