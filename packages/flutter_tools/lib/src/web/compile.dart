@@ -199,6 +199,21 @@ enum WebRendererMode implements CliEnum {
   static const WebRendererMode defaultForJs = WebRendererMode.canvaskit;
   static const WebRendererMode defaultForWasm = WebRendererMode.skwasm;
 
+  /// Returns whether the WebRendererMode is considered deprecated or not.
+  ///
+  /// Deprecated modes: auto, html.
+  bool get isDeprecated => switch (this) {
+        auto => true,
+        canvaskit => false,
+        html => true,
+        skwasm => false
+      };
+
+  /// Returns a consistent deprecation warning for the WebRendererMode.
+  String get deprecationWarning =>
+    'The HTML Renderer is deprecated. Do not use "--web-renderer=$name".'
+    '\nSee: https://docs.flutter.dev/to/web-html-renderer-deprecation';
+
   @override
   String get cliName => kebabCase(name);
 
