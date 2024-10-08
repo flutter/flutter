@@ -163,11 +163,12 @@ class ReactorGLES {
   ///             This can be called on any thread. Even one that doesn't have
   ///             an OpenGL context.
   ///
-  /// @param[in]  type  The type of handle to create.
+  /// @param[in]  type             The type of handle to create.
+  /// @param[in]  external_handle  An already created GL handle if one exists.
   ///
   /// @return     The reactor handle.
   ///
-  HandleGLES CreateHandle(HandleType type);
+  HandleGLES CreateHandle(HandleType type, GLuint external_handle = GL_NONE);
 
   //----------------------------------------------------------------------------
   /// @brief      Collect a reactor handle.

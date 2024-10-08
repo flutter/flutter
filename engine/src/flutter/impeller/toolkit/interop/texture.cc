@@ -18,6 +18,9 @@ Texture::Texture(const Context& context, const TextureDescriptor& descriptor) {
   texture_ = std::move(texture);
 }
 
+Texture::Texture(std::shared_ptr<impeller::Texture> texture)
+    : texture_(std::move(texture)) {}
+
 Texture::~Texture() = default;
 
 bool Texture::IsValid() const {

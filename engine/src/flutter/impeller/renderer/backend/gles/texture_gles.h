@@ -34,12 +34,19 @@ class TextureGLES final : public Texture,
               TextureDescriptor desc,
               IsWrapped wrapped);
 
+  TextureGLES(ReactorGLES::Ref reactor,
+              TextureDescriptor desc,
+              HandleGLES external_handle);
+
   static std::shared_ptr<TextureGLES> WrapFBO(ReactorGLES::Ref reactor,
                                               TextureDescriptor desc,
                                               GLuint fbo);
 
   // |Texture|
   ~TextureGLES() override;
+
+  // |Texture|
+  bool IsValid() const override;
 
   std::optional<GLuint> GetGLHandle() const;
 
@@ -58,9 +65,9 @@ class TextureGLES final : public Texture,
 
   Type GetType() const;
 
-  bool IsWrapped() const { return is_wrapped_; }
+  bool IsWrapped() const;
 
-  std::optional<GLuint> GetFBO() const { return wrapped_fbo_; }
+  std::optional<GLuint> GetFBO() const;
 
   // For non cubemap textures, 0 indicates uninitialized and 1 indicates
   // initialized. For cubemap textures, each face is initialized separately with
@@ -81,7 +88,8 @@ class TextureGLES final : public Texture,
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,
               TextureDescriptor desc,
               bool is_wrapped,
-              std::optional<GLuint> fbo);
+              std::optional<GLuint> fbo,
+              std::optional<HandleGLES> external_handle);
 
   // |Texture|
   void SetLabel(std::string_view label) override;
@@ -94,9 +102,6 @@ class TextureGLES final : public Texture,
   // |Texture|
   bool OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
                      size_t slice) override;
-
-  // |Texture|
-  bool IsValid() const override;
 
   // |Texture|
   ISize GetSize() const override;

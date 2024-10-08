@@ -8,7 +8,11 @@
 
 #include "flutter/fml/mapping.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/texture.h"
 #include "impeller/geometry/scalar.h"
+#include "impeller/renderer/backend/gles/context_gles.h"
+#include "impeller/renderer/backend/gles/texture_gles.h"
+#include "impeller/renderer/context.h"
 #include "impeller/toolkit/interop/color_filter.h"
 #include "impeller/toolkit/interop/color_source.h"
 #include "impeller/toolkit/interop/context.h"
@@ -499,6 +503,48 @@ ImpellerTexture ImpellerTextureCreateWithContentsNew(
     }
   }
   return texture.Leak();
+}
+
+IMPELLER_EXTERN_C
+ImpellerTexture ImpellerTextureCreateWithOpenGLTextureHandleNew(
+    ImpellerContext context,
+    const ImpellerTextureDescriptor* descriptor,
+    uint64_t external_gl_handle) {
+  auto impeller_context = GetPeer(context)->GetContext();
+  if (impeller_context->GetBackendType() !=
+      impeller::Context::BackendType::kOpenGLES) {
+    VALIDATION_LOG << "Context is not OpenGL.";
+    return nullptr;
+  }
+
+  const auto& impeller_context_gl = ContextGLES::Cast(*impeller_context);
+  const auto& reactor = impeller_context_gl.GetReactor();
+
+  auto wrapped_external_gl_handle =
+      reactor->CreateHandle(HandleType::kTexture, external_gl_handle);
+  if (wrapped_external_gl_handle.IsDead()) {
+    VALIDATION_LOG << "Could not wrap external handle.";
+    return nullptr;
+  }
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.type = TextureType::kTexture2D;
+  desc.format = ToImpellerType(descriptor->pixel_format);
+  desc.size = ToImpellerType(descriptor->size);
+  desc.mip_count = std::min(descriptor->mip_count, 1u);
+  desc.usage = TextureUsage::kShaderRead;
+  desc.compression_type = CompressionType::kLossless;
+  auto texture = std::make_shared<TextureGLES>(reactor,                    //
+                                               desc,                       //
+                                               wrapped_external_gl_handle  //
+  );
+  if (!texture || !texture->IsValid()) {
+    VALIDATION_LOG << "Could not wrap external texture.";
+    return nullptr;
+  }
+  texture->SetCoordinateSystem(TextureCoordinateSystem::kUploadFromHost);
+  return Create<Texture>(std::move(texture)).Leak();
 }
 
 IMPELLER_EXTERN_C

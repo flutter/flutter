@@ -18,6 +18,8 @@ class Texture final
  public:
   explicit Texture(const Context& context, const TextureDescriptor& descriptor);
 
+  explicit Texture(std::shared_ptr<impeller::Texture> texture);
+
   ~Texture() override;
 
   Texture(const Texture&) = delete;
