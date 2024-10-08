@@ -360,7 +360,7 @@ targets:
 
   - name: Linux analyzer_benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       test_timeout_secs: "3600" # 1 hour
@@ -376,7 +376,7 @@ targets:
       task_name: analyzer_benchmark
 
   - name: Linux coverage
-    presubmit: false
+    presubmit: true
     recipe: flutter/coverage
     timeout: 120
     enabled_branches:
@@ -387,7 +387,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux packages_autoroller
-    presubmit: false
+    presubmit: true
     recipe: pub_autoroller/pub_autoroller
     # This takes a while because we need to fetch network dependencies and run
     # Gradle for every android app in the repo
@@ -542,7 +542,7 @@ targets:
 
   - name: Linux ci_yaml flutter roller
     recipe: infra/ci_yaml
-    presubmit: false
+    presubmit: true
     timeout: 30
     properties:
       tags: >
@@ -566,7 +566,7 @@ targets:
 
   - name: Linux docs_publish
     recipe: flutter/docs
-    presubmit: false
+    presubmit: true
     timeout: 60
     dimensions:
       os: "Linux"
@@ -633,7 +633,7 @@ targets:
       - .ci.yaml
 
   - name: Linux firebase_abstract_method_smoke_test
-    presubmit: false
+    presubmit: true
     bringup: true # https://github.com/flutter/flutter/issues/147335
     recipe: firebaselab/firebaselab
     timeout: 60
@@ -731,7 +731,7 @@ targets:
 
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
-    presubmit: false
+    presubmit: true
     enabled_branches:
       - master
     properties:
@@ -1138,7 +1138,7 @@ targets:
 
   - name: Linux technical_debt__cost
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -1348,7 +1348,7 @@ targets:
 
   - name: Linux android_java11_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -1365,7 +1365,7 @@ targets:
 
   - name: Linux android_java17_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -1462,7 +1462,7 @@ targets:
 
   - name: Linux web_benchmarks_canvaskit
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -1493,7 +1493,7 @@ targets:
 
   - name: Linux web_benchmarks_skwasm
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -2190,7 +2190,7 @@ targets:
 
   - name: Linux_pixel_7pro android_obfuscate_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2200,7 +2200,7 @@ targets:
   - name: Linux_pixel_7pro android_semantics_integration_test
     recipe: devicelab/devicelab_drone
     bringup: true # Flaky: https://github.com/flutter/flutter/issues/124636
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2210,7 +2210,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey android_view_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2220,7 +2220,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey animated_image_gc_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2230,7 +2230,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey animated_complex_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2240,7 +2240,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey animated_complex_image_filtered_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2250,7 +2250,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey animated_placeholder_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2260,7 +2260,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey backdrop_filter_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2269,7 +2269,7 @@ targets:
 
   - name: Linux_pixel_7pro backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2279,7 +2279,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro draw_atlas_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2289,7 +2289,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro draw_atlas_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2299,7 +2299,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro dynamic_path_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2309,7 +2309,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro static_path_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2319,7 +2319,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro hello_world_impeller
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2328,7 +2328,7 @@ targets:
 
   - name: Linux_pixel_7pro basic_material_app_android__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2337,7 +2337,7 @@ targets:
 
   - name: Linux_pixel_7pro channels_integration_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2347,7 +2347,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey clipper_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2357,7 +2357,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey color_filter_and_fade_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2367,7 +2367,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey color_filter_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2377,7 +2377,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey color_filter_with_unstable_child_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2387,7 +2387,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey raster_cache_use_memory_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2397,7 +2397,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey shader_mask_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2407,7 +2407,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey complex_layout_android__scroll_smoothness
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2421,7 +2421,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey complex_layout_scroll_perf__devtools_memory
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2435,7 +2435,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey complex_layout_scroll_perf__memory
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2449,7 +2449,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey complex_layout_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2462,7 +2462,7 @@ targets:
 
   - name: Linux_pixel_7pro complex_layout_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2475,7 +2475,7 @@ targets:
 
   - name: Linux_pixel_7pro complex_layout_scroll_perf_impeller__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2488,7 +2488,7 @@ targets:
 
   - name: Linux_pixel_7pro complex_layout_scroll_perf_impeller_gles__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2502,7 +2502,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey complex_layout_semantics_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2516,7 +2516,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey complex_layout__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2530,7 +2530,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey cubic_bezier_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2539,7 +2539,7 @@ targets:
 
   - name: Linux_pixel_7pro cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2549,7 +2549,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey cull_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2558,7 +2558,7 @@ targets:
 
   - name: Linux_pixel_7pro cull_opacity_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2568,7 +2568,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey devtools_profile_start_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2577,7 +2577,7 @@ targets:
 
   - name: Linux_pixel_7pro drive_perf_debug_warning
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2586,7 +2586,7 @@ targets:
 
   - name: Linux_pixel_7pro embedded_android_views_integration_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2597,7 +2597,7 @@ targets:
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/153445
     timeout: 60
-    # Functionally the same as "presubmit: false", except that we will run on
+    # Functionally the same as "presubmit: true", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
     # test for external textures for the engine, it should never break.
     runIf:
@@ -2612,7 +2612,7 @@ targets:
   - name: Linux_android_emu_34 external_textures_integration_test
     recipe: devicelab/devicelab_drone
     timeout: 60
-    # Functionally the same as "presubmit: false", except that we will run on
+    # Functionally the same as "presubmit: true", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
     # test for external textures for the engine, it should never break.
     runIf:
@@ -2626,7 +2626,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey fading_child_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2636,7 +2636,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey fast_scroll_heavy_gridview__memory
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2646,7 +2646,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey fast_scroll_large_images__memory
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2655,7 +2655,7 @@ targets:
 
   - name: Linux_pixel_7pro flavors_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2666,7 +2666,7 @@ targets:
   - name: Linux_mokey flutter_engine_group_performance
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/149666
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2676,7 +2676,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__back_button_memory
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2686,7 +2686,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__image_cache_memory
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2696,7 +2696,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__memory_nav
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2706,7 +2706,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2716,7 +2716,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__start_up_delayed
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2725,7 +2725,7 @@ targets:
 
   - name: Linux_pixel_7pro flutter_gallery_android__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2734,7 +2734,7 @@ targets:
 
   - name: Linux_pixel_7pro flutter_gallery_v2_chrome_run_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2743,7 +2743,7 @@ targets:
 
   - name: Linux flutter_gallery_v2_web_compile_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2753,7 +2753,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_test_performance
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2763,7 +2763,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_view__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2772,7 +2772,7 @@ targets:
 
   - name: Linux_pixel_7pro frame_policy_delay_test_android
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2782,7 +2782,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey fullscreen_textfield_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2792,7 +2792,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey fullscreen_textfield_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2802,7 +2802,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey very_long_picture_scrolling_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 120
     properties:
       tags: >
@@ -2812,7 +2812,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey hello_world__memory
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2822,7 +2822,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2832,7 +2832,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey hot_mode_dev_cycle_linux__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2845,7 +2845,7 @@ targets:
   # linux mokey test
   - name: Linux_mokey hybrid_android_views_integration_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
@@ -2856,7 +2856,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey image_list_jit_reported_duration
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2866,7 +2866,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2875,7 +2875,7 @@ targets:
 
   - name: Linux_pixel_7pro imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2885,7 +2885,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey image_list_reported_duration
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2894,7 +2894,7 @@ targets:
 
   - name: Linux_pixel_7pro integration_ui_driver
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2903,7 +2903,7 @@ targets:
 
   - name: Linux_pixel_7pro integration_ui_keyboard_resize
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2912,7 +2912,7 @@ targets:
 
   - name: Linux_pixel_7pro integration_ui_textfield
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2922,7 +2922,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey large_image_changer_perf_android
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2931,7 +2931,7 @@ targets:
 
   - name: Linux_pixel_7pro linux_chrome_dev_mode
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2941,7 +2941,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey multi_widget_construction_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2951,7 +2951,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey list_text_layout_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2961,7 +2961,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey list_text_layout_impeller_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       ignore_flakiness: "true"
@@ -2971,7 +2971,7 @@ targets:
 
   - name: Linux_pixel_7pro native_assets_android
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2981,7 +2981,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey new_gallery__crane_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -2991,7 +2991,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey old_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3000,7 +3000,7 @@ targets:
 
   - name: Linux_build_test flutter_gallery__transition_perf
     recipe: devicelab/devicelab_drone_build_test
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3012,7 +3012,7 @@ targets:
 
   - name: Linux_build_test flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone_build_test
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3024,7 +3024,7 @@ targets:
 
   - name: Linux_build_test flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone_build_test
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3037,7 +3037,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__transition_perf_with_semantics
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3047,7 +3047,7 @@ targets:
   # Mokey, Impeller
   - name: Linux_mokey new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3057,7 +3057,7 @@ targets:
   # Mokey, Impeller (OpenGL)
   - name: Linux_mokey new_gallery_opengles_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3067,7 +3067,7 @@ targets:
   # Mokey, Skia
   - name: Linux_mokey new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3077,7 +3077,7 @@ targets:
   # Pixel 7 Pro, Skia
   - name: Linux_pixel_7pro new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3087,7 +3087,7 @@ targets:
   # Pixel 7 Pro, Impeller (Vulkan)
   - name: Linux_pixel_7pro new_gallery_impeller_old_zoom__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3097,7 +3097,7 @@ targets:
   # Pixel 7 Pro, Impeller (Vulkan)
   - name: Linux_pixel_7pro new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3107,7 +3107,7 @@ targets:
   # Pixel 7 Pro, Impeller (OpenGL)
   - name: Linux_pixel_7pro new_gallery_opengles_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3117,7 +3117,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey picture_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3126,7 +3126,7 @@ targets:
 
   - name: Linux_pixel_7pro picture_cache_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3136,7 +3136,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey android_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3146,7 +3146,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey slider_perf_android
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3156,7 +3156,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey platform_channels_benchmarks
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3165,7 +3165,7 @@ targets:
 
   - name: Linux_pixel_7pro platform_channels_benchmarks
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3174,7 +3174,7 @@ targets:
 
   - name: Linux_pixel_7pro platform_channel_sample_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3183,7 +3183,7 @@ targets:
 
   - name: Linux_pixel_7pro platform_interaction_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3193,7 +3193,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3202,7 +3202,7 @@ targets:
 
   - name: Linux_pixel_7pro platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3212,7 +3212,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey platform_views_scroll_perf_impeller__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       ignore_flakiness: "true"
@@ -3222,7 +3222,7 @@ targets:
 
   - name: Linux_pixel_7pro platform_views_scroll_perf_impeller__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3232,7 +3232,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey platform_view__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3241,7 +3241,7 @@ targets:
 
   - name: Linux_pixel_7pro routing_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3250,7 +3250,7 @@ targets:
 
   - name: Linux_pixel_7pro service_extensions_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3260,7 +3260,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey textfield_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3269,7 +3269,7 @@ targets:
 
   - name: Linux_pixel_7pro textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3279,7 +3279,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey tiles_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3292,7 +3292,7 @@ targets:
 
   - name: Linux web_size__compile_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3302,7 +3302,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey opacity_peephole_one_rect_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3312,7 +3312,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey opacity_peephole_col_of_rows_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3322,7 +3322,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey opacity_peephole_opacity_of_grid_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3332,7 +3332,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey opacity_peephole_grid_of_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3342,7 +3342,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey opacity_peephole_fade_transition_text_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3352,7 +3352,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3362,7 +3362,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3372,7 +3372,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey gradient_dynamic_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3382,7 +3382,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey gradient_consistent_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3392,7 +3392,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey gradient_static_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3401,7 +3401,7 @@ targets:
 
   - name: Linux_pixel_7pro android_choreographer_do_frame_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3411,7 +3411,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey animated_blur_backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3421,7 +3421,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3431,7 +3431,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro animated_advanced_blend_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3441,7 +3441,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro animated_advanced_blend_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3450,7 +3450,7 @@ targets:
 
   - name: Mac_ios animated_advanced_blend_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3460,7 +3460,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro rrect_blur_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3469,7 +3469,7 @@ targets:
 
   - name: Mac_ios rrect_blur_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3479,7 +3479,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3489,7 +3489,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro draw_vertices_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3499,7 +3499,7 @@ targets:
   # Uses Impeller.
   - name: Linux_pixel_7pro draw_vertices_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3508,7 +3508,7 @@ targets:
 
   - name: Mac_ios draw_vertices_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3517,7 +3517,7 @@ targets:
 
   - name: Mac_ios draw_atlas_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3526,7 +3526,7 @@ targets:
 
   - name: Mac_ios static_path_tessellation_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3535,7 +3535,7 @@ targets:
 
   - name: Mac_ios dynamic_path_tessellation_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -3543,7 +3543,7 @@ targets:
       task_name: dynamic_path_tessellation_perf_ios__timeline_summary
 
   - name: Staging_build_linux analyze
-    presubmit: false
+    presubmit: true
     bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
@@ -3554,7 +3554,7 @@ targets:
         ["framework","hostonly","shard","linux"]
 
   - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
-    presubmit: false
+    presubmit: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3565,7 +3565,7 @@ targets:
       task_name: animated_complex_opacity_perf_macos__e2e_summary
 
   - name: Mac_benchmark basic_material_app_macos__compile
-    presubmit: false
+    presubmit: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3575,7 +3575,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     # Flake rate of >3.5% in presubmit
-    presubmit: false # https://github.com/flutter/flutter/issues/150642
+    presubmit: true # https://github.com/flutter/flutter/issues/150642
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -3593,7 +3593,7 @@ targets:
 
   - name: Mac_arm64 build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -3611,7 +3611,7 @@ targets:
 
   - name: Mac_x64 build_tests_1_4
     recipe: flutter/flutter_drone
-    presubmit: false # Rely on Mac_arm build_tests in presubmit.
+    presubmit: true # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3630,7 +3630,7 @@ targets:
 
   - name: Mac_x64 build_tests_2_4
     recipe: flutter/flutter_drone
-    presubmit: false # Rely on Mac_arm build_tests in presubmit.
+    presubmit: true # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3649,7 +3649,7 @@ targets:
 
   - name: Mac_x64 build_tests_3_4
     recipe: flutter/flutter_drone
-    presubmit: false # Rely on Mac_arm build_tests in presubmit.
+    presubmit: true # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3668,7 +3668,7 @@ targets:
 
   - name: Mac_x64 build_tests_4_4
     recipe: flutter/flutter_drone
-    presubmit: false # Rely on Mac_arm build_tests in presubmit.
+    presubmit: true # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3689,7 +3689,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     # Flake rate of >2.5% in presubmit
-    presubmit: false # https://github.com/flutter/flutter/issues/150642
+    presubmit: true # https://github.com/flutter/flutter/issues/150642
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -3760,7 +3760,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
 
   - name: Mac_benchmark complex_layout_macos__start_up
-    presubmit: false
+    presubmit: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3771,7 +3771,7 @@ targets:
       task_name: complex_layout_macos__start_up
 
   - name: Mac_benchmark complex_layout_scroll_perf_macos__timeline_summary
-    presubmit: false
+    presubmit: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3810,7 +3810,7 @@ targets:
       - .ci.yaml
 
   - name: Mac flavors_test_macos
-    presubmit: false
+    presubmit: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3823,7 +3823,7 @@ targets:
       task_name: flavors_test_macos
 
   - name: Mac_benchmark flutter_gallery_macos__compile
-    presubmit: false
+    presubmit: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3835,7 +3835,7 @@ targets:
 
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
-    presubmit: false
+    presubmit: true
     enabled_branches:
       - master
     properties:
@@ -3848,7 +3848,7 @@ targets:
 
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging/packaging
-    presubmit: false
+    presubmit: true
     enabled_branches:
       - master
     properties:
@@ -3860,7 +3860,7 @@ targets:
       - dev/bots/**
 
   - name: Mac_benchmark flutter_view_macos__start_up
-    presubmit: false
+    presubmit: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4021,7 +4021,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_benchmark hello_world_macos__compile
-    presubmit: false
+    presubmit: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4030,7 +4030,7 @@ targets:
   - name: Mac integration_ui_test_test_macos
     bringup: true # Flaky https://github.com/flutter/flutter/issues/152212
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4099,7 +4099,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     # Flake rate of >10% in presubmit
-    presubmit: false # https://github.com/flutter/flutter/issues/150642
+    presubmit: true # https://github.com/flutter/flutter/issues/150642
     properties:
       dependencies: >-
         [
@@ -4115,7 +4115,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_benchmark platform_view_macos__start_up
-    presubmit: false
+    presubmit: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4124,7 +4124,7 @@ targets:
   - name: Mac platform_channel_sample_test_macos
     bringup: true # Flaky https://github.com/flutter/flutter/issues/151883
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4170,7 +4170,7 @@ targets:
 
   - name: Mac_arm64 plugin_lint_mac
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4282,7 +4282,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     # Flake rate of >2.5% in presubmit
-    presubmit: false # https://github.com/flutter/flutter/issues/150642
+    presubmit: true # https://github.com/flutter/flutter/issues/150642
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -4454,7 +4454,7 @@ targets:
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4465,7 +4465,7 @@ targets:
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4496,7 +4496,7 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey entrypoint_dart_registrant
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4511,7 +4511,7 @@ targets:
   # mac mokey benchmark
   - name: Mac_mokey hello_world_android__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4521,7 +4521,7 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey hello_world_android__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4531,7 +4531,7 @@ targets:
   # mac mokey benchmark
   - name: Mac_mokey hot_mode_dev_cycle__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4541,7 +4541,7 @@ targets:
   # mac mokey test
   - name: Mac_mokey integration_test_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4551,7 +4551,7 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey integration_test_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4561,7 +4561,7 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey integration_ui_frame_number
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4571,7 +4571,7 @@ targets:
   # mac mokey benchmark
   - name: Mac_mokey microbenchmarks
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4581,7 +4581,7 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey native_assets_android
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4591,7 +4591,7 @@ targets:
   # mac mokey test
   - name: Mac_mokey run_debug_test_android
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     runIf:
       - .ci.yaml
       - dev/**
@@ -4604,7 +4604,7 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey run_debug_test_android
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     runIf:
       - .ci.yaml
       - dev/**
@@ -4618,7 +4618,7 @@ targets:
   - name: Mac_mokey run_release_test
     bringup: true # Flaky https://github.com/flutter/flutter/issues/153830
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     runIf:
       - .ci.yaml
       - dev/**
@@ -4631,7 +4631,7 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey run_release_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     runIf:
       - .ci.yaml
       - dev/**
@@ -4643,7 +4643,7 @@ targets:
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4652,7 +4652,7 @@ targets:
 
   - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4661,7 +4661,7 @@ targets:
 
   - name: Mac_arm64_ios basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4670,7 +4670,7 @@ targets:
 
   - name: Mac_ios channels_integration_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4679,7 +4679,7 @@ targets:
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4688,7 +4688,7 @@ targets:
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4697,7 +4697,7 @@ targets:
 
   - name: Mac_ios complex_layout_scroll_perf_bad_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4706,7 +4706,7 @@ targets:
 
   - name: Mac_ios color_filter_and_fade_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4715,7 +4715,7 @@ targets:
 
   - name: Mac_ios imagefiltered_transform_animation_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4731,7 +4731,7 @@ targets:
   # with the Android test, but that can wait until we've figured out the flake.
   - name: Mac_ios external_ui_integration_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4741,7 +4741,7 @@ targets:
 
   - name: Mac_ios route_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4750,7 +4750,7 @@ targets:
 
   - name: Mac_ios flavors_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4759,7 +4759,7 @@ targets:
 
   - name: Mac_arm64_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4768,7 +4768,7 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4777,7 +4777,7 @@ targets:
 
   - name: Mac_ios flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4786,7 +4786,7 @@ targets:
 
   - name: Mac_arm64_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4810,7 +4810,7 @@ targets:
 
   - name: Mac_arm64 hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4826,7 +4826,7 @@ targets:
 
   - name: Mac_x64_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4835,7 +4835,7 @@ targets:
 
   - name: Mac_arm64_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4844,7 +4844,7 @@ targets:
 
   - name: Mac_ios integration_ui_ios_driver
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4853,7 +4853,7 @@ targets:
 
   - name: Mac_ios integration_ui_ios_frame_number
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4862,7 +4862,7 @@ targets:
 
   - name: Mac_ios integration_ui_ios_keyboard_resize
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4871,7 +4871,7 @@ targets:
 
   - name: Mac_ios integration_ui_ios_textfield
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4880,7 +4880,7 @@ targets:
 
   - name: Mac_x64 ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4893,7 +4893,7 @@ targets:
 
   - name: Mac_arm64 ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4906,7 +4906,7 @@ targets:
 
   - name: Mac_ios ios_defines_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4915,7 +4915,7 @@ targets:
 
   - name: Mac_ios ios_platform_view_tests
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4924,7 +4924,7 @@ targets:
 
   - name: Mac_ios large_image_changer_perf_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4933,7 +4933,7 @@ targets:
 
   - name: Mac_x64 macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4946,7 +4946,7 @@ targets:
 
   - name: Mac_arm64 macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4959,7 +4959,7 @@ targets:
 
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4968,7 +4968,7 @@ targets:
 
   - name: Mac native_assets_ios_simulator
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4981,7 +4981,7 @@ targets:
 
   - name: Mac_ios native_assets_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4990,7 +4990,7 @@ targets:
 
   - name: Mac_ios native_platform_view_ui_tests_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -4999,7 +4999,7 @@ targets:
 
   - name: Mac_ios new_gallery_ios__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5008,7 +5008,7 @@ targets:
 
   - name: Mac_ios new_gallery_skia_ios__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5017,7 +5017,7 @@ targets:
 
   - name: Mac_ios platform_channel_sample_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5026,7 +5026,7 @@ targets:
 
   - name: Mac_ios platform_channel_sample_test_swift
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5035,7 +5035,7 @@ targets:
 
   - name: Mac_ios platform_channels_benchmarks_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5044,7 +5044,7 @@ targets:
 
   - name: Mac_ios platform_interaction_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5053,7 +5053,7 @@ targets:
 
   - name: Mac_ios platform_view_ios__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5062,7 +5062,7 @@ targets:
 
   - name: Mac_ios platform_views_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5071,7 +5071,7 @@ targets:
 
   - name: Mac_ios platform_views_scroll_perf_ad_banners__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5080,7 +5080,7 @@ targets:
 
   - name: Mac_ios platform_views_scroll_perf_bottom_ad_banner__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5089,7 +5089,7 @@ targets:
 
   - name: Mac_ios platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5098,7 +5098,7 @@ targets:
 
   - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5107,7 +5107,7 @@ targets:
 
   - name: Mac_ios simple_animation_perf_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5116,7 +5116,7 @@ targets:
 
   - name: Mac_ios wide_gamut_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5125,7 +5125,7 @@ targets:
 
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5134,7 +5134,7 @@ targets:
 
   - name: Mac_arm64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5144,7 +5144,7 @@ targets:
 
   - name: Mac_x64 hot_mode_dev_cycle_ios_simulator
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5157,7 +5157,7 @@ targets:
 
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5166,7 +5166,7 @@ targets:
 
   - name: Mac_ios very_long_picture_scrolling_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 120
     properties:
       tags: >
@@ -5175,7 +5175,7 @@ targets:
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5184,7 +5184,7 @@ targets:
 
   - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone_build_test
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5195,7 +5195,7 @@ targets:
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5204,7 +5204,7 @@ targets:
 
   - name: Mac_ios draw_points_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5213,7 +5213,7 @@ targets:
 
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -5307,7 +5307,7 @@ targets:
 
   - name: Mac_arm64 run_release_test_macos
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5625,7 +5625,7 @@ targets:
 
   - name: Windows hot_mode_dev_cycle_win_target__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5638,7 +5638,7 @@ targets:
 
   - name: Windows_arm64 hot_mode_dev_cycle_win_target__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5708,7 +5708,7 @@ targets:
 
   - name: Windows platform_channel_sample_test_windows
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5721,7 +5721,7 @@ targets:
 
   - name: Windows_arm64 platform_channel_sample_test_windows
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5790,7 +5790,7 @@ targets:
 
   - name: Windows_arm64 plugin_test_windows
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5809,7 +5809,7 @@ targets:
 
   - name: Windows run_debug_test_windows
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5827,7 +5827,7 @@ targets:
 
   - name: Windows_arm64 run_debug_test_windows
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5845,7 +5845,7 @@ targets:
 
   - name: Windows run_release_test_windows
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5863,7 +5863,7 @@ targets:
 
   - name: Windows_arm64 run_release_test_windows
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -6180,7 +6180,7 @@ targets:
 
   - name: Windows windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6193,7 +6193,7 @@ targets:
 
   - name: Windows_arm64 windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6207,7 +6207,7 @@ targets:
 
   - name: Windows hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6220,7 +6220,7 @@ targets:
 
   - name: Windows_arm64 hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6233,7 +6233,7 @@ targets:
 
   - name: Windows flutter_gallery_win_desktop__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6246,7 +6246,7 @@ targets:
 
   - name: Windows_arm64 flutter_gallery_win_desktop__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6259,7 +6259,7 @@ targets:
 
   - name: Windows flutter_gallery_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6272,7 +6272,7 @@ targets:
 
   - name: Windows_arm64 flutter_gallery_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6285,7 +6285,7 @@ targets:
 
   - name: Windows complex_layout_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6298,7 +6298,7 @@ targets:
 
   - name: Windows_arm64 complex_layout_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6311,7 +6311,7 @@ targets:
 
   - name: Windows flutter_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6324,7 +6324,7 @@ targets:
 
   - name: Windows_arm64 flutter_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6337,7 +6337,7 @@ targets:
 
   - name: Windows platform_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6350,7 +6350,7 @@ targets:
 
   - name: Windows_arm64 platform_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6364,7 +6364,7 @@ targets:
   # windows mokey test
   - name: Windows_mokey basic_material_app_win__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6374,7 +6374,7 @@ targets:
   # windows mokey test
   - name: Windows_mokey channels_integration_test_win
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6384,7 +6384,7 @@ targets:
   # windows mokey test
   - name: Windows_mokey flavors_test_win
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6394,7 +6394,7 @@ targets:
   # windows mokey test
   - name: Windows_mokey flutter_gallery_win__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6404,7 +6404,7 @@ targets:
   # windows mokey benchmark
   - name: Windows_mokey hot_mode_dev_cycle_win__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6415,7 +6415,7 @@ targets:
   - name: Windows_mokey native_assets_android
     bringup: true # Flaky https://github.com/flutter/flutter/issues/156063
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6425,7 +6425,7 @@ targets:
   # windows mokey test
   - name: Windows_mokey windows_chrome_dev_mode
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6434,7 +6434,7 @@ targets:
 
   - name: Windows flutter_packaging_test
     recipe: packaging/packaging
-    presubmit: false
+    presubmit: true
     enabled_branches:
       - master
     properties:
@@ -6447,7 +6447,7 @@ targets:
 
   - name: Windows windows_startup_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -6460,7 +6460,7 @@ targets:
 
   - name: Windows_arm64 windows_startup_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
@@ -6473,7 +6473,7 @@ targets:
 
   - name: Windows flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6482,7 +6482,7 @@ targets:
 
   - name: Windows_arm64 flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6491,7 +6491,7 @@ targets:
 
   - name: Linux flutter_tool_startup__linux
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
@@ -6499,7 +6499,7 @@ targets:
       task_name: flutter_tool_startup
 
   - name: Mac_benchmark flutter_tool_startup__macos
-    presubmit: false
+    presubmit: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -6573,7 +6573,7 @@ targets:
     bringup: true
     enabled_branches:
       - beta
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       cores: "32"
@@ -6596,7 +6596,7 @@ targets:
     bringup: true
     enabled_branches:
       - stable
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       cores: "32"
