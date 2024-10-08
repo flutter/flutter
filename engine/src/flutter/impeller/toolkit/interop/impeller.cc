@@ -1047,13 +1047,13 @@ float ImpellerParagraphGetLongestLineWidth(ImpellerParagraph paragraph) {
 }
 
 IMPELLER_EXTERN_C
-float ImpellerParagraphGetMinInstrinsicWidth(ImpellerParagraph paragraph) {
+float ImpellerParagraphGetMinIntrinsicWidth(ImpellerParagraph paragraph) {
   return GetPeer(paragraph)->GetMinIntrinsicWidth();
 }
 
 IMPELLER_EXTERN_C
-float ImpellerParagraphGetMaxInstrinsicWidth(ImpellerParagraph paragraph) {
-  return GetPeer(paragraph)->GetMaxInstrinsicWidth();
+float ImpellerParagraphGetMaxIntrinsicWidth(ImpellerParagraph paragraph) {
+  return GetPeer(paragraph)->GetMaxIntrinsicWidth();
 }
 
 IMPELLER_EXTERN_C

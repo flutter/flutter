@@ -966,11 +966,11 @@ float ImpellerParagraphGetLongestLineWidth(
     ImpellerParagraph IMPELLER_NONNULL paragraph);
 
 IMPELLER_EXPORT
-float ImpellerParagraphGetMinInstrinsicWidth(
+float ImpellerParagraphGetMinIntrinsicWidth(
     ImpellerParagraph IMPELLER_NONNULL paragraph);
 
 IMPELLER_EXPORT
-float ImpellerParagraphGetMaxInstrinsicWidth(
+float ImpellerParagraphGetMaxIntrinsicWidth(
     ImpellerParagraph IMPELLER_NONNULL paragraph);
 
 IMPELLER_EXPORT
