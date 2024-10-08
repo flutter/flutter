@@ -27,7 +27,7 @@ Future<TaskResult> run() async {
 
   await inDirectory(appDir, () async {
     await flutter('packages', options: <String>['get']);
-    const validationLayersMessage = 'Using the Impeller rendering backend (Vulkan with Validation Layers)';
+    const String validationLayersMessage = 'Using the Impeller rendering backend (Vulkan with Validation Layers)';
     final StreamSubscription<String> adb = device.logcat.listen(
       (String data) {
         if (data.contains('Using the Impeller rendering backend')) {
