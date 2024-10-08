@@ -32,6 +32,7 @@ namespace testing {
 struct TextRenderOptions {
   bool stroke = false;
   Scalar font_size = 50;
+  Scalar stroke_width = 1;
   DlColor color = DlColor::kYellow();
   SkPoint position = SkPoint::Make(100, 200);
   std::shared_ptr<DlMaskFilter> filter;
@@ -72,7 +73,7 @@ bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
   DlPaint text_paint;
   text_paint.setColor(options.color);
   text_paint.setMaskFilter(options.filter);
-  text_paint.setStrokeWidth(1);
+  text_paint.setStrokeWidth(options.stroke_width);
   text_paint.setDrawStyle(options.stroke ? DlDrawStyle::kStroke
                                          : DlDrawStyle::kFill);
   canvas.DrawTextFrame(frame, options.position.x(), options.position.y(),
@@ -156,6 +157,22 @@ TEST_P(AiksTest, CanRenderStrokedTextFrame) {
       {
           .stroke = true,
       }));
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderTextStrokeWidth) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+
+  ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), builder, "LMNOP VWXYZ",
+                                     "Roboto-Medium.ttf",
+                                     {
+                                         .stroke = true,
+                                         .stroke_width = 4,
+                                     }));
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
