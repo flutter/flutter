@@ -56,7 +56,7 @@ bool Surface::DrawDisplayList(const DisplayList& dl) const {
 
   auto display_list = dl.GetDisplayList();
   auto& content_context = context_->GetAiksContext().GetContentContext();
-  auto render_target = surface_->GetTargetRenderPassDescriptor();
+  auto render_target = surface_->GetRenderTarget();
 
   const auto cull_rect = IRect::MakeSize(surface_->GetSize());
   auto skia_cull_rect =

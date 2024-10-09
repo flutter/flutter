@@ -98,8 +98,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
       impeller::ISize{size.width(), size.height()}  // fbo_size
   );
 
-  impeller::RenderTarget render_target =
-      surface->GetTargetRenderPassDescriptor();
+  impeller::RenderTarget render_target = surface->GetRenderTarget();
 
   SurfaceFrame::EncodeCallback encode_calback =
       [aiks_context = aiks_context_,  //
