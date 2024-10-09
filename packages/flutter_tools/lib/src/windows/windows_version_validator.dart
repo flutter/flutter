@@ -108,6 +108,11 @@ class ProcessLister {
 
   Future<ProcessResult> getProcessesWithPath() async {
     const String argument = 'Get-Process | Format-List Path';
-    return processManager.run(<String>['powershell', '-command', argument]);
+    const List<String> psArgs = <String>['-command', argument];
+    try {
+      return await processManager.run(<String>['powershell', ...psArgs]);
+    } on ProcessPackageExecutableNotFoundException {
+      return processManager.run(<String>['pwsh', ...psArgs]);
+    }
   }
 }

@@ -6,9 +6,11 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/windows/windows_version_validator.dart';
+import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 
 /// Fake [_WindowsUtils] to use for testing
 class FakeValidOperatingSystemUtils extends Fake
@@ -168,5 +170,76 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     expect(result.statusInfo, getProcessFailed.statusInfo, reason: 'The ValidationResult statusInfo should be the same');
     expect(result.messages.length, 1, reason: 'The ValidationResult should have precisely 1 message');
     expect(result.messages[0].message, getProcessFailed.messages[0].message, reason: 'The ValidationMessage message should be the same');
+  });
+
+  testWithoutContext('Falls back to pwsh when powershell is not on the path', () async {
+    final ProcessLister processLister = ProcessLister(
+      FakeProcessManager.list(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'powershell',
+              '-command',
+              'Get-Process | Format-List Path',
+            ],
+            exception: ProcessPackageExecutableNotFoundException('powershell'),
+            stdout: 'powershell',
+          ),
+          const FakeCommand(
+            command: <String>[
+              'pwsh',
+              '-command',
+              'Get-Process | Format-List Path',
+            ],
+            stdout: 'pwsh',
+          ),
+        ],
+      ),
+    );
+
+    try {
+      final ProcessResult result = await processLister.getProcessesWithPath();
+      expect(result.stdout, 'pwsh');
+    // ignore: avoid_catches_without_on_clauses
+    } catch (e) {
+      fail('Unexpected exception: $e');
+    }
+  });
+
+  testWithoutContext('getProcessesWithPath throws if both powershell and pwsh are not on PATH', () async {
+    final ProcessLister processLister = ProcessLister(
+      FakeProcessManager.list(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'powershell',
+              '-command',
+              'Get-Process | Format-List Path',
+            ],
+            exception: ProcessPackageExecutableNotFoundException('powershell'),
+            stdout: 'powershell',
+          ),
+          const FakeCommand(
+            command: <String>[
+              'pwsh',
+              '-command',
+              'Get-Process | Format-List Path',
+            ],
+            exception: ProcessPackageExecutableNotFoundException('pwsh'),
+            stdout: 'pwsh',
+          ),
+        ],
+      ),
+    );
+
+    try {
+      final ProcessResult result = await processLister.getProcessesWithPath();
+      fail('Should have thrown, but successfully ran ${result.stdout}');
+    } on ProcessPackageExecutableNotFoundException {
+      // Expected
+    // ignore: avoid_catches_without_on_clauses
+    } catch(e) {
+      fail('Unexpected exception: $e');
+    }
   });
 }
