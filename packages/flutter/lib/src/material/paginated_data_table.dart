@@ -133,6 +133,7 @@ class PaginatedDataTable extends StatefulWidget {
        dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
        dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight,
        assert(rowsPerPage > 0),
+       assert(dividerThickness == null || dividerThickness >= 0),
        assert(() {
          if (onRowsPerPageChanged != null) {
            assert(availableRowsPerPage.contains(rowsPerPage));
