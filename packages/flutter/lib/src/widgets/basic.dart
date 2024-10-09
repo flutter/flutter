@@ -4684,14 +4684,14 @@ class PositionedDirectional extends StatelessWidget {
 ///    it's going to be. It means the space (or size) reserved for it
 ///    is the maximum size the [Flexible] _could be_, in the main axis.
 ///
-///    Add up all the [flex] values of each [Flexible]'s fit parameter,
+///    Add up all the [Flexible.flex] values of each [Flexible]'s fit parameter,
 ///    and each [Flexible] will have a percentage of the leftover space
 ///    reserved for it that will be equal to the percentage
-///    of total [flex] each [Flexible] has. For example:
+///    of total [Flexible.flex] each [Flexible] has. For example:
 ///
-///    [Flexible] 1 has [flex] of 50.
-///    [Expanded] 1 has [flex] of 30.
-///    [Expanded] 2 has [flex] of 20.
+///    [Flexible] 1 has [Flexible.flex] of 50.
+///    [Expanded] 1 has [Flexible.flex] of 30.
+///    [Expanded] 2 has [Flexible.flex] of 20.
 ///
 ///    In the above case, the total of all flex parameters is 100. The
 ///    [Flexible] will get 50/100 (50%) of the remaining space reserved
@@ -4756,8 +4756,8 @@ class PositionedDirectional extends StatelessWidget {
 ///    - One child of the [Column] is a box with a set height of 100 pixels.
 ///    - Leftover space in the [Column] after the child with no flex is
 ///      laid out is 200 pixels.
-///    - There is one [Expanded] with a [flex] of 1.
-///    - There is one [Flexible] with a [flex] of 1.
+///    - There is one [Expanded] with a [Flexible.flex] of 1.
+///    - There is one [Flexible] with a [Flexible.flex] of 1.
 ///    - The flexes are equal, so half of the space (100 pixels) is reserved
 ///      for each of them.
 ///    - The [Expanded] and [Flexible] each has a child that is 50 pixels
@@ -5633,7 +5633,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 
   /// How a flexible child is inscribed into the available space.
   ///
-  /// If [flex] is non-zero, the [fit] determines whether the child fills the
+  /// If [Flexible.flex] is non-zero, the [fit] determines whether the child fills the
   /// space the parent makes available during layout. If the fit is
   /// [FlexFit.tight], the child is required to fill the available space. If the
   /// fit is [FlexFit.loose], the child can be at most as large as the available
@@ -5677,7 +5677,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 /// Using an [Expanded] widget makes a child of a [Row], [Column], or [Flex]
 /// expand to fill the available space along the main axis (e.g., horizontally for
 /// a [Row] or vertically for a [Column]). If multiple children are expanded,
-/// the available space is divided among them according to the [flex] factor.
+/// the available space is divided among them according to the [Flexible.flex] factor.
 ///
 /// An [Expanded] widget must be a descendant of a [Row], [Column], or [Flex],
 /// and the path from the [Expanded] widget to its enclosing [Row], [Column], or
@@ -5697,7 +5697,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 ///
 /// {@tool dartpad}
 /// This example shows how to use an [Expanded] widget in a [Row] with multiple
-/// children expanded, utilizing the [flex] factor to prioritize available space.
+/// children expanded, utilizing the [Flexible.flex] factor to prioritize available space.
 ///
 /// ![This results in a wide amber box, followed by a thin blue box, with a medium width amber box at the end.](https://flutter.github.io/assets-for-api-docs/assets/widgets/expanded_row.png)
 ///
