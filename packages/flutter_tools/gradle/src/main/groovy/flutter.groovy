@@ -1230,7 +1230,7 @@ class FlutterPlugin implements Plugin<Project> {
                     // for only the output APK, not for the variant itself. Skipping this step simply
                     // causes Gradle to use the value of variant.versionCode for the APK.
                     // For more, see https://developer.android.com/studio/build/configure-apk-splits
-                    Integer abiVersionCode = ABI_VERSION.get(output.getFilters().find { it.filterType == VariantOutputConfiguration.FilterType.ABI }?.identifier)
+                    Integer abiVersionCode = ABI_VERSION.get(output.filters.find { it.filterType == "ABI" }?.identifier)
                     if (abiVersionCode != null) {
                         output.versionCodeOverride =
                             abiVersionCode * 1000 + variant.versionCode
@@ -1408,7 +1408,7 @@ class FlutterPlugin implements Plugin<Project> {
                             ? outputDirectory.get()
                             : outputDirectory
                         String filename = "app"
-                        String abi = output.getFilters().find { it.filterType == VariantOutputConfiguration.FilterType.ABI }?.identifier
+                        String abi = output.filters.find { it.filterType == "ABI" }?.identifier
                         if (abi != null && !abi.isEmpty()) {
                             filename += "-${abi}"
                         }
