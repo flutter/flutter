@@ -218,6 +218,11 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
 }
 
 // |PipelineLibrary|
+bool PipelineLibraryMTL::HasPipeline(const PipelineDescriptor& descriptor) {
+  return pipelines_.find(descriptor) != pipelines_.end();
+}
+
+// |PipelineLibrary|
 void PipelineLibraryMTL::RemovePipelinesWithEntryPoint(
     std::shared_ptr<const ShaderFunction> function) {
   fml::erase_if(pipelines_, [&](auto item) {

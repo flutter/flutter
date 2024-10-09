@@ -42,8 +42,7 @@ fml::RefPtr<Shader> Shader::Make(
     std::vector<impeller::ShaderStageIOSlot> inputs,
     std::vector<impeller::ShaderStageBufferLayout> layouts,
     std::unordered_map<std::string, UniformBinding> uniform_structs,
-    std::unordered_map<std::string, impeller::SampledImageSlot>
-        uniform_textures,
+    std::unordered_map<std::string, TextureBinding> uniform_textures,
     std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts) {
   auto shader = fml::MakeRefCounted<Shader>();
   shader->entrypoint_ = std::move(entrypoint);
@@ -112,7 +111,7 @@ const Shader::UniformBinding* Shader::GetUniformStruct(
   return &uniform->second;
 }
 
-const impeller::SampledImageSlot* Shader::GetUniformTexture(
+const Shader::TextureBinding* Shader::GetUniformTexture(
     const std::string& name) const {
   auto uniform = uniform_textures_.find(name);
   if (uniform == uniform_textures_.end()) {

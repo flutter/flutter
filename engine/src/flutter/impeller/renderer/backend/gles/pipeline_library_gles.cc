@@ -308,6 +308,11 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryGLES::GetPipeline(
 }
 
 // |PipelineLibrary|
+bool PipelineLibraryGLES::HasPipeline(const PipelineDescriptor& descriptor) {
+  return pipelines_.find(descriptor) != pipelines_.end();
+}
+
+// |PipelineLibrary|
 void PipelineLibraryGLES::RemovePipelinesWithEntryPoint(
     std::shared_ptr<const ShaderFunction> function) {
   fml::erase_if(pipelines_, [&](auto item) {

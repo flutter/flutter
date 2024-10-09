@@ -48,6 +48,8 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
       ComputePipelineDescriptor descriptor,
       bool async = true) = 0;
 
+  virtual bool HasPipeline(const PipelineDescriptor& descriptor) = 0;
+
   virtual void RemovePipelinesWithEntryPoint(
       std::shared_ptr<const ShaderFunction> function) = 0;
 
