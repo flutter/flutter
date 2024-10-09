@@ -3,7 +3,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import com.android.build.api.variant.VariantOutputConfiguration
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
