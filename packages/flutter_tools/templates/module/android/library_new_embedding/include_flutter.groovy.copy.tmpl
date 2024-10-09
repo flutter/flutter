@@ -1,3 +1,14 @@
+def gradle = null
+def flutterProjectRoot = null
+if (!getBinding().getVariables().containsKey("gradle")) {
+    gradle = this
+    flutterProjectRoot = gradle.buildscript.getSourceFile().getParentFile().getParentFile().absolutePath
+} else {
+    gradle = getBinding().getVariables().get("gradle")
+    def scriptFile = getClass().protectionDomain.codeSource.location.toURI()
+    flutterProjectRoot = new File(scriptFile).parentFile.parentFile.absolutePath
+}
+
 def scriptFile = getClass().protectionDomain.codeSource.location.toURI()
 def flutterProjectRoot = new File(scriptFile).parentFile.parentFile
 
