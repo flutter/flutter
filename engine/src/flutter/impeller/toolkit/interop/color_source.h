@@ -14,6 +14,7 @@
 #include "impeller/toolkit/interop/formats.h"
 #include "impeller/toolkit/interop/impeller.h"
 #include "impeller/toolkit/interop/object.h"
+#include "impeller/toolkit/interop/texture.h"
 
 namespace impeller::interop {
 
@@ -54,6 +55,13 @@ class ColorSource final
       const std::vector<flutter::DlColor>& colors,
       const std::vector<Scalar>& stops,
       flutter::DlTileMode tile_mode,
+      const Matrix& transformation);
+
+  static ScopedObject<ColorSource> MakeImage(
+      const Texture& image,
+      flutter::DlTileMode horizontal_tile_mode,
+      flutter::DlTileMode vertical_tile_mode,
+      flutter::DlImageSampling sampling,
       const Matrix& transformation);
 
   explicit ColorSource(std::shared_ptr<flutter::DlColorSource> source);

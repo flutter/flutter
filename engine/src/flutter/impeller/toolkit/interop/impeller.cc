@@ -779,6 +779,24 @@ ImpellerColorSource ImpellerColorSourceCreateSweepGradientNew(
 }
 
 IMPELLER_EXTERN_C
+ImpellerColorSource ImpellerColorSourceCreateImageNew(
+    ImpellerTexture image,
+    ImpellerTileMode horizontal_tile_mode,
+    ImpellerTileMode vertical_tile_mode,
+    ImpellerTextureSampling sampling,
+    const ImpellerMatrix* transformation) {
+  return ColorSource::MakeImage(
+             *GetPeer(image),                          //
+             ToDisplayListType(horizontal_tile_mode),  //
+             ToDisplayListType(vertical_tile_mode),    //
+             ToDisplayListType(sampling),              //
+             transformation == nullptr ? Matrix{}
+                                       : ToImpellerType(*transformation)  //
+             )
+      .Leak();
+}
+
+IMPELLER_EXTERN_C
 void ImpellerColorFilterRetain(ImpellerColorFilter color_filter) {
   ObjectBase::SafeRetain(color_filter);
 }
