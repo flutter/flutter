@@ -242,11 +242,7 @@ class PaginatedDataTable extends StatefulWidget {
   final int? initialFirstRowIndex;
 
 
-  /// {@template flutter.material.dataTable.dividerThickness}
-  /// The width of the divider that appears between [TableRow]s.
-  ///
-  /// Must be greater than or equal to zero.
-  /// {@endtemplate}
+  /// {@macro flutter.material.dataTable.dividerThickness}
   ///
   /// If null, [DataTableThemeData.dividerThickness] is used. This value
   /// defaults to 1.0.
