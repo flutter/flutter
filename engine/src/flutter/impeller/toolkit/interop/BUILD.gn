@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/build/zip_bundle.gni")
 import("//flutter/impeller/tools/impeller.gni")
 
 embed_blob("embedded_icu_data") {
@@ -105,4 +106,49 @@ impeller_component("interop_unittests") {
     "../../playground:playground_test",
     "//flutter/testing:testing_lib",
   ]
+}
+
+zip_bundle("sdk") {
+  if (is_mac) {
+    zip_out_dir = "darwin-${target_cpu}"
+  } else {
+    zip_out_dir = "${full_target_platform_name}"
+  }
+
+  output = "${zip_out_dir}/impeller_sdk.zip"
+  deps = [ ":library" ]
+
+  files = [
+    {
+      source = "impeller.h"
+      destination = "include/impeller.h"
+    },
+  ]
+
+  if (is_mac) {
+    files += [
+      {
+        source = "$root_build_dir/libimpeller.dylib"
+        destination = "lib/libimpeller.dylib"
+      },
+    ]
+  } else if (is_linux || is_android) {
+    files += [
+      {
+        source = "$root_build_dir/libimpeller.so"
+        destination = "lib/libimpeller.so"
+      },
+    ]
+  } else if (is_win) {
+    files += [
+      {
+        source = "$root_build_dir/impeller.dll"
+        destination = "lib/impeller.dll"
+      },
+      {
+        source = "$root_build_dir/impeller.dll.lib"
+        destination = "lib/impeller.dll.lib"
+      },
+    ]
+  }
 }
