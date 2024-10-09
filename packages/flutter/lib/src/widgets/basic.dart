@@ -3729,7 +3729,7 @@ class ListBody extends MultiChildRenderObjectWidget {
   /// Creates a layout widget that arranges its children sequentially along a
   /// given axis.
   ///
-  /// By default, the [Flex.mainAxis] is [Axis.vertical].
+  /// By default, the [mainAxis] is [Axis.vertical].
   const ListBody({
     super.key,
     this.mainAxis = Axis.vertical,
@@ -3743,11 +3743,11 @@ class ListBody extends MultiChildRenderObjectWidget {
   /// Whether the list body positions children in the reading direction.
   ///
   /// For example, if the reading direction is left-to-right and
-  /// [Flex.mainAxis] is [Axis.horizontal], then the list body positions children
+  /// [mainAxis] is [Axis.horizontal], then the list body positions children
   /// from left to right when [reverse] is false and from right to left when
   /// [reverse] is true.
   ///
-  /// Similarly, if [Flex.mainAxis] is [Axis.vertical], then the list body positions
+  /// Similarly, if [mainAxis] is [Axis.vertical], then the list body positions
   /// from top to bottom when [reverse] is false and from bottom to top when
   /// [reverse] is true.
   ///
@@ -4570,13 +4570,13 @@ class PositionedDirectional extends StatelessWidget {
 /// to other [Flexible]s. More on this in step two of the layout algorithm,
 /// below.
 ///
-/// [Flex.mainAxis]: The main direction of the [Flex]. This is vertical
+/// Main Axis: The main direction of the [Flex]. This is vertical
 /// for a [Column] and horizontal for a [Row], and corresponds to the
 /// [direction] property of a [Flex].
 ///
-/// [Flex.crossAxis]: The other direction. The cross axis of a [Column]
+/// Cross Axis: The other direction. The cross axis of a [Column]
 /// is horizontal, and the cross axis of a [Row] is vertical. It is
-/// always perpendicular to the [Flex.mainAxis].
+/// always perpendicular to the Main Axis.
 ///
 /// [Flexible] : A widget that is a child of a [Flex]. It _could_ cause
 /// its child to stretch in the direction of the main axis, _though it
@@ -4669,7 +4669,7 @@ class PositionedDirectional extends StatelessWidget {
 ///    axis, then the error you will see is likely _"BoxConstraints forces an
 ///    infinite (height or width)"_. In such a case, the parent of the [Flex]
 ///    will need to be changed or modified to provide a size for the [Flex]
-///    in the [Flex.crossAxis].
+///    in the Cross Axis.
 ///
 /// 2. Children that are not [Flexible]s or [Expanded]s have a fixed size
 ///    and so do not have a flex parameter. They will not go through steps
@@ -4802,7 +4802,7 @@ class PositionedDirectional extends StatelessWidget {
 ///    impossible to calculate a final size and you may get the error,
 ///    "BoxConstraints forces an infinite (height or width)". Again,  in such
 ///    a case, the parent of the [Flex] will need to be changed or modified
-///    to provide a size for the [Flex] in the [Flex.crossAxis].
+///    to provide a size for the [Flex] in the Cross Axis.
 ///
 /// 5. The final size of the [Flex] in the main axis is determined in part
 ///    by its [mainAxisSize] property. If the [mainAxisSize] property is
