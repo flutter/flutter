@@ -25,7 +25,7 @@ void main() {
     BottomAppBar bottomAppBar = tester.widget(find.byType(BottomAppBar));
     expect(bottomAppBar.shape, isNotNull);
 
-    // Toggle the 'Notch'] switch to remove the notch
+    // Toggle the 'Notch'] switch to remive the notch
     await tester.tap(find.byType(SwitchListTile).last);
     await tester.pump(); // Rebuild the widget after the state change
 
