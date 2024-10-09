@@ -34,6 +34,11 @@ class Shader : public RefCountedDartWrappable<Shader> {
         const std::string& name) const;
   };
 
+  struct TextureBinding {
+    impeller::SampledImageSlot slot;
+    impeller::ShaderMetadata metadata;
+  };
+
   ~Shader() override;
 
   static fml::RefPtr<Shader> Make(
@@ -43,8 +48,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
       std::vector<impeller::ShaderStageIOSlot> inputs,
       std::vector<impeller::ShaderStageBufferLayout> layouts,
       std::unordered_map<std::string, UniformBinding> uniform_structs,
-      std::unordered_map<std::string, impeller::SampledImageSlot>
-          uniform_textures,
+      std::unordered_map<std::string, TextureBinding> uniform_textures,
       std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts);
 
   std::shared_ptr<const impeller::ShaderFunction> GetFunctionFromLibrary(
@@ -63,7 +67,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
 
   const Shader::UniformBinding* GetUniformStruct(const std::string& name) const;
 
-  const impeller::SampledImageSlot* GetUniformTexture(
+  const Shader::TextureBinding* GetUniformTexture(
       const std::string& name) const;
 
  private:
@@ -75,7 +79,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::vector<impeller::ShaderStageIOSlot> inputs_;
   std::vector<impeller::ShaderStageBufferLayout> layouts_;
   std::unordered_map<std::string, UniformBinding> uniform_structs_;
-  std::unordered_map<std::string, impeller::SampledImageSlot> uniform_textures_;
+  std::unordered_map<std::string, TextureBinding> uniform_textures_;
   std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Shader);

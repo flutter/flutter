@@ -42,6 +42,9 @@ class PipelineLibraryMTL final : public PipelineLibrary {
       bool async) override;
 
   // |PipelineLibrary|
+  bool HasPipeline(const PipelineDescriptor& descriptor) override;
+
+  // |PipelineLibrary|
   void RemovePipelinesWithEntryPoint(
       std::shared_ptr<const ShaderFunction> function) override;
 
