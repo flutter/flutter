@@ -4,7 +4,7 @@
 
 import 'package:test/test.dart';
 
-import 'utils.dart';
+import 'src/utils.dart';
 
 void main() async {
   final cannedProcesses = <CannedProcess>[
