@@ -9,6 +9,7 @@
 #include "flutter/lib/gpu/export.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/context.h"
 
 namespace flutter {
 namespace gpu {

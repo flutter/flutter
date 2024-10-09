@@ -260,6 +260,12 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
 }
 
 // |PipelineLibrary|
+bool PipelineLibraryVK::HasPipeline(const PipelineDescriptor& descriptor) {
+  Lock lock(pipelines_mutex_);
+  return pipelines_.find(descriptor) != pipelines_.end();
+}
+
+// |PipelineLibrary|
 void PipelineLibraryVK::RemovePipelinesWithEntryPoint(
     std::shared_ptr<const ShaderFunction> function) {
   Lock lock(pipelines_mutex_);
