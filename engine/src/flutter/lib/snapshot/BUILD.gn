@@ -63,6 +63,9 @@ group("generate_snapshot_bins") {
 # See: `bin_to_linkable` rules below that build these outputs into linkable form
 # See: https://github.com/flutter/flutter/wiki/Flutter-engine-operation-in-AOT-Mode
 compiled_action("generate_snapshot_bin") {
+  # TODO(https://github.com/flutter/flutter/issues/154437).
+  prefix_with_time_cmd = true
+
   if (target_cpu == "x86" && host_os == "linux") {
     # By default Dart will create a 32-bit gen_snapshot host binary if the target
     # platform is 32-bit.  Override this to create a 64-bit gen_snapshot for x86
