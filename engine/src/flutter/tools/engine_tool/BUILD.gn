@@ -37,7 +37,7 @@ dart_test("gn_test") {
 }
 
 dart_test("build_command_test") {
-  main_dart = "test/build_command_test.dart"
+  main_dart = "test/commands/build_command_test.dart"
 }
 
 dart_test("entry_point_test") {
@@ -45,11 +45,11 @@ dart_test("entry_point_test") {
 }
 
 dart_test("fetch_command_test") {
-  main_dart = "test/fetch_command_test.dart"
+  main_dart = "test/commands/fetch_command_test.dart"
 }
 
 dart_test("format_command_test") {
-  main_dart = "test/format_command_test.dart"
+  main_dart = "test/commands/format_command_test.dart"
 }
 
 dart_test("label_test") {
@@ -57,7 +57,7 @@ dart_test("label_test") {
 }
 
 dart_test("lint_command_test") {
-  main_dart = "test/lint_command_test.dart"
+  main_dart = "test/commands/lint_command_test.dart"
 }
 
 dart_test("logger_test") {
@@ -73,11 +73,11 @@ dart_test("proc_utils_test") {
 }
 
 dart_test("query_command_test") {
-  main_dart = "test/query_command_test.dart"
+  main_dart = "test/commands/query_command_test.dart"
 }
 
 dart_test("run_command_test") {
-  main_dart = "test/run_command_test.dart"
+  main_dart = "test/commands/run_command_test.dart"
 }
 
 dart_test("run_target_test") {
@@ -85,7 +85,7 @@ dart_test("run_target_test") {
 }
 
 dart_test("test_command_test") {
-  main_dart = "test/test_command_test.dart"
+  main_dart = "test/commands/test_command_test.dart"
 }
 
 dart_test("typed_json_test") {

@@ -5,8 +5,8 @@
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:test/test.dart';
 
-import 'src/test_build_configs.dart';
-import 'utils.dart';
+import '../src/test_build_configs.dart';
+import '../src/utils.dart';
 
 void main() {
   test('test implicitly picks a configuration and executes tests', () async {

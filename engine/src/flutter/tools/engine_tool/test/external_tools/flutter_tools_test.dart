@@ -11,7 +11,7 @@ import 'package:engine_tool/src/logger.dart';
 import 'package:test/test.dart';
 
 import '../src/matchers.dart';
-import '../utils.dart';
+import '../src/utils.dart';
 
 void main() {
   test('devices handles a non-zero exit code', () async {
