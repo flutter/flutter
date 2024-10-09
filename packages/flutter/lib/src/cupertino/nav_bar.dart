@@ -843,14 +843,14 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   }
 
   void _handleScrollChange() {
-    final ScrollController? controller = _scrollableState?.widget.controller;
-    if (controller!.offset > 0.0 && controller.offset < _kNavBarLargeTitleHeightExtension) {
-      controller.position.animateTo(
-        controller.offset > _kNavBarLargeTitleHeightExtension / 2
+    final ScrollPosition? position = _scrollableState?.position;
+    if (position != null && position.pixels > 0.0 && position.pixels < _kNavBarLargeTitleHeightExtension) {
+      position.animateTo(
+        position.pixels > _kNavBarLargeTitleHeightExtension / 2
           ? _kNavBarLargeTitleHeightExtension
           : 0.0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
       );
     }
   }
