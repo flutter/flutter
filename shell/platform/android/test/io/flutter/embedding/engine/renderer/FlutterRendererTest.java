@@ -4,6 +4,7 @@
 
 package io.flutter.embedding.engine.renderer;
 
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -671,7 +672,7 @@ public class FlutterRendererTest {
 
     // Invoke the onTrimMemory callback with level 40.
     // This should result in a trim.
-    texture.onTrimMemory(40);
+    texture.onTrimMemory(TRIM_MEMORY_BACKGROUND);
     shadowOf(Looper.getMainLooper()).idle();
 
     assertEquals(0, texture.numImageReaders());
@@ -769,10 +770,31 @@ public class FlutterRendererTest {
     producer.setCallback(callback);
 
     // Trim memory.
-    ((FlutterRenderer.ImageReaderSurfaceProducer) producer).onTrimMemory(40);
+    flutterRenderer.onTrimMemory(TRIM_MEMORY_BACKGROUND);
 
     // Verify.
     verify(callback).onSurfaceDestroyed();
+  }
+
+  @Test
+  public void ImageReaderSurfaceProducerUnsubscribesWhenReleased() {
+    // Regression test for https://github.com/flutter/flutter/issues/156434.
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    // Create and set a mock callback.
+    TextureRegistry.SurfaceProducer.Callback callback =
+        mock(TextureRegistry.SurfaceProducer.Callback.class);
+    producer.setCallback(callback);
+
+    // Release the surface.
+    producer.release();
+
+    // Call trim memory.
+    flutterRenderer.onTrimMemory(TRIM_MEMORY_BACKGROUND);
+
+    // Verify was not called.
+    verify(callback, never()).onSurfaceDestroyed();
   }
 
   @Test
@@ -795,7 +817,7 @@ public class FlutterRendererTest {
     producer.setCallback(callback);
 
     // Trim memory.
-    ((FlutterRenderer.ImageReaderSurfaceProducer) producer).onTrimMemory(40);
+    flutterRenderer.onTrimMemory(TRIM_MEMORY_BACKGROUND);
 
     // Trigger a resume.
     ((LifecycleRegistry) ProcessLifecycleOwner.get().getLifecycle())
