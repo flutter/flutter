@@ -165,12 +165,10 @@ class FlutterManifest {
   ///   licenses:
   ///     - assets/foo_license.txt
   /// ```
-  List<String> get additionalLicenses {
-    return <String>[
-      if (_flutterDescriptor case {'licenses': final YamlList list})
-        for (final Object? item in list) '$item',
-    ];
-  }
+  List<String> get additionalLicenses => <String>[
+    if (_flutterDescriptor case {'licenses': final YamlList list})
+      for (final Object? item in list) '$item',
+  ];
 
   /// True if this manifest declares a Flutter module project.
   ///
@@ -389,12 +387,10 @@ class Font {
   final String familyName;
   final List<FontAsset> fontAssets;
 
-  Map<String, Object?> get descriptor {
-    return <String, Object?>{
-      'family': familyName,
-      'fonts': fontAssets.map<Map<String, Object?>>((FontAsset a) => a.descriptor).toList(),
-    };
-  }
+  Map<String, Object?> get descriptor => <String, Object?>{
+    'family': familyName,
+    'fonts': fontAssets.map<Map<String, Object?>>((FontAsset a) => a.descriptor).toList(),
+  };
 
   @override
   String toString() => '$runtimeType(family: $familyName, assets: $fontAssets)';
