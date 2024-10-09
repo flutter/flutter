@@ -9,7 +9,7 @@ import 'package:engine_tool/src/logger.dart';
 import 'package:test/test.dart';
 
 import 'src/test_build_configs.dart';
-import 'utils.dart';
+import 'src/utils.dart';
 
 void main() {
   test('rbe defaults to true if detected', () {
