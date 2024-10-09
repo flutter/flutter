@@ -20,7 +20,7 @@ import '../utils.dart';
 /// For debugging, it is recommended to instead just run and launch these tests
 /// individually _in_ the `dev/integration_tests/native_driver_test` directory.
 Future<void> runFlutterDriverAndroidTests() async {
-  final String crashreport = _findCrashReportTool();
+  final String? crashreport = _findCrashReportTool();
   print('Running Flutter Driver Android tests...');
 
   await _runFlutterDriver(
@@ -39,7 +39,7 @@ Future<void> runFlutterDriverAndroidTests() async {
 
 Future<void> _runFlutterDriver({
   required String entrypoint,
-  required String crashreport,
+  required String? crashreport,
 }) async {
   bool failed = false;
   try {
@@ -69,11 +69,14 @@ Future<void> _runFlutterDriver({
     failed = true;
   }
   if (failed) {
+    if (crashreport == null) {
+      print('Failed to run Flutter Driver test. No crash report tool found.');
+      return;
+    }
     final CommandResult resultL = await runCommand(crashreport, <String>['-l']);
     if (resultL.exitCode != 0) {
-      throw StateError(
-        'Failed to run crash report tool: ${resultL.flattenedStderr}',
-      );
+      print('Failed to run crash report tool: ${resultL.flattenedStderr}');
+      return;
     }
     if (resultL.flattenedStdout?.isEmpty ?? true) {
       print('No crash reports found');
@@ -84,9 +87,8 @@ Future<void> _runFlutterDriver({
     }
     final CommandResult resultU = await runCommand(crashreport, <String>['-u']);
     if (resultU.exitCode != 0) {
-      throw StateError(
-        'Failed to run crash report tool: ${resultU.flattenedStderr}',
-      );
+      print('Failed to upload crash reports: ${resultU.flattenedStderr}');
+      return;
     }
     if (resultU.flattenedStdout?.isEmpty ?? true) {
       print('No crash reports uploaded');
@@ -97,17 +99,34 @@ Future<void> _runFlutterDriver({
   }
 }
 
-String _findCrashReportTool() {
+String? _findCrashReportTool() {
   final String executable;
-  if (io.Platform.environment['LUCI_CI'] == 'True') {
-    // Would have been fetched and installed by CIPD, and not on the traditional PATH.
-    final String? adbPath = io.Platform.environment['ADB_PATH'];
-    if (adbPath == null) {
-      throw StateError('Expected ADB_PATH to be set by LUCI');
+  if (isLuci) {
+    // On CI, the full path looks something like this:
+    // /b/s/w/ir/cache/avd/src/.android_emulator/android_35_google_apis_x64/emulator/crashreport
+    //
+    // To programatically reconstruct it, we use two environment variables:
+    // "EMULATOR_VERSION" which looks like "android_35_google_apis_x64.textpb"
+    // "AVD_ROOT" which looks like "/b/s/w/ir/cache/avd"
+    //
+    // This is still somewhat fragile, but it's the best we can do.
+    final String? emulatorVersion = io.Platform.environment['EMULATOR_VERSION'];
+    if (emulatorVersion == null) {
+      print('EMULATOR_VERSION is not set');
+      return null;
     }
+    final String? avdRoot = io.Platform.environment['AVD_ROOT'];
+    if (avdRoot == null) {
+      print('AVD_ROOT is not set');
+      return null;
+    }
+
+    final String emulatorName = path.basenameWithoutExtension(emulatorVersion);
     executable = path.join(
-      // Parent directory, i.e. the folder that contains platforms/ and platform-tools/.
-      path.dirname(path.dirname(adbPath)),
+      avdRoot,
+      'src',
+      '.android_emulator',
+      emulatorName,
       'emulator',
       'crashreport',
     );
@@ -149,46 +168,7 @@ String _findCrashReportTool() {
   }
   final io.File file = io.File(executable);
   if (!file.existsSync()) {
-    _exploreParentDirStructure(executable);
-    // Look at the root of the entire file system.
-    _recursivelySearchForCrashReport('/b/s/w/ir/cache/avd');
-    throw StateError('Could not find crash report tool at $executable');
+    return null;
   }
   return executable;
-}
-
-/// Finds the first parent directory that exists and prints the structure.
-void _exploreParentDirStructure(String startAt) {
-  io.Directory? current = io.Directory(startAt);
-  while (current != null) {
-    if (current.existsSync()) {
-      print('Files in ${current.path}:');
-      for (final io.FileSystemEntity entity in current.listSync()) {
-        print('  ${entity.path}');
-      }
-      break;
-    }
-    current = current.parent;
-  }
-}
-
-void _recursivelySearchForCrashReport(String startAt) {
-  if (io.Platform.isLinux) {
-    final io.ProcessResult result = io.Process.runSync(
-      'find',
-      <String>[
-        startAt,
-        '-name',
-        'crashreport',
-      ],
-    );
-    if (result.exitCode != 0) {
-      throw StateError('Failed to find crash report tool: ${result.stderr}');
-    }
-    print(result.stdout);
-  } else {
-    throw UnsupportedError(
-      'Unsupported platform: ${io.Platform.operatingSystem}',
-    );
-  }
 }
