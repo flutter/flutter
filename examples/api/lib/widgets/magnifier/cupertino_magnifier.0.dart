@@ -39,40 +39,40 @@ class _CupertinoMagnifierExampleState extends State<CupertinoMagnifierExample> {
       ),
       child: Center(
         child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Text('Drag on the logo!'),
-              RepaintBoundary(
-                child: Stack(
-                  children: <Widget>[
-                    GestureDetector(
-                      onPanUpdate: (DragUpdateDetails details) {
-                        setState(() {
-                          dragGesturePosition = details.localPosition;
-                        });
-                      },
-                      onPanDown: (DragDownDetails details) {
-                        setState(() {
-                          dragGesturePosition = details.localPosition;
-                        });
-                      },
-                      child: const FlutterLogo(size: 200),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text('Drag on the logo!'),
+            RepaintBoundary(
+              child: Stack(
+                children: <Widget>[
+                  GestureDetector(
+                    onPanUpdate: (DragUpdateDetails details) {
+                      setState(() {
+                        dragGesturePosition = details.localPosition;
+                      });
+                    },
+                    onPanDown: (DragDownDetails details) {
+                      setState(() {
+                        dragGesturePosition = details.localPosition;
+                      });
+                    },
+                    child: const FlutterLogo(size: 200),
+                  ),
+                  Positioned(
+                    left: dragGesturePosition.dx - magnifierRadius,
+                    top: dragGesturePosition.dy - magnifierRadius,
+                    child: const CupertinoMagnifier(
+                      magnificationScale: 1.5,
+                      borderRadius: BorderRadius.all(Radius.circular(magnifierRadius)),
+                      additionalFocalPointOffset: Offset(0, -magnifierRadius),
                     ),
-                    Positioned(
-                      left: dragGesturePosition.dx - magnifierRadius,
-                      top: dragGesturePosition.dy - magnifierRadius,
-                      child: const CupertinoMagnifier(
-                        magnificationScale: 1.5,
-                        borderRadius: BorderRadius.all(Radius.circular(magnifierRadius)),
-                        additionalFocalPointOffset: Offset(0, -magnifierRadius),
-                      ),
-                    )
-                  ],
-                ),
+                  )
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
     );
   }
 }
