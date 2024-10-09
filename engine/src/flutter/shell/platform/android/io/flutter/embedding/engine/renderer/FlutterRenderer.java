@@ -705,6 +705,7 @@ public class FlutterRenderer implements TextureRegistry {
     private void releaseInternal() {
       cleanup();
       released = true;
+      removeOnTrimMemoryListener(this);
       imageReaderProducers.remove(this);
     }
 
