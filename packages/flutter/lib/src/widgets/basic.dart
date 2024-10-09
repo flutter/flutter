@@ -4570,13 +4570,13 @@ class PositionedDirectional extends StatelessWidget {
 /// to other [Flexible]s. More on this in step two of the layout algorithm,
 /// below.
 ///
-/// [MainAxis]: The main direction of the [Flex]. This is vertical
+/// [mainAxis]: The main direction of the [Flex]. This is vertical
 /// for a [Column] and horizontal for a [Row], and corresponds to the
 /// [direction] property of a [Flex].
 ///
 /// [CrossAxis]: The other direction. The cross axis of a [Column]
 /// is horizontal, and the cross axis of a [Row] is vertical. It is
-/// always perpendicular to the [MainAxis].
+/// always perpendicular to the [mainAxis].
 ///
 /// [Flexible] : A widget that is a child of a [Flex]. It _could_ cause
 /// its child to stretch in the direction of the main axis, _though it
@@ -4859,16 +4859,16 @@ class PositionedDirectional extends StatelessWidget {
 ///      distributed between each child, like this:
 ///      Child - Space - Child - Space - Child - Space - Child
 ///
-///      They key thing that differentiates [spaceBetween] from
-///      [spaceAround] and [spaceEvenly] is the first and last child
+///      They key thing that differentiates [MainAxisAlignment.spaceBetween] from
+///      [MainAxisAlignment.spaceAround] and [MainAxisAlignment.spaceEvenly] is the first and last child
 ///      touch the ends of the [Flex]. You can think:
-///      _"[spaceBetween] = Spaces are only between children."_
+///      _"[MainAxisAlignment.spaceBetween] = Spaces are only between children."_
 ///
 ///    - [MainAxisAlignment.spaceEvenly]: Essentially the reverse of
-///    [spaceBetween]. Make every space the same size,
+///    [MainAxisAlignment.spaceBetween]. Make every space the same size,
 ///      but instead of placing spaces only between the children
 ///      [MainAxisAlignment.spaceEvenly] will place a space on each end,
-///      too. This looks like [spaceAround] except that the end spaces are
+///      too. This looks like [MainAxisAlignment.spaceAround] except that the end spaces are
 ///      the same size as the spaces between children:
 ///      Space - Child - Space - Child - Space- Child - Space
 ///
@@ -4880,7 +4880,7 @@ class PositionedDirectional extends StatelessWidget {
 ///      Space-Child-Space    Space-Child-Space    Space-Child-Space
 ///
 ///      You can think of this like:
-///      _"[spaceAround] = The space around each child is the same"_.
+///      _"[MainAxisAlignment.spaceAround] = The space around each child is the same"_.
 ///
 ///    Cross Axis:
 ///    - [CrossAxisAlignment.start]: Similar to [MainAxisAlignment.start],
@@ -4947,10 +4947,10 @@ class PositionedDirectional extends StatelessWidget {
 /// For example:
 ///
 /// ```dart
-///       IntrinsicHeight(
+///       const IntrinsicHeight(
 ///         child: Row(
 ///           crossAxisAlignment: CrossAxisAlignment.stretch,
-///           children: [
+///           children: <Widget>[
 ///             Placeholder(),
 ///           ],
 ///         ),
