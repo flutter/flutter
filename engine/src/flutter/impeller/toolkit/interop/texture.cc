@@ -15,11 +15,13 @@ Texture::Texture(const Context& context, const TextureDescriptor& descriptor) {
   if (!texture || !texture->IsValid()) {
     return;
   }
+  backend_ = context.GetContext()->GetBackendType();
   texture_ = std::move(texture);
 }
 
-Texture::Texture(std::shared_ptr<impeller::Texture> texture)
-    : texture_(std::move(texture)) {}
+Texture::Texture(impeller::Context::BackendType backend,
+                 std::shared_ptr<impeller::Texture> texture)
+    : backend_(backend), texture_(std::move(texture)) {}
 
 Texture::~Texture() = default;
 
@@ -43,6 +45,14 @@ bool Texture::SetContents(std::shared_ptr<const fml::Mapping> contents) {
 
 sk_sp<DlImageImpeller> Texture::MakeImage() const {
   return DlImageImpeller::Make(texture_);
+}
+
+impeller::Context::BackendType Texture::GetBackendType() const {
+  return backend_;
+}
+
+const std::shared_ptr<impeller::Texture>& Texture::GetTexture() const {
+  return texture_;
 }
 
 }  // namespace impeller::interop
