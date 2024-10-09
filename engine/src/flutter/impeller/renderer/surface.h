@@ -21,7 +21,7 @@ class Surface {
 
   bool IsValid() const;
 
-  const RenderTarget& GetTargetRenderPassDescriptor() const;
+  const RenderTarget& GetRenderTarget() const;
 
   virtual bool Present() const;
 
