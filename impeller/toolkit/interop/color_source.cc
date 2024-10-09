@@ -102,6 +102,23 @@ ScopedObject<ColorSource> ColorSource::MakeSweepGradient(
   return Create<ColorSource>(std::move(dl_filter));
 }
 
+ScopedObject<ColorSource> ColorSource::MakeImage(
+    const Texture& image,
+    flutter::DlTileMode horizontal_tile_mode,
+    flutter::DlTileMode vertical_tile_mode,
+    flutter::DlImageSampling sampling,
+    const Matrix& transformation) {
+  const auto sk_transformation = ToSkMatrix(transformation);
+  auto dl_filter =
+      std::make_shared<flutter::DlImageColorSource>(image.MakeImage(),     //
+                                                    horizontal_tile_mode,  //
+                                                    vertical_tile_mode,    //
+                                                    sampling,              //
+                                                    &sk_transformation     //
+      );
+  return Create<ColorSource>(std::move(dl_filter));
+}
+
 ColorSource::ColorSource(std::shared_ptr<flutter::DlColorSource> source)
     : color_source_(std::move(source)) {}
 
