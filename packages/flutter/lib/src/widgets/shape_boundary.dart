@@ -6,44 +6,36 @@ import 'dart:ui';
 
 import 'framework.dart';
 
-/// An abstract class that defines the boundaries of a geometric shape.
+/// An abstract class that defines a boundary for regulating a specific type of shape.
 ///
-/// [isWithinBoundary] return whether the specified shape is within the boundary.
-///
-/// [nearestShapeWithinBoundary] returns a shape within the boundary closest to
-/// the given shape, or returns the given shape if it is within the boundary.
+/// `T` represents the shape type. For example, `T` can be an `Offset` if the boundary
+/// regulates a point, or a `Rect` if it regulates a rectangle.
 ///
 /// See also:
-/// * [OffsetBoundaryProvider], A widget that provides a [ShapeBoundary] for an [Offset].
+/// * [PointBoundaryProvider], A widget that provides a [ShapeBoundary] for a point.
 /// * [RectBoundaryProvider], A widget that provides a [ShapeBoundary] for a [Rect].
 abstract class ShapeBoundary<T> {
-  /// Returns whether the specified shape is within the boundary.
-  bool isWithinBoundary(T shape);
+  /// Returns whether the specified shape position is within the boundary.
+  bool isWithinBoundary(T shapePosition);
 
-  /// Returns the shape closest to the specified shape within the boundary.
-  /// If the specified shape is within the boundary, it returns the shape as is.
-  T nearestShapeWithinBoundary(T shape);
+  /// Returns the position of the given shape after moving it fully inside the boundary
+  /// with the shortest distance.
+  T nearestPositionWithinBoundary(T shapePosition);
 }
 
-/// This widget can provide a [ShapeBoundary] of [Offset] to its descendants,
-/// whose bounds is the current position of this widget.
-///
-/// [ShapeBoundary.isWithinBoundary] returns whether the specified [Offset]
-/// is within the range of this widget. [Offset] should be specified in global coordinates.
-///
-/// [ShapeBoundary.nearestShapeWithinBoundary] returns the [Offset] closest to the specified [Offset]
-/// within the boundary, or returns the [Offset] as is if it is within the boundary.
-class OffsetBoundaryProvider extends InheritedWidget {
+/// Provides a [ShapeBoundary] to its descendants, regulating point positions
+/// within the boundary defined by this widget.
+class PointBoundaryProvider extends InheritedWidget {
   /// Creates a widget that provides a [ShapeBoundary] of [Offset] to its descendants.
-  const OffsetBoundaryProvider({required super.child, super.key});
+  const PointBoundaryProvider({required super.child, super.key});
 
   @override
   InheritedElement createElement() => _OffsetBoundaryInheritedElement(this);
 
-  /// Retrieve the [OffsetBoundaryProvider] from the nearest ancestor to
+  /// Retrieve the [PointBoundaryProvider] from the nearest ancestor to
   /// get its [ShapeBoundary] of [Offset].
   static ShapeBoundary<Offset>? maybeOf(BuildContext context) {
-    final InheritedElement? element = context.getElementForInheritedWidgetOfExactType<OffsetBoundaryProvider>();
+    final InheritedElement? element = context.getElementForInheritedWidgetOfExactType<PointBoundaryProvider>();
     if (element == null) {
       return null;
     }
@@ -60,32 +52,26 @@ class _OffsetBoundaryInheritedElement extends InheritedElement implements ShapeB
   _OffsetBoundaryInheritedElement(super.widget);
 
   @override
-  bool isWithinBoundary(Offset shape) {
+  bool isWithinBoundary(Offset shapePosition) {
     final RenderBox? rb = renderObject as RenderBox?;
     assert(rb != null && rb.hasSize, 'OffsetBoundaryProvider is not available');
     final Rect boundary = rb!.localToGlobal(Offset.zero) & rb.size;
-    return boundary.contains(shape);
+    return boundary.contains(shapePosition);
   }
 
   @override
-  Offset nearestShapeWithinBoundary(Offset shape) {
+  Offset nearestPositionWithinBoundary(Offset shapePosition) {
     final RenderBox? rb = renderObject as RenderBox?;
     assert(rb != null && rb.hasSize, 'OffsetBoundaryProvider is not available');
     final Rect boundary = rb!.localToGlobal(Offset.zero) & rb.size;
-    final double dx = clampDouble(shape.dx, boundary.left, boundary.right);
-    final double top = clampDouble(shape.dy, boundary.top, boundary.bottom);
-    return Offset(dx, top);
+    final double dx = clampDouble(shapePosition.dx, boundary.left, boundary.right);
+    final double dy = clampDouble(shapePosition.dy, boundary.top, boundary.bottom);
+    return Offset(dx, dy);
   }
 }
 
-/// This widget can provide a [ShapeBoundary] of [Rect] to its descendants,
-/// whose bounds is the current position of this widget.
-///
-/// [ShapeBoundary.isWithinBoundary] returns whether the specified [Rect]
-/// is within the range of this widget. [Rect] should be specified in global coordinates
-///
-/// [ShapeBoundary.nearestShapeWithinBoundary] returns the [Rect] with the boundary
-/// that is closest to the specified [Rect], or returns the [Rect] if it is within the boundary.
+/// Provides a [ShapeBoundary] to its descendants, regulating rect positions
+/// within the boundary defined by this widget.
 ///
 /// {@tool dartpad}
 /// This example demonstrates dragging a red box, constrained within the bounds
@@ -120,23 +106,21 @@ class _RectBoundaryInheritedElement extends InheritedElement implements ShapeBou
   _RectBoundaryInheritedElement(super.widget);
 
   @override
-  bool isWithinBoundary(Rect shape) {
+  bool isWithinBoundary(Rect shapePosition) {
     final RenderBox? rb = renderObject as RenderBox?;
     assert(rb != null && rb.hasSize, 'RectBoundaryProvider is not available');
     final Rect boundary = rb!.localToGlobal(Offset.zero) & rb.size;
-    return boundary.contains(shape.topLeft) &&
-        boundary.contains(shape.topRight) &&
-        boundary.contains(shape.bottomLeft) &&
-        boundary.contains(shape.bottomRight);
+    return boundary.contains(shapePosition.topLeft) &&
+        boundary.contains(shapePosition.bottomRight);
   }
 
   @override
-  Rect nearestShapeWithinBoundary(Rect shape) {
+  Rect nearestPositionWithinBoundary(Rect shapePosition) {
     final RenderBox? rb = renderObject as RenderBox?;
     assert(rb != null && rb.hasSize, 'RectBoundaryProvider is not available');
     final Rect boundary = rb!.localToGlobal(Offset.zero) & rb.size;
-    final double left = clampDouble(shape.left, boundary.left, boundary.right - shape.width);
-    final double top = clampDouble(shape.top, boundary.top, boundary.bottom - shape.height);
-    return Rect.fromLTWH(left, top, shape.width, shape.height);
+    final double left = clampDouble(shapePosition.left, boundary.left, boundary.right - shapePosition.width);
+    final double top = clampDouble(shapePosition.top, boundary.top, boundary.bottom - shapePosition.height);
+    return Rect.fromLTWH(left, top, shapePosition.width, shapePosition.height);
   }
 }
