@@ -348,7 +348,8 @@ class ThemeData with Diagnosticable {
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
     SwitchThemeData? switchTheme,
-    TabBarTheme? tabBarTheme,
+    // TODO(QuncCccccc): Change the parameter type to TabBarThemeData
+    Object? tabBarTheme,
     TextButtonThemeData? textButtonTheme,
     TextSelectionThemeData? textSelectionTheme,
     TimePickerThemeData? timePickerTheme,
@@ -541,7 +542,15 @@ class ThemeData with Diagnosticable {
     sliderTheme ??= const SliderThemeData();
     snackBarTheme ??= const SnackBarThemeData();
     switchTheme ??= const SwitchThemeData();
-    tabBarTheme ??= const TabBarTheme();
+    // TODO(QuncCccccc): Clean this up once the type of `tabBarTheme` is changed to `TabBarThemeData`
+    if (tabBarTheme != null) {
+      if (tabBarTheme is TabBarTheme) {
+        tabBarTheme = tabBarTheme.data;
+      } else if (tabBarTheme is! TabBarThemeData) {
+        throw ArgumentError('tabBarTheme must be either a TabBarThemeData or a TabBarTheme');
+      }
+    }
+    tabBarTheme ??= const TabBarThemeData();
     textButtonTheme ??= const TextButtonThemeData();
     textSelectionTheme ??= const TextSelectionThemeData();
     timePickerTheme ??= const TimePickerThemeData();
@@ -634,7 +643,7 @@ class ThemeData with Diagnosticable {
       sliderTheme: sliderTheme,
       snackBarTheme: snackBarTheme,
       switchTheme: switchTheme,
-      tabBarTheme: tabBarTheme,
+      tabBarTheme: tabBarTheme as TabBarThemeData,
       textButtonTheme: textButtonTheme,
       textSelectionTheme: textSelectionTheme,
       timePickerTheme: timePickerTheme,
@@ -1387,7 +1396,7 @@ class ThemeData with Diagnosticable {
   final SwitchThemeData switchTheme;
 
   /// A theme for customizing the size, shape, and color of the tab bar indicator.
-  final TabBarTheme tabBarTheme;
+  final TabBarThemeData tabBarTheme;
 
   /// A theme for customizing the appearance and internal layout of
   /// [TextButton]s.
@@ -1507,7 +1516,8 @@ class ThemeData with Diagnosticable {
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
     SwitchThemeData? switchTheme,
-    TabBarTheme? tabBarTheme,
+    // TODO(QuncCccccc): Change the parameter type to TabBarThemeData
+    Object? tabBarTheme,
     TextButtonThemeData? textButtonTheme,
     TextSelectionThemeData? textSelectionTheme,
     TimePickerThemeData? timePickerTheme,
@@ -1545,6 +1555,15 @@ class ThemeData with Diagnosticable {
         dialogTheme = dialogTheme.data;
       } else if (dialogTheme is! DialogThemeData) {
         throw ArgumentError('dialogTheme must be either a DialogThemeData or a DialogTheme');
+      }
+    }
+
+    // TODO(QuncCccccc): Clean this up once the type of `tabBarTheme` is changed to `TabBarThemeData`
+    if (tabBarTheme != null) {
+      if (tabBarTheme is TabBarTheme) {
+        tabBarTheme = tabBarTheme.data;
+      } else if (tabBarTheme is! TabBarThemeData) {
+        throw ArgumentError('tabBarTheme must be either a TabBarThemeData or a TabBarTheme');
       }
     }
     return ThemeData.raw(
@@ -1634,7 +1653,7 @@ class ThemeData with Diagnosticable {
       sliderTheme: sliderTheme ?? this.sliderTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
       switchTheme: switchTheme ?? this.switchTheme,
-      tabBarTheme: tabBarTheme ?? this.tabBarTheme,
+      tabBarTheme: tabBarTheme as TabBarThemeData? ?? this.tabBarTheme,
       textButtonTheme: textButtonTheme ?? this.textButtonTheme,
       textSelectionTheme: textSelectionTheme ?? this.textSelectionTheme,
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
@@ -1827,7 +1846,7 @@ class ThemeData with Diagnosticable {
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
       switchTheme: SwitchThemeData.lerp(a.switchTheme, b.switchTheme, t),
-      tabBarTheme: TabBarTheme.lerp(a.tabBarTheme, b.tabBarTheme, t),
+      tabBarTheme: TabBarThemeData.lerp(a.tabBarTheme, b.tabBarTheme, t),
       textButtonTheme: TextButtonThemeData.lerp(a.textButtonTheme, b.textButtonTheme, t)!,
       textSelectionTheme: TextSelectionThemeData.lerp(a.textSelectionTheme, b.textSelectionTheme, t)!,
       timePickerTheme: TimePickerThemeData.lerp(a.timePickerTheme, b.timePickerTheme, t),
@@ -2125,7 +2144,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SwitchThemeData>('switchTheme', switchTheme, defaultValue: defaultData.switchTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<TabBarTheme>('tabBarTheme', tabBarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<TabBarThemeData>('tabBarTheme', tabBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextButtonThemeData>('textButtonTheme', textButtonTheme, defaultValue: defaultData.textButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextSelectionThemeData>('textSelectionTheme', textSelectionTheme, defaultValue: defaultData.textSelectionTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TimePickerThemeData>('timePickerTheme', timePickerTheme, defaultValue: defaultData.timePickerTheme, level: DiagnosticLevel.debug));
