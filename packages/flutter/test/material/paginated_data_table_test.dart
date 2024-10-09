@@ -1434,17 +1434,15 @@ void main() {
       ),
     ));
 
-    await tester.pumpAndSettle();
-    expect(find.byType(Table), findsOneWidget); 
+    expect(find.byType(Table), findsOneWidget);
     final Table table = tester.widget(find.byType(Table));
-    
     final TableRow tableRow = table.children[0];
     final BoxDecoration? tableRowBoxDecoration = tableRow.decoration as BoxDecoration?;
     expect(tableRowBoxDecoration, isNotNull);
-    expect(tableRowBoxDecoration?.border, isNotNull);
+    expect(tableRowBoxDecoration?.border, isA<Border>());
 
     final Border? border = tableRowBoxDecoration?.border as Border?;
-    expect(border?.bottom.width, equals(dividerThickness));
+    expect(border?.bottom.width, dividerThickness);
   });
 
   testWidgets('PaginatedDataTable respects default dividerThickness', (WidgetTester tester) async {
@@ -1466,16 +1464,14 @@ void main() {
       ),
     ));
 
-    await tester.pumpAndSettle();
-    expect(find.byType(Table), findsOneWidget); 
+    expect(find.byType(Table), findsOneWidget);
     final Table table = tester.widget(find.byType(Table));
-    
     final TableRow tableRow = table.children[0];
     final BoxDecoration? tableRowBoxDecoration = tableRow.decoration as BoxDecoration?;
     expect(tableRowBoxDecoration, isNotNull);
-    expect(tableRowBoxDecoration?.border, isNotNull);
+    expect(tableRowBoxDecoration?.border, isA<Border>());
 
     final Border? border = tableRowBoxDecoration?.border as Border?;
-    expect(border?.bottom.width, equals(defaultDividerThickness));
+    expect(border?.bottom.width, defaultDividerThickness);
   });
 }
