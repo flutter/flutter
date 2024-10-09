@@ -3,7 +3,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import com.android.build.OutputFile
+import com.android.build.api.variant.VariantOutputConfiguration
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
@@ -1408,7 +1408,7 @@ class FlutterPlugin implements Plugin<Project> {
                             ? outputDirectory.get()
                             : outputDirectory
                         String filename = "app"
-                        String abi = output.getFilter(OutputFile.ABI)
+                        String abi = output.getFilters().find { it.filterType == VariantOutputConfiguration.FilterType.ABI }?.identifier
                         if (abi != null && !abi.isEmpty()) {
                             filename += "-${abi}"
                         }
