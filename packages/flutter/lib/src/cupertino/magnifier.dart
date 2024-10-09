@@ -232,7 +232,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
 /// finger may be blocking the point of interest, like a selection handle.
 ///
 /// {@tool dartpad}
-/// This sample demonstrates how to use [CupertinoTextMagnifier].
+/// This sample demonstrates how to use [CupertinoMagnifier].
 ///
 /// ** See code in examples/api/lib/widgets/magnifier/cupertino_magnifier.0.dart **
 /// {@end-tool}
