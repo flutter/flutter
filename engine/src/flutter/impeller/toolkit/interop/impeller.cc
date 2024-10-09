@@ -544,7 +544,9 @@ ImpellerTexture ImpellerTextureCreateWithOpenGLTextureHandleNew(
     return nullptr;
   }
   texture->SetCoordinateSystem(TextureCoordinateSystem::kUploadFromHost);
-  return Create<Texture>(std::move(texture)).Leak();
+  return Create<Texture>(impeller::Context::BackendType::kOpenGLES,
+                         std::move(texture))
+      .Leak();
 }
 
 IMPELLER_EXTERN_C
@@ -555,6 +557,19 @@ void ImpellerTextureRetain(ImpellerTexture texture) {
 IMPELLER_EXTERN_C
 void ImpellerTextureRelease(ImpellerTexture texture) {
   ObjectBase::SafeRelease(texture);
+}
+
+IMPELLER_EXTERN_C
+uint64_t ImpellerTextureGetOpenGLHandle(ImpellerTexture texture) {
+  auto interop_texture = GetPeer(texture);
+  if (interop_texture->GetBackendType() !=
+      impeller::Context::BackendType::kOpenGLES) {
+    VALIDATION_LOG << "Can only fetch the texture handle of an OpenGL texture.";
+    return 0u;
+  }
+  return TextureGLES::Cast(*interop_texture->GetTexture())
+      .GetGLHandle()
+      .value_or(0u);
 }
 
 IMPELLER_EXTERN_C

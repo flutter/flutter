@@ -493,6 +493,10 @@ void ImpellerTextureRetain(ImpellerTexture IMPELLER_NULLABLE texture);
 IMPELLER_EXPORT
 void ImpellerTextureRelease(ImpellerTexture IMPELLER_NULLABLE texture);
 
+IMPELLER_EXPORT
+uint64_t ImpellerTextureGetOpenGLHandle(
+    ImpellerTexture IMPELLER_NONNULL texture);
+
 //------------------------------------------------------------------------------
 // Color Sources
 //------------------------------------------------------------------------------

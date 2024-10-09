@@ -165,6 +165,9 @@ TEST_P(InteropPlaygroundTest, CanCreateOpenGLImage) {
       external_texture  //
       ));
   ASSERT_TRUE(texture);
+
+  ASSERT_EQ(ImpellerTextureGetOpenGLHandle(texture.GetC()), external_texture);
+
   auto builder =
       Adopt<DisplayListBuilder>(ImpellerDisplayListBuilderNew(nullptr));
   ImpellerPoint point = {100, 100};

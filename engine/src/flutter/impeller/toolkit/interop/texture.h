@@ -18,7 +18,8 @@ class Texture final
  public:
   explicit Texture(const Context& context, const TextureDescriptor& descriptor);
 
-  explicit Texture(std::shared_ptr<impeller::Texture> texture);
+  explicit Texture(impeller::Context::BackendType backend,
+                   std::shared_ptr<impeller::Texture> texture);
 
   ~Texture() override;
 
@@ -34,7 +35,13 @@ class Texture final
 
   sk_sp<DlImageImpeller> MakeImage() const;
 
+  impeller::Context::BackendType GetBackendType() const;
+
+  const std::shared_ptr<impeller::Texture>& GetTexture() const;
+
  private:
+  impeller::Context::BackendType backend_ =
+      impeller::Context::BackendType::kMetal;
   std::shared_ptr<impeller::Texture> texture_;
 };
 
