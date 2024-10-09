@@ -277,7 +277,7 @@ void main() {
       showDayOfWeek: true,
     ),
     throwsA(isA<AssertionError>().having(
-      (e as AssertionError) => e.message,
+      (e) => e.message as AssertionError,
       'message',
       contains('showDayOfWeek is only supported in date mode'),
     )),
@@ -290,7 +290,7 @@ void main() {
       showDayOfWeek: true,
     ),
     throwsA(isA<AssertionError>().having(
-      (e as AssertionError) => e.message,
+      (e) => e.message as AssertionError,
       'message',
       contains('showDayOfWeek is only supported in date mode'),
     )),
@@ -302,7 +302,7 @@ void main() {
       showDayOfWeek: true,
     ),
     throwsA(isA<AssertionError>().having(
-      (e as AssertionError) => e.message,
+      (e) => e.message as AssertionError,
       'message',
       contains('showDayOfWeek is only supported in date mode'),
     )),
