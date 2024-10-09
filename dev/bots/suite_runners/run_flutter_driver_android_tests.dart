@@ -151,7 +151,7 @@ String _findCrashReportTool() {
   if (!file.existsSync()) {
     _exploreParentDirStructure(executable);
     // Look at the root of the entire file system.
-    _recursivelySearchForCrashReport('/');
+    _recursivelySearchForCrashReport('/b/s/w/ir/cache/avd');
     throw StateError('Could not find crash report tool at $executable');
   }
   return executable;
