@@ -2874,7 +2874,15 @@ class InputDecoration {
 
   /// The maximum number of lines the [helperText] can occupy.
   ///
-  /// Defaults to null, which means that the [helperText] is not limited.
+  /// Defaults to null, which means that soft line breaks in [helperText] are
+  /// truncated with an ellipse while hard line breaks are respected.
+  /// For example, an [helperText] that overflows the width of the field will be
+  /// truncated with an ellipse. However, an [helperText] with explicit linebreak
+  /// characters (\n) will display on multiple lines.
+  ///
+  /// To get a long [helperText] wrapping, either set [helperMaxLines] or use
+  /// [helper] which offers more flexibility, for instance it can be set to a
+  /// Text widget with a specific overflow value.
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the helper.
@@ -2972,7 +2980,15 @@ class InputDecoration {
 
   /// The maximum number of lines the [errorText] can occupy.
   ///
-  /// Defaults to null, which means that the [errorText] is not limited.
+  /// Defaults to null, which means that soft line breaks in [errorText] are
+  /// truncated with an ellipse while hard line breaks are respected.
+  /// For example, an [errorText] that overflows the width of the field will be
+  /// truncated with an ellipse. However, an [errorText] with explicit linebreak
+  /// characters (\n) will display on multiple lines.
+  ///
+  /// To get a long [errorText] wrapping, either set [errorMaxLines] or use
+  /// [error] which offers more flexibility, for instance it can be set to a
+  /// Text widget with a specific overflow value.
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
