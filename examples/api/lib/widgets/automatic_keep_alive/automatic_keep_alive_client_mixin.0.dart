@@ -5,11 +5,8 @@
 import 'package:flutter/material.dart';
 
 /// This example demonstrates how to use the [AutomaticKeepAliveClientMixin]
-// to keep the state of a widget alive even when it is scrolled out of view.
-
-// The widget includes a button to toggle the keep-alive state. When `wantKeepAlive`
-// is `true`, the widget is kept alive. When it is `false`, the widget can be disposed
-// when scrolled out of view.
+/// to keep the state of individual items alive even when they are scrolled
+/// out of view in a ListView.
 
 void main() {
   runApp(const MyApp());
@@ -23,42 +20,62 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AutomaticKeepAliveClientMixin Example')),
-        body: const MyWidget(),
+        body: const ItemList(),
       ),
     );
   }
 }
 
-class MyWidget extends StatefulWidget {
-  const MyWidget({Key? key}) : super(key: key);
+class ItemList extends StatelessWidget {
+  const ItemList({super.key});
 
   @override
-  _MyWidgetState createState() => _MyWidgetState();
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: 100,
+      itemBuilder: (context, index) {
+        return KeepAliveItem(index: index);
+      },
+    );
+  }
 }
 
-class _MyWidgetState extends State<MyWidget> with AutomaticKeepAliveClientMixin<MyWidget> {
+class KeepAliveItem extends StatefulWidget {
+  final int index;
+
+  const KeepAliveItem({required this.index, super.key});
+
+  @override
+  _KeepAliveItemState createState() => _KeepAliveItemState();
+}
+
+class _KeepAliveItemState extends State<KeepAliveItem> with AutomaticKeepAliveClientMixin<KeepAliveItem> {
   bool _keepAlive = false;
 
   @override
   Widget build(BuildContext context) {
     super.build(context); // Important to call super.build to manage the keep-alive state
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text('Keep me alive: $_keepAlive'),
-        ElevatedButton(
-          child: const Text('Toggle'),
-          onPressed: () {
-            setState(() {
-              _keepAlive = !_keepAlive;
-              updateKeepAlive(); // Important to call to update the keep-alive status
-            });
-          },
-        ),
-      ],
+
+    return ListTile(
+      title: Text('Item ${widget.index}'),
+      subtitle: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Keep me alive: $_keepAlive'),
+          ElevatedButton(
+            child: const Text('Toggle Keep Alive'),
+            onPressed: () {
+              setState(() {
+                _keepAlive = !_keepAlive;
+                updateKeepAlive(); // Important to call to update the keep-alive status
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 
   @override
-  bool get wantKeepAlive => _keepAlive;
+  bool get wantKeepAlive => _keepAlive; // Keep the state based on button toggle
 }

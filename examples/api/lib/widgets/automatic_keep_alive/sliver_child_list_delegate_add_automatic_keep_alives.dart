@@ -37,6 +37,10 @@ class MyCustomScrollView extends StatelessWidget {
                 return MyListItem(index: index);
               },
             ),
+            // Set to true to keep the state of each item alive while scrolling.
+            // Change this to false to observe the loss of state in each item
+            // when it is scrolled out of view. Selected items will revert to
+            // their default state if this is false.
             addAutomaticKeepAlives: true, // Change this to false to see the impact
           ),
         ),
