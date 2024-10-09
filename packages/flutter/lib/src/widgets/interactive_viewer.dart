@@ -223,19 +223,19 @@ class InteractiveViewer extends StatefulWidget {
   ///     return InteractiveViewer.builder(
   ///       transformationController: controller,
   ///       transformChild: false,
-  ///       builder: (BuildContext context, Quad quad) {
+  ///       builder: (BuildContext context, Quad viewport) {
   ///         final Matrix4 matrix = controller.value;
   ///         return Stack(
   ///           clipBehavior: Clip.none,
   ///           children: nodes.map((Node node) {
-  ///                final Rect rect = MatrixUtils.transformRect(matrix, node.rect);
-  ///                return Positioned.fromRect(
-  ///                  rect: rect,
-  ///                  child: GestureDetector(
-  ///                    onTap: () => print('Node clicked'),
-  ///                    child: node.child,
-  ///                  ),
-  ///               );
+  ///             final Rect rect = MatrixUtils.transformRect(matrix, node.rect);
+  ///             return Positioned.fromRect(
+  ///               rect: rect,
+  ///               child: GestureDetector(
+  ///                 onTap: () => print('Node clicked'),
+  ///                 child: node.child,
+  ///               ),
+  ///             );
   ///           }).toList(),
   ///         );
   ///       },
@@ -244,7 +244,7 @@ class InteractiveViewer extends StatefulWidget {
   /// }
   /// ```
   ///
-  /// Now the child will never exceed the bounds of the parent and always stay static preserving hit tests.
+  /// Now the child will never exceed the bounds of the parent and always stay static, preserving hit tests.
   final bool transformChild;
 
   /// The alignment of the child's origin, relative to the size of the box.
