@@ -1137,12 +1137,13 @@ void main() {
     expect(menuMaterial, findsOneWidget);
   });
 
-  testWidgets('Down key can highlight the menu item on desktop platforms', (WidgetTester tester) async {
+  testWidgets('Down key can highlight the menu item while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           trailingIcon: const Icon(Icons.ac_unit),
           dropdownMenuEntries: menuChildren,
         ),
@@ -1177,14 +1178,15 @@ void main() {
     );
     item0material = tester.widget<Material>(button0Material);
     expect(item0material.color, Colors.transparent); // the previous item should not be highlighted.
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
-  testWidgets('Up key can highlight the menu item on desktop platforms', (WidgetTester tester) async {
+  testWidgets('Up key can highlight the menu item while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1219,16 +1221,57 @@ void main() {
 
     item5material = tester.widget<Material>(button5Material);
     expect(item5material.color, Colors.transparent); // the previous item should not be highlighted.
+  });
+
+  testWidgets('Left and right keys can move text field selection', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
+          enableFilter: true,
+          filterCallback: (List<DropdownMenuEntry<TestMenu>> entries, String filter) {
+            return entries.where((DropdownMenuEntry<TestMenu> element) => element.label.contains(filter)).toList();
+          },
+          dropdownMenuEntries: menuChildren,
+          controller: controller,
+        ),
+      ),
+    ));
+
+    // Open the menu.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextField).first, 'example');
+    await tester.pumpAndSettle();
+    expect(controller.text, 'example');
+    expect(controller.selection, const TextSelection.collapsed(offset: 7));
+
+    // Press left key, the caret should move left.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection.collapsed(offset: 6));
+
+    // Press Right key, the caret should move right.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection.collapsed(offset: 7));
   }, variant: TargetPlatformVariant.desktop());
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
-  testWidgets('Down key and up key can navigate on desktop platforms '
-      'when a label text contains another label text', (WidgetTester tester) async {
+  testWidgets('Down key and up key can navigate while focused when a label text '
+      'contains another label text', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: const Scaffold(
         body: DropdownMenu<int>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: <DropdownMenuEntry<int>>[
             DropdownMenuEntry<int>(
               value: 0,
@@ -1290,7 +1333,7 @@ void main() {
     item0Material = tester.widget<Material>(button0Material);
     expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
 
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/151878.
   testWidgets('Searching for non matching item does not crash',
@@ -1315,14 +1358,37 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/154532.
+  testWidgets('Keyboard navigation does not throw when no entries match the filter', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
+          enableFilter: true,
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).first, 'No match');
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).first, 'No match 2');
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/147253.
-  testWidgets('Default search prioritises the current highlight on desktop platforms',
+  testWidgets('Default search prioritises the current highlight',
       (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1352,16 +1418,17 @@ void main() {
     );
     item2material = tester.widget<Material>(button2Material);
     expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/152375.
-  testWidgets('Down key and up key can navigate on desktop platforms when a label text contains '
+  testWidgets('Down key and up key can navigate while focused when a label text contains '
       'another label text using customized search algorithm', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<int>(
+          requestFocusOnTap: true,
           searchCallback: (List<DropdownMenuEntry<int>> entries, String query) {
             if (query.isEmpty) {
               return null;
@@ -1432,15 +1499,16 @@ void main() {
     item0Material = tester.widget<Material>(button0Material);
     expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
 
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/152375.
-  testWidgets('Searching can hightlight entry after keyboard navigation', (WidgetTester tester) async {
+  testWidgets('Searching can hightlight entry after keyboard navigation while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1460,15 +1528,16 @@ void main() {
     );
     final Material itemMaterial = tester.widget<Material>(buttonMaterial);
     expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   testWidgets('The text input should match the label of the menu item '
-      'while pressing down key on desktop platforms', (WidgetTester tester) async {
+      'when pressing down key while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1491,15 +1560,16 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 2'), findsOneWidget);
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   testWidgets('The text input should match the label of the menu item '
-      'while pressing up key on desktop platforms', (WidgetTester tester) async {
+      'when pressing up key while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1522,9 +1592,9 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 3'), findsOneWidget);
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
-  testWidgets('Disabled button will be skipped while pressing up/down key on desktop platforms', (WidgetTester tester) async {
+  testWidgets('Disabled button will be skipped while pressing up/down key while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
@@ -1538,6 +1608,7 @@ void main() {
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuWithDisabledItems,
         ),
       ),
@@ -1566,7 +1637,7 @@ void main() {
     );
     final Material item3Material = tester.widget<Material>(button3Material);
     expect(item3Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   testWidgets('Searching is enabled by default on mobile platforms if initialSelection is non null', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
@@ -1615,12 +1686,13 @@ void main() {
     expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Highlight can move up/down starting from the searching result on desktop platforms', (WidgetTester tester) async {
+  testWidgets('Highlight can move up/down starting from the searching result while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1661,7 +1733,7 @@ void main() {
     );
     final Material item5Material = tester.widget<Material>(button5Material);
     expect(item5Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   testWidgets('Filtering is disabled by default', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
@@ -1973,6 +2045,135 @@ void main() {
     final Material itemMaterial = tester.widget<Material>(buttonMaterial);
     expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12));
   });
+
+  testWidgets(
+    'When the initial selection matches a menu entry, the text field displays the corresponding value',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                initialSelection: TestMenu.mainMenu3,
+                dropdownMenuEntries: menuChildren,
+                controller: controller,
+              ),
+            );
+          }
+        ),
+      ));
+
+      expect(controller.text, TestMenu.mainMenu3.label);
+    },
+  );
+
+  testWidgets(
+    'Text field is empty when the initial selection does not match any menu entries',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                initialSelection: TestMenu.mainMenu3,
+                // Use a menu entries which does not contain TestMenu.mainMenu3.
+                dropdownMenuEntries: menuChildren.getRange(0, 1).toList(),
+                controller: controller,
+              ),
+            );
+          }
+        ),
+      ));
+
+      expect(controller.text, isEmpty);
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/155660.
+  testWidgets('Updating the menu entries refreshes the initial selection', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    Widget boilerplate(List<DropdownMenuEntry<TestMenu>> entries) {
+      return MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                initialSelection: TestMenu.mainMenu3,
+                dropdownMenuEntries: entries,
+                controller: controller,
+              ),
+            );
+          }
+        ),
+      );
+    }
+
+    // The text field should be empty when the initial selection does not match
+    // any menu items.
+    await tester.pumpWidget(boilerplate(menuChildren.getRange(0, 1).toList()));
+    expect(controller.text, '');
+
+    // When the menu entries is updated the initial selection should be rematched.
+    await tester.pumpWidget(boilerplate(menuChildren));
+    expect(controller.text, TestMenu.mainMenu3.label);
+
+    // Update the entries with none matching the initial selection.
+    await tester.pumpWidget(boilerplate(menuChildren.getRange(0, 1).toList()));
+    expect(controller.text, '');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/155660.
+  testWidgets(
+    'Updating the menu entries refreshes the initial selection only if the current selection is no more valid',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      Widget boilerplate(List<DropdownMenuEntry<TestMenu>> entries) {
+        return MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                body: DropdownMenu<TestMenu>(
+                  initialSelection: TestMenu.mainMenu3,
+                  dropdownMenuEntries: entries,
+                  controller: controller,
+                ),
+              );
+            }
+          ),
+        );
+      }
+
+      await tester.pumpWidget(boilerplate(menuChildren));
+      expect(controller.text, TestMenu.mainMenu3.label);
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      // Select another item.
+      final Finder item2 = find.widgetWithText(MenuItemButton, 'Item 2').last;
+      await tester.tap(item2);
+      await tester.pumpAndSettle();
+      expect(controller.text, TestMenu.mainMenu2.label);
+
+      // Update the menu entries with another instance of list containing the
+      // same entries.
+      await tester.pumpWidget(boilerplate(
+        List<DropdownMenuEntry<TestMenu>>.from(menuChildren)
+      ));
+      expect(controller.text, TestMenu.mainMenu2.label);
+    },
+  );
 
   testWidgets('The default text input field should not be focused on mobile platforms '
       'when it is tapped', (WidgetTester tester) async {
@@ -3224,6 +3425,43 @@ void main() {
       tester.getRect(findMenuPanels()).top,
       tester.getRect(find.byType(TextField).first).bottom,
     );
+  });
+
+  testWidgets('DropdownMenu with expandedInsets can be aligned', (WidgetTester tester) async {
+    Widget buildMenuAnchor({ AlignmentGeometry alignment = Alignment.topCenter }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Row(
+            children: <Widget>[
+              Expanded(
+                child: Align(
+                  alignment: alignment,
+                  child: DropdownMenu<TestMenu>(
+                    expandedInsets: const EdgeInsets.all(16),
+                    dropdownMenuEntries: menuChildren,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildMenuAnchor());
+
+    Offset textFieldPosition = tester.getTopLeft(find.byType(TextField));
+    expect(textFieldPosition, equals(const Offset(16.0, 0.0)));
+
+    await tester.pumpWidget(buildMenuAnchor(alignment: Alignment.center));
+
+    textFieldPosition = tester.getTopLeft(find.byType(TextField));
+    expect(textFieldPosition, equals(const Offset(16.0, 272.0)));
+
+    await tester.pumpWidget(buildMenuAnchor(alignment: Alignment.bottomCenter));
+
+    textFieldPosition = tester.getTopLeft(find.byType(TextField));
+    expect(textFieldPosition, equals(const Offset(16.0, 544.0)));
   });
 }
 

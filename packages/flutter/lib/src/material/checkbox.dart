@@ -115,7 +115,7 @@ class Checkbox extends StatefulWidget {
   /// design [Checkbox].
   ///
   /// If a [CupertinoCheckbox] is created, the following parameters are ignored:
-  /// [mouseCursor], [fillColor], [hoverColor], [overlayColor], [splashRadius],
+  /// [fillColor], [hoverColor], [overlayColor], [splashRadius],
   /// [materialTapTargetSize], [visualDensity], [isError]. However, [shape] and
   /// [side] will still affect the [CupertinoCheckbox] and should be handled if
   /// native fidelity is important.
@@ -184,11 +184,10 @@ class Checkbox extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   /// {@endtemplate}
@@ -202,8 +201,8 @@ class Checkbox extends StatefulWidget {
   /// See also:
   ///
   ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
-  ///    `WidgetStateProperty` which is used in APIs that need to accept
-  ///    either a [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
+  ///    [WidgetStateProperty] which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [WidgetStateProperty].
   final MouseCursor? mouseCursor;
 
   /// The color to use when this checkbox is checked.
@@ -496,6 +495,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
               value: value,
               tristate: tristate,
               onChanged: onChanged,
+              mouseCursor: widget.mouseCursor,
               activeColor: widget.activeColor,
               checkColor: widget.checkColor,
               focusColor: widget.focusColor,
