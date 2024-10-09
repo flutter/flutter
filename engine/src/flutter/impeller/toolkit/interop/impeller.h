@@ -552,6 +552,14 @@ ImpellerColorSourceCreateSweepGradientNew(
     ImpellerTileMode tile_mode,
     const ImpellerMatrix* IMPELLER_NULLABLE transformation);
 
+IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerColorSource IMPELLER_NULLABLE
+ImpellerColorSourceCreateImageNew(
+    ImpellerTexture IMPELLER_NONNULL image,
+    ImpellerTileMode horizontal_tile_mode,
+    ImpellerTileMode vertical_tile_mode,
+    ImpellerTextureSampling sampling,
+    const ImpellerMatrix* IMPELLER_NULLABLE transformation);
+
 //------------------------------------------------------------------------------
 // Color Filters
 //------------------------------------------------------------------------------
