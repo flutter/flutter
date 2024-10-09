@@ -7,6 +7,7 @@
                     "type": "gcs",
                     "include_paths": [
                         "out/ci/host_debug/zip_archives/windows-x64/artifacts.zip",
+                        "out/ci/host_debug/zip_archives/windows-x64/impeller_sdk.zip",
                         "out/ci/host_debug/zip_archives/windows-x64/windows-x64-embedder.zip",
                         "out/ci/host_debug/zip_archives/windows-x64/font-subset.zip",
                         "out/ci/host_debug/zip_archives/dart-sdk-windows-x64.zip",
@@ -46,7 +47,8 @@
                     "flutter/tools/font_subset",
                     "flutter/build/archives:dart_sdk_archive",
                     "flutter/shell/platform/windows/client_wrapper:client_wrapper_archive",
-                    "flutter/build/archives:windows_flutter"
+                    "flutter/build/archives:windows_flutter",
+                    "flutter/impeller/toolkit/interop:sdk"
                 ]
             },
             "tests": [
