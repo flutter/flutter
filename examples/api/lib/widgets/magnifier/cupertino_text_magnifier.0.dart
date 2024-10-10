@@ -30,8 +30,7 @@ class CupertinoTextMagnifierExampleApp extends StatefulWidget {
       _CupertinoTextMagnifierExampleAppState();
 }
 
-class _CupertinoTextMagnifierExampleAppState
-    extends State<CupertinoTextMagnifierExampleApp> {
+class _CupertinoTextMagnifierExampleAppState extends State<CupertinoTextMagnifierExampleApp> {
   final MagnifierController _controller = MagnifierController();
   @override
   Widget build(BuildContext context) {
