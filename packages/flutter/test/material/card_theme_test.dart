@@ -205,9 +205,9 @@ void main() {
       home: Scaffold(
         body: RepaintBoundary(
           key: painterKey,
-          child: Center(
+          child: const Center(
             child: Card(
-              child: SizedBox.fromSize(size: const Size(200, 300)),
+              child: SizedBox.fromSize(size: Size(200, 300)),
             ),
           ),
         ),
@@ -389,9 +389,9 @@ void main() {
         home: Scaffold(
           body: RepaintBoundary(
             key: painterKey,
-            child: Center(
+            child: const Center(
               child: Card(
-                child: SizedBox.fromSize(size: const Size(200, 300)),
+                child: SizedBox.fromSize(size: Size(200, 300)),
               ),
             ),
           ),

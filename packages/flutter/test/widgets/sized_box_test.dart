@@ -20,11 +20,11 @@ void main() {
     expect(c.width, 10.0);
     expect(c.height, 20.0);
 
-    final SizedBox d = SizedBox.fromSize();
+    const SizedBox d = SizedBox.fromSize();
     expect(d.width, isNull);
     expect(d.height, isNull);
 
-    final SizedBox e = SizedBox.fromSize(size: const Size(1.0, 2.0));
+    const SizedBox e = SizedBox.fromSize(size: Size(1.0, 2.0));
     expect(e.width, 1.0);
     expect(e.height, 2.0);
 

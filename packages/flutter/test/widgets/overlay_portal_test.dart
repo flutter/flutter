@@ -423,7 +423,7 @@ void main() {
                 return OverlayPortal(
                   controller: controller1,
                   overlayChildBuilder: (BuildContext context) => const SizedBox(),
-                  child: SizedBox.fromSize(size: size),
+                  child: const SizedBox.fromSize(size: size),
                 );
               },
             ),

@@ -473,7 +473,7 @@ void main() {
   testWidgets('RenderView sizes itself to child if constraints allow it (unconstrained)', (WidgetTester tester) async {
     const Size size = Size(300, 600);
     tester.view.physicalConstraints = const ViewConstraints(); // unconstrained
-    await tester.pumpWidget(SizedBox.fromSize(size: size));
+    await tester.pumpWidget(const SizedBox.fromSize(size: size));
 
     final RenderView renderView = tester.renderObject<RenderView>(find.byType(View));
     expect(renderView.constraints, const BoxConstraints());
@@ -490,7 +490,7 @@ void main() {
     const ViewConstraints viewConstraints = ViewConstraints(maxWidth: 333, maxHeight: 666);
     final BoxConstraints boxConstraints = BoxConstraints.fromViewConstraints(viewConstraints / tester.view.devicePixelRatio);
     tester.view.physicalConstraints = viewConstraints;
-    await tester.pumpWidget(SizedBox.fromSize(size: size));
+    await tester.pumpWidget(const SizedBox.fromSize(size: size));
 
     final RenderView renderView = tester.renderObject<RenderView>(find.byType(View));
     expect(renderView.constraints, boxConstraints);
@@ -506,7 +506,7 @@ void main() {
     const Size size = Size(3000, 6000);
     const ViewConstraints viewConstraints = ViewConstraints(maxWidth: 300, maxHeight: 600);
     tester.view.physicalConstraints = viewConstraints;
-    await tester.pumpWidget(SizedBox.fromSize(size: size));
+    await tester.pumpWidget(const SizedBox.fromSize(size: size));
 
     final RenderView renderView = tester.renderObject<RenderView>(find.byType(View));
     expect(renderView.size, const Size(100, 200)); // viewConstraints.biggest / devicePixelRatio
