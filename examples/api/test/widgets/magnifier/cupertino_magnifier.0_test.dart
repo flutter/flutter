@@ -30,8 +30,7 @@ void main() {
     );
   });
 
-  testWidgets('should update CupertinoMagnifier position on drag',
-      (WidgetTester tester) async {
+  testWidgets('should update CupertinoMagnifier position on drag', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CupertinoMagnifierApp());
 
     Matcher isPositionedAt(Offset at) {
