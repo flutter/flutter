@@ -16,7 +16,7 @@ void main() {
       expect(find.text('Item 1'), findsOne);
       expect(find.text('Item 2'), findsOne);
 
-      // Add an item at the end of the list
+      // Add an item at the end of the list.
       await tester.tap(find.byIcon(Icons.add_circle));
       await tester.pumpAndSettle();
       expect(find.text('Item 3'), findsOne);
@@ -25,7 +25,7 @@ void main() {
       await tester.tap(find.text('Item 1'));
       await tester.pumpAndSettle();
 
-      // Add item at the top of the list
+      // Add item at the top of the list.
       await tester.tap(find.byIcon(Icons.add_circle));
       await tester.pumpAndSettle();
       expect(find.text('Item 4'), findsOne);
