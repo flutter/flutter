@@ -43,6 +43,14 @@ void main() {
       contains(AutofillHints.streetAddressLine1),
     );
 
+    final TextField shippingAddress2 = tester.widget(
+      find.byType(TextField).at(1),
+    );
+    expect(
+      shippingAddress2.autofillHints,
+      contains(AutofillHints.streetAddressLine2),
+    );
+
     final TextField billingAddress1 = tester.widget(
       find.byType(TextField).at(2),
     );
