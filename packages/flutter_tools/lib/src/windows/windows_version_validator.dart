@@ -135,6 +135,6 @@ class ProcessLister {
     if (processManager.canRun(pwsh)) {
       return processManager.run(<String>[pwsh, ...psArgs]);
     }
-    throw StateError('Failed to find $powershell or $pwsh on PATH!');
+    throw StateError('Failed to find $powershell or $pwsh on PATH');
   }
 }
