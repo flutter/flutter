@@ -27,7 +27,7 @@ void main() {
 
     expect(
       find.byType(AutofillGroup),
-      findsNWidgets(3), // 3 AutofilGroup widgets created
+      findsNWidgets(3), // 3 AutofillGroup widgets created
     );
 
     expect(
