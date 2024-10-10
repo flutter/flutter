@@ -238,7 +238,7 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     } on ProcessPackageExecutableNotFoundException {
       // Expected
     // ignore: avoid_catches_without_on_clauses
-    } catch(e) {
+    } catch (e) {
       fail('Unexpected exception: $e');
     }
   });
