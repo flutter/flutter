@@ -523,9 +523,6 @@ class FlutterPlugin implements Plugin<Project> {
                                 output.processResourcesProvider.get() : output.processResources
                         try{
                         def manifest = new XmlParser().parse(processResources.manifestFile)
-                        }catch(Exception e) {
-        println "An error occurred: ${e.message}"
-    }
                         manifest.application.activity.each { activity ->
                             activity."meta-data".each { metadata ->
                                 boolean nameAttribute = metadata.attributes().find { it.key == 'android:name' }?.value == 'flutter_deeplinking_enabled'
@@ -596,6 +593,9 @@ class FlutterPlugin implements Plugin<Project> {
                                 }
                             }
                         }
+                                               }catch(Exception e) {
+        println "An error occurred: ${e.message}"
+    }
                     }
                     JsonGenerator generator = new JsonGenerator.Options().build()
                     new File(project.getProperty("outputPath")).write(generator.toJson(appLinkSettings))
