@@ -881,8 +881,7 @@ $javaGradleCompatUrl
     return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ${appManifestFile.absolute.path}');
   }
 
-  // TODO(matanlurey): Flip to true when on by default, https://github.com/flutter/flutter/issues/132712.
-  static const bool _impellerEnabledByDefault = false;
+  static const bool _impellerEnabledByDefault = true;
 
   /// Returns the `io.flutter.embedding.android.EnableImpeller` manifest value.
   ///
