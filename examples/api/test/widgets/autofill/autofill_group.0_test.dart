@@ -8,8 +8,7 @@ import 'package:flutter_api_samples/widgets/autofill/autofill_group.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AutofillGroupExample renders and updates correctly',
-      (WidgetTester tester) async {
+  testWidgets('AutofillGroupExample renders and updates correctly', (WidgetTester tester) async {
     await tester.pumpWidget(const example.AutofillGroupExampleApp());
 
     expect(find.text('Shipping address'), findsOneWidget);
