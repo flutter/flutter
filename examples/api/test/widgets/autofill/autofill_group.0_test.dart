@@ -24,8 +24,10 @@ void main() {
     await tester.tap(find.byType(Checkbox));
     await tester.pump();
 
-    expect(find.byType(TextField),
-        findsNWidgets(7)); // 5 initial + 2 billing address fields
+    expect(
+      find.byType(TextField),
+      findsNWidgets(7), // 5 initial + 2 billing address fields
+    );  
 
     final TextField shippingAddress1 = tester.widget(
       find.byType(TextField).at(0),
