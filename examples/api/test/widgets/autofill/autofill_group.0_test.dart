@@ -59,7 +59,7 @@ void main() {
       contains(AutofillHints.streetAddressLine2),
     );
 
-    // Credit card information fields
+    // Credit card information fields.
     final TextField creditCardNumber = tester.widget(
       find.byType(TextField).at(4),
     );
