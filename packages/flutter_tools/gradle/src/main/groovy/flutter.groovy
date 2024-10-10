@@ -521,6 +521,7 @@ class FlutterPlugin implements Plugin<Project> {
                         Object processResources = output.hasProperty(propProcessResourcesProvider) ?
                                 output.processResourcesProvider.get() : output.processResources
                         System.out.println("it does work")
+                        def manifestFile = processResources.manifestFile
                         def xmlParser = new groovy.xml.XmlParser()
                         def manifest = xmlParser.parse(manifestFile)
                         if (manifestFile.exists()) {
