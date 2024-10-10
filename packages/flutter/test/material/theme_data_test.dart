@@ -737,8 +737,8 @@ void main() {
         0.5,
       );
 
-      expect(lerped.extension<MyThemeExtensionA>()!.color1, const Color(0xff7f7f7f));
-      expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, isSameColorAs(const Color(0xff7f7f7f)));
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, isSameColorAs(const Color(0xff90ab7d)));
       expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 75));
 
       // Missing from 2nd ThemeData
@@ -756,8 +756,8 @@ void main() {
         ),
         0.5,
       );
-      expect(lerped.extension<MyThemeExtensionA>()!.color1, Colors.black); // Not lerped
-      expect(lerped.extension<MyThemeExtensionA>()!.color2, Colors.amber); // Not lerped
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, isSameColorAs(Colors.black)); // Not lerped
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, isSameColorAs(Colors.amber)); // Not lerped
       expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 75));
 
       // Missing from 1st ThemeData
@@ -775,8 +775,8 @@ void main() {
         ),
         0.5,
       );
-      expect(lerped.extension<MyThemeExtensionA>()!.color1, const Color(0xff7f7f7f));
-      expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, isSameColorAs(const Color(0xff7f7f7f)));
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, isSameColorAs(const Color(0xff90ab7d)));
       expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 100)); // Not lerped
     });
 
@@ -888,12 +888,12 @@ void main() {
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
       buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
-      cardTheme: const CardTheme(color: Colors.black),
+      cardTheme: const CardThemeData(color: Colors.black),
       checkboxTheme: const CheckboxThemeData(),
       chipTheme: chipTheme,
       dataTableTheme: const DataTableThemeData(),
       datePickerTheme: const DatePickerThemeData(),
-      dialogTheme: const DialogTheme(backgroundColor: Colors.black),
+      dialogTheme: const DialogThemeData(backgroundColor: Colors.black),
       dividerTheme: const DividerThemeData(color: Colors.black),
       drawerTheme: const DrawerThemeData(),
       dropdownMenuTheme: const DropdownMenuThemeData(),
@@ -919,7 +919,7 @@ void main() {
       sliderTheme: sliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
       switchTheme: const SwitchThemeData(),
-      tabBarTheme: const TabBarTheme(labelColor: Colors.black),
+      tabBarTheme: const TabBarThemeData(labelColor: Colors.black),
       textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: Colors.red)),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
@@ -1002,12 +1002,12 @@ void main() {
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.white),
       buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.end),
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.light()),
-      cardTheme: const CardTheme(color: Colors.white),
+      cardTheme: const CardThemeData(color: Colors.white),
       checkboxTheme: const CheckboxThemeData(),
       chipTheme: otherChipTheme,
       dataTableTheme: const DataTableThemeData(),
       datePickerTheme: const DatePickerThemeData(backgroundColor: Colors.amber),
-      dialogTheme: const DialogTheme(backgroundColor: Colors.white),
+      dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
       dividerTheme: const DividerThemeData(color: Colors.white),
       drawerTheme: const DrawerThemeData(),
       dropdownMenuTheme: const DropdownMenuThemeData(),
@@ -1033,7 +1033,7 @@ void main() {
       sliderTheme: otherSliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.white),
       switchTheme: const SwitchThemeData(),
-      tabBarTheme: const TabBarTheme(labelColor: Colors.white),
+      tabBarTheme: const TabBarThemeData(labelColor: Colors.white),
       textButtonTheme: const TextButtonThemeData(),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),

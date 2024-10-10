@@ -271,13 +271,13 @@ void main() {
             'build',
             buildSubcommand,
             if (buildSubcommand == 'ios') '--no-codesign',
-            if (buildSubcommand == 'windows') '-v' // Requires verbose mode for error.
+            '-v', // Requires verbose mode for error.
           ],
           workingDirectory: exampleDirectory.path,
         );
         expect(
           (result.stdout as String) + (result.stderr as String),
-          contains('link mode set to static, but this is not yet supported'),
+          contains('has a link mode "static", which is not allowed by by the config link mode preference "dynamic"'),
         );
         expect(result.exitCode, isNot(0));
       });

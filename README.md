@@ -66,7 +66,7 @@ support for customizing or creating entirely new visual components.
 ### Fast results
 
 Flutter is fast. It's powered by hardware-accelerated 2D graphics
-libraries like [Skia] (that underpins Chrome and Android) and
+libraries like [Skia] (which underpins Chrome and Android) and
 [Impeller]. We architected Flutter to
 support glitch-free, jank-free graphics at the native speed of your device.
 

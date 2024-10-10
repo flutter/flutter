@@ -21,7 +21,7 @@ Any change that needs to be published in order to take effect must update the ve
 
 This is because the packages in flutter/packages use a continuous release model rather than a set release cadence. This model gets improvements to the community faster, makes regressions easier to pinpoint, and simplifies the release process.
 
-(The `override: no versioning needed` label can be added to skip this check, but only if the criteria above are met, or team members agree there is a compelling reason for a new exemption. Team members: please leave a comment when adding the `override` label explaining the reason for the override.)
+(The `override: no versioning needed` label can be added to skip this check if it fails, but only if the criteria above are met, or team members agree there is a compelling reason for a new exemption. Team members: please leave a comment when adding the `override` label explaining the reason for the override.)
 
 ### CHANGELOG
 
@@ -137,7 +137,7 @@ The goal is to have any plugin feature work on every platform on which that feat
 
 Given that, we welcome PRs that only implement a feature for a subset of platforms, including just one. To set expectations for how such PRs will be handled:
 - They will not be fully reviewed until there's an understanding of what support would look like across other platforms, for several reasons:
-  - API for features that will be permanently platform-specific may structured in ways that make that limitation more clear, so knowing if other platforms can support it will affect the review process.
+  - API for features that will be permanently platform-specific might be structured in ways that make that limitation more clear, so knowing if other platforms can support it will affect the review process.
   - We want to avoid over-fitting the plugin APIs to a single platform's API. It is often the case that several platforms can implement a feature, but the behavior is different enough across platforms that we need to design the API in a way that covers those variations in a cohesive way. This means that knowing at a high level what the implementation on other platform also affects the review process.
   - Features that are missing implementations on some platforms need to be clearly documented as such in the API, and those comments should clearly express whether those platform are temporarily missing implementations, or are not expected to ever have implementations due to platform limitations.
 
@@ -163,7 +163,7 @@ if (somePluginInstance.supportsDoingThing) {
 
 rather than hard-coding a platform check. (See [`image_picker`'s `supportsImageSource`](https://github.com/flutter/packages/blob/9323e33ed9d8345d87514711dcaeb4cf4159ad1c/packages/image_picker/image_picker/lib/image_picker.dart#L309-L315) for an example.) This is for several reasons:
 - It is federation-friendly: a new implementation of the plugin (including the addition of 1P support for a previously-unsupported platform) will automatically be covered.
-- It allow seamless adoption of new functionality: if we add previously-missing support to an existing implementation, clients will automatically benefit without any code changes on their part.
+- It allows seamless adoption of new functionality: if we add previously-missing support to an existing implementation, clients will automatically benefit without any code changes on their part.
 - It makes our own documentation more evergreen: we've frequently had app-facing APIs that had a comment saying that an API is only available on platform X, and then forgotten to update it when adding support for platform Y.
 
 These APIs can take a variety of forms, including specific methods to check individual methods or parameters, a single method with an enum of API options, etc. Discuss with your reviewer what pattern is best suited to the specific case, and aim for consistency within a plugin when possible.
@@ -197,7 +197,7 @@ Most of the plugins in flutter/packages are [federated](https://flutter.dev/docs
 
 We are investigating ways to streamline this, but currently the process for a multi-package PR is:
 
-1. Create a PR that has all the changes, and update the pubspec.yamls to have path-based dependency overrides. This can be done with the [plugin repo tool](https://github.com/flutter/packages/blob/main/script/tool/README.md)'s `make-deps-path-based` command, targeting any dependency packages changed in the PR. For instance, for an Android-specific change to `video_player` that required platform interface changes as well:
+1. Create a PR that has all the changes, and update the pubspec.yaml files to have path-based dependency overrides. This can be done with the [plugin repo tool](https://github.com/flutter/packages/blob/main/script/tool/README.md)'s `make-deps-path-based` command, targeting any dependency packages changed in the PR. For instance, for an Android-specific change to `video_player` that required platform interface changes as well:
     ```
     $ dart run script/tool/bin/flutter_plugin_tools.dart make-deps-path-based --target-dependencies=video_player_platform_interface,video_player_android
     ```
@@ -238,7 +238,7 @@ This makes it easy for someone looking back at the change to find the reason for
 
 ### Changing platform interface method parameters
 
-Because platform implementations are subclasses of the platform interface and override its methods, almost *any* change to the parameters of a method is a breaking change. In particular, adding an optional parameter to a platform interface method *is* a breaking change even though it doesn't break callers of the the method.
+Because platform implementations are subclasses of the platform interface and override its methods, almost *any* change to the parameters of a method is a breaking change. In particular, adding an optional parameter to a platform interface method *is* a breaking change even though it doesn't break callers of the method.
 
 The least disruptive way to make a parameter change is:
 

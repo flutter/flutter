@@ -277,7 +277,7 @@ void main() {
         bool enableServicePortFallback = false,
         List<String> cachedUserTags = const <String>[],
         String? dartExecutable,
-        Uri? google3WorkspaceRoot,
+        String? google3WorkspaceRoot,
       }) async {
         return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
       };

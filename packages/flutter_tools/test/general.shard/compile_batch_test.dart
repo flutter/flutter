@@ -64,7 +64,7 @@ void main() {
           '--enable-asserts',
           '--no-link-platform',
           '--packages',
-          '.packages',
+          '.dart_tool/package_config.json',
           '--verbosity=error',
           'file:///path/to/main.dart',
         ], completer: completer),
@@ -77,7 +77,7 @@ void main() {
       trackWidgetCreation: false,
       dartDefines: const <String>[],
       packageConfig: PackageConfig.empty,
-      packagesPath: '.packages',
+      packagesPath: '.dart_tool/package_config.json',
     );
     stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
     completer.complete();
@@ -109,7 +109,7 @@ void main() {
           '--enable-asserts',
           '--no-link-platform',
           '--packages',
-          '.packages',
+          '.dart_tool/package_config.json',
           '--verbosity=error',
           'file:///path/to/main.dart',
         ], completer: completer),
@@ -122,7 +122,7 @@ void main() {
       trackWidgetCreation: false,
       dartDefines: const <String>[],
       packageConfig: PackageConfig.empty,
-      packagesPath: '.packages',
+      packagesPath: '.dart_tool/package_config.json',
     );
     stdoutHandler.compilerOutput?.complete();
     completer.complete();
@@ -154,7 +154,7 @@ void main() {
           '--enable-asserts',
           '--no-link-platform',
           '--packages',
-          '.packages',
+          '.dart_tool/package_config.json',
           '--verbosity=error',
           'file:///path/to/main.dart',
         ], completer: completer, exitCode: 127),
@@ -167,7 +167,7 @@ void main() {
       trackWidgetCreation: false,
       dartDefines: const <String>[],
       packageConfig: PackageConfig.empty,
-      packagesPath: '.packages',
+      packagesPath: '.dart_tool/package_config.json',
     );
     stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
     completer.complete();
@@ -202,7 +202,7 @@ void main() {
           '--aot',
           '--tfa',
           '--packages',
-          '.packages',
+          '.dart_tool/package_config.json',
           '--verbosity=error',
           'file:///path/to/main.dart',
         ], completer: completer),
@@ -216,7 +216,7 @@ void main() {
       aot: true,
       dartDefines: const <String>[],
       packageConfig: PackageConfig.empty,
-      packagesPath: '.packages',
+      packagesPath: '.dart_tool/package_config.json',
     );
     stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
     completer.complete();
@@ -251,7 +251,7 @@ void main() {
           '--aot',
           '--tfa',
           '--packages',
-          '.packages',
+          '.dart_tool/package_config.json',
           '--verbosity=error',
           'file:///path/to/main.dart',
         ], completer: completer),
@@ -265,7 +265,7 @@ void main() {
       aot: true,
       dartDefines: const <String>[],
       packageConfig: PackageConfig.empty,
-      packagesPath: '.packages',
+      packagesPath: '.dart_tool/package_config.json',
     );
     stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
     completer.complete();
@@ -299,7 +299,7 @@ void main() {
           '--enable-asserts',
           '--no-link-platform',
           '--packages',
-          '.packages',
+          '.dart_tool/package_config.json',
           '--verbosity=error',
           'file:///path/to/main.dart',
         ], completer: completer),
@@ -313,7 +313,7 @@ void main() {
       trackWidgetCreation: false,
       dartDefines: const <String>['FOO=bar', 'BAZ=qux'],
       packageConfig: PackageConfig.empty,
-      packagesPath: '.packages',
+      packagesPath: '.dart_tool/package_config.json',
     );
 
     stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
@@ -348,7 +348,7 @@ void main() {
           '--enable-asserts',
           '--no-link-platform',
           '--packages',
-          '.packages',
+          '.dart_tool/package_config.json',
           '--verbosity=error',
           'scheme:///main.dart',
         ], completer: completer),
@@ -362,7 +362,7 @@ void main() {
       trackWidgetCreation: false,
       dartDefines: const <String>[],
       packageConfig: PackageConfig.empty,
-      packagesPath: '.packages',
+      packagesPath: '.dart_tool/package_config.json',
     );
 
     stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
@@ -397,7 +397,7 @@ void main() {
           '--enable-asserts',
           '--no-link-platform',
           '--packages',
-          '.packages',
+          '.dart_tool/package_config.json',
           '--source',
           '.dart_tools/flutter_build/dart_plugin_registrant.dart',
           '--source',
@@ -422,7 +422,7 @@ void main() {
       trackWidgetCreation: false,
       dartDefines: const <String>[],
       packageConfig: PackageConfig.empty,
-      packagesPath: '.packages',
+      packagesPath: '.dart_tool/package_config.json',
       buildDir: buildDir,
       checkDartPluginRegistry: true,
     );
@@ -456,7 +456,7 @@ void main() {
           '--enable-asserts',
           '--no-link-platform',
           '--packages',
-          '.packages',
+          '.dart_tool/package_config.json',
           '--native-assets',
           'path/to/native_assets.yaml',
           '--verbosity=error',
@@ -472,7 +472,7 @@ void main() {
       trackWidgetCreation: false,
       dartDefines: const <String>[],
       packageConfig: PackageConfig.empty,
-      packagesPath: '.packages',
+      packagesPath: '.dart_tool/package_config.json',
       nativeAssets: 'path/to/native_assets.yaml',
     );
     stdoutHandler.compilerOutput

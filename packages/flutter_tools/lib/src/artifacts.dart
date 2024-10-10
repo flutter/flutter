@@ -648,8 +648,17 @@ class CachedArtifacts implements Artifacts {
     switch (artifact) {
       case Artifact.genSnapshot:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
-        final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
-        return _fileSystem.path.join(engineDir, hostPlatform, _artifactToFileName(artifact, _platform));
+
+        // TODO(cbracken): Build Android gen_snapshot as Arm64 binary to run
+        // natively on Apple Silicon. See:
+        // https://github.com/flutter/flutter/issues/152281
+        HostPlatform hostPlatform = getCurrentHostPlatform();
+        if (hostPlatform == HostPlatform.darwin_arm64) {
+          hostPlatform = HostPlatform.darwin_x64;
+        }
+
+        final String hostPlatformName = getNameForHostPlatform(hostPlatform);
+        return _fileSystem.path.join(engineDir, hostPlatformName, _artifactToFileName(artifact, _platform));
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:

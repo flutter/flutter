@@ -953,7 +953,7 @@ void main() {
         '--no-minify',
         '--no-source-maps',
         '-O4',
-        '--dump-info',
+        '--stage=dump-info-all',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
         environment.buildDir.childFile('app.dill').absolute.path,

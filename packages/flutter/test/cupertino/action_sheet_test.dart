@@ -1035,7 +1035,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Find the location right within the upper edge of button 1.
-    final Offset start = tester.getTopLeft(find.text('Button 1')) + const Offset(30, -15);
+    final Offset start = tester.getTopLeft(
+      find.widgetWithText(CupertinoActionSheetAction, 'Button 1'),
+    ) + const Offset(30, 5);
     // Verify that the start location is within button 1.
     await tester.tapAt(start);
     expect(pressed, 1);

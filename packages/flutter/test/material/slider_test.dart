@@ -3136,9 +3136,9 @@ void main() {
       'max: 100.0',
       'divisions: 10',
       'label: "Set a value"',
-      'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
-      'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
-      'secondaryActiveColor: MaterialColor(primary value: Color(0xff607d8b))',
+      'activeColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'inactiveColor: MaterialColor(primary value: ${const Color(0xff9e9e9e)})',
+      'secondaryActiveColor: MaterialColor(primary value: ${const Color(0xff607d8b)})',
     ]);
   });
 

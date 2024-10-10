@@ -127,7 +127,10 @@ void main() {
       .._devFS = webDevFS
       ..device = mockDevice
       ..generator = residentCompiler;
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: test_fakes.FakeFlutterVersion(),
@@ -1755,7 +1758,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Future<void> stopEchoingDeviceLog() async {}
 
   @override
-  Future<void> initLogReader() async {}
+  Future<void> tryInitLogReader() async {}
 
   @override
   Future<Uri?> setupDevFS(String fsName, Directory rootDirectory) async {

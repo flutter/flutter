@@ -1863,7 +1863,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         ..flutterPluginsDependenciesFile = dependenciesFile
         ..windows = windowsProject;
 
-      flutterProject.directory.childFile('.packages').createSync(recursive: true);
+      flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
 
       const String dependenciesFileContents = r'''
 {
@@ -1993,7 +1993,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           flutterProject.directory.childFile('.flutter-plugins-dependencies')
       ..windows = windowsProject;
 
-    flutterProject.directory.childFile('.packages').createSync(recursive: true);
+    flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
 
     createPluginSymlinks(
       flutterProject,

@@ -297,7 +297,10 @@ void main() {
   testWithoutContext('CustomDevice.isSupportedForProject is true with editable host app', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
 
     final FlutterProject flutterProject = _setUpFlutterProject(fileSystem.currentDirectory);
 
