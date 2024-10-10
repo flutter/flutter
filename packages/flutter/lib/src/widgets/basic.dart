@@ -2412,9 +2412,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
       height = 0.0;
 
   /// Creates a box with the specified size.
-  SizedBox.fromSize({ super.key, super.child, Size? size })
-    : width = size?.width,
-      height = size?.height;
+  const factory SizedBox.fromSize({Key? key, Size? size, Widget? child}) = _SizedBoxFromSize;
 
   /// Creates a box whose [width] and [height] are equal.
   const SizedBox.square({super.key, super.child, double? dimension})
@@ -2447,8 +2445,8 @@ class SizedBox extends SingleChildRenderObjectWidget {
   String toStringShort() {
     final String type = switch ((width, height)) {
       (double.infinity, double.infinity) => '${objectRuntimeType(this, 'SizedBox')}.expand',
-      (0.0, 0.0) => '${objectRuntimeType(this, 'SizedBox')}.shrink',
-      _ => objectRuntimeType(this, 'SizedBox'),
+      (0.0, 0.0)                         => '${objectRuntimeType(this, 'SizedBox')}.shrink',
+      _                                  => objectRuntimeType(this, 'SizedBox'),
     };
     return key == null ? type : '$type-$key';
   }
@@ -2465,6 +2463,46 @@ class SizedBox extends SingleChildRenderObjectWidget {
     }
     properties.add(DoubleProperty('width', width, defaultValue: null, level: level));
     properties.add(DoubleProperty('height', height, defaultValue: null, level: level));
+  }
+}
+
+class _SizedBoxFromSize extends SingleChildRenderObjectWidget implements SizedBox {
+  const _SizedBoxFromSize({super.key, this.size, super.child});
+
+  final Size? size;
+
+  @override
+  double? get width => size?.width;
+
+  @override
+  double? get height => size?.height;
+
+  @override
+  BoxConstraints get _additionalConstraints => switch (size) {
+    final Size size => BoxConstraints.tight(size),
+    null            => const BoxConstraints(),
+  };
+
+  @override
+  RenderConstrainedBox createRenderObject(BuildContext context) {
+    return RenderConstrainedBox(additionalConstraints: _additionalConstraints);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderConstrainedBox renderObject) {
+    renderObject.additionalConstraints = _additionalConstraints;
+  }
+
+  @override
+  String toStringShort() {
+    final String type = objectRuntimeType(this, 'SizedBox');
+    return key == null ? type : '$type-$key';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Size>('size', size, defaultValue: null));
   }
 }
 
