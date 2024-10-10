@@ -309,6 +309,8 @@ class SampleChecker {
 // TODO(gspencergoog): implement the missing tests.
 // See https://github.com/flutter/flutter/issues/130459
 final Set<String> _knownMissingTests = <String>{
+  'examples/api/test/material/bottom_app_bar/bottom_app_bar.2_test.dart',
+  'examples/api/test/material/bottom_app_bar/bottom_app_bar.1_test.dart',
   'examples/api/test/material/material_state/material_state_outlined_border.0_test.dart',
   'examples/api/test/material/material_state/material_state_property.0_test.dart',
   'examples/api/test/material/selectable_region/selectable_region.0_test.dart',

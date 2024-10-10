@@ -22,7 +22,7 @@ void main() {
     // Build the app
     await tester.pumpWidget(const example.BottomAppBarDemo());
 
-    // Verify the BottomAppBar has elevation initially
+    // Verify the BottomAppBar has elevation initiallly
     BottomAppBar bottomAppBar = tester.widget(find.byType(BottomAppBar));
     expect(bottomAppBar.elevation, isNot(0.0));
 
