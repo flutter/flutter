@@ -857,8 +857,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _updateSelectedContentIfNeeded() {
-    if (_lastSelectedContent?.plainText != _selectable?.getSelectedContent()?.plainText) {
-      _lastSelectedContent = _selectable?.getSelectedContent();
+    final SelectedContent? content = _selectable?.getSelectedContent();
+    if (_lastSelectedContent?.plainText != content?.plainText) {
+      _lastSelectedContent = content;
       widget.onSelectionChanged?.call(_lastSelectedContent);
     }
   }
@@ -3218,7 +3219,7 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
     _controller._registerSelectionListenerDelegate(this);
   }
 
-  bool _lastEventChangedGeometry = false;
+  SelectionGeometry? _lastFinalizedSelectionGeometry;
 
   @override
   void dispose() {
@@ -3231,14 +3232,12 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
     final SelectionGeometry lastSelectionGeometry = value;
     final SelectionResult result = super.dispatchSelectionEvent(event);
     if (lastSelectionGeometry != value) {
-      _lastEventChangedGeometry = true;
       _controller.notifyListeners();
-    } else if (event is SelectionFinalizedSelectionEvent && _lastEventChangedGeometry) {
-      debugPrint('finalized');
+      _controller.notifyStatusListeners(SelectionListenerStatus.changed);
+    } else if (event is SelectionFinalizedSelectionEvent && _lastFinalizedSelectionGeometry != lastSelectionGeometry) {
+      _lastFinalizedSelectionGeometry = lastSelectionGeometry;
       _controller.notifyListeners();
-      _lastEventChangedGeometry = false;
-    } else {
-      _lastEventChangedGeometry = false;
+      _controller.notifyStatusListeners(SelectionListenerStatus.finalized);
     }
     return result;
   }
@@ -3257,6 +3256,8 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
 final class SelectionListenerController extends ChangeNotifier {
   _SelectionListenerDelegate? _selectionDelegate;
 
+  final ObserverList<SelectionListenerStatusCallback> _statusListeners = ObserverList<SelectionListenerStatusCallback>();
+
   SelectionDetails get value => _selectionDelegate?._getDetails() ?? (throw Exception('Selection client has not been registered to this controller.'));
 
   SelectionStatus get selectionStatus => _selectionDelegate?.value.status ?? (throw Exception('Selection client has not been registered to this controller.'));
@@ -3265,6 +3266,50 @@ final class SelectionListenerController extends ChangeNotifier {
   void dispose() {
     _unregisterSelectionListenerDelegate();
     super.dispose();
+  }
+
+  void addStatusListener(SelectionListenerStatusCallback listener) {
+    _statusListeners.add(listener);
+  }
+
+  void removeStatusListener(SelectionListenerStatusCallback listener) {
+    _statusListeners.remove(listener);
+  }
+
+  /// Calls all the status listeners.
+  ///
+  /// If listeners are added or removed during this function, the modifications
+  /// will not change which listeners are called during this iteration.
+  @protected
+  @pragma('vm:notify-debugger-on-exception')
+  void notifyStatusListeners(SelectionListenerStatus status) {
+    final List<SelectionListenerStatusCallback> localListeners = _statusListeners.toList(growable: false);
+    for (final SelectionListenerStatusCallback listener in localListeners) {
+      try {
+        if (_statusListeners.contains(listener)) {
+          listener(status);
+        }
+      } catch (exception, stack) {
+        InformationCollector? collector;
+        assert(() {
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<SelectionListenerController>(
+              'The $runtimeType notifying status listeners was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ];
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while notifying status listeners for $runtimeType'),
+          informationCollector: collector,
+        ));
+      }
+    }
   }
 
   void _registerSelectionListenerDelegate(_SelectionListenerDelegate selectionListenerDelegate) {
