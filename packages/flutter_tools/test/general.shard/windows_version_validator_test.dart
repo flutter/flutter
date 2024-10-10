@@ -23,14 +23,22 @@ class FakeValidOperatingSystemUtils extends Fake
 }
 
 class FakeProcessLister extends Fake implements ProcessLister {
-  FakeProcessLister({required this.result, this.exitCode = 0});
+  FakeProcessLister({
+    required this.result,
+    this.exitCode = 0,
+    this.powershellAvailable = true,
+  });
   final String result;
   final int exitCode;
+  final bool powershellAvailable;
 
   @override
   Future<ProcessResult> getProcessesWithPath() async {
     return ProcessResult(0, exitCode, result, null);
   }
+
+  @override
+  bool canRunPowershell() => powershellAvailable;
 }
 
 FakeProcessLister ofdRunning() {
@@ -43,6 +51,10 @@ FakeProcessLister ofdNotRunning() {
 
 FakeProcessLister failure() {
   return FakeProcessLister(result: r'Path: "C:\Program Files\Google\Chrome\Application\chrome.exe', exitCode: 10);
+}
+
+FakeProcessLister powershellUnavailable() {
+  return FakeProcessLister(result: '', powershellAvailable: false);
 }
 
 /// The expected validation result object for
@@ -71,6 +83,15 @@ const ValidationResult ofdFoundRunning = ValidationResult(
   ],
   statusInfo: 'Problem detected with Windows installation',
 );
+
+const ValidationResult powershellUnavailableResult = ValidationResult(
+  ValidationType.partial,
+  <ValidationMessage>[
+    ValidationMessage.hint('Failed to find ${ProcessLister.powershell} or ${ProcessLister.pwsh} on PATH'),
+  ],
+  statusInfo: 'Problem detected with Windows installation',
+);
+
 
 const ValidationResult getProcessFailed = ValidationResult(
   ValidationType.partial,
@@ -160,6 +181,18 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     expect(result.messages[0].message, ofdFoundRunning.messages[0].message, reason: 'The ValidationMessage message should be the same');
   });
 
+  testWithoutContext('Reports missing powershell', () async {
+    final WindowsVersionValidator validator =
+        WindowsVersionValidator(
+            operatingSystemUtils: FakeValidOperatingSystemUtils(),
+            processLister: powershellUnavailable());
+    final ValidationResult result = await validator.validate();
+    expect(result.type, powershellUnavailableResult.type, reason: 'The ValidationResult type should be the same (partial)');
+    expect(result.statusInfo, powershellUnavailableResult.statusInfo, reason: 'The ValidationResult statusInfo should be the same');
+    expect(result.messages.length, 1, reason: 'The ValidationResult should have precisely 1 message');
+    expect(result.messages[0].message, powershellUnavailableResult.messages[0].message, reason: 'The ValidationMessage message should be the same');
+  });
+
   testWithoutContext('Reports failure of Get-Process', () async {
     final WindowsVersionValidator validator =
         WindowsVersionValidator(
@@ -172,34 +205,50 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     expect(result.messages[0].message, getProcessFailed.messages[0].message, reason: 'The ValidationMessage message should be the same');
   });
 
-  testWithoutContext('Falls back to pwsh when powershell is not on the path', () async {
+  testWithoutContext('getProcessesWithPath successfully runs with powershell', () async {
     final ProcessLister processLister = ProcessLister(
       FakeProcessManager.list(
         <FakeCommand>[
           const FakeCommand(
             command: <String>[
-              'powershell',
+              ProcessLister.powershell,
               '-command',
               'Get-Process | Format-List Path',
             ],
-            exception: ProcessPackageExecutableNotFoundException('powershell'),
-            stdout: 'powershell',
-          ),
-          const FakeCommand(
-            command: <String>[
-              'pwsh',
-              '-command',
-              'Get-Process | Format-List Path',
-            ],
-            stdout: 'pwsh',
+            stdout: ProcessLister.powershell,
           ),
         ],
-      ),
+      )..excludedExecutables.add(ProcessLister.pwsh),
     );
 
     try {
       final ProcessResult result = await processLister.getProcessesWithPath();
-      expect(result.stdout, 'pwsh');
+      expect(result.stdout, ProcessLister.powershell);
+    // ignore: avoid_catches_without_on_clauses
+    } catch (e) {
+      fail('Unexpected exception: $e');
+    }
+  });
+
+  testWithoutContext('getProcessesWithPath falls back to pwsh when powershell is not on the path', () async {
+    final ProcessLister processLister = ProcessLister(
+      FakeProcessManager.list(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              ProcessLister.pwsh,
+              '-command',
+              'Get-Process | Format-List Path',
+            ],
+            stdout: ProcessLister.pwsh,
+          ),
+        ],
+      )..excludedExecutables.add(ProcessLister.powershell),
+    );
+
+    try {
+      final ProcessResult result = await processLister.getProcessesWithPath();
+      expect(result.stdout, ProcessLister.pwsh);
     // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       fail('Unexpected exception: $e');
@@ -208,26 +257,10 @@ OS 版本:          10.0.22621 暂缺 Build 22621
 
   testWithoutContext('getProcessesWithPath throws if both powershell and pwsh are not on PATH', () async {
     final ProcessLister processLister = ProcessLister(
-      FakeProcessManager.list(
-        <FakeCommand>[
-          const FakeCommand(
-            command: <String>[
-              'powershell',
-              '-command',
-              'Get-Process | Format-List Path',
-            ],
-            exception: ProcessPackageExecutableNotFoundException('powershell'),
-            stdout: 'powershell',
-          ),
-          const FakeCommand(
-            command: <String>[
-              'pwsh',
-              '-command',
-              'Get-Process | Format-List Path',
-            ],
-            exception: ProcessPackageExecutableNotFoundException('pwsh'),
-            stdout: 'pwsh',
-          ),
+      FakeProcessManager.empty()..excludedExecutables.addAll(
+        <String>[
+          ProcessLister.powershell,
+          ProcessLister.pwsh,
         ],
       ),
     );
@@ -235,7 +268,7 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     try {
       final ProcessResult result = await processLister.getProcessesWithPath();
       fail('Should have thrown, but successfully ran ${result.stdout}');
-    } on ProcessPackageExecutableNotFoundException {
+    } on StateError {
       // Expected
     // ignore: avoid_catches_without_on_clauses
     } catch (e) {
