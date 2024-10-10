@@ -17,8 +17,7 @@ void main() {
     expect(cupertinoMagnifierWidget, findsOneWidget);
   });
 
-  testWidgets('CupertinoMagnifier is not using the default value',
-      (WidgetTester tester) async {
+  testWidgets('CupertinoMagnifier is not using the default value', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CupertinoMagnifierApp());
     expect(
       tester.widget(find.byType(CupertinoMagnifier)),
