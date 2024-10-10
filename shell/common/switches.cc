@@ -360,9 +360,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.verbose_logging =
       command_line.HasOption(FlagForSwitch(Switch::VerboseLogging));
 
-  settings.merged_platform_ui_thread = command_line.HasOption(
-      FlagForSwitch(Switch::EnableMergedPlatformUIThread));
-
   command_line.GetOptionValue(FlagForSwitch(Switch::FlutterAssetsDir),
                               &settings.assets_path);
 

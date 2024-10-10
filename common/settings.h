@@ -232,10 +232,6 @@ struct Settings {
   // Force disable the android surface control even where supported.
   bool disable_surface_control = false;
 
-  // If true, the UI thread is the platform thread on supported
-  // platforms.
-  bool merged_platform_ui_thread = true;
-
   // Log a warning during shell initialization if Impeller is not enabled.
   bool warn_on_impeller_opt_out = false;
 
