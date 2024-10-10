@@ -20,7 +20,7 @@ void main() {
     final Checkbox checkbox = tester.widget(find.byType(Checkbox));
     expect(checkbox.value, isTrue);
 
-    // Tap to uncheck the checkbox (to show billing address fields)
+    // Tap to uncheck the checkbox (to show billing address fields).
     await tester.tap(find.byType(Checkbox));
     await tester.pump();
 
