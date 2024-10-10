@@ -153,7 +153,7 @@ class InteractiveViewer extends StatefulWidget {
   /// When laying out the child, InteractiveViewer applies a transform based on the current
   /// [Matrix4] defined in the [TransformationController] and will translate all the hit tests as well.
   ///
-  /// Due to the way gestures work in Flutter if a child is in an negative offset of it's parent then
+  /// Due to the way gestures work in Flutter if a child is in an negative offset of its parent then
   /// hit tests are skipped. For example you could have a [Stack] with [Clip.none] and negative offset
   /// for the [Positioned] widget.
   ///
