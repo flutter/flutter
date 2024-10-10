@@ -14,8 +14,7 @@ void main() {
     final Finder cupertinoTextFieldWidget = find.byType(CupertinoTextField);
     await tester.longPress(cupertinoTextFieldWidget);
 
-    final Finder cupertinoTextMagnifierWidget =
-        find.byType(CupertinoTextMagnifier);
+    final Finder cupertinoTextMagnifierWidget = find.byType(CupertinoTextMagnifier);
     expect(cupertinoTextMagnifierWidget, findsOneWidget);
   });
 }
