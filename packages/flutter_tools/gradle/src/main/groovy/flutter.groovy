@@ -6,7 +6,6 @@
 import com.android.build.OutputFile
 import groovy.json.JsonGenerator
 import groovy.xml.QName
-import groovy.xml.XmlParser
 import java.nio.file.Paths
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
@@ -521,7 +520,12 @@ class FlutterPlugin implements Plugin<Project> {
                     variant.outputs.all { output ->
                         Object processResources = output.hasProperty(propProcessResourcesProvider) ?
                                 output.processResourcesProvider.get() : output.processResources
-                        def manifest = new XmlParser().parseText(processResources.manifestFile)
+                        System.out.println("it does work")
+                        def xmlParser = new groovy.xml.XmlParser()
+                        def manifest = xmlParser.parse(manifestFile)
+                        if (manifestFile.exists()) {
+                        System.out.println("exist")
+                        }
                         manifest.application.activity.each { activity ->
                             activity."meta-data".each { metadata ->
                                 boolean nameAttribute = metadata.attributes().find { it.key == 'android:name' }?.value == 'flutter_deeplinking_enabled'
