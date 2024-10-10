@@ -330,7 +330,7 @@ void main() {
         globals.fs.file(manifestPath).writeAsStringSync(newManifest);
       }
 
-      testUsingContext('a default AAR build reports Impeller as disabled', () async {
+      testUsingContext('a default AAR build reports Impeller as enabled', () async {
         final String projectPath = await createProject(
           tempDir,
           arguments: <String>['--no-pub', '--template=module']
@@ -342,7 +342,7 @@ void main() {
           fakeAnalytics.sentEvents,
           contains(
             Event.flutterBuildInfo(
-              label: 'manifest-aar-impeller-disabled',
+              label: 'manifest-aar-impeller-enabled',
               buildType: 'android',
             ),
           ),
