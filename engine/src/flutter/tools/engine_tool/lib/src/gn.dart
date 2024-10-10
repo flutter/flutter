@@ -1,3 +1,8 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
@@ -106,6 +111,9 @@ interface class Gn {
             JsonObject(properties),
           );
           if (target == null) {
+            _environment.logger.warning(
+              'Unknown target type for $label: type=${properties['type']}',
+            );
             return null;
           }
           return target;
@@ -179,6 +187,11 @@ sealed class BuildTarget {
           label,
           testOnly: testOnly,
           json: json,
+        ),
+      'group' => GroupBuildTarget(
+          label: Label.parseGn(label),
+          testOnly: testOnly,
+          deps: json.stringList('deps').map(Label.parseGn).toList(),
         ),
       _ => null,
     };
@@ -280,4 +293,37 @@ final class ExecutableBuildTarget extends BuildTarget {
   @override
   String toString() =>
       'ExecutableBuildTarget($label, testOnly=$testOnly, executable=$executable)';
+}
+
+/// A build target that [group]s a meta-target of other build targets.
+///
+/// [group]: https://gn.googlesource.com/gn/+/main/docs/reference.md#func_group
+final class GroupBuildTarget extends BuildTarget {
+  /// Construct a group build target.
+  const GroupBuildTarget({
+    required super.label,
+    required super.testOnly,
+    required this.deps,
+  });
+
+  /// The list of dependencies for this group target.
+  final List<Label> deps;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! GroupBuildTarget) {
+      return false;
+    }
+    if (label != other.label || testOnly != other.testOnly) {
+      return false;
+    }
+    return const ListEquality<Object>().equals(deps, other.deps);
+  }
+
+  @override
+  int get hashCode => Object.hash(label, testOnly, Object.hashAll(deps));
+
+  @override
+  String toString() =>
+      'GroupBuildTarget($label, testOnly=$testOnly, deps=$deps)';
 }

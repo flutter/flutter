@@ -127,6 +127,40 @@ void main() {
     );
   });
 
+  test('parses a group', () async {
+    final testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: [
+        CannedProcess(
+          (List<String> command) => command.contains('desc'),
+          stdout: '''
+            {
+              "//foo/bar:baz_group": {
+                "deps": ["//foo/bar:baz_shared_library"],
+                "testonly": true,
+                "type": "group"
+              }
+            }
+          ''',
+        ),
+      ],
+    );
+    addTearDown(testEnv.cleanup);
+
+    final gn = Gn.fromEnvironment(testEnv.environment);
+    final targets = await gn.desc('out/Release', TargetPattern('//foo', 'bar'));
+    expect(targets, hasLength(1));
+
+    final groupTarget = targets.single;
+    expect(
+      groupTarget,
+      GroupBuildTarget(
+        label: Label('//foo/bar', 'baz_group'),
+        testOnly: true,
+        deps: [Label('//foo/bar', 'baz_shared_library')],
+      ),
+    );
+  });
+
   test('parses a dart_test action as an executable', () async {
     final testEnv = TestEnvironment.withTestEngine(
       cannedProcesses: [
