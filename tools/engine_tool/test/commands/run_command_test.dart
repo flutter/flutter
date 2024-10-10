@@ -19,7 +19,7 @@ import 'package:process_fakes/process_fakes.dart';
 import 'package:process_runner/process_runner.dart';
 import 'package:test/test.dart';
 
-import 'src/test_build_configs.dart';
+import '../src/test_build_configs.dart';
 
 void main() {
   late io.Directory tempRoot;

@@ -72,6 +72,20 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
       allTargets.addAll(targets.map((target) => target.label));
     }
 
+    // Warn that we've discarded some targets.
+    // Other warnings should have been emitted above, so if this ends up being
+    // unneccesarily noisy, we can remove it or limit it to verbose mode.
+    if (allTargets.length < commandLineTargets.length) {
+      // Report which targets were not found.
+      final notFound = commandLineTargets.where(
+        (target) => !allTargets.contains(Label.parse(target)),
+      );
+      environment.logger.warning(
+        'One or more targets specified did not match any build targets:\n\n'
+        '${notFound.join('\n')}',
+      );
+    }
+
     return runBuild(
       environment,
       plan.build,
