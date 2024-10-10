@@ -76,7 +76,7 @@ void main() {
       contains(AutofillHints.creditCardSecurityCode),
     );
 
-    // Contact phone number field
+    // Contact phone number field.
     final TextField phoneNumber = tester.widget(
       find.byType(TextField).at(6),
     );
