@@ -3231,6 +3231,54 @@ void main() {
     expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
   });
 
+  testUsingContext('Android Java plugin sets explicit compatibility version', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub',
+      '-t', 'plugin',
+      '--org', 'com.bar.foo',
+      '-a', 'java',
+      '--platforms=android',
+      projectDir.path]);
+
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+
+    expect(buildGradleFile.existsSync(), true);
+
+    final String buildGradleContent = await buildGradleFile.readAsString();
+
+    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_11'), true);
+    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_11'), true);
+  });
+
+  testUsingContext('Android Kotlin plugin sets explicit compatibility version', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub',
+      '-t', 'plugin',
+      '--org', 'com.bar.foo',
+      '-a', 'kotlin',
+      '--platforms=android',
+      projectDir.path]);
+
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+
+    expect(buildGradleFile.existsSync(), true);
+
+    final String buildGradleContent = await buildGradleFile.readAsString();
+
+    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_11'), true);
+    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_11'), true);
+    // jvmTarget should be set to the same value.
+    expect(buildGradleContent.contains('jvmTarget = JavaVersion.VERSION_11'), true);
+  });
+
   testUsingContext('Flutter module Android project contains namespace', () async {
     const String moduleBuildGradleFilePath = '.android/build.gradle';
     const String moduleAppBuildGradleFlePath = '.android/app/build.gradle';
