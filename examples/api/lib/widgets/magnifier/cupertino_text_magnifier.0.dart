@@ -44,8 +44,7 @@ class _CupertinoTextMagnifierExampleAppState
         child: Center(
           child: CupertinoTextField(
             magnifierConfiguration: TextMagnifierConfiguration(
-              magnifierBuilder:
-                  (_, __, ValueNotifier<MagnifierInfo> magnifierInfo) {
+              magnifierBuilder: (_, __, ValueNotifier<MagnifierInfo> magnifierInfo) {
                 return CupertinoTextMagnifier(
                   controller: _controller,
                   magnifierInfo: magnifierInfo,
