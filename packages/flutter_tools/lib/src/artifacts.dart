@@ -439,8 +439,9 @@ abstract class Artifacts {
   // and [mode] combination.
   String getEngineType(TargetPlatform platform, [ BuildMode? mode ]);
 
-  /// Whether these artifacts correspond to a non-versioned local engine.
-  bool get isLocalEngine;
+  /// Whether these artifacts use any locally built files that are not part of
+  /// a versioned engine.
+  bool get usesLocalArtifacts;
 
   /// If these artifacts are bound to a local engine build, returns info about
   /// the location and name of the local engine, otherwise returns null.
@@ -924,7 +925,7 @@ class CachedArtifacts implements Artifacts {
   }
 
   @override
-  bool get isLocalEngine => false;
+  bool get usesLocalArtifacts => false;
 }
 
 TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils operatingSystemUtils) {
@@ -1377,7 +1378,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
   }
 
   @override
-  bool get isLocalEngine => true;
+  bool get usesLocalArtifacts => true;
 }
 
 class CachedLocalWebSdkArtifacts implements Artifacts {
@@ -1581,7 +1582,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
   }
 
   @override
-  bool get isLocalEngine => _parent.isLocalEngine;
+  bool get usesLocalArtifacts => true;
 
   @override
   LocalEngineInfo? get localEngineInfo => _parent.localEngineInfo;
@@ -1642,7 +1643,7 @@ class OverrideArtifacts implements Artifacts {
   String getEngineType(TargetPlatform platform, [ BuildMode? mode ]) => parent.getEngineType(platform, mode);
 
   @override
-  bool get isLocalEngine => parent.isLocalEngine;
+  bool get usesLocalArtifacts => parent.usesLocalArtifacts;
 
   @override
   FileSystemEntity getHostArtifact(HostArtifact artifact) {
@@ -1697,7 +1698,7 @@ class _TestArtifacts implements Artifacts {
   }
 
   @override
-  bool get isLocalEngine => false;
+  bool get usesLocalArtifacts => false;
 
   @override
   FileSystemEntity getHostArtifact(HostArtifact artifact) {
@@ -1716,7 +1717,7 @@ class _TestLocalEngine extends _TestArtifacts {
       );
 
   @override
-  bool get isLocalEngine => true;
+  bool get usesLocalArtifacts => true;
 
   @override
   final LocalEngineInfo localEngineInfo;

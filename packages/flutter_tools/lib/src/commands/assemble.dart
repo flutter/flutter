@@ -248,7 +248,7 @@ class AssembleCommand extends FlutterCommand {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       platform: globals.platform,
-      engineVersion: artifacts.isLocalEngine
+      engineVersion: artifacts.usesLocalArtifacts
         ? null
         : globals.flutterVersion.engineRevision,
       generateDartPluginRegistry: true,

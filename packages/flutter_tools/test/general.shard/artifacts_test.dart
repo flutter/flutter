@@ -300,6 +300,17 @@ void main() {
         'darwin-x64',
       );
     });
+
+    testWithoutContext('CachedLocalWebSdkArtifacts wrapping a versioned engine sets usesLocalArtifacts', () {
+      final CachedLocalWebSdkArtifacts webArtifacts = CachedLocalWebSdkArtifacts(
+        parent: artifacts,
+        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
+        fileSystem: fileSystem,
+        platform: platform,
+        operatingSystemUtils: FakeOperatingSystemUtils()
+      );
+      expect(webArtifacts.usesLocalArtifacts, true);
+    });
   });
 
   group('LocalEngineArtifacts', () {
