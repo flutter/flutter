@@ -8,8 +8,7 @@ import 'package:flutter_api_samples/widgets/magnifier/cupertino_text_magnifier.0
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CupertinoTextMagnifier must be visible after longPress',
-      (WidgetTester tester) async {
+  testWidgets('CupertinoTextMagnifier must be visible after longPress', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CupertinoTextMagnifierApp());
 
     final Finder cupertinoTextFieldWidget = find.byType(CupertinoTextField);
