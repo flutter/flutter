@@ -9,8 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
 
-  testWidgets('CupertinoMagnifier must be visible',
-      (WidgetTester tester) async {
+  testWidgets('CupertinoMagnifier must be visible', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CupertinoMagnifierApp());
 
     final Finder cupertinoMagnifierWidget = find.byType(CupertinoMagnifier);
