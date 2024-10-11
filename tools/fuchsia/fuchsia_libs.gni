@@ -3,11 +3,11 @@
 # found in the LICENSE file.
 
 import("//flutter/tools/fuchsia/clang.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 
-fuchsia_sdk_base = "//fuchsia/sdk/$host_os/arch/$target_cpu"
-fuchsia_sdk_dist = "$fuchsia_sdk_base/dist"
-sysroot_lib = "$fuchsia_sdk_base/sysroot/lib"
-sysroot_dist_lib = "$fuchsia_sdk_base/sysroot/dist/lib"
+fuchsia_sdk_dist = "$fuchsia_arch_root/dist"
+sysroot_lib = "$fuchsia_arch_root/sysroot/lib"
+sysroot_dist_lib = "$fuchsia_arch_root/sysroot/dist/lib"
 
 ld_so_path = ""
 libcxx_so_2_path = "${clang_manifest_json.md5_19df03aecdc9eb27bc8b4038352f2b27}"
@@ -85,7 +85,7 @@ if (is_asan) {
   ]
 }
 
-vulkan_dist = "$fuchsia_sdk_base/dist"
+vulkan_dist = "//fuchsia/sdk/$host_os/arch/$target_cpu/dist"
 
 # Note that the other validation libraries in the Fuchsia SDK seem to have a bug right
 # now causing crashes, so it is only recommended that we use
