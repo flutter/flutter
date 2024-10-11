@@ -3582,6 +3582,8 @@
 ../../../fuchsia/sdk/linux/pkg/driver_symbols/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/include/lib/driver/testing
 ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/meta.json
+../../../fuchsia/sdk/linux/pkg/driver_testing_scoped_global_logger_cpp/include/lib/driver/testing
+../../../fuchsia/sdk/linux/pkg/driver_testing_scoped_global_logger_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/fdio/meta.json
 ../../../fuchsia/sdk/linux/pkg/fidl/meta.json
 ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
