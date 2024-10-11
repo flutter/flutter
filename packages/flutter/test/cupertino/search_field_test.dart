@@ -709,12 +709,9 @@ void main() {
     final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
 
     final TestGesture scrollGesture1 = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
-    // Start a scroll gesture to win the gesture arena.
-    await scrollGesture1.moveBy(const Offset(0, -4.0));
-    await tester.pump();
-    // Scroll enough so that the search field starts resizing.
     await scrollGesture1.moveBy(Offset(0, -searchTextFieldHeight / 5));
-    await tester.pump();
+    await scrollGesture1.up();
+    await tester.pumpAndSettle();
 
     // The icons and placeholder text start to fade.
     expect(
@@ -743,12 +740,9 @@ void main() {
     );
 
     final TestGesture scrollGesture2 = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
-    // Start a scroll gesture to win the gesture arena.
-    await scrollGesture2.moveBy(const Offset(0, -4.0));
-    await tester.pump();
-    // Scroll enough so that the search field starts resizing.
     await scrollGesture2.moveBy(Offset(0, -4 * searchTextFieldHeight / 5));
-    await tester.pump();
+    await scrollGesture2.up();
+    await tester.pumpAndSettle();
 
     // The icons and placeholder text have faded completely.
     expect(
@@ -797,12 +791,9 @@ void main() {
     final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
 
     final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
-    // Start a scroll gesture to win the gesture arena.
-    await scrollGesture.moveBy(const Offset(0, -4.0));
-    await tester.pump();
-    // Scroll enough so that the search field starts resizing.
     await scrollGesture.moveBy(Offset(0, -searchTextFieldHeight / 5));
-    await tester.pump();
+    await scrollGesture.up();
+    await tester.pumpAndSettle();
 
     expect(
       tester.widget<CupertinoTextField>(
