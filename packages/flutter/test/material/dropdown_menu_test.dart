@@ -3466,7 +3466,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/139269.
   testWidgets('DropdownMenu.closeBehavior controls menu closing behavior', (WidgetTester tester) async {
-    Widget buildDropdownMenu({ CloseBehavior closeBehavior = CloseBehavior.all }) {
+    Widget buildDropdownMenu({ DropdownMenuCloseBehavior closeBehavior = DropdownMenuCloseBehavior.all }) {
       return MaterialApp(
         home: Scaffold(
           body: MenuAnchor(
@@ -3510,7 +3510,7 @@ void main() {
     expect(find.byType(MenuAnchor), findsOneWidget);
 
     // Test closeBehavior set to self.
-    await tester.pumpWidget(buildDropdownMenu(closeBehavior: CloseBehavior.self));
+    await tester.pumpWidget(buildDropdownMenu(closeBehavior: DropdownMenuCloseBehavior.self));
 
     // Tap the button to open the root anchor.
     await tester.tap(find.byType(ElevatedButton));
@@ -3530,7 +3530,7 @@ void main() {
     expect(dropdownMenuAnchor.controller!.isOpen, false);
 
     // Test closeBehavior set to none.
-    await tester.pumpWidget(buildDropdownMenu(closeBehavior: CloseBehavior.none));
+    await tester.pumpWidget(buildDropdownMenu(closeBehavior: DropdownMenuCloseBehavior.none));
 
     // Tap the button to open the root anchor.
     await tester.tap(find.byType(ElevatedButton));
