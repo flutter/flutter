@@ -119,10 +119,11 @@ class CarouselView extends StatefulWidget {
   /// Creates a Material Design carousel.
   const CarouselView({
     super.key,
+    this.itemPadding,
     this.padding,
-    this.backgroundColor,
-    this.elevation,
-    this.shape,
+    this.itemBackgroundColor,
+    this.itemElevation,
+    this.itemShape,
     this.overlayColor,
     this.itemSnapping = false,
     this.shrinkExtent = 0.0,
@@ -179,10 +180,11 @@ class CarouselView extends StatefulWidget {
   /// layouts indicated in the Material Design 3.
   const CarouselView.weighted({
     super.key,
+    this.itemPadding,
     this.padding,
-    this.backgroundColor,
-    this.elevation,
-    this.shape,
+    this.itemBackgroundColor,
+    this.itemElevation,
+    this.itemShape,
     this.overlayColor,
     this.itemSnapping = false,
     this.shrinkExtent = 0.0,
@@ -190,6 +192,7 @@ class CarouselView extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     this.consumeMaxWeight = true,
+    
     this.onTap,
     this.enableSplash = true,
     required List<int> this.flexWeights,
@@ -199,17 +202,17 @@ class CarouselView extends StatefulWidget {
   /// The amount of space to surround each carousel item with.
   ///
   /// Defaults to [EdgeInsets.all] of 4 pixels.
-  final EdgeInsets? padding;
+  final EdgeInsets? itemPadding;
 
   /// The background color for each carousel item.
   ///
   /// Defaults to [ColorScheme.surface].
-  final Color? backgroundColor;
+  final Color? itemBackgroundColor;
 
   /// The z-coordinate of each carousel item.
   ///
   /// Defaults to 0.0.
-  final double? elevation;
+  final double? itemElevation;
 
   /// The shape of each carousel item's [Material].
   ///
@@ -217,7 +220,7 @@ class CarouselView extends StatefulWidget {
   ///
   /// Defaults to a [RoundedRectangleBorder] with a circular corner radius
   /// of 28.0.
-  final ShapeBorder? shape;
+  final ShapeBorder? itemShape;
 
   /// The highlight color to indicate the carousel items are in pressed, hovered
   /// or focused states.
@@ -324,6 +327,9 @@ class CarouselView extends StatefulWidget {
   /// The child widgets for the carousel.
   final List<Widget> children;
 
+  /// The amount of space to surround the widget.
+  final EdgeInsets? padding;
+
   @override
   State<CarouselView> createState() => _CarouselViewState();
 }
@@ -334,6 +340,7 @@ class _CarouselViewState extends State<CarouselView> {
   bool get _consumeMaxWeight => widget.consumeMaxWeight;
   CarouselController? _internalController;
   CarouselController get _controller => widget.controller ?? _internalController!;
+  late EdgeInsets effectiveWidgetPadding;
 
   @override
   void initState() {
@@ -348,6 +355,7 @@ class _CarouselViewState extends State<CarouselView> {
   @override
   void didUpdateWidget(covariant CarouselView oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller?._detach(this);
       if (widget.controller != null) {
@@ -392,10 +400,10 @@ class _CarouselViewState extends State<CarouselView> {
   }
 
   Widget _buildCarouselItem(ThemeData theme, int index) {
-    final EdgeInsets effectivePadding = widget.padding ?? const EdgeInsets.all(4.0);
-    final Color effectiveBackgroundColor = widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
-    final double effectiveElevation = widget.elevation ?? 0.0;
-    final ShapeBorder effectiveShape = widget.shape
+    final EdgeInsets effectivePadding = widget.itemPadding ?? const EdgeInsets.all(4.0);
+    final Color effectiveBackgroundColor = widget.itemBackgroundColor ?? Theme.of(context).colorScheme.surface;
+    final double effectiveElevation = widget.itemElevation ?? 0.0;
+    final ShapeBorder effectiveShape = widget.itemShape
       ?? const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(28.0))
       );

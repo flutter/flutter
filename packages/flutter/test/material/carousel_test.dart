@@ -49,10 +49,10 @@ void main() {
         theme: theme,
         home: Scaffold(
           body: CarouselView(
-            padding: const EdgeInsets.all(20.0),
-            backgroundColor: Colors.amber,
-            elevation: 10.0,
-            shape: const StadiumBorder(),
+            itemPadding: const EdgeInsets.all(20.0),
+            itemBackgroundColor: Colors.amber,
+            itemElevation: 10.0,
+            itemShape: const StadiumBorder(),
             overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
               if (states.contains(WidgetState.pressed)) {
                 return Colors.yellow;
@@ -590,7 +590,7 @@ void main() {
         home: Scaffold(
           body: CarouselView(
             itemExtent: 200,
-            padding: EdgeInsets.zero,
+            itemPadding: EdgeInsets.zero,
             scrollDirection: Axis.vertical,
             children: List<Widget>.generate(10, (int index) {
               return Center(
@@ -624,7 +624,7 @@ void main() {
         home: Scaffold(
           body: CarouselView.weighted(
             flexWeights: const <int>[3, 2, 1],
-            padding: EdgeInsets.zero,
+            itemPadding: EdgeInsets.zero,
             scrollDirection: Axis.vertical,
             children: List<Widget>.generate(10, (int index) {
               return Center(
