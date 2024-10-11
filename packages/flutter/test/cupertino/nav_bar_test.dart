@@ -1928,7 +1928,7 @@ void main() {
     await scrollGesture.up();
     await tester.pumpAndSettle();
 
-    // Expect the scroll position to snap to the app bar.
+    // Expect the large title to snap to the persistent app bar.
     expect(scrollController.position.pixels, largeTitleHeight);
     expect(renderOpacity?.opacity.value, 1.0);
   });
@@ -1971,7 +1971,7 @@ void main() {
     await scrollGesture.up();
     await tester.pumpAndSettle();
 
-    // Expect the scroll position to snap back to its extended height.
+    // Expect the large title to snap back to its extended height.
     expect(scrollController.position.pixels, 0.0);
     expect(renderOpacity?.opacity.value, 0.0);
   });
