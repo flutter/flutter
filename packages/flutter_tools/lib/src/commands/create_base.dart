@@ -100,14 +100,15 @@ abstract class CreateBase extends FlutterCommand {
       abbr: 'i',
       defaultsTo: 'swift',
       allowed: <String>['objc', 'swift'],
-      help: 'The language to use for iOS-specific code, either Objective-C (legacy) or Swift (recommended).'
+      help: '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy).',
+      hide: !verboseHelp,
     );
     argParser.addOption(
       'android-language',
       abbr: 'a',
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
-      help: 'The language to use for Android-specific code, either Java (legacy) or Kotlin (recommended).',
+      help: 'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
     );
     argParser.addFlag(
       'skip-name-checks',
@@ -857,16 +858,15 @@ String? potentialValidPackageName(String name){
 String? _validateProjectName(String projectName) {
   if (!isValidPackageName(projectName)) {
     final String? potentialValidName = potentialValidPackageName(projectName);
-
-    return <String>[
-      '"$projectName" is not a valid Dart package name.',
-      '\n\n',
-      'The name should be all lowercase, with underscores to separate words, "just_like_this".',
-      'Use only basic Latin letters and Arabic digits: [a-z0-9_].',
-      "Also, make sure the name is a valid Dart identifier—that it doesn't start with digits and isn't a reserved word.\n",
-      'See https://dart.dev/tools/pub/pubspec#name for more information.',
-      if (potentialValidName != null) '\nTry "$potentialValidName" instead.',
-    ].join();
+    return '"$projectName" is not a valid Dart package name.'
+           '${ potentialValidName != null ? ' Try "$potentialValidName" instead.' : '' }\n'
+           '\n'
+           'The name should consist of lowercase words separated by underscores, "like_this". '
+           'Use only basic Latin letters and Arabic digits: [a-z0-9_], and '
+           'ensure the name is a valid Dart identifier '
+           '(i.e. it does not start with a digit and is not a reserved word).\n'
+           '\n'
+           'See https://dart.dev/tools/pub/pubspec#name for more information.';
   }
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "

@@ -603,9 +603,9 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   }
 
   @override
-  void handleStderr(List<int> data) {
+  void handleStderr(String data) {
     _logTraffic('<== [Flutter] [stderr] $data');
-    sendOutput('stderr', utf8.decode(data));
+    sendOutput('stderr', data);
   }
 
   /// Handles stdout from the `flutter run --machine` process, decoding the JSON and calling the appropriate handlers.

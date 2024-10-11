@@ -11,6 +11,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../cache.dart';
+import '../convert.dart';
 import 'flutter_adapter_args.dart';
 import 'mixins.dart';
 
@@ -150,11 +151,11 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
     this.process = process;
 
     process.stdout.transform(ByteToLineTransformer()).listen(handleStdout);
-    process.stderr.listen(handleStderr);
+    process.stderr.transform(utf8.decoder).listen(handleStderr);
     unawaited(process.exitCode.then(handleExitCode));
   }
 
   void handleExitCode(int code);
-  void handleStderr(List<int> data);
+  void handleStderr(String data);
   void handleStdout(String data);
 }

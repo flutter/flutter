@@ -403,7 +403,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
-    Widget child = OverlayPortal(
+    Widget child = OverlayPortal.targetsRootOverlay(
       controller: _overlayController,
       overlayChildBuilder: (BuildContext context) {
         return _Submenu(
@@ -432,11 +432,22 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
-    return _MenuAnchorScope(
-      anchorKey: _anchorKey,
-      anchor: this,
-      isOpen: _isOpen,
-      child: child,
+    // This `Shortcuts` is needed so that shortcuts work when the focus is on
+    // MenuAnchor (specifically, the root menu, since submenus have their own
+    // `Shortcuts`).
+    return
+    Shortcuts(
+      shortcuts: _kMenuTraversalShortcuts,
+      // Ignore semantics here and since the same information is typically
+      // also provided by the children.
+      includeSemantics: false,
+      child:
+      _MenuAnchorScope(
+        anchorKey: _anchorKey,
+        anchor: this,
+        isOpen: _isOpen,
+        child: child,
+      ),
     );
   }
 

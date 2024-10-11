@@ -47,7 +47,7 @@ This list may become outdated, so be sure to change any references to the old SD
 
 1. Locate the desired Android Virtual Device (AVD) from https://chrome-infra-packages.appspot.com/p/chromium/tools/android/avd/linux-amd64/. You should look at the most recently updated AVD and verify that
   it has the desired `generic_android<API#>.textpb` for the API version that you are modifying the engine to support. Then, determine its build_id number by clicking on the AVD instance you would like to use and looking for the build_id tag.
-2. In each of the engine builders (at the time of writing: `ci/builders/linux_android_emulator_skia.json` & `ci/builders/linux_android_emulator.json`), find the `android_virtual_device` and `avd_cipd_version` depedency entries and update them to the versions you desire, e.g.
+2. In each of the engine builders (at the time of writing: `ci/builders/standalone/linux_android_emulator_skia.json` & `ci/builders/standalone/linux_android_emulator.json`), find the `android_virtual_device` and `avd_cipd_version` dependency entries and update them to the versions you desire, e.g.
 
 ```json
 {

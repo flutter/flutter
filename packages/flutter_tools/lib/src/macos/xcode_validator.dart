@@ -11,7 +11,7 @@ import 'xcode.dart';
 
 String _iOSSimulatorMissing(String version) => '''
 iOS $version Simulator not installed; this may be necessary for iOS and macOS development.
-To download and install the platform, open Xcode, select Xcode > Settings > Platforms,
+To download and install the platform, open Xcode, select Xcode > Settings > Components,
 and click the GET button for the required platform.
 
 For more information, please visit:
