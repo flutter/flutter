@@ -1,4 +1,4 @@
-Signature: c30984d4008a542e0d0dfa5ce86272f4
+Signature: bd56860b7a3a1c8d34acc59eb5212019
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -16140,6 +16140,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/include/lib/driver/power
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/power-support.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/types.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/wake-lease.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_testing_scoped_global_logger_cpp/scoped_global_logger.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/time.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
@@ -16221,6 +16222,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/include/lib/driver/power/c
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/power-support.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/types.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/wake-lease.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_testing_scoped_global_logger_cpp/scoped_global_logger.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/time.h
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml
