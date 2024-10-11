@@ -2782,6 +2782,79 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController->Reset();
 }
 
+- (void)testFlutterPlatformViewForwardingAndDelayingRecognizerFailureCondition {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/GetDefaultTaskRunner(),
+                               /*raster=*/GetDefaultTaskRunner(),
+                               /*ui=*/GetDefaultTaskRunner(),
+                               /*io=*/GetDefaultTaskRunner());
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
+  flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  flutterPlatformViewsController->RegisterViewFactory(
+      factory, @"MockFlutterPlatformView",
+      FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+  FlutterResult result = ^(id result) {
+  };
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  // Find touch inteceptor view
+  UIView* touchInteceptorView = gMockPlatformView;
+  while (touchInteceptorView != nil &&
+         ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
+    touchInteceptorView = touchInteceptorView.superview;
+  }
+  XCTAssertNotNil(touchInteceptorView);
+
+  // Find ForwardGestureRecognizer
+  UIGestureRecognizer* forwardingGestureRecognizer = nil;
+  UIGestureRecognizer* delayingGestureRecognizer = nil;
+  for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
+    if ([gestureRecognizer isKindOfClass:NSClassFromString(@"ForwardingGestureRecognizer")]) {
+      forwardingGestureRecognizer = gestureRecognizer;
+    }
+    if ([gestureRecognizer isKindOfClass:NSClassFromString(@"FlutterDelayingGestureRecognizer")]) {
+      delayingGestureRecognizer = gestureRecognizer;
+    }
+  }
+  UIGestureRecognizer* otherGestureRecognizer = OCMClassMock([UIGestureRecognizer class]);
+
+  id flutterViewContoller = OCMClassMock([FlutterViewController class]);
+  flutterPlatformViewsController->SetFlutterViewController(flutterViewContoller);
+
+  XCTAssertFalse([delayingGestureRecognizer.delegate
+                              gestureRecognizer:delayingGestureRecognizer
+      shouldBeRequiredToFailByGestureRecognizer:forwardingGestureRecognizer]);
+  XCTAssertTrue([delayingGestureRecognizer.delegate gestureRecognizer:delayingGestureRecognizer
+                            shouldBeRequiredToFailByGestureRecognizer:otherGestureRecognizer]);
+
+  XCTAssertTrue([delayingGestureRecognizer.delegate gestureRecognizer:delayingGestureRecognizer
+                              shouldRequireFailureOfGestureRecognizer:forwardingGestureRecognizer]);
+  XCTAssertFalse([delayingGestureRecognizer.delegate gestureRecognizer:delayingGestureRecognizer
+                               shouldRequireFailureOfGestureRecognizer:otherGestureRecognizer]);
+
+  flutterPlatformViewsController->Reset();
+}
+
 - (void)testFlutterPlatformViewControllerSubmitFrameWithoutFlutterViewNotCrashing {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
