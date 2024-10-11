@@ -1923,9 +1923,9 @@ void main() {
     expect(scrollController.offset, 0.0);
 
     // Scroll a little over the halfway point.
-    final TestGesture scrollGesture1 = await tester.startGesture(tester.getCenter(find.byType(Scrollable)));
-    await scrollGesture1.moveBy(const Offset(0.0, -(largeTitleHeight / 2) - 1));
-    await scrollGesture1.up();
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable)));
+    await scrollGesture.moveBy(const Offset(0.0, -(largeTitleHeight / 2) - 1));
+    await scrollGesture.up();
     await tester.pumpAndSettle();
 
     // Expect the scroll position to snap to the app bar.
@@ -1966,9 +1966,9 @@ void main() {
     expect(scrollController.offset, 0.0);
 
     // Scroll to the halfway point.
-    final TestGesture scrollGesture1 = await tester.startGesture(tester.getCenter(find.byType(Scrollable)));
-    await scrollGesture1.moveBy(const Offset(0.0, -(largeTitleHeight / 2)));
-    await scrollGesture1.up();
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable)));
+    await scrollGesture.moveBy(const Offset(0.0, -(largeTitleHeight / 2)));
+    await scrollGesture.up();
     await tester.pumpAndSettle();
 
     // Expect the scroll position to snap back to its extended height.
