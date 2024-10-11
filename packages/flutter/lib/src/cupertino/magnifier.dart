@@ -11,6 +11,12 @@ import 'package:flutter/widgets.dart';
 /// A [CupertinoMagnifier] used for magnifying text in cases where a user's
 /// finger may be blocking the point of interest, like a selection handle.
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how to use [CupertinoTextMagnifier].
+///
+/// ** See code in examples/api/lib/widgets/magnifier/cupertino_text_magnifier.0.dart **
+/// {@end-tool}
+///
 /// Delegates styling to [CupertinoMagnifier] with its position depending on
 /// [magnifierInfo].
 ///
@@ -224,6 +230,12 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
 
 /// A [RawMagnifier] used for magnifying text in cases where a user's
 /// finger may be blocking the point of interest, like a selection handle.
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to use [CupertinoMagnifier].
+///
+/// ** See code in examples/api/lib/widgets/magnifier/cupertino_magnifier.0.dart **
+/// {@end-tool}
 ///
 /// [CupertinoMagnifier] is a wrapper around [RawMagnifier] that handles styling
 /// and transitions.
