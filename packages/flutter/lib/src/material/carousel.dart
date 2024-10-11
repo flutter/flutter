@@ -120,7 +120,6 @@ class CarouselView extends StatefulWidget {
   const CarouselView({
     super.key,
     this.itemPadding,
-    this.padding,
     this.itemBackgroundColor,
     this.itemElevation,
     this.itemShape,
@@ -181,7 +180,6 @@ class CarouselView extends StatefulWidget {
   const CarouselView.weighted({
     super.key,
     this.itemPadding,
-    this.padding,
     this.itemBackgroundColor,
     this.itemElevation,
     this.itemShape,
@@ -326,9 +324,6 @@ class CarouselView extends StatefulWidget {
   /// The child widgets for the carousel.
   final List<Widget> children;
 
-  /// The amount of space to surround the widget.
-  final EdgeInsets? padding;
-
   @override
   State<CarouselView> createState() => _CarouselViewState();
 }
@@ -339,7 +334,6 @@ class _CarouselViewState extends State<CarouselView> {
   bool get _consumeMaxWeight => widget.consumeMaxWeight;
   CarouselController? _internalController;
   CarouselController get _controller => widget.controller ?? _internalController!;
-  late EdgeInsets effectiveWidgetPadding;
 
   @override
   void initState() {
@@ -354,7 +348,6 @@ class _CarouselViewState extends State<CarouselView> {
   @override
   void didUpdateWidget(covariant CarouselView oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller?._detach(this);
       if (widget.controller != null) {
