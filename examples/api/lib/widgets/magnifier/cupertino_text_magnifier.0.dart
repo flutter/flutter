@@ -32,7 +32,7 @@ class CupertinoTextMagnifierExampleApp extends StatefulWidget {
 
 class _CupertinoTextMagnifierExampleAppState extends State<CupertinoTextMagnifierExampleApp> {
   final MagnifierController _controller = MagnifierController();
-  
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
