@@ -19,7 +19,7 @@ constexpr SkISize kSize = SkISize::Make(64, 64);
 MockCanvas::MockCanvas() : MockCanvas(kSize.fWidth, kSize.fHeight) {}
 
 MockCanvas::MockCanvas(int width, int height)
-    : base_layer_size_({width, height}), current_layer_(0) {
+    : base_layer_size_(width, height), current_layer_(0) {
   state_stack_.emplace_back(DlRect::MakeXYWH(0, 0, width, height), DlMatrix());
 }
 
@@ -27,13 +27,13 @@ MockCanvas::~MockCanvas() {
   EXPECT_EQ(current_layer_, 0);
 }
 
-SkISize MockCanvas::GetBaseLayerSize() const {
+DlISize MockCanvas::GetBaseLayerDimensions() const {
   return base_layer_size_;
 }
 
 SkImageInfo MockCanvas::GetImageInfo() const {
-  SkISize size = GetBaseLayerSize();
-  return SkImageInfo::MakeUnknown(size.width(), size.height());
+  return SkImageInfo::MakeUnknown(base_layer_size_.width,
+                                  base_layer_size_.height);
 }
 
 void MockCanvas::Save() {
@@ -43,14 +43,13 @@ void MockCanvas::Save() {
   current_layer_++;  // Must go here; func params order of eval is undefined
 }
 
-void MockCanvas::SaveLayer(const SkRect* bounds,
+void MockCanvas::SaveLayer(std::optional<const DlRect>& bounds,
                            const DlPaint* paint,
                            const DlImageFilter* backdrop) {
-  // saveLayer calls this prior to running, so we use it to track saveLayer
-  // calls
   draw_calls_.emplace_back(DrawCall{
       current_layer_,
-      SaveLayerData{bounds ? *bounds : SkRect(), paint ? *paint : DlPaint(),
+      SaveLayerData{bounds.has_value() ? ToSkRect(bounds.value()) : SkRect(),
+                    paint ? *paint : DlPaint(),
                     backdrop ? backdrop->shared() : nullptr,
                     current_layer_ + 1}});
   state_stack_.emplace_back(state_stack_.back());
@@ -71,7 +70,10 @@ void MockCanvas::Restore() {
 // 2x3 2D affine subset of a 4x4 transform in row major order
 void MockCanvas::Transform2DAffine(SkScalar mxx, SkScalar mxy, SkScalar mxt,
                                    SkScalar myx, SkScalar myy, SkScalar myt) {
-  Transform(SkMatrix::MakeAll(mxx, mxy, mxt, myx, myy, myt, 0, 0, 1));
+  Transform(DlMatrix::MakeRow(mxx, mxy, 0, mxt,
+                              myx, myy, 0, myt,
+                              0, 0, 1, 0,
+                              0, 0, 0, 1));
 }
 
 // full 4x4 transform in row major order
@@ -80,34 +82,24 @@ void MockCanvas::TransformFullPerspective(
     SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
     SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
     SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) {
-  Transform(SkM44(mxx, mxy, mxz, mxt,
-                  myx, myy, myz, myt,
-                  mzx, mzy, mzz, mzt,
-                  mwx, mwy, mwz, mwt));
+  Transform(DlMatrix::MakeRow(mxx, mxy, mxz, mxt,
+                              myx, myy, myz, myt,
+                              mzx, mzy, mzz, mzt,
+                              mwx, mwy, mwz, mwt));
 }
 
 // clang-format on
 
-void MockCanvas::Transform(const SkMatrix* matrix) {
+void MockCanvas::Transform(const DlMatrix& matrix) {
   draw_calls_.emplace_back(
-      DrawCall{current_layer_, ConcatMatrixData{SkM44(*matrix)}});
-  state_stack_.back().transform(*matrix);
+      DrawCall{current_layer_, ConcatMatrixData{ToSkM44(matrix)}});
+  state_stack_.back().transform(matrix);
 }
 
-void MockCanvas::Transform(const SkM44* matrix) {
-  draw_calls_.emplace_back(DrawCall{current_layer_, ConcatMatrixData{*matrix}});
-  state_stack_.back().transform(*matrix);
-}
-
-void MockCanvas::SetTransform(const SkMatrix* matrix) {
+void MockCanvas::SetTransform(const DlMatrix& matrix) {
   draw_calls_.emplace_back(
-      DrawCall{current_layer_, SetMatrixData{SkM44(*matrix)}});
-  state_stack_.back().setTransform(*matrix);
-}
-
-void MockCanvas::SetTransform(const SkM44* matrix) {
-  draw_calls_.emplace_back(DrawCall{current_layer_, SetMatrixData{*matrix}});
-  state_stack_.back().setTransform(*matrix);
+      DrawCall{current_layer_, SetMatrixData{ToSkM44(matrix)}});
+  state_stack_.back().setTransform(matrix);
 }
 
 void MockCanvas::TransformReset() {
@@ -116,27 +108,23 @@ void MockCanvas::TransformReset() {
 }
 
 void MockCanvas::Translate(SkScalar x, SkScalar y) {
-  this->Transform(SkM44::Translate(x, y));
+  this->Transform(DlMatrix::MakeTranslation({x, y, 0}));
 }
 
 void MockCanvas::Scale(SkScalar x, SkScalar y) {
-  this->Transform(SkM44::Scale(x, y));
+  this->Transform(DlMatrix::MakeScale({x, y, 1}));
 }
 
 void MockCanvas::Rotate(SkScalar degrees) {
-  this->Transform(SkMatrix::RotateDeg(degrees));
+  this->Transform(DlMatrix::MakeRotationZ(DlDegrees(degrees)));
 }
 
 void MockCanvas::Skew(SkScalar sx, SkScalar sy) {
-  this->Transform(SkMatrix::Skew(sx, sy));
+  this->Transform(DlMatrix::MakeSkew(sx, sy));
 }
 
-SkM44 MockCanvas::GetTransformFullPerspective() const {
-  return state_stack_.back().matrix_4x4();
-}
-
-SkMatrix MockCanvas::GetTransform() const {
-  return state_stack_.back().matrix_3x3();
+DlMatrix MockCanvas::GetMatrix() const {
+  return state_stack_.back().matrix();
 }
 
 void MockCanvas::DrawTextBlob(const sk_sp<SkTextBlob>& text,
@@ -168,36 +156,38 @@ void MockCanvas::DrawTextFrame(
   FML_DCHECK(false);
 }
 
-void MockCanvas::DrawRect(const SkRect& rect, const DlPaint& paint) {
-  draw_calls_.emplace_back(DrawCall{current_layer_, DrawRectData{rect, paint}});
+void MockCanvas::DrawRect(const DlRect& rect, const DlPaint& paint) {
+  draw_calls_.emplace_back(
+      DrawCall{current_layer_, DrawRectData{ToSkRect(rect), paint}});
 }
 
-void MockCanvas::DrawPath(const SkPath& path, const DlPaint& paint) {
-  draw_calls_.emplace_back(DrawCall{current_layer_, DrawPathData{path, paint}});
+void MockCanvas::DrawPath(const DlPath& path, const DlPaint& paint) {
+  draw_calls_.emplace_back(
+      DrawCall{current_layer_, DrawPathData{path.GetSkPath(), paint}});
 }
 
-void MockCanvas::DrawShadow(const SkPath& path,
+void MockCanvas::DrawShadow(const DlPath& path,
                             const DlColor color,
                             const SkScalar elevation,
                             bool transparent_occluder,
                             SkScalar dpr) {
   draw_calls_.emplace_back(DrawCall{
-      current_layer_,
-      DrawShadowData{path, color, elevation, transparent_occluder, dpr}});
+      current_layer_, DrawShadowData{path.GetSkPath(), color, elevation,
+                                     transparent_occluder, dpr}});
 }
 
 void MockCanvas::DrawImage(const sk_sp<DlImage>& image,
-                           const SkPoint& point,
+                           const DlPoint& point,
                            const DlImageSampling options,
                            const DlPaint* paint) {
   if (paint) {
     draw_calls_.emplace_back(
         DrawCall{current_layer_,
-                 DrawImageData{image, point.fX, point.fY, options, *paint}});
+                 DrawImageData{image, point.x, point.y, options, *paint}});
   } else {
     draw_calls_.emplace_back(
         DrawCall{current_layer_,
-                 DrawImageDataNoPaint{image, point.fX, point.fY, options}});
+                 DrawImageDataNoPaint{image, point.x, point.y, options}});
   }
 }
 
@@ -207,17 +197,17 @@ void MockCanvas::DrawDisplayList(const sk_sp<DisplayList> display_list,
       DrawCall{current_layer_, DrawDisplayListData{display_list, opacity}});
 }
 
-void MockCanvas::ClipRect(const SkRect& rect, ClipOp op, bool is_aa) {
+void MockCanvas::ClipRect(const DlRect& rect, ClipOp op, bool is_aa) {
   ClipEdgeStyle style = is_aa ? kSoftClipEdgeStyle : kHardClipEdgeStyle;
   draw_calls_.emplace_back(
-      DrawCall{current_layer_, ClipRectData{rect, op, style}});
+      DrawCall{current_layer_, ClipRectData{ToSkRect(rect), op, style}});
   state_stack_.back().clipRect(rect, op, is_aa);
 }
 
-void MockCanvas::ClipOval(const SkRect& bounds, ClipOp op, bool is_aa) {
+void MockCanvas::ClipOval(const DlRect& bounds, ClipOp op, bool is_aa) {
   ClipEdgeStyle style = is_aa ? kSoftClipEdgeStyle : kHardClipEdgeStyle;
   draw_calls_.emplace_back(
-      DrawCall{current_layer_, ClipOvalData{bounds, op, style}});
+      DrawCall{current_layer_, ClipOvalData{ToSkRect(bounds), op, style}});
   state_stack_.back().clipOval(bounds, op, is_aa);
 }
 
@@ -228,22 +218,22 @@ void MockCanvas::ClipRRect(const SkRRect& rrect, ClipOp op, bool is_aa) {
   state_stack_.back().clipRRect(rrect, op, is_aa);
 }
 
-void MockCanvas::ClipPath(const SkPath& path, ClipOp op, bool is_aa) {
+void MockCanvas::ClipPath(const DlPath& path, ClipOp op, bool is_aa) {
   ClipEdgeStyle style = is_aa ? kSoftClipEdgeStyle : kHardClipEdgeStyle;
   draw_calls_.emplace_back(
-      DrawCall{current_layer_, ClipPathData{path, op, style}});
+      DrawCall{current_layer_, ClipPathData{path.GetSkPath(), op, style}});
   state_stack_.back().clipPath(path, op, is_aa);
 }
 
-SkRect MockCanvas::GetDestinationClipBounds() const {
-  return state_stack_.back().device_cull_rect();
+DlRect MockCanvas::GetDestinationClipCoverage() const {
+  return state_stack_.back().GetDeviceCullCoverage();
 }
 
-SkRect MockCanvas::GetLocalClipBounds() const {
-  return state_stack_.back().local_cull_rect();
+DlRect MockCanvas::GetLocalClipCoverage() const {
+  return state_stack_.back().GetLocalCullCoverage();
 }
 
-bool MockCanvas::QuickReject(const SkRect& bounds) const {
+bool MockCanvas::QuickReject(const DlRect& bounds) const {
   return state_stack_.back().content_culled(bounds);
 }
 
@@ -259,8 +249,8 @@ void MockCanvas::DrawColor(DlColor color, DlBlendMode mode) {
   DrawPaint(DlPaint(color).setBlendMode(mode));
 }
 
-void MockCanvas::DrawLine(const SkPoint& p0,
-                          const SkPoint& p1,
+void MockCanvas::DrawLine(const DlPoint& p0,
+                          const DlPoint& p1,
                           const DlPaint& paint) {
   FML_DCHECK(false);
 }
@@ -275,22 +265,22 @@ void MockCanvas::DrawDashedLine(const DlPoint& p0,
 
 void MockCanvas::DrawPoints(PointMode,
                             uint32_t,
-                            const SkPoint[],
+                            const DlPoint[],
                             const DlPaint&) {
   FML_DCHECK(false);
 }
 
-void MockCanvas::DrawOval(const SkRect&, const DlPaint&) {
+void MockCanvas::DrawOval(const DlRect&, const DlPaint&) {
   FML_DCHECK(false);
 }
 
-void MockCanvas::DrawCircle(const SkPoint& center,
+void MockCanvas::DrawCircle(const DlPoint& center,
                             SkScalar radius,
                             const DlPaint& paint) {
   FML_DCHECK(false);
 }
 
-void MockCanvas::DrawArc(const SkRect&,
+void MockCanvas::DrawArc(const DlRect&,
                          SkScalar,
                          SkScalar,
                          bool,
@@ -303,8 +293,8 @@ void MockCanvas::DrawRRect(const SkRRect&, const DlPaint&) {
 }
 
 void MockCanvas::DrawImageRect(const sk_sp<DlImage>&,
-                               const SkRect&,
-                               const SkRect&,
+                               const DlRect&,
+                               const DlRect&,
                                const DlImageSampling,
                                const DlPaint*,
                                SrcRectConstraint constraint) {
@@ -312,8 +302,8 @@ void MockCanvas::DrawImageRect(const sk_sp<DlImage>&,
 }
 
 void MockCanvas::DrawImageNine(const sk_sp<DlImage>& image,
-                               const SkIRect& center,
-                               const SkRect& dst,
+                               const DlIRect& center,
+                               const DlRect& dst,
                                DlFilterMode filter,
                                const DlPaint* paint) {
   FML_DCHECK(false);
@@ -327,12 +317,12 @@ void MockCanvas::DrawVertices(const std::shared_ptr<DlVertices>&,
 
 void MockCanvas::DrawAtlas(const sk_sp<DlImage>&,
                            const SkRSXform[],
-                           const SkRect[],
+                           const DlRect[],
                            const DlColor[],
                            int,
                            DlBlendMode,
                            const DlImageSampling,
-                           const SkRect*,
+                           const DlRect*,
                            const DlPaint*) {
   FML_DCHECK(false);
 }

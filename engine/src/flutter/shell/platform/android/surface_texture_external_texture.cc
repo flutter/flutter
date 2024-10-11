@@ -84,7 +84,8 @@ void SurfaceTextureExternalTexture::DrawFrame(
   transform = inverted;
 
   if (transform.isIdentity()) {
-    context.canvas->DrawImage(dl_image_, {0, 0}, sampling, context.paint);
+    context.canvas->DrawImage(dl_image_, SkPoint{0, 0}, sampling,
+                              context.paint);
     return;
   }
 

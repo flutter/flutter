@@ -48,7 +48,7 @@ void RasterCacheResult::draw(DlCanvas& canvas,
   canvas.TransformReset();
   flow_.Step();
   if (!preserve_rtree || !rtree_) {
-    canvas.DrawImage(image_, {bounds.fLeft, bounds.fTop},
+    canvas.DrawImage(image_, SkPoint{bounds.fLeft, bounds.fTop},
                      DlImageSampling::kNearestNeighbor, paint);
   } else {
     // On some platforms RTree from overlay layers is used for unobstructed

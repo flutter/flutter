@@ -273,7 +273,7 @@ TEST_F(DisplayListTest, GeneralReceiverInitialValues) {
 
 TEST_F(DisplayListTest, Iteration) {
   DisplayListBuilder builder;
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());
+  builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
   auto dl = builder.Build();
   for (DlIndex i : *dl) {
     EXPECT_EQ(dl->GetOpType(i), DisplayListOpType::kDrawRect)  //
@@ -421,7 +421,7 @@ TEST_F(DisplayListTest, SaveRestoreRestoresClip) {
   DisplayListBuilder builder(cull_rect);
 
   builder.Save();
-  builder.ClipRect({0.0f, 0.0f, 10.0f, 10.0f});
+  builder.ClipRect(SkRect{0.0f, 0.0f, 10.0f, 10.0f});
   builder.Restore();
   check_defaults(builder, cull_rect);
 
@@ -440,7 +440,7 @@ TEST_F(DisplayListTest, BuildRestoresClip) {
   SkRect cull_rect = SkRect::MakeLTRB(-10.0f, -10.0f, 500.0f, 500.0f);
   DisplayListBuilder builder(cull_rect);
 
-  builder.ClipRect({0.0f, 0.0f, 10.0f, 10.0f});
+  builder.ClipRect(SkRect{0.0f, 0.0f, 10.0f, 10.0f});
   builder.Build();
   check_defaults(builder, cull_rect);
 
@@ -1228,25 +1228,27 @@ TEST_F(DisplayListTest, SingleOpsMightSupportGroupOpacityBlendMode) {
   RUN_TESTS2(canvas.DrawColor(DlColor(SK_ColorRED), DlBlendMode::kSrcOver);
              , true);
   RUN_TESTS2(canvas.DrawColor(DlColor(SK_ColorRED), DlBlendMode::kSrc);, false);
-  RUN_TESTS(canvas.DrawLine({0, 0}, {10, 10}, paint););
-  RUN_TESTS(canvas.DrawRect({0, 0, 10, 10}, paint););
-  RUN_TESTS(canvas.DrawOval({0, 0, 10, 10}, paint););
-  RUN_TESTS(canvas.DrawCircle({10, 10}, 5, paint););
+  RUN_TESTS(canvas.DrawLine(SkPoint{0, 0}, SkPoint{10, 10}, paint););
+  RUN_TESTS(canvas.DrawRect(SkRect{0, 0, 10, 10}, paint););
+  RUN_TESTS(canvas.DrawOval(SkRect{0, 0, 10, 10}, paint););
+  RUN_TESTS(canvas.DrawCircle(SkPoint{10, 10}, 5, paint););
   RUN_TESTS(
       canvas.DrawRRect(SkRRect::MakeRectXY({0, 0, 10, 10}, 2, 2), paint););
   RUN_TESTS(canvas.DrawDRRect(SkRRect::MakeRectXY({0, 0, 10, 10}, 2, 2),
                               SkRRect::MakeRectXY({2, 2, 8, 8}, 2, 2), paint););
   RUN_TESTS(canvas.DrawPath(
       SkPath().addOval({0, 0, 10, 10}).addOval({5, 5, 15, 15}), paint););
-  RUN_TESTS(canvas.DrawArc({0, 0, 10, 10}, 0, math::kPi, true, paint););
+  RUN_TESTS(canvas.DrawArc(SkRect{0, 0, 10, 10}, 0, math::kPi, true, paint););
   RUN_TESTS2(
       canvas.DrawPoints(PointMode::kPoints, TestPointCount, kTestPoints, paint);
       , false);
   RUN_TESTS2(canvas.DrawVertices(kTestVertices1, DlBlendMode::kSrc, paint);
              , false);
-  RUN_TESTS(canvas.DrawImage(TestImage1, {0, 0}, kLinearSampling, &paint););
-  RUN_TESTS2(canvas.DrawImage(TestImage1, {0, 0}, kLinearSampling, nullptr);
-             , true);
+  RUN_TESTS(
+      canvas.DrawImage(TestImage1, SkPoint{0, 0}, kLinearSampling, &paint););
+  RUN_TESTS2(
+      canvas.DrawImage(TestImage1, SkPoint{0, 0}, kLinearSampling, nullptr);
+      , true);
   RUN_TESTS(canvas.DrawImageRect(TestImage1, SkIRect{10, 10, 20, 20},
                                  {0, 0, 10, 10}, kNearestSampling, &paint,
                                  DlCanvas::SrcRectConstraint::kFast););
@@ -1254,10 +1256,12 @@ TEST_F(DisplayListTest, SingleOpsMightSupportGroupOpacityBlendMode) {
                                   {0, 0, 10, 10}, kNearestSampling, nullptr,
                                   DlCanvas::SrcRectConstraint::kFast);
              , true);
-  RUN_TESTS(canvas.DrawImageNine(TestImage2, {20, 20, 30, 30}, {0, 0, 20, 20},
-                                 DlFilterMode::kLinear, &paint););
-  RUN_TESTS2(canvas.DrawImageNine(TestImage2, {20, 20, 30, 30}, {0, 0, 20, 20},
-                                  DlFilterMode::kLinear, nullptr);
+  RUN_TESTS(canvas.DrawImageNine(TestImage2, SkIRect{20, 20, 30, 30},
+                                 SkRect{0, 0, 20, 20}, DlFilterMode::kLinear,
+                                 &paint););
+  RUN_TESTS2(canvas.DrawImageNine(TestImage2, SkIRect{20, 20, 30, 30},
+                                  SkRect{0, 0, 20, 20}, DlFilterMode::kLinear,
+                                  nullptr);
              , true);
   static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
   static SkRect texs[] = {{10, 10, 20, 20}, {20, 20, 30, 30}};
@@ -1273,8 +1277,8 @@ TEST_F(DisplayListTest, SingleOpsMightSupportGroupOpacityBlendMode) {
   RUN_TESTS2(canvas.DrawDisplayList(TestDisplayList1);, true);
   {
     static DisplayListBuilder builder;
-    builder.DrawRect({0, 0, 10, 10}, DlPaint());
-    builder.DrawRect({5, 5, 15, 15}, DlPaint());
+    builder.DrawRect(SkRect{0, 0, 10, 10}, DlPaint());
+    builder.DrawRect(SkRect{5, 5, 15, 15}, DlPaint());
     static auto display_list = builder.Build();
     RUN_TESTS2(canvas.DrawDisplayList(display_list);, false);
   }
@@ -1346,9 +1350,10 @@ TEST_F(DisplayListTest, SaveLayerFalseWithSrcBlendSupportsGroupOpacity) {
   // saveLayer following it should not use that attribute to base its
   // decisions about group opacity and the draw rect after that comes
   // with its own compatible blend mode.
-  builder.DrawRect({0, 0, 0, 0}, DlPaint().setBlendMode(DlBlendMode::kSrc));
+  builder.DrawRect(SkRect{0, 0, 0, 0},
+                   DlPaint().setBlendMode(DlBlendMode::kSrc));
   builder.SaveLayer(nullptr, nullptr);
-  builder.DrawRect({0, 0, 10, 10}, DlPaint());
+  builder.DrawRect(SkRect{0, 0, 10, 10}, DlPaint());
   builder.Restore();
   auto display_list = builder.Build();
   EXPECT_TRUE(display_list->can_apply_group_opacity());
@@ -1359,7 +1364,7 @@ TEST_F(DisplayListTest, SaveLayerTrueWithSrcBlendDoesNotSupportGroupOpacity) {
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kSrc);
   builder.SaveLayer(nullptr, &save_paint);
-  builder.DrawRect({0, 0, 10, 10}, DlPaint());
+  builder.DrawRect(SkRect{0, 0, 10, 10}, DlPaint());
   builder.Restore();
   auto display_list = builder.Build();
   EXPECT_FALSE(display_list->can_apply_group_opacity());
@@ -1368,7 +1373,8 @@ TEST_F(DisplayListTest, SaveLayerTrueWithSrcBlendDoesNotSupportGroupOpacity) {
 TEST_F(DisplayListTest, SaveLayerFalseSupportsGroupOpacityWithChildSrcBlend) {
   DisplayListBuilder builder;
   builder.SaveLayer(nullptr, nullptr);
-  builder.DrawRect({0, 0, 10, 10}, DlPaint().setBlendMode(DlBlendMode::kSrc));
+  builder.DrawRect(SkRect{0, 0, 10, 10},
+                   DlPaint().setBlendMode(DlBlendMode::kSrc));
   builder.Restore();
   auto display_list = builder.Build();
   EXPECT_TRUE(display_list->can_apply_group_opacity());
@@ -1378,7 +1384,8 @@ TEST_F(DisplayListTest, SaveLayerTrueSupportsGroupOpacityWithChildSrcBlend) {
   DisplayListBuilder builder;
   DlPaint save_paint;
   builder.SaveLayer(nullptr, &save_paint);
-  builder.DrawRect({0, 0, 10, 10}, DlPaint().setBlendMode(DlBlendMode::kSrc));
+  builder.DrawRect(SkRect{0, 0, 10, 10},
+                   DlPaint().setBlendMode(DlBlendMode::kSrc));
   builder.Restore();
   auto display_list = builder.Build();
   EXPECT_TRUE(display_list->can_apply_group_opacity());
@@ -1388,12 +1395,12 @@ TEST_F(DisplayListTest, SaveLayerBoundsSnapshotsImageFilter) {
   DisplayListBuilder builder;
   DlPaint save_paint;
   builder.SaveLayer(nullptr, &save_paint);
-  builder.DrawRect({50, 50, 100, 100}, DlPaint());
+  builder.DrawRect(SkRect{50, 50, 100, 100}, DlPaint());
   // This image filter should be ignored since it was not set before saveLayer
   // And the rect drawn with it will not contribute any more area to the bounds
   DlPaint draw_paint;
   draw_paint.setImageFilter(&kTestBlurImageFilter1);
-  builder.DrawRect({70, 70, 80, 80}, draw_paint);
+  builder.DrawRect(SkRect{70, 70, 80, 80}, draw_paint);
   builder.Restore();
   SkRect bounds = builder.Build()->bounds();
   EXPECT_EQ(bounds, SkRect::MakeLTRB(50, 50, 100, 100));
@@ -1533,7 +1540,7 @@ TEST_F(DisplayListTest, SaveLayerOneSimpleOpInheritsOpacity) {
   DlPaint save_paint;
   save_paint.setColor(DlColor(SkColorSetARGB(127, 255, 255, 255)));
   builder.SaveLayer(nullptr, &save_paint);
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());
+  builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
   builder.Restore();
 
   builder.Build()->Dispatch(expector);
@@ -1547,7 +1554,7 @@ TEST_F(DisplayListTest, SaveLayerNoAttributesInheritsOpacity) {
 
   DisplayListBuilder builder;
   builder.SaveLayer(nullptr, nullptr);
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());
+  builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
   builder.Restore();
 
   builder.Build()->Dispatch(expector);
@@ -1562,8 +1569,8 @@ TEST_F(DisplayListTest, SaveLayerTwoOverlappingOpsDoesNotInheritOpacity) {
   DlPaint save_paint;
   save_paint.setColor(DlColor(SkColorSetARGB(127, 255, 255, 255)));
   builder.SaveLayer(nullptr, &save_paint);
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());
-  builder.DrawRect({15, 15, 25, 25}, DlPaint());
+  builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
+  builder.DrawRect(SkRect{15, 15, 25, 25}, DlPaint());
   builder.Restore();
 
   builder.Build()->Dispatch(expector);
@@ -1584,9 +1591,9 @@ TEST_F(DisplayListTest, NestedSaveLayersMightInheritOpacity) {
   save_paint.setColor(DlColor(SkColorSetARGB(127, 255, 255, 255)));
   builder.SaveLayer(nullptr, &save_paint);
   builder.SaveLayer(nullptr, &save_paint);
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());
+  builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
   builder.SaveLayer(nullptr, &save_paint);
-  builder.DrawRect({15, 15, 25, 25}, DlPaint());
+  builder.DrawRect(SkRect{15, 15, 25, 25}, DlPaint());
   builder.Restore();
   builder.Restore();
   builder.Restore();
@@ -1608,7 +1615,7 @@ TEST_F(DisplayListTest, NestedSaveLayersCanBothSupportOpacityOptimization) {
   save_paint.setColor(DlColor(SkColorSetARGB(127, 255, 255, 255)));
   builder.SaveLayer(nullptr, &save_paint);
   builder.SaveLayer(nullptr, nullptr);
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());
+  builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
   builder.Restore();
   builder.Restore();
 
@@ -1625,7 +1632,7 @@ TEST_F(DisplayListTest, SaveLayerImageFilterDoesNotInheritOpacity) {
   save_paint.setColor(DlColor(SkColorSetARGB(127, 255, 255, 255)));
   save_paint.setImageFilter(&kTestBlurImageFilter1);
   builder.SaveLayer(nullptr, &save_paint);
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());
+  builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
   builder.Restore();
 
   builder.Build()->Dispatch(expector);
@@ -1641,7 +1648,7 @@ TEST_F(DisplayListTest, SaveLayerColorFilterDoesNotInheritOpacity) {
   save_paint.setColor(DlColor(SkColorSetARGB(127, 255, 255, 255)));
   save_paint.setColorFilter(&kTestMatrixColorFilter1);
   builder.SaveLayer(nullptr, &save_paint);
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());
+  builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
   builder.Restore();
 
   builder.Build()->Dispatch(expector);
@@ -1657,7 +1664,7 @@ TEST_F(DisplayListTest, SaveLayerSrcBlendDoesNotInheritOpacity) {
   save_paint.setColor(DlColor(SkColorSetARGB(127, 255, 255, 255)));
   save_paint.setBlendMode(DlBlendMode::kSrc);
   builder.SaveLayer(nullptr, &save_paint);
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());
+  builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
   builder.Restore();
 
   builder.Build()->Dispatch(expector);
@@ -1675,7 +1682,7 @@ TEST_F(DisplayListTest, SaveLayerImageFilterOnChildInheritsOpacity) {
   builder.SaveLayer(nullptr, &save_paint);
   DlPaint draw_paint = save_paint;
   draw_paint.setImageFilter(&kTestBlurImageFilter1);
-  builder.DrawRect({10, 10, 20, 20}, draw_paint);
+  builder.DrawRect(SkRect{10, 10, 20, 20}, draw_paint);
   builder.Restore();
 
   builder.Build()->Dispatch(expector);
@@ -1692,7 +1699,7 @@ TEST_F(DisplayListTest, SaveLayerColorFilterOnChildDoesNotInheritOpacity) {
   builder.SaveLayer(nullptr, &save_paint);
   DlPaint draw_paint = save_paint;
   draw_paint.setColorFilter(&kTestMatrixColorFilter1);
-  builder.DrawRect({10, 10, 20, 20}, draw_paint);
+  builder.DrawRect(SkRect{10, 10, 20, 20}, draw_paint);
   builder.Restore();
 
   builder.Build()->Dispatch(expector);
@@ -1709,7 +1716,7 @@ TEST_F(DisplayListTest, SaveLayerSrcBlendOnChildDoesNotInheritOpacity) {
   builder.SaveLayer(nullptr, &save_paint);
   DlPaint draw_paint = save_paint;
   draw_paint.setBlendMode(DlBlendMode::kSrc);
-  builder.DrawRect({10, 10, 20, 20}, draw_paint);
+  builder.DrawRect(SkRect{10, 10, 20, 20}, draw_paint);
   builder.Restore();
 
   builder.Build()->Dispatch(expector);
@@ -1790,14 +1797,15 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
   DlPaint paint = DlPaint(DlColor::kWhite()).setAntiAlias(true);
   {
     builder.Save();
-    builder.ClipRect({0, 0, 100, 100}, ClipOp::kIntersect, true);
+    builder.ClipRect(SkRect{0, 0, 100, 100}, ClipOp::kIntersect, true);
     {
       builder.Save();
       builder.Transform2DAffine(2.17391, 0, -2547.83,  //
                                 0, 2.04082, -500);
       {
         builder.Save();
-        builder.ClipRect({1172, 245, 1218, 294}, ClipOp::kIntersect, true);
+        builder.ClipRect(SkRect{1172, 245, 1218, 294}, ClipOp::kIntersect,
+                         true);
         {
           builder.SaveLayer(nullptr, nullptr, nullptr);
           {
@@ -1974,7 +1982,7 @@ TEST_F(DisplayListTest, ClipRectAffectsClipBounds) {
   ASSERT_EQ(initial_destination_bounds, clip_bounds);
 
   builder.Save();
-  builder.ClipRect({0, 0, 15, 15}, ClipOp::kIntersect, false);
+  builder.ClipRect(SkRect{0, 0, 15, 15}, ClipOp::kIntersect, false);
   // Both clip bounds have changed
   ASSERT_NE(builder.GetLocalClipBounds(), clip_bounds);
   ASSERT_NE(builder.GetDestinationClipBounds(), clip_bounds);
@@ -2013,7 +2021,7 @@ TEST_F(DisplayListTest, ClipRectDoAAAffectsClipBounds) {
   ASSERT_EQ(initial_destination_bounds, clip_expanded_bounds);
 
   builder.Save();
-  builder.ClipRect({0, 0, 15, 15}, ClipOp::kIntersect, true);
+  builder.ClipRect(SkRect{0, 0, 15, 15}, ClipOp::kIntersect, true);
   // Both clip bounds have changed
   ASSERT_NE(builder.GetLocalClipBounds(), clip_expanded_bounds);
   ASSERT_NE(builder.GetDestinationClipBounds(), clip_expanded_bounds);
@@ -2071,7 +2079,7 @@ TEST_F(DisplayListTest, ClipRRectAffectsClipBounds) {
   ASSERT_EQ(initial_destination_bounds, clip_bounds);
 
   builder.Save();
-  builder.ClipRect({0, 0, 15, 15}, ClipOp::kIntersect, false);
+  builder.ClipRect(SkRect{0, 0, 15, 15}, ClipOp::kIntersect, false);
   // Both clip bounds have changed
   ASSERT_NE(builder.GetLocalClipBounds(), clip_bounds);
   ASSERT_NE(builder.GetDestinationClipBounds(), clip_bounds);
@@ -2111,7 +2119,7 @@ TEST_F(DisplayListTest, ClipRRectDoAAAffectsClipBounds) {
   ASSERT_EQ(initial_destination_bounds, clip_expanded_bounds);
 
   builder.Save();
-  builder.ClipRect({0, 0, 15, 15}, ClipOp::kIntersect, true);
+  builder.ClipRect(SkRect{0, 0, 15, 15}, ClipOp::kIntersect, true);
   // Both clip bounds have changed
   ASSERT_NE(builder.GetLocalClipBounds(), clip_expanded_bounds);
   ASSERT_NE(builder.GetDestinationClipBounds(), clip_expanded_bounds);
@@ -2172,7 +2180,7 @@ TEST_F(DisplayListTest, ClipPathAffectsClipBounds) {
   ASSERT_EQ(initial_destination_bounds, clip_bounds);
 
   builder.Save();
-  builder.ClipRect({0, 0, 15, 15}, ClipOp::kIntersect, false);
+  builder.ClipRect(SkRect{0, 0, 15, 15}, ClipOp::kIntersect, false);
   // Both clip bounds have changed
   ASSERT_NE(builder.GetLocalClipBounds(), clip_bounds);
   ASSERT_NE(builder.GetDestinationClipBounds(), clip_bounds);
@@ -2211,7 +2219,7 @@ TEST_F(DisplayListTest, ClipPathDoAAAffectsClipBounds) {
   ASSERT_EQ(initial_destination_bounds, clip_expanded_bounds);
 
   builder.Save();
-  builder.ClipRect({0, 0, 15, 15}, ClipOp::kIntersect, true);
+  builder.ClipRect(SkRect{0, 0, 15, 15}, ClipOp::kIntersect, true);
   // Both clip bounds have changed
   ASSERT_NE(builder.GetLocalClipBounds(), clip_expanded_bounds);
   ASSERT_NE(builder.GetDestinationClipBounds(), clip_expanded_bounds);
@@ -2443,9 +2451,9 @@ TEST_F(DisplayListTest, RTreeOfSimpleScene) {
 
 TEST_F(DisplayListTest, RTreeOfSaveRestoreScene) {
   DisplayListBuilder builder(/*prepare_rtree=*/true);
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());
+  builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
   builder.Save();
-  builder.DrawRect({50, 50, 60, 60}, DlPaint());
+  builder.DrawRect(SkRect{50, 50, 60, 60}, DlPaint());
   builder.Restore();
   auto display_list = builder.Build();
   auto rtree = display_list->rtree();
@@ -2477,11 +2485,11 @@ TEST_F(DisplayListTest, RTreeOfSaveLayerFilterScene) {
   auto filter = DlBlurImageFilter(1.0, 1.0, DlTileMode::kClamp);
   DlPaint default_paint = DlPaint();
   DlPaint filter_paint = DlPaint().setImageFilter(&filter);
-  builder.DrawRect({10, 10, 20, 20}, default_paint);
+  builder.DrawRect(SkRect{10, 10, 20, 20}, default_paint);
   builder.SaveLayer(nullptr, &filter_paint);
   // the following rectangle will be expanded to 50,50,60,60
   // by the saveLayer filter during the restore operation
-  builder.DrawRect({53, 53, 57, 57}, default_paint);
+  builder.DrawRect(SkRect{53, 53, 57, 57}, default_paint);
   builder.Restore();
   auto display_list = builder.Build();
   auto rtree = display_list->rtree();
@@ -2509,8 +2517,8 @@ TEST_F(DisplayListTest, RTreeOfSaveLayerFilterScene) {
 
 TEST_F(DisplayListTest, NestedDisplayListRTreesAreSparse) {
   DisplayListBuilder nested_dl_builder(/**prepare_rtree=*/true);
-  nested_dl_builder.DrawRect({10, 10, 20, 20}, DlPaint());
-  nested_dl_builder.DrawRect({50, 50, 60, 60}, DlPaint());
+  nested_dl_builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
+  nested_dl_builder.DrawRect(SkRect{50, 50, 60, 60}, DlPaint());
   auto nested_display_list = nested_dl_builder.Build();
 
   DisplayListBuilder builder(/**prepare_rtree=*/true);
@@ -2531,38 +2539,38 @@ TEST_F(DisplayListTest, NestedDisplayListRTreesAreSparse) {
 TEST_F(DisplayListTest, RemoveUnnecessarySaveRestorePairs) {
   {
     DisplayListBuilder builder;
-    builder.DrawRect({10, 10, 20, 20}, DlPaint());
+    builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
     builder.Save();  // This save op is unnecessary
-    builder.DrawRect({50, 50, 60, 60}, DlPaint());
+    builder.DrawRect(SkRect{50, 50, 60, 60}, DlPaint());
     builder.Restore();
 
     DisplayListBuilder builder2;
-    builder2.DrawRect({10, 10, 20, 20}, DlPaint());
-    builder2.DrawRect({50, 50, 60, 60}, DlPaint());
+    builder2.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
+    builder2.DrawRect(SkRect{50, 50, 60, 60}, DlPaint());
     ASSERT_TRUE(DisplayListsEQ_Verbose(builder.Build(), builder2.Build()));
   }
 
   {
     DisplayListBuilder builder;
-    builder.DrawRect({10, 10, 20, 20}, DlPaint());
+    builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
     builder.Save();
     {
       builder.Translate(1.0, 1.0);
       builder.Save();
       {  //
-        builder.DrawRect({50, 50, 60, 60}, DlPaint());
+        builder.DrawRect(SkRect{50, 50, 60, 60}, DlPaint());
       }
       builder.Restore();
     }
     builder.Restore();
 
     DisplayListBuilder builder2;
-    builder2.DrawRect({10, 10, 20, 20}, DlPaint());
+    builder2.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
     builder2.Save();
     {  //
       builder2.Translate(1.0, 1.0);
       {  //
-        builder2.DrawRect({50, 50, 60, 60}, DlPaint());
+        builder2.DrawRect(SkRect{50, 50, 60, 60}, DlPaint());
       }
     }
     builder2.Restore();
@@ -2580,8 +2588,8 @@ TEST_F(DisplayListTest, CollapseMultipleNestedSaveRestore) {
       {
         builder1.Translate(10, 10);
         builder1.Scale(2, 2);
-        builder1.ClipRect({10, 10, 20, 20}, ClipOp::kIntersect, false);
-        builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+        builder1.ClipRect(SkRect{10, 10, 20, 20}, ClipOp::kIntersect, false);
+        builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
       }
       builder1.Restore();
     }
@@ -2595,8 +2603,8 @@ TEST_F(DisplayListTest, CollapseMultipleNestedSaveRestore) {
   {
     builder2.Translate(10, 10);
     builder2.Scale(2, 2);
-    builder2.ClipRect({10, 10, 20, 20}, ClipOp::kIntersect, false);
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.ClipRect(SkRect{10, 10, 20, 20}, ClipOp::kIntersect, false);
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder2.Restore();
   auto display_list2 = builder2.Build();
@@ -2610,7 +2618,7 @@ TEST_F(DisplayListTest, CollapseNestedSaveAndSaveLayerRestore) {
   {
     builder1.SaveLayer(nullptr, nullptr);
     {
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
       builder1.Scale(2, 2);
     }
     builder1.Restore();
@@ -2621,7 +2629,7 @@ TEST_F(DisplayListTest, CollapseNestedSaveAndSaveLayerRestore) {
   DisplayListBuilder builder2;
   builder2.SaveLayer(nullptr, nullptr);
   {
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     builder2.Scale(2, 2);
   }
   builder2.Restore();
@@ -2695,14 +2703,14 @@ TEST_F(DisplayListTest, TransformTriggersDeferredSave) {
                                         0, 1, 0, 100,  //
                                         0, 0, 1, 0,    //
                                         0, 0, 0, 1);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
     builder1.TransformFullPerspective(1, 0, 0, 10,   //
                                       0, 1, 0, 100,  //
                                       0, 0, 1, 0,    //
                                       0, 0, 0, 1);
-    builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder1.Restore();
   auto display_list1 = builder1.Build();
@@ -2714,7 +2722,7 @@ TEST_F(DisplayListTest, TransformTriggersDeferredSave) {
                                       0, 1, 0, 100,  //
                                       0, 0, 1, 0,    //
                                       0, 0, 0, 1);
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder2.Restore();
   builder2.Save();
@@ -2723,7 +2731,7 @@ TEST_F(DisplayListTest, TransformTriggersDeferredSave) {
                                       0, 1, 0, 100,  //
                                       0, 0, 1, 0,    //
                                       0, 0, 0, 1);
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder2.Restore();
   auto display_list2 = builder2.Build();
@@ -2738,7 +2746,7 @@ TEST_F(DisplayListTest, Transform2DTriggersDeferredSave) {
     builder1.Save();
     {
       builder1.Transform2DAffine(0, 1, 12, 1, 0, 33);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
   }
@@ -2749,7 +2757,7 @@ TEST_F(DisplayListTest, Transform2DTriggersDeferredSave) {
   builder2.Save();
   {
     builder2.Transform2DAffine(0, 1, 12, 1, 0, 33);
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder2.Restore();
   auto display_list2 = builder2.Build();
@@ -2767,7 +2775,7 @@ TEST_F(DisplayListTest, TransformPerspectiveTriggersDeferredSave) {
                                         1, 0, 0, 33,  //
                                         3, 2, 5, 29,  //
                                         0, 0, 0, 12);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
   }
@@ -2781,7 +2789,7 @@ TEST_F(DisplayListTest, TransformPerspectiveTriggersDeferredSave) {
                                       1, 0, 0, 33,  //
                                       3, 2, 5, 29,  //
                                       0, 0, 0, 12);
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder2.Restore();
   auto display_list2 = builder2.Build();
@@ -2796,7 +2804,7 @@ TEST_F(DisplayListTest, ResetTransformTriggersDeferredSave) {
     builder1.Save();
     {
       builder1.TransformReset();
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
   }
@@ -2807,7 +2815,7 @@ TEST_F(DisplayListTest, ResetTransformTriggersDeferredSave) {
   builder2.Save();
   {
     builder2.TransformReset();
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder2.Restore();
   auto display_list2 = builder2.Build();
@@ -2822,7 +2830,7 @@ TEST_F(DisplayListTest, SkewTriggersDeferredSave) {
     builder1.Save();
     {
       builder1.Skew(10, 10);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
   }
@@ -2833,7 +2841,7 @@ TEST_F(DisplayListTest, SkewTriggersDeferredSave) {
   builder2.Save();
   {
     builder2.Skew(10, 10);
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder2.Restore();
   auto display_list2 = builder2.Build();
@@ -2848,7 +2856,7 @@ TEST_F(DisplayListTest, TranslateTriggersDeferredSave) {
     builder1.Save();
     {
       builder1.Translate(10, 10);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
   }
@@ -2859,7 +2867,7 @@ TEST_F(DisplayListTest, TranslateTriggersDeferredSave) {
   builder2.Save();
   {
     builder2.Translate(10, 10);
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder2.Restore();
   auto display_list2 = builder2.Build();
@@ -2874,7 +2882,7 @@ TEST_F(DisplayListTest, ScaleTriggersDeferredSave) {
     builder1.Save();
     {
       builder1.Scale(0.5, 0.5);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
   }
@@ -2885,7 +2893,7 @@ TEST_F(DisplayListTest, ScaleTriggersDeferredSave) {
   builder2.Save();
   {
     builder2.Scale(0.5, 0.5);
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder2.Restore();
   auto display_list2 = builder2.Build();
@@ -2901,14 +2909,14 @@ TEST_F(DisplayListTest, ClipRectTriggersDeferredSave) {
     {
       builder1.ClipRect(SkRect::MakeLTRB(0, 0, 100, 100), ClipOp::kIntersect,
                         true);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
     builder1.TransformFullPerspective(1, 0, 0, 0,  //
                                       0, 1, 0, 0,  //
                                       0, 0, 1, 0,  //
                                       0, 0, 0, 1);
-    builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder1.Restore();
   auto display_list1 = builder1.Build();
@@ -2918,14 +2926,14 @@ TEST_F(DisplayListTest, ClipRectTriggersDeferredSave) {
   {
     builder2.ClipRect(SkRect::MakeLTRB(0, 0, 100, 100), ClipOp::kIntersect,
                       true);
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder2.Restore();
   builder2.TransformFullPerspective(1, 0, 0, 0,  //
                                     0, 1, 0, 0,  //
                                     0, 0, 1, 0,  //
                                     0, 0, 0, 1);
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   auto display_list2 = builder2.Build();
 
   ASSERT_TRUE(DisplayListsEQ_Verbose(display_list1, display_list2));
@@ -2939,14 +2947,14 @@ TEST_F(DisplayListTest, ClipRRectTriggersDeferredSave) {
     {
       builder1.ClipRRect(kTestRRect, ClipOp::kIntersect, true);
 
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
     builder1.TransformFullPerspective(1, 0, 0, 0,  //
                                       0, 1, 0, 0,  //
                                       0, 0, 1, 0,  //
                                       0, 0, 0, 1);
-    builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder1.Restore();
   auto display_list1 = builder1.Build();
@@ -2955,13 +2963,13 @@ TEST_F(DisplayListTest, ClipRRectTriggersDeferredSave) {
   builder2.Save();
   builder2.ClipRRect(kTestRRect, ClipOp::kIntersect, true);
 
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   builder2.Restore();
   builder2.TransformFullPerspective(1, 0, 0, 0,  //
                                     0, 1, 0, 0,  //
                                     0, 0, 1, 0,  //
                                     0, 0, 0, 1);
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   auto display_list2 = builder2.Build();
 
   ASSERT_TRUE(DisplayListsEQ_Verbose(display_list1, display_list2));
@@ -2974,14 +2982,14 @@ TEST_F(DisplayListTest, ClipPathTriggersDeferredSave) {
     builder1.Save();
     {
       builder1.ClipPath(kTestPath1, ClipOp::kIntersect, true);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
     builder1.TransformFullPerspective(1, 0, 0, 0,  //
                                       0, 1, 0, 0,  //
                                       0, 0, 1, 0,  //
                                       0, 0, 0, 1);
-    builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder1.Restore();
   auto display_list1 = builder1.Build();
@@ -2990,14 +2998,14 @@ TEST_F(DisplayListTest, ClipPathTriggersDeferredSave) {
   builder2.Save();
   {
     builder2.ClipPath(kTestPath1, ClipOp::kIntersect, true);
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder2.Restore();
   builder2.TransformFullPerspective(1, 0, 0, 0,  //
                                     0, 1, 0, 0,  //
                                     0, 0, 1, 0,  //
                                     0, 0, 0, 1);
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   auto display_list2 = builder2.Build();
 
   ASSERT_TRUE(DisplayListsEQ_Verbose(display_list1, display_list2));
@@ -3010,17 +3018,17 @@ TEST_F(DisplayListTest, NOPTranslateDoesNotTriggerDeferredSave) {
     builder1.Save();
     {
       builder1.Translate(0, 0);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
-    builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder1.Restore();
   auto display_list1 = builder1.Build();
 
   DisplayListBuilder builder2;
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   auto display_list2 = builder2.Build();
 
   ASSERT_TRUE(DisplayListsEQ_Verbose(display_list1, display_list2));
@@ -3033,17 +3041,17 @@ TEST_F(DisplayListTest, NOPScaleDoesNotTriggerDeferredSave) {
     builder1.Save();
     {
       builder1.Scale(1.0, 1.0);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
-    builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder1.Restore();
   auto display_list1 = builder1.Build();
 
   DisplayListBuilder builder2;
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   auto display_list2 = builder2.Build();
 
   ASSERT_TRUE(DisplayListsEQ_Verbose(display_list1, display_list2));
@@ -3056,17 +3064,17 @@ TEST_F(DisplayListTest, NOPRotationDoesNotTriggerDeferredSave) {
     builder1.Save();
     {
       builder1.Rotate(360);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
-    builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder1.Restore();
   auto display_list1 = builder1.Build();
 
   DisplayListBuilder builder2;
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   auto display_list2 = builder2.Build();
 
   ASSERT_TRUE(DisplayListsEQ_Verbose(display_list1, display_list2));
@@ -3079,17 +3087,17 @@ TEST_F(DisplayListTest, NOPSkewDoesNotTriggerDeferredSave) {
     builder1.Save();
     {
       builder1.Skew(0, 0);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
-    builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder1.Restore();
   auto display_list1 = builder1.Build();
 
   DisplayListBuilder builder2;
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   auto display_list2 = builder2.Build();
 
   ASSERT_TRUE(DisplayListsEQ_Verbose(display_list1, display_list2));
@@ -3105,21 +3113,21 @@ TEST_F(DisplayListTest, NOPTransformDoesNotTriggerDeferredSave) {
                                         0, 1, 0, 0,  //
                                         0, 0, 1, 0,  //
                                         0, 0, 0, 1);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
     builder1.TransformFullPerspective(1, 0, 0, 0,  //
                                       0, 1, 0, 0,  //
                                       0, 0, 1, 0,  //
                                       0, 0, 0, 1);
-    builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder1.Restore();
   auto display_list1 = builder1.Build();
 
   DisplayListBuilder builder2;
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   auto display_list2 = builder2.Build();
 
   ASSERT_TRUE(DisplayListsEQ_Verbose(display_list1, display_list2));
@@ -3132,17 +3140,17 @@ TEST_F(DisplayListTest, NOPTransform2DDoesNotTriggerDeferredSave) {
     builder1.Save();
     {
       builder1.Transform2DAffine(1, 0, 0, 0, 1, 0);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
-    builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder1.Restore();
   auto display_list1 = builder1.Build();
 
   DisplayListBuilder builder2;
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   auto display_list2 = builder2.Build();
 
   ASSERT_TRUE(DisplayListsEQ_Verbose(display_list1, display_list2));
@@ -3159,17 +3167,17 @@ TEST_F(DisplayListTest, NOPTransformFullPerspectiveDoesNotTriggerDeferredSave) {
                                           0, 1, 0, 0,  //
                                           0, 0, 1, 0,  //
                                           0, 0, 0, 1);
-        builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+        builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
       }
       builder1.Restore();
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
     auto display_list1 = builder1.Build();
 
     DisplayListBuilder builder2;
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     auto display_list2 = builder2.Build();
 
     ASSERT_TRUE(DisplayListsEQ_Verbose(display_list1, display_list2));
@@ -3186,10 +3194,10 @@ TEST_F(DisplayListTest, NOPTransformFullPerspectiveDoesNotTriggerDeferredSave) {
                                           0, 0, 1, 0,  //
                                           0, 0, 0, 1);
         builder1.TransformReset();
-        builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+        builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
       }
       builder1.Restore();
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
     auto display_list1 = builder1.Build();
@@ -3198,10 +3206,10 @@ TEST_F(DisplayListTest, NOPTransformFullPerspectiveDoesNotTriggerDeferredSave) {
     builder2.Save();
     {
       builder2.TransformReset();
-      builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder2.Restore();
-    builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     auto display_list2 = builder2.Build();
 
     ASSERT_TRUE(DisplayListsEQ_Verbose(display_list1, display_list2));
@@ -3216,17 +3224,17 @@ TEST_F(DisplayListTest, NOPClipDoesNotTriggerDeferredSave) {
     {
       builder1.ClipRect(SkRect::MakeLTRB(0, SK_ScalarNaN, SK_ScalarNaN, 0),
                         ClipOp::kIntersect, true);
-      builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+      builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
     }
     builder1.Restore();
-    builder1.DrawRect({0, 0, 100, 100}, DlPaint());
+    builder1.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   }
   builder1.Restore();
   auto display_list1 = builder1.Build();
 
   DisplayListBuilder builder2;
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
-  builder2.DrawRect({0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
+  builder2.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
   auto display_list2 = builder2.Build();
 
   ASSERT_TRUE(DisplayListsEQ_Verbose(display_list1, display_list2));
@@ -3238,13 +3246,13 @@ TEST_F(DisplayListTest, RTreeOfClippedSaveLayerFilterScene) {
   auto filter = DlBlurImageFilter(10.0, 10.0, DlTileMode::kClamp);
   DlPaint default_paint = DlPaint();
   DlPaint filter_paint = DlPaint().setImageFilter(&filter);
-  builder.DrawRect({10, 10, 20, 20}, default_paint);
-  builder.ClipRect({50, 50, 60, 60}, ClipOp::kIntersect, false);
+  builder.DrawRect(SkRect{10, 10, 20, 20}, default_paint);
+  builder.ClipRect(SkRect{50, 50, 60, 60}, ClipOp::kIntersect, false);
   builder.SaveLayer(nullptr, &filter_paint);
   // the following rectangle will be expanded to 23,23,87,87
   // by the saveLayer filter during the restore operation
   // but it will then be clipped to 50,50,60,60
-  builder.DrawRect({53, 53, 57, 57}, default_paint);
+  builder.DrawRect(SkRect{53, 53, 57, 57}, default_paint);
   builder.Restore();
   auto display_list = builder.Build();
   auto rtree = display_list->rtree();
@@ -3393,10 +3401,10 @@ TEST_F(DisplayListTest, RTreeRenderCulling) {
 
 TEST_F(DisplayListTest, DrawSaveDrawCannotInheritOpacity) {
   DisplayListBuilder builder;
-  builder.DrawCircle({10, 10}, 5, DlPaint());
+  builder.DrawCircle(SkPoint{10, 10}, 5, DlPaint());
   builder.Save();
-  builder.ClipRect({0, 0, 20, 20}, DlCanvas::ClipOp::kIntersect, false);
-  builder.DrawRect({5, 5, 15, 15}, DlPaint());
+  builder.ClipRect(SkRect{0, 0, 20, 20}, DlCanvas::ClipOp::kIntersect, false);
+  builder.DrawRect(SkRect{5, 5, 15, 15}, DlPaint());
   builder.Restore();
   auto display_list = builder.Build();
 
@@ -3493,31 +3501,31 @@ TEST_F(DisplayListTest, NopOperationsOmittedFromRecords) {
     run_one_test(
         name + " DrawRect",
         [](DisplayListBuilder& builder, DlPaint& paint) {
-          builder.DrawRect({10, 10, 20, 20}, paint);
+          builder.DrawRect(SkRect{10, 10, 20, 20}, paint);
         },
         expected_op_count, expected_total_depth);
     run_one_test(
         name + " Other Draw Ops",
         [](DisplayListBuilder& builder, DlPaint& paint) {
-          builder.DrawLine({10, 10}, {20, 20}, paint);
-          builder.DrawOval({10, 10, 20, 20}, paint);
-          builder.DrawCircle({50, 50}, 20, paint);
+          builder.DrawLine(SkPoint{10, 10}, SkPoint{20, 20}, paint);
+          builder.DrawOval(SkRect{10, 10, 20, 20}, paint);
+          builder.DrawCircle(SkPoint{50, 50}, 20, paint);
           builder.DrawRRect(SkRRect::MakeRectXY({10, 10, 20, 20}, 5, 5), paint);
           builder.DrawDRRect(SkRRect::MakeRectXY({5, 5, 100, 100}, 5, 5),
                              SkRRect::MakeRectXY({10, 10, 20, 20}, 5, 5),
                              paint);
           builder.DrawPath(kTestPath1, paint);
-          builder.DrawArc({10, 10, 20, 20}, 45, 90, true, paint);
+          builder.DrawArc(SkRect{10, 10, 20, 20}, 45, 90, true, paint);
           SkPoint pts[] = {{10, 10}, {20, 20}};
           builder.DrawPoints(PointMode::kLines, 2, pts, paint);
           builder.DrawVertices(kTestVertices1, DlBlendMode::kSrcOver, paint);
-          builder.DrawImage(TestImage1, {10, 10}, DlImageSampling::kLinear,
-                            &paint);
+          builder.DrawImage(TestImage1, SkPoint{10, 10},
+                            DlImageSampling::kLinear, &paint);
           builder.DrawImageRect(TestImage1, SkRect{0.0f, 0.0f, 10.0f, 10.0f},
                                 SkRect{10.0f, 10.0f, 25.0f, 25.0f},
                                 DlImageSampling::kLinear, &paint);
-          builder.DrawImageNine(TestImage1, {10, 10, 20, 20},
-                                {10, 10, 100, 100}, DlFilterMode::kLinear,
+          builder.DrawImageNine(TestImage1, SkIRect{10, 10, 20, 20},
+                                SkRect{10, 10, 100, 100}, DlFilterMode::kLinear,
                                 &paint);
           SkRSXform xforms[] = {{1, 0, 10, 10}, {0, 1, 10, 10}};
           SkRect rects[] = {{10, 10, 20, 20}, {10, 20, 30, 20}};
@@ -3538,7 +3546,7 @@ TEST_F(DisplayListTest, NopOperationsOmittedFromRecords) {
         name + " SaveLayer",
         [](DisplayListBuilder& builder, DlPaint& paint) {
           builder.SaveLayer(nullptr, &paint, nullptr);
-          builder.DrawRect({10, 10, 20, 20}, DlPaint());
+          builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
           builder.Restore();
         },
         expected_op_count, expected_total_depth);
@@ -3546,7 +3554,7 @@ TEST_F(DisplayListTest, NopOperationsOmittedFromRecords) {
         name + " inside Save",
         [](DisplayListBuilder& builder, DlPaint& paint) {
           builder.Save();
-          builder.DrawRect({10, 10, 20, 20}, paint);
+          builder.DrawRect(SkRect{10, 10, 20, 20}, paint);
           builder.Restore();
         },
         expected_op_count, expected_total_depth);
@@ -3614,7 +3622,8 @@ TEST_F(DisplayListTest, NopOperationsOmittedFromRecords) {
               DlPaint save_paint;
               save_paint.setColor(DlColor::kTransparent());
               builder.SaveLayer(nullptr, &save_paint);
-              builder.DrawImage(TestImage1, {10, 10}, DlImageSampling::kLinear);
+              builder.DrawImage(TestImage1, SkPoint{10, 10},
+                                DlImageSampling::kLinear);
             });
 }
 
@@ -4150,33 +4159,33 @@ class DepthExpector : public virtual DlOpReceiver,
 
 TEST_F(DisplayListTest, SaveContentDepthTest) {
   DisplayListBuilder child_builder;
-  child_builder.DrawRect({10, 10, 20, 20}, DlPaint());  // depth 1
+  child_builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());  // depth 1
   auto child = child_builder.Build();
 
   DisplayListBuilder builder;
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());  // depth 1
+  builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());  // depth 1
 
   builder.Save();  // covers depth 1->9
   {
     builder.Translate(5, 5);  // triggers deferred save at depth 1
-    builder.DrawRect({10, 10, 20, 20}, DlPaint());  // depth 2
+    builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());  // depth 2
 
     builder.DrawDisplayList(child, 1.0f);  // depth 3 (content) + 4 (self)
 
     builder.SaveLayer(nullptr, nullptr);  // covers depth 5->6
     {
-      builder.DrawRect({12, 12, 22, 22}, DlPaint());  // depth 5
-      builder.DrawRect({14, 14, 24, 24}, DlPaint());  // depth 6
+      builder.DrawRect(SkRect{12, 12, 22, 22}, DlPaint());  // depth 5
+      builder.DrawRect(SkRect{14, 14, 24, 24}, DlPaint());  // depth 6
     }
     builder.Restore();  // layer is restored with depth 6
 
-    builder.DrawRect({16, 16, 26, 26}, DlPaint());  // depth 8
-    builder.DrawRect({18, 18, 28, 28}, DlPaint());  // depth 9
+    builder.DrawRect(SkRect{16, 16, 26, 26}, DlPaint());  // depth 8
+    builder.DrawRect(SkRect{18, 18, 28, 28}, DlPaint());  // depth 9
   }
   builder.Restore();  // save is restored with depth 9
 
-  builder.DrawRect({16, 16, 26, 26}, DlPaint());  // depth 10
-  builder.DrawRect({18, 18, 28, 28}, DlPaint());  // depth 11
+  builder.DrawRect(SkRect{16, 16, 26, 26}, DlPaint());  // depth 10
+  builder.DrawRect(SkRect{18, 18, 28, 28}, DlPaint());  // depth 11
   auto display_list = builder.Build();
 
   EXPECT_EQ(display_list->total_depth(), 11u);
@@ -5420,12 +5429,12 @@ TEST_F(DisplayListTest, BoundedRenderOpsDoNotReportUnbounded) {
 
   test_bounded("DrawLine", [](DlCanvas& builder) {
     builder.DrawLine(
-        {draw_rect.left() + 1.0f, draw_rect.top() + 1.0f},
-        {draw_rect.right() - 1.0f, draw_rect.top() + 1.0f},
+        SkPoint{draw_rect.left() + 1.0f, draw_rect.top() + 1.0f},
+        SkPoint{draw_rect.right() - 1.0f, draw_rect.top() + 1.0f},
         DlPaint().setStrokeWidth(2.0f).setStrokeCap(DlStrokeCap::kSquare));
     builder.DrawLine(
-        {draw_rect.left() + 1.0f, draw_rect.bottom() - 1.0f},
-        {draw_rect.right() - 1.0f, draw_rect.bottom() - 1.0f},
+        SkPoint{draw_rect.left() + 1.0f, draw_rect.bottom() - 1.0f},
+        SkPoint{draw_rect.right() - 1.0f, draw_rect.bottom() - 1.0f},
         DlPaint().setStrokeWidth(2.0f).setStrokeCap(DlStrokeCap::kSquare));
   });
 
@@ -5559,7 +5568,7 @@ TEST_F(DisplayListTest, BoundedRenderOpsDoNotReportUnbounded) {
 
   test_bounded("DrawImage", [](DlCanvas& builder) {
     auto image = MakeTestImage(draw_rect.width(), draw_rect.height(), 5);
-    builder.DrawImage(image, {draw_rect.left(), draw_rect.top()},
+    builder.DrawImage(image, SkPoint{draw_rect.left(), draw_rect.top()},
                       DlImageSampling::kLinear);
   });
 

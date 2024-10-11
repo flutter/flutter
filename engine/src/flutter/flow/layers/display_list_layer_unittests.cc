@@ -101,7 +101,7 @@ TEST_F(DisplayListLayerTest, SimpleDisplayList) {
 TEST_F(DisplayListLayerTest, CachingDoesNotChangeCullRect) {
   const SkPoint layer_offset = SkPoint::Make(10, 10);
   DisplayListBuilder builder;
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());
+  builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
   auto display_list = builder.Build();
   auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
                                                   true, false);
@@ -546,8 +546,8 @@ TEST_F(DisplayListLayerTest, OverflowCachedDisplayListOpacityInheritance) {
   std::vector<std::shared_ptr<DisplayListLayer>> layers;
   for (int i = 0; i < layer_count; i++) {
     DisplayListBuilder builder(false);
-    builder.DrawRect({0, 0, 100, 100}, DlPaint());
-    builder.DrawRect({50, 50, 100, 100}, DlPaint());
+    builder.DrawRect(SkRect{0, 0, 100, 100}, DlPaint());
+    builder.DrawRect(SkRect{50, 50, 100, 100}, DlPaint());
     auto display_list = builder.Build();
     ASSERT_FALSE(display_list->can_apply_group_opacity());
     SkPoint offset = {i * 200.0f, 0};

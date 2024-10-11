@@ -705,7 +705,7 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
       paint.setStrokeJoin(flutter::DlStrokeJoin::kBevel);
       paint.setStrokeWidth(10);
       paint.setColor(flutter::DlColor::kRed().withAlpha(100));
-      builder.DrawCircle({circle_center.x, circle_center.y}, 100, paint);
+      builder.DrawCircle(SkPoint{circle_center.x, circle_center.y}, 100, paint);
     }
 
     return builder.Build();
@@ -854,7 +854,7 @@ TEST_P(DisplayListTest, CanDrawZeroLengthLine) {
   SkPath path = SkPath().addPoly({{150, 50}, {150, 50}}, false);
   for (auto cap : caps) {
     paint.setStrokeCap(cap);
-    builder.DrawLine({50, 50}, {50, 50}, paint);
+    builder.DrawLine(SkPoint{50, 50}, SkPoint{50, 50}, paint);
     builder.DrawPath(path, paint);
     builder.Translate(0, 150);
   }
@@ -931,11 +931,11 @@ TEST_P(DisplayListTest, CanDrawZeroWidthLine) {
   SkPath path = SkPath().addPoly({{150, 50}, {160, 50}}, false);
   for (auto cap : caps) {
     paint.setStrokeCap(cap);
-    builder.DrawLine({50, 50}, {60, 50}, paint);
-    builder.DrawRect({45, 45, 65, 55}, outline_paint);
-    builder.DrawLine({100, 50}, {100, 50}, paint);
+    builder.DrawLine(SkPoint{50, 50}, SkPoint{60, 50}, paint);
+    builder.DrawRect(SkRect{45, 45, 65, 55}, outline_paint);
+    builder.DrawLine(SkPoint{100, 50}, SkPoint{100, 50}, paint);
     if (cap != flutter::DlStrokeCap::kButt) {
-      builder.DrawRect({95, 45, 105, 55}, outline_paint);
+      builder.DrawRect(SkRect{95, 45, 105, 55}, outline_paint);
     }
     builder.DrawPath(path, paint);
     builder.DrawRect(path.getBounds().makeOutset(5, 5), outline_paint);
@@ -1034,7 +1034,7 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
         }
       }
 
-      builder.DrawImage(DlImageImpeller::Make(boston), {},
+      builder.DrawImage(DlImageImpeller::Make(boston), SkPoint{},
                         flutter::DlImageSampling::kLinear, &paint);
     }
     if (enable_savelayer) {
@@ -1320,8 +1320,8 @@ TEST_P(DisplayListTest, DrawShapes) {
     builder.DrawRRect(
         SkRRect::MakeRectXY(SkRect::MakeXYWH(150, 150, 100, 100), 30, 30),
         stroke_paint);
-    builder.DrawCircle({350, 50}, 50, paint);
-    builder.DrawCircle({350, 200}, 50, stroke_paint);
+    builder.DrawCircle(SkPoint{350, 50}, 50, paint);
+    builder.DrawCircle(SkPoint{350, 200}, 50, stroke_paint);
     builder.Translate(0, 300);
   }
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -1485,7 +1485,7 @@ TEST_P(DisplayListTest, DrawPaintIgnoresMaskFilter) {
   builder.DrawPaint(flutter::DlPaint().setColor(flutter::DlColor::kWhite()));
 
   auto filter = flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kNormal, 10.0f);
-  builder.DrawCircle({300, 300}, 200,
+  builder.DrawCircle(SkPoint{300, 300}, 200,
                      flutter::DlPaint().setMaskFilter(&filter));
 
   std::vector<flutter::DlColor> colors = {flutter::DlColor::kGreen(),

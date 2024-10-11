@@ -9,16 +9,16 @@
 
 namespace flutter {
 
-SkRect DlCanvas::ComputeShadowBounds(const SkPath& path,
+DlRect DlCanvas::ComputeShadowBounds(const DlPath& path,
                                      float elevation,
-                                     SkScalar dpr,
-                                     const SkMatrix& ctm) {
-  SkRect shadow_bounds(path.getBounds());
+                                     DlScalar dpr,
+                                     const DlMatrix& ctm) {
+  SkRect shadow_bounds(path.GetSkBounds());
   SkShadowUtils::GetLocalBounds(
-      ctm, path, SkPoint3::Make(0, 0, dpr * elevation),
+      ToSkMatrix(ctm), path.GetSkPath(), SkPoint3::Make(0, 0, dpr * elevation),
       SkPoint3::Make(0, -1, 1), kShadowLightRadius / kShadowLightHeight,
       SkShadowFlags::kDirectionalLight_ShadowFlag, &shadow_bounds);
-  return shadow_bounds;
+  return ToDlRect(shadow_bounds);
 }
 
 }  // namespace flutter

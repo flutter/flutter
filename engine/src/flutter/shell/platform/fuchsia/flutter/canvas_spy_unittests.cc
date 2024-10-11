@@ -24,7 +24,7 @@ TEST(CanvasSpyTest, DrawingIsTracked) {
   ASSERT_FALSE(canvas_spy.DidDrawIntoCanvas());
 
   DlPaint paint;
-  spy->DrawCircle({0, 0}, 60, paint);
+  spy->DrawCircle(SkPoint{0, 0}, 60, paint);
   ASSERT_TRUE(canvas_spy.DidDrawIntoCanvas());
 }
 
