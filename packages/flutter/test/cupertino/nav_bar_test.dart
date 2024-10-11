@@ -1888,6 +1888,93 @@ void main() {
       expect(largeTitleFinder.hitTestable(), findsOneWidget);
     },
   );
+
+  testWidgets('Large title snaps up to app bar when partially scrolled more than halfway up', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    const double largeTitleHeight = 52.0;
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: CupertinoApp(
+          home: CustomScrollView(
+            controller: scrollController,
+            slivers: const <Widget>[
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('Large title'),
+                middle: Text('middle'),
+                alwaysShowMiddle: false,
+              ),
+              SliverFillRemaining(
+                child: SizedBox(
+                  height: 1000.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderAnimatedOpacity? renderOpacity = tester.element(find.text('middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+
+    // The middle widget is initially invisible.
+    expect(renderOpacity?.opacity.value, 0.0);
+    expect(scrollController.offset, 0.0);
+
+    // Scroll a little over the halfway point.
+    final TestGesture scrollGesture1 = await tester.startGesture(tester.getCenter(find.byType(Scrollable)));
+    await scrollGesture1.moveBy(const Offset(0.0, -(largeTitleHeight / 2) - 1));
+    await scrollGesture1.up();
+    await tester.pumpAndSettle();
+
+    // Expect the scroll position to snap to the app bar.
+    expect(scrollController.position.pixels, largeTitleHeight);
+    expect(renderOpacity?.opacity.value, 1.0);
+  });
+
+  testWidgets('Large title snaps back to extended height when partially scrolled halfway up or less', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    const double largeTitleHeight = 52.0;
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: CupertinoApp(
+          home: CustomScrollView(
+            controller: scrollController,
+            slivers: const <Widget>[
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('Large title'),
+                middle: Text('middle'),
+                alwaysShowMiddle: false,
+              ),
+              SliverFillRemaining(
+                child: SizedBox(
+                  height: 1000.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderAnimatedOpacity? renderOpacity = tester.element(find.text('middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+
+    expect(renderOpacity?.opacity.value, 0.0);
+    expect(scrollController.offset, 0.0);
+
+    // Scroll to the halfway point.
+    final TestGesture scrollGesture1 = await tester.startGesture(tester.getCenter(find.byType(Scrollable)));
+    await scrollGesture1.moveBy(const Offset(0.0, -(largeTitleHeight / 2)));
+    await scrollGesture1.up();
+    await tester.pumpAndSettle();
+
+    // Expect the scroll position to snap back to its extended height.
+    expect(scrollController.position.pixels, 0.0);
+    expect(renderOpacity?.opacity.value, 0.0);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
