@@ -329,7 +329,7 @@ TEST_P(AiksTest, CanSaveLayerStandalone) {
 
   builder.SaveLayer(nullptr, &alpha);
 
-  builder.DrawCircle({125, 125}, 125, red);
+  builder.DrawCircle(SkPoint{125, 125}, 125, red);
 
   builder.Restore();
 
@@ -365,7 +365,7 @@ TEST_P(AiksTest, CanRenderDifferentShapesWithSameColorSource) {
 
   builder.Save();
   builder.Translate(100, 400);
-  builder.DrawCircle({100, 100}, 100, paint);
+  builder.DrawCircle(SkPoint{100, 100}, 100, paint);
   builder.Restore();
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -430,7 +430,7 @@ TEST_P(AiksTest, FilledCirclesRenderCorrectly) {
   int radius = 600;
   while (radius > 0) {
     paint.setColor(colors[(c_index++) % color_count]);
-    builder.DrawCircle({10, 10}, radius, paint);
+    builder.DrawCircle(SkPoint{10, 10}, radius, paint);
     if (radius > 30) {
       radius -= 10;
     } else {
@@ -462,14 +462,14 @@ TEST_P(AiksTest, FilledCirclesRenderCorrectly) {
 
   paint.setColorSource(DlColorSource::MakeRadial(
       {500, 600}, 75, 7, gradient_colors, stops, DlTileMode::kMirror));
-  builder.DrawCircle({500, 600}, 100, paint);
+  builder.DrawCircle(SkPoint{500, 600}, 100, paint);
 
   SkMatrix local_matrix = SkMatrix::Translate(700, 200);
   DlImageColorSource image_source(
       image, DlTileMode::kRepeat, DlTileMode::kRepeat,
       DlImageSampling::kNearestNeighbor, &local_matrix);
   paint.setColorSource(&image_source);
-  builder.DrawCircle({800, 300}, 100, paint);
+  builder.DrawCircle(SkPoint{800, 300}, 100, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -744,7 +744,7 @@ TEST_P(AiksTest, SolidColorCirclesOvalsRRectsMaskBlurCorrectly) {
   for (int i = 0; i < 5; i++) {
     Scalar x = (i + 1) * 100;
     Scalar radius = x / 10.0f;
-    builder.DrawCircle({x + 25, y + 25}, radius, paint);
+    builder.DrawCircle(SkPoint{x + 25, y + 25}, radius, paint);
   }
 
   paint.setColor(DlColor::kGreen());
@@ -875,7 +875,7 @@ TEST_P(AiksTest, CanDrawPerspectiveTransformWithClips) {
       // 4. Draw a semi-translucent blue circle atop all previous draws.
       DlPaint paint;
       paint.setColor(DlColor::kBlue().modulateOpacity(0.4));
-      builder.DrawCircle({}, 230, paint);
+      builder.DrawCircle(SkPoint{}, 230, paint);
     }
     builder.Restore();  // Restore translation.
 
@@ -983,7 +983,7 @@ TEST_P(AiksTest, MatrixImageFilterDoesntCullWhenTranslatedFromOffscreen) {
 
   DlPaint circle_paint;
   circle_paint.setColor(DlColor::kGreen());
-  builder.DrawCircle({-300, 0}, 100, circle_paint);
+  builder.DrawCircle(SkPoint{-300, 0}, 100, circle_paint);
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -1006,7 +1006,7 @@ TEST_P(AiksTest,
 
   DlPaint circle_paint;
   circle_paint.setColor(DlColor::kGreen());
-  builder.DrawCircle({-150, 0}, 50, circle_paint);
+  builder.DrawCircle(SkPoint{-150, 0}, 50, circle_paint);
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -1058,7 +1058,7 @@ TEST_P(AiksTest, EmptySaveLayerRendersWithClear) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   auto image = DlImageImpeller::Make(CreateTextureForFixture("airplane.jpg"));
-  builder.DrawImage(image, {10, 10}, {});
+  builder.DrawImage(image, SkPoint{10, 10}, {});
   builder.ClipRect(SkRect::MakeXYWH(100, 100, 200, 200));
 
   DlPaint paint;
@@ -1443,7 +1443,7 @@ TEST_P(AiksTest, SaveLayerFiltersScaleWithTransform) {
   auto texture = DlImageImpeller::Make(CreateTextureForFixture("boston.jpg"));
   auto draw_image_layer = [&builder, &texture](const DlPaint& paint) {
     builder.SaveLayer(nullptr, &paint);
-    builder.DrawImage(texture, {}, DlImageSampling::kLinear);
+    builder.DrawImage(texture, SkPoint{}, DlImageSampling::kLinear);
     builder.Restore();
   };
 

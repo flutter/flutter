@@ -224,7 +224,7 @@ void SurfaceTextureExternalTextureVKImpeller::DrawFrame(
     PaintContext& context,
     const SkRect& bounds,
     const DlImageSampling sampling) const {
-  context.canvas->DrawImage(dl_image_, {0, 0}, sampling, context.paint);
+  context.canvas->DrawImage(dl_image_, SkPoint{0, 0}, sampling, context.paint);
 }
 
 }  // namespace flutter

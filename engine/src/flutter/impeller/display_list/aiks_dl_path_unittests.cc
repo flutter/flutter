@@ -168,8 +168,8 @@ TEST_P(AiksTest, CanRenderDifferencePaths) {
   path.setFillType(SkPathFillType::kEvenOdd);
 
   builder.DrawImage(
-      DlImageImpeller::Make(CreateTextureForFixture("boston.jpg")), {10, 10},
-      {});
+      DlImageImpeller::Make(CreateTextureForFixture("boston.jpg")),
+      SkPoint{10, 10}, {});
   builder.DrawPath(path, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -317,7 +317,7 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
          {DlStrokeCap::kButt, DlStrokeCap::kSquare, DlStrokeCap::kRound}) {
       paint.setStrokeCap(cap);
       SkPoint origin = {100, 100};
-      builder.DrawLine({150, 100}, {250, 100}, paint);
+      builder.DrawLine(SkPoint{150, 100}, SkPoint{250, 100}, paint);
       for (int d = 15; d < 90; d += 15) {
         Matrix m = Matrix::MakeRotationZ(Degrees(d));
         Point origin = {100, 100};
@@ -329,10 +329,10 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
         builder.DrawLine(SkPoint::Make(a.x, a.y), SkPoint::Make(b.x, b.y),
                          paint);
       }
-      builder.DrawLine({100, 150}, {100, 250}, paint);
+      builder.DrawLine(SkPoint{100, 150}, SkPoint{100, 250}, paint);
       builder.DrawCircle({origin}, 35, paint);
 
-      builder.DrawLine({250, 250}, {250, 250}, paint);
+      builder.DrawLine(SkPoint{250, 250}, SkPoint{250, 250}, paint);
 
       builder.Translate(250, 0);
     }
