@@ -20,7 +20,7 @@ Widget boilerplate({
   Widget? child,
   TextDirection textDirection = TextDirection.ltr,
   ThemeData? theme,
-  TabBarTheme? tabBarTheme,
+  TabBarThemeData? tabBarTheme,
   bool? useMaterial3,
 }) {
   return Theme(
@@ -52,7 +52,7 @@ Widget buildFrame({
   EdgeInsetsGeometry? padding,
   TextDirection textDirection = TextDirection.ltr,
   TabAlignment? tabAlignment,
-  TabBarTheme? tabBarTheme,
+  TabBarThemeData? tabBarTheme,
   Decoration? indicator,
   bool? useMaterial3,
 }) {
@@ -5536,7 +5536,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          tabBarTheme: const TabBarTheme(labelPadding: labelPadding),
+          tabBarTheme: const TabBarThemeData(labelPadding: labelPadding),
         ),
         home: Scaffold(
           appBar: AppBar(
@@ -5857,7 +5857,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light().copyWith(
-          tabBarTheme: TabBarTheme(
+          tabBarTheme: TabBarThemeData(
             splashFactory: splashFactory,
             overlayColor: overlayColor,
           )),
@@ -6554,7 +6554,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           useMaterial3: true,
-          tabBarTheme: const TabBarTheme(dividerColor: dividerColor),
+          tabBarTheme: const TabBarThemeData(dividerColor: dividerColor),
         ),
         home: Scaffold(
           appBar: AppBar(
@@ -6583,7 +6583,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           useMaterial3: true,
-          tabBarTheme: const TabBarTheme(dividerColor: dividerColor),
+          tabBarTheme: const TabBarThemeData(dividerColor: dividerColor),
         ),
         home: Scaffold(
           body: DefaultTabController(
@@ -6835,7 +6835,7 @@ void main() {
       const String unSelectedValue = 'C';
       const Color labelColor = Color(0xff0000ff);
       await tester.pumpWidget(
-        buildFrame(tabs: tabs, value: selectedValue, useMaterial3: false, tabBarTheme: const TabBarTheme(labelColor: labelColor)),
+        buildFrame(tabs: tabs, value: selectedValue, useMaterial3: false, tabBarTheme: const TabBarThemeData(labelColor: labelColor)),
       );
       expect(find.text('A'), findsOneWidget);
       expect(find.text('B'), findsOneWidget);

@@ -43,12 +43,6 @@ typedef FilterCallback<T> = List<DropdownMenuEntry<T>> Function(List<DropdownMen
 /// Used by [DropdownMenu.searchCallback].
 typedef SearchCallback<T> = int? Function(List<DropdownMenuEntry<T>> entries, String query);
 
-// Navigation shortcuts to move the selected menu items up or down.
-final Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent> {
-  LogicalKeySet(LogicalKeyboardKey.arrowUp): const _ArrowUpIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowDown): const _ArrowDownIntent(),
-};
-
 const double _kMinimumWidth = 112.0;
 
 const double _kDefaultHorizontalPadding = 12.0;
@@ -108,6 +102,18 @@ class DropdownMenuEntry<T> {
   final ButtonStyle? style;
 }
 
+/// Defines the behavior for closing the dropdown menu when an item is selected.
+enum DropdownMenuCloseBehavior {
+  /// Closes all open menus in the widget tree.
+  all,
+
+  /// Closes only the current dropdown menu.
+  self,
+
+  /// Does not close any menus.
+  none,
+}
+
 /// A dropdown menu that can be opened from a [TextField]. The selected
 /// menu item is displayed in that field.
 ///
@@ -120,9 +126,9 @@ class DropdownMenuEntry<T> {
 /// will be updated based on the selection from the menu entries. The text field
 /// will stay empty if the selected entry is disabled.
 ///
-/// The dropdown menu can be traversed by pressing the up or down key. During the
-/// process, the corresponding item will be highlighted and the text field will be updated.
-/// Disabled items will be skipped during traversal.
+/// When the dropdown menu has focus, it can be traversed by pressing the up or down key.
+/// During the process, the corresponding item will be highlighted and
+/// the text field will be updated. Disabled items will be skipped during traversal.
 ///
 /// The menu can be scrollable if not all items in the list are displayed at once.
 ///
@@ -178,6 +184,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.alignmentOffset,
     required this.dropdownMenuEntries,
     this.inputFormatters,
+    this.closeBehavior = DropdownMenuCloseBehavior.all,
   }) : assert(filterCallback == null || enableFilter);
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -479,6 +486,19 @@ class DropdownMenu<T> extends StatefulWidget {
   /// {@macro flutter.material.MenuAnchor.alignmentOffset}
   final Offset? alignmentOffset;
 
+  /// Defines the behavior for closing the dropdown menu when an item is selected.
+  ///
+  /// The close behavior can be set to:
+  /// * [DropdownMenuCloseBehavior.all]: Closes all open menus in the widget tree.
+  /// * [DropdownMenuCloseBehavior.self]: Closes only the current dropdown menu.
+  /// * [DropdownMenuCloseBehavior.none]: Does not close any menus.
+  ///
+  /// This property allows fine-grained control over the menu's closing behavior,
+  /// which can be useful for creating nested or complex menu structures.
+  ///
+  /// Defaults to [DropdownMenuCloseBehavior.all].
+  final DropdownMenuCloseBehavior closeBehavior;
+
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
@@ -728,6 +748,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         style: effectiveStyle,
         leadingIcon: entry.leadingIcon,
         trailingIcon: entry.trailingIcon,
+        closeOnActivate: widget.closeBehavior == DropdownMenuCloseBehavior.all,
         onPressed: entry.enabled && widget.enabled
           ? () {
               _localTextEditingController?.value = TextEditingValue(
@@ -737,6 +758,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               currentHighlight = widget.enableSearch ? i : null;
               widget.onSelected?.call(entry.value);
               _enableFilter = false;
+              if (widget.closeBehavior == DropdownMenuCloseBehavior.self) {
+                _controller.close();
+              }
             }
           : null,
         requestFocusOnHover: false,
@@ -944,14 +968,22 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           return textField;
         }
 
-        return _DropdownMenuBody(
-          width: widget.width,
-          children: <Widget>[
-            textField,
-            ..._initialMenu!.map((Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item)),
-            trailingButton,
-            leadingButton,
-          ],
+        return Shortcuts(
+          shortcuts: const <ShortcutActivator, Intent>{
+            SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+            SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+            SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
+            SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
+          },
+          child: _DropdownMenuBody(
+            width: widget.width,
+            children: <Widget>[
+              textField,
+              ..._initialMenu!.map((Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item)),
+              trailingButton,
+              leadingButton,
+            ],
+          ),
         );
       },
     );
@@ -970,30 +1002,31 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             ),
           ),
         ),
-        child: Align(
-          alignment: AlignmentDirectional.topStart,
-          child: menuAnchor,
-        ),
+        child: menuAnchor,
       );
     }
 
-    return Shortcuts(
-      shortcuts: _kMenuTraversalShortcuts,
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(
-            onInvoke: handleUpKeyInvoke,
-          ),
-          _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(
-            onInvoke: handleDownKeyInvoke,
-          ),
-        },
-        child: menuAnchor,
-      ),
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(
+          onInvoke: handleUpKeyInvoke,
+        ),
+        _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(
+          onInvoke: handleDownKeyInvoke,
+        ),
+      },
+      child: menuAnchor,
     );
   }
 }
 
+
+// `DropdownMenu` dispatches these private intents on arrow up/down keys.
+// They are needed instead of the typical `DirectionalFocusIntent`s because
+// `DropdownMenu` does not really navigate the focus tree upon arrow up/down
+// keys: the focus stays on the text field and the menu items are given fake
+// highlights as if they are focused. Using `DirectionalFocusIntent`s will cause
+// the action to be processed by `EditableText`.
 class _ArrowUpIntent extends Intent {
   const _ArrowUpIntent();
 }

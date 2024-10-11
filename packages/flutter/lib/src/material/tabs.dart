@@ -246,7 +246,7 @@ class _TabStyle extends AnimatedWidget {
 
   MaterialStateColor _resolveWithLabelColor(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TabBarThemeData tabBarTheme = TabBarTheme.of(context).data;
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
 
     // labelStyle.color (and tabBarTheme.labelStyle.color) is not considered
@@ -285,7 +285,7 @@ class _TabStyle extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TabBarThemeData tabBarTheme = TabBarTheme.of(context).data;
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
 
     final Set<MaterialState> states = isSelected
@@ -1355,7 +1355,7 @@ class _TabBarState extends State<TabBar> {
 
   Decoration _getIndicator(TabBarIndicatorSize indicatorSize) {
     final ThemeData theme = Theme.of(context);
-    final TabBarThemeData tabBarTheme = TabBarTheme.of(context).data;
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
 
     if (widget.indicator != null) {
       return widget.indicator!;
@@ -1455,7 +1455,7 @@ class _TabBarState extends State<TabBar> {
 
   void _initIndicatorPainter() {
     final ThemeData theme = Theme.of(context);
-    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final TabBarIndicatorSize indicatorSize = widget.indicatorSize
       ?? tabBarTheme.indicatorSize
       ?? _defaults.indicatorSize!;
@@ -1687,7 +1687,7 @@ class _TabBarState extends State<TabBar> {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(_debugScheduleCheckHasValidTabsCount());
     final ThemeData theme = Theme.of(context);
-    final TabBarThemeData tabBarTheme = TabBarTheme.of(context).data;
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final TabAlignment effectiveTabAlignment = widget.tabAlignment ?? tabBarTheme.tabAlignment ?? _defaults.tabAlignment!;
     assert(_debugTabAlignmentIsValid(effectiveTabAlignment));
 
@@ -1700,22 +1700,17 @@ class _TabBarState extends State<TabBar> {
     }
 
     final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
-      const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight)/2.0;
-      EdgeInsetsGeometry? adjustedPadding;
+      EdgeInsetsGeometry padding = widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding;
+      const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight) / 2.0;
 
-      if (widget.tabs[index] is PreferredSizeWidget) {
-        final PreferredSizeWidget tab = widget.tabs[index] as PreferredSizeWidget;
-        if (widget.tabHasTextAndIcon && tab.preferredSize.height == _kTabHeight) {
-          if (widget.labelPadding != null || tabBarTheme.labelPadding != null) {
-            adjustedPadding = (widget.labelPadding ?? tabBarTheme.labelPadding!).add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
-          }
-          else {
-            adjustedPadding = const EdgeInsets.symmetric(vertical: verticalAdjustment, horizontal: 16.0);
-          }
-        }
+      final Widget tab = widget.tabs[index];
+      if (
+        tab is PreferredSizeWidget && tab.preferredSize.height == _kTabHeight
+        && widget.tabHasTextAndIcon
+      ) {
+        padding = padding.add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
       }
-
-      _labelPaddings[index] = adjustedPadding ?? widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding;
+      _labelPaddings[index] = padding;
 
       return Center(
         heightFactor: 1.0,
