@@ -320,7 +320,7 @@ void main() {
         globals.fs.file(manifestPath).writeAsStringSync(newManifest);
       }
 
-      testUsingContext('a default APK build reports Impeller as disabled', () async {
+      testUsingContext('a default APK build reports Impeller as enabled', () async {
         final String projectPath = await createProject(
           tempDir,
           arguments: <String>['--no-pub', '--template=app', '--platform=android']
@@ -332,7 +332,7 @@ void main() {
           fakeAnalytics.sentEvents,
           contains(
             Event.flutterBuildInfo(
-              label: 'manifest-impeller-disabled',
+              label: 'manifest-impeller-enabled',
               buildType: 'android',
             ),
           ),
