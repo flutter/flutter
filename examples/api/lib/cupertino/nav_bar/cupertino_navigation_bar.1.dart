@@ -35,11 +35,7 @@ class _NavBarExampleState extends State<NavBarExample> {
         // Try removing opacity to observe the lack of a blur effect and of sliding content.
         backgroundColor: CupertinoColors.systemGrey.withOpacity(0.5),
         middle: const Text('CupertinoNavigationBar Sample'),
-        drawer: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-          child: CupertinoSearchTextField(),
-        ),
-        drawerHeight: 50.0,
+        bottom: const _NavigationBarSearchField(),
         automaticBackgroundVisibility: false,
       ),
       child: Column(
@@ -52,4 +48,26 @@ class _NavBarExampleState extends State<NavBarExample> {
       ),
     );
   }
+}
+
+
+class _NavigationBarSearchField extends StatelessWidget implements PreferredSizeWidget {
+  const _NavigationBarSearchField();
+
+  static const double padding = 8.0;
+  static const double searchFieldHeight = 35.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: padding, vertical: padding),
+      child: SizedBox(
+        height: searchFieldHeight,
+        child: CupertinoSearchTextField()
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(searchFieldHeight + padding * 2);
 }

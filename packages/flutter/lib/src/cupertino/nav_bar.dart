@@ -272,8 +272,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.padding,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
-    this.drawer,
-    this.drawerHeight = 0.0,
+    this.bottom,
   }) : assert(
          !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
          'Cannot specify a heroTag override if this navigation bar does not '
@@ -450,11 +449,15 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Object heroTag;
 
+  /// A widget to place at the bottom of the navigation bar.
   ///
-  final Widget? drawer;
-
+  /// Only widgets that implement [PreferredSizeWidget] can be used at the
+  /// bottom of a navigation bar.
   ///
-  final double drawerHeight;
+  /// See also:
+  ///
+  ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
+  final PreferredSizeWidget? bottom;
 
   /// True if the navigation bar's background color has no transparency.
   @override
@@ -466,7 +469,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   @override
   Size get preferredSize {
-    final double heightForDrawer = drawer != null ? drawerHeight : 0.0;
+    final double heightForDrawer = bottom != null ? bottom!.preferredSize.height : 0.0;
     return Size.fromHeight(_kNavBarPersistentHeight + heightForDrawer);
   }
 
@@ -584,7 +587,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
               components: components,
               padding: widget.padding,
             ),
-            if (widget.drawer != null) widget.drawer!,
+            if (widget.bottom != null) widget.bottom!,
           ],
         ),
       ),
