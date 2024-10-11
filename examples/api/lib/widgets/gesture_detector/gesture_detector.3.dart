@@ -17,6 +17,7 @@ class DragBoundaryExampleApp extends StatefulWidget {
 
 class DragBoundaryExampleAppState extends State<DragBoundaryExampleApp> {
   Offset _currentPosition = Offset.zero;
+  Offset _initialPosition = Offset.zero;
   final Size _boxSize = const Size(100, 100);
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class DragBoundaryExampleAppState extends State<DragBoundaryExampleApp> {
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(100),
-          child: RectBoundaryProvider(
+          child: RectBoundaryRegulatorProvider(
             child: Builder(
               builder: (BuildContext context) {
                 return Stack(
@@ -37,14 +38,18 @@ class DragBoundaryExampleAppState extends State<DragBoundaryExampleApp> {
                       left: _currentPosition.dx,
                       child: GestureDetector(
                         behavior: HitTestBehavior.translucent,
+                        onPanStart: (DragStartDetails details) {
+                          _initialPosition = details.localPosition - _currentPosition;
+                        },
                         onPanUpdate: (DragUpdateDetails details) {
                           final RenderBox containerBox = context.findRenderObject()! as RenderBox;
-                          _currentPosition += details.delta;
-                          final Rect? withinBoundary = RectBoundaryProvider.maybeOf(context)?.nearestPositionWithinBoundary(
-                            containerBox.localToGlobal(_currentPosition) & _boxSize,
+                          _currentPosition = details.localPosition - _initialPosition;
+                          final Rect? withinBoundary = RectBoundaryRegulatorProvider.maybeOf(context)?.nearestPositionWithinBoundary(
+                            _currentPosition & _boxSize,
+                            globalToLocal: containerBox.globalToLocal,
                           );
                           if (withinBoundary != null) {
-                            _currentPosition = containerBox.globalToLocal(withinBoundary.topLeft);
+                            _currentPosition = withinBoundary.topLeft;
                           }
                           setState(() {});
                         },

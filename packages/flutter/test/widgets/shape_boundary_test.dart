@@ -7,18 +7,18 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('ShapeBoundary - OffsetBoundaryProvider', (WidgetTester tester) async {
-    ShapeBoundary<Offset>? boundary;
+    ShapeBoundaryRegulator<Offset>? boundary;
     await tester.pumpWidget(
       Container(
         margin: const EdgeInsets.only(top: 100, left: 100),
         alignment: Alignment.topLeft,
-        child: PointBoundaryProvider(
+        child: PointBoundaryRegulatorProvider(
           child: SizedBox(
             width: 100,
             height: 100,
             child: Builder(
               builder: (BuildContext context) {
-                boundary = PointBoundaryProvider.maybeOf(context);
+                boundary = PointBoundaryRegulatorProvider.maybeOf(context);
                 return const SizedBox();
               },
             ),
@@ -34,18 +34,18 @@ void main() {
   });
 
   testWidgets('ShapeBoundary - RectBoundaryProvider', (WidgetTester tester) async {
-    ShapeBoundary<Rect>? boundary;
+    ShapeBoundaryRegulator<Rect>? boundary;
     await tester.pumpWidget(
       Container(
         margin: const EdgeInsets.only(top: 100, left: 100),
         alignment: Alignment.topLeft,
-        child: RectBoundaryProvider(
+        child: RectBoundaryRegulatorProvider(
           child: SizedBox(
             width: 100,
             height: 100,
             child: Builder(
               builder: (BuildContext context) {
-                boundary = RectBoundaryProvider.maybeOf(context);
+                boundary = RectBoundaryRegulatorProvider.maybeOf(context);
                 return const SizedBox();
               },
             ),
