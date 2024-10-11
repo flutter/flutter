@@ -3463,6 +3463,92 @@ void main() {
     textFieldPosition = tester.getTopLeft(find.byType(TextField));
     expect(textFieldPosition, equals(const Offset(16.0, 544.0)));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/139269.
+  testWidgets('DropdownMenu.closeBehavior controls menu closing behavior', (WidgetTester tester) async {
+    Widget buildDropdownMenu({ DropdownMenuCloseBehavior closeBehavior = DropdownMenuCloseBehavior.all }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: MenuAnchor(
+            menuChildren: <Widget>[
+              DropdownMenu<TestMenu>(
+                closeBehavior: closeBehavior,
+                dropdownMenuEntries: menuChildren,
+              ),
+            ],
+            child: const Text('Open Menu'),
+            builder: (BuildContext context, MenuController controller, Widget? child) {
+              return ElevatedButton(
+                onPressed: () => controller.open(),
+                child: child,
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // Test closeBehavior set to all.
+    await tester.pumpWidget(buildDropdownMenu());
+
+    // Tap the button to open the root anchor.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    // Tap the menu item to open the dropdown menu.
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+    expect(find.byType(DropdownMenu<TestMenu>), findsOneWidget);
+
+    MenuAnchor dropdownMenuAnchor = tester.widget<MenuAnchor>(find.byType(MenuAnchor).last);
+    expect(dropdownMenuAnchor.controller!.isOpen, true);
+
+    // Tap the dropdown menu item.
+    await tester.tap(find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label).last);
+    await tester.pumpAndSettle();
+    // All menus should be closed.
+    expect(find.byType(DropdownMenu<TestMenu>), findsNothing);
+    expect(find.byType(MenuAnchor), findsOneWidget);
+
+    // Test closeBehavior set to self.
+    await tester.pumpWidget(buildDropdownMenu(closeBehavior: DropdownMenuCloseBehavior.self));
+
+    // Tap the button to open the root anchor.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(DropdownMenu<TestMenu>), findsOneWidget);
+
+    // Tap the menu item to open the dropdown menu.
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+    dropdownMenuAnchor = tester.widget<MenuAnchor>(find.byType(MenuAnchor).last);
+    expect(dropdownMenuAnchor.controller!.isOpen, true);
+
+    // Tap the menu item to open the dropdown menu.
+    await tester.tap(find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label).last);
+    await tester.pumpAndSettle();
+    // Only the dropdown menu should be closed.
+    expect(dropdownMenuAnchor.controller!.isOpen, false);
+
+    // Test closeBehavior set to none.
+    await tester.pumpWidget(buildDropdownMenu(closeBehavior: DropdownMenuCloseBehavior.none));
+
+    // Tap the button to open the root anchor.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(DropdownMenu<TestMenu>), findsOneWidget);
+
+    // Tap the menu item to open the dropdown menu.
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+    dropdownMenuAnchor = tester.widget<MenuAnchor>(find.byType(MenuAnchor).last);
+    expect(dropdownMenuAnchor.controller!.isOpen, true);
+
+    // Tap the dropdown menu item.
+    await tester.tap(find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label).last);
+    await tester.pumpAndSettle();
+    // None of the menus should be closed.
+    expect(dropdownMenuAnchor.controller!.isOpen, true);
+  });
 }
 
 enum TestMenu {
