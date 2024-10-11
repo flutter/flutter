@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/bottom_app_bar/bottom_app_bar.1.dart'
-    as example;
+import 'package:flutter_api_samples/material/bottom_app_bar/bottom_app_bar.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -11,7 +10,7 @@ void main() {
 
     expect(find.byType(FloatingActionButton), findsOneWidget);
 
-    // Tap the 'Floating Action Button' switch to hide the FAB
+    // Tap the 'Floating Action Button' switch to hide the FAB.
     await tester.tap(find.byType(SwitchListTile).first);
     await tester.pumpAndSettle();
 
@@ -21,16 +20,16 @@ void main() {
   testWidgets('Notch can be toggled on and off', (WidgetTester tester) async {
     await tester.pumpWidget(const example.BottomAppBarDemo());
 
-    // Check the BottomAppBar has a notch initially
+    // Check the BottomAppBar has a notch initially.
     BottomAppBar bottomAppBar = tester.widget(find.byType(BottomAppBar));
     expect(bottomAppBar.shape, isNotNull);
 
-    // Toggle the 'Notch'] switch to remive the notch
+    // Toggle the 'Notch'] switch to remove the notch.
     await tester.tap(find.byType(SwitchListTile).last);
     await tester.pump(); // Rebuild the widget after the state change
 
     bottomAppBar = tester.widget(find.byType(BottomAppBar));
-    expect(bottomAppBar.shape, isNull);
+    expect(bottomAppBar.shape, isNull,);
   });
 
   testWidgets('FAB location can be changed', (WidgetTester tester) async {
@@ -43,15 +42,15 @@ void main() {
     final Size screenSize = tester.getSize(find.byType(Scaffold));
     expect(initialPosition.dx, greaterThan(screenSize.width * 0.5));
 
-    // Tap the radio button to move the FAB to centerDocked
+    // Tap the radio button to move the FAB to centerDocked.
     await tester.tap(find.text('Docked - Center'));
     await tester.pumpAndSettle(); // Rebuild the widget after the state change
 
-    // Get the new FAB position (centerDocked)
+    // Get the new FAB position (centerDocked).
     final Offset newPosition =
-        tester.getCenter(find.byType(FloatingActionButton));
+        tester.getCenter(find.byType(FloatingActionButton),);
 
     expect(newPosition.dx,
-        closeTo(screenSize.width * 0.5, 10)); // Center of the screen
+        closeTo(screenSize.width * 0.5, 10),); // Center of the screen
   });
 }

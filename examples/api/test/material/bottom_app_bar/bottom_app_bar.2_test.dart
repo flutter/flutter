@@ -10,7 +10,7 @@ void main() {
 
     expect(find.byType(FloatingActionButton), findsOneWidget);
 
-    // Tap the switch to hide the FAB
+    // Tap the switch to hide the FAB.
     await tester.tap(find.byType(SwitchListTile).first);
     await tester.pumpAndSettle();
 
@@ -53,7 +53,7 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0, 300));
     await tester.pumpAndSettle();
 
-    // Verify the BottomAppBar is visible again by checking the AnimatedContainer's height
+    // Verify the BottomAppBar is visible again by checking the AnimatedContainer's height.
     final Size visibleSize = tester.getSize(find.byType(AnimatedContainer));
     expect(
         visibleSize.height, equals(80.0)); // The expected height when visible
