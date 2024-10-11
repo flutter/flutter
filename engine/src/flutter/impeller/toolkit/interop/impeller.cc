@@ -248,8 +248,9 @@ void ImpellerPathBuilderCubicCurveTo(ImpellerPathBuilder builder,
   );
 }
 
-IMPELLER_EXTERN_C void ImpellerPathBuilderAddRect(ImpellerPathBuilder builder,
-                                                  const ImpellerRect* rect) {
+IMPELLER_EXTERN_C
+void ImpellerPathBuilderAddRect(ImpellerPathBuilder builder,
+                                const ImpellerRect* rect) {
   GetPeer(builder)->AddRect(ToImpellerType(*rect));
 }
 
@@ -290,9 +291,9 @@ ImpellerPath ImpellerPathBuilderCopyPathNew(ImpellerPathBuilder builder,
   return GetPeer(builder)->CopyPath(ToImpellerType(fill)).Leak();
 }
 
-IMPELLER_EXTERN_C ImpellerPath ImpellerPathBuilderTakePathNew(
-    ImpellerPathBuilder builder,
-    ImpellerFillType fill) {
+IMPELLER_EXTERN_C
+ImpellerPath ImpellerPathBuilderTakePathNew(ImpellerPathBuilder builder,
+                                            ImpellerFillType fill) {
   return GetPeer(builder)->TakePath(ToImpellerType(fill)).Leak();
 }
 
@@ -884,27 +885,32 @@ ImpellerImageFilter ImpellerImageFilterCreateComposeNew(
   return ImageFilter::MakeCompose(*GetPeer(outer), *GetPeer(inner)).Leak();
 }
 
+IMPELLER_EXTERN_C
 void ImpellerPaintSetColorFilter(ImpellerPaint paint,
                                  ImpellerColorFilter color_filter) {
   GetPeer(paint)->SetColorFilter(*GetPeer(color_filter));
 }
 
+IMPELLER_EXTERN_C
 void ImpellerPaintSetColorSource(ImpellerPaint paint,
                                  ImpellerColorSource color_source) {
   GetPeer(paint)->SetColorSource(*GetPeer(color_source));
 }
 
+IMPELLER_EXTERN_C
 void ImpellerPaintSetImageFilter(ImpellerPaint paint,
                                  ImpellerImageFilter image_filter) {
   GetPeer(paint)->SetImageFilter(*GetPeer(image_filter));
 }
 
+IMPELLER_EXTERN_C
 void ImpellerPaintSetMaskFilter(ImpellerPaint paint,
                                 ImpellerMaskFilter mask_filter) {
   GetPeer(paint)->SetMaskFilter(*GetPeer(mask_filter));
 }
 
-IMPELLER_EXTERN_C ImpellerParagraphStyle ImpellerParagraphStyleNew() {
+IMPELLER_EXTERN_C
+ImpellerParagraphStyle ImpellerParagraphStyleNew() {
   return Create<ParagraphStyle>().Leak();
 }
 
@@ -924,9 +930,9 @@ void ImpellerParagraphStyleSetForeground(ImpellerParagraphStyle paragraph_style,
   GetPeer(paragraph_style)->SetForeground(Ref(GetPeer(paint)));
 }
 
-IMPELLER_EXTERN_C void ImpellerParagraphStyleSetBackground(
-    ImpellerParagraphStyle paragraph_style,
-    ImpellerPaint paint) {
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetBackground(ImpellerParagraphStyle paragraph_style,
+                                         ImpellerPaint paint) {
   GetPeer(paragraph_style)->SetBackground(Ref(GetPeer(paint)));
 }
 
@@ -1000,7 +1006,8 @@ void ImpellerDisplayListBuilderDrawParagraph(ImpellerDisplayListBuilder builder,
   GetPeer(builder)->DrawParagraph(*GetPeer(paragraph), ToImpellerType(*point));
 }
 
-IMPELLER_EXTERN_C ImpellerParagraphBuilder ImpellerParagraphBuilderNew(
+IMPELLER_EXTERN_C
+ImpellerParagraphBuilder ImpellerParagraphBuilderNew(
     ImpellerTypographyContext context) {
   auto builder = Create<ParagraphBuilder>(*GetPeer(context));
   if (!builder->IsValid()) {
@@ -1048,7 +1055,8 @@ void ImpellerParagraphBuilderAddText(ImpellerParagraphBuilder paragraph_builder,
   GetPeer(paragraph_builder)->AddText(data, length);
 }
 
-IMPELLER_EXTERN_C ImpellerParagraph ImpellerParagraphBuilderBuildParagraphNew(
+IMPELLER_EXTERN_C
+ImpellerParagraph ImpellerParagraphBuilderBuildParagraphNew(
     ImpellerParagraphBuilder paragraph_builder,
     float width) {
   return GetPeer(paragraph_builder)->Build(width).Leak();
@@ -1104,7 +1112,8 @@ uint32_t ImpellerParagraphGetLineCount(ImpellerParagraph paragraph) {
   return GetPeer(paragraph)->GetLineCount();
 }
 
-IMPELLER_EXTERN_C ImpellerTypographyContext ImpellerTypographyContextNew() {
+IMPELLER_EXTERN_C
+ImpellerTypographyContext ImpellerTypographyContextNew() {
   auto context = Create<TypographyContext>();
   if (!context->IsValid()) {
     VALIDATION_LOG << "Could not create typography context.";
