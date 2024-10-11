@@ -63,7 +63,7 @@
 /dev/devicelab/bin/tasks/gradient_dynamic_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradient_static_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradle_java8_compile_test.dart @reidbaker @flutter/tool
-/dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @andrewkolos @flutter/tool
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/image_list_jit_reported_duration.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/image_list_reported_duration.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/large_image_changer_perf_android.dart @jtmcdole @flutter/engine
@@ -85,7 +85,6 @@
 /dev/devicelab/bin/tasks/platform_views_scroll_perf__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_impeller__timeline_summary.dart @bdero @flutter/engine
 /dev/devicelab/bin/tasks/plugin_dependencies_test.dart @stuartmorgan @flutter/tool
-/dev/devicelab/bin/tasks/raster_cache_use_memory_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/routing_test.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/shader_mask_cache_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/spell_check_test_ios.dart @camsim99 @flutter/android
@@ -142,7 +141,7 @@
 /dev/devicelab/bin/tasks/hello_world_android__compile.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/hello_world_impeller.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/home_scroll_perf__timeline_summary.dart @jtmcdole @flutter/engine
-/dev/devicelab/bin/tasks/hot_mode_dev_cycle__benchmark.dart @eliasyishak @flutter/tool
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle__benchmark.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/imagefiltered_transform_animation_perf__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/integration_test_test.dart @andrewkolos @flutter/tool
@@ -330,12 +329,12 @@
 # flutter_packaging @christopherfujino @flutter/infra
 # flutter_plugins @stuartmorgan @flutter/plugin
 # framework_tests @Piinks @flutter/framework
-# fuchsia_precache @andrewkolos @flutter/tool
+# fuchsia_precache @bkonyi @flutter/tool
 # realm_checker @eyebrowsoffire @flutter/tool
 # skp_generator @Hixie
 # test_ownership @keyonghan
 # tool_host_cross_arch_tests @andrewkolos @flutter/tool
-# tool_integration_tests @andrewkolos @flutter/tool
+# tool_integration_tests @bkonyi @flutter/tool
 # android_preview_tool_integration_tests @gmackall @flutter/android
 # android_java11_tool_integration_tests @gmackall @flutter/android
 # tool_tests @andrewkolos @flutter/tool

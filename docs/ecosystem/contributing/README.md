@@ -21,7 +21,7 @@ Any change that needs to be published in order to take effect must update the ve
 
 This is because the packages in flutter/packages use a continuous release model rather than a set release cadence. This model gets improvements to the community faster, makes regressions easier to pinpoint, and simplifies the release process.
 
-(The `override: no versioning needed` label can be added to skip this check, but only if the criteria above are met, or team members agree there is a compelling reason for a new exemption. Team members: please leave a comment when adding the `override` label explaining the reason for the override.)
+(The `override: no versioning needed` label can be added to skip this check if it fails, but only if the criteria above are met, or team members agree there is a compelling reason for a new exemption. Team members: please leave a comment when adding the `override` label explaining the reason for the override.)
 
 ### CHANGELOG
 

@@ -931,16 +931,10 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     required ChildLayouter layoutChild,
     required _ChildBaselineGetter getBaseline,
   }) {
-    final RenderBox? counter = this.counter;
-    Size counterSize;
-    final double counterAscent;
-    if (counter != null) {
-      counterSize = layoutChild(counter, constraints);
-      counterAscent = getBaseline(counter, constraints);
-    } else {
-      counterSize = Size.zero;
-      counterAscent = 0.0;
-    }
+    final (Size counterSize, double counterAscent) = switch (counter) {
+      final RenderBox box => (layoutChild(box, constraints), getBaseline(box, constraints)),
+      null => (Size.zero, 0.0),
+    };
 
     final BoxConstraints helperErrorConstraints = constraints.deflate(EdgeInsets.only(left: counterSize.width));
     final double helperErrorHeight = layoutChild(helperError, helperErrorConstraints).height;
@@ -1919,6 +1913,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     _floatingLabelAnimation.dispose();
     _shakingLabelController.dispose();
     _borderGap.dispose();
+    _curvedAnimation?.dispose();
     super.dispose();
   }
 
@@ -2150,6 +2145,23 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
   }
 
+  CurvedAnimation? _curvedAnimation;
+
+  FadeTransition _buildTransition(Widget child, Animation<double> animation) {
+    if (_curvedAnimation?.parent != animation) {
+      _curvedAnimation?.dispose();
+      _curvedAnimation = CurvedAnimation(
+              parent: animation,
+              curve: _kTransitionCurve,
+            );
+    }
+
+    return FadeTransition(
+      opacity: _curvedAnimation!,
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
@@ -2182,15 +2194,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         child: hintTextWidget,
       ) : AnimatedSwitcher(
         duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: _kTransitionCurve,
-            ),
-            child: child,
-          );
-        },
+        transitionBuilder: _buildTransition,
         child: showHint ? hintTextWidget : const SizedBox.shrink(),
       );
     }
@@ -2870,7 +2874,15 @@ class InputDecoration {
 
   /// The maximum number of lines the [helperText] can occupy.
   ///
-  /// Defaults to null, which means that the [helperText] is not limited.
+  /// Defaults to null, which means that soft line breaks in [helperText] are
+  /// truncated with an ellipse while hard line breaks are respected.
+  /// For example, a [helperText] that overflows the width of the field will be
+  /// truncated with an ellipse. However, a [helperText] with explicit linebreak
+  /// characters (\n) will display on multiple lines.
+  ///
+  /// To cause a long [helperText] to wrap, either set [helperMaxLines] or use
+  /// [helper] which offers more flexibility. For instance, it can be set to a
+  /// [Text] widget with a specific overflow value.
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the helper.
@@ -2968,7 +2980,15 @@ class InputDecoration {
 
   /// The maximum number of lines the [errorText] can occupy.
   ///
-  /// Defaults to null, which means that the [errorText] is not limited.
+  /// Defaults to null, which means that soft line breaks in [errorText] are
+  /// truncated with an ellipse while hard line breaks are respected.
+  /// For example, an [errorText] that overflows the width of the field will be
+  /// truncated with an ellipse. However, an [errorText] with explicit linebreak
+  /// characters (\n) will display on multiple lines.
+  ///
+  /// To cause a long [errorText] to wrap, either set [errorMaxLines] or use
+  /// [error] which offers more flexibility. For instance, it can be set to a
+  /// [Text] widget with a specific overflow value.
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
