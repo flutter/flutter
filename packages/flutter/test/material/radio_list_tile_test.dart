@@ -1589,8 +1589,7 @@ void main() {
     expect(offsetPlatform, const Offset(72.0, 16.0));
   });
 
-  testWidgets('RadioListTile renders with default scale',
-      (WidgetTester tester) async {
+  testWidgets('RadioListTile renders with default scale', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: RadioListTile<bool>(
@@ -1609,9 +1608,8 @@ void main() {
     expect(widget, findsNothing);
   });
 
-  testWidgets('RadioListTile respects radioScaleFactor',
-      (WidgetTester tester) async {
-        const double scale = 1.4;
+  testWidgets('RadioListTile respects radioScaleFactor', (WidgetTester tester) async {
+    const double scale = 1.4;
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: RadioListTile<bool>(
