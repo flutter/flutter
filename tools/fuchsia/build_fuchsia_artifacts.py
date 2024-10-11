@@ -146,8 +146,6 @@ def CopyZirconFFILibIfExists(source, destination):
   FindFileAndCopyTo('libzircon_ffi.so', source_root, destination_base)
 
 
-# TODO(zijiehe): http://crbug.com/368608542, avoid using pm or building far
-# packages here, packages should be built by ninja.
 def CopyToBucketWithMode(source, destination, aot, product, runner_type, api_level):
   mode = 'aot' if aot else 'jit'
   product_suff = '_product' if product else ''
