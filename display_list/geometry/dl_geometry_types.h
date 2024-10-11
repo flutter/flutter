@@ -47,6 +47,10 @@ inline const DlRect& ToDlRect(const SkRect& rect) {
   return *reinterpret_cast<const DlRect*>(&rect);
 }
 
+inline const DlRect ToDlRect(const SkIRect& rect) {
+  return DlRect::MakeLTRB(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom);
+}
+
 inline const DlIRect& ToDlIRect(const SkIRect& rect) {
   return *reinterpret_cast<const DlIRect*>(&rect);
 }
@@ -57,6 +61,10 @@ inline DlRect* ToDlRect(SkRect* rect) {
 
 inline const DlRect* ToDlRect(const SkRect* rect) {
   return rect == nullptr ? nullptr : reinterpret_cast<const DlRect*>(rect);
+}
+
+inline std::optional<const DlRect> ToOptDlRect(const SkRect* rect) {
+  return rect == nullptr ? std::nullopt : std::optional(ToDlRect(*rect));
 }
 
 inline const DlRect* ToDlRects(const SkRect* rects) {
@@ -102,6 +110,10 @@ inline const SkIRect& ToSkIRect(const DlIRect& rect) {
 
 inline const SkRect* ToSkRect(const DlRect* rect) {
   return rect == nullptr ? nullptr : reinterpret_cast<const SkRect*>(rect);
+}
+
+inline const SkRect* ToSkRect(std::optional<const DlRect>& rect) {
+  return rect.has_value() ? &ToSkRect(rect.value()) : nullptr;
 }
 
 inline SkRect* ToSkRect(DlRect* rect) {

@@ -60,8 +60,10 @@ class DisplayListMatrixClipState {
   SkM44 matrix_4x4() const { return SkM44::ColMajor(matrix_.m); }
   SkMatrix matrix_3x3() const { return ToSkMatrix(matrix_); }
 
-  SkRect local_cull_rect() const;
+  SkRect local_cull_rect() const { return ToSkRect(GetLocalCullCoverage()); }
+  DlRect GetLocalCullCoverage() const;
   SkRect device_cull_rect() const { return ToSkRect(cull_rect_); }
+  DlRect GetDeviceCullCoverage() const { return cull_rect_; }
 
   bool rect_covers_cull(const DlRect& content) const;
   bool rect_covers_cull(const SkRect& content) const {
@@ -154,7 +156,10 @@ class DisplayListMatrixClipState {
     clipRect(ToDlRect(bounds), op, is_aa);
   }
   void clipRRect(const SkRRect& rrect, ClipOp op, bool is_aa);
-  void clipPath(const SkPath& path, ClipOp op, bool is_aa);
+  void clipPath(const SkPath& path, ClipOp op, bool is_aa) {
+    clipPath(DlPath(path), op, is_aa);
+  }
+  void clipPath(const DlPath& path, ClipOp op, bool is_aa);
 
  private:
   DlRect cull_rect_;

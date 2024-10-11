@@ -362,7 +362,7 @@ TEST_P(AiksTest, CanRenderLinearGradientMaskBlur) {
       DlTileMode::kClamp));
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 20));
 
-  builder.DrawCircle({300, 300}, 200, paint);
+  builder.DrawCircle(SkPoint{300, 300}, 200, paint);
   builder.DrawRect(SkRect::MakeLTRB(100, 300, 500, 600), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));

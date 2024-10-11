@@ -123,12 +123,12 @@ void DisplayListMatrixClipState::clipRRect(const SkRRect& rrect,
   }
 }
 
-void DisplayListMatrixClipState::clipPath(const SkPath& path,
+void DisplayListMatrixClipState::clipPath(const DlPath& path,
                                           ClipOp op,
                                           bool is_aa) {
   // Map "kDifference of inverse path" to "kIntersect of the original path" and
   // map "kIntersect of inverse path" to "kDifference of the original path"
-  if (path.isInverseFillType()) {
+  if (path.IsInverseFillType()) {
     switch (op) {
       case ClipOp::kIntersect:
         op = ClipOp::kDifference;
@@ -139,8 +139,8 @@ void DisplayListMatrixClipState::clipPath(const SkPath& path,
     }
   }
 
-  DlRect bounds = ToDlRect(path.getBounds());
-  if (path.isRect(nullptr)) {
+  DlRect bounds = path.GetBounds();
+  if (path.IsRect(nullptr)) {
     return clipRect(bounds, op, is_aa);
   }
   switch (op) {
@@ -231,23 +231,23 @@ void DisplayListMatrixClipState::adjustCullRect(const DlRect& clip,
   }
 }
 
-SkRect DisplayListMatrixClipState::local_cull_rect() const {
+DlRect DisplayListMatrixClipState::GetLocalCullCoverage() const {
   if (cull_rect_.IsEmpty()) {
-    return SkRect::MakeEmpty();
+    return DlRect();
   }
   if (!is_matrix_invertable()) {
-    return SkRect::MakeEmpty();
+    return DlRect();
   }
   if (matrix_.HasPerspective2D()) {
     // We could do a 4-point long-form conversion, but since this is
     // only used for culling, let's just return a non-constricting
     // cull rect.
-    return DisplayListBuilder::kMaxCullRect;
+    return ToDlRect(DisplayListBuilder::kMaxCullRect);
   }
   DlMatrix inverse = matrix_.Invert();
   // We eliminated perspective above so we can use the cheaper non-clipping
   // bounds transform method.
-  return ToSkRect(cull_rect_.TransformBounds(inverse));
+  return cull_rect_.TransformBounds(inverse);
 }
 
 bool DisplayListMatrixClipState::rect_covers_cull(const DlRect& content) const {

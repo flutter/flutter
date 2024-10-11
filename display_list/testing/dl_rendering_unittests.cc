@@ -3719,17 +3719,19 @@ sk_sp<DisplayList> makeTestDisplayList() {
   DlPaint paint;
   paint.setDrawStyle(DlDrawStyle::kFill);
   paint.setColor(DlColor(SK_ColorRED));
-  builder.DrawRect({kRenderLeft, kRenderTop, kRenderCenterX, kRenderCenterY},
-                   paint);
+  builder.DrawRect(
+      SkRect{kRenderLeft, kRenderTop, kRenderCenterX, kRenderCenterY}, paint);
   paint.setColor(DlColor(SK_ColorBLUE));
-  builder.DrawRect({kRenderCenterX, kRenderTop, kRenderRight, kRenderCenterY},
-                   paint);
+  builder.DrawRect(
+      SkRect{kRenderCenterX, kRenderTop, kRenderRight, kRenderCenterY}, paint);
   paint.setColor(DlColor(SK_ColorGREEN));
-  builder.DrawRect({kRenderLeft, kRenderCenterY, kRenderCenterX, kRenderBottom},
-                   paint);
+  builder.DrawRect(
+      SkRect{kRenderLeft, kRenderCenterY, kRenderCenterX, kRenderBottom},
+      paint);
   paint.setColor(DlColor(SK_ColorYELLOW));
   builder.DrawRect(
-      {kRenderCenterX, kRenderCenterY, kRenderRight, kRenderBottom}, paint);
+      SkRect{kRenderCenterX, kRenderCenterY, kRenderRight, kRenderBottom},
+      paint);
   return builder.Build();
 }
 
@@ -4603,7 +4605,7 @@ class DisplayListNopTest : public DisplayListRendering {
     std::string desc = desc_stream.str();
     DisplayListBuilder builder({0.0f, 0.0f, 100.0f, 100.0f});
     DlPaint paint = DlPaint(color).setBlendMode(mode);
-    builder.DrawRect({0.0f, 0.0f, 10.0f, 10.0f}, paint);
+    builder.DrawRect(SkRect{0.0f, 0.0f, 10.0f, 10.0f}, paint);
     auto dl = builder.Build();
     if (dl->modifies_transparent_black()) {
       ASSERT_TRUE(dl->op_count() != 0u);
@@ -4700,8 +4702,8 @@ class DisplayListNopTest : public DisplayListRendering {
                         .setBlendMode(mode)            //
                         .setColorFilter(color_filter)  //
                         .setImageFilter(image_filter);
-    builder.DrawImage(DlImage::Make(test_image_src_data->image()), {0, 0},
-                      DlImageSampling::kNearestNeighbor, &paint);
+    builder.DrawImage(DlImage::Make(test_image_src_data->image()),
+                      SkPoint{0, 0}, DlImageSampling::kNearestNeighbor, &paint);
     auto dl = builder.Build();
 
     int w = test_image_src_data->width();

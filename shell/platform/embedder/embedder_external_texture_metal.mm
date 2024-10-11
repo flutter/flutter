@@ -49,7 +49,7 @@ void EmbedderExternalTextureMetal::Paint(PaintContext& context,
     if (bounds != image_bounds) {
       canvas->DrawImageRect(last_image_, image_bounds, bounds, sampling, paint);
     } else {
-      canvas->DrawImage(last_image_, {bounds.x(), bounds.y()}, sampling, paint);
+      canvas->DrawImage(last_image_, SkPoint{bounds.x(), bounds.y()}, sampling, paint);
     }
   }
 }
