@@ -190,12 +190,6 @@ template("aot_runner_package") {
                   "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_aot_runner",
                   "target_gen_dir") + "/dart_aot_runner.dartprofilersymbols")
 
-      inputs = [
-        vmservice_snapshot,
-        observatory_archive_file,
-        dart_profiler_symbols,
-      ]
-
       resources += [
         {
           path = vmservice_snapshot
