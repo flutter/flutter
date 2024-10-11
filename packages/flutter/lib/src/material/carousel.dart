@@ -192,7 +192,6 @@ class CarouselView extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     this.consumeMaxWeight = true,
-    
     this.onTap,
     this.enableSplash = true,
     required List<int> this.flexWeights,
