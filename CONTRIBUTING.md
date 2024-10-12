@@ -270,7 +270,6 @@ $ ./run_tests.py --variant=host_debug_unopt_arm64 --type=engine
 | runtime_unittests                        | engine              |                                                                 |
 | shell_unittests                          | engine(not windows) |                                                                 |
 | scenario_app                             | android             | Integration and golden tests for Android, iOS                   |
-| testing_unittests                        | engine              |                                                                 |
 | tonic_unittests                          | engine              | Unit tests for //third_party/tonic                              |
 | txt_unittests                            | engine(linux)       |                                                                 |
 | ui_unittests                             | engine              |                                                                 |
