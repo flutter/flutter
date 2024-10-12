@@ -1600,12 +1600,12 @@ void main() {
       ),
     ));
 
-    final Finder widget = find.ancestor(
+    final Finder transformFinder = find.ancestor(
       of: find.byType(Radio<bool>),
       matching: find.byType(Transform),
     );
 
-    expect(widget, findsNothing);
+    expect(transformFinder, findsNothing);
   });
 
   testWidgets('RadioListTile respects radioScaleFactor', (WidgetTester tester) async {
