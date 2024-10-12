@@ -565,7 +565,7 @@ the configured path by running this command: flutter config --android-studio-dir
     }
   }
 
-  static Version? _parseVersion(String? text) {
+  static Version? _parseVersion(String text) {
     Match? match;
     // Example string fort EAP: EAP AI-242.21829.142.2422.12358220
     // We try to capture 2422 here.
