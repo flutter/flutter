@@ -617,6 +617,15 @@ void InternalFlutterGpu_RenderPass_SetWindingOrder(
       flutter::gpu::ToImpellerWindingOrder(winding_order));
 }
 
+void InternalFlutterGpu_RenderPass_SetPolygonMode(
+    flutter::gpu::RenderPass* wrapper,
+    int polygon_mode) {
+  impeller::PipelineDescriptor& pipeline_descriptor =
+      wrapper->GetPipelineDescriptor();
+  pipeline_descriptor.SetPolygonMode(
+      flutter::gpu::ToImpellerPolygonMode(polygon_mode));
+}
+
 bool InternalFlutterGpu_RenderPass_Draw(flutter::gpu::RenderPass* wrapper) {
   return wrapper->Draw();
 }

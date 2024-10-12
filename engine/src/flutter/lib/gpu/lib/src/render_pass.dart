@@ -262,10 +262,13 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     _setCullMode(cullMode.index);
   }
 
+  void setPolygonMode(PolygonMode polygonMode) {
+    _setPolygonMode(polygonMode.index);
+  }
 
   void setPrimitiveType(PrimitiveType primitiveType) {
     _setPrimitiveType(primitiveType.index);
-}
+  }
 
   void setWindingOrder(WindingOrder windingOrder) {
     _setWindingOrder(windingOrder.index);
@@ -433,6 +436,9 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       symbol: 'InternalFlutterGpu_RenderPass_SetWindingOrder')
   external void _setWindingOrder(int windingOrder);
 
+  @Native<Void Function(Pointer<Void>, Int)>(
+      symbol: 'InternalFlutterGpu_RenderPass_SetPolygonMode')
+  external void _setPolygonMode(int polygonMode);
 
   @Native<Bool Function(Pointer<Void>)>(
       symbol: 'InternalFlutterGpu_RenderPass_Draw')
