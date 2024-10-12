@@ -566,27 +566,26 @@ the configured path by running this command: flutter config --android-studio-dir
   }
 
   static Version? _parseVersion(String text) {
-    Match? match;
     // Example string fort EAP: EAP AI-242.21829.142.2422.12358220
     // We try to capture 2422 here.
-    final RegExp intellijPattern = RegExp(r'EAP\s+[A-Z]{2}-\d+\.\d+\.\d+\.(\d+)\.\d+');
-    match = intellijPattern.firstMatch(text ?? '');
+    final RegExp eapVersionPattern = RegExp(r'EAP\s+[A-Z]{2}-\d+\.\d+\.\d+\.(\d+)\.\d+');
+    final Match? eapVersionMatch = eapVersionPattern.firstMatch(text);
 
-    if (match == null) {
+    if (eapVersionMatch == null) {
       return Version.parse(text);
     }
 
-    final String? matched = match.group(1);
+    final String? rawVersionMatch = eapVersionMatch.group(1);
 
     // length of 4 is because that how version is encrypted: first two digits
     // for year (part of major version), third for minor version, fourth for patch.
-    if (matched == null || matched.length != 4) {
+    if (rawVersionMatch == null || rawVersionMatch.length != 4) {
       return null;
     }
 
-    final int? major = int.tryParse('20${matched[0]}${matched[1]}');
-    final int? minor = int.tryParse(matched[2]);
-    final int? patch = int.tryParse(matched[3]);
+    final int? major = int.tryParse('20${rawVersionMatch[0]}${rawVersionMatch[1]}');
+    final int? minor = int.tryParse(rawVersionMatch[2]);
+    final int? patch = int.tryParse(rawVersionMatch[3]);
     if (major == null || minor == null || patch == null) {
       return null;
     }
