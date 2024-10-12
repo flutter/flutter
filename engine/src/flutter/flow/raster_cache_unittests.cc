@@ -39,7 +39,7 @@ TEST(RasterCache, MetricsOmitUnpopulatedEntries) {
 
   auto display_list = GetSampleDisplayList();
 
-  MockCanvas dummy_canvas(1000, 1000);
+  DisplayListBuilder dummy_canvas(1000, 1000);
   DlPaint paint;
 
   LayerStateStack preroll_state_stack;
@@ -99,7 +99,7 @@ TEST(RasterCache, ThresholdIsRespectedForDisplayList) {
 
   auto display_list = GetSampleDisplayList();
 
-  MockCanvas dummy_canvas(1000, 1000);
+  DisplayListBuilder dummy_canvas(1000, 1000);
   DlPaint paint;
 
   LayerStateStack preroll_state_stack;
@@ -151,7 +151,7 @@ TEST(RasterCache, AccessThresholdOfZeroDisablesCachingForDisplayList) {
 
   auto display_list = GetSampleDisplayList();
 
-  MockCanvas dummy_canvas(1000, 1000);
+  DisplayListBuilder dummy_canvas(1000, 1000);
   DlPaint paint;
 
   LayerStateStack preroll_state_stack;
@@ -185,7 +185,7 @@ TEST(RasterCache, PictureCacheLimitPerFrameIsRespectedWhenZeroForDisplayList) {
 
   auto display_list = GetSampleDisplayList();
 
-  MockCanvas dummy_canvas(1000, 1000);
+  DisplayListBuilder dummy_canvas(1000, 1000);
   DlPaint paint;
 
   LayerStateStack preroll_state_stack;
@@ -229,7 +229,7 @@ TEST(RasterCache, EvictUnusedCacheEntries) {
   auto display_list_1 = GetSampleDisplayList();
   auto display_list_2 = GetSampleDisplayList();
 
-  MockCanvas dummy_canvas(1000, 1000);
+  DisplayListBuilder dummy_canvas(1000, 1000);
   DlPaint paint;
 
   LayerStateStack preroll_state_stack;
@@ -342,7 +342,7 @@ TEST(RasterCache, DeviceRectRoundOutForDisplayList) {
   SkMatrix ctm = SkMatrix::MakeAll(1.3312, 0, 233, 0, 1.3312, 206, 0, 0, 1);
   DlPaint paint;
 
-  MockCanvas canvas(1000, 1000);
+  DisplayListBuilder canvas(1000, 1000);
   canvas.SetTransform(ctm);
 
   LayerStateStack preroll_state_stack;
@@ -389,7 +389,7 @@ TEST(RasterCache, NestedOpCountMetricUsedForDisplayList) {
   ASSERT_EQ(display_list->op_count(), 1u);
   ASSERT_EQ(display_list->op_count(true), 36u);
 
-  MockCanvas dummy_canvas(1000, 1000);
+  DisplayListBuilder dummy_canvas(1000, 1000);
   DlPaint paint;
 
   LayerStateStack preroll_state_stack;
@@ -440,7 +440,7 @@ TEST(RasterCache, NaiveComplexityScoringDisplayList) {
   ASSERT_EQ(display_list->op_count(), 5u);
   ASSERT_FALSE(calculator->ShouldBeCached(complexity_score));
 
-  MockCanvas dummy_canvas(1000, 1000);
+  DisplayListBuilder dummy_canvas(1000, 1000);
   DlPaint paint;
 
   LayerStateStack preroll_state_stack;
@@ -510,7 +510,7 @@ TEST(RasterCache, DisplayListWithSingularMatrixIsNotCached) {
 
   auto display_list = GetSampleDisplayList();
 
-  MockCanvas dummy_canvas(1000, 1000);
+  DisplayListBuilder dummy_canvas(1000, 1000);
   DlPaint paint;
 
   LayerStateStack preroll_state_stack;
@@ -567,7 +567,7 @@ TEST(RasterCache, PrepareLayerTransform) {
 
   size_t threshold = 2;
   MockRasterCache cache(threshold);
-  MockCanvas dummy_canvas(1000, 1000);
+  DisplayListBuilder dummy_canvas(1000, 1000);
 
   LayerStateStack preroll_state_stack;
   preroll_state_stack.set_preroll_delegate(kGiantRect, matrix);

@@ -11,17 +11,19 @@
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
 #include "flutter/testing/canvas_test.h"
-#include "flutter/testing/mock_canvas.h"
+#include "flutter/testing/display_list_testing.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
+
 class LayerTreeTest : public CanvasTest {
  public:
   LayerTreeTest()
       : root_transform_(SkMatrix::Translate(1.0f, 1.0f)),
+        builder_(DisplayListBuilder::kMaxCullRect),
         scoped_frame_(compositor_context_.AcquireFrame(nullptr,
-                                                       &mock_canvas(),
+                                                       &builder_,
                                                        nullptr,
                                                        root_transform_,
                                                        false,
@@ -31,6 +33,7 @@ class LayerTreeTest : public CanvasTest {
 
   CompositorContext::ScopedFrame& frame() { return *scoped_frame_.get(); }
   const SkMatrix& root_transform() { return root_transform_; }
+  sk_sp<DisplayList> display_list() { return builder_.Build(); }
 
   std::unique_ptr<LayerTree> BuildLayerTree(
       const std::shared_ptr<Layer>& root_layer) {
@@ -40,6 +43,7 @@ class LayerTreeTest : public CanvasTest {
  private:
   CompositorContext compositor_context_;
   SkMatrix root_transform_;
+  DisplayListBuilder builder_;
   std::unique_ptr<CompositorContext::ScopedFrame> scoped_frame_;
 };
 
@@ -62,13 +66,17 @@ TEST_F(LayerTreeTest, PaintBeforePrerollDies) {
   layer->Add(mock_layer);
 
   auto layer_tree = BuildLayerTree(layer);
-  EXPECT_EQ(mock_layer->paint_bounds(), kEmptyRect);
-  EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
+  EXPECT_EQ(mock_layer->paint_bounds(), SkRect::MakeEmpty());
+  EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
   EXPECT_TRUE(mock_layer->is_empty());
   EXPECT_TRUE(layer->is_empty());
 
   layer_tree->Paint(frame());
-  EXPECT_EQ(mock_canvas().draw_calls(), std::vector<MockCanvas::DrawCall>());
+
+  DisplayListBuilder expected_builder;
+  auto expected_dl = expected_builder.Build();
+
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_dl));
 }
 
 TEST_F(LayerTreeTest, Simple) {
@@ -88,9 +96,12 @@ TEST_F(LayerTreeTest, Simple) {
   EXPECT_EQ(mock_layer->parent_matrix(), root_transform());
 
   layer_tree->Paint(frame());
-  EXPECT_EQ(mock_canvas().draw_calls(),
-            std::vector({MockCanvas::DrawCall{
-                0, MockCanvas::DrawPathData{child_path, child_paint}}}));
+
+  DisplayListBuilder expected_builder;
+  expected_builder.DrawPath(DlPath(child_path), child_paint);
+  auto expected_dl = expected_builder.Build();
+
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_dl));
 }
 
 TEST_F(LayerTreeTest, Multiple) {
@@ -122,12 +133,13 @@ TEST_F(LayerTreeTest, Multiple) {
             kGiantRect);  // Siblings are independent
 
   layer_tree->Paint(frame());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::DrawPathData{child_path1, child_paint1}},
-                   MockCanvas::DrawCall{0, MockCanvas::DrawPathData{
-                                               child_path2, child_paint2}}}));
+
+  DisplayListBuilder expected_builder;
+  expected_builder.DrawPath(DlPath(child_path1), child_paint1);
+  expected_builder.DrawPath(DlPath(child_path2), child_paint2);
+  auto expected_dl = expected_builder.Build();
+
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_dl));
 }
 
 TEST_F(LayerTreeTest, MultipleWithEmpty) {
@@ -154,9 +166,12 @@ TEST_F(LayerTreeTest, MultipleWithEmpty) {
   EXPECT_EQ(mock_layer2->parent_cull_rect(), kGiantRect);
 
   layer_tree->Paint(frame());
-  EXPECT_EQ(mock_canvas().draw_calls(),
-            std::vector({MockCanvas::DrawCall{
-                0, MockCanvas::DrawPathData{child_path1, child_paint1}}}));
+
+  DisplayListBuilder expected_builder;
+  expected_builder.DrawPath(DlPath(child_path1), child_paint1);
+  auto expected_dl = expected_builder.Build();
+
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_dl));
 }
 
 TEST_F(LayerTreeTest, NeedsSystemComposite) {
@@ -186,12 +201,13 @@ TEST_F(LayerTreeTest, NeedsSystemComposite) {
   EXPECT_EQ(mock_layer2->parent_cull_rect(), kGiantRect);
 
   layer_tree->Paint(frame());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::DrawPathData{child_path1, child_paint1}},
-                   MockCanvas::DrawCall{0, MockCanvas::DrawPathData{
-                                               child_path2, child_paint2}}}));
+
+  DisplayListBuilder expected_builder;
+  expected_builder.DrawPath(DlPath(child_path1), child_paint1);
+  expected_builder.DrawPath(DlPath(child_path2), child_paint2);
+  auto expected_dl = expected_builder.Build();
+
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_dl));
 }
 
 TEST_F(LayerTreeTest, PrerollContextInitialization) {
