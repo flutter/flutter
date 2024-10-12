@@ -146,6 +146,11 @@ enum WindingOrder {
   counterClockwise,
 }
 
+enum PolygonMode {
+  fill,
+  line
+}
+
 enum CompareFunction {
   /// Comparison test never passes.
   never,
