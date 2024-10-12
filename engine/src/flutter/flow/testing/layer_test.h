@@ -17,13 +17,14 @@
 #include "flutter/testing/assertions_skia.h"
 #include "flutter/testing/canvas_test.h"
 #include "flutter/testing/display_list_testing.h"
-#include "flutter/testing/mock_canvas.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/utils/SkNWayCanvas.h"
 
 namespace flutter {
 namespace testing {
+
+static constexpr SkRect kEmptyRect = SkRect::MakeEmpty();
 
 // This fixture allows generating tests which can |Paint()| and |Preroll()|
 // |Layer|'s.
@@ -61,18 +62,6 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             .raster_cached_entries         = &cacheable_items_,
             // clang-format on
         },
-        paint_context_{
-            // clang-format off
-            .state_stack                   = paint_state_stack_,
-            .canvas                        = &TestT::mock_canvas(),
-            .gr_context                    = nullptr,
-            .view_embedder                 = nullptr,
-            .raster_time                   = raster_time_,
-            .ui_time                       = ui_time_,
-            .texture_registry              = texture_registry_,
-            .raster_cache                  = nullptr,
-            // clang-format on
-        },
         display_list_builder_(k_dl_bounds_),
         display_list_paint_context_{
             // clang-format off
@@ -88,7 +77,6 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
         } {
     use_null_raster_cache();
     preroll_state_stack_.set_preroll_delegate(kGiantRect, SkMatrix::I());
-    paint_state_stack_.set_delegate(&TestT::mock_canvas());
     display_list_state_stack_.set_delegate(&display_list_builder_);
   }
 
@@ -148,7 +136,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   }
   RasterCache* raster_cache() { return raster_cache_.get(); }
   PrerollContext* preroll_context() { return &preroll_context_; }
-  PaintContext& paint_context() { return paint_context_; }
+  PaintContext& paint_context() { return display_list_paint_context_; }
   PaintContext& display_list_paint_context() {
     return display_list_paint_context_;
   }
@@ -172,19 +160,16 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   void set_raster_cache_(std::unique_ptr<RasterCache> raster_cache) {
     raster_cache_ = std::move(raster_cache);
     preroll_context_.raster_cache = raster_cache_.get();
-    paint_context_.raster_cache = raster_cache_.get();
     display_list_paint_context_.raster_cache = raster_cache_.get();
   }
 
   LayerStateStack preroll_state_stack_;
-  LayerStateStack paint_state_stack_;
   FixedRefreshRateStopwatch raster_time_;
   FixedRefreshRateStopwatch ui_time_;
   std::shared_ptr<TextureRegistry> texture_registry_;
 
   std::unique_ptr<RasterCache> raster_cache_;
   PrerollContext preroll_context_;
-  PaintContext paint_context_;
   DisplayListBuilder display_list_builder_;
   LayerStateStack display_list_state_stack_;
   sk_sp<DisplayList> display_list_;

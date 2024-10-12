@@ -6,7 +6,6 @@
 #define FLUTTER_TESTING_CANVAS_TEST_H_
 
 #include "flutter/fml/macros.h"
-#include "flutter/testing/mock_canvas.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 
@@ -19,11 +18,9 @@ class CanvasTestBase : public BaseT {
  public:
   CanvasTestBase() = default;
 
-  MockCanvas& mock_canvas() { return canvas_; }
   sk_sp<SkColorSpace> mock_color_space() { return color_space_; }
 
  private:
-  MockCanvas canvas_;
   sk_sp<SkColorSpace> color_space_ = SkColorSpace::MakeSRGB();
 
   FML_DISALLOW_COPY_AND_ASSIGN(CanvasTestBase);

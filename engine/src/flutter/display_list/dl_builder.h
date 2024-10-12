@@ -38,6 +38,9 @@ class DisplayListBuilder final : public virtual DlCanvas,
   explicit DisplayListBuilder(const SkRect& cull_rect = kMaxCullRect,
                               bool prepare_rtree = false);
 
+  DisplayListBuilder(DlScalar width, DlScalar height)
+      : DisplayListBuilder(SkRect::MakeWH(width, height)) {}
+
   ~DisplayListBuilder();
 
   // |DlCanvas|

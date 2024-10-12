@@ -743,12 +743,6 @@ if (enable_unittests) {
     resources += vulkan_icds
   }
 
-  fuchsia_test_archive("testing_tests") {
-    deps = [ "//flutter/testing:testing_unittests" ]
-    gen_cml_file = true
-    binary = "testing_unittests"
-  }
-
   fuchsia_test_archive("txt_tests") {
     deps = [ "//flutter/third_party/txt:txt_unittests" ]
     gen_cml_file = true
@@ -912,7 +906,6 @@ if (enable_unittests) {
       ":fml_tests",
       ":runtime_tests",
       ":shell_tests",
-      ":testing_tests",
       ":txt_tests",
       ":ui_tests",
       "tests/integration",

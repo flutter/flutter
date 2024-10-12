@@ -44,7 +44,6 @@
 #include "flutter/shell/common/vsync_waiter_fallback.h"
 #include "flutter/shell/common/vsync_waiters_test.h"
 #include "flutter/shell/version/version.h"
-#include "flutter/testing/mock_canvas.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 #include "impeller/core/runtime_types.h"
@@ -2542,7 +2541,7 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
 
         // 2.1. Rasterize the picture. Call Draw multiple times to pass the
         // access threshold (default to 3) so a cache can be generated.
-        MockCanvas dummy_canvas;
+        DisplayListBuilder dummy_canvas;
         DlPaint paint;
         bool picture_cache_generated;
         DisplayListRasterCacheItem display_list_raster_cache_item(

@@ -26,8 +26,6 @@
 - test_command: test run fuchsia-pkg://fuchsia.com/shell_tests#meta/shell_tests.cm
   package: shell_tests-0.far
   variant: debug_x64
-- test_command: test run fuchsia-pkg://fuchsia.com/testing_tests#meta/testing_tests.cm
-  package: testing_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/txt_tests#meta/txt_tests.cm -- --gtest_filter=-ParagraphTest.*
   package: txt_tests-0.far
   variant: debug

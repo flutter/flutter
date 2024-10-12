@@ -10,7 +10,6 @@
 #include "flutter/flow/testing/mock_embedder.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
-#include "flutter/testing/mock_canvas.h"
 
 namespace flutter {
 namespace testing {
@@ -34,9 +33,12 @@ TEST_F(PlatformViewLayerTest, NullViewEmbedderDoesntPrerollCompositeOrPaint) {
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_FALSE(layer->subtree_has_platform_view());
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(paint_context().canvas, &mock_canvas());
-  EXPECT_EQ(mock_canvas().draw_calls(), std::vector<MockCanvas::DrawCall>());
+  layer->Paint(display_list_paint_context());
+
+  DisplayListBuilder expected_builder;
+  auto expected_dl = expected_builder.Build();
+
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_dl));
 }
 
 TEST_F(PlatformViewLayerTest, ClippedPlatformViewPrerollsAndPaintsNothing) {
@@ -69,21 +71,24 @@ TEST_F(PlatformViewLayerTest, ClippedPlatformViewPrerollsAndPaintsNothing) {
   EXPECT_TRUE(child_clip_layer->subtree_has_platform_view());
   EXPECT_TRUE(parent_clip_layer->subtree_has_platform_view());
 
-  parent_clip_layer->Paint(paint_context());
-  EXPECT_EQ(paint_context().canvas, &mock_canvas());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector(
-          {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::ClipRectData{parent_clip, ClipOp::kIntersect,
-                                           MockCanvas::kHardClipEdgeStyle}},
-           MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
-           MockCanvas::DrawCall{
-               2, MockCanvas::ClipRectData{child_clip, ClipOp::kIntersect,
-                                           MockCanvas::kHardClipEdgeStyle}},
-           MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  parent_clip_layer->Paint(display_list_paint_context());
+
+  DisplayListBuilder expected_builder;
+  expected_builder.Save();
+  expected_builder.ClipRect(parent_clip, ClipOp::kIntersect, false);
+
+  // In reality the following save/clip/restore are elided due to reaching
+  // a nop state (and the save is then unnecessary), but this is the order
+  // of operations that the layers will do...
+  expected_builder.Save();
+  expected_builder.ClipRect(child_clip, ClipOp::kIntersect, false);
+  expected_builder.Restore();
+  // End of section that gets ignored during recording
+
+  expected_builder.Restore();
+  auto expected_dl = expected_builder.Build();
+
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_dl));
 }
 
 TEST_F(PlatformViewLayerTest, OpacityInheritance) {

@@ -6,7 +6,6 @@
 
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/fml/macros.h"
-#include "flutter/testing/mock_canvas.h"
 
 namespace flutter {
 namespace testing {
@@ -58,10 +57,13 @@ TEST_F(MockLayerTest, SimpleParams) {
   EXPECT_EQ(layer->parent_cull_rect(), local_cull_rect);
   EXPECT_EQ(layer->parent_has_platform_view(), parent_has_platform_view);
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(mock_canvas().draw_calls(),
-            std::vector({MockCanvas::DrawCall{
-                0, MockCanvas::DrawPathData{path, paint}}}));
+  layer->Paint(display_list_paint_context());
+
+  DisplayListBuilder expected_builder;
+  expected_builder.DrawPath(DlPath(path), paint);
+  auto expected_dl = expected_builder.Build();
+
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_dl));
 }
 
 TEST_F(MockLayerTest, FakePlatformView) {

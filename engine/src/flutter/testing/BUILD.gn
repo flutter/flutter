@@ -23,8 +23,6 @@ source_set("testing_lib") {
     "display_list_testing.h",
     "logger_listener.cc",
     "logger_listener.h",
-    "mock_canvas.cc",
-    "mock_canvas.h",
     "post_task_sync.cc",
     "post_task_sync.h",
     "stream_capture.cc",
@@ -179,31 +177,6 @@ if (enable_unittests && shell_enable_vulkan) {
 if (enable_unittests) {
   test_fixtures("testing_fixtures") {
     fixtures = []
-  }
-
-  # The //flutter/testing library provides utility methods to other test targets.
-  # This test target tests the testing utilities.
-  executable("testing_unittests") {
-    testonly = true
-
-    sources = [ "mock_canvas_unittests.cc" ]
-
-    deps = [
-      ":skia",
-      ":testing",
-      ":testing_fixtures",
-      "//flutter/runtime:libdart",
-    ]
-
-    if (shell_enable_metal) {
-      sources += [ "test_metal_surface_unittests.cc" ]
-
-      deps += [ ":metal" ]
-    }
-
-    if (shell_enable_vulkan) {
-      deps += [ "//flutter/vulkan" ]
-    }
   }
 }
 
