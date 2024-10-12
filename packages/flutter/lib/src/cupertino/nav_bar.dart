@@ -454,6 +454,13 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// Only widgets that implement [PreferredSizeWidget] can be used at the
   /// bottom of a navigation bar.
   ///
+  /// {@tool dartpad}
+  /// This example shows a [CupertinoSearchTextField] at the bottom of a
+  /// [CupertinoNavigationBar].
+  ///
+  /// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_navigation_bar.1.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
