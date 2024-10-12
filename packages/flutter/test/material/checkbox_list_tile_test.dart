@@ -1277,14 +1277,12 @@ void main() {
       ),
     ));
 
-    final Transform widget = tester.widget(
-      find.ancestor(
+    final Finder transformFinder = find.ancestor(
         of: find.byType(Checkbox),
         matching: find.byType(Transform),
-      ),
     );
 
-    expect(widget.transform.getMaxScaleOnAxis(), 1.0);
+    expect(transformFinder, findsNothing);
   });
 
   testWidgets('CheckboxListTile respects checkboxScaleFactor', (WidgetTester tester) async {
