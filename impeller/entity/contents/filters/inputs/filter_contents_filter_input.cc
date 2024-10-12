@@ -17,10 +17,6 @@ FilterContentsFilterInput::FilterContentsFilterInput(
 
 FilterContentsFilterInput::~FilterContentsFilterInput() = default;
 
-FilterInput::Variant FilterContentsFilterInput::GetInput() const {
-  return filter_;
-}
-
 std::optional<Snapshot> FilterContentsFilterInput::GetSnapshot(
     const std::string& label,
     const ContentContext& renderer,
@@ -58,19 +54,6 @@ Matrix FilterContentsFilterInput::GetLocalTransform(
 
 Matrix FilterContentsFilterInput::GetTransform(const Entity& entity) const {
   return filter_->GetTransform(entity.GetTransform());
-}
-
-bool FilterContentsFilterInput::IsTranslationOnly() const {
-  return filter_->IsTranslationOnly();
-}
-
-bool FilterContentsFilterInput::IsLeaf() const {
-  return false;
-}
-
-void FilterContentsFilterInput::SetLeafInputs(
-    const FilterInput::Vector& inputs) {
-  filter_->SetLeafInputs(inputs);
 }
 
 void FilterContentsFilterInput::SetEffectTransform(const Matrix& matrix) {

@@ -42,11 +42,6 @@ class MatrixFilterContentsTest : public EntityPlayground {
 
 INSTANTIATE_PLAYGROUND_SUITE(MatrixFilterContentsTest);
 
-TEST(MatrixFilterContentsTest, Create) {
-  MatrixFilterContents contents;
-  EXPECT_TRUE(contents.IsTranslationOnly());
-}
-
 TEST(MatrixFilterContentsTest, CoverageEmpty) {
   MatrixFilterContents contents;
   FilterInput::Vector inputs = {};
