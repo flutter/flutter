@@ -2672,6 +2672,72 @@ void main() {
       expect(closed, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       expect(opened, isEmpty);
     });
+
+    testWidgets('Using a ListenableMenuController works', (WidgetTester tester) async {
+      final ListenableMenuController listenableController = ListenableMenuController();
+      addTearDown(listenableController.dispose);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: MenuAnchor(
+                childFocusNode: focusNode,
+                controller: listenableController,
+                menuChildren: <Widget>[
+                  MenuItemButton(
+                    child: Text(TestMenu.mainMenu0.label),
+                  ),
+                  MenuItemButton(
+                    child: Text(TestMenu.mainMenu1.label),
+                  ),
+                  MenuItemButton(
+                    child: Text(TestMenu.mainMenu2.label),
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return ValueListenableBuilder<bool>(
+                    valueListenable: listenableController,
+                    builder: (BuildContext innerContext, bool isOpen, _) {
+                      return ElevatedButton(
+                        focusNode: focusNode,
+                        onPressed: () {
+                          if (isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        child: Text(isOpen ? 'Close Menu' : 'Open Menu'),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Open Menu'), findsOneWidget);
+      expect(find.text('Close Menu'), findsNothing);
+
+      listenableController.open();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Open Menu'), findsNothing);
+      expect(find.text('Close Menu'), findsOneWidget);
+
+      listenableController.close();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Open Menu'), findsOneWidget);
+      expect(find.text('Close Menu'), findsNothing);
+    });
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
   group('MenuItemButton', () {

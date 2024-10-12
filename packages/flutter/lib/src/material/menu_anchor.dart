@@ -696,6 +696,73 @@ class MenuController {
   }
 }
 
+/// A [MenuController] that allows listening to its [isOpen] state.
+class ListenableMenuController extends MenuController implements ValueListenable<bool> {
+  /// Construct a new [ListenableMenuController].
+  ListenableMenuController() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$ListenableMenuController',
+        object: this,
+      );
+    }
+  }
+
+  bool _isDisposed = false;
+  final Set<VoidCallback> _listeners = <VoidCallback>{};
+
+  @override
+  bool get value => isOpen;
+
+  @override
+  void addListener(VoidCallback listener) {
+    _listeners.add(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
+  }
+
+  @override
+  void open({Offset? position}) {
+    super.open(position: position);
+
+    for (final VoidCallback listener in _listeners) {
+      listener();
+    }
+  }
+
+  @override
+  void close() {
+    super.close();
+
+    for (final VoidCallback listener in _listeners) {
+      listener();
+    }
+  }
+
+  /// Dispose of this controller.
+  void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
+    _listeners.clear();
+
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(
+        object: this,
+      );
+    }
+  }
+}
+
 /// A menu bar that manages cascading child menus.
 ///
 /// This is a Material Design menu bar that typically resides above the main
