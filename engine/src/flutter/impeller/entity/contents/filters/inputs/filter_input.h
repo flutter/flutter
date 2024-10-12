@@ -45,8 +45,6 @@ class FilterInput {
 
   static FilterInput::Vector Make(std::initializer_list<Variant> inputs);
 
-  virtual Variant GetInput() const = 0;
-
   virtual std::optional<Snapshot> GetSnapshot(
       const std::string& label,
       const ContentContext& renderer,
@@ -68,18 +66,6 @@ class FilterInput {
   /// @brief  Get the transform of this `FilterInput`. This is equivalent to
   ///         calling `entity.GetTransform() * GetLocalTransform()`.
   virtual Matrix GetTransform(const Entity& entity) const;
-
-  /// @see  `FilterContents::HasBasisTransforms`
-  virtual bool IsTranslationOnly() const;
-
-  /// @brief  Returns `true` unless this input is a `FilterInput`, which may
-  ///         take other inputs.
-  virtual bool IsLeaf() const;
-
-  /// @brief  Replaces the inputs of all leaf `FilterContents` with a new set
-  ///         of `inputs`.
-  /// @see    `FilterInput::IsLeaf`
-  virtual void SetLeafInputs(const FilterInput::Vector& inputs);
 
   /// @brief  Sets the effect transform of filter inputs.
   virtual void SetEffectTransform(const Matrix& matrix);

@@ -257,43 +257,12 @@ std::optional<Snapshot> FilterContents::RenderToSnapshot(
   return std::nullopt;
 }
 
-const FilterContents* FilterContents::AsFilter() const {
-  return this;
-}
-
 Matrix FilterContents::GetLocalTransform(const Matrix& parent_transform) const {
   return Matrix();
 }
 
 Matrix FilterContents::GetTransform(const Matrix& parent_transform) const {
   return parent_transform * GetLocalTransform(parent_transform);
-}
-bool FilterContents::IsTranslationOnly() const {
-  for (auto& input : inputs_) {
-    if (!input->IsTranslationOnly()) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool FilterContents::IsLeaf() const {
-  for (auto& input : inputs_) {
-    if (!input->IsLeaf()) {
-      return false;
-    }
-  }
-  return true;
-}
-
-void FilterContents::SetLeafInputs(const FilterInput::Vector& inputs) {
-  if (IsLeaf()) {
-    inputs_ = inputs;
-    return;
-  }
-  for (auto& input : inputs_) {
-    input->SetLeafInputs(inputs);
-  }
 }
 
 void FilterContents::SetRenderingMode(Entity::RenderingMode rendering_mode) {

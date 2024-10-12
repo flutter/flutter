@@ -17,10 +17,6 @@ ContentsFilterInput::ContentsFilterInput(std::shared_ptr<Contents> contents,
 
 ContentsFilterInput::~ContentsFilterInput() = default;
 
-FilterInput::Variant ContentsFilterInput::GetInput() const {
-  return contents_;
-}
-
 std::optional<Snapshot> ContentsFilterInput::GetSnapshot(
     const std::string& label,
     const ContentContext& renderer,

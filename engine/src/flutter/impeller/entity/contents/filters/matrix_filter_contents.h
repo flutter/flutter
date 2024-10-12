@@ -21,9 +21,6 @@ class MatrixFilterContents final : public FilterContents {
   // |FilterContents|
   void SetRenderingMode(Entity::RenderingMode rendering_mode) override;
 
-  // |FilterContents|
-  bool IsTranslationOnly() const override;
-
   void SetSamplerDescriptor(SamplerDescriptor desc);
 
   // |FilterContents|

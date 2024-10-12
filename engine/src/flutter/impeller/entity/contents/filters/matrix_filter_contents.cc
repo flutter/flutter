@@ -20,10 +20,6 @@ void MatrixFilterContents::SetRenderingMode(
   FilterContents::SetRenderingMode(rendering_mode);
 }
 
-bool MatrixFilterContents::IsTranslationOnly() const {
-  return matrix_.Basis().IsIdentity() && FilterContents::IsTranslationOnly();
-}
-
 void MatrixFilterContents::SetSamplerDescriptor(SamplerDescriptor desc) {
   sampler_descriptor_ = std::move(desc);
 }

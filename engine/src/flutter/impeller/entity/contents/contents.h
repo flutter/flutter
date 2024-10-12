@@ -158,12 +158,6 @@ class Contents {
                                                  ISize target_size) const;
 
   //----------------------------------------------------------------------------
-  /// @brief Cast to a filter. Returns `nullptr` if this Contents is not a
-  ///        filter.
-  ///
-  virtual const FilterContents* AsFilter() const;
-
-  //----------------------------------------------------------------------------
   /// @brief      If possible, applies a color filter to this contents inputs on
   ///             the CPU.
   ///
