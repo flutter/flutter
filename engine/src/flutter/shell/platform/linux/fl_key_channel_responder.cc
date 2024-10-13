@@ -62,6 +62,8 @@ static void fl_key_channel_user_data_dispose(GObject* object) {
         reinterpret_cast<gpointer*>(&(self->responder)));
     self->responder = nullptr;
   }
+
+  G_OBJECT_CLASS(fl_key_channel_user_data_parent_class)->dispose(object);
 }
 
 // Class initialization method for FlKeyChannelUserData private class.

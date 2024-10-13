@@ -132,6 +132,8 @@ static void fl_keyboard_handler_user_data_dispose(GObject* object) {
                                  reinterpret_cast<gpointer*>(&(self->handler)));
     self->handler = nullptr;
   }
+
+  G_OBJECT_CLASS(fl_keyboard_handler_user_data_parent_class)->dispose(object);
 }
 
 static void fl_keyboard_handler_user_data_class_init(

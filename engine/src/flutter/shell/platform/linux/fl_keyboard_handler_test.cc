@@ -191,14 +191,16 @@ static void fl_mock_key_binary_messenger_init(FlMockKeyBinaryMessenger* self) {
   new (priv) FlMockKeyBinaryMessengerPrivate();
 }
 
-static void fl_mock_key_binary_messenger_finalize(GObject* object) {
+static void fl_mock_key_binary_messenger_dispose(GObject* object) {
   FL_MOCK_KEY_BINARY_MESSENGER_GET_PRIVATE(object)
       ->~FlMockKeyBinaryMessengerPrivate();
+
+  G_OBJECT_CLASS(fl_mock_key_binary_messenger_parent_class)->dispose(object);
 }
 
 static void fl_mock_key_binary_messenger_class_init(
     FlMockKeyBinaryMessengerClass* klass) {
-  G_OBJECT_CLASS(klass)->finalize = fl_mock_key_binary_messenger_finalize;
+  G_OBJECT_CLASS(klass)->dispose = fl_mock_key_binary_messenger_dispose;
 }
 
 static void fl_mock_key_binary_messenger_send_on_channel(
@@ -329,13 +331,10 @@ static void fl_mock_view_delegate_init(FlMockViewDelegate* self) {
   new (priv) FlMockViewDelegatePrivate();
 }
 
-static void fl_mock_view_delegate_finalize(GObject* object) {
-  FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(object)->~FlMockViewDelegatePrivate();
-}
-
 static void fl_mock_view_delegate_dispose(GObject* object) {
   FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(object);
 
+  FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(object)->~FlMockViewDelegatePrivate();
   g_clear_object(&priv->messenger);
 
   G_OBJECT_CLASS(fl_mock_view_delegate_parent_class)->dispose(object);
@@ -343,7 +342,6 @@ static void fl_mock_view_delegate_dispose(GObject* object) {
 
 static void fl_mock_view_delegate_class_init(FlMockViewDelegateClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_mock_view_delegate_dispose;
-  G_OBJECT_CLASS(klass)->finalize = fl_mock_view_delegate_finalize;
 }
 
 static void fl_mock_view_keyboard_send_key_event(
