@@ -114,9 +114,9 @@ class DropdownMenuEntry<T> {
 /// will be updated based on the selection from the menu entries. The text field
 /// will stay empty if the selected entry is disabled.
 ///
-/// The dropdown menu can be traversed by pressing the up or down key. During the
-/// process, the corresponding item will be highlighted and the text field will be updated.
-/// Disabled items will be skipped during traversal.
+/// When the dropdown menu has focus, it can be traversed by pressing the up or down key.
+/// During the process, the corresponding item will be highlighted and
+/// the text field will be updated. Disabled items will be skipped during traversal.
 ///
 /// The menu can be scrollable if not all items in the list are displayed at once.
 ///
@@ -972,10 +972,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             ),
           ),
         ),
-        child: Align(
-          alignment: AlignmentDirectional.topStart,
-          child: menuAnchor,
-        ),
+        child: menuAnchor,
       );
     }
 
