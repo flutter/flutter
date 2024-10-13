@@ -335,6 +335,12 @@ static void fl_view_redraw(FlRenderable* renderable) {
   }
 }
 
+// Implements FlRenderable::make_current
+static void fl_view_make_current(FlRenderable* renderable) {
+  FlView* self = FL_VIEW(renderable);
+  gtk_gl_area_make_current(self->gl_area);
+}
+
 // Implements FlPluginRegistry::get_registrar_for_plugin.
 static FlPluginRegistrar* fl_view_get_registrar_for_plugin(
     FlPluginRegistry* registry,
@@ -348,6 +354,7 @@ static FlPluginRegistrar* fl_view_get_registrar_for_plugin(
 
 static void fl_renderable_iface_init(FlRenderableInterface* iface) {
   iface->redraw = fl_view_redraw;
+  iface->make_current = fl_view_make_current;
 }
 
 static void fl_view_plugin_registry_iface_init(
