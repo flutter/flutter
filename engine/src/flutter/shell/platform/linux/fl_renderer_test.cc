@@ -6,7 +6,6 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
-#include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
 #include "flutter/shell/platform/linux/testing/mock_renderer.h"
 
@@ -48,14 +47,12 @@ TEST(FlRendererTest, RestoresGLState) {
   constexpr int kWidth = 100;
   constexpr int kHeight = 100;
 
-  flutter::testing::fl_ensure_gtk_init();
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlView) view = fl_view_new(project);
+  g_autoptr(FlRenderable) renderable = FL_RENDERABLE(fl_mock_renderable_new());
   g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, kWidth, kHeight);
 
-  fl_renderer_add_view(FL_RENDERER(renderer), 0, view);
+  fl_renderer_add_renderable(FL_RENDERER(renderer), 0, renderable);
   fl_renderer_wait_for_frame(FL_RENDERER(renderer), kWidth, kHeight);
 
   FlutterBackingStore backing_store;
@@ -84,8 +81,6 @@ TEST(FlRendererTest, RestoresGLState) {
   glGetIntegerv(GL_TEXTURE_BINDING_2D,
                 reinterpret_cast<GLint*>(&texture_2d_binding));
   EXPECT_EQ(texture_2d_binding, kFakeTextureName);
-
-  g_object_ref_sink(view);
 }
 
 static constexpr double kExpectedRefreshRate = 120.0;
@@ -94,8 +89,6 @@ static gdouble renderer_get_refresh_rate(FlRenderer* renderer) {
 }
 
 TEST(FlRendererTest, RefreshRate) {
-  flutter::testing::fl_ensure_gtk_init();
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlMockRenderer) renderer =
       fl_mock_renderer_new(&renderer_get_refresh_rate);
 

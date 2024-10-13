@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_RENDERER_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_RENDERER_H_
 
+#include "flutter/shell/platform/linux/fl_renderable.h"
 #include "flutter/shell/platform/linux/fl_renderer.h"
 
 G_BEGIN_DECLS
@@ -15,10 +16,18 @@ G_DECLARE_FINAL_TYPE(FlMockRenderer,
                      MOCK_RENDERER,
                      FlRenderer)
 
+G_DECLARE_FINAL_TYPE(FlMockRenderable,
+                     fl_mock_renderable,
+                     FL,
+                     MOCK_RENDERABLE,
+                     GObject)
+
 typedef gdouble (*FlMockRendererGetRefreshRate)(FlRenderer* renderer);
 
 FlMockRenderer* fl_mock_renderer_new(
     FlMockRendererGetRefreshRate get_refresh_rate = nullptr);
+
+FlMockRenderable* fl_mock_renderable_new();
 
 G_END_DECLS
 

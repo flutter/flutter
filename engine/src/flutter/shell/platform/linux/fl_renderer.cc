@@ -10,7 +10,6 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
-#include "flutter/shell/platform/linux/fl_view_private.h"
 
 // Vertex shader to draw Flutter window contents.
 static const char* vertex_shader_src =
@@ -76,6 +75,12 @@ typedef struct {
 } FlRendererPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(FlRenderer, fl_renderer, G_TYPE_OBJECT)
+
+static void free_weak_ref(gpointer value) {
+  GWeakRef* ref = static_cast<GWeakRef*>(value);
+  g_weak_ref_clear(ref);
+  free(ref);
+}
 
 // Check if running on an NVIDIA driver.
 static gboolean is_nvidia() {
@@ -295,8 +300,8 @@ static void fl_renderer_class_init(FlRendererClass* klass) {
 static void fl_renderer_init(FlRenderer* self) {
   FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
       fl_renderer_get_instance_private(self));
-  priv->views =
-      g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr, nullptr);
+  priv->views = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
+                                      free_weak_ref);
   priv->framebuffers_by_view_id =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
                             (GDestroyNotify)g_ptr_array_unref);
@@ -311,15 +316,17 @@ void fl_renderer_set_engine(FlRenderer* self, FlEngine* engine) {
   g_weak_ref_init(&priv->engine, engine);
 }
 
-void fl_renderer_add_view(FlRenderer* self,
-                          FlutterViewId view_id,
-                          FlView* view) {
+void fl_renderer_add_renderable(FlRenderer* self,
+                                FlutterViewId view_id,
+                                FlRenderable* renderable) {
   FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
       fl_renderer_get_instance_private(self));
 
   g_return_if_fail(FL_IS_RENDERER(self));
 
-  g_hash_table_insert(priv->views, GINT_TO_POINTER(view_id), view);
+  GWeakRef* ref = g_new(GWeakRef, 1);
+  g_weak_ref_init(ref, G_OBJECT(renderable));
+  g_hash_table_insert(priv->views, GINT_TO_POINTER(view_id), ref);
 }
 
 void fl_renderer_remove_view(FlRenderer* self, FlutterViewId view_id) {
@@ -472,10 +479,12 @@ gboolean fl_renderer_present_layers(FlRenderer* self,
     }
   }
 
-  FlView* view =
-      FL_VIEW(g_hash_table_lookup(priv->views, GINT_TO_POINTER(view_id)));
-  if (view != nullptr) {
-    fl_view_redraw(view);
+  GWeakRef* ref = static_cast<GWeakRef*>(
+      g_hash_table_lookup(priv->views, GINT_TO_POINTER(view_id)));
+  g_autoptr(FlRenderable) renderable =
+      ref != nullptr ? FL_RENDERABLE(g_weak_ref_get(ref)) : nullptr;
+  if (renderable != nullptr) {
+    fl_renderable_redraw(renderable);
   }
 
   return TRUE;
