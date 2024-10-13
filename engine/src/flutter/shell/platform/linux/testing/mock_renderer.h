@@ -29,6 +29,8 @@ FlMockRenderer* fl_mock_renderer_new(
 
 FlMockRenderable* fl_mock_renderable_new();
 
+size_t fl_mock_renderable_get_redraw_count(FlMockRenderable* renderable);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_RENDERER_H_

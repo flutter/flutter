@@ -13,3 +13,9 @@ void fl_renderable_redraw(FlRenderable* self) {
 
   FL_RENDERABLE_GET_IFACE(self)->redraw(self);
 }
+
+void fl_renderable_make_current(FlRenderable* self) {
+  g_return_if_fail(FL_IS_RENDERABLE(self));
+
+  FL_RENDERABLE_GET_IFACE(self)->make_current(self);
+}

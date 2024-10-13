@@ -26,6 +26,7 @@ struct _FlRenderableInterface {
   GTypeInterface g_iface;
 
   void (*redraw)(FlRenderable* renderable);
+  void (*make_current)(FlRenderable* renderable);
 };
 
 /**
@@ -36,6 +37,14 @@ struct _FlRenderableInterface {
  * call fl_renderer_draw().
  */
 void fl_renderable_redraw(FlRenderable* renderable);
+
+/**
+ * fl_renderable_make_current:
+ * @renderable: an #FlRenderable
+ *
+ * Make this renderable the current OpenGL context.
+ */
+void fl_renderable_make_current(FlRenderable* renderable);
 
 G_END_DECLS
 
