@@ -7,10 +7,10 @@
 
 #include <gtk/gtk.h>
 
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
-
 #include "flutter/shell/platform/embedder/embedder.h"
+
+#include "flutter/shell/platform/linux/fl_renderable.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
 G_BEGIN_DECLS
 
@@ -79,16 +79,16 @@ struct _FlRendererClass {
 void fl_renderer_set_engine(FlRenderer* renderer, FlEngine* engine);
 
 /**
- * fl_renderer_add_view:
+ * fl_renderer_add_renderable:
  * @renderer: an #FlRenderer.
  * @view_id: the ID of the view.
- * @view: the view Flutter is renderering to.
+ * @renderable: object that is to be rendered on.
  *
  * Add a view to render on.
  */
-void fl_renderer_add_view(FlRenderer* renderer,
-                          FlutterViewId view_id,
-                          FlView* view);
+void fl_renderer_add_renderable(FlRenderer* renderer,
+                                FlutterViewId view_id,
+                                FlRenderable* renderable);
 
 /**
  * fl_renderer_remove_view:
