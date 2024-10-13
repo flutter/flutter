@@ -48,7 +48,7 @@ FakeProcessLister failure() {
 const ValidationResult validWindows11ValidationResult = ValidationResult(
   ValidationType.success,
   <ValidationMessage>[],
-  statusInfo: '11 Pro, 23H2, 2009',
+  statusInfo: '11 Pro 64-bit, 23H2, 2009',
 );
 
 /// The expected validation result object for
