@@ -275,7 +275,7 @@ class CarouselView extends StatefulWidget {
   )
   final ShapeBorder? shape;
 
-    /// The amount of space to surround each carousel item with.
+  /// The amount of space to surround each carousel item with.
   ///
   /// Defaults to [EdgeInsets.all] of 4 pixels.
   final EdgeInsets? itemPadding;
