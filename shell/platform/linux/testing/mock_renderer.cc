@@ -9,7 +9,19 @@ struct _FlMockRenderer {
   FlMockRendererGetRefreshRate get_refresh_rate;
 };
 
+struct _FlMockRenderable {
+  GObject parent_instance;
+};
+
 G_DEFINE_TYPE(FlMockRenderer, fl_mock_renderer, fl_renderer_get_type())
+
+static void mock_renderable_iface_init(FlRenderableInterface* iface);
+
+G_DEFINE_TYPE_WITH_CODE(FlMockRenderable,
+                        fl_mock_renderable,
+                        g_object_get_type(),
+                        G_IMPLEMENT_INTERFACE(fl_renderable_get_type(),
+                                              mock_renderable_iface_init))
 
 // Implements FlRenderer::make_current.
 static void fl_mock_renderer_make_current(FlRenderer* renderer) {}
@@ -40,11 +52,27 @@ static void fl_mock_renderer_class_init(FlMockRendererClass* klass) {
 
 static void fl_mock_renderer_init(FlMockRenderer* self) {}
 
+static void mock_renderable_redraw(FlRenderable* renderable) {}
+
+static void mock_renderable_iface_init(FlRenderableInterface* iface) {
+  iface->redraw = mock_renderable_redraw;
+}
+
+static void fl_mock_renderable_class_init(FlMockRenderableClass* klass) {}
+
+static void fl_mock_renderable_init(FlMockRenderable* self) {}
+
 // Creates a stub renderer
 FlMockRenderer* fl_mock_renderer_new(
     FlMockRendererGetRefreshRate get_refresh_rate) {
-  FlMockRenderer* fl_mock_renderer = FL_MOCK_RENDERER(
-      g_object_new_valist(fl_mock_renderer_get_type(), nullptr, nullptr));
-  fl_mock_renderer->get_refresh_rate = get_refresh_rate;
-  return fl_mock_renderer;
+  FlMockRenderer* self =
+      FL_MOCK_RENDERER(g_object_new(fl_mock_renderer_get_type(), nullptr));
+  self->get_refresh_rate = get_refresh_rate;
+  return self;
+}
+
+// Creates a sub renderable.
+FlMockRenderable* fl_mock_renderable_new() {
+  return FL_MOCK_RENDERABLE(
+      g_object_new(fl_mock_renderable_get_type(), nullptr));
 }
