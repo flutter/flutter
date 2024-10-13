@@ -24,12 +24,12 @@ static int fl_socket_accessible_get_n_children(AtkObject* object) {
   return 1;
 }
 
-static void fl_socket_accessible_finalize(GObject* object) {
+static void fl_socket_accessible_dispose(GObject* object) {
   FlSocketAccessible* self = FL_SOCKET_ACCESSIBLE(object);
 
   g_clear_object(&self->accessible_socket);
 
-  G_OBJECT_CLASS(fl_socket_accessible_parent_class)->finalize(object);
+  G_OBJECT_CLASS(fl_socket_accessible_parent_class)->dispose(object);
 }
 
 static void fl_socket_accessible_initialize(AtkObject* object, gpointer data) {
@@ -42,7 +42,7 @@ static void fl_socket_accessible_initialize(AtkObject* object, gpointer data) {
 
 static void fl_socket_accessible_class_init(FlSocketAccessibleClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
-  object_class->finalize = fl_socket_accessible_finalize;
+  object_class->dispose = fl_socket_accessible_dispose;
 
   AtkObjectClass* atk_class = ATK_OBJECT_CLASS(klass);
   atk_class->initialize = fl_socket_accessible_initialize;
