@@ -95,19 +95,16 @@ static void fl_mock_scrolling_view_delegate_init(
   new (priv) FlMockScrollingViewDelegatePrivate();
 }
 
-static void fl_mock_scrolling_view_delegate_finalize(GObject* object) {
+static void fl_mock_scrolling_view_delegate_dispose(GObject* object) {
   FL_MOCK_SCROLLING_VIEW_DELEGATE_GET_PRIVATE(object)
       ->~FlMockScrollingViewDelegatePrivate();
-}
 
-static void fl_mock_scrolling_view_delegate_dispose(GObject* object) {
   G_OBJECT_CLASS(fl_mock_scrolling_view_delegate_parent_class)->dispose(object);
 }
 
 static void fl_mock_scrolling_view_delegate_class_init(
     FlMockScrollingViewDelegateClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_mock_scrolling_view_delegate_dispose;
-  G_OBJECT_CLASS(klass)->finalize = fl_mock_scrolling_view_delegate_finalize;
 }
 
 static void fl_mock_view_send_mouse_pointer_event(
