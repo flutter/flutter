@@ -120,23 +120,23 @@ class CarouselView extends StatefulWidget {
   const CarouselView({
     super.key,
     @Deprecated(
-    'Use `itemPadding` instead. '
-    'This feature was deprecated after 3.27.0-1.0.pre.',
+      'Use `itemPadding` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
     )
     this.padding,
     @Deprecated(
-    'Use `itemBackgroundColor` instead. '
-    'This feature was deprecated after 3.27.0-1.0.pre.',
+      'Use `itemBackgroundColor` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
     )
     this.backgroundColor,
     @Deprecated(
-    'Use `itemElevation` instead. '
-    'This feature was deprecated after 3.27.0-1.0.pre.',
+      'Use `itemElevation` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
     )
     this.elevation,
     @Deprecated(
-    'Use `itemShape` instead. '
-    'This feature was deprecated after 3.27.0-1.0.pre.',
+      'Use `itemShape` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
     )
     this.shape,
     this.itemPadding,
@@ -200,23 +200,23 @@ class CarouselView extends StatefulWidget {
   const CarouselView.weighted({
     super.key,
     @Deprecated(
-    'Use `itemPadding` instead. '
-    'This feature was deprecated after 3.27.0-1.0.pre.',
+      'Use `itemPadding` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
     )
     this.padding,
     @Deprecated(
-    'Use `itemBackgroundColor` instead. '
-    'This feature was deprecated after 3.27.0-1.0.pre.',
+      'Use `itemBackgroundColor` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
     )
     this.backgroundColor,
     @Deprecated(
-    'Use `itemElevation` instead. '
-    'This feature was deprecated after 3.27.0-1.0.pre.',
+      'Use `itemElevation` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
     )
     this.elevation,
     @Deprecated(
-    'Use `itemShape` instead. '
-    'This feature was deprecated after 3.27.0-1.0.pre.',
+      'Use `itemShape` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
     )
     this.shape,
     this.itemPadding,
@@ -241,6 +241,7 @@ class CarouselView extends StatefulWidget {
   /// Defaults to [EdgeInsets.all] of 4 pixels.
   @Deprecated(
     'Use `itemPadding` instead. '
+    'itemPadding now manages space to surround each carousel item. '
     'This feature was deprecated after 3.27.0-1.0.pre.',
   )
   final EdgeInsets? padding;
@@ -250,6 +251,7 @@ class CarouselView extends StatefulWidget {
   /// Defaults to [ColorScheme.surface].
   @Deprecated(
     'Use `itemBackgroundColor` instead. '
+    'itemBackgroundColor now manages background color of each carousel item. '
     'This feature was deprecated after 3.27.0-1.0.pre.',
   )
   final Color? backgroundColor;
@@ -258,7 +260,8 @@ class CarouselView extends StatefulWidget {
   ///
   /// Defaults to 0.0.
   @Deprecated(
-    'Use `itemElevation` instead. '
+    'Use itemElevation instead. '
+    'itemElevation now manages z-coordinate of each carousel item. '
     'This feature was deprecated after 3.27.0-1.0.pre.',
   )
   final double? elevation;
@@ -270,7 +273,8 @@ class CarouselView extends StatefulWidget {
   /// Defaults to a [RoundedRectangleBorder] with a circular corner radius
   /// of 28.0.
   @Deprecated(
-    'Use `itemShape` instead. '
+    'Use itemShape instead. '
+    'itemShape now manages shape of each carousel item. '
     'This feature was deprecated after 3.27.0-1.0.pre.',
   )
   final ShapeBorder? shape;
