@@ -80,8 +80,8 @@ const ValidationResult getProcessFailed = ValidationResult(
 
 class FakeVersionExtractor extends Fake implements VersionExtractor {
   FakeVersionExtractor({required this.mockData});
-  FakeVersionExtractor.win11Pro() : this(mockData: <String, String>{
-    'Caption': '11 Pro',
+  FakeVersionExtractor.win11ProX64() : this(mockData: <String, String>{
+    'Caption': '11 Pro 64-bit',
     'ReleaseId': '2009',
     'DisplayVersion': '23H2'});
 
@@ -100,7 +100,7 @@ void main() {
         WindowsVersionValidator(
             operatingSystemUtils: FakeValidOperatingSystemUtils(),
             processLister: ofdNotRunning(),
-            versionExtractor: FakeVersionExtractor.win11Pro());
+            versionExtractor: FakeVersionExtractor.win11ProX64());
 
     final ValidationResult result = await windowsVersionValidator.validate();
 
@@ -118,7 +118,7 @@ void main() {
             operatingSystemUtils: FakeValidOperatingSystemUtils(
                 'Microsoft Windows [versão 10.0.22621.1105]'),
             processLister: ofdNotRunning(),
-            versionExtractor: FakeVersionExtractor.win11Pro());
+            versionExtractor: FakeVersionExtractor.win11ProX64());
 
     final ValidationResult result = await windowsVersionValidator.validate();
 
@@ -134,7 +134,7 @@ void main() {
             operatingSystemUtils: FakeValidOperatingSystemUtils(
                 'Microsoft Windows [Version 8.0.22621.1105]'),
             processLister: ofdNotRunning(),
-            versionExtractor: FakeVersionExtractor.win11Pro());
+            versionExtractor: FakeVersionExtractor.win11ProX64());
 
     final ValidationResult result = await windowsVersionValidator.validate();
 
@@ -169,7 +169,7 @@ OS 版本:          10.0.22621 暂缺 Build 22621
         WindowsVersionValidator(
             operatingSystemUtils: FakeValidOperatingSystemUtils(),
             processLister: ofdRunning(),
-            versionExtractor: FakeVersionExtractor.win11Pro());
+            versionExtractor: FakeVersionExtractor.win11ProX64());
     final ValidationResult result = await validator.validate();
     expect(result.type, ofdFoundRunning.type, reason: 'The ValidationResult type should be the same (partial)');
     expect(result.statusInfo, ofdFoundRunning.statusInfo, reason: 'The ValidationResult statusInfo should be the same');
