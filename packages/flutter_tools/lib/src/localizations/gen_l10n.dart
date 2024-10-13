@@ -125,7 +125,7 @@ String _syntheticL10nPackagePath(FileSystem fileSystem) => fileSystem.path.join(
 // will be set to 'String'. For such placeholders that are used for both, we should throw an error.
 List<String> generateMethodParameters(Message message, LocaleInfo? locale, bool useNamedParameters) {
 
-  // check the compatibility of template placeholders and locale placeholders.
+  // Check the compatibility of template placeholders and locale placeholders.
   final Map<String, Placeholder>? localePlaceholders = message.localePlaceholders[locale];
 
   return message.templatePlaceholders.entries.map((MapEntry<String, Placeholder> e) {
