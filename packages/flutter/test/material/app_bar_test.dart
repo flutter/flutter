@@ -3255,14 +3255,14 @@ void main() {
   });
 
   testWidgets('AppBar actions padding can be adjusted', (WidgetTester tester) async {
-    const double testActionsPadding = 8.0;
+    final Key appBarKey = UniqueKey();
     final Key actionKey = UniqueKey();
-    final Finder finder = find.byKey(actionKey);
 
-    Widget buildApp([EdgeInsetsGeometry? actionsPadding]) {
+    Widget buildAppBar({ EdgeInsetsGeometry? actionsPadding }) {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            key: appBarKey,
             actions: <Widget>[
               SizedBox.square(key: actionKey, dimension: 40.0),
             ],
@@ -3272,15 +3272,17 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp());
+    await tester.pumpWidget(buildAppBar());
 
-    final Offset offsetA = tester.getTopRight(finder);
+    // Test actions position without actions padding.
+    Offset actionsOffset = tester.getTopRight(find.byKey(actionKey));
+    final Offset appBarOffset = tester.getTopRight(find.byKey(appBarKey));
+    expect(actionsOffset.dx, appBarOffset.dx);
 
-    await tester.pumpWidget(buildApp(const EdgeInsets.only(right: testActionsPadding)));
-
-    final Offset offsetB = tester.getTopRight(finder);
-
-    expect(offsetB.dx, equals(offsetA.dx - testActionsPadding));
+    const EdgeInsets actionsPadding = EdgeInsets.only(right: 8.0);
+    await tester.pumpWidget(buildAppBar(actionsPadding: actionsPadding));
+    actionsOffset = tester.getTopRight(find.byKey(actionKey));
+    expect(actionsOffset.dx, equals(appBarOffset.dx - actionsPadding.right));
   });
 
   group('Material 2', () {
