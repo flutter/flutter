@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import '../scheduler/binding.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -586,6 +587,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// false when [reset] is called.
   bool get hasInteractedByUser => _hasInteractedByUser.value;
 
+  bool _buildScheduled = false;
+
   /// True if the current value is valid.
   ///
   /// This will not set [errorText] or [hasError] and it will not update
@@ -698,6 +701,20 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.always) {
+      if (!_buildScheduled) {
+        _buildScheduled = true;
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          _buildScheduled = false;
+          validate();
+        });
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _errorText.dispose();
     _focusNode.dispose();
@@ -742,7 +759,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
     return widget.builder(this);
   }
-
 }
 
 /// Used to configure the auto validation of [FormField] and [Form] widgets.

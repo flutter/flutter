@@ -1457,4 +1457,47 @@ void main() {
 
     expect(focusNode2.hasFocus, isTrue);
   });
+
+  testWidgets('AutovalidateMode.always should validate on first build', (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String? errorText(String? value) => '$value/error';
+
+    Widget builder() {
+      return MaterialApp(
+        theme: ThemeData(),
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Form(
+                key: formKey,
+                autovalidateMode: AutovalidateMode.always,
+                child: Material(
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        initialValue: 'foo',
+                        validator: errorText,
+                      ),
+                      TextFormField(
+                        initialValue: 'bar',
+                        validator: errorText,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await tester.pumpAndSettle();
+
+    expect(find.text(errorText('foo')!), findsOneWidget);
+    expect(find.text(errorText('bar')!), findsOneWidget);
+  });
 }
