@@ -115,7 +115,7 @@ class JsCompilerConfig extends WebCompilerConfig {
         if (buildMode != BuildMode.release) '--no-minify',
         ...toSharedCommandOptions(buildMode),
         '-O$optimizationLevel',
-        if (dumpInfo) '--dump-info',
+        if (dumpInfo) '--stage=dump-info-all',
         if (noFrequencyBasedMinification) '--no-frequency-based-minification',
         if (csp) '--csp',
       ];
@@ -157,7 +157,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
     return <String>[
       '-O$optimizationLevel',
       '--${stripSymbols ? '' : 'no-'}strip-wasm',
-      if (!sourceMaps) '--extra-compiler-option=--no-source-maps',
+      if (!sourceMaps) '--no-source-maps',
       if (buildMode == BuildMode.debug) '--extra-compiler-option=--enable-asserts',
     ];
   }

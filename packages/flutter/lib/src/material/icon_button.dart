@@ -643,24 +643,24 @@ class IconButton extends StatelessWidget {
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
   }) {
-    final MaterialStateProperty<Color?>? buttonBackgroundColor = (backgroundColor == null && disabledBackgroundColor == null)
-      ? null
-      : _IconButtonDefaultBackground(backgroundColor, disabledBackgroundColor);
-    final MaterialStateProperty<Color?>? buttonForegroundColor = (foregroundColor == null && disabledForegroundColor == null)
-      ? null
-      : _IconButtonDefaultForeground(foregroundColor, disabledForegroundColor);
-    final MaterialStateProperty<Color?>? overlayColorProp = (foregroundColor == null &&
-      hoverColor == null && focusColor == null && highlightColor == null && overlayColor == null)
-        ? null
-        : switch (overlayColor) {
-            (final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
-            _ => _IconButtonDefaultOverlay(foregroundColor, focusColor, hoverColor, highlightColor, overlayColor),
-          };
-    final MaterialStateProperty<MouseCursor?> mouseCursor = _IconButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
+    final Color? overlayFallback = overlayColor ?? foregroundColor;
+    WidgetStateProperty<Color?>? overlayColorProp;
+    if ((hoverColor ?? focusColor ?? highlightColor ?? overlayFallback) != null) {
+      overlayColorProp = switch (overlayColor) {
+        Color(a: 0.0) => WidgetStatePropertyAll<Color>(overlayColor),
+        _ => WidgetStateProperty<Color?>.fromMap(
+          <WidgetState, Color?>{
+            WidgetState.pressed: highlightColor ?? overlayFallback?.withOpacity(0.1),
+            WidgetState.hovered: hoverColor     ?? overlayFallback?.withOpacity(0.08),
+            WidgetState.focused: focusColor     ?? overlayFallback?.withOpacity(0.1),
+          },
+        ),
+      };
+    }
 
     return ButtonStyle(
-      backgroundColor: buttonBackgroundColor,
-      foregroundColor: buttonForegroundColor,
+      backgroundColor: ButtonStyleButton.defaultColor(backgroundColor, disabledBackgroundColor),
+      foregroundColor: ButtonStyleButton.defaultColor(foregroundColor, disabledForegroundColor),
       overlayColor: overlayColorProp,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
@@ -672,7 +672,12 @@ class IconButton extends StatelessWidget {
       iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
-      mouseCursor: mouseCursor,
+      mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(
+        <WidgetStatesConstraint, MouseCursor?>{
+          WidgetState.disabled: disabledMouseCursor,
+          WidgetState.any: enabledMouseCursor,
+        },
+      ),
       visualDensity: visualDensity,
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
@@ -719,14 +724,6 @@ class IconButton extends StatelessWidget {
         effectiveIcon = selectedIcon!;
       }
 
-      Widget iconButton = effectiveIcon;
-      if (tooltip != null) {
-        iconButton = Tooltip(
-          message: tooltip,
-          child: effectiveIcon,
-        );
-      }
-
       return _SelectableIconButton(
         style: adjustedStyle,
         onPressed: onPressed,
@@ -734,7 +731,8 @@ class IconButton extends StatelessWidget {
         focusNode: focusNode,
         isSelected: isSelected,
         variant: _variant,
-        child: iconButton,
+        tooltip: tooltip,
+        child: effectiveIcon,
       );
     }
 
@@ -835,6 +833,7 @@ class _SelectableIconButton extends StatefulWidget {
     required this.variant,
     required this.autofocus,
     required this.onPressed,
+    this.tooltip,
     required this.child,
   });
 
@@ -844,6 +843,7 @@ class _SelectableIconButton extends StatefulWidget {
   final _IconButtonVariant variant;
   final bool autofocus;
   final VoidCallback? onPressed;
+  final String? tooltip;
   final Widget child;
 
   @override
@@ -891,6 +891,7 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
       onPressed: widget.onPressed,
       variant: widget.variant,
       toggleable: toggleable,
+      tooltip: widget.tooltip,
       child: Semantics(
         selected: widget.isSelected,
         child: widget.child,
@@ -914,6 +915,7 @@ class _IconButtonM3 extends ButtonStyleButton {
     super.statesController,
     required this.variant,
     required this.toggleable,
+    super.tooltip,
     required Widget super.child,
   }) : super(
       onLongPress: null,
@@ -993,111 +995,6 @@ class _IconButtonM3 extends ButtonStyleButton {
     );
 
     return IconButtonTheme.of(context).style?.merge(iconThemeStyle) ?? iconThemeStyle;
-  }
-}
-
-@immutable
-class _IconButtonDefaultBackground extends MaterialStateProperty<Color?> {
-  _IconButtonDefaultBackground(this.background, this.disabledBackground);
-
-  final Color? background;
-  final Color? disabledBackground;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return disabledBackground;
-    }
-    return background;
-  }
-
-  @override
-  String toString() {
-    return '{disabled: $disabledBackground, otherwise: $background}';
-  }
-}
-
-@immutable
-class _IconButtonDefaultForeground extends MaterialStateProperty<Color?> {
-  _IconButtonDefaultForeground(this.foregroundColor, this.disabledForegroundColor);
-
-  final Color? foregroundColor;
-  final Color? disabledForegroundColor;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return disabledForegroundColor;
-    }
-    return foregroundColor;
-  }
-
-  @override
-  String toString() {
-    return '{disabled: $disabledForegroundColor, otherwise: $foregroundColor}';
-  }
-}
-
-@immutable
-class _IconButtonDefaultOverlay extends MaterialStateProperty<Color?> {
-  _IconButtonDefaultOverlay(
-    this.foregroundColor,
-    this.focusColor,
-    this.hoverColor,
-    this.highlightColor,
-    this.overlayColor,
-  );
-
-  final Color? foregroundColor;
-  final Color? focusColor;
-  final Color? hoverColor;
-  final Color? highlightColor;
-  final Color? overlayColor;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.selected)) {
-      if (states.contains(MaterialState.pressed)) {
-        return highlightColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.1);
-      }
-      if (states.contains(MaterialState.hovered)) {
-        return hoverColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.08);
-      }
-      if (states.contains(MaterialState.focused)) {
-        return focusColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.1);
-      }
-    }
-    if (states.contains(MaterialState.pressed)) {
-      return highlightColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.1);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return hoverColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.08);
-    }
-    if (states.contains(MaterialState.focused)) {
-      return focusColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.1);
-    }
-    return null;
-  }
-
-  @override
-  String toString() {
-    return '{hovered: $hoverColor, focused: $focusColor, pressed: $highlightColor, otherwise: null}';
-  }
-}
-
-@immutable
-class _IconButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor?> with Diagnosticable {
-  _IconButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
-
-  final MouseCursor? enabledCursor;
-  final MouseCursor? disabledCursor;
-
-  @override
-  MouseCursor? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return disabledCursor;
-    }
-    return enabledCursor;
   }
 }
 

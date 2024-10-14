@@ -259,6 +259,61 @@ void main() {
     expect(state.isEndDrawerOpen, equals(false));
   });
 
+  testWidgets('Open/close drawer by dragging', (WidgetTester tester) async {
+    final ThemeData draggable = ThemeData(platform: TargetPlatform.android);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: draggable,
+        home: const Scaffold(drawer: Drawer()),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture();
+    final Finder finder = find.byType(Drawer);
+
+    double drawerPosition() {
+      expect(finder, findsOneWidget);
+      final RenderBox renderBox = tester.renderObject(finder);
+      return renderBox.localToGlobal(Offset.zero).dx;
+    }
+
+    // Pointer down (drawer is closed).
+    await gesture.addPointer();
+    await gesture.down(const Offset(2,2));
+    await tester.pump();
+    expect(finder, findsNothing);
+
+    // Open drawer slightly.
+    await gesture.moveBy(const Offset(20, 0));
+    await tester.pump();
+    expect(drawerPosition(), isNegative);
+
+    // Open drawer more than halfway.
+    await gesture.moveBy(const Offset(200, 0));
+    await tester.pump();
+    expect(drawerPosition(), isNegative);
+
+    // Drawer is fully open.
+    await gesture.moveBy(const Offset(200, 0));
+    await tester.pump();
+    expect(drawerPosition(), 0.0);
+
+    // Drawer is less than halfway closed.
+    await gesture.moveBy(const Offset(-100.0, 0));
+    await tester.pump();
+    expect(drawerPosition(), moreOrLessEquals(-100.0));
+
+    // Drawer is more than halfway closed.
+    await gesture.moveBy(const Offset(-100.0, 0));
+    await tester.pump();
+    expect(drawerPosition(), moreOrLessEquals(-200.0));
+
+    // Drawer is completely closed.
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    expect(finder, findsNothing);
+  });
+
   testWidgets('Scaffold.drawer - null restorationId ', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(

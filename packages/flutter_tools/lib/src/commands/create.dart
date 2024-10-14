@@ -258,6 +258,13 @@ class CreateCommand extends CreateBase {
         'template: the language will always be C or C++.',
         exitCode: 2,
       );
+    } else if (argResults!.wasParsed('ios-language')) {
+      globals.printWarning(
+          'The "ios-language" option is deprecated and will be removed in a future Flutter release.');
+      if (stringArg('ios-language') == 'objc') {
+        globals.printWarning(
+            'Please comment in https://github.com/flutter/flutter/issues/148586 describing your use-case for using Objective-C instead of Swift.');
+      }
     }
 
     final String organization = await getOrganization();
@@ -959,19 +966,17 @@ used.
   // AGP template version incompatible with Java version.
   final gradle.JavaAgpCompat? minimumCompatibleAgpVersion = gradle.getMinimumAgpVersionForJavaVersion(globals.logger, javaV: javaVersion);
   final String compatibleAgpVersionMessage = minimumCompatibleAgpVersion == null ? '' : ' (minimum compatible AGP version: ${minimumCompatibleAgpVersion.agpMin})';
-  final String gradleBuildFilePaths = '    -  ${_getBuildGradleConfigurationFilePaths(projectType, projectDirPath)!.join('\n    - ')}';
+  final String gradleBuildFilePaths = '    ${_getBuildGradleConfigurationFilePaths(projectType, projectDirPath)!.join('\n    - ')}';
 
   globals.printWarning('''
 $incompatibleVersionsAndRecommendedOptionMessage
 
-Alternatively, to continue using your configured Java version, update the AGP
-version specified in the following files to a compatible AGP
-version$compatibleAgpVersionMessage as necessary:
+Alternatively, to continue using your current Java version, update the AGP
+version in the following file(s) to a compatible version$compatibleAgpVersionMessage:
 $gradleBuildFilePaths
 
-See
-https://developer.android.com/build/releases/gradle-plugin for details on
-compatible Java/AGP versions.
+For details on compatible Java and AGP versions, see
+https://developer.android.com/build/releases/gradle-plugin
 ''',
     emphasis: true
   );
@@ -994,12 +999,11 @@ String getIncompatibleJavaGradleAgpMessageHeader(
   return '''
 The configured version of Java detected may conflict with the $incompatibleDependency version in your new Flutter $projectType.
 
-[RECOMMENDED] If so, to keep the default $incompatibleDependencyVersion, make
-sure to download a compatible Java version
-$validJavaRangeMessage.
-You may configure this compatible Java version by running:
-`flutter config --jdk-dir=<JDK_DIRECTORY>`
-Note that this is a global configuration for Flutter.
+To keep the default AGP version $incompatibleDependencyVersion, download a compatible Java version
+(Java 17 <= $validJavaRangeMessage Java version < Java 21). Configure this Java version
+globally for Flutter by running:
+
+  flutter config --jdk-dir=<JDK_DIRECTORY>
 ''';
 }
 

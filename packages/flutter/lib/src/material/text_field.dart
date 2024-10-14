@@ -59,41 +59,11 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   final _TextFieldState _state;
 
   @override
-  void onForcePressStart(ForcePressDetails details) {
-    super.onForcePressStart(details);
-    if (delegate.selectionEnabled && shouldShowSelectionToolbar) {
-      editableText.showToolbar();
-    }
-  }
-
-  @override
-  void onForcePressEnd(ForcePressDetails details) {
-    // Not required.
-  }
-
-  @override
   bool get onUserTapAlwaysCalled => _state.widget.onTapAlwaysCalled;
 
   @override
   void onUserTap() {
     _state.widget.onTap?.call();
-  }
-
-  @override
-  void onSingleLongTapStart(LongPressStartDetails details) {
-    super.onSingleLongTapStart(details);
-    if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          Feedback.forLongPress(_state.context);
-      }
-    }
   }
 }
 
@@ -838,6 +808,8 @@ class TextField extends StatefulWidget {
   /// See also:
   ///
   ///  * [AdaptiveTextSelectionToolbar], which is built by default.
+  ///  * [BrowserContextMenu], which allows the browser's context menu on web to
+  ///    be disabled and Flutter-rendered context menus to appear.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
   /// Determine whether this text field can request the primary focus.

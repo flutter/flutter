@@ -98,7 +98,7 @@ class SnackBarThemeData with Diagnosticable {
   /// Overrides the default value for [SnackBarAction.textColor].
   ///
   /// If null, [SnackBarAction] defaults to [ColorScheme.secondary] of
-  /// [ThemeData.colorScheme] .
+  /// [ThemeData.colorScheme].
   final Color? actionTextColor;
 
   /// Overrides the default value for [SnackBarAction.disabledTextColor].
@@ -158,6 +158,7 @@ class SnackBarThemeData with Diagnosticable {
   ///
   /// Must be a value between 0 and 1, if present.
   final double? actionOverflowThreshold;
+
   /// Overrides default value for [SnackBarAction.backgroundColor].
   ///
   /// If null, [SnackBarAction] falls back to [Colors.transparent].

@@ -23,6 +23,26 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
 
+  testUsingContext('Android analyze command should run pub', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Platform platform = FakePlatform();
+    final BufferLogger logger = BufferLogger.test();
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final Terminal terminal = Terminal.test();
+    final AnalyzeCommand command = FakeAndroidAnalyzeCommand(
+      artifacts: Artifacts.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+      terminal: terminal,
+      allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: true,
+    );
+    fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+    expect(command.shouldRunPub, isTrue);
+  });
+
   group('Android analyze command', () {
     late FileSystem fileSystem;
     late Platform platform;
@@ -65,7 +85,6 @@ void main() {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
       builder = FakeAndroidBuilder();
-
     });
 
     testUsingContext('can list build variants', () async {
@@ -128,5 +147,32 @@ class FakeAndroidBuilder extends Fake implements AndroidBuilder {
   Future<String> outputsAppLinkSettings(String buildVariant, {required FlutterProject project}) async {
     outputVariant = buildVariant;
     return outputPath;
+  }
+}
+
+class FakeAndroidAnalyzeCommand extends AnalyzeCommand {
+  FakeAndroidAnalyzeCommand({
+    required super.fileSystem,
+    required super.platform,
+    required super.terminal,
+    required super.logger,
+    required super.processManager,
+    required super.artifacts,
+    required super.allProjectValidators,
+    required super.suppressAnalytics,
+  });
+
+  @override
+  bool boolArg(String arg, {bool global = false}) {
+    switch (arg) {
+      case 'current-package':
+        return true;
+      case 'android':
+        return true;
+      case 'pub':
+        return true;
+      default:
+        return false;
+    }
   }
 }

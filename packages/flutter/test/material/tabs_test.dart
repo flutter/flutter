@@ -20,7 +20,7 @@ Widget boilerplate({
   Widget? child,
   TextDirection textDirection = TextDirection.ltr,
   ThemeData? theme,
-  TabBarTheme? tabBarTheme,
+  TabBarThemeData? tabBarTheme,
   bool? useMaterial3,
 }) {
   return Theme(
@@ -52,7 +52,7 @@ Widget buildFrame({
   EdgeInsetsGeometry? padding,
   TextDirection textDirection = TextDirection.ltr,
   TabAlignment? tabAlignment,
-  TabBarTheme? tabBarTheme,
+  TabBarThemeData? tabBarTheme,
   Decoration? indicator,
   bool? useMaterial3,
 }) {
@@ -5536,7 +5536,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          tabBarTheme: const TabBarTheme(labelPadding: labelPadding),
+          tabBarTheme: const TabBarThemeData(labelPadding: labelPadding),
         ),
         home: Scaffold(
           appBar: AppBar(
@@ -5857,7 +5857,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light().copyWith(
-          tabBarTheme: TabBarTheme(
+          tabBarTheme: TabBarThemeData(
             splashFactory: splashFactory,
             overlayColor: overlayColor,
           )),
@@ -5945,6 +5945,55 @@ void main() {
       ),
     );
     gesture.removePointer();
+  });
+
+  testWidgets('No crash if TabBar build called before didUpdateWidget with SliverAppBar', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/154484.
+    final List<String> tabs = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                body: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverAppBar(
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('Add Tab'),
+                          onPressed: () {
+                            setState(() {
+                              tabs.add('Tab ${tabs.length + 1}');
+                            });
+                          },
+                        ),
+                      ],
+                      bottom: TabBar(
+                        tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Initializes with zero tabs.
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Tab 2'), findsNothing);
+
+    // No crash after tabs added.
+    await tester.tap(find.text('Add Tab'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Do not crash if the controller and TabBarView are updated at different phases(build and layout) of the same frame', (WidgetTester tester) async {
@@ -6505,7 +6554,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           useMaterial3: true,
-          tabBarTheme: const TabBarTheme(dividerColor: dividerColor),
+          tabBarTheme: const TabBarThemeData(dividerColor: dividerColor),
         ),
         home: Scaffold(
           appBar: AppBar(
@@ -6534,7 +6583,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           useMaterial3: true,
-          tabBarTheme: const TabBarTheme(dividerColor: dividerColor),
+          tabBarTheme: const TabBarThemeData(dividerColor: dividerColor),
         ),
         home: Scaffold(
           body: DefaultTabController(
@@ -6786,7 +6835,7 @@ void main() {
       const String unSelectedValue = 'C';
       const Color labelColor = Color(0xff0000ff);
       await tester.pumpWidget(
-        buildFrame(tabs: tabs, value: selectedValue, useMaterial3: false, tabBarTheme: const TabBarTheme(labelColor: labelColor)),
+        buildFrame(tabs: tabs, value: selectedValue, useMaterial3: false, tabBarTheme: const TabBarThemeData(labelColor: labelColor)),
       );
       expect(find.text('A'), findsOneWidget);
       expect(find.text('B'), findsOneWidget);

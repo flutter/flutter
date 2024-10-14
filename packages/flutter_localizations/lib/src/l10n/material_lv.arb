@@ -146,7 +146,7 @@
   "menuDismissLabel": "Nerādīt izvēlni",
   "lookUpButtonLabel": "Meklēt",
   "searchWebButtonLabel": "Meklēt tīmeklī",
-  "shareButtonLabel": "Kopīgot…",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Kopīgot",
+  "clearButtonTooltip": "Notīrīt tekstu",
+  "selectedDateLabel": "Atlasīts"
 }

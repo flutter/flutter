@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:io';
+library;
+
 import 'dart:async' show FutureOr;
 import 'dart:io' as io show HttpClient, OSError, SocketException;
 
@@ -207,27 +210,15 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     required FileSystem fs,
   }) {
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
-    Directory comparisonRoot;
+    final Directory comparisonRoot = switch (suffix) {
+      null => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'skia_goldens')),
+      _    => fs.systemTempDirectory.createTempSync(suffix),
+    };
 
-    if (suffix != null) {
-      comparisonRoot = fs.systemTempDirectory.createTempSync(suffix);
-    } else {
-      comparisonRoot = flutterRoot.childDirectory(
-        fs.path.join(
-          'bin',
-          'cache',
-          'pkg',
-          'skia_goldens',
-        )
-      );
-    }
-
-    final Directory testDirectory = fs.directory(defaultComparator.basedir);
-    final String testDirectoryRelativePath = fs.path.relative(
-      testDirectory.path,
-      from: flutterRoot.path,
+    final String testPath = fs.directory(defaultComparator.basedir).path;
+    return comparisonRoot.childDirectory(
+      fs.path.relative(testPath, from: flutterRoot.path),
     );
-    return comparisonRoot.childDirectory(testDirectoryRelativePath);
   }
 
   /// Returns the golden [File] identified by the given [Uri].

@@ -90,7 +90,7 @@ For example:
   to compile with a stack trace that may or may not really point to the plugin's
   code on disk.
 - If the plugin's code conflicts with the app's Android source code (for
-  example, the plugin has a conflicting transitive dependancy), Gradle will
+  example, the plugin has a conflicting transitive dependency), Gradle will
   generally fail to compile with difficult to translate stack traces.
 - These subprojects are added in an `afterEvaluate` hook in `flutter.gradle`.
   Generally adding any logic in `afterEvaluate` blocks is discouraged because it

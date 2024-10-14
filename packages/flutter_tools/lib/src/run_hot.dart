@@ -18,7 +18,6 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'compile.dart';
 import 'convert.dart';
-import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -262,7 +261,7 @@ class HotRunner extends ResidentRunner {
     }
 
     for (final FlutterDevice? device in flutterDevices) {
-      await device!.initLogReader();
+      await device!.tryInitLogReader();
       device
         .developmentShaderCompiler
         .configureCompiler(device.targetPlatform);
@@ -375,6 +374,7 @@ class HotRunner extends ResidentRunner {
         fileSystem: fileSystem,
         flutterDevices: flutterDevices,
         logger: logger,
+        packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         packageConfig: debuggingOptions.buildInfo.packageConfig,
       );
     }
@@ -489,7 +489,7 @@ class HotRunner extends ResidentRunner {
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
       final int result = await assetBundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         flavor: debuggingOptions.buildInfo.flavor,
       );
       if (result != 0) {
@@ -1617,24 +1617,13 @@ class ProjectFileInvalidator {
         }
       }
     }
-    // We need to check the .packages file too since it is not used in compilation.
+    // We need to check the .dart_tool/package_config.json file too since it is
+    // not used in compilation.
     final File packageFile = _fileSystem.file(packagesPath);
     final Uri packageUri = packageFile.uri;
     final DateTime updatedAt = packageFile.statSync().modified;
     if (updatedAt.isAfter(lastCompiled)) {
       invalidatedFiles.add(packageUri);
-      packageConfig = await _createPackageConfig(packagesPath);
-      // The frontend_server might be monitoring the package_config.json file,
-      // Pub should always produce both files.
-      // TODO(zanderso): remove after https://github.com/flutter/flutter/issues/55249
-      if (_fileSystem.path.basename(packagesPath) == '.packages') {
-        final File packageConfigFile = _fileSystem.file(packagesPath)
-          .parent.childDirectory('.dart_tool')
-          .childFile('package_config.json');
-        if (packageConfigFile.existsSync()) {
-          invalidatedFiles.add(packageConfigFile.uri);
-        }
-      }
     }
 
     _logger.printTrace(
@@ -1651,13 +1640,6 @@ class ProjectFileInvalidator {
   bool _isNotInPubCache(Uri uri) {
     return !(_platform.isWindows && uri.path.contains(_pubCachePathWindows))
         && !uri.path.contains(_pubCachePathLinuxAndMac);
-  }
-
-  Future<PackageConfig> _createPackageConfig(String packagesPath) {
-    return loadPackageConfigWithLogging(
-      _fileSystem.file(packagesPath),
-      logger: _logger,
-    );
   }
 }
 
@@ -1719,6 +1701,7 @@ abstract class HotRunnerNativeAssetsBuilder {
     required Uri projectUri,
     required FileSystem fileSystem,
     required List<FlutterDevice> flutterDevices,
+    required String packageConfigPath,
     required PackageConfig packageConfig,
     required Logger logger,
   });

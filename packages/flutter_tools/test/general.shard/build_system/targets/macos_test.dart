@@ -25,11 +25,15 @@ void main() {
   late Artifacts artifacts;
   late FakeProcessManager processManager;
   late File binary;
+  late File frameworkDsym;
   late BufferLogger logger;
   late FakeCommand copyFrameworkCommand;
+  late FakeCommand releaseCopyFrameworkCommand;
+  late FakeCommand copyFrameworkDsymCommand;
   late FakeCommand lipoInfoNonFatCommand;
   late FakeCommand lipoInfoFatCommand;
   late FakeCommand lipoVerifyX86_64Command;
+  late FakeCommand lipoExtractX86_64Command;
   late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
 
@@ -79,6 +83,51 @@ void main() {
       ],
     );
 
+    releaseCopyFrameworkCommand = FakeCommand(
+      command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        'Artifact.flutterMacOSFramework.release',
+        environment.outputDir.path,
+      ],
+    );
+
+    frameworkDsym = fileSystem.directory(
+      artifacts.getArtifactPath(
+        Artifact.flutterMacOSFrameworkDsym,
+        platform: TargetPlatform.darwin,
+        mode: BuildMode.release,
+      ),
+    )
+    .childDirectory('Contents')
+    .childDirectory('Resources')
+    .childDirectory('DWARF')
+    .childFile('FlutterMacOS');
+
+    environment.outputDir
+      .childDirectory('FlutterMacOS.framework.dSYM')
+      .childDirectory('Contents')
+      .childDirectory('Resources')
+      .childDirectory('DWARF')
+      .childFile('FlutterMacOS');
+
+    copyFrameworkDsymCommand = FakeCommand(
+      command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        'Artifact.flutterMacOSFrameworkDsym.TargetPlatform.darwin.release',
+        environment.outputDir.path,
+      ],
+    );
+
     lipoInfoNonFatCommand = FakeCommand(command: <String>[
       'lipo',
       '-info',
@@ -96,6 +145,15 @@ void main() {
       binary.path,
       '-verify_arch',
       'x86_64',
+    ]);
+
+    lipoExtractX86_64Command = FakeCommand(command: <String>[
+      'lipo',
+      '-output',
+      binary.path,
+      '-extract',
+      'x86_64',
+      binary.path,
     ]);
   });
 
@@ -115,10 +173,11 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('deletes entitlements.txt and without_entitlements.txt files after copying', () async {
+  testUsingContext('deletes entitlements.txt, without_entitlements.txt, unsigned_binaries.txt files after copying', () async {
     binary.createSync(recursive: true);
     final File entitlements = environment.outputDir.childFile('entitlements.txt');
     final File withoutEntitlements = environment.outputDir.childFile('without_entitlements.txt');
+    final File unsignedBinaries = environment.outputDir.childFile('unsigned_binaries.txt');
     final File nestedEntitlements = environment
         .outputDir
         .childDirectory('first_level')
@@ -143,6 +202,7 @@ void main() {
         onRun: (_) {
           entitlements.writeAsStringSync('foo');
           withoutEntitlements.writeAsStringSync('bar');
+          unsignedBinaries.writeAsStringSync('baz');
           nestedEntitlements.writeAsStringSync('somefile.bin');
         },
       ),
@@ -153,6 +213,7 @@ void main() {
     await const DebugUnpackMacOS().build(environment);
     expect(entitlements.existsSync(), isFalse);
     expect(withoutEntitlements.existsSync(), isFalse);
+    expect(unsignedBinaries.existsSync(), isFalse);
     expect(nestedEntitlements.existsSync(), isFalse);
 
     expect(processManager, hasNoRemainingExpectations);
@@ -223,19 +284,82 @@ void main() {
       copyFrameworkCommand,
       lipoInfoFatCommand,
       lipoVerifyX86_64Command,
-      FakeCommand(command: <String>[
-          'lipo',
-          '-output',
-          binary.path,
-          '-extract',
-          'x86_64',
-          binary.path,
-      ]),
+      lipoExtractX86_64Command,
     ]);
 
     await const DebugUnpackMacOS().build(environment);
 
     expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testUsingContext('Copies files to correct cache directory when no dSYM available in xcframework', () async {
+    binary.createSync(recursive: true);
+    processManager.addCommands(<FakeCommand>[
+      releaseCopyFrameworkCommand,
+      lipoInfoNonFatCommand,
+      lipoVerifyX86_64Command,
+    ]);
+
+    await const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release');
+
+    expect(processManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('Copies files to correct cache directory when dSYM available in xcframework', () async {
+    binary.createSync(recursive: true);
+    frameworkDsym.createSync(recursive: true);
+    processManager.addCommands(<FakeCommand>[
+      releaseCopyFrameworkCommand,
+      lipoInfoNonFatCommand,
+      lipoVerifyX86_64Command,
+      copyFrameworkDsymCommand,
+    ]);
+
+    await const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release');
+
+    expect(processManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('Fails if framework dSYM found within framework but copy fails', () async {
+    binary.createSync(recursive: true);
+    frameworkDsym.createSync(recursive: true);
+    final FakeCommand failedCopyFrameworkDsymCommand = FakeCommand(
+      command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        'Artifact.flutterMacOSFrameworkDsym.TargetPlatform.darwin.release',
+        environment.outputDir.path,
+      ], exitCode: 1,
+    );
+    processManager.addCommands(<FakeCommand>[
+      releaseCopyFrameworkCommand,
+      lipoInfoFatCommand,
+      lipoVerifyX86_64Command,
+      lipoExtractX86_64Command,
+      failedCopyFrameworkDsymCommand,
+    ]);
+
+    await expectLater(
+      const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release'),
+      throwsA(isException.having(
+        (Exception exception) => exception.toString(),
+        'description',
+        contains('Failed to copy framework dSYM'),
+      )),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
   });
 
   testUsingContext('debug macOS application fails if App.framework missing', () async {

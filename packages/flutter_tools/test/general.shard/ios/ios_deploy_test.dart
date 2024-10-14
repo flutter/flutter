@@ -137,9 +137,8 @@ void main () {
           '',
           'Log after process stop',
         ]));
-        expect(stdin.stream.transform<String>(const Utf8Decoder()), emitsInOrder(<String>[
+        expect(_decodeLines(stdin.stream), emitsInOrder(<String>[
           'thread backtrace all',
-          '\n',
           'process detach',
         ]));
         expect(await iosDeployDebugger.launchAndAttach(), isTrue);
@@ -234,9 +233,8 @@ void main () {
           '* thread #1, stop reason = Assertion failed:',
         ]));
 
-        expect(stdin.stream.transform<String>(const Utf8Decoder()), emitsInOrder(<String>[
+        expect(_decodeLines(stdin.stream), emitsInOrder(<String>[
           'thread backtrace all',
-          '\n',
           'process detach',
         ]));
 
@@ -386,7 +384,7 @@ void main () {
       final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
         processManager: processManager,
       );
-      expect(stdin.stream.transform<String>(const Utf8Decoder()), emits('process detach'));
+      expect(_decodeLines(stdin.stream), emits('process detach'));
       await iosDeployDebugger.launchAndAttach();
       await iosDeployDebugger.detach();
     });
@@ -412,7 +410,7 @@ void main () {
 
     testWithoutContext('stop with backtrace', () async {
       final StreamController<List<int>> stdin = StreamController<List<int>>();
-      final Stream<String> stdinStream = stdin.stream.transform<String>(const Utf8Decoder());
+      final Stream<String> stdinStream = _decodeLines(stdin.stream);
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
@@ -432,22 +430,20 @@ void main () {
       // These two futures will deadlock if await-ed sequentially
       await Future.wait(<Future<void>>[
         iosDeployDebugger.stopAndDumpBacktrace(),
-        stdinStream.take(5).toList().then<void>(
+        stdinStream.take(3).toList().then<void>(
           (List<String> lines) => stdinLines = lines,
         ),
       ]);
       expect(stdinLines, const <String>[
         'thread backtrace all',
-        '\n',
         'process detach',
-        '\n',
         'process signal SIGSTOP',
       ]);
     });
 
     testWithoutContext('pause with backtrace', () async {
       final StreamController<List<int>> stdin = StreamController<List<int>>();
-      final Stream<String> stdinStream = stdin.stream.transform<String>(const Utf8Decoder());
+      final Stream<String> stdinStream = _decodeLines(stdin.stream);
       const String stdout = '''
 (lldb)     run
 success
@@ -503,9 +499,8 @@ process continue
           'frame #0: 0x0000000102eaee80 dyld`dyld3::MachOFile::read_uleb128(Diagnostics&, unsigned char const*&, unsigned char const*) + 36',
         ),
       );
-      expect(await stdinStream.take(3).toList(), <String>[
+      expect(await stdinStream.take(2).toList(), <String>[
         'thread backtrace all',
-        '\n',
         'process detach',
       ]);
     });
@@ -711,3 +706,6 @@ class IOSDeployDebuggerWaitForExit extends IOSDeployDebugger {
     return status;
   }
 }
+
+Stream<String> _decodeLines(Stream<List<int>> bytes)
+    => bytes.transform(const Utf8Decoder()).transform(const LineSplitter());

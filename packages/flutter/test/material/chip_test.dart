@@ -260,7 +260,7 @@ void main() {
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);
     expect(getMaterial(tester).shape, RoundedRectangleBorder(
-      side: BorderSide(color: lightTheme.colorScheme.outline),
+      side: BorderSide(color: lightTheme.colorScheme.outlineVariant),
       borderRadius: BorderRadius.circular(8.0),
     ));
     expect(getIconData(tester).color, lightTheme.colorScheme.primary);
@@ -288,7 +288,7 @@ void main() {
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);
     expect(getMaterial(tester).shape, RoundedRectangleBorder(
-      side: BorderSide(color: darkTheme.colorScheme.outline),
+      side: BorderSide(color: darkTheme.colorScheme.outlineVariant),
       borderRadius: BorderRadius.circular(8.0),
     ));
     expect(getIconData(tester).color, darkTheme.colorScheme.primary);
@@ -4722,7 +4722,7 @@ void main() {
     ));
     final ShapeDecoration decoration = ink.decoration! as ShapeDecoration;
     expect(decoration.color, backgroundColor);
-    expect(decoration.shape, shape.copyWith(side: BorderSide(color: theme.colorScheme.outline)));
+    expect(decoration.shape, shape.copyWith(side: BorderSide(color: theme.colorScheme.outlineVariant)));
   });
 
   testWidgets('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
@@ -4910,7 +4910,7 @@ void main() {
     // Chip should have the default side.
     expect(
       getMaterial(tester).shape,
-      StadiumBorder(side: BorderSide(color: theme.colorScheme.outline)),
+      StadiumBorder(side: BorderSide(color: theme.colorScheme.outlineVariant)),
     );
   });
 

@@ -5,6 +5,7 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -47,7 +48,7 @@ void main() {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('name: foo\n');
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     artifacts = Artifacts.test(fileSystem: fileSystem);
@@ -377,6 +378,75 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
+
+  // Tests whether using a deprecated webRenderer toggles a warningText.
+  Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
+    testUsingContext('Using --web-renderer=${webRenderer.name} triggers a warningText.', () async {
+      // Run the command so it parses --web-renderer, but ignore all errors.
+      // We only care about the logger.
+      try {
+        final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+        await createTestCommandRunner(buildCommand).run(<String>[
+          'build',
+          'web',
+          '--no-pub',
+          '--web-renderer=${webRenderer.name}',
+        ]);
+      } on ToolExit catch (error) {
+        expect(error, isA<ToolExit>());
+      }
+      expect(logger.warningText, contains(
+        'See: https://docs.flutter.dev/to/web-html-renderer-deprecation'
+      ));
+    }, overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Logger: () => logger,
+    });
+  }
+  /// Do test all the deprecated WebRendererModes
+  WebRendererMode.values
+    .where((WebRendererMode mode) => mode.isDeprecated)
+    .forEach(testWebRendererDeprecationMessage);
+
+  testUsingContext('flutter build web option visibility', () async {
+    final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+    createTestCommandRunner(buildCommand);
+    final BuildWebCommand command = buildCommand.subcommands.values.single as BuildWebCommand;
+
+    void expectVisible(String option) {
+      expect(command.argParser.options.keys, contains(option));
+      expect(command.argParser.options[option]!.hide, isFalse);
+      expect(command.usage, contains(option));
+    }
+
+    void expectHidden(String option) {
+      expect(command.argParser.options.keys, contains(option));
+      expect(command.argParser.options[option]!.hide, isTrue);
+      expect(command.usage, isNot(contains(option)));
+    }
+
+    expectVisible('pwa-strategy');
+    expectVisible('web-resources-cdn');
+    expectVisible('optimization-level');
+    expectVisible('source-maps');
+    expectVisible('csp');
+    expectVisible('dart2js-optimization');
+    expectVisible('dump-info');
+    expectVisible('no-frequency-based-minification');
+    expectVisible('wasm');
+    expectVisible('strip-wasm');
+    expectVisible('base-href');
+
+    expectHidden('web-renderer');
+  }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    ProcessManager: () => processManager,
+  });
+
 }
 
 void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
@@ -392,10 +462,28 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
   }
 
   // Project files.
-  fileSystem.file('.packages')
-      .writeAsStringSync('''
-foo:lib/
-fizz:bar/lib/
+  fileSystem
+    .directory('.dart_tool')
+    .childFile('package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+{
+  "packages": [
+    {
+      "name": "foo",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "fizz",
+      "rootUri": "../bar",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    }
+  ],
+  "configVersion": 2
+}
 ''');
   fileSystem.file('pubspec.yaml')
       .writeAsStringSync('''

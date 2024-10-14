@@ -51,9 +51,9 @@ void main() {
         .toList();
 
     expect(description, <String>[
-      'cursorColor: Color(0xffeeffaa)',
-      'selectionColor: Color(0x88888888)',
-      'selectionHandleColor: Color(0xaabbccdd)',
+      'cursorColor: ${const Color(0xffeeffaa)}',
+      'selectionColor: ${const Color(0x88888888)}',
+      'selectionHandleColor: ${const Color(0xaabbccdd)}',
     ]);
   });
 

@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -24,12 +25,6 @@ import 'theme.dart';
 const Size _size = Size(18.0, 18.0);
 const double _kOuterRadius = 7.0;
 const double _kInnerRadius = 2.975;
-
-// The relative values needed to transform a color to its equivalent focus
-// outline color.
-const double _kCupertinoFocusColorOpacity = 0.80;
-const double _kCupertinoFocusColorBrightness = 0.69;
-const double _kCupertinoFocusColorSaturation = 0.835;
 
 // Eyeballed from a radio on a physical Macbook Pro running macOS version 14.5.
 final Color _kDisabledOuterColor = CupertinoColors.white.withOpacity(0.50);
@@ -334,9 +329,9 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
     final Color effectiveInactiveColor = _defaultOuterColor.resolve(inactiveStates);
 
     final Color effectiveFocusOverlayColor = widget.focusColor ?? HSLColor
-      .fromColor(effectiveActiveColor.withOpacity(_kCupertinoFocusColorOpacity))
-      .withLightness(_kCupertinoFocusColorBrightness)
-      .withSaturation(_kCupertinoFocusColorSaturation)
+      .fromColor(effectiveActiveColor.withOpacity(kCupertinoFocusColorOpacity))
+      .withLightness(kCupertinoFocusColorBrightness)
+      .withSaturation(kCupertinoFocusColorSaturation)
       .toColor();
 
     final Color effectiveFillColor = _defaultInnerColor.resolve(currentStates);
