@@ -2460,6 +2460,48 @@ void main() {
     expect(node.value, 'Item 3');
   });
 
+
+  testWidgets('Semantics does not include initial menu buttons', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) => MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            body: Center(
+              child: DropdownMenu<TestMenu>(
+                requestFocusOnTap: true,
+                dropdownMenuEntries: menuChildren,
+                onSelected: (TestMenu? value) {
+                  setState(() {
+                  });
+                },
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    // The menu buttons should not be visible and should not be in the semantics tree.
+    for (final String label in TestMenu.values.map((TestMenu menu) => menu.label)) {
+      expect(find.bySemanticsLabel(label), findsNothing);
+    }
+
+    // Open the menu.
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
+    await tester.pump();
+
+    // The menu buttons should be visible and in the semantics tree.
+    for (final String label in TestMenu.values.map((TestMenu menu) => menu.label)) {
+      expect(find.bySemanticsLabel(label), findsOneWidget);
+    }
+
+  });
+
   testWidgets('helperText is not visible when errorText is not null', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     const String helperText = 'I am helperText';
