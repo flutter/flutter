@@ -502,6 +502,18 @@ class CocoaPods {
           );
         }
       }
+    } else if (stdout.contains('unknown ISA `PBXFileSystemSynchronizedRootGroup`')) {
+      // CocoaPods does not work with Xcode 16 since it has not yet been
+      // updated to handled synchronized
+      // groups/folders https://github.com/CocoaPods/CocoaPods/issues/12456
+      _logger.printError(
+        'Error: CocoaPods has not been updated to support Xcode 16 and cannot '
+            'currently handle synchronized groups and folders. '
+            'See https://github.com/CocoaPods/CocoaPods/issues/12456\n'
+            'For a workaround, please refer to this Github issue: \n'
+            'https://github.com/flutter/flutter/issues/156733',
+        emphasis: true,
+      );
     }
   }
 
