@@ -907,6 +907,35 @@ void main() {
     expect(await chromiumLauncher.connect(chrome, false), equals(chrome));
     await chrome.close();
   });
+
+  testWithoutContext('close is a no-op if it has already been called', () async {
+    final BufferLogger logger = BufferLogger.test();
+    bool getTabCalled = false;
+    final FakeChromeConnectionWithTab chromeConnection = FakeChromeConnectionWithTab(onGetTab: () {
+      if (getTabCalled) {
+        throw Exception('Chromium.close tried to close chrome twice.');
+      }
+      getTabCalled = true;
+    });
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+    );
+    final FakeProcess process = FakeProcess();
+    final Chromium chrome = Chromium(
+      0,
+      chromeConnection,
+      chromiumLauncher: chromiumLauncher,
+      process: process,
+      logger: logger,
+    );
+    expect(await chromiumLauncher.connect(chrome, false), equals(chrome));
+    await Future.wait([chrome.close(), chrome.close()]);
+  });
 }
 
 /// Fake chrome connection that fails to get tabs a few times.

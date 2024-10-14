@@ -509,6 +509,12 @@ class Chromium {
 
   /// Closes all connections to the browser and asks the browser to exit.
   Future<void> close() async {
+    if (!_hasValidChromeConnection) {
+      return;
+    }
+    print(StackTrace.current);
+    _hasValidChromeConnection = false;
+
     if (_logger.isVerbose) {
       _logger.printTrace('Shutting down Chromium.');
     }
@@ -518,23 +524,20 @@ class Chromium {
 
     // Send a command to shut down the browser cleanly.
     Duration sigtermDelay = Duration.zero;
-    if (_hasValidChromeConnection) {
-      try {
-        final ChromeTab? tab = await getChromeTabGuarded(chromeConnection,
-            (_) => true, retryFor: const Duration(seconds: 1));
-        if (tab != null) {
-          final WipConnection wipConnection = await tab.connect();
-          await wipConnection.sendCommand('Browser.close');
-          await wipConnection.close();
-          sigtermDelay = const Duration(seconds: 1);
-        }
-      } on IOException {
-        // Chrome is not responding to the debug protocol and probably has
-        // already been closed.
+    try {
+      final ChromeTab? tab = await getChromeTabGuarded(chromeConnection,
+          (_) => true, retryFor: const Duration(seconds: 1));
+      if (tab != null) {
+        final WipConnection wipConnection = await tab.connect();
+        await wipConnection.sendCommand('Browser.close');
+        await wipConnection.close();
+        sigtermDelay = const Duration(seconds: 1);
       }
+    } on IOException {
+      // Chrome is not responding to the debug protocol and probably has
+      // already been closed.
     }
     chromeConnection.close();
-    _hasValidChromeConnection = false;
 
     // If the browser close command did not shut down the process, then try to
     // exit Chromium using SIGTERM.
