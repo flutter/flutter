@@ -169,7 +169,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     final Artifacts artifacts = environment.artifacts;
     final String platformBinariesPath = artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
     final List<String> sharedCommandOptions = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: TargetPlatform.web_javascript),
+      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
       'compile',
       'js',
       '--platform-binaries=$platformBinariesPath',
