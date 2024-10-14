@@ -7,8 +7,6 @@
 #include <gmodule.h>
 
 #include <cstring>
-#include <string>
-#include <vector>
 
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/common/engine_switches.h"
@@ -623,10 +621,8 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   display.single_display = true;
   display.refresh_rate = refresh_rate;
 
-  std::vector displays = {display};
   result = self->embedder_api.NotifyDisplayUpdate(
-      self->engine, kFlutterEngineDisplaysUpdateTypeStartup, displays.data(),
-      displays.size());
+      self->engine, kFlutterEngineDisplaysUpdateTypeStartup, &display, 1);
   if (result != kSuccess) {
     g_warning("Failed to notify display update to Flutter engine: %d", result);
   }
