@@ -2946,7 +2946,6 @@
 ../../../flutter/third_party/sqlite/Makefile
 ../../../flutter/third_party/sqlite/README.md
 ../../../flutter/third_party/sqlite/VERSION
-../../../flutter/third_party/stb
 ../../../flutter/third_party/swiftshader/.clang-format
 ../../../flutter/third_party/swiftshader/.git
 ../../../flutter/third_party/swiftshader/.gitignore
