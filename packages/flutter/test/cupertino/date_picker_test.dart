@@ -261,7 +261,7 @@ void main() {
     });
   });
 
- testWidgets('showDayOfWeek is only supported in date mode', (WidgetTester tester) async {
+  testWidgets('showDayOfWeek is only supported in date mode', (WidgetTester tester) async {
     expect(
       () => CupertinoDatePicker(
         mode: CupertinoDatePickerMode.date,
@@ -308,7 +308,7 @@ void main() {
         contains('showDayOfWeek is only supported in date mode'),
       )),
     );
-});
+  });
 
   testWidgets('picker honors minuteInterval and secondInterval', (WidgetTester tester) async {
     late Duration duration;
