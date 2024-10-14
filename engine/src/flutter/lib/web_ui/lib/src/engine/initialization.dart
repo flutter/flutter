@@ -229,6 +229,9 @@ Future<void> initializeEngineUi() async {
   RawKeyboard.initialize(onMacOs: ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs);
   KeyboardBinding.initInstance();
 
+  // Ensures Flutter renders a global "generator" meta-tag.
+  ensureMetaTag('generator', 'Flutter');
+
   if (!configuration.multiViewEnabled) {
     final EngineFlutterWindow implicitView =
         ensureImplicitViewInitialized(hostElement: configuration.hostElement);
