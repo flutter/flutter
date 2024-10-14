@@ -45,7 +45,6 @@ impeller_component("typographer_unittests") {
   deps = [
     "../playground:playground_test",
     "backends/skia:typographer_skia_backend",
-    "backends/stb:typographer_stb_backend",
     "//flutter/display_list/testing:display_list_testing",
     "//flutter/third_party/txt",
   ]
