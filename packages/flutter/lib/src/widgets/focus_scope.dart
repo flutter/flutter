@@ -566,6 +566,7 @@ class _FocusState extends State<Focus> {
   void dispose() {
     // Regardless of the node owner, we need to remove it from the tree and stop
     // listening to it.
+    widget.onFocusChange?.call(false);
     focusNode.removeListener(_handleFocusChanged);
     _focusAttachment!.detach();
 
