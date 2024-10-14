@@ -57,7 +57,7 @@ $assetsSection
 ''');
   }
 
-void writePackageConfigFile(Map<String, String> packages) {
+  void writePackageConfigFile(Map<String, String> packages) {
     globals.fs.directory('.dart_tool').childFile('package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync(
