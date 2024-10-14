@@ -124,6 +124,7 @@ bool BlitPass::AddCopy(BufferView source,
                        std::shared_ptr<Texture> destination,
                        std::optional<IRect> destination_region,
                        std::string label,
+                       uint32_t mip_level,
                        uint32_t slice,
                        bool convert_to_read) {
   if (!destination) {
@@ -150,14 +151,20 @@ bool BlitPass::AddCopy(BufferView source,
         << "Attempted to add a texture blit with out of bounds access.";
     return false;
   }
+  if (mip_level >= destination->GetMipCount()) {
+    VALIDATION_LOG << "Invalid value for mip_level: " << mip_level << ". "
+                   << "The destination texture has "
+                   << destination->GetMipCount() << " mip levels.";
+    return false;
+  }
   if (slice > 5) {
     VALIDATION_LOG << "Invalid value for slice: " << slice;
     return false;
   }
 
-  return OnCopyBufferToTextureCommand(std::move(source), std::move(destination),
-                                      destination_region_value,
-                                      std::move(label), slice, convert_to_read);
+  return OnCopyBufferToTextureCommand(
+      std::move(source), std::move(destination), destination_region_value,
+      std::move(label), mip_level, slice, convert_to_read);
 }
 
 bool BlitPass::ConvertTextureToShaderRead(

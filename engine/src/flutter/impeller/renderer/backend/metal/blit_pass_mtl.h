@@ -63,6 +63,7 @@ class BlitPassMTL final : public BlitPass {
                                     std::shared_ptr<Texture> destination,
                                     IRect destination_region,
                                     std::string label,
+                                    uint32_t mip_level,
                                     uint32_t slice,
                                     bool convert_to_read) override;
 

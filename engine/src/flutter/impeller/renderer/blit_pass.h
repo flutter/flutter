@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BLIT_PASS_H_
 #define FLUTTER_IMPELLER_RENDERER_BLIT_PASS_H_
 
+#include <cstdint>
 #include <string>
 
 #include "impeller/core/device_buffer.h"
@@ -73,8 +74,8 @@ class BlitPass {
                std::string label = "");
 
   //----------------------------------------------------------------------------
-  /// @brief      Record a command to copy the contents of the buffer to
-  ///             the texture.
+  /// @brief      Record a command to copy the contents of a texture to a
+  ///             buffer.
   ///
   /// @param[in]  source              The texture to read for copying.
   /// @param[in]  destination         The buffer to overwrite using the source
@@ -96,8 +97,8 @@ class BlitPass {
                std::string label = "");
 
   //----------------------------------------------------------------------------
-  /// @brief      Record a command to copy the contents of the buffer to
-  ///             the texture.
+  /// @brief      Record a command to copy the contents of a buffer to a
+  ///             texture.
   ///
   /// @param[in]  source              The buffer view to read for copying.
   /// @param[in]  destination         The texture to overwrite using the source
@@ -107,6 +108,7 @@ class BlitPass {
   ///                                 defaults to the entire texture.
   /// @param[in]  label               The optional debug label to give the
   ///                                 command.
+  /// @param[in]  mip_level           The mip level to write to.
   /// @param[in]  slice               For cubemap textures, the slice to write
   ///                                 data to.
   /// @param[in]  convert_to_read     Whether to convert the texture to a shader
@@ -126,6 +128,7 @@ class BlitPass {
                std::shared_ptr<Texture> destination,
                std::optional<IRect> destination_region = std::nullopt,
                std::string label = "",
+               uint32_t mip_level = 0,
                uint32_t slice = 0,
                bool convert_to_read = true);
 
@@ -174,6 +177,7 @@ class BlitPass {
       std::shared_ptr<Texture> destination,
       IRect destination_region,
       std::string label,
+      uint32_t mip_level,
       uint32_t slice,
       bool convert_to_read) = 0;
 

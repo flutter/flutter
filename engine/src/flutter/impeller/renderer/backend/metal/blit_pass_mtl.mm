@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/metal/blit_pass_mtl.h"
 #include <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
+#include <cstdint>
 #include <memory>
 #include <utility>
 #include <variant>
@@ -189,6 +190,7 @@ bool BlitPassMTL::OnCopyBufferToTextureCommand(
     std::shared_ptr<Texture> destination,
     IRect destination_region,
     std::string label,
+    uint32_t mip_level,
     uint32_t slice,
     bool convert_to_read) {
   auto source_mtl = DeviceBufferMTL::Cast(*source.buffer).GetMTLBuffer();
@@ -226,7 +228,7 @@ bool BlitPassMTL::OnCopyBufferToTextureCommand(
                sourceSize:source_size_mtl
                 toTexture:destination_mtl
          destinationSlice:slice
-         destinationLevel:0
+         destinationLevel:mip_level
         destinationOrigin:destination_origin_mtl];
 
 #ifdef IMPELLER_DEBUG
