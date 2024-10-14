@@ -22,7 +22,7 @@ struct _FlMouseCursorHandler {
 
   FlMethodChannel* channel;
 
-  FlView* view;
+  GWeakRef view;
 
   GHashTable* system_cursor_table;
 };
@@ -109,11 +109,14 @@ FlMethodResponse* activate_system_cursor(FlMouseCursorHandler* self,
     cursor_name = kFallbackCursor;
   }
 
-  GdkWindow* window =
-      gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(self->view)));
-  g_autoptr(GdkCursor) cursor =
-      gdk_cursor_new_from_name(gdk_window_get_display(window), cursor_name);
-  gdk_window_set_cursor(window, cursor);
+  g_autoptr(FlView) view = FL_VIEW(g_weak_ref_get(&self->view));
+  if (view != nullptr) {
+    GdkWindow* window =
+        gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(view)));
+    g_autoptr(GdkCursor) cursor =
+        gdk_cursor_new_from_name(gdk_window_get_display(window), cursor_name);
+    gdk_window_set_cursor(window, cursor);
+  }
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
@@ -144,11 +147,7 @@ static void fl_mouse_cursor_handler_dispose(GObject* object) {
   FlMouseCursorHandler* self = FL_MOUSE_CURSOR_HANDLER(object);
 
   g_clear_object(&self->channel);
-  if (self->view != nullptr) {
-    g_object_remove_weak_pointer(G_OBJECT(self->view),
-                                 reinterpret_cast<gpointer*>(&(self->view)));
-    self->view = nullptr;
-  }
+  g_weak_ref_clear(&self->view);
   g_clear_pointer(&self->system_cursor_table, g_hash_table_unref);
 
   G_OBJECT_CLASS(fl_mouse_cursor_handler_parent_class)->dispose(object);
@@ -173,11 +172,7 @@ FlMouseCursorHandler* fl_mouse_cursor_handler_new(FlBinaryMessenger* messenger,
       fl_method_channel_new(messenger, kChannelName, FL_METHOD_CODEC(codec));
   fl_method_channel_set_method_call_handler(self->channel, method_call_cb, self,
                                             nullptr);
-  self->view = view;
-  if (view != nullptr) {
-    g_object_add_weak_pointer(G_OBJECT(view),
-                              reinterpret_cast<gpointer*>(&(self->view)));
-  }
+  g_weak_ref_init(&self->view, view);
 
   return self;
 }
