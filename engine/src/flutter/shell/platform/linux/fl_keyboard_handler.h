@@ -93,6 +93,14 @@ void fl_keyboard_handler_sync_modifier_if_needed(FlKeyboardHandler* handler,
  */
 GHashTable* fl_keyboard_handler_get_pressed_state(FlKeyboardHandler* handler);
 
+/**
+ * fl_keyboard_handler_notify_layout_changed:
+ * @handler: the #FlKeyboardHandler self.
+ *
+ * Notify the handler the keyboard layout has changed.
+ */
+void fl_keyboard_handler_notify_layout_changed(FlKeyboardHandler* handler);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_KEYBOARD_HANDLER_H_

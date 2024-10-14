@@ -429,8 +429,6 @@ static void fl_keyboard_handler_dispose(GObject* object) {
   FlKeyboardHandler* self = FL_KEYBOARD_HANDLER(object);
 
   if (self->view_delegate != nullptr) {
-    fl_keyboard_view_delegate_subscribe_to_layout_change(self->view_delegate,
-                                                         nullptr);
     g_object_remove_weak_pointer(
         G_OBJECT(self->view_delegate),
         reinterpret_cast<gpointer*>(&(self->view_delegate)));
@@ -505,12 +503,6 @@ FlKeyboardHandler* fl_keyboard_handler_new(
                   FL_KEY_RESPONDER(fl_key_channel_responder_new(
                       fl_keyboard_view_delegate_get_messenger(view_delegate))));
 
-  fl_keyboard_view_delegate_subscribe_to_layout_change(
-      self->view_delegate, [self]() {
-        g_clear_object(&self->derived_layout);
-        self->derived_layout = fl_keyboard_layout_new();
-      });
-
   // Setup the flutter/keyboard channel.
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   self->channel =
@@ -578,4 +570,10 @@ GHashTable* fl_keyboard_handler_get_pressed_state(FlKeyboardHandler* self) {
   FlKeyEmbedderResponder* responder =
       FL_KEY_EMBEDDER_RESPONDER(g_ptr_array_index(self->responder_list, 0));
   return fl_key_embedder_responder_get_pressed_state(responder);
+}
+
+void fl_keyboard_handler_notify_layout_changed(FlKeyboardHandler* self) {
+  g_return_if_fail(FL_IS_KEYBOARD_HANDLER(self));
+  g_clear_object(&self->derived_layout);
+  self->derived_layout = fl_keyboard_layout_new();
 }
