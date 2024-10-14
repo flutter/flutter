@@ -2385,16 +2385,6 @@ targets:
       task_name: color_filter_with_unstable_child_perf__e2e_summary
 
   # linux mokey benchmark
-  - name: Linux_mokey raster_cache_use_memory_perf__e2e_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux","mokey"]
-      task_name: raster_cache_use_memory_perf__e2e_summary
-
-  # linux mokey benchmark
   - name: Linux_mokey shader_mask_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
