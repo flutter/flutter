@@ -566,8 +566,10 @@ the configured path by running this command: flutter config --android-studio-dir
   }
 
   static Version? _parseVersion(String text) {
-    // Example string fort EAP: EAP AI-242.21829.142.2422.12358220
-    // We try to capture 2422 here.
+    // Matches the version string for Preview builds on macOS.
+    // Example match: EAP AI-242.21829.142.2422.12358220
+    // We try to capture "2422" here, which can be translated to a
+    // more human-friendly "24.2.2".
     final RegExp eapVersionPattern = RegExp(r'EAP\s+[A-Z]{2}-\d+\.\d+\.\d+\.(\d+)\.\d+');
     final Match? eapVersionMatch = eapVersionPattern.firstMatch(text);
 
