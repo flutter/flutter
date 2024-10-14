@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_BLIT_PASS_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_BLIT_PASS_GLES_H_
 
+#include <cstdint>
 #include <memory>
 
 #include "flutter/impeller/base/config.h"
@@ -63,6 +64,7 @@ class BlitPassGLES final : public BlitPass,
                                     std::shared_ptr<Texture> destination,
                                     IRect destination_region,
                                     std::string label,
+                                    uint32_t mip_level,
                                     uint32_t slice,
                                     bool convert_to_read) override;
 

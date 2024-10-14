@@ -369,6 +369,7 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
                             IRect::MakeXYWH(pos.GetLeft() - 1, pos.GetTop() - 1,
                                             size.width, size.height),  //
                             /*label=*/"",                              //
+                            /*mip_level=*/0,                           //
                             /*slice=*/0,                               //
                             /*convert_to_read=*/false                  //
                             )) {

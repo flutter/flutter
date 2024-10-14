@@ -484,7 +484,7 @@ std::shared_ptr<Texture> Playground::CreateTextureCubeForFixture(
     auto device_buffer = context_->GetResourceAllocator()->CreateBufferWithCopy(
         *images[i].GetAllocation());
     blit_pass->AddCopy(DeviceBuffer::AsBufferView(device_buffer), texture, {},
-                       "", /*slice=*/i);
+                       "", /*mip_level=*/0, /*slice=*/i);
   }
 
   if (!blit_pass->EncodeCommands(context_->GetResourceAllocator()) ||

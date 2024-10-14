@@ -270,7 +270,7 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
   // defined by a previous glTexImage2D operation.
   if (!texture_gles.IsSliceInitialized(slice)) {
     gl.TexImage2D(texture_target,              // target
-                  0u,                          // LOD level
+                  mip_level,                   // LOD level
                   data.internal_format,        // internal format
                   tex_descriptor.size.width,   // width
                   tex_descriptor.size.height,  // height
@@ -285,7 +285,7 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
   {
     gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
     gl.TexSubImage2D(texture_target,                  // target
-                     0u,                              // LOD level
+                     mip_level,                       // LOD level
                      destination_region.GetX(),       // xoffset
                      destination_region.GetY(),       // yoffset
                      destination_region.GetWidth(),   // width

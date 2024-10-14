@@ -102,11 +102,14 @@ TEST_P(BlitPassTest, ChecksInvalidSliceParameters) {
   ASSERT_TRUE(src);
 
   EXPECT_FALSE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(src), dst,
-                                  std::nullopt, "", /*slice=*/25));
+                                  std::nullopt, "", /*mip_level=*/0,
+                                  /*slice=*/25));
   EXPECT_FALSE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(src), dst,
-                                  std::nullopt, "", /*slice=*/6));
+                                  std::nullopt, "", /*mip_level=*/0,
+                                  /*slice=*/6));
   EXPECT_TRUE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(src), dst,
-                                 std::nullopt, "", /*slice=*/0));
+                                 std::nullopt, "", /*mip_level=*/0,
+                                 /*slice=*/0));
 }
 
 TEST_P(BlitPassTest, CanBlitSmallRegionToUninitializedTexture) {
@@ -128,7 +131,62 @@ TEST_P(BlitPassTest, CanBlitSmallRegionToUninitializedTexture) {
   ASSERT_TRUE(dst);
 
   EXPECT_TRUE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(src), dst,
-                                 IRect::MakeLTRB(0, 0, 1, 1), "", /*slice=*/0));
+                                 IRect::MakeLTRB(0, 0, 1, 1), "",
+                                 /*mip_level=*/0, /*slice=*/0));
+  EXPECT_TRUE(blit_pass->EncodeCommands(GetContext()->GetResourceAllocator()));
+  EXPECT_TRUE(context->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok());
+}
+
+TEST_P(BlitPassTest, ChecksInvalidMipLevelParameter) {
+  ScopedValidationDisable scope;
+  auto context = GetContext();
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+
+  TextureDescriptor dst_format;
+  dst_format.storage_mode = StorageMode::kDevicePrivate;
+  dst_format.format = PixelFormat::kR8G8B8A8UNormInt;
+  dst_format.size = {1000, 1000};
+  auto dst = context->GetResourceAllocator()->CreateTexture(dst_format);
+
+  DeviceBufferDescriptor src_format;
+  src_format.size = 4;
+  src_format.storage_mode = StorageMode::kHostVisible;
+  auto src = context->GetResourceAllocator()->CreateBuffer(src_format);
+
+  ASSERT_TRUE(dst);
+
+  EXPECT_FALSE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(src), dst,
+                                  IRect::MakeLTRB(0, 0, 1, 1), "",
+                                  /*mip_level=*/1, /*slice=*/0));
+
+  EXPECT_TRUE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(src), dst,
+                                 IRect::MakeLTRB(0, 0, 1, 1), "",
+                                 /*mip_level=*/0, /*slice=*/0));
+}
+
+TEST_P(BlitPassTest, CanBlitToHigherTextureMipLevels) {
+  auto context = GetContext();
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+
+  TextureDescriptor dst_format;
+  dst_format.storage_mode = StorageMode::kDevicePrivate;
+  dst_format.format = PixelFormat::kR8G8B8A8UNormInt;
+  dst_format.size = {1000, 1000};
+  dst_format.mip_count = 4;
+  auto dst = context->GetResourceAllocator()->CreateTexture(dst_format);
+
+  DeviceBufferDescriptor src_format;
+  src_format.size = 4;
+  src_format.storage_mode = StorageMode::kHostVisible;
+  auto src = context->GetResourceAllocator()->CreateBuffer(src_format);
+
+  ASSERT_TRUE(dst);
+
+  EXPECT_TRUE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(src), dst,
+                                 IRect::MakeLTRB(0, 0, 1, 1), "",
+                                 /*mip_level=*/1, /*slice=*/0));
   EXPECT_TRUE(blit_pass->EncodeCommands(GetContext()->GetResourceAllocator()));
   EXPECT_TRUE(context->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok());
 }

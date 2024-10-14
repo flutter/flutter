@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BLIT_COMMAND_H_
 #define FLUTTER_IMPELLER_RENDERER_BLIT_COMMAND_H_
 
+#include <cstdint>
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/texture.h"
 #include "impeller/geometry/rect.h"
@@ -38,6 +39,7 @@ struct BlitCopyBufferToTextureCommand : public BlitCommand {
   BufferView source;
   std::shared_ptr<Texture> destination;
   IRect destination_region;
+  uint32_t mip_level = 0;
   uint32_t slice = 0;
 };
 

@@ -246,6 +246,7 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
     std::shared_ptr<Texture> destination,
     IRect destination_region,
     std::string label,
+    uint32_t mip_level,
     uint32_t slice,
     bool convert_to_read) {
   const auto& cmd_buffer = command_buffer_->GetCommandBuffer();
@@ -273,8 +274,8 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
   image_copy.setBufferOffset(source.range.offset);
   image_copy.setBufferRowLength(0);
   image_copy.setBufferImageHeight(0);
-  image_copy.setImageSubresource(
-      vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1));
+  image_copy.setImageSubresource(vk::ImageSubresourceLayers(
+      vk::ImageAspectFlagBits::eColor, mip_level, slice, 1));
   image_copy.imageOffset.x = destination_region.GetX();
   image_copy.imageOffset.y = destination_region.GetY();
   image_copy.imageOffset.z = 0u;
