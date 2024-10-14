@@ -65,91 +65,12 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 
   final _SelectableTextState _state;
 
-  /// The viewport offset pixels of any [Scrollable] containing the
-  /// [RenderEditable] at the last drag start.
-  double _dragStartScrollOffset = 0.0;
-
-  /// The viewport offset pixels of the [RenderEditable] at the last drag start.
-  double _dragStartViewportOffset = 0.0;
-
-  double get _scrollPosition {
-    final ScrollableState? scrollableState =
-        delegate.editableTextKey.currentContext == null
-            ? null
-            : Scrollable.maybeOf(delegate.editableTextKey.currentContext!);
-    return scrollableState == null
-        ? 0.0
-        : scrollableState.position.pixels;
-  }
-
-  AxisDirection? get _scrollDirection {
-    final ScrollableState? scrollableState =
-        delegate.editableTextKey.currentContext == null
-            ? null
-            : Scrollable.maybeOf(delegate.editableTextKey.currentContext!);
-    return scrollableState?.axisDirection;
-  }
-
-  @override
-  void onForcePressStart(ForcePressDetails details) {
-    super.onForcePressStart(details);
-    if (delegate.selectionEnabled && shouldShowSelectionToolbar) {
-      editableText.showToolbar();
-    }
-  }
-
-  @override
-  void onForcePressEnd(ForcePressDetails details) {
-    // Not required.
-  }
-
-  @override
-  void onSingleLongTapStart(LongPressStartDetails details) {
-    if (!delegate.selectionEnabled) {
-      return;
-    }
-    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    Feedback.forLongPress(_state.context);
-    _dragStartViewportOffset = renderEditable.offset.pixels;
-    _dragStartScrollOffset = _scrollPosition;
-  }
-
-  @override
-  void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (!delegate.selectionEnabled) {
-      return;
-    }
-    // Adjust the drag start offset for possible viewport offset changes.
-    final Offset editableOffset = renderEditable.maxLines == 1
-        ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
-        : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
-    final Offset scrollableOffset = switch (axisDirectionToAxis(_scrollDirection ?? AxisDirection.left)) {
-      Axis.horizontal => Offset(_scrollPosition - _dragStartScrollOffset, 0),
-      Axis.vertical   => Offset(0, _scrollPosition - _dragStartScrollOffset),
-    };
-    renderEditable.selectWordsInRange(
-      from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
-      to: details.globalPosition,
-      cause: SelectionChangedCause.longPress,
-    );
-  }
-
   @override
   void onSingleTapUp(TapDragUpDetails details) {
     if (!delegate.selectionEnabled) {
       return;
     }
-    editableText.hideToolbar();
-    switch (Theme.of(_state.context).platform) {
-      case TargetPlatform.iOS:
-        renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-      case TargetPlatform.macOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-    }
+    super.onSingleTapUp(details);
     _state.widget.onTap?.call();
   }
 }
