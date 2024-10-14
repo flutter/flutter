@@ -5356,7 +5356,6 @@ targets:
       - .ci.yaml
 
   - name: Windows build_tests_1_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5375,7 +5374,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_2_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5394,7 +5392,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_3_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5413,7 +5410,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_4_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5432,7 +5428,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_5_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5451,7 +5446,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_6_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5470,7 +5464,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_7_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5489,7 +5482,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_8_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
