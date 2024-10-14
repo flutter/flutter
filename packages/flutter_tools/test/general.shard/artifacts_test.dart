@@ -611,10 +611,9 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(
-          Artifact.dart2jsSnapshot,
+          Artifact.engineDartAotBinary,
           platform: TargetPlatform.web_javascript),
-        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk',
-            'bin', 'snapshots', 'dart2js.dart.snapshot'),
+        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk', 'bin', 'dartaotruntime'),
       );
     });
 
