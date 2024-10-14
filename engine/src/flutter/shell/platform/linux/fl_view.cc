@@ -76,7 +76,6 @@ struct _FlView {
   gboolean pointer_inside;
 
   /* FlKeyboardViewDelegate related properties */
-  KeyboardLayoutNotifier keyboard_layout_notifier;
   GdkKeymap* keymap;
   gulong keymap_keys_changed_cb_id;  // Signal connection ID for
                                      // keymap-keys-changed
@@ -394,12 +393,6 @@ static void fl_view_keyboard_delegate_iface_init(
     gdk_event_put(fl_key_event_get_origin(event));
   };
 
-  iface->subscribe_to_layout_change = [](FlKeyboardViewDelegate* view_delegate,
-                                         KeyboardLayoutNotifier notifier) {
-    FlView* self = FL_VIEW(view_delegate);
-    self->keyboard_layout_notifier = std::move(notifier);
-  };
-
   iface->lookup_key = [](FlKeyboardViewDelegate* view_delegate,
                          const GdkKeymapKey* key) -> guint {
     FlView* self = FL_VIEW(view_delegate);
@@ -566,11 +559,7 @@ static gboolean leave_notify_event_cb(FlView* self,
 }
 
 static void keymap_keys_changed_cb(FlView* self) {
-  if (self->keyboard_layout_notifier == nullptr) {
-    return;
-  }
-
-  self->keyboard_layout_notifier();
+  fl_keyboard_handler_notify_layout_changed(self->keyboard_handler);
 }
 
 static void gesture_rotation_begin_cb(FlView* self) {

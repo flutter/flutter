@@ -307,7 +307,6 @@ struct FlMockViewDelegatePrivate {
   EmbedderCallHandler embedder_handler;
   bool text_filter_result;
   RedispatchHandler redispatch_handler;
-  KeyboardLayoutNotifier layout_notifier;
   const MockLayoutData* layout_data;
 };
 
@@ -383,13 +382,6 @@ static void fl_mock_view_keyboard_redispatch_event(
   }
 }
 
-static void fl_mock_view_keyboard_subscribe_to_layout_change(
-    FlKeyboardViewDelegate* delegate,
-    KeyboardLayoutNotifier notifier) {
-  FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(delegate);
-  priv->layout_notifier = std::move(notifier);
-}
-
 static guint fl_mock_view_keyboard_lookup_key(FlKeyboardViewDelegate* delegate,
                                               const GdkKeymapKey* key) {
   FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(delegate);
@@ -417,8 +409,6 @@ static void fl_mock_view_keyboard_delegate_iface_init(
   iface->text_filter_key_press = fl_mock_view_keyboard_text_filter_key_press;
   iface->get_messenger = fl_mock_view_keyboard_get_messenger;
   iface->redispatch_event = fl_mock_view_keyboard_redispatch_event;
-  iface->subscribe_to_layout_change =
-      fl_mock_view_keyboard_subscribe_to_layout_change;
   iface->lookup_key = fl_mock_view_keyboard_lookup_key;
   iface->get_keyboard_state = fl_mock_view_keyboard_get_keyboard_state;
 }
@@ -458,9 +448,6 @@ static void fl_mock_view_set_layout(FlMockViewDelegate* self,
                                     const MockLayoutData* layout) {
   FlMockViewDelegatePrivate* priv = FL_MOCK_VIEW_DELEGATE_GET_PRIVATE(self);
   priv->layout_data = layout;
-  if (priv->layout_notifier != nullptr) {
-    priv->layout_notifier();
-  }
 }
 
 /***** End FlMockViewDelegate *****/
@@ -600,11 +587,14 @@ class KeyboardTester {
 
   void setLayout(const MockLayoutData& layout) {
     fl_mock_view_set_layout(view_, &layout);
+    if (handler_ != nullptr) {
+      fl_keyboard_handler_notify_layout_changed(handler_);
+    }
   }
 
  private:
   FlMockViewDelegate* view_;
-  FlKeyboardHandler* handler_;
+  FlKeyboardHandler* handler_ = nullptr;
   GPtrArray* redispatched_events_ = nullptr;
   bool during_redispatch_ = false;
 
