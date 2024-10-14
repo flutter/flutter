@@ -17,14 +17,14 @@ Because of the complexities of having native code, plugins have many more types 
   These should live in `example/integration_tests/`
 - **Native unit tests**. Most plugins that have native code should have unit tests for that native code. (Currently, many do not; fixing that is currently a priority for plugins work.) They are written as:
   - Android: **JUnit** - These should live in `android/src/test/`
-  - iOS: **XCTest** - These should live in `example/ios/RunnerTests/` (**Note**: These are in the example directory, not the main package directory, because they are run via the example app's project)
-  - macOS: **XCTest** - These should live in `example/macos/RunnerTests/` (**Note**: These are in the example directory, not the main package directory, because they are run via the example app's project)
+  - iOS: **XCTest** - These should live in `example/ios/RunnerTests/`, or `darwin/RunnerTests/` for a plugin with shared macOS source (These are in the example directory for single-platform projects because they are run via the example app's project)
+  - macOS: **XCTest** - These should live in `example/macos/RunnerTests/`, or `darwin/RunnerTests/` for a plugin with shared iOS source (These are in the example directory for single-platform projects because they are run via the example app's project)
   - Linux: **Google Test** - These should live in `linux/test/`, and be named `*_test.cc`.
   - Windows: **Google Test** - These should live in `windows/test/`, and be named `*_test.cpp`.
 - **Native UI tests**. Some plugins show native UI that the test must interact with (e.g., `image_picker`). For these normal integration tests won't work, as there is not way to drive the native UI from Dart. They are written as:
   - Android: **Espresso**, via the [`espresso` plugin](https://pub.dev/packages/espresso) - These should live in `example/android/app/src/androidTest/`
-  - iOS: **XCUITest** - These should live in `example/ios/RunnerUITests/`
-  - macOS: **XCUITest** - These should live in `example/macos/RunnerUITests/`
+  - iOS: **XCUITest** - These should live in `example/ios/RunnerUITests/`, or `darwin/RunnerUITests/` for a plugin with shared macOS source
+  - macOS: **XCUITest** - These should live in `example/macos/RunnerUITests/`, or `darwin/RunnerUITests/` for a plugin with shared iOS source
   - Windows and Linux: **TBD**, see [#70233 (Windows)](https://github.com/flutter/flutter/issues/70233) and [#70235 (Linux)](https://github.com/flutter/flutter/issues/70235)
 
 ## Running Tests
@@ -192,15 +192,16 @@ See below for instructions on bringing up test scaffolding in a plugin (*does no
         * `CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER` is currently incompatible with Flutter.
         * `IPHONEOS_DEPLOYMENT_TARGET` and `TARGETED_DEVICE_FAMILY` may cause issues running tests.
         * The compiler settings (`CLANG_*`, `GCC_*`, and `MTL_*`) shouldn't be needed.
-1. For XCTests, edit `example/ios/Podfile` (`example/macos/Podfile` for macOS) to add the following to the `target 'Runner' do` block:
+1. Use of OCMock in new tests, especially Swift tests, is discouraged in favor of protocol-based
+   programming and dependency injection. However, if your XCTests require OCMock, open the
+   Package Dependencies section of the project in Xcode, and add the following dependency to
+   the RunnnerTests target:
 
-    ```ruby
-    target 'RunnerTests' do
-      inherit! :search_paths
-      pod 'OCMock', '3.5'
-    end
-    ```
-    The `OCMock` line is only necessary if your tests use OCMock.
+   ```
+   https://github.com/erikdoe/ocmock
+   Commit fe1661a3efed11831a6452f4b1a0c5e6ddc08c3d
+   ```
+   OCMock must be set to Commit due to its use of unsafe build flags.
 1. A RunnerTests/RunnerUITests folder should be created and you can start hacking in the added `.m`/`.swift` file.
 
 #### Enabling Android UI tests
