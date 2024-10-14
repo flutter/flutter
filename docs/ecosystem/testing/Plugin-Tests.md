@@ -202,8 +202,6 @@ See below for instructions on bringing up test scaffolding in a plugin (*does no
    Commit fe1661a3efed11831a6452f4b1a0c5e6ddc08c3d
    ```
    OCMock must be set to Commit due to its use of unsafe build flags.
-
-   
 1. A RunnerTests/RunnerUITests folder should be created and you can start hacking in the added `.m`/`.swift` file.
 
 #### Enabling Android UI tests
