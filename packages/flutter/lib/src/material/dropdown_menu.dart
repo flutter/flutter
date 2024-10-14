@@ -674,6 +674,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     TextDirection textDirection, {
     int? focusedIndex,
     bool enableScrollToHighlight = true,
+    bool excludeSemantics = false,
   }) {
     final List<Widget> result = <Widget>[];
     for (int i = 0; i < filteredEntries.length; i++) {
@@ -743,28 +744,31 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         );
       }
 
-      final Widget menuItemButton = MenuItemButton(
-        key: enableScrollToHighlight ? buttonItemKeys[i] : null,
-        style: effectiveStyle,
-        leadingIcon: entry.leadingIcon,
-        trailingIcon: entry.trailingIcon,
-        closeOnActivate: widget.closeBehavior == DropdownMenuCloseBehavior.all,
-        onPressed: entry.enabled && widget.enabled
-          ? () {
-              _localTextEditingController?.value = TextEditingValue(
-                text: entry.label,
-                selection: TextSelection.collapsed(offset: entry.label.length),
-              );
-              currentHighlight = widget.enableSearch ? i : null;
-              widget.onSelected?.call(entry.value);
-              _enableFilter = false;
-              if (widget.closeBehavior == DropdownMenuCloseBehavior.self) {
-                _controller.close();
+      final Widget menuItemButton = ExcludeSemantics(
+        excluding: excludeSemantics,
+        child: MenuItemButton(
+          key: enableScrollToHighlight ? buttonItemKeys[i] : null,
+          style: effectiveStyle,
+          leadingIcon: entry.leadingIcon,
+          trailingIcon: entry.trailingIcon,
+          closeOnActivate: widget.closeBehavior == DropdownMenuCloseBehavior.all,
+          onPressed: entry.enabled && widget.enabled
+            ? () {
+                _localTextEditingController?.value = TextEditingValue(
+                  text: entry.label,
+                  selection: TextSelection.collapsed(offset: entry.label.length),
+                );
+                currentHighlight = widget.enableSearch ? i : null;
+                widget.onSelected?.call(entry.value);
+                _enableFilter = false;
+                if (widget.closeBehavior == DropdownMenuCloseBehavior.self) {
+                  _controller.close();
+                }
               }
-            }
-          : null,
-        requestFocusOnHover: false,
-        child: label,
+            : null,
+          requestFocusOnHover: false,
+          child: label,
+        ),
       );
       result.add(menuItemButton);
     }
@@ -828,7 +832,13 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
-    _initialMenu ??= _buildButtons(widget.dropdownMenuEntries, textDirection, enableScrollToHighlight: false);
+    _initialMenu ??= _buildButtons(
+      widget.dropdownMenuEntries,
+      textDirection,
+      enableScrollToHighlight: false,
+      // The _initialMenu is invisible, we should not add semantics nodes to it
+      excludeSemantics: true,
+    );
     final DropdownMenuThemeData theme = DropdownMenuTheme.of(context);
     final DropdownMenuThemeData defaults = _DropdownMenuDefaultsM3(context);
 
