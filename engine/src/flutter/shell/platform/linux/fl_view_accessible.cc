@@ -13,7 +13,7 @@ static constexpr int32_t kRootSemanticsNodeId = 0;
 struct _FlViewAccessible {
   AtkPlug parent_instance;
 
-  FlEngine* engine;
+  GWeakRef engine;
 
   // Semantics nodes keyed by ID
   GHashTable* semantics_nodes_by_id;
@@ -28,11 +28,16 @@ G_DEFINE_TYPE(FlViewAccessible, fl_view_accessible, ATK_TYPE_PLUG)
 
 static FlAccessibleNode* create_node(FlViewAccessible* self,
                                      FlutterSemanticsNode2* semantics) {
-  if (semantics->flags & kFlutterSemanticsFlagIsTextField) {
-    return fl_accessible_text_field_new(self->engine, semantics->id);
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
+    return nullptr;
   }
 
-  return fl_accessible_node_new(self->engine, semantics->id);
+  if (semantics->flags & kFlutterSemanticsFlagIsTextField) {
+    return fl_accessible_text_field_new(engine, semantics->id);
+  }
+
+  return fl_accessible_node_new(engine, semantics->id);
 }
 
 static FlAccessibleNode* lookup_node(FlViewAccessible* self, int32_t id) {
@@ -107,11 +112,7 @@ static void fl_view_accessible_dispose(GObject* object) {
 
   g_clear_pointer(&self->semantics_nodes_by_id, g_hash_table_unref);
 
-  if (self->engine != nullptr) {
-    g_object_remove_weak_pointer(object,
-                                 reinterpret_cast<gpointer*>(&self->engine));
-    self->engine = nullptr;
-  }
+  g_weak_ref_clear(&self->engine);
 
   G_OBJECT_CLASS(fl_view_accessible_parent_class)->dispose(object);
 }
@@ -133,9 +134,7 @@ static void fl_view_accessible_init(FlViewAccessible* self) {
 FlViewAccessible* fl_view_accessible_new(FlEngine* engine) {
   FlViewAccessible* self =
       FL_VIEW_ACCESSIBLE(g_object_new(fl_view_accessible_get_type(), nullptr));
-  self->engine = engine;
-  g_object_add_weak_pointer(G_OBJECT(self),
-                            reinterpret_cast<gpointer*>(&self->engine));
+  g_weak_ref_init(&self->engine, engine);
   return self;
 }
 
