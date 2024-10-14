@@ -17,7 +17,7 @@ struct _FlPluginRegistrarImpl {
   GObject parent_instance;
 
   // View that plugin is controlling.
-  FlView* view;
+  GWeakRef view;
 
   // Messenger to communicate on.
   FlBinaryMessenger* messenger;
@@ -44,11 +44,7 @@ static void fl_plugin_registrar_default_init(
 static void fl_plugin_registrar_impl_dispose(GObject* object) {
   FlPluginRegistrarImpl* self = FL_PLUGIN_REGISTRAR_IMPL(object);
 
-  if (self->view != nullptr) {
-    g_object_remove_weak_pointer(G_OBJECT(self->view),
-                                 reinterpret_cast<gpointer*>(&(self->view)));
-    self->view = nullptr;
-  }
+  g_weak_ref_clear(&self->view);
   g_clear_object(&self->messenger);
   g_clear_object(&self->texture_registrar);
 
@@ -72,7 +68,8 @@ static FlTextureRegistrar* get_texture_registrar(FlPluginRegistrar* registrar) {
 
 static FlView* get_view(FlPluginRegistrar* registrar) {
   FlPluginRegistrarImpl* self = FL_PLUGIN_REGISTRAR_IMPL(registrar);
-  return self->view;
+  g_autoptr(FlView) view = FL_VIEW(g_weak_ref_get(&self->view));
+  return view;
 }
 
 static void fl_plugin_registrar_impl_iface_init(
@@ -98,11 +95,7 @@ FlPluginRegistrar* fl_plugin_registrar_new(
   // Added to stop compiler complaining about an unused function.
   FL_IS_PLUGIN_REGISTRAR_IMPL(self);
 
-  self->view = view;
-  if (view != nullptr) {
-    g_object_add_weak_pointer(G_OBJECT(view),
-                              reinterpret_cast<gpointer*>(&(self->view)));
-  }
+  g_weak_ref_init(&self->view, view);
   self->messenger = FL_BINARY_MESSENGER(g_object_ref(messenger));
   self->texture_registrar =
       FL_TEXTURE_REGISTRAR(g_object_ref(texture_registrar));
