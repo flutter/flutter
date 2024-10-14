@@ -2417,7 +2417,6 @@ void main() {
   });
 
   testWidgets('Semantics does not include hint when input is not empty', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
     const String hintText = 'I am hintText';
     TestMenu? selectedValue;
     final TextEditingController controller = TextEditingController();
@@ -2426,7 +2425,6 @@ void main() {
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) => MaterialApp(
-          theme: themeData,
           home: Scaffold(
             body: Center(
               child: DropdownMenu<TestMenu>(
@@ -2462,25 +2460,18 @@ void main() {
 
 
   testWidgets('Semantics does not include initial menu buttons', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) => MaterialApp(
-          theme: themeData,
-          home: Scaffold(
-            body: Center(
-              child: DropdownMenu<TestMenu>(
-                requestFocusOnTap: true,
-                dropdownMenuEntries: menuChildren,
-                onSelected: (TestMenu? value) {
-                  setState(() {
-                  });
-                },
-                controller: controller,
-              ),
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              requestFocusOnTap: true,
+              dropdownMenuEntries: menuChildren,
+              onSelected: (TestMenu? value) {},
+              controller: controller,
             ),
           ),
         ),

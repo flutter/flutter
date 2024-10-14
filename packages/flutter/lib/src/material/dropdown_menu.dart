@@ -744,8 +744,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         );
       }
 
-      final Widget menuItemButton =
-      ExcludeSemantics(
+      final Widget menuItemButton = ExcludeSemantics(
         excluding: excludeSemantics,
         child: MenuItemButton(
           key: enableScrollToHighlight ? buttonItemKeys[i] : null,
