@@ -294,6 +294,7 @@ void main() {
       returnsNormally,
     );
 
+<<<<<<< HEAD
     expect(
       () => CupertinoDatePicker(
         mode: CupertinoDatePickerMode.time,
@@ -332,6 +333,46 @@ void main() {
       )),
     );
   });
+=======
+  expect(
+    () => CupertinoDatePicker(
+      mode: CupertinoDatePickerMode.time,
+      onDateTimeChanged: (_) {},
+      showDayOfWeek: true,
+    ),
+    throwsA(isA<AssertionError>().having(
+      (e) => e.message as AssertionError,
+      'message',
+      contains('showDayOfWeek is only supported in date mode'),
+    )),
+  );
+
+  expect(
+    () => CupertinoDatePicker(
+      mode: CupertinoDatePickerMode.monthYear,
+      onDateTimeChanged: (_) {},
+      showDayOfWeek: true,
+    ),
+    throwsA(isA<AssertionError>().having(
+      (e) => e.message as AssertionError,
+      'message',
+      contains('showDayOfWeek is only supported in date mode'),
+    )),
+  );
+
+  expect(
+    () => CupertinoDatePicker(
+      onDateTimeChanged: (_) {},
+      showDayOfWeek: true,
+    ),
+    throwsA(isA<AssertionError>().having(
+      (e) => e.message as AssertionError,
+      'message',
+      contains('showDayOfWeek is only supported in date mode'),
+    )),
+  );
+});
+>>>>>>> 34fe9a9ded56a7d8561dce51864220eb17482f5b
 
   testWidgets('picker honors minuteInterval and secondInterval',
       (WidgetTester tester) async {
