@@ -4,7 +4,8 @@
 
 import 'package:flutter/cupertino.dart';
 
-/// Flutter code sample for [CupertinoNavigationBar].
+/// Flutter code sample for [CupertinoNavigationBar] showing a
+/// [CupertinoSearchTextField] with padding at the bottom of the navigation bar.
 
 void main() => runApp(const NavBarApp());
 

@@ -1903,7 +1903,7 @@ void main() {
               child: Placeholder(),
             )
           ),
-          child: Container(), // Empty child
+          child: Container(),
         ),
       ),
     );
