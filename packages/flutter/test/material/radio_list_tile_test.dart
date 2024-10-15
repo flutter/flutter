@@ -1588,4 +1588,46 @@ void main() {
     final Offset offsetPlatform = tester.getTopLeft(platform);
     expect(offsetPlatform, const Offset(72.0, 16.0));
   });
+
+  testWidgets('RadioListTile renders with default scale', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: RadioListTile<bool>(
+          value: false,
+          groupValue: false,
+          onChanged: null,
+        ),
+      ),
+    ));
+
+    final Finder transformFinder = find.ancestor(
+      of: find.byType(Radio<bool>),
+      matching: find.byType(Transform),
+    );
+
+    expect(transformFinder, findsNothing);
+  });
+
+  testWidgets('RadioListTile respects radioScaleFactor', (WidgetTester tester) async {
+    const double scale = 1.4;
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: RadioListTile<bool>(
+          value: false,
+          groupValue: false,
+          onChanged: null,
+          radioScaleFactor: scale,
+        ),
+      ),
+    ));
+
+    final Transform widget = tester.widget(
+      find.ancestor(
+        of: find.byType(Radio<bool>),
+        matching: find.byType(Transform),
+      ),
+    );
+
+    expect(widget.transform.getMaxScaleOnAxis(), scale);
+  });
 }
