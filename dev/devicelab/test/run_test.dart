@@ -91,7 +91,7 @@ void main() {
         emitsThrough(contains('VM service still not ready. It is possible the target has failed')),
       );
       expect(process.kill(), isTrue);
-    });
+    }, timeout: const Timeout(Duration(seconds: 45))); // Standard 30 is flaky because this is a long running test, https://github.com/flutter/flutter/issues/156456
 
     test('exits with code 1 when results are mixed', () async {
       await expectScriptResult(
