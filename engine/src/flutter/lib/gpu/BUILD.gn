@@ -40,8 +40,6 @@ source_set("gpu") {
       "device_buffer.h",
       "export.cc",
       "export.h",
-      "fixtures.cc",
-      "fixtures.h",
       "formats.cc",
       "formats.h",
       "host_buffer.cc",
