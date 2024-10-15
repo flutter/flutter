@@ -43,10 +43,6 @@ enum Artifact {
   engineDartAotRuntime,
   /// The snapshot of frontend_server compiler.
   frontendServerSnapshotForEngineDartSdk,
-  /// The dart snapshot of the dart2js compiler.
-  dart2jsSnapshot,
-  /// The dart snapshot of the dart2wasm compiler.
-  dart2wasmSnapshot,
 
   /// The root of the Linux desktop sources.
   linuxDesktopPath,
@@ -212,10 +208,6 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'dart$exe';
     case Artifact.engineDartAotRuntime:
       return 'dartaotruntime$exe';
-    case Artifact.dart2jsSnapshot:
-      return 'dart2js.dart.snapshot';
-    case Artifact.dart2wasmSnapshot:
-      return 'dart2wasm_product.snapshot';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server_aot.dart.snapshot';
     case Artifact.linuxDesktopPath:
@@ -610,8 +602,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
-      case Artifact.dart2jsSnapshot:
-      case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterFramework:
@@ -662,8 +652,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
-      case Artifact.dart2jsSnapshot:
-      case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterFramework:
@@ -709,8 +697,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
-      case Artifact.dart2jsSnapshot:
-      case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterMacOSFramework:
@@ -773,8 +759,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
-      case Artifact.dart2jsSnapshot:
-      case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.icuData:
       case Artifact.isolateSnapshotData:
@@ -807,8 +791,6 @@ class CachedArtifacts implements Artifacts {
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
         // android_arm in profile mode because it is available on all supported host platforms.
         return _getAndroidArtifactPath(artifact, TargetPlatform.android_arm, BuildMode.profile);
-      case Artifact.dart2jsSnapshot:
-      case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(
           _dartSdkPath(_cache), 'bin', 'snapshots',
@@ -1276,8 +1258,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
         return _fileSystem.path.join(_getDartSdkPath(), 'bin', artifactFileName);
-      case Artifact.dart2jsSnapshot:
-      case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', artifactFileName);
       case Artifact.flutterToolsFileGenerators:
@@ -1410,8 +1390,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
           return _fileSystem.path.join(
             _getDartSdkPath(), 'bin',
             _artifactToFileName(artifact, _platform, mode));
-        case Artifact.dart2jsSnapshot:
-        case Artifact.dart2wasmSnapshot:
         case Artifact.frontendServerSnapshotForEngineDartSdk:
           return _fileSystem.path.join(
             _getDartSdkPath(), 'bin', 'snapshots',
