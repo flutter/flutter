@@ -55,8 +55,7 @@ void main() {
 
     // Verify the BottomAppBar is visible again by checking the AnimatedContainer's height.
     final Size visibleSize = tester.getSize(find.byType(AnimatedContainer));
-    expect(
-        visibleSize.height, equals(80.0)); // The expected height when visible
+    expect(visibleSize.height, equals(80.0));
   });
 
   testWidgets('SnackBar is shown when Open popup menu is pressed',
