@@ -11,6 +11,7 @@ import 'dart:math' as math;
 
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:collection/collection.dart';
 import 'package:file/file.dart' as fs;
 import 'package:file/local.dart';
 import 'package:meta/meta.dart';
@@ -561,7 +562,9 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   }
   // One-indexed.
   final int index = int.parse(match.group(1)!);
+  print('index = $index');
   final int total = int.parse(match.group(2)!);
+  print('total = $total');
   if (index > total) {
     foundError(<String>[
       '${red}Invalid subshard name "$subshardName". Index number must be greater or equal to total.',
@@ -569,11 +572,27 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
     return <T>[];
   }
 
-  final int testsPerShard = (tests.length / total).ceil();
-  final int start = (index - 1) * testsPerShard;
-  final int end = math.min(index * testsPerShard, tests.length);
+  // While there exists a closed formula figuring out the range of tests this
+  // shard is resposible for, doing this via simulation is easier to follow.
+  //
+  // A bucket represents how many tests a shard should be allocated.
+  final List<int> buckets = List<int>.filled(total, 0);
+  // First, allocate an even amount of items to each bucket.
+  for (int i = 0; i < buckets.length; i++) {
+    buckets[i] = (tests.length / total).floor();
+  }
+  // Then, distribute the remaining items.
+  final int remainingItems = tests.length % buckets.length;
+  for (int i = 0; i < remainingItems; i++) {
+    buckets[i] += 1;
+  }
 
-  print('Selecting subshard $index of $total (tests ${start + 1}-$end of ${tests.length})');
+  final int numberOfItemsInPreviousBuckets = index == 0 ? 0 : buckets.sublist(0, index - 1).sum;
+  final int start = (numberOfItemsInPreviousBuckets + 1) - 1;
+  final int end = (start + buckets[index - 1]) - 1;
+
+  print(
+      'Selecting subshard $index of $total (tests ${start + 1}-$end of ${tests.length})');
   return tests.sublist(start, end);
 }
 
