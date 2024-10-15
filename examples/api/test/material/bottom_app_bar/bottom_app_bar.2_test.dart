@@ -63,8 +63,9 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(const example.BottomAppBarDemo());
 
+    // Trigger the SnackBar.
     await tester.tap(find.byTooltip('Open popup menu'));
-    await tester.pump(); // Trigger the SnackBar
+    await tester.pump();
 
     expect(find.text('Yay! A SnackBar!'), findsOneWidget);
 
