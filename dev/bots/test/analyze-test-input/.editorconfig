@@ -3,5 +3,5 @@
 ij_kotlin_allow_trailing_comma = false
 ij_kotlin_allow_trailing_comma_on_call_site = false
 
-[dev/integration_tests/pure_android_host_apps/**/*]
+[**/pure_android_host_apps/**/*]
 ktlint = disabled
