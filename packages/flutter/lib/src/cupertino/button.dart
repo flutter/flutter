@@ -17,25 +17,60 @@ import 'theme.dart';
 // Measured against iOS (17) [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
 
 /// The size of a [CupertinoButton].
+///
 /// Based on the iOS (17) [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
+///
+/// See also:
+///
+///  * [kCupertinoButtonMinSize], which configures the minimum dimensions of the
+///    button.
 enum CupertinoButtonSize {
-  /// Displays a smaller button with round sides and smaller text (uses [CupertinoTextThemeData.actionSmallTextStyle]).
+  /// Displays the smallest button configuration with rounded sides and smaller
+  /// text using [CupertinoTextThemeData.actionSmallTextStyle].
+  ///
+  /// The minimum width and height of the button will be 28.0 pixels.
   small,
+
   /// Displays a medium sized button with round sides and regular-sized text.
+  ///
+  /// The minimum width and height of the button will be 32.0 pixels.
   medium,
-  /// Displays a (classic) large button with rounded edges and regular-sized text.
+
+  /// Displays a large button with rounded edges and regular-sized text.
+  ///
+  /// This is the default size for [CupertinoButton]s, with a minimum width and
+  /// height of 44.0 pixels.
   large,
+
+  /// Displays a large button with rounded edges and regular-sized text.
+  ///
+  /// The button's width will expand to fill the available space, while
+  /// maintaining  minimum height of 44.0 pixels, in line with the default
+  /// large (default) style button.
+  expanded,
 }
 
-/// The style of a [CupertinoButton] that changes the style of the button's background.
+/// The configuration of a [CupertinoButton] that sets the style of the button's
+/// background.
 ///
 /// Based on the iOS Human Interface Guidelines (https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
 enum _CupertinoButtonStyle {
-  /// No background or border, primary foreground color.
+  /// Styles the button with no background or border, and primary foreground
+  /// color for text.
+  ///
+  /// The default configuration of [CupertinoButton].
   plain,
-  /// Translucent background, primary foreground color.
+
+  /// Styles the button with a translucent background, and primary foreground
+  /// color for text.
+  ///
+  /// Configured by [CupertinoButton.tinted].
   tinted,
-  /// Solid background, contrasting foreground color.
+
+  /// Styles the button with a solid background, with the contrasting foreground
+  /// color for text.
+  ///
+  /// Configured by [CupertinoButton.filled].
   filled,
 }
 
@@ -383,6 +418,12 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         : kCupertinoButtonDefaultIconSize,
     );
 
+    final double minWidth = widget.minSize ?? kCupertinoButtonMinSize[widget.sizeStyle]!;
+    final double minHeight = widget.minSize ?? switch(widget.sizeStyle) {
+      CupertinoButtonSize.expanded || CupertinoButtonSize.large => kCupertinoButtonMinSize[CupertinoButtonSize.large]!,
+      _ => kCupertinoButtonMinSize[widget.sizeStyle]!
+    };
+
     return MouseRegion(
       cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: FocusableActionDetector(
@@ -403,8 +444,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             button: true,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minWidth: widget.minSize ?? kCupertinoButtonMinSize[widget.sizeStyle] ?? kMinInteractiveDimensionCupertino,
-                minHeight: widget.minSize ?? kCupertinoButtonMinSize[widget.sizeStyle] ?? kMinInteractiveDimensionCupertino,
+                minWidth: minWidth,
+                minHeight: minHeight,
               ),
               child: FadeTransition(
                 opacity: _opacityAnimation,

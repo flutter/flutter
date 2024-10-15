@@ -272,11 +272,40 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.padding,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
-  }) : assert(
+  }) : largeTitle = null,
+       assert(
          !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
          'Cannot specify a heroTag override if this navigation bar does not '
          'transition due to transitionBetweenRoutes = false.',
        );
+
+  ///
+  const CupertinoNavigationBar.large({
+    super.key,
+    this.largeTitle,
+    this.leading,
+    this.automaticallyImplyLeading = true,
+    bool automaticallyImplyTitle = true,
+    this.previousPageTitle,
+    this.trailing,
+    this.border = _kDefaultNavBarBorder,
+    this.backgroundColor,
+    this.automaticBackgroundVisibility = true,
+    this.enableBackgroundFilterBlur = true,
+    this.brightness,
+    this.padding,
+    this.transitionBetweenRoutes = true,
+    this.heroTag = _defaultHeroTag,
+  }) : middle = null,
+       automaticallyImplyMiddle = automaticallyImplyTitle,
+       assert(
+         !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
+         'Cannot specify a heroTag override if this navigation bar does not '
+         'transition due to transitionBetweenRoutes = false.',
+       );
+
+  ///
+  final Widget? largeTitle;
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.leading}
   /// Widget to place at the start of the navigation bar. Normally a back button
@@ -534,19 +563,28 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor =
-      CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor;
+    assert(widget.middle == null || widget.largeTitle == null);
+
+    final Color backgroundColor = CupertinoDynamicColor.maybeResolve(
+      widget.backgroundColor,
+      context,
+    ) ?? CupertinoTheme.of(context).barBackgroundColor;
 
     final Color? parentPageScaffoldBackgroundColor = CupertinoPageScaffoldBackgroundColor.maybeOf(context);
 
     final Border? initialBorder = widget.automaticBackgroundVisibility && parentPageScaffoldBackgroundColor != null
       ? _kTransparentNavBarBorder
       : widget.border;
-    final Border? effectiveBorder = widget.border == null ? null : Border.lerp(initialBorder, widget.border, _scrollAnimationValue,);
+    final Border? effectiveBorder = widget.border == null
+      ? null
+      : Border.lerp(initialBorder, widget.border, _scrollAnimationValue,);
 
     final Color effectiveBackgroundColor = widget.automaticBackgroundVisibility && parentPageScaffoldBackgroundColor != null
       ? Color.lerp(parentPageScaffoldBackgroundColor, backgroundColor, _scrollAnimationValue) ?? backgroundColor
       : backgroundColor;
+
+    final double persistentHeight = _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top;
+    final double maxHeight = persistentHeight + _kNavBarLargeTitleHeightExtension;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
@@ -558,21 +596,72 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       userMiddle: widget.middle,
       userTrailing: widget.trailing,
       padding: widget.padding,
-      userLargeTitle: null,
-      large: false,
+      userLargeTitle: widget.largeTitle,
+      large: widget.largeTitle != null,
     );
 
-    final Widget navBar = _wrapWithBackground(
+    Widget navBar = _PersistentNavigationBar(
+      components: components,
+      padding: widget.padding,
+      middleVisible: widget.middle != null,
+    );
+
+    if (widget.largeTitle != null) {
+      navBar = ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        child: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          Positioned(
+            top: persistentHeight,
+            left: 0.0,
+            right: 0.0,
+            bottom: 0.0,
+            child: ClipRect(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  start: _kNavBarEdgePadding,
+                  bottom: _kNavBarBottomPadding
+                ),
+                child: SafeArea(
+                  top: false,
+                  bottom: false,
+                  child: Semantics(
+                    header: true,
+                    child: DefaultTextStyle(
+                      style: CupertinoTheme.of(context)
+                          .textTheme
+                          .navLargeTitleTextStyle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      child: _LargeTitle(
+                        child: components.largeTitle,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0.0,
+            right: 0.0,
+            top: 0.0,
+            child: navBar,
+          ),
+        ],
+      ),
+      );
+    }
+
+    navBar = _wrapWithBackground(
       border: effectiveBorder,
       backgroundColor: effectiveBackgroundColor,
       brightness: widget.brightness,
       enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
-        child: _PersistentNavigationBar(
-          components: components,
-          padding: widget.padding,
-        ),
+        child: navBar,
       ),
     );
 
@@ -597,10 +686,10 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
             backgroundColor: effectiveBackgroundColor,
             backButtonTextStyle: CupertinoTheme.of(context).textTheme.navActionTextStyle,
             titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-            largeTitleTextStyle: null,
+            largeTitleTextStyle: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
             border: effectiveBorder,
             hasUserMiddle: widget.middle != null,
-            largeExpanded: false,
+            largeExpanded: widget.largeTitle != null,
             child: navBar,
           ),
         );
