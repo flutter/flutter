@@ -37,9 +37,22 @@ class WindowsVersionValidator extends DoctorValidator {
   final ProcessLister _processLister;
 
   Future<ValidationResult> _topazScan() async {
+      if (!_processLister.canRunPowershell()) {
+        return const ValidationResult(
+          ValidationType.missing,
+          <ValidationMessage>[
+            ValidationMessage.hint('Failed to find ${ProcessLister.powershell} or ${ProcessLister.pwsh} on PATH'),
+          ],
+        );
+      }
       final ProcessResult getProcessesResult = await _processLister.getProcessesWithPath();
       if (getProcessesResult.exitCode != 0) {
-        return const ValidationResult(ValidationType.missing, <ValidationMessage>[ValidationMessage.hint('Get-Process failed to complete')]);
+        return const ValidationResult(
+          ValidationType.missing,
+          <ValidationMessage>[
+            ValidationMessage.hint('Get-Process failed to complete'),
+          ],
+        );
       }
       final RegExp topazRegex = RegExp(kCoreProcessPattern, caseSensitive: false,  multiLine: true);
       final String processes = getProcessesResult.stdout as String;
@@ -106,8 +119,22 @@ class ProcessLister {
 
   final ProcessManager processManager;
 
+  static const String powershell = 'powershell';
+  static const String pwsh = 'pwsh';
+
+  bool canRunPowershell() {
+    return processManager.canRun(powershell) || processManager.canRun(pwsh);
+  }
+
   Future<ProcessResult> getProcessesWithPath() async {
     const String argument = 'Get-Process | Format-List Path';
-    return processManager.run(<String>['powershell', '-command', argument]);
+    const List<String> psArgs = <String>['-command', argument];
+    if (processManager.canRun(powershell)) {
+      return processManager.run(<String>[powershell, ...psArgs]);
+    }
+    if (processManager.canRun(pwsh)) {
+      return processManager.run(<String>[pwsh, ...psArgs]);
+    }
+    throw StateError('Failed to find $powershell or $pwsh on PATH');
   }
 }
