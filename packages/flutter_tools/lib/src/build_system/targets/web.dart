@@ -96,8 +96,6 @@ class WebEntrypointTarget extends Target {
 abstract class Dart2WebTarget extends Target {
   const Dart2WebTarget();
 
-  Source get compilerSnapshot;
-
   WebCompilerConfig get compilerConfig;
 
   Map<String, Object?> get buildConfig;
@@ -126,7 +124,6 @@ abstract class Dart2WebTarget extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.hostArtifact(HostArtifact.flutterWebSdk),
-    compilerSnapshot,
     const Source.artifact(Artifact.engineDartBinary),
     const Source.pattern('{BUILD_DIR}/main.dart'),
     const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
@@ -358,9 +355,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
       compilationArgs,
     );
   }
-
-  @override
-  Source get compilerSnapshot => const Source.artifact(Artifact.dart2wasmSnapshot);
 
   @override
   String get name => 'dart2wasm';
