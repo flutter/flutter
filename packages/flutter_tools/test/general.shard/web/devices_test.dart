@@ -489,6 +489,4 @@ class _OnceClosableChromium extends Fake implements Chromium {
   }
 }
 
-class _UnimplementedChromium extends Fake implements Chromium {
-
-}
+class _UnimplementedChromium extends Fake implements Chromium { }
