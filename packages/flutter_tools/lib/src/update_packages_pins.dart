@@ -22,6 +22,7 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
+  'google_mobile_ads': '5.1.0', // https://github.com/flutter/flutter/issues/156912
   'native_assets_builder': '0.8.3', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'native_assets_cli': '0.8.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'material_color_utilities': '0.11.1', // Keep pinned to latest until 1.0.0.
