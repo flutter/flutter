@@ -7,9 +7,7 @@
 #include <optional>
 #include <utility>
 
-#include "common/graphics/texture.h"
 #include "flutter/assets/asset_manager.h"
-#include "flutter/lib/gpu/fixtures.h"
 #include "flutter/lib/gpu/shader.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
@@ -17,7 +15,6 @@
 #include "fml/memory/ref_ptr.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/shader_types.h"
-#include "impeller/renderer/vertex_descriptor.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
 #include "lib/gpu/context.h"
 
