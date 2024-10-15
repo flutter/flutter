@@ -11,7 +11,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import '../scheduler/binding.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -251,8 +250,9 @@ class FormState extends State<Form> {
 
   void _register(FormFieldState<dynamic> field) {
     _fields.add(field);
-    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
-      field._focusNode.addListener(() => _updateField(field));
+    field._focusNode.addListener(() => _updateField(field));
+    if (widget.autovalidateMode == AutovalidateMode.always && field.widget.enabled){
+      field.validate();
     }
   }
 
@@ -587,8 +587,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// false when [reset] is called.
   bool get hasInteractedByUser => _hasInteractedByUser.value;
 
-  bool _buildScheduled = false;
-
   /// True if the current value is valid.
   ///
   /// This will not set [errorText] or [hasError] and it will not update
@@ -701,20 +699,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.always) {
-      if (!_buildScheduled) {
-        _buildScheduled = true;
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          _buildScheduled = false;
-          validate();
-        });
-      }
-    }
-  }
-
-  @override
   void dispose() {
     _errorText.dispose();
     _focusNode.dispose();
@@ -779,4 +763,9 @@ enum AutovalidateMode {
   /// In order to validate all fields of a [Form] after the first time the user interacts
   /// with one, use [always] instead.
   onUnfocus,
+
+  // bool get always => this == AutovalidateMode.always;
+  // bool get onUserInteraction => this == AutovalidateMode.onUserInteraction;
+  // bool get onUnfocus => this == AutovalidateMode.onUnfocus;
+  // bool get disabled => this == AutovalidateMode.disabled;
 }
