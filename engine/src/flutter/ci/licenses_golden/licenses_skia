@@ -1,4 +1,4 @@
-Signature: 3e1b5597b1f4e06824674530f4895254
+Signature: bebcb653e2a01aef3585b1a5650d03d7
 
 ====================================================================================================
 LIBRARY: etc1
@@ -399,8 +399,6 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
-FILE: ../../../flutter/third_party/skia/relnotes/backdrop-tilemode.md
-FILE: ../../../flutter/third_party/skia/relnotes/mipmap-sharpening.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
