@@ -19,7 +19,7 @@ void main() {
 
   testWidgets('BottomAppBar elevation can be toggled',
       (WidgetTester tester) async {
-    // Build the app
+    // Build the app.
     await tester.pumpWidget(const example.BottomAppBarDemo());
 
     // Verify the BottomAppBar has elevation initiallly
