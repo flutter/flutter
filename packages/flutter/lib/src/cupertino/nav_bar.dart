@@ -27,7 +27,7 @@ enum NavigationBarBottomMode {
   /// Enable hiding the bottom in response to scrolling.
   ///
   /// As scrolling starts, the large title stays pinned while the bottom resizes
-  /// until it is completely flattened. Then, the large title scrolls under the
+  /// until it is completely consumed. Then, the large title scrolls under the
   /// persistent navigation bar.
   automatic,
 
@@ -868,9 +868,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
   final PreferredSizeWidget? bottom;
 
-  /// Modes that determine when to display the navigation bar's [bottom].
+  /// Modes that determine how to display the navigation bar's [bottom] and scrolling behavior.
   ///
-  /// Defaults to [NavigationBarBottomMode.automatic] if a [bottom] is provided.
+  /// Defaults to [NavigationBarBottomMode.automatic] if this is null and a [bottom] is provided.
   final NavigationBarBottomMode? bottomMode;
 
   /// True if the navigation bar's background color has no transparency.
