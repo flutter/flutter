@@ -80,7 +80,12 @@ class RenderPassVK final : public RenderPass {
   void SetInstanceCount(size_t count) override;
 
   // |RenderPass|
-  bool SetVertexBuffer(VertexBuffer buffer) override;
+  bool SetVertexBuffer(BufferView vertex_buffers[],
+                       size_t vertex_buffer_count,
+                       size_t vertex_count) override;
+
+  // |RenderPass|
+  bool SetIndexBuffer(BufferView index_buffer, IndexType index_type) override;
 
   // |RenderPass|
   fml::Status Draw() override;

@@ -183,23 +183,45 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
   desc->SetCullMode(CullMode::kBackFace);
   desc->SetWindingOrder(WindingOrder::kCounterClockwise);
   desc->SetSampleCount(SampleCount::kCount4);
-  desc->SetStencilAttachmentDescriptors(std::nullopt);
+  desc->ClearStencilAttachments();
+
+  // Setup the vertex layout to take two bindings. The first for positions and
+  // the second for colors.
+  auto vertex_desc = std::make_shared<VertexDescriptor>();
+  ShaderStageIOSlot position_slot = VS::kInputPosition;
+  ShaderStageIOSlot color_slot = VS::kInputColor;
+  position_slot.binding = 0;
+  position_slot.offset = 0;
+  color_slot.binding = 1;
+  color_slot.offset = 0;
+  const std::vector<ShaderStageIOSlot> io_slots = {position_slot, color_slot};
+  const std::vector<ShaderStageBufferLayout> layouts = {
+      ShaderStageBufferLayout{.stride = 12u, .binding = 0},
+      ShaderStageBufferLayout{.stride = 16u, .binding = 1}};
+  vertex_desc->RegisterDescriptorSetLayouts(VS::kDescriptorSetLayouts);
+  vertex_desc->RegisterDescriptorSetLayouts(FS::kDescriptorSetLayouts);
+  vertex_desc->SetStageInputs(io_slots, layouts);
+  desc->SetVertexDescriptor(std::move(vertex_desc));
   auto pipeline =
       context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
   ASSERT_TRUE(pipeline);
 
   struct Cube {
-    VS::PerVertexData vertices[8] = {
+    Vector3 positions[8] = {
         // -Z
-        {{-1, -1, -1}, Color::Red()},
-        {{1, -1, -1}, Color::Yellow()},
-        {{1, 1, -1}, Color::Green()},
-        {{-1, 1, -1}, Color::Blue()},
+        {-1, -1, -1},
+        {1, -1, -1},
+        {1, 1, -1},
+        {-1, 1, -1},
         // +Z
-        {{-1, -1, 1}, Color::Green()},
-        {{1, -1, 1}, Color::Blue()},
-        {{1, 1, 1}, Color::Red()},
-        {{-1, 1, 1}, Color::Yellow()},
+        {-1, -1, 1},
+        {1, -1, 1},
+        {1, 1, 1},
+        {-1, 1, 1},
+    };
+    Color colors[8] = {
+        Color::Red(),   Color::Yellow(), Color::Green(), Color::Blue(),
+        Color::Green(), Color::Blue(),   Color::Red(),   Color::Yellow(),
     };
     uint16_t indices[36] = {
         1, 5, 2, 2, 5, 6,  // +X
@@ -211,19 +233,8 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
     };
   } cube;
 
-  VertexBuffer vertex_buffer;
-  {
-    auto device_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
-        reinterpret_cast<uint8_t*>(&cube), sizeof(cube));
-    vertex_buffer.vertex_buffer = {
-        .buffer = device_buffer,
-        .range = Range(offsetof(Cube, vertices), sizeof(Cube::vertices))};
-    vertex_buffer.index_buffer = {
-        .buffer = device_buffer,
-        .range = Range(offsetof(Cube, indices), sizeof(Cube::indices))};
-    vertex_buffer.vertex_count = 36;
-    vertex_buffer.index_type = IndexType::k16bit;
-  }
+  auto device_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+      reinterpret_cast<uint8_t*>(&cube), sizeof(cube));
 
   const std::unique_ptr<const Sampler>& sampler =
       context->GetSamplerLibrary()->GetSampler({});
@@ -242,7 +253,21 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
 
     pass.SetCommandLabel("Perspective Cube");
     pass.SetPipeline(pipeline);
-    pass.SetVertexBuffer(vertex_buffer);
+
+    std::array<BufferView, 2> vertex_buffers = {
+        BufferView{
+            .buffer = device_buffer,
+            .range = Range(offsetof(Cube, positions), sizeof(Cube::positions))},
+        BufferView{
+            .buffer = device_buffer,
+            .range = Range(offsetof(Cube, colors), sizeof(Cube::colors))},
+    };
+
+    BufferView index_buffer = {
+        .buffer = device_buffer,
+        .range = Range(offsetof(Cube, indices), sizeof(Cube::indices))};
+    pass.SetVertexBuffer(vertex_buffers.data(), vertex_buffers.size(), 36);
+    pass.SetIndexBuffer(index_buffer, IndexType::k16bit);
 
     VS::UniformBuffer uniforms;
     Scalar time = GetSecondsElapsed();

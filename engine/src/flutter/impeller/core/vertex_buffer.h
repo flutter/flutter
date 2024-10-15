@@ -10,6 +10,8 @@
 
 namespace impeller {
 
+constexpr size_t kMaxVertexBuffers = 16;
+
 struct VertexBuffer {
   BufferView vertex_buffer;
 

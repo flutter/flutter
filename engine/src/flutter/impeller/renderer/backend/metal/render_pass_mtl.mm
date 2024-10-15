@@ -289,22 +289,38 @@ void RenderPassMTL::SetInstanceCount(size_t count) {
 }
 
 // |RenderPass|
-bool RenderPassMTL::SetVertexBuffer(VertexBuffer buffer) {
-  if (buffer.index_type == IndexType::kUnknown) {
+bool RenderPassMTL::SetVertexBuffer(BufferView vertex_buffers[],
+                                    size_t vertex_buffer_count,
+                                    size_t vertex_count) {
+  if (!ValidateVertexBuffers(vertex_buffers, vertex_buffer_count)) {
     return false;
   }
 
-  if (!Bind(pass_bindings_, ShaderStage::kVertex,
-            VertexDescriptor::kReservedVertexBufferIndex,
-            buffer.vertex_buffer)) {
+  for (size_t i = 0; i < vertex_buffer_count; i++) {
+    if (!Bind(pass_bindings_, ShaderStage::kVertex,
+              VertexDescriptor::kReservedVertexBufferIndex - i,
+              vertex_buffers[i])) {
+      return false;
+    }
+  }
+
+  vertex_count_ = vertex_count;
+
+  return true;
+}
+
+// |RenderPass|
+bool RenderPassMTL::SetIndexBuffer(BufferView index_buffer,
+                                   IndexType index_type) {
+  if (!ValidateIndexBuffer(index_buffer, index_type)) {
     return false;
   }
 
-  vertex_count_ = buffer.vertex_count;
-  if (buffer.index_type != IndexType::kNone) {
-    index_type_ = ToMTLIndexType(buffer.index_type);
-    index_buffer_ = std::move(buffer.index_buffer);
+  if (index_type != IndexType::kNone) {
+    index_type_ = ToMTLIndexType(index_type);
+    index_buffer_ = std::move(index_buffer);
   }
+
   return true;
 }
 

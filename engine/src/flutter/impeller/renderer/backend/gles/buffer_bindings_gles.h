@@ -33,6 +33,7 @@ class BufferBindingsGLES {
   bool ReadUniformsBindings(const ProcTableGLES& gl, GLuint program);
 
   bool BindVertexAttributes(const ProcTableGLES& gl,
+                            size_t binding,
                             size_t vertex_offset) const;
 
   bool BindUniformData(const ProcTableGLES& gl,
@@ -54,7 +55,7 @@ class BufferBindingsGLES {
     GLsizei stride = 0u;
     GLsizei offset = 0u;
   };
-  std::vector<VertexAttribPointer> vertex_attrib_arrays_;
+  std::vector<std::vector<VertexAttribPointer>> vertex_attrib_arrays_;
 
   std::unordered_map<std::string, GLint> uniform_locations_;
 
