@@ -238,7 +238,6 @@ Future<void> frameworkTestsRunner() async {
     await runDartTest(
       path.join(flutterRoot, 'dev', 'devicelab'),
       ensurePrecompiledTool: false,  // See https://github.com/flutter/flutter/issues/86209
-      perTestTimeout: Duration(seconds: 45) // Standard 30 is flaky because of a long running test, https://github.com/flutter/flutter/issues/156456
     );
     await runDartTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
     // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/issues/113782 has landed.
