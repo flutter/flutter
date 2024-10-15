@@ -1495,12 +1495,14 @@ class EditableText extends StatefulWidget {
   /// Called for each tap that occurs outside of the[TextFieldTapRegion] group
   /// when the text field is focused.
   ///
-  /// If this is null, [FocusNode.unfocus] will be called on the [focusNode] for
-  /// this text field when a [PointerDownEvent] is received on another part of
-  /// the UI. However, it will not unfocus as a result of mobile application
-  /// touch events (which does not include mouse clicks), to conform with the
-  /// platform conventions. To change this behavior, a callback may be set here
-  /// that operates differently from the default.
+  /// If this is null, [EditableTextTapOutsideIntent] will be invoked. In the
+  /// default implementation, [FocusNode.unfocus] will be called on the
+  /// [focusNode] for this text field when a [PointerDownEvent] is received on
+  /// another part of the UI. However, it will not unfocus as a result of mobile
+  /// application touch events (which does not include mouse clicks), to conform
+  /// with the platform conventions. To change this behavior, a callback may be
+  /// set here or [EditableTextTapOutsideIntent] may be overwritten, that
+  /// operates differently from the default.
   ///
   /// When adding additional controls to a text field (for example, a spinner, a
   /// button that copies the selected text, or modifies formatting), it is
@@ -1529,6 +1531,8 @@ class EditableText extends StatefulWidget {
   /// See also:
   ///
   ///  * [TapRegion] for how the region group is determined.
+  ///  * [EditableTextTapOutsideIntent] for the intent that is invoked if
+  ///  this is null.
   final TapRegionCallback? onTapOutside;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
