@@ -9,14 +9,14 @@ import 'package:flutter_api_samples/material/material_state/material_state_prope
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Finder findForegroundColor(Color color) {
-    return find.byWidgetPredicate((Widget widget) {
-      if (widget is! Material) {
-        return false;
-      }
-      final TextStyle? textStyle = widget.textStyle;
-      return textStyle?.color == color;
-    });
+  Color getButtonForegroundColor(WidgetTester tester) {
+    final Material widget = tester.widget(
+      find.descendant(
+        of: find.byType(example.MaterialStatePropertyExample),
+        matching:find.widgetWithText(Material, 'TextButton'),
+      ),
+    );
+    return widget.textStyle!.color!;
   }
 
   testWidgets(
@@ -26,12 +26,12 @@ void main() {
         const example.MaterialStatePropertyExampleApp(),
       );
 
-      expect(findForegroundColor(Colors.red), findsOne);
+      expect(getButtonForegroundColor(tester), Colors.red);
     },
   );
 
   testWidgets(
-    'The foreground color of the TextButton should blue when hovered',
+    'The foreground color of the TextButton should be blue when hovered',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const example.MaterialStatePropertyExampleApp(),
@@ -41,7 +41,7 @@ void main() {
       await gesture.addPointer(location: tester.getCenter(find.byType(TextButton)));
       await tester.pump();
 
-      expect(findForegroundColor(Colors.blue), findsOne);
+      expect(getButtonForegroundColor(tester), Colors.blue);
     },
   );
 }
