@@ -256,12 +256,8 @@ bool TextContents::Render(const ContentContext& renderer,
         }
       });
 
-  pass.SetVertexBuffer({
-      .vertex_buffer = std::move(buffer_view),
-      .index_buffer = {},
-      .vertex_count = vertex_count,
-      .index_type = IndexType::kNone,
-  });
+  pass.SetVertexBuffer(std::move(buffer_view), vertex_count);
+  pass.SetIndexBuffer({}, IndexType::kNone);
 
   return pass.Draw().ok();
 }

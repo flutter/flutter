@@ -141,6 +141,37 @@ struct RenderPassData {
   std::string label;
 };
 
+static bool BindVertexBuffer(const ProcTableGLES& gl,
+                             BufferBindingsGLES* vertex_desc_gles,
+                             const BufferView& vertex_buffer_view,
+                             size_t buffer_index) {
+  if (!vertex_buffer_view) {
+    return false;
+  }
+
+  auto vertex_buffer = vertex_buffer_view.buffer;
+
+  if (!vertex_buffer) {
+    return false;
+  }
+
+  const auto& vertex_buffer_gles = DeviceBufferGLES::Cast(*vertex_buffer);
+  if (!vertex_buffer_gles.BindAndUploadDataIfNecessary(
+          DeviceBufferGLES::BindingType::kArrayBuffer)) {
+    return false;
+  }
+
+  //--------------------------------------------------------------------------
+  /// Bind the vertex attributes associated with vertex buffer.
+  ///
+  if (!vertex_desc_gles->BindVertexAttributes(
+          gl, buffer_index, vertex_buffer_view.range.offset)) {
+    return false;
+  }
+
+  return true;
+}
+
 [[nodiscard]] bool EncodeCommandsInReactor(
     const RenderPassData& pass_data,
     const std::shared_ptr<Allocator>& transients_allocator,
@@ -370,45 +401,30 @@ struct RenderPassData {
         break;
     }
 
-    if (command.vertex_buffer.index_type == IndexType::kUnknown) {
-      return false;
-    }
-
     auto vertex_desc_gles = pipeline.GetBufferBindings();
 
+    if (command.index_type == IndexType::kUnknown) {
+      return false;
+    }
+
     //--------------------------------------------------------------------------
-    /// Bind vertex and index buffers.
+    /// Bind vertex buffers.
     ///
-    auto& vertex_buffer_view = command.vertex_buffer.vertex_buffer;
-
-    if (!vertex_buffer_view) {
-      return false;
-    }
-
-    auto vertex_buffer = vertex_buffer_view.buffer;
-
-    if (!vertex_buffer) {
-      return false;
-    }
-
-    const auto& vertex_buffer_gles = DeviceBufferGLES::Cast(*vertex_buffer);
-    if (!vertex_buffer_gles.BindAndUploadDataIfNecessary(
-            DeviceBufferGLES::BindingType::kArrayBuffer)) {
-      return false;
+    /// Note: There is no need to run `RenderPass::ValidateVertexBuffers` or
+    ///       `RenderPass::ValidateIndexBuffer` here, as validation already runs
+    ///       when the vertex/index buffers are set on the command.
+    ///
+    for (size_t i = 0; i < command.vertex_buffer_count; i++) {
+      if (!BindVertexBuffer(gl, vertex_desc_gles, command.vertex_buffers[i],
+                            i)) {
+        return false;
+      }
     }
 
     //--------------------------------------------------------------------------
     /// Bind the pipeline program.
     ///
     if (!pipeline.BindProgram()) {
-      return false;
-    }
-
-    //--------------------------------------------------------------------------
-    /// Bind vertex attribs.
-    ///
-    if (!vertex_desc_gles->BindVertexAttributes(
-            gl, vertex_buffer_view.range.offset)) {
       return false;
     }
 
@@ -438,21 +454,20 @@ struct RenderPassData {
     //--------------------------------------------------------------------------
     /// Finally! Invoke the draw call.
     ///
-    if (command.vertex_buffer.index_type == IndexType::kNone) {
-      gl.DrawArrays(mode, command.base_vertex,
-                    command.vertex_buffer.vertex_count);
+    if (command.index_type == IndexType::kNone) {
+      gl.DrawArrays(mode, command.base_vertex, command.vertex_count);
     } else {
       // Bind the index buffer if necessary.
-      auto index_buffer_view = command.vertex_buffer.index_buffer;
+      auto index_buffer_view = command.index_buffer;
       auto index_buffer = index_buffer_view.buffer;
       const auto& index_buffer_gles = DeviceBufferGLES::Cast(*index_buffer);
       if (!index_buffer_gles.BindAndUploadDataIfNecessary(
               DeviceBufferGLES::BindingType::kElementArrayBuffer)) {
         return false;
       }
-      gl.DrawElements(mode,                                           // mode
-                      command.vertex_buffer.vertex_count,             // count
-                      ToIndexType(command.vertex_buffer.index_type),  // type
+      gl.DrawElements(mode,                             // mode
+                      command.vertex_count,             // count
+                      ToIndexType(command.index_type),  // type
                       reinterpret_cast<const GLvoid*>(static_cast<GLsizei>(
                           index_buffer_view.range.offset))  // indices
       );
