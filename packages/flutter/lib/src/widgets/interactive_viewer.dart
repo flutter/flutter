@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter/widgets.dart';
-/// @docImport 'editable_text.dart';
-/// @docImport 'scroll_view.dart';
-/// @docImport 'table.dart';
 library;
 
 import 'dart:math' as math;
@@ -150,12 +147,17 @@ class InteractiveViewer extends StatefulWidget {
        constrained = false,
        child = null;
 
-  /// When laying out the child, InteractiveViewer applies a transform based on the current
-  /// [Matrix4] defined in the [TransformationController] and will translate all the hit tests as well.
+  /// Setting `transformChild` to false will prevent InteractiveViewer from transforming the
+  /// child based on the [Matrix4] in the [TransformationController]. This is done to always
+  /// keep the child static and allow for custom dynamic layout widgets like
+  /// [Stack] and [CustomMultiChildLayout].
   ///
-  /// Due to the way gestures work in Flutter if a child is in an negative offset of its parent then
-  /// hit tests are skipped. For example you could have a [Stack] with [Clip.none] and negative offset
-  /// for the [Positioned] widget.
+  /// Setting `transformChild` to true will transform the child `Rect` and hit tests based on the [Matrix4]
+  /// defined in the [TransformationController].
+  ///
+  /// Due to the way gestures work in Flutter the parts of a child that are outside of the parent
+  /// [RenderBox] will not receive hit tests. For example you could have a [Stack] with [Clip.none]
+  /// and a negative offset for the [Positioned] widget which will not handle gestures.
   ///
   /// ```dart
   /// import 'package:flutter/widgets.dart';
