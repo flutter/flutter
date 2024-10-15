@@ -575,12 +575,6 @@ void main() {
           platform: TargetPlatform.web_javascript),
         throwsToolExit(message: failureMessage),
       );
-      expect(
-        () => artifacts.getArtifactPath(
-          Artifact.dart2jsSnapshot,
-          platform: TargetPlatform.web_javascript),
-        throwsToolExit(message: failureMessage),
-      );
 
       fileSystem
           .directory('flutter')
@@ -611,10 +605,9 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(
-          Artifact.dart2jsSnapshot,
+          Artifact.engineDartAotRuntime,
           platform: TargetPlatform.web_javascript),
-        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk',
-            'bin', 'snapshots', 'dart2js.dart.snapshot'),
+        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk', 'bin', 'dartaotruntime'),
       );
     });
 
