@@ -152,9 +152,6 @@ class Dart2JSTarget extends Dart2WebTarget {
   String get name => 'dart2js';
 
   @override
-  Source get compilerSnapshot => const Source.artifact(Artifact.dart2jsSnapshot);
-
-  @override
   List<String> get depfiles => const <String>[
     'dart2js.d',
   ];
