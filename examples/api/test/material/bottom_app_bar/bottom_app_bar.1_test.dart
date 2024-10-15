@@ -45,7 +45,7 @@ void main() {
 
     // Tap the radio button to move the FAB to centerDocked.
     await tester.tap(find.text('Docked - Center'));
-    await tester.pumpAndSettle(); // Rebuild the widget after the state change
+    await tester.pumpAndSettle();
 
     // Get the new FAB position (centerDocked).
     final Offset newPosition =
