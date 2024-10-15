@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_test/flutter_test.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 /// An enum identifying standard UI components.
@@ -28,8 +31,10 @@ import 'package:flutter/foundation.dart';
 /// or fragile to create a reliable test matcher for. It is not (nor should it
 /// become) an exhaustive list of standard UI components.
 ///
-/// These are typically used in tests via `find.backButton()` or
-/// `find.closeButton()`.
+/// See also:
+///
+/// - [CommonFinders.backButton], which in tests is used as `find.backButton()`.
+/// - [CommonFinders.closeButton], which in tests is used as `find.closeButton()`.
 enum StandardComponentType {
   /// Indicates the associated widget is a standard back button, typically used
   /// to navigate back to the previous screen.
