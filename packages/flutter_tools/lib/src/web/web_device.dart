@@ -161,6 +161,7 @@ abstract class ChromiumDevice extends Device {
     String? userIdentifier,
   }) async {
     await _chrome?.close();
+    _chrome = null;
     return true;
   }
 
