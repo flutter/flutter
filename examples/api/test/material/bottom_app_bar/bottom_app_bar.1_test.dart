@@ -51,7 +51,9 @@ void main() {
     final Offset newPosition =
         tester.getCenter(find.byType(FloatingActionButton),);
 
-    expect(newPosition.dx,
-        closeTo(screenSize.width * 0.5, 10),); // Center of the screen
+    expect(
+      newPosition.dx,
+      closeTo(screenSize.width * 0.5, 10), // Center of the screen.
+    );
   });
 }
