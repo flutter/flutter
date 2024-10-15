@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -251,9 +252,6 @@ class FormState extends State<Form> {
   void _register(FormFieldState<dynamic> field) {
     _fields.add(field);
     field._focusNode.addListener(() => _updateField(field));
-    if (widget.autovalidateMode == AutovalidateMode.always && field.widget.enabled){
-      field.validate();
-    }
   }
 
   void _unregister(FormFieldState<dynamic> field) {
@@ -587,6 +585,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// false when [reset] is called.
   bool get hasInteractedByUser => _hasInteractedByUser.value;
 
+  bool _buildScheduled = false;
+
   /// True if the current value is valid.
   ///
   /// This will not set [errorText] or [hasError] and it will not update
@@ -695,6 +695,20 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     super.didUpdateWidget(oldWidget);
     if (widget.forceErrorText != oldWidget.forceErrorText) {
       _errorText.value = widget.forceErrorText;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.always) {
+      if (!_buildScheduled) {
+        _buildScheduled = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _buildScheduled = false;
+          validate();
+        });
+      }
     }
   }
 
