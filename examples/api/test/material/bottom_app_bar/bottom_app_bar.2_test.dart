@@ -58,6 +58,7 @@ void main() {
     expect(
         visibleSize.height, equals(80.0)); // The expected height when visible
   });
+
   testWidgets('SnackBar is shown when Open popup menu is pressed',
       (WidgetTester tester) async {
     await tester.pumpWidget(const example.BottomAppBarDemo());
