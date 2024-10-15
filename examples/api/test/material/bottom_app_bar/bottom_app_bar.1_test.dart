@@ -24,7 +24,7 @@ void main() {
     BottomAppBar bottomAppBar = tester.widget(find.byType(BottomAppBar));
     expect(bottomAppBar.shape, isNotNull);
 
-    // Toggle the 'Notch'] switch to remove the notch.
+    // Toggle the ['Notch'] switch to remove the notch.
     await tester.tap(find.byType(SwitchListTile).last);
     await tester.pump(); // Rebuild the widget after the state change
 
@@ -38,7 +38,7 @@ void main() {
     final Offset initialPosition =
         tester.getCenter(find.byType(FloatingActionButton));
 
-    // Verify the initial position is near the right side (docked to the end)
+    // Verify the initial position is near the right side (docked to the end).
     final Size screenSize = tester.getSize(find.byType(Scaffold));
     expect(initialPosition.dx, greaterThan(screenSize.width * 0.5));
 
