@@ -36,13 +36,6 @@ G_DECLARE_FINAL_TYPE(FlKeyboardHandlerUserData,
 
 namespace {
 
-// Context variables for the foreach call used to dispatch events to responders.
-typedef struct {
-  FlKeyEvent* event;
-  uint64_t specified_logical_key;
-  FlKeyboardHandlerUserData* user_data;
-} DispatchToResponderLoopContext;
-
 static bool is_eascii(uint16_t character) {
   return character < 256;
 }
@@ -426,17 +419,6 @@ static void method_call_handler(FlMethodChannel* channel,
   }
 }
 
-// The loop body to dispatch an event to a responder.
-static void dispatch_to_responder(gpointer responder_data,
-                                  gpointer foreach_data_ptr) {
-  DispatchToResponderLoopContext* context =
-      reinterpret_cast<DispatchToResponderLoopContext*>(foreach_data_ptr);
-  FlKeyResponder* responder = FL_KEY_RESPONDER(responder_data);
-  fl_key_responder_handle_event(
-      responder, context->event, responder_handle_event_callback,
-      context->user_data, context->specified_logical_key);
-}
-
 static void fl_keyboard_handler_dispose(GObject* object) {
   FlKeyboardHandler* self = FL_KEYBOARD_HANDLER(object);
 
@@ -538,14 +520,16 @@ gboolean fl_keyboard_handler_handle_event(FlKeyboardHandler* self,
   g_ptr_array_add(self->pending_responds, pending);
   FlKeyboardHandlerUserData* user_data = fl_keyboard_handler_user_data_new(
       self, fl_keyboard_pending_event_get_sequence_id(pending));
-  DispatchToResponderLoopContext data{
-      .event = event,
-      .specified_logical_key = fl_keyboard_layout_get_logical_key(
-          self->derived_layout, fl_key_event_get_group(event),
-          fl_key_event_get_keycode(event)),
-      .user_data = user_data,
-  };
-  g_ptr_array_foreach(self->responder_list, dispatch_to_responder, &data);
+  uint64_t specified_logical_key = fl_keyboard_layout_get_logical_key(
+      self->derived_layout, fl_key_event_get_group(event),
+      fl_key_event_get_keycode(event));
+  for (guint i = 0; i < self->responder_list->len; i++) {
+    FlKeyResponder* responder =
+        FL_KEY_RESPONDER(g_ptr_array_index(self->responder_list, i));
+    fl_key_responder_handle_event(responder, event,
+                                  responder_handle_event_callback, user_data,
+                                  specified_logical_key);
+  }
 
   return TRUE;
 }
