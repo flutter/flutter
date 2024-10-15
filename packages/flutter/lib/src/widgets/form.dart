@@ -763,9 +763,4 @@ enum AutovalidateMode {
   /// In order to validate all fields of a [Form] after the first time the user interacts
   /// with one, use [always] instead.
   onUnfocus,
-
-  // bool get always => this == AutovalidateMode.always;
-  // bool get onUserInteraction => this == AutovalidateMode.onUserInteraction;
-  // bool get onUnfocus => this == AutovalidateMode.onUnfocus;
-  // bool get disabled => this == AutovalidateMode.disabled;
 }
