@@ -844,7 +844,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
   void _handleScrollChange() {
     final ScrollPosition? position = _scrollableState?.position;
-    if (position != null && position.pixels > 0.0 && position.pixels < _kNavBarLargeTitleHeightExtension) {
+    if (position != null && position.hasPixels && position.pixels > 0.0 && position.pixels < _kNavBarLargeTitleHeightExtension) {
       position.animateTo(
         position.pixels > _kNavBarLargeTitleHeightExtension / 2
           ? _kNavBarLargeTitleHeightExtension
