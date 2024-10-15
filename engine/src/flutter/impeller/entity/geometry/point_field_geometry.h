@@ -9,6 +9,7 @@
 
 namespace impeller {
 
+/// @brief A geometry class specialized for Canvas::DrawPoints.
 class PointFieldGeometry final : public Geometry {
  public:
   PointFieldGeometry(std::vector<Point> points, Scalar radius, bool round);

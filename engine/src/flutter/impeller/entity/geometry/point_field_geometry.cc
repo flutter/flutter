@@ -4,7 +4,9 @@
 
 #include "impeller/entity/geometry/point_field_geometry.h"
 
+#include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/vertex_buffer.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/renderer/command_buffer.h"
 
@@ -21,26 +23,28 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  if (radius_ < 0.0) {
+  if (radius_ < 0.0 || points_.empty()) {
     return {};
   }
   const Matrix& transform = entity.GetTransform();
-
   Scalar max_basis = transform.GetMaxBasisLengthXY();
   if (max_basis == 0) {
     return {};
   }
+
   Scalar min_size = 0.5f / max_basis;
   Scalar radius = std::max(radius_, min_size);
-
   HostBuffer& host_buffer = renderer.GetTransientsBuffer();
-  VertexBufferBuilder<SolidFillVertexShader::PerVertexData> vtx_builder;
+  BufferView buffer_view;
+  size_t vertex_count = 0;
+
   if (round_) {
     // Get triangulation relative to {0, 0} so we can translate it to each
     // point in turn.
-    auto generator =
+    Tessellator::EllipticalVertexGenerator generator =
         renderer.GetTessellator()->FilledCircle(transform, {}, radius);
     FML_DCHECK(generator.GetTriangleType() == PrimitiveType::kTriangleStrip);
+
     std::vector<Point> circle_vertices;
     circle_vertices.reserve(generator.GetVertexCount());
     generator.GenerateVertices([&circle_vertices](const Point& p) {  //
@@ -48,38 +52,76 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
     });
     FML_DCHECK(circle_vertices.size() == generator.GetVertexCount());
 
-    vtx_builder.Reserve((circle_vertices.size() + 2) * points_.size() - 2);
-    for (auto& center : points_) {
-      if (vtx_builder.HasVertices()) {
-        vtx_builder.AppendVertex(vtx_builder.Last());
-        vtx_builder.AppendVertex({center + circle_vertices[0]});
-      }
+    vertex_count = (circle_vertices.size() + 2) * points_.size() - 2;
+    buffer_view = host_buffer.Emplace(
+        vertex_count * sizeof(Point), alignof(Point), [&](uint8_t* data) {
+          Point* output = reinterpret_cast<Point*>(data);
+          size_t offset = 0;
 
-      for (auto& vertex : circle_vertices) {
-        vtx_builder.AppendVertex({center + vertex});
-      }
-    }
+          Point center = points_[0];
+          for (auto& vertex : circle_vertices) {
+            output[offset++] = Point(center + vertex);
+          }
+          // For all subequent points, insert a degenerate triangle to break
+          // the strip. This could be optimized out if we switched to using
+          // primitive restart.
+          Point last_point = circle_vertices.back() + center;
+          for (size_t i = 1; i < points_.size(); i++) {
+            Point center = points_[i];
+            output[offset++] = last_point;
+            output[offset++] = Point(center + circle_vertices[0]);
+            for (const Point& vertex : circle_vertices) {
+              output[offset++] = Point(center + vertex);
+            }
+            last_point = circle_vertices.back() + center;
+          }
+        });
   } else {
-    vtx_builder.Reserve(6 * points_.size() - 2);
-    for (auto& point : points_) {
-      auto first = Point(point.x - radius, point.y - radius);
+    vertex_count = 6 * points_.size() - 2;
+    buffer_view = host_buffer.Emplace(
+        vertex_count * sizeof(Point), alignof(Point), [&](uint8_t* data) {
+          Point* output = reinterpret_cast<Point*>(data);
+          size_t offset = 0;
 
-      if (vtx_builder.HasVertices()) {
-        vtx_builder.AppendVertex(vtx_builder.Last());
-        vtx_builder.AppendVertex({first});
-      }
+          Point point = points_[0];
+          Point first = Point(point.x - radius, point.y - radius);
 
-      // Z pattern from UL -> UR -> LL -> LR
-      vtx_builder.AppendVertex({first});
-      vtx_builder.AppendVertex({{point.x + radius, point.y - radius}});
-      vtx_builder.AppendVertex({{point.x - radius, point.y + radius}});
-      vtx_builder.AppendVertex({{point.x + radius, point.y + radius}});
-    }
+          // Z pattern from UL -> UR -> LL -> LR
+          Point last_point = Point(0, 0);
+          output[offset++] = first;
+          output[offset++] = Point(point.x + radius, point.y - radius);
+          output[offset++] = Point(point.x - radius, point.y + radius);
+          output[offset++] = last_point =
+              Point(point.x + radius, point.y + radius);
+
+          // For all subequent points, insert a degenerate triangle to break
+          // the strip. This could be optimized out if we switched to using
+          // primitive restart.
+          for (size_t i = 1; i < points_.size(); i++) {
+            Point point = points_[i];
+            Point first = Point(point.x - radius, point.y - radius);
+
+            output[offset++] = last_point;
+            output[offset++] = first;
+
+            output[offset++] = first;
+            output[offset++] = Point(point.x + radius, point.y - radius);
+            output[offset++] = Point(point.x - radius, point.y + radius);
+            output[offset++] = last_point =
+                Point(point.x + radius, point.y + radius);
+          }
+        });
   }
 
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
-      .vertex_buffer = vtx_builder.CreateVertexBuffer(host_buffer),
+      .vertex_buffer =
+          VertexBuffer{
+              .vertex_buffer = std::move(buffer_view),
+              .index_buffer = {},
+              .vertex_count = vertex_count,
+              .index_type = IndexType::kNone,
+          },
       .transform = entity.GetShaderTransform(pass),
   };
 }
