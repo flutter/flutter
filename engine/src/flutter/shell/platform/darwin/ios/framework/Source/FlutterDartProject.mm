@@ -12,8 +12,9 @@
 #include <syslog.h>
 
 #include "flutter/common/constants.h"
+#include "flutter/fml/build_config.h"
 #include "flutter/shell/common/switches.h"
-#import "flutter/shell/platform/darwin/common/command_line.h"
+#include "flutter/shell/platform/darwin/common/command_line.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -176,6 +177,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   settings.enable_wide_gamut = enableWideGamut;
 #endif
 
+#if FML_OS_IOS_SIMULATOR
   if (!command_line.HasOption("enable-impeller")) {
     // Next, look in the app bundle.
     NSNumber* enableImpeller = [bundle objectForInfoDictionaryKey:@"FLTEnableImpeller"];
@@ -188,6 +190,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
       settings.enable_impeller = enableImpeller.boolValue;
     }
   }
+#endif  // FML_OS_IOS_SIMULATOR
 
   settings.warn_on_impeller_opt_out = true;
 
