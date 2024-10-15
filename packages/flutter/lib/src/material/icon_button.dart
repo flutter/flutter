@@ -778,6 +778,25 @@ class IconButton extends StatelessWidget {
       ),
     );
 
+    result = InkResponse(
+      focusNode: focusNode,
+      autofocus: autofocus,
+      canRequestFocus: onPressed != null,
+      onTap: onPressed,
+      mouseCursor: mouseCursor ?? (onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click),
+      enableFeedback: effectiveEnableFeedback,
+      focusColor: focusColor ?? theme.focusColor,
+      hoverColor: hoverColor ?? theme.hoverColor,
+      highlightColor: highlightColor ?? theme.highlightColor,
+      splashColor: splashColor ?? theme.splashColor,
+      radius: splashRadius ?? math.max(
+        Material.defaultSplashRadius,
+        (effectiveIconSize + math.min(effectivePadding.horizontal, effectivePadding.vertical)) * 0.7,
+        // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
+      ),
+      child: result,
+    );
+
     if (tooltip != null) {
       result = Tooltip(
         message: tooltip,
@@ -788,24 +807,7 @@ class IconButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: onPressed != null,
-      child: InkResponse(
-        focusNode: focusNode,
-        autofocus: autofocus,
-        canRequestFocus: onPressed != null,
-        onTap: onPressed,
-        mouseCursor: mouseCursor ?? (onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click),
-        enableFeedback: effectiveEnableFeedback,
-        focusColor: focusColor ?? theme.focusColor,
-        hoverColor: hoverColor ?? theme.hoverColor,
-        highlightColor: highlightColor ?? theme.highlightColor,
-        splashColor: splashColor ?? theme.splashColor,
-        radius: splashRadius ?? math.max(
-          Material.defaultSplashRadius,
-          (effectiveIconSize + math.min(effectivePadding.horizontal, effectivePadding.vertical)) * 0.7,
-          // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
-        ),
-        child: result,
-      ),
+      child: result,
     );
   }
 
