@@ -29,26 +29,35 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
     const ProcTableGLES& gl,
     const std::vector<ShaderStageIOSlot>& p_inputs,
     const std::vector<ShaderStageBufferLayout>& layouts) {
-  std::vector<VertexAttribPointer> vertex_attrib_arrays;
-  for (auto i = 0u; i < p_inputs.size(); i++) {
-    const auto& input = p_inputs[i];
-    const auto& layout = layouts[input.binding];
-    VertexAttribPointer attrib;
-    attrib.index = input.location;
-    // Component counts must be 1, 2, 3 or 4. Do that validation now.
-    if (input.vec_size < 1u || input.vec_size > 4u) {
-      return false;
+  std::vector<std::vector<VertexAttribPointer>> vertex_attrib_arrays(
+      layouts.size());
+  // Every layout corresponds to a vertex binding.
+  // As we record, separate the attributes into buckets for each layout in
+  // ascending order. We do this because later on, we'll need to associate each
+  // of the attributes with bound buffers corresponding to the binding.
+  for (auto layout_i = 0u; layout_i < layouts.size(); layout_i++) {
+    const auto& layout = layouts[layout_i];
+    for (const auto& input : p_inputs) {
+      if (input.binding != layout_i) {
+        continue;
+      }
+      VertexAttribPointer attrib;
+      attrib.index = input.location;
+      // Component counts must be 1, 2, 3 or 4. Do that validation now.
+      if (input.vec_size < 1u || input.vec_size > 4u) {
+        return false;
+      }
+      attrib.size = input.vec_size;
+      auto type = ToVertexAttribType(input.type);
+      if (!type.has_value()) {
+        return false;
+      }
+      attrib.type = type.value();
+      attrib.normalized = GL_FALSE;
+      attrib.offset = input.offset;
+      attrib.stride = layout.stride;
+      vertex_attrib_arrays[layout_i].push_back(attrib);
     }
-    attrib.size = input.vec_size;
-    auto type = ToVertexAttribType(input.type);
-    if (!type.has_value()) {
-      return false;
-    }
-    attrib.type = type.value();
-    attrib.normalized = GL_FALSE;
-    attrib.offset = input.offset;
-    attrib.stride = layout.stride;
-    vertex_attrib_arrays.emplace_back(attrib);
   }
   vertex_attrib_arrays_ = std::move(vertex_attrib_arrays);
   return true;
@@ -143,8 +152,13 @@ bool BufferBindingsGLES::ReadUniformsBindings(const ProcTableGLES& gl,
 }
 
 bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
+                                              size_t binding,
                                               size_t vertex_offset) const {
-  for (const auto& array : vertex_attrib_arrays_) {
+  if (binding >= vertex_attrib_arrays_.size()) {
+    return false;
+  }
+
+  for (const auto& array : vertex_attrib_arrays_[binding]) {
     gl.EnableVertexAttribArray(array.index);
     gl.VertexAttribPointer(array.index,       // index
                            array.size,        // size (must be 1, 2, 3, or 4)
@@ -191,8 +205,11 @@ bool BufferBindingsGLES::BindUniformData(const ProcTableGLES& gl,
 
 bool BufferBindingsGLES::UnbindVertexAttributes(const ProcTableGLES& gl) const {
   for (const auto& array : vertex_attrib_arrays_) {
-    gl.DisableVertexAttribArray(array.index);
+    for (const auto& attribute : array) {
+      gl.DisableVertexAttribArray(attribute.index);
+    }
   }
+
   return true;
 }
 

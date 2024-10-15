@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 
+#include "impeller/core/buffer_view.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/platform.h"
 #include "impeller/geometry/scalar.h"
@@ -251,7 +252,7 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
             vertex_buffer_offset + pcmd->VtxOffset * sizeof(ImDrawVert);
 
         impeller::VertexBuffer vertex_buffer;
-        vertex_buffer.vertex_buffer = {
+        vertex_buffer.vertex_buffer = impeller::BufferView{
             .buffer = buffer,
             .range = impeller::Range(vb_start, draw_list_vtx_bytes - vb_start)};
         vertex_buffer.index_buffer = {
