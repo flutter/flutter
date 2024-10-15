@@ -1459,7 +1459,6 @@ void main() {
   });
 
   testWidgets('AutovalidateMode.always should validate on first build', (WidgetTester tester) async {
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? errorText(String? value) => '$value/error';
 
     Widget builder() {
@@ -1471,7 +1470,6 @@ void main() {
             textDirection: TextDirection.ltr,
             child: Center(
               child: Form(
-                key: formKey,
                 autovalidateMode: AutovalidateMode.always,
                 child: Material(
                   child: Column(
