@@ -6069,13 +6069,13 @@ class _EditableTextTapOutsideAction extends ContextAction<EditableTextTapOutside
 
   @override
   void invoke(EditableTextTapOutsideIntent intent, [BuildContext? context]) {
-    /// The focus dropping behavior is only present on desktop platforms
+    // The focus dropping behavior is only present on desktop platforms.
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
-      // On mobile platforms, we don't unfocus on touch events unless they're
-      // in the web browser, but we do unfocus for all other kinds of events.
+        // On mobile platforms, we don't unfocus on touch events unless they're
+        // in the web browser, but we do unfocus for all other kinds of events.
         switch (intent.pointerDownEvent.kind) {
           case ui.PointerDeviceKind.touch:
             if (kIsWeb) {

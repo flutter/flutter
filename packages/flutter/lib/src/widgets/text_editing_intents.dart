@@ -390,16 +390,20 @@ class TransposeCharactersIntent extends Intent {
   const TransposeCharactersIntent();
 }
 
-/// An [Intent] that represents a tap outside the field. Invoked when user taps
-/// outside the focused [EditableText] if [EditableText.onTapOutside] is null.
-/// Override this [Intent] to modify the default behavior which unfocus on touch
-/// events only in the web browser.
+/// An [Intent] that represents a tap outside the field.
+///
+/// Invoked when the user taps outside the focused [EditableText] if
+/// [EditableText.onTapOutside] is null.
+///
+/// Override this [Intent] to modify the default behavior, which is to unfocus
+/// on a touch event on web and do nothing on other platforms.
+///
 /// See also:
 ///
 ///  * [Action.overridable] for an example on how to make an [Action]
 ///    overridable.
 class EditableTextTapOutsideIntent extends Intent {
-  /// Creates a [EditableTextTapOutsideIntent].
+  /// Creates an [EditableTextTapOutsideIntent].
   const EditableTextTapOutsideIntent({required this.focusNode, required this.pointerDownEvent});
 
   /// The [FocusNode] that this [Intent]'s action should be performed on.
