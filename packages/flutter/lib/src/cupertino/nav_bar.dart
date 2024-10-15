@@ -22,7 +22,7 @@ import 'route.dart';
 import 'search_field.dart';
 import 'theme.dart';
 
-/// Modes that determine when to display the navigation bar's bottom.
+/// Modes that determine how to display the navigation bar's bottom in relation to scroll events.
 enum NavigationBarBottomMode {
   /// Enable hiding the bottom in response to scrolling.
   ///
