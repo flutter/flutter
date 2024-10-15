@@ -512,7 +512,6 @@ class Chromium {
     if (!_hasValidChromeConnection) {
       return;
     }
-    print(StackTrace.current);
     _hasValidChromeConnection = false;
 
     if (_logger.isVerbose) {

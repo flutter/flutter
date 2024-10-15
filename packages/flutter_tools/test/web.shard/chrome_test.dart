@@ -934,7 +934,7 @@ void main() {
       logger: logger,
     );
     expect(await chromiumLauncher.connect(chrome, false), equals(chrome));
-    await Future.wait([chrome.close(), chrome.close()]);
+    await Future.wait(<Future<void>>[chrome.close(), chrome.close()]);
   });
 }
 
