@@ -54,14 +54,14 @@ const String oneMajorVersionHigherJavaVersion = '23';
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const String maxKnownAndSupportedGradleVersion = '8.10';
+const String maxKnownAndSupportedGradleVersion = '8.7';
 
 // Update this when new versions of AGP come out.
 //
 // Supported here means tooling is aware of this version's Java <-> AGP
 // compatibility.
 @visibleForTesting
-const String maxKnownAndSupportedAgpVersion = '8.7.1';
+const String maxKnownAndSupportedAgpVersion = '8.4.0';
 
 // Update this when new versions of AGP come out.
 const String maxKnownAgpVersion = '8.5';
@@ -904,12 +904,6 @@ String getGradlewFileName(Platform platform) {
 /// of Gradle, as https://docs.gradle.org/current/userguide/compatibility.html
 /// details.
 List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
-    JavaGradleCompat(
-      javaMin: '23',
-      javaMax: '24',
-      gradleMin: '8.10',
-      gradleMax: maxKnownAndSupportedGradleVersion,
-    ),
     JavaGradleCompat(
       javaMin: '22',
       javaMax: '23',
