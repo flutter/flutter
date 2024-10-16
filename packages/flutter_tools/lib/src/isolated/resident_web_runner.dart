@@ -393,7 +393,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     }
   }
 
-  WebCompilerConfig get _compilerConfig => (debuggingOptions.webUseWasm)
+  WebCompilerConfig get _compilerConfig => debuggingOptions.webUseWasm
     ? WasmCompilerConfig(
         optimizationLevel: 0,
         stripWasm: false,

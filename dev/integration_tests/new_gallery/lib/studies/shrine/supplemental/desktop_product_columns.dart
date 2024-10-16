@@ -60,10 +60,10 @@ class DesktopProductCardColumn extends StatelessWidget {
                 card = DesktopProductCard(
                   product: products[productCardIndex],
                   imageWidth: startLarge
-                      ? ((productCardIndex.isEven)
+                      ? (productCardIndex.isEven
                           ? largeImageWidth
                           : smallImageWidth)
-                      : ((productCardIndex.isEven)
+                      : (productCardIndex.isEven
                           ? smallImageWidth
                           : largeImageWidth),
                 );
