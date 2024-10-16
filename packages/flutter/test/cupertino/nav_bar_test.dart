@@ -2086,6 +2086,54 @@ void main() {
       bottomHeight,
     );
   });
+
+  testWidgets('CupertinoNavigationBar with bottom widget', (WidgetTester tester) async {
+    const double persistentHeight = 44.0;
+    const double bottomHeight = 10.0;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Middle'),
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(bottomHeight),
+              child: Placeholder(),
+            )
+          ),
+          child: Container(),
+        ),
+      ),
+    );
+
+    final Finder navBarFinder = find.byType(CupertinoNavigationBar);
+    expect(navBarFinder, findsOneWidget);
+    final CupertinoNavigationBar navBar = tester.widget<CupertinoNavigationBar>(navBarFinder);
+
+    final Finder columnFinder = find.descendant(
+      of: navBarFinder,
+      matching: find.byType(Column),
+    );
+    expect(columnFinder, findsOneWidget);
+    final Column column = tester.widget<Column>(columnFinder);
+
+    expect(column.children.length, 2);
+    expect(
+      find.descendant(
+        of: find.byWidget(column.children.first),
+        matching: find.text('Middle'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byWidget(column.children.last),
+        matching: find.byType(Placeholder),
+      ),
+      findsOneWidget,
+    );
+    expect(navBar.preferredSize.height, persistentHeight + bottomHeight);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
