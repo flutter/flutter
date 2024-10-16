@@ -22,6 +22,11 @@ constexpr T Absolute(const T& val) {
   return val >= T{} ? val : -val;
 }
 
+template <>
+constexpr Scalar Absolute<Scalar>(const float& val) {
+  return fabsf(val);
+}
+
 constexpr inline bool ScalarNearlyZero(Scalar x,
                                        Scalar tolerance = kEhCloseEnough) {
   return Absolute(x) <= tolerance;
