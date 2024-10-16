@@ -184,8 +184,6 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
         result = SelectionUtils.getResultBasedOnRect(renderObjectRect, point);
       case SelectionEventType.clear:
         _start = _end = null;
-      case SelectionEventType.selectionFinalized:
-        break;
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
       case SelectionEventType.selectParagraph:

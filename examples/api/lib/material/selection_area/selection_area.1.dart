@@ -38,6 +38,7 @@ class MyHomePage extends StatefulWidget {
 typedef _LocalSpanRange = ({int startOffset, int endOffset});
 
 class _MyHomePageState extends State<MyHomePage> {
+  final SelectionListenerController _selectionListenerController = SelectionListenerController();
   final ContextMenuController _menuController = ContextMenuController();
   final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
 
@@ -57,6 +58,14 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _initData();
+    _selectionListenerController.addStatusListener(_handleOnSelectionControllerChanged);
+  }
+
+  @override
+  void dispose() {
+    _selectionListenerController.removeStatusListener(_handleOnSelectionControllerChanged);
+    _selectionListenerController.dispose();
+    super.dispose();
   }
 
   void _initData() {
@@ -110,15 +119,60 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void _handleOnSelectionControllerChanged(SelectionListenerStatus status) {
+    if (_menuController.isShown) {
+      ContextMenuController.removeAny();
+    }
+    if (_selectionListenerController.selectionStatus != SelectionStatus.uncollapsed
+        || status != SelectionListenerStatus.finalized) {
+      return;
+    }
+    if (selectionAreaKey.currentState == null
+        || !selectionAreaKey.currentState!.mounted
+        || selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor == null) {
+      return;
+    }
+    final SelectedContentRange selectedContentRange = _selectionListenerController.value;
+    _menuController.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        return TapRegion(
+          onTapOutside: (PointerDownEvent event) {
+            if (_menuController.isShown) {
+              ContextMenuController.removeAny();
+            }
+          },
+          child: AdaptiveTextSelectionToolbar.buttonItems(
+            buttonItems: <ContextMenuButtonItem>[
+              ContextMenuButtonItem(
+                onPressed: () {
+                  ContextMenuController.removeAny();
+                  _colorSelectionRed(
+                    selectedContentRange,
+                    dataMap: dataSourceMap,
+                    coloringChildSpan: false,
+                  );
+                  selectionAreaKey.currentState!.selectableRegion.clearSelection();
+                },
+                label: 'Color Text Red',
+              ),
+            ],
+            anchors: TextSelectionToolbarAnchors(primaryAnchor: selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor!),
+          ),
+        );
+      },
+    );
+  }
+
   void _colorSelectionRed(
-    SelectionDetails selectionDetails, {
+    SelectedContentRange selectedContentRange, {
     required Map<_LocalSpanRange, TextSpan> dataMap,
     required bool coloringChildSpan,
   }) {
     for (final MapEntry<_LocalSpanRange, TextSpan> entry in dataMap.entries) {
       final _LocalSpanRange entryLocalRange = entry.key;
-      final int normalizedStartOffset = min(selectionDetails.localStartOffset, selectionDetails.localEndOffset);
-      final int normalizedEndOffset = max(selectionDetails.localStartOffset, selectionDetails.localEndOffset);
+      final int normalizedStartOffset = min(selectedContentRange.startOffset, selectedContentRange.endOffset);
+      final int normalizedEndOffset = max(selectedContentRange.startOffset, selectedContentRange.endOffset);
       if (normalizedStartOffset > entryLocalRange.endOffset) {
         continue;
       }
@@ -209,7 +263,7 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           // Update widgetspan data.
           _colorSelectionRed(
-            selectionDetails,
+            selectedContentRange,
             dataMap: widgetSpanSourceMap,
             coloringChildSpan: true,
           );
@@ -262,49 +316,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SelectionArea(
         key: selectionAreaKey,
         child: SelectionListener(
-          onSelectionChanged: (SelectionDetails selectionDetails) {
-            if (_menuController.isShown) {
-              ContextMenuController.removeAny();
-            }
-            if (selectionDetails.status != SelectionStatus.uncollapsed
-               || !selectionDetails.selectionFinalized) {
-              return;
-            }
-            if (selectionAreaKey.currentState == null
-                || !selectionAreaKey.currentState!.mounted
-                || selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor == null) {
-              return;
-            }
-            _menuController.show(
-              context: context,
-              contextMenuBuilder: (BuildContext context) {
-                return TapRegion(
-                  onTapOutside: (PointerDownEvent event) {
-                    if (_menuController.isShown) {
-                      ContextMenuController.removeAny();
-                    }
-                  },
-                  child: AdaptiveTextSelectionToolbar.buttonItems(
-                    buttonItems: <ContextMenuButtonItem>[
-                      ContextMenuButtonItem(
-                        onPressed: () {
-                          ContextMenuController.removeAny();
-                          _colorSelectionRed(
-                            selectionDetails,
-                            dataMap: dataSourceMap,
-                            coloringChildSpan: false,
-                          );
-                          selectionAreaKey.currentState!.selectableRegion.clearSelection();
-                        },
-                        label: 'Color Text Red',
-                      ),
-                    ],
-                    anchors: TextSelectionToolbarAnchors(primaryAnchor: selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor!),
-                  ),
-                );
-              },
-            );
-          },
+          controller: _selectionListenerController,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
