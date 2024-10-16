@@ -2086,7 +2086,7 @@ void main() {
       bottomHeight,
     );
   });
-  
+
   testWidgets('Large title snaps up to app bar when partially scrolled more than halfway up', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     const double largeTitleHeight = 52.0;
