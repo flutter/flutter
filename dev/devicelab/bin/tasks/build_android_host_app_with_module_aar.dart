@@ -35,16 +35,15 @@ TaskFunction combine(List<TaskFunction> tasks) {
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
 class ModuleTest {
-  ModuleTest(
-    this.buildTarget, {
+  ModuleTest({
     this.gradleVersion = '7.6.3',
   });
 
-  final String buildTarget;
+  static const String buildTarget = 'module-gradle';
   final String gradleVersion;
 
   Future<TaskResult> call() async {
-    section('Running: $buildTarget');
+    section('Running: $buildTarget-$gradleVersion');
     section('Find Java');
 
     final String? javaHome = await findJavaHome();
@@ -228,6 +227,7 @@ class ModuleTest {
             flutterDirectory.path,
             'dev',
             'integration_tests',
+            'pure_android_host_apps',
             'android_host_app_v2_embedding',
           ),
         ),
@@ -449,7 +449,7 @@ class ModuleTest {
 Future<void> main() async {
   await task(combine(<TaskFunction>[
     // ignore: avoid_redundant_argument_values
-    ModuleTest('module-gradle-7.6', gradleVersion: '8.4').call,
-    ModuleTest('module-gradle-7.6', gradleVersion: '8.4-rc-3').call,
+    ModuleTest(gradleVersion: '8.4').call,
+    ModuleTest(gradleVersion: '8.4-rc-3').call,
   ]));
 }
