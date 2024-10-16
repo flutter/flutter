@@ -733,11 +733,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         break;
     }
 
-    final Decoration decoration = ShapeDecoration(
-      color: backgroundColor,
-      shape: expansionTileBorder,
-    );
-
     final Widget tile = Padding(
       padding: decoration.padding,
       child: Column(
@@ -779,20 +774,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       ),
     );
 
-    final bool isShapeProvided = widget.shape != null || expansionTileTheme.shape != null
-      || widget.collapsedShape != null || expansionTileTheme.collapsedShape != null;
-
-    if (isShapeProvided) {
-      return Material(
-        clipBehavior: clipBehavior,
-        color: backgroundColor,
-        shape: expansionTileBorder,
-        child: tile,
-      );
-    }
-
-    return DecoratedBox(
-      decoration: decoration,
+    return Material(
+      clipBehavior: clipBehavior,
+      color: Color.lerp(widget.collapsedBackgroundColor, backgroundColor,
+          _animationController.value),
+      shape: ShapeBorder.lerp(
+          widget.shape, widget.collapsedShape, _animationController.value),
       child: tile,
     );
   }
