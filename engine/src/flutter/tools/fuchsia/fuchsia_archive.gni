@@ -5,164 +5,11 @@
 import("//flutter/tools/fuchsia/fuchsia_debug_symbols.gni")
 import("//flutter/tools/fuchsia/fuchsia_libs.gni")
 import("//flutter/tools/fuchsia/gn-sdk/src/cmc.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/component.gni")
 import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/package.gni")
 
-# Alias of cmc_compile in gn-sdk/src/cmc.gni
-template("_compile_cml") {
-  assert(defined(invoker.manifest), "_compile_cml must define manifest")
-
-  # Create an empty depfile, it's not used in flutter.
-  write_file("${target_gen_dir}/${target_name}/${target_name}.d",
-             [],
-             "list lines")
-
-  cmc_compile(target_name) {
-    forward_variables_from(invoker,
-                           [
-                             "deps",
-                             "manifest",
-                             "testonly",
-                           ])
-    output_file = invoker.output
-  }
-}
-
-# TODO(zijiehe): May use fuchsia_package in gn-sdk if possible. - http://crbug.com/40935282
-
-# Creates a Fuchsia archive (.far) file using PM from the Fuchsia SDK.
-#
-# binary (required):
-#   The ELF binary for the archive's program.
-# deps (optional):
-#   The code dependencies for the archive.
-# inputs (optional):
-#   When these files are changed, the package should be regenerated.
-# libraries (optional):
-#   Paths to .so libraries that should be dynamically linked to the binary.
-# resources (optional):
-#   Files that should be placed into the `data/` directory of the archive.
-# testonly (optional):
-#   Set this to true for archives that are only used for tests.
-template("_fuchsia_archive") {
-  assert(defined(invoker.binary), "package must define binary")
-
-  pkg_testonly = defined(invoker.testonly) && invoker.testonly
-  pkg_target_name = target_name
-  pkg = {
-    package_version = "0"  # placeholder
-    forward_variables_from(invoker,
-                           [
-                             "binary",
-                             "deps",
-                             "resources",
-                             "libraries",
-                           ])
-    if (!defined(package_name)) {
-      package_name = pkg_target_name
-    }
-    if (!defined(deps)) {
-      deps = []
-    }
-    if (!defined(resources)) {
-      resources = []
-    }
-    if (!defined(libraries)) {
-      libraries = []
-    }
-  }
-
-  far_base_dir = "$root_out_dir/${pkg_target_name}_far"
-
-  copy_sources = [ "$root_out_dir/${invoker.binary}" ]
-  copy_outputs = [ "$far_base_dir/bin/app" ]
-
-  foreach(res, pkg.resources) {
-    copy_sources += [ res.path ]
-    copy_outputs += [ "$far_base_dir/data/${res.dest}" ]
-  }
-
-  foreach(lib, pkg.libraries) {
-    output_path = ""
-
-    if (defined(lib.output_path)) {
-      output_path = lib.output_path
-    }
-
-    copy_sources += [ "${lib.path}/${lib.name}" ]
-    copy_outputs += [ "$far_base_dir/lib/${output_path}${lib.name}" ]
-  }
-
-  pkg_dir_deps = pkg.deps
-
-  write_file("${far_base_dir}/meta/package",
-             {
-               name = pkg.package_name
-               version = pkg.package_version
-             },
-             "json")
-
-  _dbg_symbols_target = "${target_name}_dbg_symbols"
-  fuchsia_debug_symbols(_dbg_symbols_target) {
-    deps = pkg.deps
-    testonly = pkg_testonly
-    binary = invoker.binary
-  }
-
-  action("${target_name}_dir") {
-    script = "//flutter/tools/fuchsia/copy_path.py"
-    sources = copy_sources
-    response_file_contents = rebase_path(copy_sources + copy_outputs)
-    deps = pkg_dir_deps
-    args = [ "--file-list={{response_file_name}}" ]
-    outputs = copy_outputs
-    testonly = pkg_testonly
-  }
-
-  manifest_json_file = "${root_out_dir}/${target_name}_package_manifest.json"
-  action(target_name) {
-    script = "//flutter/tools/fuchsia/gen_package.py"
-    deps = pkg_dir_deps + [
-             ":${target_name}_dir",
-             ":${_dbg_symbols_target}",
-           ]
-
-    sources = copy_outputs
-
-    inputs = []
-    if (defined(invoker.inputs)) {
-      inputs += invoker.inputs
-    }
-
-    args = [
-      "--pm-bin",
-      rebase_path("$fuchsia_tool_dir/pm"),
-      "--package-dir",
-      rebase_path(far_base_dir),
-      "--far-name",
-      target_name,
-      "--manifest-json-file",
-      rebase_path(manifest_json_file, root_build_dir),
-    ]
-
-    assert(fuchsia_target_api_level != -1,
-           "Must set a target api level when creating an archive")
-    if (fuchsia_target_api_level != -1) {
-      args += [
-        "--api-level",
-        "${fuchsia_target_api_level}",
-      ]
-    }
-
-    outputs = [
-      manifest_json_file,
-      "${far_base_dir}.manifest",
-      "$root_out_dir/${target_name}-0.far",
-    ]
-    testonly = pkg_testonly
-  }
-}
-
-# Creates a Fuchsia archive.
+# Creates a Fuchsia archive (.far) file from the Fuchsia SDK and gn-sdk.
 #
 # An archive combines an ELF binary and a component manifest to create
 # a packaged Fuchsia program that can be deployed to a Fuchsia device.
@@ -171,78 +18,122 @@ template("_fuchsia_archive") {
 #   The ELF binary for the archive's program, or target_name if unspecified.
 # deps (optional):
 #   The code dependencies for the archive.
-# inputs (optional):
-#   When these files are changed, the package should be regenerated.
 # libraries (optional):
 #   Paths to .so libraries that should be dynamically linked to the binary.
+# manifest (optional):
+#   The component manifest cml file, or meta/binary.cml if unspecified.
 # resources (optional):
 #   Files that should be placed into the `data/` directory of the archive.
 # testonly (optional):
 #   Set this to true for archives that are only used for tests.
 template("fuchsia_archive") {
-  if (!defined(invoker.binary)) {
-    _binary = target_name
-  } else {
+  if (defined(invoker.binary)) {
     _binary = invoker.binary
-  }
-  _deps = []
-  if (defined(invoker.deps)) {
-    _deps += invoker.deps
+  } else {
+    _binary = target_name
   }
 
-  _cml_file = rebase_path("meta/${_binary}.cml")
-  _far_base_dir = "$root_out_dir/${target_name}_far"
-  _cml_file_name = get_path_info(_cml_file, "name")
-  _compile_cml_target = "${target_name}_${_cml_file_name}_compile_cml"
-
-  _compile_cml(_compile_cml_target) {
-    forward_variables_from(invoker, [ "testonly" ])
-
-    manifest = _cml_file
-    output = "$_far_base_dir/meta/${_cml_file_name}.cm"
+  if (defined(invoker.manifest)) {
+    _manifest = invoker.manifest
+  } else {
+    _manifest = rebase_path("meta/${_binary}.cml")
   }
-  _deps += [ ":$_compile_cml_target" ]
 
-  _fuchsia_archive(target_name) {
-    deps = _deps
-    binary = _binary
+  _component_target = target_name + "__component"
+  fuchsia_component(_component_target) {
     forward_variables_from(invoker,
                            [
-                             "inputs",
-                             "libraries",
-                             "resources",
+                             "deps",
                              "testonly",
                            ])
+    manifest = _manifest
+
+    resources = [
+      {
+        path = "$root_out_dir/$_binary"
+        dest = "bin/app"
+      },
+    ]
+    if (defined(invoker.resources)) {
+      foreach(resource, invoker.resources) {
+        resources += [
+          {
+            path = resource.path
+            dest = "data/${resource.dest}"
+          },
+        ]
+      }
+    }
+
+    _libs = common_libs
+    if (defined(invoker.libraries)) {
+      _libs += invoker.libraries
+    }
+    foreach(lib, _libs) {
+      output_path = ""
+      if (defined(lib.output_path)) {
+        output_path = lib.output_path
+      }
+      resources += [
+        {
+          path = "${lib.path}/${lib.name}"
+          dest = "lib/${output_path}${lib.name}"
+        },
+      ]
+    }
+  }
+
+  _package_target = target_name + "__package"
+  _package_name = target_name
+  fuchsia_package(_package_target) {
+    forward_variables_from(invoker, [ "testonly" ])
+    package_name = _package_name
+    deps = [ ":$_component_target" ]
+  }
+
+  # TODO(zijiehe): http://crbug.com/368608542, prefer using
+  # gn-sdk/build_id_dir.gni
+  _build_id_target = target_name + "__build_id"
+  fuchsia_debug_symbols(_build_id_target) {
+    forward_variables_from(invoker,
+                           [
+                             "deps",
+                             "testonly",
+                           ])
+    binary = _binary
+  }
+
+  # TODO(zijiehe): http://crbug.com/368608542, copying the far files is not very
+  # necessary, try to remove the -0.far copy.
+  copy(target_name) {
+    forward_variables_from(invoker, [ "testonly" ])
+    package_output_dir = get_label_info(":$_package_target", "target_gen_dir")
+    sources = [ "$package_output_dir/$_package_name/${_package_name}.far" ]
+    outputs = [ "$root_out_dir/${_package_name}-0.far" ]
+    deps = [
+      ":$_build_id_target",
+      ":$_package_target",
+    ]
   }
 }
 
 # Creates a Fuchsia archive (.far) file containing a generated test root
-# component and test driver component, using PM from the Fuchsia SDK.
+# component and test driver component.
 #
-# binary (optional):
-#   The binary for the test, or target_name if unspecified.
+# binary:
+#   Forward to fuchsia_archive
 # deps (required):
 #   Dependencies for the test archive.
 # gen_cml_file (optional):
 #   If is defined and true, an interpolate cml file will be generated.
-# libraries (optional):
-#   Paths to .so libraries that should be dynamically linked to the binary.
-# resources (optional):
-#   Files that should be placed into the `data/` directory of the archive.
+# libraries:
+#   Forward to fuchsia_archive
+# resources:
+#   Forward to fuchsia_archive
 template("fuchsia_test_archive") {
   assert(defined(invoker.deps), "package must define deps")
-  if (!defined(invoker.binary)) {
-    _binary = target_name
-  } else {
-    _binary = invoker.binary
-  }
-  _deps = []
-  if (defined(invoker.deps)) {
-    _deps += invoker.deps
-  }
-
-  _generated_cml = defined(invoker.gen_cml_file) && invoker.gen_cml_file
-  if (_generated_cml) {
+  _deps = invoker.deps
+  if (defined(invoker.gen_cml_file) && invoker.gen_cml_file) {
     _cml_file = "$root_out_dir/${target_name}.cml"
     _interpolate_cml_target = "${target_name}_interpolate_cml"
     action(_interpolate_cml_target) {
@@ -259,36 +150,20 @@ template("fuchsia_test_archive") {
       ]
       outputs = [ _cml_file ]
     }
-  } else {
-    _cml_file = rebase_path("meta/${_binary}.cml")
+    _deps += [ ":$_interpolate_cml_target" ]
   }
 
-  _far_base_dir = "$root_out_dir/${target_name}_far"
-  _cml_file_name = get_path_info(_cml_file, "name")
-  _compile_cml_target = "${target_name}_${_cml_file_name}_compile_cml"
-
-  _compile_cml(_compile_cml_target) {
+  fuchsia_archive(target_name) {
+    forward_variables_from(invoker,
+                           [
+                             "binary",
+                             "libraries",
+                             "resources",
+                           ])
     testonly = true
-
-    manifest = _cml_file
-    output = "$_far_base_dir/meta/${_cml_file_name}.cm"
-
-    if (_generated_cml) {
-      deps = [ ":$_interpolate_cml_target" ]
+    if (defined(_cml_file)) {
+      manifest = _cml_file
     }
-  }
-  _deps += [ ":$_compile_cml_target" ]
-
-  _fuchsia_archive(target_name) {
-    testonly = true
-    binary = _binary
-    forward_variables_from(invoker, [ "resources" ])
-
-    libraries = common_libs
-    if (defined(invoker.libraries)) {
-      libraries += invoker.libraries
-    }
-
     deps = _deps
   }
 }
