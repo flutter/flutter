@@ -48,10 +48,12 @@ class ParagraphStyle final
 
   txt::TextStyle CreateTextStyle() const;
 
+  const txt::ParagraphStyle& GetParagraphStyle() const;
+
  private:
   txt::ParagraphStyle style_;
   ScopedObject<Paint> foreground_;
-  ScopedObject<Paint> backgrond_;
+  ScopedObject<Paint> background_;
 };
 
 }  // namespace impeller::interop

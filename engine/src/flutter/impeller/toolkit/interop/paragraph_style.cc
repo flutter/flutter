@@ -51,18 +51,23 @@ void ParagraphStyle::SetForeground(ScopedObject<Paint> paint) {
 }
 
 void ParagraphStyle::SetBackground(ScopedObject<Paint> paint) {
-  backgrond_ = std::move(paint);
+  background_ = std::move(paint);
 }
 
 txt::TextStyle ParagraphStyle::CreateTextStyle() const {
   auto style = style_.GetTextStyle();
+
   if (foreground_) {
     style.foreground = foreground_->GetPaint();
   }
-  if (backgrond_) {
-    style.background = backgrond_->GetPaint();
+  if (background_) {
+    style.background = background_->GetPaint();
   }
   return style;
+}
+
+const txt::ParagraphStyle& ParagraphStyle::GetParagraphStyle() const {
+  return style_;
 }
 
 }  // namespace impeller::interop

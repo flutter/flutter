@@ -20,7 +20,7 @@ class ParagraphBuilder final
     : public Object<ParagraphBuilder,
                     IMPELLER_INTERNAL_HANDLE_NAME(ImpellerParagraphBuilder)> {
  public:
-  explicit ParagraphBuilder(const TypographyContext& context);
+  explicit ParagraphBuilder(ScopedObject<TypographyContext> context);
 
   ~ParagraphBuilder() override;
 
@@ -39,7 +39,13 @@ class ParagraphBuilder final
   ScopedObject<Paragraph> Build(Scalar width) const;
 
  private:
-  std::unique_ptr<txt::ParagraphBuilder> builder_;
+  ScopedObject<TypographyContext> context_;
+  mutable std::unique_ptr<txt::ParagraphBuilder> lazy_builder_;
+
+  const std::unique_ptr<txt::ParagraphBuilder>& GetBuilder(
+      const txt::ParagraphStyle& style) const;
+
+  const std::unique_ptr<txt::ParagraphBuilder>& GetBuilder() const;
 };
 
 }  // namespace impeller::interop

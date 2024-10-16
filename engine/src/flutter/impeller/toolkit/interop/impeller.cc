@@ -1009,7 +1009,8 @@ void ImpellerDisplayListBuilderDrawParagraph(ImpellerDisplayListBuilder builder,
 IMPELLER_EXTERN_C
 ImpellerParagraphBuilder ImpellerParagraphBuilderNew(
     ImpellerTypographyContext context) {
-  auto builder = Create<ParagraphBuilder>(*GetPeer(context));
+  auto builder =
+      Create<ParagraphBuilder>(Ref<TypographyContext>(GetPeer(context)));
   if (!builder->IsValid()) {
     VALIDATION_LOG << "Could not create valid paragraph builder.";
     return nullptr;
