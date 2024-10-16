@@ -3274,10 +3274,10 @@ void main() {
 
     await tester.pumpWidget(buildAppBar());
 
-    // Test actions position without actions padding.
+    // Actions padding default to zero padding.
     Offset actionsOffset = tester.getTopRight(find.byKey(actionKey));
     final Offset appBarOffset = tester.getTopRight(find.byKey(appBarKey));
-    expect(actionsOffset.dx, appBarOffset.dx);
+    expect(appBarOffset.dx - actionsOffset.dx, 0);
 
     const EdgeInsets actionsPadding = EdgeInsets.only(right: 8.0);
     await tester.pumpWidget(buildAppBar(actionsPadding: actionsPadding));
