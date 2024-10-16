@@ -507,11 +507,10 @@ class CocoaPods {
       // updated to handled synchronized
       // groups/folders https://github.com/CocoaPods/CocoaPods/issues/12456
       _logger.printError(
-        'Error: CocoaPods has not been updated to support Xcode 16 and cannot '
-            'currently handle synchronized groups and folders. '
-            'See https://github.com/CocoaPods/CocoaPods/issues/12456\n'
-            'For a workaround, please refer to this Github issue: \n'
-            'https://github.com/flutter/flutter/issues/156733',
+        'Error: CocoaPods does not support Xcode 16 synchronized groups. '
+            'To fix your Xcode project, '
+            'see https://github.com/flutter/flutter/issues/156733#issuecomment-2415359014 '
+            'for a workaround.',
         emphasis: true,
       );
     }
