@@ -920,10 +920,9 @@ class _ViewContentState extends State<_ViewContent> {
       return MediaQuery.removePadding(
         context: context,
         removeTop: true,
-        child: ListView.builder(
+        child: ListView(
           shrinkWrap: true,
-          itemCount: suggestions.length,
-          itemBuilder: (BuildContext context, int index) => suggestions.elementAt(index),
+          children: suggestions.toList(),
         ),
       );
     }
@@ -1009,10 +1008,6 @@ class _ViewContentState extends State<_ViewContent> {
       ?? viewDefaults.constraints!;
     final double minWidth = math.min(effectiveConstraints.minWidth, _viewRect.width);
     final double minHeight = math.min(effectiveConstraints.minHeight, _viewRect.height);
-
-    final EdgeInsets? effectivePadding = widget.viewPadding
-      ?? viewTheme.padding
-      ?? viewDefaults.padding;
 
     final Widget viewDivider = DividerTheme(
       data: dividerTheme.copyWith(color: effectiveDividerColor),

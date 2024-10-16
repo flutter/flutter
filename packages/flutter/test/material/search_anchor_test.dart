@@ -1751,7 +1751,7 @@ void main() {
       home: Material(
         child: Center(
           child: SearchAnchor(
-            viewBarPadding: const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
+            viewBarPadding: const EdgeInsets.symmetric(horizontal: 16.0),
             builder: (BuildContext context, SearchController controller) {
               return IconButton(icon: const Icon(Icons.search), onPressed: () {
                 controller.openView();
