@@ -38,6 +38,7 @@ struct PointerState {
   double scale;
   double rotation;
   int64_t buttons;
+  int64_t view_id;
 };
 
 //------------------------------------------------------------------------------
