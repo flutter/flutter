@@ -2085,7 +2085,6 @@ void main() {
       tester.getBottomLeft(bottomFinder).dy - tester.getTopLeft(bottomFinder).dy,
       bottomHeight,
     );
-
   });
 
   testWidgets('CupertinoNavigationBar with bottom widget', (WidgetTester tester) async {
