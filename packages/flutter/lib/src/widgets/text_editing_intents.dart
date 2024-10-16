@@ -8,6 +8,8 @@ library;
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
+import 'basic.dart';
+import 'focus_manager.dart';
 
 /// An [Intent] to send the event straight to the engine.
 ///
@@ -386,4 +388,27 @@ class UpdateSelectionIntent extends Intent {
 class TransposeCharactersIntent extends Intent {
   /// Creates a [TransposeCharactersIntent].
   const TransposeCharactersIntent();
+}
+
+/// An [Intent] that represents a tap outside the field.
+///
+/// Invoked when the user taps outside the focused [EditableText] if
+/// [EditableText.onTapOutside] is null.
+///
+/// Override this [Intent] to modify the default behavior, which is to unfocus
+/// on a touch event on web and do nothing on other platforms.
+///
+/// See also:
+///
+///  * [Action.overridable] for an example on how to make an [Action]
+///    overridable.
+class EditableTextTapOutsideIntent extends Intent {
+  /// Creates an [EditableTextTapOutsideIntent].
+  const EditableTextTapOutsideIntent({required this.focusNode, required this.pointerDownEvent});
+
+  /// The [FocusNode] that this [Intent]'s action should be performed on.
+  final FocusNode focusNode;
+
+  /// The [PointerDownEvent] that initiated this [Intent].
+  final PointerDownEvent pointerDownEvent;
 }
