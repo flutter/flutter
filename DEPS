@@ -170,7 +170,6 @@ vars = {
   "upstream_dartdoc": "https://github.com/dart-lang/dartdoc.git",
   "upstream_equatable": "https://github.com/felangel/equatable.git",
   "upstream_ffi": "https://github.com/dart-lang/ffi.git",
-  "upstream_file": "https://github.com/google/file.dart.git",
   "upstream_fixnum": "https://github.com/dart-lang/fixnum.git",
   "upstream_flatbuffers": "https://github.com/google/flatbuffers.git",
   "upstream_freetype2": "https://gitlab.freedesktop.org/freetype/freetype.git",
@@ -386,9 +385,6 @@ deps = {
 
   'src/flutter/third_party/dart/third_party/pkg/dartdoc':
    Var('dart_git') + '/dartdoc.git@80c6f18f34b387d4b9ce89ddd2e3049093335f9d',
-
-  'src/flutter/third_party/dart/third_party/pkg/file':
-   Var('dart_git') + '/external/github.com/google/file.dart@6842feaef1c4e06239bd30f8d3ef722838b1c97e',
 
   'src/flutter/third_party/dart/third_party/pkg/fixnum':
    Var('dart_git') + '/fixnum.git@83293b8ed86ccd574a94fcf4a2da43f31c1b43e0',
