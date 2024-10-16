@@ -156,7 +156,7 @@ static void init_keyboard(FlView* self) {
       fl_keyboard_handler_new(messenger, FL_KEYBOARD_VIEW_DELEGATE(self));
   g_clear_object(&self->keyboard_manager);
   self->keyboard_manager =
-      fl_keyboard_manager_new(FL_KEYBOARD_VIEW_DELEGATE(self));
+      fl_keyboard_manager_new(messenger, FL_KEYBOARD_VIEW_DELEGATE(self));
 }
 
 static void init_scrolling(FlView* self) {
@@ -383,11 +383,6 @@ static void fl_view_keyboard_delegate_iface_init(
     FlView* self = FL_VIEW(view_delegate);
     return fl_text_input_handler_filter_keypress(self->text_input_handler,
                                                  event);
-  };
-
-  iface->get_messenger = [](FlKeyboardViewDelegate* view_delegate) {
-    FlView* self = FL_VIEW(view_delegate);
-    return fl_engine_get_binary_messenger(self->engine);
   };
 
   iface->redispatch_event = [](FlKeyboardViewDelegate* view_delegate,

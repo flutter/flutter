@@ -32,13 +32,6 @@ gboolean fl_keyboard_view_delegate_text_filter_key_press(
       self, event);
 }
 
-FlBinaryMessenger* fl_keyboard_view_delegate_get_messenger(
-    FlKeyboardViewDelegate* self) {
-  g_return_val_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(self), nullptr);
-
-  return FL_KEYBOARD_VIEW_DELEGATE_GET_IFACE(self)->get_messenger(self);
-}
-
 void fl_keyboard_view_delegate_redispatch_event(FlKeyboardViewDelegate* self,
                                                 FlKeyEvent* event) {
   g_return_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(self));
