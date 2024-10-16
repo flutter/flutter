@@ -1159,12 +1159,12 @@ void main() {
     await tester.pump();
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'Item 0'), true);
 
     // Press down key one more time, the highlight should move to the next item.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'Menu 1'), true);
 
     // The previous item should not be highlighted.
@@ -1187,12 +1187,12 @@ void main() {
     await tester.pump();
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'Item 5'), true);
 
     // Press up key one more time, the highlight should move up to the item 4.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'Item 4'), true);
 
     // The previous item should not be highlighted.
@@ -1224,20 +1224,103 @@ void main() {
     await tester.pump();
 
     await tester.enterText(find.byType(TextField).first, 'example');
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(controller.text, 'example');
     expect(controller.selection, const TextSelection.collapsed(offset: 7));
 
     // Press left key, the caret should move left.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(controller.selection, const TextSelection.collapsed(offset: 6));
 
     // Press Right key, the caret should move right.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(controller.selection, const TextSelection.collapsed(offset: 7));
-  }, variant: TargetPlatformVariant.desktop());
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/156712.
+  testWidgets(
+    'Up and down keys can highlight the menu item when expandedInsets is set',
+    (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData();
+      await tester.pumpWidget(MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            expandedInsets: EdgeInsets.zero,
+            requestFocusOnTap: true,
+            dropdownMenuEntries: menuChildren,
+          ),
+        ),
+      ));
+
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(isItemHighlighted(tester, themeData, 'Item 5'), true);
+
+      // Press up key one more time, the highlight should move up to the item 4.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(isItemHighlighted(tester, themeData, 'Item 4'), true);
+
+      // The previous item should not be highlighted.
+      expect(isItemHighlighted(tester, themeData, 'Item 5'), false);
+
+      // Press down key, the highlight should move back to the item 5.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(isItemHighlighted(tester, themeData, 'Item 5'), true);
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/156712.
+  testWidgets(
+    'Left and right keys can move text field selection when expandedInsets is set',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      final ThemeData themeData = ThemeData();
+      await tester.pumpWidget(MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            expandedInsets: EdgeInsets.zero,
+            requestFocusOnTap: true,
+            enableFilter: true,
+            filterCallback: (List<DropdownMenuEntry<TestMenu>> entries, String filter) {
+              return entries.where((DropdownMenuEntry<TestMenu> element) => element.label.contains(filter)).toList();
+            },
+            dropdownMenuEntries: menuChildren,
+            controller: controller,
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      await tester.enterText(find.byType(TextField).first, 'example');
+      await tester.pump();
+      expect(controller.text, 'example');
+      expect(controller.selection, const TextSelection.collapsed(offset: 7));
+
+      // Press left key, the caret should move left.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(controller.selection, const TextSelection.collapsed(offset: 6));
+
+      // Press Right key, the caret should move right.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(controller.selection, const TextSelection.collapsed(offset: 7));
+    },
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Down key and up key can navigate while focused when a label text '
@@ -1271,24 +1354,24 @@ void main() {
 
     // Press down key three times, the highlight should move to the next item each time.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'ABC'), true);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'AB'), true);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'ABCD'), true);
 
     // Press up key two times, the highlight should up each time.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'AB'), true);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'ABC'), true);
   });
 
@@ -1309,9 +1392,9 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
     await tester.enterText(find.byType(TextField).first, 'Me');
-    await tester.pumpAndSettle();
+    await tester.pump();
     await tester.enterText(find.byType(TextField).first, 'Meu');
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(tester.takeException(), isNull);
   });
 
@@ -1354,15 +1437,15 @@ void main() {
     const String itemLabel = 'Item 2';
     // Open the menu
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    await tester.pumpAndSettle();
+    await tester.pump();
     // Highlight the third item by exact search.
     await tester.enterText(find.byType(TextField).first, itemLabel);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, itemLabel), true);
 
     // Search something that matches multiple items.
     await tester.enterText(find.byType(TextField).first, 'Item');
-    await tester.pumpAndSettle();
+    await tester.pump();
     // The third item should still be highlighted.
     expect(isItemHighlighted(tester, themeData, itemLabel), true);
   });
@@ -1408,24 +1491,24 @@ void main() {
 
     // Press down key three times, the highlight should move to the next item each time.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'ABC'), true);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'AB'), true);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'ABCD'), true);
 
     // Press up key two times, the highlight should up each time.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'AB'), true);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(isItemHighlighted(tester, themeData, 'ABC'), true);
   });
 
@@ -2327,7 +2410,6 @@ void main() {
     expect(node.value, 'Item 3');
   });
 
-
   testWidgets('Semantics does not include initial menu buttons', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
@@ -2359,7 +2441,6 @@ void main() {
     for (final String label in TestMenu.values.map((TestMenu menu) => menu.label)) {
       expect(find.bySemanticsLabel(label), findsOneWidget);
     }
-
   });
 
   testWidgets('helperText is not visible when errorText is not null', (WidgetTester tester) async {
