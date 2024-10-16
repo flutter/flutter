@@ -1252,9 +1252,12 @@ mixin TextInputClient {
   void performSelector(String selectorName) {}
 }
 
-/// An interface to receive focus from the engine.
+/// An interface into iOS's stylus hadnwriting text input.
 ///
-/// This is currently only used to handle UIIndirectScribbleInteraction.
+/// See also:
+///
+///  * [UIIndirectScribbleInteraction](https://developer.apple.com/documentation/uikit/uiindirectscribbleinteraction),
+///    which is iOS's API for Scribble.
 abstract class ScribbleClient {
   /// A unique identifier for this element.
   String get elementIdentifier;
