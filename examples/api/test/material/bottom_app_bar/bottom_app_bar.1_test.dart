@@ -1,5 +1,10 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/bottom_app_bar/bottom_app_bar.1.dart' as example;
+import 'package:flutter_api_samples/material/bottom_app_bar/bottom_app_bar.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -30,7 +35,10 @@ void main() {
     await tester.pump();
 
     bottomAppBar = tester.widget(find.byType(BottomAppBar));
-    expect(bottomAppBar.shape, isNull,);
+    expect(
+      bottomAppBar.shape,
+      isNull,
+    );
   });
 
   testWidgets('FAB location can be changed', (WidgetTester tester) async {
@@ -48,8 +56,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Get the new FAB position (centerDocked).
-    final Offset newPosition =
-        tester.getCenter(find.byType(FloatingActionButton),);
+    final Offset newPosition = tester.getCenter(
+      find.byType(FloatingActionButton),
+    );
 
     expect(
       newPosition.dx,
