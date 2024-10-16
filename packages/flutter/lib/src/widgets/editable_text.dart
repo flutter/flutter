@@ -1501,8 +1501,7 @@ class EditableText extends StatefulWidget {
   /// another part of the UI. However, it will not unfocus as a result of mobile
   /// application touch events (which does not include mouse clicks), to conform
   /// with the platform conventions. To change this behavior, a callback may be
-  /// set here or [EditableTextTapOutsideIntent] may be overwritten, that
-  /// operates differently from the default.
+  /// set here or [EditableTextTapOutsideIntent] may be overridden.
   ///
   /// When adding additional controls to a text field (for example, a spinner, a
   /// button that copies the selected text, or modifies formatting), it is
