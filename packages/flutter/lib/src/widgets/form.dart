@@ -705,16 +705,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     }
   }
 
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.always) {
-  //     WidgetsBinding.instance.addPostFrameCallback((_) {
-  //       validate();
-  //     });
-  //   }
-  // }
-
   @override
   void dispose() {
     _errorText.dispose();
