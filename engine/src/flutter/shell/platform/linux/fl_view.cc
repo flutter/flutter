@@ -17,6 +17,7 @@
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/fl_keyboard_handler.h"
+#include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 #include "flutter/shell/platform/linux/fl_keyboard_view_delegate.h"
 #include "flutter/shell/platform/linux/fl_mouse_cursor_handler.h"
 #include "flutter/shell/platform/linux/fl_platform_handler.h"
@@ -62,6 +63,8 @@ struct _FlView {
   FlWindowStateMonitor* window_state_monitor;
 
   FlScrollingManager* scrolling_manager;
+
+  FlKeyboardManager* keyboard_manager;
 
   // Flutter system channel handlers.
   FlKeyboardHandler* keyboard_handler;
@@ -151,6 +154,9 @@ static void init_keyboard(FlView* self) {
   g_clear_object(&self->keyboard_handler);
   self->keyboard_handler =
       fl_keyboard_handler_new(messenger, FL_KEYBOARD_VIEW_DELEGATE(self));
+  g_clear_object(&self->keyboard_manager);
+  self->keyboard_manager =
+      fl_keyboard_manager_new(FL_KEYBOARD_VIEW_DELEGATE(self));
 }
 
 static void init_scrolling(FlView* self) {
@@ -230,7 +236,7 @@ static gboolean send_pointer_button_event(FlView* self, GdkEvent* event) {
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   fl_scrolling_manager_set_last_mouse_position(
       self->scrolling_manager, event_x * scale_factor, event_y * scale_factor);
-  fl_keyboard_handler_sync_modifier_if_needed(self->keyboard_handler,
+  fl_keyboard_manager_sync_modifier_if_needed(self->keyboard_manager,
                                               event_state, event_time);
   fl_engine_send_mouse_pointer_event(
       self->engine, self->view_id, phase,
@@ -500,7 +506,7 @@ static gboolean motion_notify_event_cb(FlView* self,
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
 
-  fl_keyboard_handler_sync_modifier_if_needed(self->keyboard_handler,
+  fl_keyboard_manager_sync_modifier_if_needed(self->keyboard_manager,
                                               event_state, event_time);
   fl_engine_send_mouse_pointer_event(
       self->engine, self->view_id, self->button_state != 0 ? kMove : kHover,
@@ -559,7 +565,7 @@ static gboolean leave_notify_event_cb(FlView* self,
 }
 
 static void keymap_keys_changed_cb(FlView* self) {
-  fl_keyboard_handler_notify_layout_changed(self->keyboard_handler);
+  fl_keyboard_manager_notify_layout_changed(self->keyboard_manager);
 }
 
 static void gesture_rotation_begin_cb(FlView* self) {
@@ -728,11 +734,12 @@ static void fl_view_dispose(GObject* object) {
   g_clear_pointer(&self->background_color, gdk_rgba_free);
   g_clear_object(&self->window_state_monitor);
   g_clear_object(&self->scrolling_manager);
-  g_clear_object(&self->keyboard_handler);
+  g_clear_object(&self->keyboard_manager);
   if (self->keymap_keys_changed_cb_id != 0) {
     g_signal_handler_disconnect(self->keymap, self->keymap_keys_changed_cb_id);
     self->keymap_keys_changed_cb_id = 0;
   }
+  g_clear_object(&self->keyboard_handler);
   g_clear_object(&self->mouse_cursor_handler);
   g_clear_object(&self->platform_handler);
   g_clear_object(&self->view_accessible);
@@ -755,8 +762,8 @@ static void fl_view_realize(GtkWidget* widget) {
 static gboolean fl_view_key_press_event(GtkWidget* widget, GdkEventKey* event) {
   FlView* self = FL_VIEW(widget);
 
-  return fl_keyboard_handler_handle_event(
-      self->keyboard_handler, fl_key_event_new_from_gdk_event(gdk_event_copy(
+  return fl_keyboard_manager_handle_event(
+      self->keyboard_manager, fl_key_event_new_from_gdk_event(gdk_event_copy(
                                   reinterpret_cast<GdkEvent*>(event))));
 }
 
@@ -764,8 +771,8 @@ static gboolean fl_view_key_press_event(GtkWidget* widget, GdkEventKey* event) {
 static gboolean fl_view_key_release_event(GtkWidget* widget,
                                           GdkEventKey* event) {
   FlView* self = FL_VIEW(widget);
-  return fl_keyboard_handler_handle_event(
-      self->keyboard_handler, fl_key_event_new_from_gdk_event(gdk_event_copy(
+  return fl_keyboard_manager_handle_event(
+      self->keyboard_manager, fl_key_event_new_from_gdk_event(gdk_event_copy(
                                   reinterpret_cast<GdkEvent*>(event))));
 }
 
@@ -911,5 +918,5 @@ G_MODULE_EXPORT void fl_view_set_background_color(FlView* self,
 
 GHashTable* fl_view_get_keyboard_state(FlView* self) {
   g_return_val_if_fail(FL_IS_VIEW(self), nullptr);
-  return fl_keyboard_handler_get_pressed_state(self->keyboard_handler);
+  return fl_keyboard_manager_get_pressed_state(self->keyboard_manager);
 }

@@ -21,17 +21,7 @@ G_DECLARE_FINAL_TYPE(FlKeyboardHandler,
 /**
  * FlKeyboardHandler:
  *
- * Processes keyboard events and cooperate with `TextInputHandler`.
- *
- * A keyboard event goes through a few sections, each can choose to handle the
- * event, and only unhandled events can move to the next section:
- *
- * - Keyboard: Dispatch to the embedder responder and the channel responder
- *   simultaneously. After both responders have responded (asynchronously), the
- *   event is considered handled if either responder handles it.
- * - Text input: Events are sent to IM filter (usually owned by
- *   `TextInputHandler`) and are handled synchronously.
- * - Redispatching: Events are inserted back to the system for redispatching.
+ * Provides the channel to receive keyboard requests from the Dart code.
  */
 
 /**
@@ -46,60 +36,6 @@ G_DECLARE_FINAL_TYPE(FlKeyboardHandler,
 FlKeyboardHandler* fl_keyboard_handler_new(
     FlBinaryMessenger* messenger,
     FlKeyboardViewDelegate* view_delegate);
-
-/**
- * fl_keyboard_handler_handle_event:
- * @handler: the #FlKeyboardHandler self.
- * @event: the event to be dispatched. It is usually a wrap of a GdkEventKey.
- * This event will be managed and released by #FlKeyboardHandler.
- *
- * Make the handler process a system key event. This might eventually send
- * messages to the framework, trigger text input effects, or redispatch the
- * event back to the system.
- */
-gboolean fl_keyboard_handler_handle_event(FlKeyboardHandler* handler,
-                                          FlKeyEvent* event);
-
-/**
- * fl_keyboard_handler_is_state_clear:
- * @handler: the #FlKeyboardHandler self.
- *
- * A debug-only method that queries whether the handler's various states are
- * cleared, i.e. no pending events for redispatching or for responding.
- *
- * Returns: true if the handler's various states are cleared.
- */
-gboolean fl_keyboard_handler_is_state_clear(FlKeyboardHandler* handler);
-
-/**
- * fl_keyboard_handler_sync_modifier_if_needed:
- * @handler: the #FlKeyboardHandler self.
- * @state: the state of the modifiers mask.
- * @event_time: the time attribute of the incoming GDK event.
- *
- * If needed, synthesize modifier keys up and down event by comparing their
- * current pressing states with the given modifiers mask.
- */
-void fl_keyboard_handler_sync_modifier_if_needed(FlKeyboardHandler* handler,
-                                                 guint state,
-                                                 double event_time);
-
-/**
- * fl_keyboard_handler_get_pressed_state:
- * @handler: the #FlKeyboardHandler self.
- *
- * Returns the keyboard pressed state. The hash table contains one entry per
- * pressed keys, mapping from the logical key to the physical key.*
- */
-GHashTable* fl_keyboard_handler_get_pressed_state(FlKeyboardHandler* handler);
-
-/**
- * fl_keyboard_handler_notify_layout_changed:
- * @handler: the #FlKeyboardHandler self.
- *
- * Notify the handler the keyboard layout has changed.
- */
-void fl_keyboard_handler_notify_layout_changed(FlKeyboardHandler* handler);
 
 G_END_DECLS
 
