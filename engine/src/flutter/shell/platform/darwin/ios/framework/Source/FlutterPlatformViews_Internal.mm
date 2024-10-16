@@ -654,14 +654,14 @@ static BOOL _preparedOnce = NO;
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer*)gestureRecognizer
     shouldBeRequiredToFailByGestureRecognizer:(UIGestureRecognizer*)otherGestureRecognizer {
-  // The forwarding gesture recognizer should always get all touch events, so it should not
-  // require other gesture recognizer to fail.
-  return otherGestureRecognizer != _forwardingRecognizer;
+  // The forwarding gesture recognizer should always get all touch events, so it should not be
+  // required to fail by any other gesture recognizer.
+  return otherGestureRecognizer != _forwardingRecognizer && otherGestureRecognizer != self;
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer*)gestureRecognizer
     shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer*)otherGestureRecognizer {
-  return otherGestureRecognizer == _forwardingRecognizer;
+  return otherGestureRecognizer == self;
 }
 
 - (void)touchesBegan:(NSSet<UITouch*>*)touches withEvent:(UIEvent*)event {
