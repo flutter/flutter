@@ -25,6 +25,18 @@ TEST(MatrixTest, Multiply) {
                                         11.0, 21.0, 0.0, 1.0)));
 }
 
+TEST(MatrixTest, Equals) {
+  Matrix x;
+  Matrix y = x;
+  EXPECT_TRUE(x.Equals(y));
+}
+
+TEST(MatrixTest, NotEquals) {
+  Matrix x;
+  Matrix y = x.Translate({1, 0, 0});
+  EXPECT_FALSE(x.Equals(y));
+}
+
 TEST(MatrixTest, HasPerspective2D) {
   EXPECT_FALSE(Matrix().HasPerspective2D());
 
