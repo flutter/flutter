@@ -245,4 +245,97 @@ TEST_P(InteropPlaygroundTest, CanCreateParagraphs) {
       }));
 }
 
+static void DrawTextFrame(ImpellerTypographyContext tc,
+                          ImpellerDisplayListBuilder builder,
+                          ImpellerParagraphStyle p_style,
+                          ImpellerPaint bg,
+                          ImpellerColor color,
+                          ImpellerTextAlignment align,
+                          float x_offset) {
+  const char text[] =
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+
+  ImpellerPaint fg = ImpellerPaintNew();
+
+  // Draw a box.
+  ImpellerPaintSetColor(fg, &color);
+  ImpellerPaintSetDrawStyle(fg, kImpellerDrawStyleStroke);
+  ImpellerRect box_rect = {10 + x_offset, 10, 200, 200};
+  ImpellerDisplayListBuilderDrawRect(builder, &box_rect, fg);
+
+  // Draw text.
+  ImpellerPaintSetDrawStyle(fg, kImpellerDrawStyleFill);
+  ImpellerParagraphStyleSetForeground(p_style, fg);
+  ImpellerParagraphStyleSetBackground(p_style, bg);
+  ImpellerParagraphStyleSetTextAlignment(p_style, align);
+  ImpellerParagraphBuilder p_builder = ImpellerParagraphBuilderNew(tc);
+  ImpellerParagraphBuilderPushStyle(p_builder, p_style);
+  ImpellerParagraphBuilderAddText(p_builder, (const uint8_t*)text,
+                                  sizeof(text));
+  ImpellerParagraph left_p = ImpellerParagraphBuilderBuildParagraphNew(
+      p_builder, box_rect.width - 20.0);
+  ImpellerPoint pt = {20.0f + x_offset, 20.0f};
+  float w = ImpellerParagraphGetMaxWidth(left_p);
+  float h = ImpellerParagraphGetHeight(left_p);
+  ImpellerDisplayListBuilderDrawParagraph(builder, left_p, &pt);
+  ImpellerPaintSetDrawStyle(fg, kImpellerDrawStyleStroke);
+
+  // Draw an inner box around the paragraph layout.
+  ImpellerRect inner_box_rect = {pt.x, pt.y, w, h};
+  ImpellerDisplayListBuilderDrawRect(builder, &inner_box_rect, fg);
+
+  ImpellerParagraphRelease(left_p);
+  ImpellerParagraphBuilderRelease(p_builder);
+  ImpellerPaintRelease(fg);
+}
+
+TEST_P(InteropPlaygroundTest, CanRenderTextAlignments) {
+  ImpellerTypographyContext tc = ImpellerTypographyContextNew();
+
+  ImpellerDisplayList dl = NULL;
+
+  {
+    ImpellerDisplayListBuilder builder = ImpellerDisplayListBuilderNew(NULL);
+    ImpellerPaint bg = ImpellerPaintNew();
+    ImpellerParagraphStyle p_style = ImpellerParagraphStyleNew();
+    ImpellerParagraphStyleSetFontFamily(p_style, "Roboto");
+    ImpellerParagraphStyleSetFontSize(p_style, 24.0);
+    ImpellerParagraphStyleSetFontWeight(p_style, kImpellerFontWeight400);
+
+    // Clear the background to a white color.
+    ImpellerColor clear_color = {1.0, 1.0, 1.0, 1.0};
+    ImpellerPaintSetColor(bg, &clear_color);
+    ImpellerDisplayListBuilderDrawPaint(builder, bg);
+
+    // Draw red, left-aligned text.
+    ImpellerColor red = {1.0, 0.0, 0.0, 1.0};
+    DrawTextFrame(tc, builder, p_style, bg, red, kImpellerTextAlignmentLeft,
+                  0.0);
+
+    // Draw green, centered text.
+    ImpellerColor green = {0.0, 1.0, 0.0, 1.0};
+    DrawTextFrame(tc, builder, p_style, bg, green, kImpellerTextAlignmentCenter,
+                  220.0);
+
+    // Draw blue, right-aligned text.
+    ImpellerColor blue = {0.0, 0.0, 1.0, 1.0};
+    DrawTextFrame(tc, builder, p_style, bg, blue, kImpellerTextAlignmentRight,
+                  440.0);
+
+    dl = ImpellerDisplayListBuilderCreateDisplayListNew(builder);
+
+    ImpellerPaintRelease(bg);
+    ImpellerDisplayListBuilderRelease(builder);
+  }
+
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        ImpellerSurfaceDrawDisplayList(surface.GetC(), dl);
+        return true;
+      }));
+
+  ImpellerDisplayListRelease(dl);
+  ImpellerTypographyContextRelease(tc);
+}
+
 }  // namespace impeller::interop::testing
