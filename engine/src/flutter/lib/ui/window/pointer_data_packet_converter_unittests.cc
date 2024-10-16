@@ -510,6 +510,108 @@ TEST(PointerDataPacketConverterTest, CanSynthesizeAdd) {
   ASSERT_EQ(result[3].buttons, 0);
 }
 
+TEST(PointerDataPacketConverterTest, CanSynthesizeRemove) {
+  TestDelegate delegate;
+  delegate.AddView(100);
+  delegate.AddView(200);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(3);
+
+  PointerData data;
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
+  data.view_id = 100;
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 3.0, 4.0, 1);
+  data.view_id = 100;
+  packet->SetPointerData(1, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
+  data.view_id = 200;
+  packet->SetPointerData(2, data);
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  ASSERT_EQ(result.size(), (size_t)6);
+  ASSERT_EQ(result[0].synthesized, 0);
+  ASSERT_EQ(result[0].view_id, 100);
+
+  // A hover should be synthesized.
+  ASSERT_EQ(result[1].change, PointerData::Change::kHover);
+  ASSERT_EQ(result[1].synthesized, 1);
+  ASSERT_EQ(result[1].physical_delta_x, 3.0);
+  ASSERT_EQ(result[1].physical_delta_y, 4.0);
+  ASSERT_EQ(result[1].buttons, 0);
+
+  ASSERT_EQ(result[2].change, PointerData::Change::kDown);
+  ASSERT_EQ(result[2].pointer_identifier, 1);
+  ASSERT_EQ(result[2].synthesized, 0);
+  ASSERT_EQ(result[2].buttons, 1);
+
+  // A cancel should be synthesized.
+  ASSERT_EQ(result[3].change, PointerData::Change::kCancel);
+  ASSERT_EQ(result[3].pointer_identifier, 1);
+  ASSERT_EQ(result[3].synthesized, 1);
+  ASSERT_EQ(result[3].physical_x, 3.0);
+  ASSERT_EQ(result[3].physical_y, 4.0);
+  ASSERT_EQ(result[3].buttons, 1);
+
+  // A remove should be synthesized.
+  ASSERT_EQ(result[4].physical_x, 3.0);
+  ASSERT_EQ(result[4].physical_y, 4.0);
+  ASSERT_EQ(result[4].synthesized, 1);
+  ASSERT_EQ(result[4].view_id, 100);
+
+  ASSERT_EQ(result[5].synthesized, 0);
+  ASSERT_EQ(result[5].view_id, 200);
+}
+
+TEST(PointerDataPacketConverterTest,
+     CanAvoidDoubleRemoveAfterSynthesizedRemove) {
+  TestDelegate delegate;
+  delegate.AddView(100);
+  delegate.AddView(200);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(2);
+
+  PointerData data;
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
+  data.view_id = 100;
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
+  data.view_id = 200;
+  packet->SetPointerData(1, data);
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  ASSERT_EQ(result.size(), (size_t)3);
+  ASSERT_EQ(result[0].synthesized, 0);
+  ASSERT_EQ(result[0].view_id, 100);
+
+  // A remove should be synthesized.
+  ASSERT_EQ(result[1].synthesized, 1);
+  ASSERT_EQ(result[1].view_id, 100);
+
+  ASSERT_EQ(result[2].synthesized, 0);
+  ASSERT_EQ(result[2].view_id, 200);
+
+  // Simulate a double remove.
+  packet = std::make_unique<PointerDataPacket>(1);
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 0.0, 0.0,
+                             0);
+  data.view_id = 100;
+  packet->SetPointerData(0, data);
+  converted_packet = converter.Convert(*packet);
+
+  result.clear();
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The double remove should be ignored.
+  ASSERT_EQ(result.size(), (size_t)0);
+}
+
 TEST(PointerDataPacketConverterTest, CanHandleThreeFingerGesture) {
   // Regression test https://github.com/flutter/flutter/issues/20517.
   TestDelegate delegate;
