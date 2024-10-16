@@ -48,8 +48,13 @@ void main() {
         tester.getCenter(find.byType(FloatingActionButton));
 
     // Verify the initial position is near the right side (docked to the end).
-    final Size screenSize = tester.getSize(find.byType(Scaffold));
-    expect(initialPosition.dx, greaterThan(screenSize.width * 0.5));
+    final Size screenSize = tester.getSize(
+      find.byType(Scaffold),
+    );
+    expect(
+      initialPosition.dx,
+      greaterThan(screenSize.width * 0.5),
+    );
 
     // Tap the radio button to move the FAB to centerDocked.
     await tester.tap(find.text('Docked - Center'));
