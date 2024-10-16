@@ -8,6 +8,7 @@
 #include <gdk/gdk.h>
 
 #include "flutter/shell/platform/linux/fl_keyboard_view_delegate.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
 
 G_BEGIN_DECLS
 
@@ -36,6 +37,7 @@ G_DECLARE_FINAL_TYPE(FlKeyboardManager,
 
 /**
  * fl_keyboard_manager_new:
+ * @messenger: an #FlBinaryMessenger.
  * @view_delegate: An interface that the manager requires to communicate with
  * the platform. Usually implemented by FlView.
  *
@@ -44,6 +46,7 @@ G_DECLARE_FINAL_TYPE(FlKeyboardManager,
  * Returns: a new #FlKeyboardManager.
  */
 FlKeyboardManager* fl_keyboard_manager_new(
+    FlBinaryMessenger* messenger,
     FlKeyboardViewDelegate* view_delegate);
 
 /**

@@ -42,8 +42,6 @@ struct _FlKeyboardViewDelegateInterface {
   gboolean (*text_filter_key_press)(FlKeyboardViewDelegate* delegate,
                                     FlKeyEvent* event);
 
-  FlBinaryMessenger* (*get_messenger)(FlKeyboardViewDelegate* delegate);
-
   void (*redispatch_event)(FlKeyboardViewDelegate* delegate, FlKeyEvent* event);
 
   guint (*lookup_key)(FlKeyboardViewDelegate* view_delegate,
@@ -80,17 +78,6 @@ void fl_keyboard_view_delegate_send_key_event(FlKeyboardViewDelegate* delegate,
 gboolean fl_keyboard_view_delegate_text_filter_key_press(
     FlKeyboardViewDelegate* delegate,
     FlKeyEvent* event);
-
-/**
- * fl_keyboard_view_delegate_get_messenger:
- *
- * Returns a binary messenger that can be used to send messages to the
- * framework.
- *
- * The ownership of messenger is kept by the view delegate.
- */
-FlBinaryMessenger* fl_keyboard_view_delegate_get_messenger(
-    FlKeyboardViewDelegate* delegate);
 
 /**
  * fl_keyboard_view_delegate_redispatch_event:
