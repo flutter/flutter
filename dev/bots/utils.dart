@@ -562,9 +562,7 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   }
   // One-indexed.
   final int index = int.parse(match.group(1)!);
-  print('index = $index');
   final int total = int.parse(match.group(2)!);
-  print('total = $total');
   if (index > total) {
     foundError(<String>[
       '${red}Invalid subshard name "$subshardName". Index number must be greater or equal to total.',
@@ -573,7 +571,8 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   }
 
   // While there exists a closed formula figuring out the range of tests this
-  // shard is resposible for, doing this via simulation is easier to follow.
+  // shard is resposible for, modeling this as a simulation of distributing
+  // items equally into buckets is more intuitive.
   //
   // A bucket represents how many tests a shard should be allocated.
   final List<int> buckets = List<int>.filled(total, 0);
@@ -581,12 +580,13 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   for (int i = 0; i < buckets.length; i++) {
     buckets[i] = (tests.length / total).floor();
   }
-  // Then, distribute the remaining items.
+  // For the N leftover items, put one into each of the first N buckets.
   final int remainingItems = tests.length % buckets.length;
   for (int i = 0; i < remainingItems; i++) {
     buckets[i] += 1;
   }
 
+  // Lastly, compute the indices of the items in buckets[index].
   final int numberOfItemsInPreviousBuckets = index == 0 ? 0 : buckets.sublist(0, index - 1).sum;
   final int start = (numberOfItemsInPreviousBuckets + 1) - 1;
   final int end = (start + buckets[index - 1]) - 1;
