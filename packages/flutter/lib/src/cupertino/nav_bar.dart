@@ -850,8 +850,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           ? _kNavBarLargeTitleHeightExtension
           : 0.0,
         // Eyeballed on an iPhone 16 simulator running iOS 18.
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.fastEaseInToSlowEaseOut,
       );
     }
   }
