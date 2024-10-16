@@ -10,7 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Floating Action Button visibility can be toggled',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const example.BottomAppBarDemo());
+    await tester.pumpWidget(
+      const example.BottomAppBarDemo(),
+    );
 
     expect(find.byType(FloatingActionButton), findsOneWidget);
 
