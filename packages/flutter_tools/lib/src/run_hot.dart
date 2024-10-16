@@ -804,6 +804,20 @@ class HotRunner extends ResidentRunner {
           globals.printStatus('${result.message} in $elapsed.');
         }
       }
+
+      final Map<FlutterDevice?, List<FlutterView>> viewCache =
+          <FlutterDevice?, List<FlutterView>>{};
+      for (final FlutterDevice? device in flutterDevices) {
+        final List<FlutterView> views =
+            await device!.vmService!.getFlutterViews();
+        viewCache[device] = views;
+        for (final FlutterView view in views) {
+          await device.vmService!.flutterSendExtensionEvent(
+            isolateId: view.uiIsolate!.id!,
+            eventKind: 'Flutter.HotReload',
+          );
+        }
+      }
     }
     return result;
   }
