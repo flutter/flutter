@@ -968,7 +968,6 @@ class _MaterialAppState extends State<MaterialApp> {
 
     Widget childWidget = child ?? const SizedBox.shrink();
 
-    if (widget.themeAnimationStyle != AnimationStyle.noAnimation) {
       if (widget.builder != null) {
         childWidget = Builder(
           builder: (BuildContext context) {
@@ -987,12 +986,13 @@ class _MaterialAppState extends State<MaterialApp> {
           },
         );
       }
-      childWidget = AnimatedTheme(
-        data: theme,
-        duration: widget.themeAnimationStyle?.duration ?? widget.themeAnimationDuration,
-        curve: widget.themeAnimationStyle?.curve ?? widget.themeAnimationCurve,
-        child: childWidget,
-      );
+      if (widget.themeAnimationStyle != AnimationStyle.noAnimation) {
+        childWidget = AnimatedTheme(
+          data: theme,
+          duration: widget.themeAnimationStyle?.duration ?? widget.themeAnimationDuration,
+          curve: widget.themeAnimationStyle?.curve ?? widget.themeAnimationCurve,
+          child: childWidget,
+        );
     } else {
       childWidget = Theme(
         data: theme,
