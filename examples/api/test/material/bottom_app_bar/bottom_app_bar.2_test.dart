@@ -26,7 +26,7 @@ void main() {
     // Build the app.
     await tester.pumpWidget(const example.BottomAppBarDemo());
 
-    // Verify the BottomAppBar has elevation initiallly.
+    // Verify the BottomAppBar has elevation initially.
     BottomAppBar bottomAppBar = tester.widget(
       find.byType(BottomAppBar),
     );
@@ -59,7 +59,7 @@ void main() {
     final Size hiddenSize = tester.getSize(
       find.byType(AnimatedContainer),
     );
-    expect(hiddenSize.height, equals(0.0)); //AnimatedContainer's height
+    expect(hiddenSize.height, equals(0.0)); // AnimatedContainer's height
 
     // Scroll up to show the BottomAppBar again.
     await tester.drag(find.byType(ListView), const Offset(0, 300));
