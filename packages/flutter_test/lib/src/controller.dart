@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:io';
+///
 /// @docImport 'package:flutter/scheduler.dart';
+/// @docImport 'package:flutter_driver/flutter_driver.dart';
 ///
 /// @docImport 'binding.dart';
 /// @docImport 'finders.dart';
@@ -1962,7 +1965,7 @@ abstract class WidgetController {
   /// soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// [Platform.operatingSystem] to make the event appear to be from
   /// that type of system. If not specified, defaults to "web" on web, and the
   /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
@@ -2004,7 +2007,7 @@ abstract class WidgetController {
   /// from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// [Platform.operatingSystem] to make the event appear to be from
   /// that type of system. If not specified, defaults to "web" on web, and the
   /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
@@ -2041,7 +2044,7 @@ abstract class WidgetController {
   /// not from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// [Platform.operatingSystem] to make the event appear to be from
   /// that type of system. If not specified, defaults to "web" on web, and the
   /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
@@ -2071,7 +2074,7 @@ abstract class WidgetController {
   /// from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// [Platform.operatingSystem] to make the event appear to be from
   /// that type of system. If not specified, defaults to "web" on web, and the
   /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///

@@ -99,6 +99,10 @@ class DefaultTextStyle extends InheritedTheme {
   /// [DefaultTextStyle] using the [DefaultTextStyle.new] constructor directly.
   /// See the source below for an example of how to do this (since that's
   /// essentially what this constructor does).
+  ///
+  /// If a [textHeightBehavior] is provided, the existing configuration will be
+  /// replaced compeletely. To retain part of the original [textHeightBehavior],
+  /// manually obtain the ambient [DefaultTextStyle] using [DefaultTextStyle.of].
   static Widget merge({
     Key? key,
     TextStyle? style,
@@ -107,6 +111,7 @@ class DefaultTextStyle extends InheritedTheme {
     TextOverflow? overflow,
     int? maxLines,
     TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
     required Widget child,
   }) {
     return Builder(
@@ -120,6 +125,7 @@ class DefaultTextStyle extends InheritedTheme {
           overflow: overflow ?? parent.overflow,
           maxLines: maxLines ?? parent.maxLines,
           textWidthBasis: textWidthBasis ?? parent.textWidthBasis,
+          textHeightBehavior: textHeightBehavior ?? parent.textHeightBehavior,
           child: child,
         );
       },

@@ -448,8 +448,6 @@ void main() {
           'xcodebuild',
           '-project',
           '/',
-          '-sdk',
-          'iphonesimulator',
           '-destination',
           'generic/platform=watchOS Simulator',
           '-showBuildSettings',

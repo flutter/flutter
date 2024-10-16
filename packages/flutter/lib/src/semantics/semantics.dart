@@ -1213,7 +1213,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This value is not exposed to the users of the app.
   ///
   /// It's usually used for UI testing with tools that work by querying the
-  /// native accessibility, like UIAutomator, XCUITest, or Appium.
+  /// native accessibility, like UIAutomator, XCUITest, or Appium. It can be
+  /// matched with [CommonFinders.bySemanticsIdentifier].
   ///
   /// On Android, this is used for `AccessibilityNodeInfo.setViewIdResourceName`.
   /// It'll be appear in accessibility hierarchy as `resource-id`.
@@ -1642,7 +1643,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This handler is invoked when the user wants to replace the current text in
   /// the text field with a new text.
   ///
-  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// Voice access users can trigger this handler by speaking `type <text>` to
   /// their Android devices.
   final SetTextHandler? onSetText;
 
@@ -3085,8 +3086,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     String? prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
+    int wrapWidth = 65,
   }) {
-    return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
+    return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel, wrapWidth: wrapWidth);
   }
 
   @override
@@ -4111,7 +4113,7 @@ class SemanticsConfiguration {
   /// This handler is invoked when the user wants to replace the current text in
   /// the text field with a new text.
   ///
-  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// Voice access users can trigger this handler by speaking `type <text>` to
   /// their Android devices.
   SetTextHandler? get onSetText => _onSetText;
   SetTextHandler? _onSetText;

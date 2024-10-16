@@ -24,6 +24,7 @@ import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/xcode.dart';
+import '../migrations/swift_package_manager_gitignore_migration.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
@@ -55,7 +56,7 @@ const String kConcurrentRunFailureMessage2 = 'there are two concurrent builds ru
 String missingPlatformInstructions(String simulatorVersion) => '''
 ════════════════════════════════════════════════════════════════════════════════
 $simulatorVersion is not installed. To download and install the platform, open
-Xcode, select Xcode > Settings > Platforms, and click the GET button for the
+Xcode, select Xcode > Settings > Components, and click the GET button for the
 required platform.
 
 For more information, please visit:
@@ -175,6 +176,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         fileSystem: globals.fs,
         plistParser: globals.plistParser,
       ),
+      SwiftPackageManagerGitignoreMigration(project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -349,12 +351,15 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   if (activeArch != null) {
-    final String activeArchName = activeArch.name;
-    buildCommands.add('ONLY_ACTIVE_ARCH=YES');
     // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
     // as it cannot be build for the architecture of the Flutter app.
     if (!hasWatchCompanion) {
-      buildCommands.add('ARCHS=$activeArchName');
+      // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
+      // the native architecture.
+      final bool onlyActiveArch = activeArch == getCurrentDarwinArch();
+
+      buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch? 'YES' : 'NO'}');
+      buildCommands.add('ARCHS=${activeArch.name}');
     }
   }
 

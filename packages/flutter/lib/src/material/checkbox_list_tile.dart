@@ -205,6 +205,8 @@ class CheckboxListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.checkboxSemanticLabel,
+    this.checkboxScaleFactor = 1.0,
+    this.internalAddSemanticForOnTap = false,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
@@ -249,6 +251,8 @@ class CheckboxListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.checkboxSemanticLabel,
+    this.checkboxScaleFactor = 1.0,
+    this.internalAddSemanticForOnTap = false,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
@@ -464,6 +468,18 @@ class CheckboxListTile extends StatelessWidget {
   /// inoperative.
   final bool? enabled;
 
+  /// Whether to add button:true to the semantics if onTap is provided.
+  /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
+  ///
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
+  final bool internalAddSemanticForOnTap;
+
+  /// Controls the scaling factor applied to the [Checkbox] within the [CheckboxListTile].
+  ///
+  /// Defaults to 1.0.
+  final double checkboxScaleFactor;
+
   /// {@macro flutter.material.checkbox.semanticLabel}
   final String? checkboxSemanticLabel;
 
@@ -483,7 +499,7 @@ class CheckboxListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control;
+    Widget control;
 
     switch (_checkboxType) {
       case _CheckboxType.material:
@@ -529,6 +545,12 @@ class CheckboxListTile extends StatelessWidget {
           ),
         );
     }
+    if (checkboxScaleFactor != 1.0) {
+      control = Transform.scale(
+        scale: checkboxScaleFactor,
+        child: control,
+      );
+    }
 
     final ListTileThemeData listTileTheme = ListTileTheme.of(context);
     final ListTileControlAffinity effectiveControlAffinity =
@@ -567,6 +589,7 @@ class CheckboxListTile extends StatelessWidget {
         focusNode: focusNode,
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
+        internalAddSemanticForOnTap: internalAddSemanticForOnTap,
       ),
     );
   }

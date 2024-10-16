@@ -4002,11 +4002,13 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     String prefixLineOne = '',
     String? prefixOtherLines = '',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    int wrapWidth = 65,
   }) {
     return _withDebugActiveLayoutCleared(() => super.toStringDeep(
           prefixLineOne: prefixLineOne,
           prefixOtherLines: prefixOtherLines,
           minLevel: minLevel,
+          wrapWidth: wrapWidth,
         ));
   }
 

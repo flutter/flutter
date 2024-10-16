@@ -398,7 +398,7 @@ class HSLColor {
 
 /// A color that has a small table of related colors called a "swatch".
 ///
-/// The table is indexed by values of type `T`.
+/// The table is accessed by key values of type `T`.
 ///
 /// See also:
 ///
@@ -413,14 +413,17 @@ class ColorSwatch<T> extends Color {
   /// The `primary` argument should be the 32 bit ARGB value of one of the
   /// values in the swatch, as would be passed to the [Color.new] constructor
   /// for that same color, and as is exposed by [value]. (This is distinct from
-  /// the specific index of the color in the swatch.)
+  /// the key of any color in the swatch.)
   const ColorSwatch(super.primary, this._swatch);
 
   @protected
   final Map<T, Color> _swatch;
 
   /// Returns an element of the swatch table.
-  Color? operator [](T index) => _swatch[index];
+  Color? operator [](T key) => _swatch[key];
+
+  /// Returns the valid keys for accessing operator[].
+  Iterable<T> get keys => _swatch.keys;
 
   @override
   bool operator ==(Object other) {

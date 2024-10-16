@@ -857,6 +857,28 @@ void main() {
       expect(caretOffset.dy, 0.0);
       painter.dispose();
     });
+
+    test('caret height reflects run height if strut is disabled', () {
+      const TextSpan span = TextSpan(text: 'M', style: TextStyle(fontSize: 128), children: <InlineSpan>[
+        TextSpan(text: 'M', style: TextStyle(fontSize: 32)),
+        TextSpan(text: 'M', style: TextStyle(fontSize: 64)),
+      ]);
+      final TextPainter painter = TextPainter()
+        ..textDirection = TextDirection.ltr
+        ..text = span
+        ..layout();
+
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 0, affinity: ui.TextAffinity.upstream), Rect.zero), 128.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 0), Rect.zero), 128.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 1, affinity: ui.TextAffinity.upstream), Rect.zero), 128.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 1), Rect.zero), 32.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 2, affinity: ui.TextAffinity.upstream), Rect.zero), 32.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 2), Rect.zero), 64.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 3, affinity: ui.TextAffinity.upstream), Rect.zero), 64.0);
+      expect(painter.getFullHeightForCaret(const TextPosition(offset: 3), Rect.zero), 128.0);
+
+      painter.dispose();
+    });
   });
 
   test('TextPainter error test', () {

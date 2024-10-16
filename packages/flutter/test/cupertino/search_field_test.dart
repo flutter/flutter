@@ -654,4 +654,155 @@ void main() {
     final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
     expect(textField.enableIMEPersonalizedLearning, false);
   });
+
+  testWidgets('Icons and placeholder fade while resizing on scroll', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverResizingHeader(
+                child: CupertinoSearchTextField(
+                  suffixMode: OverlayVisibilityMode.always,
+                ),
+              ),
+              SliverFillRemaining(),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder searchTextFieldFinder = find.byType(CupertinoSearchTextField);
+    expect(searchTextFieldFinder, findsOneWidget);
+
+    final Finder prefixIconFinder = find.descendant(
+      of: searchTextFieldFinder,
+      matching: find.byIcon(CupertinoIcons.search),
+    );
+    final Finder suffixIconFinder = find.descendant(
+      of: searchTextFieldFinder,
+      matching: find.byIcon(CupertinoIcons.xmark_circle_fill),
+    );
+    final Finder placeholderFinder = find.descendant(
+      of: searchTextFieldFinder,
+      matching: find.text('Search'),
+    );
+    expect(prefixIconFinder, findsOneWidget);
+    expect(suffixIconFinder, findsOneWidget);
+    expect(placeholderFinder, findsOneWidget);
+
+    // Initially, the icons and placeholder text are fully opaque.
+    expect(
+      tester.widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity))).opacity,
+      equals(1.0),
+    );
+    expect(
+      tester.widget<Opacity>(find.ancestor(of: suffixIconFinder, matching: find.byType(Opacity))).opacity,
+      equals(1.0),
+    );
+    expect(
+      tester.widget<Text>(placeholderFinder).style?.color?.a,
+      equals(1.0),
+    );
+
+    final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
+
+    final TestGesture scrollGesture1 = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    await scrollGesture1.moveBy(Offset(0, -searchTextFieldHeight / 5));
+    await scrollGesture1.up();
+    await tester.pumpAndSettle();
+
+    // The icons and placeholder text start to fade.
+    expect(
+      tester.widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity))).opacity,
+      greaterThan(0.0),
+    );
+    expect(
+      tester.widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity))).opacity,
+      lessThan(1.0),
+    );
+    expect(
+      tester.widget<Opacity>(find.ancestor(of: suffixIconFinder, matching: find.byType(Opacity))).opacity,
+      greaterThan(0.0),
+    );
+    expect(
+      tester.widget<Opacity>(find.ancestor(of: suffixIconFinder, matching: find.byType(Opacity))).opacity,
+      lessThan(1.0),
+    );
+    expect(
+      tester.widget<Text>(placeholderFinder).style?.color?.a,
+      greaterThan(0.0),
+    );
+    expect(
+      tester.widget<Text>(placeholderFinder).style?.color?.a,
+      lessThan(1.0),
+    );
+
+    final TestGesture scrollGesture2 = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    await scrollGesture2.moveBy(Offset(0, -4 * searchTextFieldHeight / 5));
+    await scrollGesture2.up();
+    await tester.pumpAndSettle();
+
+    // The icons and placeholder text have faded completely.
+    expect(
+      tester.widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity))).opacity,
+      equals(0.0),
+    );
+    expect(
+      tester.widget<Opacity>(find.ancestor(of: suffixIconFinder, matching: find.byType(Opacity))).opacity,
+      equals(0.0),
+    );
+    expect(
+      tester.widget<Text>(placeholderFinder).style?.color?.a,
+      equals(0.0),
+    );
+  });
+
+  testWidgets('Top padding animates while resizing on scroll', (WidgetTester tester) async {
+    const TextDirection direction = TextDirection.ltr;
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: direction,
+        child: CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverResizingHeader(child: CupertinoSearchTextField()),
+                SliverFillRemaining(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder searchTextFieldFinder = find.byType(CupertinoSearchTextField);
+    expect(searchTextFieldFinder, findsOneWidget);
+
+    final double initialPadding = tester.widget<CupertinoTextField>(
+      find.descendant(
+        of: searchTextFieldFinder,
+        matching: find.byType(CupertinoTextField),
+      ),
+    ).padding.resolve(direction).top;
+    expect(initialPadding, equals(8.0));
+
+    final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
+
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    await scrollGesture.moveBy(Offset(0, -searchTextFieldHeight / 5));
+    await scrollGesture.up();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<CupertinoTextField>(
+        find.descendant(
+          of: searchTextFieldFinder,
+          matching: find.byType(CupertinoTextField),
+        ),
+      ).padding.resolve(direction).top,
+      lessThan(initialPadding),
+    );
+  });
 }

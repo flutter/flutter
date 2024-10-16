@@ -200,6 +200,8 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.radioScaleFactor = 1.0,
+    this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false,
        assert(!isThreeLine || subtitle != null);
@@ -239,7 +241,9 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.radioScaleFactor = 1.0,
     this.useCupertinoCheckmarkStyle = false,
+    this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.adaptive,
        assert(!isThreeLine || subtitle != null);
 
@@ -449,6 +453,13 @@ class RadioListTile<T> extends StatelessWidget {
 
   final _RadioType _radioType;
 
+  /// Whether to add button:true to the semantics if onTap is provided.
+  /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
+  ///
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
+  final bool internalAddSemanticForOnTap;
+
   /// Whether to use the checkbox style for the [CupertinoRadio] control.
   ///
   /// Only usable under the [RadioListTile.adaptive] constructor. If set to
@@ -459,9 +470,14 @@ class RadioListTile<T> extends StatelessWidget {
   /// Defaults to false.
   final bool useCupertinoCheckmarkStyle;
 
+  /// Controls the scaling factor applied to the [Radio] within the [RadioListTile].
+  ///
+  /// Defaults to 1.0.
+  final double radioScaleFactor;
+
   @override
   Widget build(BuildContext context) {
-    final Widget control;
+    Widget control;
     switch (_radioType) {
       case _RadioType.material:
         control = ExcludeFocus(
@@ -498,6 +514,13 @@ class RadioListTile<T> extends StatelessWidget {
             useCupertinoCheckmarkStyle: useCupertinoCheckmarkStyle,
           ),
         );
+    }
+
+    if (radioScaleFactor != 1.0) {
+      control = Transform.scale(
+        scale: radioScaleFactor,
+        child: control,
+      );
     }
 
     final ListTileThemeData listTileTheme = ListTileTheme.of(context);
@@ -546,6 +569,7 @@ class RadioListTile<T> extends StatelessWidget {
         focusNode: focusNode,
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
+        internalAddSemanticForOnTap: internalAddSemanticForOnTap,
       ),
     );
   }

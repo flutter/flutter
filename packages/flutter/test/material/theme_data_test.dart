@@ -21,6 +21,44 @@ void main() {
     expect(dawn.primaryColor, Color.lerp(dark.primaryColor, light.primaryColor, 0.25));
   });
 
+  test('ThemeData objects with .styleFrom() members are equal', () {
+    ThemeData createThemeData() {
+      return ThemeData(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.black,
+            backgroundColor: Colors.black,
+            elevation: 1.0,
+          ),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            foregroundColor: Colors.black,
+            disabledForegroundColor: Colors.black,
+            backgroundColor: Colors.black,
+            disabledBackgroundColor: Colors.black,
+            overlayColor: Colors.black,
+          ),
+        ),
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+            hoverColor: Colors.black,
+            focusColor: Colors.black,
+            highlightColor: Colors.black,
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            enabledMouseCursor: MouseCursor.defer,
+            disabledMouseCursor: MouseCursor.uncontrolled,
+          ),
+        ),
+      );
+    }
+
+    expect(createThemeData() == createThemeData(), isTrue);
+  });
+
   test('Defaults to the default typography for the platform', () {
     for (final TargetPlatform platform in TargetPlatform.values) {
       final ThemeData theme = ThemeData(platform: platform, useMaterial3: false);
@@ -272,7 +310,7 @@ void main() {
     expect(theme.colorScheme.primary, const Color(0xff6750a4));
     expect(theme.colorScheme.onPrimary, const Color(0xffffffff));
     expect(theme.colorScheme.primaryContainer, const Color(0xffeaddff));
-    expect(theme.colorScheme.onPrimaryContainer, const Color(0xff21005d));
+    expect(theme.colorScheme.onPrimaryContainer, const Color(0xff4f378b));
     expect(theme.colorScheme.primaryFixed, const Color(0xffeaddff));
     expect(theme.colorScheme.primaryFixedDim, const Color(0xffd0bcff));
     expect(theme.colorScheme.onPrimaryFixed, const Color(0xff21005d));
@@ -280,7 +318,7 @@ void main() {
     expect(theme.colorScheme.secondary, const Color(0xff625b71));
     expect(theme.colorScheme.onSecondary, const Color(0xffffffff));
     expect(theme.colorScheme.secondaryContainer, const Color(0xffe8def8));
-    expect(theme.colorScheme.onSecondaryContainer, const Color(0xff1d192b));
+    expect(theme.colorScheme.onSecondaryContainer, const Color(0xff4a4458));
     expect(theme.colorScheme.secondaryFixed, const Color(0xffe8def8));
     expect(theme.colorScheme.secondaryFixedDim, const Color(0xffccc2dc));
     expect(theme.colorScheme.onSecondaryFixed, const Color(0xff1d192b));
@@ -288,7 +326,7 @@ void main() {
     expect(theme.colorScheme.tertiary, const Color(0xff7d5260));
     expect(theme.colorScheme.onTertiary, const Color(0xffffffff));
     expect(theme.colorScheme.tertiaryContainer, const Color(0xffffd8e4));
-    expect(theme.colorScheme.onTertiaryContainer, const Color(0xff31111d));
+    expect(theme.colorScheme.onTertiaryContainer, const Color(0xff633b48));
     expect(theme.colorScheme.tertiaryFixed, const Color(0xffffd8e4));
     expect(theme.colorScheme.tertiaryFixedDim, const Color(0xffefb8c8));
     expect(theme.colorScheme.onTertiaryFixed, const Color(0xff31111d));
@@ -296,7 +334,7 @@ void main() {
     expect(theme.colorScheme.error, const Color(0xffb3261e));
     expect(theme.colorScheme.onError, const Color(0xffffffff));
     expect(theme.colorScheme.errorContainer, const Color(0xfff9dedc));
-    expect(theme.colorScheme.onErrorContainer, const Color(0xff410e0b));
+    expect(theme.colorScheme.onErrorContainer, const Color(0xff8c1d18));
     expect(theme.colorScheme.outline, const Color(0xff79747e));
     expect(theme.colorScheme.background, const Color(0xfffef7ff));
     expect(theme.colorScheme.onBackground, const Color(0xff1d1b20));
@@ -335,7 +373,7 @@ void main() {
     expect(theme.colorScheme.primary, const Color(0xff6750a4));
     expect(theme.colorScheme.onPrimary, const Color(0xffffffff));
     expect(theme.colorScheme.primaryContainer, const Color(0xffeaddff));
-    expect(theme.colorScheme.onPrimaryContainer, const Color(0xff21005d));
+    expect(theme.colorScheme.onPrimaryContainer, const Color(0xff4f378b));
     expect(theme.colorScheme.primaryFixed, const Color(0xffeaddff));
     expect(theme.colorScheme.primaryFixedDim, const Color(0xffd0bcff));
     expect(theme.colorScheme.onPrimaryFixed, const Color(0xff21005d));
@@ -343,7 +381,7 @@ void main() {
     expect(theme.colorScheme.secondary, const Color(0xff625b71));
     expect(theme.colorScheme.onSecondary, const Color(0xffffffff));
     expect(theme.colorScheme.secondaryContainer, const Color(0xffe8def8));
-    expect(theme.colorScheme.onSecondaryContainer, const Color(0xff1d192b));
+    expect(theme.colorScheme.onSecondaryContainer, const Color(0xff4a4458));
     expect(theme.colorScheme.secondaryFixed, const Color(0xffe8def8));
     expect(theme.colorScheme.secondaryFixedDim, const Color(0xffccc2dc));
     expect(theme.colorScheme.onSecondaryFixed, const Color(0xff1d192b));
@@ -351,7 +389,7 @@ void main() {
     expect(theme.colorScheme.tertiary, const Color(0xff7d5260));
     expect(theme.colorScheme.onTertiary, const Color(0xffffffff));
     expect(theme.colorScheme.tertiaryContainer, const Color(0xffffd8e4));
-    expect(theme.colorScheme.onTertiaryContainer, const Color(0xff31111d));
+    expect(theme.colorScheme.onTertiaryContainer, const Color(0xff633b48));
     expect(theme.colorScheme.tertiaryFixed, const Color(0xffffd8e4));
     expect(theme.colorScheme.tertiaryFixedDim, const Color(0xffefb8c8));
     expect(theme.colorScheme.onTertiaryFixed, const Color(0xff31111d));
@@ -359,7 +397,7 @@ void main() {
     expect(theme.colorScheme.error, const Color(0xffb3261e));
     expect(theme.colorScheme.onError, const Color(0xffffffff));
     expect(theme.colorScheme.errorContainer, const Color(0xfff9dedc));
-    expect(theme.colorScheme.onErrorContainer, const Color(0xff410e0b));
+    expect(theme.colorScheme.onErrorContainer, const Color(0xff8c1d18));
     expect(theme.colorScheme.outline, const Color(0xff79747e));
     expect(theme.colorScheme.background, const Color(0xfffef7ff));
     expect(theme.colorScheme.onBackground, const Color(0xff1d1b20));
@@ -699,8 +737,8 @@ void main() {
         0.5,
       );
 
-      expect(lerped.extension<MyThemeExtensionA>()!.color1, const Color(0xff7f7f7f));
-      expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, isSameColorAs(const Color(0xff7f7f7f)));
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, isSameColorAs(const Color(0xff90ab7d)));
       expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 75));
 
       // Missing from 2nd ThemeData
@@ -718,8 +756,8 @@ void main() {
         ),
         0.5,
       );
-      expect(lerped.extension<MyThemeExtensionA>()!.color1, Colors.black); // Not lerped
-      expect(lerped.extension<MyThemeExtensionA>()!.color2, Colors.amber); // Not lerped
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, isSameColorAs(Colors.black)); // Not lerped
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, isSameColorAs(Colors.amber)); // Not lerped
       expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 75));
 
       // Missing from 1st ThemeData
@@ -737,8 +775,8 @@ void main() {
         ),
         0.5,
       );
-      expect(lerped.extension<MyThemeExtensionA>()!.color1, const Color(0xff7f7f7f));
-      expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, isSameColorAs(const Color(0xff7f7f7f)));
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, isSameColorAs(const Color(0xff90ab7d)));
       expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 100)); // Not lerped
     });
 
@@ -850,12 +888,12 @@ void main() {
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
       buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
-      cardTheme: const CardTheme(color: Colors.black),
+      cardTheme: const CardThemeData(color: Colors.black),
       checkboxTheme: const CheckboxThemeData(),
       chipTheme: chipTheme,
       dataTableTheme: const DataTableThemeData(),
       datePickerTheme: const DatePickerThemeData(),
-      dialogTheme: const DialogTheme(backgroundColor: Colors.black),
+      dialogTheme: const DialogThemeData(backgroundColor: Colors.black),
       dividerTheme: const DividerThemeData(color: Colors.black),
       drawerTheme: const DrawerThemeData(),
       dropdownMenuTheme: const DropdownMenuThemeData(),
@@ -881,7 +919,7 @@ void main() {
       sliderTheme: sliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
       switchTheme: const SwitchThemeData(),
-      tabBarTheme: const TabBarTheme(labelColor: Colors.black),
+      tabBarTheme: const TabBarThemeData(labelColor: Colors.black),
       textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: Colors.red)),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
@@ -964,12 +1002,12 @@ void main() {
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.white),
       buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.end),
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.light()),
-      cardTheme: const CardTheme(color: Colors.white),
+      cardTheme: const CardThemeData(color: Colors.white),
       checkboxTheme: const CheckboxThemeData(),
       chipTheme: otherChipTheme,
       dataTableTheme: const DataTableThemeData(),
       datePickerTheme: const DatePickerThemeData(backgroundColor: Colors.amber),
-      dialogTheme: const DialogTheme(backgroundColor: Colors.white),
+      dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
       dividerTheme: const DividerThemeData(color: Colors.white),
       drawerTheme: const DrawerThemeData(),
       dropdownMenuTheme: const DropdownMenuThemeData(),
@@ -995,7 +1033,7 @@ void main() {
       sliderTheme: otherSliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.white),
       switchTheme: const SwitchThemeData(),
-      tabBarTheme: const TabBarTheme(labelColor: Colors.white),
+      tabBarTheme: const TabBarThemeData(labelColor: Colors.white),
       textButtonTheme: const TextButtonThemeData(),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),

@@ -99,6 +99,12 @@ class SourceVisitor implements ResolvedFiles {
         // flutter root will not contain a symbolic link.
         Environment.kFlutterRootDirectory => environment.flutterRootDir.absolute.path,
         Environment.kProjectDirectory     => environment.projectDir.resolveSymbolicLinksSync(),
+        Environment.kWorkspaceDirectory   =>
+          environment.fileSystem.path.dirname(
+            environment.fileSystem.path.dirname(
+              environment.packageConfigPath,
+            ),
+          ),
         Environment.kBuildDirectory       => environment.buildDir.resolveSymbolicLinksSync(),
         Environment.kCacheDirectory       => environment.cacheDir.resolveSymbolicLinksSync(),
         Environment.kOutputDirectory      => environment.outputDir.resolveSymbolicLinksSync(),

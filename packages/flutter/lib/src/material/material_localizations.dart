@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter/services.dart';
+/// @docImport 'package:flutter_localizations/flutter_localizations.dart';
 ///
 /// @docImport 'about.dart';
 /// @docImport 'action_buttons.dart';

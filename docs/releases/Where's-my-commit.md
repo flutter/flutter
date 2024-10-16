@@ -104,7 +104,7 @@ To find out when a given Dart SDK change rolled into the engine:
 
    **Important**: be sure to adjust for timezones when comparing times between the Dart SDK commit and the time when the engine commits landed.
 
-1. Once you've found a candidate commit, click on the hyperlink of the commit description to go to the commit details page.  The full commit description will list what Dart SDK comitts were contained in the roll.  For example:
+1. Once you've found a candidate commit, click on the hyperlink of the commit description to go to the commit details page.  The full commit description will list what Dart SDK commits were contained in the roll.  For example:
 
    <img src="https://user-images.githubusercontent.com/15253456/63283634-9ee87d00-c266-11e9-8960-3424cd2e8de1.png" alt="Commits contained in the Dart SDK roll" width="65%;" />
 

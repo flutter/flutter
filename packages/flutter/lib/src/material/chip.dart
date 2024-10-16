@@ -1369,7 +1369,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
     final Widget? avatar = iconTheme != null && hasAvatar
       ? IconTheme.merge(
-          data: theme.useMaterial3 ? chipDefaults.iconTheme!.merge(iconTheme) : iconTheme,
+          data: chipDefaults.iconTheme!.merge(iconTheme),
           child: widget.avatar!,
         )
       : widget.avatar;
@@ -2441,7 +2441,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
 
   @override
   BorderSide? get side => isEnabled
-    ? BorderSide(color: _colors.outline)
+    ? BorderSide(color: _colors.outlineVariant)
     : BorderSide(color: _colors.onSurface.withOpacity(0.12));
 
   @override

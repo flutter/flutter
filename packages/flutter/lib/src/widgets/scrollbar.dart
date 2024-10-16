@@ -4,6 +4,7 @@
 
 /// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
 ///
 /// @docImport 'editable_text.dart';
 /// @docImport 'list_wheel_scroll_view.dart';
@@ -1992,7 +1993,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return gestures;
     }
 
-    switch (_axis) {
+    switch (_effectiveScrollController!.position.axis) {
       case Axis.horizontal:
         gestures[_HorizontalThumbDragGestureRecognizer] =
           GestureRecognizerFactoryWithHandlers<_HorizontalThumbDragGestureRecognizer>(
@@ -2011,8 +2012,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             ),
             _initThumbDragGestureRecognizer,
           );
-      case null:
-        return gestures;
     }
 
     gestures[_TrackTapGestureRecognizer] =

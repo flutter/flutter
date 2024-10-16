@@ -159,6 +159,8 @@ void main() {
           // Plugin is a dynamic xor static framework.
           expect(helloDynamic != helloStatic, isTrue);
 
+          expect(outputFlutterFramework.childFile('PrivacyInfo.xcprivacy'), exists);
+
           expect(outputAppFrameworkBinary, exists);
           expect(outputAppFramework.childFile('Info.plist'), exists);
 

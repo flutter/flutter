@@ -1227,6 +1227,107 @@ void main() {
     );
   });
 
+  group('count tests for repeated animation', () {
+    test(
+      'calling repeat by setting count as zero shall throw Assertion',
+      () {
+        final AnimationController controller = AnimationController(
+          duration: const Duration(milliseconds: 100),
+          value: 0.0,
+          vsync: const TestVSync(),
+        );
+
+        expect(controller.value, 0.0);
+        expect(
+          () => controller.repeat(reverse: true, count: 0),
+          throwsAssertionError,
+        );
+      },
+    );
+
+    test(
+      'calling repeat by setting count as negative shall throw Assertion',
+      () {
+        final AnimationController controller = AnimationController(
+          duration: const Duration(milliseconds: 100),
+          value: 0.0,
+          vsync: const TestVSync(),
+        );
+
+        expect(controller.value, 0.0);
+        expect(
+          () => controller.repeat(reverse: true, count: -1),
+          throwsAssertionError,
+        );
+      },
+    );
+
+    test(
+      'calling repeat by setting count as valid with reverse as false, shall run animation accordingly',
+      () {
+        final AnimationController controller = AnimationController(
+          duration: const Duration(milliseconds: 100),
+          value: 0.0,
+          vsync: const TestVSync(),
+        );
+
+        expect(controller.value, 0.0);
+        controller.repeat(count: 1);
+        tick(Duration.zero);
+        tick(const Duration(milliseconds: 25));
+        expect(controller.value, 0.25);
+        tick(const Duration(milliseconds: 50));
+        expect(controller.value, 0.5);
+        tick(const Duration(milliseconds: 99));
+        expect(controller.value, 0.99);
+        tick(const Duration(milliseconds: 100));
+        expect(controller.value, 0);
+
+        controller.reset();
+
+        expect(controller.value, 0.0);
+        controller.repeat(count: 2);
+        tick(Duration.zero);
+        tick(const Duration(milliseconds: 25));
+        expect(controller.value, 0.25);
+        tick(const Duration(milliseconds: 50));
+        expect(controller.value, 0.5);
+        tick(const Duration(milliseconds: 200));
+        expect(controller.value, 0);
+
+        controller.reset();
+        controller.dispose();
+      },
+    );
+
+    test(
+      'calling repeat by setting count as valid with reverse as true, shall run animation accordingly',
+      () {
+        final AnimationController controller = AnimationController(
+          duration: const Duration(milliseconds: 100),
+          value: 0.0,
+          vsync: const TestVSync(),
+        );
+
+        expect(controller.value, 0.0);
+        controller.repeat(reverse: true, count: 4);
+        tick(Duration.zero);
+        tick(const Duration(milliseconds: 25));
+        expect(controller.value, 0.25);
+        tick(const Duration(milliseconds: 50));
+        expect(controller.value, 0.5);
+        tick(const Duration(milliseconds: 99));
+        expect(controller.value, 0.99);
+        tick(const Duration(milliseconds: 100));
+        expect(controller.value, 1);
+        tick(const Duration(milliseconds: 60));
+        expect(double.parse(controller.value.toStringAsFixed(1)), 0.6);
+
+        controller.reset();
+        controller.dispose();
+      },
+    );
+  });
 }
 
 class TestSimulation extends Simulation {

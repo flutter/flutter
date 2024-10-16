@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -1645,6 +1646,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor(
+          isFullScreen: false,
           viewPadding: const EdgeInsets.all(16.0),
           builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
@@ -1663,6 +1665,31 @@ void main() {
 
     final Padding padding = tester.widget<Padding>(find.descendant(of: findViewContent(), matching: find.byType(Padding)).first);
     expect(padding.padding, const EdgeInsets.all(16.0));
+  });
+
+  testWidgets('SearchAnchor ignores viewPadding property if full screen', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: true,
+          viewPadding: const EdgeInsets.all(16.0),
+          builder: (BuildContext context, SearchController controller) {
+            return IconButton(icon: const Icon(Icons.search), onPressed: () {
+              controller.openView();
+            },);
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Padding padding = tester.widget<Padding>(find.descendant(of: findViewContent(), matching: find.byType(Padding)).first);
+    expect(padding.padding, EdgeInsets.zero);
   });
 
   testWidgets('SearchAnchor respects dividerColor property', (WidgetTester tester) async {
@@ -1786,6 +1813,33 @@ void main() {
 
     final Rect materialRectWithSuggestions = tester.getRect(findMaterial);
     expect(materialRectWithSuggestions, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 113.0)));
+  });
+
+  testWidgets('SearchAnchor respects viewBarPadding property', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: SearchAnchor(
+            viewBarPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(icon: const Icon(Icons.search), onPressed: () {
+                controller.openView();
+              },);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Finder findSearchBar = find.descendant(of: findViewContent(), matching: find.byType(SearchBar)).first;
+    final Padding padding = tester.widget<Padding>(find.descendant(of: findSearchBar, matching: find.byType(Padding)).first);
+    expect(padding.padding, const EdgeInsets.symmetric(horizontal: 16.0));
   });
 
   testWidgets('SearchAnchor respects builder property - LTR', (WidgetTester tester) async {
@@ -2799,7 +2853,7 @@ void main() {
           backgroundColor: const Color(0xffffff00)
         ),
       ),
-      cardTheme: const CardTheme(color: Color(0xff00ffff)),
+      cardTheme: const CardThemeData(color: Color(0xff00ffff)),
     );
     Widget buildSearchAnchor() {
       return MaterialApp(
@@ -3109,6 +3163,56 @@ void main() {
     expect(opacityWidget.opacity, 0.38);
   });
 
+  testWidgets('Check SearchAnchor opacity when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: Material(
+          child: SearchAnchor(
+            enabled: false,
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+
+    final Finder searchBarFinder = find.byType(SearchAnchor);
+    expect(searchBarFinder, findsOneWidget);
+    final Finder opacityFinder = find.descendant(
+      of: searchBarFinder,
+      matching: find.byType(AnimatedOpacity),
+    );
+    expect(opacityFinder, findsOneWidget);
+    final AnimatedOpacity opacityWidget = tester.widget<AnimatedOpacity>(opacityFinder);
+    expect(opacityWidget.opacity, 0.38);
+  });
+
+  testWidgets('SearchAnchor tap failed when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: Material(
+          child: SearchAnchor(
+            enabled: false,
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+
+    final Finder searchBarFinder = find.byType(SearchAnchor);
+    expect(searchBarFinder, findsOneWidget);
+    expect(searchBarFinder.hitTestable().tryEvaluate(), false);
+  });
+
   testWidgets('SearchAnchor respects headerHeight', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Center(
@@ -3366,6 +3470,245 @@ void main() {
     await tester.pumpAndSettle(apiCallDuration);
 
     expect(find.text('Item - 1'), findsOneWidget);
+  });
+
+  testWidgets('SearchBar.scrollPadding is passed through to EditableText', (WidgetTester tester) async {
+    const EdgeInsets scrollPadding = EdgeInsets.zero;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: SearchBar(
+            scrollPadding: scrollPadding,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(EditableText), findsOneWidget);
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.scrollPadding, scrollPadding);
+  });
+
+  testWidgets('SearchAnchor.bar.scrollPadding is passed through to EditableText', (WidgetTester tester) async {
+    const EdgeInsets scrollPadding = EdgeInsets.zero;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor.bar(
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+            scrollPadding: scrollPadding,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(EditableText), findsOneWidget);
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.scrollPadding, scrollPadding);
+  });
+
+  group('contextMenuBuilder', () {
+    setUp(() async {
+      if (!kIsWeb) {
+        return;
+      }
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.contextMenu,
+        (MethodCall call) {
+          // Just complete successfully, so that BrowserContextMenu thinks that
+          // the engine successfully received its call.
+          return Future<void>.value();
+        },
+      );
+      await BrowserContextMenu.disableContextMenu();
+    });
+
+    tearDown(() async {
+      if (!kIsWeb) {
+        return;
+      }
+      await BrowserContextMenu.enableContextMenu();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
+    });
+
+    testWidgets('SearchAnchor.bar.contextMenuBuilder is passed through to EditableText', (WidgetTester tester) async {
+      Widget contextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+        return const Placeholder();
+      }
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SearchAnchor.bar(
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+              contextMenuBuilder: contextMenuBuilder,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(EditableText), findsOneWidget);
+      final EditableText editableText = tester.widget(find.byType(EditableText));
+      expect(editableText.contextMenuBuilder, contextMenuBuilder);
+
+      expect(find.byType(Placeholder), findsNothing);
+
+      await tester.tap(
+        find.byType(SearchBar),
+        buttons: kSecondaryButton,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Placeholder), findsOneWidget);
+    });
+  });
+
+  testWidgets('SearchAnchor does not dispose external SearchController', (WidgetTester tester) async {
+    final SearchController controller = SearchController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+    MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          searchController: controller,
+          builder: (BuildContext context, SearchController controller) {
+            return IconButton(
+              onPressed: () async {
+                controller.openView();
+              },
+              icon: const Icon(Icons.search),
+            );
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(
+    const MaterialApp(
+      home: Material(
+        child: Text('disposed'),
+      ),
+    ));
+    expect(tester.takeException(), isNull);
+    ChangeNotifier.debugAssertNotDisposed(controller);
+  });
+
+  testWidgets('SearchAnchor gracefully closes its search view when disposed', (WidgetTester tester) async {
+    bool disposed = false;
+    late StateSetter setState;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter stateSetter) {
+              setState = stateSetter;
+              if (disposed) {
+                return const Text('disposed');
+              }
+              return SearchAnchor(
+                builder: (BuildContext context, SearchController controller) {
+                  return IconButton(
+                    onPressed: () async {
+                      controller.openView();
+                    },
+                    icon: const Icon(Icons.search),
+                  );
+                },
+                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                  return <Widget>[
+                    const Text('suggestion'),
+                  ];
+                },
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    setState(() {
+      disposed = true;
+    });
+    await tester.pump();
+    // The search menu starts to close but is not disposed yet.
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    final TextEditingController controller = editableText.controller;
+    ChangeNotifier.debugAssertNotDisposed(controller);
+
+    await tester.pumpAndSettle();
+    // The search menu and the internal search controller are now disposed.
+    expect(tester.takeException(), isNull);
+    expect(find.byType(TextField), findsNothing);
+    FlutterError? error;
+    try {
+      ChangeNotifier.debugAssertNotDisposed(controller);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error, isFlutterError);
+    expect(
+      error!.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A SearchController was used after being disposed.\n'
+        '   Once you have called dispose() on a SearchController, it can no\n'
+        '   longer be used.\n',
+      ),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/155180.
+  testWidgets('disposing SearchAnchor during search view exit animation does not crash',
+    (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: key,
+          home: Material(
+            child: SearchAnchor(
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  onPressed: () async {
+                    controller.openView();
+                  },
+                  icon: const Icon(Icons.search),
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[
+                  const Text('suggestion'),
+                ];
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      key.currentState!.pop();
+      await tester.pump();
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: key,
+          home: const Material(
+            child: Text('disposed'),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull);
   });
 }
 
