@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -11,15 +14,36 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+final String gradlewExecutable =
+Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
-final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
+final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
+
+/// Combines several TaskFunctions with trivial success value into one.
+TaskFunction combine(List<TaskFunction> tasks) {
+  return () async {
+    for (final TaskFunction task in tasks) {
+      final TaskResult result = await task();
+      if (result.failed) {
+        return result;
+      }
+    }
+    return TaskResult.success(null);
+  };
+}
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
-Future<void> main() async {
-  await task(() async {
+class ModuleTest {
+  ModuleTest({
+    this.gradleVersion = '7.6.3',
+  });
 
+  static const String buildTarget = 'module-gradle';
+  final String gradleVersion;
+
+  Future<TaskResult> call() async {
+    section('Running: $buildTarget-$gradleVersion');
     section('Find Java');
 
     final String? javaHome = await findJavaHome();
@@ -40,14 +64,40 @@ Future<void> main() async {
         );
       });
 
+      section('Create package with native assets');
+
+      await flutter(
+        'config',
+        options: <String>['--enable-native-assets'],
+      );
+
+      const String ffiPackageName = 'ffi_package';
+      await createFfiPackage(ffiPackageName, tempDir);
+
+      section('Add FFI package');
+
+      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
+      String content = await pubspec.readAsString();
+      content = content.replaceFirst(
+        'dependencies:$platformLineSep',
+        'dependencies:$platformLineSep  $ffiPackageName:$platformLineSep    path: ..${Platform.pathSeparator}$ffiPackageName$platformLineSep',
+      );
+      await pubspec.writeAsString(content, flush: true);
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'packages',
+          options: <String>['get'],
+        );
+      });
+
       section('Add read-only asset');
 
       final File readonlyTxtAssetFile = await File(path.join(
-        projectDir.path,
-        'assets',
-        'read-only.txt'
+          projectDir.path,
+          'assets',
+          'read-only.txt'
       ))
-      .create(recursive: true);
+          .create(recursive: true);
 
       if (!exists(readonlyTxtAssetFile)) {
         return TaskResult.failure('Failed to create read-only asset');
@@ -60,8 +110,6 @@ Future<void> main() async {
         ]);
       }
 
-      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
-      String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '$platformLineSep  # assets:$platformLineSep',
         '$platformLineSep  assets:$platformLineSep    - assets/read-only.txt$platformLineSep',
@@ -70,7 +118,6 @@ Future<void> main() async {
 
       section('Add plugins');
 
-      content = await pubspec.readAsString();
       content = content.replaceFirst(
         '${platformLineSep}dependencies:$platformLineSep',
         '${platformLineSep}dependencies:$platformLineSep',
@@ -82,30 +129,6 @@ Future<void> main() async {
           options: <String>['get'],
         );
       });
-
-      section('Build Flutter module library archive');
-
-      await inDirectory(Directory(path.join(projectDir.path, '.android')), () async {
-        await exec(
-          gradlewExecutable,
-          <String>['flutter:assembleDebug'],
-          environment: <String, String>{ 'JAVA_HOME': javaHome },
-        );
-      });
-
-      final bool aarBuilt = exists(File(path.join(
-        projectDir.path,
-        '.android',
-        'Flutter',
-        'build',
-        'outputs',
-        'aar',
-        'flutter-debug.aar',
-      )));
-
-      if (!aarBuilt) {
-        return TaskResult.failure('Failed to build .aar');
-      }
 
       section('Build ephemeral host app');
 
@@ -179,7 +202,7 @@ Future<void> main() async {
             'dev',
             'integration_tests',
             'pure_android_host_apps',
-            'android_custom_host_app',
+            'host_app_kotlin_gradle_dsl',
           ),
         ),
         hostApp,
@@ -189,11 +212,25 @@ Future<void> main() async {
         hostApp,
       );
       copy(
-        File(path.join(projectDir.path, '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
+        File(path.join(projectDir.path, '.android', 'gradle', 'wrapper',
+            'gradle-wrapper.jar')),
         Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
       );
 
-      final File analyticsOutputFile = File(path.join(tempDir.path, 'analytics.log'));
+      // Modify gradle version to passed in version.
+      // This is somehow the wrong file.
+      final File gradleWrapperProperties = File(path.join(
+          hostApp.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'));
+      String propertyContent = await gradleWrapperProperties.readAsString();
+      propertyContent = propertyContent.replaceFirst(
+        'REPLACEME',
+        gradleVersion,
+      );
+      section(propertyContent);
+      await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
+
+      final File analyticsOutputFile =
+      File(path.join(tempDir.path, 'analytics.log'));
 
       section('Build debug host APK');
 
@@ -202,7 +239,7 @@ Future<void> main() async {
           await exec('chmod', <String>['+x', 'gradlew']);
         }
         await exec(gradlewExecutable,
-          <String>['SampleApp:assembleDebug'],
+          <String>['app:assembleDebug'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
             'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
@@ -214,12 +251,12 @@ Future<void> main() async {
 
       final String debugHostApk = path.join(
         hostApp.path,
-        'SampleApp',
+        'app',
         'build',
         'outputs',
         'apk',
         'debug',
-        'SampleApp-debug.apk',
+        'app-debug.apk',
       );
       if (!exists(File(debugHostApk))) {
         return TaskResult.failure('Failed to build debug host APK');
@@ -231,6 +268,8 @@ Future<void> main() async {
         ...flutterAssets,
         ...debugAssets,
         ...baseApkFiles,
+        'lib/arm64-v8a/lib$ffiPackageName.so',
+        'lib/armeabi-v7a/lib$ffiPackageName.so',
       ], await getFilesInApk(debugHostApk));
 
       section('Check debug AndroidManifest.xml');
@@ -249,9 +288,9 @@ Future<void> main() async {
           || !analyticsOutput.contains('cd25: true')
           || !analyticsOutput.contains('viewName: assemble')) {
         return TaskResult.failure(
-          'Building outer app produced the following analytics: "$analyticsOutput" '
-          'but not the expected strings: "cd24: android", "cd25: true" and '
-          '"viewName: assemble"'
+            'Building outer app produced the following analytics: "$analyticsOutput" '
+                'but not the expected strings: "cd24: android", "cd25: true" and '
+                '"viewName: assemble"'
         );
       }
 
@@ -259,11 +298,12 @@ Future<void> main() async {
 
       final String readonlyDebugAssetFilePath = path.joinAll(<String>[
         hostApp.path,
-        'SampleApp',
+        'app',
         'build',
         'intermediates',
         'assets',
         'debug',
+        'mergeDebugAssets',
         'flutter_assets',
         'assets',
         'read-only.txt',
@@ -283,7 +323,7 @@ Future<void> main() async {
 
       await inDirectory(hostApp, () async {
         await exec(gradlewExecutable,
-          <String>['SampleApp:assembleRelease'],
+          <String>['app:assembleRelease'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
             'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
@@ -293,12 +333,12 @@ Future<void> main() async {
 
       final String releaseHostApk = path.join(
         hostApp.path,
-        'SampleApp',
+        'app',
         'build',
         'outputs',
         'apk',
         'release',
-        'SampleApp-release-unsigned.apk',
+        'app-release-unsigned.apk',
       );
       if (!exists(File(releaseHostApk))) {
         return TaskResult.failure('Failed to build release host APK');
@@ -309,11 +349,31 @@ Future<void> main() async {
       checkCollectionContains<String>(<String>[
         ...flutterAssets,
         ...baseApkFiles,
+        'lib/arm64-v8a/lib$ffiPackageName.so',
         'lib/arm64-v8a/libapp.so',
         'lib/arm64-v8a/libflutter.so',
+        'lib/armeabi-v7a/lib$ffiPackageName.so',
         'lib/armeabi-v7a/libapp.so',
         'lib/armeabi-v7a/libflutter.so',
       ], await getFilesInApk(releaseHostApk));
+
+      section('Check the NOTICE file is correct');
+
+      await inDirectory(hostApp, () async {
+        final File apkFile = File(releaseHostApk);
+        final Archive apk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
+        // Shouldn't be missing since we already checked it exists above.
+        final ArchiveFile? noticesFile = apk.findFile('assets/flutter_assets/NOTICES.Z');
+
+        final Uint8List? licenseData = noticesFile?.content as Uint8List?;
+        if (licenseData == null) {
+          return TaskResult.failure('Invalid license file.');
+        }
+        final String licenseString = utf8.decode(gzip.decode(licenseData));
+        if (!licenseString.contains('skia') || !licenseString.contains('Flutter Authors')) {
+          return TaskResult.failure('License content missing.');
+        }
+      });
 
       section('Check release AndroidManifest.xml');
 
@@ -330,11 +390,12 @@ Future<void> main() async {
 
       final String readonlyReleaseAssetFilePath = path.joinAll(<String>[
         hostApp.path,
-        'SampleApp',
+        'app',
         'build',
         'intermediates',
         'assets',
         'release',
+        'mergeReleaseAssets',
         'flutter_assets',
         'assets',
         'read-only.txt',
@@ -358,5 +419,12 @@ Future<void> main() async {
     } finally {
       rmTree(tempDir);
     }
-  });
+  }
+}
+
+Future<void> main() async {
+  await task(combine(<TaskFunction>[
+    // ignore: avoid_redundant_argument_values
+    ModuleTest(gradleVersion: '8.7').call,
+  ]));
 }
