@@ -330,12 +330,6 @@ static gboolean fl_mock_view_keyboard_text_filter_key_press(
   return self->text_filter_result;
 }
 
-static FlBinaryMessenger* fl_mock_view_keyboard_get_messenger(
-    FlKeyboardViewDelegate* view_delegate) {
-  FlMockViewDelegate* self = FL_MOCK_VIEW_DELEGATE(view_delegate);
-  return FL_BINARY_MESSENGER(self->messenger);
-}
-
 static void fl_mock_view_keyboard_redispatch_event(
     FlKeyboardViewDelegate* view_delegate,
     FlKeyEvent* event) {
@@ -362,7 +356,6 @@ static void fl_mock_view_keyboard_delegate_iface_init(
     FlKeyboardViewDelegateInterface* iface) {
   iface->send_key_event = fl_mock_view_keyboard_send_key_event;
   iface->text_filter_key_press = fl_mock_view_keyboard_text_filter_key_press;
-  iface->get_messenger = fl_mock_view_keyboard_get_messenger;
   iface->redispatch_event = fl_mock_view_keyboard_redispatch_event;
   iface->lookup_key = fl_mock_view_keyboard_lookup_key;
 }
@@ -410,7 +403,8 @@ class KeyboardTester {
     respondToTextInputWith(false);
     setLayout(kLayoutUs);
 
-    handler_ = fl_keyboard_manager_new(FL_KEYBOARD_VIEW_DELEGATE(view_));
+    handler_ = fl_keyboard_manager_new(FL_BINARY_MESSENGER(view_->messenger),
+                                       FL_KEYBOARD_VIEW_DELEGATE(view_));
   }
 
   ~KeyboardTester() {

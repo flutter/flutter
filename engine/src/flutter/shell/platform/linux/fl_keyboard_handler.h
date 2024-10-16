@@ -8,6 +8,7 @@
 #include <gdk/gdk.h>
 
 #include "flutter/shell/platform/linux/fl_keyboard_view_delegate.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
 
 G_BEGIN_DECLS
 

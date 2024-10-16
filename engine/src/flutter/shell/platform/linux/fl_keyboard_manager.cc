@@ -410,6 +410,7 @@ static void fl_keyboard_manager_init(FlKeyboardManager* self) {
 }
 
 FlKeyboardManager* fl_keyboard_manager_new(
+    FlBinaryMessenger* messenger,
     FlKeyboardViewDelegate* view_delegate) {
   g_return_val_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(view_delegate), nullptr);
 
@@ -436,8 +437,7 @@ FlKeyboardManager* fl_keyboard_manager_new(
           },
           self)));
   g_ptr_array_add(self->responder_list,
-                  FL_KEY_RESPONDER(fl_key_channel_responder_new(
-                      fl_keyboard_view_delegate_get_messenger(view_delegate))));
+                  FL_KEY_RESPONDER(fl_key_channel_responder_new(messenger)));
 
   return self;
 }
