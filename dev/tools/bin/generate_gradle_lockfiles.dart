@@ -83,6 +83,7 @@ void main(List<String> arguments) {
         (loadYaml(exclusionFile.readAsStringSync()) as YamlList)
             .toList()
             .cast<String>()
+            .map((String s) => '${repoRoot.path}/$s')
     );
     print('Loaded exclusion file from ${exclusionFile.path}.');
   } else {
@@ -95,9 +96,12 @@ void main(List<String> arguments) {
       throw '$androidDirectory does not exist';
     }
 
+    print('$exclusionSet');
     if (exclusionSet.contains(androidDirectory.path)) {
       print('${androidDirectory.path} is included in the exclusion config file at ${exclusionFile.path} - skipping');
       continue;
+    } else {
+      print('${androidDirectory.path} not included');
     }
 
     late File rootBuildGradle;
