@@ -289,6 +289,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.padding,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
+    this.bottom,
   }) : assert(
          !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
          'Cannot specify a heroTag override if this navigation bar does not '
@@ -465,6 +466,23 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Object heroTag;
 
+  /// A widget to place at the bottom of the navigation bar.
+  ///
+  /// Only widgets that implement [PreferredSizeWidget] can be used at the
+  /// bottom of a navigation bar.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a [CupertinoSearchTextField] at the bottom of a
+  /// [CupertinoNavigationBar].
+  ///
+  /// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_navigation_bar.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
+  final PreferredSizeWidget? bottom;
+
   /// True if the navigation bar's background color has no transparency.
   @override
   bool shouldFullyObstruct(BuildContext context) {
@@ -475,7 +493,8 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   @override
   Size get preferredSize {
-    return const Size.fromHeight(_kNavBarPersistentHeight);
+    final double heightForDrawer = bottom?.preferredSize.height ?? 0.0;
+    return Size.fromHeight(_kNavBarPersistentHeight + heightForDrawer);
   }
 
   @override
@@ -586,9 +605,14 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
-        child: _PersistentNavigationBar(
-          components: components,
-          padding: widget.padding,
+        child: Column(
+          children: <Widget>[
+            _PersistentNavigationBar(
+              components: components,
+              padding: widget.padding,
+            ),
+            if (widget.bottom != null) widget.bottom!,
+          ],
         ),
       ),
     );
