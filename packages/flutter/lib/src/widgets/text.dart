@@ -1429,7 +1429,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       case SelectionEventType.clear:
         _hasReceivedStartEvent.remove(selectable);
         _hasReceivedEndEvent.remove(selectable);
-      case SelectionEventType.selectionFinalized:
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
       case SelectionEventType.selectParagraph:

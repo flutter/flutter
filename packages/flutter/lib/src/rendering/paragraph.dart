@@ -1465,8 +1465,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           directionallyExtendSelection.isEnd,
           directionallyExtendSelection.direction,
         );
-      case SelectionEventType.selectionFinalized:
-        result = SelectionResult.none;
     }
 
     if (existingSelectionStart != _textSelectionStart ||
