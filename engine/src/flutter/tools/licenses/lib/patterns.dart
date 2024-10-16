@@ -1012,11 +1012,13 @@ final List<RegExp> csTemplateLicenses = <RegExp>[
   // Seen in Mesa, among others.
   RegExp(
     kIndent +
-    r'(?:' // this bit is optional
-    r'Licensed under the MIT license:\n' // seen in expat
-    r'\1\2? *\n' // blank line
-    r'\1\2' // this is the prefix for the next block (handled by kIndent if this optional bit is skipped)
-    r')?' // end of optional bit
+    (
+      r'(?:' // this bit is optional
+      r'Licensed under the MIT license:\n' // seen in expat
+      r'\1\2? *\n' // blank line
+      r'\1\2' // this is the prefix for the next block (handled by kIndent if this optional bit is skipped)
+      r')?' // end of optional bit
+    )
     +
     (
       r'Permission is hereby granted, free of charge, to any person obtaining '
@@ -1268,36 +1270,40 @@ final List<RegExp> csTemplateLicenses = <RegExp>[
   // freetype2.
   RegExp(
     kIndent +
-    r'Permission to use, copy, modify, distribute, and sell this software and its '
-    r'documentation for any purpose is hereby granted without fee, provided that '
-    r'the above copyright notice appear in all copies and that both that '
-    r'copyright notice and this permission notice appear in supporting '
-    r'documentation\. '
-    r'The above copyright notice and this permission notice shall be included in '
-    r'all copies or substantial portions of the Software\. '
-    r'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR '
-    r'IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, '
-    r'FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT\.  IN NO EVENT SHALL THE '
-    r'OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN '
-    r'AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN '
-    r'CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE\. '
-    r'Except as contained in this notice, the name of The Open Group shall not be '
-    r'used in advertising or otherwise to promote the sale, use or other dealings '
-    r'in this Software without prior written authorization from The Open Group\. '
-    .replaceAll(' ', _linebreak),
+    (
+      r'Permission to use, copy, modify, distribute, and sell this software and its '
+      r'documentation for any purpose is hereby granted without fee, provided that '
+      r'the above copyright notice appear in all copies and that both that '
+      r'copyright notice and this permission notice appear in supporting '
+      r'documentation\. '
+      r'The above copyright notice and this permission notice shall be included in '
+      r'all copies or substantial portions of the Software\. '
+      r'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR '
+      r'IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, '
+      r'FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT\.  IN NO EVENT SHALL THE '
+      r'OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN '
+      r'AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN '
+      r'CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE\. '
+      r'Except as contained in this notice, the name of The Open Group shall not be '
+      r'used in advertising or otherwise to promote the sale, use or other dealings '
+      r'in this Software without prior written authorization from The Open Group\. '
+      .replaceAll(' ', _linebreak)
+    ),
     multiLine: true,
   ),
 
   // libjpeg-turbo
   RegExp(
     kIndent +
-    r'Permission to use, copy, modify, and distribute this software and its '
-    r'documentation for any purpose and without fee is hereby granted, provided '
-    r'that the above copyright notice appear in all copies and that both that '
-    r'copyright notice and this permission notice appear in supporting '
-    r'documentation\. This software is provided "as is" without express or '
-    r'implied warranty\.'
-    .replaceAll(' ', _linebreak),
+    (
+      r'Permission to use, copy, modify, and distribute this software and its '
+      r'documentation for any purpose and without fee is hereby granted, provided '
+      r'that the above copyright notice appear in all copies and that both that '
+      r'copyright notice and this permission notice appear in supporting '
+      r'documentation\. This software is provided "as is" without express or '
+      r'implied warranty\.'
+      .replaceAll(' ', _linebreak)
+    ),
     multiLine: true,
   ),
 ];
@@ -1351,15 +1357,17 @@ final List<RegExp> csNoticeLicenses = <RegExp>[
   // Freetype
   RegExp(
     kIndent +
-    r'This software was written by Alexander Peslyak in 2001\. No copyright is '
-    r'claimed, and the software is hereby placed in the public domain\. In case '
-    r'this attempt to disclaim copyright and place the software in the public '
-    r'domain is deemed null and void, then the software is Copyright \(c\) 2001 '
-    r'Alexander Peslyak and it is hereby released to the general public under the '
-    r'following terms: Redistribution and use in source and binary forms, with or '
-    r"without modification, are permitted\. There\'s ABSOLUTELY NO WARRANTY, "
-    r'express or implied\.(?: \(This is a heavily cut-down "BSD license"\.\))?'
-    .replaceAll(' ', _linebreak),
+    (
+      r'This software was written by Alexander Peslyak in 2001\. No copyright is '
+      r'claimed, and the software is hereby placed in the public domain\. In case '
+      r'this attempt to disclaim copyright and place the software in the public '
+      r'domain is deemed null and void, then the software is Copyright \(c\) 2001 '
+      r'Alexander Peslyak and it is hereby released to the general public under the '
+      r'following terms: Redistribution and use in source and binary forms, with or '
+      r"without modification, are permitted\. There\'s ABSOLUTELY NO WARRANTY, "
+      r'express or implied\.(?: \(This is a heavily cut-down "BSD license"\.\))?'
+      .replaceAll(' ', _linebreak)
+    ),
     multiLine: true,
   ),
 
@@ -1461,10 +1469,12 @@ final List<RegExp> csNoticeLicenses = <RegExp>[
   // Seen in libjpeg-turbo (with a copyright), zlib.h
   RegExp(
     kIndent +
-    r" This software is provided 'as-is', without any express or implied "
-    r'warranty\. In no event will the authors be held liable for any damages '
-    r'arising from the use of this software\.'
-    .replaceAll(' ', _linebreak)
+    (
+      r" This software is provided 'as-is', without any express or implied "
+      r'warranty\. In no event will the authors be held liable for any damages '
+      r'arising from the use of this software\.'
+      .replaceAll(' ', _linebreak)
+    )
     +
     (
       r' Permission is granted to anyone to use this software for any purpose, '
