@@ -1,4 +1,4 @@
-Signature: 147bb5b1f6ce1d858d13c192ce702004
+Signature: 24f927b02d0fce18209f0972eeceeedb
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -16148,6 +16148,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml + ../../../fuchsia/s
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/log_message_impl.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/log_message_impl.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vulkan/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/time.cc + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/availability_levels.inc
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/zircon/availability_levels.inc
@@ -16230,6 +16231,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/log_message_impl.h
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/log_message_impl.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/offer.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/zx/time.cc
 ----------------------------------------------------------------------------------------------------
 Copyright 2024 The Fuchsia Authors. All rights reserved.
 
