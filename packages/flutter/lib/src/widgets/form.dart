@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -250,16 +251,8 @@ class FormState extends State<Form> {
 
   void _register(FormFieldState<dynamic> field) {
     _fields.add(field);
-    switch (widget.autovalidateMode) {
-      case AutovalidateMode.always:
-        if (field.widget.enabled) {
-          field.validate();
-        }
-      case AutovalidateMode.onUnfocus:
-        field._focusNode.addListener(() => _updateField(field));
-      case AutovalidateMode.onUserInteraction:
-      case AutovalidateMode.disabled:
-        break;
+    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
+      field._focusNode.addListener(() => _updateField(field));
     }
   }
 
@@ -702,6 +695,16 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     super.didUpdateWidget(oldWidget);
     if (widget.forceErrorText != oldWidget.forceErrorText) {
       _errorText.value = widget.forceErrorText;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.always) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        validate();
+      });
     }
   }
 
