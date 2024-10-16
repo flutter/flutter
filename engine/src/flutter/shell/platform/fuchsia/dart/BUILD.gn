@@ -76,9 +76,13 @@ dart_library("expect") {
   deps = []
 
   sources = [
+    "async_helper.dart",
     "config.dart",
     "expect.dart",
+    "legacy/async_minitest.dart",
+    "legacy/minitest.dart",
     "minitest.dart",
+    "static_type_helper.dart",
     "variations.dart",
   ]
 }
