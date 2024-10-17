@@ -785,12 +785,17 @@ class HotRunner extends ResidentRunner {
       // }
       return result;
     }
+    // Create an empty map of Flutter device to Flutter views to be populated
+    // and cached.
+    final Map<FlutterDevice?, List<FlutterView>> viewsForDevice =
+        <FlutterDevice?, List<FlutterView>>{};
     final OperationResult result = await _hotReloadHelper(
       targetPlatform: _targetPlatform,
       sdkName: _sdkName,
       emulator: _emulator,
       reason: reason,
       pause: pause,
+      viewsForDevice: viewsForDevice,
     );
     if (result.isOk) {
       final String elapsed = getElapsedAsMilliseconds(timer.elapsed);
@@ -805,14 +810,11 @@ class HotRunner extends ResidentRunner {
         }
       }
 
-      final Map<FlutterDevice?, List<FlutterView>> viewCache =
-          <FlutterDevice?, List<FlutterView>>{};
-      for (final FlutterDevice? device in flutterDevices) {
+      for (final FlutterDevice device in flutterDevices) {
         final List<FlutterView> views =
-            await device!.vmService!.getFlutterViews();
-        viewCache[device] = views;
+            viewsForDevice[device] ?? <FlutterView>[];
         for (final FlutterView view in views) {
-          await device.vmService!.flutterSendExtensionEvent(
+          await device.vmService?.flutterSendExtensionEvent(
             isolateId: view.uiIsolate!.id!,
             eventKind: 'Flutter.HotReload',
           );
@@ -918,6 +920,7 @@ class HotRunner extends ResidentRunner {
     bool? emulator,
     String? reason,
     bool? pause,
+    Map<FlutterDevice?, List<FlutterView>>? viewsForDevice,
   }) async {
     Status status = globals.logger.startProgress(
       'Performing hot reload...',
@@ -931,6 +934,7 @@ class HotRunner extends ResidentRunner {
         emulator: emulator,
         reason: reason,
         pause: pause,
+        viewsForDevice: viewsForDevice,
         onSlow: (String message) {
           status.cancel();
           status = globals.logger.startProgress(
@@ -994,8 +998,10 @@ class HotRunner extends ResidentRunner {
     bool? pause = false,
     String? reason,
     void Function(String message)? onSlow,
+    Map<FlutterDevice?, List<FlutterView>>? viewsForDevice,
   }) async {
-    final Map<FlutterDevice?, List<FlutterView>> viewCache = <FlutterDevice?, List<FlutterView>>{};
+    final Map<FlutterDevice?, List<FlutterView>> viewCache =
+        viewsForDevice ?? <FlutterDevice?, List<FlutterView>>{};
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       viewCache[device] = views;
