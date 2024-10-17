@@ -86,6 +86,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.background,
     this.centerTitle,
     this.titlePadding,
+    this.collapsedTitlePadding,
     this.collapseMode = CollapseMode.parallax,
     this.stretchModes = const <StretchMode>[StretchMode.zoomBackground],
     this.expandedTitleScale = 1.5,
@@ -136,6 +137,16 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// [titlePadding] applied. If [titlePadding] is null, then defaults to start
   /// padding of 72.0 pixels and bottom padding of 16.0 pixels.
   final EdgeInsetsGeometry? titlePadding;
+
+  /// Defines the padding applied to the [title]
+  /// when the [FlexibleSpaceBar] is collapsed.
+  ///
+  ///This allows for separate control of the title's padding
+  ///when the [FlexibleSpaceBar] transitions from expanded to collapsed state.
+  ///
+  /// The [collapsedTitlePadding] is only used if [titlePadding] is set.
+  /// If [titlePadding] is null, this property is ignored.
+  final EdgeInsetsGeometry? collapsedTitlePadding;
 
   /// Defines how much the title is scaled when the FlexibleSpaceBar is expanded
   /// due to the user scrolling downwards. The title is scaled uniformly on the
@@ -203,6 +214,32 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       TextDirection.rtl => Alignment.bottomRight,
       TextDirection.ltr => Alignment.bottomLeft,
     };
+  }
+
+  EdgeInsetsGeometry _getTitlePadding(
+    double t,
+    bool? hasLeading,
+    bool effectiveCenterTitle,
+  ) {
+    final EdgeInsetsGeometry? customTitlePadding = widget.titlePadding;
+
+    if (customTitlePadding == null) {
+      final double leadingPadding = (hasLeading ?? true) ? 72.0 : 0.0;
+
+      return EdgeInsetsDirectional.only(
+        start: effectiveCenterTitle ? 0.0 : leadingPadding,
+        bottom: 16.0,
+      );
+    }
+
+    final EdgeInsetsGeometry collapsedTitlePadding =
+        widget.collapsedTitlePadding ?? customTitlePadding;
+
+    return EdgeInsetsGeometry.lerp(
+      customTitlePadding,
+      collapsedTitlePadding,
+      t,
+    )!;
   }
 
   double _getCollapsePadding(double t, FlexibleSpaceBarSettings settings) {
@@ -319,12 +356,11 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
               color: titleStyle.color!.withOpacity(opacity),
             );
             final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
-            final double leadingPadding = (settings.hasLeading ?? true) ? 72.0 : 0.0;
-            final EdgeInsetsGeometry padding = widget.titlePadding ??
-              EdgeInsetsDirectional.only(
-                start: effectiveCenterTitle ? 0.0 : leadingPadding,
-                bottom: 16.0,
-              );
+            final EdgeInsetsGeometry padding = _getTitlePadding(
+              t,
+              settings.hasLeading,
+              effectiveCenterTitle,
+            );
             final double scaleValue = Tween<double>(begin: widget.expandedTitleScale, end: 1.0).transform(t);
             final Matrix4 scaleTransform = Matrix4.identity()
               ..scale(scaleValue, scaleValue, 1.0);
