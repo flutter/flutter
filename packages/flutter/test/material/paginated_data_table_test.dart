@@ -1413,4 +1413,65 @@ void main() {
     final BoxDecoration tableRowBoxDecoration = tableRow.decoration! as BoxDecoration;
     expect(tableRowBoxDecoration.color, headingRowColor.resolve(<MaterialState>{}));
   });
+
+  testWidgets('PaginatedDataTable respects custom dividerThickness', (WidgetTester tester) async {
+    const double dividerThickness = 2.0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: PaginatedDataTable(
+          primary: true,
+          header: const Text('Test table'),
+          source: source,
+          rowsPerPage: 2,
+          dividerThickness: dividerThickness,
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+        ),
+      ),
+    ));
+
+    expect(find.byType(Table), findsOneWidget);
+    final Table table = tester.widget(find.byType(Table));
+    final TableRow tableRow = table.children[0];
+    final BoxDecoration? tableRowBoxDecoration = tableRow.decoration as BoxDecoration?;
+    expect(tableRowBoxDecoration, isNotNull);
+    expect(tableRowBoxDecoration?.border, isA<Border>());
+
+    final Border? border = tableRowBoxDecoration?.border as Border?;
+    expect(border?.bottom.width, dividerThickness);
+  });
+
+  testWidgets('PaginatedDataTable respects default dividerThickness', (WidgetTester tester) async {
+    const double defaultDividerThickness = 1.0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: PaginatedDataTable(
+          primary: true,
+          header: const Text('Test table'),
+          source: source,
+          rowsPerPage: 2,
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+        ),
+      ),
+    ));
+
+    expect(find.byType(Table), findsOneWidget);
+    final Table table = tester.widget(find.byType(Table));
+    final TableRow tableRow = table.children[0];
+    final BoxDecoration? tableRowBoxDecoration = tableRow.decoration as BoxDecoration?;
+    expect(tableRowBoxDecoration, isNotNull);
+    expect(tableRowBoxDecoration?.border, isA<Border>());
+
+    final Border? border = tableRowBoxDecoration?.border as Border?;
+    expect(border?.bottom.width, defaultDividerThickness);
+  });
 }
