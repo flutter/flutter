@@ -393,16 +393,19 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     }
   }
 
-  WebCompilerConfig get _compilerConfig => (debuggingOptions.webUseWasm)
-    ? WasmCompilerConfig(
+  WebCompilerConfig get _compilerConfig {
+    if (debuggingOptions.webUseWasm) {
+      return WasmCompilerConfig(
         optimizationLevel: 0,
         stripWasm: false,
         renderer: debuggingOptions.webRenderer
-      )
-    : JsCompilerConfig.run(
-        nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-        renderer: debuggingOptions.webRenderer,
       );
+    }
+    return JsCompilerConfig.run(
+      nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+      renderer: debuggingOptions.webRenderer,
+    );
+  }
 
   @override
   Future<OperationResult> restart({

@@ -788,7 +788,7 @@ void main() {
                   controller: scrollController,
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 500),
-                    child: (s.isEven)
+                    child: s.isEven
                       ? ListView(
                         children: <Widget>[
                           ElevatedButton(
