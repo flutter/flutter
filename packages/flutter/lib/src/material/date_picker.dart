@@ -8,6 +8,7 @@
 /// @docImport 'time_picker.dart';
 library;
 
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -666,7 +667,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       case DatePickerEntryMode.calendar:
         picker = calendarDatePicker();
         entryModeButton = IconButton(
-          icon: widget.switchToInputEntryModeIcon ?? Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit),
+          icon: widget.switchToInputEntryModeIcon ??
+              Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit,
+                  semanticLabel: localizations.inputDateModeButtonLabel),
           color: headerForegroundColor,
           tooltip: localizations.inputDateModeButtonLabel,
           onPressed: _handleEntryModeToggle,
@@ -679,7 +682,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       case DatePickerEntryMode.input:
         picker = inputDatePicker();
         entryModeButton = IconButton(
-          icon: widget.switchToCalendarEntryModeIcon ?? const Icon(Icons.calendar_today),
+          icon: widget.switchToCalendarEntryModeIcon ??
+              Icon(Icons.calendar_today,
+                  semanticLabel: localizations.calendarModeButtonLabel),
           color: headerForegroundColor,
           tooltip: localizations.calendarModeButtonLabel,
           onPressed: _handleEntryModeToggle,
@@ -1573,7 +1578,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           onCancel: _handleCancel,
           entryModeButton: showEntryModeButton
             ? IconButton(
-                icon: widget.switchToInputEntryModeIcon ?? Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit),
+                icon: widget.switchToInputEntryModeIcon ??
+                      Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit,
+                          semanticLabel:
+                              Platform.isAndroid ? localizations.inputDateModeButtonLabel : ''),
                 padding: EdgeInsets.zero,
                 tooltip: localizations.inputDateModeButtonLabel,
                 onPressed: _handleEntryModeToggle,
@@ -1642,7 +1650,9 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           onCancel: _handleCancel,
           entryModeButton: showEntryModeButton
             ? IconButton(
-                icon: widget.switchToCalendarEntryModeIcon ?? const Icon(Icons.calendar_today),
+                icon: widget.switchToCalendarEntryModeIcon ??
+                      Icon(Icons.calendar_today,
+                          semanticLabel: Platform.isAndroid ? localizations.calendarModeButtonLabel : ''),
                 padding: EdgeInsets.zero,
                 tooltip: localizations.calendarModeButtonLabel,
                 onPressed: _handleEntryModeToggle,
