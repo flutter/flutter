@@ -48,38 +48,6 @@ StatefulBuilder setupSimpleSegmentedControl() {
   );
 }
 
-StatefulBuilder buildOneDisabledSegmentedControl({required int disabledIndex}) {
-  final Map<int, Widget> children = <int, Widget>{
-    0: const Text('Child 1'),
-    1: const Text('Child 2'),
-    2: const Text('Child 3'),
-  };
-  final Set<int> disabledChildren = <int>{};
-  for (int i = 0; i < children.length; i++) {
-    if (i == disabledIndex) {
-      disabledChildren.add(i);
-    }
-  }
-  int sharedValue = 0;
-
-  return StatefulBuilder(
-    builder: (BuildContext context, StateSetter setState) {
-      return boilerplate(
-        child: CupertinoSegmentedControl<int>(
-          children: children,
-          disabledChildren: disabledChildren,
-          onValueChanged: (int newValue) {
-            setState(() {
-              sharedValue = newValue;
-            });
-          },
-          groupValue: sharedValue,
-        ),
-      );
-    },
-  );
-}
-
 Widget boilerplate({ required Widget child }) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -1714,24 +1682,55 @@ void main() {
   });
 
   testWidgets('Background color of disabled segment should be different than enabled segment', (WidgetTester tester) async {
-      await tester.pumpWidget(buildOneDisabledSegmentedControl(disabledIndex: 0));
+    final Map<int, Widget> children = <int, Widget>{
+      0: const Text('Child 1'),
+      1: const Text('Child 2'),
+    };
+    int sharedValue = 0;
 
-      // Colors are different for disabled and enabled segments in initial state.
-      // Disabled segment should have a white background with 50% opacity by default.
-      expect(
-        getBackgroundColor(tester, 0),
-        isSameColorAs(CupertinoColors.systemBackground.withOpacity(0.5)),
-      );
-      expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.systemBackground));
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            child: CupertinoSegmentedControl<int>(
+              children: children,
+              disabledChildren: const <int>{0},
+              onValueChanged: (int newValue) {
+                setState(() {
+                  sharedValue = newValue;
+                });
+              },
+              groupValue: sharedValue,
+            ),
+          );
+        },
+      ),
+    );
 
-      // Tap on disabled segment should not change its color
-      await tester.tap(find.text('Child 1'));
-      await tester.pumpAndSettle();
+    // Colors are different for disabled and enabled segments in initial state.
+    // By default, the first segment is selected (and also is disabled in this test),
+    // it should have a blue background (selected color) with 50% opacity
+    expect(
+      getBackgroundColor(tester, 0),
+      isSameColorAs(CupertinoColors.systemBlue.withOpacity(0.5)),
+    );
+    expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
 
-      expect(
-        getBackgroundColor(tester, 0),
-        isSameColorAs(CupertinoColors.systemBackground.withOpacity(0.5)),
-      );
+    // Tap on disabled segment should not change its color
+    await tester.tap(find.text('Child 1'));
+    await tester.pumpAndSettle();
+
+    expect(
+      getBackgroundColor(tester, 0),
+      isSameColorAs(CupertinoColors.systemBlue.withOpacity(0.5)),
+    );
+
+    // When tapping on another enabled segment, the first disabled segment is not selected anymore,
+    // it should have a white background (same to unselected color).
+    await tester.tap(find.text('Child 2'));
+    await tester.pumpAndSettle();
+
+    expect(getBackgroundColor(tester, 0), isSameColorAs(CupertinoColors.white));
   });
 
   testWidgets('Custom disabled color of disabled segment is showing as desired', (WidgetTester tester) async {
@@ -1741,15 +1740,13 @@ void main() {
       2: const Text('Child 3'),
     };
 
-    final Set<int> disabledChildren = <int>{0};
-
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
             child: CupertinoSegmentedControl<int>(
               children: children,
-              disabledChildren: disabledChildren,
+              disabledChildren: const <int>{0},
               onValueChanged: (int newValue) {},
               disabledColor: CupertinoColors.systemGrey2,
             ),

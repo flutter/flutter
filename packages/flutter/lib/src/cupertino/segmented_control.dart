@@ -18,6 +18,9 @@ const EdgeInsetsGeometry _kHorizontalItemPadding = EdgeInsets.symmetric(horizont
 // Minimum height of the segmented control.
 const double _kMinSegmentedControlHeight = 28.0;
 
+// The default color used for the text of the disabled segment.
+const Color _kDisableTextColor = Color.fromARGB(115, 122, 122, 122);
+
 // The duration of the fade animation used to transition when a new widget
 // is selected.
 const Duration _kFadeDuration = Duration(milliseconds: 165);
@@ -162,12 +165,12 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
 
   /// The color used to fill the background of the segment when it is disabled.
   ///
-  /// If null, this color will be 50% opacity of the selectedColor.
+  /// If null, this color will be 50% opacity of the [selectedColor] when
+  /// the segment is selected. If the segment is unselected, this color will be
+  /// set to [unselectedColor].
   final Color? disabledColor;
 
   /// The color used for the text of the segment when it is disabled.
-  ///
-  /// Defaults to [Color.fromARGB(115, 122, 122, 122)] if null.
   final Color? disabledTextColor;
 
   /// The CupertinoSegmentedControl will be placed inside this padding.
@@ -199,7 +202,8 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
   Color? _unselectedColor;
   Color? _borderColor;
   Color? _pressedColor;
-  Color? _disabledColor;
+  Color? _selectedDisabledColor;
+  Color? _unselectedDisabledColor;
   Color? _disabledTextColor;
 
   AnimationController createAnimationController() {
@@ -216,7 +220,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
   bool _updateColors() {
     assert(mounted, 'This should only be called after didUpdateDependencies');
     bool changed = false;
-    final Color disabledTextColor = widget.disabledTextColor ?? const Color.fromARGB(115, 122, 122, 122);
+    final Color disabledTextColor = widget.disabledTextColor ?? _kDisableTextColor;
     if (_disabledTextColor != disabledTextColor) {
       changed = true;
       _disabledTextColor = disabledTextColor;
@@ -231,10 +235,12 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
       changed = true;
       _unselectedColor = unselectedColor;
     }
-    final Color disabledColor = widget.disabledColor ?? unselectedColor.withOpacity(0.5);
-    if (_disabledColor != disabledColor) {
+    final Color selectedDisabledColor = widget.disabledColor ?? selectedColor.withOpacity(0.5);
+    final Color unselectedDisabledColor = widget.disabledColor ?? unselectedColor;
+    if (_selectedDisabledColor != selectedDisabledColor || _unselectedDisabledColor != unselectedDisabledColor) {
       changed = true;
-      _disabledColor = disabledColor;
+      _selectedDisabledColor = selectedDisabledColor;
+      _unselectedDisabledColor = unselectedDisabledColor;
     }
     final Color borderColor = widget.borderColor ?? CupertinoTheme.of(context).primaryColor;
     if (_borderColor != borderColor) {
@@ -364,7 +370,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
 
   Color? getBackgroundColor(int index, T currentKey) {
     if (widget.disabledChildren.contains(currentKey)) {
-      return _disabledColor;
+      return widget.groupValue == currentKey ? _selectedDisabledColor : _unselectedDisabledColor;
     }
     if (_selectionControllers[index].isAnimating) {
       return _childTweens[index].evaluate(_selectionControllers[index]);
