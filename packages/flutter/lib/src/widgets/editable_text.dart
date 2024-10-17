@@ -1549,7 +1549,7 @@ class EditableText extends StatefulWidget {
   /// See also:
   ///
   ///  * [TapRegion] for how the region group is determined.
-  /// * [onTapOutside], which is called for each tap down.
+  ///  * [onTapOutside], which is called for each tap down.
   final TapRegionUpCallback? onTapUpOutside;
 
   /// {@template flutter.widgets.editableText.inputFormatters}

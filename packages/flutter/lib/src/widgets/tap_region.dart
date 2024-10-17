@@ -33,16 +33,22 @@ bool _tapRegionDebug(String message, [Iterable<String>? details]) {
   return true;
 }
 
-/// The type of callback that [TapRegion.onTapOutside] and
-/// [TapRegion.onTapInside] take.
-///
-/// The event is the pointer event that caused the callback to be called.
+/// Signature for a callback called for a [PointerDownEvent] relative to a [TapRegion].
+/// 
+/// See also:
+/// 
+///  * [TapRegion.onTapOutside], which is of this type.
+///  * [TapRegion.onTapInside], which is of this type.
+///  * [TapRegionUpCallback], which is similar but for [PointerUpEvent]s.
 typedef TapRegionCallback = void Function(PointerDownEvent event);
 
-/// The type of callback that [TapRegion.onTapUpOutside] and
-/// [TapRegion.onTapUpInside] take.
-///
-/// The event is the pointer event that caused the callback to be called.
+/// Signature for a callback called for a [PointerUpEvent] relative to a [TapRegion].
+/// 
+/// See also:
+/// 
+///  * [TapRegion.onTapUpOutside], which is of this type.
+///  * [TapRegion.onTapUpInside], which is of this type.
+///  * [TapRegionCallback], which is similar but for [PointerDownEvent]s.
 typedef TapRegionUpCallback = void Function(PointerUpEvent event);
 
 /// An interface for registering and unregistering a [RenderTapRegion]
@@ -440,7 +446,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
   /// operate as one region. If any member of a group is hit by a particular
   /// tap, then the [onTapOutside] / [onTapUpOutside] will not be called for
   /// any members of the group. If any member of the group is hit, then all
-  //// members will have their [onTapInside] / [onTapUpInside] called.
+  /// members will have their [onTapInside] / [onTapUpInside] called.
   ///
   /// If the group id is null, then only this region is hit tested.
   final Object? groupId;

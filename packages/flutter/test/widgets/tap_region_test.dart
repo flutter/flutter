@@ -57,6 +57,7 @@ void main() {
         kind: PointerDeviceKind.mouse,
       );
       // We intentionally don't call up() here because we're testing the down event.
+      await gesture.cancel();
       await gesture.removePointer();
     }
 
@@ -339,6 +340,7 @@ void main() {
         kind: PointerDeviceKind.mouse,
       );
       // We intentionally don't call up() here because we're testing the down event.
+      await gesture.cancel();
       await gesture.removePointer();
     }
 
