@@ -58,7 +58,7 @@ class CommandBuffer {
 
   virtual bool IsValid() const = 0;
 
-  virtual void SetLabel(const std::string& label) const = 0;
+  virtual void SetLabel(std::string_view label) const = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Force execution of pending GPU commands.

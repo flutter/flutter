@@ -16,18 +16,18 @@ BlitPass::BlitPass() {}
 
 BlitPass::~BlitPass() = default;
 
-void BlitPass::SetLabel(std::string label) {
+void BlitPass::SetLabel(std::string_view label) {
   if (label.empty()) {
     return;
   }
-  OnSetLabel(std::move(label));
+  OnSetLabel(label);
 }
 
 bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
                        std::shared_ptr<Texture> destination,
                        std::optional<IRect> source_region,
                        IPoint destination_origin,
-                       std::string label) {
+                       std::string_view label) {
   if (!source) {
     VALIDATION_LOG << "Attempted to add a texture blit with no source.";
     return false;
@@ -77,14 +77,14 @@ bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
 
   return OnCopyTextureToTextureCommand(
       std::move(source), std::move(destination), source_region.value(),
-      destination_origin, std::move(label));
+      destination_origin, label);
 }
 
 bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
                        std::shared_ptr<DeviceBuffer> destination,
                        std::optional<IRect> source_region,
                        size_t destination_offset,
-                       std::string label) {
+                       std::string_view label) {
   if (!source) {
     VALIDATION_LOG << "Attempted to add a texture blit with no source.";
     return false;
@@ -117,13 +117,13 @@ bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
 
   return OnCopyTextureToBufferCommand(std::move(source), std::move(destination),
                                       source_region.value(), destination_offset,
-                                      std::move(label));
+                                      label);
 }
 
 bool BlitPass::AddCopy(BufferView source,
                        std::shared_ptr<Texture> destination,
                        std::optional<IRect> destination_region,
-                       std::string label,
+                       std::string_view label,
                        uint32_t mip_level,
                        uint32_t slice,
                        bool convert_to_read) {
@@ -162,9 +162,9 @@ bool BlitPass::AddCopy(BufferView source,
     return false;
   }
 
-  return OnCopyBufferToTextureCommand(
-      std::move(source), std::move(destination), destination_region_value,
-      std::move(label), mip_level, slice, convert_to_read);
+  return OnCopyBufferToTextureCommand(std::move(source), std::move(destination),
+                                      destination_region_value, label,
+                                      mip_level, slice, convert_to_read);
 }
 
 bool BlitPass::ConvertTextureToShaderRead(
@@ -173,14 +173,14 @@ bool BlitPass::ConvertTextureToShaderRead(
 }
 
 bool BlitPass::GenerateMipmap(std::shared_ptr<Texture> texture,
-                              std::string label) {
+                              std::string_view label) {
   if (!texture) {
     VALIDATION_LOG << "Attempted to add an invalid mipmap generation command "
                       "with no texture.";
     return false;
   }
 
-  return OnGenerateMipmapCommand(std::move(texture), std::move(label));
+  return OnGenerateMipmapCommand(std::move(texture), label);
 }
 
 }  // namespace impeller

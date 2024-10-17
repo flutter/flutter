@@ -92,7 +92,7 @@ fml::Status RecordingRenderPass::Draw() {
 }
 
 // |RenderPass|
-void RecordingRenderPass::OnSetLabel(std::string label) {
+void RecordingRenderPass::OnSetLabel(std::string_view label) {
   return;
 }
 

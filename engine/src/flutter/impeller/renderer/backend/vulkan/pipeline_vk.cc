@@ -7,6 +7,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/status_or.h"
 #include "flutter/fml/trace_event.h"
+#include "impeller/base/strings.h"
 #include "impeller/base/timing.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
@@ -159,8 +160,11 @@ static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
     return {};
   }
 
-  ContextVK::SetDebugName(device, pass.get(),
-                          "Compat Render Pass: " + desc.GetLabel());
+#ifdef IMPELLER_DEBUG
+  ContextVK::SetDebugName(
+      device, pass.get(),
+      SPrintF("Compat Render Pass: %s", desc.GetLabel().data()));
+#endif  // IMPELLER_DEBUG
 
   return pass;
 }
@@ -207,8 +211,11 @@ fml::StatusOr<vk::UniqueDescriptorSetLayout> MakeDescriptorSetLayout(
                         "unable to create uniform descriptors")};
   }
 
-  ContextVK::SetDebugName(device_holder->GetDevice(), descs_layout.get(),
-                          "Descriptor Set Layout " + desc.GetLabel());
+#ifdef IMPELLER_DEBUG
+  ContextVK::SetDebugName(
+      device_holder->GetDevice(), descs_layout.get(),
+      SPrintF("Descriptor Set Layout: %s", desc.GetLabel().data()));
+#endif  // IMPELLER_DEBUG
 
   return fml::StatusOr<vk::UniqueDescriptorSetLayout>(std::move(descs_layout));
 }
@@ -229,8 +236,11 @@ fml::StatusOr<vk::UniquePipelineLayout> MakePipelineLayout(
                         "Could not create pipeline layout for pipeline.")};
   }
 
-  ContextVK::SetDebugName(device_holder->GetDevice(), *pipeline_layout.value,
-                          "Pipeline Layout " + desc.GetLabel());
+#ifdef IMPELLER_DEBUG
+  ContextVK::SetDebugName(
+      device_holder->GetDevice(), *pipeline_layout.value,
+      SPrintF("Pipeline Layout %s", desc.GetLabel().data()));
+#endif  // IMPELLER_DEBUG
 
   return std::move(pipeline_layout.value);
 }
@@ -439,8 +449,10 @@ fml::StatusOr<vk::UniquePipeline> MakePipeline(
     ReportPipelineCreationFeedback(desc, feedback);
   }
 
+#ifdef IMPELLER_DEBUG
   ContextVK::SetDebugName(device_holder->GetDevice(), *pipeline,
-                          "Pipeline " + desc.GetLabel());
+                          SPrintF("Pipeline %s", desc.GetLabel().data()));
+#endif  // IMPELLER_DEBUG
 
   return std::move(pipeline);
 }
@@ -451,8 +463,7 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
     const std::shared_ptr<DeviceHolderVK>& device_holder,
     const std::weak_ptr<PipelineLibrary>& weak_library,
     std::shared_ptr<SamplerVK> immutable_sampler) {
-  TRACE_EVENT1("flutter", "PipelineVK::Create", "Name",
-               desc.GetLabel().c_str());
+  TRACE_EVENT1("flutter", "PipelineVK::Create", "Name", desc.GetLabel().data());
 
   auto library = weak_library.lock();
 

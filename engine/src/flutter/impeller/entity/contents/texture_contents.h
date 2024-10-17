@@ -25,7 +25,7 @@ class TextureContents final : public Contents {
   ///         when image filters are applied.
   static std::shared_ptr<TextureContents> MakeRect(Rect destination);
 
-  void SetLabel(std::string label);
+  void SetLabel(std::string_view label);
 
   void SetDestinationRect(Rect rect);
 

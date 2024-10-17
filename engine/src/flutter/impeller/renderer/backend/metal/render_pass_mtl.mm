@@ -170,7 +170,7 @@ bool RenderPassMTL::IsValid() const {
   return is_valid_;
 }
 
-void RenderPassMTL::OnSetLabel(std::string label) {
+void RenderPassMTL::OnSetLabel(std::string_view label) {
 #ifdef IMPELLER_DEBUG
   if (label.empty()) {
     return;

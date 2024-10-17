@@ -30,10 +30,7 @@ class HostBuffer {
   static std::shared_ptr<HostBuffer> Create(
       const std::shared_ptr<Allocator>& allocator);
 
-  // |Buffer|
-  virtual ~HostBuffer();
-
-  void SetLabel(std::string label);
+  ~HostBuffer();
 
   //----------------------------------------------------------------------------
   /// @brief      Emplace uniform data onto the host buffer. Ensure that backend
@@ -169,7 +166,6 @@ class HostBuffer {
   size_t current_buffer_ = 0u;
   size_t offset_ = 0u;
   size_t frame_index_ = 0u;
-  std::string label_;
 };
 
 }  // namespace impeller

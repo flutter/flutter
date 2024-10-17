@@ -19,7 +19,7 @@ CommandBufferGLES::CommandBufferGLES(std::weak_ptr<const Context> context,
 CommandBufferGLES::~CommandBufferGLES() = default;
 
 // |CommandBuffer|
-void CommandBufferGLES::SetLabel(const std::string& label) const {
+void CommandBufferGLES::SetLabel(std::string_view label) const {
   // Cannot support.
 }
 

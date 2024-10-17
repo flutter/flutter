@@ -34,7 +34,7 @@ class RenderPassGLES final
   bool IsValid() const override;
 
   // |RenderPass|
-  void OnSetLabel(std::string label) override;
+  void OnSetLabel(std::string_view label) override;
 
   // |RenderPass|
   bool OnEncodeCommands(const Context& context) const override;

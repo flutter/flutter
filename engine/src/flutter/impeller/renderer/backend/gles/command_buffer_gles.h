@@ -26,7 +26,7 @@ class CommandBufferGLES final : public CommandBuffer {
                     ReactorGLES::Ref reactor);
 
   // |CommandBuffer|
-  void SetLabel(const std::string& label) const override;
+  void SetLabel(std::string_view label) const override;
 
   // |CommandBuffer|
   bool IsValid() const override;

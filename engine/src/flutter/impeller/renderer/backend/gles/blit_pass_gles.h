@@ -35,7 +35,7 @@ class BlitPassGLES final : public BlitPass,
   bool IsValid() const override;
 
   // |BlitPass|
-  void OnSetLabel(std::string label) override;
+  void OnSetLabel(std::string_view label) override;
 
   // |BlitPass|
   bool EncodeCommands(
@@ -50,27 +50,27 @@ class BlitPassGLES final : public BlitPass,
                                      std::shared_ptr<Texture> destination,
                                      IRect source_region,
                                      IPoint destination_origin,
-                                     std::string label) override;
+                                     std::string_view label) override;
 
   // |BlitPass|
   bool OnCopyTextureToBufferCommand(std::shared_ptr<Texture> source,
                                     std::shared_ptr<DeviceBuffer> destination,
                                     IRect source_region,
                                     size_t destination_offset,
-                                    std::string label) override;
+                                    std::string_view label) override;
 
   // |BlitPass|
   bool OnCopyBufferToTextureCommand(BufferView source,
                                     std::shared_ptr<Texture> destination,
                                     IRect destination_region,
-                                    std::string label,
+                                    std::string_view label,
                                     uint32_t mip_level,
                                     uint32_t slice,
                                     bool convert_to_read) override;
 
   // |BlitPass|
   bool OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
-                               std::string label) override;
+                               std::string_view label) override;
 
   BlitPassGLES(const BlitPassGLES&) = delete;
 

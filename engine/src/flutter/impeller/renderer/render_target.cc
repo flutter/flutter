@@ -260,7 +260,7 @@ RenderTarget RenderTargetAllocator::CreateOffscreen(
     const Context& context,
     ISize size,
     int mip_count,
-    const std::string& label,
+    std::string_view label,
     RenderTarget::AttachmentConfig color_attachment_config,
     std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
     const std::shared_ptr<Texture>& existing_color_texture,
@@ -289,7 +289,9 @@ RenderTarget RenderTargetAllocator::CreateOffscreen(
       return {};
     }
   }
-  color0_tex->SetLabel(SPrintF("%s Color Texture", label.c_str()));
+#ifdef IMPELLER_DEBUG
+  color0_tex->SetLabel(SPrintF("%s Color Texture", label.data()));
+#endif  // IMPELLER_DEBUG
 
   ColorAttachment color0;
   color0.clear_color = color_attachment_config.clear_color;
@@ -314,7 +316,7 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
     const Context& context,
     ISize size,
     int mip_count,
-    const std::string& label,
+    std::string_view label,
     RenderTarget::AttachmentConfigMSAA color_attachment_config,
     std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
     const std::shared_ptr<Texture>& existing_color_msaa_texture,
@@ -349,8 +351,10 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
       return {};
     }
   }
+#ifdef IMPELLER_DEBUG
   color0_msaa_tex->SetLabel(
-      SPrintF("%s Color Texture (Multisample)", label.c_str()));
+      SPrintF("%s Color Texture (Multisample)", label.data()));
+#endif  // IMPELLER_DEBUG
 
   // Create color resolve texture.
   std::shared_ptr<Texture> color0_resolve_tex;
@@ -372,7 +376,9 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
       return {};
     }
   }
-  color0_resolve_tex->SetLabel(SPrintF("%s Color Texture", label.c_str()));
+#ifdef IMPELLER_DEBUG
+  color0_resolve_tex->SetLabel(SPrintF("%s Color Texture", label.data()));
+#endif  // IMPELLER_DEBUG
 
   // Color attachment.
 
@@ -415,7 +421,7 @@ void RenderTarget::SetupDepthStencilAttachments(
     Allocator& allocator,
     ISize size,
     bool msaa,
-    const std::string& label,
+    std::string_view label,
     RenderTarget::AttachmentConfig stencil_attachment_config,
     const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
   std::shared_ptr<Texture> depth_stencil_texture;
@@ -451,8 +457,9 @@ void RenderTarget::SetupDepthStencilAttachments(
   stencil0.clear_stencil = 0u;
   stencil0.texture = std::move(depth_stencil_texture);
 
-  stencil0.texture->SetLabel(
-      SPrintF("%s Depth+Stencil Texture", label.c_str()));
+#ifdef IMPELLER_DEBUG
+  stencil0.texture->SetLabel(SPrintF("%s Depth+Stencil Texture", label.data()));
+#endif  // IMPELLER_DEBUG
   SetDepthAttachment(std::move(depth0));
   SetStencilAttachment(std::move(stencil0));
 }

@@ -31,8 +31,8 @@ std::shared_ptr<TextureContents> TextureContents::MakeRect(Rect destination) {
   return contents;
 }
 
-void TextureContents::SetLabel(std::string label) {
-  label_ = std::move(label);
+void TextureContents::SetLabel(std::string_view label) {
+  label_ = label;
 }
 
 void TextureContents::SetDestinationRect(Rect rect) {

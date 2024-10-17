@@ -44,9 +44,9 @@ class TestImpellerDeviceBuffer : public DeviceBuffer {
   ~TestImpellerDeviceBuffer() { free(bytes_); }
 
  private:
-  bool SetLabel(const std::string& label) override { return true; }
+  bool SetLabel(std::string_view label) override { return true; }
 
-  bool SetLabel(const std::string& label, Range range) override { return true; }
+  bool SetLabel(std::string_view label, Range range) override { return true; }
 
   uint8_t* OnGetContents() const override { return bytes_; }
 
