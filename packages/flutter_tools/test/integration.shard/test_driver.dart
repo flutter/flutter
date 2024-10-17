@@ -318,6 +318,17 @@ abstract class FlutterTestDriver {
     );
   }
 
+  /// Wait for an Extension event matching [kind].
+  ///
+  /// Returns a future that completes when the first [kind] event is received.
+  Future<Event> waitForExtensionEvent(String kind) {
+    _debugPrint('Waiting for $kind events...');
+
+    return _vmService!.onExtensionEvent
+        .where((Event event) => event.extensionKind == kind)
+        .first;
+  }
+
   Future<Isolate?> resume({ bool waitForNextPause = false }) => _resume(null, waitForNextPause);
   Future<Isolate?> stepOver({ bool waitForNextPause = true }) => _resume(StepOption.kOver, waitForNextPause);
   Future<Isolate?> stepOverAsync({ bool waitForNextPause = true }) => _resume(StepOption.kOverAsyncSuspension, waitForNextPause);
