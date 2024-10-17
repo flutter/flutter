@@ -467,6 +467,14 @@ class AndroidProject extends FlutterProjectPlatform {
   static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace\\s*=?\\s*[\'"](.+)[\'"]');
   static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
   static final RegExp _imperativeKotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
+
+  /// Examples of strings that this regex matches:
+  /// - `id "kotlin-android"`
+  /// - `id("kotlin-android")`
+  /// - `id ( "kotlin-android" ) `
+  /// - `id "org.jetbrains.kotlin.android"`
+  /// - `id("org.jetbrains.kotlin.android")`
+  /// - `id ( "org.jetbrains.kotlin.android" )`
   static final List<RegExp> _declarativeKotlinPluginPatterns = <RegExp>[
       RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$'),
       RegExp('^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$'),
