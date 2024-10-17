@@ -736,14 +736,14 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byIcon(Icons.access_alarm)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final SplashController controller = Material.of(tester.element(find.text('AC')));
     Offset indicatorCenter = const Offset(600, 30);
     const Size includedIndicatorSize = Size(64, 32);
     const Size excludedIndicatorSize = Size(74, 40);
 
     // Test ripple when NavigationBar is using `NavigationDestinationLabelBehavior.alwaysShow` (default).
     expect(
-      inkFeatures,
+      controller,
       paints
         ..clipPath(
           pathMatcher: isPathThat(
@@ -785,7 +785,7 @@ void main() {
     indicatorCenter = const Offset(600, 40);
 
     expect(
-      inkFeatures,
+      controller,
       paints
         ..clipPath(
           pathMatcher: isPathThat(
@@ -825,7 +825,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      inkFeatures,
+      controller,
       paints
         ..clipPath(
           pathMatcher: isPathThat(
@@ -866,7 +866,7 @@ void main() {
     indicatorCenter = const Offset(600, 30);
 
     expect(
-      inkFeatures,
+      controller,
       paints
         ..clipPath(
           pathMatcher: isPathThat(
@@ -1145,11 +1145,13 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(NavigationIndicator).last));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    // This test extracts the controller from the allRenderObjects iterable
+    // in order to prevent some wonkiness when running via skwasm.
+    final RenderObject controller = tester.allRenderObjects.firstWhere((RenderObject object) => object is SplashController);
 
     // Test hovered state.
     expect(
-      inkFeatures,
+      controller,
       kIsWeb
         ? (paints..rrect()..rrect()..circle(color: hoverColor))
         : (paints..circle(color: hoverColor)),
@@ -1160,7 +1162,7 @@ void main() {
 
     // Test pressed state.
     expect(
-      inkFeatures,
+      controller,
       kIsWeb
         ? (paints..circle()..circle()..circle(color: pressedColor))
         : (paints..circle()..circle(color: pressedColor)),
@@ -1175,7 +1177,7 @@ void main() {
 
     // Test focused state.
     expect(
-      inkFeatures,
+      controller,
       kIsWeb ? (paints..circle()..circle(color: focusColor)) : (paints..circle()..circle(color: focusColor)),
     );
   });
@@ -1265,14 +1267,14 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.byIcon(Icons.access_alarm)));
       await tester.pumpAndSettle();
 
-      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+      final SplashController controller = Material.of(tester.element(find.text('AC')));
       Offset indicatorCenter = const Offset(600, 33);
       const Size includedIndicatorSize = Size(64, 32);
       const Size excludedIndicatorSize = Size(74, 40);
 
       // Test ripple when NavigationBar is using `NavigationDestinationLabelBehavior.alwaysShow` (default).
       expect(
-        inkFeatures,
+        controller,
         paints
           ..clipPath(
             pathMatcher: isPathThat(
@@ -1314,7 +1316,7 @@ void main() {
       indicatorCenter = const Offset(600, 40);
 
       expect(
-        inkFeatures,
+        controller,
         paints
           ..clipPath(
             pathMatcher: isPathThat(
@@ -1354,7 +1356,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        inkFeatures,
+        controller,
         paints
           ..clipPath(
             pathMatcher: isPathThat(
@@ -1395,7 +1397,7 @@ void main() {
       indicatorCenter = const Offset(600, 33);
 
       expect(
-        inkFeatures,
+        controller,
         paints
           ..clipPath(
             pathMatcher: isPathThat(
