@@ -206,7 +206,8 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     final WindowsVersionValidator validator =
         WindowsVersionValidator(
             operatingSystemUtils: FakeValidOperatingSystemUtils(),
-            processLister: powershellUnavailable());
+            processLister: powershellUnavailable(),
+            versionExtractor: FakeVersionExtractor.win11ProX64());
     final ValidationResult result = await validator.validate();
     expect(result.type, powershellUnavailableResult.type, reason: 'The ValidationResult type should be the same (partial)');
     expect(result.statusInfo, powershellUnavailableResult.statusInfo, reason: 'The ValidationResult statusInfo should be the same');
