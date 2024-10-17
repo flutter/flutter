@@ -38,7 +38,13 @@ const Duration _kTransitionDuration = Duration(milliseconds: 167);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
 
-/// Callback for building the error widget.
+
+
+/// Signature for a callback that builds an error widget.
+///
+/// See also:
+///
+/// [InputDecorator.errorBuilder], which is of this type, and passes the errorText given by [TextFormField.validator].
 typedef InputErrorBuilder = Widget Function(String errorText);
 
 typedef _SubtextSize = ({ double ascent, double bottomHeight, double subtextHeight });
@@ -2962,15 +2968,23 @@ class InputDecoration {
   final String? errorText;
 
 
-  /// Callback for building the error widget.
+  /// Builds [Widget] that appears below the [InputDecorator.child] and the border.
   ///
-  /// If non-null, [errorText] will be passed to this builder,
-  /// and the returned widget will be displayed in place of [error].
+  /// If non-null, [errorText] will be passed to this builder, and the returned
+  /// widget will be displayed below the [InputDecorator.child] and the border.
+  ///
+  /// When used with [TextFormField] the text will come from [TextFormField.validator],
+  /// otherwise it will come from [InputDecoration.errorText]
   ///
   /// Use [errorBuilder] instead of [error] if you need to show the
   /// validator error but at the same time also customize the error widget.
   ///
   /// Only one of [error] or [errorBuilder] can be specified.
+  ///
+  /// See also:
+  ///
+  ///  * [TextFormField.validator], which passes its validation error
+  ///    as [InputDecoration.errorText] through to errorBuilder.
   final InputErrorBuilder? errorBuilder;
 
   /// {@template flutter.material.inputDecoration.errorStyle}
