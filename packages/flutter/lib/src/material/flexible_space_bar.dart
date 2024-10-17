@@ -141,8 +141,8 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Defines the padding applied to the [title]
   /// when the [FlexibleSpaceBar] is collapsed.
   ///
-  ///This allows for separate control of the title's padding
-  ///when the [FlexibleSpaceBar] transitions from expanded to collapsed state.
+  /// This allows for separate control of the title's padding
+  /// when the [FlexibleSpaceBar] transitions from expanded to collapsed state.
   ///
   /// The [collapsedTitlePadding] is only used if [titlePadding] is set.
   /// If [titlePadding] is null, this property is ignored.
