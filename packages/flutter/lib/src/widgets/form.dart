@@ -252,8 +252,9 @@ class FormState extends State<Form> {
     _fields.add(field);
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
-        if (field.widget.enabled) {
-          field.validate();
+        // If the field has already been validated or has no errors, we can skip the if statement to avoid an infinite loop.
+        if (field.widget.enabled && !field.isValid && !field.hasError) {
+          field._validate();
         }
       case AutovalidateMode.onUnfocus:
         field._focusNode.addListener(() => _updateField(field));
