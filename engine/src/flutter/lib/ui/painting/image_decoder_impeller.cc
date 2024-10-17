@@ -483,6 +483,9 @@ ImageDecoderImpeller::UploadTextureToStorage(
   }
 
   texture->SetLabel(impeller::SPrintF("ui.Image(%p)", texture.get()).c_str());
+
+  context->DisposeThreadLocalCachedResources();
+
   return std::make_pair(impeller::DlImageImpeller::Make(std::move(texture)),
                         std::string());
 }
