@@ -1166,7 +1166,7 @@ class _LargeTitleNavigationBarSliverDelegate
                       bottom: 0.0,
                       child: SizedBox(
                         height: bottomHeight * (1.0 - bottomShrinkFactor),
-                        child: bottom,
+                        child: ClipRect(child: bottom),
                       ),
                     ),
                 ],
