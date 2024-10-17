@@ -256,8 +256,9 @@ bool TextContents::Render(const ContentContext& renderer,
         }
       });
 
-  pass.SetVertexBuffer(std::move(buffer_view), vertex_count);
+  pass.SetVertexBuffer(std::move(buffer_view));
   pass.SetIndexBuffer({}, IndexType::kNone);
+  pass.SetElementCount(vertex_count);
 
   return pass.Draw().ok();
 }

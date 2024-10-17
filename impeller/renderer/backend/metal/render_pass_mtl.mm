@@ -284,14 +284,18 @@ void RenderPassMTL::SetScissor(IRect scissor) {
 }
 
 // |RenderPass|
+void RenderPassMTL::SetElementCount(size_t count) {
+  vertex_count_ = count;
+}
+
+// |RenderPass|
 void RenderPassMTL::SetInstanceCount(size_t count) {
   instance_count_ = count;
 }
 
 // |RenderPass|
 bool RenderPassMTL::SetVertexBuffer(BufferView vertex_buffers[],
-                                    size_t vertex_buffer_count,
-                                    size_t vertex_count) {
+                                    size_t vertex_buffer_count) {
   if (!ValidateVertexBuffers(vertex_buffers, vertex_buffer_count)) {
     return false;
   }
@@ -303,8 +307,6 @@ bool RenderPassMTL::SetVertexBuffer(BufferView vertex_buffers[],
       return false;
     }
   }
-
-  vertex_count_ = vertex_count;
 
   return true;
 }

@@ -266,7 +266,8 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
     BufferView index_buffer = {
         .buffer = device_buffer,
         .range = Range(offsetof(Cube, indices), sizeof(Cube::indices))};
-    pass.SetVertexBuffer(vertex_buffers.data(), vertex_buffers.size(), 36);
+    pass.SetVertexBuffer(vertex_buffers.data(), vertex_buffers.size());
+    pass.SetElementCount(36);
     pass.SetIndexBuffer(index_buffer, IndexType::k16bit);
 
     VS::UniformBuffer uniforms;
