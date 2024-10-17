@@ -26,6 +26,15 @@ import 'sliver.dart';
 /// [KeepAliveNotification.handle].
 ///
 /// To send these notifications, consider using [AutomaticKeepAliveClientMixin].
+///
+/// {@tool dartpad}
+/// This example demonstrates how to use the [AutomaticKeepAlive] widget
+/// and the [AutomaticKeepAliveClientMixin] to keep the state of the list
+/// items alive even when they are scrolled out of view.
+///
+/// ** See code in examples/api/lib/widgets/automatic_keep_alive/automatic_keep_alive.0.dart **
+/// {@end-tool}
+///
 class AutomaticKeepAlive extends StatefulWidget {
   /// Creates a widget that listens to [KeepAliveNotification]s and maintains a
   /// [KeepAlive] widget appropriately.
@@ -345,6 +354,14 @@ class KeepAliveHandle extends ChangeNotifier {
 ///
 ///  * [AutomaticKeepAlive], which listens to messages from this mixin.
 ///  * [KeepAliveNotification], the notifications sent by this mixin.
+///
+/// {@tool dartpad}
+/// This example demonstrates how to use the [AutomaticKeepAliveClientMixin]
+/// to keep the state of a widget alive even when it is scrolled out of view.
+///
+/// ** See code in examples/api/lib/widgets/automatic_keep_alive/automatic_keep_alive_client_mixin.0.dart **
+/// {@end-tool}
+///
 @optionalTypeArgs
 mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   KeepAliveHandle? _keepAliveHandle;
