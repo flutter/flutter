@@ -250,8 +250,17 @@ class FormState extends State<Form> {
 
   void _register(FormFieldState<dynamic> field) {
     _fields.add(field);
-    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
-      field._focusNode.addListener(() => _updateField(field));
+    switch (widget.autovalidateMode) {
+      case AutovalidateMode.always:
+        // If the field has already been validated or has no errors, we can skip the if statement to avoid an infinite loop.
+        if (field.widget.enabled && !field.isValid && !field.hasError) {
+          field._validate();
+        }
+      case AutovalidateMode.onUnfocus:
+        field._focusNode.addListener(() => _updateField(field));
+      case AutovalidateMode.onUserInteraction:
+      case AutovalidateMode.disabled:
+        break;
     }
   }
 
@@ -742,7 +751,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
     return widget.builder(this);
   }
-
 }
 
 /// Used to configure the auto validation of [FormField] and [Form] widgets.

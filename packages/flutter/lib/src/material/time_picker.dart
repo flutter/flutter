@@ -1738,9 +1738,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
 
   String? _validateHour(String? value) {
     final int? newHour = _parseHour(value);
-    setState(() {
-      hourHasError.value = newHour == null;
-    });
+    hourHasError.value = newHour == null;
     // This is used as the validator for the [TextFormField].
     // Returning an empty string allows the field to go into an error state.
     // Returning null means no error in the validation of the entered text.
@@ -1749,9 +1747,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
 
   String? _validateMinute(String? value) {
     final int? newMinute = _parseMinute(value);
-    setState(() {
-      minuteHasError.value = newMinute == null;
-    });
+    minuteHasError.value = newMinute == null;
     // This is used as the validator for the [TextFormField].
     // Returning an empty string allows the field to go into an error state.
     // Returning null means no error in the validation of the entered text.
