@@ -888,5 +888,22 @@ TEST_P(AiksTest, ColorWheel) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, DestructiveBlendColorFilterFloodsClip) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+  builder.DrawPaint(paint);
+
+  DlPaint save_paint;
+  save_paint.setColorFilter(
+      DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kSrc));
+  builder.SaveLayer(nullptr, &save_paint);
+  builder.Restore();
+
+  // Should be solid red as the destructive color filter floods the clip.
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

@@ -25,11 +25,8 @@ std::optional<Rect> ComputeSaveLayerCoverage(
   // first is the presence of a backdrop filter on the saveLayer. The second is
   // the presence of a color filter that effects transparent black on the
   // saveLayer. The last is the presence of unbounded content within the
-  // saveLayer (such as a drawPaint, bdf, et cetera). Note that currently
-  // only the presence of a backdrop filter impacts this flag, while color
-  // filters are not yet handled
-  // (https://github.com/flutter/flutter/issues/154035) and unbounded coverage
-  // is handled in the display list dispatcher.
+  // saveLayer (such as a drawPaint, bdf, et cetera). Note that unbounded
+  // coverage is handled in the display list dispatcher.
   //
   // Backdrop filters apply before the saveLayer is restored. The presence of
   // a backdrop filter causes the content coverage of the saveLayer to be

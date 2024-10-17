@@ -1015,7 +1015,9 @@ void Canvas::SaveLayer(const Paint& paint,
       filter_contents,                    //
       /*flood_output_coverage=*/
       Entity::IsBlendModeDestructive(paint.blend_mode),  //
-      /*flood_input_coverage=*/!!backdrop_filter         //
+      /*flood_input_coverage=*/!!backdrop_filter ||
+          (paint.color_filter &&
+           paint.color_filter->modifies_transparent_black())  //
   );
 
   if (!maybe_subpass_coverage.has_value()) {
