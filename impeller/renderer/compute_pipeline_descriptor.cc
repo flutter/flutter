@@ -33,8 +33,8 @@ bool ComputePipelineDescriptor::IsEqual(
 }
 
 ComputePipelineDescriptor& ComputePipelineDescriptor::SetLabel(
-    std::string label) {
-  label_ = std::move(label);
+    std::string_view label) {
+  label_ = label;
   return *this;
 }
 

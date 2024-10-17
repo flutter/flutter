@@ -36,8 +36,8 @@ bool RenderPassGLES::IsValid() const {
 }
 
 // |RenderPass|
-void RenderPassGLES::OnSetLabel(std::string label) {
-  label_ = std::move(label);
+void RenderPassGLES::OnSetLabel(std::string_view label) {
+  label_ = label;
 }
 
 void ConfigureBlending(const ProcTableGLES& gl,

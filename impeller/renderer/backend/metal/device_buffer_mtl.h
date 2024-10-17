@@ -42,10 +42,10 @@ class DeviceBufferMTL final
                         size_t offset) override;
 
   // |DeviceBuffer|
-  bool SetLabel(const std::string& label) override;
+  bool SetLabel(std::string_view label) override;
 
   // |DeviceBuffer|
-  bool SetLabel(const std::string& label, Range range) override;
+  bool SetLabel(std::string_view label, Range range) override;
 
   // |DeviceBuffer|
   void Flush(std::optional<Range> range) const override;

@@ -27,9 +27,9 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   ~PipelineDescriptor();
 
-  PipelineDescriptor& SetLabel(std::string label);
+  PipelineDescriptor& SetLabel(std::string_view label);
 
-  const std::string& GetLabel() const;
+  std::string_view GetLabel() const;
 
   PipelineDescriptor& SetSampleCount(SampleCount samples);
 

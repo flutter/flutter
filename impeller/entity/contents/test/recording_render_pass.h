@@ -69,7 +69,7 @@ class RecordingRenderPass : public RenderPass {
                     const std::unique_ptr<const Sampler>& sampler) override;
 
   // |RenderPass|
-  void OnSetLabel(std::string label) override;
+  void OnSetLabel(std::string_view label) override;
 
   // |RenderPass|
   bool OnEncodeCommands(const Context& context) const override;

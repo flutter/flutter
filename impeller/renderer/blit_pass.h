@@ -30,7 +30,7 @@ class BlitPass {
 
   virtual bool IsValid() const = 0;
 
-  void SetLabel(std::string label);
+  void SetLabel(std::string_view label);
 
   //----------------------------------------------------------------------------
   /// @brief      If the texture is not already in a shader read internal
@@ -71,7 +71,7 @@ class BlitPass {
                std::shared_ptr<Texture> destination,
                std::optional<IRect> source_region = std::nullopt,
                IPoint destination_origin = {},
-               std::string label = "");
+               std::string_view label = "");
 
   //----------------------------------------------------------------------------
   /// @brief      Record a command to copy the contents of a texture to a
@@ -94,7 +94,7 @@ class BlitPass {
                std::shared_ptr<DeviceBuffer> destination,
                std::optional<IRect> source_region = std::nullopt,
                size_t destination_offset = 0,
-               std::string label = "");
+               std::string_view label = "");
 
   //----------------------------------------------------------------------------
   /// @brief      Record a command to copy the contents of a buffer to a
@@ -127,7 +127,7 @@ class BlitPass {
   bool AddCopy(BufferView source,
                std::shared_ptr<Texture> destination,
                std::optional<IRect> destination_region = std::nullopt,
-               std::string label = "",
+               std::string_view label = "",
                uint32_t mip_level = 0,
                uint32_t slice = 0,
                bool convert_to_read = true);
@@ -140,7 +140,8 @@ class BlitPass {
   ///
   /// @return     If the command was valid for subsequent commitment.
   ///
-  bool GenerateMipmap(std::shared_ptr<Texture> texture, std::string label = "");
+  bool GenerateMipmap(std::shared_ptr<Texture> texture,
+                      std::string_view label = "");
 
   //----------------------------------------------------------------------------
   /// @brief      Encode the recorded commands to the underlying command buffer.
@@ -156,33 +157,33 @@ class BlitPass {
  protected:
   explicit BlitPass();
 
-  virtual void OnSetLabel(std::string label) = 0;
+  virtual void OnSetLabel(std::string_view label) = 0;
 
   virtual bool OnCopyTextureToTextureCommand(
       std::shared_ptr<Texture> source,
       std::shared_ptr<Texture> destination,
       IRect source_region,
       IPoint destination_origin,
-      std::string label) = 0;
+      std::string_view label) = 0;
 
   virtual bool OnCopyTextureToBufferCommand(
       std::shared_ptr<Texture> source,
       std::shared_ptr<DeviceBuffer> destination,
       IRect source_region,
       size_t destination_offset,
-      std::string label) = 0;
+      std::string_view label) = 0;
 
   virtual bool OnCopyBufferToTextureCommand(
       BufferView source,
       std::shared_ptr<Texture> destination,
       IRect destination_region,
-      std::string label,
+      std::string_view label,
       uint32_t mip_level,
       uint32_t slice,
       bool convert_to_read) = 0;
 
   virtual bool OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
-                                       std::string label) = 0;
+                                       std::string_view label) = 0;
 
  private:
   BlitPass(const BlitPass&) = delete;

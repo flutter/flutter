@@ -28,11 +28,11 @@ class MockDeviceBuffer : public DeviceBuffer {
   explicit MockDeviceBuffer(const DeviceBufferDescriptor& desc)
       : DeviceBuffer(desc) {}
 
-  MOCK_METHOD(bool, SetLabel, (const std::string& label), (override));
+  MOCK_METHOD(bool, SetLabel, (std::string_view label), (override));
 
   MOCK_METHOD(bool,
               SetLabel,
-              (const std::string& label, Range range),
+              (std::string_view label, Range range),
               (override));
 
   MOCK_METHOD(uint8_t*, OnGetContents, (), (const, override));
@@ -63,7 +63,7 @@ class MockBlitPass : public BlitPass {
               EncodeCommands,
               (const std::shared_ptr<Allocator>& transients_allocator),
               (const, override));
-  MOCK_METHOD(void, OnSetLabel, (std::string label), (override));
+  MOCK_METHOD(void, OnSetLabel, (std::string_view label), (override));
 
   MOCK_METHOD(bool,
               ResizeTexture,
@@ -77,7 +77,7 @@ class MockBlitPass : public BlitPass {
                std::shared_ptr<Texture> destination,
                IRect source_region,
                IPoint destination_origin,
-               std::string label),
+               std::string_view label),
               (override));
 
   MOCK_METHOD(bool,
@@ -86,21 +86,21 @@ class MockBlitPass : public BlitPass {
                std::shared_ptr<DeviceBuffer> destination,
                IRect source_region,
                size_t destination_offset,
-               std::string label),
+               std::string_view label),
               (override));
   MOCK_METHOD(bool,
               OnCopyBufferToTextureCommand,
               (BufferView source,
                std::shared_ptr<Texture> destination,
                IRect destination_rect,
-               std::string label,
+               std::string_view label,
                uint32_t mip_level,
                uint32_t slice,
                bool convert_to_read),
               (override));
   MOCK_METHOD(bool,
               OnGenerateMipmapCommand,
-              (std::shared_ptr<Texture> texture, std::string label),
+              (std::shared_ptr<Texture> texture, std::string_view label),
               (override));
 };
 
@@ -114,7 +114,7 @@ class MockRenderPass : public RenderPass {
               OnEncodeCommands,
               (const Context& context),
               (const, override));
-  MOCK_METHOD(void, OnSetLabel, (std::string label), (override));
+  MOCK_METHOD(void, OnSetLabel, (std::string_view label), (override));
 };
 
 class MockCommandBuffer : public CommandBuffer {
@@ -122,7 +122,7 @@ class MockCommandBuffer : public CommandBuffer {
   explicit MockCommandBuffer(std::weak_ptr<const Context> context)
       : CommandBuffer(std::move(context)) {}
   MOCK_METHOD(bool, IsValid, (), (const, override));
-  MOCK_METHOD(void, SetLabel, (const std::string& label), (const, override));
+  MOCK_METHOD(void, SetLabel, (std::string_view label), (const, override));
   MOCK_METHOD(std::shared_ptr<BlitPass>, OnCreateBlitPass, (), (override));
   MOCK_METHOD(bool,
               OnSubmitCommands,

@@ -31,12 +31,14 @@ CommandBufferVK::CommandBufferVK(
 
 CommandBufferVK::~CommandBufferVK() = default;
 
-void CommandBufferVK::SetLabel(const std::string& label) const {
+void CommandBufferVK::SetLabel(std::string_view label) const {
+#ifdef IMPELLER_DEBUG
   auto context = context_.lock();
   if (!context) {
     return;
   }
   ContextVK::Cast(*context).SetDebugName(GetCommandBuffer(), label);
+#endif  // IMPELLER_DEBUG
 }
 
 bool CommandBufferVK::IsValid() const {

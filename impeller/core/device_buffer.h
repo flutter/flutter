@@ -23,9 +23,9 @@ class DeviceBuffer {
                                     Range source_range,
                                     size_t offset = 0u);
 
-  virtual bool SetLabel(const std::string& label) = 0;
+  virtual bool SetLabel(std::string_view label) = 0;
 
-  virtual bool SetLabel(const std::string& label, Range range) = 0;
+  virtual bool SetLabel(std::string_view label, Range range) = 0;
 
   /// @brief Create a buffer view of this entire buffer.
   static BufferView AsBufferView(std::shared_ptr<DeviceBuffer> buffer);

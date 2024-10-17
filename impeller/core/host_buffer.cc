@@ -37,10 +37,6 @@ HostBuffer::HostBuffer(const std::shared_ptr<Allocator>& allocator)
 
 HostBuffer::~HostBuffer() = default;
 
-void HostBuffer::SetLabel(std::string label) {
-  label_ = std::move(label);
-}
-
 BufferView HostBuffer::Emplace(const void* buffer,
                                size_t length,
                                size_t align) {

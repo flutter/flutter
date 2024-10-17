@@ -94,7 +94,7 @@ TEST_P(AiksTest, CanRenderColorFilterWithInvertColorsDrawPaint) {
 namespace {
 bool GenerateMipmap(const std::shared_ptr<Context>& context,
                     std::shared_ptr<Texture> texture,
-                    std::string label) {
+                    std::string_view label) {
   auto buffer = context->CreateCommandBuffer();
   if (!buffer) {
     return false;
@@ -103,7 +103,7 @@ bool GenerateMipmap(const std::shared_ptr<Context>& context,
   if (!pass) {
     return false;
   }
-  pass->GenerateMipmap(std::move(texture), std::move(label));
+  pass->GenerateMipmap(std::move(texture), label);
 
   pass->EncodeCommands(context->GetResourceAllocator());
   return context->GetCommandQueue()->Submit({buffer}).ok();

@@ -238,10 +238,9 @@ bool RenderPassVK::IsValid() const {
   return is_valid_;
 }
 
-void RenderPassVK::OnSetLabel(std::string label) {
+void RenderPassVK::OnSetLabel(std::string_view label) {
 #ifdef IMPELLER_DEBUG
-  ContextVK::Cast(*context_).SetDebugName(render_pass_->Get(),
-                                          std::string(label).c_str());
+  ContextVK::Cast(*context_).SetDebugName(render_pass_->Get(), label.data());
 #endif  // IMPELLER_DEBUG
 }
 

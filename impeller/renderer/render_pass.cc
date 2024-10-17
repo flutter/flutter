@@ -50,11 +50,11 @@ const Matrix& RenderPass::GetOrthographicTransform() const {
   return orthographic_;
 }
 
-void RenderPass::SetLabel(std::string label) {
+void RenderPass::SetLabel(std::string_view label) {
   if (label.empty()) {
     return;
   }
-  OnSetLabel(std::move(label));
+  OnSetLabel(label);
 }
 
 bool RenderPass::AddCommand(Command&& command) {
