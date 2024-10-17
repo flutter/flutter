@@ -2181,6 +2181,60 @@ void main() {
     });
   });
 
+  testWidgets('DatePickerDialog onDateChanged callback', (WidgetTester tester) async {
+    DateTime? selectedDate;
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: DatePickerDialog(
+          initialDate: initialDate,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          onDateChanged: (DateTime date) => selectedDate = date,
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('12'));
+    expect(selectedDate, equals(DateTime(2016, DateTime.january, 12)));
+  });
+
+  testWidgets('DatePickerDialog with updated insetPadding', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: DatePickerDialog(
+          initialDate: initialDate,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          insetPadding: const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
+        ),
+      ),
+    ));
+
+    final Dialog dialog = tester.widget<Dialog>(find.byType(Dialog));
+    expect(dialog.insetPadding, const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0));
+  });
+
+  testWidgets('DateRangePickerDialog onStartDateChanged and onEndDateChanged callbacks', (WidgetTester tester) async {
+    DateTime? selectedStartDate;
+    DateTime? selectedEndDate;
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: DateRangePickerDialog(
+          firstDate: firstDate,
+          lastDate: lastDate,
+          initialDateRange: DateTimeRange(start: initialDate!, end: initialDate!.add(const Duration(days: 2))),
+          onStartDateChanged: (DateTime? date) => selectedStartDate = date,
+          onEndDateChanged: (DateTime? date) => selectedEndDate = date,
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('12').first);
+    await tester.tap(find.text('18').first);
+    expect(selectedStartDate, equals(DateTime(2016, DateTime.january, 12)));
+    expect(selectedEndDate, equals(DateTime(2016, DateTime.january, 18)));
+  });
+
   group('Landscape input-only date picker headers use headlineSmall', () {
     // Regression test for https://github.com/flutter/flutter/issues/122056
 
