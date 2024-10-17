@@ -212,7 +212,9 @@ linter:
     - unnecessary_null_in_if_null_operators
     - unnecessary_nullable_for_final_variable_declarations
     - unnecessary_overrides
-    - unnecessary_parenthesis
+    # TODO(zanderso): Temporarily disabling to unblock a Dart -> Engine roll.
+    # https://github.com/flutter/engine/pull/55927.
+    # - unnecessary_parenthesis
     # - unnecessary_raw_strings # what's "necessary" is a matter of opinion; consistency across strings can help readability more than this lint
     - unnecessary_statements
     - unnecessary_string_escapes

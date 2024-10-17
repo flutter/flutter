@@ -1444,6 +1444,11 @@
 ../../../flutter/third_party/dart/runtime/tools/heapsnapshot/README.md
 ../../../flutter/third_party/dart/runtime/tools/heapsnapshot/pubspec.yaml
 ../../../flutter/third_party/dart/runtime/tools/heapsnapshot/test
+../../../flutter/third_party/dart/runtime/tools/profiling/.gitignore
+../../../flutter/third_party/dart/runtime/tools/profiling/CHANGELOG.md
+../../../flutter/third_party/dart/runtime/tools/profiling/README.md
+../../../flutter/third_party/dart/runtime/tools/profiling/analysis_options.yaml
+../../../flutter/third_party/dart/runtime/tools/profiling/pubspec.yaml
 ../../../flutter/third_party/dart/runtime/tools/utils.py
 ../../../flutter/third_party/dart/runtime/tools/valgrind.py
 ../../../flutter/third_party/dart/runtime/tools/wiki/README.md
@@ -1490,6 +1495,7 @@
 ../../../flutter/third_party/dart/runtime/vm/compiler/backend/locations_helpers_test.cc
 ../../../flutter/third_party/dart/runtime/vm/compiler/backend/loops_test.cc
 ../../../flutter/third_party/dart/runtime/vm/compiler/backend/memory_copy_test.cc
+../../../flutter/third_party/dart/runtime/vm/compiler/backend/pragma_unsafe_no_bounds_check_test.cc
 ../../../flutter/third_party/dart/runtime/vm/compiler/backend/range_analysis_test.cc
 ../../../flutter/third_party/dart/runtime/vm/compiler/backend/reachability_fence_test.cc
 ../../../flutter/third_party/dart/runtime/vm/compiler/backend/redundancy_elimination_test.cc
@@ -1565,7 +1571,7 @@
 ../../../flutter/third_party/dart/runtime/vm/port_test.cc
 ../../../flutter/third_party/dart/runtime/vm/profiler_test.cc
 ../../../flutter/third_party/dart/runtime/vm/protos/.gitignore
-../../../flutter/third_party/dart/runtime/vm/regexp_test.cc
+../../../flutter/third_party/dart/runtime/vm/regexp/regexp_test.cc
 ../../../flutter/third_party/dart/runtime/vm/ring_buffer_test.cc
 ../../../flutter/third_party/dart/runtime/vm/scopes_test.cc
 ../../../flutter/third_party/dart/runtime/vm/service
