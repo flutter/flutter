@@ -16,7 +16,6 @@ void main() {
 
     expect(find.widgetWithText(AppBar, 'SelectionContainer Sample'), findsOne);
 
-
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
       find.descendant(
         of: find.text('Row 1'),
