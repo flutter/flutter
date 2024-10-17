@@ -72,7 +72,6 @@ if (flutterVersionName == null) {
 android {
     namespace "com.example.asset_sample"
     compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

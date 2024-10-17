@@ -35,7 +35,6 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace "com.example.a11y_assessments"
     compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
