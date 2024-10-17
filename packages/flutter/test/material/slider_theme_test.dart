@@ -2551,6 +2551,80 @@ void main() {
     expect(const RoundedRectSliderTrackShape().isRounded, isTrue);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/40098.
+  testWidgets('Default Slider padding can be adjusted', (WidgetTester tester) async {
+    Widget buildSlider({ EdgeInsetsGeometry? padding }) {
+      return MaterialApp(
+        theme: ThemeData(sliderTheme: SliderThemeData(padding: padding)),
+        home: Material(
+          child: Center(
+            child: IntrinsicHeight(
+              child: Slider(
+                value: 0.5,
+                onChanged: (double value) {},
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test Slider height and tracks spacing with default padding.
+    await tester.pumpWidget(buildSlider());
+
+    final RenderBox sliderBox = tester.renderObject(find.byType(Slider));
+    expect(sliderBox.size.height, equals(48));
+    MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+    expect(
+      material,
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(398.0, 22.0, 776.0, 26.0,  const Radius.circular(2.0)),
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(24.0, 21.0, 402.0, 27.0,  const Radius.circular(3.0)),
+        ),
+    );
+
+    // Test Slider height and tracks spacing with zero padding.
+    await tester.pumpWidget(buildSlider(padding: EdgeInsets.zero));
+    await tester.pumpAndSettle();
+    expect(sliderBox.size.height, equals(20));
+    material = Material.of(tester.element(find.byType(Slider)));
+    expect(
+      material,
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(398.0, 8.0, 800.0, 12.0,  const Radius.circular(2.0)),
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 7.0, 402.0, 13.0,  const Radius.circular(3.0)),
+        ),
+    );
+
+    // Test Slider height and tracks spacing with directional padding.
+    await tester.pumpWidget(buildSlider(padding: const EdgeInsetsDirectional.only(start: 10, end: 20)));
+    await tester.pumpAndSettle();
+    expect(sliderBox.size.height, equals(20));
+    material = Material.of(tester.element(find.byType(Slider)));
+    expect(
+      material,
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(393.0, 8.0, 780.0, 12.0,  const Radius.circular(2.0)),
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(10.0, 7.0, 397.0, 13.0,  const Radius.circular(3.0)),
+        ),
+    );
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
