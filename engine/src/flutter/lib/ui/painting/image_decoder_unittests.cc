@@ -92,7 +92,11 @@ class TestImpellerContext : public impeller::Context {
     tasks_.clear();
   }
 
+  void DisposeThreadLocalCachedResources() override { did_dispose_ = true; }
+
   void Shutdown() override {}
+
+  bool DidDisposeResources() const { return did_dispose_; }
 
   mutable size_t command_buffer_count_ = 0;
 
@@ -103,6 +107,7 @@ class TestImpellerContext : public impeller::Context {
   };
   std::vector<PendingTask> tasks_;
   std::shared_ptr<const Capabilities> capabilities_;
+  bool did_dispose_ = false;
 };
 
 }  // namespace impeller
@@ -367,12 +372,14 @@ TEST_F(ImageDecoderFixtureTest, ImpellerUploadToSharedNoGpu) {
 
   EXPECT_EQ(no_gpu_access_context->command_buffer_count_, 0ul);
   EXPECT_FALSE(invoked);
+  EXPECT_EQ(no_gpu_access_context->DidDisposeResources(), false);
 
   auto result = ImageDecoderImpeller::UploadTextureToStorage(
       no_gpu_access_context, bitmap);
 
   ASSERT_EQ(no_gpu_access_context->command_buffer_count_, 0ul);
   ASSERT_EQ(result.second, "");
+  EXPECT_EQ(no_gpu_access_context->DidDisposeResources(), true);
 
   no_gpu_access_context->FlushTasks(/*fail=*/true);
 }
