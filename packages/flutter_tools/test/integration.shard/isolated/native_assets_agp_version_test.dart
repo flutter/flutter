@@ -29,10 +29,9 @@ final List<String> agpVersions = <String>[
 /// build mode, so we should cover this.
 const List<String> buildModes = <String>[
   'debug',
-//   'profile',
-//   'release',
+  'profile',
+  'release',
 ];
-
 
 void main() {
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
@@ -100,8 +99,21 @@ for (final String agpVersion in agpVersions) {
           if (result.exitCode != 0) {
             throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
           }
+          
+          // /private/var/folders/v1/wpg85hbs16qd5b_x1c_l6nj400vh_3/T/NusgWq/package_with_native_assets/example/build/app/../native_assets/android/jniLibs/lib/
+          final Directory nativeAssetsDir = exampleDirectory
+            .childDirectory('build')
+            .childDirectory('app')
+            .childDirectory('..')
+            .childDirectory('native_assets')
+            .childDirectory('android')
+            .childDirectory('jniLibs')
+            .childDirectory('lib');
+          expect(nativeAssetsDir, exists);
 
-          expect(result.exitCode, 0);
+          // We expect one subdirectory for each Android architecture.
+          List<FileSystemEntity> nativeAssetsDirSubdirectories = nativeAssetsDir.listSync();
+          expect(nativeAssetsDirSubdirectories.length, 4);
         });
       });
     }
