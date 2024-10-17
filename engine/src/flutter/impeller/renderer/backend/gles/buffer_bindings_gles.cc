@@ -415,7 +415,7 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     /// If there is a sampler for the texture at the same index, configure the
     /// bound texture using that sampler.
     ///
-    const auto& sampler_gles = SamplerGLES::Cast(*data.sampler);
+    const auto& sampler_gles = SamplerGLES::Cast(**data.sampler);
     if (!sampler_gles.ConfigureBoundTexture(texture_gles, gl)) {
       return std::nullopt;
     }
