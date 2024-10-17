@@ -589,7 +589,7 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   // Lastly, compute the indices of the items in buckets[index].
   final int numberOfItemsInPreviousBuckets = index == 0 ? 0 : buckets.sublist(0, index - 1).sum;
   final int start = (numberOfItemsInPreviousBuckets + 1) - 1;
-  final int end = (start + buckets[index - 1]) - 1;
+  final int end = start + buckets[index - 1];
 
   print('index: $index');
   print('start: $start');
