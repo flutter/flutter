@@ -219,25 +219,39 @@ bool _isTransitionable(BuildContext context) {
 
 /// An iOS-styled navigation bar.
 ///
-/// The navigation bar is a toolbar that minimally consists of a widget, normally
-/// a page title, in the [middle] of the toolbar.
+/// The navigation bar is a toolbar that minimally consists of a widget,
+/// normally a page title.
 ///
-/// It also supports a [leading] and [trailing] widget before and after the
-/// [middle] widget while keeping the [middle] widget centered.
+/// It also supports [leading] and [trailing] widgets on either end of the
+/// toolbar for actions and navigation.
 ///
 /// The [leading] widget will automatically be a back chevron icon button (or a
 /// close button in case of a fullscreen dialog) to pop the current route if none
 /// is provided and [automaticallyImplyLeading] is true (true by default).
 ///
-/// The [middle] widget will automatically be a title text from the current
-/// [CupertinoPageRoute] if none is provided and [automaticallyImplyMiddle] is
-/// true (true by default).
-///
-/// It should be placed at top of the screen and automatically accounts for
-/// the OS's status bar.
+/// This toolbar should be placed at top of the screen where it will
+/// automatically account for the OS's status bar.
 ///
 /// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
 /// default), it will produce a blurring effect to the content behind it.
+///
+/// ### Layout options
+///
+/// While the [CupertinoSliverNavigationBar] can dynamically change size and
+/// layout in response to scrolling, this static version can reflect the same
+/// large (expanded) layout, or the small (collapsed) layout.
+///
+/// The default navigation bar will display the collapsed version of the
+/// [CupertinoSliverNavigationBar]. The [middle] widget will automatically be a
+/// title text from the current [CupertinoPageRoute] if none is provided and
+/// [automaticallyImplyMiddle] is true (true by default).
+///
+/// Using the [CupertinoNavigationBar.large] constructor will display the
+/// expanded version of [CupertinoSliverNavigationBar]. The [largeTitle] widget
+/// will automatically be a title text from the current [CupertinoPageRoute] if
+/// none is provided and `automaticallyImplyTitle` is true (true by default).
+///
+/// ### Transitions
 ///
 /// When [transitionBetweenRoutes] is true, this navigation bar will transition
 /// on top of the routes instead of inside them if the route being transitioned
@@ -264,6 +278,14 @@ bool _isTransitionable(BuildContext context) {
 /// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_navigation_bar.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows the resulting layout from [CupertinoNavigationBar.large]
+/// constructor, showing a large title similar to the expanded state of
+/// [CupertinoSliverNavigationBar]
+///
+/// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_navigation_bar.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoPageScaffold], a page layout helper typically hosting the
@@ -272,7 +294,16 @@ bool _isTransitionable(BuildContext context) {
 ///    scrolling list and that supports iOS-11-style large titles.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/bars/navigation-bars/>
 class CupertinoNavigationBar extends StatefulWidget implements ObstructingPreferredSizeWidget {
-  /// Creates a navigation bar in the iOS style.
+  /// Creates a static iOS style navigation bar, with a centered [middle] title.
+  ///
+  /// Similar to the collapsed state of [CupertinoSliverNavigationBar], which
+  /// can dynamically change size in response to scrolling.
+  ///
+  /// See also:
+  ///
+  ///   * [CupertinoNavigationBar.large], which creates a static iOS style
+  ///     navigation bar with a [largeTitle], similar to the expanded state of
+  ///     [CupertinoSliverNavigationBar].
   const CupertinoNavigationBar({
     super.key,
     this.leading,
@@ -290,11 +321,59 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
     this.bottom,
-  }) : assert(
+  }) : largeTitle = null,
+       assert(
          !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
          'Cannot specify a heroTag override if this navigation bar does not '
          'transition due to transitionBetweenRoutes = false.',
        );
+
+  /// Creates a static iOS style navigation bar, with a left aligned [largeTitle].
+  ///
+  /// Similar to the expanded state of [CupertinoSliverNavigationBar], which
+  /// can dynamically change size in response to scrolling.
+  ///
+  /// See also:
+  ///
+  ///   * [CupertinoNavigationBar]'s base constructor, which creates a static
+  ///     iOS style navigation bar with [middle], similar to the collapsed state
+  ///     of [CupertinoSliverNavigationBar].
+  const CupertinoNavigationBar.large({
+    super.key,
+    this.largeTitle,
+    this.leading,
+    this.automaticallyImplyLeading = true,
+    bool automaticallyImplyTitle = true,
+    this.previousPageTitle,
+    this.trailing,
+    this.border = _kDefaultNavBarBorder,
+    this.backgroundColor,
+    this.automaticBackgroundVisibility = true,
+    this.enableBackgroundFilterBlur = true,
+    this.brightness,
+    this.padding,
+    this.transitionBetweenRoutes = true,
+    this.heroTag = _defaultHeroTag,
+  }) : middle = null,
+       automaticallyImplyMiddle = automaticallyImplyTitle,
+       assert(
+         !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
+         'Cannot specify a heroTag override if this navigation bar does not '
+         'transition due to transitionBetweenRoutes = false.',
+       );
+
+  /// The navigation bar's title, when using [CupertinoNavigationBar.large].
+  ///
+  /// The title is displayed similar to the expanded state of
+  /// [CupertinoSliverNavigationBar], which can dynamically change size in
+  /// response to scrolling. For the smaller, or collapsed, version of this static
+  /// navigation bar, use the base [CupertinoNavigationBar] constructor and
+  /// [middle].
+  ///
+  /// If null and [automaticallyImplyMiddle] is true, an appropriate [Text]
+  /// title will be created if the current route is a [CupertinoPageRoute] and
+  /// has a `title`.
+  final Widget? largeTitle;
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.leading}
   /// Widget to place at the start of the navigation bar. Normally a back button
@@ -344,6 +423,11 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   /// Widget to place in the middle of the navigation bar. Normally a title or
   /// a segmented control.
+  ///
+  /// The title is displayed similar to the collapsed state of
+  /// [CupertinoSliverNavigationBar], which can dynamically change size in
+  /// response to scrolling. For the large, or expanded, version of this static
+  /// navigation bar, use [CupertinoNavigationBar.large] and [largeTitle].
   ///
   /// If null and [automaticallyImplyMiddle] is true, an appropriate [Text]
   /// title will be created if the current route is a [CupertinoPageRoute] and
@@ -570,19 +654,30 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor =
-      CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor;
+    // The static navigation bar does not expand or collapse (see CupertinoSliverNavigationBar),
+    // it will either display the collapsed nav bar with middle, or the expanded with largeTitle.
+    assert(widget.middle == null || widget.largeTitle == null);
+
+    final Color backgroundColor = CupertinoDynamicColor.maybeResolve(
+      widget.backgroundColor,
+      context,
+    ) ?? CupertinoTheme.of(context).barBackgroundColor;
 
     final Color? parentPageScaffoldBackgroundColor = CupertinoPageScaffoldBackgroundColor.maybeOf(context);
 
     final Border? initialBorder = widget.automaticBackgroundVisibility && parentPageScaffoldBackgroundColor != null
       ? _kTransparentNavBarBorder
       : widget.border;
-    final Border? effectiveBorder = widget.border == null ? null : Border.lerp(initialBorder, widget.border, _scrollAnimationValue,);
+    final Border? effectiveBorder = widget.border == null
+      ? null
+      : Border.lerp(initialBorder, widget.border, _scrollAnimationValue,);
 
     final Color effectiveBackgroundColor = widget.automaticBackgroundVisibility && parentPageScaffoldBackgroundColor != null
       ? Color.lerp(parentPageScaffoldBackgroundColor, backgroundColor, _scrollAnimationValue) ?? backgroundColor
       : backgroundColor;
+
+    final double persistentHeight = _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top;
+    final double maxHeight = persistentHeight + _kNavBarLargeTitleHeightExtension;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
@@ -594,26 +689,78 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       userMiddle: widget.middle,
       userTrailing: widget.trailing,
       padding: widget.padding,
-      userLargeTitle: null,
-      large: false,
+      userLargeTitle: widget.largeTitle,
+      large: widget.largeTitle != null,
+      staticBar: true, // This one does not scroll
     );
 
-    final Widget navBar = _wrapWithBackground(
+    Widget navBar = Column(
+      children: [
+        _PersistentNavigationBar(
+          components: components,
+          padding: widget.padding,
+          middleVisible: widget.middle != null,
+        ),
+        if (widget.bottom != null) widget.bottom!,
+      ],
+    );
+
+    if (widget.largeTitle != null) {
+      navBar = ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        child: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          Positioned(
+            top: persistentHeight,
+            left: 0.0,
+            right: 0.0,
+            bottom: 0.0,
+            child: ClipRect(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  start: _kNavBarEdgePadding,
+                  bottom: _kNavBarBottomPadding
+                ),
+                child: SafeArea(
+                  top: false,
+                  bottom: false,
+                  child: Semantics(
+                    header: true,
+                    child: DefaultTextStyle(
+                      style: CupertinoTheme.of(context)
+                          .textTheme
+                          .navLargeTitleTextStyle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      child: _LargeTitle(
+                        child: components.largeTitle,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0.0,
+            right: 0.0,
+            top: 0.0,
+            child: navBar,
+          ),
+        ],
+      ),
+      );
+    }
+
+    navBar = _wrapWithBackground(
       border: effectiveBorder,
       backgroundColor: effectiveBackgroundColor,
       brightness: widget.brightness,
       enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
-        child: Column(
-          children: <Widget>[
-            _PersistentNavigationBar(
-              components: components,
-              padding: widget.padding,
-            ),
-            if (widget.bottom != null) widget.bottom!,
-          ],
-        ),
+        child: navBar,
       ),
     );
 
@@ -638,10 +785,10 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
             backgroundColor: effectiveBackgroundColor,
             backButtonTextStyle: CupertinoTheme.of(context).textTheme.navActionTextStyle,
             titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-            largeTitleTextStyle: null,
+            largeTitleTextStyle: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
             border: effectiveBorder,
             hasUserMiddle: widget.middle != null,
-            largeExpanded: false,
+            largeExpanded: widget.largeTitle != null,
             child: navBar,
           ),
         );
@@ -942,6 +1089,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       userLargeTitle: widget.largeTitle,
       padding: widget.padding,
       large: true,
+      staticBar: false // This one scrolls.
     );
 
     return MediaQuery.withNoTextScaling(
@@ -1441,6 +1589,7 @@ class _NavigationBarStaticComponents {
     required Widget? userLargeTitle,
     required EdgeInsetsDirectional? padding,
     required bool large,
+    required bool staticBar,
   }) : leading = createLeading(
          leadingKey: keys.leadingKey,
          userLeading: userLeading,
@@ -1468,6 +1617,7 @@ class _NavigationBarStaticComponents {
          route: route,
          automaticallyImplyTitle: automaticallyImplyTitle,
          large: large,
+         staticBar: staticBar,
        ),
        trailing = createTrailing(
          trailingKey: keys.trailingKey,
@@ -1598,10 +1748,17 @@ class _NavigationBarStaticComponents {
     required Widget? userMiddle,
     required Widget? userLargeTitle,
     required bool large,
+    required bool staticBar,
     required bool automaticallyImplyTitle,
     required ModalRoute<dynamic>? route,
   }) {
     Widget? middleContent = userMiddle;
+
+    if (middleContent == null && large && staticBar) {
+      // Static bar only displays the middle, or the large, not both.
+      // A scrolling bar cerates both middle and large to transition between.
+      return null;
+    }
 
     if (large) {
       middleContent ??= userLargeTitle;
