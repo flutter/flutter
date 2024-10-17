@@ -230,13 +230,14 @@
                 "parameters": [
                     "--engine-version",
                     "${REVISION}",
+                    "--skip-build",
                     "--upload"
                 ],
                 "script": "flutter/tools/fuchsia/build_fuchsia_artifacts.py",
                 "language": "python3"
             },
             {
-                "name": "Upload debug symbols to CIPD for arch: arm64",
+                "name": "Upload to CIPD for arch: arm64",
                 "parameters": [
                     "--engine-version",
                     "${REVISION}",
@@ -254,7 +255,7 @@
                 "language": "python3"
             },
             {
-                "name": "Upload debug symbols to CIPD for arch: x64",
+                "name": "Upload to CIPD for arch: x64",
                 "parameters": [
                     "--engine-version",
                     "${REVISION}",
