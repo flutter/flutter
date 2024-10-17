@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'editable_text.dart';
-/// @docImport 'scroll_view.dart';
-/// @docImport 'table.dart';
+/// @docImport 'package:flutter/widgets.dart';
 library;
 
 import 'dart:math' as math;
@@ -85,6 +83,7 @@ class InteractiveViewer extends StatefulWidget {
     this.transformationController,
     this.alignment,
     this.trackpadScrollCausesScale = false,
+    this.transformChild = true,
     required Widget this.child,
   }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
@@ -129,6 +128,7 @@ class InteractiveViewer extends StatefulWidget {
     this.alignment,
     this.trackpadScrollCausesScale = false,
     required InteractiveViewerWidgetBuilder this.builder,
+    this.transformChild = true,
   }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
        assert(minScale.isFinite),
@@ -146,6 +146,108 @@ class InteractiveViewer extends StatefulWidget {
        ),
        constrained = false,
        child = null;
+
+  /// Setting `transformChild` to false will prevent InteractiveViewer from transforming the
+  /// child based on the [Matrix4] in the [TransformationController]. This is done to always
+  /// keep the child static and allow for custom dynamic layout widgets like
+  /// [Stack] and [CustomMultiChildLayout].
+  ///
+  /// Setting `transformChild` to true will transform the child `Rect` and hit tests based on the [Matrix4]
+  /// defined in the [TransformationController].
+  ///
+  /// Due to the way gestures work in Flutter the parts of a child that are outside of the parent
+  /// [RenderBox] will not receive hit tests. For example you could have a [Stack] with [Clip.none]
+  /// and a negative offset for the [Positioned] widget which will not handle gestures.
+  ///
+  /// ```dart
+  /// import 'package:flutter/widgets.dart';
+  ///
+  /// class Example extends StatelessWidget {
+  ///   const Example({super.key});
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return InteractiveViewer(
+  ///       child: Stack(
+  ///         clipBehavior: Clip.none,
+  ///         children: <Widget>[
+  ///           Positioned(
+  ///             top: -20,
+  ///             left: -20,
+  ///             child: GestureDetector(
+  ///               onTap: () => print('A clicked'),
+  ///               child: const Text('A'),
+  ///             ),
+  ///           ),
+  ///           Positioned(
+  ///             top: 50,
+  ///             left: 20,
+  ///             child: GestureDetector(
+  ///               onTap: () => print('B clicked'),
+  ///               child: const Text('B'),
+  ///             ),
+  ///           ),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// In the above example 'B' can receive hit tests, but 'A' will not register any interactions. This happens
+  /// for [Stack], [CustomMultiChildLayout], or any widget that can position children irregardless
+  /// if the parent is InteractiveViewer.
+  ///
+  /// This is fine for non interactive elements and in most cases having transformChild set to true will be
+  /// the desired behavior.
+  ///
+  /// However if you need hit tests for all children you can set transformChild to false and
+  /// handle child transforms manually.
+  ///
+  /// ```dart
+  /// import 'package:flutter/widgets.dart';
+  /// import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad;
+  ///
+  /// typedef Node = ({Rect rect, Widget child});
+  ///
+  /// class Example extends StatelessWidget {
+  ///   const Example({
+  ///     super.key,
+  ///     required this.controller,
+  ///     required this.nodes,
+  ///   });
+  ///
+  ///   final TransformationController controller;
+  ///   final List<Node> nodes;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return InteractiveViewer.builder(
+  ///       transformationController: controller,
+  ///       transformChild: false,
+  ///       builder: (BuildContext context, Quad viewport) {
+  ///         final Matrix4 matrix = controller.value;
+  ///         return Stack(
+  ///           clipBehavior: Clip.none,
+  ///           children: nodes.map((Node node) {
+  ///             final Rect rect = MatrixUtils.transformRect(matrix, node.rect);
+  ///             return Positioned.fromRect(
+  ///               rect: rect,
+  ///               child: GestureDetector(
+  ///                 onTap: () => print('Node clicked'),
+  ///                 child: node.child,
+  ///               ),
+  ///             );
+  ///           }).toList(),
+  ///         );
+  ///       },
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// Now the child will never exceed the bounds of the parent and always stay static, preserving hit tests.
+  final bool transformChild;
 
   /// The alignment of the child's origin, relative to the size of the box.
   final Alignment? alignment;
@@ -1114,6 +1216,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         constrained: widget.constrained,
         matrix: _transformer.value,
         alignment: widget.alignment,
+        transformChild: widget.transformChild,
         child: widget.child!,
       );
     } else {
@@ -1130,6 +1233,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
             constrained: widget.constrained,
             alignment: widget.alignment,
             matrix: matrix,
+            transformChild: widget.transformChild,
             child: widget.builder!(
               context,
               _transformViewport(matrix, Offset.zero & constraints.biggest),
@@ -1165,6 +1269,7 @@ class _InteractiveViewerBuilt extends StatelessWidget {
     required this.constrained,
     required this.matrix,
     required this.alignment,
+    required this.transformChild,
   });
 
   final Widget child;
@@ -1173,17 +1278,22 @@ class _InteractiveViewerBuilt extends StatelessWidget {
   final bool constrained;
   final Matrix4 matrix;
   final Alignment? alignment;
+  final bool transformChild;
 
   @override
   Widget build(BuildContext context) {
-    Widget child = Transform(
-      transform: matrix,
-      alignment: alignment,
-      child: KeyedSubtree(
-        key: childKey,
-        child: this.child,
-      ),
+   Widget child = KeyedSubtree(
+      key: childKey,
+      child: this.child,
     );
+
+    if (transformChild) {
+      child = Transform(
+        transform: matrix,
+        alignment: alignment,
+        child: child,
+      );
+    }
 
     if (!constrained) {
       child = OverflowBox(
