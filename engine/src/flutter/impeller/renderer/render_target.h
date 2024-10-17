@@ -82,7 +82,7 @@ class RenderTarget final {
       Allocator& allocator,
       ISize size,
       bool msaa,
-      const std::string& label = "Offscreen",
+      std::string_view label = "Offscreen",
       RenderTarget::AttachmentConfig stencil_attachment_config =
           RenderTarget::kDefaultStencilAttachmentConfig,
       const std::shared_ptr<Texture>& depth_stencil_texture = nullptr);
@@ -149,7 +149,7 @@ class RenderTargetAllocator {
       const Context& context,
       ISize size,
       int mip_count,
-      const std::string& label = "Offscreen",
+      std::string_view label = "Offscreen",
       RenderTarget::AttachmentConfig color_attachment_config =
           RenderTarget::kDefaultColorAttachmentConfig,
       std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config =
@@ -161,7 +161,7 @@ class RenderTargetAllocator {
       const Context& context,
       ISize size,
       int mip_count,
-      const std::string& label = "Offscreen MSAA",
+      std::string_view label = "Offscreen MSAA",
       RenderTarget::AttachmentConfigMSAA color_attachment_config =
           RenderTarget::kDefaultColorAttachmentConfigMSAA,
       std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config =

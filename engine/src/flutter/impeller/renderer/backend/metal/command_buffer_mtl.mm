@@ -140,12 +140,14 @@ bool CommandBufferMTL::IsValid() const {
   return buffer_ != nil;
 }
 
-void CommandBufferMTL::SetLabel(const std::string& label) const {
+void CommandBufferMTL::SetLabel(std::string_view label) const {
+#ifdef IMPELLER_DEBUG
   if (label.empty()) {
     return;
   }
 
   [buffer_ setLabel:@(label.data())];
+#endif  // IMPELLER_DEBUG
 }
 
 static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {

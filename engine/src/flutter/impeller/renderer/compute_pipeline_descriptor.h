@@ -24,7 +24,7 @@ class ComputePipelineDescriptor final
 
   ~ComputePipelineDescriptor();
 
-  ComputePipelineDescriptor& SetLabel(std::string label);
+  ComputePipelineDescriptor& SetLabel(std::string_view label);
 
   const std::string& GetLabel() const;
 

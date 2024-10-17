@@ -110,13 +110,15 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
 }
 
 // |DeviceBuffer|
-bool DeviceBufferGLES::SetLabel(const std::string& label) {
+bool DeviceBufferGLES::SetLabel(std::string_view label) {
+#ifdef IMPELLER_DEBUG
   reactor_->SetDebugLabel(handle_, label);
+#endif  // IMPELLER_DEBUG
   return true;
 }
 
 // |DeviceBuffer|
-bool DeviceBufferGLES::SetLabel(const std::string& label, Range range) {
+bool DeviceBufferGLES::SetLabel(std::string_view label, Range range) {
   // Cannot support debug label on the range. Set the label for the entire
   // range.
   return SetLabel(label);

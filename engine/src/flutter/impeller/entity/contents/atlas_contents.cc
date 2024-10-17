@@ -94,8 +94,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
     using FS = PorterDuffBlendPipeline::FragmentShader;
 
 #ifdef IMPELLER_DEBUG
-    pass.SetCommandLabel(
-        SPrintF("DrawAtlas Blend (%s)", BlendModeToString(blend_mode)));
+    pass.SetCommandLabel("DrawAtlas Blend");
 #endif  // IMPELLER_DEBUG
     pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(host_buffer));
     pass.SetPipeline(
@@ -138,8 +137,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
   using FS = VerticesUberShader::FragmentShader;
 
 #ifdef IMPELLER_DEBUG
-  pass.SetCommandLabel(
-      SPrintF("DrawAtlas Advanced Blend (%s)", BlendModeToString(blend_mode)));
+  pass.SetCommandLabel("DrawAtlas Advanced Blend");
 #endif  // IMPELLER_DEBUG
   pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(host_buffer));
 

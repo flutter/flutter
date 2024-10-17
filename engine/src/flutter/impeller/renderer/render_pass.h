@@ -6,7 +6,6 @@
 #define FLUTTER_IMPELLER_RENDERER_RENDER_PASS_H_
 
 #include <cstddef>
-#include <string>
 
 #include "fml/status.h"
 #include "impeller/core/formats.h"
@@ -45,7 +44,7 @@ class RenderPass : public ResourceBinder {
 
   virtual bool IsValid() const = 0;
 
-  void SetLabel(std::string label);
+  void SetLabel(std::string_view label);
 
   /// @brief Reserve [command_count] commands in the HAL command buffer.
   ///
@@ -269,7 +268,7 @@ class RenderPass : public ResourceBinder {
   static bool ValidateIndexBuffer(const BufferView& index_buffer,
                                   IndexType index_type);
 
-  virtual void OnSetLabel(std::string label) = 0;
+  virtual void OnSetLabel(std::string_view label) = 0;
 
   virtual bool OnEncodeCommands(const Context& context) const = 0;
 

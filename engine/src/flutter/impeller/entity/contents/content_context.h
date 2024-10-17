@@ -992,7 +992,7 @@ class ContentContext {
                              PipelineDescriptor& desc) {
           opts.ApplyToPipelineDescriptor(desc);
           desc.SetLabel(
-              SPrintF("%s V#%zu", desc.GetLabel().c_str(), variants_count));
+              SPrintF("%s V#%zu", desc.GetLabel().data(), variants_count));
         });
     std::unique_ptr<RenderPipelineHandleT> variant =
         std::make_unique<RenderPipelineHandleT>(std::move(variant_future));

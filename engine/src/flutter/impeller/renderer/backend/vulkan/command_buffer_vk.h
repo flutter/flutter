@@ -95,7 +95,7 @@ class CommandBufferVK final
                   std::shared_ptr<FenceWaiterVK> fence_waiter);
 
   // |CommandBuffer|
-  void SetLabel(const std::string& label) const override;
+  void SetLabel(std::string_view label) const override;
 
   // |CommandBuffer|
   bool IsValid() const override;

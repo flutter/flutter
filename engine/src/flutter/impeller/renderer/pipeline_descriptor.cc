@@ -68,8 +68,8 @@ bool PipelineDescriptor::IsEqual(const PipelineDescriptor& other) const {
          specialization_constants_ == other.specialization_constants_;
 }
 
-PipelineDescriptor& PipelineDescriptor::SetLabel(std::string label) {
-  label_ = std::move(label);
+PipelineDescriptor& PipelineDescriptor::SetLabel(std::string_view label) {
+  label_ = std::string(label);
   return *this;
 }
 
@@ -231,7 +231,7 @@ std::shared_ptr<const ShaderFunction> PipelineDescriptor::GetEntrypointForStage(
   return nullptr;
 }
 
-const std::string& PipelineDescriptor::GetLabel() const {
+std::string_view PipelineDescriptor::GetLabel() const {
   return label_;
 }
 

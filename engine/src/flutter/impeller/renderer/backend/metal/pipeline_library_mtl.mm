@@ -28,7 +28,7 @@ using Callback = std::function<void(MTLRenderPipelineDescriptor*)>;
 static void GetMTLRenderPipelineDescriptor(const PipelineDescriptor& desc,
                                            const Callback& callback) {
   auto descriptor = [[MTLRenderPipelineDescriptor alloc] init];
-  descriptor.label = @(desc.GetLabel().c_str());
+  descriptor.label = @(desc.GetLabel().data());
   descriptor.rasterSampleCount = static_cast<NSUInteger>(desc.GetSampleCount());
   bool created_specialized_function = false;
 

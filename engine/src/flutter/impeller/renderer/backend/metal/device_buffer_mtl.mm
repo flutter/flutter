@@ -64,20 +64,24 @@ void DeviceBufferMTL::Flush(std::optional<Range> range) const {
 #endif
 }
 
-bool DeviceBufferMTL::SetLabel(const std::string& label) {
+bool DeviceBufferMTL::SetLabel(std::string_view label) {
+#ifdef IMPELLER_DEBUG
   if (label.empty()) {
     return false;
   }
-  [buffer_ setLabel:@(label.c_str())];
+  [buffer_ setLabel:@(label.data())];
+#endif  // IMPELLER_DEBUG
   return true;
 }
 
-bool DeviceBufferMTL::SetLabel(const std::string& label, Range range) {
+bool DeviceBufferMTL::SetLabel(std::string_view label, Range range) {
+#ifdef IMPELLER_DEBUG
   if (label.empty()) {
     return false;
   }
-  [buffer_ addDebugMarker:@(label.c_str())
+  [buffer_ addDebugMarker:@(label.data())
                     range:NSMakeRange(range.offset, range.length)];
+#endif  // IMPELLER_DEBUG
   return true;
 }
 

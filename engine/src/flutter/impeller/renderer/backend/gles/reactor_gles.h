@@ -190,7 +190,7 @@ class ReactorGLES {
   /// @param[in]  handle  The handle
   /// @param[in]  label   The label
   ///
-  void SetDebugLabel(const HandleGLES& handle, std::string label);
+  void SetDebugLabel(const HandleGLES& handle, std::string_view label);
 
   using Operation = std::function<void(const ReactorGLES& reactor)>;
 
