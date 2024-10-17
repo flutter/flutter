@@ -72,7 +72,7 @@ bool RenderPass::AddCommand(Command&& command) {
     }
   }
 
-  if (command.vertex_count == 0u || command.instance_count == 0u) {
+  if (command.element_count == 0u || command.instance_count == 0u) {
     // Essentially a no-op. Don't record the command but this is not necessary
     // an error either.
     return true;
@@ -117,40 +117,40 @@ void RenderPass::SetScissor(IRect scissor) {
   pending_.scissor = scissor;
 }
 
+void RenderPass::SetElementCount(size_t count) {
+  pending_.element_count = count;
+}
+
 void RenderPass::SetInstanceCount(size_t count) {
   pending_.instance_count = count;
 }
 
 bool RenderPass::SetVertexBuffer(VertexBuffer buffer) {
-  if (!SetVertexBuffer(&buffer.vertex_buffer, 1u, buffer.vertex_count)) {
+  if (!SetVertexBuffer(&buffer.vertex_buffer, 1u)) {
     return false;
   }
   if (!SetIndexBuffer(buffer.index_buffer, buffer.index_type)) {
     return false;
   }
+  SetElementCount(buffer.vertex_count);
 
   return true;
 }
 
-bool RenderPass::SetVertexBuffer(BufferView vertex_buffer,
-                                 size_t vertex_count) {
-  return SetVertexBuffer(&vertex_buffer, 1, vertex_count);
+bool RenderPass::SetVertexBuffer(BufferView vertex_buffer) {
+  return SetVertexBuffer(&vertex_buffer, 1);
 }
 
-bool RenderPass::SetVertexBuffer(std::vector<BufferView> vertex_buffers,
-                                 size_t vertex_count) {
-  return SetVertexBuffer(vertex_buffers.data(), vertex_buffers.size(),
-                         vertex_count);
+bool RenderPass::SetVertexBuffer(std::vector<BufferView> vertex_buffers) {
+  return SetVertexBuffer(vertex_buffers.data(), vertex_buffers.size());
 }
 
 bool RenderPass::SetVertexBuffer(BufferView vertex_buffers[],
-                                 size_t vertex_buffer_count,
-                                 size_t vertex_count) {
+                                 size_t vertex_buffer_count) {
   if (!ValidateVertexBuffers(vertex_buffers, vertex_buffer_count)) {
     return false;
   }
 
-  pending_.vertex_count = vertex_count;
   pending_.vertex_buffer_count = vertex_buffer_count;
   for (size_t i = 0; i < vertex_buffer_count; i++) {
     pending_.vertex_buffers[i] = std::move(vertex_buffers[i]);

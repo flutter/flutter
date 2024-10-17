@@ -20,7 +20,7 @@ bool Command::BindVertices(const VertexBuffer& buffer) {
 
   vertex_buffers = {buffer.vertex_buffer};
   vertex_buffer_count = 1u;
-  vertex_count = buffer.vertex_count;
+  element_count = buffer.vertex_count;
   index_buffer = buffer.index_buffer;
   index_type = buffer.index_type;
   return true;
@@ -89,14 +89,14 @@ bool Command::BindResource(ShaderStage stage,
       vertex_bindings.sampled_images.emplace_back(TextureAndSampler{
           .slot = slot,
           .texture = {&metadata, std::move(texture)},
-          .sampler = sampler,
+          .sampler = &sampler,
       });
       return true;
     case ShaderStage::kFragment:
       fragment_bindings.sampled_images.emplace_back(TextureAndSampler{
           .slot = slot,
           .texture = {&metadata, std::move(texture)},
-          .sampler = sampler,
+          .sampler = &sampler,
       });
       return true;
     case ShaderStage::kCompute:

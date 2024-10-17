@@ -80,12 +80,14 @@ class RenderPassMTL final : public RenderPass {
   void SetScissor(IRect scissor) override;
 
   // |RenderPass|
+  void SetElementCount(size_t count) override;
+
+  // |RenderPass|
   void SetInstanceCount(size_t count) override;
 
   // |RenderPass|
   bool SetVertexBuffer(BufferView vertex_buffers[],
-                       size_t vertex_buffer_count,
-                       size_t vertex_count) override;
+                       size_t vertex_buffer_count) override;
 
   // |RenderPass|
   bool SetIndexBuffer(BufferView index_buffer, IndexType index_type) override;

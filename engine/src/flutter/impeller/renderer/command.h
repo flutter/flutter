@@ -61,7 +61,7 @@ using TextureResource = Resource<std::shared_ptr<const Texture>>;
 struct TextureAndSampler {
   SampledImageSlot slot;
   TextureResource texture;
-  const std::unique_ptr<const Sampler>& sampler;
+  const std::unique_ptr<const Sampler>* sampler;
 };
 
 /// @brief combines the buffer resource and its uniform slot information.
@@ -160,14 +160,13 @@ struct Command : public ResourceBinder {
   BufferView index_buffer;
 
   //----------------------------------------------------------------------------
-  /// The total count of vertices, either in the vertex_buffer if the
-  /// index_type is IndexType::kNone or in the index_buffer otherwise.
-  size_t vertex_count = 0u;
+  /// The number of elements to draw. When only a vertex buffer is set, this is
+  /// the vertex count. When an index buffer is set, this is the index count.
+  size_t element_count = 0u;
 
   //----------------------------------------------------------------------------
   /// The type of indices in the index buffer. The indices must be tightly
   /// packed in the index buffer.
-  ///
   IndexType index_type = IndexType::kUnknown;
 
   //----------------------------------------------------------------------------

@@ -472,11 +472,6 @@ void main() async {
     // the API.
     state.renderPass.setStencilConfig(
         gpu.StencilConfig(compareFunction: gpu.CompareFunction.equal));
-    // TODO(bdero): https://github.com/flutter/flutter/issues/155335
-    //              Re-binding the same uniform with `bindUniform` does not
-    //              replace the previous binding. We shouldn't need to clear the
-    //              command bindings to work around this.
-    state.renderPass.clearBindings();
     state.renderPass.bindUniform(vertInfo, outerGreenVertInfo);
     state.renderPass.draw();
 
@@ -511,9 +506,6 @@ void main() async {
 
       final gpu.UniformSlot vertInfo =
           pipeline.vertexShader.getUniformSlot('VertInfo');
-      // TODO(bdero): Overwrite bindings with the same slot so we don't need to clear.
-      //              https://github.com/flutter/flutter/issues/155335
-      state.renderPass.clearBindings();
       state.renderPass.bindVertexBuffer(vertices, 3);
       state.renderPass.bindUniform(vertInfo, vertInfoUboFront);
       state.renderPass.draw();
