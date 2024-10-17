@@ -2147,7 +2147,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     _owner = owner;
     // If the node was dirtied in some way while unattached, make sure to add
     // it to the appropriate dirty list now that an owner is available
-    if (_needsLayout && _relayoutBoundary != null) {
+    if (_needsLayout && _isRelayoutBoundary != null) {
       // Don't enter this block if we've never laid out at all;
       // scheduleInitialLayout() will handle it
       _needsLayout = false;
@@ -2204,7 +2204,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   }
   bool _needsLayout = true;
 
-  /// The nearest relayout boundary enclosing this render object, if known.
+  /// Whether this render object is a relayout boundary, if known.
   ///
   /// When a render object is marked as needing layout, its parent may
   /// as a result also need to be marked as needing layout.
@@ -2224,13 +2224,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// This property can also be null while an ancestor in the tree is
   /// currently doing layout, until this render object itself does layout.
   ///
-  /// When not null, the relayout boundary is either this render object itself
-  /// or one of its ancestors, and all the render objects in the ancestry chain
-  /// up through that ancestor have the same [_relayoutBoundary].
-  /// Equivalently: when not null, the relayout boundary is either this render
-  /// object itself or the same as that of its parent.  (So [_relayoutBoundary]
-  /// is one of `null`, `this`, or `parent!._relayoutBoundary!`.)
-  RenderObject? _relayoutBoundary;
+  /// When [_isRelayoutBoundary] is false, then `parent?._isRelayoutBoundary`
+  /// may be true or false but not null.  As a result, when it's known that
+  /// this render object is not a relayout boundary, that always comes with
+  /// knowledge of some specific ancestor which is the nearest enclosing
+  /// relayout boundary.
+  bool? _isRelayoutBoundary;
 
   /// Whether [invokeLayoutCallback] for this render object is currently running.
   bool get debugDoingThisLayoutWithCallback => _doingThisLayoutWithCallback;
@@ -2268,20 +2267,20 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   static bool debugCheckingIntrinsics = false;
 
   bool _debugRelayoutBoundaryAlreadyMarkedNeedsLayout() {
-    if (_relayoutBoundary == null) {
+    if (_isRelayoutBoundary == null) {
       // We don't know where our relayout boundary is yet.
       return true;
     }
     RenderObject node = this;
-    while (node != _relayoutBoundary) {
-      assert(node._relayoutBoundary == _relayoutBoundary);
+    while (node._isRelayoutBoundary != true) {
+      assert(node._isRelayoutBoundary == false);
       assert(node.parent != null);
       node = node.parent!;
       if ((!node._needsLayout) && (!node._debugDoingThisLayout)) {
         return false;
       }
     }
-    assert(node._relayoutBoundary == node);
+    assert(node._isRelayoutBoundary ?? false);
     return true;
   }
 
@@ -2329,20 +2328,13 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       assert(_debugRelayoutBoundaryAlreadyMarkedNeedsLayout());
       return;
     }
-    if (_relayoutBoundary == null) {
-      _needsLayout = true;
+    _needsLayout = true;
+    if (_isRelayoutBoundary != true) {
+      assert(parent != null || _isRelayoutBoundary == null);
       if (parent != null) {
-        // _relayoutBoundary is cleaned by an ancestor in RenderObject.layout.
-        // Conservatively mark everything dirty until it reaches the closest
-        // known relayout boundary.
         markParentNeedsLayout();
       }
-      return;
-    }
-    if (_relayoutBoundary != this) {
-      markParentNeedsLayout();
     } else {
-      _needsLayout = true;
       if (owner != null) {
         assert(() {
           if (debugPrintMarkNeedsLayoutStacks) {
@@ -2391,35 +2383,30 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     markParentNeedsLayout();
   }
 
-  /// Set [_relayoutBoundary] to null throughout this render object's subtree,
+  /// Set [_isRelayoutBoundary] to null throughout this render object's subtree,
   /// stopping at relayout boundaries.
   // This is a static method to reduce closure allocation with visitChildren.
   static void _cleanChildRelayoutBoundary(RenderObject child) {
-    if (child._relayoutBoundary != child) {
+    if (child._isRelayoutBoundary != true) {
       child.visitChildren(_cleanChildRelayoutBoundary);
-      child._relayoutBoundary = null;
+      child._isRelayoutBoundary = null;
     }
   }
 
   // This is a static method to reduce closure allocation with visitChildren.
   static void _propagateRelayoutBoundaryToChild(RenderObject child) {
-    if (child._relayoutBoundary == child) {
+    if (child._isRelayoutBoundary ?? false) {
       return;
     }
-    final RenderObject? parentRelayoutBoundary = child.parent?._relayoutBoundary;
-    assert(parentRelayoutBoundary != null);
-    assert(parentRelayoutBoundary != child._relayoutBoundary);
-    child._setRelayoutBoundary(parentRelayoutBoundary!);
+    assert(child.parent?._isRelayoutBoundary != null);
+    child._setIsRelayoutBoundary(false);
   }
 
-  /// Set [_relayoutBoundary] to [value] throughout this render object's
-  /// subtree, including this render object but stopping at relayout boundaries
-  /// thereafter.
-  void _setRelayoutBoundary(RenderObject value) {
-    assert(value != _relayoutBoundary);
-    // This may temporarily break the _relayoutBoundary invariant at children;
-    // the visitChildren restores the invariant.
-    _relayoutBoundary = value;
+  /// Set [_isRelayoutBoundary] to [value] on this render object,
+  /// then to false throughout the rest of its subtree,
+  /// stopping at relayout boundaries.
+  void _setIsRelayoutBoundary(bool value) {
+    _isRelayoutBoundary = value;
     visitChildren(_propagateRelayoutBoundaryToChild);
   }
 
@@ -2434,8 +2421,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(attached);
     assert(parent is! RenderObject);
     assert(!owner!._debugDoingLayout);
-    assert(_relayoutBoundary == null);
-    _relayoutBoundary = this;
+    assert(_isRelayoutBoundary == null);
+    _isRelayoutBoundary = true;
     assert(() {
       _debugCanParentUseSize = false;
       return true;
@@ -2446,7 +2433,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @pragma('vm:notify-debugger-on-exception')
   void _layoutWithoutResize() {
     assert(_needsLayout);
-    assert(_relayoutBoundary == this);
+    assert(_isRelayoutBoundary ?? false);
     RenderObject? debugPreviousActiveLayout;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -2548,7 +2535,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
     final bool isRelayoutBoundary = !parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject;
-    final RenderObject relayoutBoundary = isRelayoutBoundary ? this : parent!._relayoutBoundary!;
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
       return true;
@@ -2569,8 +2555,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         return true;
       }());
 
-      if (relayoutBoundary != _relayoutBoundary) {
-        _setRelayoutBoundary(relayoutBoundary);
+      if (isRelayoutBoundary != _isRelayoutBoundary) {
+        _setIsRelayoutBoundary(isRelayoutBoundary);
       }
 
       if (!kReleaseMode && debugProfileLayoutsEnabled) {
@@ -2580,13 +2566,13 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
     _constraints = constraints;
 
-    if (_relayoutBoundary != null && relayoutBoundary != _relayoutBoundary) {
+    if (_isRelayoutBoundary != null && isRelayoutBoundary != _isRelayoutBoundary) {
       // The local relayout boundary has changed, must notify children in case
       // they also need updating. Otherwise, they will be confused about what
       // their actual relayout boundary is later.
       visitChildren(_cleanChildRelayoutBoundary);
     }
-    _relayoutBoundary = relayoutBoundary;
+    _isRelayoutBoundary = isRelayoutBoundary;
 
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -3966,10 +3952,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         header += ' DISPOSED';
         return header;
       }
-      if (_relayoutBoundary != null && _relayoutBoundary != this) {
+      if (_isRelayoutBoundary == false) {
         int count = 1;
         RenderObject? target = parent;
-        while (target != null && target != _relayoutBoundary) {
+        while (target != null && target._isRelayoutBoundary == false) {
           target = target.parent;
           count += 1;
         }
