@@ -1459,32 +1459,26 @@ void main() {
   });
 
   testWidgets('AutovalidateMode.always should validate on first build', (WidgetTester tester) async {
-    String? errorText(String? value) => '$value/error';
+    String errorText(String? value) => '$value/error';
 
     Widget builder() {
       return MaterialApp(
         theme: ThemeData(),
-        home: MediaQuery(
-          data: const MediaQueryData(),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Form(
-                autovalidateMode: AutovalidateMode.always,
-                child: Material(
-                  child: Column(
-                    children: <Widget>[
-                      TextFormField(
-                        initialValue: 'foo',
-                        validator: errorText,
-                      ),
-                      TextFormField(
-                        initialValue: 'bar',
-                        validator: errorText,
-                      ),
-                    ],
+        home: Center(
+          child: Form(
+            autovalidateMode: AutovalidateMode.always,
+            child: Material(
+              child: Column(
+                children: <Widget>[
+                  TextFormField(
+                    initialValue: 'foo',
+                    validator: errorText,
                   ),
-                ),
+                  TextFormField(
+                    initialValue: 'bar',
+                    validator: errorText,
+                  ),
+                ],
               ),
             ),
           ),
@@ -1495,7 +1489,7 @@ void main() {
     await tester.pumpWidget(builder());
     await tester.pumpAndSettle();
 
-    expect(find.text(errorText('foo')!), findsOneWidget);
-    expect(find.text(errorText('bar')!), findsOneWidget);
+    expect(find.text(errorText('foo')), findsOneWidget);
+    expect(find.text(errorText('bar')), findsOneWidget);
   });
 }
