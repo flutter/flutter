@@ -81,15 +81,17 @@ const ValidationResult getProcessFailed = ValidationResult(
 
 class FakeVersionExtractor extends Fake implements WindowsVersionExtractor {
   FakeVersionExtractor({required this.mockData});
-  FakeVersionExtractor.win11ProX64() : this(mockData: <String, String>{
-    'Caption': '11 Pro 64-bit',
-    'ReleaseId': '2009',
-    'DisplayVersion': '23H2'});
-
-  final Map<String, String> mockData;
+  FakeVersionExtractor.win11ProX64()
+      : this(
+          mockData: WindowsVersionExtractionResult(
+              caption: '11 Pro 64-bit',
+              releaseId: '2009',
+              displayVersion: '23H2'),
+        );
+  final WindowsVersionExtractionResult mockData;
 
   @override
-  Future<Map<String, String>> getDetails() async {
+  Future<WindowsVersionExtractionResult> getDetails() async {
     return mockData;
   }
 }
@@ -183,7 +185,7 @@ OS 版本:          10.0.22621 暂缺 Build 22621
         WindowsVersionValidator(
             operatingSystemUtils: FakeValidOperatingSystemUtils(),
             processLister: failure(),
-            versionExtractor: FakeVersionExtractor(mockData: <String, String>{}));
+            versionExtractor: FakeVersionExtractor(mockData: WindowsVersionExtractionResult.empty()));
     final ValidationResult result = await validator.validate();
     expect(result.type, getProcessFailed.type, reason: 'The ValidationResult type should be the same (partial)');
     expect(result.statusInfo, getProcessFailed.statusInfo, reason: 'The ValidationResult statusInfo should be the same');

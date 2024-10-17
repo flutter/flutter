@@ -76,8 +76,8 @@ class WindowsVersionValidator extends DoctorValidator {
     if (matches.length == 1 &&
         !kUnsupportedVersions.contains(matches.elementAt(0).group(1))) {
       windowsVersionStatus = ValidationType.success;
-      final Map<String, String?> details = await _versionExtractor.getDetails();
-      String? caption = details['Caption'];
+      final WindowsVersionExtractionResult details = await _versionExtractor.getDetails();
+      String? caption = details.caption;
       if (caption == null || caption.isEmpty) {
         final bool isWindows11 = int.parse(matches.elementAt(0).group(3)!) > 20000;
         if (isWindows11) {
@@ -86,7 +86,7 @@ class WindowsVersionValidator extends DoctorValidator {
           caption = 'Windows 10';
         }
       }
-      statusInfo = '$caption, ${details['DisplayVersion']}, ${details['ReleaseId']}';
+      statusInfo = '$caption, ${details.displayVersion}, ${details.releaseId}';
 
       // Check if the Topaz OFD security module is running, and warn the user if it is.
       // See https://github.com/flutter/flutter/issues/121366
@@ -130,7 +130,7 @@ class WindowsVersionExtractor {
 
   final ProcessManager processManager;
 
-  Future<Map<String, String?>> getDetails() async {
+  Future<WindowsVersionExtractionResult> getDetails() async {
     String? caption, releaseId, displayVersion;
     try {
       final ProcessResult captionResult = await processManager.run(
@@ -171,10 +171,30 @@ class WindowsVersionExtractor {
       // Ignored, use default null values.
     }
 
-    return <String, String?>{
-      'Caption': caption,
-      'ReleaseId': releaseId,
-      'DisplayVersion': displayVersion,
-    };
+    return WindowsVersionExtractionResult(
+      caption: caption,
+      releaseId: releaseId,
+      displayVersion: displayVersion,
+    );
   }
+}
+
+final class WindowsVersionExtractionResult {
+  WindowsVersionExtractionResult({
+    required this.caption,
+    required this.releaseId,
+    required this.displayVersion,
+  });
+
+  factory WindowsVersionExtractionResult.empty() {
+    return WindowsVersionExtractionResult(
+      caption: null,
+      releaseId: null,
+      displayVersion: null,
+    );
+  }
+
+  final String? caption;
+  final String? releaseId;
+  final String? displayVersion;
 }
