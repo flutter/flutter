@@ -18,8 +18,8 @@ abstract class DragBoundary<T> {
   T nearestPositionWithinBoundary(T position);
 }
 
-class _BoundaryRegulatorForRect extends DragBoundary<Rect> {
-  _BoundaryRegulatorForRect(this.boundary);
+class _DragBoundaryForRect extends DragBoundary<Rect> {
+  _DragBoundaryForRect(this.boundary);
   final Rect boundary;
   @override
   bool isWithinBoundary(Rect position) {
@@ -78,7 +78,7 @@ class DragBoundaryProvider extends InheritedWidget {
     final RenderBox? rb = element.findRenderObject() as RenderBox?;
     assert(rb != null && rb.hasSize, 'BoundaryProvider is not available');
     final Rect boundary = (useGlobalPosition ? rb!.localToGlobal(Offset.zero) : Offset.zero) & rb!.size;
-    return _BoundaryRegulatorForRect(boundary);
+    return _DragBoundaryForRect(boundary);
   }
 
   @override
