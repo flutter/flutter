@@ -160,11 +160,14 @@ TEST_P(AiksTest, TranslucentSaveLayerWithBlendColorFilterDrawsCorrectly) {
   paint.setColor(DlColor::kBlack().withAlpha(128));
   paint.setColorFilter(
       DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kDstOver));
+  builder.Save();
+  builder.ClipRect(SkRect::MakeXYWH(100, 500, 300, 300));
   builder.SaveLayer(nullptr, &paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kBlue());
   builder.DrawRect(SkRect::MakeXYWH(100, 500, 300, 300), draw_paint);
+  builder.Restore();
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -203,11 +206,14 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorAndImageFilterDrawsCorrectly) {
   save_paint.setColor(DlColor::kBlack().withAlpha(128));
   save_paint.setColorFilter(
       DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kDstOver));
+  builder.Save();
+  builder.ClipRect(SkRect::MakeXYWH(100, 500, 300, 300));
   builder.SaveLayer(nullptr, &save_paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kBlue());
   builder.DrawRect(SkRect::MakeXYWH(100, 500, 300, 300), draw_paint);
+  builder.Restore();
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
