@@ -977,7 +977,7 @@ class _MaterialAppState extends State<MaterialApp> {
           // Theme.of(), which should return the theme we selected
           // above in AnimatedTheme. However, if we invoke
           // widget.builder() directly as the child of AnimatedTheme
-          // then there is no Context separating them, and the
+          // then there is no BuildContext separating them, the
           // widget.builder() will not find the theme. Therefore, we
           // surround widget.builder with yet another builder so that
           // a context separates them and Theme.of() correctly
