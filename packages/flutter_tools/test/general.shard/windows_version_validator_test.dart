@@ -207,6 +207,7 @@ Microsoft Windows 10 Enterprise  64-bit
           '/t',
           'REG_SZ',
         ], stdout: r'''
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion
     SystemRoot    REG_SZ    C:\Windows
     BuildBranch    REG_SZ    vb_release
     BuildGUID    REG_SZ    ffffffff-ffff-ffff-ffff-ffffffffffff
@@ -231,6 +232,7 @@ Microsoft Windows 10 Enterprise  64-bit
     WinREVersion    REG_SZ    10.0.19041.3920
 
 End of search: 22 match(es) found.
+
 '''),
       ],
     );
@@ -242,5 +244,66 @@ End of search: 22 match(es) found.
     final ValidationResult result = await validator.validate();
     expect(result.type, ValidationType.success);
     expect(result.statusInfo, '10 Enterprise 64-bit, 22H2, 2009');
+  });
+
+  testWithoutContext('Differentiates Windows 11 from 10 when wmic call fails', () async {
+    const String windows10RegQueryOutput = r'''
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion
+    SystemRoot    REG_SZ    C:\WINDOWS
+    BuildBranch    REG_SZ    ni_release
+    BuildGUID    REG_SZ    ffffffff-ffff-ffff-ffff-ffffffffffff
+    BuildLab    REG_SZ    22621.ni_release.220506-1250
+    BuildLabEx    REG_SZ    22621.1.amd64fre.ni_release.220506-1250
+    CompositionEditionID    REG_SZ    Enterprise
+    CurrentBuild    REG_SZ    22631
+    CurrentBuildNumber    REG_SZ    22631
+    CurrentType    REG_SZ    Multiprocessor Free
+    CurrentVersion    REG_SZ    6.3
+    DisplayVersion    REG_SZ    23H2
+    EditionID    REG_SZ    Professional
+    EditionSubManufacturer    REG_SZ
+    EditionSubstring    REG_SZ
+    EditionSubVersion    REG_SZ
+    InstallationType    REG_SZ    Client
+    ProductName    REG_SZ    Windows 10 Pro
+    ReleaseId    REG_SZ    2009
+    SoftwareType    REG_SZ    System
+    PathName    REG_SZ    C:\Windows
+    ProductId    REG_SZ    00330-80832-91035-AA540
+
+End of search: 21 match(es) found.
+
+''';
+    const List<String> wmicCommand = <String>['wmic', 'os', 'get', 'Caption,OSArchitecture'];
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: wmicCommand,
+          exception: ProcessException(
+            wmicCommand[0],
+            wmicCommand.sublist(1),
+          ),
+        ),
+        const FakeCommand(
+          command: <Pattern>[
+            'reg',
+            'query',
+            r'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion',
+            '/t',
+            'REG_SZ',
+          ],
+          stdout: windows10RegQueryOutput,
+        ),
+      ],
+    );
+
+    final WindowsVersionValidator validator = WindowsVersionValidator(
+      operatingSystemUtils: FakeValidOperatingSystemUtils(),
+      processLister: ofdNotRunning(),
+      versionExtractor: VersionExtractor(processManager),
+    );
+    final ValidationResult result = await validator.validate();
+    expect(result.type, ValidationType.success);
+    expect(result.statusInfo, 'Windows 11 or higher, 23H2, 2009');
   });
 }
