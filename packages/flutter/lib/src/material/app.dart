@@ -968,31 +968,31 @@ class _MaterialAppState extends State<MaterialApp> {
 
     Widget childWidget = child ?? const SizedBox.shrink();
 
-      if (widget.builder != null) {
-        childWidget = Builder(
-          builder: (BuildContext context) {
-            // Why are we surrounding a builder with a builder?
-            //
-            // The widget.builder may contain code that invokes
-            // Theme.of(), which should return the theme we selected
-            // above in AnimatedTheme. However, if we invoke
-            // widget.builder() directly as the child of AnimatedTheme
-            // then there is no Context separating them, and the
-            // widget.builder() will not find the theme. Therefore, we
-            // surround widget.builder with yet another builder so that
-            // a context separates them and Theme.of() correctly
-            // resolves to the theme we passed to AnimatedTheme.
-            return widget.builder!(context, child);
-          },
-        );
-      }
-      if (widget.themeAnimationStyle != AnimationStyle.noAnimation) {
-        childWidget = AnimatedTheme(
-          data: theme,
-          duration: widget.themeAnimationStyle?.duration ?? widget.themeAnimationDuration,
-          curve: widget.themeAnimationStyle?.curve ?? widget.themeAnimationCurve,
-          child: childWidget,
-        );
+    if (widget.builder != null) {
+      childWidget = Builder(
+        builder: (BuildContext context) {
+          // Why are we surrounding a builder with a builder?
+          //
+          // The widget.builder may contain code that invokes
+          // Theme.of(), which should return the theme we selected
+          // above in AnimatedTheme. However, if we invoke
+          // widget.builder() directly as the child of AnimatedTheme
+          // then there is no Context separating them, and the
+          // widget.builder() will not find the theme. Therefore, we
+          // surround widget.builder with yet another builder so that
+          // a context separates them and Theme.of() correctly
+          // resolves to the theme we passed to AnimatedTheme.
+          return widget.builder!(context, child);
+        },
+      );
+    }
+    if (widget.themeAnimationStyle != AnimationStyle.noAnimation) {
+      childWidget = AnimatedTheme(
+        data: theme,
+        duration: widget.themeAnimationStyle?.duration ?? widget.themeAnimationDuration,
+        curve: widget.themeAnimationStyle?.curve ?? widget.themeAnimationCurve,
+        child: childWidget,
+      );
     } else {
       childWidget = Theme(
         data: theme,
