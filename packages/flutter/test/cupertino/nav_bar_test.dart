@@ -1888,6 +1888,252 @@ void main() {
       expect(largeTitleFinder.hitTestable(), findsOneWidget);
     },
   );
+
+  testWidgets('NavigationBarBottomMode.automatic mode for bottom', (WidgetTester tester) async {
+    const double persistentHeight = 44.0;
+    const double largeTitleHeight = 44.0;
+    const double bottomHeight = 10.0;
+    final ScrollController controller = ScrollController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                largeTitle: Text('Large title'),
+                bottom: PreferredSize(
+                  preferredSize: Size.fromHeight(bottomHeight),
+                  child: Placeholder(),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.offset, 0.0);
+
+    final Finder largeTitleFinder = find.ancestor(
+      of: find.text('Large title').first,
+      matching: find.byType(Padding),
+    ).first;
+    final Finder bottomFinder = find.byType(Placeholder);
+
+    // The persistent navigation bar, large title, and search field are all
+    // visible.
+    expect(tester.getTopLeft(largeTitleFinder).dy, persistentHeight);
+    expect(tester.getBottomLeft(largeTitleFinder).dy, persistentHeight + largeTitleHeight);
+    expect(tester.getTopLeft(bottomFinder).dy, 96.0);
+    expect(tester.getBottomLeft(bottomFinder).dy, 96.0 + bottomHeight);
+
+    // Scroll the length of the navigation bar search text field.
+    controller.jumpTo(bottomHeight);
+    await tester.pump();
+
+    // The search field is hidden, but the large title remains visible.
+    expect(tester.getBottomLeft(largeTitleFinder).dy, persistentHeight + largeTitleHeight);
+    expect(tester.getBottomLeft(bottomFinder).dy - tester.getTopLeft(bottomFinder).dy, 0.0);
+
+    // Scroll until the large title scrolls under the persistent navigation bar.
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, -400.0), 10.0);
+    await tester.pump();
+
+    // The large title and search field are both hidden.
+    expect(tester.getBottomLeft(largeTitleFinder).dy - tester.getTopLeft(bottomFinder).dy, 0.0);
+    expect(tester.getBottomLeft(bottomFinder).dy - tester.getTopLeft(bottomFinder).dy, 0.0);
+
+    controller.dispose();
+  });
+
+  testWidgets('NavigationBarBottomMode.always mode for bottom', (WidgetTester tester) async {
+    const double persistentHeight = 44.0;
+    const double largeTitleHeight = 44.0;
+    const double bottomHeight = 10.0;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                largeTitle: Text('Large title'),
+                bottom: PreferredSize(
+                  preferredSize: Size.fromHeight(bottomHeight),
+                  child: Placeholder(),
+                ),
+                bottomMode: NavigationBarBottomMode.always,
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder largeTitleFinder = find.ancestor(
+      of: find.text('Large title').first,
+      matching: find.byType(Padding),
+    ).first;
+    final Finder bottomFinder = find.byType(Placeholder);
+
+    // The persistent navigation bar, large title, and search field are all
+    // visible.
+    expect(tester.getTopLeft(largeTitleFinder).dy, persistentHeight);
+    expect(tester.getBottomLeft(largeTitleFinder).dy, persistentHeight + largeTitleHeight);
+    expect(tester.getTopLeft(bottomFinder).dy, 96.0);
+    expect(tester.getBottomLeft(bottomFinder).dy, 96.0 + bottomHeight);
+
+    // Scroll until the large title scrolls under the persistent navigation bar.
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, -400.0), 10.0);
+    await tester.pump();
+
+    // Only the large title is hidden.
+    expect(tester.getBottomLeft(largeTitleFinder).dy - tester.getTopLeft(bottomFinder).dy, 0.0);
+    expect(tester.getTopLeft(bottomFinder).dy, persistentHeight);
+    expect(tester.getBottomLeft(bottomFinder).dy, persistentHeight + bottomHeight);
+  });
+
+  testWidgets('Disallow providing a bottomMode without a corresponding bottom', (WidgetTester tester) async {
+    expect(
+      () => const CupertinoSliverNavigationBar(
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(10.0),
+          child: Placeholder(),
+        ),
+        bottomMode: NavigationBarBottomMode.automatic,
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => const CupertinoSliverNavigationBar(
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(10.0),
+          child: Placeholder(),
+        ),
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoSliverNavigationBar(
+        bottomMode: NavigationBarBottomMode.automatic,
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError e) => e.message,
+        'message',
+        contains('A bottomMode was provided without a corresponding bottom.'),
+      )),
+    );
+  });
+
+  testWidgets('Overscroll when stretched does not resize bottom in automatic mode', (WidgetTester tester) async {
+    const double bottomHeight = 10.0;
+    const double bottomDisplacement = 96.0;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                stretch: true,
+                largeTitle: Text('Large title'),
+                bottom: PreferredSize(
+                  preferredSize: Size.fromHeight(bottomHeight),
+                  child: Placeholder(),
+                ),
+                bottomMode: NavigationBarBottomMode.automatic,
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder bottomFinder = find.byType(Placeholder);
+    expect(tester.getTopLeft(bottomFinder).dy, bottomDisplacement);
+    expect(
+      tester.getBottomLeft(bottomFinder).dy - tester.getTopLeft(bottomFinder).dy,
+      bottomHeight,
+    );
+
+    // Overscroll to stretch the navigation bar.
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, 50.0), 10.0);
+    await tester.pump();
+
+    // The bottom stretches without resizing.
+    expect(tester.getTopLeft(bottomFinder).dy, greaterThan(bottomDisplacement));
+    expect(
+      tester.getBottomLeft(bottomFinder).dy - tester.getTopLeft(bottomFinder).dy,
+      bottomHeight,
+    );
+  });
+
+  testWidgets('CupertinoNavigationBar with bottom widget', (WidgetTester tester) async {
+    const double persistentHeight = 44.0;
+    const double bottomHeight = 10.0;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Middle'),
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(bottomHeight),
+              child: Placeholder(),
+            )
+          ),
+          child: Container(),
+        ),
+      ),
+    );
+
+    final Finder navBarFinder = find.byType(CupertinoNavigationBar);
+    expect(navBarFinder, findsOneWidget);
+    final CupertinoNavigationBar navBar = tester.widget<CupertinoNavigationBar>(navBarFinder);
+
+    final Finder columnFinder = find.descendant(
+      of: navBarFinder,
+      matching: find.byType(Column),
+    );
+    expect(columnFinder, findsOneWidget);
+    final Column column = tester.widget<Column>(columnFinder);
+
+    expect(column.children.length, 2);
+    expect(
+      find.descendant(
+        of: find.byWidget(column.children.first),
+        matching: find.text('Middle'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byWidget(column.children.last),
+        matching: find.byType(Placeholder),
+      ),
+      findsOneWidget,
+    );
+    expect(navBar.preferredSize.height, persistentHeight + bottomHeight);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
