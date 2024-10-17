@@ -4947,14 +4947,14 @@ class PositionedDirectional extends StatelessWidget {
 /// For example:
 ///
 /// ```dart
-///       const IntrinsicHeight(
-///         child: Row(
-///           crossAxisAlignment: CrossAxisAlignment.stretch,
-///           children: <Widget>[
-///             Placeholder(),
-///           ],
-///         ),
-///       ),
+/// const IntrinsicHeight(
+///   child: Row(
+///     crossAxisAlignment: CrossAxisAlignment.stretch,
+///     children: <Widget>[
+///       Placeholder(),
+///     ],
+///   ),
+/// ),
 /// ```
 ///
 /// ## RenderFlex Errors
