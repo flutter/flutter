@@ -16,8 +16,8 @@ const List<String> kUnsupportedVersions = <String>[
 ];
 
 /// Regex pattern for identifying line from systeminfo stdout with windows version
-/// (ie. 10.5.4123)
-const String kWindowsOSVersionSemVerPattern = r'([0-9]+)\.([0-9]+)\.([0-9\.]+)';
+/// (ie. 10.0.22631.4037)
+const String kWindowsOSVersionSemVerPattern = r'([0-9]+)\.([0-9]+)\.([0-9]+)\.?([0-9\.]+)?';
 
 /// Regex pattern for identifying a running instance of the Topaz OFD process.
 /// This is a known process that interferes with the build toolchain.
@@ -29,12 +29,15 @@ class WindowsVersionValidator extends DoctorValidator {
   const WindowsVersionValidator({
     required OperatingSystemUtils operatingSystemUtils,
     required ProcessLister processLister,
+    required WindowsVersionExtractor versionExtractor,
   })  : _operatingSystemUtils = operatingSystemUtils,
         _processLister = processLister,
+        _versionExtractor = versionExtractor,
         super('Windows Version');
 
   final OperatingSystemUtils _operatingSystemUtils;
   final ProcessLister _processLister;
+  final WindowsVersionExtractor _versionExtractor;
 
   Future<ValidationResult> _topazScan() async {
       if (!_processLister.canRunPowershell()) {
@@ -86,7 +89,17 @@ class WindowsVersionValidator extends DoctorValidator {
     if (matches.length == 1 &&
         !kUnsupportedVersions.contains(matches.elementAt(0).group(1))) {
       windowsVersionStatus = ValidationType.success;
-      statusInfo = 'Installed version of Windows is version 10 or higher';
+      final WindowsVersionExtractionResult details = await _versionExtractor.getDetails();
+      String? caption = details.caption;
+      if (caption == null || caption.isEmpty) {
+        final bool isWindows11 = int.parse(matches.elementAt(0).group(3)!) > 20000;
+        if (isWindows11) {
+          caption = 'Windows 11 or higher';
+        } else {
+          caption = 'Windows 10';
+        }
+      }
+      statusInfo = '$caption, ${details.displayVersion}, ${details.releaseId}';
 
       // Check if the Topaz OFD security module is running, and warn the user if it is.
       // See https://github.com/flutter/flutter/issues/121366
@@ -137,4 +150,78 @@ class ProcessLister {
     }
     throw StateError('Failed to find $powershell or $pwsh on PATH');
   }
+}
+
+class WindowsVersionExtractor {
+  WindowsVersionExtractor(this.processManager);
+
+  final ProcessManager processManager;
+
+  Future<WindowsVersionExtractionResult> getDetails() async {
+    String? caption, releaseId, displayVersion;
+    try {
+      final ProcessResult captionResult = await processManager.run(
+        <String>['wmic', 'os', 'get', 'Caption,OSArchitecture'],
+      );
+
+      if (captionResult.exitCode == 0) {
+        final String? output = captionResult.stdout as String?;
+        if (output != null) {
+          final List<String> parts = output.split('\n');
+          if (parts.length >= 2) {
+            caption = parts[1].replaceAll('Microsoft Windows', '').replaceAll('  ', ' ').trim();
+          }
+        }
+      }
+    } on ProcessException {
+      // Ignored, use default null value.
+    }
+
+    try {
+      final ProcessResult osDetails = await processManager.run(
+        <String>['reg', 'query', r'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion', '/t', 'REG_SZ'],
+      );
+
+      if (osDetails.exitCode == 0) {
+        final String? output = osDetails.stdout as String?;
+        if (output != null) {
+          final Map<String, String> data = Map<String, String>.fromEntries(
+              output.split('\n').where((String line) => line.contains('REG_SZ')).map((String line) {
+                final List<String> parts = line.split('REG_SZ');
+                return MapEntry<String, String>(parts.first.trim(), parts.last.trim());
+              }));
+          releaseId = data['ReleaseId'];
+          displayVersion = data['DisplayVersion'];
+        }
+      }
+    } on ProcessException {
+      // Ignored, use default null values.
+    }
+
+    return WindowsVersionExtractionResult(
+      caption: caption,
+      releaseId: releaseId,
+      displayVersion: displayVersion,
+    );
+  }
+}
+
+final class WindowsVersionExtractionResult {
+  WindowsVersionExtractionResult({
+    required this.caption,
+    required this.releaseId,
+    required this.displayVersion,
+  });
+
+  factory WindowsVersionExtractionResult.empty() {
+    return WindowsVersionExtractionResult(
+      caption: null,
+      releaseId: null,
+      displayVersion: null,
+    );
+  }
+
+  final String? caption;
+  final String? releaseId;
+  final String? displayVersion;
 }
