@@ -19,7 +19,24 @@ import 'constants.dart';
 import 'icons.dart';
 import 'page_scaffold.dart';
 import 'route.dart';
+import 'search_field.dart';
 import 'theme.dart';
+
+/// Modes that determine how to display the navigation bar's bottom in relation to scroll events.
+enum NavigationBarBottomMode {
+  /// Enable hiding the bottom in response to scrolling.
+  ///
+  /// As scrolling starts, the large title stays pinned while the bottom resizes
+  /// until it is completely consumed. Then, the large title scrolls under the
+  /// persistent navigation bar.
+  automatic,
+
+  /// Always display the bottom regardless of the scroll activity.
+  ///
+  /// When scrolled, the bottom stays pinned while the large title scrolls under
+  /// the persistent navigation bar.
+  always,
+}
 
 /// Standard iOS navigation bar height without the status bar.
 ///
@@ -272,6 +289,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.padding,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
+    this.bottom,
   }) : assert(
          !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
          'Cannot specify a heroTag override if this navigation bar does not '
@@ -448,6 +466,23 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Object heroTag;
 
+  /// A widget to place at the bottom of the navigation bar.
+  ///
+  /// Only widgets that implement [PreferredSizeWidget] can be used at the
+  /// bottom of a navigation bar.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a [CupertinoSearchTextField] at the bottom of a
+  /// [CupertinoNavigationBar].
+  ///
+  /// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_navigation_bar.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
+  final PreferredSizeWidget? bottom;
+
   /// True if the navigation bar's background color has no transparency.
   @override
   bool shouldFullyObstruct(BuildContext context) {
@@ -458,7 +493,8 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   @override
   Size get preferredSize {
-    return const Size.fromHeight(_kNavBarPersistentHeight);
+    final double heightForDrawer = bottom?.preferredSize.height ?? 0.0;
+    return Size.fromHeight(_kNavBarPersistentHeight + heightForDrawer);
   }
 
   @override
@@ -569,9 +605,14 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
-        child: _PersistentNavigationBar(
-          components: components,
-          padding: widget.padding,
+        child: Column(
+          children: <Widget>[
+            _PersistentNavigationBar(
+              components: components,
+              padding: widget.padding,
+            ),
+            if (widget.bottom != null) widget.bottom!,
+          ],
         ),
       ),
     );
@@ -667,6 +708,13 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_sliver_nav_bar.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to add a bottom (typically a
+/// [CupertinoSearchTextField]) to a [CupertinoSliverNavigationBar].
+///
+/// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_sliver_nav_bar.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
@@ -697,12 +745,51 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
     this.stretch = false,
+    this.bottom,
+    this.bottomMode,
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
          'true.',
+       ),
+       assert(
+         bottomMode == null || bottom != null,
+         'A bottomMode was provided without a corresponding bottom.',
        );
+
+  /// Create a navigation bar for scrolling lists with [bottom] set to a
+  /// [CupertinoSearchTextField] with padding.
+  ///
+  /// If [automaticallyImplyTitle] is false, then the [largeTitle] argument is
+  /// required.
+  const CupertinoSliverNavigationBar.search({
+    super.key,
+    this.largeTitle,
+    this.leading,
+    this.automaticallyImplyLeading = true,
+    this.automaticallyImplyTitle = true,
+    this.alwaysShowMiddle = true,
+    this.previousPageTitle,
+    this.middle,
+    this.trailing,
+    this.border = _kDefaultNavBarBorder,
+    this.backgroundColor,
+    this.automaticBackgroundVisibility = true,
+    this.enableBackgroundFilterBlur = true,
+    this.brightness,
+    this.padding,
+    this.transitionBetweenRoutes = true,
+    this.heroTag = _defaultHeroTag,
+    this.stretch = false,
+    this.bottomMode = NavigationBarBottomMode.automatic,
+  }) : assert(
+         automaticallyImplyTitle || largeTitle != null,
+         'No largeTitle has been provided but automaticallyImplyTitle is also '
+         'false. Either provide a largeTitle or set automaticallyImplyTitle to '
+         'true.',
+       ),
+       bottom = const _NavigationBarSearchField();
 
   /// The navigation bar's title.
   ///
@@ -794,6 +881,22 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.CupertinoNavigationBar.heroTag}
   final Object heroTag;
 
+  /// A widget to place at the bottom of the large title or static navigation
+  /// bar if there is no large title.
+  ///
+  /// Only widgets that implement [PreferredSizeWidget] can be used at the
+  /// bottom of a navigation bar.
+  ///
+  /// See also:
+  ///
+  ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
+  final PreferredSizeWidget? bottom;
+
+  /// Modes that determine how to display the navigation bar's [bottom] and scrolling behavior.
+  ///
+  /// Defaults to [NavigationBarBottomMode.automatic] if this is null and a [bottom] is provided.
+  final NavigationBarBottomMode? bottomMode;
+
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor?.alpha == 0xFF;
 
@@ -860,6 +963,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
           enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
+          bottom: widget.bottom ?? const SizedBox.shrink(),
+          bottomMode: widget.bottomMode ?? NavigationBarBottomMode.automatic,
+          bottomHeight: widget.bottom != null ? widget.bottom!.preferredSize.height : 0.0,
         ),
       ),
     );
@@ -884,6 +990,9 @@ class _LargeTitleNavigationBarSliverDelegate
     required this.alwaysShowMiddle,
     required this.stretchConfiguration,
     required this.enableBackgroundFilterBlur,
+    required this.bottom,
+    required this.bottomMode,
+    required this.bottomHeight,
   });
 
   final _NavigationBarStaticComponentsKeys keys;
@@ -900,12 +1009,15 @@ class _LargeTitleNavigationBarSliverDelegate
   final double persistentHeight;
   final bool alwaysShowMiddle;
   final bool enableBackgroundFilterBlur;
+  final Widget bottom;
+  final NavigationBarBottomMode bottomMode;
+  final double bottomHeight;
 
   @override
-  double get minExtent => persistentHeight;
+  double get minExtent => persistentHeight + (bottomMode == NavigationBarBottomMode.always ? bottomHeight : 0.0);
 
   @override
-  double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension;
+  double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension + bottomHeight;
 
   @override
   OverScrollHeaderStretchConfiguration? stretchConfiguration;
@@ -914,6 +1026,10 @@ class _LargeTitleNavigationBarSliverDelegate
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double largeTitleThreshold = maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
     final bool showLargeTitle = shrinkOffset < largeTitleThreshold;
+
+    // Calculate how much the bottom should shrink.
+    final double bottomShrinkFactor = clampDouble(shrinkOffset / bottomHeight, 0, 1);
+
     final double shrinkAnimationValue = clampDouble(
       (shrinkOffset - largeTitleThreshold - _kNavBarScrollUnderAnimationExtent) / _kNavBarScrollUnderAnimationExtent,
       0,
@@ -947,50 +1063,68 @@ class _LargeTitleNavigationBarSliverDelegate
       enableBackgroundFilterBlur: enableBackgroundFilterBlur,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
-        child: Stack(
-          fit: StackFit.expand,
+        child: Column(
           children: <Widget>[
-            Positioned(
-              top: persistentHeight,
-              left: 0.0,
-              right: 0.0,
-              bottom: 0.0,
-              child: ClipRect(
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: _kNavBarEdgePadding,
-                    bottom: _kNavBarBottomPadding
-                  ),
-                  child: SafeArea(
-                    top: false,
-                    bottom: false,
-                    child: AnimatedOpacity(
-                      opacity: showLargeTitle ? 1.0 : 0.0,
-                      duration: _kNavBarTitleFadeDuration,
-                      child: Semantics(
-                        header: true,
-                        child: DefaultTextStyle(
-                          style: CupertinoTheme.of(context)
-                              .textTheme
-                              .navLargeTitleTextStyle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          child: _LargeTitle(
-                            child: components.largeTitle,
+            Expanded(
+              child: Stack(
+                children: <Widget>[
+                  Positioned(
+                    top: persistentHeight,
+                    left: 0.0,
+                    right: 0.0,
+                    bottom: bottomMode == NavigationBarBottomMode.automatic
+                      ? bottomHeight * (1.0 - bottomShrinkFactor)
+                      : 0.0,
+                    child: ClipRect(
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: _kNavBarEdgePadding,
+                          bottom: _kNavBarBottomPadding
+                        ),
+                        child: SafeArea(
+                          top: false,
+                          bottom: false,
+                          child: AnimatedOpacity(
+                            opacity: showLargeTitle ? 1.0 : 0.0,
+                            duration: _kNavBarTitleFadeDuration,
+                            child: Semantics(
+                              header: true,
+                              child: DefaultTextStyle(
+                                style: CupertinoTheme.of(context)
+                                    .textTheme
+                                    .navLargeTitleTextStyle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                child: _LargeTitle(
+                                  child: components.largeTitle,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                  Positioned(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                    child: persistentNavigationBar,
+                  ),
+                  if (bottomMode == NavigationBarBottomMode.automatic)
+                    Positioned(
+                      left: 0.0,
+                      right: 0.0,
+                      bottom: 0.0,
+                      child: SizedBox(
+                        height: bottomHeight * (1.0 - bottomShrinkFactor),
+                        child: bottom,
+                      ),
+                    ),
+                ],
               ),
             ),
-            Positioned(
-              left: 0.0,
-              right: 0.0,
-              top: 0.0,
-              child: persistentNavigationBar,
-            ),
+            if (bottomMode == NavigationBarBottomMode.always) SizedBox(height: bottomHeight, child: bottom),
           ],
         ),
       ),
@@ -1038,7 +1172,10 @@ class _LargeTitleNavigationBarSliverDelegate
         || persistentHeight != oldDelegate.persistentHeight
         || alwaysShowMiddle != oldDelegate.alwaysShowMiddle
         || heroTag != oldDelegate.heroTag
-        || enableBackgroundFilterBlur != oldDelegate.enableBackgroundFilterBlur;
+        || enableBackgroundFilterBlur != oldDelegate.enableBackgroundFilterBlur
+        || bottom != oldDelegate.bottom
+        || bottomMode != oldDelegate.bottomMode
+        || bottomHeight != oldDelegate.bottomHeight;
   }
 }
 
@@ -2632,4 +2769,25 @@ Widget _navBarHeroFlightShuttleBuilder(
         topNavBar: fromNavBar,
       );
   }
+}
+
+class _NavigationBarSearchField extends StatelessWidget implements PreferredSizeWidget {
+  const _NavigationBarSearchField();
+
+  static const double padding = 8.0;
+  static const double searchFieldHeight = 35.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: padding, vertical: padding),
+      child: SizedBox(
+        height: searchFieldHeight,
+        child: CupertinoSearchTextField()
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(searchFieldHeight + padding * 2);
 }
