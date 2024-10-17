@@ -994,11 +994,12 @@ abstract class WidgetController {
   }
 
   /// Returns a list of all the [Layer] objects in the rendering.
-  List<Layer> get layers => <Layer>[
-    for (final RenderView renderView in binding.renderViews)
-      ..._walkLayers(renderView.debugLayer!)
-  ];
-
+  List<Layer> get layers {
+    return <Layer>[
+      for (final RenderView renderView in binding.renderViews)
+        ..._walkLayers(renderView.debugLayer!)
+    ];
+  }
   Iterable<Layer> _walkLayers(Layer layer) sync* {
     TestAsyncUtils.guardSync();
     yield layer;

@@ -2572,11 +2572,13 @@ class TestDeviceManager extends DeviceManager {
   );
 
   @override
-  List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[
-    androidDiscoverer,
-    otherDiscoverer,
-    iosDiscoverer,
-  ];
+  List<DeviceDiscovery> get deviceDiscoverers {
+    return <DeviceDiscovery>[
+      androidDiscoverer,
+      otherDiscoverer,
+      iosDiscoverer,
+    ];
+  }
 
   void setDeviceToWaitFor(
     IOSDevice device,

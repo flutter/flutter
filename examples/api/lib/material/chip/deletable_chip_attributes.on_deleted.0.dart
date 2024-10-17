@@ -45,9 +45,9 @@ class CastListState extends State<CastList> {
     const Actor('James Madison', 'JM'),
   ];
 
-  List<Widget> get actorWidgets => <Widget>[
-    for (final Actor actor in _cast)
-      Padding(
+  Iterable<Widget> get actorWidgets {
+    return _cast.map((Actor actor) {
+      return Padding(
         padding: const EdgeInsets.all(4.0),
         child: Chip(
           avatar: CircleAvatar(child: Text(actor.initials)),
@@ -60,8 +60,9 @@ class CastListState extends State<CastList> {
             });
           },
         ),
-      ),
-  ];
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

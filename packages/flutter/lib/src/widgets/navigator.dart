@@ -4007,9 +4007,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// The overlay this navigator uses for its visual presentation.
   OverlayState? get overlay => _overlayKey.currentState;
 
-  Iterable<OverlayEntry> get _allRouteOverlayEntries => <OverlayEntry>[
-    for (final _RouteEntry entry in _history) ...entry.route.overlayEntries,
-  ];
+  Iterable<OverlayEntry> get _allRouteOverlayEntries {
+    return <OverlayEntry>[
+      for (final _RouteEntry entry in _history)
+        ...entry.route.overlayEntries,
+    ];
+  }
 
   _RouteEntry? _lastTopmostRoute;
   String? _lastAnnouncedRouteName;

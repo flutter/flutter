@@ -171,12 +171,14 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
     };
   }
 
-  static final DateFormat yMMMd = DateFormat.yMMMd();
-  String get _labelText => switch (widget.type) {
-    PickerDemoType.date  => yMMMd.format(_fromDate.value),
-    PickerDemoType.time  => _fromTime.value.format(context),
-    PickerDemoType.range => '${yMMMd.format(_startDate.value)} - ${yMMMd.format(_endDate.value)}',
-  };
+  String get _labelText {
+    final DateFormat yMMMd = DateFormat.yMMMd();
+    return switch (widget.type) {
+      PickerDemoType.date  => yMMMd.format(_fromDate.value),
+      PickerDemoType.time  => _fromTime.value.format(context),
+      PickerDemoType.range => '${yMMMd.format(_startDate.value)} - ${yMMMd.format(_endDate.value)}',
+    };
+  }
 
   @override
   Widget build(BuildContext context) {

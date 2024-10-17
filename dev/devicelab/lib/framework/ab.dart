@@ -208,9 +208,9 @@ class ABTest {
   }
 
   Set<String> get _allScoreKeys => <String>{
-      ..._aResults.keys,
-      ..._bResults.keys,
-    };
+    ..._aResults.keys,
+    ..._bResults.keys,
+  };
 
   /// Returns the summary as a tab-separated spreadsheet.
   ///
