@@ -27,7 +27,7 @@ void main() {
 
     test('toMatrix handles zero size', () {
       // The code below will throw without the default.
-      Matrix4 matrix = TestViewConfiguration(size: const Size(0.0, 0.0)).toMatrix();
+      final Matrix4 matrix = TestViewConfiguration(size: Size.zero).toMatrix();
       expect(matrix.storage.every((double x) => x.isFinite), isTrue);
     });
   });
