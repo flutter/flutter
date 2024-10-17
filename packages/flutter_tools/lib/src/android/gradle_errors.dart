@@ -635,7 +635,6 @@ final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
   eventLabel: 'could-not-open-cache-directory',
 );
 
-@visibleForTesting
 String _getAgpLocation(FlutterProject project) {
   return '''
  The version of AGP that your project uses is likely defined in:
