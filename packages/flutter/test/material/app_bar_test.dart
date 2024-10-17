@@ -3254,6 +3254,37 @@ void main() {
     expect(find.text('Second Screen'), findsNothing);
   });
 
+  testWidgets('AppBar actions padding can be adjusted', (WidgetTester tester) async {
+    final Key appBarKey = UniqueKey();
+    final Key actionKey = UniqueKey();
+
+    Widget buildAppBar({ EdgeInsetsGeometry? actionsPadding }) {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            key: appBarKey,
+            actions: <Widget>[
+              SizedBox.square(key: actionKey, dimension: 40.0),
+            ],
+            actionsPadding: actionsPadding,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildAppBar());
+
+    // Actions padding default to zero padding.
+    Offset actionsOffset = tester.getTopRight(find.byKey(actionKey));
+    final Offset appBarOffset = tester.getTopRight(find.byKey(appBarKey));
+    expect(appBarOffset.dx - actionsOffset.dx, 0);
+
+    const EdgeInsets actionsPadding = EdgeInsets.only(right: 8.0);
+    await tester.pumpWidget(buildAppBar(actionsPadding: actionsPadding));
+    actionsOffset = tester.getTopRight(find.byKey(actionKey));
+    expect(actionsOffset.dx, equals(appBarOffset.dx - actionsPadding.right));
+  });
+
   group('Material 2', () {
     testWidgets('Material2 - AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
       final ThemeData darkTheme = ThemeData.dark(useMaterial3: false);

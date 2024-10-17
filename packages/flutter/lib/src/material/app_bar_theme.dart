@@ -46,6 +46,7 @@ class AppBarTheme with Diagnosticable {
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
+    this.actionsPadding,
   }) : assert(
          color == null || backgroundColor == null,
          'The color and backgroundColor parameters mean the same thing. Only specify one.',
@@ -153,6 +154,10 @@ class AppBarTheme with Diagnosticable {
   /// property in all descendant [AppBar] widgets.
   final SystemUiOverlayStyle? systemOverlayStyle;
 
+  /// Overrides the default value of [AppBar.actionsPadding]
+  /// property in all descendant [AppBar] widgets.
+  final EdgeInsetsGeometry? actionsPadding;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
@@ -172,6 +177,7 @@ class AppBarTheme with Diagnosticable {
     TextStyle? toolbarTextStyle,
     TextStyle? titleTextStyle,
     SystemUiOverlayStyle? systemOverlayStyle,
+    EdgeInsetsGeometry? actionsPadding,
   }) {
     assert(
       color == null || backgroundColor == null,
@@ -193,6 +199,7 @@ class AppBarTheme with Diagnosticable {
       toolbarTextStyle: toolbarTextStyle ?? this.toolbarTextStyle,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       systemOverlayStyle: systemOverlayStyle ?? this.systemOverlayStyle,
+      actionsPadding: actionsPadding ?? this.actionsPadding,
     );
   }
 
@@ -224,6 +231,7 @@ class AppBarTheme with Diagnosticable {
       toolbarTextStyle: TextStyle.lerp(a?.toolbarTextStyle, b?.toolbarTextStyle, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
       systemOverlayStyle: t < 0.5 ? a?.systemOverlayStyle : b?.systemOverlayStyle,
+      actionsPadding: EdgeInsetsGeometry.lerp(a?.actionsPadding, b?.actionsPadding, t),
     );
   }
 
@@ -244,6 +252,7 @@ class AppBarTheme with Diagnosticable {
     toolbarTextStyle,
     titleTextStyle,
     systemOverlayStyle,
+    actionsPadding,
   );
 
   @override
@@ -269,7 +278,8 @@ class AppBarTheme with Diagnosticable {
         && other.toolbarHeight == toolbarHeight
         && other.toolbarTextStyle == toolbarTextStyle
         && other.titleTextStyle == titleTextStyle
-        && other.systemOverlayStyle == systemOverlayStyle;
+        && other.systemOverlayStyle == systemOverlayStyle
+        && other.actionsPadding == actionsPadding;
   }
 
   @override
@@ -289,5 +299,6 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<double>('toolbarHeight', toolbarHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('toolbarTextStyle', toolbarTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null));
   }
 }
