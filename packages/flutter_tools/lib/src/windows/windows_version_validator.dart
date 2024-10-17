@@ -29,7 +29,7 @@ class WindowsVersionValidator extends DoctorValidator {
   const WindowsVersionValidator({
     required OperatingSystemUtils operatingSystemUtils,
     required ProcessLister processLister,
-    required VersionExtractor versionExtractor,
+    required WindowsVersionExtractor versionExtractor,
   })  : _operatingSystemUtils = operatingSystemUtils,
         _processLister = processLister,
         _versionExtractor = versionExtractor,
@@ -37,7 +37,7 @@ class WindowsVersionValidator extends DoctorValidator {
 
   final OperatingSystemUtils _operatingSystemUtils;
   final ProcessLister _processLister;
-  final VersionExtractor _versionExtractor;
+  final WindowsVersionExtractor _versionExtractor;
 
   Future<ValidationResult> _topazScan() async {
       final ProcessResult getProcessesResult = await _processLister.getProcessesWithPath();
@@ -125,8 +125,8 @@ class ProcessLister {
   }
 }
 
-class VersionExtractor {
-  VersionExtractor(this.processManager);
+class WindowsVersionExtractor {
+  WindowsVersionExtractor(this.processManager);
 
   final ProcessManager processManager;
 

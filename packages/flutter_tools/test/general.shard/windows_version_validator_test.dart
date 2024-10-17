@@ -79,7 +79,7 @@ const ValidationResult getProcessFailed = ValidationResult(
   statusInfo: 'Problem detected with Windows installation',
 );
 
-class FakeVersionExtractor extends Fake implements VersionExtractor {
+class FakeVersionExtractor extends Fake implements WindowsVersionExtractor {
   FakeVersionExtractor({required this.mockData});
   FakeVersionExtractor.win11ProX64() : this(mockData: <String, String>{
     'Caption': '11 Pro 64-bit',
@@ -239,7 +239,7 @@ End of search: 22 match(es) found.
     final WindowsVersionValidator validator = WindowsVersionValidator(
       operatingSystemUtils: FakeValidOperatingSystemUtils(),
       processLister: ofdNotRunning(),
-      versionExtractor: VersionExtractor(processManager),
+      versionExtractor: WindowsVersionExtractor(processManager),
     );
     final ValidationResult result = await validator.validate();
     expect(result.type, ValidationType.success);
@@ -300,7 +300,7 @@ End of search: 21 match(es) found.
     final WindowsVersionValidator validator = WindowsVersionValidator(
       operatingSystemUtils: FakeValidOperatingSystemUtils(),
       processLister: ofdNotRunning(),
-      versionExtractor: VersionExtractor(processManager),
+      versionExtractor: WindowsVersionExtractor(processManager),
     );
     final ValidationResult result = await validator.validate();
     expect(result.type, ValidationType.success);
