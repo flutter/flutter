@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/windows/windows_version_validator.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
+import '../src/fake_process_manager.dart';
 
 /// Fake [_WindowsUtils] to use for testing
 class FakeValidOperatingSystemUtils extends Fake
@@ -188,5 +189,58 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     expect(result.statusInfo, getProcessFailed.statusInfo, reason: 'The ValidationResult statusInfo should be the same');
     expect(result.messages.length, 1, reason: 'The ValidationResult should have precisely 1 message');
     expect(result.messages[0].message, getProcessFailed.messages[0].message, reason: 'The ValidationMessage message should be the same');
+  });
+
+  testWithoutContext('Parses Caption, OSArchitecture, releaseId, and CurrentVersion from the OS', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        const FakeCommand(
+            command: <Pattern>['wmic', 'os', 'get', 'Caption,OSArchitecture'],
+            stdout: '''
+Caption                          OSArchitecture
+Microsoft Windows 10 Enterprise  64-bit
+'''),
+        const FakeCommand(command: <Pattern>[
+          'reg',
+          'query',
+          r'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion',
+          '/t',
+          'REG_SZ',
+        ], stdout: r'''
+    SystemRoot    REG_SZ    C:\Windows
+    BuildBranch    REG_SZ    vb_release
+    BuildGUID    REG_SZ    ffffffff-ffff-ffff-ffff-ffffffffffff
+    BuildLab    REG_SZ    19041.vb_release.191206-1406
+    BuildLabEx    REG_SZ    19041.1.amd64fre.vb_release.191206-1406
+    CompositionEditionID    REG_SZ    Enterprise
+    CurrentBuild    REG_SZ    19045
+    CurrentBuildNumber    REG_SZ    19045
+    CurrentType    REG_SZ    Multiprocessor Free
+    CurrentVersion    REG_SZ    6.3
+    EditionID    REG_SZ    Enterprise
+    EditionSubManufacturer    REG_SZ
+    EditionSubstring    REG_SZ
+    EditionSubVersion    REG_SZ
+    InstallationType    REG_SZ    Client
+    ProductName    REG_SZ    Windows 10 Enterprise
+    ReleaseId    REG_SZ    2009
+    SoftwareType    REG_SZ    System
+    PathName    REG_SZ    C:\Windows
+    ProductId    REG_SZ    00329-00000-00003-AA153
+    DisplayVersion    REG_SZ    22H2
+    WinREVersion    REG_SZ    10.0.19041.3920
+
+End of search: 22 match(es) found.
+'''),
+      ],
+    );
+    final WindowsVersionValidator validator = WindowsVersionValidator(
+      operatingSystemUtils: FakeValidOperatingSystemUtils(),
+      processLister: ofdNotRunning(),
+      versionExtractor: VersionExtractor(processManager),
+    );
+    final ValidationResult result = await validator.validate();
+    expect(result.type, ValidationType.success);
+    expect(result.statusInfo, '10 Enterprise 64-bit, 22H2, 2009');
   });
 }
