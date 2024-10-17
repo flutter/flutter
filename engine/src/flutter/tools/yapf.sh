@@ -36,5 +36,19 @@ function follow_links() (
 SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
 SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
 YAPF_DIR="$(cd "$SRC_DIR/flutter/third_party/yapf"; pwd -P)"
+if command -v python3.10 &> /dev/null; then
+  PYTHON_EXEC="python3.10"
+else
+  python3 -c "
+import sys
+version = sys.version_info
+if (version.major, version.minor) > (3, 10):
+    print(f'Error: python3 version {version.major}.{version.minor} is greater than 3.10.', file=sys.stderr)
+    sys.exit(1)
+else:
+    print(f'Using python3 version {version.major}.{version.minor}.')
+" || exit 1
+  PYTHON_EXEC="python3"
+fi
 
-PYTHONPATH="$YAPF_DIR" python3 "$YAPF_DIR/yapf" "$@"
+PYTHONPATH="$YAPF_DIR" $PYTHON_EXEC "$YAPF_DIR/yapf" "$@"
