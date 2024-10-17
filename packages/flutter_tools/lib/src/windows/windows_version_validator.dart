@@ -16,7 +16,7 @@ const List<String> kUnsupportedVersions = <String>[
 ];
 
 /// Regex pattern for identifying line from systeminfo stdout with windows version
-/// (ie. 10.5.4123)
+/// (ie. 10.0.22631.4037)
 const String kWindowsOSVersionSemVerPattern = r'([0-9]+)\.([0-9]+)\.([0-9]+)\.?([0-9\.]+)?';
 
 /// Regex pattern for identifying a running instance of the Topaz OFD process.
