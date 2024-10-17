@@ -25,7 +25,7 @@ class DragBoundaryExampleAppState extends State<DragBoundaryExampleApp> {
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(100),
-          child: RectBoundaryRegulatorProvider(
+          child: DragBoundaryProvider(
             child: Builder(
               builder: (BuildContext context) {
                 return Stack(
@@ -42,11 +42,9 @@ class DragBoundaryExampleAppState extends State<DragBoundaryExampleApp> {
                           _initialPosition = details.localPosition - _currentPosition;
                         },
                         onPanUpdate: (DragUpdateDetails details) {
-                          final RenderBox containerBox = context.findRenderObject()! as RenderBox;
                           _currentPosition = details.localPosition - _initialPosition;
-                          final Rect? withinBoundary = RectBoundaryRegulatorProvider.maybeOf(context)?.nearestPositionWithinBoundary(
+                          final Rect? withinBoundary = DragBoundaryProvider.forRectOf(context)?.nearestPositionWithinBoundary(
                             _currentPosition & _boxSize,
-                            globalToLocal: containerBox.globalToLocal,
                           );
                           if (withinBoundary != null) {
                             _currentPosition = withinBoundary.topLeft;
