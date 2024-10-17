@@ -3,7 +3,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import com.android.build.OutputFile
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
@@ -1230,7 +1229,7 @@ class FlutterPlugin implements Plugin<Project> {
                     // for only the output APK, not for the variant itself. Skipping this step simply
                     // causes Gradle to use the value of variant.versionCode for the APK.
                     // For more, see https://developer.android.com/studio/build/configure-apk-splits
-                    Integer abiVersionCode = ABI_VERSION.get(output.getFilter(OutputFile.ABI))
+                    Integer abiVersionCode = ABI_VERSION.get(output.filters.find { it.filterType == "ABI" }?.identifier)
                     if (abiVersionCode != null) {
                         output.versionCodeOverride =
                             abiVersionCode * 1000 + variant.versionCode
@@ -1408,7 +1407,7 @@ class FlutterPlugin implements Plugin<Project> {
                             ? outputDirectory.get()
                             : outputDirectory
                         String filename = "app"
-                        String abi = output.getFilter(OutputFile.ABI)
+                        String abi = output.filters.find { it.filterType == "ABI" }?.identifier
                         if (abi != null && !abi.isEmpty()) {
                             filename += "-${abi}"
                         }
