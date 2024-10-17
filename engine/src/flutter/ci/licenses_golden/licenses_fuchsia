@@ -1,4 +1,4 @@
-Signature: 24f927b02d0fce18209f0972eeceeedb
+Signature: e6795c8a2a5ff5824f7e5b3c503cf201
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -14859,7 +14859,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/exception.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/functional.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/span.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/tuple.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/type_traits.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/iterator.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/span.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -15042,7 +15041,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/er
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/exception.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/functional.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/span.h
-FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/tuple.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/type_traits.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/iterator.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/span.h
@@ -15415,7 +15413,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-view.h + ../..
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/fake_flatland.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/fake_flatland_types.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/linkage.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/variant.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_base.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/convert.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -15769,7 +15766,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-view.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/fake_flatland.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/fake_flatland_types.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/linkage.h
-FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/variant.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_base.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/convert.cc
@@ -16126,6 +16122,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/include/zircon/availab
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/zircon/availability_levels.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/zircon/availability_levels.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/zircon/availability_levels.inc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_incoming_cpp/include/lib/driver/incoming/cpp/service_validator.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_incoming_cpp/service_validator.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/include/lib/driver/metadata/cpp/metadata.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/include/lib/driver/metadata/cpp/metadata_server.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_node_cpp/add_child.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -16209,6 +16207,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/include/zircon/availabil
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/zircon/availability_levels.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/zircon/availability_levels.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/zircon/availability_levels.inc
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_incoming_cpp/include/lib/driver/incoming/cpp/service_validator.h
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_incoming_cpp/service_validator.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/include/lib/driver/metadata/cpp/metadata.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/include/lib/driver/metadata/cpp/metadata_server.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_node_cpp/add_child.cc
