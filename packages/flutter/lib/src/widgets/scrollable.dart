@@ -570,14 +570,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   ///
   /// Used by [EdgeDraggingAutoScroller] to progress the position forward when a
   /// drag gesture reaches the edge of the [Viewport].
-  Offset get deltaToScrollOrigin {
-    return switch (axisDirection) {
-      AxisDirection.up    => Offset(0, -position.pixels),
-      AxisDirection.down  => Offset(0, position.pixels),
-      AxisDirection.left  => Offset(-position.pixels, 0),
-      AxisDirection.right => Offset(position.pixels, 0),
-    };
-  }
+  Offset get deltaToScrollOrigin => switch (axisDirection) {
+    AxisDirection.up    => Offset(0, -position.pixels),
+    AxisDirection.down  => Offset(0, position.pixels),
+    AxisDirection.left  => Offset(-position.pixels, 0),
+    AxisDirection.right => Offset(position.pixels, 0),
+  };
 
   ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
 

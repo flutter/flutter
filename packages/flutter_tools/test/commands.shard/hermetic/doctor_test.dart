@@ -1247,13 +1247,11 @@ class FakeAsyncCrashingDoctor extends Doctor {
 /// overriding the doctor.
 class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
   @override
-  List<DoctorValidator> get validators {
-    return <DoctorValidator>[
-      PassingValidator('Passing Validator'),
-      PassingValidator('Another Passing Validator'),
-      PassingValidator('Providing validators is fun'),
-    ];
-  }
+  List<DoctorValidator> get validators => <DoctorValidator>[
+    PassingValidator('Passing Validator'),
+    PassingValidator('Another Passing Validator'),
+    PassingValidator('Providing validators is fun'),
+  ];
 
   @override
   List<Workflow> get workflows => <Workflow>[];

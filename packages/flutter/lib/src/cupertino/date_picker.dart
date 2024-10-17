@@ -2076,12 +2076,11 @@ class CupertinoTimerPicker extends StatefulWidget {
 class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   late TextDirection textDirection;
   late CupertinoLocalizations localizations;
-  int get textDirectionFactor {
-    return switch (textDirection) {
-      TextDirection.ltr =>  1,
-      TextDirection.rtl => -1,
-    };
-  }
+
+  int get textDirectionFactor => switch (textDirection) {
+    TextDirection.ltr =>  1,
+    TextDirection.rtl => -1,
+  };
 
   // The currently selected values of the picker.
   int? selectedHour;

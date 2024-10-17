@@ -864,12 +864,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   //
   // Unselected labels are shown by default for [BottomNavigationBarType.fixed],
   // and hidden by default for [BottomNavigationBarType.shifting].
-  bool get _defaultShowUnselected {
-    return switch (_effectiveType) {
-      BottomNavigationBarType.shifting => false,
-      BottomNavigationBarType.fixed    => true,
-    };
-  }
+  bool get _defaultShowUnselected => switch (_effectiveType) {
+    BottomNavigationBarType.shifting => false,
+    BottomNavigationBarType.fixed    => true,
+  };
 
   @override
   void initState() {

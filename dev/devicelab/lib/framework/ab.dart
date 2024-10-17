@@ -207,12 +207,10 @@ class ABTest {
     return buffer.toString();
   }
 
-  Set<String> get _allScoreKeys {
-    return <String>{
-      ..._aResults.keys,
-      ..._bResults.keys,
-    };
-  }
+  Set<String> get _allScoreKeys => <String>{
+    ..._aResults.keys,
+    ..._bResults.keys,
+  };
 
   /// Returns the summary as a tab-separated spreadsheet.
   ///

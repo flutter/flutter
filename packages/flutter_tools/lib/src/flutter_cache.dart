@@ -801,11 +801,9 @@ class IosUsbArtifacts extends CachedArtifact {
   };
 
   @override
-  Map<String, String> get environment {
-    return <String, String>{
-      'DYLD_LIBRARY_PATH': cache.getArtifactDirectory(name).path,
-    };
-  }
+  Map<String, String> get environment => <String, String>{
+    'DYLD_LIBRARY_PATH': cache.getArtifactDirectory(name).path,
+  };
 
   @override
   bool isUpToDateInner(FileSystem fileSystem) {

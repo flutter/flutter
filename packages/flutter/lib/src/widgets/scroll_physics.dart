@@ -787,12 +787,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double get dragStartDistanceMotionThreshold => 3.5;
 
   @override
-  double get maxFlingVelocity {
-    return switch (decelerationRate) {
-      ScrollDecelerationRate.fast => kMaxFlingVelocity * 8.0,
-      ScrollDecelerationRate.normal => super.maxFlingVelocity,
-    };
-  }
+  double get maxFlingVelocity => switch (decelerationRate) {
+    ScrollDecelerationRate.fast => kMaxFlingVelocity * 8.0,
+    ScrollDecelerationRate.normal => super.maxFlingVelocity,
+  };
 
   @override
   SpringDescription get spring {

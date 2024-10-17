@@ -2097,14 +2097,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       .merge(decoration.errorStyle);
   }
 
-  Set<MaterialState> get materialState {
-    return <MaterialState>{
-      if (!decoration.enabled) MaterialState.disabled,
-      if (isFocused) MaterialState.focused,
-      if (isHovering) MaterialState.hovered,
-      if (_hasError) MaterialState.error,
-    };
-  }
+  Set<MaterialState> get materialState => <MaterialState>{
+    if (!decoration.enabled) MaterialState.disabled,
+    if (isFocused) MaterialState.focused,
+    if (isHovering) MaterialState.hovered,
+    if (_hasError) MaterialState.error,
+  };
 
 
   InputBorder _getDefaultBorder(ThemeData themeData, InputDecorationTheme defaults) {

@@ -161,14 +161,12 @@ class ValidationResult {
   final String? statusInfo;
   final List<ValidationMessage> messages;
 
-  String get leadingBox {
-    return switch (type) {
-      ValidationType.crash   => '[☠]',
-      ValidationType.missing => '[✗]',
-      ValidationType.success => '[✓]',
-      ValidationType.notAvailable || ValidationType.partial => '[!]',
-    };
-  }
+  String get leadingBox => switch (type) {
+    ValidationType.crash   => '[☠]',
+    ValidationType.missing => '[✗]',
+    ValidationType.success => '[✓]',
+    ValidationType.notAvailable || ValidationType.partial => '[!]',
+  };
 
   String get coloredLeadingBox {
     return globals.terminal.color(leadingBox, switch (type) {
@@ -179,15 +177,13 @@ class ValidationResult {
   }
 
   /// The string representation of the type.
-  String get typeStr {
-    return switch (type) {
-      ValidationType.crash        => 'crash',
-      ValidationType.missing      => 'missing',
-      ValidationType.success      => 'installed',
-      ValidationType.notAvailable => 'notAvailable',
-      ValidationType.partial      => 'partial',
-    };
-  }
+  String get typeStr => switch (type) {
+    ValidationType.crash        => 'crash',
+    ValidationType.missing      => 'missing',
+    ValidationType.success      => 'installed',
+    ValidationType.notAvailable => 'notAvailable',
+    ValidationType.partial      => 'partial',
+  };
 
   @override
   String toString() {
@@ -237,13 +233,11 @@ class ValidationMessage {
 
   bool get isInformation => type == ValidationMessageType.information;
 
-  String get indicator {
-    return switch (type) {
-      ValidationMessageType.error => '✗',
-      ValidationMessageType.hint => '!',
-      ValidationMessageType.information => '•',
-    };
-  }
+  String get indicator => switch (type) {
+    ValidationMessageType.error => '✗',
+    ValidationMessageType.hint => '!',
+    ValidationMessageType.information => '•',
+  };
 
   String get coloredIndicator {
     return globals.terminal.color(indicator, switch (type) {

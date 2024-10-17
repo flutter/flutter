@@ -395,12 +395,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Track Offsets
   // The track is offset by only padding.
   double get _totalTrackMainAxisOffsets => _isVertical ? padding.vertical : padding.horizontal;
-  double get _leadingTrackMainAxisOffset {
-    return switch (_resolvedOrientation) {
-      ScrollbarOrientation.left || ScrollbarOrientation.right => padding.top,
-      ScrollbarOrientation.top || ScrollbarOrientation.bottom => padding.left,
-    };
-  }
+
+  double get _leadingTrackMainAxisOffset => switch (_resolvedOrientation) {
+    ScrollbarOrientation.left || ScrollbarOrientation.right => padding.top,
+    ScrollbarOrientation.top || ScrollbarOrientation.bottom => padding.left,
+  };
 
   Rect? _thumbRect;
   // The current scroll position + _leadingThumbMainAxisOffset
