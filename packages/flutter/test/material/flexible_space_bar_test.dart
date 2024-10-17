@@ -1414,6 +1414,69 @@ void main() {
     expect(getTitleBottomLeft(), const Offset(389.0, 0.0));
   });
 
+  testWidgets('Material3 - FlexibleSpaceBar collapsedTitlePadding override', (WidgetTester tester) async {
+    const EdgeInsets expandedTitlePadding = EdgeInsets.only(left: 16.0);
+    const EdgeInsets collapsedTitlePadding = EdgeInsets.only(left: 32.0);
+
+    for (final TargetPlatform platform in TargetPlatform.values) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  expandedHeight: 200,
+                  flexibleSpace: FlexibleSpaceBar(
+                    titlePadding: expandedTitlePadding,
+                    collapsedTitlePadding: collapsedTitlePadding,
+                    centerTitle: false,
+                    title: Text('X'),
+                  ),
+                ),
+                SliverList(
+                  delegate: SliverChildListDelegate(
+                    <Widget>[
+                      for (int i = 0; i < 3; i++)
+                        SizedBox(
+                          height: 200.0,
+                          child: Center(child: Text('Item $i')),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder title = find.text('X');
+
+      EdgeInsets getTitleLeftPadding() {
+        return EdgeInsets.only(
+          left: tester.getTopLeft(title).dx,
+        );
+      }
+
+      // We drag up to fully collapse the space bar.
+      // collapsedTitlePadding should be taken
+      await tester.drag(find.text('Item 0'), const Offset(0, -600.0));
+      await tester.pumpAndSettle();
+      expect(getTitleLeftPadding(), collapsedTitlePadding, reason: 'fails collapsed state on $platform');
+
+      // We drag down to fully expand the space bar.
+      // titlePadding should be taken
+      await tester.drag(find.text('Item 2'), const Offset(0, 600.0));
+      await tester.pumpAndSettle();
+      expect(getTitleLeftPadding(), expandedTitlePadding, reason: 'fails expanded state on $platform');
+
+      // Clear the widget tree to avoid animating between platforms.
+      await tester.pumpWidget(Container(key: UniqueKey()));
+    }
+  });
+
   testWidgets('Material2 - FlexibleSpaceBar titlePadding override', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
