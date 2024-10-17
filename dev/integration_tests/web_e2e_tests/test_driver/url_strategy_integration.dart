@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:js_interop';
 import 'dart:ui' as ui;
-import 'dart:ui_web';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

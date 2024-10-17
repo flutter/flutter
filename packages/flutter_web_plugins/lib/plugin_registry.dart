@@ -2,5 +2,5 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-export 'src/non_web/navigation/url_strategy.dart'
-    if (dart.library.ui_web) 'src/navigation/url_strategy.dart';
+export 'src/non_web/plugin_registry.dart'
+    if (dart.library.ui_web) 'src/plugin_registry.dart';

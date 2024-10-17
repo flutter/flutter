@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
-import 'plugin_registry.dart';
+import '../plugin_registry.dart';
 
 /// A named channel for sending events to the framework-side using streams.
 ///

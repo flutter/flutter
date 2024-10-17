@@ -15,6 +15,9 @@ export 'dart:ui_web'
         UrlStrategy,
         urlStrategy;
 
+/// Callback that receives the new state of the browser history entry.
+typedef PopStateListener = void Function(Object? state);
+
 /// Change the strategy to use for handling browser URL.
 ///
 /// Setting this to null disables all integration with the browser history.
