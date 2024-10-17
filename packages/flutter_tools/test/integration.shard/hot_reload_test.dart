@@ -187,6 +187,16 @@ void main() {
     await flutter.resume();
     await subscription.cancel();
   });
+
+  testWithoutContext('Flutter.HotReload event is sent after a hot-reload',
+      () async {
+    await flutter.run(withDebugger: true);
+    final Future<Event> extensionEventFuture =
+        flutter.waitForExtensionEvent('Flutter.HotReload');
+    await flutter.hotReload();
+    final Event extensionEvent = await extensionEventFuture;
+    expect(extensionEvent.extensionKind, equals('Flutter.HotReload'));
+  });
 }
 
 bool _isHotReloadCompletionEvent(Map<String, Object?>? event) {
