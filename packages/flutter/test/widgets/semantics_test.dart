@@ -710,7 +710,11 @@ void main() {
       ],
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
-  });
+  }, skip: true); // TODO(yjbanov): https://github.com/flutter/flutter/issues/66673
+                  // Skipped temporarily to allow https://github.com/flutter/engine/pull/55780
+                  // to roll into the framework, which introduces a new flag. Because this
+                  // test enumerates all flags, the new flag breaks it. This test will need
+                  // to be updated after the roll.
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
