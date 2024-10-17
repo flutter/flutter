@@ -354,7 +354,7 @@ class _DummyTapRecognizer extends GestureArenaMember {
 /// If there is no [TapRegionSurface] ancestor, [TapRegion] will do nothing.
 ///
 /// [TapRegion] is aware of the [Route]s in the [Navigator], so that [onTapOutside]
-/// isn't called after the user navigates to a different page.
+/// or [onTapUpOutside] isn't called after the user navigates to a different page.
 class TapRegion extends SingleChildRenderObjectWidget {
   /// Creates a const [TapRegion].
   ///
@@ -474,7 +474,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
       behavior: behavior,
       onTapOutside: isCurrent ? onTapOutside : null,
       onTapInside: onTapInside,
-      onTapUpOutside: onTapUpOutside,
+      onTapUpOutside: isCurrent ? onTapUpOutside : null,
       onTapUpInside: onTapUpInside,
       groupId: groupId,
       debugLabel: debugLabel,
@@ -492,7 +492,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
       ..groupId = groupId
       ..onTapOutside = isCurrent ? onTapOutside : null
       ..onTapInside = onTapInside
-      ..onTapUpOutside = onTapUpOutside
+      ..onTapUpOutside = isCurrent ? onTapUpOutside : null
       ..onTapUpInside = onTapUpInside;
     if (!kReleaseMode) {
       renderObject.debugLabel = debugLabel;
