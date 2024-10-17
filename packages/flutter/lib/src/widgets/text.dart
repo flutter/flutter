@@ -1298,6 +1298,21 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     return result;
   }
 
+  /// Collapses a selection in a selectable at the location
+  /// [CollapseSelectionEvent.globalPosition].
+  @override
+  SelectionResult handleCollapseSelection(CollapseSelectionEvent event) {
+    final SelectionResult result = super.handleCollapseSelection(event);
+    if (currentSelectionStartIndex != -1) {
+      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
+    }
+    if (currentSelectionEndIndex != -1) {
+      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
+    }
+    _updateLastEdgeEventsFromGeometries();
+    return result;
+  }
+
   /// Selects a word in a selectable at the location
   /// [SelectWordSelectionEvent.globalPosition].
   @override
@@ -1361,6 +1376,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         _hasReceivedStartEvent.remove(selectable);
         _hasReceivedEndEvent.remove(selectable);
       case SelectionEventType.selectAll:
+      case SelectionEventType.collapseSelection:
       case SelectionEventType.selectWord:
       case SelectionEventType.selectParagraph:
         break;
