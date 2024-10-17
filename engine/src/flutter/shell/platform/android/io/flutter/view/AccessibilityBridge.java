@@ -2158,7 +2158,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     IS_KEYBOARD_KEY(1 << 24),
     IS_CHECK_STATE_MIXED(1 << 25),
     HAS_EXPANDED_STATE(1 << 26),
-    IS_EXPANDED(1 << 27);
+    IS_EXPANDED(1 << 27),
+    HAS_SELECTED_STATE(1 << 28);
 
     final int value;
 
