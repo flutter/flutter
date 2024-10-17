@@ -1188,9 +1188,9 @@ void main() {
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      final SizedBox sizedBox = tester.widget<SizedBox>(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
-      expect(sizedBox.width, 800.0);
-      expect(sizedBox.height, 600.0);
+      final ConstrainedBox constrainedBox = tester.widget<ConstrainedBox>(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
+      expect(constrainedBox.constraints.maxWidth, 800.0);
+      expect(constrainedBox.constraints.maxHeight, 600.0);
     }
 
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.linux, TargetPlatform.windows ]) {
@@ -1198,9 +1198,9 @@ void main() {
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      final SizedBox sizedBox = tester.widget<SizedBox>(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
-      expect(sizedBox.width, 360.0);
-      expect(sizedBox.height, 400.0);
+      final ConstrainedBox constrainedBox = tester.widget<ConstrainedBox>(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
+      expect(constrainedBox.constraints.maxWidth, 360.0);
+      expect(constrainedBox.constraints.maxHeight, 400.0);
     }
   });
 
@@ -1234,9 +1234,9 @@ void main() {
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      final SizedBox sizedBox = tester.widget<SizedBox>(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
-      expect(sizedBox.width, 800.0);
-      expect(sizedBox.height, 600.0);
+      final ConstrainedBox constrainedBox = tester.widget<ConstrainedBox>(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
+      expect(constrainedBox.constraints.maxWidth, 800.0);
+      expect(constrainedBox.constraints.maxHeight, 600.0);
     }
   });
 
@@ -1703,7 +1703,7 @@ void main() {
             },);
           },
           suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return <Widget>[];
+            return const <Widget>[ListTile(title: Text('test'))];
           },
         ),
       ),
@@ -1741,9 +1741,78 @@ void main() {
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
 
-    final SizedBox sizedBox = tester.widget<SizedBox>(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
-    expect(sizedBox.width, 280.0);
-    expect(sizedBox.height, 390.0);
+    final ConstrainedBox constrainedBox = tester.widget<ConstrainedBox>(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
+    expect(constrainedBox.constraints.maxWidth, 280.0);
+    expect(constrainedBox.constraints.maxHeight, 390.0);
+  });
+
+  testWidgets('SearchAnchor respects viewBarPadding property', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: SearchAnchor(
+            viewBarPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(icon: const Icon(Icons.search), onPressed: () {
+                controller.openView();
+              },);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Finder findSearchBar = find.descendant(of: findViewContent(), matching: find.byType(SearchBar)).first;
+    final Padding padding = tester.widget<Padding>(find.descendant(of: findSearchBar, matching: find.byType(Padding)).first);
+    expect(padding.padding, const EdgeInsets.symmetric(horizontal: 16.0));
+  });
+
+  testWidgets('SearchAnchor respects viewConstraints min width and height', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: false,
+          viewConstraints: const BoxConstraints(),
+          builder: (BuildContext context, SearchController controller) {
+            return IconButton(icon: const Icon(Icons.search), onPressed: () {
+              controller.openView();
+            },);
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return List<Widget>.generate(
+              controller.text.length,
+              (int index) => ListTile(title: Text('Item $index')),
+            );
+          }
+        ),
+      ),
+    ));
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Finder findDivider = find.descendant(of: findViewContent(), matching: find.byType(Divider));
+
+    // Divider should not be shown if there are no suggestions
+    expect(findDivider, findsNothing);
+
+    final Finder findMaterial = find.descendant(of: findViewContent(), matching: find.byType(Material)).first;
+    final Rect materialRectWithoutSuggestions = tester.getRect(findMaterial);
+    expect(materialRectWithoutSuggestions, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0)));
+
+    await tester.enterText(find.byType(SearchBar), 'a');
+    await tester.pumpAndSettle();
+
+    expect(findDivider, findsOneWidget);
+
+    final Rect materialRectWithSuggestions = tester.getRect(findMaterial);
+    expect(materialRectWithSuggestions, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 113.0)));
   });
 
   testWidgets('SearchAnchor respects viewBarPadding property', (WidgetTester tester) async {
@@ -1802,7 +1871,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
     expect(searchViewRect, equals(const Rect.fromLTRB(388.0, 0.0, 748.0, 400.0)));
 
     // Search view top left should be the same as the anchor top left
@@ -1839,7 +1908,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
     expect(searchViewRect, equals(const Rect.fromLTRB(52.0, 0.0, 412.0, 400.0)));
 
     // Search view top right should be the same as the anchor top right
@@ -2049,7 +2118,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
     expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 400.0)));
 
     // Search view has same width with the default anchor(search bar).
@@ -2128,7 +2197,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
     expect(searchViewRect, equals(const Rect.fromLTRB(440.0, 200.0, 800.0, 600.0)));
   });
 
@@ -2169,7 +2238,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
     expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 200.0, 360.0, 600.0)));
   });
 
@@ -2216,7 +2285,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
     expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 200.0)));
 
     // Test RTL text direction.
@@ -2231,7 +2300,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRectRTL = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRectRTL = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
     expect(searchViewRectRTL, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 200.0)));
   });
 
@@ -2394,7 +2463,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
     expect(searchViewRect.topLeft, equals(const Offset(rootSpacing, rootSpacing)));
   });
 
@@ -2440,7 +2509,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
     expect(searchViewRect.bottomRight, equals(const Offset(300.0, 300.0)));
   });
 
