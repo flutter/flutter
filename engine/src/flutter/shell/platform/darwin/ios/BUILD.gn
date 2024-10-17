@@ -70,7 +70,9 @@ source_set("flutter_framework_source_arc") {
     "framework/Source/FlutterDartVMServicePublisher.mm",
     "framework/Source/FlutterEmbedderKeyResponder.h",
     "framework/Source/FlutterEmbedderKeyResponder.mm",
+    "framework/Source/FlutterEngine.mm",
     "framework/Source/FlutterEngineGroup.mm",
+    "framework/Source/FlutterEngine_Internal.h",
     "framework/Source/FlutterHeadlessDartRunner.mm",
     "framework/Source/FlutterKeyPrimaryResponder.h",
     "framework/Source/FlutterKeySecondaryResponder.h",
@@ -186,8 +188,6 @@ source_set("flutter_framework_source") {
     # iOS embedder is migrating to ARC.
     # New files are highly encouraged to be in ARC.
     # To add new files in ARC, add them to the `flutter_framework_source_arc` target.
-    "framework/Source/FlutterEngine.mm",
-    "framework/Source/FlutterEngine_Internal.h",
     "framework/Source/FlutterViewController.mm",
     "framework/Source/FlutterViewController_Internal.h",
     "platform_view_ios.h",

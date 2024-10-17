@@ -12,7 +12,7 @@
 @interface FlutterPlatformPlugin : NSObject
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
-- (instancetype)initWithEngine:(fml::WeakNSObject<FlutterEngine>)engine NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithEngine:(FlutterEngine*)engine NS_DESIGNATED_INITIALIZER;
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
 
 @end
