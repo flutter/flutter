@@ -712,7 +712,7 @@ void main() {
   testUsingContext('kotlin/swift plugin project without Swift Package Manager', () async {
     return _createProject(
       projectDir,
-      <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift', '--platforms', 'ios,android'],
+      <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift', '--platforms', 'android,ios,macos'],
       <String>[
         'analysis_options.yaml',
         'android/src/main/kotlin/com/example/flutter_project/FlutterProjectPlugin.kt',
@@ -722,6 +722,8 @@ void main() {
         'example/lib/main.dart',
         'ios/Classes/FlutterProjectPlugin.swift',
         'ios/Resources/PrivacyInfo.xcprivacy',
+        'macos/Classes/FlutterProjectPlugin.swift',
+        'macos/Resources/PrivacyInfo.xcprivacy',
         'lib/flutter_project.dart',
       ],
       unexpectedPaths: <String>[
@@ -736,7 +738,7 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     // Test flags disable Swift Package Manager.
-    FeatureFlags: () => TestFeatureFlags(),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('swift plugin project with Swift Package Manager', () async {
@@ -749,7 +751,7 @@ void main() {
         'ios/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
         'macos/flutter_project/Package.swift',
         'macos/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
-        'macos/flutter_project/Sources/flutter_project/Resources/.gitkeep',
+        'macos/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
       ],
       unexpectedPaths: <String>[
         'ios/Classes/FlutterProjectPlugin.swift',
@@ -836,9 +838,15 @@ void main() {
         <String>['--no-pub', '--template=plugin', '--project-name', 'xyz-xyz', '--platforms', 'android,ios',],
         <String>[],
       ),
-      allOf(
-        throwsToolExit(message: '"xyz-xyz" is not a valid Dart package name.'),
-        throwsToolExit(message: 'Try "xyz_xyz" instead.'),
+      throwsToolExit(message:
+        '"xyz-xyz" is not a valid Dart package name. Try "xyz_xyz" instead.\n'
+        '\n'
+        'The name should consist of lowercase words separated by underscores, '
+        '"like_this". Use only basic Latin letters and Arabic digits: [a-z0-9_], '
+        'and ensure the name is a valid Dart identifier (i.e. it does not start '
+        'with a digit and is not a reserved word).\n'
+        '\n'
+        'See https://dart.dev/tools/pub/pubspec#name for more information.'
       ),
     );
   });
@@ -1676,6 +1684,36 @@ void main() {
     expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
+  });
+
+  testUsingContext('should not show --ios-language deprecation warning issue for Swift', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--ios-language=swift', projectDir.path]);
+    expect(logger.warningText, contains('The "ios-language" option is deprecated and will be removed in a future Flutter release.'));
+    expect(logger.warningText, isNot(contains('https://github.com/flutter/flutter/issues/148586')));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
+  testUsingContext('should show --ios-language deprecation warning issue for Objective-C', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--ios-language=objc', projectDir.path]);
+    expect(logger.warningText, contains('The "ios-language" option is deprecated and will be removed in a future Flutter release.'));
+    expect(logger.warningText, contains('https://github.com/flutter/flutter/issues/148586'));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
   });
 
   testUsingContext('has correct content and formatting with macOS app template', () async {
@@ -3141,6 +3179,36 @@ void main() {
     expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
   });
 
+  testUsingContext('Android FFI plugin contains 16kb page support', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '-t',
+      'plugin_ffi',
+      '--org',
+      'com.bar.foo',
+      '--platforms=android',
+      projectDir.path
+    ]);
+
+    final File cmakeLists =
+        globals.fs.file('${projectDir.path}/src/CMakeLists.txt');
+
+    expect(cmakeLists.existsSync(), true);
+
+    final String cmakeListsContent = await cmakeLists.readAsString();
+    // If we ever change the flags, this should be accounted for in the
+    // migration as well:
+    // lib/src/android/migrations/cmake_android_16k_pages_migration.dart
+    const String expected16KbFlags = 'PRIVATE "-Wl,-z,max-page-size=16384")';
+    expect(cmakeListsContent, contains(expected16KbFlags));
+  });
+
   testUsingContext('Android Kotlin plugin contains namespace', () async {
     Cache.flutterRoot = '../..';
 
@@ -3161,6 +3229,54 @@ void main() {
     final String buildGradleContent = await buildGradleFile.readAsString();
 
     expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
+  });
+
+  testUsingContext('Android Java plugin sets explicit compatibility version', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub',
+      '-t', 'plugin',
+      '--org', 'com.bar.foo',
+      '-a', 'java',
+      '--platforms=android',
+      projectDir.path]);
+
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+
+    expect(buildGradleFile.existsSync(), true);
+
+    final String buildGradleContent = await buildGradleFile.readAsString();
+
+    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_11'), true);
+    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_11'), true);
+  });
+
+  testUsingContext('Android Kotlin plugin sets explicit compatibility version', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub',
+      '-t', 'plugin',
+      '--org', 'com.bar.foo',
+      '-a', 'kotlin',
+      '--platforms=android',
+      projectDir.path]);
+
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+
+    expect(buildGradleFile.existsSync(), true);
+
+    final String buildGradleContent = await buildGradleFile.readAsString();
+
+    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_11'), true);
+    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_11'), true);
+    // jvmTarget should be set to the same value.
+    expect(buildGradleContent.contains('jvmTarget = JavaVersion.VERSION_11'), true);
   });
 
   testUsingContext('Flutter module Android project contains namespace', () async {

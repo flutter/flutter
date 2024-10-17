@@ -5,6 +5,7 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -378,6 +379,37 @@ void main() {
     ProcessManager: () => processManager,
   });
 
+  // Tests whether using a deprecated webRenderer toggles a warningText.
+  Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
+    testUsingContext('Using --web-renderer=${webRenderer.name} triggers a warningText.', () async {
+      // Run the command so it parses --web-renderer, but ignore all errors.
+      // We only care about the logger.
+      try {
+        final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+        await createTestCommandRunner(buildCommand).run(<String>[
+          'build',
+          'web',
+          '--no-pub',
+          '--web-renderer=${webRenderer.name}',
+        ]);
+      } on ToolExit catch (error) {
+        expect(error, isA<ToolExit>());
+      }
+      expect(logger.warningText, contains(
+        'See: https://docs.flutter.dev/to/web-html-renderer-deprecation'
+      ));
+    }, overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Logger: () => logger,
+    });
+  }
+  /// Do test all the deprecated WebRendererModes
+  WebRendererMode.values
+    .where((WebRendererMode mode) => mode.isDeprecated)
+    .forEach(testWebRendererDeprecationMessage);
+
   testUsingContext('flutter build web option visibility', () async {
     final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
     createTestCommandRunner(buildCommand);
@@ -421,8 +453,8 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
   final List<String> dependencies = <String>[
     fileSystem.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),
     fileSystem.path.join('bin', 'cache', 'flutter_web_sdk'),
-    fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
     fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+    fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dartaotruntime'),
     fileSystem.path.join('bin', 'cache', 'dart-sdk '),
   ];
   for (final String dependency in dependencies) {

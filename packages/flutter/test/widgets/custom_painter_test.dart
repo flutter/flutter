@@ -524,7 +524,11 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
-  });
+  }, skip: true); // TODO(yjbanov): https://github.com/flutter/flutter/issues/66673
+                  // Skipped temporarily to allow https://github.com/flutter/engine/pull/55780
+                  // to roll into the framework, which introduces a new flag. Because this
+                  // test enumerates all flags, the new flag breaks it. This test will need
+                  // to be updated after the roll.
 
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {
