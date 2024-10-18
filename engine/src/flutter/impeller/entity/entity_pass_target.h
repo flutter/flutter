@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_ENTITY_PASS_TARGET_H_
 #define FLUTTER_IMPELLER_ENTITY_ENTITY_PASS_TARGET_H_
 
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/render_target.h"
 
 namespace impeller {
@@ -24,7 +25,7 @@ class EntityPassTarget {
   ///         result of `GetRenderTarget` is guaranteed to be able to read the
   ///         previous pass's backdrop texture (which is returned by this
   ///         method).
-  std::shared_ptr<Texture> Flip(Allocator& allocator);
+  std::shared_ptr<Texture> Flip(const ContentContext& renderer);
 
   RenderTarget& GetRenderTarget();
 

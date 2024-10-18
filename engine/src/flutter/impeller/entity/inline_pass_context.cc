@@ -7,34 +7,22 @@
 #include <utility>
 
 #include "flutter/fml/status.h"
-#include "impeller/base/allocation.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity_pass_target.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/texture_mipmap.h"
 
 namespace impeller {
 
-InlinePassContext::InlinePassContext(
-    const ContentContext& renderer,
-    EntityPassTarget& pass_target,
-    uint32_t entity_count,
-    std::optional<RenderPassResult> collapsed_parent_pass)
-    : renderer_(renderer),
-      pass_target_(pass_target),
-      entity_count_(entity_count),
-      is_collapsed_(collapsed_parent_pass.has_value()) {
-  if (collapsed_parent_pass.has_value()) {
-    pass_ = collapsed_parent_pass.value().pass;
-  }
-}
+InlinePassContext::InlinePassContext(const ContentContext& renderer,
+                                     EntityPassTarget& pass_target)
+    : renderer_(renderer), pass_target_(pass_target) {}
 
 InlinePassContext::~InlinePassContext() {
-  if (!is_collapsed_) {
-    EndPass();
-  }
+  EndPass();
 }
 
 bool InlinePassContext::IsValid() const {
@@ -90,10 +78,9 @@ EntityPassTarget& InlinePassContext::GetPassTarget() const {
   return pass_target_;
 }
 
-InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
-    uint32_t pass_depth) {
+const std::shared_ptr<RenderPass>& InlinePassContext::GetRenderPass() {
   if (IsActive()) {
-    return {.pass = pass_};
+    return pass_;
   }
 
   /// Create a new render pass if one isn't active. This path will run the first
@@ -103,18 +90,17 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
   command_buffer_ = renderer_.GetContext()->CreateCommandBuffer();
   if (!command_buffer_) {
     VALIDATION_LOG << "Could not create command buffer.";
-    return {};
+    return pass_;
   }
 
   if (pass_target_.GetRenderTarget().GetColorAttachments().empty()) {
     VALIDATION_LOG << "Color attachment unexpectedly missing from the "
                       "EntityPass render target.";
-    return {};
+    return pass_;
   }
 
   command_buffer_->SetLabel("EntityPass Command Buffer");
 
-  RenderPassResult result;
   {
     // If the pass target has a resolve texture, then we're using MSAA.
     bool is_msaa = pass_target_.GetRenderTarget()
@@ -122,11 +108,7 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
                        .find(0)
                        ->second.resolve_texture != nullptr;
     if (pass_count_ > 0 && is_msaa) {
-      result.backdrop_texture =
-          pass_target_.Flip(*renderer_.GetContext()->GetResourceAllocator());
-      if (!result.backdrop_texture) {
-        VALIDATION_LOG << "Could not flip the EntityPass render target.";
-      }
+      pass_target_.Flip(renderer_);
     }
   }
 
@@ -152,7 +134,7 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
   if (!depth.has_value()) {
     VALIDATION_LOG << "Depth attachment unexpectedly missing from the "
                       "EntityPass render target.";
-    return {};
+    return pass_;
   }
   depth->load_action = LoadAction::kClear;
   depth->store_action = StoreAction::kDontCare;
@@ -162,7 +144,7 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
   if (!depth.has_value() || !stencil.has_value()) {
     VALIDATION_LOG << "Stencil/Depth attachment unexpectedly missing from the "
                       "EntityPass render target.";
-    return {};
+    return pass_;
   }
   stencil->load_action = LoadAction::kClear;
   stencil->store_action = StoreAction::kDontCare;
@@ -175,26 +157,12 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
   pass_ = command_buffer_->CreateRenderPass(pass_target_.GetRenderTarget());
   if (!pass_) {
     VALIDATION_LOG << "Could not create render pass.";
-    return {};
+    return pass_;
   }
-  // Commands are fairly large (500B) objects, so re-allocation of the command
-  // buffer while encoding can add a surprising amount of overhead. We make a
-  // conservative npot estimate to avoid this case.
-  pass_->ReserveCommands(Allocation::NextPowerOfTwoSize(entity_count_));
   pass_->SetLabel("EntityPass Render Pass");
 
-  result.pass = pass_;
-  result.just_created = true;
-
-  if (!renderer_.GetContext()->GetCapabilities()->SupportsReadFromResolve() &&
-      result.backdrop_texture ==
-          result.pass->GetRenderTarget().GetRenderTargetTexture()) {
-    VALIDATION_LOG << "EntityPass backdrop restore configuration is not valid "
-                      "for the current graphics backend.";
-  }
-
   ++pass_count_;
-  return result;
+  return pass_;
 }
 
 uint32_t InlinePassContext::GetPassCount() const {

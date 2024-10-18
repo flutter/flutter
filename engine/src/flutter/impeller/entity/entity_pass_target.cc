@@ -17,7 +17,8 @@ EntityPassTarget::EntityPassTarget(const RenderTarget& render_target,
       supports_read_from_resolve_(supports_read_from_resolve),
       supports_implicit_msaa_(supports_implicit_msaa) {}
 
-std::shared_ptr<Texture> EntityPassTarget::Flip(Allocator& allocator) {
+std::shared_ptr<Texture> EntityPassTarget::Flip(
+    const ContentContext& renderer) {
   auto color0 = target_.GetColorAttachments().find(0)->second;
   if (!color0.resolve_texture) {
     VALIDATION_LOG << "EntityPassTarget Flip should never be called for a "
@@ -40,7 +41,9 @@ std::shared_ptr<Texture> EntityPassTarget::Flip(Allocator& allocator) {
     // The second texture is allocated lazily to avoid unused allocations.
     TextureDescriptor new_descriptor =
         color0.resolve_texture->GetTextureDescriptor();
-    secondary_color_texture_ = allocator.CreateTexture(new_descriptor);
+    RenderTarget target = renderer.GetRenderTargetCache()->CreateOffscreenMSAA(
+        *renderer.GetContext(), new_descriptor.size, 1);
+    secondary_color_texture_ = target.GetRenderTargetTexture();
 
     if (!secondary_color_texture_) {
       return nullptr;
