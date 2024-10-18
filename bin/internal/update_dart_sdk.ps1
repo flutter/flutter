@@ -27,7 +27,7 @@ if (Test-Path "$flutterRoot\bin\internal\engine.version") {
 } else {
     # Calculate the engine hash from tracked git files.
     $lsTree = ((git ls-tree -r HEAD engine DEPS) | Out-String).Replace("`r`n", "`n")
-    $engineVersion = (Get-FileHash -InputStream ([System.IO.MemoryStream] [System.Text.Encoding]::UTF8.GetBytes($output)) -Algorithm SHA1 | ForEach-Object { $_.Hash }).ToLower()
+    $engineVersion = (Get-FileHash -InputStream ([System.IO.MemoryStream] [System.Text.Encoding]::UTF8.GetBytes($lsTree)) -Algorithm SHA1 | ForEach-Object { $_.Hash }).ToLower()
 }
 
 $oldDartSdkPrefix = "dart-sdk.old"
