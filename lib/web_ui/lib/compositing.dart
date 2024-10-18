@@ -76,6 +76,7 @@ abstract class SceneBuilder {
     ImageFilter filter, {
     BlendMode blendMode = BlendMode.srcOver,
     BackdropFilterEngineLayer? oldLayer,
+    int? backdropId,
   });
   ShaderMaskEngineLayer pushShaderMask(
     Shader shader,

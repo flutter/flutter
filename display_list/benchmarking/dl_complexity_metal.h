@@ -37,7 +37,8 @@ class DisplayListMetalComplexityCalculator
 
     void saveLayer(const DlRect& bounds,
                    const SaveLayerOptions options,
-                   const DlImageFilter* backdrop) override;
+                   const DlImageFilter* backdrop,
+                   std::optional<int64_t> backdrop_id) override;
 
     void drawLine(const DlPoint& p0, const DlPoint& p1) override;
     void drawDashedLine(const DlPoint& p0,

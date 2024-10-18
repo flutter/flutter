@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
+#include <cstdint>
 
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
@@ -46,7 +47,8 @@ void DlSkCanvasDispatcher::restore() {
 }
 void DlSkCanvasDispatcher::saveLayer(const DlRect& bounds,
                                      const SaveLayerOptions options,
-                                     const DlImageFilter* backdrop) {
+                                     const DlImageFilter* backdrop,
+                                     std::optional<int64_t> backdrop_id) {
   if (!options.content_is_clipped() && options.can_distribute_opacity() &&
       backdrop == nullptr) {
     // We know that:

@@ -54,7 +54,8 @@ class DisplayListBuilder final : public virtual DlCanvas,
   // |DlCanvas|
   void SaveLayer(std::optional<const DlRect>& bounds,
                  const DlPaint* paint = nullptr,
-                 const DlImageFilter* backdrop = nullptr) override;
+                 const DlImageFilter* backdrop = nullptr,
+                 std::optional<int64_t> backdrop_id = std::nullopt) override;
   // |DlCanvas|
   void Restore() override;
   // |DlCanvas|
@@ -354,7 +355,8 @@ class DisplayListBuilder final : public virtual DlCanvas,
   // |DlOpReceiver|
   void saveLayer(const DlRect& bounds,
                  const SaveLayerOptions options,
-                 const DlImageFilter* backdrop) override;
+                 const DlImageFilter* backdrop,
+                 std::optional<int64_t> backdrop_id) override;
   // |DlOpReceiver|
   void restore() override { Restore(); }
 
