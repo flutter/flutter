@@ -100,7 +100,6 @@ for (final String agpVersion in agpVersions) {
             throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
           }
           
-          // /private/var/folders/v1/wpg85hbs16qd5b_x1c_l6nj400vh_3/T/NusgWq/package_with_native_assets/example/build/app/../native_assets/android/jniLibs/lib/
           final Directory nativeAssetsDir = exampleDirectory
             .childDirectory('build')
             .childDirectory('app')
@@ -112,8 +111,11 @@ for (final String agpVersion in agpVersions) {
           expect(nativeAssetsDir, exists);
 
           // We expect one subdirectory for each Android architecture.
-          List<FileSystemEntity> nativeAssetsDirSubdirectories = nativeAssetsDir.listSync();
-          expect(nativeAssetsDirSubdirectories.length, 4);
+          expect(nativeAssetsDir.listSync().length, 4);
+          expect(nativeAssetsDir..childDirectory('armeabi-v7a'), exists);
+          expect(nativeAssetsDir..childDirectory('x86'), exists);
+          expect(nativeAssetsDir..childDirectory('arm64-v8a'), exists);
+          expect(nativeAssetsDir..childDirectory('x86_64'), exists);
         });
       });
     }
