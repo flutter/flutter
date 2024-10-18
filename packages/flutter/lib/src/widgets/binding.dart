@@ -620,6 +620,21 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       );
 
       registerServiceExtension(
+        name: WidgetsServiceExtensions.sendExtensionEvent.name,
+        callback: (Map<String, String> params) async {
+          final String? eventKind = params['eventKind'];
+          if (eventKind == null) {
+            return <String, dynamic>{
+              'sent': false,
+              'error': 'Missing event kind param.',
+            };
+          }
+          developer.postEvent(eventKind, <String, dynamic>{});
+          return <String, dynamic>{'sent': true};
+        },
+      );
+
+      registerServiceExtension(
         name: WidgetsServiceExtensions.didSendFirstFrameRasterizedEvent.name,
         callback: (_) async {
           return <String, dynamic>{

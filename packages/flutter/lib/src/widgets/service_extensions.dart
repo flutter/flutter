@@ -113,6 +113,10 @@ enum WidgetsServiceExtensions {
   /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   debugAllowBanner,
+
+  /// Name of service extension that, when called, will send an event to the
+  /// Extension event stream.
+  sendExtensionEvent,
 }
 
 /// Service extension constants for the Widget Inspector.

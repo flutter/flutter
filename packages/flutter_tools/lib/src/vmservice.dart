@@ -752,6 +752,17 @@ class FlutterVmService {
     );
   }
 
+  Future<Map<String, Object?>?> flutterSendExtensionEvent({
+    required String isolateId,
+    required String eventKind,
+  }) {
+    return invokeFlutterExtensionRpcRaw(
+      'ext.flutter.sendExtensionEvent',
+      isolateId: isolateId,
+      args: <String, Object>{'eventKind': eventKind},
+    );
+  }
+
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame({
     required String isolateId,
   }) async {
