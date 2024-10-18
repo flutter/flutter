@@ -47,7 +47,7 @@ TEST(RenderPassBuilder, CreatesRenderPassWithCombinedDepthStencil) {
   ASSERT_NE(maybe_color, builder.GetColorAttachments().end());
   auto color = maybe_color->second;
 
-  EXPECT_EQ(color.initialLayout, vk::ImageLayout::eGeneral);
+  EXPECT_EQ(color.initialLayout, vk::ImageLayout::eUndefined);
   EXPECT_EQ(color.finalLayout, vk::ImageLayout::eGeneral);
   EXPECT_EQ(color.loadOp, vk::AttachmentLoadOp::eClear);
   EXPECT_EQ(color.storeOp, vk::AttachmentStoreOp::eStore);
@@ -117,7 +117,7 @@ TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStore) {
   auto color = maybe_color->second;
 
   // MSAA Texture.
-  EXPECT_EQ(color.initialLayout, vk::ImageLayout::eGeneral);
+  EXPECT_EQ(color.initialLayout, vk::ImageLayout::eUndefined);
   EXPECT_EQ(color.finalLayout, vk::ImageLayout::eGeneral);
   EXPECT_EQ(color.loadOp, vk::AttachmentLoadOp::eClear);
   EXPECT_EQ(color.storeOp, vk::AttachmentStoreOp::eDontCare);
@@ -127,7 +127,7 @@ TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStore) {
   auto resolve = maybe_resolve->second;
 
   // MSAA Resolve Texture.
-  EXPECT_EQ(resolve.initialLayout, vk::ImageLayout::eGeneral);
+  EXPECT_EQ(resolve.initialLayout, vk::ImageLayout::eUndefined);
   EXPECT_EQ(resolve.finalLayout, vk::ImageLayout::eGeneral);
   EXPECT_EQ(resolve.loadOp, vk::AttachmentLoadOp::eClear);
   EXPECT_EQ(resolve.storeOp, vk::AttachmentStoreOp::eStore);
