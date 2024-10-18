@@ -86,7 +86,6 @@ for (final String agpVersion in agpVersions) {
         appBuildGradle.replaceFirst(
             buildTypesBlockRegExp, appBuildGradleSegmentDefiningFlavors);
 
-          // Test that building an APK with native assets succeeds.
           final ProcessResult result = processManager.runSync(
             <String>[
               flutterBin,
@@ -100,6 +99,7 @@ for (final String agpVersion in agpVersions) {
             throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
           }
           
+          // Test that the native libraries are included as expected.
           final Directory nativeAssetsDir = exampleDirectory
             .childDirectory('build')
             .childDirectory('app')
