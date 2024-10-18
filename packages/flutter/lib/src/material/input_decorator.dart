@@ -740,6 +740,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   // TODO(bleroux): consider defining this value as a Material token and making it
   // configurable by InputDecorationTheme.
   double get subtextGap => material3 ? 4.0 : 8.0;
+  double get prefixToInputGap => material3 ? 4.0 : 0.0;
+  double get inputToSuffixGap => material3 ? 4.0 : 0.0;
 
   RenderBox? get icon => childForSlot(_DecorationSlot.icon);
   RenderBox? get input => childForSlot(_DecorationSlot.input);
@@ -997,8 +999,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final Size suffixSize = suffix == null ? Size.zero : layoutChild(suffix, contentConstraints);
 
     final EdgeInsetsDirectional accessoryHorizontalInsets = EdgeInsetsDirectional.only(
-      start: iconWidth + prefixSize.width + (prefixIcon == null ? contentPadding.start : prefixIconSize.width),
-      end: suffixSize.width + (suffixIcon == null ? contentPadding.end : suffixIconSize.width),
+      start: iconWidth + prefixSize.width + (prefixIcon == null ? contentPadding.start : prefixIconSize.width + prefixToInputGap),
+      end: suffixSize.width + (suffixIcon == null ? contentPadding.end : suffixIconSize.width + inputToSuffixGap),
     );
 
     final double inputWidth = math.max(0.0, constraints.maxWidth - accessoryHorizontalInsets.horizontal);
@@ -1165,25 +1167,25 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   @override
   double computeMinIntrinsicWidth(double height) {
     return _minWidth(icon, height)
-      + (prefixIcon != null ? 0.0 : contentPadding.start)
+      + (prefixIcon != null ? prefixToInputGap : contentPadding.start)
       + _minWidth(prefixIcon, height)
       + _minWidth(prefix, height)
       + math.max(_minWidth(input, height), _minWidth(hint, height))
       + _minWidth(suffix, height)
       + _minWidth(suffixIcon, height)
-      + (suffixIcon != null ? 0.0 : contentPadding.end);
+      + (suffixIcon != null ? inputToSuffixGap : contentPadding.end);
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     return _maxWidth(icon, height)
-      + (prefixIcon != null ? 0.0 : contentPadding.start)
+      + (prefixIcon != null ? prefixToInputGap : contentPadding.start)
       + _maxWidth(prefixIcon, height)
       + _maxWidth(prefix, height)
       + math.max(_maxWidth(input, height), _maxWidth(hint, height))
       + _maxWidth(suffix, height)
       + _maxWidth(suffixIcon, height)
-      + (suffixIcon != null ? 0.0 : contentPadding.end);
+      + (suffixIcon != null ? inputToSuffixGap : contentPadding.end);
   }
 
   double _lineHeight(double width, List<RenderBox?> boxes) {
@@ -1371,6 +1373,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         if (prefixIcon != null) {
           start += contentPadding.start;
           start -= centerLayout(prefixIcon!, start - prefixIcon!.size.width);
+          start -= prefixToInputGap;
         }
         if (label != null) {
           if (decoration.alignLabelWithHint) {
@@ -1391,6 +1394,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         if (suffixIcon != null) {
           end -= contentPadding.end;
           end += centerLayout(suffixIcon!, end);
+          end += inputToSuffixGap;
         }
         if (suffix != null) {
           end += baselineLayout(suffix!, end);
@@ -1401,6 +1405,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         if (prefixIcon != null) {
           start -= contentPadding.start;
           start += centerLayout(prefixIcon!, start);
+          start += prefixToInputGap;
         }
         if (label != null) {
           if (decoration.alignLabelWithHint) {
@@ -1421,6 +1426,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         if (suffixIcon != null) {
           end += contentPadding.end;
           end -= centerLayout(suffixIcon!, end - suffixIcon!.size.width);
+          end -= inputToSuffixGap;
         }
         if (suffix != null) {
           end -= baselineLayout(suffix!, end - suffix!.size.width);
