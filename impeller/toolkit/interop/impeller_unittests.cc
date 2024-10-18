@@ -245,6 +245,80 @@ TEST_P(InteropPlaygroundTest, CanCreateParagraphs) {
       }));
 }
 
+TEST_P(InteropPlaygroundTest, CanCreateParagraphsWithCustomFont) {
+  // Create a typography context.
+  auto type_context = Adopt<TypographyContext>(ImpellerTypographyContextNew());
+  ASSERT_TRUE(type_context);
+
+  // Open the custom font file.
+  std::unique_ptr<fml::Mapping> font_data =
+      flutter::testing::OpenFixtureAsMapping("wtf.otf");
+  ASSERT_NE(font_data, nullptr);
+  ASSERT_GT(font_data->GetSize(), 0u);
+  ImpellerMapping font_data_mapping = {
+      .data = font_data->GetMapping(),
+      .length = font_data->GetSize(),
+      .on_release = [](auto ctx) {
+        delete reinterpret_cast<fml::Mapping*>(ctx);
+      }};
+  auto registered =
+      ImpellerTypographyContextRegisterFont(type_context.GetC(),  //
+                                            &font_data_mapping,   //
+                                            font_data.release(),  //
+                                            nullptr               //
+      );
+  ASSERT_TRUE(registered);
+
+  // Create a builder.
+  auto builder =
+      Adopt<ParagraphBuilder>(ImpellerParagraphBuilderNew(type_context.GetC()));
+  ASSERT_TRUE(builder);
+
+  // Create a paragraph style with the font size and foreground and background
+  // colors.
+  auto style = Adopt<ParagraphStyle>(ImpellerParagraphStyleNew());
+  ASSERT_TRUE(style);
+  ImpellerParagraphStyleSetFontSize(style.GetC(), 150.0f);
+  ImpellerParagraphStyleSetFontFamily(style.GetC(), "WhatTheFlutter");
+
+  {
+    auto paint = Adopt<Paint>(ImpellerPaintNew());
+    ASSERT_TRUE(paint);
+    ImpellerColor color = {0.0, 1.0, 1.0, 1.0};
+    ImpellerPaintSetColor(paint.GetC(), &color);
+    ImpellerParagraphStyleSetForeground(style.GetC(), paint.GetC());
+  }
+
+  // Push the style onto the style stack.
+  ImpellerParagraphBuilderPushStyle(builder.GetC(), style.GetC());
+  std::string text = "0F0F0F0";
+
+  // Add the paragraph text data.
+  ImpellerParagraphBuilderAddText(builder.GetC(),
+                                  reinterpret_cast<const uint8_t*>(text.data()),
+                                  text.size());
+
+  // Layout and build the paragraph.
+  auto paragraph = Adopt<Paragraph>(
+      ImpellerParagraphBuilderBuildParagraphNew(builder.GetC(), 1200.0f));
+  ASSERT_TRUE(paragraph);
+
+  // Create a display list with just the paragraph drawn into it.
+  auto dl_builder =
+      Adopt<DisplayListBuilder>(ImpellerDisplayListBuilderNew(nullptr));
+  ImpellerPoint point = {20, 20};
+  ImpellerDisplayListBuilderDrawParagraph(dl_builder.GetC(), paragraph.GetC(),
+                                          &point);
+  auto dl = Adopt<DisplayList>(
+      ImpellerDisplayListBuilderCreateDisplayListNew(dl_builder.GetC()));
+
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        ImpellerSurfaceDrawDisplayList(surface.GetC(), dl.GetC());
+        return true;
+      }));
+}  // namespace impeller::interop::testing
+
 static void DrawTextFrame(ImpellerTypographyContext tc,
                           ImpellerDisplayListBuilder builder,
                           ImpellerParagraphStyle p_style,
