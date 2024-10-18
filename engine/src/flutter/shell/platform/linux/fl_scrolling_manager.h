@@ -11,7 +11,6 @@
 
 G_BEGIN_DECLS
 
-#define FL_TYPE_SCROLLING_MANAGER fl_scrolling_manager_get_type()
 G_DECLARE_FINAL_TYPE(FlScrollingManager,
                      fl_scrolling_manager,
                      FL,

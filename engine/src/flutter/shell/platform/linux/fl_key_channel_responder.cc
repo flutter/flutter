@@ -44,7 +44,7 @@ struct _FlKeyChannelUserData {
   // The current responder.
   GWeakRef responder;
   // The callback provided by the caller #FlKeyboardHandler.
-  FlKeyResponderAsyncCallback callback;
+  FlKeyChannelResponderAsyncCallback callback;
   // The user_data provided by the caller #FlKeyboardHandler.
   gpointer user_data;
 };
@@ -76,7 +76,7 @@ static void fl_key_channel_user_data_init(FlKeyChannelUserData* self) {}
 // The callback and the user_data might be nullptr.
 static FlKeyChannelUserData* fl_key_channel_user_data_new(
     FlKeyChannelResponder* responder,
-    FlKeyResponderAsyncCallback callback,
+    FlKeyChannelResponderAsyncCallback callback,
     gpointer user_data) {
   FlKeyChannelUserData* self = FL_KEY_CHANNEL_USER_DATA(
       g_object_new(fl_key_channel_user_data_get_type(), nullptr));
@@ -98,28 +98,7 @@ struct _FlKeyChannelResponder {
   FlKeyChannelResponderMock* mock;
 };
 
-static void fl_key_channel_responder_iface_init(FlKeyResponderInterface* iface);
-
-G_DEFINE_TYPE_WITH_CODE(
-    FlKeyChannelResponder,
-    fl_key_channel_responder,
-    G_TYPE_OBJECT,
-    G_IMPLEMENT_INTERFACE(FL_TYPE_KEY_RESPONDER,
-                          fl_key_channel_responder_iface_init))
-
-static void fl_key_channel_responder_handle_event(
-    FlKeyResponder* responder,
-    FlKeyEvent* event,
-    uint64_t specified_logical_key,
-    FlKeyResponderAsyncCallback callback,
-    gpointer user_data);
-
-static void fl_key_channel_responder_iface_init(
-    FlKeyResponderInterface* iface) {
-  iface->handle_event = fl_key_channel_responder_handle_event;
-}
-
-/* Implement FlKeyChannelResponder */
+G_DEFINE_TYPE(FlKeyChannelResponder, fl_key_channel_responder, G_TYPE_OBJECT)
 
 // Handles a response from the method channel to a key event sent to the
 // framework earlier.
@@ -194,14 +173,12 @@ FlKeyChannelResponder* fl_key_channel_responder_new(
   return self;
 }
 
-// Sends a key event to the framework.
-static void fl_key_channel_responder_handle_event(
-    FlKeyResponder* responder,
+void fl_key_channel_responder_handle_event(
+    FlKeyChannelResponder* self,
     FlKeyEvent* event,
     uint64_t specified_logical_key,
-    FlKeyResponderAsyncCallback callback,
+    FlKeyChannelResponderAsyncCallback callback,
     gpointer user_data) {
-  FlKeyChannelResponder* self = FL_KEY_CHANNEL_RESPONDER(responder);
   g_return_if_fail(event != nullptr);
   g_return_if_fail(callback != nullptr);
 

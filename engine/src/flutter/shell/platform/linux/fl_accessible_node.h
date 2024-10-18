@@ -19,7 +19,6 @@ G_BEGIN_DECLS
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(AtkObject, g_object_unref)
 #endif
 
-#define FL_TYPE_ACCESSIBLE_NODE fl_accessible_node_get_type()
 G_DECLARE_DERIVABLE_TYPE(FlAccessibleNode,
                          fl_accessible_node,
                          FL,
