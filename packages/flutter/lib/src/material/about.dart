@@ -483,8 +483,8 @@ class _AdaptiveAboutDialog extends AboutDialog {
         return <Widget>[
           CupertinoDialogAction(
             child: Text(themeData.useMaterial3
-                ? localizations.viewLicensesButtonLabel
-                : localizations.viewLicensesButtonLabel.toUpperCase()),
+              ? localizations.viewLicensesButtonLabel
+              : localizations.viewLicensesButtonLabel.toUpperCase()),
             onPressed: () {
               showLicensePage(
                 context: context,
@@ -497,8 +497,8 @@ class _AdaptiveAboutDialog extends AboutDialog {
           ),
           CupertinoDialogAction(
             child: Text(themeData.useMaterial3
-                ? localizations.closeButtonLabel
-                : localizations.closeButtonLabel.toUpperCase()),
+              ? localizations.closeButtonLabel
+              : localizations.closeButtonLabel.toUpperCase()),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -511,8 +511,8 @@ class _AdaptiveAboutDialog extends AboutDialog {
         return <Widget>[
           TextButton(
             child: Text(themeData.useMaterial3
-                ? localizations.viewLicensesButtonLabel
-                : localizations.viewLicensesButtonLabel.toUpperCase()),
+              ? localizations.viewLicensesButtonLabel
+              : localizations.viewLicensesButtonLabel.toUpperCase()),
             onPressed: () {
               showLicensePage(
                 context: context,
@@ -525,8 +525,8 @@ class _AdaptiveAboutDialog extends AboutDialog {
           ),
           TextButton(
             child: Text(themeData.useMaterial3
-                ? localizations.closeButtonLabel
-                : localizations.closeButtonLabel.toUpperCase()),
+              ? localizations.closeButtonLabel
+              : localizations.closeButtonLabel.toUpperCase()),
             onPressed: () {
               Navigator.pop(context);
             },
