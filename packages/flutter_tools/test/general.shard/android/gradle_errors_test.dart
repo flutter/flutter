@@ -1383,7 +1383,7 @@ Execution failed for task ':shared_preferences_android:compileReleaseJavaWithJav
          > Error while executing process /Users/mackall/Desktop/JDKs/21/jdk-21.0.2.jdk/Contents/Home/bin/jlink with arguments {--module-path /Users/mackall/.gradle/caches/8.9/transforms/2890fec03da42154757073d3208548e5-79660961-f91d-4df2-90bc-b9a3f2a270bd/transformed/output/temp/jmod --add-modules java.base --output /Users/mackall/.gradle/caches/8.9/transforms/2890fec03da42154757073d3208548e5-79660961-f91d-4df2-90bc-b9a3f2a270bd/transformed/output/jdkImage --disable-plugin system-modules}
     ''';
 
-    FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     await jlinkErrorWithJava21AndSourceCompatibility.handler(
       line: errorExample,
       project: project,
