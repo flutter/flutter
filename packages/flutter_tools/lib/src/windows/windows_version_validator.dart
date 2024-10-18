@@ -7,6 +7,7 @@ import 'package:process/process.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../doctor_validator.dart';
+import '../globals.dart';
 
 /// Flutter only supports development on Windows host machines version 10 and greater.
 const List<String> kUnsupportedVersions = <String>[
@@ -99,7 +100,8 @@ class WindowsVersionValidator extends DoctorValidator {
           caption = 'Windows 10';
         }
       }
-      statusInfo = '$caption, ${details.displayVersion}, ${details.releaseId}';
+      statusInfo = <String?>[caption, details.displayVersion, details.releaseId]
+          .where((String? part) => part != null).join(', ');
 
       // Check if the Topaz OFD security module is running, and warn the user if it is.
       // See https://github.com/flutter/flutter/issues/121366
@@ -175,6 +177,7 @@ class WindowsVersionExtractor {
       }
     } on ProcessException {
       // Ignored, use default null value.
+      printTrace('Failed to get Caption and OSArchitecture from WMI');
     }
 
     try {
@@ -196,6 +199,7 @@ class WindowsVersionExtractor {
       }
     } on ProcessException {
       // Ignored, use default null values.
+      printTrace('Failed to get ReleaseId and DisplayVersion from registry');
     }
 
     return WindowsVersionExtractionResult(
