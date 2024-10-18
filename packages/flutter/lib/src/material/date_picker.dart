@@ -158,8 +158,7 @@ const double _fontSizeToScale = 14.0;
 ///
 /// {@tool dartpad}
 /// This sample demonstrates how to create a basic date picker.
-/// When the button is tapped, [showDatePicker] is triggered and the selected date
-/// is displayed on the screen.
+/// Tapping the button calls [showDatePicker] and displays the selected date.
 ///
 /// ** See code in examples/api/lib/material/date_picker/show_date_picker.1.dart **
 /// {@end-tool}
