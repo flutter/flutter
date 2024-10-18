@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -250,23 +251,12 @@ class FormState extends State<Form> {
 
   void _register(FormFieldState<dynamic> field) {
     _fields.add(field);
-    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
-      field._focusNode.addListener(() => _updateField(field));
-    }
   }
 
   void _unregister(FormFieldState<dynamic> field) {
     _fields.remove(field);
-    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
-      field._focusNode.removeListener(()=> _updateField(field));
-    }
   }
 
-  void _updateField(FormFieldState<dynamic> field) {
-    if (!field._focusNode.hasFocus) {
-      _validate();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -698,8 +688,35 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    switch (Form.maybeOf(context)?.widget.autovalidateMode) {
+      case AutovalidateMode.always:
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // If the form is already validated, don't validate again.
+          if (widget.enabled && !hasError && !isValid) {
+            validate();
+          }
+        });
+      case AutovalidateMode.onUnfocus:
+        _focusNode.addListener(_updateField);
+      case AutovalidateMode.onUserInteraction:
+      case AutovalidateMode.disabled:
+      case null:
+        break;
+    }
+  }
+
+  void _updateField() {
+    if (!_focusNode.hasFocus) {
+      _validate();
+    }
+  }
+
+  @override
   void dispose() {
     _errorText.dispose();
+    _focusNode.removeListener(_updateField);
     _focusNode.dispose();
     _hasInteractedByUser.dispose();
     super.dispose();
@@ -742,7 +759,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
     return widget.builder(this);
   }
-
 }
 
 /// Used to configure the auto validation of [FormField] and [Form] widgets.
