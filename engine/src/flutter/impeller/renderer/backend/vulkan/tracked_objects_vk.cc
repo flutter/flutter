@@ -4,7 +4,6 @@
 
 #include "impeller/renderer/backend/vulkan/tracked_objects_vk.h"
 
-#include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 
 namespace impeller {
@@ -12,9 +11,8 @@ namespace impeller {
 TrackedObjectsVK::TrackedObjectsVK(
     const std::weak_ptr<const ContextVK>& context,
     const std::shared_ptr<CommandPoolVK>& pool,
-    std::shared_ptr<DescriptorPoolVK> descriptor_pool,
     std::unique_ptr<GPUProbe> probe)
-    : desc_pool_(std::move(descriptor_pool)), probe_(std::move(probe)) {
+    : desc_pool_(context), probe_(std::move(probe)) {
   if (!pool) {
     return;
   }
@@ -80,7 +78,7 @@ vk::CommandBuffer TrackedObjectsVK::GetCommandBuffer() const {
 }
 
 DescriptorPoolVK& TrackedObjectsVK::GetDescriptorPool() {
-  return *desc_pool_;
+  return desc_pool_;
 }
 
 GPUProbe& TrackedObjectsVK::GetGPUProbe() const {
