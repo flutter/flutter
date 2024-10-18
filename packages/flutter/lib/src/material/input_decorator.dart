@@ -2499,6 +2499,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// to describe their decoration. (In fact, this class is merely the
 /// configuration of an [InputDecorator], which does all the heavy lifting.)
 ///
+/// Using [hintText] can help password manager like Samsung Pass to well detect and autofill the input.
+///
 /// {@tool dartpad}
 /// This sample shows how to style a `TextField` using an `InputDecorator`. The
 /// TextField displays a "send message" icon to the left of the input area,
