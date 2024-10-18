@@ -22,11 +22,17 @@ struct _FlKeyboardPendingEvent {
   // Unique ID to identify pending responds.
   uint64_t sequence_id;
 
-  // The number of responders that haven't replied.
-  size_t unreplied;
+  // True if the embedder responder has replied.
+  bool embedder_replied;
 
-  // Whether any replied responders reported true (handled).
-  bool any_handled;
+  // True if the channel responder has replied.
+  bool channel_replied;
+
+  // True if this event was handled by the embedder responder.
+  bool embedder_handled;
+
+  // True if this event was handled by the channel responder.
+  bool channel_handled;
 
   // A value calculated out of critical event information that can be used
   // to identify redispatched events.
@@ -53,15 +59,12 @@ static void fl_keyboard_pending_event_init(FlKeyboardPendingEvent* self) {}
 // Creates a new FlKeyboardPendingEvent by providing the target event,
 // the sequence ID, and the number of responders that will reply.
 FlKeyboardPendingEvent* fl_keyboard_pending_event_new(FlKeyEvent* event,
-                                                      uint64_t sequence_id,
-                                                      size_t to_reply) {
+                                                      uint64_t sequence_id) {
   FlKeyboardPendingEvent* self = FL_KEYBOARD_PENDING_EVENT(
       g_object_new(fl_keyboard_pending_event_get_type(), nullptr));
 
   self->event = FL_KEY_EVENT(g_object_ref(event));
   self->sequence_id = sequence_id;
-  self->unreplied = to_reply;
-  self->any_handled = false;
   self->hash = fl_key_event_hash(self->event);
 
   return self;
@@ -83,23 +86,29 @@ uint64_t fl_keyboard_pending_event_get_hash(FlKeyboardPendingEvent* self) {
   return self->hash;
 }
 
-void fl_keyboard_pending_event_mark_replied(FlKeyboardPendingEvent* self,
-                                            gboolean handled) {
+void fl_keyboard_pending_event_mark_embedder_replied(
+    FlKeyboardPendingEvent* self,
+    gboolean handled) {
   g_return_if_fail(FL_IS_KEYBOARD_PENDING_EVENT(self));
-  g_return_if_fail(self->unreplied > 0);
-  self->unreplied -= 1;
-  if (handled) {
-    self->any_handled = TRUE;
-  }
+  self->embedder_replied = true;
+  self->embedder_handled = handled;
+}
+
+void fl_keyboard_pending_event_mark_channel_replied(
+    FlKeyboardPendingEvent* self,
+    gboolean handled) {
+  g_return_if_fail(FL_IS_KEYBOARD_PENDING_EVENT(self));
+  self->channel_replied = true;
+  self->channel_handled = handled;
 }
 
 gboolean fl_keyboard_pending_event_get_any_handled(
     FlKeyboardPendingEvent* self) {
   g_return_val_if_fail(FL_IS_KEYBOARD_PENDING_EVENT(self), FALSE);
-  return self->any_handled;
+  return self->embedder_handled || self->channel_handled;
 }
 
 gboolean fl_keyboard_pending_event_is_complete(FlKeyboardPendingEvent* self) {
   g_return_val_if_fail(FL_IS_KEYBOARD_PENDING_EVENT(self), FALSE);
-  return self->unreplied == 0;
+  return self->embedder_replied && self->channel_replied;
 }

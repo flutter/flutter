@@ -73,14 +73,11 @@ static uint64_t to_lower(uint64_t n) {
   return n;
 }
 
-/* Define FlKeyEmbedderUserData */
-
 /**
  * FlKeyEmbedderUserData:
  * The user_data used when #FlKeyEmbedderResponder sends message through the
  * embedder.SendKeyEvent API.
  */
-#define FL_TYPE_EMBEDDER_USER_DATA fl_key_embedder_user_data_get_type()
 G_DECLARE_FINAL_TYPE(FlKeyEmbedderUserData,
                      fl_key_embedder_user_data,
                      FL,
@@ -90,7 +87,7 @@ G_DECLARE_FINAL_TYPE(FlKeyEmbedderUserData,
 struct _FlKeyEmbedderUserData {
   GObject parent_instance;
 
-  FlKeyResponderAsyncCallback callback;
+  FlKeyEmbedderResponderAsyncCallback callback;
   gpointer user_data;
 };
 
@@ -115,17 +112,15 @@ static void fl_key_embedder_user_data_dispose(GObject* object) {
 //
 // The callback and the user_data might be nullptr.
 static FlKeyEmbedderUserData* fl_key_embedder_user_data_new(
-    FlKeyResponderAsyncCallback callback,
+    FlKeyEmbedderResponderAsyncCallback callback,
     gpointer user_data) {
   FlKeyEmbedderUserData* self = FL_KEY_EMBEDDER_USER_DATA(
-      g_object_new(FL_TYPE_EMBEDDER_USER_DATA, nullptr));
+      g_object_new(fl_key_embedder_user_data_get_type(), nullptr));
 
   self->callback = callback;
   self->user_data = user_data;
   return self;
 }
-
-/* Define FlKeyEmbedderResponder */
 
 namespace {
 
@@ -197,30 +192,9 @@ struct _FlKeyEmbedderResponder {
   GHashTable* logical_key_to_lock_bit;
 };
 
-static void fl_key_embedder_responder_iface_init(
-    FlKeyResponderInterface* iface);
 static void fl_key_embedder_responder_dispose(GObject* object);
 
-#define FL_TYPE_EMBEDDER_RESPONDER_USER_DATA \
-  fl_key_embedder_responder_get_type()
-G_DEFINE_TYPE_WITH_CODE(
-    FlKeyEmbedderResponder,
-    fl_key_embedder_responder,
-    G_TYPE_OBJECT,
-    G_IMPLEMENT_INTERFACE(FL_TYPE_KEY_RESPONDER,
-                          fl_key_embedder_responder_iface_init))
-
-static void fl_key_embedder_responder_handle_event(
-    FlKeyResponder* responder,
-    FlKeyEvent* event,
-    uint64_t specified_logical_key,
-    FlKeyResponderAsyncCallback callback,
-    gpointer user_data);
-
-static void fl_key_embedder_responder_iface_init(
-    FlKeyResponderInterface* iface) {
-  iface->handle_event = fl_key_embedder_responder_handle_event;
-}
+G_DEFINE_TYPE(FlKeyEmbedderResponder, fl_key_embedder_responder, G_TYPE_OBJECT)
 
 // Initializes the FlKeyEmbedderResponder class methods.
 static void fl_key_embedder_responder_class_init(
@@ -264,7 +238,7 @@ FlKeyEmbedderResponder* fl_key_embedder_responder_new(
     EmbedderSendKeyEvent send_key_event,
     void* send_key_event_user_data) {
   FlKeyEmbedderResponder* self = FL_KEY_EMBEDDER_RESPONDER(
-      g_object_new(FL_TYPE_EMBEDDER_RESPONDER_USER_DATA, nullptr));
+      g_object_new(fl_key_embedder_responder_get_type(), nullptr));
 
   self->send_key_event = send_key_event;
   self->send_key_event_user_data = send_key_event_user_data;
@@ -290,8 +264,6 @@ FlKeyEmbedderResponder* fl_key_embedder_responder_new(
 
   return self;
 }
-
-/* Implement FlKeyEmbedderUserData */
 
 static uint64_t apply_id_plane(uint64_t logical_id, uint64_t plane) {
   return (logical_id & kValueMask) | plane;
@@ -774,10 +746,10 @@ static uint64_t corrected_modifier_physical_key(
 }
 
 static void fl_key_embedder_responder_handle_event_impl(
-    FlKeyResponder* responder,
+    FlKeyEmbedderResponder* responder,
     FlKeyEvent* event,
     uint64_t specified_logical_key,
-    FlKeyResponderAsyncCallback callback,
+    FlKeyEmbedderResponderAsyncCallback callback,
     gpointer user_data) {
   FlKeyEmbedderResponder* self = FL_KEY_EMBEDDER_RESPONDER(responder);
 
@@ -859,17 +831,15 @@ static void fl_key_embedder_responder_handle_event_impl(
                        self->send_key_event_user_data);
 }
 
-// Sends a key event to the framework.
-static void fl_key_embedder_responder_handle_event(
-    FlKeyResponder* responder,
+void fl_key_embedder_responder_handle_event(
+    FlKeyEmbedderResponder* self,
     FlKeyEvent* event,
     uint64_t specified_logical_key,
-    FlKeyResponderAsyncCallback callback,
+    FlKeyEmbedderResponderAsyncCallback callback,
     gpointer user_data) {
-  FlKeyEmbedderResponder* self = FL_KEY_EMBEDDER_RESPONDER(responder);
   self->sent_any_events = false;
   fl_key_embedder_responder_handle_event_impl(
-      responder, event, specified_logical_key, callback, user_data);
+      self, event, specified_logical_key, callback, user_data);
   if (!self->sent_any_events) {
     self->send_key_event(&kEmptyEvent, nullptr, nullptr,
                          self->send_key_event_user_data);

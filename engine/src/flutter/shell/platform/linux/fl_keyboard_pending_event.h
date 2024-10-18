@@ -16,8 +16,7 @@ G_DECLARE_FINAL_TYPE(FlKeyboardPendingEvent,
                      GObject);
 
 FlKeyboardPendingEvent* fl_keyboard_pending_event_new(FlKeyEvent* event,
-                                                      uint64_t sequence_id,
-                                                      size_t to_reply);
+                                                      uint64_t sequence_id);
 
 FlKeyEvent* fl_keyboard_pending_event_get_event(FlKeyboardPendingEvent* event);
 
@@ -26,8 +25,13 @@ uint64_t fl_keyboard_pending_event_get_sequence_id(
 
 uint64_t fl_keyboard_pending_event_get_hash(FlKeyboardPendingEvent* event);
 
-void fl_keyboard_pending_event_mark_replied(FlKeyboardPendingEvent* event,
-                                            gboolean handled);
+void fl_keyboard_pending_event_mark_embedder_replied(
+    FlKeyboardPendingEvent* event,
+    gboolean handled);
+
+void fl_keyboard_pending_event_mark_channel_replied(
+    FlKeyboardPendingEvent* event,
+    gboolean handled);
 
 gboolean fl_keyboard_pending_event_get_any_handled(
     FlKeyboardPendingEvent* event);
