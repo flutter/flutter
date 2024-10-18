@@ -1146,7 +1146,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                   nibName:nil
                                                                                    bundle:nil];
     weakViewController = viewController;
-    [viewController loadView];
     [viewController viewDidLoad];
     weakView = viewController.view;
     XCTAssertTrue([viewController.view isKindOfClass:[FlutterView class]]);
