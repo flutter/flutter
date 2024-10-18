@@ -12,7 +12,7 @@ class TabsTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
+class _${blockName}PrimaryDefaultsM3 extends TabBarThemeData {
   _${blockName}PrimaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.label);
 
@@ -91,7 +91,7 @@ class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
   static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 2);
 }
 
-class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
+class _${blockName}SecondaryDefaultsM3 extends TabBarThemeData {
   _${blockName}SecondaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.tab);
 

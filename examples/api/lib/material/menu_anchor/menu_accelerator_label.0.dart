@@ -103,7 +103,6 @@ class MenuAcceleratorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
       home: Shortcuts(
         shortcuts: <ShortcutActivator, Intent>{
           const SingleActivator(LogicalKeyboardKey.keyT, control: true): VoidCallbackIntent(() {

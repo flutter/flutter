@@ -23,7 +23,8 @@ import '../../../src/testbed.dart';
 
 const List<String> _kDart2jsLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
-  'Artifact.dart2jsSnapshot.TargetPlatform.web_javascript',
+  'compile',
+  'js',
   '--platform-binaries=HostArtifact.webPlatformKernelFolder',
   '--invoker=flutter_tool',
 ];
@@ -953,7 +954,7 @@ void main() {
         '--no-minify',
         '--no-source-maps',
         '-O4',
-        '--dump-info',
+        '--stage=dump-info-all',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
         environment.buildDir.childFile('app.dill').absolute.path,

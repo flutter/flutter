@@ -637,11 +637,6 @@ class FlutterPlugin implements Plugin<Project> {
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
         List<String> platforms = getTargetPlatforms().collect()
-        // Debug mode includes x86 and x64, which are commonly used in emulators.
-        if (flutterBuildMode == "debug" && !useLocalEngine()) {
-            platforms.add("android-x86")
-            platforms.add("android-x64")
-        }
         platforms.each { platform ->
             String arch = PLATFORM_ARCH_MAP[platform].replace("-", "_")
             // Add the `libflutter.so` dependency.
@@ -891,7 +886,7 @@ class FlutterPlugin implements Plugin<Project> {
                         if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
                             project.logger.error("Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugin(s) require to be compiled against a higher Android SDK version:")
                             for (Tuple2<String, String> pluginToCompileSdkVersion : pluginsWithHigherSdkVersion) {
-                                project.logger.error("- ${pluginToCompileSdkVersion.first} compiles against Android SDK ${pluginToCompileSdkVersion.second}")
+                                project.logger.error("- ${pluginToCompileSdkVersion.v1} compiles against Android SDK ${pluginToCompileSdkVersion.v2}")
                             }
                             project.logger.error("""\
                                 Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
@@ -906,7 +901,7 @@ class FlutterPlugin implements Plugin<Project> {
                         if (maxPluginNdkVersion != projectNdkVersion) {
                             project.logger.error("Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:")
                             for (Tuple2<String, String> pluginToNdkVersion : pluginsWithDifferentNdkVersion) {
-                                project.logger.error("- ${pluginToNdkVersion.first} requires Android NDK ${pluginToNdkVersion.second}")
+                                project.logger.error("- ${pluginToNdkVersion.v1} requires Android NDK ${pluginToNdkVersion.v2}")
                             }
                             project.logger.error("""\
                                 Fix this issue by using the highest Android NDK version (they are backward compatible).
@@ -1423,7 +1418,7 @@ class FlutterPlugin implements Plugin<Project> {
                         filename += "-${buildModeFor(variant.buildType)}"
                         project.copy {
                             from new File("$outputDirectoryStr/${output.outputFileName}")
-                            into new File("${project.buildDir}/outputs/flutter-apk")
+                            into new File("${project.layout.buildDirectory.dir("outputs/flutter-apk").get()}")
                             rename {
                                 return "${filename}.apk"
                             }

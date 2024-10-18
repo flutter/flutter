@@ -2422,27 +2422,29 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                   : MaterialLocalizations.of(context).dialModeButtonLabel,
             ),
           Expanded(
-            child: Container(
-              alignment: AlignmentDirectional.centerEnd,
+            child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 36),
-              child: OverflowBar(
-                spacing: 8,
-                overflowAlignment: OverflowBarAlignment.end,
-                children: <Widget>[
-                  TextButton(
-                    style: pickerTheme.cancelButtonStyle ?? defaultTheme.cancelButtonStyle,
-                    onPressed: _handleCancel,
-                    child: Text(widget.cancelText ??
-                        (theme.useMaterial3
-                            ? localizations.cancelButtonLabel
-                            : localizations.cancelButtonLabel.toUpperCase())),
-                  ),
-                  TextButton(
-                    style: pickerTheme.confirmButtonStyle ?? defaultTheme.confirmButtonStyle,
-                    onPressed: _handleOk,
-                    child: Text(widget.confirmText ?? localizations.okButtonLabel),
-                  ),
-                ],
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: OverflowBar(
+                  spacing: 8,
+                  overflowAlignment: OverflowBarAlignment.end,
+                  children: <Widget>[
+                    TextButton(
+                      style: pickerTheme.cancelButtonStyle ?? defaultTheme.cancelButtonStyle,
+                      onPressed: _handleCancel,
+                      child: Text(widget.cancelText ??
+                          (theme.useMaterial3
+                              ? localizations.cancelButtonLabel
+                              : localizations.cancelButtonLabel.toUpperCase())),
+                    ),
+                    TextButton(
+                      style: pickerTheme.confirmButtonStyle ?? defaultTheme.confirmButtonStyle,
+                      onPressed: _handleOk,
+                      child: Text(widget.confirmText ?? localizations.okButtonLabel),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -194,6 +194,26 @@ void main() {
     );
   });
 
+  test('equalsIgnoringHashCodes - wrong line', () {
+    TestFailure? failure;
+    try {
+      expect(
+        '1\n2\n3\n4\n5\n6\n7\n8\n9\n10',
+        equalsIgnoringHashCodes('1\n2\n3\n4\n5\n6\na\n8\n9\n10'),
+      );
+    } on TestFailure catch (e) {
+      failure = e;
+    }
+
+    expect(failure, isNotNull);
+    if (failure != null) {
+      final String? message = failure.message;
+      expect(message, contains('Lines 7 differed'));
+      expect(message, contains("'a'"));
+      expect(message, contains("'7'"));
+    }
+  });
+
   test('moreOrLessEquals', () {
     expect(0.0, moreOrLessEquals(1e-11));
     expect(1e-11, moreOrLessEquals(0.0));
@@ -329,6 +349,25 @@ void main() {
     expect(
       () => within<int>(distance: 1, from: 2, distanceFunction: (int a, int b) => -1).matches(1, <dynamic, dynamic>{}),
       throwsArgumentError,
+    );
+  });
+
+  test('isSameColorSwatchAs', () {
+    expect(
+      const ColorSwatch<String>(0xaaaaaaaa,
+          <String, Color>{'foo': Color(0xaaaaaaaa), 'bar': Color(0xbbbbbbbb)}),
+      isSameColorSwatchAs(const ColorSwatch<String>(0xaaaaaaaa,
+          <String, Color>{'foo': Color(0xaaaaaaaa), 'bar': Color(0xbbbbbbbb)})),
+    );
+
+    expect(
+      const ColorSwatch<String>(0xaaaaaaaa,
+          <String, Color>{'foo': Color(0xaaaaaaaa), 'bar': Color(0xbbbbbbbb)}),
+      isNot(isSameColorSwatchAs(const ColorSwatch<String>(
+          0xaaaaaaaa, <String, Color>{
+        'foo': Color(0xaaaaaaaa),
+        'bar': Color(0xcccccccc)
+      }))),
     );
   });
 

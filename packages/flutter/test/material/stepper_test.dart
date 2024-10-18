@@ -1520,7 +1520,14 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       find.widgetWithText(AnimatedContainer, circleText),
     ).decoration as BoxDecoration?)?.color;
 
-    Color? lineColor(String keyStep) => tester.widget<Container>(find.byKey(Key(keyStep))).color;
+    Color lineColor(String keyStep) {
+      return tester.widget<ColoredBox>(
+        find.descendant(
+          of: find.byKey(Key(keyStep)),
+          matching: find.byType(ColoredBox).last,
+        ),
+      ).color;
+    }
 
     // Step 1
     // check if I'm in step 1
@@ -1714,10 +1721,13 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       )
     );
 
-    final SizedBox lastConnector = tester.widget<SizedBox>(
-      find.descendant(of: find.byType(PositionedDirectional),
-      matching: find.byType(SizedBox).last,
-    ));
+    final SizedBox lastConnector = tester.widget<Center>(
+      find.descendant(
+        of: find.byType(PositionedDirectional),
+        matching: find.byType(Center).last,
+      ),
+    ).child! as SizedBox;
+
     expect(lastConnector.width, equals(0.0));
   });
 

@@ -649,23 +649,19 @@ enum AndroidArch {
   x86,
   x86_64;
 
-  String get archName {
-    return switch (this) {
-      AndroidArch.armeabi_v7a => 'armeabi-v7a',
-      AndroidArch.arm64_v8a => 'arm64-v8a',
-      AndroidArch.x86_64 => 'x86_64',
-      AndroidArch.x86 => 'x86'
-    };
-  }
+  String get archName => switch (this) {
+    AndroidArch.armeabi_v7a => 'armeabi-v7a',
+    AndroidArch.arm64_v8a   => 'arm64-v8a',
+    AndroidArch.x86_64      => 'x86_64',
+    AndroidArch.x86         => 'x86',
+  };
 
-  String get platformName {
-    return switch (this) {
-      AndroidArch.armeabi_v7a => 'android-arm',
-      AndroidArch.arm64_v8a => 'android-arm64',
-      AndroidArch.x86_64 => 'android-x64',
-      AndroidArch.x86 => 'android-x86'
-    };
-  }
+  String get platformName => switch (this) {
+    AndroidArch.armeabi_v7a => 'android-arm',
+    AndroidArch.arm64_v8a   => 'android-arm64',
+    AndroidArch.x86_64      => 'android-x64',
+    AndroidArch.x86         => 'android-x86',
+  };
 }
 
 /// The default set of iOS device architectures to build for.
@@ -788,9 +784,23 @@ AndroidArch getAndroidArchForName(String platform) {
   };
 }
 
+DarwinArch getCurrentDarwinArch() {
+  return switch (globals.os.hostPlatform) {
+    HostPlatform.darwin_arm64 => DarwinArch.arm64,
+    HostPlatform.darwin_x64 => DarwinArch.x86_64,
+    final HostPlatform unsupported => throw Exception(
+      'Unsupported Darwin host platform "$unsupported"',
+    ),
+  };
+}
+
 HostPlatform getCurrentHostPlatform() {
   if (globals.platform.isMacOS) {
-    return HostPlatform.darwin_x64;
+    return switch (getCurrentDarwinArch()) {
+      DarwinArch.arm64 => HostPlatform.darwin_arm64,
+      DarwinArch.x86_64 => HostPlatform.darwin_x64,
+      DarwinArch.armv7 => throw Exception('Unsupported macOS arch "amv7"'),
+    };
   }
   if (globals.platform.isLinux) {
     // support x64 and arm64 architecture.
