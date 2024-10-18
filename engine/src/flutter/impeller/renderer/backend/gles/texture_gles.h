@@ -95,6 +95,9 @@ class TextureGLES final : public Texture,
   void SetLabel(std::string_view label) override;
 
   // |Texture|
+  void SetLabel(std::string_view label, std::string_view trailing) override;
+
+  // |Texture|
   bool OnSetContents(const uint8_t* contents,
                      size_t length,
                      size_t slice) override;

@@ -189,6 +189,10 @@ class MockTexture : public Texture {
  public:
   explicit MockTexture(const TextureDescriptor& desc) : Texture(desc) {}
   MOCK_METHOD(void, SetLabel, (std::string_view label), (override));
+  MOCK_METHOD(void,
+              SetLabel,
+              (std::string_view label, std::string_view trailing),
+              (override));
   MOCK_METHOD(bool, IsValid, (), (const, override));
   MOCK_METHOD(ISize, GetSize, (), (const, override));
   MOCK_METHOD(bool,

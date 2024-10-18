@@ -19,6 +19,7 @@ TextureVK::TextureVK(std::weak_ptr<Context> context,
 TextureVK::~TextureVK() = default;
 
 void TextureVK::SetLabel(std::string_view label) {
+#ifdef IMPELLER_DEBUG
   auto context = context_.lock();
   if (!context) {
     // The context may have died.
@@ -26,6 +27,20 @@ void TextureVK::SetLabel(std::string_view label) {
   }
   ContextVK::Cast(*context).SetDebugName(GetImage(), label);
   ContextVK::Cast(*context).SetDebugName(GetImageView(), label);
+#endif  // IMPELLER_DEBUG
+}
+
+void TextureVK::SetLabel(std::string_view label, std::string_view trailing) {
+#ifdef IMPELLER_DEBUG
+  auto context = context_.lock();
+  if (!context) {
+    // The context may have died.
+    return;
+  }
+
+  ContextVK::Cast(*context).SetDebugName(GetImage(), label, trailing);
+  ContextVK::Cast(*context).SetDebugName(GetImageView(), label, trailing);
+#endif  // IMPELLER_DEBUG
 }
 
 bool TextureVK::OnSetContents(const uint8_t* contents,
