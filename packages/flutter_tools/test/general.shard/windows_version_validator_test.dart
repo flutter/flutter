@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/windows/windows_version_validator.dart';
@@ -347,7 +348,10 @@ End of search: 22 match(es) found.
     final WindowsVersionValidator validator = WindowsVersionValidator(
       operatingSystemUtils: FakeValidOperatingSystemUtils(),
       processLister: ofdNotRunning(),
-      versionExtractor: WindowsVersionExtractor(processManager),
+      versionExtractor: WindowsVersionExtractor(
+        processManager: processManager,
+        logger: BufferLogger.test(),
+      ),
     );
     final ValidationResult result = await validator.validate();
     expect(result.type, ValidationType.success);
@@ -408,7 +412,10 @@ End of search: 21 match(es) found.
     final WindowsVersionValidator validator = WindowsVersionValidator(
       operatingSystemUtils: FakeValidOperatingSystemUtils(),
       processLister: ofdNotRunning(),
-      versionExtractor: WindowsVersionExtractor(processManager),
+      versionExtractor: WindowsVersionExtractor(
+        processManager: processManager,
+        logger: BufferLogger.test(),
+      ),
     );
     final ValidationResult result = await validator.validate();
     expect(result.type, ValidationType.success);
@@ -452,7 +459,10 @@ Microsoft Windows 11 Pro  64-bit
     final WindowsVersionValidator validator = WindowsVersionValidator(
       operatingSystemUtils: FakeValidOperatingSystemUtils(),
       processLister: ofdNotRunning(),
-      versionExtractor: WindowsVersionExtractor(processManager),
+      versionExtractor: WindowsVersionExtractor(
+        processManager: processManager,
+        logger: BufferLogger.test(),
+      ),
     );
     final ValidationResult result = await validator.validate();
     expect(result.type, ValidationType.success);

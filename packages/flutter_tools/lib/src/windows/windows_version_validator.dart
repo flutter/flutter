@@ -5,9 +5,9 @@
 import 'package:process/process.dart';
 
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
 import '../doctor_validator.dart';
-import '../globals.dart';
 
 /// Flutter only supports development on Windows host machines version 10 and greater.
 const List<String> kUnsupportedVersions = <String>[
@@ -155,14 +155,18 @@ class ProcessLister {
 }
 
 class WindowsVersionExtractor {
-  WindowsVersionExtractor(this.processManager);
+  WindowsVersionExtractor({
+    required ProcessManager processManager,
+    required Logger logger,
+  }) : _logger = logger, _processManager = processManager;
 
-  final ProcessManager processManager;
+  final ProcessManager _processManager;
+  final Logger _logger;
 
   Future<WindowsVersionExtractionResult> getDetails() async {
     String? caption, releaseId, displayVersion;
     try {
-      final ProcessResult captionResult = await processManager.run(
+      final ProcessResult captionResult = await _processManager.run(
         <String>['wmic', 'os', 'get', 'Caption,OSArchitecture'],
       );
 
@@ -177,11 +181,11 @@ class WindowsVersionExtractor {
       }
     } on ProcessException {
       // Ignored, use default null value.
-      printTrace('Failed to get Caption and OSArchitecture from WMI');
+      _logger.printTrace('Failed to get Caption and OSArchitecture from WMI');
     }
 
     try {
-      final ProcessResult osDetails = await processManager.run(
+      final ProcessResult osDetails = await _processManager.run(
         <String>['reg', 'query', r'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion', '/t', 'REG_SZ'],
       );
 
@@ -199,7 +203,7 @@ class WindowsVersionExtractor {
       }
     } on ProcessException {
       // Ignored, use default null values.
-      printTrace('Failed to get ReleaseId and DisplayVersion from registry');
+      _logger.printTrace('Failed to get ReleaseId and DisplayVersion from registry');
     }
 
     return WindowsVersionExtractionResult(
