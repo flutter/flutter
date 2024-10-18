@@ -8,14 +8,14 @@
 #include <cstring>
 #include <memory>
 #include <optional>
-#include <utility>
 #include <vector>
 
 #include "display_list/effects/dl_color_source.h"
+#include "display_list/effects/dl_image_filter.h"
 #include "flutter/fml/logging.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/aiks_context.h"
-#include "impeller/display_list/color_filter.h"
+#include "impeller/display_list/canvas.h"
 #include "impeller/display_list/dl_atlas_geometry.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
@@ -302,7 +302,8 @@ void DlDispatcherBase::saveLayer(const DlRect& bounds,
                                  const flutter::SaveLayerOptions& options,
                                  uint32_t total_content_depth,
                                  flutter::DlBlendMode max_content_mode,
-                                 const flutter::DlImageFilter* backdrop) {
+                                 const flutter::DlImageFilter* backdrop,
+                                 std::optional<int64_t> backdrop_id) {
   AUTO_DEPTH_WATCHER(1u);
 
   auto paint = options.renders_with_attributes() ? paint_ : Paint{};
@@ -320,7 +321,9 @@ void DlDispatcherBase::saveLayer(const DlRect& bounds,
       paint, impeller_bounds, backdrop, promise, total_content_depth,
       // Unbounded content can still have user specified bounds that require a
       // saveLayer to be created to perform the clip.
-      options.can_distribute_opacity() && !options.content_is_unbounded());
+      options.can_distribute_opacity() && !options.content_is_unbounded(),
+      backdrop_id  //
+  );
 }
 
 // |flutter::DlOpReceiver|
@@ -974,6 +977,11 @@ void CanvasDlDispatcher::drawVertices(
       skia_conversions::ToBlendMode(dl_mode), paint_);
 }
 
+void CanvasDlDispatcher::SetBackdropData(
+    std::unordered_map<int64_t, BackdropData> backdrop) {
+  GetCanvas().SetBackdropData(std::move(backdrop));
+}
+
 //// Text Frame Dispatcher
 
 TextFrameDispatcher::TextFrameDispatcher(const ContentContext& renderer,
@@ -994,8 +1002,27 @@ void TextFrameDispatcher::save() {
 
 void TextFrameDispatcher::saveLayer(const DlRect& bounds,
                                     const flutter::SaveLayerOptions options,
-                                    const flutter::DlImageFilter* backdrop) {
+                                    const flutter::DlImageFilter* backdrop,
+                                    std::optional<int64_t> backdrop_id) {
   save();
+
+  if (backdrop != nullptr && backdrop_id.has_value()) {
+    std::shared_ptr<flutter::DlImageFilter> shared_backdrop =
+        backdrop->shared();
+    std::unordered_map<int64_t, BackdropData>::iterator existing =
+        backdrop_data_.find(backdrop_id.value());
+    if (existing == backdrop_data_.end()) {
+      backdrop_data_[backdrop_id.value()] =
+          BackdropData{.backdrop_count = 1, .last_backdrop = shared_backdrop};
+    } else {
+      BackdropData& data = existing->second;
+      data.backdrop_count++;
+      if (data.all_filters_equal) {
+        data.all_filters_equal = (*data.last_backdrop == *shared_backdrop);
+        data.last_backdrop = shared_backdrop;
+      }
+    }
+  }
 
   // This dispatcher does not track enough state to accurately compute
   // cull rects with image filters.
@@ -1192,6 +1219,13 @@ void TextFrameDispatcher::setImageFilter(const flutter::DlImageFilter* filter) {
   }
 }
 
+std::unordered_map<int64_t, BackdropData>
+TextFrameDispatcher::TakeBackdropData() {
+  std::unordered_map<int64_t, BackdropData> temp;
+  std::swap(temp, backdrop_data_);
+  return temp;
+}
+
 std::shared_ptr<Texture> DisplayListToTexture(
     const sk_sp<flutter::DisplayList>& display_list,
     ISize size,
@@ -1239,6 +1273,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
       display_list->max_root_blend_mode(),       //
       impeller::IRect::MakeSize(size)            //
   );
+  impeller_dispatcher.SetBackdropData(collector.TakeBackdropData());
   display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
   impeller_dispatcher.FinishRecording();
 
@@ -1267,6 +1302,7 @@ bool RenderToOnscreen(ContentContext& context,
       display_list->max_root_blend_mode(),       //
       IRect::RoundOut(ip_cull_rect)              //
   );
+  impeller_dispatcher.SetBackdropData(collector.TakeBackdropData());
   display_list->Dispatch(impeller_dispatcher, cull_rect);
   impeller_dispatcher.FinishRecording();
   if (reset_host_buffer) {

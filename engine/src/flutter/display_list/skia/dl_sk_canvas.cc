@@ -54,7 +54,8 @@ void DlSkCanvasAdapter::Save() {
 
 void DlSkCanvasAdapter::SaveLayer(std::optional<const DlRect>& bounds,
                                   const DlPaint* paint,
-                                  const DlImageFilter* backdrop) {
+                                  const DlImageFilter* backdrop,
+                                  std::optional<int64_t> backdrop_id) {
   sk_sp<SkImageFilter> sk_backdrop = ToSk(backdrop);
   SkOptionalPaint sk_paint(paint);
   TRACE_EVENT0("flutter", "Canvas::saveLayer");

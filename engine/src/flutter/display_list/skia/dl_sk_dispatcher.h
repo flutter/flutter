@@ -31,7 +31,8 @@ class DlSkCanvasDispatcher : public virtual DlOpReceiver,
   void restore() override;
   void saveLayer(const DlRect& bounds,
                  const SaveLayerOptions options,
-                 const DlImageFilter* backdrop) override;
+                 const DlImageFilter* backdrop,
+                 std::optional<int64_t> backdrop_id) override;
 
   void translate(DlScalar tx, DlScalar ty) override;
   void scale(DlScalar sx, DlScalar sy) override;

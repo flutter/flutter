@@ -4,6 +4,7 @@
 
 #include "flutter/testing/display_list_testing.h"
 
+#include <cstdint>
 #include <iomanip>
 
 #include "flutter/display_list/display_list.h"
@@ -701,12 +702,17 @@ void DisplayListStreamDispatcher::save() {
 }
 void DisplayListStreamDispatcher::saveLayer(const DlRect& bounds,
                                             const SaveLayerOptions options,
-                                            const DlImageFilter* backdrop) {
+                                            const DlImageFilter* backdrop,
+                                            std::optional<int64_t> backdrop_id) {
   startl() << "saveLayer(" << bounds << ", " << options;
   if (backdrop) {
     os_ << "," << std::endl;
     indent(10);
-    startl() << "backdrop: ";
+    if (backdrop_id.has_value()) {
+      startl() << "backdrop: " << backdrop_id.value();
+    } else {
+      startl() << "backdrop: (no id)";
+    }
     out(backdrop);
     outdent(10);
   } else {

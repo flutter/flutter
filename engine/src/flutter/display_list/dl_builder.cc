@@ -409,7 +409,8 @@ void DisplayListBuilder::Save() {
 
 void DisplayListBuilder::saveLayer(const DlRect& bounds,
                                    const SaveLayerOptions in_options,
-                                   const DlImageFilter* backdrop) {
+                                   const DlImageFilter* backdrop,
+                                   std::optional<int64_t> backdrop_id) {
   SaveLayerOptions options = in_options.without_optimizations();
   DisplayListAttributeFlags flags = options.renders_with_attributes()
                                         ? kSaveLayerWithPaintFlags
@@ -524,7 +525,8 @@ void DisplayListBuilder::saveLayer(const DlRect& bounds,
     }
 
     if (backdrop) {
-      Push<SaveLayerBackdropOp>(0, options, record_bounds, backdrop);
+      Push<SaveLayerBackdropOp>(0, options, record_bounds, backdrop,
+                                backdrop_id);
     } else {
       Push<SaveLayerOp>(0, options, record_bounds);
     }
@@ -542,7 +544,8 @@ void DisplayListBuilder::saveLayer(const DlRect& bounds,
 }
 void DisplayListBuilder::SaveLayer(std::optional<const DlRect>& bounds,
                                    const DlPaint* paint,
-                                   const DlImageFilter* backdrop) {
+                                   const DlImageFilter* backdrop,
+                                   std::optional<int64_t> backdrop_id) {
   SaveLayerOptions options;
   DlRect temp_bounds;
   if (bounds.has_value()) {
@@ -556,7 +559,7 @@ void DisplayListBuilder::SaveLayer(std::optional<const DlRect>& bounds,
     SetAttributesFromPaint(*paint,
                            DisplayListOpFlags::kSaveLayerWithPaintFlags);
   }
-  saveLayer(temp_bounds, options, backdrop);
+  saveLayer(temp_bounds, options, backdrop, backdrop_id);
 }
 
 void DisplayListBuilder::Restore() {

@@ -8,8 +8,11 @@ namespace flutter {
 
 BackdropFilterLayer::BackdropFilterLayer(
     std::shared_ptr<const DlImageFilter> filter,
-    DlBlendMode blend_mode)
-    : filter_(std::move(filter)), blend_mode_(blend_mode) {}
+    DlBlendMode blend_mode,
+    std::optional<int64_t> backdrop_id)
+    : filter_(std::move(filter)),
+      blend_mode_(blend_mode),
+      backdrop_id_(backdrop_id) {}
 
 void BackdropFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
@@ -57,7 +60,8 @@ void BackdropFilterLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   auto mutator = context.state_stack.save();
-  mutator.applyBackdropFilter(paint_bounds(), filter_, blend_mode_);
+  mutator.applyBackdropFilter(paint_bounds(), filter_, blend_mode_,
+                              backdrop_id_);
 
   PaintChildren(context);
 }

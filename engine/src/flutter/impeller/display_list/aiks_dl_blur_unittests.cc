@@ -268,6 +268,87 @@ TEST_P(AiksTest, CanRenderBackdropBlur) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderBackdropBlurWithSingleBackdropId) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  builder.DrawImage(image, SkPoint::Make(50.0, 50.0),
+                    DlImageSampling::kNearestNeighbor, &paint);
+
+  SkRRect rrect =
+      SkRRect::MakeRectXY(SkRect::MakeXYWH(50, 250, 100, 100), 20, 20);
+  builder.Save();
+  builder.ClipRRect(rrect);
+
+  DlPaint save_paint;
+  save_paint.setBlendMode(DlBlendMode::kSrc);
+  auto backdrop_filter = DlBlurImageFilter::Make(30, 30, DlTileMode::kClamp);
+  builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get(),
+                    /*backdrop_id=*/1);
+  builder.Restore();
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderMultipleBackdropBlurWithSingleBackdropId) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  builder.DrawImage(image, SkPoint::Make(50.0, 50.0),
+                    DlImageSampling::kNearestNeighbor, &paint);
+
+  for (int i = 0; i < 6; i++) {
+    SkRRect rrect = SkRRect::MakeRectXY(
+        SkRect::MakeXYWH(50 + (i * 100), 250, 100, 100), 20, 20);
+    builder.Save();
+    builder.ClipRRect(rrect);
+
+    DlPaint save_paint;
+    save_paint.setBlendMode(DlBlendMode::kSrc);
+    auto backdrop_filter = DlBlurImageFilter::Make(30, 30, DlTileMode::kClamp);
+    builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get(),
+                      /*backdrop_id=*/1);
+    builder.Restore();
+    builder.Restore();
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest,
+       CanRenderMultipleBackdropBlurWithSingleBackdropIdAndDistinctFilters) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  builder.DrawImage(image, SkPoint::Make(50.0, 50.0),
+                    DlImageSampling::kNearestNeighbor, &paint);
+
+  for (int i = 0; i < 6; i++) {
+    SkRRect rrect = SkRRect::MakeRectXY(
+        SkRect::MakeXYWH(50 + (i * 100), 250, 100, 100), 20, 20);
+    builder.Save();
+    builder.ClipRRect(rrect);
+
+    DlPaint save_paint;
+    save_paint.setBlendMode(DlBlendMode::kSrc);
+    auto backdrop_filter =
+        DlBlurImageFilter::Make(30 + i, 30, DlTileMode::kClamp);
+    builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get(),
+                      /*backdrop_id=*/1);
+    builder.Restore();
+    builder.Restore();
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderBackdropBlurHugeSigma) {
   DisplayListBuilder builder;
 
@@ -1256,6 +1337,42 @@ TEST_P(AiksTest, GaussianBlurBackdropTinyMipMap) {
     auto image = DisplayListToTexture(builder.Build(), {1024, 768}, renderer);
     EXPECT_TRUE(image) << " length " << i;
   }
+}
+
+TEST_P(AiksTest,
+       CanRenderMultipleBackdropBlurWithSingleBackdropIdDifferentLayers) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  builder.DrawImage(image, SkPoint::Make(50.0, 50.0),
+                    DlImageSampling::kNearestNeighbor, &paint);
+
+  for (int i = 0; i < 6; i++) {
+    if (i != 0) {
+      DlPaint paint;
+      paint.setColor(DlColor::kWhite().withAlphaF(0.95));
+      builder.SaveLayer(nullptr, &paint);
+    }
+    SkRRect rrect = SkRRect::MakeRectXY(
+        SkRect::MakeXYWH(50 + (i * 100), 250, 100, 100), 20, 20);
+    builder.Save();
+    builder.ClipRRect(rrect);
+
+    DlPaint save_paint;
+    save_paint.setBlendMode(DlBlendMode::kSrc);
+    auto backdrop_filter = DlBlurImageFilter::Make(30, 30, DlTileMode::kClamp);
+    builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get(),
+                      /*backdrop_id=*/1);
+    builder.Restore();
+    builder.Restore();
+    if (i != 0) {
+      builder.Restore();
+    }
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 }  // namespace testing

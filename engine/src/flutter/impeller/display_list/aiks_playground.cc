@@ -10,6 +10,7 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
+#include "include/core/SkRect.h"
 
 namespace impeller {
 
@@ -49,22 +50,14 @@ bool AiksPlayground::OpenPlaygroundHere(
 
   return Playground::OpenPlaygroundHere(
       [&renderer, &callback](RenderTarget& render_target) -> bool {
-        auto display_list = callback();
-        TextFrameDispatcher collector(renderer.GetContentContext(),  //
-                                      Matrix(),                      //
-                                      Rect::MakeMaximum()            //
+        return RenderToOnscreen(
+            renderer.GetContentContext(),  //
+            render_target,                 //
+            callback(),                    //
+            SkIRect::MakeWH(render_target.GetRenderTargetSize().width,
+                            render_target.GetRenderTargetSize().height),  //
+            /*reset_host_buffer=*/true                                    //
         );
-        display_list->Dispatch(collector);
-
-        CanvasDlDispatcher impeller_dispatcher(
-            renderer.GetContentContext(), render_target,
-            display_list->root_has_backdrop_filter(),
-            display_list->max_root_blend_mode(), IRect::MakeMaximum());
-        display_list->Dispatch(impeller_dispatcher);
-        impeller_dispatcher.FinishRecording();
-        renderer.GetContentContext().GetTransientsBuffer().Reset();
-        renderer.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
-        return true;
       });
 }
 

@@ -73,4 +73,8 @@ bool EntityPassTarget::IsValid() const {
   return target_.IsValid();
 }
 
+void EntityPassTarget::RemoveSecondary() {
+  secondary_color_texture_ = nullptr;
+}
+
 }  // namespace impeller

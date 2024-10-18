@@ -45,21 +45,14 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
           wireframe = !wireframe;
           context.GetContentContext().SetWireframe(wireframe);
         }
-
-        auto list = callback();
-        TextFrameDispatcher collector(context.GetContentContext(), Matrix(),
-                                      Rect::MakeMaximum());
-        list->Dispatch(collector);
-
-        CanvasDlDispatcher impeller_dispatcher(
-            context.GetContentContext(), render_target,
-            list->root_has_backdrop_filter(), list->max_root_blend_mode(),
-            IRect::MakeMaximum());
-        list->Dispatch(impeller_dispatcher);
-        impeller_dispatcher.FinishRecording();
-        context.GetContentContext().GetTransientsBuffer().Reset();
-        context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
-        return true;
+        return RenderToOnscreen(
+            context.GetContentContext(),  //
+            render_target,                //
+            callback(),                   //
+            SkIRect::MakeWH(render_target.GetRenderTargetSize().width,
+                            render_target.GetRenderTargetSize().height),  //
+            /*reset_host_buffer=*/true                                    //
+        );
       });
 }
 
