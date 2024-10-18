@@ -98,7 +98,7 @@ for (final String agpVersion in agpVersions) {
           if (result.exitCode != 0) {
             throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
           }
-          
+
           // Test that the native libraries are included as expected.
           final Directory nativeAssetsDir = exampleDirectory
             .childDirectory('build')
