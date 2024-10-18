@@ -83,25 +83,6 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('Refuses to build a debug build for web', () async {
-    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
-      artifacts: artifacts,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: fileSystem,
-      logger: logger,
-      processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
-    ));
-
-    expect(() => runner.run(<String>['build', 'web', '--debug', '--no-pub']),
-      throwsA(isA<UsageException>()));
-  }, overrides: <Type, Generator>{
-    Platform: () => fakePlatform,
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => processManager,
-  });
-
   testUsingContext('Refuses to build for web when feature is disabled', () async {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
       artifacts: artifacts,
