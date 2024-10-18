@@ -851,6 +851,13 @@ IMPELLER_EXPORT
 void ImpellerTypographyContextRelease(
     ImpellerTypographyContext IMPELLER_NULLABLE context);
 
+IMPELLER_EXPORT
+bool ImpellerTypographyContextRegisterFont(
+    ImpellerTypographyContext IMPELLER_NONNULL context,
+    const ImpellerMapping* IMPELLER_NONNULL contents,
+    void* IMPELLER_NULLABLE contents_on_release_user_data,
+    const char* IMPELLER_NULLABLE family_name_alias);
+
 //------------------------------------------------------------------------------
 // Paragraph Style
 //------------------------------------------------------------------------------
