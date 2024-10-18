@@ -3825,6 +3825,7 @@ targets:
       - .ci.yaml
 
   - name: Mac flavors_test_macos
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/156943
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
