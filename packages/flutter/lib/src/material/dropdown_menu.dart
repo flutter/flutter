@@ -971,12 +971,20 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           ).applyDefaults(effectiveInputDecorationTheme)
         );
 
-        if (widget.expandedInsets != null) {
-          // If [expandedInsets] is not null, the width of the text field should depend
-          // on its parent width. So we don't need to use `_DropdownMenuBody` to
-          // calculate the children's width.
-          return textField;
-        }
+        // If [expandedInsets] is not null, the width of the text field should depend
+        // on its parent width. So we don't need to use `_DropdownMenuBody` to
+        // calculate the children's width.
+        final Widget body = widget.expandedInsets != null
+          ? textField
+          : _DropdownMenuBody(
+              width: widget.width,
+              children: <Widget>[
+                textField,
+                ..._initialMenu!.map((Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item)),
+                trailingButton,
+                leadingButton,
+              ],
+            );
 
         return Shortcuts(
           shortcuts: const <ShortcutActivator, Intent>{
@@ -985,15 +993,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
             SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
           },
-          child: _DropdownMenuBody(
-            width: widget.width,
-            children: <Widget>[
-              textField,
-              ..._initialMenu!.map((Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item)),
-              trailingButton,
-              leadingButton,
-            ],
-          ),
+          child: body,
         );
       },
     );
