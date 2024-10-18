@@ -10,7 +10,6 @@
 #include <utility>
 
 #include "impeller/base/thread.h"
-#include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
 #include "vulkan/vulkan_handles.hpp"
 
@@ -77,14 +76,6 @@ class CommandPoolVK final {
       pool_mutex_);
 };
 
-struct ThreadLocalData {
-  std::shared_ptr<CommandPoolVK> command_pool;
-  std::shared_ptr<DescriptorPoolVK> descriptor_pool;
-};
-
-// Associates a resource with a thread and context.
-using CommandPoolMap = std::unordered_map<uint64_t, ThreadLocalData>;
-
 //------------------------------------------------------------------------------
 /// @brief      Creates and manages the lifecycle of |vk::CommandPool| objects.
 ///
@@ -137,11 +128,6 @@ class CommandPoolRecyclerVK final
   /// @warning    Returns a |nullptr| if a pool could not be created.
   std::shared_ptr<CommandPoolVK> Get();
 
-  /// @brief      Gets a descriptor pool for the current thread.
-  ///
-  /// @warning    Returns a |nullptr| if a pool could not be created.
-  std::shared_ptr<DescriptorPoolVK> GetDescriptorPool();
-
   /// @brief      Returns a command pool to be reset on a background thread.
   ///
   /// @param[in]  pool The pool to recycler.
@@ -166,13 +152,6 @@ class CommandPoolRecyclerVK final
   ///
   /// @returns    Returns a |std::nullopt| if a pool was not available.
   std::optional<RecycledData> Reuse();
-
-  /// Create a DescriptorPoolVK and a CommandPoolVK and stash them in the TLS
-  /// map.
-  std::optional<ThreadLocalData> InitializeThreadLocalResources(
-      const std::shared_ptr<ContextVK>& context,
-      CommandPoolMap& pool_map,
-      uint64_t pool_key);
 
   CommandPoolRecyclerVK(const CommandPoolRecyclerVK&) = delete;
 
