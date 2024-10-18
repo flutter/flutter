@@ -17,9 +17,7 @@ void main() {
 
   testWidgets('The app bar should stretch when over-scrolled', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: example.FlexibleSpaceBarExampleApp(),
-      ),
+        const example.FlexibleSpaceBarExampleApp(),
     );
 
     expect(find.text('Flight Report'), findsOne);
