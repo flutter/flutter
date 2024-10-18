@@ -281,7 +281,8 @@ class DlBlurImageFilter final : public DlImageFilter {
   bool equals_(const DlImageFilter& other) const override {
     FML_DCHECK(other.type() == DlImageFilterType::kBlur);
     auto that = static_cast<const DlBlurImageFilter*>(&other);
-    return (sigma_x_ == that->sigma_x_ && sigma_y_ == that->sigma_y_ &&
+    return (SkScalarNearlyEqual(sigma_x_, that->sigma_x_) &&
+            SkScalarNearlyEqual(sigma_y_, that->sigma_y_) &&
             tile_mode_ == that->tile_mode_);
   }
 

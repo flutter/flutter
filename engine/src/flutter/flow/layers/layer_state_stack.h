@@ -197,7 +197,8 @@ class LayerStateStack {
     // will only see a saveLayer with the indicated blend_mode.
     void applyBackdropFilter(const SkRect& bounds,
                              const std::shared_ptr<const DlImageFilter>& filter,
-                             DlBlendMode blend_mode);
+                             DlBlendMode blend_mode,
+                             std::optional<int64_t> backdrop_id);
 
     void translate(SkScalar tx, SkScalar ty);
     void translate(SkPoint tp) { translate(tp.fX, tp.fY); }
@@ -334,7 +335,8 @@ class LayerStateStack {
                          const std::shared_ptr<const DlImageFilter>& filter);
   void push_backdrop(const SkRect& bounds,
                      const std::shared_ptr<const DlImageFilter>& filter,
-                     DlBlendMode blend_mode);
+                     DlBlendMode blend_mode,
+                     std::optional<int64_t> backdrop_id);
 
   void push_translate(SkScalar tx, SkScalar ty);
   void push_transform(const SkM44& matrix);
@@ -444,10 +446,12 @@ class LayerStateStack {
     virtual bool content_culled(const SkRect& content_bounds) const = 0;
 
     virtual void save() = 0;
-    virtual void saveLayer(const SkRect& bounds,
-                           RenderingAttributes& attributes,
-                           DlBlendMode blend,
-                           const DlImageFilter* backdrop) = 0;
+    virtual void saveLayer(
+        const SkRect& bounds,
+        RenderingAttributes& attributes,
+        DlBlendMode blend,
+        const DlImageFilter* backdrop,
+        std::optional<int64_t> backdrop_id = std::nullopt) = 0;
     virtual void restore() = 0;
 
     virtual void translate(SkScalar tx, SkScalar ty) = 0;

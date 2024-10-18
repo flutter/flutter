@@ -327,7 +327,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
               r.drawRect(DlRect::MakeLTRB(10, 10, 20, 20));
               r.restore();
             }},
-           {5, 136, 3,
+           {5, 152, 3,
             [](DlOpReceiver& r) {
               r.saveLayer(nullptr, SaveLayerOptions::kNoAttributes,
                           &kTestCFImageFilter1);
@@ -337,7 +337,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
               r.drawRect(DlRect::MakeLTRB(10, 10, 20, 20));
               r.restore();
             }},
-           {5, 136, 3,
+           {5, 152, 3,
             [](DlOpReceiver& r) {
               r.saveLayer(nullptr, SaveLayerOptions::kWithAttributes,
                           &kTestCFImageFilter1);
@@ -347,7 +347,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
               r.drawRect(DlRect::MakeLTRB(10, 10, 20, 20));
               r.restore();
             }},
-           {5, 136, 3,
+           {5, 152, 3,
             [](DlOpReceiver& r) {
               r.saveLayer(&kTestBounds, SaveLayerOptions::kNoAttributes,
                           &kTestCFImageFilter1);
@@ -357,7 +357,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
               r.drawRect(DlRect::MakeLTRB(10, 10, 20, 20));
               r.restore();
             }},
-           {5, 136, 3,
+           {5, 152, 3,
             [](DlOpReceiver& r) {
               r.saveLayer(&kTestBounds, SaveLayerOptions::kWithAttributes,
                           &kTestCFImageFilter1);
