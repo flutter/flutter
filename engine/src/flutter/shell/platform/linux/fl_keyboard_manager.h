@@ -102,6 +102,20 @@ GHashTable* fl_keyboard_manager_get_pressed_state(FlKeyboardManager* manager);
  */
 void fl_keyboard_manager_notify_layout_changed(FlKeyboardManager* manager);
 
+typedef void (*FlKeyboardManagerRedispatchEventHandler)(FlKeyEvent* event,
+                                                        gpointer user_data);
+
+/**
+ * fl_keyboard_manager_set_redispatch_handler:
+ * @manager: the #FlKeyboardManager self.
+ *
+ * Set the handler for redispatches, for testing purposes only.
+ */
+void fl_keyboard_manager_set_redispatch_handler(
+    FlKeyboardManager* manager,
+    FlKeyboardManagerRedispatchEventHandler redispatch_handler,
+    gpointer user_data);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_KEYBOARD_MANAGER_H_

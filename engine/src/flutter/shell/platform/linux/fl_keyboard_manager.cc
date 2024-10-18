@@ -118,6 +118,9 @@ struct _FlKeyboardManager {
 
   GWeakRef view_delegate;
 
+  FlKeyboardManagerRedispatchEventHandler redispatch_handler;
+  gpointer redispatch_handler_user_data;
+
   FlKeyEmbedderResponder* key_embedder_responder;
 
   FlKeyChannelResponder* key_channel_responder;
@@ -263,9 +266,16 @@ static void responder_handle_event_callback(bool handled,
             view_delegate, fl_keyboard_pending_event_get_event(pending));
     if (should_redispatch) {
       g_ptr_array_add(self->pending_redispatches, pending);
-      fl_keyboard_view_delegate_redispatch_event(
-          view_delegate,
-          FL_KEY_EVENT(fl_keyboard_pending_event_get_event(pending)));
+      FlKeyEvent* event = fl_keyboard_pending_event_get_event(pending);
+      if (self->redispatch_handler != nullptr) {
+        self->redispatch_handler(event, self->redispatch_handler_user_data);
+      } else {
+        GdkEventType event_type =
+            gdk_event_get_event_type(fl_key_event_get_origin(event));
+        g_return_if_fail(event_type == GDK_KEY_PRESS ||
+                         event_type == GDK_KEY_RELEASE);
+        gdk_event_put(fl_key_event_get_origin(event));
+      }
     } else {
       g_object_unref(pending);
     }
@@ -505,4 +515,12 @@ void fl_keyboard_manager_notify_layout_changed(FlKeyboardManager* self) {
   g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
   g_clear_object(&self->derived_layout);
   self->derived_layout = fl_keyboard_layout_new();
+}
+
+void fl_keyboard_manager_set_redispatch_handler(
+    FlKeyboardManager* self,
+    FlKeyboardManagerRedispatchEventHandler redispatch_handler,
+    gpointer user_data) {
+  self->redispatch_handler = redispatch_handler;
+  self->redispatch_handler_user_data = user_data;
 }
