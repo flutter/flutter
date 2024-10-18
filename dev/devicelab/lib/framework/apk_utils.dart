@@ -256,7 +256,7 @@ class FlutterProject {
   String get rootPath => path.join(parent.path, name);
   String get androidPath => path.join(rootPath, 'android');
   String get iosPath => path.join(rootPath, 'ios');
-  File get appBuildFile => getAndroidBuildFile(androidPath);
+  File get appBuildFile => getAndroidBuildFile(path.join(androidPath, 'app'));
 
   Future<void> addCustomBuildType(String name, {required String initWith}) async {
     final File buildScript = appBuildFile;
@@ -471,9 +471,9 @@ String? validateSnapshotDependency(FlutterProject project, String expectedTarget
     ? null : 'Dependency file should have $expectedTarget as target. Instead found $contentSnapshot';
 }
 
-File getAndroidBuildFile(String androidPath) {
-  final File groovyFile = File(path.join(androidPath, 'app', 'build.gradle'));
-  final File kotlinFile = File(path.join(androidPath, 'app', 'build.gradle.kts'));
+File getAndroidBuildFile(String androidAppPath, {bool settings = false}) {
+  final File groovyFile = File(path.join(androidAppPath, settings ? 'settings.gradle' : 'build.gradle'));
+  final File kotlinFile = File(path.join(androidAppPath, settings ? 'settings.gradle.kts' : 'build.gradle.kts'));
 
   if (groovyFile.existsSync()) {
     return groovyFile;

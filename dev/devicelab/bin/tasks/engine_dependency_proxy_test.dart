@@ -29,7 +29,7 @@ Future<void> main() async {
     await runProjectTest((FlutterProject flutterProject) async {
       await inDirectory(path.join(flutterProject.rootPath, 'android'), () async {
         section('Insert gradle testing script');
-        final File buildFile = getAndroidBuildFile(path.join(flutterProject.rootPath, 'android'));
+        final File buildFile = getAndroidBuildFile(path.join(flutterProject.rootPath, 'android', 'app'));
         buildFile.writeAsStringSync(
           '''
 tasks.register("printEngineMavenUrl") {
