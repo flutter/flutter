@@ -5,3 +5,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
+
+include("kt")
