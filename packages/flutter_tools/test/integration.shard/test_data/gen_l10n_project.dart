@@ -413,7 +413,21 @@ dependencies:
     }
   },
   "datetime1": "{today, date, ::yMd}",
-  "datetime2": "{current, time, ::jms}"
+  "datetime2": "{current, time, ::jms}",
+  "datetimeAddedFormats": "{firstDate} and {secondDate}",
+  "@datetimeAddedFormats": {
+    "description": "A message with two dates, with added formats",
+    "placeholders": {
+      "firstDate": {
+        "type": "DateTime",
+        "format": "yMd+jms"
+      },
+      "secondDate": {
+        "type": "DateTime",
+        "format": "yMMMMEEEEd+Hms+QQQQ"
+      }
+    }
+  }
 }
 ''';
 
@@ -693,6 +707,7 @@ class Home extends StatelessWidget {
               "${localizations.selectInPlural('female', 1)}",
               '${localizations.datetime1(DateTime(2023, 6, 26))}',
               '${localizations.datetime2(DateTime(2023, 6, 26, 5, 23))}',
+              '${localizations.datetimeAddedFormats(DateTime(2024, 10, 6, 23, 29, 48), DateTime(2000, 7, 4, 12, 54, 32))}',
             ]);
           },
         ),
@@ -977,6 +992,7 @@ class Home extends StatelessWidget {
               "${localizations.selectInPlural(gender: 'female', count: 1)}",
               '${localizations.datetime1(today: DateTime(2023, 6, 26))}',
               '${localizations.datetime2(current: DateTime(2023, 6, 26, 5, 23))}',
+              '${localizations.datetimeAddedFormats(firstDate: DateTime(2024, 10, 6, 23, 29, 48), secondDate: DateTime(2000, 7, 4, 12, 54, 32))}',
             ]);
           },
         ),
