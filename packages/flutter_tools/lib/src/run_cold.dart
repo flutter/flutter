@@ -104,7 +104,6 @@ class ColdRunner extends ResidentRunner {
       if (device!.vmService == null) {
         continue;
       }
-      await device.tryInitLogReader();
       globals.printTrace('Connected to ${device.device!.name}');
     }
 
@@ -153,9 +152,6 @@ class ColdRunner extends ResidentRunner {
       return 2;
     }
 
-    for (final FlutterDevice? device in flutterDevices) {
-      await device!.tryInitLogReader();
-    }
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
