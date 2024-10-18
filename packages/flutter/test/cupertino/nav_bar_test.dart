@@ -2092,24 +2092,21 @@ void main() {
     const double largeTitleHeight = 52.0;
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(),
-        child: CupertinoApp(
-          home: CustomScrollView(
-            controller: scrollController,
-            slivers: const <Widget>[
-              CupertinoSliverNavigationBar(
-                largeTitle: Text('Large title'),
-                middle: Text('middle'),
-                alwaysShowMiddle: false,
+      CupertinoApp(
+        home: CustomScrollView(
+          controller: scrollController,
+          slivers: const <Widget>[
+            CupertinoSliverNavigationBar(
+              largeTitle: Text('Large title'),
+              middle: Text('middle'),
+              alwaysShowMiddle: false,
+            ),
+            SliverFillRemaining(
+              child: SizedBox(
+                height: 1000.0,
               ),
-              SliverFillRemaining(
-                child: SizedBox(
-                  height: 1000.0,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -2136,24 +2133,21 @@ void main() {
     const double largeTitleHeight = 52.0;
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(),
-        child: CupertinoApp(
-          home: CustomScrollView(
-            controller: scrollController,
-            slivers: const <Widget>[
-              CupertinoSliverNavigationBar(
-                largeTitle: Text('Large title'),
-                middle: Text('middle'),
-                alwaysShowMiddle: false,
+      CupertinoApp(
+        home: CustomScrollView(
+          controller: scrollController,
+          slivers: const <Widget>[
+            CupertinoSliverNavigationBar(
+              largeTitle: Text('Large title'),
+              middle: Text('middle'),
+              alwaysShowMiddle: false,
+            ),
+            SliverFillRemaining(
+              child: SizedBox(
+                height: 1000.0,
               ),
-              SliverFillRemaining(
-                child: SizedBox(
-                  height: 1000.0,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -2180,29 +2174,26 @@ void main() {
     const double bottomHeight = 100.0;
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(),
-        child: CupertinoApp(
-          home: CustomScrollView(
-            controller: scrollController,
-            slivers: const <Widget>[
-              CupertinoSliverNavigationBar(
-                largeTitle: Text('Large title'),
-                middle: Text('middle'),
-                alwaysShowMiddle: false,
-                bottom: PreferredSize(
-                  preferredSize: Size.fromHeight(bottomHeight),
-                  child: Placeholder(),
-                ),
-                bottomMode: NavigationBarBottomMode.automatic,
+      CupertinoApp(
+        home: CustomScrollView(
+          controller: scrollController,
+          slivers: const <Widget>[
+            CupertinoSliverNavigationBar(
+              largeTitle: Text('Large title'),
+              middle: Text('middle'),
+              alwaysShowMiddle: false,
+              bottom: PreferredSize(
+                preferredSize: Size.fromHeight(bottomHeight),
+                child: Placeholder(),
               ),
-              SliverFillRemaining(
-                child: SizedBox(
-                  height: 1000.0,
-                ),
+              bottomMode: NavigationBarBottomMode.automatic,
+            ),
+            SliverFillRemaining(
+              child: SizedBox(
+                height: 1000.0,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -2241,29 +2232,26 @@ void main() {
     const double bottomHeight = 100.0;
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(),
-        child: CupertinoApp(
-          home: CustomScrollView(
-            controller: scrollController,
-            slivers: const <Widget>[
-              CupertinoSliverNavigationBar(
-                largeTitle: Text('Large title'),
-                middle: Text('middle'),
-                alwaysShowMiddle: false,
-                bottom: PreferredSize(
-                  preferredSize: Size.fromHeight(bottomHeight),
-                  child: Placeholder(),
-                ),
-                bottomMode: NavigationBarBottomMode.automatic,
+      CupertinoApp(
+        home: CustomScrollView(
+          controller: scrollController,
+          slivers: const <Widget>[
+            CupertinoSliverNavigationBar(
+              largeTitle: Text('Large title'),
+              middle: Text('middle'),
+              alwaysShowMiddle: false,
+              bottom: PreferredSize(
+                preferredSize: Size.fromHeight(bottomHeight),
+                child: Placeholder(),
               ),
-              SliverFillRemaining(
-                child: SizedBox(
-                  height: 1000.0,
-                ),
+              bottomMode: NavigationBarBottomMode.automatic,
+            ),
+            SliverFillRemaining(
+              child: SizedBox(
+                height: 1000.0,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
