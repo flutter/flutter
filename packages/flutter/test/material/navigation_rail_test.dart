@@ -5999,6 +5999,7 @@ TestSemantics _expectedSemantics() {
                 children: <TestSemantics>[
                   TestSemantics(
                     flags: <SemanticsFlag>[
+                      SemanticsFlag.hasSelectedState,
                       SemanticsFlag.isSelected,
                       SemanticsFlag.isFocusable,
                     ],
@@ -6007,19 +6008,19 @@ TestSemantics _expectedSemantics() {
                     textDirection: TextDirection.ltr,
                   ),
                   TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                    flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
                     actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     label: 'Def\nTab 2 of 4',
                     textDirection: TextDirection.ltr,
                   ),
                   TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                    flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
                     actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     label: 'Ghi\nTab 3 of 4',
                     textDirection: TextDirection.ltr,
                   ),
                   TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                    flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
                     actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     label: 'Jkl\nTab 4 of 4',
                     textDirection: TextDirection.ltr,

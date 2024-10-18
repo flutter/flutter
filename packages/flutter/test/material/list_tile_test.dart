@@ -299,6 +299,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
+                SemanticsFlag.hasSelectedState,
               ],
               label: 'one',
             ),
@@ -308,21 +309,24 @@ void main() {
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocusable,
+                SemanticsFlag.hasSelectedState,
               ],
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               label: 'two',
             ),
             TestSemantics.rootChild(
               flags: <SemanticsFlag>[
-                SemanticsFlag.isSelected,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
+                SemanticsFlag.hasSelectedState,
+                SemanticsFlag.isSelected,
               ],
               label: 'three',
             ),
             TestSemantics.rootChild(
               flags: <SemanticsFlag>[
                 SemanticsFlag.hasEnabledState,
+                SemanticsFlag.hasSelectedState,
               ],
               label: 'four',
             ),

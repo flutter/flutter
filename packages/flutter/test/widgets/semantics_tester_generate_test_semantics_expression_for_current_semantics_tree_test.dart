@@ -132,7 +132,7 @@ void _tests() {
                                 TestSemantics(
                                   id: 6,
                                   tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                  flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.isSelected],
+                                  flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.hasSelectedState, SemanticsFlag.isSelected],
                                   actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
                                   label: '\u202aInteractive text\u202c',
                                   value: 'test-value',
