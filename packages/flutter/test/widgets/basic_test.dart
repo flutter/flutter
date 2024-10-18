@@ -1032,6 +1032,87 @@ void main() {
     });
   });
 
+  testWidgets('Padding named constructors render correctly', (WidgetTester tester) async {
+    const Key key = Key('padding');
+    const Widget child = SizedBox.square(key: Key('child'), dimension: 10);
+
+    final Finder findPadding = find.byKey(key);
+    final Finder findChild = find.byKey(const Key('child'));
+
+    Future<void> buildPadding(
+      Padding padding, {
+      TextDirection textDirection = TextDirection.ltr,
+    }) {
+      return tester.pumpWidget(
+        Directionality(
+          textDirection: textDirection,
+          child: Align(alignment: Alignment.topLeft, child: padding),
+        ),
+      );
+    }
+
+    await buildPadding(
+      const Padding.only(
+        key: key,
+        left: 1,
+        top: 2,
+        right: 3,
+        bottom: 4,
+        child: child,
+      ),
+    );
+    expect(tester.getRect(findPadding), const Rect.fromLTWH(0, 0, 14, 16));
+    expect(tester.getRect(findChild), const Rect.fromLTWH(1, 2, 10, 10));
+
+    await buildPadding(
+      const Padding.directional(
+        key: key,
+        start: 1,
+        top: 2,
+        end: 3,
+        bottom: 4,
+        child: child,
+      ),
+    );
+    expect(tester.getRect(findPadding), const Rect.fromLTWH(0, 0, 14, 16));
+    expect(tester.getRect(findChild), const Rect.fromLTWH(1, 2, 10, 10));
+
+    await buildPadding(
+      textDirection: TextDirection.rtl,
+      const Padding.directional(
+        key: key,
+        start: 1,
+        top: 2,
+        end: 3,
+        bottom: 4,
+        child: child,
+      ),
+    );
+    expect(tester.getRect(findPadding), const Rect.fromLTWH(0, 0, 14, 16));
+    expect(tester.getRect(findChild), const Rect.fromLTWH(3, 2, 10, 10));
+
+    const double value = 42.0;
+    await buildPadding(
+      const Padding.all(value, key: key, child: child),
+    );
+    expect(
+      tester.getRect(findPadding),
+      const Rect.fromLTWH(0, 0, 10 + 2 * value, 10 + 2 * value),
+    );
+    expect(tester.getRect(findChild), const Rect.fromLTWH(value, value, 10, 10));
+
+    await buildPadding(
+      const Padding.symmetric(
+        horizontal: 1,
+        vertical: 2,
+        key: key,
+        child: child,
+      ),
+    );
+    expect(tester.getRect(findPadding), const Rect.fromLTWH(0, 0, 12, 14));
+    expect(tester.getRect(findChild), const Rect.fromLTWH(1, 2, 10, 10));
+  });
+
   testWidgets('AbsorbPointer absorbs pointers', (WidgetTester tester) async {
     final List<String> logs = <String>[];
     Widget target({required bool absorbing}) => Align(
