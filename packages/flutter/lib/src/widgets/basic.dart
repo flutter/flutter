@@ -1948,7 +1948,7 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 ///    duration.
 ///  * [SliverPadding], the sliver equivalent of this widget.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class Padding extends SingleChildRenderObjectWidget {
+class Padding extends SingleChildRenderObjectWidget with _PaddingMixin {
   /// Creates a widget that insets its child.
   const Padding({
     super.key,
@@ -1956,8 +1956,60 @@ class Padding extends SingleChildRenderObjectWidget {
     super.child,
   });
 
+  /// Creates a widget that insets its child.
+  ///
+  /// The [left], [top], [right], and [bottom] parameters default to zero
+  /// and correspond to the [EdgeInsets.only] constructor.
+  const factory Padding.only({
+    Key? key,
+    double left,
+    double top,
+    double right,
+    double bottom,
+    Widget? child,
+  }) = _EdgeInsetsWidget;
+
+  /// Creates a widget that insets its child.
+  ///
+  /// The [start], [top], [end], and [bottom] parameters default to zero
+  /// and correspond to the [EdgeInsetsDirectional.only] constructor.
+  const factory Padding.directional({
+    Key? key,
+    double start,
+    double top,
+    double end,
+    double bottom,
+    Widget? child,
+  }) = _EdgeInsetsDirectionalWidget;
+
+  /// Creates a widget that insets its child.
+  ///
+  /// The positional [value] parameter corresponds to the [double] value
+  /// passed into the [EdgeInsets.all] constructor.
+  const factory Padding.all(
+    double value, {
+    Key? key,
+    Widget? child,
+  }) = _EdgeInsetsWidget.all;
+
+  /// Creates a widget that insets its child.
+  ///
+  /// The [horizontal] and [vertical] parameters default to zero
+  /// and correspond to the [EdgeInsets.symmetric] constructor.
+  const factory Padding.symmetric({
+    Key? key,
+    double horizontal,
+    double vertical,
+    Widget? child,
+  }) = _EdgeInsetsWidget.symmetric;
+
   /// The amount of space by which to inset the child.
+  @override
   final EdgeInsetsGeometry padding;
+}
+
+mixin _PaddingMixin on SingleChildRenderObjectWidget {
+  EdgeInsetsGeometry get padding;
 
   @override
   RenderPadding createRenderObject(BuildContext context) {
@@ -1979,6 +2031,69 @@ class Padding extends SingleChildRenderObjectWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
   }
+}
+
+/// Allows creating a [Padding] widget by passing [double] padding values
+/// instead of setting up an [EdgeInsetsGeometry] object directly.
+class _EdgeInsetsDirectionalWidget extends SingleChildRenderObjectWidget with _PaddingMixin implements Padding {
+  /// This constructor serves 2 purposes:
+  ///
+  ///  1. Initializes fields for the [_EdgeInsetsWidget] subclass.
+  ///  2. Used as the constructor for [Padding.directional].
+  const _EdgeInsetsDirectionalWidget({
+    super.key,
+    this.left = 0,
+    this.top = 0,
+    this.right = 0,
+    this.bottom = 0,
+    this.start = 0,
+    this.end = 0,
+    super.child,
+  }) : assert(left   >= 0, 'Left padding value cannot be negative.'),
+       assert(top    >= 0, 'Top padding value cannot be negative.'),
+       assert(right  >= 0, 'Right padding value cannot be negative.'),
+       assert(bottom >= 0, 'Bottom padding value cannot be negative.'),
+       assert(start  >= 0, 'Start padding value cannot be negative.'),
+       assert(end    >= 0, 'End padding value cannot be negative.');
+
+  final double left;
+  final double top;
+  final double right;
+  final double bottom;
+  final double start;
+  final double end;
+
+  @override
+  EdgeInsetsGeometry get padding => EdgeInsetsDirectional.fromSTEB(start, top, end, bottom);
+}
+
+class _EdgeInsetsWidget extends _EdgeInsetsDirectionalWidget {
+  const _EdgeInsetsWidget({
+    super.key,
+    super.left,
+    super.top,
+    super.right,
+    super.bottom,
+    super.child,
+  });
+
+  const _EdgeInsetsWidget.all(double value, {super.key, super.child})
+      : super(left: value, top: value, right: value, bottom: value);
+
+  const _EdgeInsetsWidget.symmetric({
+    super.key,
+    double horizontal = 0,
+    double vertical = 0,
+    super.child,
+  }) : super(
+         left: horizontal,
+         top: vertical,
+         right: horizontal,
+         bottom: vertical,
+       );
+
+  @override
+  EdgeInsetsGeometry get padding => EdgeInsets.fromLTRB(left, top, right, bottom);
 }
 
 /// A widget that aligns its child within itself and optionally sizes itself
