@@ -1387,6 +1387,7 @@ targets:
       test_timeout_secs: "2700"
     runIf:
       - packages/flutter_tools/templates/**
+      - .ci.yaml
 
   - name: Linux android_java17_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
@@ -1405,6 +1406,7 @@ targets:
       test_timeout_secs: "2700"
     runIf:
       - packages/flutter_tools/templates/**
+      - .ci.yaml
 
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
