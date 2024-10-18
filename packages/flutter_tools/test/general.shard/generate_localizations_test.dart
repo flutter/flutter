@@ -792,6 +792,7 @@ flutter:
       expect(fs.file('/lib/l10n/bar_en.dart').readAsStringSync(), '''
 HEADER
 
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 import 'bar.dart';
 
@@ -895,6 +896,7 @@ flutter:\r
       );
 
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
@@ -929,6 +931,7 @@ class AppLocalizationsEn extends AppLocalizations {
     expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
 HEADER
 
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
