@@ -1534,5 +1534,50 @@ TEST_P(AiksTest, MassiveScalingMatrixImageFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, NoDimplesInRRectPath) {
+  Scalar width = 200.f;
+  Scalar height = 60.f;
+  Scalar corner = 1.f;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("width", &width, 0, 200);
+      ImGui::SliderFloat("height", &height, 0, 200);
+      ImGui::SliderFloat("corner", &corner, 0, 1);
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
+
+    DlPaint background_paint;
+    background_paint.setColor(DlColor(1, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+    builder.DrawPaint(background_paint);
+
+    std::vector<DlColor> colors = {DlColor::kRed(), DlColor::kBlue()};
+    std::vector<Scalar> stops = {0.0, 1.0};
+
+    DlPaint paint;
+    auto gradient = DlColorSource::MakeLinear(
+        {0, 0}, {200, 200}, 2, colors.data(), stops.data(), DlTileMode::kClamp);
+    paint.setColorSource(gradient);
+    paint.setColor(DlColor::kWhite());
+    paint.setDrawStyle(DlDrawStyle::kStroke);
+    paint.setStrokeWidth(20);
+
+    builder.Save();
+    builder.Translate(100, 100);
+
+    Scalar corner_x = ((1 - corner) * 50) + 50;
+    Scalar corner_y = corner * 50 + 50;
+    SkRRect rrect = SkRRect::MakeRectXY(SkRect::MakeXYWH(0, 0, width, height),
+                                        corner_x, corner_y);
+    builder.DrawRRect(rrect, paint);
+    builder.Restore();
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 }  // namespace testing
 }  // namespace impeller
