@@ -2425,8 +2425,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
               style: theme.useMaterial3 ? IconButton.styleFrom(foregroundColor: entryModeIconColor) : null,
               onPressed: _toggleEntryMode,
               icon: _entryMode.value == TimePickerEntryMode.dial
-                ? widget.switchToInputEntryModeIcon ?? Icon(Icons.keyboard_outlined)
-                : widget.switchToTimerEntryModeIcon ?? Icon(Icons.access_time),
+                ? widget.switchToInputEntryModeIcon ?? const Icon(Icons.keyboard_outlined)
+                : widget.switchToTimerEntryModeIcon ?? const Icon(Icons.access_time),
               tooltip: _entryMode.value == TimePickerEntryMode.dial
                   ? MaterialLocalizations.of(context).inputTimeModeButtonLabel
                   : MaterialLocalizations.of(context).dialModeButtonLabel,
