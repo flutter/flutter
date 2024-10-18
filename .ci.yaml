@@ -358,11 +358,15 @@ targets:
       tags: >
         ["framework","hostonly","shard","linux"]
 
+  # This is a benchmark that does not require an attached device. However, we
+  # are intentionally running it in the devicelab to ensure that it does not
+  # run on a VM in order to avoid noisy results from the benchmark.
   - name: Linux analyzer_benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
+      os: Linux
+      device_type: "mokey"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
@@ -370,9 +374,8 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
-      cores: "32"
       tags: >
-        ["devicelab", "hostonly", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: analyzer_benchmark
 
   - name: Linux coverage

@@ -59,14 +59,12 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     setState(() => _filterType = selected ? type : null);
   }
 
-  String get _title {
-    return switch (_filterType) {
-      FilterType.opacity => 'Fading Child Animation',
-      FilterType.rotateTransform => 'Transformed Child Animation',
-      FilterType.rotateFilter => 'Matrix Filtered Child Animation',
-      null => 'Static Child',
-    };
-  }
+  String get _title => switch (_filterType) {
+    FilterType.opacity         => 'Fading Child Animation',
+    FilterType.rotateTransform => 'Transformed Child Animation',
+    FilterType.rotateFilter    => 'Matrix Filtered Child Animation',
+    null                       => 'Static Child',
+  };
 
   static Widget _makeChild(int rows, int cols, double fontSize, bool complex) {
     final BoxDecoration decoration = BoxDecoration(
