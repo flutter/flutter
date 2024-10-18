@@ -1403,6 +1403,8 @@ targets:
       tags: >
         ["devicelab", "hostonly", "linux"]
       test_timeout_secs: "2700"
+    runIf:
+      - packages/flutter_tools/templates/**
 
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
