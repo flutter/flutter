@@ -28,6 +28,10 @@ bool ReactorGLES::IsValid() const {
   return is_valid_;
 }
 
+bool ReactorGLES::CanSetDebugLabels() const {
+  return can_set_debug_labels_;
+}
+
 ReactorGLES::WorkerID ReactorGLES::AddWorker(std::weak_ptr<Worker> worker) {
   Lock lock(workers_mutex_);
   auto id = WorkerID{};

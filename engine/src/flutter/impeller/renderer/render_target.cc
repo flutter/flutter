@@ -289,9 +289,7 @@ RenderTarget RenderTargetAllocator::CreateOffscreen(
       return {};
     }
   }
-#ifdef IMPELLER_DEBUG
-  color0_tex->SetLabel(SPrintF("%s Color Texture", label.data()));
-#endif  // IMPELLER_DEBUG
+  color0_tex->SetLabel(label, "Color Texture");
 
   ColorAttachment color0;
   color0.clear_color = color_attachment_config.clear_color;
@@ -351,10 +349,7 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
       return {};
     }
   }
-#ifdef IMPELLER_DEBUG
-  color0_msaa_tex->SetLabel(
-      SPrintF("%s Color Texture (Multisample)", label.data()));
-#endif  // IMPELLER_DEBUG
+  color0_msaa_tex->SetLabel(label, "Color Texture (Multisample)");
 
   // Create color resolve texture.
   std::shared_ptr<Texture> color0_resolve_tex;
@@ -376,9 +371,7 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
       return {};
     }
   }
-#ifdef IMPELLER_DEBUG
-  color0_resolve_tex->SetLabel(SPrintF("%s Color Texture", label.data()));
-#endif  // IMPELLER_DEBUG
+  color0_resolve_tex->SetLabel(label, "Color Texture");
 
   // Color attachment.
 
@@ -456,10 +449,8 @@ void RenderTarget::SetupDepthStencilAttachments(
   stencil0.store_action = stencil_attachment_config.store_action;
   stencil0.clear_stencil = 0u;
   stencil0.texture = std::move(depth_stencil_texture);
+  stencil0.texture->SetLabel(label, "Depth+Stencil Texture");
 
-#ifdef IMPELLER_DEBUG
-  stencil0.texture->SetLabel(SPrintF("%s Depth+Stencil Texture", label.data()));
-#endif  // IMPELLER_DEBUG
   SetDepthAttachment(std::move(depth0));
   SetStencilAttachment(std::move(stencil0));
 }

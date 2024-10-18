@@ -192,6 +192,13 @@ class ReactorGLES {
   ///
   void SetDebugLabel(const HandleGLES& handle, std::string_view label);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Whether the device is capable of writing debug labels.
+  ///
+  ///             This function is useful for short circuiting expensive debug
+  ///             labeling.
+  bool CanSetDebugLabels() const;
+
   using Operation = std::function<void(const ReactorGLES& reactor)>;
 
   //----------------------------------------------------------------------------
