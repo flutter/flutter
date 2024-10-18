@@ -5364,8 +5364,17 @@ class Expanded extends Flexible {
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows a typical application of the [Wrap] widget. With user
+/// inputs and a [TextField] that prefers to be in the current run.
+///
+/// ** See code in examples/api/lib/widgets/wrap/wrap.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
+///  * [Wrapped], to indicate children that should be placed in the current
+///    run, if their minimal intrinsic size in the [Wrap.direction] allows it.
 ///  * [Row], which places children in one line, and gives control over their
 ///    alignment and spacing.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
@@ -5571,6 +5580,53 @@ class Wrap extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<WrapCrossAlignment>('crossAxisAlignment', crossAxisAlignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
+  }
+}
+
+/// A widget that controls how a child of a [Wrap] is layed out.
+///
+/// Using a [Wrapped] widget gives a child of a [Wrap] the flexibility to
+/// either layout in the current run or layout in the next run, depending on the
+/// child's minimal intrinsic size ([RenderBox.getMinIntrinsicWidth] or
+/// [RenderBox.getMinIntrinsicHeight] depending on the [Wrap.direction]).
+///
+/// A [Wrapped] widget must be a descendant of a [Wrap], and the path from the
+/// [Wrapped] widget to its enclosing [Wrap] must contain only
+/// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
+/// [RenderObjectWidget]s).
+///
+/// See also:
+///  * [Wrap], which is the typical parent of [Wrapped]
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
+class Wrapped extends ParentDataWidget<WrapParentData>{
+  /// Creates a widget that controls how a child of a [Wrap] is layed out.
+  const Wrapped({
+    super.key,
+    this.fit = WrapFit.fillRun,
+    required super.child,
+  });
+
+  /// How a wrapped child is inscribed into the available space of the current
+  /// or an empty run.
+  final WrapFit fit;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is WrapParentData);
+    final WrapParentData parentData = renderObject.parentData! as WrapParentData;
+    if (parentData.fit != fit) {
+      parentData.fit = fit;
+      renderObject.parent?.markNeedsLayout();
+    }
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => Wrap;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<WrapFit>('fit', fit));
   }
 }
 
