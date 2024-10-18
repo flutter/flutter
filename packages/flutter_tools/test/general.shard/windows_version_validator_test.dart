@@ -435,6 +435,7 @@ End of search: 21 match(es) found.
           command: wmicCommand,
           stdout: r'''
 Caption                   OSArchitecture
+
 Microsoft Windows 11 Pro  64-bit
 '''
         ),
