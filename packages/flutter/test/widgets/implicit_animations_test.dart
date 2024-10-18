@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -64,6 +67,65 @@ void main() {
     );
     final Matrix4 result = tween.lerp(0.25);
     expect(result, equals(Matrix4.translationValues(11.0, 21.0, 31.0)));
+  });
+
+  testWidgets('AnimatedValue.builder control test', (WidgetTester tester) async {
+    late double t;
+    final AnimatedValue<double> animatedValue = AnimatedValue<double>.builder(
+      1.0,
+      initial: 0.0,
+      lerp: lerpDouble,
+      duration: const Duration(seconds: 1),
+      builder: (BuildContext context, double value, Widget? child) {
+        t = value;
+        return const SizedBox.shrink();
+      },
+    );
+
+    await tester.pumpWidget(animatedValue);
+    expect(t, 0.0);
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(t, 0.5);
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(t, 1.0);
+  });
+
+  testWidgets('AnimatedValue responds smoothly to interruptions', (WidgetTester tester) async {
+    double targetValue = 20.0;
+    late double currentValue;
+    AnimatedValue<double> animatedValue() {
+      return AnimatedValue<double>.builder(
+        targetValue,
+        initial: 0.0,
+        lerp: lerpDouble,
+        duration: const Duration(seconds: 1),
+        builder: (BuildContext context, double value, Widget? child) {
+          currentValue = value;
+          return const SizedBox.shrink();
+        },
+      );
+    }
+
+    await tester.pumpWidget(animatedValue());
+    expect(currentValue, 0.0);
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(currentValue, 10.0);
+
+    // Set a new value halfway through the animation.
+    targetValue = 30;
+    await tester.pumpWidget(animatedValue());
+    expect(currentValue, 10.0);
+
+    // Animation should restart using the current value,
+    // and should transition to the new target value.
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(currentValue, 20.0);
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(currentValue, 30.0);
   });
 
   testWidgets('AnimatedContainer onEnd callback test', (WidgetTester tester) async {
@@ -255,7 +317,7 @@ void main() {
     await tester.tap(widgetFinder);
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(animationDuration);
+    await tester.pump(const Duration(milliseconds: 999));
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
@@ -264,41 +326,41 @@ void main() {
   });
 
   testWidgets('AnimatedScale transition test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        switchKey: switchKey,
-        state: _TestAnimatedScaleWidgetState(),
+    await tester.pumpWidget(
+      const Stack(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          AnimatedScale(
+            scale: 1.0,
+            duration: Duration(seconds: 2),
+            child: SizedBox.shrink(),
+          ),
+        ],
       ),
-    ));
+    );
+    double? scale() => MatrixUtils.getAsScale(findBuiltValue<AnimatedScale, Transform>(tester).transform);
 
-    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
-      find.byType(TestAnimatedWidget)
-    ).rebuildState!;
-    final Finder switchFinder = find.byKey(switchKey);
-    final ScaleTransition scaleWidget = tester.widget<ScaleTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(ScaleTransition),
-      ).first,
+    await tester.pump(const Duration(seconds: 1));
+    expect(scale(), 1.0);
+
+    await tester.pumpWidget(
+      const Stack(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          AnimatedScale(
+            scale: 2.0,
+            duration: Duration(seconds: 2),
+            child: SizedBox.shrink(),
+          ),
+        ],
+      ),
     );
 
-    expect(state.builds, equals(1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(scale(), 1.5);
 
-    await tester.tap(switchFinder);
-    expect(state.builds, equals(1));
-    await tester.pump();
-    expect(scaleWidget.scale.value, equals(1.0));
-    expect(state.builds, equals(2));
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(scaleWidget.scale.value, equals(1.5));
-    expect(state.builds, equals(2));
-    await tester.pump(const Duration(milliseconds: 250));
-    expect(scaleWidget.scale.value, equals(1.75));
-    expect(state.builds, equals(2));
-    await tester.pump(const Duration(milliseconds: 250));
-    expect(scaleWidget.scale.value, equals(2.0));
-    expect(state.builds, equals(2));
+    await tester.pump(const Duration(seconds: 1));
+    expect(scale(), 2.0);
   });
 
   testWidgets('AnimatedRotation onEnd callback test', (WidgetTester tester) async {
@@ -315,7 +377,7 @@ void main() {
     await tester.tap(widgetFinder);
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(animationDuration);
+    await tester.pump(const Duration(milliseconds: 999));
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
@@ -324,41 +386,42 @@ void main() {
   });
 
   testWidgets('AnimatedRotation transition test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        switchKey: switchKey,
-        state: _TestAnimatedRotationWidgetState(),
+    await tester.pumpWidget(
+      const Stack(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          AnimatedRotation(
+            turns: 0.0,
+            duration: Duration(seconds: 2),
+            child: SizedBox.shrink(),
+          ),
+        ],
       ),
-    ));
+    );
+    Matrix4 transform() => findBuiltValue<AnimatedRotation, Transform>(tester).transform;
+    Matrix4 rotated(double turns) => Transform.rotate(angle: turns * 2 * math.pi).transform;
 
-    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
-        find.byType(TestAnimatedWidget)
-    ).rebuildState!;
-    final Finder switchFinder = find.byKey(switchKey);
-    final RotationTransition rotationWidget = tester.widget<RotationTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(RotationTransition),
-      ).first,
+    await tester.pump(const Duration(seconds: 1));
+    expect(transform(), rotated(0.0));
+
+    await tester.pumpWidget(
+      const Stack(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          AnimatedRotation(
+            turns: 1.0,
+            duration: Duration(seconds: 2),
+            child: SizedBox.shrink(),
+          ),
+        ],
+      ),
     );
 
-    expect(state.builds, equals(1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(transform(), rotated(0.5));
 
-    await tester.tap(switchFinder);
-    expect(state.builds, equals(1));
-    await tester.pump();
-    expect(rotationWidget.turns.value, equals(0.0));
-    expect(state.builds, equals(2));
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(rotationWidget.turns.value, equals(0.75));
-    expect(state.builds, equals(2));
-    await tester.pump(const Duration(milliseconds: 250));
-    expect(rotationWidget.turns.value, equals(1.125));
-    expect(state.builds, equals(2));
-    await tester.pump(const Duration(milliseconds: 250));
-    expect(rotationWidget.turns.value, equals(1.5));
-    expect(state.builds, equals(2));
+    await tester.pump(const Duration(seconds: 1));
+    expect(transform(), rotated(1.0));
   });
 
   testWidgets('AnimatedOpacity onEnd callback test', (WidgetTester tester) async {
@@ -931,6 +994,14 @@ class _TestAnimatedPhysicalModelWidgetState extends _TestAnimatedWidgetState {
       child: child,
     );
   }
+}
+
+Built findBuiltValue<Animated, Built extends Widget>(WidgetTester tester) {
+  final Finder built = find.descendant(
+    of: find.byType(Animated),
+    matching: find.byType(Built),
+  );
+  return tester.widget<Built>(built);
 }
 
 class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
