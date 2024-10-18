@@ -165,7 +165,7 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   //----------------------------------------------------------------------------
   // Top line.
   //
-  AddLinearComponent(
+  AddLinearComponentIfNeeded(
       {rect_origin.x + radii.top_left.x, rect_origin.y},
       {rect_origin.x + rect_size.width - radii.top_right.x, rect_origin.y});
 
@@ -177,7 +177,7 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   //----------------------------------------------------------------------------
   // Right line.
   //
-  AddLinearComponent(
+  AddLinearComponentIfNeeded(
       {rect_origin.x + rect_size.width, rect_origin.y + radii.top_right.y},
       {rect_origin.x + rect_size.width,
        rect_origin.y + rect_size.height - radii.bottom_right.y});
@@ -190,7 +190,7 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   //----------------------------------------------------------------------------
   // Bottom line.
   //
-  AddLinearComponent(
+  AddLinearComponentIfNeeded(
       {rect_origin.x + rect_size.width - radii.bottom_right.x,
        rect_origin.y + rect_size.height},
       {rect_origin.x + radii.bottom_left.x, rect_origin.y + rect_size.height});
@@ -203,7 +203,7 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   //----------------------------------------------------------------------------
   // Left line.
   //
-  AddLinearComponent(
+  AddLinearComponentIfNeeded(
       {rect_origin.x, rect_origin.y + rect_size.height - radii.bottom_left.y},
       {rect_origin.x, rect_origin.y + radii.top_left.y});
 
@@ -281,6 +281,14 @@ void PathBuilder::AddContourComponent(const Point& destination,
     components.push_back(Path::ComponentType::kContour);
   }
   prototype_.bounds.reset();
+}
+
+void PathBuilder::AddLinearComponentIfNeeded(const Point& p1, const Point& p2) {
+  if (ScalarNearlyEqual(p1.x, p2.x, 1e-4f) &&
+      ScalarNearlyEqual(p1.y, p2.y, 1e-4f)) {
+    return;
+  }
+  AddLinearComponent(p1, p2);
 }
 
 void PathBuilder::AddLinearComponent(const Point& p1, const Point& p2) {

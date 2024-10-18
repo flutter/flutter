@@ -173,6 +173,8 @@ class PathBuilder {
 
   void AddLinearComponent(const Point& p1, const Point& p2);
 
+  void AddLinearComponentIfNeeded(const Point& p1, const Point& p2);
+
   void AddQuadraticComponent(const Point& p1, const Point& cp, const Point& p2);
 
   void AddCubicComponent(const Point& p1,
