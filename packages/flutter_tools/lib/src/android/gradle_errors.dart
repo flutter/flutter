@@ -643,7 +643,7 @@ in the 'plugins' closure (by the number following "com.android.application").
  Alternatively, if your project was created with an older version of the templates, it is likely
 in the buildscript.dependencies closure of the top-level build.gradle:
 ${project.android.hostAppGradleFile.path},
-by the number following "com.android.tools.build:gradle:".''';
+as the number following "com.android.tools.build:gradle:".''';
 }
 
 @visibleForTesting

@@ -1319,7 +1319,7 @@ Execution failed for task ':app:bundleReleaseResources'.
                     '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
                     '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
                     '│ /android/build.gradle,                                                                           │\n'
-                    '│ by the number following "com.android.tools.build:gradle:".                                       │\n'
+                    '│ as the number following "com.android.tools.build:gradle:".                                       │\n'
                     '│                                                                                                  │\n'
                     '│  Finally, if you have a strong reason to avoid upgrading AGP, you can temporarily lower the      │\n'
                     '│  compileSdk version in the following file:                                                       │\n'
@@ -1357,11 +1357,11 @@ ERROR:/Users/mackall/.gradle/caches/transforms-3/bd2c84591857c6d4c308221ffece862
                 '│                                                                                                  │\n'
                 '│  The version of AGP that your project uses is likely defined in:                                 │\n'
                 '│ /android/settings.gradle,                                                                        │\n'
-                "│ in the 'plugins' closure (by the number following \"com.android.application\").                    │\n"
+                '│ in the \'plugins\' closure (by the number following "com.android.application").                    │\n'
                 '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
                 '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
                 '│ /android/build.gradle,                                                                           │\n'
-                '│ by the number following "com.android.tools.build:gradle:".                                       │\n'
+                '│ as the number following "com.android.tools.build:gradle:".                                       │\n'
                 '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
                 ''
         )
