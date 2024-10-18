@@ -125,7 +125,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   std::shared_ptr<flutter::PlatformViewsController> _platformViewsController;
   flutter::IOSRenderingAPI _renderingApi;
-  std::shared_ptr<flutter::ProfilerMetricsIOS> _profiler_metrics;
   std::shared_ptr<flutter::SamplingProfiler> _profiler;
 
   // Channels
@@ -570,10 +569,13 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 - (void)startProfiler {
   FML_DCHECK(!_threadHost->name_prefix.empty());
-  _profiler_metrics = std::make_shared<flutter::ProfilerMetricsIOS>();
   _profiler = std::make_shared<flutter::SamplingProfiler>(
       _threadHost->name_prefix.c_str(), _threadHost->profiler_thread->GetTaskRunner(),
-      [self]() { return self->_profiler_metrics->GenerateSample(); }, kNumProfilerSamplesPerSec);
+      []() {
+        flutter::ProfilerMetricsIOS profiler_metrics;
+        return profiler_metrics.GenerateSample();
+      },
+      kNumProfilerSamplesPerSec);
   _profiler->Start();
 }
 
@@ -1486,7 +1488,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
   result->_threadHost = _threadHost;
   result->_profiler = _profiler;
-  result->_profiler_metrics = _profiler_metrics;
   result->_isGpuDisabled = _isGpuDisabled;
   [result setUpShell:std::move(shell) withVMServicePublication:NO];
   return [result autorelease];
