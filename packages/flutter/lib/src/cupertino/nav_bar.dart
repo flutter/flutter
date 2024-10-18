@@ -921,11 +921,59 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 // lose their own states.
 class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar> {
   late _NavigationBarStaticComponentsKeys keys;
+  ScrollableState? _scrollableState;
 
   @override
   void initState() {
     super.initState();
     keys = _NavigationBarStaticComponentsKeys();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
+    _scrollableState = Scrollable.maybeOf(context);
+    _scrollableState?.position.isScrollingNotifier.addListener(_handleScrollChange);
+  }
+
+  @override
+  void dispose() {
+    if (_scrollableState?.position != null) {
+      _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
+    }
+    super.dispose();
+  }
+
+  void _handleScrollChange() {
+    final ScrollPosition? position = _scrollableState?.position;
+    if (position == null || !position.hasPixels || position.pixels <= 0.0) {
+      return;
+    }
+
+    double? target;
+    final bool canScrollBottom = widget.bottom != null && (widget.bottomMode == NavigationBarBottomMode.automatic || widget.bottomMode == null);
+    final double bottomScrollOffset = canScrollBottom ? widget.bottom!.preferredSize.height : 0.0;
+
+    if (canScrollBottom && position.pixels < bottomScrollOffset) {
+      target = position.pixels > bottomScrollOffset / 2
+        ? bottomScrollOffset
+        : 0.0;
+    }
+    else if (position.pixels > bottomScrollOffset && position.pixels < bottomScrollOffset + _kNavBarLargeTitleHeightExtension) {
+      target = position.pixels > bottomScrollOffset + (_kNavBarLargeTitleHeightExtension / 2)
+        ? bottomScrollOffset + _kNavBarLargeTitleHeightExtension
+        : bottomScrollOffset;
+    }
+
+    if (target != null) {
+      position.animateTo(
+        target,
+        // Eyeballed on an iPhone 16 simulator running iOS 18.
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.fastEaseInToSlowEaseOut,
+      );
+    }
   }
 
   @override
@@ -1118,7 +1166,7 @@ class _LargeTitleNavigationBarSliverDelegate
                       bottom: 0.0,
                       child: SizedBox(
                         height: bottomHeight * (1.0 - bottomShrinkFactor),
-                        child: bottom,
+                        child: ClipRect(child: bottom),
                       ),
                     ),
                 ],
