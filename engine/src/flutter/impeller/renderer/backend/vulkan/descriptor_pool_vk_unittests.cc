@@ -5,6 +5,7 @@
 #include "flutter/testing/testing.h"  // IWYU pragma: keep.
 #include "fml/closure.h"
 #include "fml/synchronization/waitable_event.h"
+#include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
@@ -119,6 +120,28 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
   EXPECT_EQ(
       std::count(called->begin(), called->end(), "vkCreateDescriptorPool"),
       34u);
+
+  context->Shutdown();
+}
+
+TEST(DescriptorPoolRecyclerVKTest, MultipleCommandBuffersShareDescriptorPool) {
+  auto const context = MockVulkanContextBuilder().Build();
+
+  auto cmd_buffer_1 = context->CreateCommandBuffer();
+  auto cmd_buffer_2 = context->CreateCommandBuffer();
+
+  CommandBufferVK& vk_1 = CommandBufferVK::Cast(*cmd_buffer_1);
+  CommandBufferVK& vk_2 = CommandBufferVK::Cast(*cmd_buffer_2);
+
+  EXPECT_EQ(&vk_1.GetDescriptorPool(), &vk_2.GetDescriptorPool());
+
+  // Resetting resources creates a new pool.
+  context->DisposeThreadLocalCachedResources();
+
+  auto cmd_buffer_3 = context->CreateCommandBuffer();
+  CommandBufferVK& vk_3 = CommandBufferVK::Cast(*cmd_buffer_3);
+
+  EXPECT_NE(&vk_1.GetDescriptorPool(), &vk_3.GetDescriptorPool());
 
   context->Shutdown();
 }

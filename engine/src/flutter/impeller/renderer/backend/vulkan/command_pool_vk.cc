@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 
 #include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
@@ -155,10 +156,6 @@ void CommandPoolVK::Destroy() {
   collected_buffers_.clear();
 }
 
-// Associates a resource with a thread and context.
-using CommandPoolMap =
-    std::unordered_map<uint64_t, std::shared_ptr<CommandPoolVK>>;
-
 // CommandPoolVK Lifecycle:
 // 1. End of frame will reset the command pool (clearing this on a thread).
 //    There will still be references to the command pool from the uncompleted
@@ -169,17 +166,20 @@ using CommandPoolMap =
 //    available for reuse ("recycle").
 static thread_local std::unique_ptr<CommandPoolMap> tls_command_pool_map;
 
+struct WeakThreadLocalData {
+  std::weak_ptr<CommandPoolVK> command_pool;
+  std::weak_ptr<DescriptorPoolVK> descriptor_pool;
+};
+
 // Map each context to a list of all thread-local command pools associated
 // with that context.
 static Mutex g_all_pools_map_mutex;
-static std::unordered_map<
-    const ContextVK*,
-    std::vector<std::weak_ptr<CommandPoolVK>>> g_all_pools_map
+static std::unordered_map<const ContextVK*,
+                          std::vector<WeakThreadLocalData>> g_all_pools_map
     IPLR_GUARDED_BY(g_all_pools_map_mutex);
 
-// TODO(matanlurey): Return a status_or<> instead of nullptr when we have one.
-std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
-  auto const strong_context = context_.lock();
+std::shared_ptr<DescriptorPoolVK> CommandPoolRecyclerVK::GetDescriptorPool() {
+  const auto& strong_context = context_.lock();
   if (!strong_context) {
     return nullptr;
   }
@@ -192,25 +192,67 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
   auto const hash = strong_context->GetHash();
   auto const it = pool_map.find(hash);
   if (it != pool_map.end()) {
-    return it->second;
+    return it->second.descriptor_pool;
   }
 
-  // Otherwise, create a new resource and return it.
-  auto data = Create();
-  if (!data || !data->pool) {
+  const auto& result =
+      InitializeThreadLocalResources(strong_context, pool_map, hash);
+  if (result.has_value()) {
+    return result->descriptor_pool;
+  }
+
+  return nullptr;
+}
+
+// TODO(matanlurey): Return a status_or<> instead of nullptr when we have one.
+std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
+  const auto& strong_context = context_.lock();
+  if (!strong_context) {
     return nullptr;
   }
 
-  auto const resource = std::make_shared<CommandPoolVK>(
-      std::move(data->pool), std::move(data->buffers), context_);
-  pool_map.emplace(hash, resource);
-
-  {
-    Lock all_pools_lock(g_all_pools_map_mutex);
-    g_all_pools_map[strong_context.get()].push_back(resource);
+  // If there is a resource in used for this thread and context, return it.
+  if (!tls_command_pool_map.get()) {
+    tls_command_pool_map.reset(new CommandPoolMap());
+  }
+  CommandPoolMap& pool_map = *tls_command_pool_map.get();
+  auto const hash = strong_context->GetHash();
+  auto const it = pool_map.find(hash);
+  if (it != pool_map.end()) {
+    return it->second.command_pool;
   }
 
-  return resource;
+  const auto& result =
+      InitializeThreadLocalResources(strong_context, pool_map, hash);
+  if (result.has_value()) {
+    return result->command_pool;
+  }
+
+  return nullptr;
+}
+
+std::optional<ThreadLocalData>
+CommandPoolRecyclerVK::InitializeThreadLocalResources(
+    const std::shared_ptr<ContextVK>& context,
+    CommandPoolMap& pool_map,
+    uint64_t pool_key) {
+  auto data = Create();
+  if (!data || !data->pool) {
+    return std::nullopt;
+  }
+
+  auto command_pool = std::make_shared<CommandPoolVK>(
+      std::move(data->pool), std::move(data->buffers), context_);
+  auto descriptor_pool = std::make_shared<DescriptorPoolVK>(context_);
+  {
+    Lock all_pools_lock(g_all_pools_map_mutex);
+    g_all_pools_map[context.get()].push_back(WeakThreadLocalData{
+        .command_pool = command_pool, .descriptor_pool = descriptor_pool});
+  }
+
+  return pool_map[pool_key] =
+             ThreadLocalData{.command_pool = std::move(command_pool),
+                             .descriptor_pool = std::move(descriptor_pool)};
 }
 
 // TODO(matanlurey): Return a status_or<> instead of nullopt when we have one.
@@ -293,14 +335,13 @@ void CommandPoolRecyclerVK::DestroyThreadLocalPools(const ContextVK* context) {
   Lock all_pools_lock(g_all_pools_map_mutex);
   auto found = g_all_pools_map.find(context);
   if (found != g_all_pools_map.end()) {
-    for (auto& weak_pool : found->second) {
-      auto pool = weak_pool.lock();
-      if (!pool) {
-        continue;
+    for (auto& [command_pool, desc_pool] : found->second) {
+      const auto& strong_pool = command_pool.lock();
+      if (strong_pool) {
+        // Delete all objects held by this pool.  The destroyed pool will still
+        // remain in its thread's TLS map until that thread exits.
+        strong_pool->Destroy();
       }
-      // Delete all objects held by this pool.  The destroyed pool will still
-      // remain in its thread's TLS map until that thread exits.
-      pool->Destroy();
     }
     g_all_pools_map.erase(found);
   }

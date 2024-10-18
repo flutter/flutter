@@ -6,6 +6,7 @@
 
 #include "fml/concurrent_message_loop.h"
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
+#include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
 #include "impeller/renderer/render_target.h"
 
@@ -495,9 +496,14 @@ std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
   if (!tls_pool) {
     return nullptr;
   }
+  auto tls_desc_pool = recycler->GetDescriptorPool();
+  if (!tls_desc_pool) {
+    return nullptr;
+  }
 
   auto tracked_objects = std::make_shared<TrackedObjectsVK>(
-      weak_from_this(), std::move(tls_pool), GetGPUTracer()->CreateGPUProbe());
+      weak_from_this(), std::move(tls_pool), tls_desc_pool,
+      GetGPUTracer()->CreateGPUProbe());
   auto queue = GetGraphicsQueue();
 
   if (!tracked_objects || !tracked_objects->IsValid() || !queue) {
@@ -516,10 +522,9 @@ std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
       tracked_objects->GetCommandBuffer());
 
   return std::shared_ptr<CommandBufferVK>(new CommandBufferVK(
-      shared_from_this(),          //
-      GetDeviceHolder(),           //
-      std::move(tracked_objects),  //
-      GetFenceWaiter()             //
+      shared_from_this(),         //
+      GetDeviceHolder(),          //
+      std::move(tracked_objects)  //
       ));
 }
 
