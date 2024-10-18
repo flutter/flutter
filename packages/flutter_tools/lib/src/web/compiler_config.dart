@@ -33,8 +33,8 @@ sealed class WebCompilerConfig {
   /// The compiler optimization level specified by the user.
   ///
   /// Valid values are O0 (lowest, debug default) to O4 (highest, release default).
-  /// If the value is null, the user hasn't specified an optimization level and we
-  /// will use the default appropriate for teh build mode.
+  /// If the value is null, the user hasn't specified an optimization level and an
+  /// appropriate default for the build mode will be used instead.
   final int? optimizationLevel;
 
   /// `true` if the compiler build should output source maps.
