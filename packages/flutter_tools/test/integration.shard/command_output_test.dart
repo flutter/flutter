@@ -234,7 +234,7 @@ void main() {
     ], workingDirectory: helloWorld);
 
     expect(result.exitCode, isNot(0));
-    expect(result.stderr, contains('Could not find an option named "release"'));
+    expect(result.stderr, contains('Could not find an option named "--release"'));
   });
 
   testWithoutContext('flutter can report crashes', () async {

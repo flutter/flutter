@@ -216,7 +216,7 @@ void main() {
           ],
         ),
         throwsUsageException(
-          message: '"package_ffi" is not an allowed value for option "template"',
+          message: '"package_ffi" is not an allowed value for option "--template"',
         ),
       );
     }, overrides: <Type, Generator>{
