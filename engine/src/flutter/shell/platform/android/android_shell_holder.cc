@@ -90,6 +90,9 @@ AndroidShellHolder::AndroidShellHolder(
   auto thread_label = std::to_string(thread_host_count++);
 
   auto mask = ThreadHost::Type::kRaster | ThreadHost::Type::kIo;
+  if (!settings.merged_platform_ui_thread) {
+    mask |= ThreadHost::Type::kUi;
+  }
 
   flutter::ThreadHost::ThreadHostConfig host_config(
       thread_label, mask, AndroidPlatformThreadConfigSetter);
@@ -136,7 +139,11 @@ AndroidShellHolder::AndroidShellHolder(
   fml::RefPtr<fml::TaskRunner> platform_runner =
       fml::MessageLoop::GetCurrent().GetTaskRunner();
   raster_runner = thread_host_->raster_thread->GetTaskRunner();
-  ui_runner = platform_runner;
+  if (settings.merged_platform_ui_thread) {
+    ui_runner = platform_runner;
+  } else {
+    ui_runner = thread_host_->ui_thread->GetTaskRunner();
+  }
   io_runner = thread_host_->io_thread->GetTaskRunner();
 
   flutter::TaskRunners task_runners(thread_label,     // label

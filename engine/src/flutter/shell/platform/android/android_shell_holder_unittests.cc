@@ -174,5 +174,19 @@ TEST(AndroidShellHolder, CreateWithMergedPlatformAndUIThread) {
       holder->GetShellForTesting()->GetTaskRunners().GetPlatformTaskRunner());
 }
 
+TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
+  Settings settings;
+  settings.merged_platform_ui_thread = false;
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  auto holder = std::make_unique<AndroidShellHolder>(settings, jni);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
+  holder->GetPlatformView()->NotifyCreated(window);
+
+  EXPECT_NE(
+      holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner(),
+      holder->GetShellForTesting()->GetTaskRunners().GetPlatformTaskRunner());
+}
+
 }  // namespace testing
 }  // namespace flutter

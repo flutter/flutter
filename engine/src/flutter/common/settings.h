@@ -363,6 +363,10 @@ struct Settings {
   ///
   /// This is used by the runOnPlatformThread API.
   bool enable_platform_isolates = false;
+
+  // If true, the UI thread is the platform thread on supported
+  // platforms.
+  bool merged_platform_ui_thread = true;
 };
 
 }  // namespace flutter
