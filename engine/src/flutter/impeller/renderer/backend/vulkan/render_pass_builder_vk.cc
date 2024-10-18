@@ -39,7 +39,7 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
   desc.storeOp = ToVKAttachmentStoreOp(store_action, false);
   desc.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
   desc.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-  desc.initialLayout = vk::ImageLayout::eGeneral;
+  desc.initialLayout = vk::ImageLayout::eUndefined;
   desc.finalLayout = vk::ImageLayout::eGeneral;
   colors_[index] = desc;
 
