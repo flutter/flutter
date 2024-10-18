@@ -16,17 +16,8 @@ namespace impeller {
 
 class InlinePassContext {
  public:
-  struct RenderPassResult {
-    bool just_created = false;
-    std::shared_ptr<RenderPass> pass;
-    std::shared_ptr<Texture> backdrop_texture;
-  };
-
-  InlinePassContext(
-      const ContentContext& renderer,
-      EntityPassTarget& pass_target,
-      uint32_t entity_count,
-      std::optional<RenderPassResult> collapsed_parent_pass = std::nullopt);
+  InlinePassContext(const ContentContext& renderer,
+                    EntityPassTarget& pass_target);
 
   ~InlinePassContext();
 
@@ -42,7 +33,7 @@ class InlinePassContext {
 
   uint32_t GetPassCount() const;
 
-  RenderPassResult GetRenderPass(uint32_t pass_depth);
+  const std::shared_ptr<RenderPass>& GetRenderPass();
 
  private:
   const ContentContext& renderer_;
@@ -50,10 +41,6 @@ class InlinePassContext {
   std::shared_ptr<CommandBuffer> command_buffer_;
   std::shared_ptr<RenderPass> pass_;
   uint32_t pass_count_ = 0;
-  uint32_t entity_count_ = 0;
-
-  // Whether this context is collapsed into a parent entity pass.
-  bool is_collapsed_ = false;
 
   InlinePassContext(const InlinePassContext&) = delete;
 
