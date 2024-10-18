@@ -29,17 +29,14 @@ Future<void> main() async {
     await runProjectTest((FlutterProject flutterProject) async {
       await inDirectory(path.join(flutterProject.rootPath, 'android'), () async {
         section('Insert gradle testing script');
-        final File buildFile = getAndroidBuildFile(path.join(flutterProject.rootPath, 'android'));
-        buildFile.writeAsStringSync(
+        final File build = File(path.join(
+          flutterProject.rootPath, 'android', 'app', 'build.gradle',
+        ));
+        build.writeAsStringSync(
           '''
-tasks.register("printEngineMavenUrl") {
+task printEngineMavenUrl() {
     doLast {
-        project.repositories.forEach { repo ->
-            if (repo.name == "maven") {
-                repo as MavenArtifactRepository
-                logger.quiet(repo.url.toString())
-            }
-        }
+        println project.repositories.find { it.name == 'maven' }.url
     }
 }
           ''',
