@@ -2936,6 +2936,7 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey large_image_changer_perf_android
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/156945
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
