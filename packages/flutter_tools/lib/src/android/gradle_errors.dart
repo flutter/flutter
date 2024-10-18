@@ -699,7 +699,7 @@ final GradleHandledError jlinkErrorWithJava21AndSourceCompatibility = GradleHand
       required bool usesAndroidX,
     }) async {
       globals.printBox('''
-${globals.logger.terminal.warningMark} This is likely due to a known bug in Android Gradle Plugin (AGP) versions less than 8.2.1, when 
+${globals.logger.terminal.warningMark} This is likely due to a known bug in Android Gradle Plugin (AGP) versions less than 8.2.1, when
   1. setting a value for SourceCompatibility and
   2. using Java 21 or above.
 To fix this error, please upgrade your AGP version to at least 8.2.1.${_getAgpLocation(project)}
