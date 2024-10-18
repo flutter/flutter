@@ -466,6 +466,6 @@ Microsoft Windows 11 Pro  64-bit
     );
     final ValidationResult result = await validator.validate();
     expect(result.type, ValidationType.success);
-    expect(result.statusInfo, 'Windows 11 or higher, ?');
+    expect(result.statusInfo, 'Windows 11 or higher');
   });
 }
