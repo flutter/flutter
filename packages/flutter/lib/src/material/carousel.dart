@@ -119,10 +119,30 @@ class CarouselView extends StatefulWidget {
   /// Creates a Material Design carousel.
   const CarouselView({
     super.key,
+    @Deprecated(
+      'Use `itemPadding` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
+    )
     this.padding,
+    @Deprecated(
+      'Use `itemBackgroundColor` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
+    )
     this.backgroundColor,
+    @Deprecated(
+      'Use `itemElevation` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
+    )
     this.elevation,
+    @Deprecated(
+      'Use `itemShape` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
+    )
     this.shape,
+    this.itemPadding,
+    this.itemBackgroundColor,
+    this.itemElevation,
+    this.itemShape,
     this.overlayColor,
     this.itemSnapping = false,
     this.shrinkExtent = 0.0,
@@ -179,10 +199,30 @@ class CarouselView extends StatefulWidget {
   /// layouts indicated in the Material Design 3.
   const CarouselView.weighted({
     super.key,
+    @Deprecated(
+      'Use `itemPadding` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
+    )
     this.padding,
+    @Deprecated(
+      'Use `itemBackgroundColor` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
+    )
     this.backgroundColor,
+    @Deprecated(
+      'Use `itemElevation` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
+    )
     this.elevation,
+    @Deprecated(
+      'Use `itemShape` instead. '
+      'This feature was deprecated after 3.27.0-1.0.pre.',
+    )
     this.shape,
+    this.itemPadding,
+    this.itemBackgroundColor,
+    this.itemElevation,
+    this.itemShape,
     this.overlayColor,
     this.itemSnapping = false,
     this.shrinkExtent = 0.0,
@@ -199,16 +239,31 @@ class CarouselView extends StatefulWidget {
   /// The amount of space to surround each carousel item with.
   ///
   /// Defaults to [EdgeInsets.all] of 4 pixels.
+  @Deprecated(
+    'Use `itemPadding` instead. '
+    'itemPadding now manages space to surround each carousel item. '
+    'This feature was deprecated after 3.27.0-1.0.pre.',
+  )
   final EdgeInsets? padding;
 
   /// The background color for each carousel item.
   ///
   /// Defaults to [ColorScheme.surface].
+  @Deprecated(
+    'Use `itemBackgroundColor` instead. '
+    'itemBackgroundColor now manages background color of each carousel item. '
+    'This feature was deprecated after 3.27.0-1.0.pre.',
+  )
   final Color? backgroundColor;
 
   /// The z-coordinate of each carousel item.
   ///
   /// Defaults to 0.0.
+  @Deprecated(
+    'Use itemElevation instead. '
+    'itemElevation now manages z-coordinate of each carousel item. '
+    'This feature was deprecated after 3.27.0-1.0.pre.',
+  )
   final double? elevation;
 
   /// The shape of each carousel item's [Material].
@@ -217,7 +272,35 @@ class CarouselView extends StatefulWidget {
   ///
   /// Defaults to a [RoundedRectangleBorder] with a circular corner radius
   /// of 28.0.
+  @Deprecated(
+    'Use itemShape instead. '
+    'itemShape now manages shape of each carousel item. '
+    'This feature was deprecated after 3.27.0-1.0.pre.',
+  )
   final ShapeBorder? shape;
+
+  /// The amount of space to surround each carousel item with.
+  ///
+  /// Defaults to [EdgeInsets.all] of 4 pixels.
+  final EdgeInsets? itemPadding;
+
+  /// The background color for each carousel item.
+  ///
+  /// Defaults to [ColorScheme.surface].
+  final Color? itemBackgroundColor;
+
+  /// The z-coordinate of each carousel item.
+  ///
+  /// Defaults to 0.0.
+  final double? itemElevation;
+
+  /// The shape of each carousel item's [Material].
+  ///
+  /// Defines each item's [Material.shape].
+  ///
+  /// Defaults to a [RoundedRectangleBorder] with a circular corner radius
+  /// of 28.0.
+  final ShapeBorder? itemShape;
 
   /// The highlight color to indicate the carousel items are in pressed, hovered
   /// or focused states.
@@ -392,10 +475,12 @@ class _CarouselViewState extends State<CarouselView> {
   }
 
   Widget _buildCarouselItem(ThemeData theme, int index) {
-    final EdgeInsets effectivePadding = widget.padding ?? const EdgeInsets.all(4.0);
-    final Color effectiveBackgroundColor = widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
-    final double effectiveElevation = widget.elevation ?? 0.0;
-    final ShapeBorder effectiveShape = widget.shape
+    final EdgeInsets effectivePadding = widget.padding ?? widget.itemPadding
+      ?? const EdgeInsets.all(4.0);
+    final Color effectiveBackgroundColor = widget.backgroundColor ?? widget.itemBackgroundColor
+      ?? Theme.of(context).colorScheme.surface;
+    final double effectiveElevation = widget.elevation ?? widget.itemElevation ?? 0.0;
+    final ShapeBorder effectiveShape = widget.shape ?? widget.itemShape
       ?? const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(28.0))
       );
