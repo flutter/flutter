@@ -50,13 +50,11 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      spacing: 20,
       children: <Widget>[
         Text(selectedDate != null
           ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
           : 'No date selected',
-        ),
-        const SizedBox(
-          height: 20,
         ),
         OutlinedButton(
           onPressed: _selectDate,
