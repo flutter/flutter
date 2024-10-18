@@ -249,7 +249,7 @@ FLUTTER_ASSERT_ARC
                        [timeoutFirstFrame fulfill];
                      }
                    }];
-  [self waitForExpectationsWithTimeout:5 handler:nil];
+  [self waitForExpectations:@[ timeoutFirstFrame ]];
 }
 
 - (void)testSpawn {
@@ -275,7 +275,7 @@ FLUTTER_ASSERT_ARC
                                  [deallocNotification fulfill];
                                }];
   }
-  [self waitForExpectationsWithTimeout:1 handler:nil];
+  [self waitForExpectations:@[ deallocNotification ]];
   [center removeObserver:observer];
 }
 
@@ -299,7 +299,7 @@ FLUTTER_ASSERT_ARC
                                  [gotMessage fulfill];
                                }];
   });
-  [self waitForExpectationsWithTimeout:1 handler:nil];
+  [self waitForExpectations:@[ gotMessage ]];
 }
 
 - (void)testThreadPrioritySetCorrectly {
@@ -325,7 +325,7 @@ FLUTTER_ASSERT_ARC
 
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine run];
-  [self waitForExpectationsWithTimeout:1 handler:nil];
+  [self waitForExpectations:@[ prioritiesSet ]];
 
   method_setImplementation(method, originalSetThreadPriority);
 }
