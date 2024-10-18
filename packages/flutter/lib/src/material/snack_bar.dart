@@ -423,8 +423,8 @@ class SnackBar extends StatefulWidget {
   /// to a new line.
   ///
   /// Must be between 0 and 1.
-  /// If the width of the snackbar's [action] divided by the width of the snackbar
-  /// is greater than this percentage then the [action] will appear below the [content].
+  /// If the width of the [action] divided by the total snackbar width
+  /// is greater than this percentage, the [action] will appear below the [content].
   ///
   /// At a value of 0, the action will always overflow to a new line.
   ///
