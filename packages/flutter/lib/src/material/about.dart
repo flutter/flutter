@@ -475,8 +475,8 @@ class _AdaptiveAboutDialog extends AboutDialog {
 
   List<Widget>? _actions(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+
     switch (themeData.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -540,8 +540,7 @@ class _AdaptiveAboutDialog extends AboutDialog {
     super.build(context);
 
     final String name = applicationName ?? _defaultApplicationName(context);
-    final String version =
-        applicationVersion ?? _defaultApplicationVersion(context);
+    final String version = applicationVersion ?? _defaultApplicationVersion(context);
     final Widget? icon = applicationIcon ?? _defaultApplicationIcon(context);
     final ThemeData themeData = Theme.of(context);
     final List<Widget>? actions = _actions(context);
@@ -552,8 +551,7 @@ class _AdaptiveAboutDialog extends AboutDialog {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              if (icon != null)
-                IconTheme(data: themeData.iconTheme, child: icon),
+              if (icon != null) IconTheme(data: themeData.iconTheme, child: icon),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -562,8 +560,7 @@ class _AdaptiveAboutDialog extends AboutDialog {
                       Text(name, style: themeData.textTheme.headlineSmall),
                       Text(version, style: themeData.textTheme.bodyMedium),
                       const SizedBox(height: _textVerticalSeparation),
-                      Text(applicationLegalese ?? '',
-                          style: themeData.textTheme.bodySmall),
+                      Text(applicationLegalese ?? '', style: themeData.textTheme.bodySmall),
                     ],
                   ),
                 ),
