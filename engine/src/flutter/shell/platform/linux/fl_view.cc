@@ -385,15 +385,6 @@ static void fl_view_keyboard_delegate_iface_init(
                                                  event);
   };
 
-  iface->redispatch_event = [](FlKeyboardViewDelegate* view_delegate,
-                               FlKeyEvent* event) {
-    GdkEventType event_type =
-        gdk_event_get_event_type(fl_key_event_get_origin(event));
-    g_return_if_fail(event_type == GDK_KEY_PRESS ||
-                     event_type == GDK_KEY_RELEASE);
-    gdk_event_put(fl_key_event_get_origin(event));
-  };
-
   iface->lookup_key = [](FlKeyboardViewDelegate* view_delegate,
                          const GdkKeymapKey* key) -> guint {
     FlView* self = FL_VIEW(view_delegate);

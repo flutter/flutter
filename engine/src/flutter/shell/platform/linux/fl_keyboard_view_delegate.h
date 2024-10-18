@@ -42,8 +42,6 @@ struct _FlKeyboardViewDelegateInterface {
   gboolean (*text_filter_key_press)(FlKeyboardViewDelegate* delegate,
                                     FlKeyEvent* event);
 
-  void (*redispatch_event)(FlKeyboardViewDelegate* delegate, FlKeyEvent* event);
-
   guint (*lookup_key)(FlKeyboardViewDelegate* view_delegate,
                       const GdkKeymapKey* key);
 
@@ -76,16 +74,6 @@ void fl_keyboard_view_delegate_send_key_event(FlKeyboardViewDelegate* delegate,
  * The ownership of the `event` is kept by the keyboard handler.
  */
 gboolean fl_keyboard_view_delegate_text_filter_key_press(
-    FlKeyboardViewDelegate* delegate,
-    FlKeyEvent* event);
-
-/**
- * fl_keyboard_view_delegate_redispatch_event:
- *
- * Handles `FlKeyboardHandler`'s request to insert a GDK event to the system for
- * redispatching.
- */
-void fl_keyboard_view_delegate_redispatch_event(
     FlKeyboardViewDelegate* delegate,
     FlKeyEvent* event);
 

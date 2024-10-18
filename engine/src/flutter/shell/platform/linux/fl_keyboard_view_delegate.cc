@@ -32,15 +32,6 @@ gboolean fl_keyboard_view_delegate_text_filter_key_press(
       self, event);
 }
 
-void fl_keyboard_view_delegate_redispatch_event(FlKeyboardViewDelegate* self,
-                                                FlKeyEvent* event) {
-  g_return_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(self));
-  g_return_if_fail(event != nullptr);
-
-  return FL_KEYBOARD_VIEW_DELEGATE_GET_IFACE(self)->redispatch_event(self,
-                                                                     event);
-}
-
 guint fl_keyboard_view_delegate_lookup_key(FlKeyboardViewDelegate* self,
                                            const GdkKeymapKey* key) {
   g_return_val_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(self), 0);
