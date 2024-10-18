@@ -529,6 +529,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.disable_surface_control = command_line.HasOption(
       FlagForSwitch(Switch::DisableAndroidSurfaceControl));
 
+  settings.merged_platform_ui_thread = !command_line.HasOption(
+      FlagForSwitch(Switch::DisableMergedPlatformUIThread));
+
   return settings;
 }
 
