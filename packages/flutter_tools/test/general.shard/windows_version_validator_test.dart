@@ -414,4 +414,47 @@ End of search: 21 match(es) found.
     expect(result.type, ValidationType.success);
     expect(result.statusInfo, 'Windows 11 or higher, 23H2, 2009');
   });
+
+  testWithoutContext('Handles reg call failing', () async {
+    const List<String> wmicCommand = <String>[
+      'wmic',
+      'os',
+      'get',
+      'Caption,OSArchitecture',
+    ];
+    const List<String> regCommand = <String>[
+      'reg',
+      'query',
+      r'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion',
+      '/t',
+      'REG_SZ',
+    ];
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        const FakeCommand(
+          command: wmicCommand,
+          stdout: r'''
+Caption                   OSArchitecture
+Microsoft Windows 11 Pro  64-bit
+'''
+        ),
+        FakeCommand(
+          command: regCommand,
+          exception: ProcessException(
+            regCommand[0],
+            regCommand.sublist(1),
+          )
+        ),
+      ],
+    );
+
+    final WindowsVersionValidator validator = WindowsVersionValidator(
+      operatingSystemUtils: FakeValidOperatingSystemUtils(),
+      processLister: ofdNotRunning(),
+      versionExtractor: WindowsVersionExtractor(processManager),
+    );
+    final ValidationResult result = await validator.validate();
+    expect(result.type, ValidationType.success);
+    expect(result.statusInfo, 'Windows 11 or higher, ?');
+  });
 }
