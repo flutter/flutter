@@ -81,6 +81,9 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   incompatibleJavaAndGradleVersionsHandler,
   remoteTerminatedHandshakeHandler,
   couldNotOpenCacheDirectoryHandler,
+  incompatibleCompileSdk35AndAgpVersionHandler,
+  jlinkErrorWithJava21AndSourceCompatibility,
+  incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -640,4 +643,84 @@ final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
     return GradleBuildStatus.retry;
   },
   eventLabel: 'could-not-open-cache-directory',
+);
+
+String _getAgpLocation(FlutterProject project) {
+  return '''
+ The version of AGP that your project uses is likely defined in:
+${project.android.settingsGradleFile.path},
+in the 'plugins' closure (by the number following "com.android.application").
+ Alternatively, if your project was created with an older version of the templates, it is likely
+in the buildscript.dependencies closure of the top-level build.gradle:
+${project.android.hostAppGradleFile.path},
+as the number following "com.android.tools.build:gradle:".''';
+}
+
+@visibleForTesting
+final GradleHandledError incompatibleCompileSdk35AndAgpVersionHandler = GradleHandledError(
+  test: (String line) => line.contains('RES_TABLE_TYPE_TYPE entry offsets overlap actual entry data'),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+  }) async {
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.'
+          ' \n Please upgrade to a newer AGP version.${_getAgpLocation(project)}\n\n Finally, if you have a'
+          ' strong reason to avoid upgrading AGP, you can temporarily lower the compileSdk version in the following file:\n${project.android.appGradleFile.path}',
+      title: _boxTitle,
+    );
+
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'incompatible-compile-sdk-and-agp',
+);
+
+@visibleForTesting
+final GradleHandledError r8DexingBugInAgp73Handler = GradleHandledError(
+  test: (String line) => line.contains('com.android.tools.r8.internal') && line.contains(': Unused argument with users'),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+  }) async {
+    globals.printBox('''
+${globals.logger.terminal.warningMark} Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug which causes this error (see more info at https://issuetracker.google.com/issues/242308990).
+To fix this error, update to a newer version of AGP (at least 7.4.0).
+
+${_getAgpLocation(project)}''',
+        title: _boxTitle,
+    );
+
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'r8-dexing-bug-in-AGP-7.3'
+);
+
+@visibleForTesting
+const String jlinkErrorMessage = '> Error while executing process';
+
+@visibleForTesting
+final GradleHandledError jlinkErrorWithJava21AndSourceCompatibility = GradleHandledError(
+    test: (String line) => line.contains('> Error while executing process')&& line.contains('jlink'),
+    handler: ({
+      required String line,
+      required FlutterProject project,
+      required bool usesAndroidX,
+    }) async {
+      globals.printBox('''
+${globals.logger.terminal.warningMark} This is likely due to a known bug in Android Gradle Plugin (AGP) versions less than 8.2.1, when
+  1. setting a value for SourceCompatibility and
+  2. using Java 21 or above.
+To fix this error, please upgrade your AGP version to at least 8.2.1.${_getAgpLocation(project)}
+
+For more information, see:
+https://issuetracker.google.com/issues/294137077
+https://github.com/flutter/flutter/issues/156304''',
+        title: _boxTitle,
+      );
+
+      return GradleBuildStatus.exit;
+    },
+    eventLabel: 'java21-and-source-compatibility'
 );
