@@ -30,7 +30,7 @@ static void fl_accessible_editable_text_iface_init(AtkEditableTextIface* iface);
 G_DEFINE_TYPE_WITH_CODE(
     FlAccessibleTextField,
     fl_accessible_text_field,
-    FL_TYPE_ACCESSIBLE_NODE,
+    fl_accessible_node_get_type(),
     G_IMPLEMENT_INTERFACE(ATK_TYPE_TEXT, fl_accessible_text_iface_init)
         G_IMPLEMENT_INTERFACE(ATK_TYPE_EDITABLE_TEXT,
                               fl_accessible_editable_text_iface_init))

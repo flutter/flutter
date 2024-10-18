@@ -12,7 +12,6 @@
 
 G_BEGIN_DECLS
 
-#define FL_TYPE_KEYBOARD_HANDLER fl_keyboard_handler_get_type()
 G_DECLARE_FINAL_TYPE(FlKeyboardHandler,
                      fl_keyboard_handler,
                      FL,

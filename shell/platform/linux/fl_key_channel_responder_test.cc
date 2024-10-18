@@ -39,12 +39,13 @@ TEST(FlKeyChannelResponderTest, SendKeyEvent) {
       .value_converter = echo_response_cb,
       .channel_name = "test/echo",
   };
-  g_autoptr(FlKeyResponder) responder =
-      FL_KEY_RESPONDER(fl_key_channel_responder_new(messenger, &mock));
+  g_autoptr(FlKeyChannelResponder) responder =
+      fl_key_channel_responder_new(messenger, &mock);
 
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
       12345, TRUE, 0x04, GDK_KEY_A, static_cast<GdkModifierType>(0), 0);
-  fl_key_responder_handle_event(responder, event1, responder_callback, loop);
+  fl_key_channel_responder_handle_event(responder, event1, 0,
+                                        responder_callback, loop);
   expected_value =
       "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, keyCode: 65, "
       "modifiers: 0, unicodeScalarValues: 65}";
@@ -55,7 +56,8 @@ TEST(FlKeyChannelResponderTest, SendKeyEvent) {
 
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
       23456, FALSE, 0x04, GDK_KEY_A, static_cast<GdkModifierType>(0), 0);
-  fl_key_responder_handle_event(responder, event2, responder_callback, loop);
+  fl_key_channel_responder_handle_event(responder, event2, 0,
+                                        responder_callback, loop);
   expected_value =
       "{type: keyup, keymap: linux, scanCode: 4, toolkit: gtk, keyCode: 65, "
       "modifiers: 0, unicodeScalarValues: 65}";
@@ -76,12 +78,13 @@ void test_lock_event(guint key_code,
       .value_converter = echo_response_cb,
       .channel_name = "test/echo",
   };
-  g_autoptr(FlKeyResponder) responder =
-      FL_KEY_RESPONDER(fl_key_channel_responder_new(messenger, &mock));
+  g_autoptr(FlKeyChannelResponder) responder =
+      fl_key_channel_responder_new(messenger, &mock);
 
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
       12345, TRUE, 0x04, key_code, static_cast<GdkModifierType>(0), 0);
-  fl_key_responder_handle_event(responder, event1, responder_callback, loop);
+  fl_key_channel_responder_handle_event(responder, event1, 0,
+                                        responder_callback, loop);
   expected_value = down_expected;
   expected_handled = FALSE;
 
@@ -92,7 +95,8 @@ void test_lock_event(guint key_code,
   expected_handled = FALSE;
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
       12346, FALSE, 0x04, key_code, static_cast<GdkModifierType>(0), 0);
-  fl_key_responder_handle_event(responder, event2, responder_callback, loop);
+  fl_key_channel_responder_handle_event(responder, event2, 0,
+                                        responder_callback, loop);
 
   // Blocks here until echo_response_cb is called.
   g_main_loop_run(loop);
@@ -134,12 +138,13 @@ TEST(FlKeyChannelResponderTest, TestKeyEventHandledByFramework) {
       .value_converter = echo_response_cb,
       .channel_name = "test/echo",
   };
-  g_autoptr(FlKeyResponder) responder =
-      FL_KEY_RESPONDER(fl_key_channel_responder_new(messenger, &mock));
+  g_autoptr(FlKeyChannelResponder) responder =
+      fl_key_channel_responder_new(messenger, &mock);
 
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       12345, TRUE, 0x04, GDK_KEY_A, static_cast<GdkModifierType>(0), 0);
-  fl_key_responder_handle_event(responder, event, responder_callback, loop);
+  fl_key_channel_responder_handle_event(responder, event, 0, responder_callback,
+                                        loop);
   expected_handled = TRUE;
   expected_value =
       "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, "
@@ -158,13 +163,13 @@ TEST(FlKeyChannelResponderTest, UseSpecifiedLogicalKey) {
       .value_converter = echo_response_cb,
       .channel_name = "test/echo",
   };
-  g_autoptr(FlKeyResponder) responder =
-      FL_KEY_RESPONDER(fl_key_channel_responder_new(messenger, &mock));
+  g_autoptr(FlKeyChannelResponder) responder =
+      fl_key_channel_responder_new(messenger, &mock);
 
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       12345, TRUE, 0x04, GDK_KEY_A, static_cast<GdkModifierType>(0), 0);
-  fl_key_responder_handle_event(responder, event, responder_callback, loop,
-                                888);
+  fl_key_channel_responder_handle_event(responder, event, 888,
+                                        responder_callback, loop);
   expected_handled = TRUE;
   expected_value =
       "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, "
