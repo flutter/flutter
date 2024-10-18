@@ -5,9 +5,10 @@
 import 'dart:io';
 
 import 'package:file/local.dart';
+
+import 'apk_utils.dart';
 import 'task_result.dart';
 import 'utils.dart';
-import 'apk_utils.dart';
 
 // The following test outline shares a lot of similarities with
 // the one in packages/flutter_tools/test/src/android_common.dart. When making
