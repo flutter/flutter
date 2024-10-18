@@ -34,18 +34,18 @@ bool _tapRegionDebug(String message, [Iterable<String>? details]) {
 }
 
 /// Signature for a callback called for a [PointerDownEvent] relative to a [TapRegion].
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [TapRegion.onTapOutside], which is of this type.
 ///  * [TapRegion.onTapInside], which is of this type.
 ///  * [TapRegionUpCallback], which is similar but for [PointerUpEvent]s.
 typedef TapRegionCallback = void Function(PointerDownEvent event);
 
 /// Signature for a callback called for a [PointerUpEvent] relative to a [TapRegion].
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [TapRegion.onTapUpOutside], which is of this type.
 ///  * [TapRegion.onTapUpInside], which is of this type.
 ///  * [TapRegionCallback], which is similar but for [PointerDownEvent]s.
