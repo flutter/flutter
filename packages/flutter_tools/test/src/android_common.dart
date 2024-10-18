@@ -160,7 +160,7 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
 
   if (versions.compileSdkVersion != null) {
     final File appGradleBuild = File(fileSystem.path.join(
-        app.path, 'android', 'app', 'build.gradle.kts'));
+        app.path, 'android', 'app', 'build.gradle'));
     final String appBuildContent = appGradleBuild.readAsStringSync()
         .replaceFirst(flutterCompileSdkString, versions.compileSdkVersion!);
     appGradleBuild.writeAsStringSync(appBuildContent);

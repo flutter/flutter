@@ -54,7 +54,7 @@ void main() {
 
     final Directory pluginExampleAppDir = pluginAppDir.childDirectory('example');
 
-    final File projectGradleFile = pluginExampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle.kts');
+    final File projectGradleFile = pluginExampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
     expect(projectGradleFile, exists);
 
     final String projectBuildGradle = projectGradleFile.readAsStringSync();
