@@ -292,6 +292,7 @@ class TextField extends StatefulWidget {
     this.onTap,
     this.onTapAlwaysCalled = false,
     this.onTapOutside,
+    this.onTapUpOutside,
     this.mouseCursor,
     this.buildCounter,
     this.scrollController,
@@ -706,6 +707,9 @@ class TextField extends StatefulWidget {
   ///
   ///  * [TapRegion] for how the region group is determined.
   final TapRegionCallback? onTapOutside;
+
+  /// {@macro flutter.widgets.editableText.onTapUpOutside}
+  final TapRegionUpCallback? onTapUpOutside;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
@@ -1485,6 +1489,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           groupId: widget.groupId,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
           onTapOutside: widget.onTapOutside,
+          onTapUpOutside: widget.onTapUpOutside,
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
           mouseCursor: MouseCursor.defer, // TextField will handle the cursor
