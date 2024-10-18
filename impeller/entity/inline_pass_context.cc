@@ -112,9 +112,7 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
     return {};
   }
 
-  command_buffer_->SetLabel(
-      "EntityPass Command Buffer: Depth=" + std::to_string(pass_depth) +
-      " Count=" + std::to_string(pass_count_));
+  command_buffer_->SetLabel("EntityPass Command Buffer");
 
   RenderPassResult result;
   {
@@ -183,9 +181,7 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
   // buffer while encoding can add a surprising amount of overhead. We make a
   // conservative npot estimate to avoid this case.
   pass_->ReserveCommands(Allocation::NextPowerOfTwoSize(entity_count_));
-  pass_->SetLabel(
-      "EntityPass Render Pass: Depth=" + std::to_string(pass_depth) +
-      " Count=" + std::to_string(pass_count_));
+  pass_->SetLabel("EntityPass Render Pass");
 
   result.pass = pass_;
   result.just_created = true;

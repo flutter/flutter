@@ -22,6 +22,7 @@ class TestImpellerTexture : public Texture {
   explicit TestImpellerTexture(TextureDescriptor desc) : Texture(desc) {}
 
   void SetLabel(std::string_view label) override {}
+  void SetLabel(std::string_view label, std::string_view trailing) override {}
   bool IsValid() const override { return true; }
   ISize GetSize() const { return GetTextureDescriptor().size; }
 

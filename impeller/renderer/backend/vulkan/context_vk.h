@@ -12,6 +12,7 @@
 #include "flutter/fml/unique_fd.h"
 #include "fml/thread.h"
 #include "impeller/base/backend_cast.h"
+#include "impeller/base/strings.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
@@ -108,6 +109,18 @@ class ContextVK final : public Context,
   template <typename T>
   bool SetDebugName(T handle, std::string_view label) const {
     return SetDebugName(GetDevice(), handle, label);
+  }
+
+  template <typename T>
+  bool SetDebugName(T handle,
+                    std::string_view label,
+                    std::string_view trailing) const {
+    if (!HasValidationLayers()) {
+      // No-op if validation layers are not enabled.
+      return true;
+    }
+    std::string combined = SPrintF("%s %s", label.data(), trailing.data());
+    return SetDebugName(GetDevice(), handle, combined);
   }
 
   template <typename T>

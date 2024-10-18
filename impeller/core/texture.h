@@ -18,7 +18,16 @@ class Texture {
  public:
   virtual ~Texture();
 
+  /// @brief Label this resource for inspection in GPU debugging tools.
+  ///
+  /// This functionality may be disabled in release builds.
   virtual void SetLabel(std::string_view label) = 0;
+
+  /// @brief Label this resource for inspection in GPU debugging tools, with
+  ///        label and trailing will be concatenated together.
+  ///
+  /// This functionality may be disabled in release builds.
+  virtual void SetLabel(std::string_view label, std::string_view trailing) = 0;
 
   // Deprecated: use BlitPass::AddCopy instead.
   [[nodiscard]] bool SetContents(const uint8_t* contents,

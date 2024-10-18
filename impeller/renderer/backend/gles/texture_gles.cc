@@ -11,6 +11,7 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/allocation.h"
+#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
@@ -207,7 +208,19 @@ bool TextureGLES::IsValid() const {
 
 // |Texture|
 void TextureGLES::SetLabel(std::string_view label) {
-  reactor_->SetDebugLabel(handle_, std::string{label.data(), label.size()});
+#ifdef IMPELLER_DEBUG
+  reactor_->SetDebugLabel(handle_, label);
+#endif  // IMPELLER_DEBUG
+}
+
+// |Texture|
+void TextureGLES::SetLabel(std::string_view label, std::string_view trailing) {
+#ifdef IMPELLER_DEBUG
+  if (reactor_->CanSetDebugLabels()) {
+    reactor_->SetDebugLabel(handle_,
+                            SPrintF("%s %s", label.data(), trailing.data()));
+  }
+#endif  // IMPELLER_DEBUG
 }
 
 // |Texture|
