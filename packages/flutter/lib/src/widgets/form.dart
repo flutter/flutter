@@ -708,7 +708,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   void _updateField() {
-    if (_focusNode.hasFocus) {
+    if (!_focusNode.hasFocus) {
       _validate();
     }
   }
