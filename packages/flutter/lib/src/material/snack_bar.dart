@@ -422,9 +422,9 @@ class SnackBar extends StatefulWidget {
   /// (optional) The percentage threshold for action widget's width before it overflows
   /// to a new line.
   ///
-  /// Must be between 0 and 1. If the width of the snackbar's [content] is greater
-  /// than this percentage of the width of the snackbar less the width of its [action],
-  /// then the [action] will appear below the [content].
+  /// Must be between 0 and 1.
+  /// If the width of the snackbar's [action] divided by the width of the snackbar
+  /// is greater than this percentage then the [action] will appear below the [content].
   ///
   /// At a value of 0, the action will always overflow to a new line.
   ///
