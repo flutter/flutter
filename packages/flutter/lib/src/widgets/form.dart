@@ -251,21 +251,6 @@ class FormState extends State<Form> {
 
   void _register(FormFieldState<dynamic> field) {
     _fields.add(field);
-    // switch (widget.autovalidateMode) {
-    //   case AutovalidateMode.always:
-    //     // check if _StateLifecycle is ready
-    //     // if not, wait for it
-
-
-    //     if ( field.widget.enabled && !field.isValid && !field.hasError) {
-    //       field._validate();
-    //     }
-    //   case AutovalidateMode.onUnfocus:
-    //     // field._focusNode.addListener(() => _updateField(field));
-    //   case AutovalidateMode.onUserInteraction:
-    //   case AutovalidateMode.disabled:
-    //     break;
-    // }
   }
 
   void _unregister(FormFieldState<dynamic> field) {
