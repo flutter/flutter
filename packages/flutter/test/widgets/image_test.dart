@@ -825,7 +825,7 @@ void main() {
 
   testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143',
   // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
   (WidgetTester tester) async {
     final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
     final _TestImageProvider provider = _TestImageProvider(streamCompleter: imageStreamCompleter);
@@ -845,12 +845,21 @@ void main() {
 
     // Make sure the first listener can be called re-entrantly
     final ImageInfo imageInfo = ImageInfo(image: image10x10);
-    listeners[1].onImage(imageInfo.clone(), false);
-    listeners[1].onImage(imageInfo.clone(), false);
+    final ImageInfo clone1 = imageInfo.clone();
+    final ImageInfo clone2 = imageInfo.clone();
+    final ImageInfo clone3 = imageInfo.clone();
+    final ImageInfo clone4 = imageInfo.clone();
+
+    listeners[1].onImage(clone1, false);
+    listeners[1].onImage(clone2, false);
 
     // Make sure the second listener can be called re-entrantly.
-    listeners[0].onImage(imageInfo.clone(), false);
-    listeners[0].onImage(imageInfo.clone(), false);
+    listeners[0].onImage(clone3, false);
+    listeners[0].onImage(clone4, false);
+
+    imageInfo.dispose();
+    imageStreamCompleter.dispose();
+    imageCache.clear();
   });
 
   testWidgets('Precache completes with onError on error', (WidgetTester tester) async {
@@ -2197,21 +2206,24 @@ class _TestImageProvider extends ImageProvider<Object> {
 }
 
 class _TestImageStreamCompleter extends ImageStreamCompleter {
-  _TestImageStreamCompleter([this._currentImage]);
+  _TestImageStreamCompleter([this._currentImage]) {
+    if (_currentImage != null) {
+      setImage(_currentImage!);
+    }
+  }
 
   ImageInfo? _currentImage;
   final Set<ImageStreamListener> listeners = <ImageStreamListener>{};
 
   @override
   void addListener(ImageStreamListener listener) {
+    super.addListener(listener);
     listeners.add(listener);
-    if (_currentImage != null) {
-      listener.onImage(_currentImage!.clone(), true);
-    }
   }
 
   @override
   void removeListener(ImageStreamListener listener) {
+    super.removeListener(listener);
     listeners.remove(listener);
   }
 
@@ -2220,14 +2232,14 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
     ImageChunkEvent? chunkEvent,
   }) {
     if (imageInfo != null) {
+      super.setImage(imageInfo);
       _currentImage?.dispose();
       _currentImage = imageInfo;
     }
     final List<ImageStreamListener> localListeners = listeners.toList();
     for (final ImageStreamListener listener in localListeners) {
-      if (imageInfo != null) {
-        listener.onImage(imageInfo.clone(), false);
-      }
+      removeListener(listener);
+      addListener(listener);
       if (chunkEvent != null && listener.onChunk != null) {
         listener.onChunk!(chunkEvent);
       }
@@ -2242,6 +2254,12 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
     for (final ImageStreamListener listener in localListeners) {
       listener.onError?.call(exception, stackTrace);
     }
+  }
+
+  void dispose() {
+    final List<ImageStreamListener> listenersCopy = listeners.toList();
+    listenersCopy.forEach(removeListener);
+    _currentImage?.dispose();
   }
 }
 
