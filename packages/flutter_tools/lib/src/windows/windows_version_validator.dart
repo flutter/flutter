@@ -179,9 +179,8 @@ class WindowsVersionExtractor {
           }
         }
       }
-    } on ProcessException {
-      // Ignored, use default null value.
-      _logger.printTrace('Failed to get Caption and OSArchitecture from WMI');
+    } on ProcessException catch (e) {
+      _logger.printTrace('Failed to get Caption and OSArchitecture from WMI: $e');
     }
 
     try {
@@ -201,9 +200,8 @@ class WindowsVersionExtractor {
           displayVersion = data['DisplayVersion'];
         }
       }
-    } on ProcessException {
-      // Ignored, use default null values.
-      _logger.printTrace('Failed to get ReleaseId and DisplayVersion from registry');
+    } on ProcessException catch (e) {
+      _logger.printTrace('Failed to get ReleaseId and DisplayVersion from registry: $e');
     }
 
     return WindowsVersionExtractionResult(
