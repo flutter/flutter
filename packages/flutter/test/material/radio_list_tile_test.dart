@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -412,6 +413,7 @@ void main() {
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
+                SemanticsFlag.hasSelectedState,
               ],
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               label: 'Title',
@@ -451,6 +453,7 @@ void main() {
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
+                SemanticsFlag.hasSelectedState,
               ],
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               label: 'Title',
@@ -487,6 +490,7 @@ void main() {
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
+                SemanticsFlag.hasSelectedState,
               ],
               actions: <SemanticsAction>[SemanticsAction.focus],
               label: 'Title',
@@ -524,6 +528,7 @@ void main() {
                 SemanticsFlag.isChecked,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
+                SemanticsFlag.hasSelectedState,
               ],
               label: 'Title',
               textDirection: TextDirection.ltr,
