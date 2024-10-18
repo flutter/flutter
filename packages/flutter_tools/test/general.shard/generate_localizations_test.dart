@@ -792,6 +792,8 @@ flutter:
       expect(fs.file('/lib/l10n/bar_en.dart').readAsStringSync(), '''
 HEADER
 
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'bar.dart';
 
 // ignore_for_file: type=lint
@@ -894,6 +896,8 @@ flutter:\r
       );
 
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -927,6 +931,8 @@ class AppLocalizationsEn extends AppLocalizations {
     expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
 HEADER
 
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -1705,6 +1711,219 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           )),
         );
       });
+
+      testWithoutContext('handle date with multiple locale', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "MMMd"
+      }
+    }
+  }
+}''',
+          'ja': '''
+{
+  "@@locale": "ja",
+  "springBegins": "春が始まるのは{springStartDate}",
+  "@springBegins": {
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "MMMMd"
+      }
+    }
+  }
+}'''
+        });
+
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMMd(localeName)'));
+      });
+
+      testWithoutContext('handle date with multiple locale when only template has placeholders', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "MMMd"
+      }
+    }
+  }
+}''',
+          'ja': '''
+{
+  "@@locale": "ja",
+  "springBegins": "春が始まるのは{springStartDate}"
+}'''
+        });
+
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMd(localeName)'));
+      });
+
+      testWithoutContext('handle date with multiple locale when there is unused placeholder', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "MMMd"
+      }
+    }
+  }
+}''',
+          'ja': '''
+{
+  "@@locale": "ja",
+  "springBegins": "春が始まるのは{springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "notUsed": {
+        "type": "DateTime",
+        "format": "MMMMd"
+      }
+    }
+  }
+}'''
+        });
+
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'ja'), isNot(contains('notUsed')));
+      });
+
+      testWithoutContext('handle date with multiple locale when placeholders are incompatible', () {
+        expect(
+          () {
+            setupLocalizations(<String, String>{
+              'en': '''
+    {
+      "@@locale": "en",
+      "springBegins": "Spring begins on {springStartDate}",
+      "@springBegins": {
+        "description": "The first day of spring",
+        "placeholders": {
+          "springStartDate": {
+            "type": "DateTime",
+            "format": "MMMd"
+          }
+        }
+      }
+    }''',
+              'ja': '''
+    {
+      "@@locale": "ja",
+      "springBegins": "春が始まるのは{springStartDate}",
+      "@springBegins": {
+        "description": "The first day of spring",
+        "placeholders": {
+          "springStartDate": {
+            "type": "String"
+          }
+        }
+      }
+    }'''
+            });
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('The placeholder, springStartDate, has its "type" resource attribute set to the "String" type in locale "ja", but it is "DateTime" in the template placeholders.'),
+          )),
+        );
+      });
+
+      testWithoutContext('handle ordinary formatted date and arbitrary formatted date', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "MMMd"
+      }
+    }
+  }
+}''',
+          'ja': '''
+{
+  "@@locale": "ja",
+  "springBegins": "春が始まるのは{springStartDate}",
+  "@springBegins": {
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "立春",
+        "isCustomDateFormat": "true"
+      }
+    }
+  }
+}'''
+        });
+
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains(r"DateFormat('立春', localeName)"));
+      });
+
+      testWithoutContext('handle arbitrary formatted date with multiple locale', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "asdf o'clock",
+        "isCustomDateFormat": "true"
+      }
+    }
+  }
+}''',
+          'ja': '''
+{
+  "@@locale": "ja",
+  "springBegins": "春が始まるのは{springStartDate}",
+  "@springBegins": {
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "立春",
+        "isCustomDateFormat": "true"
+      }
+    }
+  }
+}'''
+        });
+
+        expect(getGeneratedFileContent(locale: 'en'), contains(r"DateFormat('asdf o\'clock', localeName)"));
+        expect(getGeneratedFileContent(locale: 'ja'), contains(r"DateFormat('立春', localeName)"));
+      });
     });
 
     group('NumberFormat tests', () {
@@ -1766,7 +1985,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           'en': singleMessageArbFileString,
           'es': singleEsMessageArbFileString,
         });
-        expect(getGeneratedFileContent(locale: 'es'), isNot(contains(intlImportDartCode)));
+        expect(getGeneratedFileContent(locale: 'es'), contains(intlImportDartCode));
       });
 
       testWithoutContext('warnings are generated when plural parts are repeated', () {
@@ -2425,6 +2644,122 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         )),
       );
     });
+
+    testWithoutContext('handle number with multiple locale', () {
+      setupLocalizations(<String, String>{
+        'en': '''
+{
+"@@locale": "en",
+"money": "Sum {number}",
+"@money": {
+  "placeholders": {
+    "number": {
+      "type": "int",
+      "format": "currency"
+    }
+  }
+}
+}''',
+        'ja': '''
+{
+"@@locale": "ja",
+"money": "合計 {number}",
+"@money": {
+  "placeholders": {
+    "number": {
+      "type": "int",
+      "format": "decimalPatternDigits",
+      "optionalParameters": {
+        "decimalDigits": 3
+      }
+    }
+  }
+}
+}'''
+      });
+
+      expect(getGeneratedFileContent(locale: 'en'), contains('intl.NumberFormat.currency('));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('intl.NumberFormat.decimalPatternDigits('));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('decimalDigits: 3'));
+    });
+
+    testWithoutContext('handle number with multiple locale specifying a format only in template', () {
+      setupLocalizations(<String, String>{
+        'en': '''
+{
+"@@locale": "en",
+"money": "Sum {number}",
+"@money": {
+  "placeholders": {
+    "number": {
+      "type": "int",
+      "format": "decimalPatternDigits",
+      "optionalParameters": {
+        "decimalDigits": 3
+      }
+    }
+  }
+}
+}''',
+        'ja': '''
+{
+"@@locale": "ja",
+"money": "合計 {number}",
+"@money": {
+  "placeholders": {
+    "number": {
+      "type": "int"
+    }
+  }
+}
+}'''
+      });
+
+      expect(getGeneratedFileContent(locale: 'en'), contains('intl.NumberFormat.decimalPatternDigits('));
+      expect(getGeneratedFileContent(locale: 'en'), contains('decimalDigits: 3'));
+      expect(getGeneratedFileContent(locale: 'en'), contains(r"return 'Sum $numberString'"));
+      expect(getGeneratedFileContent(locale: 'ja'), isNot(contains('intl.NumberFormat')));
+      expect(getGeneratedFileContent(locale: 'ja'), contains(r"return '合計 $number'"));
+    });
+
+    testWithoutContext('handle number with multiple locale specifying a format only in non-template', () {
+      setupLocalizations(<String, String>{
+        'en': '''
+{
+"@@locale": "en",
+"money": "Sum {number}",
+"@money": {
+  "placeholders": {
+    "number": {
+      "type": "int"
+    }
+  }
+}
+}''',
+        'ja': '''
+{
+"@@locale": "ja",
+"money": "合計 {number}",
+"@money": {
+  "placeholders": {
+    "number": {
+      "type": "int",
+      "format": "decimalPatternDigits",
+      "optionalParameters": {
+        "decimalDigits": 3
+      }
+    }
+  }
+}
+}'''
+      });
+
+      expect(getGeneratedFileContent(locale: 'en'), isNot(contains('intl.NumberFormat')));
+      expect(getGeneratedFileContent(locale: 'en'), contains(r"return 'Sum $number'"));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('intl.NumberFormat.decimalPatternDigits('));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('decimalDigits: 3'));
+      expect(getGeneratedFileContent(locale: 'ja'), contains(r"return '合計 $numberString'"));
+    });
   });
 
   testWithoutContext('should generate a valid pubspec.yaml file when using synthetic package if it does not already exist', () {
@@ -2477,7 +2812,7 @@ String orderNumber(int number) {
   return 'This is order #$number.';
 }
 '''));
-    expect(getGeneratedFileContent(locale: 'en'), isNot(contains(intlImportDartCode)));
+    expect(getGeneratedFileContent(locale: 'en'), contains(intlImportDartCode));
   });
 
   testWithoutContext('app localizations lookup is a public method', () {
