@@ -69,7 +69,7 @@ for (final String agpVersion in agpVersions) {
         buildGradleFile.writeAsStringSync(newBuildGradle);
 
         // Use Android app with multiple flavors.
-        final String appBuildGradle = appBuildGradleFile.readAsStringSync();
+        final String appBuildGradle = appBuildGradleFile.readAsStringSync().replaceAll('\r\n', '\n');
         print(appBuildGradle);
         final RegExp buildTypesBlockRegExp = RegExp(r'buildTypes {\n[ \t]+release {((.|\n)*)\n[ \t]+}\n[ \t]+}');
         final String buildTypesBlock = buildTypesBlockRegExp.firstMatch(appBuildGradle)!.toString();
