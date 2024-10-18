@@ -1546,12 +1546,10 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
   Color? get tileColor =>  Colors.transparent;
 
   @override
-  TextStyle? get titleTextStyle {
-    return switch (style!) {
-      ListTileStyle.drawer => _textTheme.bodyLarge,
-      ListTileStyle.list   => _textTheme.titleMedium,
-    };
-  }
+  TextStyle? get titleTextStyle => switch (style!) {
+    ListTileStyle.drawer => _textTheme.bodyLarge,
+    ListTileStyle.list   => _textTheme.titleMedium,
+  };
 
   @override
   TextStyle? get subtitleTextStyle => _textTheme.bodyMedium!
@@ -1564,15 +1562,13 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
   Color? get selectedColor => _theme.colorScheme.primary;
 
   @override
-  Color? get iconColor {
-    return switch (_theme.brightness) {
-      // For the sake of backwards compatibility, the default for unselected
-      // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
-      Brightness.light => Colors.black45,
-      // null -> use current icon theme color
-      Brightness.dark => null,
-    };
-  }
+  Color? get iconColor => switch (_theme.brightness) {
+    // For the sake of backwards compatibility, the default for unselected
+    // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
+    Brightness.light => Colors.black45,
+    // null -> use current icon theme color
+    Brightness.dark => null,
+  };
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - LisTile
