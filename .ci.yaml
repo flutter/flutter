@@ -1385,6 +1385,8 @@ targets:
       tags: >
         ["devicelab", "hostonly", "linux"]
       test_timeout_secs: "2700"
+    runIf:
+      - packages/flutter_tools/templates/**
 
   - name: Linux android_java17_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
