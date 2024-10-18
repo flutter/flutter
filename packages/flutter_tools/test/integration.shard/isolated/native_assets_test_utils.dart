@@ -31,11 +31,11 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   final Directory packageDirectory = tempDirectory.childDirectory(packageName);
 
   // No platform-specific boilerplate files.
-  expect(packageDirectory.childDirectory('android/'), isNot(exists));
-  expect(packageDirectory.childDirectory('ios/'), isNot(exists));
-  expect(packageDirectory.childDirectory('linux/'), isNot(exists));
-  expect(packageDirectory.childDirectory('macos/'), isNot(exists));
-  expect(packageDirectory.childDirectory('windows/'), isNot(exists));
+  expect(packageDirectory.childDirectory('android'), isNot(exists));
+  expect(packageDirectory.childDirectory('ios'), isNot(exists));
+  expect(packageDirectory.childDirectory('linux'), isNot(exists));
+  expect(packageDirectory.childDirectory('macos'), isNot(exists));
+  expect(packageDirectory.childDirectory('windows'), isNot(exists));
 
   await pinDependencies(packageDirectory.childFile('pubspec.yaml'));
   await pinDependencies(

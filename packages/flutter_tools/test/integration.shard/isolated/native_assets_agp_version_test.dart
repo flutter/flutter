@@ -102,8 +102,6 @@ for (final String agpVersion in agpVersions) {
           // Test that the native libraries are included as expected.
           final Directory nativeAssetsDir = exampleDirectory
             .childDirectory('build')
-            .childDirectory('app')
-            .childDirectory('..')
             .childDirectory('native_assets')
             .childDirectory('android')
             .childDirectory('jniLibs')
