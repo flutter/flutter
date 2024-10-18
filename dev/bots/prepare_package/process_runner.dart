@@ -21,6 +21,7 @@ class ProcessRunner {
     this.subprocessOutput = true,
     this.defaultWorkingDirectory,
     this.platform = const LocalPlatform(),
+    required this.printError,
   }) : processManager = processManager ?? const LocalProcessManager() {
     environment = Map<String, String>.from(platform.environment);
   }
@@ -40,6 +41,9 @@ class ProcessRunner {
   /// to [runProcess].
   final Directory? defaultWorkingDirectory;
 
+  /// Function that logs to STDERR.
+  final void Function([Object?]) printError;
+
   /// The environment to run processes with.
   late Map<String, String> environment;
 
@@ -56,7 +60,7 @@ class ProcessRunner {
   }) async {
     workingDirectory ??= defaultWorkingDirectory ?? Directory.current;
     if (subprocessOutput) {
-      stderr.write('Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
+      printError('Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
     }
     final List<int> output = <int>[];
     final Completer<void> stdoutComplete = Completer<void>();
