@@ -1064,28 +1064,14 @@ void Shell::OnPlatformViewDispatchPlatformMessage(
   }
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
 
-  // If the root isolate is not yet running this may be the navigation
-  // channel initial route and must be dispatched immediately so that
-  // it can be set before isolate creation.
-  static constexpr char kNavigationChannel[] = "flutter/navigation";
-  if (!engine_->GetRuntimeController()->IsRootIsolateRunning() &&
-      message->channel() == kNavigationChannel) {
-    // The static leak checker gets confused by the use of fml::MakeCopyable.
-    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-    fml::TaskRunner::RunNowOrPostTask(
-        task_runners_.GetUITaskRunner(),
-        fml::MakeCopyable([engine = engine_->GetWeakPtr(),
-                           message = std::move(message)]() mutable {
-          if (engine) {
-            engine->DispatchPlatformMessage(std::move(message));
-          }
-        }));
-  } else {
-    // In all other cases, the message must be dispatched via a new task so
-    // that the completion of the platform channel response future is guaranteed
-    // to wake up the Dart event loop, even in cases where the platform and UI
-    // threads are the same.
+  if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread()) {
+    engine_->DispatchPlatformMessage(std::move(message));
 
+    // Post an empty task to make the UI message loop run its task observers.
+    // The observers will execute any Dart microtasks queued by the platform
+    // message handler.
+    task_runners_.GetUITaskRunner()->PostTask([] {});
+  } else {
     // The static leak checker gets confused by the use of fml::MakeCopyable.
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     task_runners_.GetUITaskRunner()->PostTask(
