@@ -1663,8 +1663,8 @@ void main() {
       });
 
       testWidgets('TimePicker uses custom icons if provided', (WidgetTester tester) async {
-        final customInputIcon = Icon(Icons.text_fields);
-        final customTimerIcon = Icon(Icons.watch);
+        const Icon customInputIcon = Icon(Icons.text_fields);
+        const Icon customTimerIcon = Icon(Icons.watch);
 
         await tester.pumpWidget(MaterialApp(
           home: TimePickerDialog(
