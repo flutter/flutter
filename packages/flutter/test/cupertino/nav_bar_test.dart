@@ -2208,6 +2208,7 @@ void main() {
     );
 
     final RenderAnimatedOpacity? renderOpacity = tester.element(find.text('middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+    final Finder bottomFinder = find.byType(Placeholder);
 
     expect(renderOpacity?.opacity.value, 0.0);
     expect(scrollController.offset, 0.0);
@@ -2220,6 +2221,7 @@ void main() {
 
     // Expect the bottom to snap up to the large title.
     expect(scrollController.position.pixels, bottomHeight);
+    expect(tester.getBottomLeft(bottomFinder).dy - tester.getTopLeft(bottomFinder).dy, 0.0);
     expect(renderOpacity?.opacity.value, 0.0);
 
     // Scroll to just past the halfway point of the large title.
@@ -2267,6 +2269,7 @@ void main() {
     );
 
     final RenderAnimatedOpacity? renderOpacity = tester.element(find.text('middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+    final Finder bottomFinder = find.byType(Placeholder);
 
     expect(renderOpacity?.opacity.value, 0.0);
     expect(scrollController.offset, 0.0);
@@ -2279,6 +2282,7 @@ void main() {
 
     // Expect the bottom to snap back to its extended height.
     expect(scrollController.position.pixels, 0.0);
+    expect(tester.getBottomLeft(bottomFinder).dy - tester.getTopLeft(bottomFinder).dy, bottomHeight);
     expect(renderOpacity?.opacity.value, 0.0);
 
     // Scroll to the halfway point of the large title.
