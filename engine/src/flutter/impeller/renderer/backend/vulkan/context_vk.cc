@@ -445,6 +445,7 @@ void ContextVK::Setup(Settings settings) {
   device_name_ = std::string(physical_device_properties.deviceName);
   command_queue_vk_ = std::make_shared<CommandQueueVK>(weak_from_this());
   should_disable_surface_control_ = settings.disable_surface_control;
+  should_batch_cmd_buffers_ = driver_info_->CanBatchSubmitCommandBuffers();
   is_valid_ = true;
 
   // Create the GPU Tracer later because it depends on state from
@@ -588,6 +589,26 @@ std::shared_ptr<DescriptorPoolRecyclerVK> ContextVK::GetDescriptorPoolRecycler()
 
 std::shared_ptr<CommandQueue> ContextVK::GetCommandQueue() const {
   return command_queue_vk_;
+}
+
+bool ContextVK::EnqueueCommandBuffer(
+    std::shared_ptr<CommandBuffer> command_buffer) {
+  if (should_batch_cmd_buffers_) {
+    pending_command_buffers_.push_back(std::move(command_buffer));
+    return true;
+  } else {
+    return GetCommandQueue()->Submit({command_buffer}).ok();
+  }
+}
+
+bool ContextVK::FlushCommandBuffers() {
+  if (should_batch_cmd_buffers_) {
+    bool result = GetCommandQueue()->Submit(pending_command_buffers_).ok();
+    pending_command_buffers_.clear();
+    return result;
+  } else {
+    return true;
+  }
 }
 
 // Creating a render pass is observed to take an additional 6ms on a Pixel 7

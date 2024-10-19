@@ -203,6 +203,25 @@ class Context {
   /// operation completes in order to clear the cache.
   virtual void DisposeThreadLocalCachedResources() {}
 
+  /// @brief Enqueue command_buffer for submission by the end of the frame.
+  ///
+  /// Certain backends may immediately flush the command buffer if batch
+  /// submission is not supported. This functionality is not thread safe
+  /// and should only be used via the ContentContext for rendering a
+  /// 2D workload.
+  ///
+  /// Returns true if submission has succeeded. If the buffer is enqueued
+  /// then no error may be returned until FlushCommandBuffers is called.
+  [[nodiscard]] virtual bool EnqueueCommandBuffer(
+      std::shared_ptr<CommandBuffer> command_buffer);
+
+  /// @brief Flush all pending command buffers.
+  ///
+  /// Returns whether or not submission was successful. This functionality
+  /// is not threadsafe and should only be used via the ContentContext for
+  /// rendering a 2D workload.
+  [[nodiscard]] virtual bool FlushCommandBuffers();
+
  protected:
   Context();
 

@@ -54,13 +54,39 @@ bool IsBadVersionTest(std::string_view driver_name, bool qc = true) {
   return context->GetDriverInfo()->IsKnownBadDriver();
 }
 
+bool CanBatchSubmitTest(std::string_view driver_name, bool qc = true) {
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(
+              [&driver_name, qc](VkPhysicalDevice device,
+                                 VkPhysicalDeviceProperties* prop) {
+                if (qc) {
+                  prop->vendorID = 0x168C;  // Qualcomm
+                } else {
+                  prop->vendorID = 0x13B5;  // ARM
+                }
+                driver_name.copy(prop->deviceName, driver_name.size());
+                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+              })
+          .Build();
+  return context->GetDriverInfo()->CanBatchSubmitCommandBuffers();
+}
+
+TEST(DriverInfoVKTest, CanBatchSubmitCommandBuffers) {
+  // Old Adreno no batch submit!
+  EXPECT_FALSE(CanBatchSubmitTest("Adreno (TM) 540", true));
+
+  EXPECT_TRUE(CanBatchSubmitTest("Mali-G51", false));
+  EXPECT_TRUE(CanBatchSubmitTest("Adreno (TM) 750", true));
+}
+
 TEST(DriverInfoVKTest, DriverParsingMali) {
   EXPECT_EQ(GetMaliVersion("Mali-G51-MORE STUFF"), MaliGPU::kG51);
   EXPECT_EQ(GetMaliVersion("Mali-G51"), MaliGPU::kG51);
   EXPECT_EQ(GetMaliVersion("Mali-111111"), MaliGPU::kUnknown);
 }
 
-TEST(DriverInfoVKTest, DriverParsingArm) {
+TEST(DriverInfoVKTest, DriverParsingAdreno) {
   EXPECT_EQ(GetAdrenoVersion("Adreno (TM) 540"), AdrenoGPU::kAdreno540);
   EXPECT_EQ(GetAdrenoVersion("Foo Bar"), AdrenoGPU::kUnknown);
 }

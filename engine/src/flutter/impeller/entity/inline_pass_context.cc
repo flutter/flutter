@@ -61,17 +61,10 @@ bool InlinePassContext::EndPass() {
       return false;
     }
   }
-  if (!renderer_.GetContext()
-           ->GetCommandQueue()
-           ->Submit({std::move(command_buffer_)})
-           .ok()) {
-    return false;
-  }
 
   pass_ = nullptr;
-  command_buffer_ = nullptr;
-
-  return true;
+  return renderer_.GetContext()->EnqueueCommandBuffer(
+      std::move(command_buffer_));
 }
 
 EntityPassTarget& InlinePassContext::GetPassTarget() const {

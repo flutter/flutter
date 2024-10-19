@@ -111,4 +111,13 @@ const std::shared_ptr<ContextVK>& SurfaceContextVK::GetParent() const {
   return parent_;
 }
 
+bool SurfaceContextVK::EnqueueCommandBuffer(
+    std::shared_ptr<CommandBuffer> command_buffer) {
+  return parent_->EnqueueCommandBuffer(std::move(command_buffer));
+}
+
+bool SurfaceContextVK::FlushCommandBuffers() {
+  return parent_->FlushCommandBuffers();
+}
+
 }  // namespace impeller

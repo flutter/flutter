@@ -260,5 +260,56 @@ TEST(ContextVKTest, HasDefaultColorFormat) {
   ASSERT_NE(capabilites_vk->GetDefaultColorFormat(), PixelFormat::kUnknown);
 }
 
+TEST(ContextVKTest, BatchSubmitCommandBuffersOnArm) {
+  std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(
+              [](VkPhysicalDevice device, VkPhysicalDeviceProperties* prop) {
+                prop->vendorID = 0x13B5;  // ARM
+                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+              })
+          .Build();
+
+  EXPECT_TRUE(context->EnqueueCommandBuffer(context->CreateCommandBuffer()));
+  EXPECT_TRUE(context->EnqueueCommandBuffer(context->CreateCommandBuffer()));
+
+  // If command buffers are batch submitted, we should have created them but not
+  // created the fence to track them after enqueing.
+  auto functions = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_TRUE(std::find(functions->begin(), functions->end(),
+                        "vkAllocateCommandBuffers") != functions->end());
+  EXPECT_TRUE(std::find(functions->begin(), functions->end(),
+                        "vkCreateFence") == functions->end());
+
+  context->FlushCommandBuffers();
+
+  // After flushing, the fence should be created.
+  functions = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_TRUE(std::find(functions->begin(), functions->end(),
+                        "vkCreateFence") != functions->end());
+}
+
+TEST(ContextVKTest, BatchSubmitCommandBuffersOnNonArm) {
+  std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(
+              [](VkPhysicalDevice device, VkPhysicalDeviceProperties* prop) {
+                prop->vendorID = 0x8686;  // Made up ID
+                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+              })
+          .Build();
+
+  EXPECT_TRUE(context->EnqueueCommandBuffer(context->CreateCommandBuffer()));
+  EXPECT_TRUE(context->EnqueueCommandBuffer(context->CreateCommandBuffer()));
+
+  // If command buffers are batch not submitted, we should have created them and
+  // a corresponding fence immediately.
+  auto functions = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_TRUE(std::find(functions->begin(), functions->end(),
+                        "vkAllocateCommandBuffers") != functions->end());
+  EXPECT_TRUE(std::find(functions->begin(), functions->end(),
+                        "vkCreateFence") != functions->end());
+}
+
 }  // namespace testing
 }  // namespace impeller

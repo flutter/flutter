@@ -817,11 +817,12 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  if (!renderer.GetContext()
-           ->GetCommandQueue()
-           ->Submit(/*buffers=*/{command_buffer_1, command_buffer_2,
-                                 command_buffer_3})
-           .ok()) {
+  if (!(renderer.GetContext()->EnqueueCommandBuffer(
+            std::move(command_buffer_1)) &&
+        renderer.GetContext()->EnqueueCommandBuffer(
+            std::move(command_buffer_2)) &&
+        renderer.GetContext()->EnqueueCommandBuffer(
+            std::move(command_buffer_3)))) {
     return std::nullopt;
   }
 

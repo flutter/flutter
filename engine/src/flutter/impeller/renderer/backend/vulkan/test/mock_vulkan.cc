@@ -494,6 +494,7 @@ VkResult vkCreateFence(VkDevice device,
                        const VkAllocationCallbacks* pAllocator,
                        VkFence* pFence) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkCreateFence");
   *pFence = reinterpret_cast<VkFence>(new MockFence());
   return VK_SUCCESS;
 }
