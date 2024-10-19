@@ -1859,8 +1859,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       });
 
       testWithoutContext('handle date with multiple locale when non-template placeholder does not specify type', () {
-
-
+        expect(
+          () {
             setupLocalizations(<String, String>{
               'en': '''
     {
@@ -1890,10 +1890,13 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       }
     }'''
             });
-        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
-        expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMMd(localeName)')); // Fails
-        expect(getGeneratedFileContent(locale: 'en'), contains('String springBegins(DateTime springStartDate)'));
-        expect(getGeneratedFileContent(locale: 'ja'), contains('String springBegins(DateTime springStartDate)'));
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('The placeholder, springStartDate, has its "type" resource attribute set to the "null" type in locale "ja", but it is "DateTime" in the template placeholders.'),
+          )),
+        );
       });
 
       testWithoutContext('handle ordinary formatted date and arbitrary formatted date', () {

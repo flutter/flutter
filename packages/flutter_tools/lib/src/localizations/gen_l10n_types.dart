@@ -359,7 +359,9 @@ class Message {
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
 
-      localePlaceholders[bundle.locale] = _placeholders(bundle.resources, resourceId, false);
+      localePlaceholders[bundle.locale] = templateBundle.locale == bundle.locale
+        ? templatePlaceholders
+        : _placeholders(bundle.resources, resourceId, false);
 
       List<String>? validPlaceholders;
       if (useRelaxedSyntax) {

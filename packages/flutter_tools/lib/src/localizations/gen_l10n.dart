@@ -130,11 +130,11 @@ List<String> generateMethodParameters(Message message, LocaleInfo? locale, bool 
 
   return message.templatePlaceholders.entries.map((MapEntry<String, Placeholder> e) {
     final Placeholder placeholder = e.value;
-    final String? localePlaceholderType = localePlaceholders?[e.key]?.type;
-    if (localePlaceholderType != null && placeholder.type != localePlaceholderType) {
+    final Placeholder? localePlaceholder = localePlaceholders?[e.key];
+    if (localePlaceholder != null && placeholder.type != localePlaceholder.type) {
       throw L10nException(
           'The placeholder, ${placeholder.name}, has its "type" resource attribute set to '
-          'the "$localePlaceholderType" type in locale "$locale", but it is "${placeholder.type}" '
+          'the "${localePlaceholder.type}" type in locale "$locale", but it is "${placeholder.type}" '
           'in the template placeholders. For compatibility with template placeholders, change '
           'the "type" attribute to "${placeholder.type}".');
     }
