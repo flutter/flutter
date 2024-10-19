@@ -1359,20 +1359,21 @@ class FlutterPlugin implements Plugin<Project> {
             // The following tasks use the output of copyFlutterAssetsTask,
             // so it's necessary to declare it as an dependency since Gradle 8.
             // See https://docs.gradle.org/8.1/userguide/validation_problems.html#implicit_dependency.
-            def compressAssetsTask = project.tasks.named("compress${variant.name.capitalize()}Assets")
-            if (compressAssetsTask) {
-                compressAssetsTask.dependsOn(copyFlutterAssetsTask)
-            }
+            def compressAssetsTaskName = "compress${variant.name.capitalize()}Assets"
+project.tasks.named(compressAssetsTaskName).configure { task ->
+    task.dependsOn(copyFlutterAssetsTask)
+}
 
-            def bundleAarTask = project.tasks.named("bundle${variant.name.capitalize()}Aar")
-            if (bundleAarTask) {
-                bundleAarTask.dependsOn(copyFlutterAssetsTask)
-            }
+def bundleAarTaskName = "bundle${variant.name.capitalize()}Aar"
+project.tasks.named(bundleAarTaskName).configure { task ->
+    task.dependsOn(copyFlutterAssetsTask)
+}
 
-            def bundleAarTaskWithLint = project.tasks.findByName("bundle${variant.name.capitalize()}LocalLintAar")
-            if (bundleAarTaskWithLint) {
-                bundleAarTaskWithLint.dependsOn(copyFlutterAssetsTask)
-            }
+def bundleAarTaskWithLintName = "bundle${variant.name.capitalize()}LocalLintAar"
+project.tasks.named(bundleAarTaskWithLintName).configure { task ->
+    task.dependsOn(copyFlutterAssetsTask)
+}
+
 
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
