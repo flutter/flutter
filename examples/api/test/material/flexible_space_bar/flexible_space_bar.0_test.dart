@@ -15,7 +15,7 @@ void main() {
     HttpOverrides.global = null;
   });
 
-  testWidgets('The app bar should stretch when over-scrolled', (WidgetTester tester) async {
+  testWidgets('The app bar stretches when over-scrolled', (WidgetTester tester) async {
     await tester.pumpWidget(
         const example.FlexibleSpaceBarExampleApp(),
     );
@@ -37,5 +37,6 @@ void main() {
     final Size sizeAfterScroll = tester.getSize(appBarContainer);
 
     expect(sizeBeforeScroll.height, lessThan(sizeAfterScroll.height));
-  });
+    // Verifies ScrollBehavior.dragDevices is correctly set.
+  }, variant: TargetPlatformVariant.all());
 }
