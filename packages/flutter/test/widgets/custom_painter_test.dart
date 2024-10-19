@@ -200,7 +200,7 @@ void _defineTests() {
               TestSemantics(
                 rect: const Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
                 id: 2,
-                flags: 1,
+                flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.hasSelectedState],
                 label: 'label-before',
                 value: 'value-before',
                 increasedValue: 'increase-before',
@@ -253,7 +253,13 @@ void _defineTests() {
                 rect: const Rect.fromLTRB(5.0, 6.0, 7.0, 8.0),
                 actions: 255,
                 id: 2,
-                flags: 15,
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasCheckedState,
+                  SemanticsFlag.isChecked,
+                  SemanticsFlag.hasSelectedState,
+                  SemanticsFlag.isSelected,
+                  SemanticsFlag.isButton,
+                ],
                 label: 'label-after',
                 value: 'value-after',
                 increasedValue: 'increase-after',
@@ -524,11 +530,7 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
-  }, skip: true); // TODO(yjbanov): https://github.com/flutter/flutter/issues/66673
-                  // Skipped temporarily to allow https://github.com/flutter/engine/pull/55780
-                  // to roll into the framework, which introduces a new flag. Because this
-                  // test enumerates all flags, the new flag breaks it. This test will need
-                  // to be updated after the roll.
+  });
 
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {
