@@ -53,11 +53,7 @@ via rebase, rather than a merge commit.)
 
 ## A bug in the PR
 
-Following the steps outlined in
-[setting up the framework dev environment](../../Setting-up-the-Framework-development-environment.md)
-makes it so most problems are caught in static analysis, but oftentimes a change
-still inadvertently breaks expected behavior.
-
+Oftentimes, a change inadvertently breaks expected behavior.\
 When this happens, usually the best way to find out what's wrong is to
 [**view the test output**](#view-the-test-output).
 
@@ -70,7 +66,10 @@ If a pull request requires an update to those external tests, it qualifies as a
 it's great to avoid those when possible.
 
 If **Linux Analyze** fails, it's likely that one or more changes in the PR
-violated a [linter rule](https://dart.dev/lints/).
+violated a [linter rule](https://dart.dev/lints/).\
+Consider reviewing the steps outlined in
+[setting up the framework dev environment](../../Setting-up-the-Framework-development-environment.md)
+so that most of these problems get caught in static analysis right away.
 
 > [!NOTE]
 > All Dart code is run through static analysis:
@@ -128,16 +127,12 @@ and figuring out how to fix it!
 
 ### Flaking
 
-A check might "flake", or randomly fail, due to an
-[infra error](../../infra/Understanding-a-LUCI-build-failure.md#overview-of-an-infra-failure-build)
-or for other reasons unrelated to the PR's changes.
+A check might "flake", or randomly fail, for a variety of reasons.
 
-Sometimes a flake will resolve itself once some more changes are pushed to
-re-trigger the checks. This can be as simple as [performing a rebase](#ciyaml-validation)
-to include the latest changes from the main branch.
+Sometimes a flake resolves itself after changes are pushed to re-trigger
+the checks. Consider [performing a rebase](#ciyaml-validation) to include
+the latest changes from the main branch.
 
-If that doesn't work, head over to the [tree status](https://flutter-dashboard.appspot.com/#/build?repo=flutter)
-page and check if that test is failing on the main branch too.
-
-- If so: wait for the tree to turn green, and then rebase with those changes.
-- But if not: it's probably [a bug in the PR](#a-bug-in-the-pr).
+Flakes often happen due to **infra errors**.
+For information on how to view and report infrastructure bugs, see the
+[infra failure overview](../../infra/Understanding-a-LUCI-build-failure.md#overview-of-an-infra-failure-build).
