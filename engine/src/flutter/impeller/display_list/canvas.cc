@@ -13,6 +13,7 @@
 #include "display_list/effects/dl_image_filter.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "impeller/base/validation.h"
 #include "impeller/display_list/color_filter.h"
 #include "impeller/display_list/image_filter.h"
 #include "impeller/display_list/skia_conversions.h"
@@ -1672,10 +1673,8 @@ bool Canvas::BlitToOnscreen() {
       VALIDATION_LOG << "Failed to encode root pass blit command.";
       return false;
     }
-    if (!renderer_.GetContext()
-             ->GetCommandQueue()
-             ->Submit({command_buffer})
-             .ok()) {
+    if (!renderer_.GetContext()->EnqueueCommandBuffer(
+            std::move(command_buffer))) {
       return false;
     }
   } else {
@@ -1703,10 +1702,8 @@ bool Canvas::BlitToOnscreen() {
       VALIDATION_LOG << "Failed to encode root pass command buffer.";
       return false;
     }
-    if (!renderer_.GetContext()
-             ->GetCommandQueue()
-             ->Submit({command_buffer})
-             .ok()) {
+    if (!renderer_.GetContext()->EnqueueCommandBuffer(
+            std::move(command_buffer))) {
       return false;
     }
   }
@@ -1726,6 +1723,10 @@ void Canvas::EndReplay() {
     BlitToOnscreen();
   }
 
+  if (!renderer_.GetContext()->FlushCommandBuffers()) {
+    // Not much we can do.
+    VALIDATION_LOG << "Failed to submit command buffers";
+  }
   render_passes_.clear();
   renderer_.GetRenderTargetCache()->End();
   clip_geometry_.clear();
