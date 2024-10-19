@@ -2159,8 +2159,8 @@ class TimePickerDialog extends StatefulWidget {
     this.initialEntryMode = TimePickerEntryMode.dial,
     this.orientation,
     this.onEntryModeChanged,
-    this.switchToInputEntryModeIcon,
-    this.switchToTimerEntryModeIcon,
+    this.switchToInputEntryModeIcon = const Icon(Icons.keyboard_outlined),
+    this.switchToTimerEntryModeIcon = const Icon(Icons.access_time),
   });
 
   /// The time initially selected when the dialog is shown.
@@ -2222,10 +2222,10 @@ class TimePickerDialog extends StatefulWidget {
   final EntryModeChangeCallback? onEntryModeChanged;
 
   /// {@macro flutter.material.time_picker.switchToInputEntryModeIcon}
-  final Icon? switchToInputEntryModeIcon;
+  final Icon switchToInputEntryModeIcon;
 
   /// {@macro flutter.material.time_picker.switchToTimerEntryModeIcon}
-  final Icon? switchToTimerEntryModeIcon;
+  final Icon switchToTimerEntryModeIcon;
 
   @override
   State<TimePickerDialog> createState() => _TimePickerDialogState();
@@ -2425,8 +2425,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
               style: theme.useMaterial3 ? IconButton.styleFrom(foregroundColor: entryModeIconColor) : null,
               onPressed: _toggleEntryMode,
               icon: _entryMode.value == TimePickerEntryMode.dial
-                ? widget.switchToInputEntryModeIcon ?? const Icon(Icons.keyboard_outlined)
-                : widget.switchToTimerEntryModeIcon ?? const Icon(Icons.access_time),
+                ? widget.switchToInputEntryModeIcon 
+                : widget.switchToTimerEntryModeIcon,
               tooltip: _entryMode.value == TimePickerEntryMode.dial
                   ? MaterialLocalizations.of(context).inputTimeModeButtonLabel
                   : MaterialLocalizations.of(context).dialModeButtonLabel,
@@ -2552,8 +2552,8 @@ class _TimePicker extends StatefulWidget {
     this.entryMode = TimePickerEntryMode.dial,
     this.orientation,
     this.onEntryModeChanged,
-    this.switchToInputEntryModeIcon,
-    this.switchToTimerEntryModeIcon,
+    this.switchToInputEntryModeIcon = const Icon(Icons.keyboard_outlined),
+    this.switchToTimerEntryModeIcon = const Icon(Icons.access_time),
   });
 
   /// Optionally provide your own text for the help text at the top of the
@@ -2623,10 +2623,10 @@ class _TimePicker extends StatefulWidget {
   final EntryModeChangeCallback? onEntryModeChanged;
 
   /// {@macro flutter.material.time_picker.switchToInputEntryModeIcon}
-  final Icon? switchToInputEntryModeIcon;
+  final Icon switchToInputEntryModeIcon;
 
   /// {@macro flutter.material.time_picker.switchToTimerEntryModeIcon}
-  final Icon? switchToTimerEntryModeIcon;
+  final Icon switchToTimerEntryModeIcon;
 
   @override
   State<_TimePicker> createState() => _TimePickerState();
@@ -3051,8 +3051,8 @@ Future<TimeOfDay?> showTimePicker({
   EntryModeChangeCallback? onEntryModeChanged,
   Offset? anchorPoint,
   Orientation? orientation,
-  final Icon? switchToInputEntryModeIcon,
-  final Icon? switchToTimerEntryModeIcon,
+  Icon switchToInputEntryModeIcon = const Icon(Icons.keyboard_outlined),
+  Icon switchToTimerEntryModeIcon = const Icon(Icons.access_time),
 }) async {
   assert(debugCheckHasMaterialLocalizations(context));
 
