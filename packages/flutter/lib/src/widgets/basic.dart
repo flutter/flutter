@@ -150,6 +150,24 @@ abstract class _UbiquitousInheritedWidget extends InheritedWidget {
 ///
 /// For example, [Padding] depends on the [Directionality] to resolve
 /// [EdgeInsetsDirectional] objects into absolute [EdgeInsets] objects.
+///
+/// {@tool snippet}
+///
+/// This example uses a right-to-left text direction and draws a blue box with
+/// a right margin of 8 pixels.
+///
+/// ```dart
+/// Directionality(
+///   textDirection: TextDirection.rtl,
+///   child: Padding(
+///     padding: EdgeInsetsDirectional.only(start: 8),
+///       child: Container(
+///       color: Colors.blue,
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 class Directionality extends _UbiquitousInheritedWidget {
   /// Creates a widget that determines the directionality of text and
   /// text-direction-sensitive render objects.
