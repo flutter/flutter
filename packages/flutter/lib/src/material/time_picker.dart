@@ -2962,19 +2962,19 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
 /// portrait or landscape mode.
 ///
 /// {@template flutter.material.time_picker.switchToInputEntryModeIcon}
-/// An optional [switchToInputEntryModeIcon] argument can be used to
-/// display a custom Icon in the corner of the dialog
-/// when [TimePickerEntryMode] is [TimePickerEntryMode.dial]. Clicking on
-/// icon changes the [TimePickerEntryMode] to [TimePickerEntryMode.input].
-/// If null, `Icon(keyboard_outlined)` is used.
+/// The [switchToInputEntryModeIcon] argument can be used to customize
+/// the input method icon that is shown when the [TimePickerEntryMode]
+/// is [TimePickerEntryMode.dial].
+///
+/// Defaults to an [Icon] widget with [Icons.keyboard_outlined] as icon.
 /// {@endtemplate}
 ///
 /// {@template flutter.material.time_picker.switchToTimerEntryModeIcon}
-/// An optional [switchToTimerEntryModeIcon] argument can be used to
-/// display a custom Icon in the corner of the dialog
-/// when [TimePickerEntryMode] is [TimePickerEntryMode.input]. Clicking on
-/// icon changes the [TimePickerEntryMode] to [TimePickerEntryMode.dial].
-/// If null, `Icon(access_time)` is used.
+/// The [switchToTimerEntryModeIcon] argument can be used to customize
+/// the input method icon that is shown when the [TimePickerEntryMode]
+/// is [TimePickerEntryMode.input].
+///
+/// Defaults to an [Icon] widget with [Icons.access_time] as icon.
 /// {@endtemplate}
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
