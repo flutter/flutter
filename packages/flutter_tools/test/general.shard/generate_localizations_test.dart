@@ -1745,6 +1745,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
         expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
         expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'en'), contains('String springBegins(DateTime springStartDate)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('String springBegins(DateTime springStartDate)'));
       });
 
       testWithoutContext('handle date with multiple locale when only template has placeholders', () {
@@ -1772,6 +1774,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
         expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
         expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'en'), contains('String springBegins(DateTime springStartDate)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('String springBegins(DateTime springStartDate)'));
       });
 
       testWithoutContext('handle date with multiple locale when there is unused placeholder', () {
@@ -1808,6 +1812,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
         expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
         expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'en'), contains('String springBegins(DateTime springStartDate)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('String springBegins(DateTime springStartDate)'));
         expect(getGeneratedFileContent(locale: 'ja'), isNot(contains('notUsed')));
       });
 
@@ -1852,6 +1858,44 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
+      testWithoutContext('handle date with multiple locale when non-template placeholder does not specify type', () {
+
+
+            setupLocalizations(<String, String>{
+              'en': '''
+    {
+      "@@locale": "en",
+      "springBegins": "Spring begins on {springStartDate}",
+      "@springBegins": {
+        "description": "The first day of spring",
+        "placeholders": {
+          "springStartDate": {
+            "type": "DateTime",
+            "format": "MMMd"
+          }
+        }
+      }
+    }''',
+              'ja': '''
+    {
+      "@@locale": "ja",
+      "springBegins": "春が始まるのは{springStartDate}",
+      "@springBegins": {
+        "description": "The first day of spring",
+        "placeholders": {
+          "springStartDate": {
+            "format": "MMMMd"
+          }
+        }
+      }
+    }'''
+            });
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMMd(localeName)')); // Fails
+        expect(getGeneratedFileContent(locale: 'en'), contains('String springBegins(DateTime springStartDate)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('String springBegins(DateTime springStartDate)'));
+      });
+
       testWithoutContext('handle ordinary formatted date and arbitrary formatted date', () {
         setupLocalizations(<String, String>{
           'en': '''
@@ -1886,6 +1930,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
         expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
         expect(getGeneratedFileContent(locale: 'ja'), contains(r"DateFormat('立春', localeName)"));
+        expect(getGeneratedFileContent(locale: 'en'), contains('String springBegins(DateTime springStartDate)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('String springBegins(DateTime springStartDate)'));
       });
 
       testWithoutContext('handle arbitrary formatted date with multiple locale', () {
@@ -1923,6 +1969,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
         expect(getGeneratedFileContent(locale: 'en'), contains(r"DateFormat('asdf o\'clock', localeName)"));
         expect(getGeneratedFileContent(locale: 'ja'), contains(r"DateFormat('立春', localeName)"));
+        expect(getGeneratedFileContent(locale: 'en'), contains('String springBegins(DateTime springStartDate)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('String springBegins(DateTime springStartDate)'));
       });
     });
 
@@ -2678,6 +2726,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 }'''
       });
 
+      expect(getGeneratedFileContent(locale: 'en'), contains('String money(int number)'));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('String money(int number)'));
       expect(getGeneratedFileContent(locale: 'en'), contains('intl.NumberFormat.currency('));
       expect(getGeneratedFileContent(locale: 'ja'), contains('intl.NumberFormat.decimalPatternDigits('));
       expect(getGeneratedFileContent(locale: 'ja'), contains('decimalDigits: 3'));
@@ -2715,6 +2765,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 }'''
       });
 
+      expect(getGeneratedFileContent(locale: 'en'), contains('String money(int number)'));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('String money(int number)'));
       expect(getGeneratedFileContent(locale: 'en'), contains('intl.NumberFormat.decimalPatternDigits('));
       expect(getGeneratedFileContent(locale: 'en'), contains('decimalDigits: 3'));
       expect(getGeneratedFileContent(locale: 'en'), contains(r"return 'Sum $numberString'"));
@@ -2754,6 +2806,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 }'''
       });
 
+      expect(getGeneratedFileContent(locale: 'en'), contains('String money(int number)'));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('String money(int number)'));
       expect(getGeneratedFileContent(locale: 'en'), isNot(contains('intl.NumberFormat')));
       expect(getGeneratedFileContent(locale: 'en'), contains(r"return 'Sum $number'"));
       expect(getGeneratedFileContent(locale: 'ja'), contains('intl.NumberFormat.decimalPatternDigits('));
