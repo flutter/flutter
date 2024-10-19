@@ -78,7 +78,7 @@ Future<int> main(List<String> args) async {
 
 /// Returns the hash signature for the engine source code.
 Future<({String result, String? error})> engineHash(
-  Future<ProcessResult> Function(List<String> command) runProccess, {
+  Future<ProcessResult> Function(List<String> command) runProcess, {
   GitRevisionStrategy revisionStrategy = GitRevisionStrategy.mergeBase,
 }) async {
   // First figure out the hash we're working with
@@ -87,7 +87,7 @@ Future<({String result, String? error})> engineHash(
     case GitRevisionStrategy.head:
       base = 'HEAD';
     case GitRevisionStrategy.mergeBase:
-      final processResult = await runProccess(
+      final processResult = await runProcess(
         <String>[
           'git',
           'merge-base',
@@ -121,7 +121,7 @@ ${processResult.stdout}''',
   // This is important for future filtering of files, but also do not include
   // the developer's changes / in flight PRs.
   // The presence `engine` and `DEPS` are signals that you live in a monorepo world.
-  final processResult = await runProccess(
+  final processResult = await runProcess(
     <String>['git', 'ls-tree', '-r', base, 'engine', 'DEPS'],
   );
 
