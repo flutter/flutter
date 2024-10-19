@@ -1648,7 +1648,7 @@ void main() {
 
       testWidgets('TimePicker shows default icons when no custom icons are provided', (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
-        home: TimePickerDialog(initialTime: TimeOfDay.now()),
+          home: TimePickerDialog(initialTime: TimeOfDay.now()),
         ));
 
         // Check that the default icon for the dial mode is displayed
