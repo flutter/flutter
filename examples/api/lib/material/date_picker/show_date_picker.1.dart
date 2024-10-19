@@ -58,7 +58,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
         ),
         OutlinedButton(
           onPressed: _selectDate,
-          child: const Text('Selecte Date'),
+          child: const Text('Select Date'),
         ),
       ],
     );
