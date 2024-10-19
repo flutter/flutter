@@ -1359,16 +1359,19 @@ class FlutterPlugin implements Plugin<Project> {
             // The following tasks use the output of copyFlutterAssetsTask,
             // so it's necessary to declare it as an dependency since Gradle 8.
             // See https://docs.gradle.org/8.1/userguide/validation_problems.html#implicit_dependency.
-  def assetTaskNames = [
+               def tasksToCheck = [
                     "compress${variant.name.capitalize()}Assets",
                     "bundle${variant.name.capitalize()}Aar",
                     "bundle${variant.name.capitalize()}LocalLintAar"
             ]
-            def tasks = project.tasks.findAll { task ->
-                assetTaskNames.contains(task.name)
-            }
-            tasks.each { task ->
-                task.dependsOn(copyFlutterAssetsTask)
+
+            tasksToCheck.each { Taskname ->
+                try {
+                    project.tasks.named(Taskname).configure { task ->
+                        task.dependsOn(copyFlutterAssetsTask)
+                    }
+                } catch (Exception ignored) {
+                }
             }
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
