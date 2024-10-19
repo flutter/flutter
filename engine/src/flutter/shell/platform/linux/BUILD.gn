@@ -248,6 +248,7 @@ executable("flutter_linux_unittests") {
     "testing/mock_engine.cc",
     "testing/mock_epoxy.cc",
     "testing/mock_im_context.cc",
+    "testing/mock_keymap.cc",
     "testing/mock_plugin_registrar.cc",
     "testing/mock_renderer.cc",
     "testing/mock_settings.cc",

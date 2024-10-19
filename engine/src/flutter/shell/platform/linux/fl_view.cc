@@ -78,11 +78,6 @@ struct _FlView {
   // Tracks whether mouse pointer is inside the view.
   gboolean pointer_inside;
 
-  /* FlKeyboardViewDelegate related properties */
-  GdkKeymap* keymap;
-  gulong keymap_keys_changed_cb_id;  // Signal connection ID for
-                                     // keymap-keys-changed
-
   // Accessible tree from Flutter, exposed as an AtkPlug.
   FlViewAccessible* view_accessible;
 
@@ -385,13 +380,6 @@ static void fl_view_keyboard_delegate_iface_init(
                                                  event);
   };
 
-  iface->lookup_key = [](FlKeyboardViewDelegate* view_delegate,
-                         const GdkKeymapKey* key) -> guint {
-    FlView* self = FL_VIEW(view_delegate);
-    g_return_val_if_fail(self->keymap != nullptr, 0);
-    return gdk_keymap_lookup_key(self->keymap, key);
-  };
-
   iface->get_keyboard_state =
       [](FlKeyboardViewDelegate* view_delegate) -> GHashTable* {
     FlView* self = FL_VIEW(view_delegate);
@@ -550,10 +538,6 @@ static gboolean leave_notify_event_cb(FlView* self,
   return TRUE;
 }
 
-static void keymap_keys_changed_cb(FlView* self) {
-  fl_keyboard_manager_notify_layout_changed(self->keyboard_manager);
-}
-
 static void gesture_rotation_begin_cb(FlView* self) {
   fl_scrolling_manager_handle_rotation_begin(self->scrolling_manager);
 }
@@ -584,11 +568,6 @@ static void gesture_zoom_end_cb(FlView* self) {
 static GdkGLContext* create_context_cb(FlView* self) {
   fl_renderer_gdk_set_window(self->renderer,
                              gtk_widget_get_parent_window(GTK_WIDGET(self)));
-
-  // Must initialize the keymap before the keyboard.
-  self->keymap = gdk_keymap_get_for_display(gdk_display_get_default());
-  self->keymap_keys_changed_cb_id = g_signal_connect_swapped(
-      self->keymap, "keys-changed", G_CALLBACK(keymap_keys_changed_cb), self);
 
   // Create system channel handlers.
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
@@ -721,10 +700,6 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->window_state_monitor);
   g_clear_object(&self->scrolling_manager);
   g_clear_object(&self->keyboard_manager);
-  if (self->keymap_keys_changed_cb_id != 0) {
-    g_signal_handler_disconnect(self->keymap, self->keymap_keys_changed_cb_id);
-    self->keymap_keys_changed_cb_id = 0;
-  }
   g_clear_object(&self->keyboard_handler);
   g_clear_object(&self->mouse_cursor_handler);
   g_clear_object(&self->platform_handler);

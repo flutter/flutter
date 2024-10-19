@@ -118,6 +118,9 @@ struct _FlKeyboardManager {
 
   GWeakRef view_delegate;
 
+  FlKeyboardManagerLookupKeyHandler lookup_key_handler;
+  gpointer lookup_key_handler_user_data;
+
   FlKeyboardManagerRedispatchEventHandler redispatch_handler;
   gpointer redispatch_handler_user_data;
 
@@ -157,9 +160,18 @@ struct _FlKeyboardManager {
   // It is set up when the manager is initialized and is not changed ever after.
   std::unique_ptr<std::map<uint64_t, const LayoutGoal*>>
       logical_to_mandatory_goals;
+
+  GdkKeymap* keymap;
+  gulong keymap_keys_changed_cb_id;  // Signal connection ID for
+                                     // keymap-keys-changed
 };
 
 G_DEFINE_TYPE(FlKeyboardManager, fl_keyboard_manager, G_TYPE_OBJECT);
+
+static void keymap_keys_changed_cb(FlKeyboardManager* self) {
+  g_clear_object(&self->derived_layout);
+  self->derived_layout = fl_keyboard_layout_new();
+}
 
 // This is an exact copy of g_ptr_array_find_with_equal_func.  Somehow CI
 // reports that can not find symbol g_ptr_array_find_with_equal_func, despite
@@ -292,13 +304,18 @@ static void responder_handle_channel_event_callback(bool handled,
   responder_handle_event_callback(handled, user_data_ptr, FALSE);
 }
 
-static uint16_t convert_key_to_char(FlKeyboardViewDelegate* view_delegate,
+static uint16_t convert_key_to_char(FlKeyboardManager* self,
                                     guint keycode,
                                     gint group,
                                     gint level) {
   GdkKeymapKey key = {keycode, group, level};
   constexpr int kBmpMax = 0xD7FF;
-  guint origin = fl_keyboard_view_delegate_lookup_key(view_delegate, &key);
+  guint origin;
+  if (self->lookup_key_handler != nullptr) {
+    origin = self->lookup_key_handler(&key, self->lookup_key_handler_user_data);
+  } else {
+    origin = gdk_keymap_lookup_key(self->keymap, &key);
+  }
   return origin < kBmpMax ? origin : 0xFFFF;
 }
 
@@ -329,8 +346,8 @@ static void guarantee_layout(FlKeyboardManager* self, FlKeyEvent* event) {
   std::string debug_layout_data;
   for (uint16_t keycode = 0; keycode < 128; keycode += 1) {
     std::vector<uint16_t> this_key_clues = {
-        convert_key_to_char(view_delegate, keycode, group, 0),
-        convert_key_to_char(view_delegate, keycode, group, 1),  // Shift
+        convert_key_to_char(self, keycode, group, 0),
+        convert_key_to_char(self, keycode, group, 1),  // Shift
     };
     debug_format_layout_data(debug_layout_data, keycode, this_key_clues[0],
                              this_key_clues[1]);
@@ -344,8 +361,8 @@ static void guarantee_layout(FlKeyboardManager* self, FlKeyEvent* event) {
   for (const LayoutGoal& keycode_goal : layout_goals) {
     uint16_t keycode = keycode_goal.keycode;
     std::vector<uint16_t> this_key_clues = {
-        convert_key_to_char(view_delegate, keycode, group, 0),
-        convert_key_to_char(view_delegate, keycode, group, 1),  // Shift
+        convert_key_to_char(self, keycode, group, 0),
+        convert_key_to_char(self, keycode, group, 1),  // Shift
     };
 
     // The logical key should be the first available clue from below:
@@ -404,6 +421,10 @@ static void fl_keyboard_manager_dispose(GObject* object) {
   g_ptr_array_free(self->pending_responds, TRUE);
   g_ptr_array_free(self->pending_redispatches, TRUE);
   g_clear_object(&self->derived_layout);
+  if (self->keymap_keys_changed_cb_id != 0) {
+    g_signal_handler_disconnect(self->keymap, self->keymap_keys_changed_cb_id);
+    self->keymap_keys_changed_cb_id = 0;
+  }
 
   G_OBJECT_CLASS(fl_keyboard_manager_parent_class)->dispose(object);
 }
@@ -430,6 +451,10 @@ static void fl_keyboard_manager_init(FlKeyboardManager* self) {
   self->pending_redispatches = g_ptr_array_new_with_free_func(g_object_unref);
 
   self->last_sequence_id = 1;
+
+  self->keymap = gdk_keymap_get_for_display(gdk_display_get_default());
+  self->keymap_keys_changed_cb_id = g_signal_connect_swapped(
+      self->keymap, "keys-changed", G_CALLBACK(keymap_keys_changed_cb), self);
 }
 
 FlKeyboardManager* fl_keyboard_manager_new(
@@ -511,16 +536,25 @@ GHashTable* fl_keyboard_manager_get_pressed_state(FlKeyboardManager* self) {
       self->key_embedder_responder);
 }
 
+void fl_keyboard_manager_set_lookup_key_handler(
+    FlKeyboardManager* self,
+    FlKeyboardManagerLookupKeyHandler lookup_key_handler,
+    gpointer user_data) {
+  g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
+  self->lookup_key_handler = lookup_key_handler;
+  self->lookup_key_handler_user_data = user_data;
+}
+
 void fl_keyboard_manager_notify_layout_changed(FlKeyboardManager* self) {
   g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
-  g_clear_object(&self->derived_layout);
-  self->derived_layout = fl_keyboard_layout_new();
+  keymap_keys_changed_cb(self);
 }
 
 void fl_keyboard_manager_set_redispatch_handler(
     FlKeyboardManager* self,
     FlKeyboardManagerRedispatchEventHandler redispatch_handler,
     gpointer user_data) {
+  g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
   self->redispatch_handler = redispatch_handler;
   self->redispatch_handler_user_data = user_data;
 }

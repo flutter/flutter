@@ -42,9 +42,6 @@ struct _FlKeyboardViewDelegateInterface {
   gboolean (*text_filter_key_press)(FlKeyboardViewDelegate* delegate,
                                     FlKeyEvent* event);
 
-  guint (*lookup_key)(FlKeyboardViewDelegate* view_delegate,
-                      const GdkKeymapKey* key);
-
   GHashTable* (*get_keyboard_state)(FlKeyboardViewDelegate* delegate);
 };
 
@@ -76,9 +73,6 @@ void fl_keyboard_view_delegate_send_key_event(FlKeyboardViewDelegate* delegate,
 gboolean fl_keyboard_view_delegate_text_filter_key_press(
     FlKeyboardViewDelegate* delegate,
     FlKeyEvent* event);
-
-guint fl_keyboard_view_delegate_lookup_key(FlKeyboardViewDelegate* delegate,
-                                           const GdkKeymapKey* key);
 
 /**
  * fl_keyboard_view_delegate_get_keyboard_state:

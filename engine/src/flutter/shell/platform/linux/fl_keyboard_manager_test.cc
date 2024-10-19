@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
+#include "flutter/shell/platform/linux/testing/mock_keymap.h"
 #include "flutter/shell/platform/linux/testing/mock_text_input_handler.h"
 #include "flutter/testing/testing.h"
 
@@ -282,7 +283,6 @@ struct _FlMockViewDelegate {
   FlMockKeyBinaryMessenger* messenger;
   EmbedderCallHandler embedder_handler;
   bool text_filter_result;
-  const MockLayoutData* layout_data;
 };
 
 static void fl_mock_view_keyboard_delegate_iface_init(
@@ -329,24 +329,10 @@ static gboolean fl_mock_view_keyboard_text_filter_key_press(
   return self->text_filter_result;
 }
 
-static guint fl_mock_view_keyboard_lookup_key(
-    FlKeyboardViewDelegate* view_delegate,
-    const GdkKeymapKey* key) {
-  FlMockViewDelegate* self = FL_MOCK_VIEW_DELEGATE(view_delegate);
-  guint8 group = static_cast<guint8>(key->group);
-  EXPECT_LT(group, self->layout_data->size());
-  const MockGroupLayoutData* group_layout = (*self->layout_data)[group];
-  EXPECT_TRUE(group_layout != nullptr);
-  EXPECT_TRUE(key->level == 0 || key->level == 1);
-  bool shift = key->level == 1;
-  return (*group_layout)[key->keycode * 2 + shift];
-}
-
 static void fl_mock_view_keyboard_delegate_iface_init(
     FlKeyboardViewDelegateInterface* iface) {
   iface->send_key_event = fl_mock_view_keyboard_send_key_event;
   iface->text_filter_key_press = fl_mock_view_keyboard_text_filter_key_press;
-  iface->lookup_key = fl_mock_view_keyboard_lookup_key;
 }
 
 static FlMockViewDelegate* fl_mock_view_delegate_new() {
@@ -371,11 +357,6 @@ static void fl_mock_view_set_text_filter_result(FlMockViewDelegate* self,
   self->text_filter_result = result;
 }
 
-static void fl_mock_view_set_layout(FlMockViewDelegate* self,
-                                    const MockLayoutData* layout) {
-  self->layout_data = layout;
-}
-
 /***** End FlMockViewDelegate *****/
 
 class KeyboardTester {
@@ -389,6 +370,20 @@ class KeyboardTester {
 
     manager_ = fl_keyboard_manager_new(FL_BINARY_MESSENGER(view_->messenger),
                                        FL_KEYBOARD_VIEW_DELEGATE(view_));
+    fl_keyboard_manager_set_lookup_key_handler(
+        manager_,
+        [](const GdkKeymapKey* key, gpointer user_data) {
+          KeyboardTester* self = reinterpret_cast<KeyboardTester*>(user_data);
+          guint8 group = static_cast<guint8>(key->group);
+          EXPECT_LT(group, self->layout_data_->size());
+          const MockGroupLayoutData* group_layout =
+              (*self->layout_data_)[group];
+          EXPECT_TRUE(group_layout != nullptr);
+          EXPECT_TRUE(key->level == 0 || key->level == 1);
+          bool shift = key->level == 1;
+          return (*group_layout)[key->keycode * 2 + shift];
+        },
+        this);
     fl_keyboard_manager_set_redispatch_handler(
         manager_,
         [](FlKeyEvent* event, gpointer user_data) {
@@ -516,7 +511,7 @@ class KeyboardTester {
   }
 
   void setLayout(const MockLayoutData& layout) {
-    fl_mock_view_set_layout(view_, &layout);
+    layout_data_ = &layout;
     if (manager_ != nullptr) {
       fl_keyboard_manager_notify_layout_changed(manager_);
     }
@@ -527,6 +522,7 @@ class KeyboardTester {
   FlKeyboardManager* manager_ = nullptr;
   GPtrArray* redispatched_events_ = nullptr;
   bool during_redispatch_ = false;
+  const MockLayoutData* layout_data_;
 
   static gboolean _flushChannelMessagesCb(gpointer data) {
     g_autoptr(GMainLoop) loop = reinterpret_cast<GMainLoop*>(data);
@@ -538,6 +534,7 @@ class KeyboardTester {
 // Make sure that the keyboard can be disposed without crashes when there are
 // unresolved pending events.
 TEST(FlKeyboardManagerTest, DisposeWithUnresolvedPends) {
+  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
   KeyboardTester tester;
   std::vector<CallRecord> call_records;
 
@@ -558,6 +555,7 @@ TEST(FlKeyboardManagerTest, DisposeWithUnresolvedPends) {
 }
 
 TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
+  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
   KeyboardTester tester;
   std::vector<CallRecord> call_records;
   g_autoptr(GPtrArray) redispatched =
@@ -645,6 +643,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
 }
 
 TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
+  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
   KeyboardTester tester;
   gboolean handler_handled = false;
   std::vector<CallRecord> call_records;
@@ -692,6 +691,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
 }
 
 TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
+  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
   KeyboardTester tester;
   std::vector<CallRecord> call_records;
   g_autoptr(GPtrArray) redispatched =
@@ -751,6 +751,7 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
 }
 
 TEST(FlKeyboardManagerTest, TextInputHandlerReturnsFalse) {
+  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
   KeyboardTester tester;
   g_autoptr(GPtrArray) redispatched =
       g_ptr_array_new_with_free_func(g_object_unref);
@@ -774,6 +775,7 @@ TEST(FlKeyboardManagerTest, TextInputHandlerReturnsFalse) {
 }
 
 TEST(FlKeyboardManagerTest, TextInputHandlerReturnsTrue) {
+  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
   KeyboardTester tester;
   g_autoptr(GPtrArray) redispatched =
       g_ptr_array_new_with_free_func(g_object_unref);
@@ -794,6 +796,7 @@ TEST(FlKeyboardManagerTest, TextInputHandlerReturnsTrue) {
 }
 
 TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
+  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
   KeyboardTester tester;
 
   std::vector<CallRecord> call_records;
@@ -887,6 +890,7 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
 }
 
 TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
+  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
   KeyboardTester tester;
   std::vector<CallRecord> call_records;
   tester.recordEmbedderCallsTo(call_records);
@@ -925,6 +929,7 @@ TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
 }
 
 TEST(FlKeyboardManagerTest, GetPressedState) {
+  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
   KeyboardTester tester;
   tester.respondToTextInputWith(true);
 
