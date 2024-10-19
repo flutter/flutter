@@ -1364,9 +1364,9 @@ class FlutterPlugin implements Plugin<Project> {
                     "bundle${variant.name.capitalize()}Aar",
                     "bundle${variant.name.capitalize()}LocalLintAar"
             ]
-            tasksToCheck.each { Taskname ->
+            tasksToCheck.each { taskTocheck ->
                 try {
-                    project.tasks.named(Taskname).configure { task ->
+                    project.tasks.named(taskTocheck).configure { task ->
                         task.dependsOn(copyFlutterAssetsTask)
                     }
                 } catch (Exception ignored) {
