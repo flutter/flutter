@@ -25,6 +25,23 @@ import 'media_query.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=lkF0TQJO0bA}
 ///
+/// {@tool snippet}
+///
+/// This example creates a blue box containing text that is sufficiently padded
+/// to avoid instrusions by the operating system.
+///
+/// ```dart
+/// SafeArea(
+///   child: Container(
+///     constraints: BoxConstraints.expand(),
+///     alignment: Alignment.center,
+///     color: Colors.blue,
+///     child: Text('Hello, World!'),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SliverSafeArea], for insetting slivers to avoid operating system
