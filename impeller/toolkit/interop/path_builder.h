@@ -42,8 +42,7 @@ class PathBuilder final
 
   void AddOval(const Rect& oval_bounds);
 
-  void AddRoundedRect(const Rect& rect,
-                      const impeller::PathBuilder::RoundingRadii& radii);
+  void AddRoundedRect(const Rect& rect, const RoundingRadii& radii);
 
   void Close();
 

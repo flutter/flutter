@@ -484,26 +484,26 @@ std::vector<DisplayListInvocationGroup> CreateAllClipOps() {
        }},
       {"ClipRRect",
        {
-           {1, 64, 0,
+           {1, 56, 0,
             [](DlOpReceiver& r) {
-              r.clipRRect(kTestRRect, DlCanvas::ClipOp::kIntersect, true);
+              r.clipRoundRect(kTestRRect, DlCanvas::ClipOp::kIntersect, true);
             }},
-           {1, 64, 0,
+           {1, 56, 0,
             [](DlOpReceiver& r) {
-              r.clipRRect(kTestRRect.makeOffset(1, 1),
-                          DlCanvas::ClipOp::kIntersect, true);
+              r.clipRoundRect(kTestRRect.Shift(1, 1),
+                              DlCanvas::ClipOp::kIntersect, true);
             }},
-           {1, 64, 0,
+           {1, 56, 0,
             [](DlOpReceiver& r) {
-              r.clipRRect(kTestRRect, DlCanvas::ClipOp::kIntersect, false);
+              r.clipRoundRect(kTestRRect, DlCanvas::ClipOp::kIntersect, false);
             }},
-           {1, 64, 0,
+           {1, 56, 0,
             [](DlOpReceiver& r) {
-              r.clipRRect(kTestRRect, DlCanvas::ClipOp::kDifference, true);
+              r.clipRoundRect(kTestRRect, DlCanvas::ClipOp::kDifference, true);
             }},
-           {1, 64, 0,
+           {1, 56, 0,
             [](DlOpReceiver& r) {
-              r.clipRRect(kTestRRect, DlCanvas::ClipOp::kDifference, false);
+              r.clipRoundRect(kTestRRect, DlCanvas::ClipOp::kDifference, false);
             }},
        }},
       {"ClipPath",
@@ -543,7 +543,7 @@ std::vector<DisplayListInvocationGroup> CreateAllClipOps() {
               r.clipPath(kTestPathOval, DlCanvas::ClipOp::kIntersect, true);
             }},
            // clipPath(rrect) becomes clipRRect
-           {1, 64, 0,
+           {1, 56, 0,
             [](DlOpReceiver& r) {
               r.clipPath(kTestPathRRect, DlCanvas::ClipOp::kIntersect, true);
             }},
@@ -681,18 +681,20 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        }},
       {"DrawRRect",
        {
-           {1, 56, 1, [](DlOpReceiver& r) { r.drawRRect(kTestRRect); }},
+           {1, 56, 1, [](DlOpReceiver& r) { r.drawRoundRect(kTestRRect); }},
            {1, 56, 1,
-            [](DlOpReceiver& r) { r.drawRRect(kTestRRect.makeOffset(5, 5)); }},
+            [](DlOpReceiver& r) { r.drawRoundRect(kTestRRect.Shift(5, 5)); }},
        }},
       {"DrawDRRect",
        {
-           {1, 112, 1,
-            [](DlOpReceiver& r) { r.drawDRRect(kTestRRect, kTestInnerRRect); }},
-           {1, 112, 1,
+           {1, 104, 1,
             [](DlOpReceiver& r) {
-              r.drawDRRect(kTestRRect.makeOffset(5, 5),
-                           kTestInnerRRect.makeOffset(4, 4));
+              r.drawDiffRoundRect(kTestRRect, kTestInnerRRect);
+            }},
+           {1, 104, 1,
+            [](DlOpReceiver& r) {
+              r.drawDiffRoundRect(kTestRRect.Shift(5, 5),
+                                  kTestInnerRRect.Shift(4, 4));
             }},
        }},
       {"DrawPath",

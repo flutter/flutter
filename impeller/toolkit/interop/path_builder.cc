@@ -51,9 +51,7 @@ void PathBuilder::AddOval(const Rect& oval_bounds) {
   builder_.addOval(ToSkiaType(oval_bounds));
 }
 
-void PathBuilder::AddRoundedRect(
-    const Rect& rect,
-    const impeller::PathBuilder::RoundingRadii& radii) {
+void PathBuilder::AddRoundedRect(const Rect& rect, const RoundingRadii& radii) {
   builder_.addRRect(ToSkiaType(rect, radii));
 }
 

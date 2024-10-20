@@ -237,8 +237,8 @@ void DisplayListGLComplexityCalculator::GLHelper::drawCircle(
   AccumulateComplexity(complexity);
 }
 
-void DisplayListGLComplexityCalculator::GLHelper::drawRRect(
-    const SkRRect& rrect) {
+void DisplayListGLComplexityCalculator::GLHelper::drawRoundRect(
+    const DlRoundRect& rrect) {
   if (IsComplex()) {
     return;
   }
@@ -257,14 +257,15 @@ void DisplayListGLComplexityCalculator::GLHelper::drawRRect(
   // approximately matching the measured data, normalising the data so that
   // 0.0005ms resulted in a score of 100 then simplifying down the formula.
   if (DrawStyle() == DlDrawStyle::kFill ||
-      ((rrect.getType() == SkRRect::Type::kSimple_Type) && IsAntiAliased())) {
-    unsigned int area = rrect.width() * rrect.height();
+      ((rrect.GetRadii().AreAllCornersSame()) && IsAntiAliased())) {
+    unsigned int area = rrect.GetBounds().Area();
     // m = 1/3200
     // c = 0.5
     complexity = (area + 1600) / 80;
   } else {
     // Take the average of the width and height.
-    unsigned int length = (rrect.width() + rrect.height()) / 2;
+    unsigned int length =
+        (rrect.GetBounds().GetWidth() + rrect.GetBounds().GetHeight()) / 2;
 
     // There is some difference between hairline and non-hairline performance
     // but the spread is relatively inconsistent and it's pretty much a wash.
@@ -282,9 +283,9 @@ void DisplayListGLComplexityCalculator::GLHelper::drawRRect(
   AccumulateComplexity(complexity);
 }
 
-void DisplayListGLComplexityCalculator::GLHelper::drawDRRect(
-    const SkRRect& outer,
-    const SkRRect& inner) {
+void DisplayListGLComplexityCalculator::GLHelper::drawDiffRoundRect(
+    const DlRoundRect& outer,
+    const DlRoundRect& inner) {
   if (IsComplex()) {
     return;
   }
@@ -307,8 +308,8 @@ void DisplayListGLComplexityCalculator::GLHelper::drawDRRect(
   // There is also a kStrokeAndFill_Style that Skia exposes, but we do not
   // currently use it anywhere in Flutter.
   if (DrawStyle() == DlDrawStyle::kFill) {
-    unsigned int area = outer.width() * outer.height();
-    if (outer.getType() == SkRRect::Type::kComplex_Type) {
+    unsigned int area = outer.GetBounds().Area();
+    if (!outer.GetRadii().AreAllCornersSame()) {
       // m = 1/500
       // c = 0.5
       complexity = (area + 250) / 5;
@@ -318,7 +319,8 @@ void DisplayListGLComplexityCalculator::GLHelper::drawDRRect(
       complexity = (area + 3200) / 16;
     }
   } else {
-    unsigned int length = (outer.width() + outer.height()) / 2;
+    unsigned int length =
+        (outer.GetBounds().GetWidth() + outer.GetBounds().GetHeight()) / 2;
     if (IsAntiAliased()) {
       // m = 1/15
       // c = 1

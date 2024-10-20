@@ -50,10 +50,6 @@ Color ToColor(const flutter::DlColor& color);
 
 Matrix ToRSXForm(const SkRSXform& form);
 
-PathBuilder::RoundingRadii ToRoundingRadii(const SkRRect& rrect);
-
-Path ToPath(const SkRRect& rrect);
-
 std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type);
 
 impeller::SamplerDescriptor ToSamplerDescriptor(

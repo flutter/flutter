@@ -201,20 +201,6 @@ static std::ostream& operator<<(std::ostream& os, const SkRect& rect) {
             << ")";
 }
 
-static std::ostream& operator<<(std::ostream& os, const SkRRect& rrect) {
-  return os << "SkRRect("
-            << rrect.rect() << ", "
-            << "ul: (" << rrect.radii(SkRRect::kUpperLeft_Corner).fX << ", "
-                       << rrect.radii(SkRRect::kUpperLeft_Corner).fY << "), "
-            << "ur: (" << rrect.radii(SkRRect::kUpperRight_Corner).fX << ", "
-                       << rrect.radii(SkRRect::kUpperRight_Corner).fY << "), "
-            << "lr: (" << rrect.radii(SkRRect::kLowerRight_Corner).fX << ", "
-                       << rrect.radii(SkRRect::kLowerRight_Corner).fY << "), "
-            << "ll: (" << rrect.radii(SkRRect::kLowerLeft_Corner).fX << ", "
-                       << rrect.radii(SkRRect::kLowerLeft_Corner).fY << ")"
-            << ")";
-}
-
 extern std::ostream& operator<<(std::ostream& os, const DlPath& path) {
   return os << "DlPath("
             << "bounds: " << path.GetSkBounds()
@@ -800,9 +786,9 @@ void DisplayListStreamDispatcher::clipOval(const DlRect& bounds, ClipOp clip_op,
            << "isaa: " << is_aa
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::clipRRect(const SkRRect& rrect,
-                         ClipOp clip_op,
-                         bool is_aa) {
+void DisplayListStreamDispatcher::clipRoundRect(const DlRoundRect& rrect,
+                                                ClipOp clip_op,
+                                                bool is_aa) {
   startl() << "clipRRect("
            << rrect << ", "
            << clip_op << ", "
@@ -852,11 +838,11 @@ void DisplayListStreamDispatcher::drawCircle(const DlPoint& center,
                                              DlScalar radius) {
   startl() << "drawCircle(" << center << ", " << radius << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawRRect(const SkRRect& rrect) {
+void DisplayListStreamDispatcher::drawRoundRect(const DlRoundRect& rrect) {
   startl() << "drawRRect(" << rrect << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawDRRect(const SkRRect& outer,
-                                             const SkRRect& inner) {
+void DisplayListStreamDispatcher::drawDiffRoundRect(const DlRoundRect& outer,
+                                                    const DlRoundRect& inner) {
   startl() << "drawDRRect(outer: " << outer << ", " << std::endl;
   startl() << "           inner: " << inner << ");" << std::endl;
 }
