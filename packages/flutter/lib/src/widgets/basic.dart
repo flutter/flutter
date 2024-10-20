@@ -931,7 +931,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
 ///
 /// ```dart
 /// ClipOval(
-///   child: Image.network('images/cat.png')
+///   child: Image.asset('images/cat.png'),
 /// )
 /// ```
 /// {@end-tool}
