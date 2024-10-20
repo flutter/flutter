@@ -159,11 +159,9 @@ abstract class _UbiquitousInheritedWidget extends InheritedWidget {
 /// ```dart
 /// Directionality(
 ///   textDirection: TextDirection.rtl,
-///   child: Padding(
-///     padding: const EdgeInsetsDirectional.only(start: 8),
-///       child: Container(
-///       color: Colors.blue,
-///     ),
+///   child: Container(
+///     margin: const EdgeInsetsDirectional.only(start: 8),
+///     color: Colors.blue,
 ///   ),
 /// )
 /// ```
