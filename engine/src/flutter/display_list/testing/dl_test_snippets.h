@@ -178,13 +178,17 @@ static const DlBlurMaskFilter kTestMaskFilter4(DlBlurStyle::kInner, 3.0);
 static const DlBlurMaskFilter kTestMaskFilter5(DlBlurStyle::kOuter, 3.0);
 constexpr DlRect kTestBounds = DlRect::MakeLTRB(10, 10, 50, 60);
 constexpr SkRect kTestSkBounds = SkRect::MakeLTRB(10, 10, 50, 60);
-static const SkRRect kTestRRect = SkRRect::MakeRectXY(kTestSkBounds, 5, 5);
+static const DlRoundRect kTestRRect =
+    DlRoundRect::MakeRectXY(kTestBounds, 5, 5);
+static const SkRRect kTestSkRRect = SkRRect::MakeRectXY(kTestSkBounds, 5, 5);
 static const SkRRect kTestRRectRect = SkRRect::MakeRect(kTestSkBounds);
-static const SkRRect kTestInnerRRect =
+static const DlRoundRect kTestInnerRRect =
+    DlRoundRect::MakeRectXY(kTestBounds.Expand(-5, -5), 2, 2);
+static const SkRRect kTestSkInnerRRect =
     SkRRect::MakeRectXY(kTestSkBounds.makeInset(5, 5), 2, 2);
 static const DlPath kTestPathRect = DlPath(SkPath::Rect(kTestSkBounds));
 static const DlPath kTestPathOval = DlPath(SkPath::Oval(kTestSkBounds));
-static const DlPath kTestPathRRect = DlPath(SkPath::RRect(kTestRRect));
+static const DlPath kTestPathRRect = DlPath(SkPath::RRect(kTestSkRRect));
 static const DlPath kTestPath1 =
     DlPath(SkPath::Polygon({{0, 0}, {10, 10}, {10, 0}, {0, 10}}, true));
 static const DlPath kTestPath2 =

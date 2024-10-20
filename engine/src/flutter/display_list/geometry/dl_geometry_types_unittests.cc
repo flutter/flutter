@@ -50,5 +50,23 @@ TEST(DisplayListGeometryTypes, ISizeConversion) {
   EXPECT_NE(ToDlISize(sk_s), dl_s);
 }
 
+TEST(DisplayListGeometryTypes, VectorToSizeConversion) {
+  SkVector sk_v = SkVector::Make(1.0f, 2.0f);
+  DlSize dl_s = DlSize(1.0f, 2.0f);
+
+  EXPECT_EQ(sk_v, ToSkVector(dl_s));
+  EXPECT_EQ(ToDlSize(sk_v), dl_s);
+
+  dl_s = DlSize(1.0f, 3.0f);
+
+  EXPECT_NE(sk_v, ToSkVector(dl_s));
+  EXPECT_NE(ToDlSize(sk_v), dl_s);
+
+  dl_s = DlSize(3.0f, 2.0f);
+
+  EXPECT_NE(sk_v, ToSkVector(dl_s));
+  EXPECT_NE(ToDlSize(sk_v), dl_s);
+}
+
 }  // namespace testing
 }  // namespace flutter

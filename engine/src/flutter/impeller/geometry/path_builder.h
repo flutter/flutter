@@ -7,6 +7,7 @@
 
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/rect.h"
+#include "impeller/geometry/round_rect.h"
 #include "impeller/geometry/scalar.h"
 
 namespace impeller {
@@ -102,54 +103,7 @@ class PathBuilder {
   ///        recomputing these bounds.
   PathBuilder& SetBounds(Rect bounds);
 
-  struct RoundingRadii {
-    Point top_left;
-    Point bottom_left;
-    Point top_right;
-    Point bottom_right;
-
-    RoundingRadii() = default;
-
-    RoundingRadii(Scalar p_top_left,
-                  Scalar p_bottom_left,
-                  Scalar p_top_right,
-                  Scalar p_bottom_right)
-        : top_left(p_top_left, p_top_left),
-          bottom_left(p_bottom_left, p_bottom_left),
-          top_right(p_top_right, p_top_right),
-          bottom_right(p_bottom_right, p_bottom_right) {}
-
-    explicit RoundingRadii(Scalar radius)
-        : top_left(radius, radius),
-          bottom_left(radius, radius),
-          top_right(radius, radius),
-          bottom_right(radius, radius) {}
-
-    explicit RoundingRadii(Point radii)
-        : top_left(radii),
-          bottom_left(radii),
-          top_right(radii),
-          bottom_right(radii) {}
-
-    explicit RoundingRadii(Size radii)
-        : top_left(radii),
-          bottom_left(radii),
-          top_right(radii),
-          bottom_right(radii) {}
-
-    bool AreAllZero() const {
-      return top_left.IsZero() &&     //
-             bottom_left.IsZero() &&  //
-             top_right.IsZero() &&    //
-             bottom_right.IsZero();
-    }
-  };
-
-  PathBuilder& AddRoundedRect(Rect rect, RoundingRadii radii);
-
-  PathBuilder& AddRoundedRect(Rect rect, Size radii);
-
-  PathBuilder& AddRoundedRect(Rect rect, Scalar radius);
+  PathBuilder& AddRoundRect(RoundRect rect);
 
   PathBuilder& AddPath(const Path& path);
 

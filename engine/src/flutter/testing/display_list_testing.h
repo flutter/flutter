@@ -131,7 +131,9 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
 
   void clipRect(const DlRect& rect, ClipOp clip_op, bool is_aa) override;
   void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) override;
-  void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
+  void clipRoundRect(const DlRoundRect& rrect,
+                     ClipOp clip_op,
+                     bool is_aa) override;
   void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override;
 
   void drawColor(DlColor color, DlBlendMode mode) override;
@@ -144,8 +146,9 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   void drawRect(const DlRect& rect) override;
   void drawOval(const DlRect& bounds) override;
   void drawCircle(const DlPoint& center, DlScalar radius) override;
-  void drawRRect(const SkRRect& rrect) override;
-  void drawDRRect(const SkRRect& outer, const SkRRect& inner) override;
+  void drawRoundRect(const DlRoundRect& rrect) override;
+  void drawDiffRoundRect(const DlRoundRect& outer,
+                         const DlRoundRect& inner) override;
   void drawPath(const DlPath& path) override;
   void drawArc(const DlRect& oval_bounds,
                DlScalar start_degrees,
@@ -370,15 +373,15 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
         break;
     }
   }
-  void clipRRect(const SkRRect& rrect,
-                 DlCanvas::ClipOp clip_op,
-                 bool is_aa) override {
+  void clipRoundRect(const DlRoundRect& rrect,
+                     DlCanvas::ClipOp clip_op,
+                     bool is_aa) override {
     switch (clip_op) {
       case DlCanvas::ClipOp::kIntersect:
-        RecordByType(DisplayListOpType::kClipIntersectRRect);
+        RecordByType(DisplayListOpType::kClipIntersectRoundRect);
         break;
       case DlCanvas::ClipOp::kDifference:
-        RecordByType(DisplayListOpType::kClipDifferenceRRect);
+        RecordByType(DisplayListOpType::kClipDifferenceRoundRect);
         break;
     }
   }
@@ -430,11 +433,12 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
   void drawCircle(const DlPoint& center, DlScalar radius) override {
     RecordByType(DisplayListOpType::kDrawCircle);
   }
-  void drawRRect(const SkRRect& rrect) override {
-    RecordByType(DisplayListOpType::kDrawRRect);
+  void drawRoundRect(const DlRoundRect& rrect) override {
+    RecordByType(DisplayListOpType::kDrawRoundRect);
   }
-  void drawDRRect(const SkRRect& outer, const SkRRect& inner) override {
-    RecordByType(DisplayListOpType::kDrawDRRect);
+  void drawDiffRoundRect(const DlRoundRect& outer,
+                         const DlRoundRect& inner) override {
+    RecordByType(DisplayListOpType::kDrawDiffRoundRect);
   }
   void drawPath(const DlPath& path) override {
     RecordByType(DisplayListOpType::kDrawPath);

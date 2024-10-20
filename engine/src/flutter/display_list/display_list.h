@@ -100,11 +100,11 @@ namespace flutter {
                                     \
   V(ClipIntersectRect)              \
   V(ClipIntersectOval)              \
-  V(ClipIntersectRRect)             \
+  V(ClipIntersectRoundRect)         \
   V(ClipIntersectPath)              \
   V(ClipDifferenceRect)             \
   V(ClipDifferenceOval)             \
-  V(ClipDifferenceRRect)            \
+  V(ClipDifferenceRoundRect)        \
   V(ClipDifferencePath)             \
                                     \
   V(DrawPaint)                      \
@@ -115,8 +115,8 @@ namespace flutter {
   V(DrawRect)                       \
   V(DrawOval)                       \
   V(DrawCircle)                     \
-  V(DrawRRect)                      \
-  V(DrawDRRect)                     \
+  V(DrawRoundRect)                  \
+  V(DrawDiffRoundRect)              \
   V(DrawArc)                        \
   V(DrawPath)                       \
                                     \

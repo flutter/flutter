@@ -110,9 +110,9 @@ class DisplayListBuilder final : public virtual DlCanvas,
                 ClipOp clip_op = ClipOp::kIntersect,
                 bool is_aa = false) override;
   // |DlCanvas|
-  void ClipRRect(const SkRRect& rrect,
-                 ClipOp clip_op = ClipOp::kIntersect,
-                 bool is_aa = false) override;
+  void ClipRoundRect(const DlRoundRect& rrect,
+                     ClipOp clip_op = ClipOp::kIntersect,
+                     bool is_aa = false) override;
   // |DlCanvas|
   void ClipPath(const DlPath& path,
                 ClipOp clip_op = ClipOp::kIntersect,
@@ -162,11 +162,11 @@ class DisplayListBuilder final : public virtual DlCanvas,
                   DlScalar radius,
                   const DlPaint& paint) override;
   // |DlCanvas|
-  void DrawRRect(const SkRRect& rrect, const DlPaint& paint) override;
+  void DrawRoundRect(const DlRoundRect& rrect, const DlPaint& paint) override;
   // |DlCanvas|
-  void DrawDRRect(const SkRRect& outer,
-                  const SkRRect& inner,
-                  const DlPaint& paint) override;
+  void DrawDiffRoundRect(const DlRoundRect& outer,
+                         const DlRoundRect& inner,
+                         const DlPaint& paint) override;
   // |DlCanvas|
   void DrawPath(const DlPath& path, const DlPaint& paint) override;
   // |DlCanvas|
@@ -399,8 +399,10 @@ class DisplayListBuilder final : public virtual DlCanvas,
     ClipOval(bounds, clip_op, is_aa);
   }
   // |DlOpReceiver|
-  void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override {
-    ClipRRect(rrect, clip_op, is_aa);
+  void clipRoundRect(const DlRoundRect& rrect,
+                     ClipOp clip_op,
+                     bool is_aa) override {
+    ClipRoundRect(rrect, clip_op, is_aa);
   }
   // |DlOpReceiver|
   void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override {
@@ -427,9 +429,10 @@ class DisplayListBuilder final : public virtual DlCanvas,
   // |DlOpReceiver|
   void drawCircle(const DlPoint& center, DlScalar radius) override;
   // |DlOpReceiver|
-  void drawRRect(const SkRRect& rrect) override;
+  void drawRoundRect(const DlRoundRect& rrect) override;
   // |DlOpReceiver|
-  void drawDRRect(const SkRRect& outer, const SkRRect& inner) override;
+  void drawDiffRoundRect(const DlRoundRect& outer,
+                         const DlRoundRect& inner) override;
   // |DlOpReceiver|
   void drawPath(const DlPath& path) override;
   // |DlOpReceiver|

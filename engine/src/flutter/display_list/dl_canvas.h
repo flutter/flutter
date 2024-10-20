@@ -97,9 +97,9 @@ class DlCanvas {
   virtual void ClipOval(const DlRect& bounds,
                         ClipOp clip_op = ClipOp::kIntersect,
                         bool is_aa = false) = 0;
-  virtual void ClipRRect(const SkRRect& rrect,
-                         ClipOp clip_op = ClipOp::kIntersect,
-                         bool is_aa = false) = 0;
+  virtual void ClipRoundRect(const DlRoundRect& rrect,
+                             ClipOp clip_op = ClipOp::kIntersect,
+                             bool is_aa = false) = 0;
   virtual void ClipPath(const DlPath& path,
                         ClipOp clip_op = ClipOp::kIntersect,
                         bool is_aa = false) = 0;
@@ -135,10 +135,11 @@ class DlCanvas {
   virtual void DrawCircle(const DlPoint& center,
                           DlScalar radius,
                           const DlPaint& paint) = 0;
-  virtual void DrawRRect(const SkRRect& rrect, const DlPaint& paint) = 0;
-  virtual void DrawDRRect(const SkRRect& outer,
-                          const SkRRect& inner,
-                          const DlPaint& paint) = 0;
+  virtual void DrawRoundRect(const DlRoundRect& rrect,
+                             const DlPaint& paint) = 0;
+  virtual void DrawDiffRoundRect(const DlRoundRect& outer,
+                                 const DlRoundRect& inner,
+                                 const DlPaint& paint) = 0;
   virtual void DrawPath(const DlPath& path, const DlPaint& paint) = 0;
   virtual void DrawArc(const DlRect& bounds,
                        DlScalar start,
@@ -281,11 +282,15 @@ class DlCanvas {
                 bool is_aa = false) {
     ClipRect(ToDlRect(rect), clip_op, is_aa);
   }
-
   void ClipOval(const SkRect& bounds,
                 ClipOp clip_op = ClipOp::kIntersect,
                 bool is_aa = false) {
     ClipOval(ToDlRect(bounds), clip_op, is_aa);
+  }
+  void ClipRRect(const SkRRect& rrect,
+                 ClipOp clip_op = ClipOp::kIntersect,
+                 bool is_aa = false) {
+    ClipRoundRect(ToDlRoundRect(rrect), clip_op, is_aa);
   }
   void ClipPath(const SkPath& path,
                 ClipOp clip_op = ClipOp::kIntersect,
@@ -314,6 +319,14 @@ class DlCanvas {
                   DlScalar radius,
                   const DlPaint& paint) {
     DrawCircle(ToDlPoint(center), radius, paint);
+  }
+  void DrawRRect(const SkRRect& rrect, const DlPaint& paint) {
+    DrawRoundRect(ToDlRoundRect(rrect), paint);
+  }
+  void DrawDRRect(const SkRRect& outer,
+                  const SkRRect& inner,
+                  const DlPaint& paint) {
+    DrawDiffRoundRect(ToDlRoundRect(outer), ToDlRoundRect(inner), paint);
   }
   void DrawPath(const SkPath& path, const DlPaint& paint) {
     DrawPath(DlPath(path), paint);

@@ -24,6 +24,7 @@
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
+#include "impeller/geometry/round_rect.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/snapshot.h"
 #include "impeller/typographer/text_frame.h"
@@ -190,9 +191,7 @@ class Canvas {
 
   void DrawOval(const Rect& rect, const Paint& paint);
 
-  void DrawRRect(const Rect& rect,
-                 const Size& corner_radii,
-                 const Paint& paint);
+  void DrawRoundRect(const RoundRect& rect, const Paint& paint);
 
   void DrawCircle(const Point& center, Scalar radius, const Paint& paint);
 

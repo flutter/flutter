@@ -139,35 +139,26 @@ PathBuilder& PathBuilder::AddCircle(const Point& c, Scalar r) {
   return AddOval(Rect::MakeXYWH(c.x - r, c.y - r, 2.0f * r, 2.0f * r));
 }
 
-PathBuilder& PathBuilder::AddRoundedRect(Rect rect, Scalar radius) {
-  return radius <= 0.0 ? AddRect(rect)
-                       : AddRoundedRect(rect, RoundingRadii(radius));
-}
-
-PathBuilder& PathBuilder::AddRoundedRect(Rect rect, Size radii) {
-  return radii.width <= 0 || radii.height <= 0
-             ? AddRect(rect)
-             : AddRoundedRect(rect, RoundingRadii(radii));
-}
-
-PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
-  if (radii.AreAllZero()) {
+PathBuilder& PathBuilder::AddRoundRect(RoundRect round_rect) {
+  auto rect = round_rect.GetBounds();
+  auto radii = round_rect.GetRadii();
+  if (radii.AreAllCornersEmpty()) {
     return AddRect(rect);
   }
 
   auto rect_origin = rect.GetOrigin();
   auto rect_size = rect.GetSize();
 
-  current_ = rect_origin + Point{radii.top_left.x, 0.0};
+  current_ = rect_origin + Point{radii.top_left.width, 0.0};
 
-  MoveTo({rect_origin.x + radii.top_left.x, rect_origin.y});
+  MoveTo({rect_origin.x + radii.top_left.width, rect_origin.y});
 
   //----------------------------------------------------------------------------
   // Top line.
   //
   AddLinearComponentIfNeeded(
-      {rect_origin.x + radii.top_left.x, rect_origin.y},
-      {rect_origin.x + rect_size.width - radii.top_right.x, rect_origin.y});
+      {rect_origin.x + radii.top_left.width, rect_origin.y},
+      {rect_origin.x + rect_size.width - radii.top_right.width, rect_origin.y});
 
   //----------------------------------------------------------------------------
   // Top right arc.
@@ -178,9 +169,9 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   // Right line.
   //
   AddLinearComponentIfNeeded(
-      {rect_origin.x + rect_size.width, rect_origin.y + radii.top_right.y},
+      {rect_origin.x + rect_size.width, rect_origin.y + radii.top_right.height},
       {rect_origin.x + rect_size.width,
-       rect_origin.y + rect_size.height - radii.bottom_right.y});
+       rect_origin.y + rect_size.height - radii.bottom_right.height});
 
   //----------------------------------------------------------------------------
   // Bottom right arc.
@@ -191,9 +182,10 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   // Bottom line.
   //
   AddLinearComponentIfNeeded(
-      {rect_origin.x + rect_size.width - radii.bottom_right.x,
+      {rect_origin.x + rect_size.width - radii.bottom_right.width,
        rect_origin.y + rect_size.height},
-      {rect_origin.x + radii.bottom_left.x, rect_origin.y + rect_size.height});
+      {rect_origin.x + radii.bottom_left.width,
+       rect_origin.y + rect_size.height});
 
   //----------------------------------------------------------------------------
   // Bottom left arc.
@@ -204,8 +196,9 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   // Left line.
   //
   AddLinearComponentIfNeeded(
-      {rect_origin.x, rect_origin.y + rect_size.height - radii.bottom_left.y},
-      {rect_origin.x, rect_origin.y + radii.top_left.y});
+      {rect_origin.x,
+       rect_origin.y + rect_size.height - radii.bottom_left.height},
+      {rect_origin.x, rect_origin.y + radii.top_left.height});
 
   //----------------------------------------------------------------------------
   // Top left arc.
@@ -221,10 +214,11 @@ PathBuilder& PathBuilder::AddRoundedRectTopLeft(Rect rect,
                                                 RoundingRadii radii) {
   const auto magic_top_left = radii.top_left * kArcApproximationMagic;
   const auto corner = rect.GetOrigin();
-  AddCubicComponent({corner.x, corner.y + radii.top_left.y},
-                    {corner.x, corner.y + radii.top_left.y - magic_top_left.y},
-                    {corner.x + radii.top_left.x - magic_top_left.x, corner.y},
-                    {corner.x + radii.top_left.x, corner.y});
+  AddCubicComponent(
+      {corner.x, corner.y + radii.top_left.height},
+      {corner.x, corner.y + radii.top_left.height - magic_top_left.height},
+      {corner.x + radii.top_left.width - magic_top_left.width, corner.y},
+      {corner.x + radii.top_left.width, corner.y});
   return *this;
 }
 
@@ -233,10 +227,10 @@ PathBuilder& PathBuilder::AddRoundedRectTopRight(Rect rect,
   const auto magic_top_right = radii.top_right * kArcApproximationMagic;
   const auto corner = rect.GetOrigin() + Point{rect.GetWidth(), 0};
   AddCubicComponent(
-      {corner.x - radii.top_right.x, corner.y},
-      {corner.x - radii.top_right.x + magic_top_right.x, corner.y},
-      {corner.x, corner.y + radii.top_right.y - magic_top_right.y},
-      {corner.x, corner.y + radii.top_right.y});
+      {corner.x - radii.top_right.width, corner.y},
+      {corner.x - radii.top_right.width + magic_top_right.width, corner.y},
+      {corner.x, corner.y + radii.top_right.height - magic_top_right.height},
+      {corner.x, corner.y + radii.top_right.height});
   return *this;
 }
 
@@ -245,10 +239,12 @@ PathBuilder& PathBuilder::AddRoundedRectBottomRight(Rect rect,
   const auto magic_bottom_right = radii.bottom_right * kArcApproximationMagic;
   const auto corner = rect.GetOrigin() + rect.GetSize();
   AddCubicComponent(
-      {corner.x, corner.y - radii.bottom_right.y},
-      {corner.x, corner.y - radii.bottom_right.y + magic_bottom_right.y},
-      {corner.x - radii.bottom_right.x + magic_bottom_right.x, corner.y},
-      {corner.x - radii.bottom_right.x, corner.y});
+      {corner.x, corner.y - radii.bottom_right.height},
+      {corner.x,
+       corner.y - radii.bottom_right.height + magic_bottom_right.height},
+      {corner.x - radii.bottom_right.width + magic_bottom_right.width,
+       corner.y},
+      {corner.x - radii.bottom_right.width, corner.y});
   return *this;
 }
 
@@ -257,10 +253,11 @@ PathBuilder& PathBuilder::AddRoundedRectBottomLeft(Rect rect,
   const auto magic_bottom_left = radii.bottom_left * kArcApproximationMagic;
   const auto corner = rect.GetOrigin() + Point{0, rect.GetHeight()};
   AddCubicComponent(
-      {corner.x + radii.bottom_left.x, corner.y},
-      {corner.x + radii.bottom_left.x - magic_bottom_left.x, corner.y},
-      {corner.x, corner.y - radii.bottom_left.y + magic_bottom_left.y},
-      {corner.x, corner.y - radii.bottom_left.y});
+      {corner.x + radii.bottom_left.width, corner.y},
+      {corner.x + radii.bottom_left.width - magic_bottom_left.width, corner.y},
+      {corner.x,
+       corner.y - radii.bottom_left.height + magic_bottom_left.height},
+      {corner.x, corner.y - radii.bottom_left.height});
   return *this;
 }
 

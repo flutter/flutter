@@ -24,6 +24,7 @@ using DlScalar = flutter::DlScalar;
 using DlPoint = flutter::DlPoint;
 using DlRect = flutter::DlRect;
 using DlIRect = flutter::DlIRect;
+using DlRoundRect = flutter::DlRoundRect;
 using DlPath = flutter::DlPath;
 
 class DlDispatcherBase : public flutter::DlOpReceiver {
@@ -129,7 +130,9 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::DlOpReceiver|
-  void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
+  void clipRoundRect(const DlRoundRect& rrect,
+                     ClipOp clip_op,
+                     bool is_aa) override;
 
   // |flutter::DlOpReceiver|
   void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override;
@@ -159,10 +162,11 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void drawCircle(const DlPoint& center, DlScalar radius) override;
 
   // |flutter::DlOpReceiver|
-  void drawRRect(const SkRRect& rrect) override;
+  void drawRoundRect(const DlRoundRect& rrect) override;
 
   // |flutter::DlOpReceiver|
-  void drawDRRect(const SkRRect& outer, const SkRRect& inner) override;
+  void drawDiffRoundRect(const DlRoundRect& outer,
+                         const DlRoundRect& inner) override;
 
   // |flutter::DlOpReceiver|
   void drawPath(const DlPath& path) override;

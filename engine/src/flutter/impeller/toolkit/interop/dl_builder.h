@@ -62,7 +62,7 @@ class DisplayListBuilder final
   void ClipOval(const Rect& rect, flutter::DlCanvas::ClipOp op);
 
   void ClipRoundedRect(const Rect& rect,
-                       const impeller::PathBuilder::RoundingRadii& radii,
+                       const RoundingRadii& radii,
                        flutter::DlCanvas::ClipOp op);
 
   void ClipPath(const Path& path, flutter::DlCanvas::ClipOp op);
@@ -82,15 +82,14 @@ class DisplayListBuilder final
   void DrawOval(const Rect& oval_bounds, const Paint& paint);
 
   void DrawRoundedRect(const Rect& rect,
-                       const impeller::PathBuilder::RoundingRadii& radii,
+                       const RoundingRadii& radii,
                        const Paint& paint);
 
-  void DrawRoundedRectDifference(
-      const Rect& outer_rect,
-      const impeller::PathBuilder::RoundingRadii& outer_radii,
-      const Rect& inner_rect,
-      const impeller::PathBuilder::RoundingRadii& inner_radii,
-      const Paint& paint);
+  void DrawRoundedRectDifference(const Rect& outer_rect,
+                                 const RoundingRadii& outer_radii,
+                                 const Rect& inner_rect,
+                                 const RoundingRadii& inner_radii,
+                                 const Paint& paint);
 
   void DrawPath(const Path& path, const Paint& paint);
 

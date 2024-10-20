@@ -293,7 +293,9 @@ class DlOpReceiver {
 
   virtual void clipRect(const DlRect& rect, ClipOp clip_op, bool is_aa) = 0;
   virtual void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) = 0;
-  virtual void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) = 0;
+  virtual void clipRoundRect(const DlRoundRect& rrect,
+                             ClipOp clip_op,
+                             bool is_aa) = 0;
   virtual void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) = 0;
 
   // The following rendering methods all take their rendering attributes
@@ -313,8 +315,9 @@ class DlOpReceiver {
   virtual void drawRect(const DlRect& rect) = 0;
   virtual void drawOval(const DlRect& bounds) = 0;
   virtual void drawCircle(const DlPoint& center, DlScalar radius) = 0;
-  virtual void drawRRect(const SkRRect& rrect) = 0;
-  virtual void drawDRRect(const SkRRect& outer, const SkRRect& inner) = 0;
+  virtual void drawRoundRect(const DlRoundRect& rrect) = 0;
+  virtual void drawDiffRoundRect(const DlRoundRect& outer,
+                                 const DlRoundRect& inner) = 0;
   virtual void drawPath(const DlPath& path) = 0;
   virtual void drawArc(const DlRect& oval_bounds,
                        DlScalar start_degrees,
