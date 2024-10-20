@@ -2143,13 +2143,11 @@ class FlagProperty extends DiagnosticsProperty<bool> {
   }
 
   @override
-  DiagnosticLevel get level {
-    return switch (value) {
-      true  when ifTrue == null => DiagnosticLevel.hidden,
-      false when ifFalse == null => DiagnosticLevel.hidden,
-      _ => super.level,
-    };
-  }
+  DiagnosticLevel get level => switch (value) {
+    true  when ifTrue == null => DiagnosticLevel.hidden,
+    false when ifFalse == null => DiagnosticLevel.hidden,
+    _ => super.level,
+  };
 }
 
 /// Property with an `Iterable<T>` [value] that can be displayed with
