@@ -153,7 +153,7 @@ abstract class _UbiquitousInheritedWidget extends InheritedWidget {
 ///
 /// {@tool snippet}
 ///
-/// This example uses a right-to-left text direction and draws a blue box with
+/// This example uses a right-to-left [TextDirection] and draws a blue box with
 /// a right margin of 8 pixels.
 ///
 /// ```dart
