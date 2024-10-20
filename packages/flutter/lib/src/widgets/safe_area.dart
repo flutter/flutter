@@ -33,10 +33,10 @@ import 'media_query.dart';
 /// ```dart
 /// SafeArea(
 ///   child: Container(
-///     constraints: BoxConstraints.expand(),
+///     constraints: const BoxConstraints.expand(),
 ///     alignment: Alignment.center,
 ///     color: Colors.blue,
-///     child: Text('Hello, World!'),
+///     child: const Text('Hello, World!'),
 ///   ),
 /// )
 /// ```
