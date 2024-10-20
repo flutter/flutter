@@ -9,7 +9,7 @@ import 'framework.dart';
 /// An abstract class that defines drag boundaries
 ///
 /// [T] is the drag object position.
-abstract class DragBoundary<T> {
+abstract class DragBoundaryDelegate<T> {
   /// Returns whether the specified drag object position is within the boundary.
   bool isWithinBoundary(T position);
 
@@ -18,8 +18,8 @@ abstract class DragBoundary<T> {
   T nearestPositionWithinBoundary(T position);
 }
 
-class _DragBoundaryForRect extends DragBoundary<Rect> {
-  _DragBoundaryForRect(this.boundary);
+class _DragBoundaryDelegateForRect extends DragBoundaryDelegate<Rect> {
+  _DragBoundaryDelegateForRect(this.boundary);
   final Rect boundary;
   @override
   bool isWithinBoundary(Rect position) {
@@ -52,7 +52,7 @@ class _DragBoundaryForRect extends DragBoundary<Rect> {
   }
 }
 
-/// Provides a [DragBoundary] for its descendants whose bounds are those defined by this widget.
+/// Provides a [DragBoundaryDelegate] for its descendants whose bounds are those defined by this widget.
 ///
 /// {@tool dartpad}
 /// This example demonstrates dragging a red box, constrained within the bounds
@@ -60,25 +60,25 @@ class _DragBoundaryForRect extends DragBoundary<Rect> {
 ///
 /// ** See code in examples/api/lib/widgets/gesture_detector/gesture_detector.3.dart **
 /// {@end-tool}
-class DragBoundaryProvider extends InheritedWidget {
+class DragBoundary extends InheritedWidget {
   /// Creates a widget that provides a boundary to its descendants.
-  const DragBoundaryProvider({required super.child, super.key});
+  const DragBoundary({required super.child, super.key});
 
-  /// Retrieve the [DragBoundaryProvider] from the nearest ancestor to
-  /// get its [DragBoundary] of [Rect].
+  /// Retrieve the [DragBoundary] from the nearest ancestor to
+  /// get its [DragBoundaryDelegate] of [Rect].
   ///
   /// [useGlobalPosition] Specifies whether to use global position.
   /// If false, the local position of the bounds are used.
-  static DragBoundary<Rect>? forRectOf(BuildContext context, {bool useGlobalPosition = false}) {
+  static DragBoundaryDelegate<Rect>? forRectOf(BuildContext context, {bool useGlobalPosition = false}) {
     final InheritedElement? element =
-        context.getElementForInheritedWidgetOfExactType<DragBoundaryProvider>();
+        context.getElementForInheritedWidgetOfExactType<DragBoundary>();
     if (element == null) {
       return null;
     }
     final RenderBox? rb = element.findRenderObject() as RenderBox?;
-    assert(rb != null && rb.hasSize, 'BoundaryProvider is not available');
+    assert(rb != null && rb.hasSize, 'DragBoundary is not available');
     final Rect boundary = (useGlobalPosition ? rb!.localToGlobal(Offset.zero) : Offset.zero) & rb!.size;
-    return _DragBoundaryForRect(boundary);
+    return _DragBoundaryDelegateForRect(boundary);
   }
 
   @override
