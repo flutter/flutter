@@ -995,15 +995,15 @@ void DisplayListBuilder::ClipOval(const DlRect& bounds,
       break;
   }
 }
-void DisplayListBuilder::ClipRRect(const SkRRect& rrect,
-                                   ClipOp clip_op,
-                                   bool is_aa) {
-  if (rrect.isRect()) {
-    ClipRect(ToDlRect(rrect.rect()), clip_op, is_aa);
+void DisplayListBuilder::ClipRoundRect(const DlRoundRect& rrect,
+                                       ClipOp clip_op,
+                                       bool is_aa) {
+  if (rrect.IsRect()) {
+    ClipRect(rrect.GetBounds(), clip_op, is_aa);
     return;
   }
-  if (rrect.isOval()) {
-    ClipOval(ToDlRect(rrect.rect()), clip_op, is_aa);
+  if (rrect.IsOval()) {
+    ClipOval(rrect.GetBounds(), clip_op, is_aa);
     return;
   }
   if (current_info().is_nop) {
@@ -1025,10 +1025,10 @@ void DisplayListBuilder::ClipRRect(const SkRRect& rrect,
   checkForDeferredSave();
   switch (clip_op) {
     case ClipOp::kIntersect:
-      Push<ClipIntersectRRectOp>(0, rrect, is_aa);
+      Push<ClipIntersectRoundRectOp>(0, rrect, is_aa);
       break;
     case ClipOp::kDifference:
-      Push<ClipDifferenceRRectOp>(0, rrect, is_aa);
+      Push<ClipDifferenceRoundRectOp>(0, rrect, is_aa);
       break;
   }
 }
@@ -1185,42 +1185,43 @@ void DisplayListBuilder::DrawCircle(const DlPoint& center,
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawCircleFlags);
   drawCircle(center, radius);
 }
-void DisplayListBuilder::drawRRect(const SkRRect& rrect) {
-  if (rrect.isRect()) {
-    drawRect(ToDlRect(rrect.rect()));
-  } else if (rrect.isOval()) {
-    drawOval(ToDlRect(rrect.rect()));
+void DisplayListBuilder::drawRoundRect(const DlRoundRect& rrect) {
+  if (rrect.IsRect()) {
+    drawRect(rrect.GetBounds());
+  } else if (rrect.IsOval()) {
+    drawOval(rrect.GetBounds());
   } else {
     DisplayListAttributeFlags flags = kDrawRRectFlags;
     OpResult result = PaintResult(current_, flags);
     if (result != OpResult::kNoEffect &&
-        AccumulateOpBounds(rrect.getBounds(), flags)) {
-      Push<DrawRRectOp>(0, rrect);
+        AccumulateOpBounds(ToSkRect(rrect.GetBounds()), flags)) {
+      Push<DrawRoundRectOp>(0, rrect);
       CheckLayerOpacityCompatibility();
       UpdateLayerResult(result);
     }
   }
 }
-void DisplayListBuilder::DrawRRect(const SkRRect& rrect, const DlPaint& paint) {
+void DisplayListBuilder::DrawRoundRect(const DlRoundRect& rrect,
+                                       const DlPaint& paint) {
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawRRectFlags);
-  drawRRect(rrect);
+  drawRoundRect(rrect);
 }
-void DisplayListBuilder::drawDRRect(const SkRRect& outer,
-                                    const SkRRect& inner) {
+void DisplayListBuilder::drawDiffRoundRect(const DlRoundRect& outer,
+                                           const DlRoundRect& inner) {
   DisplayListAttributeFlags flags = kDrawDRRectFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect &&
-      AccumulateOpBounds(outer.getBounds(), flags)) {
-    Push<DrawDRRectOp>(0, outer, inner);
+      AccumulateOpBounds(ToSkRect(outer.GetBounds()), flags)) {
+    Push<DrawDiffRoundRectOp>(0, outer, inner);
     CheckLayerOpacityCompatibility();
     UpdateLayerResult(result);
   }
 }
-void DisplayListBuilder::DrawDRRect(const SkRRect& outer,
-                                    const SkRRect& inner,
-                                    const DlPaint& paint) {
+void DisplayListBuilder::DrawDiffRoundRect(const DlRoundRect& outer,
+                                           const DlRoundRect& inner,
+                                           const DlPaint& paint) {
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawDRRectFlags);
-  drawDRRect(outer, inner);
+  drawDiffRoundRect(outer, inner);
 }
 void DisplayListBuilder::drawPath(const DlPath& path) {
   DisplayListAttributeFlags flags = kDrawPathFlags;

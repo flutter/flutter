@@ -77,24 +77,6 @@ std::vector<Point> ToPoints(const flutter::DlPoint points[], int count) {
   return result;
 }
 
-PathBuilder::RoundingRadii ToRoundingRadii(const SkRRect& rrect) {
-  using Corner = SkRRect::Corner;
-  PathBuilder::RoundingRadii radii;
-  radii.bottom_left = ToPoint(rrect.radii(Corner::kLowerLeft_Corner));
-  radii.bottom_right = ToPoint(rrect.radii(Corner::kLowerRight_Corner));
-  radii.top_left = ToPoint(rrect.radii(Corner::kUpperLeft_Corner));
-  radii.top_right = ToPoint(rrect.radii(Corner::kUpperRight_Corner));
-  return radii;
-}
-
-Path ToPath(const SkRRect& rrect) {
-  return PathBuilder{}
-      .AddRoundedRect(ToRect(rrect.getBounds()), ToRoundingRadii(rrect))
-      .SetConvexity(Convexity::kConvex)
-      .SetBounds(ToRect(rrect.getBounds()))
-      .TakePath();
-}
-
 Point ToPoint(const SkPoint& point) {
   return Point::MakeXY(point.fX, point.fY);
 }

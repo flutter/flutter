@@ -34,6 +34,10 @@ constexpr SkPoint ToSkiaType(const Point& point) {
   return SkPoint::Make(point.x, point.y);
 }
 
+constexpr SkVector ToSkiaVector(const Size& point) {
+  return SkVector::Make(point.width, point.height);
+}
+
 constexpr SkRect ToSkiaType(const Rect& rect) {
   return SkRect::MakeXYWH(rect.GetX(),      //
                           rect.GetY(),      //
@@ -182,14 +186,13 @@ constexpr flutter::DlBlendMode ToDisplayListType(BlendMode mode) {
   return Mode::kSrcOver;
 }
 
-inline SkRRect ToSkiaType(const Rect& rect,
-                          const impeller::PathBuilder::RoundingRadii& radii) {
+inline SkRRect ToSkiaType(const Rect& rect, const RoundingRadii& radii) {
   using Corner = SkRRect::Corner;
   SkVector sk_radii[4];
-  sk_radii[Corner::kUpperLeft_Corner] = ToSkiaType(radii.top_left);
-  sk_radii[Corner::kUpperRight_Corner] = ToSkiaType(radii.top_right);
-  sk_radii[Corner::kLowerRight_Corner] = ToSkiaType(radii.bottom_right);
-  sk_radii[Corner::kLowerLeft_Corner] = ToSkiaType(radii.bottom_left);
+  sk_radii[Corner::kUpperLeft_Corner] = ToSkiaVector(radii.top_left);
+  sk_radii[Corner::kUpperRight_Corner] = ToSkiaVector(radii.top_right);
+  sk_radii[Corner::kLowerRight_Corner] = ToSkiaVector(radii.bottom_right);
+  sk_radii[Corner::kLowerLeft_Corner] = ToSkiaVector(radii.bottom_left);
   SkRRect result;
   result.setRectRadii(ToSkiaType(rect), sk_radii);
   return result;
@@ -230,6 +233,10 @@ constexpr Point ToImpellerType(const ImpellerPoint& point) {
   return Point{point.x, point.y};
 }
 
+constexpr Size ToImpellerSize(const ImpellerPoint& point) {
+  return Size{point.x, point.y};
+}
+
 constexpr Rect ToImpellerType(const ImpellerRect& rect) {
   return Rect::MakeXYWH(rect.x, rect.y, rect.width, rect.height);
 }
@@ -248,13 +255,12 @@ constexpr flutter::DlTileMode ToDisplayListType(ImpellerTileMode mode) {
   return flutter::DlTileMode::kClamp;
 }
 
-constexpr impeller::PathBuilder::RoundingRadii ToImpellerType(
-    const ImpellerRoundingRadii& radii) {
-  auto result = impeller::PathBuilder::RoundingRadii{};
-  result.top_left = ToImpellerType(radii.top_left);
-  result.bottom_left = ToImpellerType(radii.bottom_left);
-  result.top_right = ToImpellerType(radii.top_right);
-  result.bottom_right = ToImpellerType(radii.bottom_right);
+constexpr RoundingRadii ToImpellerType(const ImpellerRoundingRadii& radii) {
+  auto result = RoundingRadii{};
+  result.top_left = ToImpellerSize(radii.top_left);
+  result.bottom_left = ToImpellerSize(radii.bottom_left);
+  result.top_right = ToImpellerSize(radii.top_right);
+  result.bottom_right = ToImpellerSize(radii.bottom_right);
   return result;
 }
 

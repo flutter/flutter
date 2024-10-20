@@ -310,11 +310,11 @@ DisplayListOpCategory DisplayList::GetOpCategory(DisplayListOpType type) {
 
     case DisplayListOpType::kClipIntersectRect:
     case DisplayListOpType::kClipIntersectOval:
-    case DisplayListOpType::kClipIntersectRRect:
+    case DisplayListOpType::kClipIntersectRoundRect:
     case DisplayListOpType::kClipIntersectPath:
     case DisplayListOpType::kClipDifferenceRect:
     case DisplayListOpType::kClipDifferenceOval:
-    case DisplayListOpType::kClipDifferenceRRect:
+    case DisplayListOpType::kClipDifferenceRoundRect:
     case DisplayListOpType::kClipDifferencePath:
       return DisplayListOpCategory::kClip;
 
@@ -325,8 +325,8 @@ DisplayListOpCategory DisplayList::GetOpCategory(DisplayListOpType type) {
     case DisplayListOpType::kDrawRect:
     case DisplayListOpType::kDrawOval:
     case DisplayListOpType::kDrawCircle:
-    case DisplayListOpType::kDrawRRect:
-    case DisplayListOpType::kDrawDRRect:
+    case DisplayListOpType::kDrawRoundRect:
+    case DisplayListOpType::kDrawDiffRoundRect:
     case DisplayListOpType::kDrawArc:
     case DisplayListOpType::kDrawPath:
     case DisplayListOpType::kDrawPoints:

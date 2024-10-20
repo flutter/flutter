@@ -938,7 +938,7 @@ TEST(DisplayListMatrixClipState, RRectCoverage) {
   // Expanded by 2.0 and then with a corner of 2.0 obviously still covers
   EXPECT_TRUE(state.rrect_covers_cull(SkRRect::MakeRectXY(test, 2.0f, 2.0f)));
   // The corner point of the cull rect is at (c-2, c-2) relative to the
-  // corner of the rrect bounds so we compute its disance to the center
+  // corner of the rrect bounds so we compute its distance to the center
   // of the circular part and compare it to the radius of the corner (c)
   // to find the corner radius where it will start to leave the rounded
   // rectangle:

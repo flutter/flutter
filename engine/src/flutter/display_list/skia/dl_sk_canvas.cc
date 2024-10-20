@@ -150,10 +150,10 @@ void DlSkCanvasAdapter::ClipOval(const DlRect& bounds,
                        is_aa);
 }
 
-void DlSkCanvasAdapter::ClipRRect(const SkRRect& rrect,
-                                  ClipOp clip_op,
-                                  bool is_aa) {
-  delegate_->clipRRect(rrect, ToSk(clip_op), is_aa);
+void DlSkCanvasAdapter::ClipRoundRect(const DlRoundRect& rrect,
+                                      ClipOp clip_op,
+                                      bool is_aa) {
+  delegate_->clipRRect(ToSkRRect(rrect), ToSk(clip_op), is_aa);
 }
 
 void DlSkCanvasAdapter::ClipPath(const DlPath& path,
@@ -223,14 +223,15 @@ void DlSkCanvasAdapter::DrawCircle(const DlPoint& center,
   delegate_->drawCircle(ToSkPoint(center), radius, ToSk(paint));
 }
 
-void DlSkCanvasAdapter::DrawRRect(const SkRRect& rrect, const DlPaint& paint) {
-  delegate_->drawRRect(rrect, ToSk(paint));
+void DlSkCanvasAdapter::DrawRoundRect(const DlRoundRect& rrect,
+                                      const DlPaint& paint) {
+  delegate_->drawRRect(ToSkRRect(rrect), ToSk(paint));
 }
 
-void DlSkCanvasAdapter::DrawDRRect(const SkRRect& outer,
-                                   const SkRRect& inner,
-                                   const DlPaint& paint) {
-  delegate_->drawDRRect(outer, inner, ToSk(paint));
+void DlSkCanvasAdapter::DrawDiffRoundRect(const DlRoundRect& outer,
+                                          const DlRoundRect& inner,
+                                          const DlPaint& paint) {
+  delegate_->drawDRRect(ToSkRRect(outer), ToSkRRect(inner), ToSk(paint));
 }
 
 void DlSkCanvasAdapter::DrawPath(const DlPath& path, const DlPaint& paint) {

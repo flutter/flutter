@@ -133,10 +133,10 @@ void DlSkCanvasDispatcher::clipOval(const DlRect& bounds,
                                     bool is_aa) {
   canvas_->clipRRect(SkRRect::MakeOval(ToSkRect(bounds)), ToSk(clip_op), is_aa);
 }
-void DlSkCanvasDispatcher::clipRRect(const SkRRect& rrect,
-                                     ClipOp clip_op,
-                                     bool is_aa) {
-  canvas_->clipRRect(rrect, ToSk(clip_op), is_aa);
+void DlSkCanvasDispatcher::clipRoundRect(const DlRoundRect& rrect,
+                                         ClipOp clip_op,
+                                         bool is_aa) {
+  canvas_->clipRRect(ToSkRRect(rrect), ToSk(clip_op), is_aa);
 }
 void DlSkCanvasDispatcher::clipPath(const DlPath& path,
                                     ClipOp clip_op,
@@ -183,12 +183,12 @@ void DlSkCanvasDispatcher::drawOval(const DlRect& bounds) {
 void DlSkCanvasDispatcher::drawCircle(const DlPoint& center, DlScalar radius) {
   canvas_->drawCircle(ToSkPoint(center), radius, paint());
 }
-void DlSkCanvasDispatcher::drawRRect(const SkRRect& rrect) {
-  canvas_->drawRRect(rrect, paint());
+void DlSkCanvasDispatcher::drawRoundRect(const DlRoundRect& rrect) {
+  canvas_->drawRRect(ToSkRRect(rrect), paint());
 }
-void DlSkCanvasDispatcher::drawDRRect(const SkRRect& outer,
-                                      const SkRRect& inner) {
-  canvas_->drawDRRect(outer, inner, paint());
+void DlSkCanvasDispatcher::drawDiffRoundRect(const DlRoundRect& outer,
+                                             const DlRoundRect& inner) {
+  canvas_->drawDRRect(ToSkRRect(outer), ToSkRRect(inner), paint());
 }
 void DlSkCanvasDispatcher::drawPath(const DlPath& path) {
   path.WillRenderSkPath();

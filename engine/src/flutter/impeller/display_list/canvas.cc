@@ -610,26 +610,28 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
 }
 
-void Canvas::DrawRRect(const Rect& rect,
-                       const Size& corner_radii,
-                       const Paint& paint) {
-  if (AttemptDrawBlurredRRect(rect, corner_radii, paint)) {
-    return;
-  }
+void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
+  auto& rect = round_rect.GetBounds();
+  auto& radii = round_rect.GetRadii();
+  if (radii.AreAllCornersSame()) {
+    if (AttemptDrawBlurredRRect(rect, radii.top_left, paint)) {
+      return;
+    }
 
-  if (paint.style == Paint::Style::kFill) {
-    Entity entity;
-    entity.SetTransform(GetCurrentTransform());
-    entity.SetBlendMode(paint.blend_mode);
+    if (paint.style == Paint::Style::kFill) {
+      Entity entity;
+      entity.SetTransform(GetCurrentTransform());
+      entity.SetBlendMode(paint.blend_mode);
 
-    RoundRectGeometry geom(rect, corner_radii);
-    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
-    return;
+      RoundRectGeometry geom(rect, radii.top_left);
+      AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+      return;
+    }
   }
 
   auto path = PathBuilder{}
                   .SetConvexity(Convexity::kConvex)
-                  .AddRoundedRect(rect, corner_radii)
+                  .AddRoundRect(round_rect)
                   .SetBounds(rect)
                   .TakePath();
   DrawPath(path, paint);

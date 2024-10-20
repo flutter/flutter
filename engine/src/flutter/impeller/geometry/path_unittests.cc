@@ -79,7 +79,8 @@ TEST(PathTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
 
   {
     Path path = PathBuilder{}
-                    .AddRoundedRect(Rect::MakeXYWH(100, 100, 100, 100), 10)
+                    .AddRoundRect(RoundRect::MakeRectRadius(
+                        Rect::MakeXYWH(100, 100, 100, 100), 10))
                     .TakePath();
     ContourComponent contour;
     path.GetContourComponentAtIndex(0, contour);
@@ -88,10 +89,10 @@ TEST(PathTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
   }
 
   {
-    Path path =
-        PathBuilder{}
-            .AddRoundedRect(Rect::MakeXYWH(100, 100, 100, 100), Size(10, 20))
-            .TakePath();
+    Path path = PathBuilder{}
+                    .AddRoundRect(RoundRect::MakeRectXY(
+                        Rect::MakeXYWH(100, 100, 100, 100), Size(10, 20)))
+                    .TakePath();
     ContourComponent contour;
     path.GetContourComponentAtIndex(0, contour);
     EXPECT_POINT_NEAR(contour.destination, Point(110, 100));
@@ -357,7 +358,8 @@ TEST(PathTest, BoundingBoxCubic) {
 
 TEST(PathTest, BoundingBoxOfCompositePathIsCorrect) {
   PathBuilder builder;
-  builder.AddRoundedRect(Rect::MakeXYWH(10, 10, 300, 300), {50, 50, 50, 50});
+  builder.AddRoundRect(
+      RoundRect::MakeRectRadius(Rect::MakeXYWH(10, 10, 300, 300), 50));
   auto path = builder.TakePath();
   auto actual = path.GetBoundingBox();
   Rect expected = Rect::MakeXYWH(10, 10, 300, 300);

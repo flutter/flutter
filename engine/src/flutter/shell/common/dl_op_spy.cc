@@ -60,10 +60,11 @@ void DlOpSpy::drawOval(const DlRect& bounds) {
 void DlOpSpy::drawCircle(const DlPoint& center, DlScalar radius) {
   did_draw_ |= will_draw_;
 }
-void DlOpSpy::drawRRect(const SkRRect& rrect) {
+void DlOpSpy::drawRoundRect(const DlRoundRect& rrect) {
   did_draw_ |= will_draw_;
 }
-void DlOpSpy::drawDRRect(const SkRRect& outer, const SkRRect& inner) {
+void DlOpSpy::drawDiffRoundRect(const DlRoundRect& outer,
+                                const DlRoundRect& inner) {
   did_draw_ |= will_draw_;
 }
 void DlOpSpy::drawPath(const DlPath& path) {
