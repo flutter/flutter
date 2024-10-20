@@ -157,6 +157,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
       color: CupertinoColors.placeholderText,
     ),
     EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
+    super.restorationId,
   })  : assert(initialValue == null || controller == null),
         assert(obscuringCharacter.length == 1),
         assert(maxLines == null || maxLines > 0),
@@ -186,50 +187,54 @@ class CupertinoTextFormFieldRow extends FormField<String> {
               prefix: prefix,
               padding: padding,
               error: (field.errorText == null) ? null : Text(field.errorText!),
-              child: CupertinoTextField.borderless(
-                controller: state._effectiveController,
-                focusNode: focusNode,
-                keyboardType: keyboardType,
-                decoration: decoration,
-                textInputAction: textInputAction,
-                style: style,
-                strutStyle: strutStyle,
-                textAlign: textAlign,
-                textAlignVertical: textAlignVertical,
-                textCapitalization: textCapitalization,
-                textDirection: textDirection,
-                autofocus: autofocus,
-                toolbarOptions: toolbarOptions,
-                readOnly: readOnly,
-                showCursor: showCursor,
-                obscuringCharacter: obscuringCharacter,
-                obscureText: obscureText,
-                autocorrect: autocorrect,
-                smartDashesType: smartDashesType,
-                smartQuotesType: smartQuotesType,
-                enableSuggestions: enableSuggestions,
-                maxLines: maxLines,
-                minLines: minLines,
-                expands: expands,
-                maxLength: maxLength,
-                onChanged: onChangedHandler,
-                onTap: onTap,
-                onEditingComplete: onEditingComplete,
-                onSubmitted: onFieldSubmitted,
-                inputFormatters: inputFormatters,
-                enabled: enabled ?? true,
-                cursorWidth: cursorWidth,
-                cursorHeight: cursorHeight,
-                cursorColor: cursorColor,
-                scrollPadding: scrollPadding,
-                scrollPhysics: scrollPhysics,
-                keyboardAppearance: keyboardAppearance,
-                enableInteractiveSelection: enableInteractiveSelection,
-                selectionControls: selectionControls,
-                autofillHints: autofillHints,
-                placeholder: placeholder,
-                placeholderStyle: placeholderStyle,
-                contextMenuBuilder: contextMenuBuilder,
+              child: UnmanagedRestorationScope(
+                bucket: field.bucket,
+                child: CupertinoTextField.borderless(
+                  restorationId: restorationId,
+                  controller: state._effectiveController,
+                  focusNode: focusNode,
+                  keyboardType: keyboardType,
+                  decoration: decoration,
+                  textInputAction: textInputAction,
+                  style: style,
+                  strutStyle: strutStyle,
+                  textAlign: textAlign,
+                  textAlignVertical: textAlignVertical,
+                  textCapitalization: textCapitalization,
+                  textDirection: textDirection,
+                  autofocus: autofocus,
+                  toolbarOptions: toolbarOptions,
+                  readOnly: readOnly,
+                  showCursor: showCursor,
+                  obscuringCharacter: obscuringCharacter,
+                  obscureText: obscureText,
+                  autocorrect: autocorrect,
+                  smartDashesType: smartDashesType,
+                  smartQuotesType: smartQuotesType,
+                  enableSuggestions: enableSuggestions,
+                  maxLines: maxLines,
+                  minLines: minLines,
+                  expands: expands,
+                  maxLength: maxLength,
+                  onChanged: onChangedHandler,
+                  onTap: onTap,
+                  onEditingComplete: onEditingComplete,
+                  onSubmitted: onFieldSubmitted,
+                  inputFormatters: inputFormatters,
+                  enabled: enabled ?? true,
+                  cursorWidth: cursorWidth,
+                  cursorHeight: cursorHeight,
+                  cursorColor: cursorColor,
+                  scrollPadding: scrollPadding,
+                  scrollPhysics: scrollPhysics,
+                  keyboardAppearance: keyboardAppearance,
+                  enableInteractiveSelection: enableInteractiveSelection,
+                  selectionControls: selectionControls,
+                  autofillHints: autofillHints,
+                  placeholder: placeholder,
+                  placeholderStyle: placeholderStyle,
+                  contextMenuBuilder: contextMenuBuilder,
+                ),
               ),
             );
           },
@@ -272,19 +277,45 @@ class CupertinoTextFormFieldRow extends FormField<String> {
 }
 
 class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
-  TextEditingController? _controller;
+  RestorableTextEditingController? _controller;
 
-  TextEditingController? get _effectiveController =>
-      _cupertinoTextFormFieldRow.controller ?? _controller;
+  TextEditingController get _effectiveController =>
+      _cupertinoTextFormFieldRow.controller ?? _controller!.value;
 
   CupertinoTextFormFieldRow get _cupertinoTextFormFieldRow =>
       super.widget as CupertinoTextFormFieldRow;
 
   @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    super.restoreState(oldBucket, initialRestore);
+    if (_controller != null) {
+      _registerController();
+    }
+    // This makes sure to update the internal [FormFieldState] value to sync up with
+    // text editing controller value.
+    setValue(_effectiveController.text);
+  }
+
+  void _registerController() {
+    assert(_controller != null);
+    registerForRestoration(_controller!, 'controller');
+  }
+
+  void _createLocalController([TextEditingValue? value]) {
+    assert(_controller == null);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
+    if (!restorePending) {
+      _registerController();
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     if (_cupertinoTextFormFieldRow.controller == null) {
-      _controller = TextEditingController(text: widget.initialValue);
+      _createLocalController(widget.initialValue != null ? TextEditingValue(text: widget.initialValue!) : null);
     } else {
       _cupertinoTextFormFieldRow.controller!.addListener(_handleControllerChanged);
     }
@@ -298,13 +329,14 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
       _cupertinoTextFormFieldRow.controller?.addListener(_handleControllerChanged);
 
       if (oldWidget.controller != null && _cupertinoTextFormFieldRow.controller == null) {
-        _controller =
-            TextEditingController.fromValue(oldWidget.controller!.value);
+        _createLocalController(oldWidget.controller!.value);
       }
 
       if (_cupertinoTextFormFieldRow.controller != null) {
         setValue(_cupertinoTextFormFieldRow.controller!.text);
         if (oldWidget.controller == null) {
+          unregisterFromRestoration(_controller!);
+          _controller!.dispose();
           _controller = null;
         }
       }
@@ -322,8 +354,8 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   void didChange(String? value) {
     super.didChange(value);
 
-    if (value != null && _effectiveController!.text != value) {
-      _effectiveController!.text = value;
+    if (value != null && _effectiveController.text != value) {
+      _effectiveController.text = value;
     }
   }
 
@@ -331,9 +363,9 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   void reset() {
     // Set the controller value before calling super.reset() to let
     // _handleControllerChanged suppress the change.
-    _effectiveController!.text = widget.initialValue!;
+    _effectiveController.text = widget.initialValue!;
     super.reset();
-    _cupertinoTextFormFieldRow.onChanged?.call(_effectiveController!.text);
+    _cupertinoTextFormFieldRow.onChanged?.call(_effectiveController.text);
   }
 
   void _handleControllerChanged() {
@@ -344,8 +376,8 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
     // notifications for changes originating from within this class -- for
     // example, the reset() method. In such cases, the FormField value will
     // already have been set.
-    if (_effectiveController!.text != value) {
-      didChange(_effectiveController!.text);
+    if (_effectiveController.text != value) {
+      didChange(_effectiveController.text);
     }
   }
 }

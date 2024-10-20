@@ -15,8 +15,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../impeller_test_helpers.dart';
+
 void main() {
-  testWidgetsWithLeakTracking('SnapshotWidget can rasterize child', (WidgetTester tester) async {
+  testWidgets('SnapshotWidget can rasterize child', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
     final Key key = UniqueKey();
@@ -59,7 +61,7 @@ void main() {
     await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.red.png'));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgetsWithLeakTracking('Changing devicePixelRatio does not repaint if snapshotting is not enabled', (WidgetTester tester) async {
+  testWidgets('Changing devicePixelRatio does not repaint if snapshotting is not enabled', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController();
     addTearDown(controller.dispose);
     final TestPainter painter = TestPainter();
@@ -94,7 +96,7 @@ void main() {
     expect(painter.count, 1);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgetsWithLeakTracking('Changing devicePixelRatio forces raster regeneration', (WidgetTester tester) async {
+  testWidgets('Changing devicePixelRatio forces raster regeneration', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
     final TestPainter painter = TestPainter();
@@ -133,7 +135,7 @@ void main() {
     expect(raster, isNot(newRaster));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgetsWithLeakTracking('SnapshotWidget paints its child as a single picture layer', (WidgetTester tester) async {
+  testWidgets('SnapshotWidget paints its child as a single picture layer', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
@@ -162,7 +164,7 @@ void main() {
     expect(tester.layers.last, isA<PictureLayer>());
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgetsWithLeakTracking('SnapshotWidget can update the painter type', (WidgetTester tester) async {
+  testWidgets('SnapshotWidget can update the painter type', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
     final TestPainter painter1 = TestPainter();
@@ -198,7 +200,7 @@ void main() {
     expect(tester.takeException(), isNull);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgetsWithLeakTracking('RenderSnapshotWidget does not error on rasterization of child with empty size', (WidgetTester tester) async {
+  testWidgets('RenderSnapshotWidget does not error on rasterization of child with empty size', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
@@ -240,7 +242,7 @@ void main() {
       .having((FlutterError error) => error.message, 'message', contains('SnapshotWidget used with a child that contains a PlatformView')));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgetsWithLeakTracking('RenderSnapshotWidget does not assert if SnapshotMode.forced', (WidgetTester tester) async {
+  testWidgets('RenderSnapshotWidget does not assert if SnapshotMode.forced', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
@@ -263,7 +265,7 @@ void main() {
     expect(tester.takeException(), isNull);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgetsWithLeakTracking('RenderSnapshotWidget does not take a snapshot if a platform view is encountered with SnapshotMode.permissive', (WidgetTester tester) async {
+  testWidgets('RenderSnapshotWidget does not take a snapshot if a platform view is encountered with SnapshotMode.permissive', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
@@ -286,14 +288,9 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(tester.layers.last, isA<PlatformViewLayer>());
   },
-  skip: kIsWeb, // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/135141
-    allowAllNotDisposed: true,
-  ));
+  skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgetsWithLeakTracking('SnapshotWidget should have same result when enabled', (WidgetTester tester) async {
+  testWidgets('SnapshotWidget should have same result when enabled', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
     tester.view
@@ -330,12 +327,17 @@ void main() {
 
     await expectLater(find.byKey(repaintBoundaryKey), matchesReferenceImage(imageWhenDisabled));
   },
-  skip: kIsWeb, // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/135137
-    notDisposedAllowList: <String, int> {'Image': 1},
-  ));
+  skip: kIsWeb || impellerEnabled); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
+  test('SnapshotPainter dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => TestPainter().dispose(),
+        TestPainter,
+      ),
+      areCreateAndDispose,
+    );
+  });
 }
 
 class TestPlatformView extends SingleChildRenderObjectWidget {

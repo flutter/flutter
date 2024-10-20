@@ -4,13 +4,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const double kHeight = 10.0;
 const double kFlingOffset = kHeight * 20.0;
 
 void main() {
-  testWidgetsWithLeakTracking("Flings don't stutter", (WidgetTester tester) async {
+  testWidgets("Flings don't stutter", (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

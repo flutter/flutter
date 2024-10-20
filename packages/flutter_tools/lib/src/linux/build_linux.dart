@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -40,7 +43,7 @@ Future<void> buildLinux(
   target ??= 'lib/main.dart';
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://flutter.dev/to/add-desktop-support '
       'to learn about adding Linux support to a project.');
   }
 
@@ -50,7 +53,7 @@ Future<void> buildLinux(
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  migration.run();
+  await migration.run();
 
   // Build the environment that needs to be set for the re-entrant flutter build
   // step.
@@ -71,16 +74,31 @@ Future<void> buildLinux(
   final Status status = logger.startProgress(
     'Building Linux application...',
   );
+  final String buildModeName = buildInfo.mode.cliName;
+  final Directory platformBuildDirectory = globals.fs.directory(getLinuxBuildDirectory(targetPlatform));
+  final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
   try {
-    final String buildModeName = buildInfo.mode.cliName;
-    final Directory buildDirectory =
-        globals.fs.directory(getLinuxBuildDirectory(targetPlatform)).childDirectory(buildModeName);
     await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory,
                     needCrossBuild, targetPlatform, targetSysroot);
     await _runBuild(buildDirectory);
   } finally {
     status.cancel();
   }
+
+  final String? binaryName = getCmakeExecutableName(linuxProject);
+  final File binaryFile = buildDirectory
+    .childDirectory('bundle')
+    .childFile('$binaryName');
+  final FileSystemEntity buildOutput =  binaryFile.existsSync() ? binaryFile : binaryFile.parent;
+  // We don't print a size because the output directory can contain
+  // optional files not needed by the user and because the binary is not
+  // self-contained.
+  globals.printStatus(
+    '${globals.terminal.successMark} '
+    'Built ${globals.fs.path.relative(buildOutput.path)}',
+    color: TerminalColor.green,
+  );
+
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final String arch = getNameForTargetPlatform(targetPlatform);
     final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
@@ -155,7 +173,13 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
   if (result != 0) {
     throwToolExit('Unable to generate build files');
   }
-  globals.flutterUsage.sendTiming('build', 'cmake-linux', Duration(milliseconds: sw.elapsedMilliseconds));
+  final Duration elapsedDuration = sw.elapsed;
+  globals.flutterUsage.sendTiming('build', 'cmake-linux', elapsedDuration);
+  globals.analytics.send(Event.timing(
+    workflow: 'build',
+    variableName: 'cmake-linux',
+    elapsedMilliseconds: elapsedDuration.inMilliseconds,
+  ));
 }
 
 Future<void> _runBuild(Directory buildDir) async {
@@ -185,5 +209,11 @@ Future<void> _runBuild(Directory buildDir) async {
   if (result != 0) {
     throwToolExit('Build process failed');
   }
-  globals.flutterUsage.sendTiming('build', 'linux-ninja', Duration(milliseconds: sw.elapsedMilliseconds));
+  final Duration elapsedDuration = sw.elapsed;
+  globals.flutterUsage.sendTiming('build', 'linux-ninja', elapsedDuration);
+  globals.analytics.send(Event.timing(
+    workflow: 'build',
+    variableName: 'linux-ninja',
+    elapsedMilliseconds: elapsedDuration.inMilliseconds,
+  ));
 }

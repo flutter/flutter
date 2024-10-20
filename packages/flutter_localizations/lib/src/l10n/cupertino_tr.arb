@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "Ara",
   "noSpellCheckReplacementsLabel": "Yerine Kelime Bulunamadı",
   "menuDismissLabel": "Menüyü kapat",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Ara",
+  "searchWebButtonLabel": "Web'de Ara",
+  "shareButtonLabel": "Paylaş...",
+  "clearButtonLabel": "Clear"
 }

@@ -25,7 +25,7 @@ class OfExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Demo')),
+      appBar: AppBar(title: const Text('Scaffold.of Example')),
       body: Builder(
         // Create an inner BuildContext so that the onPressed methods
         // can refer to the Scaffold with Scaffold.of().
@@ -34,7 +34,7 @@ class OfExample extends StatelessWidget {
             child: ElevatedButton(
               child: const Text('SHOW BOTTOM SHEET'),
               onPressed: () {
-                Scaffold.of(context).showBottomSheet<void>(
+                Scaffold.of(context).showBottomSheet(
                   (BuildContext context) {
                     return Container(
                       alignment: Alignment.center,

@@ -3,39 +3,49 @@
 // found in the LICENSE file.
 
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import 'java.dart';
 
-// ANDROID_HOME is deprecated.
+// ANDROID_SDK_ROOT is deprecated.
 // See https://developer.android.com/studio/command-line/variables.html#envar
-const String kAndroidHome = 'ANDROID_HOME';
 const String kAndroidSdkRoot = 'ANDROID_SDK_ROOT';
+const String kAndroidHome = 'ANDROID_HOME';
+
+// No official environment variable for the NDK root is documented:
+// https://developer.android.com/tools/variables#envar
+// The follow three seem to be most commonly used.
+const String kAndroidNdkHome = 'ANDROID_NDK_HOME';
+const String kAndroidNdkPath = 'ANDROID_NDK_PATH';
+const String kAndroidNdkRoot = 'ANDROID_NDK_ROOT';
 
 final RegExp _numberedAndroidPlatformRe = RegExp(r'^android-([0-9]+)$');
 final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 
 // Android SDK layout:
 
-// $ANDROID_SDK_ROOT/platform-tools/adb
+// $ANDROID_HOME/platform-tools/adb
 
-// $ANDROID_SDK_ROOT/build-tools/19.1.0/aapt, dx, zipalign
-// $ANDROID_SDK_ROOT/build-tools/22.0.1/aapt
-// $ANDROID_SDK_ROOT/build-tools/23.0.2/aapt
-// $ANDROID_SDK_ROOT/build-tools/24.0.0-preview/aapt
-// $ANDROID_SDK_ROOT/build-tools/25.0.2/apksigner
+// $ANDROID_HOME/build-tools/19.1.0/aapt, dx, zipalign
+// $ANDROID_HOME/build-tools/22.0.1/aapt
+// $ANDROID_HOME/build-tools/23.0.2/aapt
+// $ANDROID_HOME/build-tools/24.0.0-preview/aapt
+// $ANDROID_HOME/build-tools/25.0.2/apksigner
 
-// $ANDROID_SDK_ROOT/platforms/android-22/android.jar
-// $ANDROID_SDK_ROOT/platforms/android-23/android.jar
-// $ANDROID_SDK_ROOT/platforms/android-N/android.jar
+// $ANDROID_HOME/platforms/android-22/android.jar
+// $ANDROID_HOME/platforms/android-23/android.jar
+// $ANDROID_HOME/platforms/android-N/android.jar
 class AndroidSdk {
   AndroidSdk(this.directory, {
     Java? java,
+    FileSystem? fileSystem,
   }): _java = java {
-    reinitialize();
+    reinitialize(fileSystem: fileSystem);
   }
 
   /// The Android SDK root directory.
@@ -320,11 +330,121 @@ class AndroidSdk {
 
   String? getAvdManagerPath() => getCmdlineToolsPath(globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
 
+  /// From https://developer.android.com/ndk/guides/other_build_systems.
+  static const Map<String, String> _llvmHostDirectoryName = <String, String>{
+    'macos': 'darwin-x86_64',
+    'linux': 'linux-x86_64',
+    'windows': 'windows-x86_64',
+  };
+
+  /// Locates the binary path for an NDK binary.
+  ///
+  /// The order of resolution is as follows:
+  ///
+  /// 1. If [globals.config] defines an `'android-ndk'` use that.
+  /// 2. If the environment variable `ANDROID_NDK_HOME` is defined, use that.
+  /// 3. If the environment variable `ANDROID_NDK_PATH` is defined, use that.
+  /// 4. If the environment variable `ANDROID_NDK_ROOT` is defined, use that.
+  /// 5. Look for the default install location inside the Android SDK:
+  ///    [directory]/ndk/\<version\>/. If multiple versions exist, use the
+  ///    newest.
+  String? getNdkBinaryPath(
+    String binaryName, {
+    Platform? platform,
+    Config? config,
+  }) {
+    platform ??= globals.platform;
+    config ??= globals.config;
+    Directory? findAndroidNdkHomeDir() {
+      String? androidNdkHomeDir;
+      if (config!.containsKey('android-ndk')) {
+        androidNdkHomeDir = config.getValue('android-ndk') as String?;
+      } else if (platform!.environment.containsKey(kAndroidNdkHome)) {
+        androidNdkHomeDir = platform.environment[kAndroidNdkHome];
+      } else if (platform.environment.containsKey(kAndroidNdkPath)) {
+        androidNdkHomeDir = platform.environment[kAndroidNdkPath];
+      } else if (platform.environment.containsKey(kAndroidNdkRoot)) {
+        androidNdkHomeDir = platform.environment[kAndroidNdkRoot];
+      }
+      if (androidNdkHomeDir != null) {
+        return directory.fileSystem.directory(androidNdkHomeDir);
+      }
+
+      // Look for the default install location of the NDK inside the Android
+      // SDK when installed through `sdkmanager` or Android studio.
+      final Directory ndk = directory.childDirectory('ndk');
+      if (!ndk.existsSync()) {
+        return null;
+      }
+      final List<Version> ndkVersions = ndk
+          .listSync()
+          .map((FileSystemEntity entity) {
+            try {
+              return Version.parse(entity.basename);
+            } on Exception {
+              return null;
+            }
+          })
+          .whereType<Version>()
+          .toList()
+        // Use latest NDK first.
+        ..sort((Version a, Version b) => -a.compareTo(b));
+      if (ndkVersions.isEmpty) {
+        return null;
+      }
+      return ndk.childDirectory(ndkVersions.first.toString());
+    }
+
+    final Directory? androidNdkHomeDir = findAndroidNdkHomeDir();
+    if (androidNdkHomeDir == null) {
+      return null;
+    }
+    final File executable = androidNdkHomeDir
+        .childDirectory('toolchains')
+        .childDirectory('llvm')
+        .childDirectory('prebuilt')
+        .childDirectory(_llvmHostDirectoryName[platform.operatingSystem]!)
+        .childDirectory('bin')
+        .childFile(binaryName);
+    if (executable.existsSync()) {
+      // LLVM missing in this NDK version.
+      return executable.path;
+    }
+    return null;
+  }
+
+  String? getNdkClangPath({Platform? platform, Config? config}) {
+    platform ??= globals.platform;
+    return getNdkBinaryPath(
+      platform.isWindows ? 'clang.exe' : 'clang',
+      platform: platform,
+      config: config,
+    );
+  }
+
+  String? getNdkArPath({Platform? platform, Config? config}) {
+    platform ??= globals.platform;
+    return getNdkBinaryPath(
+      platform.isWindows ? 'llvm-ar.exe' : 'llvm-ar',
+      platform: platform,
+      config: config,
+    );
+  }
+
+  String? getNdkLdPath({Platform? platform, Config? config}) {
+    platform ??= globals.platform;
+    return getNdkBinaryPath(
+      platform.isWindows ? 'ld.lld.exe' : 'ld.lld',
+      platform: platform,
+      config: config,
+    );
+  }
+
   /// Sets up various paths used internally.
   ///
   /// This method should be called in a case where the tooling may have updated
   /// SDK artifacts, such as after running a gradle build.
-  void reinitialize() {
+  void reinitialize({FileSystem? fileSystem}) {
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
     final Directory buildToolsDir = directory.childDirectory('build-tools');
@@ -387,7 +507,7 @@ class AndroidSdk {
         sdkLevel: platformVersion,
         platformName: platformName,
         buildToolsVersion: buildToolsVersion,
-        fileSystem: globals.fs,
+        fileSystem: fileSystem ?? globals.fs,
       );
     }).whereType<AndroidSdkVersion>().toList();
 
@@ -401,11 +521,7 @@ class AndroidSdk {
     final String executable = globals.platform.isWindows
       ? 'sdkmanager.bat'
       : 'sdkmanager';
-    final String? path = getCmdlineToolsPath(executable, skipOldTools: true);
-    if (path != null) {
-      return path;
-    }
-    return null;
+    return getCmdlineToolsPath(executable, skipOldTools: true);
   }
 
   /// Returns the version of the Android SDK manager tool or null if not found.

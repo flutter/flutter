@@ -1,4 +1,7 @@
 {
+  "lookUpButtonLabel": "Pogled nagore",
+  "searchWebButtonLabel": "Pretraži veb",
+  "shareButtonLabel": "Deli…",
   "noSpellCheckReplacementsLabel": "Nisu pronađene zamene",
   "menuDismissLabel": "Odbacite meni",
   "searchTextFieldPlaceholderLabel": "Pretražite",

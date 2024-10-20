@@ -23,7 +23,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('error logged when plugin Android compileSdkVersion higher than project', () async {
+  test('error logged when plugin Android compileSdk version higher than project', () async {
     final String flutterBin = fileSystem.path.join(
       getFlutterRoot(),
       'bin',
@@ -46,10 +46,10 @@ void main() {
 
     final String pluginBuildGradle = pluginGradleFile.readAsStringSync();
 
-    // Bump up plugin compileSdkVersion to 31
-    final RegExp androidCompileSdkVersionRegExp = RegExp(r'compileSdkVersion ([0-9]+|flutter.compileSdkVersion)');
+    // Bump up plugin compileSdk version to 31
+    final RegExp androidCompileSdkVersionRegExp = RegExp(r'compileSdk = ([0-9]+|flutter.compileSdkVersion)');
     final String newPluginGradleFile = pluginBuildGradle.replaceAll(
-      androidCompileSdkVersionRegExp, 'compileSdkVersion 31');
+      androidCompileSdkVersionRegExp, 'compileSdk = 31');
     pluginGradleFile.writeAsStringSync(newPluginGradleFile);
 
     final Directory pluginExampleAppDir = pluginAppDir.childDirectory('example');
@@ -59,9 +59,9 @@ void main() {
 
     final String projectBuildGradle = projectGradleFile.readAsStringSync();
 
-    // Bump down plugin example app compileSdkVersion to 30
+    // Bump down plugin example app compileSdk version to 30
     final String newProjectGradleFile = projectBuildGradle.replaceAll(
-      androidCompileSdkVersionRegExp, 'compileSdkVersion 30');
+      androidCompileSdkVersionRegExp, 'compileSdk = 30');
     projectGradleFile.writeAsStringSync(newProjectGradleFile);
 
     // Run flutter build apk to build plugin example project
@@ -75,16 +75,20 @@ void main() {
 
     // Check error message is thrown
     expect(
-        result.stdout,
+        result.stderr,
         contains(
-            'Warning: The plugin test_plugin requires Android SDK version 31.'));
+            'Your project is configured to compile against Android SDK 30, but '
+            'the following plugin(s) require to be compiled against a higher Android SDK version:'));
     expect(
       result.stderr,
-      contains('One or more plugins require a higher Android SDK version.'),
+      contains('- test_plugin compiles against Android SDK 31'),
     );
     expect(
         result.stderr,
         contains(
-            'Fix this issue by adding the following to ${projectGradleFile.path}'));
+            'Fix this issue by compiling against the highest Android SDK version (they are backward compatible).'));
+    expect(
+        result.stderr,
+        contains('Add the following to ${projectGradleFile.path}:'));
   });
 }

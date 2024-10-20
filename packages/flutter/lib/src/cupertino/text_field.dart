@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
@@ -14,6 +17,7 @@ import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
+import 'localizations.dart';
 import 'magnifier.dart';
 import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
@@ -116,7 +120,6 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
       }
     }
     super.onSingleTapUp(details);
-    _state._requestKeyboard();
     _state.widget.onTap?.call();
   }
 
@@ -163,6 +166,14 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///
 /// {@macro flutter.widgets.editableText.showCaretOnScreen}
 ///
+/// ## Scrolling Considerations
+///
+/// If this [CupertinoTextField] is not a descendant of [Scaffold] and is being
+/// used within a [Scrollable] or nested [Scrollable]s, consider placing a
+/// [ScrollNotificationObserver] above the root [Scrollable] that contains this
+/// [CupertinoTextField] to ensure proper scroll coordination for
+/// [CupertinoTextField] and its components like [TextSelectionOverlay].
+///
 /// See also:
 ///
 ///  * <https://developer.apple.com/documentation/uikit/uitextfield>
@@ -170,7 +181,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///    Design UI conventions.
 ///  * [EditableText], which is the raw text editing control at the heart of a
 ///    [TextField].
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://docs.flutter.dev/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/text-fields/>
 class CupertinoTextField extends StatefulWidget {
   /// Creates an iOS-style text field.
@@ -213,6 +224,7 @@ class CupertinoTextField extends StatefulWidget {
   ///    characters" and how it may differ from the intuitive meaning.
   const CupertinoTextField({
     super.key,
+    this.groupId = EditableText,
     this.controller,
     this.focusNode,
     this.undoController,
@@ -228,6 +240,7 @@ class CupertinoTextField extends StatefulWidget {
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
+    this.clearButtonSemanticLabel,
     TextInputType? keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
@@ -342,6 +355,7 @@ class CupertinoTextField extends StatefulWidget {
   ///    characters" and how it may differ from the intuitive meaning.
   const CupertinoTextField.borderless({
     super.key,
+    this.groupId = EditableText,
     this.controller,
     this.focusNode,
     this.undoController,
@@ -354,6 +368,7 @@ class CupertinoTextField extends StatefulWidget {
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
+    this.clearButtonSemanticLabel,
     TextInputType? keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
@@ -436,6 +451,9 @@ class CupertinoTextField extends StatefulWidget {
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
+  /// {@macro flutter.widgets.editableText.groupId}
+  final Object groupId;
+
   /// Controls the text being edited.
   ///
   /// If null, this widget will create its own [TextEditingController].
@@ -507,6 +525,12 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// Defaults to [OverlayVisibilityMode.never].
   final OverlayVisibilityMode clearButtonMode;
+
+  /// The semantic label for the clear button used by screen readers.
+  ///
+  /// This will be used by screen reading software to identify the clear button
+  /// widget. Defaults to "Clear".
+  final String? clearButtonSemanticLabel;
 
   /// {@macro flutter.widgets.editableText.keyboardType}
   final TextInputType keyboardType;
@@ -747,15 +771,14 @@ class CupertinoTextField extends StatefulWidget {
     );
   }
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  /// Configuration for the text field magnifier.
+  ///
+  /// By default (when this property is set to null), a [CupertinoTextMagnifier]
+  /// is used on mobile platforms, and nothing on desktop platforms. To suppress
+  /// the magnifier on all platforms, consider passing
+  /// [TextMagnifierConfiguration.disabled] explicitly.
   ///
   /// {@macro flutter.widgets.magnifier.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
-  ///
-  /// By default, builds a [CupertinoTextMagnifier] on iOS and Android nothing on all other
-  /// platforms. If it is desired to suppress the magnifier, consider passing
-  /// [TextMagnifierConfiguration.disabled].
   ///
   /// {@tool dartpad}
   /// This sample demonstrates how to customize the magnifier that this text field uses.
@@ -829,6 +852,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('prefix', prefix == null ? null : prefixMode));
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('suffix', suffix == null ? null : suffixMode));
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('clearButtonMode', clearButtonMode));
+    properties.add(DiagnosticsProperty<String>('clearButtonSemanticLabel', clearButtonSemanticLabel));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
@@ -1116,15 +1140,21 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   Widget _buildClearButton() {
-    return GestureDetector(
-      key: _clearGlobalKey,
-      onTap: widget.enabled ? _onClearButtonTapped : null,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6.0),
-        child: Icon(
-          CupertinoIcons.clear_thick_circled,
-          size: 18.0,
-          color: CupertinoDynamicColor.resolve(_kClearButtonColor, context),
+    final String clearLabel = widget.clearButtonSemanticLabel ?? CupertinoLocalizations.of(context).clearButtonLabel;
+
+    return Semantics(
+      button: true,
+      label: clearLabel,
+      child: GestureDetector(
+        key: _clearGlobalKey,
+        onTap: widget.enabled ? _onClearButtonTapped : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+          child: Icon(
+            CupertinoIcons.clear_thick_circled,
+            size: 18.0,
+            color: CupertinoDynamicColor.resolve(_kClearButtonColor, context),
+          ),
         ),
       ),
     );
@@ -1311,10 +1341,16 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         );
     }
 
-    final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
-      border: resolvedBorder,
-      color: enabled ? decorationColor : disabledColor,
-    );
+    // Use the default disabled color only if the box decoration was not set.
+    final BoxDecoration? effectiveDecoration =
+      widget.decoration?.copyWith(
+        border: resolvedBorder,
+        color: enabled ? decorationColor
+          : (widget.decoration == _kDefaultRoundedBorderDecoration
+              ? disabledColor
+              : widget.decoration?.color
+            ),
+      );
 
     final Color selectionColor = CupertinoDynamicColor.maybeResolve(
       DefaultSelectionStyle.of(context).selectionColor,
@@ -1365,6 +1401,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
             selectionControls: widget.selectionEnabled
               ? textSelectionControls : null,
+            groupId: widget.groupId,
             onChanged: widget.onChanged,
             onSelectionChanged: _handleSelectionChanged,
             onEditingComplete: widget.onEditingComplete,
@@ -1411,6 +1448,35 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         _requestKeyboard();
       },
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+      onFocus: enabled
+        ? () {
+            assert(
+              _effectiveFocusNode.canRequestFocus,
+              'Received SemanticsAction.focus from the engine. However, the FocusNode '
+              'of this text field cannot gain focus. This likely indicates a bug. '
+              'If this text field cannot be focused (e.g. because it is not '
+              'enabled), then its corresponding semantics node must be configured '
+              'such that the assistive technology cannot request focus on it.'
+            );
+
+            if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
+              _effectiveFocusNode.requestFocus();
+            } else if (!widget.readOnly) {
+              // If the platform requested focus, that means that previously the
+              // platform believed that the text field did not have focus (even
+              // though Flutter's widget system believed otherwise). This likely
+              // means that the on-screen keyboard is hidden, or more generally,
+              // there is no current editing session in this field. To correct
+              // that, keyboard must be requested.
+              //
+              // A concrete scenario where this can happen is when the user
+              // dismisses the keyboard on the web. The editing session is
+              // closed by the engine, but the text field widget stays focused
+              // in the framework.
+              _requestKeyboard();
+            }
+          }
+        : null,
       child: TextFieldTapRegion(
         child: IgnorePointer(
           ignoring: !enabled,

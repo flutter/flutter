@@ -144,7 +144,9 @@
   "expandedHint": "Imekunjwa",
   "collapsedHint": "Imepanuliwa",
   "menuDismissLabel": "Ondoa menyu",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Tafuta",
+  "searchWebButtonLabel": "Tafuta kwenye Wavuti",
+  "shareButtonLabel": "Shiriki...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

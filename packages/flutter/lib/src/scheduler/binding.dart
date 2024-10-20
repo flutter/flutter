@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+/// @docImport 'package:flutter/services.dart';
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'ticker.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline, TimelineTask;
@@ -196,7 +204,17 @@ typedef _PerformanceModeCleanupCallback = VoidCallback;
 /// To create a [PerformanceModeRequestHandle], use [SchedulerBinding.requestPerformanceMode].
 /// The component that makes the request is responsible for disposing the handle.
 class PerformanceModeRequestHandle {
-  PerformanceModeRequestHandle._(_PerformanceModeCleanupCallback this._cleanup);
+  PerformanceModeRequestHandle._(_PerformanceModeCleanupCallback this._cleanup) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/scheduler.dart',
+        className: '$PerformanceModeRequestHandle',
+        object: this,
+      );
+    }
+  }
 
   _PerformanceModeCleanupCallback? _cleanup;
 
@@ -206,6 +224,11 @@ class PerformanceModeRequestHandle {
   /// This method must only be called once per object.
   void dispose() {
     assert(_cleanup != null);
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _cleanup!();
     _cleanup = null;
   }
@@ -376,11 +399,12 @@ mixin SchedulerBinding on BindingBase {
   AppLifecycleState? get lifecycleState => _lifecycleState;
   AppLifecycleState? _lifecycleState;
 
-  /// Allows the test framework to reset the lifecycle state back to its
-  /// initial value.
+  /// Allows the test framework to reset the lifecycle state and framesEnabled
+  /// back to their initial values.
   @visibleForTesting
-  void resetLifecycleState() {
+  void resetInternalState() {
     _lifecycleState = null;
+    _framesEnabled = true;
   }
 
   /// Called when the application lifecycle state changes.
@@ -493,14 +517,11 @@ mixin SchedulerBinding on BindingBase {
 
   /// Execute the highest-priority task, if it is of a high enough priority.
   ///
-  /// Returns true if a task was executed and there are other tasks remaining
-  /// (even if they are not high-enough priority).
+  /// Returns false if the scheduler is [locked], or if there are no tasks
+  /// remaining.
   ///
-  /// Returns false if no task was executed, which can occur if there are no
-  /// tasks scheduled, if the scheduler is [locked], or if the highest-priority
-  /// task is of too low a priority given the current [schedulingStrategy].
-  ///
-  /// Also returns false if there are no tasks remaining.
+  /// Returns true otherwise, including when no task is executed due to priority
+  /// being too low.
   @visibleForTesting
   @pragma('vm:notify-debugger-on-exception')
   bool handleEventLoopCallback() {
@@ -537,7 +558,7 @@ mixin SchedulerBinding on BindingBase {
       }
       return _taskQueue.isNotEmpty;
     }
-    return false;
+    return true;
   }
 
   int _nextFrameCallbackId = 0; // positive
@@ -559,6 +580,11 @@ mixin SchedulerBinding on BindingBase {
   /// Adds the given callback to the list of frame callbacks and ensures that a
   /// frame is scheduled.
   ///
+  /// If this is called during the frame's animation phase (when transient frame
+  /// callbacks are still being invoked), a new frame will be scheduled, and
+  /// `callback` will be called in the newly scheduled frame, not in the current
+  /// frame.
+  ///
   /// If this is a one-off registration, ignore the `rescheduling` argument.
   ///
   /// If this is a callback that will be re-registered each time it fires, then
@@ -573,6 +599,12 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Callbacks registered with this method can be canceled using
   /// [cancelFrameCallbackWithId].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBinding.drawFrame], which explains the phases of each frame
+  ///    for those apps that use Flutter widgets (and where transient frame
+  ///    callbacks fit into those phases).
   int scheduleFrameCallback(FrameCallback callback, { bool rescheduling = false }) {
     scheduleFrame();
     _nextFrameCallbackId += 1;
@@ -725,6 +757,12 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Persistent frame callbacks cannot be unregistered. Once registered, they
   /// are called for every frame for the lifetime of the application.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBinding.drawFrame], which explains the phases of each frame
+  ///    for those apps that use Flutter widgets (and where persistent frame
+  ///    callbacks fit into those phases).
   void addPersistentFrameCallback(FrameCallback callback) {
     _persistentCallbacks.add(callback);
   }
@@ -748,11 +786,35 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Post-frame callbacks cannot be unregistered. They are called exactly once.
   ///
+  /// In debug mode, if [debugTracePostFrameCallbacks] is set to true, then the
+  /// registered callback will show up in the timeline events chart, which can
+  /// be viewed in [DevTools](https://docs.flutter.dev/tools/devtools).
+  /// In that case, the `debugLabel` argument specifies the name of the callback
+  /// as it will appear in the timeline. In profile and release builds,
+  /// post-frame are never traced, and the `debugLabel` argument is ignored.
+  ///
   /// See also:
   ///
   ///  * [scheduleFrameCallback], which registers a callback for the start of
   ///    the next frame.
-  void addPostFrameCallback(FrameCallback callback) {
+  ///  * [WidgetsBinding.drawFrame], which explains the phases of each frame
+  ///    for those apps that use Flutter widgets (and where post frame
+  ///    callbacks fit into those phases).
+  void addPostFrameCallback(FrameCallback callback, {String debugLabel = 'callback'}) {
+    assert(() {
+      if (debugTracePostFrameCallbacks) {
+        final FrameCallback originalCallback = callback;
+        callback = (Duration timeStamp) {
+          Timeline.startSync(debugLabel);
+          try {
+            originalCallback(timeStamp);
+          } finally {
+            Timeline.finishSync();
+          }
+        };
+      }
+      return true;
+    }());
     _postFrameCallbacks.add(callback);
   }
 
@@ -776,7 +838,7 @@ mixin SchedulerBinding on BindingBase {
       addPostFrameCallback((Duration timeStamp) {
         _nextFrameCompleter!.complete();
         _nextFrameCompleter = null;
-      });
+      }, debugLabel: 'SchedulerBinding.completeFrame');
     }
     return _nextFrameCompleter!.future;
   }
@@ -968,28 +1030,29 @@ mixin SchedulerBinding on BindingBase {
       debugTimelineTask = TimelineTask()..start('Warm-up frame');
     }
     final bool hadScheduledFrame = _hasScheduledFrame;
-    // We use timers here to ensure that microtasks flush in between.
-    Timer.run(() {
-      assert(_warmUpFrame);
-      handleBeginFrame(null);
-    });
-    Timer.run(() {
-      assert(_warmUpFrame);
-      handleDrawFrame();
-      // We call resetEpoch after this frame so that, in the hot reload case,
-      // the very next frame pretends to have occurred immediately after this
-      // warm-up frame. The warm-up frame's timestamp will typically be far in
-      // the past (the time of the last real frame), so if we didn't reset the
-      // epoch we would see a sudden jump from the old time in the warm-up frame
-      // to the new time in the "real" frame. The biggest problem with this is
-      // that implicit animations end up being triggered at the old time and
-      // then skipping every frame and finishing in the new time.
-      resetEpoch();
-      _warmUpFrame = false;
-      if (hadScheduledFrame) {
-        scheduleFrame();
-      }
-    });
+    PlatformDispatcher.instance.scheduleWarmUpFrame(
+      beginFrame: () {
+        assert(_warmUpFrame);
+        handleBeginFrame(null);
+      },
+      drawFrame: () {
+        assert(_warmUpFrame);
+        handleDrawFrame();
+        // We call resetEpoch after this frame so that, in the hot reload case,
+        // the very next frame pretends to have occurred immediately after this
+        // warm-up frame. The warm-up frame's timestamp will typically be far in
+        // the past (the time of the last real frame), so if we didn't reset the
+        // epoch we would see a sudden jump from the old time in the warm-up frame
+        // to the new time in the "real" frame. The biggest problem with this is
+        // that implicit animations end up being triggered at the old time and
+        // then skipping every frame and finishing in the new time.
+        resetEpoch();
+        _warmUpFrame = false;
+        if (hadScheduledFrame) {
+          scheduleFrame();
+        }
+      },
+    );
 
     // Lock events so touch events etc don't insert themselves until the
     // scheduled frame has finished.
@@ -1107,7 +1170,7 @@ mixin SchedulerBinding on BindingBase {
         // still be true here and cause us to skip scheduling an engine frame.
         _hasScheduledFrame = false;
         scheduleFrame();
-      });
+      }, debugLabel: 'SchedulerBinding.scheduleFrame');
       return;
     }
     handleDrawFrame();
@@ -1260,8 +1323,17 @@ mixin SchedulerBinding on BindingBase {
       final List<FrameCallback> localPostFrameCallbacks =
           List<FrameCallback>.of(_postFrameCallbacks);
       _postFrameCallbacks.clear();
-      for (final FrameCallback callback in localPostFrameCallbacks) {
-        _invokeFrameCallback(callback, _currentFrameTimeStamp!);
+      if (!kReleaseMode) {
+        FlutterTimeline.startSync('POST_FRAME');
+      }
+      try {
+        for (final FrameCallback callback in localPostFrameCallbacks) {
+          _invokeFrameCallback(callback, _currentFrameTimeStamp!);
+        }
+      } finally {
+        if (!kReleaseMode) {
+          FlutterTimeline.finishSync();
+        }
       }
     } finally {
       _schedulerPhase = SchedulerPhase.idle;

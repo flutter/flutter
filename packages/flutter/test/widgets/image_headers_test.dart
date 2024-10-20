@@ -14,7 +14,10 @@ import '../image_data.dart';
 void main() {
   final MockHttpClient client = MockHttpClient();
 
-  testWidgetsWithLeakTracking('Headers', (WidgetTester tester) async {
+  testWidgets('Headers',
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     HttpOverrides.runZoned<Future<void>>(() async {
       await tester.pumpWidget(Image.network(
         'https://www.example.com/images/frame.png',

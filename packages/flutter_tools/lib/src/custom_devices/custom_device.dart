@@ -101,14 +101,11 @@ class CustomDeviceLogReader extends DeviceLogReader {
   /// [logLines] as done.
   @override
   Future<void> dispose() async {
-    final List<Future<void>> futures = <Future<void>>[];
-
-    for (final StreamSubscription<String> subscription in subscriptions) {
-      futures.add(subscription.cancel());
-    }
-
-    futures.add(logLinesController.close());
-
+    final List<Future<void>> futures = <Future<void>>[
+      for (final StreamSubscription<String> subscription in subscriptions)
+        subscription.cancel(),
+      logLinesController.close(),
+    ];
     await Future.wait(futures);
   }
 
@@ -300,6 +297,8 @@ class CustomDeviceAppSession {
         'trace-allowlist=${debuggingOptions.traceAllowlist}',
       if (debuggingOptions.traceSystrace)
         'trace-systrace=true',
+      if (debuggingOptions.traceToFile != null)
+        'trace-to-file=${debuggingOptions.traceToFile}',
       if (debuggingOptions.endlessTraceBuffer)
         'endless-trace-buffer=true',
       if (debuggingOptions.dumpSkpOnShaderCompilation)

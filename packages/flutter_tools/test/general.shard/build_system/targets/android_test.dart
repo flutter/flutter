@@ -535,7 +535,9 @@ void main() {
     processManager.addCommands(<FakeCommand>[
       const FakeCommand(command: <String>[
         'HostArtifact.impellerc',
+        '--sksl',
         '--runtime-stage-gles',
+        '--runtime-stage-vulkan',
         '--iplr',
         '--sl=out/flutter_assets/shader.glsl',
         '--spirv=out/flutter_assets/shader.glsl.spirv',

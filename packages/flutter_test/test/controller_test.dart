@@ -5,7 +5,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stack_trace/stack_trace.dart';
 
@@ -883,6 +883,7 @@ void main() {
     group('simulatedTraversal', () {
       final List<Matcher> fullTraversalMatchers = <Matcher>[
         containsSemantics(isHeader: true, label: 'Semantics Test'),
+        containsSemantics(label: 'Text Field'),
         containsSemantics(isTextField: true),
         containsSemantics(label: 'Off Switch'),
         containsSemantics(hasToggledState: true),
@@ -913,11 +914,47 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to start where the slider is.
-        final List<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]..removeRange(0, 8);
+        final List<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]..removeRange(0, 9);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(start: find.byType(Slider)),
           orderedEquals(expectedMatchers));
+      });
+
+      testWidgets('simulatedAccessibilityTraversal end Index supports empty traversal', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Center(
+            child: Column(), // No nodes!
+          ),
+        ));
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal().map((SemanticsNode node) => node.label),
+          <String>[],
+        );
+      });
+
+      testWidgets('starts traversal at semantics node for `startNode`', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                for (int c = 0; c < 5; c++)
+                  Semantics(container: true, child: Text('Child$c')),
+              ]
+            ),
+          ),
+        ));
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(
+            startNode: find.semantics.byLabel('Child1'),
+          ).map((SemanticsNode node) => node.label),
+          <String>[
+            'Child1',
+            'Child2',
+            'Child3',
+            'Child4',
+          ],
+        );
       });
 
       testWidgets('throws StateError if `start` not found in traversal', (WidgetTester tester) async {
@@ -931,15 +968,54 @@ void main() {
         );
       });
 
+      testWidgets('throws StateError if `startNode` not found in traversal', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                for (int c = 0; c < 5; c++)
+                  Semantics(container: true, child: Text('Child$c')),
+              ]
+            ),
+          ),
+        ));
+        expect(
+          () => tester.semantics.simulatedAccessibilityTraversal(startNode: find.semantics.byLabel('Child20')),
+          throwsA(isA<StateError>()),
+        );
+      });
+
       testWidgets('ends traversal at semantics node for `end`', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to end where the slider is, inclusive.
-        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(0, 9);
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(0, 10);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(end: find.byType(Slider)),
           orderedEquals(expectedMatchers));
+      });
+
+      testWidgets('ends traversal at semantics node for `endNode`', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                for (int c = 0; c < 5; c++)
+                  Semantics(container: true, child: Text('Child$c')),
+              ]
+            ),
+          ),
+        ));
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(
+            endNode: find.semantics.byLabel('Child1'),
+          ).map((SemanticsNode node) => node.label),
+          <String>[
+            'Child0',
+            'Child1',
+          ],
+        );
       });
 
       testWidgets('throws StateError if `end` not found in traversal', (WidgetTester tester) async {
@@ -953,11 +1029,28 @@ void main() {
         );
       });
 
+      testWidgets('throws StateError if `endNode` not found in traversal', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                for (int c = 0; c < 5; c++)
+                  Semantics(container: true, child: Text('Child$c')),
+              ]
+            ),
+          ),
+        ));
+        expect(
+          () => tester.semantics.simulatedAccessibilityTraversal(endNode: find.semantics.byLabel('Child20')),
+          throwsA(isA<StateError>()),
+        );
+      });
+
       testWidgets('returns traversal between `start` and `end` if both are provided', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to start at the text field and end at the slider.
-        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(1, 9);
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(1, 10);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(
@@ -965,6 +1058,30 @@ void main() {
             end: find.byType(Slider),
           ),
           orderedEquals(expectedMatchers));
+      });
+
+      testWidgets('returns traversal between `startNode` and `endNode` if both are provided', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                for (int c = 0; c < 5; c++)
+                  Semantics(container: true, child: Text('Child$c')),
+              ]
+            ),
+          ),
+        ));
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(
+            startNode: find.semantics.byLabel('Child1'),
+            endNode: find.semantics.byLabel('Child3'),
+          ).map((SemanticsNode node) => node.label),
+          <String>[
+            'Child1',
+            'Child2',
+            'Child3',
+          ],
+        );
       });
 
       testWidgets('can do fuzzy traversal match with `containsAllInOrder`', (WidgetTester tester) async {
@@ -1015,6 +1132,638 @@ void main() {
         );
       });
     });
+
+    group('actions', () {
+      testWidgets('performAction with unsupported action throws StateError', (WidgetTester tester) async {
+        await tester.pumpWidget(Semantics(onTap: () {}));
+
+        expect(
+          () => tester.semantics.performAction(
+            find.semantics.byLabel('Test'),
+            SemanticsAction.dismiss,
+          ),
+          throwsStateError,
+        );
+      });
+
+      testWidgets('tap causes semantic tap', (WidgetTester tester) async {
+        bool invoked = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: TextButton(
+              onPressed: () => invoked = true,
+              child: const Text('Test Button'),
+            ),
+          ),
+        );
+
+        tester.semantics.tap(find.semantics.byAction(SemanticsAction.tap));
+        expect(invoked, isTrue);
+      });
+
+      testWidgets('longPress causes semantic long press', (WidgetTester tester) async {
+        bool invoked = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: TextButton(
+              onPressed: () {},
+              onLongPress: () => invoked = true,
+              child: const Text('Test Button'),
+            ),
+          ),
+        );
+
+        tester.semantics.longPress(find.semantics.byAction(SemanticsAction.longPress));
+        expect(invoked, isTrue);
+      });
+
+      testWidgets('scrollLeft and scrollRight scroll left and right respectively', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: ListView(
+            scrollDirection: Axis.horizontal,
+            children: <Widget>[
+              SizedBox(
+                height: 40,
+                width: tester.binding.window.physicalSize.width * 1.5,
+              )
+            ],
+          ),
+        ));
+
+        expect(
+          find.semantics.scrollable(),
+          containsSemantics(hasScrollLeftAction: true, hasScrollRightAction: false),
+          reason: 'When not yet scrolled, a scrollview should only be able to support left scrolls.',
+        );
+
+        tester.semantics.scrollLeft();
+        await tester.pump();
+
+        expect(
+          find.semantics.scrollable(),
+          containsSemantics(hasScrollLeftAction: true, hasScrollRightAction: true),
+          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
+        );
+
+        // This will scroll the listview until it's completely scrolled to the right.
+        final SemanticsFinder leftScrollable = find.semantics.byAction(SemanticsAction.scrollLeft);
+        while (leftScrollable.tryEvaluate()) {
+          tester.semantics.scrollLeft(scrollable: leftScrollable);
+          await tester.pump();
+        }
+
+        expect(
+          find.semantics.scrollable(),
+          containsSemantics(hasScrollLeftAction: false, hasScrollRightAction: true),
+          reason: 'When fully scrolled, a scrollview should only support right scrolls.',
+        );
+
+        tester.semantics.scrollRight();
+        await tester.pump();
+
+        expect(
+          find.semantics.scrollable(),
+          containsSemantics(hasScrollLeftAction: true, hasScrollRightAction: true),
+          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
+        );
+      });
+
+      testWidgets('scrollUp and scrollDown scrolls up and down respectively', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: ListView(
+            children: <Widget>[
+              SizedBox(
+                height: tester.binding.window.physicalSize.height * 1.5,
+                width: 40,
+              )
+            ],
+          ),
+        ));
+
+        expect(
+          find.semantics.scrollable(),
+          containsSemantics(hasScrollUpAction: true, hasScrollDownAction: false),
+          reason: 'When not yet scrolled, a scrollview should only be able to support left scrolls.',
+        );
+
+        tester.semantics.scrollUp();
+        await tester.pump();
+
+        expect(
+          find.semantics.scrollable(),
+          containsSemantics(hasScrollUpAction: true, hasScrollDownAction: true),
+          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
+        );
+
+        // This will scroll the listview until it's completely scrolled to the right.
+        final SemanticsFinder upScrollable = find.semantics.byAction(SemanticsAction.scrollUp);
+        while (upScrollable.tryEvaluate()) {
+          tester.semantics.scrollUp(scrollable: upScrollable);
+          await tester.pump();
+        }
+
+        expect(
+          find.semantics.scrollable(),
+          containsSemantics(hasScrollUpAction: false, hasScrollDownAction: true),
+          reason: 'When fully scrolled, a scrollview should only support right scrolls.',
+        );
+
+        tester.semantics.scrollDown();
+        await tester.pump();
+
+        expect(
+          find.semantics.scrollable(),
+          containsSemantics(hasScrollUpAction: true, hasScrollDownAction: true),
+          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
+        );
+      });
+
+      testWidgets('increase causes semantic increase', (WidgetTester tester) async {
+        bool invoked = false;
+        await tester.pumpWidget(MaterialApp(
+          home: Material(
+            child: _StatefulSlider(
+              initialValue: 0,
+              onChanged: (double _) {invoked = true;},
+            ),
+          )
+        ));
+
+        final SemanticsFinder sliderFinder = find.semantics.byFlag(SemanticsFlag.isSlider);
+        final String expected = sliderFinder.evaluate().single.increasedValue;
+        tester.semantics.increase(sliderFinder);
+        await tester.pumpAndSettle();
+
+        expect(invoked, isTrue);
+        expect(
+          find.semantics.byFlag(SemanticsFlag.isSlider).evaluate().single.value,
+          equals(expected),
+        );
+      });
+
+      testWidgets('decrease causes semantic decrease', (WidgetTester tester) async {
+        bool invoked = false;
+        await tester.pumpWidget(MaterialApp(
+          home: Material(
+            child: _StatefulSlider(
+              initialValue: 1,
+              onChanged: (double _) {invoked = true;},
+            ),
+          )
+        ));
+
+        final SemanticsFinder sliderFinder = find.semantics.byFlag(SemanticsFlag.isSlider);
+        final String expected = sliderFinder.evaluate().single.decreasedValue;
+        tester.semantics.decrease(sliderFinder);
+        await tester.pumpAndSettle();
+
+        expect(invoked, isTrue);
+        expect(
+          tester.semantics.find(find.byType(Slider)).value,
+          equals(expected),
+        );
+      });
+
+      testWidgets('showOnScreen sends showOnScreen action', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: ListView(
+            controller: ScrollController(initialScrollOffset: 50),
+            children: <Widget>[
+              const MergeSemantics(
+                child: SizedBox(
+                  height: 40,
+                  child: Text('Test'),
+                ),
+              ),
+              SizedBox(
+                width: 40,
+                height: tester.binding.window.physicalSize.height * 1.5,
+              ),
+            ],
+          ),
+        ));
+
+        expect(
+          find.semantics.byLabel('Test'),
+          containsSemantics(isHidden:true),
+        );
+
+        tester.semantics.showOnScreen(find.semantics.byLabel('Test'));
+        await tester.pump();
+
+        expect(
+          tester.semantics.find(find.text('Test')),
+          containsSemantics(isHidden: false),
+        );
+      });
+
+      testWidgets('actions for moving the cursor without modifying selection can move the cursor forward and back by character and word', (WidgetTester tester) async {
+        const String text = 'This is some text.';
+        int currentIndex = text.length;
+        final TextEditingController controller = TextEditingController(text: text);
+        await tester.pumpWidget(MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ));
+
+        void expectUnselectedIndex(int expectedIndex) {
+          expect(controller.selection.start, equals(expectedIndex));
+          expect(controller.selection.end, equals(expectedIndex));
+        }
+
+        final SemanticsFinder finder = find.semantics.byValue(text);
+
+        // Get focus onto the text field
+        tester.semantics.tap(finder);
+        await tester.pump();
+
+        tester.semantics.moveCursorBackwardByCharacter(finder);
+        await tester.pump();
+        expectUnselectedIndex(currentIndex - 1);
+        currentIndex -= 1;
+
+        tester.semantics.moveCursorBackwardByWord(finder);
+        await tester.pump();
+        expectUnselectedIndex(currentIndex - 4);
+        currentIndex -= 4;
+
+        tester.semantics.moveCursorBackwardByWord(finder);
+        await tester.pump();
+        expectUnselectedIndex(currentIndex - 5);
+        currentIndex -= 5;
+
+        tester.semantics.moveCursorForwardByCharacter(finder);
+        await tester.pump();
+        expectUnselectedIndex(currentIndex + 1);
+        currentIndex += 1;
+
+        tester.semantics.moveCursorForwardByWord(finder);
+        await tester.pump();
+        expectUnselectedIndex(currentIndex + 4);
+        currentIndex += 4;
+      });
+
+      testWidgets('actions for moving the cursor with modifying selection can update the selection forward and back by character and word', (WidgetTester tester) async {
+        const String text = 'This is some text.';
+        int currentIndex = text.length;
+        final TextEditingController controller = TextEditingController(text: text);
+        await tester.pumpWidget(MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ));
+
+        void expectSelectedIndex(int start) {
+          expect(controller.selection.start, equals(start));
+          expect(controller.selection.end, equals(text.length));
+        }
+
+        final SemanticsFinder finder = find.semantics.byValue(text);
+
+        // Get focus onto the text field
+        tester.semantics.tap(finder);
+        await tester.pump();
+
+        tester.semantics.moveCursorBackwardByCharacter(finder, shouldModifySelection: true);
+        await tester.pump();
+        expectSelectedIndex(currentIndex - 1);
+        currentIndex -= 1;
+
+        tester.semantics.moveCursorBackwardByWord(finder, shouldModifySelection: true);
+        await tester.pump();
+        expectSelectedIndex(currentIndex - 4);
+        currentIndex -= 4;
+
+        tester.semantics.moveCursorBackwardByWord(finder, shouldModifySelection: true);
+        await tester.pump();
+        expectSelectedIndex(currentIndex - 5);
+        currentIndex -= 5;
+
+        tester.semantics.moveCursorForwardByCharacter(finder, shouldModifySelection: true);
+        await tester.pump();
+        expectSelectedIndex(currentIndex + 1);
+        currentIndex += 1;
+
+        tester.semantics.moveCursorForwardByWord(finder, shouldModifySelection: true);
+        await tester.pump();
+        expectSelectedIndex(currentIndex + 4);
+        currentIndex += 4;
+      });
+
+      testWidgets('setText causes semantics to set the text', (WidgetTester tester) async {
+        const String expectedText = 'This is some text.';
+        final TextEditingController controller = TextEditingController();
+        await tester.pumpWidget(MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ));
+
+        final SemanticsFinder finder = find.semantics.byFlag(SemanticsFlag.isTextField);
+
+        tester.semantics.tap(finder);
+        await tester.pump();
+
+        tester.semantics.setText(finder, expectedText);
+        await tester.pump();
+
+        expect(controller.text, equals(expectedText));
+      });
+
+      testWidgets('setSelection causes semantics to select text', (WidgetTester tester) async {
+        const String text = 'This is some text.';
+        const int expectedStart = text.length - 8;
+        const int expectedEnd = text.length - 4;
+        final TextEditingController controller = TextEditingController(text: text);
+        await tester.pumpWidget(MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ));
+
+        final SemanticsFinder finder = find.semantics.byFlag(SemanticsFlag.isTextField);
+
+        tester.semantics.tap(finder);
+        await tester.pump();
+
+        tester.semantics.setSelection(
+          finder,
+          base: expectedStart,
+          extent: expectedEnd,
+        );
+        await tester.pump();
+
+        expect(controller.selection.start, equals(expectedStart));
+        expect(controller.selection.end, equals(expectedEnd));
+      });
+
+      testWidgets('copy sends semantic copy', (WidgetTester tester) async {
+        bool invoked = false;
+        await tester.pumpWidget(MaterialApp(
+          home: Semantics(
+            label: 'test',
+            onCopy: () => invoked = true,
+          ),
+        ));
+
+        tester.semantics.copy(find.semantics.byLabel('test'));
+        expect(invoked, isTrue);
+      });
+
+      testWidgets('cut sends semantic cut', (WidgetTester tester) async {
+        bool invoked = false;
+        await tester.pumpWidget(MaterialApp(
+          home: Semantics(
+            label: 'test',
+            onCut: () => invoked = true,
+          ),
+        ));
+
+        tester.semantics.cut(find.semantics.byLabel('test'));
+        expect(invoked, isTrue);
+      });
+
+      testWidgets('paste sends semantic paste', (WidgetTester tester) async {
+        bool invoked = false;
+        await tester.pumpWidget(MaterialApp(
+          home: Semantics(
+            label: 'test',
+            onPaste: () => invoked = true,
+          ),
+        ));
+
+        tester.semantics.paste(find.semantics.byLabel('test'));
+        expect(invoked, isTrue);
+      });
+
+      testWidgets('didGainAccessibilityFocus causes semantic focus on node', (WidgetTester tester) async {
+        bool invoked = false;
+        await tester.pumpWidget(MaterialApp(
+          home: Semantics(
+            label: 'test',
+            onDidGainAccessibilityFocus: () => invoked = true,
+          ),
+        ));
+
+        tester.semantics.didGainAccessibilityFocus(find.semantics.byLabel('test'));
+        expect(invoked, isTrue);
+      });
+
+      testWidgets('didLoseAccessibility causes semantic focus to be lost', (WidgetTester tester) async {
+        bool invoked = false;
+        await tester.pumpWidget(MaterialApp(
+          home: Semantics(
+            label: 'test',
+            onDidLoseAccessibilityFocus: () => invoked = true,
+          ),
+        ));
+
+        tester.semantics.didLoseAccessibilityFocus(find.semantics.byLabel('test'));
+        expect(invoked, isTrue);
+      });
+
+      testWidgets('dismiss sends semantic dismiss', (WidgetTester tester) async {
+        final GlobalKey key = GlobalKey();
+        const Duration duration = Duration(seconds: 3);
+        final Duration halfDuration = Duration(milliseconds: (duration.inMilliseconds / 2).floor());
+        late SnackBarClosedReason reason;
+
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            key: key,
+          )
+        ));
+
+        final ScaffoldMessengerState messenger = ScaffoldMessenger.of(key.currentContext!);
+        messenger.showSnackBar(const SnackBar(
+          content: SizedBox(height: 40, width: 300,),
+          duration: duration
+        )).closed.then((SnackBarClosedReason result) => reason = result);
+        await tester.pumpFrames(tester.widget(find.byType(MaterialApp)), halfDuration);
+
+        tester.semantics.dismiss(find.semantics.byAction(SemanticsAction.dismiss));
+        await tester.pumpAndSettle();
+
+        expect(reason, equals(SnackBarClosedReason.dismiss));
+      });
+
+      testWidgets('customAction invokes appropriate custom action', (WidgetTester tester) async {
+        const CustomSemanticsAction customAction = CustomSemanticsAction(label: 'test');
+        bool invoked = false;
+        await tester.pumpWidget(MaterialApp(
+          home: Semantics(
+            label: 'test',
+            customSemanticsActions: <CustomSemanticsAction, void Function()>{
+              customAction:() => invoked = true,
+            },
+          ),
+        ));
+
+        tester.semantics.customAction(find.semantics.byLabel('test'), customAction);
+        await tester.pump();
+
+        expect(invoked, isTrue);
+      });
+    });
+  });
+
+  group('WidgetTester.tapOnText', () {
+    final List<String > tapLogs = <String>[];
+    final TapGestureRecognizer tapA = TapGestureRecognizer()..onTap = () { tapLogs.add('A'); };
+    final TapGestureRecognizer tapB = TapGestureRecognizer()..onTap = () { tapLogs.add('B'); };
+    final TapGestureRecognizer tapC = TapGestureRecognizer()..onTap = () { tapLogs.add('C'); };
+    tearDown(tapLogs.clear);
+    tearDownAll(() {
+      tapA.dispose();
+      tapB.dispose();
+      tapC.dispose();
+    });
+
+    testWidgets('basic test', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Text.rich(TextSpan(text: 'match', recognizer: tapA)),
+        ),
+      );
+
+      await tester.tapOnText(find.textRange.ofSubstring('match'));
+      expect(tapLogs, <String>['A']);
+    });
+
+    testWidgets('partially obstructed: find a hit-testable Offset', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              Positioned(
+                left: 100.0 - 9 * 10.0,  // Only the last character is visible.
+                child: Text.rich(TextSpan(text: 'text match', style: const TextStyle(fontSize: 10), recognizer: tapA)),
+              ),
+              const Positioned(
+                left: 0.0,
+                right: 100.0,
+                child: MetaData(behavior: HitTestBehavior.opaque),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await expectLater(
+        () => tester.tapOnText(find.textRange.ofSubstring('text match')),
+        returnsNormally,
+      );
+    });
+
+    testWidgets('multiline text partially obstructed: find a hit-testable Offset', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              Positioned(
+                width: 100.0,
+                top: 23.0,
+                left: 0.0,
+                child: Text.rich(
+                  TextSpan(
+                    style: const TextStyle(fontSize: 10),
+                    children: <InlineSpan>[
+                      TextSpan(text: 'AAAAAAAAA ', recognizer: tapA),
+                      TextSpan(text: 'BBBBBBBBB ', recognizer: tapB), // The only visible line
+                      TextSpan(text: 'CCCCCCCCC ', recognizer: tapC),
+                    ]
+                  )
+                ),
+              ),
+              const Positioned(
+                top: 23.0, // Some random offset to test the global to local Offset conversion
+                left: 0.0,
+                right: 0.0,
+                height: 10.0,
+                child: MetaData(behavior: HitTestBehavior.opaque, child: SizedBox.expand()),
+              ),
+              const Positioned(
+                top: 43.0,
+                left: 0.0,
+                right: 0.0,
+                height: 10.0,
+                child: MetaData(behavior: HitTestBehavior.opaque, child: SizedBox.expand()),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tapOnText(find.textRange.ofSubstring('AAAAAAAAA BBBBBBBBB CCCCCCCCC '));
+      expect(tapLogs, <String>['B']);
+    });
+
+    testWidgets('error message: no matching text', (WidgetTester tester) async {
+      await tester.pumpWidget(const SizedBox());
+      await expectLater(
+        () => tester.tapOnText(find.textRange.ofSubstring('nonexistent')),
+        throwsA(isFlutterError.having(
+          (FlutterError error) => error.message,
+          'message',
+          contains('Found 0 non-overlapping TextRanges that match the Pattern "nonexistent": []'),
+        )),
+      );
+    });
+
+    testWidgets('error message: too many matches', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Text.rich(
+            TextSpan(
+              text: 'match',
+              recognizer: tapA,
+              children: <InlineSpan>[TextSpan(text: 'another match', recognizer: tapB)],
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        () => tester.tapOnText(find.textRange.ofSubstring('match')),
+        throwsA(isFlutterError.having(
+          (FlutterError error) => error.message,
+          'message',
+          stringContainsInOrder(<String>[
+            'Found 2 non-overlapping TextRanges that match the Pattern "match"',
+            'TextRange(start: 0, end: 5)',
+            'TextRange(start: 13, end: 18)',
+            'The "tapOnText" method needs a single non-empty TextRange.',
+          ])
+        )),
+      );
+    });
+
+    testWidgets('error message: not hit-testable', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              Text.rich(TextSpan(text: 'match', recognizer: tapA)),
+              const MetaData(behavior: HitTestBehavior.opaque),
+            ],
+          ),
+        ),
+      );
+
+      await expectLater(
+        () => tester.tapOnText(find.textRange.ofSubstring('match')),
+        throwsA(isFlutterError.having(
+          (FlutterError error) => error.message,
+          'message',
+          stringContainsInOrder(<String>[
+            'The finder used was: A finder that searches for non-overlapping TextRanges that match the Pattern "match".',
+            'Found a matching substring in a static text widget, within TextRange(start: 0, end: 5).',
+            'But the "tapOnText" method could not find a hit-testable Offset with in that text range.',
+          ])
+        )),
+      );
+    });
   });
 }
 
@@ -1029,7 +1778,7 @@ class _SemanticsTestWidget extends StatelessWidget {
         child: Column(
           children: <Widget>[
             const _SemanticsTestCard(
-              label: 'TextField',
+              label: 'Text Field',
               widget: TextField(),
             ),
             _SemanticsTestCard(
@@ -1093,5 +1842,38 @@ class _SemanticsTestCard extends StatelessWidget {
         trailing: SizedBox(width: 200, child: widget),
       ),
     );
+  }
+}
+
+class _StatefulSlider extends StatefulWidget {
+  const _StatefulSlider({required this.initialValue, required this.onChanged});
+
+  final double initialValue;
+  final ValueChanged<double> onChanged;
+
+  @override
+  _StatefulSliderState createState() => _StatefulSliderState();
+}
+
+class _StatefulSliderState extends State<_StatefulSlider> {
+  double _value = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _value = widget.initialValue;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Slider(
+      value: _value,
+      onChanged: (double value) {
+        setState(() {
+            _value = value;
+          },
+        );
+        widget.onChanged(value);
+    });
   }
 }

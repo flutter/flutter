@@ -115,8 +115,18 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     for (final SynonymKeyInfo synonymInfo in synonyms.values) {
       for (final LogicalKeyEntry key in synonymInfo.keys) {
         final LogicalKeyEntry synonym = logicalData.entryByName(synonymInfo.name);
-        result.writeln('    ${key.constantName}: ${synonym.constantName},');
+        result.writeln('    ${key.constantName}: <LogicalKeyboardKey>{${synonym.constantName}},');
       }
+    }
+    return result.toString();
+  }
+
+  String get _logicalReverseSynonyms {
+    final StringBuffer result = StringBuffer();
+    for (final SynonymKeyInfo synonymInfo in synonyms.values) {
+      final LogicalKeyEntry synonym = logicalData.entryByName(synonymInfo.name);
+      final List<String> entries = synonymInfo.keys.map<String>((LogicalKeyEntry entry) => entry.constantName).toList();
+      result.writeln('    ${synonym.constantName}: <LogicalKeyboardKey>{${entries.join(', ')}},');
     }
     return result.toString();
   }
@@ -169,6 +179,7 @@ ${_wrapString(constant.description)}  ///
       'LOGICAL_KEY_MAP': _predefinedKeyCodeMap,
       'LOGICAL_KEY_DEFINITIONS': _logicalDefinitions,
       'LOGICAL_KEY_SYNONYMS': _logicalSynonyms,
+      'LOGICAL_KEY_REVERSE_SYNONYMS': _logicalReverseSynonyms,
       'LOGICAL_KEY_KEY_LABELS': _logicalKeyLabels,
       'PHYSICAL_KEY_MAP': _predefinedHidCodeMap,
       'PHYSICAL_KEY_DEFINITIONS': _physicalDefinitions,

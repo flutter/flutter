@@ -23,13 +23,14 @@
   "cutButtonLabel": "Decupați",
   "copyButtonLabel": "Copiați",
   "pasteButtonLabel": "Inserați",
-  "selectAllButtonLabel": "Selectați-le pe toate",
+  "selectAllButtonLabel": "Selectează tot",
   "tabSemanticsLabel": "Fila $tabIndex din $tabCount",
   "modalBarrierDismissLabel": "Închideți",
   "searchTextFieldPlaceholderLabel": "Căutați",
   "noSpellCheckReplacementsLabel": "Nu s-au găsit înlocuiri",
   "menuDismissLabel": "Respingeți meniul",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Privire în sus",
+  "searchWebButtonLabel": "Căutați pe web",
+  "shareButtonLabel": "Trimiteți…",
+  "clearButtonLabel": "Clear"
 }

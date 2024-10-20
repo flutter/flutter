@@ -528,6 +528,14 @@ void main() {
             'average_frame_request_pending_latency': 2000.0,
             '90th_percentile_frame_request_pending_latency': 3000.0,
             '99th_percentile_frame_request_pending_latency': 3000.0,
+            'average_gpu_frame_time': 0,
+            '90th_percentile_gpu_frame_time': 0,
+            '99th_percentile_gpu_frame_time': 0,
+            'worst_gpu_frame_time': 0,
+            'average_gpu_memory_mb': 0,
+            '90th_percentile_gpu_memory_mb': 0,
+            '99th_percentile_gpu_memory_mb': 0,
+            'worst_gpu_memory_mb': 0,
           },
         );
       });
@@ -659,6 +667,14 @@ void main() {
           'average_frame_request_pending_latency': 2000.0,
           '90th_percentile_frame_request_pending_latency': 3000.0,
           '99th_percentile_frame_request_pending_latency': 3000.0,
+          'average_gpu_frame_time': 0,
+          '90th_percentile_gpu_frame_time': 0,
+          '99th_percentile_gpu_frame_time': 0,
+          'worst_gpu_frame_time': 0,
+          'average_gpu_memory_mb': 0,
+          '90th_percentile_gpu_memory_mb': 0,
+          '99th_percentile_gpu_memory_mb': 0,
+          'worst_gpu_memory_mb': 0,
         });
       });
     });

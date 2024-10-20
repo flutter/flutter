@@ -4,12 +4,11 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgetsWithLeakTracking('can press', (WidgetTester tester) async {
+  testWidgets('can press', (WidgetTester tester) async {
     bool pressed = false;
     await tester.pumpWidget(
       CupertinoApp(
@@ -30,7 +29,7 @@ void main() {
     expect(pressed, true);
   });
 
-  testWidgetsWithLeakTracking('background darkens when pressed', (WidgetTester tester) async {
+  testWidgets('background darkens when pressed', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -48,7 +47,7 @@ void main() {
       matching: find.byType(DecoratedBox),
     ));
     BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
-    expect(boxDecoration.color, const Color(0x00000000));
+    expect(boxDecoration.color, CupertinoColors.transparent);
 
     // Make a "down" gesture on the button.
     final Offset center = tester.getCenter(find.byType(CupertinoTextSelectionToolbarButton));
@@ -73,10 +72,10 @@ void main() {
       matching: find.byType(DecoratedBox),
     ));
     boxDecoration = decoratedBox.decoration as BoxDecoration;
-    expect(boxDecoration.color, const Color(0x00000000));
+    expect(boxDecoration.color, CupertinoColors.transparent);
   });
 
-  testWidgetsWithLeakTracking('passing null to onPressed disables the button', (WidgetTester tester) async {
+  testWidgets('passing null to onPressed disables the button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(

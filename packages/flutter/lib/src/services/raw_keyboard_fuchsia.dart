@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'hardware_keyboard.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_maps.g.dart';
@@ -10,18 +13,28 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Platform-specific key event data for Fuchsia.
+///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer be available. See [KeyEvent] for what is available.
 ///
 /// This object contains information about key events obtained from Fuchsia's
 /// `KeyData` interface.
 ///
 /// See also:
 ///
-///  * [RawKeyboard], which uses this interface to expose key data.
+/// * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// Creates a key event data structure specific for Fuchsia.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const RawKeyEventDataFuchsia({
     this.hidUsage = 0,
     this.codePoint = 0,
@@ -43,7 +56,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   /// The modifiers that were present when the key event occurred.
   ///
-  /// See <https://fuchsia.googlesource.com/garnet/+/master/public/fidl/fuchsia.ui.input/input_event_constants.fidl>
+  /// See <https://android.googlesource.com/platform/prebuilts/fuchsia_sdk/+/main/fidl/fuchsia.ui.input/input_event_constants.fidl>
   /// for the numerical values of the modifiers. Many of these are also
   /// replicated as static constants in this class.
   ///
@@ -89,16 +102,12 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
     if (modifiers & anyMask == 0) {
       return false;
     }
-    switch (side) {
-      case KeyboardSide.any:
-        return true;
-      case KeyboardSide.all:
-        return modifiers & leftMask != 0 && modifiers & rightMask != 0;
-      case KeyboardSide.left:
-        return modifiers & leftMask != 0;
-      case KeyboardSide.right:
-        return modifiers & rightMask != 0;
-    }
+    return switch (side) {
+      KeyboardSide.any   => true,
+      KeyboardSide.all   => (modifiers & leftMask != 0) && (modifiers & rightMask != 0),
+      KeyboardSide.left  => modifiers & leftMask != 0,
+      KeyboardSide.right => modifiers & rightMask != 0,
+    };
   }
 
   @override

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:ui' as ui show PlaceholderAlignment;
 
 import 'package:flutter/foundation.dart';
@@ -70,20 +73,6 @@ abstract class PlaceholderSpan extends InlineSpan {
   @override
   void computeSemanticsInformation(List<InlineSpanSemanticsInformation> collector) {
     collector.add(InlineSpanSemanticsInformation.placeholder);
-  }
-
-  /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
-  /// to be able to construct a [SemanticsNode].
-  ///
-  /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
-  /// replacement character (0xFFFC) that is inserted to represent it.
-  ///
-  /// Null is added to `semanticsElements` for [PlaceholderSpan]s.
-  void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
-    semanticsOffsets.add(offset.value);
-    semanticsOffsets.add(offset.value + 1);
-    semanticsElements.add(null); // null indicates this is a placeholder.
-    offset.increment(1);
   }
 
   @override

@@ -8,11 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/keyboard_key.g.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('RawMaterialButton responds when tapped', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton responds when tapped', (WidgetTester tester) async {
     bool pressed = false;
     const Color splashColor = Color(0xff00ff00);
     await tester.pumpWidget(
@@ -42,7 +41,7 @@ void main() {
     expect(pressed, isTrue);
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton responds to shortcut when activated', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton responds to shortcut when activated', (WidgetTester tester) async {
     bool pressed = false;
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Button');
     const Color splashColor = Color(0xff00ff00);
@@ -110,7 +109,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
+  testWidgets('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
     int pressed = 0;
 
     await tester.pumpWidget(
@@ -132,7 +131,7 @@ void main() {
     expect(pressed, 1);
   });
 
-  testWidgetsWithLeakTracking('materialTapTargetSize.padded expands semantics area', (WidgetTester tester) async {
+  testWidgets('materialTapTargetSize.padded expands semantics area', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -161,6 +160,7 @@ void main() {
             ],
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
             ],
             label: '+',
             textDirection: TextDirection.ltr,
@@ -175,7 +175,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Ink splash from center tap originates in correct location', (WidgetTester tester) async {
+  testWidgets('Ink splash from center tap originates in correct location', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xAA0000FF);
     const Color fillColor = Color(0xFFEF5350);
@@ -210,7 +210,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Ink splash from tap above material originates in correct location', (WidgetTester tester) async {
+  testWidgets('Ink splash from tap above material originates in correct location', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xAA0000FF);
     const Color fillColor = Color(0xFFEF5350);
@@ -244,7 +244,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('off-center child is hit testable', (WidgetTester tester) async {
+  testWidgets('off-center child is hit testable', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
@@ -274,7 +274,7 @@ void main() {
     expect(find.text('Material').hitTestable(), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('smaller child is hit testable', (WidgetTester tester) async {
+  testWidgets('smaller child is hit testable', (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
       MaterialApp(
@@ -299,7 +299,7 @@ void main() {
     expect(find.byKey(key).hitTestable(), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton can be expanded by parent constraints', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton can be expanded by parent constraints', (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
       MaterialApp(
@@ -319,7 +319,7 @@ void main() {
     expect(tester.getSize(find.byKey(key)), const Size(800.0, 48.0));
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton handles focus', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton handles focus', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button Focus');
     const Key key = Key('test');
     const Color focusColor = Color(0xff00ff00);
@@ -348,7 +348,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton loses focus when disabled.', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton loses focus when disabled.', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'RawMaterialButton');
     await tester.pumpWidget(
       MaterialApp(
@@ -383,7 +383,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking("Disabled RawMaterialButton can't be traversed to.", (WidgetTester tester) async {
+  testWidgets("Disabled RawMaterialButton can't be traversed to.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: '$RawMaterialButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: '$RawMaterialButton 2');
 
@@ -426,7 +426,7 @@ void main() {
     focusNode2.dispose();
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton handles hover', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton handles hover', (WidgetTester tester) async {
     const Key key = Key('test');
     const Color hoverColor = Color(0xff00ff00);
 
@@ -455,7 +455,7 @@ void main() {
     expect(box, paints..rect(color: hoverColor));
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
 
     bool wasPressed;
     Finder rawMaterialButton;
@@ -499,7 +499,7 @@ void main() {
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, false);
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
     bool didPressButton = false;
     bool didLongPressButton = false;
 
@@ -530,7 +530,7 @@ void main() {
     expect(didLongPressButton, isTrue);
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton responds to density changes.', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     const Key childKey = Key('test child');
 
@@ -591,7 +591,7 @@ void main() {
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

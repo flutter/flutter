@@ -27,6 +27,7 @@ import 'macos/macos_device.dart';
 import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
+import 'preview_device.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'web/web_device.dart';
@@ -103,6 +104,14 @@ class FlutterDeviceManager extends DeviceManager {
       platform: platform,
       fileSystem: fileSystem,
       operatingSystemUtils: operatingSystemUtils,
+    ),
+    PreviewDeviceDiscovery(
+      platform: platform,
+      artifacts: artifacts,
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      featureFlags: featureFlags,
     ),
     LinuxDevices(
       platform: platform,

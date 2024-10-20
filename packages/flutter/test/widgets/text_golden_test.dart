@@ -10,10 +10,9 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Centered text', (WidgetTester tester) async {
+  testWidgets('Centered text', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -64,7 +63,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('Text Foreground', (WidgetTester tester) async {
+  testWidgets('Text Foreground', (WidgetTester tester) async {
     const Color black = Color(0xFF000000);
     const Color red = Color(0xFFFF0000);
     const Color blue = Color(0xFF0000FF);
@@ -142,7 +141,7 @@ void main() {
   // TODO(garyq): This test requires an update when the background
   // drawing from the beginning of the line bug is fixed. The current
   // tested version is not completely correct.
-  testWidgetsWithLeakTracking('Text Background', (WidgetTester tester) async {
+  testWidgets('Text Background', (WidgetTester tester) async {
     const Color red = Colors.red;
     const Color blue = Colors.blue;
     const Color translucentGreen = Color(0x5000F000);
@@ -189,27 +188,28 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Fade', (WidgetTester tester) async {
-    await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: RepaintBoundary(
-              child: Center(
-                child: Container(
-                  width: 200.0,
-                  height: 200.0,
-                  color: Colors.green,
-                  child: Center(
-                    child: Container(
-                      width: 100.0,
-                      color: Colors.blue,
-                      child: const Text(
-                        'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
-                        style: TextStyle(color: Colors.black),
-                        maxLines: 3,
-                        overflow: TextOverflow.fade,
+  testWidgets('Text Fade', (WidgetTester tester) async {
+      await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(useMaterial3: false),
+            home: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: RepaintBoundary(
+                child: Center(
+                  child: Container(
+                    width: 200.0,
+                    height: 200.0,
+                    color: Colors.green,
+                    child: Center(
+                      child: Container(
+                        width: 100.0,
+                        color: Colors.blue,
+                        child: const Text(
+                          'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
+                          style: TextStyle(color: Colors.black),
+                          maxLines: 3,
+                          overflow: TextOverflow.fade,
+                        ),
                       ),
                     ),
                   ),
@@ -217,16 +217,16 @@ void main() {
               ),
             ),
           ),
-        ),
-    );
+      );
 
-    await expectLater(
-      find.byType(RepaintBoundary).first,
-      matchesGoldenFile('text_golden.Fade.png'),
-    );
-  });
+      await expectLater(
+        find.byType(RepaintBoundary).first,
+        matchesGoldenFile('text_golden.Fade.png'),
+      );
+    },
+  );
 
-  testWidgetsWithLeakTracking('Default Strut text', (WidgetTester tester) async {
+  testWidgets('Default Strut text', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -251,7 +251,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Strut text 1', (WidgetTester tester) async {
+  testWidgets('Strut text 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -278,7 +278,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Strut text 2', (WidgetTester tester) async {
+  testWidgets('Strut text 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -306,7 +306,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Strut text rich', (WidgetTester tester) async {
+  testWidgets('Strut text rich', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -357,7 +357,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Strut text font fallback', (WidgetTester tester) async {
+  testWidgets('Strut text font fallback', (WidgetTester tester) async {
     // Font Fallback
     await tester.pumpWidget(
       Center(
@@ -392,7 +392,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Strut text rich forceStrutHeight', (WidgetTester tester) async {
+  testWidgets('Strut text rich forceStrutHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -443,7 +443,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Decoration thickness', (WidgetTester tester) async {
+  testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
       <TextDecoration>[
         TextDecoration.underline,
@@ -481,7 +481,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Decoration thickness', (WidgetTester tester) async {
+  testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
       <TextDecoration>[
         TextDecoration.underline,
@@ -520,7 +520,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget', (WidgetTester tester) async {
+  testWidgets('Text Inline widget', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(data: ThemeData(useMaterial3: false), child: Center(
         child: RepaintBoundary(
@@ -614,7 +614,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget textfield', (WidgetTester tester) async {
+  testWidgets('Text Inline widget textfield', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: MaterialApp(
@@ -661,7 +661,7 @@ void main() {
   });
 
   // This tests if multiple Text.rich widgets are able to inline nest within each other.
-  testWidgetsWithLeakTracking('Text Inline widget nesting', (WidgetTester tester) async {
+  testWidgets('Text Inline widget nesting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: MaterialApp(
@@ -790,7 +790,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget baseline', (WidgetTester tester) async {
+  testWidgets('Text Inline widget baseline', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -900,7 +900,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget aboveBaseline', (WidgetTester tester) async {
+  testWidgets('Text Inline widget aboveBaseline', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -1010,7 +1010,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget belowBaseline', (WidgetTester tester) async {
+  testWidgets('Text Inline widget belowBaseline', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -1120,7 +1120,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget top', (WidgetTester tester) async {
+  testWidgets('Text Inline widget top', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -1230,7 +1230,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget middle', (WidgetTester tester) async {
+  testWidgets('Text Inline widget middle', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -1340,7 +1340,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text TextHeightBehavior', (WidgetTester tester) async {
+  testWidgets('Text TextHeightBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(

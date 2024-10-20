@@ -8,13 +8,12 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
 
-  testWidgetsWithLeakTracking('Drawer control test', (WidgetTester tester) async {
+  testWidgets('Drawer control test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     late BuildContext savedContext;
     await tester.pumpWidget(
@@ -45,7 +44,7 @@ void main() {
     expect(find.text('drawer'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Drawer tap test', (WidgetTester tester) async {
+  testWidgets('Drawer tap test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -77,7 +76,7 @@ void main() {
     expect(find.text('drawer'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Drawer hover test', (WidgetTester tester) async {
+  testWidgets('Drawer hover test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final List<String> logs = <String>[];
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -147,7 +146,7 @@ void main() {
     logs.clear();
   });
 
-  testWidgetsWithLeakTracking('Drawer drag cancel resume (LTR)', (WidgetTester tester) async {
+  testWidgets('Drawer drag cancel resume (LTR)', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -198,7 +197,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Drawer drag cancel resume (RTL)', (WidgetTester tester) async {
+  testWidgets('Drawer drag cancel resume (RTL)', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -252,7 +251,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Drawer navigator back button', (WidgetTester tester) async {
+  testWidgets('Drawer navigator back button', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool buttonPressed = false;
 
@@ -300,7 +299,7 @@ void main() {
     expect(buttonPressed, equals(true));
   });
 
-  testWidgetsWithLeakTracking('Dismissible ModalBarrier includes button in semantic tree', (WidgetTester tester) async {
+  testWidgets('Dismissible ModalBarrier includes button in semantic tree', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -327,7 +326,7 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
+  testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -349,13 +348,13 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus])));
     expect(semantics, isNot(includesNodeWith(label: 'Dismiss')));
 
     semantics.dispose();
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgetsWithLeakTracking('Drawer contains route semantics flags', (WidgetTester tester) async {
+  testWidgets('Drawer contains route semantics flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 

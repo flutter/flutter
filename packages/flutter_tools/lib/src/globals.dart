@@ -27,6 +27,7 @@ import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
+import 'build_system/build_targets.dart';
 import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
@@ -49,8 +50,12 @@ import 'runner/flutter_command.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 
+// TODO(ianh): We should remove all the global variables and replace them with
+// arguments (to constructors, methods, etc, as appropriate).
+
 Artifacts? get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>()!;
+BuildTargets get buildTargets => context.get<BuildTargets>()!;
 Cache get cache => context.get<Cache>()!;
 CocoaPodsValidator? get cocoapodsValidator => context.get<CocoaPodsValidator>();
 Config get config => context.get<Config>()!;
@@ -238,6 +243,7 @@ final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
   stdio: stdio,
   platform: platform,
   now: DateTime.now(),
+  shutdownHooks: shutdownHooks,
 );
 
 /// The global Stdio wrapper.

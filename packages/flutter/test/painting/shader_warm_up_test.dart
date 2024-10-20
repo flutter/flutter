@@ -15,7 +15,7 @@ Future<void> main() async {
     debugCaptureShaderWarmUpImage = expectAsync1((ui.Image image) => true);
     WidgetsFlutterBinding.ensureInitialized();
     expect(shaderWarmUp.ranWarmUp, true);
-  }, skip: kIsWeb && !isCanvasKit); // [intended] Testing only for canvasKit
+  }, skip: kIsWeb && !isSkiaWeb); // [intended] Testing only for canvasKit
 }
 
 class FakeShaderWarmUp extends ShaderWarmUp {

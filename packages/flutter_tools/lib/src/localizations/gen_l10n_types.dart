@@ -4,6 +4,7 @@
 
 import 'package:intl/locale.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
@@ -646,7 +647,14 @@ class AppResourceBundle {
   final Map<String, Object?> resources;
   final Iterable<String> resourceIds;
 
-  String? translationFor(String resourceId) => resources[resourceId] as String?;
+  String? translationFor(String resourceId) {
+    final Object? result = resources[resourceId];
+    if (result is! String?) {
+      throwToolExit('Localized message for key "$resourceId" in "${file.path}" '
+        'is not a string.');
+    }
+    return result;
+  }
 
   @override
   String toString() {

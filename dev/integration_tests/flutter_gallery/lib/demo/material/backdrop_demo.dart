@@ -276,13 +276,8 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     });
   }
 
-  bool get _backdropPanelVisible {
-    final AnimationStatus status = _controller.status;
-    return status == AnimationStatus.completed || status == AnimationStatus.forward;
-  }
-
   void _toggleBackdropPanelVisibility() {
-    _controller.fling(velocity: _backdropPanelVisible ? -2.0 : 2.0);
+    _controller.fling(velocity: _controller.isForwardOrCompleted ? -2.0 : 2.0);
   }
 
   double get _backdropHeight {
@@ -294,7 +289,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   // the user must either tap its heading or the backdrop's menu icon.
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    if (_controller.isAnimating || _controller.status == AnimationStatus.completed) {
+    if (!_controller.isDismissed) {
       return;
     }
 
@@ -302,18 +297,16 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (_controller.isAnimating || _controller.status == AnimationStatus.completed) {
+    if (!_controller.isDismissed) {
       return;
     }
 
     final double flingVelocity = details.velocity.pixelsPerSecond.dy / _backdropHeight;
-    if (flingVelocity < 0.0) {
-      _controller.fling(velocity: math.max(2.0, -flingVelocity));
-    } else if (flingVelocity > 0.0) {
-      _controller.fling(velocity: math.min(-2.0, -flingVelocity));
-    } else {
-      _controller.fling(velocity: _controller.value < 0.5 ? -2.0 : 2.0);
-    }
+    _controller.fling(velocity: switch (flingVelocity) {
+      < 0.0 => math.max(2.0, -flingVelocity),
+      > 0.0 => math.min(-2.0, -flingVelocity),
+      _ => _controller.value < 0.5 ? -2.0 : 2.0,
+    });
   }
 
   // Stacks a BackdropPanel, which displays the selected category, on top

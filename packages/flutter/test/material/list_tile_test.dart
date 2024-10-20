@@ -10,9 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({ super.key });
@@ -51,7 +50,7 @@ class TestTextState extends State<TestText> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ListTile geometry (LTR)', (WidgetTester tester) async {
+  testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
     // See https://material.io/go/design-lists
 
     final Key leadingKey = GlobalKey();
@@ -60,22 +59,22 @@ void main() {
 
     const double leftPadding = 10.0;
     const double rightPadding = 20.0;
-    Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, double textScaleFactor = 1.0, double? subtitleScaleFactor }) {
+    Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, TextScaler textScaler = TextScaler.noScaling, TextScaler? subtitleScaler }) {
       hasSubtitle = isTwoLine || isThreeLine;
-      subtitleScaleFactor ??= textScaleFactor;
+      subtitleScaler ??= textScaler;
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
         home: MediaQuery(
           data: MediaQueryData(
             padding: const EdgeInsets.only(left: leftPadding, right: rightPadding),
-            textScaleFactor: textScaleFactor,
+            textScaler: textScaler,
           ),
           child: Material(
             child: Center(
               child: ListTile(
                 leading: SizedBox(key: leadingKey, width: 24.0, height: 24.0),
                 title: const Text('title'),
-                subtitle: hasSubtitle ? Text('subtitle', textScaleFactor: subtitleScaleFactor) : null,
+                subtitle: hasSubtitle ? Text('subtitle', textScaler: subtitleScaler) : null,
                 trailing: SizedBox(key: trailingKey, width: 24.0, height: 24.0),
                 dense: dense,
                 isThreeLine: isThreeLine,
@@ -147,35 +146,35 @@ void main() {
     testHorizontalGeometry();
     testVerticalGeometry(88.0);
 
-    await tester.pumpWidget(buildFrame(textScaleFactor: 4.0));
+    await tester.pumpWidget(buildFrame(textScaler: const TextScaler.linear(4.0)));
     testChildren();
     testHorizontalGeometry();
     testVerticalGeometry(112.0);
 
-    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 4.0));
+    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaler: const TextScaler.linear(4.0)));
     testChildren();
     testHorizontalGeometry();
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       testVerticalGeometry(192.0);
     }
 
     // Make sure that the height of a large subtitle is taken into account.
-    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 0.5, subtitleScaleFactor: 4.0));
+    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaler: const TextScaler.linear(0.5), subtitleScaler: const TextScaler.linear(4.0)));
     testChildren();
     testHorizontalGeometry();
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       testVerticalGeometry(108.0);
     }
 
-    await tester.pumpWidget(buildFrame(isThreeLine: true, textScaleFactor: 4.0));
+    await tester.pumpWidget(buildFrame(isThreeLine: true, textScaler: const TextScaler.linear(4.0)));
     testChildren();
     testHorizontalGeometry();
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       testVerticalGeometry(192.0);
     }
   });
 
-  testWidgetsWithLeakTracking('ListTile geometry (RTL)', (WidgetTester tester) async {
+  testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
     const double leftPadding = 10.0;
     const double rightPadding = 20.0;
     await tester.pumpWidget(MaterialApp(
@@ -211,7 +210,7 @@ void main() {
     testHorizontalGeometry();
   });
 
-  testWidgetsWithLeakTracking('ListTile.divideTiles', (WidgetTester tester) async {
+  testWidgets('ListTile.divideTiles', (WidgetTester tester) async {
     final List<String> titles = <String>[ 'first', 'second', 'third' ];
 
     await tester.pumpWidget(MaterialApp(
@@ -234,17 +233,17 @@ void main() {
     expect(find.text('third'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('ListTile.divideTiles with empty list', (WidgetTester tester) async {
+  testWidgets('ListTile.divideTiles with empty list', (WidgetTester tester) async {
     final Iterable<Widget> output = ListTile.divideTiles(tiles: <Widget>[], color: Colors.grey);
     expect(output, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('ListTile.divideTiles with single item list', (WidgetTester tester) async {
+  testWidgets('ListTile.divideTiles with single item list', (WidgetTester tester) async {
     final Iterable<Widget> output = ListTile.divideTiles(tiles: const <Widget>[SizedBox()], color: Colors.grey);
     expect(output.single, isA<SizedBox>());
   });
 
-  testWidgetsWithLeakTracking('ListTile.divideTiles only runs the generator once', (WidgetTester tester) async {
+  testWidgets('ListTile.divideTiles only runs the generator once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/78879
     int callCount = 0;
     Iterable<Widget> generator() sync* {
@@ -258,7 +257,7 @@ void main() {
     expect(callCount, 1);
   });
 
-  testWidgetsWithLeakTracking('ListTile semantics', (WidgetTester tester) async {
+  testWidgets('ListTile semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -309,7 +308,7 @@ void main() {
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocusable,
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               label: 'two',
             ),
             TestSemantics.rootChild(
@@ -337,7 +336,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('ListTile contentPadding', (WidgetTester tester) async {
+  testWidgets('ListTile contentPadding', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(),
@@ -379,7 +378,7 @@ void main() {
     expect(right('L'), 790.0); // 800 - contentPadding.start
   });
 
-  testWidgetsWithLeakTracking('ListTile wide leading Widget', (WidgetTester tester) async {
+  testWidgets('ListTile wide leading Widget', (WidgetTester tester) async {
     const Key leadingKey = ValueKey<String>('L');
 
     Widget buildFrame(double leadingWidth, TextDirection textDirection) {
@@ -445,7 +444,7 @@ void main() {
     expect(right('subtitle'), 800.0 - 72.0);
   });
 
-  testWidgetsWithLeakTracking('ListTile leading and trailing positions', (WidgetTester tester) async {
+  testWidgets('ListTile leading and trailing positions', (WidgetTester tester) async {
     // This test is based on the redlines at
     // https://material.io/design/components/lists.html#specs
 
@@ -506,7 +505,7 @@ void main() {
       ),
     );
 
-    if (kIsWeb && !isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (kIsWeb && !isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       return;
     }
     const double height = 300;
@@ -586,7 +585,7 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder).at(3)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0, 328.0 + 16.0,  24.0,  24.0));
   });
 
-  testWidgetsWithLeakTracking('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
+  testWidgets('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/28765
     const SizedBox oversizedWidget = SizedBox(height: 80.0, width: 24.0, child: Placeholder());
 
@@ -669,7 +668,7 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 88.0 + 8.0, 24.0, 56.0));
   });
 
-  testWidgetsWithLeakTracking('ListTile trailing icon height does not exceed ListTile height', (WidgetTester tester) async {
+  testWidgets('ListTile trailing icon height does not exceed ListTile height', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/28765
     const SizedBox oversizedWidget = SizedBox(height: 80.0, width: 24.0, child: Placeholder());
 
@@ -758,7 +757,7 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 24.0 - 24.0, 88.0 + 8.0, 24.0, 56.0));
   });
 
-  testWidgetsWithLeakTracking('ListTile only accepts focus when enabled', (WidgetTester tester) async {
+  testWidgets('ListTile only accepts focus when enabled', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
 
     await tester.pumpWidget(
@@ -805,7 +804,7 @@ void main() {
     expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('ListTile can autofocus unless disabled.', (WidgetTester tester) async {
+  testWidgets('ListTile can autofocus unless disabled.', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
 
     await tester.pumpWidget(
@@ -850,7 +849,7 @@ void main() {
     expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('ListTile is focusable and has correct focus color', (WidgetTester tester) async {
+  testWidgets('ListTile is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'ListTile');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     Widget buildApp({bool enabled = true}) {
@@ -909,7 +908,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('ListTile can be hovered and has correct hover color', (WidgetTester tester) async {
+  testWidgets('ListTile can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -992,7 +991,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ListTile can be splashed and has correct splash color', (WidgetTester tester) async {
+  testWidgets('ListTile can be splashed and has correct splash color', (WidgetTester tester) async {
     final Widget buildApp = MaterialApp(
       theme: ThemeData(useMaterial3: false),
       home: Material(
@@ -1017,7 +1016,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('ListTile can be triggered by keyboard shortcuts', (WidgetTester tester) async {
+  testWidgets('ListTile can be triggered by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Key tileKey = Key('ListTile');
     bool tapped = false;
@@ -1056,7 +1055,7 @@ void main() {
     expect(tapped, isTrue);
   });
 
-  testWidgetsWithLeakTracking('ListTile responds to density changes.', (WidgetTester tester) async {
+  testWidgets('ListTile responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
@@ -1093,7 +1092,7 @@ void main() {
     expect(box.size, equals(const Size(800, 44)));
   });
 
-  testWidgetsWithLeakTracking('ListTile shape is painted correctly', (WidgetTester tester) async {
+  testWidgets('ListTile shape is painted correctly', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/63877
     const ShapeBorder rectShape = RoundedRectangleBorder();
     const ShapeBorder stadiumShape = StadiumBorder();
@@ -1133,7 +1132,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ListTile changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('ListTile changes mouse cursor when hovered', (WidgetTester tester) async {
     // Test ListTile() constructor
     await tester.pumpWidget(
       MaterialApp(
@@ -1211,7 +1210,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgetsWithLeakTracking('ListTile onFocusChange callback', (WidgetTester tester) async {
+  testWidgets('ListTile onFocusChange callback', (WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'ListTile Focus');
     bool gotFocus = false;
     await tester.pumpWidget(
@@ -1241,7 +1240,7 @@ void main() {
     node.dispose();
   });
 
-  testWidgetsWithLeakTracking('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
+  testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
     bool isSelected = false;
     final Color tileColor = Colors.green.shade500;
     final Color selectedTileColor = Colors.red.shade500;
@@ -1279,7 +1278,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
-  testWidgetsWithLeakTracking('ListTile shows Material ripple effects on top of tileColor', (WidgetTester tester) async {
+  testWidgets('ListTile shows Material ripple effects on top of tileColor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/73616
     final Color tileColor = Colors.red.shade500;
 
@@ -1314,7 +1313,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ListTile default tile color', (WidgetTester tester) async {
+  testWidgets('ListTile default tile color', (WidgetTester tester) async {
     bool isSelected = false;
     final ThemeData theme =  ThemeData(useMaterial3: true);
     const Color defaultColor = Colors.transparent;
@@ -1349,7 +1348,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: defaultColor));
   });
 
-  testWidgetsWithLeakTracking('Default tile color when ListTile is wrapped with an elevated widget', (WidgetTester tester) async {
+  testWidgets('Default tile color when ListTile is wrapped with an elevated widget', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/117700
     bool isSelected = false;
     final ThemeData theme =  ThemeData(useMaterial3: true);
@@ -1381,7 +1380,7 @@ void main() {
       find.byType(Material),
       paints
         ..path(color: const Color(0xff000000))
-        ..path(color: const Color(0xffece6f3))
+        ..path(color: const Color(0xfff7f2fa))
         ..save()
         ..save(),
     );
@@ -1395,14 +1394,14 @@ void main() {
       find.byType(Material),
       paints
         ..path(color: const Color(0xff000000))
-        ..path(color: const Color(0xffece6f3))
+        ..path(color: const Color(0xfff7f2fa))
         ..save()
         ..save(),
     );
     expect(find.byType(Material), paints..rect(color: defaultColor));
   });
 
-  testWidgetsWithLeakTracking('ListTile layout at zero size', (WidgetTester tester) async {
+  testWidgets('ListTile layout at zero size', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66636
     const Key key = Key('key');
 
@@ -1433,7 +1432,7 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgetsWithLeakTracking('ListTile with disabled feedback', (WidgetTester tester) async {
+    testWidgets('ListTile with disabled feedback', (WidgetTester tester) async {
       const bool enableFeedback = false;
 
       await tester.pumpWidget(
@@ -1454,7 +1453,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgetsWithLeakTracking('ListTile with enabled feedback', (WidgetTester tester) async {
+    testWidgets('ListTile with enabled feedback', (WidgetTester tester) async {
       const bool enableFeedback = true;
 
       await tester.pumpWidget(
@@ -1475,7 +1474,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgetsWithLeakTracking('ListTile with enabled feedback by default', (WidgetTester tester) async {
+    testWidgets('ListTile with enabled feedback by default', (WidgetTester tester) async {
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1494,7 +1493,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgetsWithLeakTracking('ListTile with disabled feedback using ListTileTheme', (WidgetTester tester) async {
+    testWidgets('ListTile with disabled feedback using ListTileTheme', (WidgetTester tester) async {
       const bool enableFeedbackTheme = false;
 
       await tester.pumpWidget(
@@ -1517,7 +1516,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgetsWithLeakTracking('ListTile.enableFeedback overrides ListTileTheme.enableFeedback', (WidgetTester tester) async {
+    testWidgets('ListTile.enableFeedback overrides ListTileTheme.enableFeedback', (WidgetTester tester) async {
       const bool enableFeedbackTheme = false;
       const bool enableFeedback = true;
 
@@ -1542,7 +1541,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgetsWithLeakTracking('ListTile.mouseCursor overrides ListTileTheme.mouseCursor', (WidgetTester tester) async {
+    testWidgets('ListTile.mouseCursor overrides ListTileTheme.mouseCursor', (WidgetTester tester) async {
       final Key tileKey = UniqueKey();
 
       await tester.pumpWidget(
@@ -1570,7 +1569,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('ListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
+  testWidgets('ListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection, { double? themeHorizontalTitleGap, double? widgetHorizontalTitleGap }) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -1622,7 +1621,7 @@ void main() {
     expect(right('title'), 760.0);
   });
 
-  testWidgetsWithLeakTracking('ListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)', (WidgetTester tester) async {
+  testWidgets('ListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -1658,7 +1657,7 @@ void main() {
     expect(right('title'), 744.0);
   });
 
-  testWidgetsWithLeakTracking('ListTile horizontalTitleGap with visualDensity', (WidgetTester tester) async {
+  testWidgets('ListTile horizontalTitleGap with visualDensity', (WidgetTester tester) async {
     Widget buildFrame({
       double? horizontalTitleGap,
       VisualDensity? visualDensity,
@@ -1703,7 +1702,7 @@ void main() {
     expect(left('title'), 42.0);
   });
 
-  testWidgetsWithLeakTracking('ListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
+  testWidgets('ListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection, { double? themeMinVerticalPadding, double? widgetMinVerticalPadding }) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -1749,7 +1748,7 @@ void main() {
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
   });
 
-  testWidgetsWithLeakTracking('ListTile minLeadingWidth = 60.0', (WidgetTester tester) async {
+  testWidgets('ListTile minLeadingWidth = 60.0', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection, { double? themeMinLeadingWidth, double? widgetMinLeadingWidth }) {
       return MediaQuery(
         data: const MediaQueryData(),
@@ -1803,8 +1802,38 @@ void main() {
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
     expect(right('title'), 708.0);
   });
+  testWidgets('ListTile minTileHeight', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection, { double? minTileHeight, }) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: ListTile(
+                minTileHeight: minTileHeight,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
-  testWidgetsWithLeakTracking('colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
+    // Default list tile with height = 56.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+
+    // Set list tile height = 30.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, minTileHeight: 30));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 30.0));
+
+    // Set list tile height = 60.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, minTileHeight: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 60.0));
+  });
+
+  testWidgets('colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
     final Key leadingKey = UniqueKey();
     final Key trailingKey = UniqueKey();
 
@@ -1856,7 +1885,7 @@ void main() {
     expect(textColor(trailingKey), theme.disabledColor);
   });
 
-  testWidgetsWithLeakTracking('selected, enabled ListTile default icon color', (WidgetTester tester) async {
+  testWidgets('selected, enabled ListTile default icon color', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final ColorScheme colorScheme = theme.colorScheme;
     final Key leadingKey = UniqueKey();
@@ -1896,7 +1925,7 @@ void main() {
     expect(iconColor(trailingKey), colorScheme.onSurfaceVariant);
   });
 
-  testWidgetsWithLeakTracking('ListTile font size', (WidgetTester tester) async {
+  testWidgets('ListTile font size', (WidgetTester tester) async {
     Widget buildFrame() {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -1929,7 +1958,7 @@ void main() {
     expect(trailing.text.style!.fontSize, 11.0);
   });
 
-  testWidgetsWithLeakTracking('ListTile text color', (WidgetTester tester) async {
+  testWidgets('ListTile text color', (WidgetTester tester) async {
     Widget buildFrame() {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -1964,7 +1993,7 @@ void main() {
     expect(trailing.text.style!.color, theme.colorScheme.onSurfaceVariant);
   });
 
-  testWidgetsWithLeakTracking('Default ListTile debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ListTile debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ListTile().debugFillProperties(builder);
 
@@ -1976,7 +2005,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('ListTile implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('ListTile implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ListTile(
       leading: Text('leading'),
@@ -2017,10 +2046,6 @@ void main() {
     expect(
       description,
       equalsIgnoringHashCodes(<String>[
-        'leading: Text',
-        'title: Text',
-        'subtitle: Text',
-        'trailing: Text',
         'isThreeLine: THREE_LINE',
         'dense: true',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
@@ -2049,7 +2074,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ListTile.textColor respects MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('ListTile.textColor respects MaterialStateColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -2105,7 +2130,7 @@ void main() {
     expect(title.text.style!.color, selectedColor);
   });
 
-  testWidgetsWithLeakTracking('ListTile.iconColor respects MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('ListTile.iconColor respects MaterialStateColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -2160,7 +2185,7 @@ void main() {
     expect(iconColor(leadingKey), selectedColor);
   });
 
-  testWidgetsWithLeakTracking('ListTile.iconColor respects iconColor property with icon buttons Material 3 in presence of IconButtonTheme override', (WidgetTester tester) async {
+  testWidgets('ListTile.iconColor respects iconColor property with icon buttons Material 3 in presence of IconButtonTheme override', (WidgetTester tester) async {
     const Color iconButtonThemeColor = Colors.blue;
     const Color listTileIconColor = Colors.green;
     const Icon leadingIcon = Icon(Icons.favorite);
@@ -2204,7 +2229,7 @@ void main() {
     expect(getIconStyle(tester, trailingIcon.icon!)?.color, listTileIconColor);
   });
 
-  testWidgetsWithLeakTracking('ListTile.dense does not throw assertion', (WidgetTester tester) async {
+  testWidgets('ListTile.dense does not throw assertion', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/pull/116908
 
     Widget buildFrame({required bool useMaterial3}) {
@@ -2232,7 +2257,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('titleAlignment position with title widget', (WidgetTester tester) async {
+  testWidgets('titleAlignment position with title widget', (WidgetTester tester) async {
     final Key leadingKey = GlobalKey();
     final Key trailingKey = GlobalKey();
     const double leadingHeight = 24.0;
@@ -2331,7 +2356,7 @@ void main() {
     expect(trailingOffset.dy - tileOffset.dy, bottomPosition);
   });
 
-  testWidgetsWithLeakTracking('titleAlignment position with title and subtitle widgets', (WidgetTester tester) async {
+  testWidgets('titleAlignment position with title and subtitle widgets', (WidgetTester tester) async {
     final Key leadingKey = GlobalKey();
     final Key trailingKey = GlobalKey();
     const double leadingHeight = 24.0;
@@ -2431,7 +2456,7 @@ void main() {
     expect(trailingOffset.dy - tileOffset.dy, bottomPosition);
   });
 
-  testWidgetsWithLeakTracking("ListTile.isThreeLine updates ListTileTitleAlignment.threeLine's alignment", (WidgetTester tester) async {
+  testWidgets("ListTile.isThreeLine updates ListTileTitleAlignment.threeLine's alignment", (WidgetTester tester) async {
     final Key leadingKey = GlobalKey();
     final Key trailingKey = GlobalKey();
     const double leadingHeight = 24.0;
@@ -2491,7 +2516,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('ListTile geometry (LTR)', (WidgetTester tester) async {
+    testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
       // See https://material.io/go/design-lists
 
       final Key leadingKey = GlobalKey();
@@ -2500,22 +2525,22 @@ void main() {
 
       const double leftPadding = 10.0;
       const double rightPadding = 20.0;
-      Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, double textScaleFactor = 1.0, double? subtitleScaleFactor }) {
+      Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, TextScaler textScaler = TextScaler.noScaling, TextScaler? subtitleScaler }) {
         hasSubtitle = isTwoLine || isThreeLine;
-        subtitleScaleFactor ??= textScaleFactor;
+        subtitleScaler ??= textScaler;
         return MaterialApp(
           theme: ThemeData(useMaterial3: false),
           home: MediaQuery(
             data: MediaQueryData(
               padding: const EdgeInsets.only(left: leftPadding, right: rightPadding),
-              textScaleFactor: textScaleFactor,
+              textScaler: textScaler,
             ),
             child: Material(
               child: Center(
                 child: ListTile(
                   leading: SizedBox(key: leadingKey, width: 24.0, height: 24.0),
                   title: const Text('title'),
-                  subtitle: hasSubtitle ? Text('subtitle', textScaleFactor: subtitleScaleFactor) : null,
+                  subtitle: hasSubtitle ? Text('subtitle', textScaler: subtitleScaler) : null,
                   trailing: SizedBox(key: trailingKey, width: 24.0, height: 24.0),
                   dense: dense,
                   isThreeLine: isThreeLine,
@@ -2602,44 +2627,44 @@ void main() {
       testHorizontalGeometry();
       testVerticalGeometry(76.0);
 
-      await tester.pumpWidget(buildFrame(textScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(textScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(72.0);
 
-      await tester.pumpWidget(buildFrame(dense: true, textScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(dense: true, textScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(72.0);
 
-      await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(isTwoLine: true, textScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(128.0);
 
       // Make sure that the height of a large subtitle is taken into account.
-      await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 0.5, subtitleScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(isTwoLine: true, textScaler: const TextScaler.linear(0.5), subtitleScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(72.0);
 
-      await tester.pumpWidget(buildFrame(isTwoLine: true, dense: true, textScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(isTwoLine: true, dense: true, textScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(128.0);
 
-      await tester.pumpWidget(buildFrame(isThreeLine: true, textScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(isThreeLine: true, textScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(128.0);
 
-      await tester.pumpWidget(buildFrame(isThreeLine: true, dense: true, textScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(isThreeLine: true, dense: true, textScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(128.0);
     });
 
-    testWidgetsWithLeakTracking('ListTile geometry (RTL)', (WidgetTester tester) async {
+    testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
       const double leftPadding = 10.0;
       const double rightPadding = 20.0;
       await tester.pumpWidget(MaterialApp(
@@ -2675,7 +2700,7 @@ void main() {
       testHorizontalGeometry();
     });
 
-    testWidgetsWithLeakTracking('ListTile leading and trailing positions', (WidgetTester tester) async {
+    testWidgets('ListTile leading and trailing positions', (WidgetTester tester) async {
       // This test is based on the redlines at
       // https://material.io/design/components/lists.html#specs
 
@@ -2910,7 +2935,7 @@ void main() {
       expect(tester.getRect(find.byType(Placeholder).at(3)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
     });
 
-    testWidgetsWithLeakTracking('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
+    testWidgets('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
       // regression test for https://github.com/flutter/flutter/issues/28765
       const SizedBox oversizedWidget = SizedBox(height: 80.0, width: 24.0, child: Placeholder());
 
@@ -3083,7 +3108,7 @@ void main() {
       expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 88.0 + 16.0, 24.0, 56.0));
     });
 
-    testWidgetsWithLeakTracking('ListTile trailing icon height does not exceed ListTile height', (WidgetTester tester) async {
+    testWidgets('ListTile trailing icon height does not exceed ListTile height', (WidgetTester tester) async {
       // regression test for https://github.com/flutter/flutter/issues/28765
       const SizedBox oversizedWidget = SizedBox(height: 80.0, width: 24.0, child: Placeholder());
 
@@ -3256,7 +3281,7 @@ void main() {
       expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 88.0 + 16.0, 24.0, 56.0));
     });
 
-    testWidgetsWithLeakTracking('ListTile wide leading Widget', (WidgetTester tester) async {
+    testWidgets('ListTile wide leading Widget', (WidgetTester tester) async {
       const Key leadingKey = ValueKey<String>('L');
 
       Widget buildFrame(double leadingWidth, TextDirection textDirection) {
@@ -3321,7 +3346,7 @@ void main() {
       expect(right('subtitle'), 800.0 - 72.0);
     });
 
-    testWidgetsWithLeakTracking('ListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
+    testWidgets('ListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
       Widget buildFrame(TextDirection textDirection, { double? themeHorizontalTitleGap, double? widgetHorizontalTitleGap }) {
         return MaterialApp(
           theme: ThemeData(useMaterial3: false),
@@ -3373,7 +3398,7 @@ void main() {
       expect(right('title'), 744.0);
     });
 
-    testWidgetsWithLeakTracking('ListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)', (WidgetTester tester) async {
+    testWidgets('ListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)', (WidgetTester tester) async {
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
           theme: ThemeData(useMaterial3: false),
@@ -3409,7 +3434,7 @@ void main() {
       expect(right('title'), 728.0);
     });
 
-    testWidgetsWithLeakTracking('ListTile horizontalTitleGap with visualDensity', (WidgetTester tester) async {
+    testWidgets('ListTile horizontalTitleGap with visualDensity', (WidgetTester tester) async {
       Widget buildFrame({
         double? horizontalTitleGap,
         VisualDensity? visualDensity,
@@ -3454,7 +3479,7 @@ void main() {
       expect(left('title'), 58.0);
     });
 
-    testWidgetsWithLeakTracking('ListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
+    testWidgets('ListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
       Widget buildFrame(TextDirection textDirection, { double? themeMinVerticalPadding, double? widgetMinVerticalPadding }) {
         return MaterialApp(
           theme: ThemeData(useMaterial3: false),
@@ -3500,7 +3525,7 @@ void main() {
       expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
     });
 
-    testWidgetsWithLeakTracking('ListTile font size', (WidgetTester tester) async {
+    testWidgets('ListTile font size', (WidgetTester tester) async {
       Widget buildFrame({
         bool dense = false,
         bool enabled = true,
@@ -3578,7 +3603,7 @@ void main() {
       expect(trailing.text.style!.fontSize, 14.0);
     });
 
-    testWidgetsWithLeakTracking('ListTile text color', (WidgetTester tester) async {
+    testWidgets('ListTile text color', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
       Widget buildFrame({
         bool dense = false,
@@ -3633,7 +3658,7 @@ void main() {
       expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
     });
 
-    testWidgetsWithLeakTracking('selected, enabled ListTile default icon color, light and dark themes', (WidgetTester tester) async {
+    testWidgets('selected, enabled ListTile default icon color, light and dark themes', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/pull/77004
 
       const ColorScheme lightColorScheme = ColorScheme.light();
@@ -3693,7 +3718,7 @@ void main() {
       expect(iconColor(trailingKey), Colors.white);
     });
 
-    testWidgetsWithLeakTracking('ListTile default tile color', (WidgetTester tester) async {
+    testWidgets('ListTile default tile color', (WidgetTester tester) async {
       bool isSelected = false;
       const Color defaultColor = Colors.transparent;
 
@@ -3727,7 +3752,7 @@ void main() {
       expect(find.byType(Material), paints..rect(color: defaultColor));
     });
 
-    testWidgetsWithLeakTracking('titleAlignment position with title widget', (WidgetTester tester) async {
+    testWidgets('titleAlignment position with title widget', (WidgetTester tester) async {
       final Key leadingKey = GlobalKey();
       final Key trailingKey = GlobalKey();
       const double leadingHeight = 24.0;
@@ -3826,7 +3851,7 @@ void main() {
       expect(trailingOffset.dy - tileOffset.dy, bottomPosition);
     });
 
-    testWidgetsWithLeakTracking('titleAlignment position with title and subtitle widgets', (WidgetTester tester) async {
+    testWidgets('titleAlignment position with title and subtitle widgets', (WidgetTester tester) async {
       final Key leadingKey = GlobalKey();
       final Key trailingKey = GlobalKey();
       const double leadingHeight = 24.0;
@@ -3926,7 +3951,7 @@ void main() {
       expect(trailingOffset.dy - tileOffset.dy, bottomPosition);
     });
 
-    testWidgetsWithLeakTracking("ListTile.isThreeLine updates ListTileTitleAlignment.threeLine's alignment", (WidgetTester tester) async {
+    testWidgets("ListTile.isThreeLine updates ListTileTitleAlignment.threeLine's alignment", (WidgetTester tester) async {
       final Key leadingKey = GlobalKey();
       final Key trailingKey = GlobalKey();
       const double leadingHeight = 24.0;

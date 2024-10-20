@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
+import 'dart:collection';
 import 'dart:ui' as ui show
-  FontFeature,
-  FontVariation,
   ParagraphStyle,
   Shadow,
   StrutStyle,
-  TextHeightBehavior,
-  TextLeadingDistribution,
   TextStyle,
+  kTextHeightNone,
   lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -28,11 +29,6 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 
 const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor and a background\n'
     'The backgroundColor argument is just a shorthand for "background: Paint()..color = color".';
-
-// The default font size if none is specified. This should be kept in
-// sync with the default values in text_painter.dart, as well as the
-// defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
-const double _kDefaultFontSize = 14.0;
 
 // Examples can assume:
 // late BuildContext context;
@@ -277,7 +273,7 @@ const double _kDefaultFontSize = 14.0;
 ///
 /// {@tool snippet}
 /// The [foreground] property also allows effects such as gradients to be
-/// applied to the text. Here we provide a [Paint] with a [ui.Gradient]
+/// applied to the text. Here we provide a [Paint] with a [Gradient]
 /// shader.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_gradient.png)
@@ -438,7 +434,7 @@ const double _kDefaultFontSize = 14.0;
 /// By default, fonts differ depending on the platform.
 ///
 ///  * The default font-family for `Android`,`Fuchsia` and `Linux` is `Roboto`.
-///  * The default font-family for `iOS` is `.SF UI Display`/`.SF UI Text`.
+///  * The default font-family for `iOS` is `SF Pro Display`/`SF Pro Text`.
 ///  * The default font-family for `MacOS` is `.AppleSystemUIFont`.
 ///  * The default font-family for `Windows` is `Segoe UI`.
 //
@@ -466,8 +462,8 @@ const double _kDefaultFontSize = 14.0;
 ///  * [TextSpan], the class that wraps a [TextStyle] for the purposes of
 ///    passing it to a [RichText].
 ///  * [TextStyle](https://api.flutter.dev/flutter/dart-ui/TextStyle-class.html), the class in the [dart:ui] library.
-///  * Cookbook: [Use a custom font](https://flutter.dev/docs/cookbook/design/fonts)
-///  * Cookbook: [Use themes to share colors and font styles](https://flutter.dev/docs/cookbook/design/themes)
+///  * Cookbook: [Use a custom font](https://docs.flutter.dev/cookbook/design/fonts)
+///  * Cookbook: [Use themes to share colors and font styles](https://docs.flutter.dev/cookbook/design/themes)
 @immutable
 class TextStyle with Diagnosticable {
   /// Creates a text style.
@@ -475,6 +471,14 @@ class TextStyle with Diagnosticable {
   /// The `package` argument must be non-null if the font family is defined in a
   /// package. It is combined with the `fontFamily` argument to set the
   /// [fontFamily] property.
+  ///
+  /// On Apple devices the strings 'CupertinoSystemText' and
+  /// 'CupertinoSystemDisplay' are used in [fontFamily] as proxies for the
+  /// Apple system fonts. They currently redirect to the equivalent of SF Pro
+  /// Text and SF Pro Display respectively. 'CupertinoSystemText' is designed
+  /// for fonts below 20 point size, and 'CupertinoSystemDisplay' is recommended
+  /// for sizes 20 and above. When used on non-Apple platforms, these strings
+  /// will return the regular fallback font family instead.
   const TextStyle({
     this.inherit = true,
     this.color,
@@ -518,10 +522,10 @@ class TextStyle with Diagnosticable {
   /// Otherwise, the combining is allowed, and the returned [TextStyle] inherits
   /// the [inherit] value from the method receiver.
   ///
-  /// This property has no effect on [TextSpan]'s text style cascading: in a
-  /// [TextSpan] tree, a [TextSpan]'s text style can be combined with that of an
-  /// ancestor [TextSpan] if it has unspecified fields, regardless of its
-  /// [inherit] value.
+  /// This property does not affect the text style inheritance in an [InlineSpan]
+  /// tree: an [InlineSpan]'s text style is merged with that of an ancestor
+  /// [InlineSpan] if it has unspecified fields, regardless of its [inherit]
+  /// value.
   ///
   /// Properties that don't have explicit values or other default values to fall
   /// back to will revert to the defaults: white in color, a font size of 14
@@ -566,6 +570,14 @@ class TextStyle with Diagnosticable {
   /// first value in [fontFamilyFallback] acts as the preferred/first font
   /// family. When neither is provided, then the default platform font will
   /// be used.
+  ///
+  /// When running on Apple devices, the strings 'CupertinoSystemText' and
+  /// 'CupertinoSystemDisplay' are used as proxies for the Apple system fonts.
+  /// They currently redirect to the equivalent of SF Pro Text and SF Pro Display
+  /// respectively. 'CupertinoSystemText' is designed for fonts below 20 point
+  /// size, and 'CupertinoSystemDisplay' is recommended for sizes 20 and above.
+  /// When used on non-Apple platforms, these strings will return the regular
+  /// fallback font family instead.
   final String? fontFamily;
 
   /// The ordered list of font families to fall back on when a glyph cannot be
@@ -632,14 +644,13 @@ class TextStyle with Diagnosticable {
 
   /// The height of this text span, as a multiple of the font size.
   ///
-  /// When [height] is null or omitted, the line height will be determined
-  /// by the font's metrics directly, which may differ from the fontSize.
-  /// When [height] is non-null, the line height of the span of text will be a
-  /// multiple of [fontSize] and be exactly `fontSize * height` logical pixels
-  /// tall.
+  /// When [height] is [kTextHeightNone], the line height will be determined by
+  /// the font's metrics directly, which may differ from the fontSize. Otherwise
+  /// the line height of the span of text will be a multiple of [fontSize],
+  /// and be exactly `fontSize * height` logical pixels tall.
   ///
-  /// For most fonts, setting [height] to 1.0 is not the same as omitting or
-  /// setting height to null because the [fontSize] sets the height of the EM-square,
+  /// For most fonts, setting [height] to 1.0 is not the same as setting height
+  /// to [kTextHeightNone] because the [fontSize] sets the height of the EM-square,
   /// which is different than the font provided metrics for line height. The
   /// following diagram illustrates the difference between the font-metrics
   /// defined line height and the line height produced with `height: 1.0`
@@ -669,7 +680,7 @@ class TextStyle with Diagnosticable {
   ///
   /// Defaults to null, which defers to the paragraph's
   /// `ParagraphStyle.textHeightBehavior`'s [leadingDistribution].
-  final ui.TextLeadingDistribution? leadingDistribution;
+  final TextLeadingDistribution? leadingDistribution;
 
   /// The locale used to select region-specific glyphs.
   ///
@@ -789,7 +800,7 @@ class TextStyle with Diagnosticable {
   ///
   /// Shadows must be in the same order for [TextStyle] to be considered as
   /// equivalent as order produces differing transparency.
-  final List<ui.Shadow>? shadows;
+  final List<Shadow>? shadows;
 
   /// A list of [FontFeature]s that affect how the font selects glyphs.
   ///
@@ -798,7 +809,13 @@ class TextStyle with Diagnosticable {
   /// tabular numbers, or it might offer versions of the zero digit with
   /// and without slashes. [FontFeature]s can be used to select which of
   /// these variants will be used for rendering.
-  final List<ui.FontFeature>? fontFeatures;
+  ///
+  /// Font features are not interpolated by [lerp].
+  ///
+  /// See also:
+  ///
+  ///  * [fontVariations], for font features that have continuous parameters.
+  final List<FontFeature>? fontFeatures;
 
   /// A list of [FontVariation]s that affect how a variable font is rendered.
   ///
@@ -812,10 +829,18 @@ class TextStyle with Diagnosticable {
   /// ```dart
   /// const TextStyle(
   ///   fontFamily: 'RobotoSlab',
-  ///   fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 900.0)]
+  ///   fontVariations: <FontVariation>[FontVariation('wght', 900.0)]
   /// )
   /// ```
-  final List<ui.FontVariation>? fontVariations;
+  ///
+  /// Font variations can be interpolated via [lerp]. This is fastest when the
+  /// same font variation axes are specified, in the same order, in both
+  /// [TextStyle] objects. See [lerpFontVariations].
+  ///
+  /// See also:
+  ///
+  ///  * [fontFeatures], for font variations that have discrete values.
+  final List<FontVariation>? fontVariations;
 
   /// How visual text overflow should be handled.
   final TextOverflow? overflow;
@@ -851,13 +876,13 @@ class TextStyle with Diagnosticable {
     double? wordSpacing,
     TextBaseline? textBaseline,
     double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
+    TextLeadingDistribution? leadingDistribution,
     Locale? locale,
     Paint? foreground,
     Paint? background,
-    List<ui.Shadow>? shadows,
-    List<ui.FontFeature>? fontFeatures,
-    List<ui.FontVariation>? fontVariations,
+    List<Shadow>? shadows,
+    List<FontFeature>? fontFeatures,
+    List<FontVariation>? fontVariations,
     TextDecoration? decoration,
     Color? decorationColor,
     TextDecorationStyle? decorationStyle,
@@ -872,8 +897,10 @@ class TextStyle with Diagnosticable {
     assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
     String? newDebugLabel;
     assert(() {
-      if (this.debugLabel != null) {
-        newDebugLabel = debugLabel ?? '(${this.debugLabel}).copyWith';
+      if (debugLabel != null) {
+        newDebugLabel = debugLabel;
+      } else if (this.debugLabel != null) {
+        newDebugLabel = '(${this.debugLabel}).copyWith';
       }
       return true;
     }());
@@ -930,7 +957,8 @@ class TextStyle with Diagnosticable {
   /// [TextStyle] with a [FontWeight.w300].
   ///
   /// If the underlying values are null, then the corresponding factors and/or
-  /// deltas must not be specified.
+  /// deltas must not be specified. Additionally, if [height] is [kTextHeightNone]
+  /// it will not be modified by this method.
   ///
   /// If [foreground] is specified on this object, then applying [color] here
   /// will have no effect and if [background] is specified on this object, then
@@ -956,11 +984,11 @@ class TextStyle with Diagnosticable {
     double heightFactor = 1.0,
     double heightDelta = 0.0,
     TextBaseline? textBaseline,
-    ui.TextLeadingDistribution? leadingDistribution,
+    TextLeadingDistribution? leadingDistribution,
     Locale? locale,
-    List<ui.Shadow>? shadows,
-    List<ui.FontFeature>? fontFeatures,
-    List<ui.FontVariation>? fontVariations,
+    List<Shadow>? shadows,
+    List<FontFeature>? fontFeatures,
+    List<FontVariation>? fontVariations,
     String? package,
     TextOverflow? overflow,
   }) {
@@ -985,12 +1013,12 @@ class TextStyle with Diagnosticable {
       fontFamily: fontFamily ?? _fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? _fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize! * fontSizeFactor + fontSizeDelta,
-      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)], // ignore_clamp_double_lint
+      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
       fontStyle: fontStyle ?? this.fontStyle,
       letterSpacing: letterSpacing == null ? null : letterSpacing! * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null ? null : wordSpacing! * wordSpacingFactor + wordSpacingDelta,
       textBaseline: textBaseline ?? this.textBaseline,
-      height: height == null ? null : height! * heightFactor + heightDelta,
+      height: (height == null || height == ui.kTextHeightNone) ? height : height! * heightFactor + heightDelta,
       leadingDistribution: leadingDistribution ?? this.leadingDistribution,
       locale: locale ?? this.locale,
       foreground: foreground,
@@ -1125,7 +1153,7 @@ class TextStyle with Diagnosticable {
         background: t < 0.5 ? null : b.background,
         shadows: t < 0.5 ? null : b.shadows,
         fontFeatures: t < 0.5 ? null : b.fontFeatures,
-        fontVariations: t < 0.5 ? null : b.fontVariations,
+        fontVariations: lerpFontVariations(null, b.fontVariations, t),
         decoration: t < 0.5 ? null : b.decoration,
         decorationColor: Color.lerp(null, b.decorationColor, t),
         decorationStyle: t < 0.5 ? null : b.decorationStyle,
@@ -1156,7 +1184,7 @@ class TextStyle with Diagnosticable {
         background: t < 0.5 ? a.background : null,
         shadows: t < 0.5 ? a.shadows : null,
         fontFeatures: t < 0.5 ? a.fontFeatures : null,
-        fontVariations: t < 0.5 ? a.fontVariations : null,
+        fontVariations: lerpFontVariations(a.fontVariations, null, t),
         decoration: t < 0.5 ? a.decoration : null,
         decorationColor: Color.lerp(a.decorationColor, null, t),
         decorationStyle: t < 0.5 ? a.decorationStyle : null,
@@ -1254,9 +1282,9 @@ class TextStyle with Diagnosticable {
           ? a.background ?? (Paint()..color = a.backgroundColor!)
           : b.background ?? (Paint()..color = b.backgroundColor!)
         : null,
-      shadows: t < 0.5 ? a.shadows : b.shadows,
+      shadows: ui.Shadow.lerpList(a.shadows, b.shadows, t),
       fontFeatures: t < 0.5 ? a.fontFeatures : b.fontFeatures,
-      fontVariations: t < 0.5 ? a.fontVariations : b.fontVariations,
+      fontVariations: lerpFontVariations(a.fontVariations, b.fontVariations, t),
       decoration: t < 0.5 ? a.decoration : b.decoration,
       decorationColor: Color.lerp(a.decorationColor, b.decorationColor, t),
       decorationStyle: t < 0.5 ? a.decorationStyle : b.decorationStyle,
@@ -1331,7 +1359,7 @@ class TextStyle with Diagnosticable {
     TextScaler textScaler = TextScaler.noScaling,
     String? ellipsis,
     int? maxLines,
-    ui.TextHeightBehavior? textHeightBehavior,
+    TextHeightBehavior? textHeightBehavior,
     Locale? locale,
     String? fontFamily,
     double? fontSize,
@@ -1341,9 +1369,9 @@ class TextStyle with Diagnosticable {
     StrutStyle? strutStyle,
   }) {
     assert(maxLines == null || maxLines > 0);
-    final ui.TextLeadingDistribution? leadingDistribution = this.leadingDistribution;
-    final ui.TextHeightBehavior? effectiveTextHeightBehavior = textHeightBehavior
-      ?? (leadingDistribution == null ? null : ui.TextHeightBehavior(leadingDistribution: leadingDistribution));
+    final TextLeadingDistribution? leadingDistribution = this.leadingDistribution;
+    final TextHeightBehavior? effectiveTextHeightBehavior = textHeightBehavior
+      ?? (leadingDistribution == null ? null : TextHeightBehavior(leadingDistribution: leadingDistribution));
 
     return ui.ParagraphStyle(
       textAlign: textAlign,
@@ -1353,7 +1381,7 @@ class TextStyle with Diagnosticable {
       fontWeight: fontWeight ?? this.fontWeight,
       fontStyle: fontStyle ?? this.fontStyle,
       fontFamily: fontFamily ?? this.fontFamily,
-      fontSize: textScaler.scale(fontSize ?? this.fontSize ?? _kDefaultFontSize),
+      fontSize: textScaler.scale(fontSize ?? this.fontSize ?? kDefaultFontSize),
       height: height ?? this.height,
       textHeightBehavior: effectiveTextHeightBehavior,
       strutStyle: strutStyle == null ? null : ui.StrutStyle(
@@ -1365,6 +1393,7 @@ class TextStyle with Diagnosticable {
         },
         height: strutStyle.height,
         leading: strutStyle.leading,
+        leadingDistribution: strutStyle.leadingDistribution,
         fontWeight: strutStyle.fontWeight,
         fontStyle: strutStyle.fontStyle,
         forceStrutHeight: strutStyle.forceStrutHeight,
@@ -1464,9 +1493,9 @@ class TextStyle with Diagnosticable {
       overflow,
     );
 
-    final List<ui.Shadow>? shadows = this.shadows;
-    final List<ui.FontFeature>? fontFeatures = this.fontFeatures;
-    final List<ui.FontVariation>? fontVariations = this.fontVariations;
+    final List<Shadow>? shadows = this.shadows;
+    final List<FontFeature>? fontFeatures = this.fontFeatures;
+    final List<FontVariation>? fontVariations = this.fontVariations;
     return Object.hash(
       inherit,
       color,
@@ -1526,7 +1555,7 @@ class TextStyle with Diagnosticable {
     styles.add(DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
     styles.add(EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
-    styles.add(EnumProperty<ui.TextLeadingDistribution>('${prefix}leadingDistribution', leadingDistribution, defaultValue: null));
+    styles.add(EnumProperty<TextLeadingDistribution>('${prefix}leadingDistribution', leadingDistribution, defaultValue: null));
     styles.add(DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
@@ -1566,4 +1595,96 @@ class TextStyle with Diagnosticable {
 
     styles.add(EnumProperty<TextOverflow>('${prefix}overflow', overflow, defaultValue: null));
   }
+}
+
+/// Interpolate between two lists of [FontVariation] objects.
+///
+/// Variations are paired by axis, and interpolated using [FontVariation.lerp].
+///
+/// Entries that are only present in one list are animated using a step-function
+/// at t=0.5 that enables or disables the variation. This can be jarring and
+/// largely defeats the point of animating font variations. For best results,
+/// specify the same axes in both lists, and for best performance, specify them
+/// in the same order.
+///
+/// ## Performance details
+///
+/// This algorithm is O(N), but the constant factor varies based on the input,
+/// and that is probably more important (because typically N is going to be
+/// tiny, like 1 or 2; at the time of writing, there are only about five defined
+/// axes that fonts typically use!).
+///
+/// It is fastest when the lists contain the same axes ([FontVariation.axis]) in
+/// the same order. The result is again in the same order, and no attempt is
+/// made to detect or remove duplicates in this process. This is, by far, the
+/// recommended way to use this algorithm.
+///
+/// When the order of items in the two input lists vary, the constant factor
+/// increases substantially, as it involves creating two maps and a set,
+/// inserting every variation in both lists into the maps and the set, and then
+/// iterating over them to recreate the list.
+///
+/// In this case, the resulting order is arbitrary. Duplicates are dropped; in
+/// each list, the last [FontVariation] for any particular axis is the one used
+/// to compute the value for that axis. Values that only appear on one side are
+/// interpolated using [FontVariation.lerp] against a null value, and resulting
+/// null values are omitted from the resulting list.
+///
+/// When the lists begin with matching pairs of axes, the fast algorithm is used
+/// up to the point where the lists diverge, and the more expensive algorithm
+/// is used on the remaining entries.
+///
+/// See also:
+///
+///  * [TextStyle.lerp], which uses this function to handle
+///    [TextStyle.fontVariations].
+List<FontVariation>? lerpFontVariations(List<FontVariation>? a, List<FontVariation>? b, double t) {
+  if (t == 0.0) {
+    return a;
+  }
+  if (t == 1.0) {
+    return b;
+  }
+  if (a == null || a.isEmpty || b == null || b.isEmpty) {
+    // If one side is empty, that means anything on the other
+    // side will use the null-to-something lerp, which is to
+    // say, a step function at t=0.5.
+    return t < 0.5 ? a : b;
+  }
+  assert(a.isNotEmpty && b.isNotEmpty);
+  final List<FontVariation> result = <FontVariation>[];
+  // First, try the efficient O(N) solution in the event that
+  // the lists are compatible.
+  int index = 0;
+  final int minLength = a.length < b.length ? a.length : b.length;
+  for (; index < minLength; index += 1) {
+    if (a[index].axis != b[index].axis) {
+      // The lists aren't compatible.
+      break;
+    }
+    result.add(FontVariation.lerp(a[index], b[index], t)!);
+  }
+  final int maxLength = a.length > b.length ? a.length : b.length;
+  if (index < maxLength) {
+    // If we get here, we have found some case where we cannot
+    // use the efficient approach.
+    final Set<String> axes = HashSet<String>();
+    final Map<String, FontVariation> aVariations = HashMap<String, FontVariation>();
+    for (int indexA = index; indexA < a.length; indexA += 1) {
+      aVariations[a[indexA].axis] = a[indexA];
+      axes.add(a[indexA].axis);
+    }
+    final Map<String, FontVariation> bVariations = HashMap<String, FontVariation>();
+    for (int indexB = index; indexB < b.length; indexB += 1) {
+      bVariations[b[indexB].axis] = b[indexB];
+      axes.add(b[indexB].axis);
+    }
+    for (final String axis in axes) {
+      final FontVariation? variation = FontVariation.lerp(aVariations[axis], bVariations[axis], t);
+      if (variation != null) {
+        result.add(variation);
+      }
+    }
+  }
+  return result;
 }

@@ -28,7 +28,6 @@ import '../../src/context.dart';
 import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 
-
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
   pauseEvent: vm_service.Event(
@@ -476,9 +475,6 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice(this.result, {this.supportsFlutterExit = true});
 
@@ -566,24 +562,5 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> shutdown() async {
     disposed = true;
-  }
-}
-
-class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
-  bool closed = false;
-  final Completer<void> _processStarted = Completer<void>();
-
-  @override
-  Future<void> launch(Uri vmServiceUri, {List<String>? additionalArguments}) {
-    _processStarted.complete();
-    return Completer<void>().future;
-  }
-
-  @override
-  Future<void> get processStart => _processStarted.future;
-
-  @override
-  Future<void> close() async {
-    closed = true;
   }
 }

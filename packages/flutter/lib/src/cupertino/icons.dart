@@ -54,12 +54,11 @@ import 'package:flutter/widgets.dart';
 /// ```
 /// {@end-tool}
 ///
-/// For versions 0.1.3 and below, see this [glyph map](https://raw.githubusercontent.com/flutter/packages/master/third_party/packages/cupertino_icons/map.png).
+/// For versions 0.1.3 and below, see this [glyph map](https://raw.githubusercontent.com/flutter/packages/main/third_party/packages/cupertino_icons/map.png).
 ///
 /// See also:
 ///
 ///  * [Icon], used to show these icons.
-/// {@hideConstantImplementations}
 @staticIconProvider
 abstract final class CupertinoIcons {
   /// The icon font used for Cupertino icons.

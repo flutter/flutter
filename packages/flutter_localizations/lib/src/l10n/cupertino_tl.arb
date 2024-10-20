@@ -25,6 +25,7 @@
   "noSpellCheckReplacementsLabel": "Walang Nahanap na Kapalit",
   "menuDismissLabel": "I-dismiss ang menu",
   "lookUpButtonLabel": "Tumingin sa Itaas",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Maghanap sa Web",
+  "shareButtonLabel": "Ibahagi...",
+  "clearButtonLabel": "Clear"
 }

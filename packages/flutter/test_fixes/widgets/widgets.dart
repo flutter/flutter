@@ -138,7 +138,7 @@ void main() {
   renderObjectToWidgetElement.moveChildRenderObject(renderObject, object);
   renderObjectToWidgetElement.removeChildRenderObject(renderObject);
 
-  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  // Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   ListWheelViewport listWheelViewport = ListWheelViewport();
   listWheelViewport = ListWheelViewport(clipToSize: true);
   listWheelViewport = ListWheelViewport(clipToSize: false);
@@ -170,4 +170,11 @@ void main() {
     clipBehavior: Clip.none,
   );
   final Clip clip = details.clipBehavior;
+
+  final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], body: const SizedBox());
+  final Widget bodyValue = platformMenuBar.body;
+
+  // Changes made in TBD
+  final NavigatorState state = Navigator.of(context);
+  state.focusScopeNode;
 }

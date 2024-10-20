@@ -43,6 +43,10 @@ void main() {
     selectedTabs = <int>[];
   });
 
+  tearDown(() {
+    imageCache.clear();
+  });
+
   BottomNavigationBarItem tabGenerator(int index) {
     return BottomNavigationBarItem(
       icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
@@ -145,6 +149,9 @@ void main() {
       FocusNode(debugLabel: 'Node 1'),
       FocusNode(debugLabel: 'Node 2'),
     ];
+    for (final FocusNode focusNode in focusNodes) {
+      addTearDown(focusNode.dispose);
+    }
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -182,6 +189,9 @@ void main() {
       FocusNode(debugLabel: 'Node 3'),
       FocusNode(debugLabel: 'Node 4'),
     ];
+    for (final FocusNode focusNode in focusNodes) {
+      addTearDown(focusNode.dispose);
+    }
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -240,6 +250,7 @@ void main() {
 
   testWidgets('Programmatic tab switching by changing the index of an existing controller', (WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
+    addTearDown(controller.dispose);
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(
@@ -297,11 +308,13 @@ void main() {
 
     expect(tabsPainted, const <int>[0]);
 
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          controller: CupertinoTabController(initialIndex: 1), // Programmatically change the tab now.
+          controller: controller, // Programmatically change the tab now.
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
               painter: TestCallbackPainter(
@@ -620,6 +633,7 @@ void main() {
   testWidgets('Adding new tabs does not crash the app', (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
     final CupertinoTabController controller = CupertinoTabController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -678,6 +692,7 @@ void main() {
     (WidgetTester tester) async {
       final List<int> tabsPainted = <int>[];
       final CupertinoTabController oldController = CupertinoTabController();
+      addTearDown(oldController.dispose);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -740,6 +755,7 @@ void main() {
     'but do remove from its listeners when done listening to it',
     (WidgetTester tester) async {
       final MockCupertinoTabController mockController = MockCupertinoTabController(initialIndex: 0);
+      addTearDown(mockController.dispose);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -792,6 +808,7 @@ void main() {
 
     controller.dispose();
     controller = CupertinoTabController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -893,7 +910,9 @@ void main() {
       expect(controller.numOfListeners, 1);
 
       // Replacing controller works.
+      controller.dispose();
       controller = MockCupertinoTabController(initialIndex: 2);
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: CupertinoPageScaffold(
@@ -925,6 +944,7 @@ void main() {
 
   testWidgets('Assert when current tab index >= number of tabs', (WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+    addTearDown(controller.dispose);
 
     try {
       await tester.pumpWidget(
@@ -966,8 +986,14 @@ void main() {
 
   testWidgets("Don't replace focus nodes for existing tabs when changing tab count", (WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+    addTearDown(controller.dispose);
 
-    final List<FocusScopeNode> scopes = List<FocusScopeNode>.filled(5, FocusScopeNode());
+    final List<FocusScopeNode> scopes = <FocusScopeNode>[];
+    for (int i = 0; i < 5; i++) {
+      final FocusScopeNode scope = FocusScopeNode();
+      addTearDown(scope.dispose);
+      scopes.add(scope);
+    }
     await tester.pumpWidget(
         CupertinoApp(
           home: CupertinoTabScaffold(
@@ -1025,6 +1051,7 @@ void main() {
     expectAssertionError(() => CupertinoTabController(initialIndex: -1), '>= 0');
 
     final CupertinoTabController controller = CupertinoTabController();
+    addTearDown(controller.dispose);
 
     expectAssertionError(() => controller.index = -1, '>= 0');
   });
@@ -1075,8 +1102,9 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 99,
+            maxScaleFactor: 99,
             child: CupertinoTabScaffold(
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
@@ -1202,6 +1230,7 @@ void main() {
     expect(find.text('Content 3'), findsNothing);
 
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 3);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(buildWidget(controller: controller));
 
     expect(find.text('Content 0'), findsNothing);
@@ -1338,6 +1367,8 @@ void main() {
       expect(find.text('Page 1 of tab 2'), findsOneWidget);
       expect(find.text('Page 2 of tab 2'), findsNothing);
       expect(lastFrameworkHandlesBack, isFalse);
+
+      imageCache.clear();
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.

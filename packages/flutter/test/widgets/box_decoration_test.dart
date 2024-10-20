@@ -9,7 +9,6 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 
@@ -18,7 +17,13 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   final Future<void> future;
 
-  static late ui.Image image;
+  static final List<ui.Image> _images = <ui.Image>[];
+
+  static Future<void> prepareImages(int count) async {
+    for (int i = 0; i < count; i++) {
+      _images.add(await decodeImageFromList(Uint8List.fromList(kTransparentImage)));
+    }
+  }
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
@@ -27,17 +32,25 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   @override
   ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
+    assert(_images.isNotEmpty, 'ask for more images in `prepareImages`');
+    final ui.Image image = _images.last;
+    _images.removeLast();
+
     return OneFrameImageStreamCompleter(
-      future.then<ImageInfo>((void value) => ImageInfo(image: image)),
+      future.then<ImageInfo>((void value) {
+        final ImageInfo result = ImageInfo(image: image);
+        return result;
+      }),
     );
   }
 }
 
 Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
-  TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
+  await TestImageProvider.prepareImages(2);
 
-  testWidgetsWithLeakTracking('DecoratedBox handles loading images', (WidgetTester tester) async {
+  testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     final GlobalKey key = GlobalKey();
     final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
@@ -60,7 +73,8 @@ Future<void> main() async {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Moving a DecoratedBox', (WidgetTester tester) async {
+  testWidgets('Moving a DecoratedBox', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     final Completer<void> completer = Completer<void>();
     final Widget subtree = KeyedSubtree(
       key: GlobalKey(),
@@ -89,7 +103,7 @@ Future<void> main() async {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Circles can have uniform borders', (WidgetTester tester) async {
+  testWidgets('Circles can have uniform borders', (WidgetTester tester) async {
     await tester.pumpWidget(
       Container(
         padding: const EdgeInsets.all(50.0),
@@ -102,7 +116,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgetsWithLeakTracking('Bordered Container insets its child', (WidgetTester tester) async {
+  testWidgets('Bordered Container insets its child', (WidgetTester tester) async {
     const Key key = Key('outerContainer');
     await tester.pumpWidget(
       Center(
@@ -119,7 +133,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byKey(key)), equals(const Size(45.0, 45.0)));
   });
 
-  testWidgetsWithLeakTracking('BoxDecoration paints its border correctly', (WidgetTester tester) async {
+  testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/7672
 
     const Key key = Key('Container with BoxDecoration');
@@ -170,7 +184,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgetsWithLeakTracking('BoxDecoration paints its border correctly', (WidgetTester tester) async {
+  testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12165
     await tester.pumpWidget(
       Column(
@@ -255,7 +269,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgetsWithLeakTracking('Can hit test on BoxDecoration', (WidgetTester tester) async {
+  testWidgets('Can hit test on BoxDecoration', (WidgetTester tester) async {
 
     late List<int> itemsTapped;
 
@@ -292,7 +306,7 @@ Future<void> main() async {
 
   });
 
-  testWidgetsWithLeakTracking('Can hit test on BoxDecoration circle', (WidgetTester tester) async {
+  testWidgets('Can hit test on BoxDecoration circle', (WidgetTester tester) async {
 
     late List<int> itemsTapped;
 
@@ -332,7 +346,7 @@ Future<void> main() async {
 
   });
 
-  testWidgetsWithLeakTracking('Can hit test on BoxDecoration border', (WidgetTester tester) async {
+  testWidgets('Can hit test on BoxDecoration border', (WidgetTester tester) async {
     late List<int> itemsTapped;
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
@@ -370,7 +384,7 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1,1]);
   });
 
-  testWidgetsWithLeakTracking('BoxDecoration not tap outside rounded angles - Top Left', (WidgetTester tester) async {
+  testWidgets('BoxDecoration not tap outside rounded angles - Top Left', (WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 12.3;
@@ -430,7 +444,7 @@ Future<void> main() async {
 
   });
 
-  testWidgetsWithLeakTracking('BoxDecoration tap inside rounded angles - Top Left', (WidgetTester tester) async {
+  testWidgets('BoxDecoration tap inside rounded angles - Top Left', (WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 12.3;
@@ -478,7 +492,7 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1,1,1,1]);
   });
 
-  testWidgetsWithLeakTracking('BoxDecoration rounded angles other corner works', (WidgetTester tester) async {
+  testWidgets('BoxDecoration rounded angles other corner works', (WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 20;
@@ -546,7 +560,7 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1,1,1,1,1], reason: 'top left tapped');
   });
 
-  testWidgetsWithLeakTracking("BoxDecoration doesn't crash with BorderRadiusDirectional", (WidgetTester tester) async {
+  testWidgets("BoxDecoration doesn't crash with BorderRadiusDirectional", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/88039
 
     await tester.pumpWidget(

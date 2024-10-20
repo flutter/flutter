@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -31,6 +33,7 @@ abstract class WebRunnerFactory {
     required FileSystem fileSystem,
     required SystemClock systemClock,
     required Usage usage,
+    required Analytics analytics,
     bool machine = false,
   });
 }

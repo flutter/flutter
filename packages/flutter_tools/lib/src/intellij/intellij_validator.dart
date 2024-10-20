@@ -9,7 +9,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/user_messages.dart' hide userMessages;
+import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';
@@ -367,6 +367,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     required UserMessages userMessages,
     required PlistParser plistParser,
     required String? homeDirPath,
+
   }) : _plistParser = plistParser,
        _homeDirPath = homeDirPath,
        super(title, installPath, fileSystem: fileSystem, userMessages: userMessages);

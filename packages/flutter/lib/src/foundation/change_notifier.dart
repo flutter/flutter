@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:ui' show VoidCallback;
 
 import 'package:meta/meta.dart';
@@ -62,11 +66,11 @@ abstract class Listenable {
   /// Return a [Listenable] that triggers when any of the given [Listenable]s
   /// themselves trigger.
   ///
-  /// The list must not be changed after this method has been called. Doing so
-  /// will lead to memory leaks or exceptions.
+  /// Once the factory is called, items must not be added or removed from the iterable.
+  /// Doing so will lead to memory leaks or exceptions.
   ///
-  /// The list may contain nulls; they are ignored.
-  factory Listenable.merge(List<Listenable?> listenables) = _MergingListenable;
+  /// The iterable may contain nulls; they are ignored.
+  factory Listenable.merge(Iterable<Listenable?> listenables) = _MergingListenable;
 
   /// Register a closure to be called when the object notifies its listeners.
   void addListener(VoidCallback listener);
@@ -148,9 +152,9 @@ mixin class ChangeNotifier implements Listenable {
   bool _debugDisposed = false;
 
   /// If true, the event [ObjectCreated] for this instance was dispatched to
-  /// [MemoryAllocations].
+  /// [FlutterMemoryAllocations].
   ///
-  /// As [ChangedNotifier] is used as mixin, it does not have constructor,
+  /// As [ChangeNotifier] is used as mixin, it does not have constructor,
   /// so we use [addListener] to dispatch the event.
   bool _creationDispatched = false;
 
@@ -207,7 +211,7 @@ mixin class ChangeNotifier implements Listenable {
   @protected
   bool get hasListeners => _count > 0;
 
-  /// Dispatches event of the [object] creation to [MemoryAllocations.instance].
+  /// Dispatches event of the [object] creation to [FlutterMemoryAllocations.instance].
   ///
   /// If the event was already dispatched or [kFlutterMemoryAllocationsEnabled]
   /// is false, the method is noop.
@@ -231,7 +235,7 @@ mixin class ChangeNotifier implements Listenable {
     // Tree shaker does not include this method and the class MemoryAllocations
     // if kFlutterMemoryAllocationsEnabled is false.
     if (kFlutterMemoryAllocationsEnabled && !object._creationDispatched) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterFoundationLibrary,
         className: '$ChangeNotifier',
         object: object,
@@ -384,7 +388,7 @@ mixin class ChangeNotifier implements Listenable {
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _listeners = _emptyListeners;
     _count = 0;
@@ -491,7 +495,7 @@ mixin class ChangeNotifier implements Listenable {
 class _MergingListenable extends Listenable {
   _MergingListenable(this._children);
 
-  final List<Listenable?> _children;
+  final Iterable<Listenable?> _children;
 
   @override
   void addListener(VoidCallback listener) {

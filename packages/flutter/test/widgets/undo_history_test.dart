@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'editable_text_utils.dart';
 
@@ -31,7 +30,124 @@ void main() {
     Future<void> sendUndo(WidgetTester tester) => sendUndoRedo(tester);
     Future<void> sendRedo(WidgetTester tester) => sendUndoRedo(tester, true);
 
-    testWidgetsWithLeakTracking('allows undo and redo to be called programmatically from the UndoHistoryController', (WidgetTester tester) async {
+    testWidgets('UndoHistory widget registers as global undo/redo client', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');
+      addTearDown(focusNode.dispose);
+      final GlobalKey undoHistoryGlobalKey = GlobalKey();
+      final ValueNotifier<int> value = ValueNotifier<int>(0);
+      addTearDown(value.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: UndoHistory<int>(
+            key: undoHistoryGlobalKey,
+            value: value,
+            onTriggered: (_) {},
+            focusNode: focusNode,
+            child: Focus(
+              focusNode: focusNode,
+              child: Container(),
+            ),
+          ),
+        ),
+      );
+
+      // Initially the UndoHistory doesn't have focus, therefore it should
+      // not be the global undo/redo client. Ensure that's the case.
+      expect(UndoManager.client, isNull);
+
+      // Give focus to the UndoHistory widget.
+      focusNode.requestFocus();
+      await tester.pump();
+
+      // Now that the UndoHistory widget has focus, it should have registered
+      // itself as the global undo/redo client.
+      final State? undoHistoryState = undoHistoryGlobalKey.currentState;
+      expect(UndoManager.client, undoHistoryState);
+    });
+
+    testWidgets('UndoHistory widget deregisters as global undo/redo client when it loses focus',
+            (WidgetTester tester) async {
+          final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');
+          addTearDown(focusNode.dispose);
+          final GlobalKey undoHistoryGlobalKey = GlobalKey();
+          final ValueNotifier<int> value = ValueNotifier<int>(0);
+          addTearDown(value.dispose);
+
+          await tester.pumpWidget(
+            MaterialApp(
+              home: UndoHistory<int>(
+                key: undoHistoryGlobalKey,
+                value: value,
+                onTriggered: (_) {},
+                focusNode: focusNode,
+                child: Focus(
+                  focusNode: focusNode,
+                  child: Container(),
+                ),
+              ),
+            ),
+          );
+
+          // Give focus to the UndoHistory widget.
+          focusNode.requestFocus();
+          await tester.pump();
+
+          // Ensure that UndoHistory is the global undo/redo client.
+          final State? undoHistoryState = undoHistoryGlobalKey.currentState;
+          expect(UndoManager.client, undoHistoryState);
+
+          // Remove focus from UndoHistory widget.
+          focusNode.unfocus();
+          await tester.pump();
+
+          // Ensure the UndoHistory widget is no longer the global client
+          expect(UndoManager.client, null);
+        });
+
+    testWidgets('UndoHistory widget deregisters as global undo/redo client when disposed', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');
+      addTearDown(focusNode.dispose);
+      final GlobalKey undoHistoryGlobalKey = GlobalKey();
+      final ValueNotifier<int> value = ValueNotifier<int>(0);
+      addTearDown(value.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: UndoHistory<int>(
+            key: undoHistoryGlobalKey,
+            value: value,
+            onTriggered: (_) {},
+            focusNode: focusNode,
+            child: Focus(
+              focusNode: focusNode,
+              child: Container(),
+            ),
+          ),
+        ),
+      );
+
+      // Give focus to the UndoHistory widget.
+      focusNode.requestFocus();
+      await tester.pump();
+
+      // Ensure that UndoHistory is the global undo/redo client.
+      final State? undoHistoryState = undoHistoryGlobalKey.currentState;
+      expect(UndoManager.client, undoHistoryState);
+
+      // Cause the UndoHistory widget to dispose its state.
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox(),
+        ),
+      );
+
+      // Ensure that the disposed UndoHistory state is not still the global
+      // undo/redo history client.
+      expect(UndoManager.client, isNull);
+    });
+
+    testWidgets('allows undo and redo to be called programmatically from the UndoHistoryController', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
       addTearDown(value.dispose);
       final UndoHistoryController controller = UndoHistoryController();
@@ -123,7 +239,7 @@ void main() {
       expect(controller.value.canRedo, false);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('allows undo and redo to be called using the keyboard', (WidgetTester tester) async {
+    testWidgets('allows undo and redo to be called using the keyboard', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
       addTearDown(value.dispose);
       final UndoHistoryController controller = UndoHistoryController();
@@ -218,7 +334,7 @@ void main() {
       expect(controller.value.canRedo, false);
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-    testWidgetsWithLeakTracking('duplicate changes do not affect the undo history', (WidgetTester tester) async {
+    testWidgets('duplicate changes do not affect the undo history', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
       addTearDown(value.dispose);
       final UndoHistoryController controller = UndoHistoryController();
@@ -271,7 +387,7 @@ void main() {
       expect(controller.value.canRedo, true);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('ignores value changes pushed during onTriggered', (WidgetTester tester) async {
+    testWidgets('ignores value changes pushed during onTriggered', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
       addTearDown(value.dispose);
       final UndoHistoryController controller = UndoHistoryController();
@@ -322,7 +438,7 @@ void main() {
       expect(() => key.currentState!.undo(), throwsAssertionError);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('changes should send setUndoState to the UndoManagerConnection on iOS', (WidgetTester tester) async {
+    testWidgets('changes should send setUndoState to the UndoManagerConnection on iOS', (WidgetTester tester) async {
       final List<MethodCall> log = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.undoManager, (MethodCall methodCall) async {
         log.add(methodCall);
@@ -395,7 +511,7 @@ void main() {
       expect(methodCall.arguments as Map<String, dynamic>, <String, bool>{'canUndo': false, 'canRedo': true});
     }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}), skip: kIsWeb); // [intended]
 
-    testWidgetsWithLeakTracking('handlePlatformUndo should undo or redo appropriately on iOS', (WidgetTester tester) async {
+    testWidgets('handlePlatformUndo should undo or redo appropriately on iOS', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
       addTearDown(value.dispose);
       final UndoHistoryController controller = UndoHistoryController();
@@ -485,7 +601,7 @@ void main() {
   });
 
   group('UndoHistoryController', () {
-    testWidgetsWithLeakTracking('UndoHistoryController notifies onUndo listeners onUndo', (WidgetTester tester) async {
+    testWidgets('UndoHistoryController notifies onUndo listeners onUndo', (WidgetTester tester) async {
       int calls = 0;
       final UndoHistoryController controller = UndoHistoryController();
       addTearDown(controller.dispose);
@@ -503,7 +619,7 @@ void main() {
       expect(calls, 1);
     });
 
-    testWidgetsWithLeakTracking('UndoHistoryController notifies onRedo listeners onRedo', (WidgetTester tester) async {
+    testWidgets('UndoHistoryController notifies onRedo listeners onRedo', (WidgetTester tester) async {
       int calls = 0;
       final UndoHistoryController controller = UndoHistoryController();
       addTearDown(controller.dispose);
@@ -521,7 +637,7 @@ void main() {
       expect(calls, 1);
     });
 
-    testWidgetsWithLeakTracking('UndoHistoryController notifies listeners on value change', (WidgetTester tester) async {
+    testWidgets('UndoHistoryController notifies listeners on value change', (WidgetTester tester) async {
       int calls = 0;
       final UndoHistoryController controller = UndoHistoryController(value: const UndoHistoryValue(canUndo: true));
       addTearDown(controller.dispose);

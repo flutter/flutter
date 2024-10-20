@@ -27,12 +27,20 @@ import 'theme.dart';
 ///    its subtree.
 ///  * [ButtonBar], which uses this to configure itself and its children
 ///    button widgets.
+@Deprecated(
+  'Use OverflowBar instead. '
+  'This feature was deprecated after v3.21.0-10.0.pre.',
+)
 @immutable
 class ButtonBarThemeData with Diagnosticable {
   /// Constructs the set of properties used to configure [ButtonBar] widgets.
   ///
   /// Both [buttonMinWidth] and [buttonHeight] must be non-negative if they
   /// are not null.
+  @Deprecated(
+    'Use OverflowBar instead. '
+    'This feature was deprecated after v3.21.0-10.0.pre.',
+  )
   const ButtonBarThemeData({
     this.alignment,
     this.mainAxisSize,
@@ -231,7 +239,7 @@ class ButtonBarThemeData with Diagnosticable {
 ///  * [ButtonBarThemeData], which describes the actual configuration of a button
 ///    bar theme.
 class ButtonBarTheme extends InheritedWidget {
-  /// Constructs a button bar theme that configures all descendent [ButtonBar]
+  /// Constructs a button bar theme that configures all descendant [ButtonBar]
   /// widgets.
   const ButtonBarTheme({
     super.key,

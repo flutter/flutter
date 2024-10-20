@@ -531,7 +531,7 @@ void main() {
       ]);
     });
 
-    testUsingContext('Unconnencted devices filtered out by default', () async {
+    testUsingContext('Unconnected devices filtered out by default', () async {
       final List<Device> devices = <Device>[
         unconnectedDevice,
       ];
@@ -814,6 +814,7 @@ void main() {
         traceAllowlist: 'foo',
         traceSkiaAllowlist: 'skia.a,skia.b',
         traceSystrace: true,
+        traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
         cacheSkSL: true,
@@ -846,6 +847,7 @@ void main() {
           '--verify-entry-points',
           '--enable-software-rendering',
           '--trace-systrace',
+          '--trace-to-file="path/to/trace.binpb"',
           '--skia-deterministic-rendering',
           '--trace-skia',
           '--trace-allowlist="foo"',
@@ -994,6 +996,7 @@ void main() {
         traceAllowlist: 'foo',
         traceSkiaAllowlist: 'skia.a,skia.b',
         traceSystrace: true,
+        traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
         cacheSkSL: true,
@@ -1026,6 +1029,7 @@ void main() {
           '--verify-entry-points',
           '--enable-software-rendering',
           '--trace-systrace',
+          '--trace-to-file="path/to/trace.binpb"',
           '--skia-deterministic-rendering',
           '--trace-skia',
           '--trace-allowlist="foo"',
@@ -1085,6 +1089,47 @@ void main() {
       );
     });
   });
+
+  group('PollingDeviceDiscovery', () {
+    final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+
+    testWithoutContext('initial call to devices returns the correct list', () async {
+      final List<Device> deviceList = <Device>[device1];
+      final TestPollingDeviceDiscovery testDeviceDiscovery = TestPollingDeviceDiscovery(deviceList);
+
+      // Call `onAdded` to make sure that calling `onAdded` does not affect the
+      // result of `devices()`.
+      final List<Device> addedDevice = <Device>[];
+      final List<Device> removedDevice = <Device>[];
+      testDeviceDiscovery.onAdded.listen(addedDevice.add);
+      testDeviceDiscovery.onRemoved.listen(removedDevice.add);
+
+      final List<Device> devices = await testDeviceDiscovery.devices();
+      expect(devices.length, 1);
+      expect(devices.first.id, device1.id);
+    });
+
+    testWithoutContext('call to devices triggers onAdded', () async {
+      final List<Device> deviceList = <Device>[device1];
+      final TestPollingDeviceDiscovery testDeviceDiscovery = TestPollingDeviceDiscovery(deviceList);
+
+      // Call `onAdded` to make sure that calling `onAdded` does not affect the
+      // result of `devices()`.
+      final List<Device> addedDevice = <Device>[];
+      final List<Device> removedDevice = <Device>[];
+      testDeviceDiscovery.onAdded.listen(addedDevice.add);
+      testDeviceDiscovery.onRemoved.listen(removedDevice.add);
+
+      final List<Device> devices = await testDeviceDiscovery.devices();
+      expect(devices.length, 1);
+      expect(devices.first.id, device1.id);
+
+      await pumpEventQueue();
+
+      expect(addedDevice.length, 1);
+      expect(addedDevice.first.id, device1.id);
+    });
+  });
 }
 
 class TestDeviceManager extends DeviceManager {
@@ -1126,10 +1171,7 @@ class TestDeviceDiscoverySupportFilter extends DeviceDiscoverySupportFilter {
 
   @override
   bool isDeviceSupportedForProject(Device device) {
-    if (isAlwaysSupportedForProjectOverride != null) {
-      return isAlwaysSupportedForProjectOverride!;
-    }
-    return super.isDeviceSupportedForProject(device);
+    return isAlwaysSupportedForProjectOverride ?? super.isDeviceSupportedForProject(device);
   }
 }
 
@@ -1191,6 +1233,27 @@ class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
   @override
   Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
     throw const ProcessException('fake-discovery', <String>[]);
+  }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+
+  @override
+  List<String> get wellKnownIds => <String>[];
+}
+
+
+class TestPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  TestPollingDeviceDiscovery(this._devices) : super('test');
+
+  final List<Device> _devices;
+
+  @override
+  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+    return _devices;
   }
 
   @override

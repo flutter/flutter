@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 # ---------------------------------- NOTE ---------------------------------- #
 #
 # Please keep the logic in this file consistent with the logic in the
@@ -144,6 +143,11 @@ function upgrade_flutter () (
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
+    if [[ "$BIN_NAME" == 'dart' ]]; then
+      # Don't try to build tool
+      return
+    fi
+
     >&2 echo Building flutter tool...
 
     # Prepare packages...
@@ -229,6 +233,8 @@ function shared::execute() {
     exit 1
   fi
 
+  BIN_NAME="$(basename "$PROG_NAME")"
+
   # File descriptor 7 is prepared here so that we can use it with
   # flock(1) in _lock() (see above).
   #
@@ -247,7 +253,6 @@ function shared::execute() {
   # SHARED_NAME itself is prepared by the caller script.
   upgrade_flutter 7< "$SHARED_NAME"
 
-  BIN_NAME="$(basename "$PROG_NAME")"
   case "$BIN_NAME" in
     flutter*)
       # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be

@@ -961,9 +961,16 @@ void main() {
     expect(fancyProxyBox.fancyMethod(), 36);
     // Box has behavior from RenderProxyBox:
     expect(
+      // ignore: invalid_use_of_protected_member
       fancyProxyBox.computeDryLayout(const BoxConstraints(minHeight: 8)),
       const Size(0, 8),
     );
+  });
+
+  test('computeDryLayout constraints are covariant', () {
+    final RenderBoxWithTestConstraints box = RenderBoxWithTestConstraints();
+    const TestConstraints constraints = TestConstraints(testValue: 6);
+    expect(box.computeDryLayout(constraints), const Size.square(6));
   });
 }
 
@@ -1048,10 +1055,7 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
 
   @override
   OffsetLayer updateCompositedLayer({required covariant OffsetLayer? oldLayer}) {
-    if (offsetLayerFactory != null) {
-      return offsetLayerFactory!.call(oldLayer);
-    }
-    return super.updateCompositedLayer(oldLayer: oldLayer);
+    return offsetLayerFactory?.call(oldLayer) ?? super.updateCompositedLayer(oldLayer: oldLayer);
   }
 
   @override
@@ -1087,3 +1091,19 @@ void expectAssertionError() {
 }
 
 typedef DebugPaintCallback = void Function(PaintingContext context, Offset offset);
+
+class TestConstraints extends BoxConstraints {
+  const TestConstraints({
+    double extent = 100,
+    required this.testValue,
+  }) : super(maxWidth: extent, maxHeight: extent);
+
+  final double testValue;
+}
+
+class RenderBoxWithTestConstraints extends RenderProxyBox {
+  @override
+  Size computeDryLayout(TestConstraints constraints) {
+    return constraints.constrain(Size.square(constraints.testValue));
+  }
+}

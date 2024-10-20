@@ -7,10 +7,9 @@ import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Positioned constructors', (WidgetTester tester) async {
+  testWidgets('Positioned constructors', (WidgetTester tester) async {
     final Widget child = Container();
     final Positioned a = Positioned(
       left: 101.0,
@@ -57,7 +56,7 @@ void main() {
     expect(c.height, null);
   });
 
-  testWidgetsWithLeakTracking('Can animate position data', (WidgetTester tester) async {
+  testWidgets('Can animate position data', (WidgetTester tester) async {
     final RelativeRectTween rect = RelativeRectTween(
       begin: RelativeRect.fromRect(
         const Rect.fromLTRB(10.0, 20.0, 20.0, 30.0),
@@ -72,6 +71,7 @@ void main() {
       duration: const Duration(seconds: 10),
       vsync: tester,
     );
+    addTearDown(controller.dispose);
     final List<Size> sizes = <Size>[];
     final List<Offset> positions = <Offset>[];
     final GlobalKey key = GlobalKey();

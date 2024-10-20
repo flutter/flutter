@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestSingleChildLayoutDelegate extends SingleChildLayoutDelegate {
   late BoxConstraints constraintsFromGetSize;
@@ -22,16 +21,18 @@ class TestSingleChildLayoutDelegate extends SingleChildLayoutDelegate {
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    assert(!RenderObject.debugCheckingIntrinsics);
-    constraintsFromGetConstraintsForChild = constraints;
+    if (!RenderObject.debugCheckingIntrinsics) {
+      constraintsFromGetConstraintsForChild = constraints;
+    }
     return const BoxConstraints(minWidth: 100.0, maxWidth: 150.0, minHeight: 200.0, maxHeight: 400.0);
   }
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    assert(!RenderObject.debugCheckingIntrinsics);
-    sizeFromGetPositionForChild = size;
-    childSizeFromGetPositionForChild = childSize;
+    if (!RenderObject.debugCheckingIntrinsics) {
+      sizeFromGetPositionForChild = size;
+      childSizeFromGetPositionForChild = childSize;
+    }
     return Offset.zero;
   }
 
@@ -94,7 +95,7 @@ Widget buildFrame(SingleChildLayoutDelegate delegate) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Control test for CustomSingleChildLayout', (WidgetTester tester) async {
+  testWidgets('Control test for CustomSingleChildLayout', (WidgetTester tester) async {
     final TestSingleChildLayoutDelegate delegate = TestSingleChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
@@ -115,7 +116,7 @@ void main() {
     expect(delegate.childSizeFromGetPositionForChild.height, 400.0);
   });
 
-  testWidgetsWithLeakTracking('Test SingleChildDelegate shouldRelayout method', (WidgetTester tester) async {
+  testWidgets('Test SingleChildDelegate shouldRelayout method', (WidgetTester tester) async {
     TestSingleChildLayoutDelegate delegate =
         TestSingleChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
@@ -139,7 +140,7 @@ void main() {
     expect(delegate.constraintsFromGetConstraintsForChild, isNotNull);
   });
 
-  testWidgetsWithLeakTracking('Delegate can change size', (WidgetTester tester) async {
+  testWidgets('Delegate can change size', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(FixedSizeLayoutDelegate(const Size(100.0, 200.0))));
 
     RenderBox box = tester.renderObject(find.byType(CustomSingleChildLayout));
@@ -151,7 +152,7 @@ void main() {
     expect(box.size, equals(const Size(150.0, 240.0)));
   });
 
-  testWidgetsWithLeakTracking('Can use listener for relayout', (WidgetTester tester) async {
+  testWidgets('Can use listener for relayout', (WidgetTester tester) async {
     final ValueNotifier<Size> size = ValueNotifier<Size>(const Size(100.0, 200.0));
     addTearDown(size.dispose);
 

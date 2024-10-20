@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -33,7 +32,7 @@ void main() {
     return tester.dragFrom(topLeft + const Offset(unit, unit), const Offset(delta, 0.0));
   }
 
-  testWidgetsWithLeakTracking('Slider does not move when tapped (LTR)', (WidgetTester tester) async {
+  testWidgets('Slider does not move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
@@ -69,7 +68,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Slider does not move when tapped (RTL)', (WidgetTester tester) async {
+  testWidgets('Slider does not move when tapped (RTL)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
@@ -105,7 +104,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Slider calls onChangeStart once when interaction begins', (WidgetTester tester) async {
+  testWidgets('Slider calls onChangeStart once when interaction begins', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     int numberOfTimesOnChangeStartIsCalled = 0;
@@ -146,7 +145,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Slider calls onChangeEnd once after interaction has ended', (WidgetTester tester) async {
+  testWidgets('Slider calls onChangeEnd once after interaction has ended', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     int numberOfTimesOnChangeEndIsCalled = 0;
@@ -187,7 +186,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Slider moves when dragged (LTR)', (WidgetTester tester) async {
+  testWidgets('Slider moves when dragged (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     late double startValue;
@@ -241,7 +240,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Slider moves when dragged (RTL)', (WidgetTester tester) async {
+  testWidgets('Slider moves when dragged (RTL)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     late double startValue;
@@ -295,7 +294,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -359,7 +358,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Slider Semantics can be updated', (WidgetTester tester) async {
+  testWidgets('Slider Semantics can be updated', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     double value = 0.5;
     await tester.pumpWidget(
@@ -410,7 +409,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Slider respects themes', (WidgetTester tester) async {
+  testWidgets('Slider respects themes', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -445,7 +444,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Themes can be overridden', (WidgetTester tester) async {
+  testWidgets('Themes can be overridden', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
@@ -464,7 +463,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Themes can be overridden by dynamic colors', (WidgetTester tester) async {
+  testWidgets('Themes can be overridden by dynamic colors', (WidgetTester tester) async {
     const CupertinoDynamicColor activeColor = CupertinoDynamicColor(
       color: Color(0x00000001),
       darkColor: Color(0x00000002),
@@ -520,7 +519,7 @@ void main() {
     expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.highContrastElevatedColor));
   });
 
-  testWidgetsWithLeakTracking('track color is dynamic', (WidgetTester tester) async {
+  testWidgets('track color is dynamic', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -568,7 +567,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Thumb color can be overridden', (WidgetTester tester) async {
+  testWidgets('Thumb color can be overridden', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -616,7 +615,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Hovering over Cupertino slider thumb updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgets('Hovering over Cupertino slider thumb updates cursor to clickable on Web', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 

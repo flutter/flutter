@@ -5,10 +5,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('ScrollMetricsNotification test', (WidgetTester tester) async {
+  testWidgets('ScrollMetricsNotification test', (WidgetTester tester) async {
     final List<Notification> events = <Notification>[];
     Widget buildFrame(double height) {
       return NotificationListener<Notification>(
@@ -23,12 +22,17 @@ void main() {
     }
     await tester.pumpWidget(buildFrame(1200.0));
     expect(events.length, 1);
+    ScrollMetricsNotification event = events[0] as ScrollMetricsNotification;
+    expect(event.metrics.extentBefore, 0.0);
+    expect(event.metrics.extentInside, 600.0);
+    expect(event.metrics.extentAfter, 600.0);
+    expect(event.metrics.extentTotal, 1200.0);
 
     events.clear();
     await tester.pumpWidget(buildFrame(1000.0));
     // Change the content dimensions will trigger a new event.
     expect(events.length, 1);
-    ScrollMetricsNotification event = events[0] as ScrollMetricsNotification;
+    event = events[0] as ScrollMetricsNotification;
     expect(event.metrics.extentBefore, 0.0);
     expect(event.metrics.extentInside, 600.0);
     expect(event.metrics.extentAfter, 400.0);
@@ -36,24 +40,27 @@ void main() {
 
     events.clear();
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
-    expect(events.length, 1);
-    // user scroll do not trigger the ScrollContentMetricsNotification.
-    expect(events[0] is ScrollStartNotification, true);
-
-    events.clear();
+    await tester.pump(const Duration(seconds: 1));
     await gesture.moveBy(const Offset(-10.0, -10.0));
-    expect(events.length, 2);
-    // User scroll do not trigger the ScrollContentMetricsNotification.
-    expect(events[0] is UserScrollNotification, true);
-    expect(events[1] is ScrollUpdateNotification, true);
+    await tester.pump(const Duration(seconds: 1));
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(events.length, 5);
+    // user scroll do not trigger the ScrollMetricsNotification.
+    expect(events[0] is ScrollStartNotification, true);
+    expect(events[1] is UserScrollNotification, true);
+    expect(events[2] is ScrollUpdateNotification, true);
+    expect(events[3] is ScrollEndNotification, true);
+    expect(events[4] is UserScrollNotification, true);
 
     events.clear();
     // Change the content dimensions again.
     await tester.pumpWidget(buildFrame(500.0));
     expect(events.length, 1);
     event = events[0] as ScrollMetricsNotification;
-    expect(event.metrics.extentBefore, 10.0);
-    expect(event.metrics.extentInside, 590.0);
+    expect(event.metrics.extentBefore, 0.0);
+    expect(event.metrics.extentInside, 600.0);
     expect(event.metrics.extentAfter, 0.0);
     expect(event.metrics.extentTotal, 600.0);
 
@@ -63,7 +70,7 @@ void main() {
     expect(events.length, 0);
   });
 
-  testWidgetsWithLeakTracking('Scroll notification basics', (WidgetTester tester) async {
+  testWidgets('Scroll notification basics', (WidgetTester tester) async {
     late ScrollNotification notification;
 
     await tester.pumpWidget(NotificationListener<ScrollNotification>(
@@ -104,7 +111,7 @@ void main() {
     expect(end.dragDetails!.velocity, equals(Velocity.zero));
   });
 
-  testWidgetsWithLeakTracking('Scroll notification depth', (WidgetTester tester) async {
+  testWidgets('Scroll notification depth', (WidgetTester tester) async {
     final List<Type> depth0Types = <Type>[];
     final List<Type> depth1Types = <Type>[];
     final List<int> depth0Values = <int>[];
@@ -159,7 +166,7 @@ void main() {
     expect(depth1Values, equals(<int>[1, 1, 1, 1, 1]));
   });
 
-  testWidgetsWithLeakTracking('ScrollNotifications bubble past Scaffold Material', (WidgetTester tester) async {
+  testWidgets('ScrollNotifications bubble past Scaffold Material', (WidgetTester tester) async {
     final List<Type> notificationTypes = <Type>[];
 
     await tester.pumpWidget(
@@ -207,7 +214,7 @@ void main() {
     expect(notificationTypes, equals(types));
   });
 
-  testWidgetsWithLeakTracking('ScrollNotificationObserver', (WidgetTester tester) async {
+  testWidgets('ScrollNotificationObserver', (WidgetTester tester) async {
     late ScrollNotificationObserverState observer;
     ScrollNotification? notification;
 
@@ -272,5 +279,61 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(notification, isNull);
+  });
+
+  testWidgets('ScrollBar thumb drag triggers scroll start-update-end notifications', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    ScrollNotification? notification;
+
+    addTearDown(scrollController.dispose);
+
+    bool handleScrollNotification(ScrollNotification value) {
+      if (value is ScrollStartNotification || value is ScrollUpdateNotification || value is ScrollEndNotification) {
+        notification = value;
+      }
+      return true;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox.expand(
+            child: Scrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: handleScrollNotification,
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: const SizedBox(height: 1200.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0);
+    expect(notification, isNull);
+
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(790, 45));
+    await tester.pumpAndSettle();
+    expect(notification, isA<ScrollStartNotification>());
+
+    await dragScrollbarGesture.moveBy(const Offset(0, -20));
+    await tester.pumpAndSettle();
+    expect(notification, isA<ScrollUpdateNotification>());
+    expect(scrollController.offset, 20);
+
+    await dragScrollbarGesture.moveBy(const Offset(0, -20));
+    await tester.pumpAndSettle();
+    expect(notification, isA<ScrollUpdateNotification>());
+    expect(scrollController.offset, 40);
+
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+    expect(notification, isA<ScrollEndNotification>());
   });
 }

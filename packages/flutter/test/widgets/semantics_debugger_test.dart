@@ -5,10 +5,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('SemanticsDebugger will schedule a frame', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger will schedule a frame', (WidgetTester tester) async {
     await tester.pumpWidget(
       SemanticsDebugger(
         child: Container(),
@@ -18,7 +17,7 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isTrue);
   });
 
-  testWidgetsWithLeakTracking('SemanticsDebugger smoke test', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger smoke test', (WidgetTester tester) async {
 
     // This is a smoketest to verify that adding a debugger doesn't crash.
     await tester.pumpWidget(
@@ -62,7 +61,7 @@ void main() {
     expect(true, isTrue); // expect that we reach here without crashing
   });
 
-  testWidgetsWithLeakTracking('SemanticsDebugger reparents subtree', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger reparents subtree', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -148,7 +147,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('SemanticsDebugger interaction test', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger interaction test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -186,7 +185,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('SemanticsDebugger interaction test - negative', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger interaction test - negative', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -226,7 +225,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('SemanticsDebugger scroll test', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger scroll test', (WidgetTester tester) async {
     final Key childKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -269,7 +268,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
   });
 
-  testWidgetsWithLeakTracking('SemanticsDebugger long press', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger long press', (WidgetTester tester) async {
     bool didLongPress = false;
 
     await tester.pumpWidget(
@@ -291,7 +290,7 @@ void main() {
     expect(didLongPress, isTrue);
   });
 
-  testWidgetsWithLeakTracking('SemanticsDebugger slider', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger slider', (WidgetTester tester) async {
     double value = 0.75;
 
     await tester.pumpWidget(
@@ -338,7 +337,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('SemanticsDebugger checkbox', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger checkbox', (WidgetTester tester) async {
     final Key keyTop = UniqueKey();
     final Key keyBottom = UniqueKey();
 
@@ -379,7 +378,7 @@ void main() {
     expect(valueTop, isFalse);
   });
 
-  testWidgetsWithLeakTracking('SemanticsDebugger checkbox message', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger checkbox message', (WidgetTester tester) async {
     final Key checkbox = UniqueKey();
     final Key checkboxUnchecked = UniqueKey();
     final Key checkboxDisabled = UniqueKey();
@@ -451,7 +450,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('SemanticsDebugger ignores duplicated label and tooltip for Android', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger ignores duplicated label and tooltip for Android', (WidgetTester tester) async {
     final Key child = UniqueKey();
     final Key debugger = UniqueKey();
     final bool isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
@@ -478,7 +477,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('SemanticsDebugger textfield', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger textfield', (WidgetTester tester) async {
     final UniqueKey textField = UniqueKey();
     final UniqueKey debugger = UniqueKey();
 
@@ -505,7 +504,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
     final UniqueKey debugger = UniqueKey();
     const TextStyle labelStyle = TextStyle(color: Colors.amber);
     await tester.pumpWidget(
@@ -525,6 +524,43 @@ void main() {
     // ignore: avoid_dynamic_calls
     expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
   });
+
+  testWidgets('SemanticsDebugger label for rtl.', (WidgetTester tester) async {
+    final UniqueKey debugger = UniqueKey();
+    final Key label = UniqueKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: SemanticsDebugger(
+          key: debugger,
+          child: Semantics(
+            label: 'ملصق',
+            textDirection: TextDirection.rtl,
+            key: label,
+          ),
+        ),
+      ),
+    );
+
+    expect(_getMessageShownInSemanticsDebugger(widgetKey: label, debuggerKey: debugger, tester: tester), '\u2067ملصق\u2069');
+  });
+
+  testWidgets('SemanticsDebugger turns on semantics.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/147665.
+    expect(tester.binding.semanticsEnabled, isFalse);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: SemanticsDebugger(
+          child: Semantics(
+            label: 'Hello World',
+          ),
+        ),
+      ),
+    );
+    expect(tester.binding.semanticsEnabled, isTrue);
+  }, semanticsEnabled: false);
 }
 
 String _getMessageShownInSemanticsDebugger({

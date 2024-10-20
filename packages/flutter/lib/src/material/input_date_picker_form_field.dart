@@ -57,6 +57,7 @@ class InputDatePickerFormField extends StatefulWidget {
     this.keyboardType,
     this.autofocus = false,
     this.acceptEmptyDate = false,
+    this.focusNode,
   }) : initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate) {
@@ -136,6 +137,9 @@ class InputDatePickerFormField extends StatefulWidget {
   /// If true, [errorFormatText] is not shown when the date input field is empty.
   final bool acceptEmptyDate;
 
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
   @override
   State<InputDatePickerFormField> createState() => _InputDatePickerFormFieldState();
 }
@@ -174,7 +178,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
           _selectedDate = widget.initialDate;
           _updateValueForSelectedDate();
         });
-      });
+      }, debugLabel: 'InputDatePickerFormField.update');
     }
   }
 
@@ -252,20 +256,24 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       ?? theme.inputDecorationTheme.border
       ?? (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
 
-    return TextFormField(
-      decoration: InputDecoration(
-        hintText: widget.fieldHintText ?? localizations.dateHelpText,
-        labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
-      ).applyDefaults(inputTheme
-        .merge(datePickerTheme.inputDecorationTheme)
-        .copyWith(border: effectiveInputBorder),
+    return Semantics(
+      container: true,
+      child: TextFormField(
+        decoration: InputDecoration(
+          hintText: widget.fieldHintText ?? localizations.dateHelpText,
+          labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
+        ).applyDefaults(inputTheme
+          .merge(datePickerTheme.inputDecorationTheme)
+          .copyWith(border: effectiveInputBorder),
+        ),
+        validator: _validateDate,
+        keyboardType: widget.keyboardType ?? TextInputType.datetime,
+        onSaved: _handleSaved,
+        onFieldSubmitted: _handleSubmitted,
+        autofocus: widget.autofocus,
+        controller: _controller,
+        focusNode: widget.focusNode,
       ),
-      validator: _validateDate,
-      keyboardType: widget.keyboardType ?? TextInputType.datetime,
-      onSaved: _handleSaved,
-      onFieldSubmitted: _handleSubmitted,
-      autofocus: widget.autofocus,
-      controller: _controller,
     );
   }
 }

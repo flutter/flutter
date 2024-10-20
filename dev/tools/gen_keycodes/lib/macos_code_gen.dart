@@ -108,7 +108,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
           '${mandatory ? 'true' : 'false'}'
           '},';
       lines.add(logicalEntry.value,
-          '    ${line.padRight(39)}'
+          '    ${line.padRight(32)}'
           '// ${logicalEntry.name}');
     });
     return lines.sortedJoin().trimRight();

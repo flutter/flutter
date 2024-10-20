@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'raw_keyboard.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
@@ -225,35 +230,40 @@ class LogicalKeyboardKey extends KeyboardKey {
 
   /// Returns a set of pseudo-key synonyms for the given `key`.
   ///
-  /// This allows finding the pseudo-keys that also represents a concrete
-  /// `key` so that a class with a key map can match pseudo-keys as well as the
-  /// actual generated keys.
+  /// This allows finding the pseudo-keys that also represent a concrete `key`
+  /// so that a class with a key map can match pseudo-keys as well as the actual
+  /// generated keys.
   ///
-  /// The pseudo-keys returned in the set are typically used to represent keys
-  /// which appear in multiple places on the keyboard, such as the [shift],
-  /// [alt], [control], and [meta] keys. The keys in the returned set won't ever
-  /// be generated directly, but if a more specific key event is received, then
+  /// Pseudo-keys returned in the set are typically used to represent keys which
+  /// appear in multiple places on the keyboard, such as the [shift], [alt],
+  /// [control], and [meta] keys. Pseudo-keys in the returned set won't ever be
+  /// generated directly, but if a more specific key event is received, then
   /// this set can be used to find the more general pseudo-key. For example, if
   /// this is a [shiftLeft] key, this accessor will return the set
   /// `<LogicalKeyboardKey>{ shift }`.
-  Set<LogicalKeyboardKey> get synonyms {
-    final LogicalKeyboardKey? result = _synonyms[this];
-    return result == null ? <LogicalKeyboardKey>{} : <LogicalKeyboardKey>{result};
-  }
+  Set<LogicalKeyboardKey> get synonyms => _synonyms[this] ?? <LogicalKeyboardKey>{};
 
   /// Takes a set of keys, and returns the same set, but with any keys that have
   /// synonyms replaced.
   ///
-  /// It is used, for example, to make sets of keys with members like
+  /// It is used, for example, to take sets of keys with members like
   /// [controlRight] and [controlLeft] and convert that set to contain just
   /// [control], so that the question "is any control key down?" can be asked.
   static Set<LogicalKeyboardKey> collapseSynonyms(Set<LogicalKeyboardKey> input) {
-    final Set<LogicalKeyboardKey> result = <LogicalKeyboardKey>{};
-    for (final LogicalKeyboardKey key in input) {
-      final LogicalKeyboardKey? synonym = _synonyms[key];
-      result.add(synonym ?? key);
-    }
-    return result;
+    return input.expand((LogicalKeyboardKey element) {
+      return _synonyms[element] ?? <LogicalKeyboardKey>{element};
+    }).toSet();
+  }
+
+  /// Returns the given set with any pseudo-keys expanded into their synonyms.
+  ///
+  /// It is used, for example, to take sets of keys with members like [control]
+  /// and [shift] and convert that set to contain [controlLeft], [controlRight],
+  /// [shiftLeft], and [shiftRight].
+  static Set<LogicalKeyboardKey> expandSynonyms(Set<LogicalKeyboardKey> input) {
+    return input.expand((LogicalKeyboardKey element) {
+      return _reverseSynonyms[element] ?? <LogicalKeyboardKey>{element};
+    }).toSet();
   }
 
   @override
@@ -3017,16 +3027,24 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0020000031f: gameButtonZ,
   };
 
-  // A map of keys to the pseudo-key synonym for that key. Used by getSynonyms.
-  static final Map<LogicalKeyboardKey, LogicalKeyboardKey> _synonyms = <LogicalKeyboardKey, LogicalKeyboardKey>{
-    shiftLeft: shift,
-    shiftRight: shift,
-    metaLeft: meta,
-    metaRight: meta,
-    altLeft: alt,
-    altRight: alt,
-    controlLeft: control,
-    controlRight: control,
+  // A map of keys to the pseudo-key synonym for that key.
+  static final Map<LogicalKeyboardKey, Set<LogicalKeyboardKey>> _synonyms = <LogicalKeyboardKey, Set<LogicalKeyboardKey>>{
+    shiftLeft: <LogicalKeyboardKey>{shift},
+    shiftRight: <LogicalKeyboardKey>{shift},
+    metaLeft: <LogicalKeyboardKey>{meta},
+    metaRight: <LogicalKeyboardKey>{meta},
+    altLeft: <LogicalKeyboardKey>{alt},
+    altRight: <LogicalKeyboardKey>{alt},
+    controlLeft: <LogicalKeyboardKey>{control},
+    controlRight: <LogicalKeyboardKey>{control},
+  };
+
+  // A map of pseudo-key to the set of keys that are synonyms for that pseudo-key.
+  static final Map<LogicalKeyboardKey, Set<LogicalKeyboardKey>> _reverseSynonyms = <LogicalKeyboardKey, Set<LogicalKeyboardKey>>{
+    shift: <LogicalKeyboardKey>{shiftLeft, shiftRight},
+    meta: <LogicalKeyboardKey>{metaLeft, metaRight},
+    alt: <LogicalKeyboardKey>{altLeft, altRight},
+    control: <LogicalKeyboardKey>{controlLeft, controlRight},
   };
 
   static const Map<int, String> _keyLabels = <int, String>{

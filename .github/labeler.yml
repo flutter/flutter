@@ -4,95 +4,206 @@
 
 # See https://github.com/actions/labeler/blob/main/README.md for docs.
 'a: accessibility':
-  - '**/accessibility/*'
-  - '**/*accessibility*'
-  - '**/semantics/*'
-  - '**/*semantics*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/accessibility/*'
+      - '**/*accessibility*'
+      - '**/semantics/*'
+      - '**/*semantics*'
 
 'a: animation':
-  - '**/animation/*'
-  - '**/*animation*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/animation/*'
+      - '**/*animation*'
 
 'a: desktop':
-  - '**/linux/**/*'
-  - '**/macos/**/*'
-  - '**/windows/**/*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/linux/**/*'
+      - '**/macos/**/*'
+      - '**/windows/**/*'
 
 'a: internationalization':
-  - packages/flutter_localizations/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter_localizations/**/*
 
 'a: tests':
-  - packages/flutter_driver/**/*
-  - packages/flutter_goldens/**/*
-  - packages/flutter_goldens_client/**/*
-  - packages/flutter_test/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter_driver/**/*
+      - packages/flutter_goldens/**/*
+      - packages/flutter_test/**/*
+      - packages/integration_test/**/*
 
 'a: text input':
-  - '**/text/*'
-  - '**/*text*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/text/*'
+      - '**/*text*'
 
 'd: api docs':
-  - examples/api/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - examples/api/**/*
+
+'d: docs/':
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/**/*
 
 'd: examples':
-  - examples/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - examples/**/*
 
 engine:
-  - bin/internal/engine.version
+  - changed-files:
+    - any-glob-to-any-file:
+      - bin/internal/engine.version
+      - docs/engine/**/*
 
 'f: cupertino':
-  - '**/cupertino/*'
-  - '**/*cupertino*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/cupertino/*'
+      - '**/*cupertino*'
+      - docs/libraries/cupertino/**/*
 
 'f: focus':
-  - '**/focus/*'
-  - '**/*focus*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/focus/*'
+      - '**/*focus*'
 
 'f: gestures':
-  - '**/gestures/*'
-  - '**/*gestures*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/gestures/*'
+      - '**/*gestures*'
 
 'f: material design':
-  - '**/material/*'
-  - '**/*material*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/material/*'
+      - '**/*material*'
+      - docs/libraries/material/**/*
 
 'f: routes':
-  - '**/navigator/*'
-  - '**/*navigator*'
-  - '**/route/*'
-  - '**/*route*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/navigator/*'
+      - '**/*navigator*'
+      - '**/route/*'
+      - '**/*route*'
 
 'f: scrolling':
-  - '**/*scroll*'
-  - '**/scroll/*'
-  - '**/*sliver*'
-  - '**/sliver/*'
-  - '**/*viewport*'
-  - '**/viewport/*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*scroll*'
+      - '**/scroll/*'
+      - '**/*sliver*'
+      - '**/sliver/*'
+      - '**/*viewport*'
+      - '**/viewport/*'
 
 framework:
-  - packages/flutter/**/*
-  - packages/flutter_driver/**/*
-  - packages/flutter_goldens/**/*
-  - packages/flutter_goldens_client/**/*
-  - packages/flutter_test/**/*
-  - packages/integration_test/**/*
-  - examples/api/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter/**/*
+      - packages/flutter_driver/**/*
+      - packages/flutter_goldens/**/*
+      - packages/flutter_localizations/**/*
+      - packages/flutter_test/**/*
+      - packages/integration_test/**/*
+      - examples/api/**/*
+      - docs/about/**/*
+      - docs/contributing/**/*
+      - docs/libraries/**/*
 
 'f: integration_test':
-  - packages/integration_test/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/integration_test/**/*
+
+package:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/ecosystem/**/*
+
+platform-android:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/platform/android/**/*
 
 platform-ios:
-  - packages/flutter_tools/lib/src/ios/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter_tools/lib/src/ios/**/*
+
+platform-web:
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter_web_plugins/**/*
 
 'customer: gallery':
-  - examples/flutter_gallery/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - examples/flutter_gallery/**/*
 
 'c: tech-debt':
-  - '**/fix_data.yaml'
-  - '**/*.expect'
-  - '**/*test_fixes*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/fix_data.yaml'
+      - '**/*.expect'
+      - '**/*test_fixes*'
+
+team:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/about/**/*
+      - docs/contributing/**/*
+      - docs/postmortems/**/*
+
+team-android:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/platform/android/**/*
+
+team-ecosystem:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/ecosystem/**/*
+
+team-engine:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/engine/**/*
+
+team-infra:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/infra/**/*
+
+team-release:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/releases/**/*
+
+team-tool:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/tool/**/*
+
+team-web:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/platforms/web/**/*
 
 tool:
-  - packages/flutter_tools/**/*
-  - packages/fuchsia_remote_debug_protocol/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter_tools/**/*
+      - packages/fuchsia_remote_debug_protocol/**/*
+      - docs/tool/**/*

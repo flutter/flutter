@@ -28,7 +28,7 @@ const FakeCommand kARMCheckCommand = FakeCommand(
 );
 
 const List<String> kDefaultClang = <String>[
-  '-miphoneos-version-min=11.0',
+  '-miphoneos-version-min=12.0',
   '-isysroot',
   'path/to/sdk',
   '-dynamiclib',
@@ -49,12 +49,6 @@ const List<String> kDefaultClang = <String>[
 ];
 
 void main() {
-  group('SnapshotType', () {
-    test('does not throw, if target platform is null', () {
-      expect(() => SnapshotType(null, BuildMode.release), returnsNormally);
-    });
-  });
-
   group('GenSnapshot', () {
     late GenSnapshot genSnapshot;
     late Artifacts artifacts;
@@ -221,7 +215,7 @@ void main() {
           'cc',
           '-arch',
           'arm64',
-          '-miphoneos-version-min=11.0',
+          '-miphoneos-version-min=12.0',
           '-isysroot',
           'path/to/sdk',
           '-c',
@@ -292,7 +286,7 @@ void main() {
           'cc',
           '-arch',
           'arm64',
-          '-miphoneos-version-min=11.0',
+          '-miphoneos-version-min=12.0',
           '-isysroot',
           'path/to/sdk',
           '-c',
@@ -360,7 +354,7 @@ void main() {
           'cc',
           '-arch',
           'arm64',
-          '-miphoneos-version-min=11.0',
+          '-miphoneos-version-min=12.0',
           '-isysroot',
           'path/to/sdk',
           '-c',

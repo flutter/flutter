@@ -18,6 +18,8 @@ import 'package:intl/intl.dart' as intl;
 
 @(messageClassImports)
 
+// ignore_for_file: type=lint
+
 /// Callers can lookup localized strings with an instance of @(class)
 /// returned by `@(class).of(context)`.
 ///
@@ -142,6 +144,14 @@ const String methodTemplate = '''
 @(tempVars)    return @(message);
   }''';
 
+const String methodWithNamedParameterTemplate = '''
+  @override
+  String @(name)({@(parameters)}) {
+@(dateFormatting)
+@(numberFormatting)
+@(tempVars)    return @(message);
+  }''';
+
 const String pluralVariableTemplate = '''
     String @(varName) = intl.Intl.pluralLogic(
       @(count),
@@ -162,6 +172,8 @@ const String dateVariableTemplate = '''
 
 const String classFileTemplate = '''
 @(header)@(requiresIntlImport)import '@(fileName)';
+
+// ignore_for_file: type=lint
 
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseClass) {
@@ -193,6 +205,13 @@ const String baseClassMethodTemplate = '''
   ///
 @(templateLocaleTranslationComment)
   String @(name)(@(parameters));
+''';
+
+const String baseClassMethodWithNamedParameterTemplate = '''
+@(comment)
+  ///
+@(templateLocaleTranslationComment)
+  String @(name)({@(parameters)});
 ''';
 
 // DELEGATE CLASS TEMPLATES

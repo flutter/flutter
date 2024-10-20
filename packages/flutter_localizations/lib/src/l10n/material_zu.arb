@@ -142,7 +142,9 @@
   "expandedHint": "Kugoqiwe",
   "collapsedHint": "Kunwetshiwe",
   "menuDismissLabel": "Chitha imenyu",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Bheka Phezulu",
+  "searchWebButtonLabel": "Sesha Iwebhu",
+  "shareButtonLabel": "Yabelana...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
@@ -14,14 +16,17 @@ class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
     MacOSProject project,
     super.logger,
     Usage usage,
+    Analytics analytics,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-        _usage = usage;
+        _usage = usage,
+        _analytics = analytics;
 
   final File _xcodeProjectInfoFile;
   final Usage _usage;
+  final Analytics _analytics;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     if (!_xcodeProjectInfoFile.existsSync()) {
       logger.printTrace(
           'Xcode project not found, skipping framework link and embedding migration');
@@ -89,6 +94,11 @@ class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
       UsageEvent('macos-migration', 'remove-frameworks',
               label: 'failure', flutterUsage: _usage)
           .send();
+      _analytics.send(Event.appleUsageEvent(
+        workflow: 'macos-migration',
+        parameter: 'remove-frameworks',
+        result: 'failure',
+      ));
       throwToolExit(
           'Your Xcode project requires migration.');
     }

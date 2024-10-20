@@ -34,9 +34,11 @@ class _${blockName}DefaultsM3 extends NavigationBarThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
         size: ${getToken("md.comp.navigation-bar.icon.size")},
-        color: states.contains(MaterialState.selected)
-          ? ${componentColor("md.comp.navigation-bar.active.icon")}
-          : ${componentColor("md.comp.navigation-bar.inactive.icon")},
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
+            ? ${componentColor("md.comp.navigation-bar.active.icon")}
+            : ${componentColor("md.comp.navigation-bar.inactive.icon")},
       );
     });
   }
@@ -47,9 +49,12 @@ class _${blockName}DefaultsM3 extends NavigationBarThemeData {
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = ${textStyle("md.comp.navigation-bar.label-text")}!;
-      return style.apply(color: states.contains(MaterialState.selected)
-        ? ${componentColor("md.comp.navigation-bar.active.label-text")}
-        : ${componentColor("md.comp.navigation-bar.inactive.label-text")}
+      return style.apply(
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
+            ? ${componentColor("md.comp.navigation-bar.active.label-text")}
+            : ${componentColor("md.comp.navigation-bar.inactive.label-text")}
       );
     });
   }

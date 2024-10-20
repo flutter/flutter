@@ -348,7 +348,8 @@ class SliverGridDelegateWithFixedCrossAxisCount extends SliverGridDelegate {
   }) : assert(crossAxisCount > 0),
        assert(mainAxisSpacing >= 0),
        assert(crossAxisSpacing >= 0),
-       assert(childAspectRatio > 0);
+       assert(childAspectRatio > 0),
+       assert(mainAxisExtent == null || mainAxisExtent >= 0);
 
   /// The number of children in the cross axis.
   final int crossAxisCount;
@@ -446,8 +447,8 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
   }) : assert(maxCrossAxisExtent > 0),
        assert(mainAxisSpacing >= 0),
        assert(crossAxisSpacing >= 0),
-       assert(childAspectRatio > 0);
-
+       assert(childAspectRatio > 0),
+       assert(mainAxisExtent == null || mainAxisExtent >= 0);
   /// The maximum extent of tiles in the cross axis.
   ///
   /// This delegate will select a cross-axis extent for the tiles that is as
@@ -596,14 +597,9 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     final int firstIndex = layout.getMinChildIndexForScrollOffset(scrollOffset);
     final int? targetLastIndex = targetEndScrollOffset.isFinite ?
       layout.getMaxChildIndexForScrollOffset(targetEndScrollOffset) : null;
-
     if (firstChild != null) {
-      final int oldFirstIndex = indexOf(firstChild!);
-      final int oldLastIndex = indexOf(lastChild!);
-      final int leadingGarbage = (firstIndex - oldFirstIndex).clamp(0, childCount); // ignore_clamp_double_lint
-      final int trailingGarbage = targetLastIndex == null
-        ? 0
-        : (oldLastIndex - targetLastIndex).clamp(0, childCount); // ignore_clamp_double_lint
+      final int leadingGarbage = calculateLeadingGarbage(firstIndex: firstIndex);
+      final int trailingGarbage = targetLastIndex != null ? calculateTrailingGarbage(lastIndex: targetLastIndex) : 0;
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);

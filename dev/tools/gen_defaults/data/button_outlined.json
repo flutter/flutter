@@ -1,5 +1,5 @@
 {
-  "version": "v0_162",
+  "version": "v4_1_0",
 
   "md.comp.outlined-button.container.height": 40.0,
   "md.comp.outlined-button.container.shape": "md.sys.shape.corner.full",
@@ -7,6 +7,9 @@
   "md.comp.outlined-button.disabled.label-text.opacity": 0.38,
   "md.comp.outlined-button.disabled.outline.color": "onSurface",
   "md.comp.outlined-button.disabled.outline.opacity": 0.12,
+  "md.comp.outlined-button.focus.indicator.color": "secondary",
+  "md.comp.outlined-button.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
+  "md.comp.outlined-button.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.outlined-button.focus.label-text.color": "primary",
   "md.comp.outlined-button.focus.outline.color": "primary",
   "md.comp.outlined-button.focus.state-layer.color": "primary",

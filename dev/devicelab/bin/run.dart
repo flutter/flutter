@@ -10,7 +10,6 @@ import 'package:flutter_devicelab/framework/ab.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:path/path.dart' as path;
 
 /// Runs tasks.
 ///
@@ -115,6 +114,7 @@ Future<void> main(List<String> rawArgs) async {
       deviceId: deviceId,
       resultsFile: resultsFile,
       taskName: taskNames.single,
+      onlyLocalEngine: (args['ab-local-engine-only'] as bool?) ?? false,
     );
   } else {
     await runTasks(taskNames,
@@ -143,6 +143,7 @@ Future<void> _runABTest({
   required String? deviceId,
   required String resultsFile,
   required String taskName,
+  bool onlyLocalEngine = false,
 }) async {
   print('$taskName A/B test. Will run $runsPerTest times.');
 
@@ -156,22 +157,26 @@ Future<void> _runABTest({
   for (int i = 1; i <= runsPerTest; i++) {
     section('Run #$i');
 
-    print('Running with the default engine (A)');
-    final TaskResult defaultEngineResult = await runTask(
-      taskName,
-      silent: silent,
-      deviceId: deviceId,
-    );
+    if (onlyLocalEngine) {
+      print('Skipping default engine (A)');
+    } else {
+      print('Running with the default engine (A)');
+      final TaskResult defaultEngineResult = await runTask(
+        taskName,
+        silent: silent,
+        deviceId: deviceId,
+      );
 
-    print('Default engine result:');
-    print(const JsonEncoder.withIndent('  ').convert(defaultEngineResult));
+      print('Default engine result:');
+      print(const JsonEncoder.withIndent('  ').convert(defaultEngineResult));
 
-    if (!defaultEngineResult.succeeded) {
-      stderr.writeln('Task failed on the default engine.');
-      exit(1);
+      if (!defaultEngineResult.succeeded) {
+        stderr.writeln('Task failed on the default engine.');
+        exit(1);
+      }
+
+      abTest.addAResult(defaultEngineResult);
     }
-
-    abTest.addAResult(defaultEngineResult);
 
     print('Running with the local engine (B)');
     final TaskResult localEngineResult = await runTask(
@@ -235,29 +240,12 @@ ArgParser createArgParser(List<String> taskNames) {
     ..addMultiOption(
       'task',
       abbr: 't',
-      help: 'Either:\n'
-          ' - the name of a task defined in manifest.yaml.\n'
-          '   Example: complex_layout__start_up.\n'
-          ' - the path to a Dart file corresponding to a task,\n'
-          '   which resides in bin/tasks.\n'
-          '   Example: bin/tasks/complex_layout__start_up.dart.\n'
+      help: 'Name of a Dart file in bin/tasks.\n'
+          '   Example: complex_layout__start_up\n'
           '\n'
           'This option may be repeated to specify multiple tasks.',
-      callback: (List<String> value) {
-        for (final String nameOrPath in value) {
-          final List<String> fragments = path.split(nameOrPath);
-          final bool isDartFile = fragments.last.endsWith('.dart');
-
-          if (fragments.length == 1 && !isDartFile) {
-            // Not a path
-            taskNames.add(nameOrPath);
-          } else if (!isDartFile || !path.equals(path.dirname(nameOrPath), path.join('bin', 'tasks'))) {
-            // Unsupported executable location
-            throw FormatException('Invalid value for option -t (--task): $nameOrPath');
-          } else {
-            taskNames.add(path.withoutExtension(fragments.last));
-          }
-        }
+      callback: (List<String> tasks) {
+        taskNames.addAll(tasks);
       },
     )
     ..addOption(
@@ -290,6 +278,11 @@ ArgParser createArgParser(List<String> taskNames) {
       help: 'The filename in which to place the json encoded results of an A/B test.\n'
             'The filename may contain a single # character to be replaced by a sequence\n'
             'number if the name already exists.',
+    )
+    ..addFlag(
+      'ab-local-engine-only',
+      help: 'When running the A/B aggregator, do not run benchmarks with the default engine (A), only the local engine (B).\n'
+            'Shows the averages and noise report for the local engine without comparison to anything else.',
     )
     ..addFlag(
       'exit',
@@ -339,14 +332,6 @@ ArgParser createArgParser(List<String> taskNames) {
             'the location based on the value of the --flutter-root option.',
     )
     ..addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.')
-    ..addFlag(
-      'match-host-platform',
-      defaultsTo: true,
-      help: 'Only run tests that match the host platform (e.g. do not run a\n'
-            'test with a `required_agent_capabilities` value of "mac/android"\n'
-            'on a windows host). Each test publishes its '
-            '`required_agent_capabilities`\nin the `manifest.yaml` file.',
-    )
     ..addOption(
       'results-file',
       help: '[Flutter infrastructure] File path for test results. If passed with\n'

@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # For details regarding the *Flutter Fix* feature, see
-# https://flutter.dev/docs/development/tools/flutter-fix
+# https://flutter.dev/to/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -23,6 +23,38 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
+  # Changes made in TBD
+  - title: "Migrate to focusNode.enclosingScope!"
+    date: 2023-11-29
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      getter: 'focusScopeNode'
+      inClass: 'NavigatorState'
+    changes:
+      - kind: 'rename'
+        newName: 'focusNode.enclosingScope!'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138509
+  - title: "Migrate to 'PlatformMenuBar.child'"
+    date: 2023-11-15
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'body'
+      inClass: 'PlatformMenuBar'
+    changes:
+      - kind: 'rename'
+        newName: 'child'
+  - title: "Migrate PlatformMenuBar(body:) to PlatformMenuBar(child:)"
+    date: 2023-11-15
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'PlatformMenuBar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'body'
+        newName: 'child'
+
   # Changes made in https://github.com/flutter/flutter/pull/123352
   - title: "Migrate to 'rootElement'"
     date: 2023-03-13
@@ -815,7 +847,7 @@ transforms:
       - kind: 'rename'
         newName: 'insertRenderObjectChild'
 
-  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  # Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   - title: "Migrate to 'clipBehavior'"
     date: 2020-08-20
     element:
@@ -826,7 +858,7 @@ transforms:
     - kind: 'rename'
       newName: 'clipBehavior'
 
-  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  # Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   - title: "Migrate to 'clipBehavior'"
     date: 2020-08-20
     element:

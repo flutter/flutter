@@ -246,9 +246,6 @@ class FakeDaemonStreams implements DaemonStreams {
   }
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
   final String id = 'device';
@@ -276,6 +273,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   bool get isConnected => true;
+
+  @override
+  final DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
 
   @override
   Future<String> get sdkNameAndVersion async => 'Android 12';

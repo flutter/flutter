@@ -11,10 +11,11 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+import '../impeller_test_helpers.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Color filter - red', (WidgetTester tester) async {
+  testWidgets('Color filter - red', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RepaintBoundary(
         child: ColorFiltered(
@@ -29,7 +30,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Color filter - sepia', (WidgetTester tester) async {
+  testWidgets('Color filter - sepia', (WidgetTester tester) async {
+
     const ColorFilter sepia = ColorFilter.matrix(<double>[
       0.39,  0.769, 0.189, 0, 0, //
       0.349, 0.686, 0.168, 0, 0, //
@@ -41,6 +43,7 @@ void main() {
         child: ColorFiltered(
           colorFilter: sepia,
           child: MaterialApp(
+            debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
             title: 'Flutter Demo',
             theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
             home: Scaffold(
@@ -64,9 +67,9 @@ void main() {
       find.byType(ColorFiltered),
       matchesGoldenFile('color_filter_sepia.png'),
     );
-  });
+  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
 
-  testWidgetsWithLeakTracking('Color filter - reuses its layer', (WidgetTester tester) async {
+  testWidgets('Color filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithColor(Color color) async {
       await tester.pumpWidget(
         RepaintBoundary(

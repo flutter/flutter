@@ -14,10 +14,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
-import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
-import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
 import 'common.dart';
+import 'src/callback.dart' as driver_actions;
 import 'src/channel.dart';
+import 'src/extension.dart';
 
 const String _success = 'success';
 
@@ -75,7 +75,7 @@ If you're running the tests with Android instrumentation or XCTest, this means
 that you are not capturing test results properly! See the following link for
 how to set up the integration_test plugin:
 
-https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
+https://docs.flutter.dev/testing/integration-tests
 ''');
       }
     });

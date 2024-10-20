@@ -225,9 +225,6 @@ AndroidDevice createFakeDevice(int? sdkLevel) {
   );
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   FakeAndroidDevice(this._apiVersion, this._lastLogcatTimestamp);
 

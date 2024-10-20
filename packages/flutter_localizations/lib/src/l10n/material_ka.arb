@@ -142,7 +142,9 @@
   "expandedHint": "ჩაკეცილია",
   "collapsedHint": "გაფართოებულია",
   "menuDismissLabel": "მენიუს უარყოფა",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "აიხედეთ ზემოთ",
+  "searchWebButtonLabel": "ვებში ძიება",
+  "shareButtonLabel": "გაზიარება...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -6,7 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('SwitchThemeData copyWith, ==, hashCode basics', () {
@@ -43,7 +42,7 @@ void main() {
     expect(theme.data.thumbIcon, null);
   });
 
-  testWidgetsWithLeakTracking('Default SwitchThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default SwitchThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SwitchThemeData().debugFillProperties(builder);
 
@@ -55,7 +54,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('SwitchThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('SwitchThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SwitchThemeData(
       thumbColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
@@ -74,18 +73,18 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description[0], 'thumbColor: MaterialStatePropertyAll(Color(0xfffffff0))');
-    expect(description[1], 'trackColor: MaterialStatePropertyAll(Color(0xfffffff1))');
-    expect(description[2], 'trackOutlineColor: MaterialStatePropertyAll(Color(0xfffffff3))');
-    expect(description[3], 'trackOutlineWidth: MaterialStatePropertyAll(6.0)');
+    expect(description[0], 'thumbColor: WidgetStatePropertyAll(Color(0xfffffff0))');
+    expect(description[1], 'trackColor: WidgetStatePropertyAll(Color(0xfffffff1))');
+    expect(description[2], 'trackOutlineColor: WidgetStatePropertyAll(Color(0xfffffff3))');
+    expect(description[3], 'trackOutlineWidth: WidgetStatePropertyAll(6.0)');
     expect(description[4], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
-    expect(description[5], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
-    expect(description[6], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
+    expect(description[5], 'mouseCursor: WidgetStatePropertyAll(SystemMouseCursor(click))');
+    expect(description[6], 'overlayColor: WidgetStatePropertyAll(Color(0xfffffff2))');
     expect(description[7], 'splashRadius: 1.0');
-    expect(description[8], 'thumbIcon: MaterialStatePropertyAll(Icon(IconData(U+0007B)))');
+    expect(description[8], 'thumbIcon: WidgetStatePropertyAll(Icon(IconData(U+0007B)))');
   });
 
-  testWidgetsWithLeakTracking('Material2 - Switch is themeable', (WidgetTester tester) async {
+  testWidgets('Material2 - Switch is themeable', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color defaultThumbColor = Color(0xfffffff0);
@@ -208,7 +207,7 @@ void main() {
     expect(_getSwitchMaterial(tester), paints..circle(color: focusOverlayColor, radius: splashRadius));
   });
 
-  testWidgetsWithLeakTracking('Material3 - Switch is themeable', (WidgetTester tester) async {
+  testWidgets('Material3 - Switch is themeable', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color defaultThumbColor = Color(0xfffffff0);
@@ -326,7 +325,7 @@ void main() {
     expect(_getSwitchMaterial(tester), paints..circle(color: focusOverlayColor, radius: splashRadius));
   });
 
-  testWidgetsWithLeakTracking('Material2 - Switch properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgets('Material2 - Switch properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
@@ -496,7 +495,7 @@ void main() {
     expect(_getSwitchMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
 
-  testWidgetsWithLeakTracking('Material3 - Switch properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgets('Material3 - Switch properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
@@ -659,7 +658,7 @@ void main() {
     expect(_getSwitchMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
 
-  testWidgetsWithLeakTracking('Material2 - Switch active and inactive properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgets('Material2 - Switch active and inactive properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
@@ -717,6 +716,7 @@ void main() {
         ..rrect()
         ..rrect()
         ..rrect()
+        ..rrect()
         ..rrect(color: defaultThumbColor)
     );
 
@@ -730,11 +730,12 @@ void main() {
         ..rrect()
         ..rrect()
         ..rrect()
+        ..rrect()
         ..rrect(color: selectedThumbColor)
     );
   });
 
-  testWidgetsWithLeakTracking('Material3 - Switch active and inactive properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgets('Material3 - Switch active and inactive properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
@@ -805,7 +806,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material2 - Switch theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+  testWidgets('Material2 - Switch theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
@@ -870,7 +871,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material3 - Switch theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+  testWidgets('Material3 - Switch theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
@@ -936,7 +937,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material2 - Local SwitchTheme can override global SwitchTheme', (WidgetTester tester) async {
+  testWidgets('Material2 - Local SwitchTheme can override global SwitchTheme', (WidgetTester tester) async {
     const Color globalThemeThumbColor = Color(0xfffffff1);
     const Color globalThemeTrackColor = Color(0xfffffff2);
     const Color globalThemeOutlineColor = Color(0xfffffff3);
@@ -990,7 +991,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material3 - Local SwitchTheme can override global SwitchTheme', (WidgetTester tester) async {
+  testWidgets('Material3 - Local SwitchTheme can override global SwitchTheme', (WidgetTester tester) async {
     const Color globalThemeThumbColor = Color(0xfffffff1);
     const Color globalThemeTrackColor = Color(0xfffffff2);
     const Color globalThemeOutlineColor = Color(0xfffffff3);

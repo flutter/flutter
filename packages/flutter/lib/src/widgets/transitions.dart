@@ -126,6 +126,9 @@ class _AnimatedState extends State<AnimatedWidget> {
   }
 
   void _handleChange() {
+    if (!mounted) {
+      return;
+    }
     setState(() {
       // The listenable's state is our build state, and it changed already.
     });
@@ -296,19 +299,10 @@ class MatrixTransition extends AnimatedWidget {
     // a saveLayer call. This is usually worthwhile when animating the layer,
     // but leaving it in the layer tree before the animation has started or after
     // it has finished significantly hurts performance.
-    final bool useFilterQuality;
-    switch (animation.status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        useFilterQuality = false;
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        useFilterQuality = true;
-    }
     return Transform(
       transform: onTransform(animation.value),
       alignment: alignment,
-      filterQuality: useFilterQuality ? filterQuality : null,
+      filterQuality: animation.isAnimating ? filterQuality : null,
       child: child,
     );
   }
@@ -441,8 +435,10 @@ class SizeTransition extends AnimatedWidget {
     this.axis = Axis.vertical,
     required Animation<double> sizeFactor,
     this.axisAlignment = 0.0,
+    this.fixedCrossAxisSizeFactor,
     this.child,
-  }) : super(listenable: sizeFactor);
+  }) : assert(fixedCrossAxisSizeFactor == null || fixedCrossAxisSizeFactor >= 0.0),
+    super(listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
   /// [Axis.vertical].
@@ -471,6 +467,14 @@ class SizeTransition extends AnimatedWidget {
   /// A value of 0.0 (the default) indicates the center for either [axis] value.
   final double axisAlignment;
 
+  /// The factor by which to multiply the cross axis size of the child.
+  ///
+  /// If the value of [fixedCrossAxisSizeFactor] is less than one, the child
+  /// will be clipped along the appropriate axis.
+  ///
+  /// If `null` (the default), the cross axis size is as large as the parent.
+  final double? fixedCrossAxisSizeFactor;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -478,17 +482,14 @@ class SizeTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AlignmentDirectional alignment;
-    if (axis == Axis.vertical) {
-      alignment = AlignmentDirectional(-1.0, axisAlignment);
-    } else {
-      alignment = AlignmentDirectional(axisAlignment, -1.0);
-    }
     return ClipRect(
       child: Align(
-        alignment: alignment,
-        heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : null,
-        widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : null,
+        alignment: switch (axis) {
+          Axis.horizontal => AlignmentDirectional(axisAlignment, -1.0),
+          Axis.vertical   => AlignmentDirectional(-1.0, axisAlignment),
+        },
+        heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : fixedCrossAxisSizeFactor,
+        widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : fixedCrossAxisSizeFactor,
         child: child,
       ),
     );
@@ -620,7 +621,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 /// To avoid such problems, it is generally a good idea to combine this widget
 /// with a [SliverIgnorePointer] that one enables when the [opacity] animation
 /// reaches zero. This prevents interactions with any children in the subtree
-/// when the [sliver] is not visible. For performance reasons, when implementing
+/// when the sliver is not visible. For performance reasons, when implementing
 /// this, care should be taken not to rebuild the relevant widget (e.g. by
 /// calling [State.setState]) except at the transition point.
 ///

@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/gestures/monodrag.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'two_dimensional_utils.dart';
 
@@ -20,7 +19,7 @@ Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
 
 void main() {
   group('TwoDimensionalScrollView',() {
-    testWidgetsWithLeakTracking('asserts the axis directions do not conflict with one another', (WidgetTester tester) async {
+    testWidgets('asserts the axis directions do not conflict with one another', (WidgetTester tester) async {
       final List<Object> exceptions = <Object>[];
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails details) {
@@ -67,7 +66,7 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('ScrollableDetails.controller can set initial scroll positions, modify within bounds', (WidgetTester tester) async {
+    testWidgets('ScrollableDetails.controller can set initial scroll positions, modify within bounds', (WidgetTester tester) async {
       final ScrollController verticalController = ScrollController(initialScrollOffset: 100);
       addTearDown(verticalController.dispose);
       final ScrollController horizontalController = ScrollController(initialScrollOffset: 50);
@@ -110,7 +109,7 @@ void main() {
       expect(horizontalController.position.pixels, 19200);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('Properly assigns the PrimaryScrollController to the main axis on the correct platform', (WidgetTester tester) async {
+    testWidgets('Properly assigns the PrimaryScrollController to the main axis on the correct platform', (WidgetTester tester) async {
       late ScrollController controller;
       Widget buildForPrimaryScrollController({
         bool? explicitPrimary,
@@ -308,7 +307,7 @@ void main() {
       FlutterError.onError = oldHandler;
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('TwoDimensionalScrollable receives the correct details from TwoDimensionalScrollView', (WidgetTester tester) async {
+    testWidgets('TwoDimensionalScrollable receives the correct details from TwoDimensionalScrollView', (WidgetTester tester) async {
       late BuildContext capturedContext;
       // Default
       late final TwoDimensionalChildBuilderDelegate delegate1;
@@ -353,5 +352,618 @@ void main() {
       expect(scrollable.widget.diagonalDragBehavior, DiagonalDragBehavior.weightedContinuous);
       expect(scrollable.widget.dragStartBehavior, DragStartBehavior.down);
     }, variant: TargetPlatformVariant.all());
+
+    testWidgets('TwoDimensionalScrollable with hitTestBehavior.translucent lets widgets underneath catch the hit', (WidgetTester tester) async {
+      bool tapped = false;
+      final Key key = UniqueKey();
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
+      await tester.pumpWidget(MaterialApp(
+        home: Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => tapped = true,
+                child: SizedBox(key: key, height: 300),
+              ),
+            ),
+            SimpleBuilderTableView(
+              hitTestBehavior: HitTestBehavior.translucent,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                builder: (BuildContext context, ChildVicinity vicinity) {
+                  return const SizedBox(width: 50, height: 50);
+                },
+              ),
+            ),
+          ],
+        ),
+      ));
+      await tester.pumpAndSettle();
+      await tester.tapAt(tester.getCenter(find.byKey(key)));
+      expect(tapped, isTrue);
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Interrupt fling with tap stops scrolling', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/133529
+      final List<String> log = <String>[];
+      final ScrollController verticalController = ScrollController();
+      addTearDown(verticalController.dispose);
+      final ScrollController horizontalController = ScrollController();
+      addTearDown(horizontalController.dispose);
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SimpleBuilderTableView(
+            verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+            horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+            diagonalDragBehavior: DiagonalDragBehavior.free,
+            delegate: delegate = TwoDimensionalChildBuilderDelegate(
+              maxXIndex: 100,
+              maxYIndex: 100,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return GestureDetector(
+                  onTapUp: (TapUpDetails details) {
+                    log.add('Tapped: $vicinity');
+                  },
+                  child: Text('$vicinity'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(log, equals(<String>[]));
+      expect(verticalController.position.pixels, 0.0);
+      expect(horizontalController.position.pixels, 0.0);
+      expect(verticalController.position.activity?.isScrolling, isFalse);
+      expect(horizontalController.position.activity?.isScrolling, isFalse);
+      expect(verticalController.position.activity!.velocity, 0.0);
+      expect(horizontalController.position.activity!.velocity, 0.0);
+
+      // Tap once
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+      expect(verticalController.position.pixels, 0.0);
+      expect(horizontalController.position.pixels, 0.0);
+      expect(verticalController.position.activity?.isScrolling, isFalse);
+      expect(horizontalController.position.activity?.isScrolling, isFalse);
+      expect(verticalController.position.activity!.velocity, 0.0);
+      expect(horizontalController.position.activity!.velocity, 0.0);
+
+      // Fling the scrollview to get it scrolling, verify that no tap occurs.
+      await tester.fling(find.byType(TwoDimensionalScrollable), const Offset(0.0, -200.0), 2000.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+      expect(verticalController.position.pixels, greaterThan(170.0));
+      double unchangedOffset = verticalController.position.pixels;
+      expect(horizontalController.position.pixels, 0.0);
+      expect(verticalController.position.activity!.isScrolling, isTrue);
+      expect(horizontalController.position.activity!.isScrolling, isFalse);
+      expect(verticalController.position.activity!.velocity, greaterThan(1500));
+      expect(horizontalController.position.activity!.velocity, 0.0);
+
+      // Tap to stop the scroll movement, this should stop the fling but not tap anything
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+      expect(verticalController.position.pixels, unchangedOffset);
+      expect(horizontalController.position.pixels, 0.0);
+      expect(verticalController.position.activity?.isScrolling, isFalse);
+      expect(horizontalController.position.activity?.isScrolling, isFalse);
+      expect(verticalController.position.activity!.velocity, 0.0);
+      expect(horizontalController.position.activity!.velocity, 0.0);
+
+      // Another tap.
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, <String>['Tapped: (xIndex: 0, yIndex: 0)', 'Tapped: (xIndex: 0, yIndex: 0)']);
+      expect(verticalController.position.pixels, unchangedOffset);
+      expect(horizontalController.position.pixels, 0.0);
+      expect(verticalController.position.activity?.isScrolling, isFalse);
+      expect(horizontalController.position.activity?.isScrolling, isFalse);
+      expect(verticalController.position.activity!.velocity, 0.0);
+      expect(horizontalController.position.activity!.velocity, 0.0);
+
+      log.clear();
+      verticalController.jumpTo(0.0);
+      await tester.pump();
+      // Fling off in the other direction now ----------------------------------
+      expect(log, equals(<String>[]));
+      expect(verticalController.position.pixels, 0.0);
+      expect(horizontalController.position.pixels, 0.0);
+      expect(verticalController.position.activity?.isScrolling, isFalse);
+      expect(horizontalController.position.activity?.isScrolling, isFalse);
+      expect(verticalController.position.activity!.velocity, 0.0);
+      expect(horizontalController.position.activity!.velocity, 0.0);
+
+      // Tap once
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+      expect(verticalController.position.pixels, 0.0);
+      expect(horizontalController.position.pixels, 0.0);
+      expect(verticalController.position.activity?.isScrolling, isFalse);
+      expect(horizontalController.position.activity?.isScrolling, isFalse);
+      expect(verticalController.position.activity!.velocity, 0.0);
+      expect(horizontalController.position.activity!.velocity, 0.0);
+
+      // Fling the scrollview to get it scrolling, verify that no tap occurs.
+      await tester.fling(find.byType(TwoDimensionalScrollable), const Offset(-200.0, 0.0), 2000.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+      expect(horizontalController.position.pixels, greaterThan(170.0));
+      unchangedOffset = horizontalController.position.pixels;
+      expect(verticalController.position.pixels, 0.0);
+      expect(horizontalController.position.activity!.isScrolling, isTrue);
+      expect(verticalController.position.activity!.isScrolling, isFalse);
+      expect(horizontalController.position.activity!.velocity, greaterThan(1500));
+      expect(verticalController.position.activity!.velocity, 0.0);
+
+      // Tap to stop the scroll movement, this should stop the fling but not tap anything
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+      expect(horizontalController.position.pixels, unchangedOffset);
+      expect(verticalController.position.pixels, 0.0);
+      expect(horizontalController.position.activity?.isScrolling, isFalse);
+      expect(verticalController.position.activity?.isScrolling, isFalse);
+      expect(horizontalController.position.activity!.velocity, 0.0);
+      expect(verticalController.position.activity!.velocity, 0.0);
+
+      // Another tap.
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, <String>['Tapped: (xIndex: 0, yIndex: 0)', 'Tapped: (xIndex: 0, yIndex: 0)']);
+      expect(horizontalController.position.pixels, unchangedOffset);
+      expect(verticalController.position.pixels, 0.0);
+      expect(horizontalController.position.activity?.isScrolling, isFalse);
+      expect(verticalController.position.activity?.isScrolling, isFalse);
+      expect(horizontalController.position.activity!.velocity, 0.0);
+      expect(verticalController.position.activity!.velocity, 0.0);
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Fling, wait to stop and tap', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/133529
+      final List<String> log = <String>[];
+      final ScrollController verticalController = ScrollController();
+      addTearDown(verticalController.dispose);
+      final ScrollController horizontalController = ScrollController();
+      addTearDown(horizontalController.dispose);
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SimpleBuilderTableView(
+            verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+            horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+            diagonalDragBehavior: DiagonalDragBehavior.free,
+            delegate: delegate = TwoDimensionalChildBuilderDelegate(
+              maxXIndex: 100,
+              maxYIndex: 100,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return GestureDetector(
+                  onTapUp: (TapUpDetails details) {
+                    log.add('Tapped: $vicinity');
+                  },
+                  child: Text('$vicinity'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(log, equals(<String>[]));
+      expect(verticalController.position.pixels, 0.0);
+      expect(horizontalController.position.pixels, 0.0);
+      expect(verticalController.position.activity?.isScrolling, isFalse);
+      expect(horizontalController.position.activity?.isScrolling, isFalse);
+      expect(verticalController.position.activity!.velocity, 0.0);
+      expect(horizontalController.position.activity!.velocity, 0.0);
+
+      // Tap once
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+      expect(verticalController.position.pixels, 0.0);
+      expect(horizontalController.position.pixels, 0.0);
+      expect(verticalController.position.activity?.isScrolling, isFalse);
+      expect(horizontalController.position.activity?.isScrolling, isFalse);
+      expect(verticalController.position.activity!.velocity, 0.0);
+      expect(horizontalController.position.activity!.velocity, 0.0);
+
+      // Fling the scrollview to get it scrolling, verify that no tap occurs.
+      await tester.fling(find.byType(TwoDimensionalScrollable), const Offset(0.0, -200.0), 2000.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+      expect(verticalController.position.pixels, greaterThan(170.0));
+      expect(horizontalController.position.pixels, 0.0);
+      expect(verticalController.position.activity!.isScrolling, isTrue);
+      expect(horizontalController.position.activity!.isScrolling, isFalse);
+      expect(verticalController.position.activity!.velocity, greaterThan(1500));
+      expect(horizontalController.position.activity!.velocity, 0.0);
+
+      // Wait for the fling to finish.
+      await tester.pumpAndSettle();
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+      expect(verticalController.position.pixels, greaterThan(800.0));
+      final double unchangedOffset = verticalController.position.pixels;
+      expect(horizontalController.position.pixels, 0.0);
+      expect(verticalController.position.activity?.isScrolling, isFalse);
+      expect(horizontalController.position.activity?.isScrolling, isFalse);
+      expect(verticalController.position.activity!.velocity, 0.0);
+      expect(horizontalController.position.activity!.velocity, 0.0);
+
+      // Another tap.
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, <String>['Tapped: (xIndex: 0, yIndex: 0)', 'Tapped: (xIndex: 0, yIndex: 4)']);
+      expect(horizontalController.position.pixels, 0.0);
+      expect(verticalController.position.pixels, unchangedOffset);
+      expect(horizontalController.position.activity?.isScrolling, isFalse);
+      expect(verticalController.position.activity?.isScrolling, isFalse);
+      expect(horizontalController.position.activity!.velocity, 0.0);
+      expect(verticalController.position.activity!.velocity, 0.0);
+    });
+
+    group('Can drag horizontally when there is not enough vertical content', () {
+      testWidgets('DiagonalDragBehavior.free', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/144982
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleBuilderTableView(
+              verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+              diagonalDragBehavior: DiagonalDragBehavior.free,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 20,
+                maxYIndex: 1,
+                builder: _testChildBuilder,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        expect(verticalController.position.maxScrollExtent, 0.0);
+        expect(horizontalController.position.maxScrollExtent, 3400.0);
+        // Fling vertically, nothing should happen.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(0.0, -200.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Fling horizontally, the horizontal position should change.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(-200.0, 0.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, greaterThan(840.0));
+      });
+
+      testWidgets('DiagonalDragBehavior.weightedEvent', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/144982
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleBuilderTableView(
+              verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+              diagonalDragBehavior: DiagonalDragBehavior.weightedEvent,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 20,
+                maxYIndex: 1,
+                builder: _testChildBuilder,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        expect(verticalController.position.maxScrollExtent, 0.0);
+        expect(horizontalController.position.maxScrollExtent, 3400.0);
+        // Fling vertically, nothing should happen.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(0.0, -200.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Fling horizontally, the horizontal position should change.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(-200.0, 0.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, greaterThan(840.0));
+      });
+
+      testWidgets('DiagonalDragBehavior.weightedContinuous', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/144982
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleBuilderTableView(
+              verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+              diagonalDragBehavior: DiagonalDragBehavior.weightedContinuous,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 20,
+                maxYIndex: 1,
+                builder: _testChildBuilder,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        expect(verticalController.position.maxScrollExtent, 0.0);
+        expect(horizontalController.position.maxScrollExtent, 3400.0);
+        // Fling vertically, nothing should happen.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(0.0, -200.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Fling horizontally, the horizontal position should change.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(-200.0, 0.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, greaterThan(840.0));
+      });
+    });
+
+    group('Can drag vertically when there is not enough horizontal content', () {
+      testWidgets('DiagonalDragBehavior.free', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/144982
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleBuilderTableView(
+              verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+              diagonalDragBehavior: DiagonalDragBehavior.free,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 1,
+                maxYIndex: 20,
+                builder: _testChildBuilder,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        expect(verticalController.position.maxScrollExtent, 3600.0);
+        expect(horizontalController.position.maxScrollExtent, 0.0);
+        // Fling horizontally, nothing should happen.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(-200.0, 0.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Fling vertically, the vertical position should change.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(0.0, -200.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, greaterThan(840.0));
+        expect(horizontalController.position.pixels, 0.0);
+      });
+
+      testWidgets('DiagonalDragBehavior.weightedEvent', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/144982
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleBuilderTableView(
+              verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+              diagonalDragBehavior: DiagonalDragBehavior.weightedEvent,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 1,
+                maxYIndex: 20,
+                builder: _testChildBuilder,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        expect(verticalController.position.maxScrollExtent, 3600.0);
+        expect(horizontalController.position.maxScrollExtent, 0.0);
+        // Fling horizontally, nothing should happen.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(-200.0, 0.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Fling vertically, the vertical position should change.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(0.0, -200.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, greaterThan(840.0));
+        expect(horizontalController.position.pixels, 0.0);
+      });
+
+      testWidgets('DiagonalDragBehavior.weightedContinuous', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/144982
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleBuilderTableView(
+              verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+              diagonalDragBehavior: DiagonalDragBehavior.weightedContinuous,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 1,
+                maxYIndex: 20,
+                builder: _testChildBuilder,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        expect(verticalController.position.maxScrollExtent, 3600.0);
+        expect(horizontalController.position.maxScrollExtent, 0.0);
+        // Fling horizontally, nothing should happen.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(-200.0, 0.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Fling vertically, the vertical position should change.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(0.0, -200.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, greaterThan(840.0));
+        expect(horizontalController.position.pixels, 0.0);
+      });
+    });
+
+    testWidgets('Dismiss keyboard onDrag and keep dismissed on drawer opened', (WidgetTester tester) async {
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      addTearDown(() => delegate.dispose());
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            key: scaffoldKey,
+            drawer: Container(),
+            body: Column(
+              children: <Widget>[
+                const TextField(),
+                Expanded(
+                  child: SimpleBuilderTableView(
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                      builder: _testChildBuilder,
+                      maxXIndex: 99,
+                      maxYIndex: 99,
+                    ),
+                  ),
+                ),
+              ]
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(tester.testTextInput.isVisible, isFalse);
+      final Finder finder = find.byType(TextField).first;
+      await tester.tap(finder);
+      expect(tester.testTextInput.isVisible, isTrue);
+
+      await tester.drag(find.byType(SimpleBuilderTableView).first, const Offset(-40.0, -40.0));
+      await tester.pumpAndSettle();
+
+      expect(tester.testTextInput.isVisible, isFalse);
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+
+      expect(tester.testTextInput.isVisible, isFalse);
+    });
   });
 }

@@ -9,14 +9,13 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   tearDown(() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('Shadows on BoxDecoration', (WidgetTester tester) async {
+  testWidgets('Shadows on BoxDecoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -62,7 +61,7 @@ void main() {
       );
     }
     for (final int elevation in kElevationToShadow.keys) {
-      testWidgetsWithLeakTracking('elevation $elevation', (WidgetTester tester) async {
+      testWidgets('elevation $elevation', (WidgetTester tester) async {
         debugDisableShadows = false;
         await tester.pumpWidget(build(elevation));
         await expectLater(
@@ -74,7 +73,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Shadows with PhysicalLayer', (WidgetTester tester) async {
+  testWidgets('Shadows with PhysicalLayer', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -133,7 +132,7 @@ void main() {
     }
 
     for (final int elevation in kElevationToShadow.keys) {
-      testWidgetsWithLeakTracking('elevation $elevation', (WidgetTester tester) async {
+      testWidgets('elevation $elevation', (WidgetTester tester) async {
         debugDisableShadows = false;
         await tester.pumpWidget(build(elevation.toDouble()));
         await expectLater(

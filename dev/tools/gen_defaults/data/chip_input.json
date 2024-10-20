@@ -1,5 +1,5 @@
 {
-  "version": "v0_162",
+  "version": "v4_1_0",
 
   "md.comp.input-chip.container.elevation": "md.sys.elevation.level0",
   "md.comp.input-chip.container.height": 32.0,
@@ -11,6 +11,9 @@
   "md.comp.input-chip.disabled.unselected.outline.color": "onSurface",
   "md.comp.input-chip.disabled.unselected.outline.opacity": 0.12,
   "md.comp.input-chip.dragged.container.elevation": "md.sys.elevation.level4",
+  "md.comp.input-chip.focus.indicator.color": "secondary",
+  "md.comp.input-chip.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
+  "md.comp.input-chip.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.input-chip.label-text.text-style": "labelLarge",
   "md.comp.input-chip.selected.container.color": "secondaryContainer",
   "md.comp.input-chip.selected.dragged.label-text.color": "onSecondaryContainer",

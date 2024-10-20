@@ -15,7 +15,7 @@ the following locations:
 
 * [flutter.dev](https://flutter.dev) (main Flutter site)
 * [Stable channel API Docs](https://api.flutter.dev)
-* [Main channel API Docs](https://master-api.flutter.dev)
+* [Main channel API Docs](https://main-api.flutter.dev)
 * Engine Embedder API documentation:
   * [Android Embedder](../javadoc/index.html)
   * [iOS Embedder](../ios-embedder/index.html)
@@ -25,7 +25,7 @@ the following locations:
   * [Web Embedder](dart-ui_web/dart-ui_web-library.html)
 * [Installation](https://flutter.dev/docs/get-started/install)
 * [Codelabs](https://flutter.dev/docs/codelabs)
-* [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
+* [Contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
 
 ## Offline Documentation
 
@@ -39,7 +39,7 @@ to 900 MB.**
 Offline HTML documentation ZIP bundles:
 
  * [Stable channel](https://api.flutter.dev/offline/flutter.docs.zip)
- * [Master channel](https://master-api.flutter.dev/offline/flutter.docs.zip)
+ * [Main channel](https://main-api.flutter.dev/offline/flutter.docs.zip)
 
 Or, you can add Flutter to the open-source [Zeal](https://zealdocs.org/) app
 using the following XML configurations. Follow the instructions in the
@@ -47,8 +47,8 @@ application for adding a feed.
 
  * Stable channel Zeal XML configuration URL:
    <https://api.flutter.dev/offline/flutter.xml>
- * Master channel Zeal XML configuration URL:
-   <https://master-api.flutter.dev/offline/flutter.xml>
+ * Main channel Zeal XML configuration URL:
+   <https://main-api.flutter.dev/offline/flutter.xml>
 
 ## Importing a Library
 

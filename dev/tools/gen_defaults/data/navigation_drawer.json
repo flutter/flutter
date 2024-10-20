@@ -1,5 +1,5 @@
 {
-  "version": "v0_162",
+  "version": "v4_1_0",
 
   "md.comp.navigation-drawer.active.focus.icon.color": "onSecondaryContainer",
   "md.comp.navigation-drawer.active.focus.label-text.color": "onSecondaryContainer",
@@ -17,11 +17,12 @@
   "md.comp.navigation-drawer.active.pressed.label-text.color": "onSecondaryContainer",
   "md.comp.navigation-drawer.active.pressed.state-layer.color": "onSecondaryContainer",
   "md.comp.navigation-drawer.bottom.container.shape": "md.sys.shape.corner.large.top",
-  "md.comp.navigation-drawer.container.color": "surface",
   "md.comp.navigation-drawer.container.height": 100.0,
   "md.comp.navigation-drawer.container.shape": "md.sys.shape.corner.large.end",
-  "md.comp.navigation-drawer.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.navigation-drawer.container.width": 360.0,
+  "md.comp.navigation-drawer.focus.indicator.color": "secondary",
+  "md.comp.navigation-drawer.focus.indicator.outline.offset": "md.sys.state.focus-indicator.inner-offset",
+  "md.comp.navigation-drawer.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.navigation-drawer.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
   "md.comp.navigation-drawer.headline.color": "onSurfaceVariant",
   "md.comp.navigation-drawer.headline.text-style": "titleSmall",
@@ -41,7 +42,9 @@
   "md.comp.navigation-drawer.label-text.text-style": "labelLarge",
   "md.comp.navigation-drawer.large-badge-label.color": "onSurfaceVariant",
   "md.comp.navigation-drawer.large-badge-label.text-style": "labelLarge",
+  "md.comp.navigation-drawer.modal.container.color": "surfaceContainerLow",
   "md.comp.navigation-drawer.modal.container.elevation": "md.sys.elevation.level1",
   "md.comp.navigation-drawer.pressed.state-layer.opacity": "md.sys.state.pressed.state-layer-opacity",
+  "md.comp.navigation-drawer.standard.container.color": "surface",
   "md.comp.navigation-drawer.standard.container.elevation": "md.sys.elevation.level0"
 }

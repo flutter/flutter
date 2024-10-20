@@ -115,18 +115,15 @@ class MultiRootFileSystem extends ForwardingFileSystem {
   /// If the path is a multiroot uri, resolve to the actual path of the
   /// underlying file system. Otherwise, return as is.
   dynamic _resolve(dynamic path) {
-    Uri uri;
     if (path == null) {
       return null;
-    } else if (path is String) {
-      uri = Uri.parse(path);
-    } else if (path is Uri) {
-      uri = path;
-    } else if (path is FileSystemEntity) {
-      uri = path.uri;
-    } else {
-      throw ArgumentError('Invalid type for "path": ${(path as Object?)?.runtimeType}');
     }
+    final Uri uri = switch (path) {
+      String() => Uri.parse(path),
+      Uri() => path,
+      FileSystemEntity() => path.uri,
+      _ => throw ArgumentError('Invalid type for "path": ${(path as Object?)?.runtimeType}'),
+    };
 
     if (!uri.hasScheme || uri.scheme != _scheme) {
       return path;
@@ -209,8 +206,7 @@ abstract class MultiRootFileSystemEntity<T extends FileSystemEntity,
 }
 
 class MultiRootFile extends MultiRootFileSystemEntity<File, io.File>
-    // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
-    with ForwardingFile { // ignore: prefer_mixin
+    with ForwardingFile {
   MultiRootFile({
     required super.fileSystem,
     required super.delegate,
@@ -223,8 +219,7 @@ class MultiRootFile extends MultiRootFileSystemEntity<File, io.File>
 
 class MultiRootDirectory
     extends MultiRootFileSystemEntity<Directory, io.Directory>
-    // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
-    with ForwardingDirectory<Directory> { // ignore: prefer_mixin
+    with ForwardingDirectory<Directory> {
   MultiRootDirectory({
     required super.fileSystem,
     required super.delegate,
@@ -250,9 +245,9 @@ class MultiRootDirectory
     'MultiRootDirectory(fileSystem = $fileSystem, delegate = $delegate)';
 }
 
-class MultiRootLink extends MultiRootFileSystemEntity<Link, io.Link>
-    // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
-    with ForwardingLink { // ignore: prefer_mixin
+class MultiRootLink
+    extends MultiRootFileSystemEntity<Link, io.Link>
+    with ForwardingLink {
   MultiRootLink({
     required super.fileSystem,
     required super.delegate,

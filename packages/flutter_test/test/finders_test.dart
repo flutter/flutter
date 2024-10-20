@@ -301,6 +301,98 @@ void main() {
     });
   });
 
+  group('byTooltip', () {
+    testWidgets('finds widgets by tooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          message: 'Tooltip Message',
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip('Tooltip Message'), findsOneWidget);
+    });
+
+    testWidgets('finds widgets with tooltip by RegExp', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          message: 'Tooltip Message',
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip('Tooltip'), findsNothing);
+      expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);
+    });
+
+    testWidgets('finds widgets by rich text tooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          richMessage: TextSpan(
+            children: <InlineSpan>[
+            TextSpan(text: 'Tooltip '),
+            TextSpan(text: 'Message'),
+          ]),
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip('Tooltip Message'), findsOneWidget);
+    });
+
+    testWidgets('finds widgets with rich text tooltip by RegExp', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          richMessage: TextSpan(
+            children: <InlineSpan>[
+            TextSpan(text: 'Tooltip '),
+            TextSpan(text: 'Message'),
+          ]),
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip('Tooltip M'), findsNothing);
+      expect(find.byTooltip(RegExp(r'^Tooltip M')), findsOneWidget);
+    });
+
+    testWidgets('finds empty string with tooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          message: '',
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip(''), findsOneWidget);
+
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          richMessage: TextSpan(
+            children: <InlineSpan>[
+            TextSpan(text: ''),
+          ]),
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip(''), findsOneWidget);
+
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          message: '',
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip(RegExp(r'^$')), findsOneWidget);
+
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          richMessage: TextSpan(
+            children: <InlineSpan>[
+            TextSpan(text: ''),
+          ]),
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip(RegExp(r'^$')), findsOneWidget);
+    });
+  });
+
   group('hitTestable', () {
     testWidgets('excludes non-hit-testable widgets',
         (WidgetTester tester) async {
@@ -328,6 +420,100 @@ void main() {
       final Finder hitTestable = find.byType(GestureDetector, skipOffstage: false).hitTestable();
       expect(hitTestable, findsOneWidget);
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
+    });
+  });
+
+  group('text range finders', () {
+    testWidgets('basic text span test', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(const IndexedStack(
+          sizing: StackFit.expand,
+          children: <Widget>[
+            Text.rich(TextSpan(
+              text: 'sub',
+              children: <InlineSpan>[
+                TextSpan(text: 'stringsub'),
+                TextSpan(text: 'stringsub'),
+                TextSpan(text: 'stringsub'),
+              ],
+            )),
+            Text('substringsub'),
+          ],
+        )),
+      );
+
+      expect(find.textRange.ofSubstring('substringsub'), findsExactly(2)); // Pattern skips overlapping matches.
+      expect(find.textRange.ofSubstring('substringsub').first.evaluate().single.textRange, const TextRange(start: 0, end: 12));
+      expect(find.textRange.ofSubstring('substringsub').last.evaluate().single.textRange, const TextRange(start: 18, end: 30));
+
+      expect(
+        find.textRange.ofSubstring('substringsub').first.evaluate().single.renderObject,
+        find.textRange.ofSubstring('substringsub').last.evaluate().single.renderObject,
+      );
+
+      expect(find.textRange.ofSubstring('substringsub', skipOffstage: false), findsExactly(3));
+    });
+
+    testWidgets('basic text span test', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(const IndexedStack(
+          sizing: StackFit.expand,
+          children: <Widget>[
+            Text.rich(TextSpan(
+              text: 'sub',
+              children: <InlineSpan>[
+                TextSpan(text: 'stringsub'),
+                TextSpan(text: 'stringsub'),
+                TextSpan(text: 'stringsub'),
+              ],
+            )),
+            Text('substringsub'),
+          ],
+        )),
+      );
+
+      expect(find.textRange.ofSubstring('substringsub'), findsExactly(2)); // Pattern skips overlapping matches.
+      expect(find.textRange.ofSubstring('substringsub').first.evaluate().single.textRange, const TextRange(start: 0, end: 12));
+      expect(find.textRange.ofSubstring('substringsub').last.evaluate().single.textRange, const TextRange(start: 18, end: 30));
+
+      expect(
+        find.textRange.ofSubstring('substringsub').first.evaluate().single.renderObject,
+        find.textRange.ofSubstring('substringsub').last.evaluate().single.renderObject,
+      );
+
+      expect(find.textRange.ofSubstring('substringsub', skipOffstage: false), findsExactly(3));
+    });
+
+    testWidgets('descendentOf', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          const Column(
+            children: <Widget>[
+              Text.rich(TextSpan(text: 'text')),
+              Text.rich(TextSpan(text: 'text')),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.textRange.ofSubstring('text'), findsExactly(2));
+      expect(find.textRange.ofSubstring('text', descendentOf: find.text('text').first), findsOne);
+    });
+
+    testWidgets('finds only static text for now', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          EditableText(
+            controller: TextEditingController(text: 'text'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: const Color(0x00000000),
+            backgroundCursorColor: const Color(0x00000000),
+          )
+        ),
+      );
+
+      expect(find.textRange.ofSubstring('text'), findsNothing);
     });
   });
 
@@ -584,11 +770,11 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: _deepWidgetTree(
-            depth: 1000,
+            depth: 500,
             child: Row(
               children: <Widget>[
                 _deepWidgetTree(
-                  depth: 1000,
+                  depth: 500,
                   child: const Column(children: fooBarTexts),
                 ),
               ],
@@ -988,6 +1174,110 @@ void main() {
         expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 2 SemanticsNodes with any of the following flags: [SemanticsFlag.isHeader, SemanticsFlag.isTextField]:'));
       });
     });
+
+    group('scrollable', () {
+      testWidgets('can find node that can scroll up', (WidgetTester tester) async {
+        final ScrollController controller = ScrollController();
+        await tester.pumpWidget(MaterialApp(
+          home: SingleChildScrollView(
+            controller: controller,
+            child: const SizedBox(width: 100, height: 1000),
+          ),
+        ));
+
+        expect(find.semantics.scrollable(), containsSemantics(
+          hasScrollUpAction: true,
+          hasScrollDownAction: false,
+        ));
+      });
+
+      testWidgets('can find node that can scroll down', (WidgetTester tester) async {
+        final ScrollController controller = ScrollController(initialScrollOffset: 400);
+        await tester.pumpWidget(MaterialApp(
+          home: SingleChildScrollView(
+            controller: controller,
+            child: const SizedBox(width: 100, height: 1000),
+          ),
+        ));
+
+        expect(find.semantics.scrollable(), containsSemantics(
+          hasScrollUpAction: false,
+          hasScrollDownAction: true,
+        ));
+      });
+
+      testWidgets('can find node that can scroll left', (WidgetTester tester) async {
+        final ScrollController controller = ScrollController();
+        await tester.pumpWidget(MaterialApp(
+          home: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: controller,
+            child: const SizedBox(width: 1000, height: 100),
+          ),
+        ));
+
+        expect(find.semantics.scrollable(), containsSemantics(
+          hasScrollLeftAction: true,
+          hasScrollRightAction: false,
+        ));
+      });
+
+      testWidgets('can find node that can scroll right', (WidgetTester tester) async {
+        final ScrollController controller = ScrollController(initialScrollOffset: 200);
+        await tester.pumpWidget(MaterialApp(
+          home: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: controller,
+            child: const SizedBox(width: 1000, height: 100),
+          ),
+        ));
+
+        expect(find.semantics.scrollable(), containsSemantics(
+          hasScrollLeftAction: false,
+          hasScrollRightAction: true,
+        ));
+      });
+
+      testWidgets('can exclusively find node that scrolls horizontally', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Column(
+            children: <Widget>[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(width: 1000, height: 100),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: SizedBox(width: 100, height: 1000),
+                ),
+              ),
+            ],
+          )
+        ));
+
+        expect(find.semantics.scrollable(axis: Axis.horizontal), findsOne);
+      });
+
+      testWidgets('can exclusively find node that scrolls vertically', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Column(
+            children: <Widget>[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(width: 1000, height: 100),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: SizedBox(width: 100, height: 1000),
+                ),
+              ),
+            ],
+          )
+        ));
+
+        expect(find.semantics.scrollable(axis: Axis.vertical), findsOne);
+      });
+    });
   });
 
   group('FinderBase', () {
@@ -1158,9 +1448,16 @@ void main() {
 Widget _boilerplate(Widget child) {
   return Directionality(
     textDirection: TextDirection.ltr,
-    child: child,
+    child: Navigator(
+      onGenerateRoute: (RouteSettings settings) {
+        return MaterialPageRoute<void>(
+          builder: (BuildContext context) => child,
+        );
+      },
+    ),
   );
 }
+
 
 class SimpleCustomSemanticsWidget extends LeafRenderObjectWidget {
   const SimpleCustomSemanticsWidget(this.label, {super.key});

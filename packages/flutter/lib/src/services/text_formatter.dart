@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
 
 import 'dart:math' as math;
 
@@ -91,6 +93,10 @@ abstract class TextInputFormatter {
   /// This constructor enables subclasses to provide const constructors so that they can be used in const expressions.
   const TextInputFormatter();
 
+  /// A shorthand to creating a custom [TextInputFormatter] which formats
+  /// incoming text input changes with the given function.
+  const factory TextInputFormatter.withFunction(TextInputFormatFunction formatFunction) = _SimpleTextInputFormatter;
+
   /// Called when text is being typed or cut/copy/pasted in the [EditableText].
   ///
   /// You can override the resulting text based on the previous text value and
@@ -102,14 +108,6 @@ abstract class TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   );
-
-  /// A shorthand to creating a custom [TextInputFormatter] which formats
-  /// incoming text input changes with the given function.
-  static TextInputFormatter withFunction(
-    TextInputFormatFunction formatFunction,
-  ) {
-    return _SimpleTextInputFormatter(formatFunction);
-  }
 }
 
 /// Function signature expected for creating custom [TextInputFormatter]
@@ -121,7 +119,7 @@ typedef TextInputFormatFunction = TextEditingValue Function(
 
 /// Wiring for [TextInputFormatter.withFunction].
 class _SimpleTextInputFormatter extends TextInputFormatter {
-  _SimpleTextInputFormatter(this.formatFunction);
+  const _SimpleTextInputFormatter(this.formatFunction);
 
   final TextInputFormatFunction formatFunction;
 
@@ -265,8 +263,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   ///
   /// If [allow] is true, then the filter pattern is an allow list,
   /// and characters must match the pattern to be accepted. See also
-  /// the `FilteringTextInputFormatter.allow` constructor.
-  // TODO(goderbauer): Cannot link to the constructor because of https://github.com/dart-lang/dartdoc/issues/2276.
+  /// the [FilteringTextInputFormatter.allow()] constructor.
   ///
   /// If [allow] is false, then the filter pattern is a deny list,
   /// and characters that match the pattern are rejected. See also
@@ -420,7 +417,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
       // The length added by adding the replacementString.
       final int replacedLength = originalIndex <= regionStart && originalIndex < regionEnd ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart; // ignore_clamp_double_lint
+      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart;
       return replacedLength - removedLength;
     }
 

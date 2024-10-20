@@ -96,6 +96,7 @@ void main() {
       bool areResourceAttributeRequired = false,
       bool suppressWarnings = false,
       bool relaxSyntax = false,
+      bool useNamedParameters = false,
       void Function(Directory)? setup,
     }
   ) {
@@ -128,6 +129,7 @@ void main() {
       areResourceAttributesRequired: areResourceAttributeRequired,
       suppressWarnings: suppressWarnings,
       useRelaxedSyntax: relaxSyntax,
+      useNamedParameters: useNamedParameters,
     )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: isFromYaml);
@@ -685,7 +687,41 @@ void main() {
   });
 
   group('generateLocalizations', () {
-    // Regression test for https://github.com/flutter/flutter/issues/119593
+    testWithoutContext('works even if CWD does not have a pubspec.yaml', () async {
+      final Directory projectDir = fs.currentDirectory.childDirectory('project')..createSync(recursive: true);
+      final Directory l10nDirectory = projectDir.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleMessageArbFileString);
+      l10nDirectory.childFile(esArbFileName)
+        .writeAsStringSync(singleEsMessageArbFileString);
+      projectDir.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+flutter:
+  generate: true
+''');
+
+      final Logger logger = BufferLogger.test();
+      logger.printError('An error output from a different tool in flutter_tools');
+
+      // Should run without error.
+      await generateLocalizations(
+        fileSystem: fs,
+        options: LocalizationOptions(
+          arbDir: Uri.directory(defaultL10nPathString).path,
+          outputDir: Uri.directory(defaultL10nPathString, windows: false).path,
+          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+          syntheticPackage: false,
+        ),
+        logger: logger,
+        projectDir: projectDir,
+        dependenciesDir: fs.currentDirectory,
+        artifacts: artifacts,
+        processManager: processManager,
+      );
+    });
+
     testWithoutContext('other logs from flutter_tools does not affect gen-l10n', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
@@ -757,6 +793,8 @@ void main() {
 HEADER
 
 import 'bar.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for English (`en`).
 class FooEn extends Foo {
@@ -858,6 +896,8 @@ flutter:\r
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
 import 'app_localizations.dart';
 
+// ignore_for_file: type=lint
+
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
@@ -888,6 +928,8 @@ class AppLocalizationsEn extends AppLocalizations {
 HEADER
 
 import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
@@ -1239,6 +1281,34 @@ class AppLocalizationsEn extends AppLocalizations {
           'message',
           contains('Arb file for a fallback, en, does not exist'),
         )),
+      );
+    });
+
+    testWithoutContext('AppResourceBundle throws if file contains non-string value', () {
+      const String inputPathString = 'lib/l10n';
+      const String templateArbFileName = 'app_en.arb';
+      const String outputFileString = 'app_localizations.dart';
+      const String classNameString = 'AppLocalizations';
+
+      fs.file(fs.path.join(inputPathString, templateArbFileName))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ "helloWorld": "Hello World!" }');
+      fs.file(fs.path.join(inputPathString, 'app_es.arb'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ "helloWorld": {} }');
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: inputPathString,
+        templateArbFileName: templateArbFileName,
+        outputFileString: outputFileString,
+        classNameString: classNameString,
+        logger: logger,
+      );
+      expect(
+          () => generator.loadResources(),
+          throwsToolExit(message: 'Localized message for key "helloWorld" in '
+            '"lib/l10n/app_es.arb" is not a string.'),
       );
     });
   });
@@ -2458,9 +2528,48 @@ NumberFormat.decimalPatternDigits(
   testWithoutContext('dollar signs are escaped properly when there is a select clause', () {
     const String dollarSignWithSelect = r'''
 {
-  "dollarSignWithSelect": "$nice_bug\nHello Bug! Manifistation #1 {selectPlaceholder, select, case{message} other{messageOther}}"
+  "dollarSignWithSelect": "$nice_bug\nHello Bug! Manifestation #1 {selectPlaceholder, select, case{message} other{messageOther}}"
 }''';
     setupLocalizations(<String, String>{ 'en': dollarSignWithSelect });
-    expect(getGeneratedFileContent(locale: 'en'), contains(r'\$nice_bug\nHello Bug! Manifistation #1 $_temp0'));
+    expect(getGeneratedFileContent(locale: 'en'), contains(r'\$nice_bug\nHello Bug! Manifestation #1 $_temp0'));
+  });
+
+  testWithoutContext('can generate method with named parameter', () {
+    const String arbFile = '''
+{
+  "helloName": "Hello {name}!",
+  "@helloName": {
+    "description": "A more personal greeting",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The name of the person to greet"
+      }
+    }
+  },
+  "helloNameAndAge": "Hello {name}! You are {age} years old.",
+  "@helloNameAndAge": {
+    "description": "A more personal greeting",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The name of the person to greet"
+      },
+      "age": {
+        "type": "int",
+        "description": "The age of the person to greet"
+      }
+    }
+  }
+}
+    ''';
+    setupLocalizations(<String, String>{ 'en': arbFile }, useNamedParameters: true);
+    final String localizationsFile = getGeneratedFileContent(locale: 'en');
+    expect(localizationsFile, containsIgnoringWhitespace(r'''
+String helloName({required String name}) {
+  '''));
+    expect(localizationsFile, containsIgnoringWhitespace(r'''
+String helloNameAndAge({required String name, required int age}) {
+  '''));
   });
 }

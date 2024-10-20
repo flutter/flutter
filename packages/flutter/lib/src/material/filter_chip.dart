@@ -10,6 +10,7 @@ import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'icons.dart';
 import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -56,14 +57,16 @@ enum _ChipVariant { flat, elevated }
 class FilterChip extends StatelessWidget
     implements
         ChipAttributes,
+        DeletableChipAttributes,
         SelectableChipAttributes,
         CheckmarkableChipAttributes,
         DisabledChipAttributes {
   /// Create a chip that acts like a checkbox.
   ///
   /// The [selected], [label], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// not be null. When [onSelected] is null, the [FilterChip] will be disabled.
+  /// The [pressElevation] and [elevation] must be null or non-negative. Typically,
+  /// [pressElevation] is greater than [elevation].
   const FilterChip({
     super.key,
     this.avatar,
@@ -72,6 +75,10 @@ class FilterChip extends StatelessWidget
     this.labelPadding,
     this.selected = false,
     required this.onSelected,
+    this.deleteIcon,
+    this.onDeleted,
+    this.deleteIconColor,
+    this.deleteButtonTooltipMessage,
     this.pressElevation,
     this.disabledColor,
     this.selectedColor,
@@ -94,6 +101,9 @@ class FilterChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    this.avatarBoxConstraints,
+    this.deleteIconBoxConstraints,
+    this.chipAnimationStyle,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -101,8 +111,9 @@ class FilterChip extends StatelessWidget
   /// Create an elevated chip that acts like a checkbox.
   ///
   /// The [selected], [label], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// not be null. When [onSelected] is null, the [FilterChip] will be disabled.
+  /// The [pressElevation] and [elevation] must be null or non-negative. Typically,
+  /// [pressElevation] is greater than [elevation].
   const FilterChip.elevated({
     super.key,
     this.avatar,
@@ -111,6 +122,10 @@ class FilterChip extends StatelessWidget
     this.labelPadding,
     this.selected = false,
     required this.onSelected,
+    this.deleteIcon,
+    this.onDeleted,
+    this.deleteIconColor,
+    this.deleteButtonTooltipMessage,
     this.pressElevation,
     this.disabledColor,
     this.selectedColor,
@@ -133,6 +148,9 @@ class FilterChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    this.avatarBoxConstraints,
+    this.deleteIconBoxConstraints,
+    this.chipAnimationStyle,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -149,6 +167,14 @@ class FilterChip extends StatelessWidget
   final bool selected;
   @override
   final ValueChanged<bool>? onSelected;
+  @override
+  final Widget? deleteIcon;
+  @override
+  final VoidCallback? onDeleted;
+  @override
+  final Color? deleteIconColor;
+  @override
+  final String? deleteButtonTooltipMessage;
   @override
   final double? pressElevation;
   @override
@@ -193,6 +219,12 @@ class FilterChip extends StatelessWidget
   final ShapeBorder avatarBorder;
   @override
   final IconThemeData? iconTheme;
+  @override
+  final BoxConstraints? avatarBoxConstraints;
+  @override
+  final BoxConstraints? deleteIconBoxConstraints;
+  @override
+  final ChipAnimationStyle? chipAnimationStyle;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -205,6 +237,8 @@ class FilterChip extends StatelessWidget
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
       ? _FilterChipDefaultsM3(context, isEnabled, selected, _chipVariant)
       : null;
+    final Widget? resolvedDeleteIcon = deleteIcon
+      ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -212,6 +246,10 @@ class FilterChip extends StatelessWidget
       labelStyle: labelStyle,
       labelPadding: labelPadding,
       onSelected: onSelected,
+      deleteIcon: resolvedDeleteIcon,
+      onDeleted: onDeleted,
+      deleteIconColor: deleteIconColor,
+      deleteButtonTooltipMessage: deleteButtonTooltipMessage,
       pressElevation: pressElevation,
       selected: selected,
       tooltip: tooltip,
@@ -235,6 +273,10 @@ class FilterChip extends StatelessWidget
       showCheckmark: showCheckmark,
       checkmarkColor: checkmarkColor,
       avatarBorder: avatarBorder,
+      iconTheme: iconTheme,
+      avatarBoxConstraints: avatarBoxConstraints,
+      deleteIconBoxConstraints: deleteIconBoxConstraints,
+      chipAnimationStyle: chipAnimationStyle,
     );
   }
 }
@@ -273,7 +315,13 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   double? get pressElevation => 1.0;
 
   @override
-  TextStyle? get labelStyle => _textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
+    color: isEnabled
+      ? isSelected
+        ? _colors.onSecondaryContainer
+        : _colors.onSurfaceVariant
+      : _colors.onSurface,
+  );
 
   @override
   MaterialStateProperty<Color?>? get color =>
@@ -295,7 +343,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
       }
       return _chipVariant == _ChipVariant.flat
         ? null
-        : null;
+        : _colors.surfaceContainerLow;
     });
 
   @override
@@ -304,13 +352,21 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
     : _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  Color? get checkmarkColor => _colors.onSecondaryContainer;
+  Color? get checkmarkColor => isEnabled
+    ? isSelected
+      ? _colors.onSecondaryContainer
+      : _colors.primary
+    : _colors.onSurface;
 
   @override
-  Color? get deleteIconColor => _colors.onSecondaryContainer;
+  Color? get deleteIconColor => isEnabled
+    ? isSelected
+      ? _colors.onSecondaryContainer
+      : _colors.onSurfaceVariant
+    : _colors.onSurface;
 
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat && !isSelected
@@ -322,7 +378,9 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
-      ? null
+      ? isSelected
+        ? _colors.onSecondaryContainer
+        : _colors.primary
       : _colors.onSurface,
     size: 18.0,
   );
@@ -330,16 +388,24 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   @override
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
 
-  /// The chip at text scale 1 starts with 8px on each side and as text scaling
-  /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
-  /// Once the widget has a text scaling of 2 or higher than the label padding
-  /// remains 4px.
+  /// The label padding of the chip scales with the font size specified in the
+  /// [labelStyle], and the system font size settings that scale font sizes
+  /// globally.
+  ///
+  /// The chip at effective font size 14.0 starts with 8px on each side and as
+  /// the font size scales up to closer to 28.0, the label padding is linearly
+  /// interpolated from 8px to 4px. Once the label has a font size of 2 or
+  /// higher, label padding remains 4px.
   @override
-  EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
-    const EdgeInsets.symmetric(horizontal: 8.0),
-    const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
-  )!;
+  EdgeInsetsGeometry? get labelPadding {
+    final double fontSize = labelStyle?.fontSize ?? 14.0;
+    final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(fontSize) / 14.0;
+    return EdgeInsets.lerp(
+      const EdgeInsets.symmetric(horizontal: 8.0),
+      const EdgeInsets.symmetric(horizontal: 4.0),
+      clampDouble(fontSizeRatio - 1.0, 0.0, 1.0),
+    )!;
+  }
 }
 
 // END GENERATED TOKEN PROPERTIES - FilterChip

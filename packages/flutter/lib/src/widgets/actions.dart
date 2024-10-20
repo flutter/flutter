@@ -106,8 +106,8 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 /// developers to change that if they add an ancestor [Actions] widget that maps
 /// [SelectAllTextIntent] to a different [Action].
 ///
-/// See the article on [Using Actions and
-/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// See the article on
+/// [Using Actions and Shortcuts](https://flutter.dev/to/actions-shortcuts)
 /// for a detailed explanation.
 ///
 /// See also:
@@ -565,7 +565,7 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
 
 /// The signature of a callback accepted by [CallbackAction.onInvoke].
 ///
-/// Such callbacks are implementions of [Action.invoke]. The returned value
+/// Such callbacks are implementations of [Action.invoke]. The returned value
 /// is the return value of [Action.invoke], the argument is the intent passed
 /// to [Action.invoke], and so forth.
 typedef OnInvokeCallback<T extends Intent> = Object? Function(T intent);
@@ -740,6 +740,9 @@ class Actions extends StatefulWidget {
   // getElementForInheritedWidgetOfExactType. Returns true if the visitor found
   // what it was looking for.
   static bool _visitActionsAncestors(BuildContext context, bool Function(InheritedElement element) visitor) {
+    if (!context.mounted) {
+      return false;
+    }
     InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsScope>();
     while (actionsElement != null) {
       if (visitor(actionsElement)) {
@@ -1228,7 +1231,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       _updateHighlightMode(FocusManager.instance.highlightMode);
-    });
+    }, debugLabel: 'FocusableActionDetector.updateHighlightMode');
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
@@ -1241,12 +1244,10 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   bool _canShowHighlight = false;
   void _updateHighlightMode(FocusHighlightMode mode) {
     _mayTriggerCallback(task: () {
-      switch (FocusManager.instance.highlightMode) {
-        case FocusHighlightMode.touch:
-          _canShowHighlight = false;
-        case FocusHighlightMode.traditional:
-          _canShowHighlight = true;
-      }
+      _canShowHighlight = switch (FocusManager.instance.highlightMode) {
+        FocusHighlightMode.touch       => false,
+        FocusHighlightMode.traditional => true,
+      };
     });
   }
 
@@ -1300,13 +1301,10 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
 
     bool canRequestFocus(FocusableActionDetector target) {
-      final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
-      switch (mode) {
-        case NavigationMode.traditional:
-          return target.enabled;
-        case NavigationMode.directional:
-          return true;
-      }
+      return switch (MediaQuery.maybeNavigationModeOf(context)) {
+        NavigationMode.traditional || null => target.enabled,
+        NavigationMode.directional => true,
+      };
     }
 
     bool shouldShowFocusHighlight(FocusableActionDetector target) {
@@ -1336,18 +1334,15 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     if (widget.enabled != oldWidget.enabled) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         _mayTriggerCallback(oldWidget: oldWidget);
-      });
+      }, debugLabel: 'FocusableActionDetector.mayTriggerCallback');
     }
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
-    switch (mode) {
-      case NavigationMode.traditional:
-        return widget.enabled;
-      case NavigationMode.directional:
-        return true;
-    }
+    return switch (MediaQuery.maybeNavigationModeOf(context)) {
+      NavigationMode.traditional || null => widget.enabled,
+      NavigationMode.directional => true,
+    };
   }
 
   // This global key is needed to keep only the necessary widgets in the tree

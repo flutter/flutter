@@ -123,7 +123,7 @@ void main() {
     expect(logger.statusText, contains('Property List error: Unexpected character \x01 at line 1 / '
       'JSON error: JSON text did not start with array or object and option to allow fragments not '
       'set. around line 1, column 0.\n'));
-    expect(logger.errorText, 'ProcessException: The command failed\n'
+    expect(logger.errorText, 'ProcessException: The command failed with exit code 1\n'
               '  Command: /usr/bin/plutil -convert xml1 -o - ${file.absolute.path}\n');
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
@@ -185,7 +185,7 @@ void main() {
     expect(logger.statusText, contains('foo.plist: Property List error: Unexpected character \x01 '
       'at line 1 / JSON error: JSON text did not start with array or object and option to allow '
       'fragments not set. around line 1, column 0.\n'));
-    expect(logger.errorText, equals('ProcessException: The command failed\n'
+    expect(logger.errorText, equals('ProcessException: The command failed with exit code 1\n'
       '  Command: /usr/bin/plutil -replace CFBundleIdentifier -string dev.flutter.fake foo.plist\n'));
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
@@ -212,5 +212,81 @@ void main() {
     expect(values['dateValue'], DateTime.utc(2021, 12, 1, 12, 34, 56));
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
+
+  testWithoutContext('PlistParser.plistJsonContent can parse pbxproj file', () async {
+    final String xcodeProjectFile = fileSystem.path.join(
+      getFlutterRoot(),
+      'dev',
+      'integration_tests',
+      'flutter_gallery',
+      'ios',
+      'Runner.xcodeproj',
+      'project.pbxproj'
+    );
+
+    final BufferLogger logger = BufferLogger(
+      terminal: Terminal.test(),
+      outputPreferences: OutputPreferences(),
+    );
+
+    final PlistParser parser = PlistParser(
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: logger,
+    );
+
+    final String? projectFileAsJson = parser.plistJsonContent(xcodeProjectFile);
+    expect(projectFileAsJson, isNotNull);
+    expect(projectFileAsJson, contains('"PRODUCT_NAME":"Flutter Gallery"'));
+    expect(logger.errorText, isEmpty);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
+
+  testWithoutContext('PlistParser.plistJsonContent can parse pbxproj file with unicode and emojis', () async {
+    String xcodeProjectFile = fileSystem.path.join(
+      getFlutterRoot(),
+      'dev',
+      'integration_tests',
+      'flutter_gallery',
+      'ios',
+      'Runner.xcodeproj',
+      'project.pbxproj'
+    );
+
+    final BufferLogger logger = BufferLogger(
+      terminal: Terminal.test(),
+      outputPreferences: OutputPreferences(),
+    );
+
+    final PlistParser parser = PlistParser(
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: logger,
+    );
+
+    xcodeProjectFile = xcodeProjectFile.replaceAll('AppDelegate.m', 'AppDélegate.m');
+    xcodeProjectFile = xcodeProjectFile.replaceAll('AppDelegate.h', 'App👍Delegate.h');
+
+    final String? projectFileAsJson = parser.plistJsonContent(xcodeProjectFile);
+    expect(projectFileAsJson, isNotNull);
+    expect(projectFileAsJson, contains('"PRODUCT_NAME":"Flutter Gallery"'));
+    expect(logger.errorText, isEmpty);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
+
+  testWithoutContext('PlistParser.plistJsonContent returns null when errors', () async {
+    final BufferLogger logger = BufferLogger(
+      terminal: Terminal.test(),
+      outputPreferences: OutputPreferences(),
+    );
+
+    final PlistParser parser = PlistParser(
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: logger,
+    );
+
+    final String? projectFileAsJson = parser.plistJsonContent('bad/path');
+    expect(projectFileAsJson, isNull);
+    expect(logger.errorText, isNotEmpty);
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 }

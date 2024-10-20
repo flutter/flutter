@@ -6,7 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({ super.key });
@@ -73,13 +72,14 @@ void main() {
     expect(themeData.horizontalTitleGap, null);
     expect(themeData.minVerticalPadding, null);
     expect(themeData.minLeadingWidth, null);
+    expect(themeData.minTileHeight, null);
     expect(themeData.enableFeedback, null);
     expect(themeData.mouseCursor, null);
     expect(themeData.visualDensity, null);
     expect(themeData.titleAlignment, null);
   });
 
-  testWidgetsWithLeakTracking('Default ListTileThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ListTileThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ListTileThemeData().debugFillProperties(builder);
 
@@ -91,7 +91,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('ListTileThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('ListTileThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ListTileThemeData(
       dense: true,
@@ -109,6 +109,7 @@ void main() {
       horizontalTitleGap: 200,
       minVerticalPadding: 300,
       minLeadingWidth: 400,
+      minTileHeight: 30,
       enableFeedback: true,
       mouseCursor: MaterialStateMouseCursor.clickable,
       visualDensity: VisualDensity.comfortable,
@@ -138,15 +139,16 @@ void main() {
         'horizontalTitleGap: 200.0',
         'minVerticalPadding: 300.0',
         'minLeadingWidth: 400.0',
+        'minTileHeight: 30.0',
         'enableFeedback: true',
-        'mouseCursor: MaterialStateMouseCursor(clickable)',
+        'mouseCursor: WidgetStateMouseCursor(clickable)',
         'visualDensity: VisualDensity#00000(h: -1.0, v: -1.0)(horizontal: -1.0, vertical: -1.0)',
         'titleAlignment: ListTileTitleAlignment.top',
       ]),
     );
   });
 
-  testWidgetsWithLeakTracking('ListTileTheme backwards compatibility constructor', (WidgetTester tester) async {
+  testWidgets('ListTileTheme backwards compatibility constructor', (WidgetTester tester) async {
     late ListTileThemeData theme;
 
     await tester.pumpWidget(
@@ -196,7 +198,7 @@ void main() {
     expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);
   });
 
-  testWidgetsWithLeakTracking('ListTileTheme', (WidgetTester tester) async {
+  testWidgets('ListTileTheme', (WidgetTester tester) async {
     final Key listTileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key subtitleKey = UniqueKey();
@@ -332,7 +334,7 @@ void main() {
     expect(trailingOffset.dy - titleOffset.dy, 6);
   });
 
-  testWidgetsWithLeakTracking('ListTileTheme colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
+  testWidgets('ListTileTheme colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
     final Key leadingKey = UniqueKey();
     final Key trailingKey = UniqueKey();
 
@@ -392,7 +394,7 @@ void main() {
     expect(textColor(trailingKey), theme.disabledColor);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     "Material3 - ListTile respects ListTileTheme's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle",
     (WidgetTester tester) async {
       const TextStyle titleTextStyle = TextStyle(
@@ -459,7 +461,7 @@ void main() {
     expect(trailing.text.style!.fontStyle, leadingAndTrailingTextStyle.fontStyle);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     "Material2 - ListTile respects ListTileTheme's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle",
     (WidgetTester tester) async {
       const TextStyle titleTextStyle = TextStyle(
@@ -526,7 +528,7 @@ void main() {
     expect(trailing.text.style!.fontStyle, leadingAndTrailingTextStyle.fontStyle);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     "Material3 - ListTile's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle are overridden by ListTile properties",
     (WidgetTester tester) async {
       final ThemeData theme = ThemeData(
@@ -595,7 +597,7 @@ void main() {
       expect(trailing.text.style!.fontStyle, leadingAndTrailingTextStyle.fontStyle);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     "Material2 - ListTile's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle are overridden by ListTile properties",
     (WidgetTester tester) async {
       final ThemeData theme = ThemeData(
@@ -664,7 +666,7 @@ void main() {
       expect(trailing.text.style!.fontStyle, leadingAndTrailingTextStyle.fontStyle);
   });
 
-  testWidgetsWithLeakTracking("ListTile respects ListTileTheme's tileColor & selectedTileColor", (WidgetTester tester) async {
+  testWidgets("ListTile respects ListTileTheme's tileColor & selectedTileColor", (WidgetTester tester) async {
     late ListTileThemeData theme;
     bool isSelected = false;
 
@@ -704,7 +706,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: theme.selectedTileColor));
   });
 
-  testWidgetsWithLeakTracking("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (WidgetTester tester) async {
+  testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (WidgetTester tester) async {
     bool isSelected = false;
     final Color tileColor = Colors.green.shade500;
     final Color selectedTileColor = Colors.red.shade500;
@@ -746,7 +748,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
-  testWidgetsWithLeakTracking('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
+  testWidgets('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/106303
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -779,7 +781,7 @@ void main() {
     expect(inkWellBorder, shapeBorder);
   });
 
-  testWidgetsWithLeakTracking('ListTile respects MaterialStateColor LisTileTheme.textColor', (WidgetTester tester) async {
+  testWidgets('ListTile respects MaterialStateColor LisTileTheme.textColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -839,7 +841,7 @@ void main() {
     expect(title.text.style!.color, selectedColor);
   });
 
-  testWidgetsWithLeakTracking('ListTile respects MaterialStateColor LisTileTheme.iconColor', (WidgetTester tester) async {
+  testWidgets('ListTile respects MaterialStateColor LisTileTheme.iconColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -898,7 +900,7 @@ void main() {
     expect(iconColor(leadingKey), selectedColor);
   });
 
-  testWidgetsWithLeakTracking('ListTileThemeData copyWith overrides all properties', (WidgetTester tester) async {
+  testWidgets('ListTileThemeData copyWith overrides all properties', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/119734
 
     const ListTileThemeData original = ListTileThemeData(
@@ -917,6 +919,7 @@ void main() {
       horizontalTitleGap: 200,
       minVerticalPadding: 300,
       minLeadingWidth: 400,
+      minTileHeight: 30,
       enableFeedback: true,
       titleAlignment: ListTileTitleAlignment.bottom,
     );
@@ -937,6 +940,7 @@ void main() {
       horizontalTitleGap: 600,
       minVerticalPadding: 700,
       minLeadingWidth: 800,
+      minTileHeight: 80,
       enableFeedback: false,
       titleAlignment: ListTileTitleAlignment.top,
     );
@@ -956,11 +960,12 @@ void main() {
     expect(copy.horizontalTitleGap, 600);
     expect(copy.minVerticalPadding, 700);
     expect(copy.minLeadingWidth, 800);
+    expect(copy.minTileHeight, 80);
     expect(copy.enableFeedback, false);
     expect(copy.titleAlignment, ListTileTitleAlignment.top);
   });
 
-  testWidgetsWithLeakTracking('ListTileTheme.titleAlignment is overridden by ListTile.titleAlignment', (WidgetTester tester) async {
+  testWidgets('ListTileTheme.titleAlignment is overridden by ListTile.titleAlignment', (WidgetTester tester) async {
     final Key leadingKey = GlobalKey();
     final Key trailingKey = GlobalKey();
     const String titleText = '\nHeadline Text\n';
@@ -996,7 +1001,7 @@ void main() {
     expect(trailingOffset.dy - tileOffset.dy, 8.0);
   });
 
-  testWidgetsWithLeakTracking('ListTileTheme.merge supports all properties', (WidgetTester tester) async {
+  testWidgets('ListTileTheme.merge supports all properties', (WidgetTester tester) async {
     Widget buildFrame() {
       return MaterialApp(
         theme: ThemeData(
@@ -1016,6 +1021,7 @@ void main() {
             horizontalTitleGap: 200,
             minVerticalPadding: 300,
             minLeadingWidth: 400,
+            minTileHeight: 30,
             enableFeedback: true,
             titleAlignment: ListTileTitleAlignment.bottom,
             mouseCursor: MaterialStateMouseCursor.textable,
@@ -1042,6 +1048,7 @@ void main() {
                   horizontalTitleGap: 600,
                   minVerticalPadding: 700,
                   minLeadingWidth: 800,
+                  minTileHeight: 80,
                   enableFeedback: false,
                   titleAlignment: ListTileTitleAlignment.top,
                   mouseCursor: MaterialStateMouseCursor.clickable,
@@ -1072,6 +1079,7 @@ void main() {
     expect(theme.horizontalTitleGap, 600);
     expect(theme.minVerticalPadding, 700);
     expect(theme.minLeadingWidth, 800);
+    expect(theme.minTileHeight, 80);
     expect(theme.enableFeedback, false);
     expect(theme.titleAlignment, ListTileTitleAlignment.top);
     expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);

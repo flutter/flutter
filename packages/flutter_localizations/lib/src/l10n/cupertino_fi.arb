@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "Hae",
   "noSpellCheckReplacementsLabel": "Korvaavia sanoja ei löydy",
   "menuDismissLabel": "Hylkää valikko",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Hae",
+  "searchWebButtonLabel": "Hae verkosta",
+  "shareButtonLabel": "Jaa…",
+  "clearButtonLabel": "Clear"
 }

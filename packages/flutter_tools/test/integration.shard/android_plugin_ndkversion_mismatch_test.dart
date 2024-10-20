@@ -46,8 +46,8 @@ void main() {
     final String pluginBuildGradle = pluginGradleFile.readAsStringSync();
 
     // Bump up plugin ndkVersion to 21.4.7075529.
-    final RegExp androidNdkVersionRegExp = RegExp(r'ndkVersion (\"[0-9\.]+\"|flutter.ndkVersion|android.ndkVersion)');
-    final String newPluginGradleFile = pluginBuildGradle.replaceAll(androidNdkVersionRegExp, 'ndkVersion "21.4.7075529"');
+    final RegExp androidNdkVersionRegExp = RegExp(r'ndkVersion = (\"[0-9\.]+\"|flutter.ndkVersion|android.ndkVersion)');
+    final String newPluginGradleFile = pluginBuildGradle.replaceAll(androidNdkVersionRegExp, 'ndkVersion = "21.4.7075529"');
     expect(newPluginGradleFile, contains('21.4.7075529'));
     pluginGradleFile.writeAsStringSync(newPluginGradleFile);
 
@@ -59,7 +59,7 @@ void main() {
     final String projectBuildGradle = projectGradleFile.readAsStringSync();
 
     // Bump down plugin example app ndkVersion to 21.1.6352462.
-    final String newProjectGradleFile = projectBuildGradle.replaceAll(androidNdkVersionRegExp, 'ndkVersion "21.1.6352462"');
+    final String newProjectGradleFile = projectBuildGradle.replaceAll(androidNdkVersionRegExp, 'ndkVersion = "21.1.6352462"');
     expect(newProjectGradleFile, contains('21.1.6352462'));
     projectGradleFile.writeAsStringSync(newProjectGradleFile);
 
@@ -74,13 +74,15 @@ void main() {
 
     // Check that an error message is thrown.
     expect(result.stderr, contains('''
-One or more plugins require a higher Android NDK version.
-Fix this issue by adding the following to ${projectGradleFile.path}:
-android {
-  ndkVersion "21.4.7075529"
-  ...
-}
+Your project is configured with Android NDK 21.1.6352462, but the following plugin(s) depend on a different Android NDK version:
+- test_plugin requires Android NDK 21.4.7075529
+Fix this issue by using the highest Android NDK version (they are backward compatible).
+Add the following to ${projectGradleFile.path}:
 
+    android {
+        ndkVersion = "21.4.7075529"
+        ...
+    }
 '''));
   });
 }

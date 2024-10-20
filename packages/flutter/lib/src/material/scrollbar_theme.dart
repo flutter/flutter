@@ -45,11 +45,6 @@ class ScrollbarThemeData with Diagnosticable {
     this.mainAxisMargin,
     this.minThumbLength,
     this.interactive,
-    @Deprecated(
-      'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-      'This feature was deprecated after v3.4.0-19.0.pre.',
-    )
-    this.showTrackOnHover,
   });
 
   /// Overrides the default value of [Scrollbar.thumbVisibility] in all
@@ -66,14 +61,6 @@ class ScrollbarThemeData with Diagnosticable {
   /// Overrides the default value of [Scrollbar.trackVisibility] in all
   /// descendant [Scrollbar] widgets.
   final MaterialStateProperty<bool?>? trackVisibility;
-
-  /// Overrides the default value of [Scrollbar.showTrackOnHover] in all
-  /// descendant [Scrollbar] widgets.
-  @Deprecated(
-    'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-    'This feature was deprecated after v3.4.0-19.0.pre.',
-  )
-  final bool? showTrackOnHover;
 
   /// Overrides the default value of [Scrollbar.interactive] in all
   /// descendant [Scrollbar] widgets.
@@ -92,14 +79,14 @@ class ScrollbarThemeData with Diagnosticable {
   final MaterialStateProperty<Color?>? thumbColor;
 
   /// Overrides the default [Color] of the [Scrollbar] track when
-  /// [showTrackOnHover] is true in all descendant [Scrollbar] widgets.
+  /// [trackVisibility] is true in all descendant [Scrollbar] widgets.
   ///
   /// Resolves in the following states:
   ///  * [MaterialState.hovered] on web and desktop platforms.
   final MaterialStateProperty<Color?>? trackColor;
 
   /// Overrides the default [Color] of the [Scrollbar] track border when
-  /// [showTrackOnHover] is true in all descendant [Scrollbar] widgets.
+  /// [trackVisibility] is true in all descendant [Scrollbar] widgets.
   ///
   /// Resolves in the following states:
   ///  * [MaterialState.hovered] on web and desktop platforms.
@@ -148,17 +135,11 @@ class ScrollbarThemeData with Diagnosticable {
     double? crossAxisMargin,
     double? mainAxisMargin,
     double? minThumbLength,
-    @Deprecated(
-      'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-      'This feature was deprecated after v3.4.0-19.0.pre.',
-    )
-    bool? showTrackOnHover,
   }) {
     return ScrollbarThemeData(
       thumbVisibility: thumbVisibility ?? this.thumbVisibility,
       thickness: thickness ?? this.thickness,
       trackVisibility: trackVisibility ?? this.trackVisibility,
-      showTrackOnHover: showTrackOnHover ?? this.showTrackOnHover,
       interactive: interactive ?? this.interactive,
       radius: radius ?? this.radius,
       thumbColor: thumbColor ?? this.thumbColor,
@@ -181,7 +162,6 @@ class ScrollbarThemeData with Diagnosticable {
       thumbVisibility: MaterialStateProperty.lerp<bool?>(a?.thumbVisibility, b?.thumbVisibility, t, _lerpBool),
       thickness: MaterialStateProperty.lerp<double?>(a?.thickness, b?.thickness, t, lerpDouble),
       trackVisibility: MaterialStateProperty.lerp<bool?>(a?.trackVisibility, b?.trackVisibility, t, _lerpBool),
-      showTrackOnHover: _lerpBool(a?.showTrackOnHover, b?.showTrackOnHover, t),
       interactive: _lerpBool(a?.interactive, b?.interactive, t),
       radius: Radius.lerp(a?.radius, b?.radius, t),
       thumbColor: MaterialStateProperty.lerp<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
@@ -198,7 +178,6 @@ class ScrollbarThemeData with Diagnosticable {
     thumbVisibility,
     thickness,
     trackVisibility,
-    showTrackOnHover,
     interactive,
     radius,
     thumbColor,
@@ -221,7 +200,6 @@ class ScrollbarThemeData with Diagnosticable {
       && other.thumbVisibility == thumbVisibility
       && other.thickness == thickness
       && other.trackVisibility == trackVisibility
-      && other.showTrackOnHover == showTrackOnHover
       && other.interactive == interactive
       && other.radius == radius
       && other.thumbColor == thumbColor
@@ -238,7 +216,6 @@ class ScrollbarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('thumbVisibility', thumbVisibility, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('thickness', thickness, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('trackVisibility', trackVisibility, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('showTrackOnHover', showTrackOnHover, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('interactive', interactive, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('radius', radius, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('thumbColor', thumbColor, defaultValue: null));

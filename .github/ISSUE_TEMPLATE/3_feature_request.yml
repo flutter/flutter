@@ -12,15 +12,12 @@ body:
           - https://flutter.dev/
           - https://api.flutter.dev/
           - https://stackoverflow.com/questions/tagged/flutter?sort=frequent
-  - type: checkboxes
+  - type: markdown
     attributes:
-      label: Is there an existing issue for this?
-      description: Please search to see if an issue already exists for this feature request or proposal.
-      options:
-        - label: I have searched the [existing issues](https://github.com/flutter/flutter/issues)
-          required: true
-        - label: I have read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
-          required: true
+      value: |
+        Before filling the form fields, please consider the following:
+        - Ensure that you have searched the [existing issues](https://github.com/flutter/flutter/issues)
+        - Read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
   - type: textarea
     attributes:
       label: Use case

@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 const Key avatarA = Key('A');
@@ -82,7 +81,7 @@ void main() {
     matching: find.byType(Transform),
   );
 
-  testWidgetsWithLeakTracking('UserAccountsDrawerHeader inherits ColorScheme.primary', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader inherits ColorScheme.primary', (WidgetTester tester) async {
     const Color primaryColor = Color(0xff00ff00);
     const Color colorSchemePrimary = Color(0xff0000ff);
 
@@ -95,7 +94,7 @@ void main() {
     expect(boxDecoration?.color == colorSchemePrimary, true);
   });
 
-  testWidgetsWithLeakTracking('UserAccountsDrawerHeader test', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader test', (WidgetTester tester) async {
     await pumpTestWidget(tester);
 
     expect(find.text('A'), findsOneWidget);
@@ -133,7 +132,7 @@ void main() {
     expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
   });
 
-  testWidgetsWithLeakTracking('UserAccountsDrawerHeader change default size test', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader change default size test', (WidgetTester tester) async {
     const Size currentAccountPictureSize = Size.square(60.0);
     const Size otherAccountsPictureSize = Size.square(30.0);
 
@@ -150,7 +149,7 @@ void main() {
     expect(otherAccountRenderBox.size, otherAccountsPictureSize);
   });
 
-  testWidgetsWithLeakTracking('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
     await pumpTestWidget(tester);
     Transform transformWidget = tester.firstWidget(findTransform);
 
@@ -186,7 +185,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/25801.
-  testWidgetsWithLeakTracking('UserAccountsDrawerHeader icon does not rotate after setState', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon does not rotate after setState', (WidgetTester tester) async {
     late StateSetter testSetState;
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -221,7 +220,7 @@ void main() {
     expect(transformWidget.transform.getRotation()[4], 1.0);
   });
 
-  testWidgetsWithLeakTracking('UserAccountsDrawerHeader icon rotation test speeeeeedy', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon rotation test speeeeeedy', (WidgetTester tester) async {
     await pumpTestWidget(tester);
     Transform transformWidget = tester.firstWidget(findTransform);
 
@@ -262,7 +261,7 @@ void main() {
     expect(transformWidget.transform.getRotation()[4], 1.0);
   });
 
-  testWidgetsWithLeakTracking('UserAccountsDrawerHeader icon color changes', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon color changes', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: UserAccountsDrawerHeader(
@@ -293,7 +292,7 @@ void main() {
     expect(iconWidget.color, arrowColor);
   });
 
-  testWidgetsWithLeakTracking('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
     Widget buildFrame({
       Widget? currentAccountPicture,
       List<Widget>? otherAccountsPictures,
@@ -401,7 +400,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('UserAccountsDrawerHeader null parameters RTL', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader null parameters RTL', (WidgetTester tester) async {
     Widget buildFrame({
       Widget? currentAccountPicture,
       List<Widget>? otherAccountsPictures,
@@ -512,7 +511,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('UserAccountsDrawerHeader provides semantics', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader provides semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
 
@@ -532,6 +531,7 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                           label: 'Signed in\nname\nemail',
                           textDirection: TextDirection.ltr,
+                          actions: <SemanticsAction>[SemanticsAction.focus],
                           children: <TestSemantics>[
                             TestSemantics(
                               label: r'B',
@@ -568,7 +568,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('alternative account selectors have sufficient tap targets', (WidgetTester tester) async {
+  testWidgets('alternative account selectors have sufficient tap targets', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await pumpTestWidget(tester);
 
@@ -589,7 +589,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('UserAccountsDrawerHeader provides semantics with missing properties', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader provides semantics with missing properties', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(
       tester,

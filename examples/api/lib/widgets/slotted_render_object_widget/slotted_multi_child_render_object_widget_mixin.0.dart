@@ -33,12 +33,10 @@ class Diagonal extends SlottedMultiChildRenderObjectWidget<DiagonalSlot, RenderB
 
   @override
   Widget? childForSlot(DiagonalSlot slot) {
-    switch (slot) {
-      case DiagonalSlot.topLeft:
-        return topLeft;
-      case DiagonalSlot.bottomRight:
-        return bottomRight;
-    }
+    return switch (slot) {
+      DiagonalSlot.topLeft     => topLeft,
+      DiagonalSlot.bottomRight => bottomRight,
+    };
   }
 
   // The [createRenderObject] and [updateRenderObject] methods configure the
@@ -244,8 +242,8 @@ class RenderDiagonal extends RenderBox
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     const BoxConstraints childConstraints = BoxConstraints();
-    final Size topLeftSize = _topLeft?.computeDryLayout(childConstraints) ?? Size.zero;
-    final Size bottomRightSize = _bottomRight?.computeDryLayout(childConstraints) ?? Size.zero;
+    final Size topLeftSize = _topLeft?.getDryLayout(childConstraints) ?? Size.zero;
+    final Size bottomRightSize = _bottomRight?.getDryLayout(childConstraints) ?? Size.zero;
     return constraints.constrain(Size(
       topLeftSize.width + bottomRightSize.width,
       topLeftSize.height + bottomRightSize.height,

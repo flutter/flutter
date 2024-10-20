@@ -87,8 +87,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   const String outputDirectoryName = 'flutter-frameworks';
 
   await inDirectory(projectDir, () async {
-    final StringBuffer outputError = StringBuffer();
-    await evalFlutter(
+    await flutter(
       'build',
       options: <String>[
         'ios-framework',
@@ -97,11 +96,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
         '--obfuscate',
         '--split-debug-info=symbols',
       ],
-      stderr: outputError,
     );
-    if (!outputError.toString().contains('Bitcode support has been deprecated.')) {
-      throw TaskResult.failure('Missing bitcode deprecation warning');
-    }
   });
 
   final String outputPath = path.join(projectDir.path, outputDirectoryName);
@@ -278,7 +273,6 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       throw TaskResult.failure('$pluginFrameworkPath does not link on Flutter');
     }
 
-    // TODO(jmagman): Remove ios-arm64_armv7 checks when CI is updated to Xcode 14.
     final String transitiveDependencyFrameworkPath = path.join(
       outputPath,
       mode,
@@ -288,23 +282,11 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'Reachability',
     );
 
-    final String armv7TransitiveDependencyFrameworkPath = path.join(
-      outputPath,
-      mode,
-      'Reachability.xcframework',
-      'ios-arm64_armv7',
-      'Reachability.framework',
-      'Reachability',
-    );
-
-    final bool transitiveDependencyExists = exists(File(transitiveDependencyFrameworkPath));
-    final bool armv7TransitiveDependencyExists = exists(File(armv7TransitiveDependencyFrameworkPath));
-    if (!transitiveDependencyExists && !armv7TransitiveDependencyExists) {
+    if (!exists(File(transitiveDependencyFrameworkPath))) {
       throw TaskResult.failure('Expected debug Flutter engine artifact binary to exist');
     }
 
-    if ((transitiveDependencyExists && await _linksOnFlutter(transitiveDependencyFrameworkPath)) ||
-        (armv7TransitiveDependencyExists && await _linksOnFlutter(armv7TransitiveDependencyFrameworkPath))) {
+    if (await _linksOnFlutter(transitiveDependencyFrameworkPath)) {
       throw TaskResult.failure(
           'Transitive dependency $transitiveDependencyFrameworkPath unexpectedly links on Flutter');
     }
@@ -493,6 +475,12 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       isModule) {
     throw TaskResult.failure('Unexpected GeneratedPluginRegistrant.m.');
   }
+
+  section('Build frameworks without plugins');
+  await _testBuildFrameworksWithoutPlugins(projectDir, platform: 'ios');
+
+  section('check --static cannot be used with the --no-plugins flag');
+  await _testStaticAndNoPlugins(projectDir);
 }
 
 
@@ -816,6 +804,118 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
     outputPath,
     'GeneratedPluginRegistrant.swift',
   ));
+
+  section('Validate embed FlutterMacOS.framework with CocoaPods');
+
+  final File podspec = File(path.join(
+    cocoapodsOutputPath,
+    'Debug',
+    'FlutterMacOS.podspec',
+  ));
+
+  podspec.writeAsStringSync(
+    podspec.readAsStringSync().replaceFirst('null.null.0', '0.0.0'),
+  );
+
+  final Directory macosDirectory = Directory(path.join(projectDir.path, 'macos'));
+  final File podfile = File(path.join(macosDirectory.path, 'Podfile'));
+  final String currentPodfile = podfile.readAsStringSync();
+
+  // Temporarily test Add-to-App Cocoapods podspec for framework
+  podfile.writeAsStringSync('''
+target 'Runner' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  use_frameworks!
+
+  pod 'FlutterMacOS', :podspec => '${podspec.path}'
+end
+''');
+  await inDirectory(macosDirectory, () async {
+    await eval('pod', <String>['install']);
+  });
+
+  // Change podfile back to original
+  podfile.writeAsStringSync(currentPodfile);
+  await inDirectory(macosDirectory, () async {
+    await eval('pod', <String>['install']);
+  });
+
+  section('Build frameworks without plugins');
+  await _testBuildFrameworksWithoutPlugins(projectDir, platform: 'macos');
+}
+
+Future<void> _testBuildFrameworksWithoutPlugins(Directory projectDir, { required String platform}) async {
+  const String noPluginsOutputDir = 'flutter-frameworks-no-plugins';
+
+  await inDirectory(projectDir, () async {
+    await flutter(
+      'build',
+      options: <String>[
+        '$platform-framework',
+        '--cocoapods',
+        '--force', // Allow podspec creation on master.
+        '--output=$noPluginsOutputDir',
+        '--no-plugins',
+      ],
+    );
+  });
+
+  final String noPluginsOutputPath = path.join(projectDir.path, noPluginsOutputDir);
+  for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+    checkFileExists(path.join(
+      noPluginsOutputPath,
+      mode,
+      'Flutter${platform == 'macos' ? 'MacOS' : ''}.podspec',
+    ));
+    checkDirectoryExists(path.join(
+      noPluginsOutputPath,
+      mode,
+      'App.xcframework',
+    ));
+
+    checkDirectoryNotExists(path.join(
+      noPluginsOutputPath,
+      mode,
+      'package_info.xcframework',
+    ));
+
+    checkDirectoryNotExists(path.join(
+      noPluginsOutputPath,
+      mode,
+      'connectivity.xcframework',
+    ));
+
+    checkDirectoryNotExists(path.join(
+      noPluginsOutputPath,
+      mode,
+      'Reachability.xcframework',
+    ));
+  }
+}
+
+Future<void> _testStaticAndNoPlugins(Directory projectDir) async {
+  const String noPluginsOutputDir = 'flutter-frameworks-no-plugins-static';
+  final ProcessResult result = await inDirectory(projectDir, () async {
+    return executeFlutter(
+        'build',
+        options: <String>[
+          'ios-framework',
+          '--cocoapods',
+          '--force', // Allow podspec creation on master.
+          '--output=$noPluginsOutputDir',
+          '--no-plugins',
+          '--static'
+        ],
+        canFail: true
+    );
+  });
+  if (result.exitCode == 0) {
+    throw TaskResult.failure('Build framework command did not exit with error as expected');
+  }
+  final String output = '${result.stdout}\n${result.stderr}';
+  if (!output.contains('--static cannot be used with the --no-plugins flag')) {
+    throw TaskResult.failure(output);
+  }
 }
 
 Future<void> _checkDylib(String pathToLibrary) async {

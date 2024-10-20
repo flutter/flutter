@@ -8,8 +8,8 @@ import 'dart:ui' as ui;
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
-import 'package:web/web.dart' as web;
 
+import '../web.dart' as web;
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
@@ -117,7 +117,7 @@ class NetworkImage
 
     // We use a different method when headers are set because the
     // `ui_web.createImageCodecFromUrl` method is not capable of handling headers.
-    if (isCanvasKit || containsNetworkImageHeaders) {
+    if (isSkiaWeb || containsNetworkImageHeaders) {
       final Completer<web.XMLHttpRequest> completer =
           Completer<web.XMLHttpRequest>();
       final web.XMLHttpRequest request = httpRequestFactory();

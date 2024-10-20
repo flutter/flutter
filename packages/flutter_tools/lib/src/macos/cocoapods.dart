@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
 import '../base/error_handling_io.dart';
@@ -20,13 +21,13 @@ import '../cache.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/cocoapods_script_symlink.dart';
 import '../migrations/cocoapods_toolchain_directory_migration.dart';
+import '../project.dart';
 import '../reporting/reporting.dart';
-import '../xcode_project.dart';
 
 const String noCocoaPodsConsequence = '''
-  CocoaPods is used to retrieve the iOS and macOS platform side's plugin code that responds to your plugin usage on the Dart side.
+  CocoaPods is a package manager for iOS or macOS platform code.
   Without CocoaPods, plugins will not work on iOS or macOS.
-  For more info, see https://flutter.dev/platform-plugins''';
+  For more info, see https://flutter.dev/to/platform-plugins''';
 
 const String unknownCocoaPodsConsequence = '''
   Flutter is unable to determine the installed CocoaPods's version.
@@ -43,12 +44,12 @@ const String outOfDateFrameworksPodfileConsequence = '''
 
 const String outOfDatePluginsPodfileConsequence = '''
   This can cause issues if your application depends on plugins that do not support iOS or macOS.
-  See https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms for details.
+  See https://flutter.dev/to/pubspec-plugin-platforms for details.
   If you have local Podfile edits you would like to keep, see https://github.com/flutter/flutter/issues/45197 for instructions.''';
 
-const String cocoaPodsInstallInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#installation for instructions.';
+const String cocoaPodsInstallInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#installation';
 
-const String cocoaPodsUpdateInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#updating-cocoapods for instructions.';
+const String cocoaPodsUpdateInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#updating-cocoapods';
 
 const String podfileIosMigrationInstructions = '''
   rm ios/Podfile''';
@@ -74,7 +75,7 @@ enum CocoaPodsStatus {
 }
 
 const Version cocoaPodsMinimumVersion = Version.withText(1, 10, 0, '1.10.0');
-const Version cocoaPodsRecommendedVersion = Version.withText(1, 11, 0, '1.11.0');
+const Version cocoaPodsRecommendedVersion = Version.withText(1, 13, 0, '1.13.0');
 
 /// Cocoapods is a dependency management solution for iOS and macOS applications.
 ///
@@ -83,7 +84,7 @@ const Version cocoaPodsRecommendedVersion = Version.withText(1, 11, 0, '1.11.0')
 ///
 /// See also:
 ///   * https://cocoapods.org/ - the cocoapods website.
-///   * https://flutter.dev/docs/get-started/install/macos#deploy-to-ios-devices - instructions for
+///   * https://flutter.dev/to/macos-ios-setup - instructions for
 ///     installing iOS/macOS dependencies.
 class CocoaPods {
   CocoaPods({
@@ -93,11 +94,13 @@ class CocoaPods {
     required Logger logger,
     required Platform platform,
     required Usage usage,
+    required Analytics analytics,
   }) : _fileSystem = fileSystem,
       _processManager = processManager,
       _xcodeProjectInterpreter = xcodeProjectInterpreter,
       _logger = logger,
       _usage = usage,
+      _analytics = analytics,
       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
       _operatingSystemUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
@@ -113,6 +116,7 @@ class CocoaPods {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Logger _logger;
   final Usage _usage;
+  final Analytics _analytics;
 
   Future<String?>? _versionText;
 
@@ -162,6 +166,10 @@ class CocoaPods {
     bool dependenciesChanged = true,
   }) async {
     if (!xcodeProject.podfile.existsSync()) {
+      // Swift Package Manager doesn't need Podfile, so don't error.
+      if (xcodeProject.parent.usesSwiftPackageManager) {
+        return false;
+      }
       throwToolExit('Podfile missing');
     }
     _warnIfPodfileOutOfDate(xcodeProject);
@@ -181,7 +189,7 @@ class CocoaPods {
           _logger,
         ),
       ]);
-      postPodMigration.run();
+      await postPodMigration.run();
 
       podsProcessed = true;
     }
@@ -196,7 +204,7 @@ class CocoaPods {
         _logger.printWarning(
           'Warning: CocoaPods not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
-          'To install $cocoaPodsInstallInstructions\n',
+          'For installation instructions, $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         return false;
@@ -204,7 +212,7 @@ class CocoaPods {
         _logger.printWarning(
           'Warning: CocoaPods is installed but broken. Skipping pod install.\n'
           '$brokenCocoaPodsConsequence\n'
-          'To re-install $cocoaPodsInstallInstructions\n',
+          'For re-installation instructions, $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         return false;
@@ -212,14 +220,14 @@ class CocoaPods {
         _logger.printWarning(
           'Warning: Unknown CocoaPods version installed.\n'
           '$unknownCocoaPodsConsequence\n'
-          'To upgrade $cocoaPodsInstallInstructions\n',
+          'To update CocoaPods, $cocoaPodsUpdateInstructions\n',
           emphasis: true,
         );
       case CocoaPodsStatus.belowMinimumVersion:
         _logger.printWarning(
           'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
-          'To upgrade $cocoaPodsInstallInstructions\n',
+          'To update CocoaPods, $cocoaPodsUpdateInstructions\n',
           emphasis: true,
         );
         return false;
@@ -227,7 +235,7 @@ class CocoaPods {
         _logger.printWarning(
           'Warning: CocoaPods recommended version $cocoaPodsRecommendedVersion or greater not installed.\n'
           'Pods handling may fail on some projects involving plugins.\n'
-          'To upgrade $cocoaPodsInstallInstructions\n',
+          'To update CocoaPods, $cocoaPodsUpdateInstructions\n',
           emphasis: true,
         );
       case CocoaPodsStatus.recommended:
@@ -254,6 +262,18 @@ class CocoaPods {
       addPodsDependencyToFlutterXcconfig(xcodeProject);
       return;
     }
+    final File podfileTemplate = await getPodfileTemplate(
+      xcodeProject,
+      runnerProject,
+    );
+    podfileTemplate.copySync(podfile.path);
+    addPodsDependencyToFlutterXcconfig(xcodeProject);
+  }
+
+  Future<File> getPodfileTemplate(
+    XcodeBasedProject xcodeProject,
+    Directory runnerProject,
+  ) async {
     String podfileTemplateName;
     if (xcodeProject is MacOSProject) {
       podfileTemplateName = 'Podfile-macos';
@@ -264,7 +284,7 @@ class CocoaPods {
       )).containsKey('SWIFT_VERSION');
       podfileTemplateName = isSwift ? 'Podfile-ios-swift' : 'Podfile-ios-objc';
     }
-    final File podfileTemplate = _fileSystem.file(_fileSystem.path.join(
+    return _fileSystem.file(_fileSystem.path.join(
       Cache.flutterRoot!,
       'packages',
       'flutter_tools',
@@ -272,8 +292,6 @@ class CocoaPods {
       'cocoapods',
       podfileTemplateName,
     ));
-    podfileTemplate.copySync(podfile.path);
-    addPodsDependencyToFlutterXcconfig(xcodeProject);
   }
 
   /// Ensures all `Flutter/Xxx.xcconfig` files for the given Xcode-based
@@ -283,12 +301,24 @@ class CocoaPods {
     _addPodsDependencyToFlutterXcconfig(xcodeProject, 'Release');
   }
 
+  String includePodsXcconfig(String mode) {
+    return 'Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
+        .toLowerCase()}.xcconfig';
+  }
+
+  bool xcconfigIncludesPods(File xcodeConfig) {
+    if (xcodeConfig.existsSync()) {
+      final String content = xcodeConfig.readAsStringSync();
+      return content.contains('Pods/Target Support Files/Pods-');
+    }
+    return false;
+  }
+
   void _addPodsDependencyToFlutterXcconfig(XcodeBasedProject xcodeProject, String mode) {
     final File file = xcodeProject.xcodeConfigFor(mode);
     if (file.existsSync()) {
       final String content = file.readAsStringSync();
-      final String includeFile = 'Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
-          .toLowerCase()}.xcconfig';
+      final String includeFile = includePodsXcconfig(mode);
       final String include = '#include? "$includeFile"';
       if (!content.contains('Pods/Target Support Files/Pods-')) {
         file.writeAsStringSync('$include\n$content', flush: true);
@@ -351,7 +381,7 @@ class CocoaPods {
 
     if (result.exitCode != 0) {
       invalidatePodInstallOutput(xcodeProject);
-      _diagnosePodInstallFailure(result);
+      _diagnosePodInstallFailure(result, xcodeProject);
       throwToolExit('Error running pod install');
     } else if (xcodeProject.podfileLock.existsSync()) {
       // Even if the Podfile.lock didn't change, update its modified date to now
@@ -363,7 +393,7 @@ class CocoaPods {
     }
   }
 
-  void _diagnosePodInstallFailure(ProcessResult result) {
+  void _diagnosePodInstallFailure(ProcessResult result, XcodeBasedProject xcodeProject) {
     final Object? stdout = result.stdout;
     final Object? stderr = result.stderr;
     if (stdout is! String || stderr is! String) {
@@ -384,12 +414,140 @@ class CocoaPods {
         'arm-ffi',
         flutterUsage: _usage,
       ).send();
+      _analytics.send(Event.appleUsageEvent(
+        workflow: 'pod-install-failure',
+        parameter: 'arm-ffi',
+      ));
       _logger.printError(
         'Error: To set up CocoaPods for ARM macOS, run:\n'
         '  sudo gem uninstall ffi && sudo gem install ffi -- --enable-libffi-alloc\n',
         emphasis: true,
       );
+    } else if (stdout.contains('required a higher minimum deployment target')) {
+      final ({String failingPod, String sourcePlugin, String podPluginSubdir})?
+          podInfo = _parseMinDeploymentFailureInfo(stdout);
+      if (podInfo != null) {
+        final Directory symlinksDir;
+        final String podPlatformString;
+        final String platformName;
+        final String docsLink;
+        if (xcodeProject is IosProject) {
+          symlinksDir = xcodeProject.symlinks;
+          podPlatformString = 'ios';
+          platformName = 'iOS';
+          docsLink = 'https://flutter.dev/to/ios-deploy';
+        } else if (xcodeProject is MacOSProject) {
+          symlinksDir = xcodeProject.ephemeralDirectory.childDirectory('.symlinks');
+          podPlatformString = 'osx';
+          platformName = 'macOS';
+          docsLink = 'https://flutter.dev/to/macos-deploy';
+        } else {
+          return;
+        }
+
+        final String sourcePlugin = podInfo.sourcePlugin;
+        // If the plugin's podfile has set its own minimum version correctly
+        // based on the requirements of its dependencies the failing pod should
+        // be the plugin itself, but if not they may be different (e.g., if
+        // a plugin says its minimum iOS version is 11, but depends on a pod
+        // with a minimum version of 12, then building for 11 will report that
+        // pod as failing.)
+        if (podInfo.failingPod == podInfo.sourcePlugin) {
+          final File podspec = symlinksDir
+              .childDirectory('plugins')
+              .childDirectory(sourcePlugin)
+              .childDirectory(podInfo.podPluginSubdir)
+              .childFile('$sourcePlugin.podspec');
+          final String? minDeploymentVersion = _findPodspecMinDeploymentVersion(
+            podspec,
+            podPlatformString
+          );
+          if (minDeploymentVersion != null) {
+            _logger.printError(
+              'Error: The plugin "$sourcePlugin" requires a higher minimum '
+              '$platformName deployment version than your application is targeting.\n'
+              "To build, increase your application's deployment target to at "
+              'least $minDeploymentVersion as described at $docsLink',
+              emphasis: true,
+            );
+          } else {
+            // If for some reason the min version can't be parsed out, provide
+            // a less specific error message that still describes the problem,
+            // but also requests filing a Flutter issue so the parsing in
+            // _findPodspecMinDeploymentVersion can be improved.
+            _logger.printError(
+              'Error: The plugin "$sourcePlugin" requires a higher minimum '
+              '$platformName deployment version than your application is targeting.\n'
+              "To build, increase your application's deployment target as "
+              'described at $docsLink\n\n'
+              'The minimum required version for "$sourcePlugin" could not be '
+              'determined. Please file an issue at '
+              'https://github.com/flutter/flutter/issues about this error message.',
+              emphasis: true,
+            );
+          }
+        } else {
+          // In theory this could find the failing pod's spec and parse out its
+          // minimum deployment version, but finding that spec would add a lot
+          // of complexity to handle a case that plugin authors should not
+          // create, so this just provides the actionable step of following up
+          // with the plugin developer.
+          _logger.printError(
+            'Error: The pod "${podInfo.failingPod}" required by the plugin '
+            '"$sourcePlugin" requires a higher minimum $platformName deployment '
+            "version than the plugin's reported minimum version.\n"
+            'To build, remove the plugin "$sourcePlugin", or contact the plugin\'s '
+            'developers for assistance.',
+            emphasis: true,
+          );
+        }
+      }
     }
+  }
+
+  ({String failingPod, String sourcePlugin, String podPluginSubdir})?
+      _parseMinDeploymentFailureInfo(String podInstallOutput) {
+    final RegExp sourceLine = RegExp(r'\(from `.*\.symlinks/plugins/([^/]+)/([^/]+)`\)');
+    final RegExp dependencyLine = RegExp(r'Specs satisfying the `([^ ]+).*` dependency were found, '
+        'but they required a higher minimum deployment target');
+    final RegExpMatch? sourceMatch = sourceLine.firstMatch(podInstallOutput);
+    final RegExpMatch? dependencyMatch = dependencyLine.firstMatch(podInstallOutput);
+    if (sourceMatch == null || dependencyMatch == null) {
+      return null;
+    }
+    return (
+      failingPod: dependencyMatch.group(1)!,
+      sourcePlugin:  sourceMatch.group(1)!,
+      podPluginSubdir: sourceMatch.group(2)!
+    );
+  }
+
+  String? _findPodspecMinDeploymentVersion(File podspec, String platformString) {
+    if (!podspec.existsSync()) {
+      return null;
+    }
+    // There are two ways the deployment target can be specified; see
+    // https://guides.cocoapods.org/syntax/podspec.html#group_platform
+    final RegExp platformPattern = RegExp(
+      // Example: spec.platform = :osx, '10.8'
+      // where "spec" is an arbitrary variable name.
+      r'^\s*[a-zA-Z_]+\.platform\s*=\s*'
+      ':$platformString'
+      r'''\s*,\s*["']([^"']+)["']''',
+      multiLine: true
+    );
+    final RegExp deploymentTargetPlatform = RegExp(
+      // Example: spec.osx.deployment_target = '10.8'
+      // where "spec" is an arbitrary variable name.
+      r'^\s*[a-zA-Z_]+\.'
+      '$platformString\\.deployment_target'
+      r'''\s*=\s*["']([^"']+)["']''',
+      multiLine: true
+    );
+    final String podspecContents = podspec.readAsStringSync();
+    final RegExpMatch? match = platformPattern.firstMatch(podspecContents) ??
+        deploymentTargetPlatform.firstMatch(podspecContents);
+    return match?.group(1);
   }
 
   bool _isFfiX86Error(String error) {

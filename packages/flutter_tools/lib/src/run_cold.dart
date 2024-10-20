@@ -21,7 +21,6 @@ class ColdRunner extends ResidentRunner {
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
-    this.multidexEnabled = false,
     bool super.ipv6 = false,
     super.stayResident,
     super.machine,
@@ -33,7 +32,6 @@ class ColdRunner extends ResidentRunner {
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
   final File? applicationBinary;
-  final bool multidexEnabled;
   bool _didAttach = false;
 
   @override

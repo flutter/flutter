@@ -87,6 +87,7 @@ void main() {
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_ffi'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_shared'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_cocoapods'),
         ];
         for (final String templatePath in templatePaths) {
           globals.fs.directory(templatePath).createSync(recursive: true);

@@ -49,7 +49,7 @@ void main() {
 
     int? breakLine;
     await _timeoutAfter(
-      message: 'Timed out getting source location of top stack frome',
+      message: 'Timed out getting source location of top stack frame',
       work: () async => breakLine = (await flutter.getSourceLocation())?.line,
     );
 
@@ -359,7 +359,7 @@ void main() {
       SchedulerBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
         throw 'TimingsCallback';
       });
-      ui.window.onReportTimings!(<FrameTiming>[]);
+      ui.PlatformDispatcher.instance.onReportTimings!(<FrameTiming>[]);
       '''
     );
 

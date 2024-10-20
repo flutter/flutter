@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestNotifier extends ChangeNotifier {
   void notify() {
@@ -62,7 +61,7 @@ class Counter with ChangeNotifier {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
+  testWidgets('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
     final TestNotifier test = TestNotifier();
     bool callbackDidFinish = false;
     void foo() {
@@ -80,7 +79,7 @@ void main() {
     test.dispose();
   });
 
-  testWidgetsWithLeakTracking('ChangeNotifier', (WidgetTester tester) async {
+  testWidgets('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
     void listener() {
       log.add('listener');
@@ -312,6 +311,21 @@ void main() {
     source2.notify();
     source3.notify();
     expect(log, <String>['listener1', 'listener2', 'listener1', 'listener2']);
+    log.clear();
+  });
+
+  test('Merging change notifiers supports any iterable', () {
+    final TestNotifier source1 = TestNotifier();
+    final TestNotifier source2 = TestNotifier();
+    final List<String> log = <String>[];
+
+    final Listenable merged = Listenable.merge(<Listenable?>{source1, source2});
+    void listener() => log.add('listener');
+
+    merged.addListener(listener);
+    source1.notify();
+    source2.notify();
+    expect(log, <String>['listener', 'listener']);
     log.clear();
   });
 

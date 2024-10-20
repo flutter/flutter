@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_tab_bar.dart';
+/// @docImport 'date_picker.dart';
+/// @docImport 'search_field.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -251,6 +256,10 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get pasteButtonLabel;
 
+  /// The term used for clearing a field.
+  // The global version uses the translated string from the arb file.
+  String get clearButtonLabel;
+
   /// Label that appears in the Cupertino toolbar when the spell checker
   /// couldn't find any replacements for the current word.
   // The global version uses the translated string from the arb file.
@@ -478,6 +487,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get pasteButtonLabel => 'Paste';
+
+  @override
+  String get clearButtonLabel => 'Clear';
 
   @override
   String get noSpellCheckReplacementsLabel => 'No Replacements Found';

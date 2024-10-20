@@ -31,17 +31,13 @@ class TargetModel {
   /// Throws an exception if passed a value other than 'flutter',
   /// 'flutter_runner', 'vm', or 'dartdevc'.
   factory TargetModel(String rawValue) {
-    switch (rawValue) {
-      case 'flutter':
-        return flutter;
-      case 'flutter_runner':
-        return flutterRunner;
-      case 'vm':
-        return vm;
-      case 'dartdevc':
-        return dartdevc;
-    }
-    throw Exception('Unexpected target model $rawValue');
+    return switch (rawValue) {
+      'flutter'        => flutter,
+      'flutter_runner' => flutterRunner,
+      'vm'             => vm,
+      'dartdevc'       => dartdevc,
+      _ => throw Exception('Unexpected target model $rawValue'),
+    };
   }
 
   const TargetModel._(this._value);
@@ -133,22 +129,20 @@ class StdoutHandler {
       compilerOutput?.complete(output);
       return;
     }
-    if (state == StdoutState.CollectDiagnostic) {
-      if (!_suppressCompilerMessages) {
-        _logger.printError(message);
-      } else {
+    switch (state) {
+      case StdoutState.CollectDiagnostic when _suppressCompilerMessages:
         _logger.printTrace(message);
-      }
-    } else {
-      assert(state == StdoutState.CollectDependencies);
-      switch (message[0]) {
-        case '+':
-          sources.add(Uri.parse(message.substring(1)));
-        case '-':
-          sources.remove(Uri.parse(message.substring(1)));
-        default:
-          _logger.printTrace('Unexpected prefix for $message uri - ignoring');
-      }
+      case StdoutState.CollectDiagnostic:
+        _logger.printError(message);
+      case StdoutState.CollectDependencies:
+        switch (message[0]) {
+          case '+':
+            sources.add(Uri.parse(message.substring(1)));
+          case '-':
+            sources.remove(Uri.parse(message.substring(1)));
+          default:
+            _logger.printTrace('Unexpected prefix for $message uri - ignoring');
+        }
     }
   }
 
@@ -183,11 +177,15 @@ List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) =>
             '-Ddart.vm.profile=true',
           if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
             '-Ddart.vm.product=false',
+          '--delete-tostring-package-uri=dart:ui',
+          '--delete-tostring-package-uri=package:flutter',
           ...kDartCompilerExperiments,
         ],
       BuildMode.release => <String>[
           '-Ddart.vm.profile=false',
           '-Ddart.vm.product=true',
+          '--delete-tostring-package-uri=dart:ui',
+          '--delete-tostring-package-uri=package:flutter',
           ...kDartCompilerExperiments,
         ],
       _ => throw Exception('Unknown BuildMode: $mode')
@@ -244,27 +242,19 @@ class KernelCompiler {
     String? nativeAssets,
   }) async {
     final TargetPlatform? platform = targetModel == TargetModel.dartdevc ? TargetPlatform.web_javascript : null;
-    final String frontendServer = (frontendServerStarterPath == null || frontendServerStarterPath.isEmpty)
-        ? _artifacts.getArtifactPath(
-            Artifact.frontendServerSnapshotForEngineDartSdk,
-            platform: platform,
-          )
-        : frontendServerStarterPath;
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
     }
-    final String engineDartPath = _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform);
-    if (!_processManager.canRun(engineDartPath)) {
-      throwToolExit('Unable to find Dart binary at $engineDartPath');
-    }
     String? mainUri;
-    final File mainFile = _fileSystem.file(mainPath);
-    final Uri mainFileUri = mainFile.uri;
-    if (packagesPath != null) {
-      mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
+    if (mainPath != null) {
+      final File mainFile = _fileSystem.file(mainPath);
+      final Uri mainFileUri = mainFile.uri;
+      if (packagesPath != null) {
+        mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
+      }
+      mainUri ??= toMultiRootPath(mainFileUri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\');
     }
-    mainUri ??= toMultiRootPath(mainFileUri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\');
     if (outputFilePath != null && !_fileSystem.isFileSync(outputFilePath)) {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
@@ -282,10 +272,33 @@ class KernelCompiler {
         toMultiRootPath(dartPluginRegistrantFileUri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\');
     }
 
-    final List<String> command = <String>[
-      engineDartPath,
-      '--disable-dart-dev',
-      frontendServer,
+    final List<String> commandToStartFrontendServer;
+    if (frontendServerStarterPath != null && frontendServerStarterPath.isNotEmpty) {
+      final String engineDartPath = _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform);
+      if (!_processManager.canRun(engineDartPath)) {
+        throwToolExit('Unable to find Dart binary at $engineDartPath');
+      }
+      commandToStartFrontendServer = <String>[
+        engineDartPath,
+        '--disable-dart-dev',
+        frontendServerStarterPath,
+      ];
+    } else {
+      final String engineDartAotRuntimePath = _artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: platform);
+      if (!_processManager.canRun(engineDartAotRuntimePath)) {
+        throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath');
+      }
+      commandToStartFrontendServer = <String>[
+        engineDartAotRuntimePath,
+        '--disable-dart-dev',
+        _artifacts.getArtifactPath(
+          Artifact.frontendServerSnapshotForEngineDartSdk,
+          platform: platform,
+        ),
+      ];
+    }
+
+    final List<String> command = commandToStartFrontendServer + <String>[
       '--sdk-root',
       sdkRoot,
       '--target=$targetModel',
@@ -348,7 +361,8 @@ class KernelCompiler {
       // See: https://github.com/flutter/flutter/issues/103994
       '--verbosity=error',
       ...?extraFrontEndOptions,
-      mainUri,
+      if (mainUri != null) mainUri
+      else '--native-assets-only',
     ];
 
     _logger.printTrace(command.join(' '));
@@ -777,16 +791,25 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? nativeAssetsUri,
   }) async {
     final TargetPlatform? platform = (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
-    final String frontendServer = (frontendServerStarterPath == null || frontendServerStarterPath!.isEmpty)
-        ? artifacts.getArtifactPath(
-            Artifact.frontendServerSnapshotForEngineDartSdk,
-            platform: platform,
-          )
-        : frontendServerStarterPath!;
-    final List<String> command = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
-      '--disable-dart-dev',
-      frontendServer,
+    late final List<String> commandToStartFrontendServer;
+    if (frontendServerStarterPath != null && frontendServerStarterPath!.isNotEmpty) {
+      commandToStartFrontendServer = <String>[
+        artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
+        '--disable-dart-dev',
+        frontendServerStarterPath!,
+      ];
+    } else {
+      commandToStartFrontendServer = <String>[
+        artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: platform),
+        '--disable-dart-dev',
+        artifacts.getArtifactPath(
+          Artifact.frontendServerSnapshotForEngineDartSdk,
+          platform: platform,
+        ),
+      ];
+    }
+
+    final List<String> command = commandToStartFrontendServer + <String>[
       '--sdk-root',
       sdkRoot,
       '--incremental',

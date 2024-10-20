@@ -393,7 +393,8 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _getSize(constraints);
   }
 

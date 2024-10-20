@@ -134,7 +134,7 @@ class Wrapper extends StatelessWidget {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Legal times for setState', (WidgetTester tester) async {
+  testWidgets('Legal times for setState', (WidgetTester tester) async {
     final GlobalKey flipKey = GlobalKey();
     expect(ProbeWidgetState.buildCount, equals(0));
     await tester.pumpWidget(const ProbeWidget(key: Key('a')));
@@ -165,14 +165,16 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('Setting state during dispose is forbidden', (WidgetTester tester) async {
+  testWidgets('Setting state during dispose is forbidden',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(const BadDisposeWidget());
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(Container());
     expect(tester.takeException(), isNotNull);
   });
 
-  testWidgetsWithLeakTracking('Dirty element list sort order', (WidgetTester tester) async {
+  testWidgets('Dirty element list sort order', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey(debugLabel: 'key1');
     final GlobalKey key2 = GlobalKey(debugLabel: 'key2');
 

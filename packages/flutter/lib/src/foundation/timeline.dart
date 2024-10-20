@@ -8,7 +8,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
 import '_timeline_io.dart'
-  if (dart.library.js_util) '_timeline_web.dart' as impl;
+  if (dart.library.js_interop) '_timeline_web.dart' as impl;
 import 'constants.dart';
 
 /// Measures how long blocks of code take to run.
@@ -252,7 +252,7 @@ final class AggregatedTimedBlock {
   /// easily tell which part of code was measured.
   final String name;
 
-  /// The sum of [TimedBlock.duration] values of aggretaged blocks.
+  /// The sum of [TimedBlock.duration] values of aggregated blocks.
   final double duration;
 
   /// The number of [TimedBlock] objects aggregated.
@@ -311,12 +311,10 @@ final class _Float64ListChain {
   /// are read back, they do not affect the timings of the work being
   /// benchmarked.
   List<double> extractElements() {
-    final List<double> result = <double>[];
-    _chain.forEach(result.addAll);
-    for (int i = 0; i < _pointer; i++) {
-      result.add(_slice[i]);
-    }
-    return result;
+    return <double>[
+      for (final Float64List list in _chain) ...list,
+      for (int i = 0; i < _pointer; i++) _slice[i],
+    ];
   }
 }
 
@@ -349,16 +347,11 @@ final class _StringListChain {
   /// are read back, they do not affect the timings of the work being
   /// benchmarked.
   List<String> extractElements() {
-    final List<String> result = <String>[];
-    for (final List<String?> slice in _chain) {
-      for (final String? element in slice) {
-        result.add(element!);
-      }
-    }
-    for (int i = 0; i < _pointer; i++) {
-      result.add(_slice[i]!);
-    }
-    return result;
+    return <String>[
+      for (final List<String?> slice in _chain)
+        for (final String? value in slice) value!,
+      for (int i = 0; i < _pointer; i++) _slice[i]!,
+    ];
   }
 }
 

@@ -6,7 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('CheckboxThemeData copyWith, ==, hashCode basics', () {
@@ -40,7 +39,7 @@ void main() {
     expect(theme.data.visualDensity, null);
   });
 
-  testWidgetsWithLeakTracking('Default CheckboxThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default CheckboxThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const CheckboxThemeData().debugFillProperties(builder);
 
@@ -52,7 +51,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('CheckboxThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('CheckboxThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const CheckboxThemeData(
       mouseCursor: MaterialStatePropertyAll<MouseCursor?>(SystemMouseCursors.click),
@@ -72,10 +71,10 @@ void main() {
     expect(
       description,
       equalsIgnoringHashCodes(<String>[
-        'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))',
-        'fillColor: MaterialStatePropertyAll(Color(0xfffffff0))',
-        'checkColor: MaterialStatePropertyAll(Color(0xfffffff1))',
-        'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))',
+        'mouseCursor: WidgetStatePropertyAll(SystemMouseCursor(click))',
+        'fillColor: WidgetStatePropertyAll(Color(0xfffffff0))',
+        'checkColor: WidgetStatePropertyAll(Color(0xfffffff1))',
+        'overlayColor: WidgetStatePropertyAll(Color(0xfffffff2))',
         'splashRadius: 1.0',
         'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
@@ -83,7 +82,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Checkbox is themeable', (WidgetTester tester) async {
+  testWidgets('Checkbox is themeable', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor mouseCursor = SystemMouseCursors.text;
@@ -165,7 +164,7 @@ void main() {
     expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor)..path(color: focusedCheckColor));
   });
 
-  testWidgetsWithLeakTracking('Checkbox properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgets('Checkbox properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor themeMouseCursor = SystemMouseCursors.click;
@@ -263,7 +262,7 @@ void main() {
     expect(_getCheckboxMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
 
-  testWidgetsWithLeakTracking('Checkbox activeColor property is taken over the theme', (WidgetTester tester) async {
+  testWidgets('Checkbox activeColor property is taken over the theme', (WidgetTester tester) async {
     const Color themeSelectedFillColor = Color(0xfffffff1);
     const Color themeDefaultFillColor = Color(0xfffffff0);
     const Color selectedFillColor = Color(0xfffffff6);
@@ -301,7 +300,7 @@ void main() {
     expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor));
   });
 
-  testWidgetsWithLeakTracking('Checkbox theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+  testWidgets('Checkbox theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
@@ -334,7 +333,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildCheckbox(active: false));
-    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -348,7 +347,7 @@ void main() {
     );
 
     await tester.pumpWidget(buildCheckbox(active: true));
-    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -360,9 +359,14 @@ void main() {
         ),
       reason: 'Active pressed Checkbox should have overlay color: $activePressedOverlayColor',
     );
+
+    // Finish gesture to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Local CheckboxTheme can override global CheckboxTheme', (WidgetTester tester) async {
+  testWidgets('Local CheckboxTheme can override global CheckboxTheme', (WidgetTester tester) async {
     const Color globalThemeFillColor = Color(0xfffffff1);
     const Color globalThemeCheckColor = Color(0xff000000);
     const Color localThemeFillColor = Color(0xffff0000);
@@ -466,6 +470,47 @@ void main() {
     expect(lerped.visualDensity,  const VisualDensity(vertical: 2.0, horizontal: 2.0));
     expect(lerped.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.5))));
     expect(lerped.side, const BorderSide(width: 3.5));
+  });
+
+  testWidgets('MaterialStateBorderSide properly lerp in CheckboxThemeData.side', (WidgetTester tester) async {
+    late ColorScheme colorScheme;
+
+    Widget buildCheckbox({ required  Color seedColor }) {
+      colorScheme = ColorScheme.fromSeed(seedColor: seedColor);
+      return MaterialApp(
+        theme: ThemeData(
+          colorScheme: colorScheme,
+          checkboxTheme: CheckboxThemeData(
+            side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+              return BorderSide(
+                color: colorScheme.primary,
+                width: 4.0,
+              );
+            }),
+          ),
+        ),
+        home: Scaffold(
+          body: Checkbox(
+            value: false,
+            onChanged: (_) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCheckbox(seedColor: Colors.red));
+    await tester.pumpAndSettle();
+
+    RenderBox getCheckboxRendeBox() {
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
+    }
+
+    expect(getCheckboxRendeBox(), paints..drrect(color: colorScheme.primary));
+
+    await tester.pumpWidget(buildCheckbox(seedColor: Colors.blue));
+    await tester.pump(kPressTimeout);
+
+    expect(getCheckboxRendeBox(), paints..drrect(color: colorScheme.primary));
   });
 }
 

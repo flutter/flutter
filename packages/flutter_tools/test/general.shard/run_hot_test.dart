@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 //import '../src/context.dart';
@@ -25,6 +26,7 @@ void main() {
       false,
       'test-reason',
       TestUsage(),
+      const NoOpAnalytics(),
     );
   });
 }

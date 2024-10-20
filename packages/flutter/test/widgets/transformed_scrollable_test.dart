@@ -6,10 +6,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Scrollable scaled up', (WidgetTester tester) async {
+  testWidgets('Scrollable scaled up', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -55,7 +54,7 @@ void main() {
     expect(controller.offset, 42.5); // 85.0 - (85.0 / 2)
   });
 
-  testWidgetsWithLeakTracking('Scrollable scaled down', (WidgetTester tester) async {
+  testWidgets('Scrollable scaled down', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -101,7 +100,7 @@ void main() {
     expect(controller.offset, 0.0); // 340.0 - (170.0 * 2)
   });
 
-  testWidgetsWithLeakTracking('Scrollable rotated 90 degrees', (WidgetTester tester) async {
+  testWidgets('Scrollable rotated 90 degrees', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -143,7 +142,7 @@ void main() {
     expect(controller.offset, 30.0); // 100.0 - 70.0
   });
 
-  testWidgetsWithLeakTracking('Perspective transform on scrollable', (WidgetTester tester) async {
+  testWidgets('Perspective transform on scrollable', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 

@@ -8,12 +8,6 @@ import 'package:flutter/rendering.dart';
 
 import 'use_cases/use_cases.dart';
 
-// TODO(yjbanov): https://github.com/flutter/flutter/issues/83809
-//                Currently this app (as most Flutter Web apps) relies on the
-//                `autofocus` property to guide the a11y focus when navigating
-//                across routes (screen transitions, dialogs, etc). We may want
-//                to revisit this after we figure out a long-term story for a11y
-//                focus. See also https://github.com/flutter/flutter/issues/97747
 void main() {
   runApp(const App());
   if (kIsWeb) {
@@ -26,16 +20,25 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData lightTheme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xff6750a4),
+        contrastLevel: MediaQuery.highContrastOf(context) ? 1.0 : 0.0,
+    ));
+    final ThemeData darkTheme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        brightness: Brightness.dark,
+        seedColor: const Color(0xff6750a4),
+        contrastLevel: MediaQuery.highContrastOf(context) ? 1.0 : 0.0,
+    ));
 
     final Map<String, WidgetBuilder> routes = Map<String, WidgetBuilder>.fromEntries(
       useCases.map((UseCase useCase) => MapEntry<String, WidgetBuilder>(useCase.route, useCase.build)),
     );
     return MaterialApp(
       title: 'Accessibility Assessments',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: lightTheme,
+      darkTheme: darkTheme,
       routes: <String, WidgetBuilder>{
         '/': (_) => const HomePage(),
         ...routes
@@ -44,8 +47,21 @@ class App extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => HomePageState();
+}
+
+class HomePageState extends State<HomePage> {
+  final ScrollController scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
 
   Widget _buildUseCaseItem(int index, UseCase useCase) {
     return Padding(
@@ -53,7 +69,6 @@ class HomePage extends StatelessWidget {
       child: Builder(
           builder: (BuildContext context) {
             return TextButton(
-              autofocus: index == 0,
               key: Key(useCase.name),
               onPressed: () => Navigator.of(context).pushNamed(useCase.route),
               child: Text(useCase.name),
@@ -69,6 +84,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(title: const Text('Accessibility Assessments')),
       body: Center(
         child: ListView(
+          controller: scrollController,
           children: List<Widget>.generate(
             useCases.length,
             (int index) => _buildUseCaseItem(index, useCases[index]),

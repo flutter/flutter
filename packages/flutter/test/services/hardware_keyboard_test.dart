@@ -8,10 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('HardwareKeyboard records pressed keys and enabled locks', (WidgetTester tester) async {
+  testWidgets('HardwareKeyboard records pressed keys and enabled locks', (WidgetTester tester) async {
     await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
       equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
@@ -69,7 +68,41 @@ void main() {
       equals(<KeyboardLockMode>{}));
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
-  testWidgetsWithLeakTracking('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
+  testWidgets('KeyEvent can tell which keys are pressed', (WidgetTester tester) async {
+    await tester.pumpWidget(const Focus(autofocus: true, child: SizedBox()));
+    await tester.pump();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
+
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isTrue);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isTrue);
+
+    await simulateKeyRepeatEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isTrue);
+
+    await simulateKeyUpEvent(LogicalKeyboardKey.numLock);
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isTrue);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isTrue);
+
+    await simulateKeyUpEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isFalse);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isFalse);
+
+    await simulateKeyUpEvent(LogicalKeyboardKey.numLock, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isFalse);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isFalse);
+  }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
+
+  testWidgets('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
     HardwareKeyboard.instance.addHandler((KeyEvent event) {
       events.add(event);
@@ -97,7 +130,7 @@ void main() {
     expect(events[1].synthesized, false);
   });
 
-  testWidgetsWithLeakTracking('Dispatch events to all handlers', (WidgetTester tester) async {
+  testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     final List<int> logs = <int>[];
@@ -203,7 +236,7 @@ void main() {
   // _CastError on _hardwareKeyboard.lookUpLayout(key). The original scenario
   // that this is triggered on Android is unknown. Here we make up a scenario
   // where a ShiftLeft key down is dispatched but the modifier bit is not set.
-  testWidgetsWithLeakTracking('Correctly convert down events that are synthesized released', (WidgetTester tester) async {
+  testWidgets('Correctly convert down events that are synthesized released', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     final List<KeyEvent> events = <KeyEvent>[];
@@ -247,7 +280,7 @@ void main() {
     KeyDataTransitMode.rawKeyData,
   }));
 
-  testWidgetsWithLeakTracking('Instantly dispatch synthesized key events when the queue is empty', (WidgetTester tester) async {
+  testWidgets('Instantly dispatch synthesized key events when the queue is empty', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     final List<int> logs = <int>[];
@@ -280,7 +313,7 @@ void main() {
     logs.clear();
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
-  testWidgetsWithLeakTracking('Postpone synthesized key events when the queue is not empty', (WidgetTester tester) async {
+  testWidgets('Postpone synthesized key events when the queue is not empty', (WidgetTester tester) async {
     final FocusNode keyboardListenerFocusNode = FocusNode();
     addTearDown(keyboardListenerFocusNode.dispose);
     final FocusNode rawKeyboardListenerFocusNode = FocusNode();
@@ -338,7 +371,7 @@ void main() {
   // In that case, the key data should not be converted to any [KeyEvent]s,
   // but is only used so that *a* key data comes before the raw key message
   // and makes [KeyEventManager] infer [KeyDataTransitMode.keyDataThenRawKeyData].
-  testWidgetsWithLeakTracking('Empty keyData yields no event but triggers inference', (WidgetTester tester) async {
+  testWidgets('Empty keyData yields no event but triggers inference', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
     final List<RawKeyEvent> rawEvents = <RawKeyEvent>[];
     tester.binding.keyboard.addHandler((KeyEvent event) {
@@ -390,7 +423,7 @@ void main() {
     expect(rawEvents.length, 2);
   });
 
-  testWidgetsWithLeakTracking('Exceptions from keyMessageHandler are caught and reported', (WidgetTester tester) async {
+  testWidgets('Exceptions from keyMessageHandler are caught and reported', (WidgetTester tester) async {
     final KeyMessageHandler? oldKeyMessageHandler = tester.binding.keyEventManager.keyMessageHandler;
     addTearDown(() {
       tester.binding.keyEventManager.keyMessageHandler = oldKeyMessageHandler;
@@ -433,7 +466,7 @@ void main() {
     expect(record, isNull);
   });
 
-  testWidgetsWithLeakTracking('Exceptions from HardwareKeyboard handlers are caught and reported', (WidgetTester tester) async {
+  testWidgets('Exceptions from HardwareKeyboard handlers are caught and reported', (WidgetTester tester) async {
     bool throwingCallback(KeyEvent event) {
       throw 1;
     }
@@ -473,7 +506,7 @@ void main() {
     expect(record, isNull);
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgetsWithLeakTracking('debugPrintKeyboardEvents causes logging of key events', (WidgetTester tester) async {
+  testWidgets('debugPrintKeyboardEvents causes logging of key events', (WidgetTester tester) async {
     final bool oldDebugPrintKeyboardEvents = debugPrintKeyboardEvents;
     final DebugPrintCallback oldDebugPrint = debugPrint;
     final StringBuffer messages = StringBuffer();

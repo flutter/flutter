@@ -5,6 +5,9 @@
 // Examples can assume:
 // bool _giveVerse = false;
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -60,7 +63,7 @@ import 'thumb_painter.dart';
 /// See also:
 ///
 ///  * [Switch], the Material Design equivalent.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/switches/>
+///  * <https://developer.apple.com/design/human-interface-guidelines/toggles/>
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
   ///
@@ -200,10 +203,10 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   late HorizontalDragGestureRecognizer _drag;
 
   late AnimationController _positionController;
-  late CurvedAnimation position;
+  late final CurvedAnimation position;
 
   late AnimationController _reactionController;
-  late Animation<double> _reaction;
+  late CurvedAnimation _reaction;
 
   late bool isFocused;
 
@@ -322,12 +325,10 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         ..curve = Curves.linear
         ..reverseCurve = Curves.linear;
       final double delta = details.primaryDelta! / _kTrackInnerLength;
-      switch (Directionality.of(context)) {
-        case TextDirection.rtl:
-          _positionController.value -= delta;
-        case TextDirection.ltr:
-          _positionController.value += delta;
-      }
+      _positionController.value += switch (Directionality.of(context)) {
+        TextDirection.rtl => -delta,
+        TextDirection.ltr =>  delta,
+      };
     }
   }
 
@@ -426,6 +427,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
     _positionController.dispose();
     _reactionController.dispose();
+    position.dispose();
+    _reaction.dispose();
     super.dispose();
   }
 }
@@ -674,13 +677,10 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     final double currentValue = _state.position.value;
     final double currentReactionValue = _state._reaction.value;
 
-    final double visualPosition;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        visualPosition = 1.0 - currentValue;
-      case TextDirection.ltr:
-        visualPosition = currentValue;
-    }
+    final double visualPosition = switch (textDirection) {
+      TextDirection.rtl => 1.0 - currentValue,
+      TextDirection.ltr => currentValue,
+    };
 
     final Paint paint = Paint()
       ..color = Color.lerp(trackColor, activeColor, currentValue)!;

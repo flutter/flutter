@@ -139,9 +139,6 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
 class FakeIOSApp extends Fake implements IOSApp { }
 class FakeAndroidApk extends Fake implements AndroidApk { }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
@@ -162,9 +159,6 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   String get name => 'iOS';
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;

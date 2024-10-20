@@ -91,6 +91,9 @@ class FlutterTesterDevice extends Device {
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
@@ -163,7 +166,7 @@ class FlutterTesterDevice extends Device {
       '--non-interactive',
       if (debuggingOptions.enableDartProfiling)
         '--enable-dart-profiling',
-      '--packages=${debuggingOptions.buildInfo.packagesPath}',
+      '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       '--flutter-assets-dir=${assetDirectory.path}',
       if (debuggingOptions.startPaused)
         '--start-paused',

@@ -237,19 +237,41 @@ class VsCode {
   }
 
   // Linux:
-  //   /usr/share/code/bin/code
-  //   /snap/code/current
-  //   /usr/share/code-insiders/bin/code-insiders
+  //   Deb:
+  //     /usr/share/code/bin/code
+  //     /usr/share/code-insiders/bin/code-insiders
+  //   Snap:
+  //     /snap/code/current/usr/share/code
+  //   Flatpak:
+  //     /var/lib/flatpak/app/com.visualstudio.code/x86_64/stable/active/files/extra/vscode
+  //     /var/lib/flatpak/app/com.visualstudio.code.insiders/x86_64/beta/active/files/extra/vscode-insiders
   // Linux Extensions:
-  //   $HOME/.vscode/extensions
-  //   $HOME/.vscode-insiders/extensions
+  //   Deb:
+  //     $HOME/.vscode/extensions
+  //   Snap:
+  //     $HOME/.vscode/extensions
+  //   Flatpak:
+  //     $HOME/.var/app/com.visualstudio.code/data/vscode/extensions
+  //     $HOME/.var/app/com.visualstudio.code.insiders/data/vscode-insiders/extensions
   static List<VsCode> _installedLinux(FileSystem fileSystem, Platform platform) {
     return _findInstalled(<VsCodeInstallLocation>[
       const VsCodeInstallLocation('/usr/share/code', '.vscode'),
-      const VsCodeInstallLocation('/snap/code/current', '.vscode'),
+      const VsCodeInstallLocation('/snap/code/current/usr/share/code', '.vscode'),
+      const VsCodeInstallLocation(
+        '/var/lib/flatpak/app/com.visualstudio.code/x86_64/stable/active/files/extra/vscode',
+        '.var/app/com.visualstudio.code/data/vscode',
+      ),
       const VsCodeInstallLocation(
         '/usr/share/code-insiders',
         '.vscode-insiders',
+      ),
+      const VsCodeInstallLocation(
+        '/snap/code-insiders/current/usr/share/code-insiders',
+        '.vscode-insiders',
+      ),
+      const VsCodeInstallLocation(
+        '/var/lib/flatpak/app/com.visualstudio.code.insiders/x86_64/beta/active/files/extra/vscode-insiders',
+        '.var/app/com.visualstudio.code.insiders/data/vscode-insiders',
       ),
     ], fileSystem, platform);
   }

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'binding.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -268,7 +273,7 @@ class RestorationManager extends ChangeNotifier {
     if (_isReplacing) {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _isReplacing = false;
-      });
+      }, debugLabel: 'RestorationManager.resetIsReplacing');
     }
 
     final RestorationBucket? oldRoot = _rootBucket;
@@ -349,7 +354,10 @@ class RestorationManager extends ChangeNotifier {
     _bucketsNeedingSerialization.add(bucket);
     if (!_serializationScheduled) {
       _serializationScheduled = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _doSerialization());
+      SchedulerBinding.instance.addPostFrameCallback(
+        (Duration _) => _doSerialization(),
+        debugLabel: 'RestorationManager.doSerialization'
+      );
     }
   }
 
@@ -416,6 +424,12 @@ class RestorationManager extends ChangeNotifier {
     }
     _doSerialization();
     assert(!_serializationScheduled);
+  }
+
+  @override
+  void dispose() {
+    _rootBucket?.dispose();
+    super.dispose();
   }
 }
 
@@ -504,6 +518,9 @@ class RestorationBucket {
       _debugOwner = debugOwner;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
   }
 
   /// Creates the root [RestorationBucket] for the provided restoration
@@ -537,6 +554,9 @@ class RestorationBucket {
       _debugOwner = manager;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
   }
 
   /// Creates a child bucket initialized with the data that the provided
@@ -560,6 +580,9 @@ class RestorationBucket {
       _debugOwner = debugOwner;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
   }
 
   static const String _childrenMapKey = 'c';
@@ -931,6 +954,19 @@ class RestorationBucket {
     _parent?._addChildData(this);
   }
 
+  // TODO(polina-c): stop duplicating code across disposables
+  // https://github.com/flutter/flutter/issues/137435
+  /// Dispatches event of object creation to [FlutterMemoryAllocations.instance].
+  void _maybeDispatchObjectCreation() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/services.dart',
+        className: '$RestorationBucket',
+        object: this,
+      );
+    }
+  }
+
   /// Deletes the bucket and all the data stored in it from the bucket
   /// hierarchy.
   ///
@@ -945,6 +981,11 @@ class RestorationBucket {
   /// This method must only be called by the object's owner.
   void dispose() {
     assert(_debugAssertNotDisposed());
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _visitChildren(_dropChild, concurrentModification: true);
     _claimedChildren.clear();
     _childrenToAdd.clear();

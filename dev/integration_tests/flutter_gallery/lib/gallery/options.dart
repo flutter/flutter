@@ -100,7 +100,6 @@ class _OptionsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ignore: deprecated_member_use, https://github.com/flutter/flutter/issues/128825
     final double textScaleFactor = MediaQuery.textScalerOf(context).textScaleFactor;
 
     return MergeSemantics(
@@ -411,20 +410,14 @@ class _PlatformItem extends StatelessWidget {
   final ValueChanged<GalleryOptions>? onOptionsChanged;
 
   String _platformLabel(TargetPlatform platform) {
-    switch (platform) {
-      case TargetPlatform.android:
-        return 'Mountain View';
-      case TargetPlatform.fuchsia:
-        return 'Fuchsia';
-      case TargetPlatform.iOS:
-        return 'Cupertino';
-      case TargetPlatform.linux:
-        return 'Material Desktop (linux)';
-      case TargetPlatform.macOS:
-        return 'Material Desktop (macOS)';
-      case TargetPlatform.windows:
-        return 'Material Desktop (Windows)';
-    }
+    return switch (platform) {
+      TargetPlatform.android => 'Mountain View',
+      TargetPlatform.fuchsia => 'Fuchsia',
+      TargetPlatform.iOS     => 'Cupertino',
+      TargetPlatform.linux   => 'Material Desktop (linux)',
+      TargetPlatform.macOS   => 'Material Desktop (macOS)',
+      TargetPlatform.windows => 'Material Desktop (Windows)',
+    };
   }
 
   @override

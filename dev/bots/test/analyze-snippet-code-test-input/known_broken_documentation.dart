@@ -162,7 +162,7 @@
 /// }
 /// ```
 ///
-/// ```
+/// ```none
 /// error (something about backticks)
 /// this must be the last error, since it aborts parsing of this file
 /// ```

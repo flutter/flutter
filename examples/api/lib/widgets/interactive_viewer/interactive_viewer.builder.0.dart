@@ -122,7 +122,7 @@ class _TableBuilder extends StatelessWidget {
     return SizedBox(
       // Stack needs constraints, even though we then Clip.none outside of them.
       // InteractiveViewer.builder always sets constrained to false, giving infinite constraints to the child.
-      // See: https://master-api.flutter.dev/flutter/widgets/InteractiveViewer/constrained.html
+      // See: https://api.flutter.dev/flutter/widgets/InteractiveViewer/constrained.html
       width: 1,
       height: 1,
       child: Stack(

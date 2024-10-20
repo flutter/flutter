@@ -53,7 +53,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-         'Artifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -99,7 +99,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-         'Artifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -145,7 +145,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-         'Artifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -191,7 +191,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'Artifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -200,6 +200,8 @@ void main() {
           '--no-print-incremental-dependencies',
           '-Ddart.vm.profile=true',
           '-Ddart.vm.product=false',
+          '--delete-tostring-package-uri=dart:ui',
+          '--delete-tostring-package-uri=package:flutter',
           '--no-link-platform',
           '--aot',
           '--tfa',
@@ -239,7 +241,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'Artifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -248,6 +250,8 @@ void main() {
           '--no-print-incremental-dependencies',
           '-Ddart.vm.profile=false',
           '-Ddart.vm.product=true',
+          '--delete-tostring-package-uri=dart:ui',
+          '--delete-tostring-package-uri=package:flutter',
           '--no-link-platform',
           '--aot',
           '--tfa',
@@ -287,7 +291,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'Artifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -339,7 +343,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'Artifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -389,7 +393,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'Artifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -449,7 +453,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'Artifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',

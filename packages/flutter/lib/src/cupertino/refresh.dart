@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'nav_bar.dart';
+library;
+
 import 'dart:math';
 
 import 'package:flutter/foundation.dart' show clampDouble;
@@ -461,7 +467,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
       } else {
         SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
           setState(() => hasSliverLayoutExtent = false);
-        });
+        }, debugLabel: 'Refresh.goToDone');
       }
     }
 
@@ -497,7 +503,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
                 }
               });
               setState(() => hasSliverLayoutExtent = true);
-            });
+            }, debugLabel: 'Refresh.transition');
           }
           return RefreshIndicatorMode.armed;
         }
@@ -558,7 +564,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
               widget.refreshIndicatorExtent,
             );
           }
-          return Container();
+          return const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand());
         },
       ),
     );

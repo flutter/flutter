@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'object.dart';
 
@@ -62,7 +64,41 @@ class RenderListBody extends RenderBox
   Axis get mainAxis => axisDirectionToAxis(axisDirection);
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    assert(_debugCheckConstraints(constraints));
+    RenderBox? child;
+    final RenderBox? Function(RenderBox) nextChild;
+    switch (axisDirection) {
+      case AxisDirection.right:
+      case AxisDirection.left:
+        final BoxConstraints childConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
+        BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+        for (child = firstChild; child != null; child = childAfter(child)) {
+          baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)));
+        }
+        return baselineOffset.offset;
+      case AxisDirection.up:
+        child = lastChild;
+        nextChild = childBefore;
+      case AxisDirection.down:
+        child = firstChild;
+        nextChild = childAfter;
+    }
+    final BoxConstraints childConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
+    double mainAxisExtent = 0.0;
+    for (; child != null; child = nextChild(child)) {
+      final double? childBaseline = child.getDryBaseline(childConstraints, baseline);
+      if (childBaseline != null) {
+        return childBaseline + mainAxisExtent;
+      }
+      mainAxisExtent += child.getDryLayout(childConstraints).height;
+    }
+    return null;
+  }
+
+  @override
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     assert(_debugCheckConstraints(constraints));
     double mainAxisExtent = 0.0;
     RenderBox? child = firstChild;
@@ -249,42 +285,34 @@ class RenderListBody extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    switch (mainAxis) {
-      case Axis.horizontal:
-        return _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicWidth(height));
-      case Axis.vertical:
-        return _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicWidth(height));
-    }
+    return switch (mainAxis) {
+      Axis.horizontal => _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicWidth(height)),
+      Axis.vertical  => _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicWidth(height)),
+    };
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    switch (mainAxis) {
-      case Axis.horizontal:
-        return _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicWidth(height));
-      case Axis.vertical:
-        return _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicWidth(height));
-    }
+    return switch (mainAxis) {
+      Axis.horizontal => _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicWidth(height)),
+      Axis.vertical  => _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicWidth(height)),
+    };
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    switch (mainAxis) {
-      case Axis.horizontal:
-        return _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicHeight(width));
-      case Axis.vertical:
-        return _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicHeight(width));
-    }
+    return switch (mainAxis) {
+      Axis.horizontal => _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicHeight(width)),
+      Axis.vertical  => _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicHeight(width)),
+    };
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    switch (mainAxis) {
-      case Axis.horizontal:
-        return _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicHeight(width));
-      case Axis.vertical:
-        return _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicHeight(width));
-    }
+    return switch (mainAxis) {
+      Axis.horizontal => _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicHeight(width)),
+      Axis.vertical  => _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicHeight(width)),
+    };
   }
 
   @override

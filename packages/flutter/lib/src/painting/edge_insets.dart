@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:ui' as ui show ViewPadding, lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -64,12 +69,10 @@ abstract class EdgeInsetsGeometry {
 
   /// The total offset in the given direction.
   double along(Axis axis) {
-    switch (axis) {
-      case Axis.horizontal:
-        return horizontal;
-      case Axis.vertical:
-        return vertical;
-    }
+    return switch (axis) {
+      Axis.horizontal => horizontal,
+      Axis.vertical   => vertical,
+    };
   }
 
   /// The size that this [EdgeInsets] would occupy with an empty interior.
@@ -400,7 +403,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// Creates insets that match the given view padding.
   ///
   /// If you need the current system padding or view insets in the context of a
-  /// widget, consider using [MediaQuery.of] to obtain these values rather than
+  /// widget, consider using [MediaQuery.paddingOf] to obtain these values rather than
   /// using the value from a [FlutterView] directly, so that you get notified of
   /// changes.
   EdgeInsets.fromViewPadding(ui.ViewPadding padding, double devicePixelRatio)
@@ -897,12 +900,26 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   @override
   EdgeInsets resolve(TextDirection? direction) {
     assert(direction != null);
-    switch (direction!) {
-      case TextDirection.rtl:
-        return EdgeInsets.fromLTRB(end, top, start, bottom);
-      case TextDirection.ltr:
-        return EdgeInsets.fromLTRB(start, top, end, bottom);
-    }
+    return switch (direction!) {
+      TextDirection.rtl => EdgeInsets.fromLTRB(end, top, start, bottom),
+      TextDirection.ltr => EdgeInsets.fromLTRB(start, top, end, bottom),
+    };
+  }
+
+  /// Creates a copy of this EdgeInsetsDirectional but with the given
+  /// fields replaced with the new values.
+  EdgeInsetsDirectional copyWith({
+    double? start,
+    double? top,
+    double? end,
+    double? bottom,
+  }) {
+    return EdgeInsetsDirectional.only(
+      start: start ?? this.start,
+      top: top ?? this.top,
+      end: end ?? this.end,
+      bottom: bottom ?? this.bottom,
+    );
   }
 }
 
@@ -1000,11 +1017,9 @@ class _MixedEdgeInsets extends EdgeInsetsGeometry {
   @override
   EdgeInsets resolve(TextDirection? direction) {
     assert(direction != null);
-    switch (direction!) {
-      case TextDirection.rtl:
-        return EdgeInsets.fromLTRB(_end + _left, _top, _start + _right, _bottom);
-      case TextDirection.ltr:
-        return EdgeInsets.fromLTRB(_start + _left, _top, _end + _right, _bottom);
-    }
+    return switch (direction!) {
+      TextDirection.rtl => EdgeInsets.fromLTRB(_end + _left, _top, _start + _right, _bottom),
+      TextDirection.ltr => EdgeInsets.fromLTRB(_start + _left, _top, _end + _right, _bottom),
+    };
   }
 }

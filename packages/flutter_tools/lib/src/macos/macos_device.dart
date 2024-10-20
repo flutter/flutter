@@ -48,6 +48,9 @@ class MacOSDevice extends DesktopDevice {
   String get name => 'macOS';
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
@@ -67,12 +70,14 @@ class MacOSDevice extends DesktopDevice {
   Future<void> buildForDevice({
     required BuildInfo buildInfo,
     String? mainPath,
+    bool usingCISystem = false,
   }) async {
     await buildMacOS(
       flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,
+      usingCISystem: usingCISystem,
     );
   }
 

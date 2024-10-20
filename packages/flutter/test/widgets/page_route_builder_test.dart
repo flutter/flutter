@@ -9,7 +9,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestPage extends StatelessWidget {
   const TestPage({ super.key, this.useMaterial3 });
@@ -20,6 +19,7 @@ class TestPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Test',
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       theme: ThemeData(
         useMaterial3: useMaterial3,
         primarySwatch: Colors.blue,
@@ -94,7 +94,7 @@ class ModalPage extends StatelessWidget {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Material2 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
+  testWidgets('Material2 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
     await tester.pumpWidget(const TestPage(useMaterial3: false));
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
@@ -104,7 +104,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material3 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
+  testWidgets('Material3 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
     await tester.pumpWidget(const TestPage(useMaterial3: true));
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();

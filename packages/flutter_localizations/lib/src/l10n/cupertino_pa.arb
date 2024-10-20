@@ -8,7 +8,7 @@
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
   "todayLabel": "ਅੱਜ",
-  "alertDialogLabel": "ਸੁਚੇਤਨਾ",
+  "alertDialogLabel": "ਅਲਰਟ",
   "timerPickerHourLabelOne": "ਘੰਟਾ",
   "timerPickerHourLabelOther": "ਘੰਟੇ",
   "timerPickerMinuteLabelOne": "ਮਿੰ.",
@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "ਖੋਜੋ",
   "noSpellCheckReplacementsLabel": "ਕੋਈ ਸੁਝਾਅ ਨਹੀਂ ਮਿਲਿਆ",
   "menuDismissLabel": "ਮੀਨੂ ਖਾਰਜ ਕਰੋ",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "ਖੋਜੋ",
+  "searchWebButtonLabel": "ਵੈੱਬ 'ਤੇ ਖੋਜੋ",
+  "shareButtonLabel": "ਸਾਂਝਾ ਕਰੋ...",
+  "clearButtonLabel": "Clear"
 }

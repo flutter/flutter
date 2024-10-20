@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 const double _kToolbarContentDistance = 8.0;
@@ -75,7 +74,7 @@ void main() {
 
   Finder findOverflowButton() => findPrivate('_TextSelectionToolbarOverflowButton');
 
-  testWidgetsWithLeakTracking('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
+  testWidgets('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
     final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
 
@@ -123,7 +122,7 @@ void main() {
     expect(findOverflowButton(), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
+  testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
     const double height = 44.0;
     const double anchorBelowY = 500.0;
@@ -172,7 +171,7 @@ void main() {
     expect(toolbarY, equals(anchorAboveY - height - _kToolbarContentDistance));
   });
 
-  testWidgetsWithLeakTracking('can create and use a custom toolbar', (WidgetTester tester) async {
+  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -205,7 +204,7 @@ void main() {
   }, skip: kIsWeb); // [intended] We don't show the toolbar on the web.
 
   for (final ColorScheme colorScheme in <ColorScheme>[ThemeData.light().colorScheme, ThemeData.dark().colorScheme]) {
-    testWidgetsWithLeakTracking('default background color', (WidgetTester tester) async {
+    testWidgets('default background color', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
@@ -249,7 +248,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('custom background color', (WidgetTester tester) async {
+    testWidgets('custom background color', (WidgetTester tester) async {
       const Color customBackgroundColor = Colors.red;
 
       await tester.pumpWidget(
@@ -292,4 +291,64 @@ void main() {
       );
     });
   }
+
+  testWidgets('Overflowed menu expands children horizontally', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/144089.
+    late StateSetter setState;
+    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return TextSelectionToolbar(
+                anchorAbove: const Offset(50.0, 100.0),
+                anchorBelow: const Offset(50.0, 200.0),
+                children: children,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // All children fit on the screen, so they are all rendered.
+    expect(find.byType(TestBox), findsNWidgets(children.length));
+    expect(findOverflowButton(), findsNothing);
+
+    const String short = 'Short';
+    const String medium = 'Medium length';
+    const String long = 'Long label in the overflow menu';
+
+    // Adding several children makes the menu overflow.
+    setState(() {
+      children.addAll(const <Text>[
+        Text(short),
+        Text(medium),
+        Text(long),
+      ]);
+    });
+    await tester.pumpAndSettle();
+    expect(findOverflowButton(), findsOneWidget);
+
+    // Tap the overflow button to show the overflow menu.
+    await tester.tap(findOverflowButton());
+    await tester.pumpAndSettle();
+    expect(find.byType(TestBox), findsNothing);
+    expect(find.byType(Text), findsNWidgets(3));
+    expect(findOverflowButton(), findsOneWidget);
+
+    Finder findToolbarContainer() {
+      return find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionToolbarContainer');
+    }
+    expect(findToolbarContainer(), findsAtLeastNWidgets(1));
+
+    // Buttons have their width set to the container width.
+    final double overflowMenuWidth = tester.getRect(findToolbarContainer()).width;
+    expect(tester.getRect(find.text(long)).width, overflowMenuWidth);
+    expect(tester.getRect(find.text(medium)).width, overflowMenuWidth);
+    expect(tester.getRect(find.text(short)).width, overflowMenuWidth);
+  });
 }

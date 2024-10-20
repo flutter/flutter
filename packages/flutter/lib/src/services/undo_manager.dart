@@ -21,7 +21,7 @@ enum UndoDirection {
 /// [UndoManagerClient] and set it as the [client] on [UndoManager].
 ///
 /// The [setUndoState] method can be used to update the system's undo manager
-/// using the [canUndo] and [canRedo] parameters.
+/// using the `canUndo` and `canRedo` parameters.
 ///
 /// When the system undo or redo button is tapped, the current
 /// [UndoManagerClient] will receive [UndoManagerClient.handlePlatformUndo]
@@ -98,13 +98,11 @@ class UndoManager {
   }
 
   UndoDirection _toUndoDirection(String direction) {
-    switch (direction) {
-      case 'undo':
-        return UndoDirection.undo;
-      case 'redo':
-        return UndoDirection.redo;
-    }
-    throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown undo direction: $direction')]);
+    return switch (direction) {
+      'undo' => UndoDirection.undo,
+      'redo' => UndoDirection.redo,
+      _ => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown undo direction: $direction')]),
+    };
   }
 }
 

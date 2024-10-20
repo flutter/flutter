@@ -6,28 +6,34 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('SemanticsNode ids are stable', (WidgetTester tester) async {
+  testWidgets('SemanticsNode ids are stable', (WidgetTester tester) async {
     // Regression test for b/151732341.
     final SemanticsTester semantics = SemanticsTester(tester);
+    final TapGestureRecognizer recognizer1 = TapGestureRecognizer();
+    addTearDown(recognizer1.dispose);
+    final TapGestureRecognizer recognizer2 = TapGestureRecognizer();
+    addTearDown(recognizer2.dispose);
+    final TapGestureRecognizer recognizer3 = TapGestureRecognizer();
+    addTearDown(recognizer3.dispose);
+
     await tester.pumpWidget(Directionality(
     textDirection: TextDirection.ltr,
       child: Text.rich(
         TextSpan(
           text: 'Hallo ',
-          recognizer: TapGestureRecognizer()..onTap = () {},
+          recognizer: recognizer1..onTap = () {},
           children: <TextSpan>[
             TextSpan(
               text: 'Welt ',
-              recognizer: TapGestureRecognizer()..onTap = () {},
+              recognizer: recognizer2..onTap = () {},
             ),
             TextSpan(
               text: '!!!',
-              recognizer: TapGestureRecognizer()..onTap = () {},
+              recognizer: recognizer3..onTap = () {},
             ),
           ],
         ),
@@ -64,17 +70,22 @@ void main() {
     expect(labelToNodeIdAfterRebuild['!!!'], labelToNodeId['!!!']);
     expect(labelToNodeIdAfterRebuild.length, 3);
 
+    final TapGestureRecognizer recognizer4 = TapGestureRecognizer();
+    addTearDown(recognizer4.dispose);
+    final TapGestureRecognizer recognizer5 = TapGestureRecognizer();
+    addTearDown(recognizer5.dispose);
+
     // Remove one node.
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Text.rich(
         TextSpan(
           text: 'Hallo ',
-          recognizer: TapGestureRecognizer()..onTap = () {},
+          recognizer: recognizer4..onTap = () {},
           children: <TextSpan>[
             TextSpan(
               text: 'Welt ',
-              recognizer: TapGestureRecognizer()..onTap = () {},
+              recognizer: recognizer5..onTap = () {},
             ),
           ],
         ),
@@ -94,20 +105,27 @@ void main() {
     expect(labelToNodeIdAfterRemoval['Welt '], labelToNodeId['Welt ']);
     expect(labelToNodeIdAfterRemoval.length, 2);
 
+    final TapGestureRecognizer recognizer6 = TapGestureRecognizer();
+    addTearDown(recognizer6.dispose);
+    final TapGestureRecognizer recognizer7 = TapGestureRecognizer();
+    addTearDown(recognizer7.dispose);
+    final TapGestureRecognizer recognizer8 = TapGestureRecognizer();
+    addTearDown(recognizer8.dispose);
+
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Text.rich(
         TextSpan(
           text: 'Hallo ',
-          recognizer: TapGestureRecognizer()..onTap = () {},
+          recognizer: recognizer6..onTap = () {},
           children: <TextSpan>[
             TextSpan(
               text: 'Welt ',
-              recognizer: TapGestureRecognizer()..onTap = () {},
+              recognizer: recognizer7..onTap = () {},
             ),
             TextSpan(
               text: '!!!',
-              recognizer: TapGestureRecognizer()..onTap = () {},
+              recognizer: recognizer8..onTap = () {},
             ),
           ],
         ),

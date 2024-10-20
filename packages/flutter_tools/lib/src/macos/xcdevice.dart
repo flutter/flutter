@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
@@ -69,6 +70,7 @@ class XCDevice {
     required Platform platform,
     required IProxy iproxy,
     required FileSystem fileSystem,
+    required Analytics analytics,
     @visibleForTesting
     IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
@@ -100,7 +102,8 @@ class XCDevice {
         fileSystem: fileSystem,
       ),
       _iProxy = iproxy,
-      _xcode = xcode {
+      _xcode = xcode,
+      _analytics = analytics {
 
     _setupDeviceIdentifierByEventStream();
   }
@@ -120,6 +123,7 @@ class XCDevice {
   final IProxy _iProxy;
   final IOSCoreDeviceControl _coreDeviceControl;
   final XcodeDebug _xcodeDebug;
+  final Analytics _analytics;
 
   List<Object>? _cachedListResults;
 
@@ -192,7 +196,7 @@ class XCDevice {
   /// Observe identifiers (UDIDs) of devices as they attach and detach.
   ///
   /// Each attach and detach event contains information on the event type,
-  /// the event interface, and the device identifer.
+  /// the event interface, and the device identifier.
   Stream<XCDeviceEventNotification>? observedDeviceEvents() {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
@@ -540,12 +544,15 @@ class XCDevice {
         }
         bool devModeEnabled = true;
         bool isConnected = true;
+        bool isPaired = true;
         final Map<String, Object?>? errorProperties = _errorProperties(device);
         if (errorProperties != null) {
           final String? errorMessage = _parseErrorMessage(errorProperties);
           if (errorMessage != null) {
             if (errorMessage.contains('not paired')) {
               UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
+              _analytics.send(Event.appleUsageEvent(workflow: 'device', parameter: 'ios-trust-failure'));
+
             }
             _logger.printTrace(errorMessage);
           }
@@ -557,6 +564,10 @@ class XCDevice {
           // Other times this is a false positive and the app will successfully launch despite the error.
           if (code != -10) {
             isConnected = false;
+          }
+          // Error: iPhone is not paired with your computer. To use iPhone with Xcode, unlock it and choose to trust this computer when prompted. (code -9)
+          if (code == -9) {
+            isPaired = false;
           }
 
           if (code == 6) {
@@ -629,6 +640,7 @@ class XCDevice {
           xcodeDebug: _xcodeDebug,
           platform: globals.platform,
           devModeEnabled: devModeEnabled,
+          isPaired: isPaired,
           isCoreDevice: coreDevice != null,
         );
       }

@@ -21,5 +21,5 @@ class ToolExit implements Exception {
   final int? exitCode;
 
   @override
-  String toString() => 'Exception: $message'; // TODO(ianh): Really this should say "Error".
+  String toString() => 'Error: $message';
 }

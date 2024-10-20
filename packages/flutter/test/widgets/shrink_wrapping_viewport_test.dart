@@ -17,9 +17,12 @@ void main() {
       );
     }
 
+    final ViewportOffset offset1 = ViewportOffset.zero();
+    addTearDown(offset1.dispose);
+
     await tester.pumpWidget(build(
       ShrinkWrappingViewport(
-        offset: ViewportOffset.zero(),
+        offset: offset1,
         slivers: <Widget>[SliverToBoxAdapter(child: Container(height: 2000.0))],
       ),
     ));
@@ -33,10 +36,13 @@ void main() {
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
+    final ViewportOffset offset2 = ViewportOffset.zero();
+    addTearDown(offset2.dispose);
+
     // 3rd, pump a new widget to check that the render object can update its clip behavior.
     await tester.pumpWidget(build(
       ShrinkWrappingViewport(
-        offset: ViewportOffset.zero(),
+        offset: offset2,
         slivers: <Widget>[SliverToBoxAdapter(child: Container(height: 2000.0))],
         clipBehavior: Clip.antiAlias,
       ),

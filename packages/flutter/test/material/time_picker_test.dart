@@ -11,10 +11,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 void main() {
   const String okString = 'OK';
@@ -24,7 +23,7 @@ void main() {
     return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
   }
 
-  testWidgetsWithLeakTracking('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
+  testWidgets('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
     const Size timePickerPortraitSize =  Size(310, 468);
@@ -262,7 +261,7 @@ void main() {
     expect(
       dial,
       paints
-        ..circle(color: theme.colorScheme.surfaceVariant) // Dial background color.
+        ..circle(color: theme.colorScheme.surfaceContainerHighest) // Dial background color.
         ..circle(color: Color(theme.colorScheme.primary.value)), // Dial hand color.
     );
 
@@ -285,7 +284,7 @@ void main() {
     expect(
       dial,
       paints
-        ..circle(color: const Color(0xffff0000)) // Dial background color.
+        ..circle(color: theme.colorScheme.surfaceContainerHighest) // Dial background color.
         ..circle(color: Color(theme.colorScheme.primary.value)), // Dial hand color.
     );
   });
@@ -603,7 +602,7 @@ void main() {
         render = tester.renderObject(
           find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
         );
-        expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
+        expect((render as dynamic).orientation, Orientation.landscape);
       });
 
       testWidgets('setting orientation should override MediaQuery orientation', (WidgetTester tester) async {
@@ -617,7 +616,7 @@ void main() {
         final RenderObject render = tester.renderObject(
           find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
         );
-        expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
+        expect((render as dynamic).orientation, Orientation.landscape);
       });
 
       testWidgets('builder parameter', (WidgetTester tester) async {
@@ -1084,7 +1083,7 @@ void main() {
         // Verify that the time display is not affected by text scale.
         await mediaQueryBoilerplate(
           tester,
-          textScaleFactor: 2,
+          textScaler: const TextScaler.linear(2),
           initialTime: const TimeOfDay(hour: 7, minute: 41),
           materialType: materialType,
         );
@@ -1099,7 +1098,7 @@ void main() {
         // Verify that text scale for AM/PM is at most 2x.
         await mediaQueryBoilerplate(
           tester,
-          textScaleFactor: 3,
+          textScaler: const TextScaler.linear(3),
           initialTime: const TimeOfDay(hour: 7, minute: 41),
           materialType: materialType,
         );
@@ -1251,7 +1250,7 @@ void main() {
           semantics,
           includesNodeWith(
             label: amString,
-            actions: <SemanticsAction>[SemanticsAction.tap],
+            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.isChecked,
@@ -1265,7 +1264,7 @@ void main() {
           semantics,
           includesNodeWith(
             label: pmString,
-            actions: <SemanticsAction>[SemanticsAction.tap],
+            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.isInMutuallyExclusiveGroup,
@@ -1344,7 +1343,12 @@ void main() {
             label: 'Hour',
             value: '07',
             actions: <SemanticsAction>[SemanticsAction.tap],
-            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isMultiline],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isTextField,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+              SemanticsFlag.isMultiline,
+            ],
           ),
         );
         expect(
@@ -1353,7 +1357,12 @@ void main() {
             label: 'Minute',
             value: '00',
             actions: <SemanticsAction>[SemanticsAction.tap],
-            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isMultiline],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isTextField,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+              SemanticsFlag.isMultiline,
+            ],
           ),
         );
 
@@ -1832,7 +1841,7 @@ void main() {
         final double minuteFieldTop =
             tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField')).dy;
         final double separatorTop =
-            tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment')).dy;
+            tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator')).dy;
         expect(hourFieldTop, separatorTop);
         expect(minuteFieldTop, separatorTop);
       });
@@ -1966,6 +1975,32 @@ void main() {
       });
     });
   }
+
+  testWidgets('Material3 - Time selector separator default text style', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await startPicker(
+      tester,
+      (TimeOfDay? value) { },
+      theme: theme,
+    );
+
+    final RenderParagraph paragraph = tester.renderObject(find.text(':'));
+    expect(paragraph.text.style!.color, theme.colorScheme.onSurface);
+    expect(paragraph.text.style!.fontSize, 57.0);
+  });
+
+  testWidgets('Material2 - Time selector separator default text style', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
+    await startPicker(
+      tester,
+      (TimeOfDay? value) { },
+      theme: theme,
+    );
+
+    final RenderParagraph paragraph = tester.renderObject(find.text(':'));
+    expect(paragraph.text.style!.color, theme.colorScheme.onSurface);
+    expect(paragraph.text.style!.fontSize, 56.0);
+  });
 }
 
 final Finder findDialPaint = find.descendant(
@@ -1997,7 +2032,7 @@ Future<void> mediaQueryBoilerplate(
   WidgetTester tester, {
   bool alwaysUse24HourFormat = false,
   TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0),
-  double textScaleFactor = 1,
+  TextScaler textScaler = TextScaler.noScaling,
   TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
   String? helpText,
   String? hourLabelText,
@@ -2021,7 +2056,7 @@ Future<void> mediaQueryBoilerplate(
         child: MediaQuery(
           data: MediaQueryData(
             alwaysUse24HourFormat: alwaysUse24HourFormat,
-            textScaleFactor: textScaleFactor,
+            textScaler: textScaler,
             accessibleNavigation: accessibleNavigation,
             size: tester.view.physicalSize / tester.view.devicePixelRatio,
           ),
@@ -2099,6 +2134,12 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
     },
   );
 
+  @override
+  void dispose() {
+    _restorableTimePickerRouteFuture.dispose();
+    super.dispose();
+  }
+
   @pragma('vm:entry-point')
   static Route<TimeOfDay> _timePickerRoute(
     BuildContext context,
@@ -2170,10 +2211,11 @@ Future<Offset?> startPicker(
   ValueChanged<TimeOfDay?> onChanged, {
   TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
   String? restorationId,
-  required MaterialType materialType,
+  ThemeData? theme,
+  MaterialType? materialType,
 }) async {
   await tester.pumpWidget(MaterialApp(
-    theme: ThemeData(useMaterial3: materialType == MaterialType.material3),
+    theme: theme ?? ThemeData(useMaterial3: materialType == MaterialType.material3),
     restorationScopeId: 'app',
     locale: const Locale('en', 'US'),
     home: _TimePickerLauncher(

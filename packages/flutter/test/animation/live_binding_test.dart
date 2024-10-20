@@ -9,7 +9,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   /*
@@ -19,7 +18,7 @@ void main() {
 
   LiveTestWidgetsFlutterBinding().framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps;
 
-  testWidgetsWithLeakTracking('Should show event indicator for pointer events', (WidgetTester tester) async {
+  testWidgets('Should show event indicator for pointer events', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     addTearDown(animationSheet.dispose);
     final List<Offset> taps = <Offset>[];
@@ -78,7 +77,8 @@ void main() {
     // Currently skipped due to daily flake: https://github.com/flutter/flutter/issues/87588
   }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
 
-  testWidgetsWithLeakTracking('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
+  testWidgets('Should show event indicator for pointer events with setSurfaceSize',
+  (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     addTearDown(animationSheet.dispose);
     final List<Offset> taps = <Offset>[];
@@ -110,6 +110,7 @@ void main() {
     );
 
     await tester.binding.setSurfaceSize(const Size(300, 300));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(target(recording: false));
 
     await tester.pumpFrames(target(), const Duration(milliseconds: 50));
@@ -137,7 +138,5 @@ void main() {
     );
   },
     skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
-    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
-    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
   );
 }

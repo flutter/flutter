@@ -14,7 +14,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class LinkedScrollController extends ScrollController {
   LinkedScrollController({ this.before, this.after });
@@ -92,17 +91,14 @@ class LinkedScrollController extends ScrollController {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (before != null && after != null) {
-      description.add('links: ⬌');
-    } else if (before != null) {
-      description.add('links: ⬅');
-    } else if (after != null) {
-      description.add('links: ➡');
-    } else {
-      description.add('links: none');
-    }
+    final String linkSymbol = switch ((before, after)) {
+      (null, null) => 'none',
+      (null, _)    => '➡',
+      (_, null)    => '⬅',
+      (_, _)       => '⬌',
+    };
+    description.add('links: $linkSymbol');
   }
-
 }
 
 class LinkedScrollPosition extends ScrollPositionWithSingleContext {
@@ -382,7 +378,7 @@ class _TestState extends State<Test> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('LinkedScrollController - 1', (WidgetTester tester) async {
+  testWidgets('LinkedScrollController - 1', (WidgetTester tester) async {
     await tester.pumpWidget(const Test());
     expect(find.text('Hello A'), findsOneWidget);
     expect(find.text('Hello 1'), findsOneWidget);
@@ -460,7 +456,7 @@ void main() {
     expect(find.text('Hello D'), findsNothing);
     expect(find.text('Hello 4'), findsOneWidget);
   });
-  testWidgetsWithLeakTracking('LinkedScrollController - 2', (WidgetTester tester) async {
+  testWidgets('LinkedScrollController - 2', (WidgetTester tester) async {
     await tester.pumpWidget(const Test());
     expect(find.text('Hello A'), findsOneWidget);
     expect(find.text('Hello B'), findsOneWidget);

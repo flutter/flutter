@@ -10,8 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 
-const double _kEngineDefaultFontSize = 14.0;
-
 // Examples can assume:
 // late WidgetSpan myWidgetSpan;
 
@@ -100,7 +98,7 @@ class WidgetSpan extends PlaceholderSpan {
     final List<Widget> widgets = <Widget>[];
     // _kEngineDefaultFontSize is the default font size to use when none of the
     // ancestor spans specifies one.
-    final List<double> fontSizeStack = <double>[_kEngineDefaultFontSize];
+    final List<double> fontSizeStack = <double>[kDefaultFontSize];
     int index = 0;
     // This assumes an InlineSpan tree's logical order is equivalent to preorder.
     bool visitSubtree(InlineSpan span) {
@@ -355,22 +353,22 @@ class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixi
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return (child?.computeMaxIntrinsicHeight(width / scale) ?? 0.0) * scale;
+    return (child?.getMaxIntrinsicHeight(width / scale) ?? 0.0) * scale;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    return (child?.computeMaxIntrinsicWidth(height / scale) ?? 0.0) * scale;
+    return (child?.getMaxIntrinsicWidth(height / scale) ?? 0.0) * scale;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return (child?.computeMinIntrinsicHeight(width / scale) ?? 0.0) * scale;
+    return (child?.getMinIntrinsicHeight(width / scale) ?? 0.0) * scale;
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return (child?.computeMinIntrinsicWidth(height / scale) ?? 0.0) * scale;
+    return (child?.getMinIntrinsicWidth(height / scale) ?? 0.0) * scale;
   }
 
   @override
@@ -382,9 +380,15 @@ class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixi
   }
 
   @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final double? distance = child?.getDryBaseline(BoxConstraints(maxWidth: constraints.maxWidth / scale), baseline);
+    return distance == null ? null : scale * distance;
+  }
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     assert(!constraints.hasBoundedHeight);
-    final Size unscaledSize = child?.computeDryLayout(BoxConstraints(maxWidth: constraints.maxWidth / scale)) ?? Size.zero;
+    final Size unscaledSize = child?.getDryLayout(BoxConstraints(maxWidth: constraints.maxWidth / scale)) ?? Size.zero;
     return constraints.constrain(unscaledSize * scale);
   }
 

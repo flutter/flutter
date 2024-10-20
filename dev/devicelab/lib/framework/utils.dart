@@ -339,6 +339,8 @@ Future<int> exec(
   Map<String, String>? environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   String? workingDirectory,
+  StringBuffer? output, // if not null, the stdout will be written here
+  StringBuffer? stderr, // if not null, the stderr will be written here
 }) async {
   return _execute(
     executable,
@@ -346,6 +348,8 @@ Future<int> exec(
     environment: environment,
     canFail : canFail,
     workingDirectory: workingDirectory,
+    output: output,
+    stderr: stderr,
   );
 }
 
@@ -465,6 +469,7 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
   final String? localEngineHost = localEngineHostFromEnv;
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
   final String? localWebSdk = localWebSdkFromEnv;
+  final bool pubOrPackagesCommand = command.startsWith('packages') || command.startsWith('pub');
   return <String>[
     command,
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
@@ -485,7 +490,9 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
     // Use CI flag when running devicelab tests, except for `packages`/`pub` commands.
     // `packages`/`pub` commands effectively runs the `pub` tool, which does not have
     // the same allowed args.
-    if (!command.startsWith('packages') && !command.startsWith('pub')) '--ci',
+    if (!pubOrPackagesCommand) '--ci',
+    if (!pubOrPackagesCommand && hostAgent.dumpDirectory != null)
+      '--debug-logs-dir=${hostAgent.dumpDirectory!.path}'
   ];
 }
 
@@ -699,22 +706,6 @@ String jsonEncode(dynamic data) {
   return '$jsonValue\n';
 }
 
-Future<void> getNewGallery(String revision, Directory galleryDir) async {
-  section('Get New Flutter Gallery!');
-
-  if (exists(galleryDir)) {
-    galleryDir.deleteSync(recursive: true);
-  }
-
-  await inDirectory<void>(galleryDir.parent, () async {
-    await exec('git', <String>['clone', 'https://github.com/flutter/gallery.git']);
-  });
-
-  await inDirectory<void>(galleryDir, () async {
-    await exec('git', <String>['checkout', revision]);
-  });
-}
-
 /// Splits [from] into lines and selects those that contain [pattern].
 Iterable<String> grep(Pattern pattern, {required String from}) {
   return from.split('\n').where((String line) {
@@ -897,4 +888,31 @@ Future<T> retry<T>(
     // Sleep for a delay
     await Future<void>.delayed(delayDuration);
   }
+}
+
+Future<void> createFfiPackage(String name, Directory parent) async {
+  await inDirectory(parent, () async {
+    await flutter(
+      'create',
+      options: <String>[
+        '--no-pub',
+        '--org',
+        'io.flutter.devicelab',
+        '--template=package_ffi',
+        name,
+      ],
+    );
+    await _pinDependencies(
+      File(path.join(parent.path, name, 'pubspec.yaml')),
+    );
+    await _pinDependencies(
+      File(path.join(parent.path, name, 'example', 'pubspec.yaml')),
+    );
+  });
+}
+
+Future<void> _pinDependencies(File pubspecFile) async {
+  final String oldPubspec = await pubspecFile.readAsString();
+  final String newPubspec = oldPubspec.replaceAll(': ^', ': ');
+  await pubspecFile.writeAsString(newPubspec);
 }

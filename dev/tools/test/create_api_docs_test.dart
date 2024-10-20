@@ -45,6 +45,9 @@ void main() {
         command: <Pattern>['flutter', '--version', '--machine'],
         stdout: testVersionInfo,
       ));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <Pattern>['git', 'rev-parse', 'HEAD'],
+      ));
       expect(
         apidocs.FlutterInformation.instance.getBranchName(),
         branchName,
@@ -60,6 +63,9 @@ void main() {
       fakeProcessManager.addCommand(const FakeCommand(
         command: <Pattern>['git', 'status', '-b', '--porcelain'],
         stdout: '## $branchName',
+      ));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <Pattern>['git', 'rev-parse', 'HEAD'],
       ));
 
       expect(
@@ -82,6 +88,9 @@ void main() {
       fakeProcessManager.addCommand(const FakeCommand(
         command: <Pattern>['git', 'status', '-b', '--porcelain'],
         stdout: '## $branchName',
+      ));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <Pattern>['git', 'rev-parse', 'HEAD'],
       ));
 
       expect(
@@ -125,6 +134,9 @@ void main() {
         command: <Pattern>['git', 'status', '-b', '--porcelain'],
         stdout: '## $branchName',
       ));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <Pattern>['git', 'rev-parse', 'HEAD'],
+      ));
       final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(info['frameworkVersion'], equals(Version.parse('2.5.0')));
@@ -136,6 +148,9 @@ void main() {
       fakeProcessManager.addCommand(const FakeCommand(
         command: <Pattern>['git', 'status', '-b', '--porcelain'],
         stdout: '## $branchName',
+      ));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <Pattern>['git', 'rev-parse', 'HEAD'],
       ));
       final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
       expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -150,6 +165,9 @@ void main() {
         command: <Pattern>['git', 'status', '-b', '--porcelain'],
         stdout: '## $branchName',
       ));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <Pattern>['git', 'rev-parse', 'HEAD'],
+      ));
       final Directory root = flutterInformation.getFlutterRoot();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(root.path, equals('/home/user/flutter'));
@@ -162,10 +180,15 @@ void main() {
     });
     test('parses version properly', () async {
       fakePlatform.environment['FLUTTER_VERSION'] = testVersionInfo;
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'status', '-b', '--porcelain'],
-        stdout: '## $branchName',
-      ));
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+        ),
+      ]);
       final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
       expect(info['frameworkVersion'], isNotNull);
       expect(info['frameworkVersion'], equals(Version.parse('2.5.0')));
@@ -183,14 +206,19 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('realm');
       setUpWithEnvironment(<String, String>{'FLUTTER_ROOT': '/home/user/flutter'});
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['/home/user/flutter/bin/flutter', '--version', '--machine'],
-        stdout: testVersionInfo,
-      ));
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'status', '-b', '--porcelain'],
-        stdout: '## $branchName',
-      ));
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <Pattern>['/home/user/flutter/bin/flutter', '--version', '--machine'],
+          stdout: testVersionInfo,
+        ),
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+        ),
+      ]);
       final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(info['engineRealm'], equals('realm'));
@@ -260,7 +288,11 @@ void main() {
             '--link-to-source-root',
             '/flutter',
             '--link-to-source-uri-template',
+<<<<<<< HEAD
             'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
+=======
+            'https://github.com/flutter/flutter/blob/main/%f%#L%l%',
+>>>>>>> 2663184aa79047d0a33a14a3b607954f8fdd8730
             '--inject-html',
             '--use-base-href',
             '--header',
@@ -344,7 +376,11 @@ void main() {
             '--link-to-source-root',
             '/flutter',
             '--link-to-source-uri-template',
+<<<<<<< HEAD
             'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
+=======
+            'https://github.com/flutter/flutter/blob/main/%f%#L%l%',
+>>>>>>> 2663184aa79047d0a33a14a3b607954f8fdd8730
             '--inject-html',
             '--use-base-href',
             '--header',
@@ -375,7 +411,11 @@ void main() {
             'flutter,Dart,${apidocs.kPlatformIntegrationPackageName},flutter_test,flutter_driver',
             '--auto-include-dependencies',
           ],
+<<<<<<< HEAD
           onRun: () {
+=======
+          onRun: (_) {
+>>>>>>> 2663184aa79047d0a33a14a3b607954f8fdd8730
             for (final File canary in generator.canaries) {
               canary.createSync(recursive: true);
             }
@@ -413,7 +453,11 @@ void main() {
   </code>
 </pre>
 ''');
+<<<<<<< HEAD
             const String queryParams = 'split=1&run=true&sample_id=widgets.Listener.123&sample_channel=master&channel=master';
+=======
+            const String queryParams = 'split=1&run=true&sample_id=widgets.Listener.123&channel=main';
+>>>>>>> 2663184aa79047d0a33a14a3b607954f8fdd8730
             widgetsDir.childFile('Listener-class.html').writeAsStringSync('''
 <iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?$queryParams">
 </iframe>

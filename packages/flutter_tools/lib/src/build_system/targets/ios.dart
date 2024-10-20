@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../artifacts.dart';
 import '../../base/build.dart';
@@ -19,10 +20,10 @@ import '../../reporting/reporting.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
+import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'shader_compiler.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
 ///
@@ -295,13 +296,11 @@ abstract class UnpackIOS extends Target {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     await _thinFramework(environment, frameworkBinaryPath, archs);
-    if (buildMode == BuildMode.release) {
-      await _bitcodeStripFramework(environment, frameworkBinaryPath);
-    }
     await _signFramework(environment, frameworkBinary, buildMode);
   }
 
   Future<void> _copyFramework(Environment environment, String sdkRoot) async {
+    // Copy Flutter framework.
     final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem);
     final String basePath = environment.artifacts.getArtifactPath(
       Artifact.flutterFramework,
@@ -316,6 +315,7 @@ abstract class UnpackIOS extends Target {
       '--delete',
       '--filter',
       '- .DS_Store/',
+      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
       basePath,
       environment.outputDir.path,
     ]);
@@ -324,6 +324,34 @@ abstract class UnpackIOS extends Target {
         'Failed to copy framework (exit ${result.exitCode}:\n'
         '${result.stdout}\n---\n${result.stderr}',
       );
+    }
+
+    // Copy Flutter framework dSYM (debug symbol) bundle, if present.
+    final Directory frameworkDsym = environment.fileSystem.directory(
+      environment.artifacts.getArtifactPath(
+        Artifact.flutterFrameworkDsym,
+        platform: TargetPlatform.ios,
+        mode: buildMode,
+        environmentType: environmentType,
+      )
+    );
+    if (frameworkDsym.existsSync()) {
+      final ProcessResult result = await environment.processManager.run(<String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        frameworkDsym.path,
+        environment.outputDir.path,
+      ]);
+      if (result.exitCode != 0) {
+        throw Exception(
+          'Failed to copy framework dSYM (exit ${result.exitCode}:\n'
+          '${result.stdout}\n---\n${result.stderr}',
+        );
+      }
     }
   }
 
@@ -373,26 +401,6 @@ abstract class UnpackIOS extends Target {
 
     if (extractResult.exitCode != 0) {
       throw Exception('Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
-    }
-  }
-
-  /// Destructively strip bitcode from the framework. This can be removed
-  /// when the framework is no longer built with bitcode.
-  Future<void> _bitcodeStripFramework(
-    Environment environment,
-    String frameworkBinaryPath,
-  ) async {
-    final ProcessResult stripResult = await environment.processManager.run(<String>[
-      'xcrun',
-      'bitcode_strip',
-      frameworkBinaryPath,
-      '-r', // Delete the bitcode segment.
-      '-o',
-      frameworkBinaryPath,
-    ]);
-
-    if (stripResult.exitCode != 0) {
-      throw Exception('Failed to strip bitcode for $frameworkBinaryPath.\n${stripResult.stderr}');
     }
   }
 }
@@ -525,13 +533,12 @@ abstract class IosAssetBundle extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
-      // Always specify an impeller shader target so that we support runtime toggling and
-      // the --enable-impeller debug flag.
-      shaderTarget: ShaderTarget.impelleriOS,
+      buildMode: buildMode,
       additionalInputs: <File>[
         flutterProject.ios.infoPlist,
         flutterProject.ios.appFrameworkInfoPlist,
       ],
+      flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
       assetDepfile,
@@ -640,6 +647,11 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
           label: buildSuccess ? 'success' : 'fail',
           flutterUsage: environment.usage,
         ).send();
+        environment.analytics.send(Event.appleUsageEvent(
+          workflow: 'assemble',
+          parameter: 'ios-archive',
+          result: buildSuccess ? 'success' : 'fail',
+        ));
       }
     }
   }
@@ -677,9 +689,9 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
       '-dynamiclib',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=11.0'
+        '-miphoneos-version-min=12.0'
       else
-        '-miphonesimulator-version-min=11.0',
+        '-miphonesimulator-version-min=12.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-fapplication-extension',

@@ -51,13 +51,12 @@
   "reorderItemRight": "انتقال به چپ",
   "expandedIconTapHint": "کوچک کردن",
   "collapsedIconTapHint": "بزرگ کردن",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "۱ نویسه باقی مانده است",
   "remainingTextFieldCharacterCountOther": "$remainingCount نویسه باقی مانده است",
   "refreshIndicatorSemanticLabel": "بازآوری",
   "moreButtonTooltip": "بیشتر",
   "dateSeparator": "/",
-  "dateHelpText": "روز/ماه/سال",
+  "dateHelpText": "رر/م‌م/س‌س‌س‌س",
   "selectYearSemanticsLabel": "انتخاب سال",
   "unspecifiedDate": "تاریخ",
   "unspecifiedDateRange": "محدوده تاریخ",
@@ -143,7 +142,9 @@
   "expandedHint": "جمع‌شده",
   "collapsedHint": "ازهم بازشده",
   "menuDismissLabel": "بستن منو",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "جستجو",
+  "searchWebButtonLabel": "جستجو در وب",
+  "shareButtonLabel": "هم‌رسانی…",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

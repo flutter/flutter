@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'clipboard_utils.dart';
 import 'editable_text_utils.dart';
@@ -21,7 +20,7 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
-  testWidgetsWithLeakTracking('Hides and shows only a single menu', (WidgetTester tester) async {
+  testWidgets('Hides and shows only a single menu', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
     late final BuildContext context;
@@ -91,7 +90,7 @@ void main() {
     expect(find.byKey(key2), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('A menu can be hidden and then reshown', (WidgetTester tester) async {
+  testWidgets('A menu can be hidden and then reshown', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     late final BuildContext context;
 
@@ -111,6 +110,7 @@ void main() {
     expect(find.byKey(key1), findsNothing);
 
     final ContextMenuController controller = ContextMenuController();
+    addTearDown(controller.remove);
 
     // Instantiating the controller does not shown it.
     await tester.pump();
@@ -142,7 +142,7 @@ void main() {
     expect(find.byKey(key1), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('markNeedsBuild causes the builder to update', (WidgetTester tester) async {
+  testWidgets('markNeedsBuild causes the builder to update', (WidgetTester tester) async {
     int buildCount = 0;
     late final BuildContext context;
 
@@ -179,10 +179,16 @@ void main() {
     controller.remove();
   });
 
-  testWidgetsWithLeakTracking('Calling show when a built-in widget is already showing its context menu hides the built-in menu', (WidgetTester tester) async {
+  testWidgets('Calling show when a built-in widget is already showing its context menu hides the built-in menu', (WidgetTester tester) async {
     final GlobalKey builtInKey = GlobalKey();
     final GlobalKey directKey = GlobalKey();
     late final BuildContext context;
+
+    final TextEditingController textEditingController = TextEditingController();
+    addTearDown(textEditingController.dispose);
+
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -191,9 +197,9 @@ void main() {
             builder: (BuildContext localContext) {
               context = localContext;
               return EditableText(
-                controller: TextEditingController(),
+                controller: textEditingController,
                 backgroundCursorColor: Colors.grey,
-                focusNode: FocusNode(),
+                focusNode: focusNode,
                 style: const TextStyle(),
                 cursorColor: Colors.red,
                 selectionControls: materialTextSelectionHandleControls,

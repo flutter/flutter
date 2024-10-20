@@ -1,0 +1,24 @@
+// swift-tools-version: {{swiftToolsVersion}}
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
+import PackageDescription
+
+let package = Package(
+    name: "{{projectName}}",
+    platforms: [
+        {{macosSupportedPlatform}}
+    ],
+    products: [
+        .library(name: "{{swiftLibraryName}}", targets: ["{{projectName}}"])
+    ],
+    dependencies: [],
+    targets: [
+        .target(
+            name: "{{projectName}}",
+            dependencies: [],
+            resources: [
+               .process("Resources"),
+            ]
+        )
+    ]
+)

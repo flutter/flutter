@@ -5,23 +5,19 @@
 @TestOn('browser') // This file contains web-only library.
 library;
 
+import 'dart:js_interop';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:web/web.dart' as web;
 
 extension on web.HTMLCollection {
-  Iterable<web.Element> get iterable => _genIterable(this);
+  Iterable<web.Element?> get iterable => Iterable<web.Element?>.generate(length, (int index) => item(index));
 }
 extension on web.CSSRuleList {
-  Iterable<web.CSSRule> get iterable => _genIterable(this);
-}
-
-Iterable<T> _genIterable<T>(dynamic jsCollection) {
-  // ignore: avoid_dynamic_calls
-  return Iterable<T>.generate(jsCollection.length as int, (int index) => jsCollection.item(index) as T,);
+  Iterable<web.CSSRule?> get iterable => Iterable<web.CSSRule?>.generate(length, (int index) => item(index));
 }
 
 void main() {
@@ -30,7 +26,7 @@ void main() {
     element = fn(0) as web.HTMLElement;
     // The element needs to be attached to the document body to receive mouse
     // events.
-    web.document.body!.append(element);
+    web.document.body!.append(element! as JSAny);
   };
   // This force register the dom element.
   PlatformSelectableRegionContextMenu(child: const Placeholder());
@@ -45,13 +41,14 @@ void main() {
 
     expect(web.document.head!.children.iterable, isNotEmpty);
     bool foundStyle = false;
-    for (final web.Element element in web.document.head!.children.iterable) {
-      if (element.tagName != 'STYLE') {
+    for (final web.Element? element in web.document.head!.children.iterable) {
+      expect(element, isNotNull);
+      if (element!.tagName != 'STYLE') {
         continue;
       }
       final web.CSSRuleList? rules = (element as web.HTMLStyleElement).sheet?.rules;
       if (rules != null) {
-        foundStyle = rules.iterable.any((web.CSSRule rule) => rule.cssText.contains(className));
+        foundStyle = rules.iterable.any((web.CSSRule? rule) => rule!.cssText.contains(className));
       }
       if (foundStyle) {
         break;
@@ -60,7 +57,7 @@ void main() {
     expect(foundStyle, isTrue);
   });
 
-  testWidgetsWithLeakTracking('right click can trigger select word', (WidgetTester tester) async {
+  testWidgets('right click can trigger select word', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     final UniqueKey spy = UniqueKey();
@@ -137,8 +134,13 @@ class RenderSelectionSpy extends RenderProxyBox
   Size _size = Size.zero;
 
   @override
+  List<Rect> get boundingBoxes => _boundingBoxes;
+  final List<Rect> _boundingBoxes = <Rect>[];
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     _size = Size(constraints.maxWidth, constraints.maxHeight);
+    _boundingBoxes.add(Rect.fromLTWH(0.0, 0.0, constraints.maxWidth, constraints.maxHeight));
     return _size;
   }
 

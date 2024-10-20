@@ -62,12 +62,8 @@ class AppStateModel extends Model {
 
   // Adds a product to the cart.
   void addProductToCart(int productId) {
-    final int? value = _productsInCart[productId];
-    if (value == null) {
-      _productsInCart[productId] = 1;
-    } else {
-      _productsInCart[productId] = value+1;
-    }
+    final int value = _productsInCart[productId] ?? 0;
+    _productsInCart[productId] = value + 1;
 
     notifyListeners();
   }

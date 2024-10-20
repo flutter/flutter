@@ -60,6 +60,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Kanselleer';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Maak toe';
 
   @override
@@ -330,7 +333,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisensies';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Kyk op';
 
   @override
   String get menuBarMenuLabel => 'Kieslysbalkkieslys';
@@ -438,13 +441,16 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Soek';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Deursoek web';
 
   @override
   String get selectAllButtonLabel => 'Kies alles';
 
   @override
   String get selectYearSemanticsLabel => 'Kies jaar';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -465,7 +471,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Deel …';
 
   @override
   String get showAccountsLabel => 'Wys rekeninge';
@@ -548,6 +554,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ይቅር';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ዝጋ';
@@ -820,7 +829,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ፈቃዶች';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ይመልከቱ';
 
   @override
   String get menuBarMenuLabel => 'የምናሌ አሞሌ ምናሌ';
@@ -928,13 +937,16 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ይፈልጉ';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ድርን ፈልግ';
 
   @override
   String get selectAllButtonLabel => 'ሁሉንም ምረጥ';
 
   @override
   String get selectYearSemanticsLabel => 'ዓመት ይምረጡ';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -955,7 +967,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'አጋራ...';
 
   @override
   String get showAccountsLabel => 'መለያዎችን አሳይ';
@@ -1038,6 +1050,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'الإلغاء';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'الإغلاق';
@@ -1310,7 +1325,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'التراخيص';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'النظر إلى أعلى';
 
   @override
   String get menuBarMenuLabel => 'قائمة شريط القوائم';
@@ -1418,13 +1433,16 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'بحث';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'البحث على الويب';
 
   @override
   String get selectAllButtonLabel => 'اختيار الكل';
 
   @override
   String get selectYearSemanticsLabel => 'اختيار العام';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'تم اختيار $selectedRowCount عنصر';
@@ -1445,7 +1463,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'لم يتم اختيار أي عنصر';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'مشاركة…';
 
   @override
   String get showAccountsLabel => 'إظهار الحسابات';
@@ -1528,6 +1546,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'বাতিল কৰক';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'বন্ধ কৰক';
@@ -1800,7 +1821,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'অনুজ্ঞাপত্ৰসমূহ';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ওপৰলৈ চাওক';
 
   @override
   String get menuBarMenuLabel => 'মেনু বাৰ মেনু';
@@ -1908,13 +1929,16 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'সন্ধান কৰক';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ৱেবত সন্ধান কৰক';
 
   @override
   String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
 
   @override
   String get selectYearSemanticsLabel => 'বছৰ বাছনি কৰক';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -1935,7 +1959,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'শ্বেয়াৰ কৰক…';
 
   @override
   String get showAccountsLabel => 'একাউণ্টসমূহ দেখুৱাওক';
@@ -2018,6 +2042,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Ləğv edin';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Bağlayın';
@@ -2290,7 +2317,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenziyalar';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Axtarın';
 
   @override
   String get menuBarMenuLabel => 'Menyu paneli menyusu';
@@ -2398,13 +2425,16 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Axtarın';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Vebdə axtarın';
 
   @override
   String get selectAllButtonLabel => 'Hamısını seçin';
 
   @override
   String get selectYearSemanticsLabel => 'İl seçin';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -2425,7 +2455,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Paylaşın...';
 
   @override
   String get showAccountsLabel => 'Hesabları göstərin';
@@ -2508,6 +2538,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Скасаваць';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Закрыць';
@@ -2780,7 +2813,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Ліцэнзіі';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Знайсці';
 
   @override
   String get menuBarMenuLabel => 'Меню "Панэль меню"';
@@ -2888,13 +2921,16 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Пошук';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Пошук у сетцы';
 
   @override
   String get selectAllButtonLabel => 'Выбраць усе';
 
   @override
   String get selectYearSemanticsLabel => 'Выберыце год';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Выбрана $selectedRowCount элементы';
@@ -2915,7 +2951,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Абагуліць...';
 
   @override
   String get showAccountsLabel => 'Паказаць уліковыя запісы';
@@ -2998,6 +3034,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Отказ';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Затваряне';
@@ -3336,7 +3375,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Преместване надолу';
@@ -3378,13 +3417,16 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Търсене';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Търсене в мрежата';
 
   @override
   String get selectAllButtonLabel => 'Избиране на всички';
 
   @override
   String get selectYearSemanticsLabel => 'Избиране на година';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -3405,7 +3447,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Споделяне...';
 
   @override
   String get showAccountsLabel => 'Показване на профилите';
@@ -3488,6 +3530,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'বাতিল করুন';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'বন্ধ করুন';
@@ -3760,7 +3805,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'লাইসেন্স';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'লুক-আপ';
 
   @override
   String get menuBarMenuLabel => 'মেনু বার মেনু';
@@ -3868,13 +3913,16 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'খুঁজুন';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ওয়েবে সার্চ করুন';
 
   @override
   String get selectAllButtonLabel => 'সব বেছে নিন';
 
   @override
   String get selectYearSemanticsLabel => 'বছর বেছে নিন';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -3895,7 +3943,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'শেয়ার করুন...';
 
   @override
   String get showAccountsLabel => 'অ্যাকাউন্টগুলি দেখান';
@@ -3978,6 +4026,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Otkaži';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zatvori';
@@ -4250,7 +4301,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
-  String get lookUpButtonLabel => 'Pogled prema gore';
+  String get lookUpButtonLabel => 'Pogled nagore';
 
   @override
   String get menuBarMenuLabel => 'Meni trake menija';
@@ -4316,7 +4367,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Pomjeri nadolje';
@@ -4358,13 +4409,16 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Pretražite';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Pretraži Web';
 
   @override
   String get selectAllButtonLabel => 'Odaberi sve';
 
   @override
   String get selectYearSemanticsLabel => 'Odaberite godinu';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Odabrane su $selectedRowCount stavke';
@@ -4385,7 +4439,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Dijeli...';
 
   @override
   String get showAccountsLabel => 'Prikaži račune';
@@ -4468,6 +4522,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancel·la';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Tanca';
@@ -4740,7 +4797,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Llicències';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Mira amunt';
 
   @override
   String get menuBarMenuLabel => 'Menú de la barra de menú';
@@ -4806,7 +4863,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Mou avall';
@@ -4848,13 +4905,16 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Cerca';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Cerca al web';
 
   @override
   String get selectAllButtonLabel => 'Selecciona-ho tot';
 
   @override
   String get selectYearSemanticsLabel => 'Selecciona un any';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -4875,7 +4935,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Comparteix...';
 
   @override
   String get showAccountsLabel => 'Mostra els comptes';
@@ -4958,6 +5018,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Zrušit';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zavřít';
@@ -5230,7 +5293,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Vyhledat';
 
   @override
   String get menuBarMenuLabel => 'Nabídka na liště s nabídkou';
@@ -5296,7 +5359,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Přesunout dolů';
@@ -5338,13 +5401,16 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Hledat';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Vyhledávat na webu';
 
   @override
   String get selectAllButtonLabel => 'Vybrat vše';
 
   @override
   String get selectYearSemanticsLabel => 'Vyberte rok';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Jsou vybrány $selectedRowCount položky';
@@ -5365,7 +5431,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Sdílet…';
 
   @override
   String get showAccountsLabel => 'Zobrazit účty';
@@ -5448,6 +5514,9 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Canslo';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Cau';
@@ -5720,7 +5789,7 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Trwyddedau';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Chwilio';
 
   @override
   String get menuBarMenuLabel => 'Dewislen bar dewislen';
@@ -5828,13 +5897,16 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Chwilio';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => "Chwilio'r We";
 
   @override
   String get selectAllButtonLabel => 'Dewis y Cyfan';
 
   @override
   String get selectYearSemanticsLabel => 'Dewiswch flwyddyn';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r"Mae $selectedRowCount eitem wedi'u dewis";
@@ -5855,7 +5927,7 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => "Nid oes unrhyw eitemau wedi'u dewis";
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Rhannu...';
 
   @override
   String get showAccountsLabel => 'Dangos cyfrifon';
@@ -5938,6 +6010,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Annuller';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Luk';
@@ -6210,7 +6285,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenser';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Slå op';
 
   @override
   String get menuBarMenuLabel => 'Menuen for menulinjen';
@@ -6276,7 +6351,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Flyt ned';
@@ -6318,13 +6393,16 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Søg';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Søg på nettet';
 
   @override
   String get selectAllButtonLabel => 'Markér alt';
 
   @override
   String get selectYearSemanticsLabel => 'Vælg år';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -6345,7 +6423,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Del…';
 
   @override
   String get showAccountsLabel => 'Vis konti';
@@ -6428,6 +6506,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Abbrechen';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Schließen';
@@ -6700,7 +6781,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lizenzen';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Nachschlagen';
 
   @override
   String get menuBarMenuLabel => 'Menü in der Menüleiste';
@@ -6766,7 +6847,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -6808,13 +6889,16 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Suchen';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Im Web suchen';
 
   @override
   String get selectAllButtonLabel => 'Alle auswählen';
 
   @override
   String get selectYearSemanticsLabel => 'Jahr auswählen';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -6835,7 +6919,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Keine Objekte ausgewählt';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Teilen…';
 
   @override
   String get showAccountsLabel => 'Konten anzeigen';
@@ -6982,6 +7066,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Ακύρωση';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Κλείσιμο';
@@ -7320,7 +7407,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Μετακίνηση προς τα κάτω';
@@ -7362,13 +7449,16 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Αναζήτηση';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Αναζήτηση στον ιστό';
 
   @override
   String get selectAllButtonLabel => 'Επιλογή όλων';
 
   @override
   String get selectYearSemanticsLabel => 'Επιλογή έτους';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -7389,7 +7479,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Κοινοποίηση…';
 
   @override
   String get showAccountsLabel => 'Εμφάνιση λογαριασμών';
@@ -7472,6 +7562,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancel';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Close';
@@ -7861,6 +7954,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Select year';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -7879,7 +7975,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'No items selected';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Share';
 
   @override
   String get showAccountsLabel => 'Show accounts';
@@ -7941,6 +8037,9 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -8149,6 +8248,9 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   });
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get lookUpButtonLabel => 'Look up';
 
   @override
@@ -8247,6 +8349,9 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -8349,6 +8454,9 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   });
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get lookUpButtonLabel => 'Look up';
 
   @override
@@ -8444,6 +8552,9 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -8543,6 +8654,9 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   });
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get lookUpButtonLabel => 'Look up';
 
   @override
@@ -8638,6 +8752,9 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -8759,6 +8876,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancelar';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Cerrar';
@@ -9031,7 +9151,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencias';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Buscador visual';
 
   @override
   String get menuBarMenuLabel => 'Menú de la barra de menú';
@@ -9097,7 +9217,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Mover hacia abajo';
@@ -9139,13 +9259,16 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Buscar';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Buscar en la Web';
 
   @override
   String get selectAllButtonLabel => 'Seleccionar todo';
 
   @override
   String get selectYearSemanticsLabel => 'Seleccionar año';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -9166,7 +9289,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'No se han seleccionado elementos';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Compartir...';
 
   @override
   String get showAccountsLabel => 'Mostrar cuentas';
@@ -9228,6 +9351,9 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -9420,6 +9546,9 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -9608,6 +9737,9 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -9800,6 +9932,9 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -9988,6 +10123,9 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -10180,6 +10318,9 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -10368,6 +10509,9 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -10560,6 +10704,9 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -10748,6 +10895,9 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -10940,6 +11090,9 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -11128,6 +11281,9 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -11320,6 +11476,9 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -11508,6 +11667,9 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -11700,6 +11862,9 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -11888,6 +12053,9 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -12080,6 +12248,9 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -12270,6 +12441,9 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -12458,6 +12632,9 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -12653,6 +12830,9 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -12841,6 +13021,9 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -13052,6 +13235,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Tühista';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Sule';
@@ -13390,7 +13576,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Teisalda alla';
@@ -13432,13 +13618,16 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Otsing';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Otsi veebist';
 
   @override
   String get selectAllButtonLabel => 'Vali kõik';
 
   @override
   String get selectYearSemanticsLabel => 'Valige aasta';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -13459,7 +13648,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Jaga …';
 
   @override
   String get showAccountsLabel => 'Kuva kontod';
@@ -13542,6 +13731,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Utzi';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Itxi';
@@ -13814,7 +14006,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lizentziak';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Bilatu';
 
   @override
   String get menuBarMenuLabel => 'Menu-barraren menua';
@@ -13922,13 +14114,16 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Bilatu';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Bilatu sarean';
 
   @override
   String get selectAllButtonLabel => 'Hautatu guztiak';
 
   @override
   String get selectYearSemanticsLabel => 'Hautatu urtea';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -13949,7 +14144,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Partekatu...';
 
   @override
   String get showAccountsLabel => 'Erakutsi kontuak';
@@ -14034,6 +14229,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'لغو';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'بستن';
 
   @override
@@ -14058,7 +14256,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'برش';
 
   @override
-  String get dateHelpText => 'روز/ماه/سال';
+  String get dateHelpText => 'رر/م‌م/س‌س‌س‌س';
 
   @override
   String get dateInputLabel => 'تاریخ را وارد کنید';
@@ -14304,7 +14502,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'پروانه‌ها';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'جستجو';
 
   @override
   String get menuBarMenuLabel => 'منوی نوار منو';
@@ -14370,7 +14568,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'انتقال به پایین';
@@ -14412,13 +14610,16 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'جستجو';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'جستجو در وب';
 
   @override
   String get selectAllButtonLabel => 'انتخاب همه';
 
   @override
   String get selectYearSemanticsLabel => 'انتخاب سال';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -14439,7 +14640,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'هم‌رسانی…';
 
   @override
   String get showAccountsLabel => 'نشان دادن حساب‌ها';
@@ -14522,6 +14723,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Peru';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Sulje';
@@ -14794,7 +14998,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenssit';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Hae';
 
   @override
   String get menuBarMenuLabel => 'Valikkopalkki';
@@ -14860,7 +15064,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Siirrä alas';
@@ -14902,13 +15106,16 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Haku';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Hae verkosta';
 
   @override
   String get selectAllButtonLabel => 'Valitse kaikki';
 
   @override
   String get selectYearSemanticsLabel => 'Valitse vuosi';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -14929,7 +15136,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Jaa…';
 
   @override
   String get showAccountsLabel => 'Näytä tilit';
@@ -15012,6 +15219,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Kanselahin';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Isara';
@@ -15350,7 +15560,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Ilipat pababa';
@@ -15392,13 +15602,16 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Maghanap';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Maghanap sa Web';
 
   @override
   String get selectAllButtonLabel => 'Piliin lahat';
 
   @override
   String get selectYearSemanticsLabel => 'Pumili ng taon';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -15419,7 +15632,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Ibahagi...';
 
   @override
   String get showAccountsLabel => 'Ipakita ang mga account';
@@ -15502,6 +15715,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Annuler';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Fermer';
@@ -15774,7 +15990,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licences';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Recherche visuelle';
 
   @override
   String get menuBarMenuLabel => 'Menu de la barre de menu';
@@ -15840,7 +16056,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Déplacer vers le bas';
@@ -15882,13 +16098,16 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Rechercher';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Rechercher sur le Web';
 
   @override
   String get selectAllButtonLabel => 'Tout sélectionner';
 
   @override
   String get selectYearSemanticsLabel => 'Sélectionner une année';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -15909,7 +16128,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Aucun élément sélectionné';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Partager…';
 
   @override
   String get showAccountsLabel => 'Afficher les comptes';
@@ -15973,6 +16192,9 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   });
 
   @override
+  String get lookUpButtonLabel => 'Regarder en haut';
+
+  @override
   String get scanTextButtonLabel => 'Balayer un texte';
 
   @override
@@ -16010,9 +16232,6 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
 
   @override
   String get keyboardKeyInsert => 'Insér.';
-
-  @override
-  String get keyboardKeyEscape => 'Échapp.';
 
   @override
   String get keyboardKeyEject => 'Éject.';
@@ -16149,6 +16368,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancelar';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Pechar';
@@ -16487,7 +16709,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Mover cara abaixo';
@@ -16529,13 +16751,16 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Buscar';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Buscar na Web';
 
   @override
   String get selectAllButtonLabel => 'Seleccionar todo';
 
   @override
   String get selectYearSemanticsLabel => 'Seleccionar ano';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -16556,7 +16781,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Non se seleccionaron elementos';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get showAccountsLabel => 'Mostrar contas';
@@ -16639,6 +16864,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Abbrechen';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Schließen';
@@ -16911,7 +17139,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lizenzen';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Nachschlagen';
 
   @override
   String get menuBarMenuLabel => 'Menü in der Menüleiste';
@@ -16977,7 +17205,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -17019,13 +17247,16 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Suchen';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Im Web suchen';
 
   @override
   String get selectAllButtonLabel => 'Alle auswählen';
 
   @override
   String get selectYearSemanticsLabel => 'Jahr auswählen';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -17046,7 +17277,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Teilen…';
 
   @override
   String get showAccountsLabel => 'Konten anzeigen';
@@ -17129,6 +17360,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'રદ કરો';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'બંધ કરો';
@@ -17401,7 +17635,7 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'લાઇસન્સ';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'શોધો';
 
   @override
   String get menuBarMenuLabel => 'મેનૂ બાર મેનૂ';
@@ -17509,13 +17743,16 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'શોધો';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'વેબ પર શોધો';
 
   @override
   String get selectAllButtonLabel => 'બધા પસંદ કરો';
 
   @override
   String get selectYearSemanticsLabel => 'વર્ષ પસંદ કરો';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -17536,7 +17773,7 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'શેર કરો…';
 
   @override
   String get showAccountsLabel => 'એકાઉન્ટ બતાવો';
@@ -17619,6 +17856,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ביטול';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'סגירה';
@@ -17891,7 +18131,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'רישיונות';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'חיפוש';
 
   @override
   String get menuBarMenuLabel => 'תפריט בסרגל התפריטים';
@@ -17957,7 +18197,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => r'נותרו $remainingCount תווים';
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'העברה למטה';
@@ -17999,13 +18239,16 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'חיפוש';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'חיפוש באינטרנט';
 
   @override
   String get selectAllButtonLabel => 'בחירת הכול';
 
   @override
   String get selectYearSemanticsLabel => 'בחירת שנה';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -18026,7 +18269,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'שיתוף…';
 
   @override
   String get showAccountsLabel => 'הצגת החשבונות';
@@ -18109,6 +18352,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'रद्द करें';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'बंद करें';
@@ -18381,7 +18627,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'लाइसेंस';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'लुक अप बटन';
 
   @override
   String get menuBarMenuLabel => 'मेन्यू बार का मेन्यू';
@@ -18447,7 +18693,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'नीचे ले जाएं';
@@ -18489,13 +18735,16 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'खोजें';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'वेब पर खोजें';
 
   @override
   String get selectAllButtonLabel => 'सभी को चुनें';
 
   @override
   String get selectYearSemanticsLabel => 'साल चुनें';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -18516,7 +18765,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'शेयर करें…';
 
   @override
   String get showAccountsLabel => 'खाते दिखाएं';
@@ -18599,6 +18848,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Odustani';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zatvori';
@@ -18937,7 +19189,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Pomakni prema dolje';
@@ -18979,13 +19231,16 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Pretražite';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Pretraži web';
 
   @override
   String get selectAllButtonLabel => 'Odaberi sve';
 
   @override
   String get selectYearSemanticsLabel => 'Odaberite godinu';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Odabrane su $selectedRowCount stavke';
@@ -19006,7 +19261,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Dijeli...';
 
   @override
   String get showAccountsLabel => 'Prikažite račune';
@@ -19089,6 +19344,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Mégse';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Bezárás';
@@ -19427,7 +19685,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Áthelyezés lefelé';
@@ -19469,13 +19727,16 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Keresés';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Keresés az interneten';
 
   @override
   String get selectAllButtonLabel => 'Összes kijelölése';
 
   @override
   String get selectYearSemanticsLabel => 'Válassza ki az évet';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -19496,7 +19757,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Megosztás…';
 
   @override
   String get showAccountsLabel => 'Fiókok megjelenítése';
@@ -19579,6 +19840,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Չեղարկել';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Փակել';
@@ -19851,7 +20115,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Արտոնագրեր';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Փնտրել';
 
   @override
   String get menuBarMenuLabel => 'Ընտրացանկի գոտու ընտրացանկ';
@@ -19959,13 +20223,16 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Որոնել';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Որոնել համացանցում';
 
   @override
   String get selectAllButtonLabel => 'Նշել բոլորը';
 
   @override
   String get selectYearSemanticsLabel => 'Ընտրել տարին';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Ընտրված է $selectedRowCount օբյեկտ';
@@ -19986,7 +20253,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Տողերը ընտրված չեն';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Կիսվել...';
 
   @override
   String get showAccountsLabel => 'Ցույց տալ հաշիվները';
@@ -20069,6 +20336,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Batal';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Tutup';
@@ -20341,7 +20611,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisensi';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Cari';
 
   @override
   String get menuBarMenuLabel => 'Menu panel menu';
@@ -20407,7 +20677,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Turunkan';
@@ -20449,13 +20719,16 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Telusuri';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Telusuri di Web';
 
   @override
   String get selectAllButtonLabel => 'Pilih semua';
 
   @override
   String get selectYearSemanticsLabel => 'Pilih tahun';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -20476,7 +20749,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Bagikan...';
 
   @override
   String get showAccountsLabel => 'Tampilkan akun';
@@ -20559,6 +20832,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Hætta við';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Loka';
@@ -20939,13 +21215,16 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Leit';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Leita á vefnum';
 
   @override
   String get selectAllButtonLabel => 'Velja allt';
 
   @override
   String get selectYearSemanticsLabel => 'Velja ár';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -20966,7 +21245,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Deila...';
 
   @override
   String get showAccountsLabel => 'Sýna reikninga';
@@ -21049,6 +21328,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Annulla';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Chiudi';
@@ -21387,7 +21669,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Sposta giù';
@@ -21429,13 +21711,16 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Cerca';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Cerca sul web';
 
   @override
   String get selectAllButtonLabel => 'Seleziona tutto';
 
   @override
   String get selectYearSemanticsLabel => 'Seleziona anno';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -21456,7 +21741,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Condividi…';
 
   @override
   String get showAccountsLabel => 'Mostra account';
@@ -21539,6 +21824,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'キャンセル';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => '閉じる';
@@ -21877,7 +22165,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => '下に移動';
@@ -21919,13 +22207,16 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '検索';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ウェブを検索';
 
   @override
-  String get selectAllButtonLabel => 'すべて選択';
+  String get selectAllButtonLabel => 'すべてを選択';
 
   @override
   String get selectYearSemanticsLabel => '年を選択';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -21946,7 +22237,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => '共有...';
 
   @override
   String get showAccountsLabel => 'アカウントを表示';
@@ -22029,6 +22320,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'გაუქმება';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'დახურვა';
@@ -22301,7 +22595,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ლიცენზიები';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'აიხედეთ ზემოთ';
 
   @override
   String get menuBarMenuLabel => 'მენიუს ზოლის მენიუ';
@@ -22409,13 +22703,16 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ძიება';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ვებში ძიება';
 
   @override
   String get selectAllButtonLabel => 'ყველას არჩევა';
 
   @override
   String get selectYearSemanticsLabel => 'აირჩიეთ წელი';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -22436,7 +22733,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'გაზიარება...';
 
   @override
   String get showAccountsLabel => 'ანგარიშების ჩვენება';
@@ -22519,6 +22816,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Бас тарту';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Жабу';
@@ -22791,7 +23091,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лицензиялар';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Іздеу';
 
   @override
   String get menuBarMenuLabel => 'Мәзір жолағының мәзірі';
@@ -22899,13 +23199,16 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Іздеу';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Интернеттен іздеу';
 
   @override
   String get selectAllButtonLabel => 'Барлығын таңдау';
 
   @override
   String get selectYearSemanticsLabel => 'Жылды таңдау';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -22926,7 +23229,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Тармақ таңдалмаған';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Бөлісу…';
 
   @override
   String get showAccountsLabel => 'Аккаунттарды көрсету';
@@ -23009,6 +23312,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'បោះបង់';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'បិទ';
@@ -23347,7 +23653,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'ផ្លាស់ទី​ចុះ​ក្រោម';
@@ -23389,13 +23695,16 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ស្វែងរក';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ស្វែងរក​លើបណ្ដាញ';
 
   @override
   String get selectAllButtonLabel => 'ជ្រើសរើស​ទាំងអស់';
 
   @override
   String get selectYearSemanticsLabel => 'ជ្រើសរើសឆ្នាំ';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -23416,7 +23725,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'ចែករំលែក...';
 
   @override
   String get showAccountsLabel => 'បង្ហាញគណនី';
@@ -23499,6 +23808,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => '\u{cb0}\u{ca6}\u{ccd}\u{ca6}\u{cc1}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => '\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
@@ -23771,7 +24083,7 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get licensesPageTitle => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{ca8}\u{ccb}\u{ca1}\u{cbf}';
 
   @override
   String get menuBarMenuLabel => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{cac}\u{cbe}\u{cb0}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
@@ -23879,13 +24191,16 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => '\u{cb5}\u{cc6}\u{cac}\u{ccd}\u{200c}\u{ca8}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
   String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get selectYearSemanticsLabel => '\u{cb5}\u{cb0}\u{ccd}\u{cb7}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -23906,7 +24221,7 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => '\u{cb9}\u{c82}\u{c9a}\u{cbf}\u{c95}\u{cca}\u{cb3}\u{ccd}\u{cb3}\u{cbf}\u{2e}\u{2e}\u{2e}';
 
   @override
   String get showAccountsLabel => '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -23989,6 +24304,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => '취소';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => '닫기';
@@ -24261,7 +24579,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => '라이선스';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => '찾기';
 
   @override
   String get menuBarMenuLabel => '메뉴 바 메뉴';
@@ -24327,7 +24645,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => '아래로 이동';
@@ -24369,13 +24687,16 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '검색';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => '웹 검색';
 
   @override
   String get selectAllButtonLabel => '전체 선택';
 
   @override
   String get selectYearSemanticsLabel => '연도 선택';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -24396,7 +24717,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => '공유...';
 
   @override
   String get showAccountsLabel => '계정 표시';
@@ -24479,6 +24800,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Токтотуу';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Жабуу';
@@ -24751,7 +25075,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Уруксаттамалар';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Издөө';
 
   @override
   String get menuBarMenuLabel => 'Меню тилкеси менюсу';
@@ -24859,13 +25183,16 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Издөө';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Интернеттен издөө';
 
   @override
   String get selectAllButtonLabel => 'Баарын тандоо';
 
   @override
   String get selectYearSemanticsLabel => 'Жылды тандоо';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -24886,7 +25213,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Бөлүшүү…';
 
   @override
   String get showAccountsLabel => 'Аккаунттарды көрсөтүү';
@@ -24969,6 +25296,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ຍົກເລີກ';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ປິດ';
@@ -25241,7 +25571,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ໃບອະນຸຍາດ';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ຊອກຫາຂໍ້ມູນ';
 
   @override
   String get menuBarMenuLabel => 'ເມນູແຖບເມນູ';
@@ -25349,13 +25679,16 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ຊອກຫາ';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ຊອກຫາຢູ່ອິນເຕີເນັດ';
 
   @override
   String get selectAllButtonLabel => 'ເລືອກທັງໝົດ';
 
   @override
   String get selectYearSemanticsLabel => 'ເລືອກ​ປີ';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -25376,7 +25709,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'ແບ່ງປັນ...';
 
   @override
   String get showAccountsLabel => 'ສະແດງບັນຊີ';
@@ -25459,6 +25792,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Atšaukti';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Uždaryti';
@@ -25731,7 +26067,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencijos';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Ieškoti';
 
   @override
   String get menuBarMenuLabel => 'Meniu juostos meniu';
@@ -25797,7 +26133,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Perkelti žemyn';
@@ -25839,13 +26175,16 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Paieška';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Ieškoti žiniatinklyje';
 
   @override
   String get selectAllButtonLabel => 'Pasirinkti viską';
 
   @override
   String get selectYearSemanticsLabel => 'Pasirinkite metus';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Pasirinkti $selectedRowCount elementai';
@@ -25866,7 +26205,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Bendrinti...';
 
   @override
   String get showAccountsLabel => 'Rodyti paskyras';
@@ -25949,6 +26288,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Atcelt';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Aizvērt';
@@ -26221,7 +26563,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licences';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Meklēt';
 
   @override
   String get menuBarMenuLabel => 'Izvēļņu joslas izvēlne';
@@ -26329,13 +26671,16 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Meklēt';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Meklēt tīmeklī';
 
   @override
   String get selectAllButtonLabel => 'Atlasīt visu';
 
   @override
   String get selectYearSemanticsLabel => 'Atlasiet gadu';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -26356,7 +26701,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Nav atlasītu vienumu';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Kopīgot…';
 
   @override
   String get showAccountsLabel => 'Rādīt kontus';
@@ -26439,6 +26784,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Откажи';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Затвори';
@@ -26711,7 +27059,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лиценци';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Погледнете нагоре';
 
   @override
   String get menuBarMenuLabel => 'Мени на лентата со мени';
@@ -26819,13 +27167,16 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Пребарувајте';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Пребарајте на интернет';
 
   @override
   String get selectAllButtonLabel => 'Избери ги сите';
 
   @override
   String get selectYearSemanticsLabel => 'Изберете година';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -26846,7 +27197,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Споделете...';
 
   @override
   String get showAccountsLabel => 'Прикажи сметки';
@@ -26929,6 +27280,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'റദ്ദാക്കുക';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'അടയ്ക്കുക';
@@ -27309,13 +27663,16 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'തിരയുക';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'വെബിൽ തിരയുക';
 
   @override
   String get selectAllButtonLabel => 'എല്ലാം തിരഞ്ഞെടുക്കുക';
 
   @override
   String get selectYearSemanticsLabel => 'വർഷം തിരഞ്ഞെടുക്കുക';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -27336,7 +27693,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'പങ്കിടുക...';
 
   @override
   String get showAccountsLabel => 'അക്കൗണ്ടുകൾ കാണിക്കുക';
@@ -27419,6 +27776,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Цуцлах';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Хаах';
@@ -27691,7 +28051,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лиценз';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Дээшээ харах';
 
   @override
   String get menuBarMenuLabel => 'Цэсний талбарын цэс';
@@ -27799,13 +28159,16 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Хайх';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Вебээс хайх';
 
   @override
   String get selectAllButtonLabel => 'Бүгдийг сонгох';
 
   @override
   String get selectYearSemanticsLabel => 'Жил сонгох';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -27826,7 +28189,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Бичлэг сонгоогүй байна';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Хуваалцах...';
 
   @override
   String get showAccountsLabel => 'Бүртгэлүүдийг харуулах';
@@ -27909,6 +28272,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'रद्द करा';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'बंद करा';
@@ -28181,7 +28547,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'परवाने';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'शोध घ्या';
 
   @override
   String get menuBarMenuLabel => 'मेनू बार मेनू';
@@ -28289,13 +28655,16 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'शोध';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'वेबवर शोधा';
 
   @override
   String get selectAllButtonLabel => 'सर्व निवडा';
 
   @override
   String get selectYearSemanticsLabel => 'वर्ष निवडा';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -28316,7 +28685,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'कोणतेही आयटम निवडलेले नाहीत';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'शेअर करा...';
 
   @override
   String get showAccountsLabel => 'खाती दर्शवा';
@@ -28399,6 +28768,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Batal';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Tutup';
@@ -28737,7 +29109,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Alih ke bawah';
@@ -28779,13 +29151,16 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Cari';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Buat carian pada Web';
 
   @override
   String get selectAllButtonLabel => 'Pilih semua';
 
   @override
   String get selectYearSemanticsLabel => 'Pilih tahun';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -28806,7 +29181,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Tiada item dipilih';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Kongsi...';
 
   @override
   String get showAccountsLabel => 'Tunjukkan akaun';
@@ -28889,6 +29264,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'မလုပ်တော့';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ပိတ်ရန်';
@@ -29161,7 +29539,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'လိုင်စင်များ';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'အပေါ်ကြည့်ရန်';
 
   @override
   String get menuBarMenuLabel => 'မီနူးဘား မီနူး';
@@ -29269,13 +29647,16 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ရှာဖွေရန်';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ဝဘ်တွင်ရှာရန်';
 
   @override
   String get selectAllButtonLabel => 'အားလုံး ရွေးရန်';
 
   @override
   String get selectYearSemanticsLabel => 'ခုနှစ် ရွေးရန်';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -29296,7 +29677,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'မျှဝေရန်...';
 
   @override
   String get showAccountsLabel => 'အကောင့်များကို ပြရန်';
@@ -29379,6 +29760,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Avbryt';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Lukk';
@@ -29651,7 +30035,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenser';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Slå opp';
 
   @override
   String get menuBarMenuLabel => 'Meny med menylinje';
@@ -29759,13 +30143,16 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Søk';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Søk på nettet';
 
   @override
   String get selectAllButtonLabel => 'Velg alle';
 
   @override
   String get selectYearSemanticsLabel => 'Velg året';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -29786,7 +30173,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Del…';
 
   @override
   String get showAccountsLabel => 'Vis kontoer';
@@ -29869,6 +30256,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'रद्द गर्नुहोस्';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'बन्द गर्नुहोस्';
@@ -30141,7 +30531,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'इजाजतपत्रहरू';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'माथितिर हेर्नुहोस्';
 
   @override
   String get menuBarMenuLabel => '"मेनु बार" मेनु';
@@ -30249,13 +30639,16 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'खोज्नुहोस्';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'वेबमा खोज्नुहोस्';
 
   @override
   String get selectAllButtonLabel => 'सबै बटनहरू चयन गर्नुहोस्';
 
   @override
   String get selectYearSemanticsLabel => 'वर्ष छान्नुहोस्';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -30276,7 +30669,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'सेयर गर्नुहोस्...';
 
   @override
   String get showAccountsLabel => 'खाताहरू देखाउनुहोस्';
@@ -30359,6 +30752,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Annuleren';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Sluiten';
@@ -30631,7 +31027,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenties';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Opzoeken';
 
   @override
   String get menuBarMenuLabel => 'Menu van menubalk';
@@ -30697,7 +31093,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Omlaag verplaatsen';
@@ -30739,13 +31135,16 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Zoeken';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Op internet zoeken';
 
   @override
   String get selectAllButtonLabel => 'Alles selecteren';
 
   @override
   String get selectYearSemanticsLabel => 'Jaar selecteren';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -30766,7 +31165,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Delen...';
 
   @override
   String get showAccountsLabel => 'Accounts tonen';
@@ -30849,6 +31248,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Avbryt';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Lukk';
@@ -31121,7 +31523,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenser';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Slå opp';
 
   @override
   String get menuBarMenuLabel => 'Meny med menylinje';
@@ -31229,13 +31631,16 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Søk';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Søk på nettet';
 
   @override
   String get selectAllButtonLabel => 'Velg alle';
 
   @override
   String get selectYearSemanticsLabel => 'Velg året';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -31256,7 +31661,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Del…';
 
   @override
   String get showAccountsLabel => 'Vis kontoer';
@@ -31339,6 +31744,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ବାତିଲ କରନ୍ତୁ';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ବନ୍ଦ କରନ୍ତୁ';
@@ -31611,7 +32019,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ଲାଇସେନ୍ସଗୁଡ଼କ';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ଉପରକୁ ଦେଖନ୍ତୁ';
 
   @override
   String get menuBarMenuLabel => 'ମେନୁ ବାର ମେନୁ';
@@ -31719,13 +32127,16 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ସନ୍ଧାନ କରନ୍ତୁ';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ୱେବ ସର୍ଚ୍ଚ କରନ୍ତୁ';
 
   @override
   String get selectAllButtonLabel => 'ସବୁ ଚୟନ କରନ୍ତୁ';
 
   @override
   String get selectYearSemanticsLabel => 'ବର୍ଷ ଚୟନ କରନ୍ତୁ';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -31746,7 +32157,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'ସେୟାର୍ କରନ୍ତୁ...';
 
   @override
   String get showAccountsLabel => 'ଆକାଉଣ୍ଟ ଦେଖାନ୍ତୁ';
@@ -31813,7 +32224,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'$applicationName ਬਾਰੇ';
 
   @override
-  String get alertDialogLabel => 'ਸੁਚੇਤਨਾ';
+  String get alertDialogLabel => 'ਅਲਰਟ';
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
@@ -31829,6 +32240,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ਰੱਦ ਕਰੋ';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ਬੰਦ ਕਰੋ';
@@ -32101,7 +32515,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ਲਾਇਸੰਸ';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ਖੋਜੋ';
 
   @override
   String get menuBarMenuLabel => 'ਮੀਨੂ ਬਾਰ ਮੀਨੂ';
@@ -32209,13 +32623,16 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ਖੋਜੋ';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => "ਵੈੱਬ 'ਤੇ ਖੋਜੋ";
 
   @override
   String get selectAllButtonLabel => 'ਸਭ ਚੁਣੋ';
 
   @override
   String get selectYearSemanticsLabel => 'ਸਾਲ ਚੁਣੋ';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -32236,7 +32653,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'ਸਾਂਝਾ ਕਰੋ...';
 
   @override
   String get showAccountsLabel => 'ਖਾਤੇ ਦਿਖਾਓ';
@@ -32319,6 +32736,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Anuluj';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zamknij';
@@ -32657,7 +33077,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Przenieś w dół';
@@ -32699,13 +33119,16 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Szukaj';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Szukaj w internecie';
 
   @override
   String get selectAllButtonLabel => 'Zaznacz wszystko';
 
   @override
   String get selectYearSemanticsLabel => 'Wybierz rok';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'$selectedRowCount wybrane elementy';
@@ -32726,7 +33149,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Udostępnij…';
 
   @override
   String get showAccountsLabel => 'Pokaż konta';
@@ -32809,6 +33232,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'لغوه کول';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'تړل';
@@ -33198,6 +33624,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Select year';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -33299,6 +33728,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancelar';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Fechar';
@@ -33637,7 +34069,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Mover para baixo';
@@ -33679,13 +34111,16 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Pesquisa';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Pesquisar na Web';
 
   @override
   String get selectAllButtonLabel => 'Selecionar tudo';
 
   @override
   String get selectYearSemanticsLabel => 'Selecione o ano';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -33706,7 +34141,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Compartilhar…';
 
   @override
   String get showAccountsLabel => 'Mostrar contas';
@@ -33768,6 +34203,9 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Partilhar…';
 
   @override
   String get lookUpButtonLabel => 'Procurar';
@@ -33854,13 +34292,13 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get dateOutOfRangeLabel => 'Fora do intervalo.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Data de conclusão: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Data de fim: $fullDate';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Data de início: $fullDate';
 
   @override
-  String get dateRangeEndLabel => 'Data de conclusão';
+  String get dateRangeEndLabel => 'Data de fim';
 
   @override
   String get inputDateModeButtonLabel => 'Mude para a introdução';
@@ -33964,6 +34402,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Anulați';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Închideți';
@@ -34236,7 +34677,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licențe';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Privire în sus';
 
   @override
   String get menuBarMenuLabel => 'Bară de meniu';
@@ -34302,7 +34743,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Mutați în jos';
@@ -34344,13 +34785,16 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Căutați';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Căutați pe web';
 
   @override
   String get selectAllButtonLabel => 'Selectați tot';
 
   @override
   String get selectYearSemanticsLabel => 'Selectați anul';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'$selectedRowCount articole selectate';
@@ -34371,7 +34815,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Nu există elemente selectate';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Trimiteți…';
 
   @override
   String get showAccountsLabel => 'Afișați conturile';
@@ -34454,6 +34898,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Отмена';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Закрыть';
@@ -34726,7 +35173,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лицензии';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Найти';
 
   @override
   String get menuBarMenuLabel => 'Строка меню';
@@ -34792,7 +35239,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Переместить вниз';
@@ -34834,13 +35281,16 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Поиск';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Искать в интернете';
 
   @override
   String get selectAllButtonLabel => 'Выбрать все';
 
   @override
   String get selectYearSemanticsLabel => 'Выберите год';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Выбрано $selectedRowCount объекта';
@@ -34861,7 +35311,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Строки не выбраны';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Поделиться';
 
   @override
   String get showAccountsLabel => 'Показать аккаунты';
@@ -34944,6 +35394,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'අවලංගු කරන්න';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'වසන්න';
@@ -35216,7 +35669,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'බලපත්‍ර';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'උඩ බලන්න';
 
   @override
   String get menuBarMenuLabel => 'මෙනු තීරු මෙනුව';
@@ -35324,13 +35777,16 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'සෙවීම';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'වෙබය සොයන්න';
 
   @override
   String get selectAllButtonLabel => 'සියල්ල තෝරන්න';
 
   @override
   String get selectYearSemanticsLabel => 'වර්ෂය තෝරන්න';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -35351,7 +35807,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'බෙදා ගන්න...';
 
   @override
   String get showAccountsLabel => 'ගිණුම් පෙන්වන්න';
@@ -35434,6 +35890,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Zrušiť';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zavrieť';
@@ -35706,7 +36165,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencie';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Pohľad nahor';
 
   @override
   String get menuBarMenuLabel => 'Ponuka panela s ponukami';
@@ -35772,7 +36231,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Presunúť nadol';
@@ -35814,13 +36273,16 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Hľadať';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Hľadať na webe';
 
   @override
   String get selectAllButtonLabel => 'Vybrať všetko';
 
   @override
   String get selectYearSemanticsLabel => 'Vyberte rok';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'$selectedRowCount vybraté položky';
@@ -35841,7 +36303,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Zdieľať…';
 
   @override
   String get showAccountsLabel => 'Zobraziť účty';
@@ -35924,6 +36386,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Prekliči';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zapri';
@@ -36196,7 +36661,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Pogled gor';
 
   @override
   String get menuBarMenuLabel => 'Meni menijske vrstice';
@@ -36262,7 +36727,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => r'Še $remainingCount znaka';
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Premakni navzdol';
@@ -36304,13 +36769,16 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Iskanje';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Iskanje v spletu';
 
   @override
   String get selectAllButtonLabel => 'Izberi vse';
 
   @override
   String get selectYearSemanticsLabel => 'Izberite leto';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Izbrani so $selectedRowCount elementi';
@@ -36331,7 +36799,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Deli …';
 
   @override
   String get showAccountsLabel => 'Prikaz računov';
@@ -36414,6 +36882,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Anulo';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Mbyll';
@@ -36686,7 +37157,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencat';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Kërko';
 
   @override
   String get menuBarMenuLabel => 'Menyja e shiritit të menysë';
@@ -36794,13 +37265,16 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Kërko';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Kërko në ueb';
 
   @override
   String get selectAllButtonLabel => 'Zgjidh të gjitha';
 
   @override
   String get selectYearSemanticsLabel => 'Zgjidh vitin';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -36821,7 +37295,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Ndaj...';
 
   @override
   String get showAccountsLabel => 'Shfaq llogaritë';
@@ -36904,6 +37378,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Откажи';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Затвори';
@@ -37176,7 +37653,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лиценце';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Поглед нагоре';
 
   @override
   String get menuBarMenuLabel => 'Мени трака менија';
@@ -37242,7 +37719,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Померите надоле';
@@ -37284,13 +37761,16 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Претражите';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Претражи веб';
 
   @override
   String get selectAllButtonLabel => 'Изабери све';
 
   @override
   String get selectYearSemanticsLabel => 'Изаберите годину';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Изабране су $selectedRowCount ставке';
@@ -37311,7 +37791,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Дели…';
 
   @override
   String get showAccountsLabel => 'Прикажи налоге';
@@ -37547,6 +38027,9 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get licensesPageTitle => 'Licence';
 
   @override
+  String get lookUpButtonLabel => 'Pogled nagore';
+
+  @override
   String get menuBarMenuLabel => 'Meni traka menija';
 
   @override
@@ -37640,6 +38123,9 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get searchFieldLabel => 'Pretražite';
 
   @override
+  String get searchWebButtonLabel => 'Pretraži veb';
+
+  @override
   String get selectAllButtonLabel => 'Izaberi sve';
 
   @override
@@ -37653,6 +38139,9 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
 
   @override
   String get selectedRowCountTitleOther => r'Izabrano je $selectedRowCount stavki';
+
+  @override
+  String get shareButtonLabel => 'Deli…';
 
   @override
   String get showAccountsLabel => 'Prikaži naloge';
@@ -37732,6 +38221,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Avbryt';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Stäng';
@@ -38004,7 +38496,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenser';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Titta upp';
 
   @override
   String get menuBarMenuLabel => 'Menyrad';
@@ -38070,7 +38562,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Flytta nedåt';
@@ -38112,13 +38604,16 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Sök';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Sök på webben';
 
   @override
   String get selectAllButtonLabel => 'Markera allt';
 
   @override
   String get selectYearSemanticsLabel => 'Välj år';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -38139,7 +38634,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Dela …';
 
   @override
   String get showAccountsLabel => 'Visa konton';
@@ -38222,6 +38717,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Ghairi';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Funga';
@@ -38494,7 +38992,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Leseni';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Tafuta';
 
   @override
   String get menuBarMenuLabel => 'Menyu ya upau wa menyu';
@@ -38602,13 +39100,16 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Tafuta';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Tafuta kwenye Wavuti';
 
   @override
   String get selectAllButtonLabel => 'Chagua vyote';
 
   @override
   String get selectYearSemanticsLabel => 'Chagua mwaka';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -38629,7 +39130,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Hamna kilicho chaguliwa';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Shiriki...';
 
   @override
   String get showAccountsLabel => 'Onyesha akaunti';
@@ -38712,6 +39213,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ரத்துசெய்';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'மூடுக';
@@ -38984,7 +39488,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'உரிமங்கள்';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'தேடு';
 
   @override
   String get menuBarMenuLabel => 'மெனு பட்டியின் மெனு';
@@ -39092,13 +39596,16 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'தேடல்';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'இணையத்தில் தேடு';
 
   @override
   String get selectAllButtonLabel => 'அனைத்தையும் தேர்ந்தெடு';
 
   @override
   String get selectYearSemanticsLabel => 'ஆண்டைத் தேர்ந்தெடுக்கவும்';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -39119,7 +39626,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'எந்த வரிசையும் தேர்ந்தெடுக்கவில்லை';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'பகிர்...';
 
   @override
   String get showAccountsLabel => 'கணக்குகளைக் காட்டும்';
@@ -39202,6 +39709,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'రద్దు చేయండి';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'మూసివేయండి';
@@ -39474,7 +39984,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'లైసెన్స్‌లు';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'వెతకండి';
 
   @override
   String get menuBarMenuLabel => 'మెనూ బార్ మెనూ';
@@ -39582,13 +40092,16 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'వెతకండి';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'వెబ్‌లో సెర్చ్ చేయండి';
 
   @override
   String get selectAllButtonLabel => 'అన్నింటినీ ఎంచుకోండి';
 
   @override
   String get selectYearSemanticsLabel => 'సంవత్సరాన్ని ఎంచుకోండి';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -39609,7 +40122,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'షేర్ చేయండి...';
 
   @override
   String get showAccountsLabel => 'ఖాతాలను చూపు';
@@ -39692,6 +40205,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ยกเลิก';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ปิด';
@@ -39964,7 +40480,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ใบอนุญาต';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ค้นหา';
 
   @override
   String get menuBarMenuLabel => 'เมนูในแถบเมนู';
@@ -40030,7 +40546,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'ย้ายลง';
@@ -40072,13 +40588,16 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ค้นหา';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ค้นหาบนอินเทอร์เน็ต';
 
   @override
   String get selectAllButtonLabel => 'เลือกทั้งหมด';
 
   @override
   String get selectYearSemanticsLabel => 'เลือกปี';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -40099,7 +40618,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'แชร์...';
 
   @override
   String get showAccountsLabel => 'แสดงบัญชี';
@@ -40182,6 +40701,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Kanselahin';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Isara';
@@ -40520,7 +41042,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Ilipat pababa';
@@ -40562,13 +41084,16 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Maghanap';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Maghanap sa Web';
 
   @override
   String get selectAllButtonLabel => 'Piliin lahat';
 
   @override
   String get selectYearSemanticsLabel => 'Pumili ng taon';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -40589,7 +41114,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Ibahagi...';
 
   @override
   String get showAccountsLabel => 'Ipakita ang mga account';
@@ -40672,6 +41197,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'İptal';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Kapat';
@@ -40944,7 +41472,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisanslar';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Ara';
 
   @override
   String get menuBarMenuLabel => 'Menü çubuğu menüsü';
@@ -41010,7 +41538,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Aşağı taşı';
@@ -41052,13 +41580,16 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Ara';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => "Web'de Ara";
 
   @override
   String get selectAllButtonLabel => 'Tümünü seç';
 
   @override
   String get selectYearSemanticsLabel => 'Yılı seçin';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -41079,7 +41610,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Paylaş...';
 
   @override
   String get showAccountsLabel => 'Hesapları göster';
@@ -41162,6 +41693,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Скасувати';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Закрити';
@@ -41434,7 +41968,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Ліцензії';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Шукати';
 
   @override
   String get menuBarMenuLabel => 'Панель меню';
@@ -41500,7 +42034,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Перемістити вниз';
@@ -41542,13 +42076,16 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Пошук';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Пошук в Інтернеті';
 
   @override
   String get selectAllButtonLabel => 'Вибрати всі';
 
   @override
   String get selectYearSemanticsLabel => 'Виберіть рік';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Вибрано $selectedRowCount елементи';
@@ -41569,7 +42106,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Поділитися…';
 
   @override
   String get showAccountsLabel => 'Показати облікові записи';
@@ -41652,6 +42189,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'منسوخ کریں';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'بند کریں';
@@ -41924,7 +42464,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'لائسنسز';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'تفصیل دیکھیں';
 
   @override
   String get menuBarMenuLabel => 'مینیو بار کا مینیو';
@@ -41990,7 +42530,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'نیچے منتقل کریں';
@@ -42032,13 +42572,16 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'تلاش';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ویب تلاش کریں';
 
   @override
   String get selectAllButtonLabel => 'سبھی کو منتخب کریں';
 
   @override
   String get selectYearSemanticsLabel => 'سال منتخب کریں';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -42059,7 +42602,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'اشتراک کریں...';
 
   @override
   String get showAccountsLabel => 'اکاؤنٹس دکھائیں';
@@ -42142,6 +42685,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Bekor qilish';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Yopish';
@@ -42522,13 +43068,16 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Qidirish';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Internetdan qidirish';
 
   @override
   String get selectAllButtonLabel => 'Hammasi';
 
   @override
   String get selectYearSemanticsLabel => 'Yilni tanlang';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -42549,7 +43098,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Ulashish…';
 
   @override
   String get showAccountsLabel => 'Hisoblarni koʻrsatish';
@@ -42632,6 +43181,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Huỷ';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Đóng';
@@ -42904,7 +43456,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Giấy phép';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Tra cứu';
 
   @override
   String get menuBarMenuLabel => 'Trình đơn của thanh trình đơn';
@@ -42970,7 +43522,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Di chuyển xuống';
@@ -43012,13 +43564,16 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Tìm kiếm';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Tìm kiếm trên web';
 
   @override
   String get selectAllButtonLabel => 'Chọn tất cả';
 
   @override
   String get selectYearSemanticsLabel => 'Chọn năm';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -43039,7 +43594,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Chia sẻ...';
 
   @override
   String get showAccountsLabel => 'Hiển thị tài khoản';
@@ -43122,6 +43677,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => '取消';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => '关闭';
@@ -43211,7 +43769,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get firstPageTooltip => '第一页';
 
   @override
-  String get hideAccountsLabel => '隐藏帐号';
+  String get hideAccountsLabel => '隐藏账号';
 
   @override
   String get inputDateModeButtonLabel => '切换到输入模式';
@@ -43394,7 +43952,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get licensesPageTitle => '许可';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => '查询';
 
   @override
   String get menuBarMenuLabel => '菜单栏的菜单';
@@ -43460,7 +44018,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => '下移';
@@ -43502,13 +44060,16 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '搜索';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => '搜索';
 
   @override
   String get selectAllButtonLabel => '全选';
 
   @override
   String get selectYearSemanticsLabel => '选择年份';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -43529,10 +44090,10 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => '共享…';
 
   @override
-  String get showAccountsLabel => '显示帐号';
+  String get showAccountsLabel => '显示账号';
 
   @override
   String get showMenuTooltip => '显示菜单';
@@ -43912,6 +44473,9 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get searchFieldLabel => '搜尋';
 
   @override
+  String get searchWebButtonLabel => '搜尋';
+
+  @override
   String get selectAllButtonLabel => '全部選取';
 
   @override
@@ -43922,6 +44486,9 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
 
   @override
   String get selectedRowCountTitleOther => r'已選取 $selectedRowCount 個項目';
+
+  @override
+  String get shareButtonLabel => '分享…';
 
   @override
   String get showAccountsLabel => '顯示帳戶';
@@ -44147,6 +44714,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Khansela';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Vala';
@@ -44419,7 +44989,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Amalayisense';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Bheka Phezulu';
 
   @override
   String get menuBarMenuLabel => 'Imenyu yebha yemenyu';
@@ -44527,13 +45097,16 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Sesha';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Sesha Iwebhu';
 
   @override
   String get selectAllButtonLabel => 'Khetha konke';
 
   @override
   String get selectYearSemanticsLabel => 'Khetha unyaka';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -44554,7 +45127,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Yabelana...';
 
   @override
   String get showAccountsLabel => 'Bonisa ama-akhawunti';

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Render and element tree stay in sync when keyed children move around', (WidgetTester tester) async {
+  testWidgets('Render and element tree stay in sync when keyed children move around', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/48855.
 
     await tester.pumpWidget(
@@ -60,7 +60,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Building a new MultiChildRenderObjectElement with children having duplicated keys throws', (WidgetTester tester) async {
+  testWidgets('Building a new MultiChildRenderObjectElement with children having duplicated keys throws', (WidgetTester tester) async {
     const ValueKey<int> duplicatedKey = ValueKey<int>(1);
 
     await tester.pumpWidget(const Column(
@@ -80,7 +80,9 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Updating a MultiChildRenderObjectElement to have children with duplicated keys throws', (WidgetTester tester) async {
+  testWidgets('Updating a MultiChildRenderObjectElement to have children with duplicated keys throws',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/81541
 
     const ValueKey<int> key1 = ValueKey<int>(1);

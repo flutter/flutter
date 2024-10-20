@@ -16,18 +16,32 @@ void main() {
       final CocoaPodsValidator workflow = CocoaPodsValidator(FakeCocoaPods(CocoaPodsStatus.recommended, '1000.0.0'), UserMessages());
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.success);
+      expect(result.messages.length, 1);
+      final ValidationMessage message = result.messages.first;
+      expect(message.type, ValidationMessageType.information);
+      expect(message.message, contains('CocoaPods version 1000.0.0'));
     });
 
     testWithoutContext('Emits missing status when CocoaPods is not installed', () async {
       final CocoaPodsValidator workflow = CocoaPodsValidator(FakeCocoaPods(CocoaPodsStatus.notInstalled), UserMessages());
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
+      expect(result.messages.length, 1);
+      final ValidationMessage message = result.messages.first;
+      expect(message.type, ValidationMessageType.error);
+      expect(message.message, contains('CocoaPods not installed'));
+      expect(message.message, contains('getting-started.html#installation'));
     });
 
     testWithoutContext('Emits partial status when CocoaPods is installed with unknown version', () async {
       final CocoaPodsValidator workflow = CocoaPodsValidator(FakeCocoaPods(CocoaPodsStatus.unknownVersion), UserMessages());
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
+      expect(result.messages.length, 1);
+      final ValidationMessage message = result.messages.first;
+      expect(message.type, ValidationMessageType.hint);
+      expect(message.message, contains('Unknown CocoaPods version installed'));
+      expect(message.message, contains('getting-started.html#updating-cocoapods'));
     });
 
     testWithoutContext('Emits partial status when CocoaPods version is too low', () async {
@@ -40,7 +54,7 @@ void main() {
       final ValidationMessage message = result.messages.first;
       expect(message.type, ValidationMessageType.hint);
       expect(message.message, contains('CocoaPods $currentVersion out of date'));
-      expect(message.message, contains('(1.11.0 is recommended)'));
+      expect(message.message, contains('(1.13.0 is recommended)'));
       expect(message.message, contains('getting-started.html#updating-cocoapods'));
     });
   });

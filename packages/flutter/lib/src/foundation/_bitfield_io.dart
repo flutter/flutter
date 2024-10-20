@@ -7,7 +7,7 @@ import 'bitfield.dart' as bitfield;
 /// The dart:io implementation of [bitfield.kMaxUnsignedSMI].
 const int kMaxUnsignedSMI = 0x3FFFFFFFFFFFFFFF; // ignore: avoid_js_rounded_ints, (VM-only code)
 
-/// The dart:io implementation of [bitfield.Bitfield].
+/// The dart:io implementation of [bitfield.BitField].
 class BitField<T extends dynamic> implements bitfield.BitField<T> {
   /// The dart:io implementation of [bitfield.Bitfield()].
   BitField(this._length)

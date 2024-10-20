@@ -72,7 +72,7 @@ abstract class TapRegionRegistry {
 
 /// A widget that provides notification of a tap inside or outside of a set of
 /// registered regions, without participating in the [gesture
-/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
+/// disambiguation](https://flutter.dev/to/gesture-disambiguation)
 /// system.
 ///
 /// The regions are defined by adding [TapRegion] widgets to the widget tree
@@ -98,7 +98,7 @@ abstract class TapRegionRegistry {
 /// entire app.
 ///
 /// [TapRegionSurface] does not participate in the [gesture
-/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
+/// disambiguation](https://flutter.dev/to/gesture-disambiguation)
 /// system, so if multiple [TapRegionSurface]s are active at the same time, they
 /// will all fire, and so will any other gestures recognized by a
 /// [GestureDetector] or other pointer event handlers.
@@ -109,7 +109,7 @@ abstract class TapRegionRegistry {
 ///
 ///  * [RenderTapRegionSurface], the render object that is inserted into the
 ///    render tree by this widget.
-///  * <https://flutter.dev/gestures/#gesture-disambiguation> for more
+///  * <https://flutter.dev/to/gesture-disambiguation> for more
 ///    information about the gesture system and how it disambiguates inputs.
 class TapRegionSurface extends SingleChildRenderObjectWidget {
   /// Creates a const [RenderTapRegionSurface].
@@ -134,8 +134,9 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 
 /// A render object that provides notification of a tap inside or outside of a
 /// set of registered regions, without participating in the [gesture
-/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
-/// system.
+/// disambiguation](https://flutter.dev/to/gesture-disambiguation) system
+/// (other than to consume tap down events if [TapRegion.consumeOutsideTaps] is
+/// true).
 ///
 /// The regions are defined by adding [RenderTapRegion] render objects in the
 /// render tree around the regions of interest, and they will register with this
@@ -160,7 +161,7 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 /// [RenderTapRegionSurface] around the entire app.
 ///
 /// [RenderTapRegionSurface] does not participate in the [gesture
-/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
+/// disambiguation](https://flutter.dev/to/gesture-disambiguation)
 /// system, so if multiple [RenderTapRegionSurface]s are active at the same
 /// time, they will all fire, and so will any other gestures recognized by a
 /// [GestureDetector] or other pointer event handlers.
@@ -170,10 +171,10 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [TapRegionSurface], a widget that inserts a [RenderTapRegionSurface] into
-///    the render tree.
-///  * [TapRegionRegistry.of], which can find the nearest ancestor
-///    [RenderTapRegionSurface], which is a [TapRegionRegistry].
+/// * [TapRegionSurface], a widget that inserts a [RenderTapRegionSurface] into
+///   the render tree.
+/// * [TapRegionRegistry.of], which can find the nearest ancestor
+///   [RenderTapRegionSurface], which is a [TapRegionRegistry].
 class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implements TapRegionRegistry {
   final Expando<BoxHitTestResult> _cachedResults = Expando<BoxHitTestResult>();
   final Set<RenderTapRegion> _registeredRegions = <RenderTapRegion>{};
@@ -233,7 +234,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implement
       return true;
     }(), 'A RenderTapRegion was registered when it was disabled.');
 
-    if (event is! PointerDownEvent || event.buttons != kPrimaryButton) {
+    if (event is! PointerDownEvent) {
       return;
     }
 
@@ -253,48 +254,65 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implement
     // groups of regions that were not hit.
     final Set<RenderTapRegion> hitRegions =
         _getRegionsHit(_registeredRegions, result.path).cast<RenderTapRegion>().toSet();
-    final Set<RenderTapRegion> insideRegions = <RenderTapRegion>{};
     assert(_tapRegionDebug('Tap event hit ${hitRegions.length} descendants.'));
 
-    for (final RenderTapRegion region in hitRegions) {
-      if (region.groupId == null) {
-        insideRegions.add(region);
-        continue;
-      }
-      // Add all grouped regions to the insideRegions so that groups act as a
-      // single region.
-      insideRegions.addAll(_groupIdToRegions[region.groupId]!);
-    }
+    final Set<RenderTapRegion> insideRegions = <RenderTapRegion>{
+      for (final RenderTapRegion region in hitRegions)
+        if (region.groupId == null) region
+        // Adding all grouped regions, so they act as a single region.
+        else ..._groupIdToRegions[region.groupId]!,
+    };
     // If they're not inside, then they're outside.
     final Set<RenderTapRegion> outsideRegions = _registeredRegions.difference(insideRegions);
 
+    bool consumeOutsideTaps = false;
     for (final RenderTapRegion region in outsideRegions) {
       assert(_tapRegionDebug('Calling onTapOutside for $region'));
+      if (region.consumeOutsideTaps) {
+        assert(_tapRegionDebug('Stopping tap propagation for $region (and all of ${region.groupId})'));
+        consumeOutsideTaps = true;
+      }
       region.onTapOutside?.call(event);
     }
     for (final RenderTapRegion region in insideRegions) {
       assert(_tapRegionDebug('Calling onTapInside for $region'));
       region.onTapInside?.call(event);
     }
+
+    // If any of the "outside" regions have consumeOutsideTaps set, then stop
+    // the propagation of the event through the gesture recognizer by adding it
+    // to the recognizer and immediately resolving it.
+    if (consumeOutsideTaps) {
+      GestureBinding.instance.gestureArena.add(event.pointer, _DummyTapRecognizer()).resolve(GestureDisposition.accepted);
+    }
   }
 
   // Returns the registered regions that are in the hit path.
-  Iterable<HitTestTarget> _getRegionsHit(Set<RenderTapRegion> detectors, Iterable<HitTestEntry> hitTestPath) {
-    final Set<HitTestTarget> hitRegions = <HitTestTarget>{};
-    for (final HitTestEntry<HitTestTarget> entry in hitTestPath) {
-      final HitTestTarget target = entry.target;
-      if (_registeredRegions.contains(target)) {
-        hitRegions.add(target);
-      }
-    }
-    return hitRegions;
+  Set<HitTestTarget> _getRegionsHit(Set<RenderTapRegion> detectors, Iterable<HitTestEntry> hitTestPath) {
+    return <HitTestTarget>{
+      for (final HitTestEntry<HitTestTarget> entry in hitTestPath)
+        if (entry.target case final HitTestTarget target)
+          if (_registeredRegions.contains(target)) target,
+    };
   }
+}
+
+// A dummy tap recognizer so that we don't have to deal with the lifecycle of
+// TapGestureRecognizer, since we're just going to immediately resolve it
+// anyhow.
+class _DummyTapRecognizer extends GestureArenaMember {
+  @override
+  void acceptGesture(int pointer) { }
+
+  @override
+  void rejectGesture(int pointer) { }
 }
 
 /// A widget that defines a region that can detect taps inside or outside of
 /// itself and any group of regions it belongs to, without participating in the
-/// [gesture disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
-/// system.
+/// [gesture
+/// disambiguation](https://flutter.dev/to/gesture-disambiguation) system
+/// (other than to consume tap down events if [consumeOutsideTaps] is true).
 ///
 /// This widget indicates to the nearest ancestor [TapRegionSurface] that the
 /// region occupied by its child will participate in the tap detection for that
@@ -316,6 +334,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
     this.onTapOutside,
     this.onTapInside,
     this.groupId,
+    this.consumeOutsideTaps = false,
     String? debugLabel,
   }) : debugLabel = kReleaseMode ? null : debugLabel;
 
@@ -357,6 +376,19 @@ class TapRegion extends SingleChildRenderObjectWidget {
   /// If the group id is null, then only this region is hit tested.
   final Object? groupId;
 
+  /// If true, then the group that this region belongs to will stop the
+  /// propagation of the tap down event in the gesture arena.
+  ///
+  /// This is useful if you want to block the tap down from being given to a
+  /// [GestureDetector] when [onTapOutside] is called.
+  ///
+  /// If other [TapRegion]s with the same [groupId] have [consumeOutsideTaps]
+  /// set to false, but this one is true, then this one will take precedence,
+  /// and the event will be consumed.
+  ///
+  /// Defaults to false.
+  final bool consumeOutsideTaps;
+
   /// An optional debug label to help with debugging in debug mode.
   ///
   /// Will be null in release mode.
@@ -367,6 +399,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
     return RenderTapRegion(
       registry: TapRegionRegistry.maybeOf(context),
       enabled: enabled,
+      consumeOutsideTaps: consumeOutsideTaps,
       behavior: behavior,
       onTapOutside: onTapOutside,
       onTapInside: onTapInside,
@@ -402,8 +435,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
 /// A render object that defines a region that can detect taps inside or outside
 /// of itself and any group of regions it belongs to, without participating in
 /// the [gesture
-/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
-/// system.
+/// disambiguation](https://flutter.dev/to/gesture-disambiguation) system.
 ///
 /// This render object indicates to the nearest ancestor [TapRegionSurface] that
 /// the region occupied by its child (or itself if [behavior] is
@@ -430,6 +462,7 @@ class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
   RenderTapRegion({
     TapRegionRegistry? registry,
     bool enabled = true,
+    bool consumeOutsideTaps = false,
     this.onTapOutside,
     this.onTapInside,
     super.behavior = HitTestBehavior.deferToChild,
@@ -437,6 +470,7 @@ class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
     String? debugLabel,
   })  : _registry = registry,
         _enabled = enabled,
+        _consumeOutsideTaps = consumeOutsideTaps,
         _groupId = groupId,
         debugLabel = kReleaseMode ? null : debugLabel;
 
@@ -469,6 +503,21 @@ class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
   set enabled(bool value) {
     if (_enabled != value) {
       _enabled = value;
+      markNeedsLayout();
+    }
+  }
+
+  /// Whether or not the tap down even that triggers a call to [onTapOutside]
+  /// will continue on to participate in the gesture arena.
+  ///
+  /// If any [RenderTapRegion] in the same group has [consumeOutsideTaps] set to
+  /// true, then the tap down event will be consumed before other gesture
+  /// recognizers can process them.
+  bool get consumeOutsideTaps => _consumeOutsideTaps;
+  bool _consumeOutsideTaps;
+  set consumeOutsideTaps(bool value) {
+    if (_consumeOutsideTaps != value) {
+      _consumeOutsideTaps = value;
       markNeedsLayout();
     }
   }
@@ -583,6 +632,8 @@ class TextFieldTapRegion extends TapRegion {
     super.enabled,
     super.onTapOutside,
     super.onTapInside,
+    super.consumeOutsideTaps,
     super.debugLabel,
-  }) : super(groupId: EditableText);
+    super.groupId = EditableText,
+  });
 }

@@ -27,12 +27,12 @@ import 'material.dart';
 /// The [controller] argument is typically obtained via
 /// `Material.of(context)`.
 ///
-/// If [containedInkWell] is true, then the effect will be sized to fit
+/// If `containedInkWell` is true, then the effect will be sized to fit
 /// the well rectangle, and clipped to it when drawn. The well
-/// rectangle is the box returned by [rectCallback], if provided, or
+/// rectangle is the box returned by `rectCallback`, if provided, or
 /// otherwise is the bounds of the [referenceBox].
 ///
-/// If [containedInkWell] is false, then [rectCallback] should be null.
+/// If `containedInkWell` is false, then `rectCallback` should be null.
 /// The ink ripple is clipped only to the edges of the [Material].
 /// This is the default.
 ///
@@ -201,11 +201,18 @@ class InkSparkle extends InteractiveInkFeature {
 
     // Creates an element of randomness so that ink emanating from the same
     // pixel have slightly different rings and sparkles.
+    assert((){
+      // In tests, randomness can cause flakes. So if a seed has not
+      // already been specified (i.e. for the purpose of the test), set it to
+      // the constant turbulence seed.
+      turbulenceSeed ??= _InkSparkleFactory.constantSeed;
+      return true;
+    }());
     _turbulenceSeed = turbulenceSeed ?? math.Random().nextDouble() * 1000.0;
   }
 
   void _handleStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
+    if (status.isCompleted) {
       dispose();
     }
   }
@@ -242,14 +249,14 @@ class InkSparkle extends InteractiveInkFeature {
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
   /// material [Theme], or [ButtonStyle].
   ///
-  /// Since no [turbulenceSeed] is passed, the effect will be random for
+  /// Since no `turbulenceSeed` is passed, the effect will be random for
   /// subsequent presses in the same position.
   static const InteractiveInkFeatureFactory splashFactory = _InkSparkleFactory();
 
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
   /// material [Theme], or [ButtonStyle].
   ///
-  /// Since a [turbulenceSeed] is passed, the effect will not be random for
+  /// Since a `turbulenceSeed` is passed, the effect will not be random for
   /// subsequent presses in the same position. This can be used for testing.
   static const InteractiveInkFeatureFactory constantTurbulenceSeedSplashFactory = _InkSparkleFactory.constantTurbulenceSeed();
 
@@ -309,9 +316,9 @@ class InkSparkle extends InteractiveInkFeature {
 
   /// All double values for uniforms come from the Android 12 ripple
   /// implementation from the following files:
-  /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
-  /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
-  /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
+  /// - https://cs.android.com/android/platform/superproject/+/main:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
+  /// - https://cs.android.com/android/platform/superproject/+/main:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
+  /// - https://cs.android.com/android/platform/superproject/+/main:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
   void _updateFragmentShader() {
     const double turbulenceScale = 1.5;
     final double turbulencePhase = _turbulenceSeed + _radiusScale.value;
@@ -429,7 +436,9 @@ class InkSparkle extends InteractiveInkFeature {
 class _InkSparkleFactory extends InteractiveInkFeatureFactory {
   const _InkSparkleFactory() : turbulenceSeed = null;
 
-  const _InkSparkleFactory.constantTurbulenceSeed() : turbulenceSeed = 1337.0;
+  const _InkSparkleFactory.constantTurbulenceSeed() : turbulenceSeed = _InkSparkleFactory.constantSeed;
+
+  static const double constantSeed = 1337.0;
 
   static void initializeShader() {
     if (!_initCalled) {

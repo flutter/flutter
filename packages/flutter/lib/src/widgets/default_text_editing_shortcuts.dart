@@ -25,6 +25,8 @@ import 'text_editing_intents.dart';
 /// cause CJK input methods to discard more text than they should when the
 /// backspace key is pressed during text composition on iOS.
 ///
+/// {@macro flutter.widgets.editableText.shortcutsAndTextInput}
+///
 /// {@tool snippet}
 ///
 /// This example shows how to use an additional [Shortcuts] widget to override
@@ -251,8 +253,51 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
   static final Map<ShortcutActivator, Intent> _fuchsiaShortcuts = _androidShortcuts;
 
+  static final Map<ShortcutActivator, Intent> _linuxNumpadShortcuts = <ShortcutActivator, Intent>{
+    // When numLock is on, numpad keys shortcuts require shift to be pressed too.
+    const SingleActivator(LogicalKeyboardKey.numpad6, shift: true, numLock: LockState.locked): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.numpad4, shift: true, numLock: LockState.locked): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.numpad8, shift: true, numLock: LockState.locked): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.numpad2, shift: true, numLock: LockState.locked): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
+
+    const SingleActivator(LogicalKeyboardKey.numpad6, shift: true, control: true, numLock: LockState.locked): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.numpad4, shift: true, control: true, numLock: LockState.locked): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.numpad8, shift: true, control: true, numLock: LockState.locked): const ExtendSelectionToNextParagraphBoundaryIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.numpad2, shift: true, control: true, numLock: LockState.locked): const ExtendSelectionToNextParagraphBoundaryIntent(forward: true, collapseSelection: false),
+
+    const SingleActivator(LogicalKeyboardKey.numpad9, shift: true, numLock: LockState.locked): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.numpad3, shift: true, numLock: LockState.locked): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: false),
+
+    const SingleActivator(LogicalKeyboardKey.numpad7, shift: true, numLock: LockState.locked): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.numpad1, shift: true, numLock: LockState.locked): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
+
+    const SingleActivator(LogicalKeyboardKey.numpadDecimal, shift: true, numLock: LockState.locked): const DeleteCharacterIntent(forward: true),
+    const SingleActivator(LogicalKeyboardKey.numpadDecimal, shift: true, control: true, numLock: LockState.locked): const DeleteToNextWordBoundaryIntent(forward: true),
+
+    // When numLock is off, numpad keys shortcuts require shift not to be pressed.
+    const SingleActivator(LogicalKeyboardKey.numpad6, numLock: LockState.unlocked): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.numpad4, numLock: LockState.unlocked): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.numpad8, numLock: LockState.unlocked): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.numpad2, numLock: LockState.unlocked): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
+
+    const SingleActivator(LogicalKeyboardKey.numpad6, control: true, numLock: LockState.unlocked): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.numpad4, control: true, numLock: LockState.unlocked): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.numpad8, control: true, numLock: LockState.unlocked): const ExtendSelectionToNextParagraphBoundaryIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.numpad2, control: true, numLock: LockState.unlocked): const ExtendSelectionToNextParagraphBoundaryIntent(forward: true, collapseSelection: true),
+
+    const SingleActivator(LogicalKeyboardKey.numpad9, numLock: LockState.unlocked): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.numpad3, numLock: LockState.unlocked): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: true),
+
+    const SingleActivator(LogicalKeyboardKey.numpad7, numLock: LockState.unlocked): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.numpad1, numLock: LockState.unlocked): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
+
+    const SingleActivator(LogicalKeyboardKey.numpadDecimal, numLock: LockState.unlocked): const DeleteCharacterIntent(forward: true),
+    const SingleActivator(LogicalKeyboardKey.numpadDecimal, control: true, numLock: LockState.unlocked): const DeleteToNextWordBoundaryIntent(forward: true),
+  };
+
   static final Map<ShortcutActivator, Intent> _linuxShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
+    ..._linuxNumpadShortcuts,
     const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.end): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
@@ -419,10 +464,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.pageUp, shift: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.pageDown, shift: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.end, shift: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.home, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationTextIntent(),
@@ -431,12 +472,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     SingleActivator(LogicalKeyboardKey.arrowRight, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.pageUp): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.pageDown): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.end): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.home): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.end, control: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.home, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.space): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.enter): DoNothingAndStopPropagationTextIntent(),
   };
@@ -455,6 +490,16 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.pageUp): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.end): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.home): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.end, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.home, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.end, control: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.home, control: true): const DoNothingAndStopPropagationTextIntent(),
   };
 
   // Hand backspace/delete events that do not depend on text layout (delete
@@ -472,25 +517,32 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        return _androidShortcuts;
-      case TargetPlatform.fuchsia:
-        return _fuchsiaShortcuts;
-      case TargetPlatform.iOS:
-        return _iOSShortcuts;
-      case TargetPlatform.linux:
-        return _linuxShortcuts;
-      case TargetPlatform.macOS:
-        return _macShortcuts;
-      case TargetPlatform.windows:
-        return _windowsShortcuts;
-    }
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => _androidShortcuts,
+      TargetPlatform.fuchsia => _fuchsiaShortcuts,
+      TargetPlatform.iOS     => _iOSShortcuts,
+      TargetPlatform.linux   => _linuxShortcuts,
+      TargetPlatform.macOS   => _macShortcuts,
+      TargetPlatform.windows => _windowsShortcuts,
+    };
   }
 
   Map<ShortcutActivator, Intent>? _getDisablingShortcut() {
     if (kIsWeb) {
-      return _webDisablingTextShortcuts;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.linux:
+          return <ShortcutActivator, Intent>{
+            ..._webDisablingTextShortcuts,
+            for (final ShortcutActivator activator in _linuxNumpadShortcuts.keys)
+              activator as SingleActivator: const DoNothingAndStopPropagationTextIntent(),
+          };
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.windows:
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return _webDisablingTextShortcuts;
+      }
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:

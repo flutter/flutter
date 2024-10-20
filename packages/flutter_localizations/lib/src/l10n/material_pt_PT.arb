@@ -1,4 +1,6 @@
 {
+  "searchWebButtonLabel": "Pesquisar na Web",
+  "shareButtonLabel": "Partilhar…",
   "scanTextButtonLabel": "Digitalizar texto",
   "lookUpButtonLabel": "Procurar",
   "menuDismissLabel": "Ignorar menu",
@@ -78,9 +80,9 @@
   "dateOutOfRangeLabel": "Fora do intervalo.",
   "invalidDateRangeLabel": "Intervalo inválido.",
   "invalidDateFormatLabel": "Formato inválido.",
-  "dateRangeEndDateSemanticLabel": "Data de conclusão: $fullDate",
+  "dateRangeEndDateSemanticLabel": "Data de fim: $fullDate",
   "dateRangeStartDateSemanticLabel": "Data de início: $fullDate",
-  "dateRangeEndLabel": "Data de conclusão",
+  "dateRangeEndLabel": "Data de fim",
   "dateRangeStartLabel": "Data de início",
   "inputDateModeButtonLabel": "Mude para a introdução",
   "unspecifiedDateRange": "Intervalo de datas",
@@ -139,7 +141,6 @@
   "reorderItemRight": "Mover para a direita",
   "expandedIconTapHint": "Reduzir",
   "collapsedIconTapHint": "Expandir",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Resta 1 caráter",
   "remainingTextFieldCharacterCountOther": "Restam $remainingCount carateres",
   "refreshIndicatorSemanticLabel": "Atualizar"

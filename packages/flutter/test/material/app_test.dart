@@ -24,15 +24,12 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child != null) {
-      return widget.child!;
-    }
-    return Container();
+    return widget.child ?? Container();
   }
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Can nest apps', (WidgetTester tester) async {
+  testWidgets('Can nest apps', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: MaterialApp(
@@ -44,8 +41,10 @@ void main() {
     expect(find.text('Home sweet home'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Focus handling', (WidgetTester tester) async {
+  testWidgets('Focus handling', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -57,8 +56,9 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Can place app inside FocusScope', (WidgetTester tester) async {
+  testWidgets('Can place app inside FocusScope', (WidgetTester tester) async {
     final FocusScopeNode focusScopeNode = FocusScopeNode();
+    addTearDown(focusScopeNode.dispose);
 
     await tester.pumpWidget(FocusScope(
       autofocus: true,
@@ -69,10 +69,9 @@ void main() {
     ));
 
     expect(find.text('Home'), findsOneWidget);
-    focusScopeNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('Can show grid without losing sync', (WidgetTester tester) async {
+  testWidgets('Can show grid without losing sync', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: StateMarker(),
@@ -94,7 +93,7 @@ void main() {
     expect(state2.marker, equals('original'));
   });
 
-  testWidgetsWithLeakTracking('Do not rebuild page during a route transition', (WidgetTester tester) async {
+  testWidgets('Do not rebuild page during a route transition', (WidgetTester tester) async {
     int buildCounter = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -139,7 +138,7 @@ void main() {
     expect(find.text('Y'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Do rebuild the home page if it changes', (WidgetTester tester) async {
+  testWidgets('Do rebuild the home page if it changes', (WidgetTester tester) async {
     int buildCounter = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -167,7 +166,7 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Do not rebuild the home page if it does not actually change', (WidgetTester tester) async {
+  testWidgets('Do not rebuild the home page if it does not actually change', (WidgetTester tester) async {
     int buildCounter = 0;
     final Widget home = Builder(
       builder: (BuildContext context) {
@@ -189,7 +188,7 @@ void main() {
     expect(buildCounter, 1);
   });
 
-  testWidgetsWithLeakTracking('Do rebuild pages that come from the routes table if the MaterialApp changes', (WidgetTester tester) async {
+  testWidgets('Do rebuild pages that come from the routes table if the MaterialApp changes', (WidgetTester tester) async {
     int buildCounter = 0;
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) {
@@ -211,7 +210,7 @@ void main() {
     expect(buildCounter, 2);
   });
 
-  testWidgetsWithLeakTracking('Cannot pop the initial route', (WidgetTester tester) async {
+  testWidgets('Cannot pop the initial route', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Text('Home')));
 
     expect(find.text('Home'), findsOneWidget);
@@ -224,7 +223,7 @@ void main() {
     expect(find.text('Home'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Default initialRoute', (WidgetTester tester) async {
+  testWidgets('Default initialRoute', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(routes: <String, WidgetBuilder>{
       '/': (BuildContext context) => const Text('route "/"'),
     }));
@@ -232,7 +231,7 @@ void main() {
     expect(find.text('route "/"'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('One-step initial route', (WidgetTester tester) async {
+  testWidgets('One-step initial route', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         initialRoute: '/a',
@@ -251,7 +250,7 @@ void main() {
     expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Return value from pop is correct', (WidgetTester tester) async {
+  testWidgets('Return value from pop is correct', (WidgetTester tester) async {
     late Future<Object?> result;
     await tester.pumpWidget(
         MaterialApp(
@@ -291,7 +290,7 @@ void main() {
     expect(await result, equals('all done'));
   });
 
-  testWidgetsWithLeakTracking('Two-step initial route', (WidgetTester tester) async {
+  testWidgets('Two-step initial route', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const Text('route "/"'),
       '/a': (BuildContext context) => const Text('route "/a"'),
@@ -311,7 +310,7 @@ void main() {
     expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Initial route with missing step', (WidgetTester tester) async {
+  testWidgets('Initial route with missing step', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const Text('route "/"'),
       '/a': (BuildContext context) => const Text('route "/a"'),
@@ -336,7 +335,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Make sure initialRoute is only used the first time', (WidgetTester tester) async {
+  testWidgets('Make sure initialRoute is only used the first time', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const Text('route "/"'),
       '/a': (BuildContext context) => const Text('route "/a"'),
@@ -371,7 +370,9 @@ void main() {
     expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('onGenerateRoute / onUnknownRoute', (WidgetTester tester) async {
+  testWidgets('onGenerateRoute / onUnknownRoute',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -393,7 +394,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp with builder and no route information works.', (WidgetTester tester) async {
+  testWidgets('MaterialApp with builder and no route information works.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/18904
     await tester.pumpWidget(
       MaterialApp(
@@ -404,7 +405,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking("WidgetsApp doesn't rebuild routes when MediaQuery updates", (WidgetTester tester) async {
+  testWidgets("WidgetsApp doesn't rebuild routes when MediaQuery updates", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/37878
     addTearDown(tester.platformDispatcher.clearAllTestValues);
     addTearDown(tester.view.reset);
@@ -464,7 +465,7 @@ void main() {
     expect(dependentBuildCount, equals(5));
   });
 
-  testWidgetsWithLeakTracking('Can get text scale from media query', (WidgetTester tester) async {
+  testWidgets('Can get text scale from media query', (WidgetTester tester) async {
     TextScaler? textScaler;
     await tester.pumpWidget(MaterialApp(
       home: Builder(builder:(BuildContext context) {
@@ -475,7 +476,7 @@ void main() {
     expect(textScaler, TextScaler.noScaling);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp.navigatorKey', (WidgetTester tester) async {
+  testWidgets('MaterialApp.navigatorKey', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(MaterialApp(
       navigatorKey: key,
@@ -496,7 +497,7 @@ void main() {
     expect(key.currentState, isA<NavigatorState>());
   });
 
-  testWidgetsWithLeakTracking('Has default material and cupertino localizations', (WidgetTester tester) async {
+  testWidgets('Has default material and cupertino localizations', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -518,7 +519,7 @@ void main() {
     expect(find.text('Select All'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp uses regular theme when themeMode is light', (WidgetTester tester) async {
+  testWidgets('MaterialApp uses regular theme when themeMode is light', (WidgetTester tester) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
     // Mock the test to explicitly report a light platformBrightness.
@@ -566,7 +567,7 @@ void main() {
     expect(appliedTheme.brightness, Brightness.light);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp uses darkTheme when themeMode is dark', (WidgetTester tester) async {
+  testWidgets('MaterialApp uses darkTheme when themeMode is dark', (WidgetTester tester) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
     // Mock the test to explicitly report a light platformBrightness.
@@ -614,7 +615,7 @@ void main() {
     expect(appliedTheme.brightness, Brightness.dark);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp uses regular theme when themeMode is system and platformBrightness is light', (WidgetTester tester) async {
+  testWidgets('MaterialApp uses regular theme when themeMode is system and platformBrightness is light', (WidgetTester tester) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
     // Mock the test to explicitly report a light platformBrightness.
@@ -642,7 +643,7 @@ void main() {
     expect(appliedTheme.brightness, Brightness.light);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp uses darkTheme when themeMode is system and platformBrightness is dark', (WidgetTester tester) async {
+  testWidgets('MaterialApp uses darkTheme when themeMode is system and platformBrightness is dark', (WidgetTester tester) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
     // Mock the test to explicitly report a dark platformBrightness.
@@ -668,7 +669,7 @@ void main() {
     expect(appliedTheme.brightness, Brightness.dark);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp uses light theme when platformBrightness is dark but no dark theme is provided', (WidgetTester tester) async {
+  testWidgets('MaterialApp uses light theme when platformBrightness is dark but no dark theme is provided', (WidgetTester tester) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
     // Mock the test to explicitly report a dark platformBrightness.
@@ -693,7 +694,7 @@ void main() {
     expect(appliedTheme.brightness, Brightness.light);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp uses fallback light theme when platformBrightness is dark but no theme is provided at all', (WidgetTester tester) async {
+  testWidgets('MaterialApp uses fallback light theme when platformBrightness is dark but no theme is provided at all', (WidgetTester tester) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
     // Mock the test to explicitly report a dark platformBrightness.
@@ -715,7 +716,7 @@ void main() {
     expect(appliedTheme.brightness, Brightness.light);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp uses fallback light theme when platformBrightness is light and a dark theme is provided', (WidgetTester tester) async {
+  testWidgets('MaterialApp uses fallback light theme when platformBrightness is light and a dark theme is provided', (WidgetTester tester) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
     // Mock the test to explicitly report a dark platformBrightness.
@@ -740,7 +741,7 @@ void main() {
     expect(appliedTheme.brightness, Brightness.light);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp uses dark theme when platformBrightness is dark', (WidgetTester tester) async {
+  testWidgets('MaterialApp uses dark theme when platformBrightness is dark', (WidgetTester tester) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
     // Mock the test to explicitly report a dark platformBrightness.
@@ -768,7 +769,7 @@ void main() {
     expect(appliedTheme.brightness, Brightness.dark);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp uses high contrast theme when appropriate', (WidgetTester tester) async {
+  testWidgets('MaterialApp uses high contrast theme when appropriate', (WidgetTester tester) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
@@ -796,7 +797,7 @@ void main() {
     expect(appliedTheme.primaryColor, Colors.blue);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp uses high contrast dark theme when appropriate', (WidgetTester tester) async {
+  testWidgets('MaterialApp uses high contrast dark theme when appropriate', (WidgetTester tester) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
@@ -830,7 +831,7 @@ void main() {
     expect(appliedTheme.primaryColor, Colors.green);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp uses dark theme when no high contrast dark theme is provided', (WidgetTester tester) async {
+  testWidgets('MaterialApp uses dark theme when no high contrast dark theme is provided', (WidgetTester tester) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
@@ -858,7 +859,7 @@ void main() {
     expect(appliedTheme.primaryColor, Colors.lightGreen);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp animates theme changes', (WidgetTester tester) async {
+  testWidgets('MaterialApp animates theme changes', (WidgetTester tester) async {
     final ThemeData lightTheme = ThemeData.light();
     final ThemeData darkTheme = ThemeData.dark();
     await tester.pumpWidget(
@@ -898,7 +899,7 @@ void main() {
     expect(tester.widget<Material>(find.byType(Material)).color, halfBGColor);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp theme animation can be turned off', (WidgetTester tester) async {
+  testWidgets('MaterialApp theme animation can be turned off', (WidgetTester tester) async {
     final ThemeData lightTheme = ThemeData.light();
     final ThemeData darkTheme = ThemeData.dark();
     int scaffoldRebuilds = 0;
@@ -940,7 +941,7 @@ void main() {
     expect(scaffoldRebuilds, 2);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp switches themes when the platformBrightness changes.', (WidgetTester tester) async {
+  testWidgets('MaterialApp switches themes when the platformBrightness changes.', (WidgetTester tester) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
     // Mock the test to explicitly report a light platformBrightness.
@@ -979,7 +980,7 @@ void main() {
     expect(themeAfterBrightnessChange!.brightness, Brightness.dark);
   });
 
-  testWidgetsWithLeakTracking('Material2 - MaterialApp provides default overscroll color', (WidgetTester tester) async {
+  testWidgets('Material2 - MaterialApp provides default overscroll color', (WidgetTester tester) async {
     Future<void> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
       final TestGesture gesture = await tester.startGesture(start);
       for (int index = 0; index < 10; index += 1) {
@@ -1011,7 +1012,7 @@ void main() {
     expect(painter, paints..circle(color: glowSecondaryColor));
   });
 
-  testWidgetsWithLeakTracking('MaterialApp can customize initial routes', (WidgetTester tester) async {
+  testWidgets('MaterialApp can customize initial routes', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -1058,8 +1059,9 @@ void main() {
     expect(find.text('regular page two'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp does create HeroController with the MaterialRectArcTween', (WidgetTester tester) async {
+  testWidgets('MaterialApp does create HeroController with the MaterialRectArcTween', (WidgetTester tester) async {
     final HeroController controller = MaterialApp.createMaterialHeroController();
+    addTearDown(controller.dispose);
     final Tween<Rect?> tween = controller.createRectTween!(
       const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
       const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
@@ -1067,7 +1069,7 @@ void main() {
     expect(tween, isA<MaterialRectArcTween>());
   });
 
-  testWidgetsWithLeakTracking('MaterialApp.navigatorKey can be updated', (WidgetTester tester) async {
+  testWidgets('MaterialApp.navigatorKey can be updated', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
     await tester.pumpWidget(MaterialApp(
       navigatorKey: key1,
@@ -1083,7 +1085,7 @@ void main() {
     expect(key1.currentState, isNull);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp.router works', (WidgetTester tester) async {
+  testWidgets('MaterialApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
         uri: Uri.parse('initial'),
@@ -1114,14 +1116,55 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134205
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    allowAllNotDisposed: true,
-  ));
+  });
 
-  testWidgetsWithLeakTracking('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
+  testWidgets('MaterialApp.router works with onNavigationNotification', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/139903.
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
+      ),
+    );
+    addTearDown(provider.dispose);
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
+        );
+        return route.didPop(result);
+      },
+    );
+    addTearDown(delegate.dispose);
+
+    int navigationCount = 0;
+
+    await tester.pumpWidget(MaterialApp.router(
+      routeInformationProvider: provider,
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: delegate,
+      onNavigationNotification: (NavigationNotification? notification) {
+        navigationCount += 1;
+        return true;
+      },
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    expect(navigationCount, greaterThan(0));
+    final int navigationCountAfterBuild = navigationCount;
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+
+    expect(navigationCount, greaterThan(navigationCountAfterBuild));
+  });
+
+  testWidgets('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -1145,14 +1188,9 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134205
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    allowAllNotDisposed: true,
-  ));
+  });
 
-  testWidgetsWithLeakTracking('MaterialApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
+  testWidgets('MaterialApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -1179,7 +1217,7 @@ void main() {
     provider.dispose();
   });
 
-  testWidgetsWithLeakTracking('MaterialApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
+  testWidgets('MaterialApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -1201,7 +1239,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp.router router config works', (WidgetTester tester) async {
+  testWidgets('MaterialApp.router router config works', (WidgetTester tester) async {
     late SimpleNavigatorRouterDelegate routerDelegate;
     addTearDown(() => routerDelegate.dispose());
     late PlatformRouteInformationProvider provider;
@@ -1236,14 +1274,9 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134205
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    allowAllNotDisposed: true,
-  ));
+  });
 
-  testWidgetsWithLeakTracking('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
+  testWidgets('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
     Widget? builderChild;
     await tester.pumpWidget(MaterialApp(
       builder: (BuildContext context, Widget? child) {
@@ -1254,7 +1287,7 @@ void main() {
     expect(builderChild, isNull);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp has correct default ScrollBehavior', (WidgetTester tester) async {
+  testWidgets('MaterialApp has correct default ScrollBehavior', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       MaterialApp(
@@ -1269,7 +1302,7 @@ void main() {
     expect(ScrollConfiguration.of(capturedContext).runtimeType, MaterialScrollBehavior);
   });
 
-  testWidgetsWithLeakTracking('A ScrollBehavior can be set for MaterialApp', (WidgetTester tester) async {
+  testWidgets('A ScrollBehavior can be set for MaterialApp', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       MaterialApp(
@@ -1287,7 +1320,7 @@ void main() {
     expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
   });
 
-  testWidgetsWithLeakTracking('Material2 - ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
+  testWidgets('Material2 - ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
       scrollBehavior: const MaterialScrollBehavior(),
@@ -1306,7 +1339,7 @@ void main() {
     expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgetsWithLeakTracking('Material3 - ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
+  testWidgets('Material3 - ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
       scrollBehavior: const MaterialScrollBehavior(),
@@ -1325,7 +1358,7 @@ void main() {
     expect(find.byType(GlowingOverscrollIndicator), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgetsWithLeakTracking('MaterialScrollBehavior default stretch android overscroll indicator', (WidgetTester tester) async {
+  testWidgets('MaterialScrollBehavior default stretch android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: ListView(
         children: const <Widget>[
@@ -1342,7 +1375,7 @@ void main() {
     expect(find.byType(GlowingOverscrollIndicator), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgetsWithLeakTracking('Overscroll indicator can be set by theme', (WidgetTester tester) async {
+  testWidgets('Overscroll indicator can be set by theme', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       // The current default is M3 and stretch overscroll, setting via the theme should override.
       theme: ThemeData().copyWith(useMaterial3: false),
@@ -1361,7 +1394,7 @@ void main() {
     expect(find.byType(StretchingOverscrollIndicator), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgetsWithLeakTracking('Material3 - ListView clip behavior updates overscroll indicator clip behavior', (WidgetTester tester) async {
+  testWidgets('Material3 - ListView clip behavior updates overscroll indicator clip behavior', (WidgetTester tester) async {
     Widget buildFrame(Clip clipBehavior) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -1437,7 +1470,7 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgetsWithLeakTracking('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
+  testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
     late BuildContext capturedContext;
     final UniqueKey uniqueKey = UniqueKey();
     await tester.pumpWidget(
@@ -1457,7 +1490,7 @@ void main() {
     expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
 
-  testWidgetsWithLeakTracking('Assert in buildScrollbar that controller != null when using it (vertical)', (WidgetTester tester) async {
+  testWidgets('Assert in buildScrollbar that controller != null when using it (vertical)', (WidgetTester tester) async {
     const ScrollBehavior defaultBehavior = MaterialScrollBehavior();
     late BuildContext capturedContext;
 
@@ -1502,7 +1535,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('Assert in buildScrollbar that controller != null when using it (horizontal)', (WidgetTester tester) async {
+  testWidgets('Assert in buildScrollbar that controller != null when using it (horizontal)', (WidgetTester tester) async {
     const ScrollBehavior defaultBehavior = MaterialScrollBehavior();
     late BuildContext capturedContext;
 
@@ -1539,6 +1572,96 @@ void main() {
         defaultBehavior.buildScrollbar(capturedContext, child, details);
     }
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Override theme animation using AnimationStyle', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData darkTheme = ThemeData.dark();
+
+    Widget buildWidget({ ThemeMode themeMode = ThemeMode.light, AnimationStyle? animationStyle }) {
+      return MaterialApp(
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: themeMode,
+        themeAnimationStyle: animationStyle,
+        home: const Scaffold(body: Text('body')),
+      );
+    }
+
+    // Test the initial Scaffold background color.
+    await tester.pumpWidget(buildWidget());
+
+    expect(tester.widget<Material>(find.byType(Material)).color, lightTheme.colorScheme.surface);
+
+    // Test the Scaffold background color animation from light to dark theme.
+    await tester.pumpWidget(buildWidget(themeMode: ThemeMode.dark));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance animation by 50 milliseconds.
+
+    // Scaffold background color is slightly updated.
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffc3bdc5));
+
+    // Let the animation finish.
+    await tester.pumpAndSettle();
+
+    // Scaffold background color is fully updated to dark theme.
+    expect(tester.widget<Material>(find.byType(Material)).color, darkTheme.colorScheme.surface);
+
+    // Reset to light theme to compare the Scaffold background color animation
+    // with the default animation curve.
+    await tester.pumpWidget(buildWidget());
+    await tester.pumpAndSettle();
+
+    // Switch to dark theme with overridden animation curve.
+    await tester.pumpWidget(buildWidget(
+      themeMode: ThemeMode.dark,
+      animationStyle: AnimationStyle(curve: Curves.easeIn,
+    )));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Scaffold background color is slightly updated but with a different
+    // color than the default animation curve.
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffe7e1e9));
+
+    // Let the animation finish.
+    await tester.pumpAndSettle();
+
+    // Scaffold background color is fully updated to dark theme.
+    expect(tester.widget<Material>(find.byType(Material)).color, darkTheme.colorScheme.surface);
+
+    // Switch from dark to light theme with overridden animation duration.
+    await tester.pumpWidget(buildWidget(animationStyle: AnimationStyle.noAnimation));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    expect(tester.widget<Material>(find.byType(Material)).color, isNot(darkTheme.colorScheme.surface));
+    expect(tester.widget<Material>(find.byType(Material)).color, lightTheme.colorScheme.surface);
+  });
+
+  testWidgets('AnimationStyle.noAnimation removes AnimatedTheme from the tree', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(themeAnimationStyle: AnimationStyle()));
+
+    expect(find.byType(AnimatedTheme), findsOneWidget);
+    expect(find.byType(Theme), findsOneWidget);
+
+    await tester.pumpWidget(MaterialApp(themeAnimationStyle: AnimationStyle.noAnimation));
+
+    expect(find.byType(AnimatedTheme), findsNothing);
+    expect(find.byType(Theme), findsOneWidget);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/137875.
+  testWidgets('MaterialApp works in an unconstrained environment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const UnconstrainedBox(
+        child: MaterialApp(
+          home: SizedBox(width: 123, height: 456),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(MaterialApp)), const Size(123, 456));
+  });
 }
 
 class MockScrollBehavior extends ScrollBehavior {
@@ -1548,7 +1671,7 @@ class MockScrollBehavior extends ScrollBehavior {
   ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
 typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {

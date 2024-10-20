@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'monodrag.dart';
+/// @docImport 'recognizer.dart';
+/// @docImport 'tap.dart';
+library;
 
 import 'arena.dart';
 import 'binding.dart';
@@ -73,16 +79,16 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     if (_resolved) {
       return;
     }
-    if (disposition == GestureDisposition.rejected) {
-      _members.remove(member);
-      member.rejectGesture(_pointer);
-      if (_members.isEmpty) {
+    switch (disposition) {
+      case GestureDisposition.accepted:
+        _winner ??= _owner.captain ?? member;
         _entry!.resolve(disposition);
-      }
-    } else {
-      assert(disposition == GestureDisposition.accepted);
-      _winner ??= _owner.captain ?? member;
-      _entry!.resolve(disposition);
+      case GestureDisposition.rejected:
+        _members.remove(member);
+        member.rejectGesture(_pointer);
+        if (_members.isEmpty) {
+          _entry!.resolve(disposition);
+        }
     }
   }
 }

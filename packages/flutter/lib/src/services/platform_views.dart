@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'message_codecs.dart';
+library;
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -653,28 +658,33 @@ class _AndroidMotionEventConverter {
       yPrecision: 1.0,
       deviceId: 0,
       edgeFlags: 0,
-      source: 0,
+      source: _AndroidMotionEventConverter.sourceFor(event),
       flags: 0,
       motionEventId: event.embedderId,
     );
   }
 
+  static int sourceFor(PointerEvent event) {
+    return switch (event.kind) {
+      PointerDeviceKind.touch          => AndroidViewController.kInputDeviceSourceTouchScreen,
+      PointerDeviceKind.trackpad       => AndroidViewController.kInputDeviceSourceTouchPad,
+      PointerDeviceKind.mouse          => AndroidViewController.kInputDeviceSourceMouse,
+      PointerDeviceKind.stylus         => AndroidViewController.kInputDeviceSourceStylus,
+      PointerDeviceKind.invertedStylus => AndroidViewController.kInputDeviceSourceStylus,
+      PointerDeviceKind.unknown        => AndroidViewController.kInputDeviceSourceUnknown,
+    };
+  }
+
+
   AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
-    int toolType = AndroidPointerProperties.kToolTypeUnknown;
-    switch (event.kind) {
-      case PointerDeviceKind.touch:
-      case PointerDeviceKind.trackpad:
-        toolType = AndroidPointerProperties.kToolTypeFinger;
-      case PointerDeviceKind.mouse:
-        toolType = AndroidPointerProperties.kToolTypeMouse;
-      case PointerDeviceKind.stylus:
-        toolType = AndroidPointerProperties.kToolTypeStylus;
-      case PointerDeviceKind.invertedStylus:
-        toolType = AndroidPointerProperties.kToolTypeEraser;
-      case PointerDeviceKind.unknown:
-        toolType = AndroidPointerProperties.kToolTypeUnknown;
-    }
-    return AndroidPointerProperties(id: pointerId, toolType: toolType);
+    return AndroidPointerProperties(id: pointerId, toolType: switch (event.kind) {
+      PointerDeviceKind.touch          => AndroidPointerProperties.kToolTypeFinger,
+      PointerDeviceKind.trackpad       => AndroidPointerProperties.kToolTypeFinger,
+      PointerDeviceKind.mouse          => AndroidPointerProperties.kToolTypeMouse,
+      PointerDeviceKind.stylus         => AndroidPointerProperties.kToolTypeStylus,
+      PointerDeviceKind.invertedStylus => AndroidPointerProperties.kToolTypeEraser,
+      PointerDeviceKind.unknown        => AndroidPointerProperties.kToolTypeUnknown,
+    });
   }
 
   bool isSinglePointerAction(PointerEvent event) =>
@@ -739,6 +749,21 @@ abstract class AndroidViewController extends PlatformViewController {
   /// Android's [View.LAYOUT_DIRECTION_RTL](https://developer.android.com/reference/android/view/View.html#LAYOUT_DIRECTION_RTL) value.
   static const int kAndroidLayoutDirectionRtl = 1;
 
+  /// Android's [InputDevice.SOURCE_UNKNOWN](https://developer.android.com/reference/android/view/InputDevice#SOURCE_UNKNOWN)
+  static const int kInputDeviceSourceUnknown = 0;
+
+  /// Android's [InputDevice.SOURCE_TOUCHSCREEN](https://developer.android.com/reference/android/view/InputDevice#SOURCE_TOUCHSCREEN)
+  static const int kInputDeviceSourceTouchScreen = 4098;
+
+  /// Android's [InputDevice.SOURCE_MOUSE](https://developer.android.com/reference/android/view/InputDevice#SOURCE_MOUSE)
+  static const int kInputDeviceSourceMouse = 8194;
+
+  /// Android's [InputDevice.SOURCE_STYLUS](https://developer.android.com/reference/android/view/InputDevice#SOURCE_STYLUS)
+  static const int kInputDeviceSourceStylus = 16386;
+
+  /// Android's [InputDevice.SOURCE_TOUCHPAD](https://developer.android.com/reference/android/view/InputDevice#SOURCE_TOUCHPAD)
+  static const int kInputDeviceSourceTouchPad = 1048584;
+
   /// The unique identifier of the Android view controlled by this controller.
   @override
   final int viewId;
@@ -759,12 +784,10 @@ abstract class AndroidViewController extends PlatformViewController {
       <PlatformViewCreatedCallback>[];
 
   static int _getAndroidDirection(TextDirection direction) {
-    switch (direction) {
-      case TextDirection.ltr:
-        return kAndroidLayoutDirectionLtr;
-      case TextDirection.rtl:
-        return kAndroidLayoutDirectionRtl;
-    }
+    return switch (direction) {
+      TextDirection.ltr => kAndroidLayoutDirectionLtr,
+      TextDirection.rtl => kAndroidLayoutDirectionRtl,
+    };
   }
 
   /// Creates a masked Android MotionEvent action value for an indexed pointer.

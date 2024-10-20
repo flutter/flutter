@@ -5,9 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:connectivity/connectivity.dart';
-import 'package:device_info/device_info.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -265,84 +262,6 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
   }
 }
 
-class ConnectivityOverlay extends StatefulWidget {
-  const ConnectivityOverlay({
-    super.key,
-    this.child,
-    this.connectedCompleter,
-  });
-
-  final Widget? child;
-  final Completer<void>? connectedCompleter;
-
-  @override
-  State<ConnectivityOverlay> createState() => _ConnectivityOverlayState();
-}
-
-class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
-  StreamSubscription<ConnectivityResult>? connectivitySubscription;
-  bool connected = true;
-
-  static const SnackBar errorSnackBar = SnackBar(
-    backgroundColor: Colors.red,
-    content: ListTile(
-      title: Text('No network'),
-      subtitle: Text(
-        'To load the videos you must have an active network connection',
-      ),
-    ),
-  );
-
-  Stream<ConnectivityResult> connectivityStream() async* {
-    final Connectivity connectivity = Connectivity();
-    ConnectivityResult previousResult = await connectivity.checkConnectivity();
-    yield previousResult;
-    await for (final ConnectivityResult result in connectivity.onConnectivityChanged) {
-      if (result != previousResult) {
-        yield result;
-        previousResult = result;
-      }
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (kIsWeb) {
-      // Assume connectivity
-      // TODO(ditman): Remove this shortcut when `connectivity` support for web
-      // lands, https://github.com/flutter/flutter/issues/46735
-      if (!widget.connectedCompleter!.isCompleted) {
-        widget.connectedCompleter!.complete();
-      }
-      return;
-    }
-    connectivitySubscription = connectivityStream().listen(
-      (ConnectivityResult connectivityResult) {
-        if (!mounted) {
-          return;
-        }
-        if (connectivityResult == ConnectivityResult.none) {
-          ScaffoldMessenger.of(context).showSnackBar(errorSnackBar);
-        } else {
-          if (!widget.connectedCompleter!.isCompleted) {
-            widget.connectedCompleter!.complete();
-          }
-        }
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    connectivitySubscription?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child!;
-}
-
 class VideoDemo extends StatefulWidget {
   const VideoDemo({ super.key });
 
@@ -352,14 +271,6 @@ class VideoDemo extends StatefulWidget {
   State<VideoDemo> createState() => _VideoDemoState();
 }
 
-final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-
-Future<bool> isIOSSimulator() async {
-  return !kIsWeb &&
-      Platform.isIOS &&
-      !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
-}
-
 class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMixin {
   final VideoPlayerController butterflyController = VideoPlayerController.asset(
     'videos/butterfly.mp4',
@@ -367,26 +278,28 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
     videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
   );
 
-  // TODO(sigurdm): This should not be stored here.
-  static const String beeUri = 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
-  final VideoPlayerController beeController = VideoPlayerController.network(
-    beeUri,
+  final VideoPlayerController beeController = VideoPlayerController.asset(
+    'videos/bee.mp4',
+    package: 'flutter_gallery_assets',
     videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
   );
 
-  final Completer<void> connectedCompleter = Completer<void>();
-  bool isSupported = true;
   bool isDisposed = false;
+
+  // Only non-test mobile environments are supported for this demo.
+  bool isSupported = Platform.isAndroid || Platform.isIOS;
 
   @override
   void initState() {
     super.initState();
+    if (!isSupported) {
+      return;
+    }
 
     Future<void> initController(VideoPlayerController controller, String name) async {
       controller.setLooping(true);
       controller.setVolume(0.0);
       controller.play();
-      await connectedCompleter.future;
       await controller.initialize();
       if (mounted) {
         setState(() { });
@@ -395,9 +308,6 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
 
     initController(butterflyController, 'butterfly');
     initController(beeController, 'bee');
-    isIOSSimulator().then((bool result) {
-      isSupported = !result;
-    });
   }
 
   @override
@@ -415,9 +325,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
         title: const Text('Videos'),
       ),
       body: isSupported
-        ? ConnectivityOverlay(
-            connectedCompleter: connectedCompleter,
-            child: Scrollbar(
+          ? Scrollbar(
               child: ListView(
                 primary: true,
                 children: <Widget>[
@@ -433,13 +341,8 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
                   ),
                 ],
               ),
-            ),
-          )
-        : const Center(
-            child: Text(
-              'Video playback not supported on the iOS Simulator.',
-            ),
-          ),
+            )
+          : const Placeholder(),
     );
   }
 }

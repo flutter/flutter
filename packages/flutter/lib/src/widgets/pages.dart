@@ -51,6 +51,12 @@ abstract class PageRoute<T> extends ModalRoute<T> {
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => previousRoute is PageRoute;
+
+  @override
+  bool get popGestureEnabled {
+    // Fullscreen dialogs aren't dismissible by back swipe.
+    return !fullscreenDialog && super.popGestureEnabled;
+  }
 }
 
 Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {

@@ -8,13 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const String _actualContent = 'Actual Content';
 const String _loading = 'Loading...';
 
 void main() {
-  testWidgetsWithLeakTracking('deferFirstFrame/allowFirstFrame stops sending frames to engine', (WidgetTester tester) async {
+  testWidgets('deferFirstFrame/allowFirstFrame stops sending frames to engine', (WidgetTester tester) async {
     expect(RendererBinding.instance.sendFramesToEngine, isTrue);
 
     final Completer<void> completer = Completer<void>();
@@ -51,7 +50,7 @@ void main() {
     expect(RendererBinding.instance.sendFramesToEngine, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Two widgets can defer frames', (WidgetTester tester) async {
+  testWidgets('Two widgets can defer frames', (WidgetTester tester) async {
     expect(RendererBinding.instance.sendFramesToEngine, isTrue);
 
     final Completer<void> completer1 = Completer<void>();
@@ -89,7 +88,7 @@ void main() {
 }
 
 class _DeferringWidget extends StatefulWidget {
-  const _DeferringWidget({required Key key, required this.loader}) : super(key: key);
+  const _DeferringWidget({required Key super.key, required this.loader});
 
   final Future<void> loader;
 

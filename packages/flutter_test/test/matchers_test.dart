@@ -663,6 +663,7 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -683,6 +684,7 @@ void main() {
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
         currentValueLength: 10,
         maxValueLength: 15,
+        headingLevel: 0,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -745,6 +747,7 @@ void main() {
          hasDidGainAccessibilityFocusAction: true,
          hasDidLoseAccessibilityFocusAction: true,
          hasDismissAction: true,
+         hasFocusAction: true,
          customActions: <CustomSemanticsAction>[action],
       ));
     });
@@ -790,6 +793,7 @@ void main() {
         link: true,
         onTap: () { },
         onLongPress: () { },
+        identifier: 'ident',
         label: 'foo',
         hint: 'bar',
         value: 'baz',
@@ -947,6 +951,7 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -967,6 +972,7 @@ void main() {
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
         currentValueLength: 10,
         maxValueLength: 15,
+        headingLevel: 0,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1030,6 +1036,7 @@ void main() {
           hasDidGainAccessibilityFocusAction: true,
           hasDidLoseAccessibilityFocusAction: true,
           hasDismissAction: true,
+          hasFocusAction: true,
           customActions: <CustomSemanticsAction>[action],
         ),
       );
@@ -1039,6 +1046,7 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: 0,
         actions: 0,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1058,6 +1066,7 @@ void main() {
         platformViewId: 105,
         currentValueLength: 10,
         maxValueLength: 15,
+        headingLevel: 0,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1121,6 +1130,7 @@ void main() {
           hasDidGainAccessibilityFocusAction: false,
           hasDidLoseAccessibilityFocusAction: false,
           hasDismissAction: false,
+          hasFocusAction: false,
         ),
       );
     });
@@ -1137,6 +1147,7 @@ void main() {
       final SemanticsData emptyData = SemanticsData(
         flags: 0,
         actions: 0,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1156,6 +1167,7 @@ void main() {
         platformViewId: 105,
         currentValueLength: 10,
         maxValueLength: 15,
+        headingLevel: 0,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1163,6 +1175,7 @@ void main() {
       final SemanticsData fullData = SemanticsData(
         flags: allFlags,
         actions: allActions,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1183,6 +1196,7 @@ void main() {
         currentValueLength: 10,
         maxValueLength: 15,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+        headingLevel: 0,
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1252,6 +1266,7 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: 0,
         actions: SemanticsAction.customAction.index,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1272,6 +1287,7 @@ void main() {
         currentValueLength: 10,
         maxValueLength: 15,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+        headingLevel: 0,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 

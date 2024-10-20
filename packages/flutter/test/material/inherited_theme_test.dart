@@ -4,10 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Theme.wrap()', (WidgetTester tester) async {
+  testWidgets('Theme.wrap()', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF00FF00);
     final Key primaryContainerKey = UniqueKey();
 
@@ -92,7 +91,7 @@ void main() {
     expect(containerColor(), isNot(primaryColor));
   });
 
-  testWidgetsWithLeakTracking('PopupMenuTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('Material2 - PopupMenuTheme.wrap()', (WidgetTester tester) async {
     const double menuFontSize = 24;
     const Color menuTextColor = Color(0xFF0000FF);
 
@@ -146,7 +145,59 @@ void main() {
     await tester.pumpAndSettle(); // menu route animation
   });
 
-  testWidgetsWithLeakTracking('BannerTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('Material3 - PopupMenuTheme.wrap()', (WidgetTester tester) async {
+    const TextStyle textStyle = TextStyle(fontSize: 24.0, color: Color(0xFF0000FF));
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Scaffold(
+          body: PopupMenuTheme(
+            data: const PopupMenuThemeData(
+              // The menu route's elevation, shape, and color are defined by the
+              // current context, so they're not affected by ThemeData.captureAll().
+              labelTextStyle: MaterialStatePropertyAll<TextStyle>(textStyle),
+            ),
+            child: Center(
+              child: PopupMenuButton<int>(
+                // The appearance of the menu items' text is defined by the
+                // PopupMenuTheme defined above. Popup menus use
+                // InheritedTheme.captureAll() by default.
+                child: const Text('show popupmenu'),
+                onSelected: (int result) { },
+                itemBuilder: (BuildContext context) {
+                  return const <PopupMenuEntry<int>>[
+                    PopupMenuItem<int>(value: 1, child: Text('One')),
+                    PopupMenuItem<int>(value: 2, child: Text('Two')),
+                  ];
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    TextStyle itemTextStyle(String text) {
+      return tester.widget<RichText>(
+        find.descendant(of: find.text(text), matching: find.byType(RichText)),
+      ).text.style!;
+    }
+
+    await tester.pumpWidget(buildFrame());
+
+    await tester.tap(find.text('show popupmenu'));
+    await tester.pumpAndSettle(); // menu route animation
+    expect(itemTextStyle('One').fontSize, textStyle.fontSize);
+    expect(itemTextStyle('One').color, textStyle.color);
+    expect(itemTextStyle('Two').fontSize, textStyle.fontSize);
+    expect(itemTextStyle('Two').color, textStyle.color);
+
+    // Dismiss the menu
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle(); // menu route animation
+  });
+
+  testWidgets('BannerTheme.wrap()', (WidgetTester tester) async {
     const Color bannerBackgroundColor = Color(0xFF0000FF);
     const double bannerFontSize = 48;
     const Color bannerTextColor = Color(0xFF00FF00);
@@ -244,7 +295,7 @@ void main() {
     expect(getTextStyle('hello').color, isNot(bannerTextColor));
   });
 
-  testWidgetsWithLeakTracking('DividerTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('DividerTheme.wrap()', (WidgetTester tester) async {
     const Color dividerColor = Color(0xFF0000FF);
     const double dividerSpace = 13;
     const double dividerThickness = 7;
@@ -326,7 +377,7 @@ void main() {
     expect(dividerBorder().width, isNot(dividerThickness));
   });
 
-  testWidgetsWithLeakTracking('ListTileTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('ListTileTheme.wrap()', (WidgetTester tester) async {
     const Color tileSelectedColor = Color(0xFF00FF00);
     const Color tileIconColor = Color(0xFF0000FF);
     const Color tileTextColor = Color(0xFFFF0000);
@@ -437,7 +488,7 @@ void main() {
     expect(getIconStyle(unselectedIconKey).color, isNot(tileIconColor));
   });
 
-  testWidgetsWithLeakTracking('SliderTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('SliderTheme.wrap()', (WidgetTester tester) async {
     const Color activeTrackColor = Color(0xFF00FF00);
     const Color inactiveTrackColor = Color(0xFF0000FF);
     const Color thumbColor = Color(0xFFFF0000);
@@ -520,7 +571,7 @@ void main() {
     expect(sliderBox, isNot(paints..circle(color: thumbColor)));
   });
 
-  testWidgetsWithLeakTracking('ToggleButtonsTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('ToggleButtonsTheme.wrap()', (WidgetTester tester) async {
     const Color buttonColor = Color(0xFF00FF00);
     const Color selectedButtonColor = Color(0xFFFF0000);
 

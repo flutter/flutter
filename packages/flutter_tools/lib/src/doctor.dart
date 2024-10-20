@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
@@ -19,6 +20,7 @@ import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/terminal.dart';
+import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
@@ -117,7 +119,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ...IntelliJValidator.installedValidators(
         fileSystem: globals.fs,
         platform: platform,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         plistParser: globals.plistParser,
         processManager: globals.processManager,
         logger: _logger,
@@ -132,7 +134,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         flutterVersion: () => globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
         devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         artifacts: globals.artifacts!,
         flutterRoot: () => Cache.flutterRoot!,
         operatingSystemUtils: globals.os,
@@ -140,6 +142,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (platform.isWindows)
         WindowsVersionValidator(
           operatingSystemUtils: globals.os,
+          processLister: ProcessLister(globals.processManager),
         ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
@@ -147,7 +150,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         GroupedValidator(<DoctorValidator>[
           XcodeValidator(
             xcode: globals.xcode!,
-            userMessages: userMessages,
+            userMessages: globals.userMessages,
             iosSimulatorUtils: globals.iosSimulatorUtils!,
           ),
           globals.cocoapodsValidator!,
@@ -167,7 +170,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(
           processManager: globals.processManager,
-          userMessages: userMessages,
+          userMessages: globals.userMessages,
         ),
       if (windowsWorkflow!.appliesToHostPlatform)
         visualStudioValidator!,
@@ -193,51 +196,31 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   @override
   List<Workflow> get workflows {
-    if (_workflows == null) {
-      _workflows = <Workflow>[];
-
-      if (globals.iosWorkflow!.appliesToHostPlatform) {
-        _workflows!.add(globals.iosWorkflow!);
-      }
-
-      if (androidWorkflow?.appliesToHostPlatform ?? false) {
-        _workflows!.add(androidWorkflow!);
-      }
-
-      if (fuchsiaWorkflow?.appliesToHostPlatform ?? false) {
-        _workflows!.add(fuchsiaWorkflow!);
-      }
-
-      if (linuxWorkflow.appliesToHostPlatform) {
-        _workflows!.add(linuxWorkflow);
-      }
-
-      if (macOSWorkflow.appliesToHostPlatform) {
-        _workflows!.add(macOSWorkflow);
-      }
-
-      if (windowsWorkflow?.appliesToHostPlatform ?? false) {
-        _workflows!.add(windowsWorkflow!);
-      }
-
-      if (webWorkflow.appliesToHostPlatform) {
-        _workflows!.add(webWorkflow);
-      }
-
-      if (customDeviceWorkflow.appliesToHostPlatform) {
-        _workflows!.add(customDeviceWorkflow);
-      }
-    }
-    return _workflows!;
+    return _workflows ??= <Workflow>[
+      if (globals.iosWorkflow!.appliesToHostPlatform)      globals.iosWorkflow!,
+      if (androidWorkflow?.appliesToHostPlatform ?? false) androidWorkflow!,
+      if (fuchsiaWorkflow?.appliesToHostPlatform ?? false) fuchsiaWorkflow!,
+      if (linuxWorkflow.appliesToHostPlatform)             linuxWorkflow,
+      if (macOSWorkflow.appliesToHostPlatform)             macOSWorkflow,
+      if (windowsWorkflow?.appliesToHostPlatform ?? false) windowsWorkflow!,
+      if (webWorkflow.appliesToHostPlatform)               webWorkflow,
+      if (customDeviceWorkflow.appliesToHostPlatform)      customDeviceWorkflow,
+    ];
   }
 }
 
 class Doctor {
   Doctor({
     required Logger logger,
-  }) : _logger = logger;
+    required SystemClock clock,
+    Analytics? analytics,
+  })  : _logger = logger,
+        _clock = clock,
+        _analytics = analytics ?? globals.analytics;
 
   final Logger _logger;
+  final SystemClock _clock;
+  final Analytics _analytics;
 
   List<DoctorValidator> get validators {
     return DoctorValidatorsProvider._instance.validators;
@@ -381,6 +364,10 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
+    // This timestamp will be used on the backend of GA4 to group each of the events that
+    // were sent for each doctor validator and its result
+    final int analyticsTimestamp = _clock.now().millisecondsSinceEpoch;
+
     for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = _logger.startSpinner(
@@ -410,6 +397,38 @@ class Doctor {
           break;
       }
       if (sendEvent) {
+        if (validator is GroupedValidator) {
+          for (int i = 0; i < validator.subValidators.length; i++) {
+            final DoctorValidator subValidator = validator.subValidators[i];
+
+            // Ensure that all of the subvalidators in the group have
+            // a corresponding subresult in case a validator crashed
+            final ValidationResult subResult;
+            try {
+              subResult = validator.subResults[i];
+            } on RangeError {
+              continue;
+            }
+
+            _analytics.send(Event.doctorValidatorResult(
+              validatorName: subValidator.title,
+              result: subResult.typeStr,
+              statusInfo: subResult.statusInfo,
+              partOfGroupedValidator: true,
+              doctorInvocationId: analyticsTimestamp,
+            ));
+          }
+        } else {
+          _analytics.send(Event.doctorValidatorResult(
+            validatorName: validator.title,
+            result: result.typeStr,
+            statusInfo: result.statusInfo,
+            partOfGroupedValidator: false,
+            doctorInvocationId: analyticsTimestamp,
+          ));
+        }
+        // TODO(eliasyishak): remove this after migrating from package:usage,
+        //  https://github.com/flutter/flutter/issues/128251
         DoctorResultEvent(validator: validator, result: result).send();
       }
 
@@ -733,8 +752,10 @@ class DeviceValidator extends DoctorValidator {
 class DoctorText {
   DoctorText(
     BufferLogger logger, {
+    SystemClock? clock,
     @visibleForTesting Doctor? doctor,
-  }) : _doctor = doctor ?? Doctor(logger: logger), _logger = logger;
+  })  : _doctor = doctor ?? Doctor(logger: logger, clock: clock ?? globals.systemClock),
+        _logger = logger;
 
   final BufferLogger _logger;
   final Doctor _doctor;

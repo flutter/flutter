@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Baseline - control test', (WidgetTester tester) async {
+  testWidgets('Baseline - control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: DefaultTextStyle(
@@ -21,7 +21,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
   });
 
-  testWidgetsWithLeakTracking('Baseline - position test', (WidgetTester tester) async {
+  testWidgets('Baseline - position test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: Baseline(
@@ -44,7 +44,9 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Chip caches baseline', (WidgetTester tester) async {
+  testWidgets('Chip caches baseline', (WidgetTester tester) async {
+    final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
+    debugCheckIntrinsicSizes = false;
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -54,6 +56,7 @@ void main() {
             baselineType: TextBaseline.alphabetic,
             child: Chip(
               label: BaselineDetector(() {
+                assert(!debugCheckIntrinsicSizes);
                 calls += 1;
               }),
             ),
@@ -67,9 +70,12 @@ void main() {
     tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
     await tester.pump();
     expect(calls, 2);
+    debugCheckIntrinsicSizes = checkIntrinsicSizes;
   });
 
-  testWidgetsWithLeakTracking('ListTile caches baseline', (WidgetTester tester) async {
+  testWidgets('ListTile caches baseline', (WidgetTester tester) async {
+    final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
+    debugCheckIntrinsicSizes = false;
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -79,6 +85,7 @@ void main() {
             baselineType: TextBaseline.alphabetic,
             child: ListTile(
               title: BaselineDetector(() {
+                assert(!debugCheckIntrinsicSizes);
                 calls += 1;
               }),
             ),
@@ -92,9 +99,10 @@ void main() {
     tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
     await tester.pump();
     expect(calls, 2);
+    debugCheckIntrinsicSizes = checkIntrinsicSizes;
   });
 
-  testWidgetsWithLeakTracking("LayoutBuilder returns child's baseline", (WidgetTester tester) async {
+  testWidgets("LayoutBuilder returns child's baseline", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(

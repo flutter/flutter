@@ -4,6 +4,7 @@
 
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -147,13 +148,34 @@ class _AnimationTuple {
     required this.startAnimation,
     required this.endAnimation,
     required this.gapAnimation,
-  });
+  }) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$_AnimationTuple',
+        object: this,
+      );
+    }
+  }
 
   final AnimationController controller;
   final CurvedAnimation startAnimation;
   final CurvedAnimation endAnimation;
   final CurvedAnimation gapAnimation;
   double gapStart = 0.0;
+
+  @mustCallSuper
+  void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+    controller.dispose();
+    startAnimation.dispose();
+    endAnimation.dispose();
+    gapAnimation.dispose();
+  }
 }
 
 class _MergeableMaterialState extends State<MergeableMaterial> with TickerProviderStateMixin {
@@ -208,7 +230,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   void dispose() {
     for (final MergeableMaterialItem child in _children) {
       if (child is MaterialGap) {
-        _animationTuples[child.key]!.controller.dispose();
+        _animationTuples[child.key]!.dispose();
       }
     }
     super.dispose();
@@ -258,6 +280,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     final MergeableMaterialItem child = _children.removeAt(index);
 
     if (child is MaterialGap) {
+      _animationTuples[child.key]!.dispose();
       _animationTuples[child.key] = null;
     }
   }
@@ -272,16 +295,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   void _removeEmptyGaps() {
-    int j = 0;
-
-    while (j < _children.length) {
-      if (
-        _children[j] is MaterialGap &&
-        _animationTuples[_children[j].key]!.controller.status == AnimationStatus.dismissed
-      ) {
+    for (int j = _children.length - 1; j >= 0; j -= 1) {
+      if (_children[j] is MaterialGap && _animationTuples[_children[j].key]!.controller.isDismissed) {
         _removeChild(j);
-      } else {
-        j += 1;
       }
     }
   }
@@ -556,12 +572,10 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         );
         slices = <Widget>[];
 
-        widgets.add(
-          SizedBox(
-            width: widget.mainAxis == Axis.horizontal ? _getGapSize(i) : null,
-            height: widget.mainAxis == Axis.vertical ? _getGapSize(i) : null,
-          ),
-        );
+        widgets.add(switch (widget.mainAxis) {
+          Axis.horizontal => SizedBox(width: _getGapSize(i)),
+          Axis.vertical   => SizedBox(height: _getGapSize(i)),
+        });
       } else {
         final MaterialSlice slice = _children[i] as MaterialSlice;
         Widget child = slice.child;

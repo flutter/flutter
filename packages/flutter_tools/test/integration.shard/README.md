@@ -6,7 +6,7 @@ Dart VM and Flutter integration.
 
 Use this command to run (from the `flutter_tools` directory):
 
-```shell
+```sh
 ../../bin/cache/dart-sdk/bin/dart run test test/integration.shard
 ```
 
@@ -20,3 +20,7 @@ information for the `flutter` tool (since they are black-box tests that
 run the tool as a subprocess, rather than being unit tests). For this
 reason, they are in a separate shard when running on continuous
 integration and are not run when calculating coverage.
+
+## Adding new test files
+
+When adding a new test file make sure that it ends with `_test.dart`, or else it will not be run.

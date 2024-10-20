@@ -5,7 +5,6 @@
 import 'package:flutter/src/rendering/sliver.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class Wrapper extends StatelessWidget {
   const Wrapper({
@@ -42,7 +41,7 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
+  testWidgets('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
     final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
     await tester.pumpWidget(
       LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
@@ -61,7 +60,46 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('Moving global key inside a SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgets('Moving GlobalKeys out of LayoutBuilder', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/146379.
+    final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget key');
+    final Widget widgetWithKey = Builder(builder: (BuildContext context) {
+      Directionality.of(context);
+      return SizedBox(key: widgetKey);
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: <Widget>[
+            LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) => widgetWithKey,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Row(
+          children: <Widget>[
+            LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) => const Placeholder(),
+            ),
+            widgetWithKey,
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), null);
+    expect(find.byKey(widgetKey), findsOneWidget);
+  });
+
+  testWidgets('Moving global key inside a SliverLayoutBuilder', (WidgetTester tester) async {
     final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
 
     await tester.pumpWidget(

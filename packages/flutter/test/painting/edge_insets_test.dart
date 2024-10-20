@@ -279,4 +279,10 @@ void main() {
     expect(const EdgeInsetsDirectional.only(top: 4.0).add(const EdgeInsets.only(right: 3.0)).toString(), 'EdgeInsets(0.0, 4.0, 3.0, 0.0)');
     expect(const EdgeInsetsDirectional.only(start: 4.0).add(const EdgeInsets.only(left: 3.0)).toString(), 'EdgeInsets(3.0, 0.0, 0.0, 0.0) + EdgeInsetsDirectional(4.0, 0.0, 0.0, 0.0)');
   });
+
+  test('EdgeInsetsDirectional copyWith', () {
+    const EdgeInsetsDirectional sourceEdgeInsets = EdgeInsetsDirectional.only(start: 1.0, top: 2.0, bottom: 3.0, end: 4.0);
+    final EdgeInsetsDirectional copy = sourceEdgeInsets.copyWith(start: 5.0, top: 6.0);
+    expect(copy, const EdgeInsetsDirectional.only(start: 5.0, top: 6.0, bottom: 3.0, end: 4.0));
+  });
 }

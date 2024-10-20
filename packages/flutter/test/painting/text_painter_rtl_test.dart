@@ -301,9 +301,9 @@ void main() {
       painter.getOffsetForCaret(const TextPosition(offset: 2, affinity: TextAffinity.upstream), Rect.zero),
       const Offset(0.0, 10.0),
     );
-    expect( // after the Alef
+    expect( // To the right of the Alef
       painter.getOffsetForCaret(const TextPosition(offset: 2), Rect.zero),
-      const Offset(0.0, 10.0),
+      const Offset(10.0, 10.0),
     );
 
     expect(

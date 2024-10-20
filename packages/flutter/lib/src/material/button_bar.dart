@@ -79,11 +79,19 @@ import 'dialog.dart';
 ///  * [Card], at the bottom of which it is common to place a [ButtonBar].
 ///  * [Dialog], which uses a [ButtonBar] for its actions.
 ///  * [ButtonBarTheme], which configures the [ButtonBar].
+@Deprecated(
+  'Use OverflowBar instead. '
+  'This feature was deprecated after v3.21.0-10.0.pre.',
+)
 class ButtonBar extends StatelessWidget {
   /// Creates a button bar.
   ///
   /// Both [buttonMinWidth] and [buttonHeight] must be non-negative if they
   /// are not null.
+  @Deprecated(
+    'Use OverflowBar instead. '
+    'This feature was deprecated after v3.21.0-10.0.pre.',
+  )
   const ButtonBar({
     super.key,
     this.alignment,
@@ -236,11 +244,12 @@ class ButtonBar extends StatelessWidget {
           child: child,
         );
       case ButtonBarLayoutBehavior.constrained:
-        return Container(
-          padding: EdgeInsets.symmetric(horizontal: paddingUnit),
+        return ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 52.0),
-          alignment: Alignment.center,
-          child: child,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: paddingUnit),
+            child: Center(child: child),
+          ),
         );
     }
   }
@@ -383,14 +392,11 @@ class _RenderButtonBarRow extends RenderFlex {
       super.performLayout();
     } else {
       final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
-      RenderBox? child;
       double currentHeight = 0.0;
-      switch (verticalDirection) {
-        case VerticalDirection.down:
-          child = firstChild;
-        case VerticalDirection.up:
-          child = lastChild;
-      }
+      RenderBox? child = switch (verticalDirection) {
+        VerticalDirection.down => firstChild,
+        VerticalDirection.up   => lastChild,
+      };
 
       while (child != null) {
         final FlexParentData childParentData = child.parentData! as FlexParentData;
@@ -432,12 +438,10 @@ class _RenderButtonBarRow extends RenderFlex {
             }
         }
         currentHeight += child.size.height;
-        switch (verticalDirection) {
-          case VerticalDirection.down:
-            child = childParentData.nextSibling;
-          case VerticalDirection.up:
-            child = childParentData.previousSibling;
-        }
+        child = switch (verticalDirection) {
+          VerticalDirection.down => childParentData.nextSibling,
+          VerticalDirection.up   => childParentData.previousSibling,
+        };
 
         if (overflowButtonSpacing != null && child != null) {
           currentHeight += overflowButtonSpacing!;

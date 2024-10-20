@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -110,7 +109,101 @@ void resetScrollOffset(WidgetTester tester) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Flings on different platforms', (WidgetTester tester) async {
+  testWidgets('hitTestBehavior is respected', (WidgetTester tester) async {
+    HitTestBehavior? getBehavior(Type of) {
+      final RawGestureDetector widget = tester.widget(find.descendant(
+        of: find.byType(of),
+        matching: find.byType(RawGestureDetector),
+      ));
+      return widget.behavior;
+    }
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SingleChildScrollView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(SingleChildScrollView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CustomScrollView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(CustomScrollView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(ListView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GridView.extent(
+          maxCrossAxisExtent: 1,
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(GridView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PageView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(PageView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListWheelScrollView(
+          itemExtent: 10,
+          hitTestBehavior: HitTestBehavior.translucent,
+          children: const <Widget>[],
+        ),
+      ),
+    );
+    expect(getBehavior(ListWheelScrollView), HitTestBehavior.translucent);
+  });
+
+  testWidgets(
+      'hitTestBehavior.translucent lets widgets underneath catch the hit',
+      (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    bool tapped = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => tapped = true,
+                child: SizedBox(key: key, height: 300),
+              ),
+            ),
+            const SingleChildScrollView(
+              hitTestBehavior: HitTestBehavior.translucent,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.tapAt(tester.getCenter(find.byKey(key)));
+    expect(tapped, isTrue);
+  });
+
+  testWidgets('Flings on different platforms', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     expect(getScrollOffset(tester), dragOffset);
@@ -146,7 +239,7 @@ void main() {
     expect(macOSResult, lessThan(iOSResult)); // iOS is slipperier than macOS
   });
 
-  testWidgetsWithLeakTracking('Holding scroll', (WidgetTester tester) async {
+  testWidgets('Holding scroll', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     await tester.drag(find.byType(Scrollable), const Offset(0.0, 200.0), touchSlopY: 0.0);
     expect(getScrollOffset(tester), -200.0);
@@ -165,7 +258,7 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Repeated flings builds momentum', (WidgetTester tester) async {
+  testWidgets('Repeated flings builds momentum', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
@@ -178,7 +271,7 @@ void main() {
     expect(getScrollVelocity(tester), greaterThan(1100.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Repeated flings do not build momentum on Android', (WidgetTester tester) async {
+  testWidgets('Repeated flings do not build momentum on Android', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
@@ -191,7 +284,7 @@ void main() {
     expect(getScrollVelocity(tester), moreOrLessEquals(1000.0));
   });
 
-  testWidgetsWithLeakTracking('A slower final fling does not apply carried momentum', (WidgetTester tester) async {
+  testWidgets('A slower final fling does not apply carried momentum', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
@@ -208,7 +301,7 @@ void main() {
     expect(getScrollVelocity(tester), lessThan(200.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('No iOS/macOS momentum build with flings in opposite directions', (WidgetTester tester) async {
+  testWidgets('No iOS/macOS momentum build with flings in opposite directions', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
@@ -221,7 +314,7 @@ void main() {
     expect(getScrollVelocity(tester), -1000.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('No iOS/macOS momentum kept on hold gestures', (WidgetTester tester) async {
+  testWidgets('No iOS/macOS momentum kept on hold gestures', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
@@ -234,7 +327,7 @@ void main() {
     expect(getScrollVelocity(tester), 0.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Drags creeping unaffected on Android', (WidgetTester tester) async {
+  testWidgets('Drags creeping unaffected on Android', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -0.5));
@@ -245,7 +338,7 @@ void main() {
     expect(getScrollOffset(tester), 1.5);
   });
 
-  testWidgetsWithLeakTracking('Drags creeping must break threshold on iOS/macOS', (WidgetTester tester) async {
+  testWidgets('Drags creeping must break threshold on iOS/macOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -0.5));
@@ -265,7 +358,7 @@ void main() {
     expect(getScrollOffset(tester), 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Big drag over threshold magnitude preserved on iOS/macOS', (WidgetTester tester) async {
+  testWidgets('Big drag over threshold magnitude preserved on iOS/macOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -30.0));
@@ -273,7 +366,7 @@ void main() {
     expect(getScrollOffset(tester), 30.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Slow threshold breaks are attenuated on iOS/macOS', (WidgetTester tester) async {
+  testWidgets('Slow threshold breaks are attenuated on iOS/macOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     // This is a typical 'hesitant' iOS scroll start.
@@ -284,7 +377,7 @@ void main() {
     expect(getScrollOffset(tester), moreOrLessEquals(11.16666666666666673));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Small continuing motion preserved on iOS/macOS', (WidgetTester tester) async {
+  testWidgets('Small continuing motion preserved on iOS/macOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -30.0)); // Break threshold.
@@ -297,7 +390,7 @@ void main() {
     expect(getScrollOffset(tester), 31.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Motion stop resets threshold on iOS/macOS', (WidgetTester tester) async {
+  testWidgets('Motion stop resets threshold on iOS/macOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -30.0)); // Break threshold.
@@ -320,7 +413,7 @@ void main() {
     expect(getScrollOffset(tester), 32.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Scroll pointer signals are handled on Fuchsia', (WidgetTester tester) async {
+  testWidgets('Scroll pointer signals are handled on Fuchsia', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.fuchsia);
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
@@ -333,7 +426,7 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   });
 
-  testWidgetsWithLeakTracking('Scroll pointer signals are handled when there is competition', (WidgetTester tester) async {
+  testWidgets('Scroll pointer signals are handled when there is competition', (WidgetTester tester) async {
     // This is a regression test. When there are multiple scrollables listening
     // to the same event, for example when scrollables are nested, there used
     // to be exceptions at scrolling events.
@@ -350,7 +443,7 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   });
 
-  testWidgetsWithLeakTracking('Scroll pointer signals are ignored when scrolling is disabled', (WidgetTester tester) async {
+  testWidgets('Scroll pointer signals are ignored when scrolling is disabled', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.fuchsia, scrollable: false);
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
@@ -360,7 +453,64 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   });
 
-  testWidgetsWithLeakTracking('Holding scroll and Scroll pointer signal will update ScrollDirection.forward / ScrollDirection.reverse', (WidgetTester tester) async {
+  testWidgets('Engine is notified of ignored pointer signals (no scroll physics)', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, scrollable: false);
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+
+    bool allowedPlatformDefault = false;
+    await tester.sendEventToBinding(
+      testPointer.scroll(
+        const Offset(0.0, 20.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          allowedPlatformDefault = allowPlatformDefault;
+        },
+      ));
+
+    expect(allowedPlatformDefault, isTrue,
+      reason: 'Engine should be notified of ignored scroll pointer signals.');
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Engine is notified of rejected scroll events (wrong direction)', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+
+    // Horizontal input is accepted
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendEventToBinding(
+      testPointer.scroll(
+        const Offset(0.0, 10.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          fail('The engine should not be notified when the scroll is accepted.');
+        },
+      ));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+
+    // Vertical input not accepted
+    bool allowedPlatformDefault = false;
+    await tester.sendEventToBinding(
+      testPointer.scroll(
+        const Offset(0.0, 20.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          allowedPlatformDefault = allowPlatformDefault;
+        },
+      ));
+    expect(allowedPlatformDefault, isTrue,
+      reason: 'Engine should be notified when scroll is rejected by the scrollable.');
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Holding scroll and Scroll pointer signal will update ScrollDirection.forward / ScrollDirection.reverse', (WidgetTester tester) async {
     ScrollDirection? lastUserScrollingDirection;
 
     final ScrollController controller = ScrollController();
@@ -396,7 +546,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('Scrolls in correct direction when scroll axis is reversed', (WidgetTester tester) async {
+  testWidgets('Scrolls in correct direction when scroll axis is reversed', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.fuchsia, reverse: true);
 
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
@@ -408,7 +558,7 @@ void main() {
     expect(getScrollOffset(tester), 20.0);
   });
 
-  testWidgetsWithLeakTracking('Scrolls horizontally when shift is pressed by default', (WidgetTester tester) async {
+  testWidgets('Scrolls horizontally when shift is pressed by default', (WidgetTester tester) async {
     await pumpTest(
       tester,
       debugDefaultTargetPlatformOverride,
@@ -435,7 +585,7 @@ void main() {
     expect(getScrollOffset(tester), 20.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('Scroll axis is not flipped for trackpad', (WidgetTester tester) async {
+  testWidgets('Scroll axis is not flipped for trackpad', (WidgetTester tester) async {
     await pumpTest(
       tester,
       debugDefaultTargetPlatformOverride,
@@ -462,7 +612,7 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('Scrolls horizontally when custom key is pressed', (WidgetTester tester) async {
+  testWidgets('Scrolls horizontally when custom key is pressed', (WidgetTester tester) async {
     await pumpTest(
       tester,
       debugDefaultTargetPlatformOverride,
@@ -490,7 +640,7 @@ void main() {
     expect(getScrollOffset(tester), 20.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('Still scrolls horizontally when other keys are pressed at the same time', (WidgetTester tester) async {
+  testWidgets('Still scrolls horizontally when other keys are pressed at the same time', (WidgetTester tester) async {
     await pumpTest(
       tester,
       debugDefaultTargetPlatformOverride,
@@ -539,7 +689,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('Hold does not disable user interaction', (WidgetTester tester) async {
+    testWidgets('Hold does not disable user interaction', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/66816.
       await pumpTestWidget(tester, canDrag: true);
       final RenderIgnorePointer renderIgnorePointer = tester.renderObject<RenderIgnorePointer>(
@@ -558,7 +708,7 @@ void main() {
       expect(renderIgnorePointer.ignoring, false);
     });
 
-    testWidgetsWithLeakTracking('Drag disables user interaction when recognized', (WidgetTester tester) async {
+    testWidgets('Drag disables user interaction when recognized', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/66816.
       await pumpTestWidget(tester, canDrag: true);
       final RenderIgnorePointer renderIgnorePointer = tester.renderObject<RenderIgnorePointer>(
@@ -580,7 +730,7 @@ void main() {
       expect(renderIgnorePointer.ignoring, false);
     });
 
-    testWidgetsWithLeakTracking('Ballistic disables user interaction until it stops', (WidgetTester tester) async {
+    testWidgets('Ballistic disables user interaction until it stops', (WidgetTester tester) async {
       await pumpTestWidget(tester, canDrag: true);
       final RenderIgnorePointer renderIgnorePointer = tester.renderObject<RenderIgnorePointer>(
         find.descendant(of: find.byType(CustomScrollView), matching: find.byType(IgnorePointer)),
@@ -598,7 +748,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Can recommendDeferredLoadingForContext - animation', (WidgetTester tester) async {
+  testWidgets('Can recommendDeferredLoadingForContext - animation', (WidgetTester tester) async {
     final List<String> widgetTracker = <String>[];
     int cheapWidgets = 0;
     int expensiveWidgets = 0;
@@ -655,7 +805,7 @@ void main() {
     expect(widgetTracker.skip(17).skip(25).skip(70).every((String type) => type == 'expensive'), true);
   });
 
-  testWidgetsWithLeakTracking('Can recommendDeferredLoadingForContext - ballistics', (WidgetTester tester) async {
+  testWidgets('Can recommendDeferredLoadingForContext - ballistics', (WidgetTester tester) async {
     int cheapWidgets = 0;
     int expensiveWidgets = 0;
     await tester.pumpWidget(Directionality(
@@ -692,7 +842,7 @@ void main() {
     expect(cheapWidgets, 21);
   });
 
-  testWidgetsWithLeakTracking('Can recommendDeferredLoadingForContext - override heuristic', (WidgetTester tester) async {
+  testWidgets('Can recommendDeferredLoadingForContext - override heuristic', (WidgetTester tester) async {
     int cheapWidgets = 0;
     int expensiveWidgets = 0;
     await tester.pumpWidget(Directionality(
@@ -736,7 +886,7 @@ void main() {
     expect(physics.count, 44 + 17);
   });
 
-  testWidgetsWithLeakTracking('Can recommendDeferredLoadingForContext - override heuristic and always return true', (WidgetTester tester) async {
+  testWidgets('Can recommendDeferredLoadingForContext - override heuristic and always return true', (WidgetTester tester) async {
     int cheapWidgets = 0;
     int expensiveWidgets = 0;
     await tester.pumpWidget(Directionality(
@@ -777,7 +927,7 @@ void main() {
     expect(cheapWidgets, 61);
   });
 
-  testWidgetsWithLeakTracking('ensureVisible does not move PageViews', (WidgetTester tester) async {
+  testWidgets('ensureVisible does not move PageViews', (WidgetTester tester) async {
     final PageController controller = PageController();
     addTearDown(controller.dispose);
 
@@ -867,6 +1017,7 @@ void main() {
       length: 3,
       vsync: vsync,
     );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -948,7 +1099,7 @@ void main() {
     expect(targetMidLeftPage1, findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('PointerScroll on nested NeverScrollable ListView goes to outer Scrollable.', (WidgetTester tester) async {
+  testWidgets('PointerScroll on nested NeverScrollable ListView goes to outer Scrollable.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70948
     final ScrollController outerController = ScrollController();
     addTearDown(outerController.dispose);
@@ -1008,7 +1159,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/71949
-  testWidgetsWithLeakTracking('Zero offset pointer scroll should not trigger an assertion.', (WidgetTester tester) async {
+  testWidgets('Zero offset pointer scroll should not trigger an assertion.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -1038,7 +1189,7 @@ void main() {
 
     // Make the outer constraints larger that the scrollable widget is no longer able to scroll.
     await tester.pumpWidget(build(300.0));
-    expect(controller.position.pixels, 100.0);
+    expect(controller.position.pixels, 0.0);
     expect(controller.position.maxScrollExtent, 0.0);
 
     // Hover over the scroll view and create a zero offset pointer scroll.
@@ -1050,7 +1201,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('Accepts drag with unknown device kind by default', (WidgetTester tester) async {
+  testWidgets('Accepts drag with unknown device kind by default', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/90912.
     await tester.pumpWidget(
       const MaterialApp(
@@ -1079,7 +1230,7 @@ void main() {
     await tester.pump();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
 
-  testWidgetsWithLeakTracking('Does not scroll with mouse pointer drag when behavior is configured to ignore them', (WidgetTester tester) async {
+  testWidgets('Does not scroll with mouse pointer drag when behavior is configured to ignore them', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride, enableMouseDrag: false);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
 
@@ -1099,7 +1250,7 @@ void main() {
     await tester.pump();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
 
-  testWidgetsWithLeakTracking("Support updating 'ScrollBehavior.dragDevices' at runtime", (WidgetTester tester) async {
+  testWidgets("Support updating 'ScrollBehavior.dragDevices' at runtime", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/111716
     Widget buildFrame(Set<ui.PointerDeviceKind>? dragDevices) {
       return MaterialApp(
@@ -1133,7 +1284,7 @@ void main() {
     expect(getScrollOffset(tester), 200.0);
   });
 
-  testWidgetsWithLeakTracking('Does scroll with mouse pointer drag when behavior is not configured to ignore them', (WidgetTester tester) async {
+  testWidgets('Does scroll with mouse pointer drag when behavior is not configured to ignore them', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
 
@@ -1153,7 +1304,7 @@ void main() {
     await tester.pump();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
 
-  testWidgetsWithLeakTracking('Updated content dimensions correctly reflect in semantics', (WidgetTester tester) async {
+  testWidgets('Updated content dimensions correctly reflect in semantics', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/40419.
     final SemanticsHandle handle = tester.ensureSemantics();
     final UniqueKey listView = UniqueKey();
@@ -1211,7 +1362,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Two panel semantics is added to the sibling nodes of direct children', (WidgetTester tester) async {
+  testWidgets('Two panel semantics is added to the sibling nodes of direct children', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final UniqueKey key = UniqueKey();
     await tester.pumpWidget(MaterialApp(
@@ -1256,7 +1407,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Scroll inertia cancel event', (WidgetTester tester) async {
+  testWidgets('Scroll inertia cancel event', (WidgetTester tester) async {
     await pumpTest(tester, null);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     expect(getScrollOffset(tester), dragOffset);
@@ -1272,7 +1423,7 @@ void main() {
     expect(getScrollOffset(tester), closeTo(344.0642, 0.0001));
   });
 
-  testWidgetsWithLeakTracking('Swapping viewports in a scrollable does not crash', (WidgetTester tester) async {
+  testWidgets('Swapping viewports in a scrollable does not crash', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey key = GlobalKey();
     final GlobalKey key1 = GlobalKey();
@@ -1319,7 +1470,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('deltaToScrollOrigin getter', (WidgetTester tester) async {
+  testWidgets('deltaToScrollOrigin getter', (WidgetTester tester) async {
     await tester.pumpWidget(
         const MaterialApp(
           home: CustomScrollView(
@@ -1340,7 +1491,7 @@ void main() {
     expect(scrollable.deltaToScrollOrigin, const Offset(0.0, 200));
   });
 
-  testWidgetsWithLeakTracking('resolvedPhysics getter', (WidgetTester tester) async {
+  testWidgets('resolvedPhysics getter', (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light().copyWith(
@@ -1370,7 +1521,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('dragDevices change updates widget', (WidgetTester tester) async {
+  testWidgets('dragDevices change updates widget', (WidgetTester tester) async {
     bool enable = false;
 
     await tester.pumpWidget(
@@ -1423,7 +1574,7 @@ void main() {
     expect(getScrollOffset(tester), 200);
   });
 
-  testWidgetsWithLeakTracking('dragDevices change updates widget when oldWidget scrollBehavior is null', (WidgetTester tester) async {
+  testWidgets('dragDevices change updates widget when oldWidget scrollBehavior is null', (WidgetTester tester) async {
     ScrollBehavior? scrollBehavior;
 
     await tester.pumpWidget(

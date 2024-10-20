@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'navigator_utils.dart';
 
@@ -35,7 +34,7 @@ void main() {
         .setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
-  testWidgetsWithLeakTracking('toggling canPop on root route allows/prevents backs', (WidgetTester tester) async {
+  testWidgets('toggling canPop on root route allows/prevents backs', (WidgetTester tester) async {
     bool canPop = false;
     late StateSetter setState;
     late BuildContext context;
@@ -48,7 +47,7 @@ void main() {
               builder: (BuildContext buildContext, StateSetter stateSetter) {
                 context = buildContext;
                 setState = stateSetter;
-                return PopScope(
+                return PopScope<Object?>(
                   canPop: canPop,
                   child: const Center(
                     child: Column(
@@ -80,7 +79,95 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('toggling canPop on secondary route allows/prevents backs', (WidgetTester tester) async {
+  testWidgets('pop scope can receive result', (WidgetTester tester) async {
+    Object? receivedResult;
+    final Object poppedResult = Object();
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/',
+        navigatorKey: nav,
+        home: Scaffold(
+          body: PopScope<Object?>(
+            canPop: false,
+            onPopInvokedWithResult: (bool didPop, Object? result) {
+              receivedResult = result;
+            },
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Home/PopScope Page'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    nav.currentState!.maybePop(poppedResult);
+    await tester.pumpAndSettle();
+    expect(receivedResult, poppedResult);
+  },
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('pop scope can have Object? generic type while route has stricter generic type', (WidgetTester tester) async {
+    Object? receivedResult;
+    const int poppedResult = 13;
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/',
+        navigatorKey: nav,
+        home: Scaffold(
+          body: PopScope<Object?>(
+            canPop: false,
+            onPopInvokedWithResult: (bool didPop, Object? result) {
+              receivedResult = result;
+            },
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Home/PopScope Page'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    nav.currentState!.push(
+      MaterialPageRoute<int>(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: PopScope<Object?>(
+              canPop: false,
+              onPopInvokedWithResult: (bool didPop, Object? result) {
+                receivedResult = result;
+              },
+              child: const Center(
+                child: Text('new page'),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('new page'), findsOneWidget);
+
+    nav.currentState!.maybePop(poppedResult);
+    await tester.pumpAndSettle();
+    expect(receivedResult, poppedResult);
+  },
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('toggling canPop on secondary route allows/prevents backs', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
     bool canPop = true;
     late StateSetter setState;
@@ -116,9 +203,9 @@ void main() {
               builder: (BuildContext context, StateSetter stateSetter) {
                 oneContext = context;
                 setState = stateSetter;
-                return PopScope(
+                return PopScope<Object?>(
                   canPop: canPop,
-                  onPopInvoked: (bool didPop) {
+                  onPopInvokedWithResult: (bool didPop, Object? result) {
                     lastPopSuccess = didPop;
                   },
                   child: const Center(
@@ -248,7 +335,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('removing PopScope from the tree removes its effect on navigation', (WidgetTester tester) async {
+  testWidgets('removing PopScope from the tree removes its effect on navigation', (WidgetTester tester) async {
     bool usePopScope = true;
     late StateSetter setState;
     late BuildContext context;
@@ -272,7 +359,7 @@ void main() {
                 if (!usePopScope) {
                   return child;
                 }
-                return const PopScope(
+                return const PopScope<Object?>(
                   canPop: false,
                   child: child,
                 );
@@ -300,7 +387,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('identical PopScopes', (WidgetTester tester) async {
+  testWidgets('identical PopScopes', (WidgetTester tester) async {
     bool usePopScope1 = true;
     bool usePopScope2 = true;
     late StateSetter setState;
@@ -315,12 +402,12 @@ void main() {
               return Column(
                 children: <Widget>[
                   if (usePopScope1)
-                    const PopScope(
+                    const PopScope<Object?>(
                       canPop: false,
                       child: Text('hello'),
                     ),
                   if (usePopScope2)
-                    const PopScope(
+                    const PopScope<Object?>(
                       canPop: false,
                       child: Text('hello'),
                     ),

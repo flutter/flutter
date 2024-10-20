@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('DropdownMenuThemeData copyWith, ==, hashCode basics', () {
@@ -31,7 +30,7 @@ void main() {
     expect(identical(DropdownMenuThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgetsWithLeakTracking('Default DropdownMenuThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default DropdownMenuThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DropdownMenuThemeData().debugFillProperties(builder);
 
@@ -43,7 +42,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('With no other configuration, defaults are used', (WidgetTester tester) async {
+  testWidgets('With no other configuration, defaults are used', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
@@ -80,11 +79,11 @@ void main() {
     final Finder menuMaterial = find.ancestor(
       of: find.widgetWithText(TextButton, 'Item 0'),
       matching: find.byType(Material),
-    ).last;
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
-    expect(material.color, themeData.colorScheme.surface);
+    expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
-    expect(material.surfaceTintColor, themeData.colorScheme.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
@@ -100,7 +99,7 @@ void main() {
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
   });
 
-  testWidgetsWithLeakTracking('ThemeData.dropdownMenuTheme overrides defaults', (WidgetTester tester) async {
+  testWidgets('ThemeData.dropdownMenuTheme overrides defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: TextStyle(
@@ -159,7 +158,7 @@ void main() {
     final Finder menuMaterial = find.ancestor(
       of: find.widgetWithText(TextButton, 'Item 0'),
       matching: find.byType(Material),
-    ).last;
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.grey);
     expect(material.shadowColor, Colors.brown);
@@ -179,7 +178,7 @@ void main() {
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgetsWithLeakTracking('DropdownMenuTheme overrides ThemeData and defaults', (WidgetTester tester) async {
+  testWidgets('DropdownMenuTheme overrides ThemeData and defaults', (WidgetTester tester) async {
     final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
@@ -262,7 +261,7 @@ void main() {
     final Finder menuMaterial = find.ancestor(
       of: find.widgetWithText(TextButton, 'Item 0'),
       matching: find.byType(Material),
-    ).last;
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.yellow);
     expect(material.shadowColor, Colors.green);
@@ -282,7 +281,7 @@ void main() {
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgetsWithLeakTracking('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (WidgetTester tester) async {
+  testWidgets('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (WidgetTester tester) async {
     final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
@@ -383,7 +382,7 @@ void main() {
     final Finder menuMaterial = find.ancestor(
       of: find.widgetWithText(TextButton, 'Item 0'),
       matching: find.byType(Material),
-    ).last;
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.limeAccent);
     expect(material.shadowColor, Colors.deepOrangeAccent);

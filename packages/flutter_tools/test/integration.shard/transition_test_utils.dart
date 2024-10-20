@@ -122,25 +122,15 @@ class LogLine {
   }
 
   static String clarify(String line) {
-    return line.runes.map<String>((int rune) {
-      if (rune >= 0x20 && rune <= 0x7F) {
-        return String.fromCharCode(rune);
-      }
-      switch (rune) {
-        case 0x00:
-          return '<NUL>';
-        case 0x07:
-          return '<BEL>';
-        case 0x08:
-          return '<TAB>';
-        case 0x09:
-          return '<BS>';
-        case 0x0A:
-          return '<LF>';
-        case 0x0D:
-          return '<CR>';
-      }
-      return '<${rune.toRadixString(16).padLeft(rune <= 0xFF ? 2 : rune <= 0xFFFF ? 4 : 5, '0')}>';
+    return line.runes.map<String>((int rune) => switch (rune) {
+      >= 0x20 && <= 0x7F => String.fromCharCode(rune),
+      0x00 => '<NUL>',
+      0x07 => '<BEL>',
+      0x08 => '<TAB>',
+      0x09 => '<BS>',
+      0x0A => '<LF>',
+      0x0D => '<CR>',
+      _ => '<${rune.toRadixString(16).padLeft(rune <= 0xFF ? 2 : rune <= 0xFFFF ? 4 : 5, '0')}>',
     }).join();
   }
 }
@@ -175,8 +165,8 @@ Future<ProcessTestResult> runFlutter(
   bool debug = false,
   bool logging = true,
   Duration expectedMaxDuration = const Duration(
-      minutes:
-          10), // must be less than test timeout of 15 minutes! See ../../dart_test.yaml.
+    minutes: 10,
+  ), // must be less than test timeout of 15 minutes! See ../../dart_test.yaml.
 }) async {
   const LocalPlatform platform = LocalPlatform();
   final Stopwatch clock = Stopwatch()..start();

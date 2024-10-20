@@ -40,7 +40,7 @@ const Map<String, PlatformDocsSection> kPlatformDocs = <String, PlatformDocsSect
   'android': PlatformDocsSection(
     zipName: 'android-javadoc.zip',
     sectionName: 'Android',
-    checkFile: 'io/flutter/view/FlutterView.html',
+    checkFile: 'io/flutter/embedding/android/FlutterView.html',
     subdir: 'javadoc',
   ),
   'ios': PlatformDocsSection(
@@ -200,7 +200,7 @@ class Configurator {
 
   /// The [Platform] to use for this run.
   ///
-  /// Can be replaced by tests to test behavior on different plaforms.
+  /// Can be replaced by tests to test behavior on different platforms.
   final Platform platform;
 
   void generateConfiguration() {
@@ -277,9 +277,13 @@ class Configurator {
 
   void _createPageFooter(Directory footerPath, Version version) {
     final String timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
-    final String gitBranch = FlutterInformation.instance.getBranchName();
+    String channel = FlutterInformation.instance.getBranchName();
+    // Backward compatibility: Still support running on "master", but pretend it is "main".
+    if (channel == 'master') {
+      channel = 'main';
+    }
     final String gitRevision = FlutterInformation.instance.getFlutterRevision();
-    final String gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';
+    final String channelOut = channel.isEmpty ? '' : '• $channel';
     footerPath.childFile('footer.html').writeAsStringSync('<script src="footer.js"></script>');
     publishRoot.childDirectory('flutter').childFile('footer.js')
       ..createSync(recursive: true)
@@ -287,11 +291,11 @@ class Configurator {
 (function() {
   var span = document.querySelector('footer>span');
   if (span) {
-    span.innerText = 'Flutter $version • $timestamp • $gitRevision $gitBranchOut';
+    span.innerText = 'Flutter $version • $timestamp • $gitRevision $channelOut';
   }
   var sourceLink = document.querySelector('a.source-link');
   if (sourceLink) {
-    sourceLink.href = sourceLink.href.replace('/master/', '/$gitRevision/');
+    sourceLink.href = sourceLink.href.replace('/main/', '/$gitRevision/');
   }
 })();
 ''');
@@ -341,7 +345,7 @@ class Configurator {
     final String branch = FlutterInformation.instance.getBranchName();
     final String metadata = template.replaceAll(
       '{SITE_URL}',
-      branch == 'stable' ? 'https://api.flutter.dev/' : 'https://master-api.flutter.dev/',
+      branch == 'stable' ? 'https://api.flutter.dev/' : 'https://main-api.flutter.dev/',
     );
     metadataPath.parent.create(recursive: true);
     metadataPath.writeAsStringSync(metadata);
@@ -412,7 +416,7 @@ class Configurator {
     final bool isStable = platform.environment['LUCI_BRANCH'] == 'stable';
     offlineDir.childFile('flutter.xml').writeAsStringSync('<entry>\n'
         '  <version>${FlutterInformation.instance.getFlutterVersion()}</version>\n'
-        '  <url>https://${isStable ? '' : 'master-'}api.flutter.dev/offline/flutter.docset.tar.gz</url>\n'
+        '  <url>https://${isStable ? '' : 'main-'}api.flutter.dev/offline/flutter.docset.tar.gz</url>\n'
         '</entry>\n');
   }
 
@@ -517,8 +521,13 @@ class DartdocGenerator {
 
     final Version version = FlutterInformation.instance.getFlutterVersion();
 
+<<<<<<< HEAD
     // Verify which version of snippets and dartdoc we're using.
     final ProcessResult snippetsResult = processManager.runSync(
+=======
+    // Verify which version of the global activated packages we're using.
+    final ProcessResult versionResults = processManager.runSync(
+>>>>>>> 2663184aa79047d0a33a14a3b607954f8fdd8730
       <String>[
         FlutterInformation.instance.getFlutterBinaryPath().path,
         'pub',
@@ -531,8 +540,8 @@ class DartdocGenerator {
     );
     print('');
     final Iterable<RegExpMatch> versionMatches =
-        RegExp(r'^(?<name>snippets|dartdoc) (?<version>[^\s]+)', multiLine: true)
-            .allMatches(snippetsResult.stdout as String);
+        RegExp(r'^(?<name>dartdoc) (?<version>[^\s]+)', multiLine: true)
+            .allMatches(versionResults.stdout as String);
     for (final RegExpMatch match in versionMatches) {
       print('${match.namedGroup('name')} version: ${match.namedGroup('version')}');
     }
@@ -568,7 +577,7 @@ class DartdocGenerator {
       '--link-to-source-root',
       flutterRoot.path,
       '--link-to-source-uri-template',
-      'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
+      'https://github.com/flutter/flutter/blob/main/%f%#L%l%',
       '--inject-html',
       '--use-base-href',
       '--header',
@@ -742,15 +751,15 @@ class DartdocGenerator {
 
     // Check a "dartpad" example, any one will do, and check for the correct URL
     // arguments.
-    // Just use "master" for any branch other than the LUCI_BRANCH.
+    // Just use "main" for any branch other than "stable", just like it is done
+    // in the snippet generator at https://github.com/flutter/assets-for-api-docs/blob/cc56972b8f03552fc5f9f9f1ef309efc6c93d7bc/packages/snippets/lib/src/snippet_generator.dart#L104.
     final String? luciBranch = platform.environment['LUCI_BRANCH']?.trim();
-    final String expectedBranch = luciBranch != null && luciBranch.isNotEmpty ? luciBranch : 'master';
+    final String expectedChannel = luciBranch == 'stable' ? 'stable' : 'main';
     final List<String> argumentRegExps = <String>[
       r'split=\d+',
       r'run=true',
       r'sample_id=widgets\.Listener\.\d+',
-      'sample_channel=$expectedBranch',
-      'channel=$expectedBranch',
+      'channel=$expectedChannel',
     ];
     for (final String argumentRegExp in argumentRegExps) {
       _sanityCheckExample(

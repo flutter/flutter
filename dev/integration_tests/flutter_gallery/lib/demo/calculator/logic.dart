@@ -75,16 +75,12 @@ class OperationToken extends ExpressionToken {
   Operation operation;
 
   static String? opString(Operation operation) {
-    switch (operation) {
-      case Operation.Addition:
-        return ' + ';
-      case Operation.Subtraction:
-        return ' - ';
-      case Operation.Multiplication:
-        return '  \u00D7  ';
-      case Operation.Division:
-        return '  \u00F7  ';
-    }
+    return switch (operation) {
+      Operation.Addition       => ' + ',
+      Operation.Subtraction    => ' - ',
+      Operation.Multiplication => '  \u00D7  ',
+      Operation.Division       => '  \u00F7  ',
+    };
   }
 }
 
@@ -125,10 +121,8 @@ class CalcExpression {
     : this(<ExpressionToken>[], ExpressionState.Start);
 
   CalcExpression.result(FloatToken result)
-    : _list = <ExpressionToken?>[],
-      state = ExpressionState.Result {
-    _list.add(result);
-  }
+    : _list = <ExpressionToken?>[result],
+      state = ExpressionState.Result;
 
   /// The tokens comprising the expression.
   final List<ExpressionToken?> _list;

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
@@ -10,6 +12,7 @@ import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -76,13 +79,14 @@ class BuildAarCommand extends BuildSubCommand {
   };
 
   @override
-  Future<CustomDimensions> get usageValues async {
-    final FlutterProject flutterProject = _getProject();
+  late final FlutterProject project = _getProject();
 
-    String projectType;
-    if (flutterProject.manifest.isModule) {
+  @override
+  Future<CustomDimensions> get usageValues async {
+    final String projectType;
+    if (project.manifest.isModule) {
       projectType = 'module';
-    } else if (flutterProject.manifest.isPlugin) {
+    } else if (project.manifest.isPlugin) {
       projectType = 'plugin';
     } else {
       projectType = 'app';
@@ -95,12 +99,39 @@ class BuildAarCommand extends BuildSubCommand {
   }
 
   @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final String projectType;
+    if (project.manifest.isModule) {
+      projectType = 'module';
+    } else if (project.manifest.isPlugin) {
+      projectType = 'plugin';
+    } else {
+      projectType = 'app';
+    }
+
+    return Event.commandUsageValues(
+      workflow: commandPath,
+      commandHasTerminal: hasTerminal,
+      buildAarProjectType: projectType,
+      buildAarTargetPlatform: stringsArg('target-platform').join(','),
+    );
+  }
+
+  @override
   final String description = 'Build a repository containing an AAR and a POM file.\n\n'
       'By default, AARs are built for `release`, `debug` and `profile`.\n'
       'The POM file is used to include the dependencies that the AAR was compiled against.\n'
-      'To learn more about how to use these artifacts, see: https://flutter.dev/go/build-aar\n'
+      'To learn more about how to use these artifacts, see: https://flutter.dev/to/integrate-android-archive\n'
       'This command assumes that the entrypoint is "lib/main.dart". '
       'This cannot currently be configured.';
+
+  @override
+  Future<void> validateCommand() async {
+    if (!project.manifest.isModule) {
+      throwToolExit('AARs can only be built from modules.');
+    }
+    await super.validateCommand();
+  }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -139,12 +170,25 @@ class BuildAarCommand extends BuildSubCommand {
 
     displayNullSafetyMode(androidBuildInfo.first.buildInfo);
     await androidBuilder?.buildAar(
-      project: _getProject(),
+      project: project,
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
       outputDirectoryPath: stringArg('output'),
       buildNumber: buildNumber,
     );
+
+    // When an aar is successfully built, record to analytics whether Impeller
+    // is enabled or disabled. Note that 'computeImpellerEnabled' will default
+    // to false if not enabled explicitly in the manifest.
+    final bool impellerEnabled = project.android.computeImpellerEnabled();
+    final String buildLabel = impellerEnabled
+          ? 'manifest-aar-impeller-enabled'
+          : 'manifest-aar-impeller-disabled';
+    globals.analytics.send(Event.flutterBuildInfo(
+      label: buildLabel,
+      buildType: 'android',
+    ));
+
     return FlutterCommandResult.success();
   }
 
@@ -153,7 +197,7 @@ class BuildAarCommand extends BuildSubCommand {
   FlutterProject _getProject() {
     final List<String> remainingArguments = argResults!.rest;
     if (remainingArguments.isEmpty) {
-      return FlutterProject.current();
+      return super.project;
     }
     final File mainFile = _fileSystem.file(remainingArguments.first);
     final String path;

@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "Bilatu",
   "noSpellCheckReplacementsLabel": "Ez da aurkitu ordezteko hitzik",
   "menuDismissLabel": "Baztertu menua",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Bilatu",
+  "searchWebButtonLabel": "Bilatu sarean",
+  "shareButtonLabel": "Partekatu...",
+  "clearButtonLabel": "Clear"
 }

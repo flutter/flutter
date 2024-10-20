@@ -6,11 +6,38 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_driver/flutter_driver.dart';
+import 'package:path/path.dart' as path;
 
 import 'common.dart';
+
+export 'package:flutter_driver/flutter_driver.dart' show testOutputsDirectory;
+
+/// The callback type to handle [Response.data] after the test
+/// succeeds.
+typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?);
+
+/// Writes a json-serializable data to
+/// [testOutputsDirectory]/`testOutputFilename.json`.
+///
+/// This is the default `responseDataCallback` in [integrationDriver].
+Future<void> writeResponseData(
+  Map<String, dynamic>? data, {
+  String testOutputFilename = 'integration_response_data',
+  String? destinationDirectory,
+}) async {
+  destinationDirectory ??= testOutputsDirectory;
+  await fs.directory(destinationDirectory).create(recursive: true);
+  final File file = fs.file(path.join(
+    destinationDirectory,
+    '$testOutputFilename.json',
+  ));
+  final String resultString = _encodeJson(data, true);
+  await file.writeAsString(resultString);
+}
 
 /// Adaptor to run an integration test using `flutter drive`.
 ///
@@ -43,8 +70,19 @@ import 'common.dart';
 /// and it returns `true` if both images are equal.
 ///
 /// As a result, returning `false` from `onScreenshot` will make the test fail.
-Future<void> integrationDriver(
-    {FlutterDriver? driver, ScreenshotCallback? onScreenshot}) async {
+///
+/// `responseDataCallback` is the handler for processing [Response.data].
+/// The default value is `writeResponseData`.
+///
+/// `writeResponseOnFailure` determines whether the `responseDataCallback`
+/// function will be called to process the [Response.data] when a test fails.
+/// The default value is `false`.
+Future<void> integrationDriver({
+  FlutterDriver? driver,
+  ScreenshotCallback? onScreenshot,
+  ResponseDataCallback? responseDataCallback = writeResponseData,
+  bool writeResponseOnFailure = false,
+}) async {
   driver ??= await FlutterDriver.connect();
   // Test states that it's waiting on web driver commands.
   // [DriverTestMessage] is converted to string since json format causes an
@@ -130,9 +168,21 @@ Future<void> integrationDriver(
 
   if (response.allTestsPassed) {
     print('All tests passed.');
+    if (responseDataCallback != null) {
+      await responseDataCallback(response.data);
+    }
     exit(0);
   } else {
     print('Failure Details:\n${response.formattedFailureDetails}');
+    if (responseDataCallback != null && writeResponseOnFailure) {
+      await responseDataCallback(response.data);
+    }
     exit(1);
   }
+}
+
+const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
+
+String _encodeJson(Map<String, dynamic>? jsonObject, bool pretty) {
+  return pretty ? _prettyEncoder.convert(jsonObject) : json.encode(jsonObject);
 }

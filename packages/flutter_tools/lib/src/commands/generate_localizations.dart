@@ -17,7 +17,7 @@ import '../runner/flutter_command.dart';
 /// It generates Dart localization source files from arb files.
 ///
 /// For a more comprehensive tutorial on the tool, please see the
-/// [internationalization user guide](flutter.dev/go/i18n-user-guide).
+/// [internationalization guide](https://flutter.dev/to/internationalization).
 class GenerateLocalizationsCommand extends FlutterCommand {
   GenerateLocalizationsCommand({
     required FileSystem fileSystem,
@@ -206,6 +206,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
             '"{" is treated as a string if it is not followed by a valid placeholder '
             'and "}" is treated as a string if it does not close any previous "{" '
             'that is treated as a special character.',
+    );
+    argParser.addFlag(
+      'use-named-parameters',
+      help: 'Whether or not to use named parameters for the generated localization methods.',
     );
   }
 

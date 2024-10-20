@@ -359,6 +359,7 @@ void main() {
 
   testWidgets('Media padding is applied to CupertinoSliverNavigationBar', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     final Key leadingKey = GlobalKey();
     final Key middleKey = GlobalKey();
     final Key trailingKey = GlobalKey();
@@ -407,6 +408,7 @@ void main() {
 
   testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -487,6 +489,7 @@ void main() {
 
   testWidgets('User specified middle is always visible in sliver', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     final Key segmentedControlsKey = UniqueKey();
     await tester.pumpWidget(
       CupertinoApp(
@@ -544,6 +547,7 @@ void main() {
 
   testWidgets('User specified middle is only visible when sliver is collapsed if alwaysShowMiddle is false', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -590,6 +594,7 @@ void main() {
 
   testWidgets('Small title can be overridden', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -1192,8 +1197,9 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 99,
+            maxScaleFactor: 99,
             child: const CupertinoPageScaffold(
               child: CustomScrollView(
                 slivers: <Widget>[
@@ -1238,8 +1244,9 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
       title: 'title',
       builder: (BuildContext context) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+        return MediaQuery.withClampedTextScaling(
+          minScaleFactor: 99,
+          maxScaleFactor: 99,
           child: const CupertinoPageScaffold(
             child: CustomScrollView(
               slivers: <Widget>[
@@ -1525,6 +1532,7 @@ void main() {
     'CupertinoSliverNavigationBar large title can be hit tested when magnified',
     (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -1574,7 +1582,7 @@ class _ExpectStyles extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextStyle style = DefaultTextStyle.of(context).style;
     expect(style.color, isSameColorAs(color));
-    expect(style.fontFamily, '.SF Pro Text');
+    expect(style.fontFamily, 'CupertinoSystemText');
     expect(style.fontSize, 17.0);
     expect(style.letterSpacing, -0.41);
     count += index;

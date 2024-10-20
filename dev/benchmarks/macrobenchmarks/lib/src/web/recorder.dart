@@ -164,7 +164,7 @@ abstract class Recorder {
 ///
 /// Example:
 ///
-/// ```
+/// ```dart
 /// class BenchForLoop extends RawRecorder {
 ///   BenchForLoop() : super(name: benchmarkName);
 ///
@@ -219,7 +219,7 @@ abstract class RawRecorder extends Recorder {
 ///
 /// Example:
 ///
-/// ```
+/// ```dart
 /// class BenchDrawCircle extends SceneBuilderRecorder {
 ///   BenchDrawCircle() : super(name: benchmarkName);
 ///
@@ -287,7 +287,7 @@ abstract class SceneBuilderRecorder extends Recorder {
         if (shouldContinue()) {
           PlatformDispatcher.instance.scheduleFrame();
         } else {
-          profileCompleter.complete(_profile);
+          profileCompleter.complete(_profile!);
         }
       } catch (error, stackTrace) {
         profileCompleter.completeError(error, stackTrace);
@@ -311,7 +311,7 @@ abstract class SceneBuilderRecorder extends Recorder {
 ///
 /// Example:
 ///
-/// ```
+/// ```dart
 /// class BenchListView extends WidgetRecorder {
 ///   BenchListView() : super(name: benchmarkName);
 ///

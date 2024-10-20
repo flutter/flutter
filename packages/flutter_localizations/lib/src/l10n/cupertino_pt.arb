@@ -18,13 +18,14 @@
   "cutButtonLabel": "Cortar",
   "copyButtonLabel": "Copiar",
   "pasteButtonLabel": "Colar",
-  "selectAllButtonLabel": "Selecionar Tudo",
+  "selectAllButtonLabel": "Selecionar tudo",
   "tabSemanticsLabel": "Guia $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Dispensar",
   "searchTextFieldPlaceholderLabel": "Pesquisar",
   "noSpellCheckReplacementsLabel": "Nenhuma alternativa encontrada",
   "menuDismissLabel": "Dispensar menu",
   "lookUpButtonLabel": "Pesquisar",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Pesquisar na Web",
+  "shareButtonLabel": "Compartilhar…",
+  "clearButtonLabel": "Clear"
 }

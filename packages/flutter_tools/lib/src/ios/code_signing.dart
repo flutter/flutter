@@ -50,7 +50,7 @@ It's also possible that a previously installed app with the same Bundle\u0020
 Identifier was signed with a different certificate.
 
 For more information, please visit:
-  https://flutter.dev/docs/get-started/install/macos#deploy-to-ios-devices
+  https://flutter.dev/to/ios-app-signing
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════''';
@@ -64,7 +64,7 @@ Provisioning Profile. Please ensure that a Development Team is selected by:
 $fixWithDevelopmentTeamInstruction
 
 For more information, please visit:
-  https://flutter.dev/docs/get-started/install/macos#deploy-to-ios-devices
+  https://flutter.dev/to/ios-development-team
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════''';
@@ -206,7 +206,7 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
     return null;
   }
 
-  logger.printStatus('Signing iOS app for device deployment using developer identity: "$signingIdentity"');
+  logger.printStatus('Developer identity "$signingIdentity" selected for iOS code signing');
 
   final String? signingCertificateId =
       _securityFindIdentityCertificateCnExtractionPattern
@@ -231,7 +231,15 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
 
   final Process opensslProcess = await processUtils.start(
     const <String>['openssl', 'x509', '-subject']);
-  await (opensslProcess.stdin..write(signingCertificateStdout)).close();
+
+  await ProcessUtils.writeToStdinGuarded(
+    stdin: opensslProcess.stdin,
+    content: signingCertificateStdout,
+    onError: (Object? error, _) {
+      throw Exception('Unexpected error when writing to openssl: $error');
+    },
+  );
+  await opensslProcess.stdin.close();
 
   final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
   // Fire and forget discard of the stderr stream so we don't hold onto resources.

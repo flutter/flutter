@@ -94,11 +94,13 @@ void main() {
   testWidgets(
     'text entries are padded by default',
     (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'initial');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoSearchTextField(
-              controller: TextEditingController(text: 'initial'),
+              controller: controller,
             ),
           ),
         ),
@@ -132,6 +134,7 @@ void main() {
     'can control text content via controller',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -220,11 +223,14 @@ void main() {
   testWidgets(
     'prefix widget is in front of the text',
     (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'input');
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoSearchTextField(
-              controller: TextEditingController(text: 'input'),
+              controller: controller,
             ),
           ),
         ),
@@ -247,11 +253,14 @@ void main() {
   testWidgets(
     'suffix widget is after the text',
     (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'Hi');
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoSearchTextField(
-              controller: TextEditingController(text: 'Hi'),
+              controller: controller,
             ),
           ),
         ),
@@ -329,6 +338,7 @@ void main() {
     'clear button shows with right visibility mode',
     (WidgetTester tester) async {
       TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -349,7 +359,7 @@ void main() {
       expect(find.text('text input'), findsOneWidget);
 
       controller = TextEditingController();
-
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -374,6 +384,7 @@ void main() {
     'clear button removes text',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -402,6 +413,7 @@ void main() {
     (WidgetTester tester) async {
       String value = 'text entry';
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -485,6 +497,7 @@ void main() {
     'custom suffix onTap overrides default clearing behavior',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'Text');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -581,6 +594,7 @@ void main() {
 
   testWidgets('autofocus:true gives focus to the widget', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -625,7 +639,8 @@ void main() {
     expect(textField.smartDashesType, SmartDashesType.disabled);
   });
 
-  testWidgets('enableIMEPersonalizedLearning is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgets(
+      'enableIMEPersonalizedLearning is properly forwarded to the inner text field', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'tab_scaffold.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'app.dart' show CupertinoApp;
@@ -88,7 +91,7 @@ class CupertinoTabView extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed] inside this tab view,
   /// the route name is looked up in this map. If the name is present,
-  /// the associated [widgets.WidgetBuilder] is used to construct a
+  /// the associated [WidgetBuilder] is used to construct a
   /// [CupertinoPageRoute] that performs an appropriate transition to the new
   /// route.
   ///
@@ -156,6 +159,12 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     }
   }
 
+  @override
+  void dispose() {
+    _heroController.dispose();
+    super.dispose();
+  }
+
   void _updateObservers() {
     _navigatorObservers =
         List<NavigatorObserver>.of(widget.navigatorObservers)
@@ -191,7 +200,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
         if (!_isActive) {
           return;
         }
-        _navigatorKey.currentState!.pop();
+        _navigatorKey.currentState!.maybePop();
       },
       child: child,
     );

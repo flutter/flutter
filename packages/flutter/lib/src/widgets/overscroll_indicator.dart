@@ -152,16 +152,12 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
-    final String showDescription;
-    if (showLeading && showTrailing) {
-      showDescription = 'both sides';
-    } else if (showLeading) {
-      showDescription = 'leading side only';
-    } else if (showTrailing) {
-      showDescription = 'trailing side only';
-    } else {
-      showDescription = 'neither side (!)';
-    }
+    final String showDescription = switch ((showLeading, showTrailing)) {
+      (true,  true)  => 'both sides',
+      (true,  false) => 'leading side only',
+      (false, true)  => 'trailing side only',
+      (false, false) => 'neither side (!)',
+    };
     properties.add(MessageProperty('show', showDescription));
     properties.add(ColorProperty('color', color, showName: false));
   }
@@ -296,7 +292,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
 }
 
 // The Glow logic is a port of the logic in the following file:
-// https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget/EdgeEffect.java
+// https://android.googlesource.com/platform/frameworks/base/+/main/core/java/android/widget/EdgeEffect.java
 // as of December 2016.
 
 enum _GlowState { idle, absorb, pull, recede }
@@ -308,14 +304,17 @@ class _GlowController extends ChangeNotifier {
     required Axis axis,
   }) : _color = color,
        _axis = axis {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     _glowController = AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
-    final Animation<double> decelerator = CurvedAnimation(
+    _decelerator = CurvedAnimation(
       parent: _glowController,
       curve: Curves.decelerate,
     )..addListener(notifyListeners);
-    _glowOpacity = decelerator.drive(_glowOpacityTween);
-    _glowSize = decelerator.drive(_glowSizeTween);
+    _glowOpacity = _decelerator.drive(_glowOpacityTween);
+    _glowSize = _decelerator.drive(_glowSizeTween);
     _displacementTicker = vsync.createTicker(_tickDisplacement);
   }
 
@@ -327,6 +326,7 @@ class _GlowController extends ChangeNotifier {
   double _paintOffsetScrollPixels = 0.0;
 
   // animation values
+  late final CurvedAnimation _decelerator;
   final Tween<double> _glowOpacityTween = Tween<double>(begin: 0.0, end: 0.0);
   late final Animation<double> _glowOpacity;
   final Tween<double> _glowSizeTween = Tween<double>(begin: 0.0, end: 0.0);
@@ -380,6 +380,7 @@ class _GlowController extends ChangeNotifier {
   @override
   void dispose() {
     _glowController.dispose();
+    _decelerator.dispose();
     _displacementTicker.dispose();
     _pullRecedeTimer?.cancel();
     super.dispose();
@@ -452,7 +453,7 @@ class _GlowController extends ChangeNotifier {
   }
 
   void _changePhase(AnimationStatus status) {
-    if (status != AnimationStatus.completed) {
+    if (!status.isCompleted) {
       return;
     }
     switch (_state) {
@@ -728,24 +729,16 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
   AlignmentGeometry _getAlignmentForAxisDirection(_StretchDirection stretchDirection) {
     // Accounts for reversed scrollables by checking the AxisDirection
-    switch (widget.axisDirection) {
-      case AxisDirection.up:
-        return stretchDirection == _StretchDirection.trailing
-            ? AlignmentDirectional.topCenter
-            : AlignmentDirectional.bottomCenter;
-      case AxisDirection.right:
-        return stretchDirection == _StretchDirection.trailing
-            ? Alignment.centerRight
-            : Alignment.centerLeft;
-      case AxisDirection.down:
-        return stretchDirection == _StretchDirection.trailing
-            ? AlignmentDirectional.bottomCenter
-            : AlignmentDirectional.topCenter;
-      case AxisDirection.left:
-        return stretchDirection == _StretchDirection.trailing
-            ? Alignment.centerLeft
-            : Alignment.centerRight;
-    }
+    final AxisDirection direction = switch (stretchDirection) {
+      _StretchDirection.trailing => widget.axisDirection,
+      _StretchDirection.leading => flipAxisDirection(widget.axisDirection),
+    };
+    return switch (direction) {
+      AxisDirection.up    => AlignmentDirectional.topCenter,
+      AxisDirection.down  => AlignmentDirectional.bottomCenter,
+      AxisDirection.left  => Alignment.centerLeft,
+      AxisDirection.right => Alignment.centerRight,
+    };
   }
 
   @override
@@ -784,7 +777,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           final Widget transform = Transform(
             alignment: alignment,
             transform: Matrix4.diagonal3Values(x, y, 1.0),
-            filterQuality: stretch == 0 ? null : FilterQuality.low,
+            filterQuality: stretch == 0 ? null : FilterQuality.medium,
             child: widget.child,
           );
 
@@ -812,17 +805,21 @@ enum _StretchState {
 
 class _StretchController extends ChangeNotifier {
   _StretchController({ required TickerProvider vsync }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     _stretchController = AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
-    final Animation<double> decelerator = CurvedAnimation(
+    _decelerator = CurvedAnimation(
       parent: _stretchController,
       curve: Curves.decelerate,
     )..addListener(notifyListeners);
-    _stretchSize = decelerator.drive(_stretchSizeTween);
+    _stretchSize = _decelerator.drive(_stretchSizeTween);
   }
 
   late final AnimationController _stretchController;
   late final Animation<double> _stretchSize;
+  late final CurvedAnimation _decelerator;
   final Tween<double> _stretchSizeTween = Tween<double>(begin: 0.0, end: 0.0);
   _StretchState _state = _StretchState.idle;
 
@@ -840,15 +837,23 @@ class _StretchController extends ChangeNotifier {
 
   double get value => _stretchSize.value;
 
+  // Constants for absorbImpact.
+  static const double _kMinVelocity = 1;
+  static const double _kMaxVelocity = 10000;
+  static const Duration _kMinStretchDuration = Duration(milliseconds: 50);
+
   /// Handle a fling to the edge of the viewport at a particular velocity.
   ///
   /// The velocity must be positive.
   void absorbImpact(double velocity, double totalOverscroll) {
     assert(velocity >= 0.0);
-    velocity = clampDouble(velocity, 1, 10000);
+    velocity = clampDouble(velocity, _kMinVelocity, _kMaxVelocity);
     _stretchSizeTween.begin = _stretchSize.value;
     _stretchSizeTween.end = math.min(_stretchIntensity + (_flingFriction / velocity), 1.0);
-    _stretchController.duration = Duration(milliseconds: (velocity * 0.02).round());
+    _stretchController.duration = Duration(
+      milliseconds:
+          math.max(velocity * 0.02, _kMinStretchDuration.inMilliseconds).round(),
+    );
     _stretchController.forward(from: 0.0);
     _state = _StretchState.absorb;
     _stretchDirection = totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
@@ -896,7 +901,7 @@ class _StretchController extends ChangeNotifier {
   }
 
   void _changePhase(AnimationStatus status) {
-    if (status != AnimationStatus.completed) {
+    if (!status.isCompleted) {
       return;
     }
     switch (_state) {
@@ -925,6 +930,7 @@ class _StretchController extends ChangeNotifier {
   @override
   void dispose() {
     _stretchController.dispose();
+    _decelerator.dispose();
     super.dispose();
   }
 

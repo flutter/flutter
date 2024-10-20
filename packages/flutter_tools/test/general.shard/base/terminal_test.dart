@@ -5,6 +5,7 @@
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:test/fake.dart';
 
@@ -264,6 +265,21 @@ void main() {
     );
     terminal.singleCharMode = true;
   });
+<<<<<<< HEAD
+=======
+
+  testWithoutContext('singleCharMode is reset by shutdown hook', () {
+    final ShutdownHooks shutdownHooks = ShutdownHooks();
+    final FakeStdio stdio = FakeStdio();
+    final AnsiTerminal terminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), shutdownHooks: shutdownHooks);
+    stdio.stdinHasTerminal = true;
+    stdio._stdin = FakeStdin();
+
+    terminal.singleCharMode = true;
+    shutdownHooks.runShutdownHooks(BufferLogger.test());
+    expect(terminal.singleCharMode, false);
+  });
+>>>>>>> 2663184aa79047d0a33a14a3b607954f8fdd8730
 }
 
 late Stream<String> mockStdInStream;
@@ -282,12 +298,21 @@ class TestTerminal extends AnsiTerminal {
 
   bool _singleCharMode = false;
 
+<<<<<<< HEAD
   @override
   bool get singleCharMode => _singleCharMode;
 
   void Function(bool newMode)? _singleCharModeCallback;
 
   @override
+=======
+  @override
+  bool get singleCharMode => _singleCharMode;
+
+  void Function(bool newMode)? _singleCharModeCallback;
+
+  @override
+>>>>>>> 2663184aa79047d0a33a14a3b607954f8fdd8730
   set singleCharMode(bool newMode) {
     _singleCharMode = newMode;
     if (_singleCharModeCallback != null) {

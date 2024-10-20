@@ -19,8 +19,8 @@ FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART_SDK_PATH_OLD="$DART_SDK_PATH.old"
 ENGINE_STAMP="$FLUTTER_ROOT/bin/cache/engine-dart-sdk.stamp"
-ENGINE_VERSION=`cat "$FLUTTER_ROOT/bin/internal/engine.version"`
-ENGINE_REALM=`cat "$FLUTTER_ROOT/bin/internal/engine.realm"`
+ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
+ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/internal/engine.realm" | tr -d '[:space:]')
 OS="$(uname -s)"
 
 if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; then

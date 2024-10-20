@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:fake_async/fake_async.dart';
+///
+/// @docImport 'widget_tester.dart';
+/// @docImport 'test_compat.dart';
+library;
+
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;

@@ -94,7 +94,7 @@ abstract class StreamBuilderBase<T, S> extends StatefulWidget {
 
 /// State for [StreamBuilderBase].
 class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
-  StreamSubscription<T>? _subscription; // ignore: cancel_subscriptions
+  StreamSubscription<T>? _subscription;
   late S _summary;
 
   @override
@@ -200,7 +200,7 @@ class AsyncSnapshot<T> {
   /// and optionally either [data] or [error] with an optional [stackTrace]
   /// (but not both data and error).
   const AsyncSnapshot._(this.connectionState, this.data, this.error, this.stackTrace)
-    : assert(!(data != null && error != null)),
+    : assert(data == null || error == null),
       assert(stackTrace == null || error != null);
 
   /// Creates an [AsyncSnapshot] in [ConnectionState.none] with null data and error.
@@ -320,6 +320,20 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// a [Stream].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=MkKEWHfy99Y}
+///
+/// ## Managing the stream
+///
+/// The [stream] must have been obtained earlier, e.g. during [State.initState],
+/// [State.didUpdateWidget], or [State.didChangeDependencies]. It must not be
+/// created during the [State.build] or [StatelessWidget.build] method call when
+/// constructing the [StreamBuilder]. If the [stream] is created at the same
+/// time as the [StreamBuilder], then every time the [StreamBuilder]'s parent is
+/// rebuilt, the asynchronous task will be restarted.
+///
+/// A general guideline is to assume that every `build` method could get called
+/// every frame, and to treat omitted calls as an optimization.
+///
+/// ## Timing
 ///
 /// Widget rebuilding is scheduled by each interaction, using [State.setState],
 /// but is otherwise decoupled from the timing of the stream. The [builder]

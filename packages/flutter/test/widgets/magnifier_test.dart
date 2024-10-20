@@ -9,7 +9,6 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class _MockAnimationController extends AnimationController {
   _MockAnimationController()
@@ -43,7 +42,7 @@ void main() {
   }
 
   group('Raw Magnifier', () {
-    testWidgetsWithLeakTracking('should render with correct focal point and decoration',
+    testWidgets('should render with correct focal point and decoration',
         (WidgetTester tester) async {
       final Key appKey = UniqueKey();
       const Size magnifierSize = Size(100, 100);
@@ -54,7 +53,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
           key: appKey,
           home: Container(
-            color: Colors.orange,
+            color: Colors.blue,
             width: double.infinity,
             height: double.infinity,
             child: Stack(
@@ -65,7 +64,7 @@ void main() {
                   left: magnifierPosition.dx + magnifierFocalPoint.dx,
                   top: magnifierPosition.dy + magnifierFocalPoint.dy,
                   child: Container(
-                    color: Colors.pink,
+                    color: Colors.black,
                     // Since it is the size of the magnifier but over its
                     // magnificationScale, it should take up the whole magnifier.
                     width: (magnifierSize.width * 1.5) / magnificationScale,
@@ -79,26 +78,27 @@ void main() {
                     size: magnifierSize,
                     focalPointOffset: magnifierFocalPoint,
                     magnificationScale: magnificationScale,
-                    decoration: MagnifierDecoration(shadows: <BoxShadow>[
-                      BoxShadow(
-                        spreadRadius: 10,
-                        blurRadius: 10,
-                        color: Colors.green,
-                        offset: Offset(5, 5),
-                      ),
-                    ]),
+                    clipBehavior: Clip.hardEdge,
+                    decoration: MagnifierDecoration(
+                      shadows: <BoxShadow>[
+                        BoxShadow(
+                          spreadRadius: 10.0,
+                          blurRadius: 10.0,
+                          color: Colors.yellow,
+                          offset: Offset(5.0, 5.0),
+                        ),
+                      ],
+                      opacity: 0.5,
+                    ),
                   ),
                 ),
               ],
             ),
           )));
 
-      await tester.pumpAndSettle();
-
-      // Should look like an orange screen, with two pink boxes.
-      // One pink box is in the magnifier (so has a green shadow) and is double
-      // size (from magnification). Also, the magnifier should be slightly orange
-      // since it has opacity.
+      // Should look like a blue screen, with two black boxes. The larger black
+      // box is in the magnifier, is outlined in yellow, and is doubled in size
+      // (from magnification). The magnifier should be slightly transparent.
       await expectLater(
         find.byKey(appKey),
         matchesGoldenFile('widgets.magnifier.styled.png'),
@@ -117,7 +117,7 @@ void main() {
         magnifierController.removeFromOverlay();
       });
 
-      testWidgetsWithLeakTracking(
+      testWidgets(
           'should immediately remove from overlay on no animation controller',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
@@ -150,7 +150,7 @@ void main() {
         });
       });
 
-      testWidgetsWithLeakTracking('should update shown based on animation status',
+      testWidgets('should update shown based on animation status',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
           final MagnifierController magnifierController =
@@ -215,7 +215,7 @@ void main() {
     });
 
     group('show', () {
-      testWidgetsWithLeakTracking('should insert below below widget', (WidgetTester tester) async {
+      testWidgets('should insert below below widget', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Text('text'),
         ));
@@ -249,11 +249,12 @@ void main() {
         expect(allOverlayChildren.first.widget.key, fakeMagnifier.key);
       });
 
-      testWidgetsWithLeakTracking('should insert newly built widget without animating out if overlay != null',
+      testWidgets('should insert newly built widget without animating out if overlay != null',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
           final _MockAnimationController animationController =
               _MockAnimationController();
+          addTearDown(animationController.dispose);
 
           const RawMagnifier testMagnifier = RawMagnifier(
             size: Size(100, 100),
@@ -324,5 +325,12 @@ void main() {
         });
       }
     });
+  });
+
+  testWidgets('MagnifierInfo.toString', (WidgetTester tester) async {
+    expect(MagnifierInfo.empty.toString(),
+      'MagnifierInfo(position: Offset(0.0, 0.0), line: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), '
+      'caret: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), field: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))',
+    );
   });
 }

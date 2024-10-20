@@ -5,6 +5,7 @@
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -42,7 +43,7 @@ class RenderImage extends RenderBox {
     TextDirection? textDirection,
     bool invertColors = false,
     bool isAntiAlias = false,
-    FilterQuality filterQuality = FilterQuality.low,
+    FilterQuality filterQuality = FilterQuality.medium,
   }) : _image = image,
        _width = width,
        _height = height,
@@ -92,10 +93,11 @@ class RenderImage extends RenderBox {
       value.dispose();
       return;
     }
+    final bool sizeChanged = _image?.width != value?.width || _image?.height != value?.height;
     _image?.dispose();
     _image = value;
     markNeedsPaint();
-    if (_width == null || _height == null) {
+    if (sizeChanged && (_width == null || _height == null)) {
       markNeedsLayout();
     }
   }
@@ -186,9 +188,7 @@ class RenderImage extends RenderBox {
 
   /// Used to set the filterQuality of the image.
   ///
-  /// Use the [FilterQuality.low] quality setting to scale the image, which corresponds to
-  /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
-  /// to nearest-neighbor.
+  /// Defaults to [FilterQuality.medium].
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {
@@ -401,7 +401,8 @@ class RenderImage extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _sizeForConstraints(constraints);
   }
 

@@ -42,6 +42,7 @@ class DataColumn {
     this.numeric = false,
     this.onSort,
     this.mouseCursor,
+    this.headingRowAlignment,
   });
 
   /// The column heading.
@@ -97,6 +98,17 @@ class DataColumn {
   /// See also:
   ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
+
+  /// Defines the horizontal layout of the [label] and sort indicator in the
+  /// heading row.
+  ///
+  /// If [headingRowAlignment] value is [MainAxisAlignment.center] and [onSort] is
+  /// not null, then a [SizedBox] with a width of sort arrow icon size and sort
+  /// arrow padding will be placed before the [label] to ensure the label is
+  /// centered in the column.
+  ///
+  /// If null, then defaults to [MainAxisAlignment.start].
+  final MainAxisAlignment? headingRowAlignment;
 }
 
 /// Row configuration and cell data for a [DataTable].
@@ -193,6 +205,8 @@ class DataRow {
   /// color is painted as an overlay to the row. To make sure that the row's
   /// [InkWell] is visible (when pressed, hovered and focused), it is
   /// recommended to use a translucent color.
+  ///
+  /// If [onSelectChanged] or [onLongPress] is null, the row's [InkWell] will be disabled.
   ///
   /// ```dart
   /// DataRow(
@@ -513,6 +527,9 @@ class DataTable extends StatelessWidget {
   /// row. To make sure that the row's [InkWell] is visible (when pressed,
   /// hovered and focused), it is recommended to use a translucent background
   /// color.
+  ///
+  /// If [DataRow.onSelectChanged] or [DataRow.onLongPress] is null, the row's
+  /// [InkWell] will be disabled.
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.dataRowColor] is used. By default, the
@@ -825,12 +842,16 @@ class DataTable extends StatelessWidget {
     required bool ascending,
     required MaterialStateProperty<Color?>? overlayColor,
     required MouseCursor? mouseCursor,
+    required MainAxisAlignment headingRowAlignment,
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
     label = Row(
       textDirection: numeric ? TextDirection.rtl : null,
+      mainAxisAlignment: headingRowAlignment,
       children: <Widget>[
+        if (headingRowAlignment == MainAxisAlignment.center && onSort != null)
+          const SizedBox(width: _SortArrowState._arrowIconSize + _sortArrowPadding),
         label,
         if (onSort != null)
           ...<Widget>[
@@ -1075,16 +1096,11 @@ class DataTable extends StatelessWidget {
     for (int dataColumnIndex = 0; dataColumnIndex < columns.length; dataColumnIndex += 1) {
       final DataColumn column = columns[dataColumnIndex];
 
-      final double paddingStart;
-      if (dataColumnIndex == 0 && displayCheckboxColumn && checkboxHorizontalMargin != null) {
-        paddingStart = effectiveHorizontalMargin;
-      } else if (dataColumnIndex == 0 && displayCheckboxColumn) {
-        paddingStart = effectiveHorizontalMargin / 2.0;
-      } else if (dataColumnIndex == 0 && !displayCheckboxColumn) {
-        paddingStart = effectiveHorizontalMargin;
-      } else {
-        paddingStart = effectiveColumnSpacing / 2.0;
-      }
+      final double paddingStart = switch (dataColumnIndex) {
+        0 when displayCheckboxColumn && checkboxHorizontalMargin == null => effectiveHorizontalMargin / 2.0,
+        0 => effectiveHorizontalMargin,
+        _ => effectiveColumnSpacing / 2.0,
+      };
 
       final double paddingEnd;
       if (dataColumnIndex == columns.length - 1) {
@@ -1117,6 +1133,7 @@ class DataTable extends StatelessWidget {
         ascending: sortAscending,
         overlayColor: effectiveHeadingRowColor,
         mouseCursor: column.mouseCursor?.resolve(headerStates) ?? dataTableTheme.headingCellCursor?.resolve(headerStates),
+        headingRowAlignment: column.headingRowAlignment ?? dataTableTheme.headingRowAlignment ?? MainAxisAlignment.start,
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
@@ -1254,11 +1271,11 @@ class _SortArrow extends StatefulWidget {
 }
 
 class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
-  late AnimationController _opacityController;
-  late Animation<double> _opacityAnimation;
+  late final AnimationController _opacityController;
+  late final CurvedAnimation _opacityAnimation;
 
-  late AnimationController _orientationController;
-  late Animation<double> _orientationAnimation;
+  late final AnimationController _orientationController;
+  late final Animation<double> _orientationAnimation;
   double _orientationOffset = 0.0;
 
   bool? _up;
@@ -1298,7 +1315,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   }
 
   void _resetOrientationAnimation(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
+    if (status.isCompleted) {
       assert(_orientationAnimation.value == math.pi);
       _orientationOffset += math.pi;
       _orientationController.value = 0.0; // TODO(ianh): This triggers a pointless rebuild.
@@ -1311,7 +1328,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     bool skipArrow = false;
     final bool? newUp = widget.up ?? _up;
     if (oldWidget.visible != widget.visible) {
-      if (widget.visible && (_opacityController.status == AnimationStatus.dismissed)) {
+      if (widget.visible && _opacityController.isDismissed) {
         _orientationController.stop();
         _orientationController.value = 0.0;
         _orientationOffset = newUp! ? 0.0 : math.pi;
@@ -1324,7 +1341,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
       }
     }
     if ((_up != newUp) && !skipArrow) {
-      if (_orientationController.status == AnimationStatus.dismissed) {
+      if (_orientationController.isDismissed) {
         _orientationController.forward();
       } else {
         _orientationController.reverse();
@@ -1337,6 +1354,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   void dispose() {
     _opacityController.dispose();
     _orientationController.dispose();
+    _opacityAnimation.dispose();
     super.dispose();
   }
 

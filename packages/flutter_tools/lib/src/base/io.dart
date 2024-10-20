@@ -93,6 +93,7 @@ export 'dart:io'
         // ProcessSignal     NO! Use [ProcessSignal] below.
         ProcessStartMode,
         // RandomAccessFile  NO! Use `file_system.dart`
+        SecurityContext,
         ServerSocket,
         SignalException,
         Socket,
@@ -386,9 +387,9 @@ class Stdio {
 
 /// An overridable version of io.ProcessInfo.
 abstract class ProcessInfo {
-  factory ProcessInfo(FileSystem fs) => _DefaultProcessInfo(fs);
+  factory ProcessInfo(FileSystem fs) = _DefaultProcessInfo;
 
-  factory ProcessInfo.test(FileSystem fs) => _TestProcessInfo(fs);
+  factory ProcessInfo.test(FileSystem fs) = _TestProcessInfo;
 
   int get currentRss;
 

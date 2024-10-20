@@ -1275,7 +1275,7 @@ To use 'target-device' for development, enable Developer Mode in Settings → Pr
 
         testUsingContext('when one of the matching devices has dev mode disabled', () async {
           deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device-1', devModeEnabled: false, isConnected: false),
-            FakeIOSDevice(deviceName: 'target-device-2', devModeEnabled: true)];
+            FakeIOSDevice(deviceName: 'target-device-2')];
 
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
           expect(logger.statusText, equals('''
@@ -1294,6 +1294,45 @@ Checking for wireless devices...
           expect(logger.statusText, equals('''
 To use 'target-device-1' for development, enable Developer Mode in Settings → Privacy & Security.
 To use 'target-device-2' for development, enable Developer Mode in Settings → Privacy & Security.
+No devices found yet. Checking for wireless devices...
+
+No supported devices found with name or id matching 'target-device'.
+'''));
+          expect(devices, isNull);
+        });
+
+        testUsingContext('when only matching device is unpaired', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device', isPaired: false)];
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+          expect(logger.statusText, equals('''
+'target-device' is not paired. Open Xcode and trust this computer when prompted.
+'''));
+          expect(devices, isNull);
+        });
+
+        testUsingContext('when one of the matching devices is unpaired', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device-1', isPaired: false, isConnected: false),
+            FakeIOSDevice(deviceName: 'target-device-2')];
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+          expect(logger.statusText, contains('''
+'target-device-1' is not paired. Open Xcode and trust this computer when prompted.
+Checking for wireless devices...
+'''));
+          expect(devices, isNotNull);
+        });
+
+        testUsingContext('when all matching devices are unpaired', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device-1', isPaired: false, isConnected: false),
+            FakeIOSDevice(deviceName: 'target-device-2', isPaired: false, isConnected: false)];
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+          expect(logger.statusText, contains('''
+'target-device-1' is not paired. Open Xcode and trust this computer when prompted.
+'target-device-2' is not paired. Open Xcode and trust this computer when prompted.
 No devices found yet. Checking for wireless devices...
 
 No supported devices found with name or id matching 'target-device'.
@@ -2677,9 +2716,6 @@ class FakeXcdevice extends Fake implements XCDevice {
 
 class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     String? deviceId,
@@ -2776,23 +2812,20 @@ class FakeDevice extends Fake implements Device {
       getNameForTargetPlatform(await targetPlatform);
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     String? deviceId,
     String? deviceName,
-    bool? devModeEnabled,
     bool deviceSupported = true,
     bool deviceSupportForProject = true,
     this.ephemeral = true,
     this.isConnected = true,
+    this.devModeEnabled = true,
+    this.isPaired = true,
     this.platformType = PlatformType.ios,
     this.connectionInterface = DeviceConnectionInterface.attached,
   })  : id = deviceId ?? 'xxx',
         name = deviceName ?? 'test',
-        devModeEnabled = devModeEnabled ?? true,
         _isSupported = deviceSupported,
         _isSupportedForProject = deviceSupportForProject;
 
@@ -2805,6 +2838,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     this.isConnected = false,
     this.platformType = PlatformType.ios,
     this.devModeEnabled = true,
+    this.isPaired = true,
     this.connectionInterface = DeviceConnectionInterface.wireless,
   })  : id = deviceId ?? 'xxx',
         name = deviceName ?? 'test',
@@ -2819,6 +2853,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     this.ephemeral = true,
     this.isConnected = true,
     this.devModeEnabled = true,
+    this.isPaired = true,
     this.platformType = PlatformType.ios,
     this.connectionInterface = DeviceConnectionInterface.wireless,
   })  : id = deviceId ?? 'xxx',
@@ -2837,6 +2872,9 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   final bool devModeEnabled;
+
+  @override
+  final bool isPaired;
 
   @override
   String id;

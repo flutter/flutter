@@ -16,8 +16,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/targets/scene_importer.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
+import 'package:flutter_tools/src/build_system/tools/scene_importer.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -34,6 +34,7 @@ import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
@@ -41,6 +42,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart' as test_fakes;
 
 const List<VmServiceExpectation> kAttachLogExpectations =
     <VmServiceExpectation>[
@@ -60,6 +62,9 @@ const List<VmServiceExpectation> kAttachLogExpectations =
 
 const List<VmServiceExpectation> kAttachIsolateExpectations =
     <VmServiceExpectation>[
+  FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+    'streamId': 'Service',
+  }),
   FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
     'streamId': 'Isolate',
   }),
@@ -100,9 +105,10 @@ void main() {
   late FakeWebServerDevice webServerDevice;
   late FakeDevice mockDevice;
   late FakeVmServiceHost fakeVmServiceHost;
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
   late TestUsage testUsage;
+  late FakeAnalytics fakeAnalytics;
 
   setUp(() {
     testUsage = TestUsage();
@@ -122,6 +128,10 @@ void main() {
       ..device = mockDevice
       ..generator = residentCompiler;
     fileSystem.file('.packages').writeAsStringSync('\n');
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: test_fakes.FakeFlutterVersion(),
+    );
   });
 
   void setupMocks() {
@@ -156,6 +166,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -188,6 +199,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -207,6 +219,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
@@ -220,6 +233,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -258,7 +272,7 @@ void main() {
   testUsingContext('WebRunner copies compiled app.dill to cache during startup',
       () async {
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
-      const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
+      const BuildInfo(BuildMode.debug, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'),
     );
     final ResidentRunner residentWebRunner =
         setUpResidentRunner(flutterDevice, debuggingOptions: debuggingOptions);
@@ -353,6 +367,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -379,6 +394,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -579,6 +595,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost =
@@ -663,11 +680,32 @@ void main() {
             'cd48': 'false'
           })),
     ]);
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.hotRunnerInfo(
+          label: 'restart',
+          targetPlatform: 'web-javascript',
+          sdkName: '',
+          emulator: false,
+          fullRestart: true,
+          overallTimeInMs: 0,
+        ),
+      ),
+    );
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
     ]);
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.timing(
+        workflow: 'hot',
+        variableName: 'web-incremental-restart',
+        elapsedMilliseconds: 0,
+      ),
+    ));
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
+    Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
@@ -735,11 +773,32 @@ void main() {
             'cd48': 'false'
           })),
     ]);
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.hotRunnerInfo(
+          label: 'restart',
+          targetPlatform: 'web-javascript',
+          sdkName: '',
+          emulator: false,
+          fullRestart: true,
+          overallTimeInMs: 0,
+        ),
+      ),
+    );
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
     ]);
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.timing(
+        workflow: 'hot',
+        variableName: 'web-incremental-restart',
+        elapsedMilliseconds: 0,
+      ),
+    ));
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
+    Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
@@ -771,9 +830,11 @@ void main() {
 
     // web-server device does not send restart analytics
     expect(testUsage.events, isEmpty);
+    expect(fakeAnalytics.sentEvents, isEmpty);
     expect(testUsage.timings, isEmpty);
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
+    Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
@@ -803,9 +864,11 @@ void main() {
 
     expect(await residentWebRunner.run(), 1);
     expect(testUsage.events, isEmpty);
+    expect(fakeAnalytics.sentEvents, isEmpty);
     expect(testUsage.timings, isEmpty);
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
+    Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
@@ -868,9 +931,11 @@ void main() {
     expect(result.code, 1);
     expect(result.message, contains('Failed to recompile application.'));
     expect(testUsage.events, isEmpty);
+    expect(fakeAnalytics.sentEvents, isEmpty);
     expect(testUsage.timings, isEmpty);
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
+    Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
@@ -911,7 +976,7 @@ void main() {
       const FakeVmServiceRequest(
         method: kHotRestartServiceName,
         // Failed response,
-        errorCode: RPCErrorCodes.kInternalError,
+        error: FakeRPCError(code: RPCErrorCodes.kInternalError),
       ),
     ]);
     setupMocks();
@@ -1054,6 +1119,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -1102,6 +1168,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -1144,6 +1211,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -1253,6 +1321,59 @@ flutter:
     ProcessManager: () => processManager,
   });
 
+  testUsingContext('Turns HttpException from ChromeTab::connect into ToolExit', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final ResidentRunner residentWebRunner = setUpResidentRunner(
+      flutterDevice,
+      logger: logger,
+    );
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    setupMocks();
+    final FakeChromeConnection chromeConnection = FakeChromeConnection();
+    final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
+    final FakeProcess process = FakeProcess();
+    final Chromium chrome = Chromium(
+      1,
+      chromeConnection,
+      chromiumLauncher: chromiumLauncher,
+      process: process,
+      logger: logger,
+    );
+    chromiumLauncher.setInstance(chrome);
+
+    flutterDevice.device = GoogleChromeDevice(
+      fileSystem: fileSystem,
+      chromiumLauncher: chromiumLauncher,
+      logger: logger,
+      platform: FakePlatform(),
+      processManager: FakeProcessManager.any(),
+    );
+    webDevFS.baseUri = Uri.parse('http://localhost:8765/app/');
+
+    final FakeChromeTab chromeTab = FakeChromeTab(
+      'index.html',
+      connectException: HttpException(
+        'Connection closed before full header was received',
+        uri: Uri(
+          path: 'http://localhost:50094/devtools/page/3036A94908353E86E183B6A40F54104B',
+        ),
+      ),
+    );
+    chromeConnection.tabs.add(chromeTab);
+
+    await expectLater(
+      residentWebRunner.run,
+      throwsToolExit(
+        message: 'Failed to establish connection with the application instance in Chrome.',
+      ),
+    );
+    expect(logger.errorText, contains('HttpException'));
+    expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
   testUsingContext('Successfully turns AppConnectionException into ToolExit',
       () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
@@ -1344,6 +1465,7 @@ ResidentRunner setUpResidentRunner(
         debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
     ipv6: true,
     usage: globals.flutterUsage,
+    analytics: globals.analytics,
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,
     logger: logger ?? BufferLogger.test(),
@@ -1351,14 +1473,8 @@ ResidentRunner setUpResidentRunner(
   );
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeWebServerDevice extends FakeDevice implements WebServerDevice {}
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   String name = 'FakeDevice';
@@ -1428,10 +1544,6 @@ class FakeAppConnection extends Fake implements AppConnection {
     ranMain = true;
   }
 }
-
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeChromeDevice extends Fake implements ChromiumDevice {}
 
 class FakeWipDebugger extends Fake implements WipDebugger {}
@@ -1506,7 +1618,6 @@ class FakeWebDevFS extends Fake implements WebDevFS {
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
     String? projectRootPath,
@@ -1543,14 +1654,21 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
 }
 
 class FakeChromeTab extends Fake implements ChromeTab {
-  FakeChromeTab(this.url);
+  FakeChromeTab(this.url, {
+    Exception? connectException,
+  }): _connectException = connectException;
 
   @override
   final String url;
+
+  final Exception? _connectException;
   final FakeWipConnection connection = FakeWipConnection();
 
   @override
   Future<WipConnection> connect({Function? onError}) async {
+    if (_connectException != null) {
+      throw _connectException;
+    }
     return connection;
   }
 }
@@ -1675,7 +1793,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     Uri? mainUri,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
@@ -1700,10 +1817,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
-  }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

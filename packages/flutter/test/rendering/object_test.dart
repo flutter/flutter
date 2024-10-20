@@ -8,11 +8,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'rendering_tester.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
+
+  test('PipelineOwner dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => PipelineOwner().dispose(), PipelineOwner),
+      areCreateAndDispose,
+    );
+  });
 
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
     // Initialize all bindings because owner.flushSemantics() requires a window
@@ -148,13 +156,71 @@ void main() {
     expect(() => data3.detach(), throwsAssertionError);
   });
 
-  test('RenderObject.getTransformTo asserts is argument is not descendant', () {
+  test('RenderObject.getTransformTo asserts if target not in the same render tree', () {
     final PipelineOwner owner = PipelineOwner();
     final TestRenderObject renderObject1 = TestRenderObject();
     renderObject1.attach(owner);
     final TestRenderObject renderObject2 = TestRenderObject();
     renderObject2.attach(owner);
     expect(() => renderObject1.getTransformTo(renderObject2), throwsAssertionError);
+  });
+
+  test('RenderObject.getTransformTo works for siblings and descendants', () {
+    final PipelineOwner owner = PipelineOwner();
+    final TestRenderObject renderObject1 = TestRenderObject()..attach(owner);
+    final TestRenderObject renderObject11 = TestRenderObject();
+    final TestRenderObject renderObject12 = TestRenderObject();
+
+    renderObject1
+      ..add(renderObject11)
+      ..add(renderObject12);
+    expect(renderObject11.getTransformTo(renderObject12), equals(Matrix4.identity()));
+    expect(renderObject1.getTransformTo(renderObject11), equals(Matrix4.identity()));
+    expect(renderObject1.getTransformTo(renderObject12), equals(Matrix4.identity()));
+    expect(renderObject11.getTransformTo(renderObject1), equals(Matrix4.identity()));
+    expect(renderObject12.getTransformTo(renderObject1), equals(Matrix4.identity()));
+
+    expect(renderObject1.getTransformTo(renderObject1), equals(Matrix4.identity()));
+    expect(renderObject11.getTransformTo(renderObject11), equals(Matrix4.identity()));
+    expect(renderObject12.getTransformTo(renderObject12), equals(Matrix4.identity()));
+  });
+
+  test('RenderObject.getTransformTo gets the correct paint transform', () {
+    final PipelineOwner owner = PipelineOwner();
+    final TestRenderObject renderObject0 = TestRenderObject()
+      ..attach(owner);
+    final TestRenderObject renderObject1 = TestRenderObject();
+    final TestRenderObject renderObject2 = TestRenderObject();
+    renderObject0
+      ..add(renderObject1)
+      ..add(renderObject2)
+      ..paintTransform = Matrix4.diagonal3Values(9, 4, 1);
+
+    final TestRenderObject renderObject11 = TestRenderObject();
+    final TestRenderObject renderObject21 = TestRenderObject();
+    renderObject1
+      ..add(renderObject11)
+      ..paintTransform = Matrix4.translationValues(8, 16, 32);
+    renderObject2
+      ..add(renderObject21)
+      ..paintTransform = Matrix4.translationValues(32, 64, 128);
+
+    expect(
+      renderObject11.getTransformTo(renderObject21),
+      equals(Matrix4.translationValues((8 - 32) * 9, (16 - 64) * 4, 32 - 128)),
+    );
+    // Turn one of the paint transforms into a singular matrix and getTransformTo
+    // should return Matrix4.zero().
+    renderObject0.paintTransform = Matrix4(
+      1, 1, 1 ,1,
+      2, 2, 2, 2,
+      3, 3, 3, 3,
+      4, 4, 4, 4,
+    ); // Not a full rank matrix, so it has to be singular.
+    expect(
+      renderObject11.getTransformTo(renderObject21),
+      equals(Matrix4.zero()),
+    );
   });
 
   test('PaintingContext.pushClipRect reuses the layer', () {
@@ -368,7 +434,8 @@ class _TestCustomLayerBox extends RenderBox {
 
 class TestParentData extends ParentData with ContainerParentDataMixin<RenderBox> { }
 
-class TestRenderObject extends RenderObject {
+class TestRenderObjectParentData extends ParentData with ContainerParentDataMixin<TestRenderObject> { }
+class TestRenderObject extends RenderObject with ContainerRenderObjectMixin<TestRenderObject, TestRenderObjectParentData> {
   TestRenderObject({this.allowPaintBounds = false});
 
   final bool allowPaintBounds;
@@ -383,6 +450,20 @@ class TestRenderObject extends RenderObject {
   Rect get paintBounds {
     assert(allowPaintBounds); // For some tests, this should not get called.
     return Rect.zero;
+  }
+
+  Matrix4 paintTransform = Matrix4.identity();
+  @override
+  void applyPaintTransform(covariant RenderObject child, Matrix4 transform) {
+    super.applyPaintTransform(child, transform);
+    transform.multiply(paintTransform);
+  }
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! TestRenderObjectParentData) {
+      child.parentData = TestRenderObjectParentData();
+    }
   }
 
   @override

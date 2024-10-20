@@ -8,11 +8,12 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/localizations.dart';
+import '../build_system/build_targets.dart';
 
 Future<void> generateLocalizationsSyntheticPackage({
   required Environment environment,
   required BuildSystem buildSystem,
+  required BuildTargets buildTargets,
 }) async {
 
   final FileSystem fileSystem = environment.fileSystem;
@@ -54,7 +55,7 @@ Future<void> generateLocalizationsSyntheticPackage({
   }
 
   final BuildResult result = await buildSystem.build(
-    const GenerateLocalizationsTarget(),
+    buildTargets.generateLocalizationsTarget,
     environment,
   );
 

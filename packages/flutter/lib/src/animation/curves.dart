@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
 
 import 'dart:math' as math;
 import 'dart:ui';
@@ -190,6 +192,79 @@ class Interval extends Curve {
       return '${objectRuntimeType(this, 'Interval')}($begin\u22EF$end)\u27A9$curve';
     }
     return '${objectRuntimeType(this, 'Interval')}($begin\u22EF$end)';
+  }
+}
+
+/// A curve that progresses according to [beginCurve] until [split], then
+/// according to [endCurve].
+///
+/// Split curves are useful in situations where a widget must track the
+/// user's finger (which requires a linear animation), but can also be flung
+/// using a curve specified with the [endCurve] argument, after the finger is
+/// released. In such a case, the value of [split] would be the progress
+/// of the animation at the time when the finger was released.
+///
+/// For example, if [split] is set to 0.5, [beginCurve] is [Curves.linear],
+/// and [endCurve] is [Curves.easeOutCubic], then the bottom-left quarter of the
+/// curve will be a straight line, and the top-right quarter will contain the
+/// entire [Curves.easeOutCubic] curve.
+///
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_split.mp4}
+class Split extends Curve {
+  /// Creates a split curve.
+  const Split(
+    this.split, {
+    this.beginCurve = Curves.linear,
+    this.endCurve = Curves.easeOutCubic,
+  });
+
+  /// The progress value separating [beginCurve] from [endCurve].
+  ///
+  /// The value before which the curve progresses according to [beginCurve] and
+  /// after which the curve progresses according to [endCurve].
+  ///
+  /// When t is exactly `split`, the curve has the value `split`.
+  ///
+  /// Must be between 0 and 1.0, inclusively.
+  final double split;
+
+  /// The curve to use before [split] is reached.
+  ///
+  /// Defaults to [Curves.linear].
+  final Curve beginCurve;
+
+  /// The curve to use after [split] is reached.
+  ///
+  /// Defaults to [Curves.easeOutCubic].
+  final Curve endCurve;
+
+  @override
+  double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
+    assert(split >= 0.0 && split <= 1.0);
+
+    if (t == 0.0 || t == 1.0) {
+      return t;
+    }
+
+    if (t == split) {
+      return split;
+    }
+
+    if (t < split) {
+      final double curveProgress = t / split;
+      final double transformed = beginCurve.transform(curveProgress);
+      return lerpDouble(0, split, transformed)!;
+    } else {
+      final double curveProgress = (t - split) / (1 - split);
+      final double transformed = endCurve.transform(curveProgress);
+      return lerpDouble(split, 1, transformed)!;
+    }
+  }
+
+  @override
+  String toString() {
+    return '${describeIdentity(this)}($split, $beginCurve, $endCurve)';
   }
 }
 
@@ -1158,7 +1233,7 @@ class _DecelerateCurve extends Curve {
   @override
   double transformInternal(double t) {
     // Intended to match the behavior of:
-    // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/view/animation/DecelerateInterpolator.java
+    // https://android.googlesource.com/platform/frameworks/base/+/main/core/java/android/view/animation/DecelerateInterpolator.java
     // ...as of December 2016.
     t = 1.0 - t;
     return 1.0 - t * t;
@@ -1411,10 +1486,14 @@ abstract final class Curves {
 
   /// A cubic animation curve that speeds up quickly and ends slowly.
   ///
+  /// This is the same as the CSS easing function `ease`.
+  ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease.mp4}
   static const Cubic ease = Cubic(0.25, 0.1, 0.25, 1.0);
 
   /// A cubic animation curve that starts slowly and ends quickly.
+  ///
+  /// This is the same as the CSS easing function `ease-in`.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.mp4}
   static const Cubic easeIn = Cubic(0.42, 0.0, 1.0, 1.0);
@@ -1517,6 +1596,8 @@ abstract final class Curves {
 
   /// A cubic animation curve that starts quickly and ends slowly.
   ///
+  /// This is the same as the CSS easing function `ease-out`.
+  ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out.mp4}
   static const Cubic easeOut = Cubic(0.0, 0.0, 0.58, 1.0);
 
@@ -1617,6 +1698,8 @@ abstract final class Curves {
 
   /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly.
+  ///
+  /// This is the same as the CSS easing function `ease-in-out`.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out.mp4}
   static const Cubic easeInOut = Cubic(0.42, 0.0, 0.58, 1.0);

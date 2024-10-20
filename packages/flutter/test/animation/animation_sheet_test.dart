@@ -9,7 +9,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 
 void main() {
@@ -18,7 +17,7 @@ void main() {
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
-  testWidgetsWithLeakTracking('recording disposes images',
+  testWidgets('recording disposes images',
   (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
     addTearDown(builder.dispose);
@@ -34,7 +33,7 @@ void main() {
     skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
   );
 
-  testWidgetsWithLeakTracking('correctly records frames using collate',
+  testWidgets('correctly records frames using collate',
   (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
     addTearDown(builder.dispose);
@@ -72,7 +71,7 @@ void main() {
     skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
   ); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgetsWithLeakTracking('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
+  testWidgets('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(
       frameSize: const Size(8, 2),
       allLayers: true,

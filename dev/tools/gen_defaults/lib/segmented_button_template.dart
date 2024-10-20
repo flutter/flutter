@@ -119,6 +119,33 @@ class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
   }
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
+
+  static MaterialStateProperty<Color?> resolveStateColor(Color? unselectedColor, Color? selectedColor, Color? overlayColor){
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return (overlayColor ?? selectedColor)?.withOpacity(0.1);
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return (overlayColor ?? selectedColor)?.withOpacity(0.08);
+        }
+        if (states.contains(MaterialState.focused)) {
+          return (overlayColor ?? selectedColor)?.withOpacity(0.1);
+        }
+      } else {
+        if (states.contains(MaterialState.pressed)) {
+          return (overlayColor ?? unselectedColor)?.withOpacity(0.1);
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return (overlayColor ?? unselectedColor)?.withOpacity(0.08);
+        }
+        if (states.contains(MaterialState.focused)) {
+          return (overlayColor ?? unselectedColor)?.withOpacity(0.1);
+        }
+      }
+      return Colors.transparent;
+    });
+  }
 }
 ''';
 }

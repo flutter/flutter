@@ -6,11 +6,13 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -42,6 +44,7 @@ void main() {
     late Directory tempDir;
     late Config testConfig;
     late FileSystem fs;
+
     const String flutterRoot = '/path/to/flutter';
 
     setUp(() {
@@ -161,6 +164,9 @@ void main() {
     late FakeClock fakeClock;
     late FakeDoctor doctor;
     late FakeAndroidStudio androidStudio;
+    late ProcessManager processManager;
+    late BufferLogger logger;
+    late ProcessUtils processUtils;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -169,6 +175,9 @@ void main() {
       fakeClock = FakeClock();
       doctor = FakeDoctor();
       androidStudio = FakeAndroidStudio();
+      processManager = FakeProcessManager.empty();
+      logger = BufferLogger.test();
+      processUtils = ProcessUtils(logger: logger, processManager: processManager);
     });
 
     testUsingContext('flutter commands send timing events', () async {
@@ -220,17 +229,17 @@ void main() {
 
     testUsingContext('compound command usage path', () async {
       final BuildCommand buildCommand = BuildCommand(
+        artifacts: Artifacts.test(fileSystem: memoryFileSystem),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
+        fileSystem: memoryFileSystem,
+        logger: logger,
+        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       final FlutterCommand buildApkCommand = buildCommand.subcommands['apk']! as FlutterCommand;
 
       expect(await buildApkCommand.usagePath, 'build/apk');
-    }, overrides: <Type, Generator>{
-      Usage: () => testUsage,
     });
 
     testUsingContext('command sends localtime', () async {
@@ -253,7 +262,7 @@ void main() {
       expect(log.contains(formatDateTime(dateTime)), isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       SystemClock: () => fakeClock,
       Platform: () => FakePlatform(
         environment: <String, String>{
@@ -283,7 +292,7 @@ void main() {
       expect(log.contains(formatDateTime(dateTime)), isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       SystemClock: () => fakeClock,
       Platform: () => FakePlatform(
         environment: <String, String>{

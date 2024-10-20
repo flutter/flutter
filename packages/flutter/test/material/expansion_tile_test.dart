@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
@@ -49,19 +54,22 @@ void main() {
   const Color unselectedWidgetColor = Colors.black54;
   const Color headerColor = Colors.black45;
 
-  testWidgetsWithLeakTracking('ExpansionTile initial state', (WidgetTester tester) async {
+  Material getMaterial(WidgetTester tester) {
+    return tester.widget<Material>(find.descendant(
+      of: find.byType(ExpansionTile),
+      matching: find.byType(Material),
+    ));
+  }
+
+  testWidgets('ExpansionTile initial state', (WidgetTester tester) async {
     final Key topKey = UniqueKey();
+    final Key tileKey = UniqueKey();
     const Key expandedKey = PageStorageKey<String>('expanded');
     const Key collapsedKey = PageStorageKey<String>('collapsed');
     const Key defaultKey = PageStorageKey<String>('default');
 
-    final Key tileKey = UniqueKey();
-    const Clip clipBehavior = Clip.antiAlias;
-
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        dividerColor: dividerColor,
-      ),
+      theme: ThemeData(dividerColor: dividerColor),
       home: Material(
         child: SingleChildScrollView(
           child: Column(
@@ -72,7 +80,6 @@ void main() {
                 initiallyExpanded: true,
                 title: const Text('Expanded'),
                 backgroundColor: Colors.red,
-                clipBehavior: clipBehavior,
                 children: <Widget>[
                   ListTile(
                     key: tileKey,
@@ -104,24 +111,21 @@ void main() {
     ));
 
     double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
-    Container getContainer(Key key) => tester.firstWidget(find.descendant(
+    DecoratedBox getDecoratedBox(Key key) => tester.firstWidget(find.descendant(
       of: find.byKey(key),
-      matching: find.byType(Container),
+      matching: find.byType(DecoratedBox),
     ));
 
     expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
     expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
     expect(getHeight(topKey), getHeight(defaultKey) - 2.0);
 
-    // expansionTile should have Clip.antiAlias as clipBehavior
-    expect(getContainer(expandedKey).clipBehavior, clipBehavior);
-
-    ShapeDecoration expandedContainerDecoration = getContainer(expandedKey).decoration! as ShapeDecoration;
+    ShapeDecoration expandedContainerDecoration = getDecoratedBox(expandedKey).decoration as ShapeDecoration;
     expect(expandedContainerDecoration.color, Colors.red);
     expect((expandedContainerDecoration.shape as Border).top.color, dividerColor);
     expect((expandedContainerDecoration.shape as Border).bottom.color, dividerColor);
 
-    ShapeDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
+    ShapeDecoration collapsedContainerDecoration = getDecoratedBox(collapsedKey).decoration as ShapeDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
     expect((collapsedContainerDecoration.shape as Border).top.color, Colors.transparent);
     expect((collapsedContainerDecoration.shape as Border).bottom.color, Colors.transparent);
@@ -134,7 +138,7 @@ void main() {
 
     // Pump to the middle of the animation for expansion.
     await tester.pump(const Duration(milliseconds: 100));
-    final ShapeDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
+    final ShapeDecoration collapsingContainerDecoration = getDecoratedBox(collapsedKey).decoration as ShapeDecoration;
     expect(collapsingContainerDecoration.color, Colors.transparent);
     expect((collapsingContainerDecoration.shape as Border).top.color, const Color(0x15222222));
     expect((collapsingContainerDecoration.shape as Border).bottom.color, const Color(0x15222222));
@@ -147,19 +151,19 @@ void main() {
     expect(getHeight(topKey), getHeight(defaultKey) - getHeight(tileKey) - 2.0);
 
     // Expanded should be collapsed now.
-    expandedContainerDecoration = getContainer(expandedKey).decoration! as ShapeDecoration;
+    expandedContainerDecoration = getDecoratedBox(expandedKey).decoration as ShapeDecoration;
     expect(expandedContainerDecoration.color, Colors.transparent);
     expect((expandedContainerDecoration.shape as Border).top.color, Colors.transparent);
     expect((expandedContainerDecoration.shape as Border).bottom.color, Colors.transparent);
 
     // Collapsed should be expanded now.
-    collapsedContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
+    collapsedContainerDecoration = getDecoratedBox(collapsedKey).decoration as ShapeDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
     expect((collapsedContainerDecoration.shape as Border).top.color, dividerColor);
     expect((collapsedContainerDecoration.shape as Border).bottom.color, dividerColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('ExpansionTile Theme dependencies', (WidgetTester tester) async {
+  testWidgets('ExpansionTile Theme dependencies', (WidgetTester tester) async {
     final Key expandedTitleKey = UniqueKey();
     final Key collapsedTitleKey = UniqueKey();
     final Key expandedIconKey = UniqueKey();
@@ -218,7 +222,7 @@ void main() {
     expect(iconColor(collapsedIconKey), foregroundColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('ExpansionTile subtitle', (WidgetTester tester) async {
+  testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -234,7 +238,7 @@ void main() {
     expect(find.text('Subtitle'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile maintainState', (WidgetTester tester) async {
+  testWidgets('ExpansionTile maintainState', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -272,7 +276,7 @@ void main() {
      expect(find.text('Discarding State'), findsNothing);
    });
 
-  testWidgetsWithLeakTracking('ExpansionTile padding test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile padding test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
@@ -299,7 +303,7 @@ void main() {
     expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile expandedAlignment test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile expandedAlignment test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
@@ -328,7 +332,7 @@ void main() {
     expect(columnRect.right, 100.0);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
 
@@ -372,7 +376,7 @@ void main() {
     expect(child1Rect.left, 700.0);
   });
 
-  testWidgetsWithLeakTracking('CrossAxisAlignment.baseline is not allowed', (WidgetTester tester) async {
+  testWidgets('CrossAxisAlignment.baseline is not allowed', (WidgetTester tester) async {
     expect(
       () {
         MaterialApp(
@@ -392,7 +396,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {
+  testWidgets('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {
     const Key child1Key = Key('child1');
 
     await tester.pumpWidget(const MaterialApp(
@@ -427,7 +431,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('childrenPadding default value', (WidgetTester tester) async {
+  testWidgets('childrenPadding default value', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -457,7 +461,7 @@ void main() {
     expect(columnRect.bottom, paddingRect.bottom);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile childrenPadding test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile childrenPadding test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -488,7 +492,7 @@ void main() {
     expect(columnRect.bottom, paddingRect.bottom - 4);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile.collapsedBackgroundColor', (WidgetTester tester) async {
+  testWidgets('ExpansionTile.collapsedBackgroundColor', (WidgetTester tester) async {
     const Key expansionTileKey = Key('expansionTileKey');
     const Color backgroundColor = Colors.red;
     const Color collapsedBackgroundColor = Colors.brown;
@@ -507,25 +511,25 @@ void main() {
       ),
     ));
 
-    ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
+    ShapeDecoration shapeDecoration =  tester.firstWidget<DecoratedBox>(find.descendant(
       of: find.byKey(expansionTileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+      matching: find.byType(DecoratedBox),
+    )).decoration as ShapeDecoration;
 
     expect(shapeDecoration.color, collapsedBackgroundColor);
 
     await tester.tap(find.text('Title'));
     await tester.pumpAndSettle();
 
-    shapeDecoration =  tester.firstWidget<Container>(find.descendant(
+    shapeDecoration =  tester.firstWidget<DecoratedBox>(find.descendant(
       of: find.byKey(expansionTileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+      matching: find.byType(DecoratedBox),
+    )).decoration as ShapeDecoration;
 
     expect(shapeDecoration.color, backgroundColor);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
+  testWidgets('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(MaterialApp(
@@ -554,7 +558,7 @@ void main() {
     expect(getTextColor(), theme.colorScheme.onSurface);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile iconColor, textColor', (WidgetTester tester) async {
+  testWidgets('ExpansionTile iconColor, textColor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/78281
 
     const Color iconColor = Color(0xff00ff00);
@@ -591,7 +595,7 @@ void main() {
     expect(getTextColor(), textColor);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile Border', (WidgetTester tester) async {
+  testWidgets('ExpansionTile Border', (WidgetTester tester) async {
     const Key expansionTileKey = PageStorageKey<String>('expansionTile');
 
     const Border collapsedShape = Border(
@@ -602,44 +606,38 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Material(
-        child: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              ExpansionTile(
-                key: expansionTileKey,
-                title: const Text('ExpansionTile'),
-                collapsedShape: collapsedShape,
-                shape: shape,
-                children: const <Widget>[
-                  ListTile(
-                    title: Text('0'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+        child: ExpansionTile(
+          key: expansionTileKey,
+          title: const Text('ExpansionTile'),
+          collapsedShape: collapsedShape,
+          shape: shape,
+          children: const <Widget>[
+            ListTile(
+              title: Text('0'),
+            ),
+          ],
         ),
       ),
     ));
 
-    Container getContainer(Key key) => tester.firstWidget(find.descendant(
-      of: find.byKey(key),
-      matching: find.byType(Container),
-    ));
-
-    // expansionTile should be Collapsed now.
-    ShapeDecoration expandedContainerDecoration = getContainer(expansionTileKey).decoration! as ShapeDecoration;
-    expect(expandedContainerDecoration.shape, collapsedShape);
+    // When a custom shape is provided, ExpansionTile will use the
+    // Material widget to draw the shape and background color
+    // instead of a Container.
+    Material material = getMaterial(tester);
+    // ExpansionTile should be collapsed initially.
+    expect(material.shape, collapsedShape);
+    expect(material.clipBehavior, Clip.antiAlias);
 
     await tester.tap(find.text('ExpansionTile'));
     await tester.pumpAndSettle();
 
-    // expansionTile should be Expanded now.
-    expandedContainerDecoration = getContainer(expansionTileKey).decoration! as ShapeDecoration;
-    expect(expandedContainerDecoration.shape, shape);
+    // ExpansionTile should be Expanded now.
+    material = getMaterial(tester);
+    expect(material.shape, shape);
+    expect(material.clipBehavior, Clip.antiAlias);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(
@@ -653,7 +651,7 @@ void main() {
     expect(listTile.trailing.runtimeType, RotationTransition);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile trailing controlAffinity test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile trailing controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(
@@ -668,7 +666,7 @@ void main() {
     expect(listTile.trailing.runtimeType, RotationTransition);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile leading controlAffinity test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile leading controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(
@@ -683,7 +681,7 @@ void main() {
     expect(listTile.trailing, isNull);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile override rotating icon test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile override rotating icon test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(
@@ -699,7 +697,7 @@ void main() {
     expect(listTile.trailing, isNull);
   });
 
-  testWidgetsWithLeakTracking('Nested ListTile Semantics', (WidgetTester tester) async {
+  testWidgets('Nested ListTile Semantics', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final SemanticsHandle handle = tester.ensureSemantics();
 
@@ -730,6 +728,7 @@ void main() {
       tester.getSemantics(find.byType(ListTile).first),
       matchesSemantics(
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isEnabled: true,
         isFocused: true,
@@ -744,6 +743,7 @@ void main() {
       tester.getSemantics(find.byType(ListTile).last),
       matchesSemantics(
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isEnabled: true,
         isFocusable: true,
@@ -754,7 +754,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('ExpansionTile Semantics announcement', (WidgetTester tester) async {
+  testWidgets('ExpansionTile Semantics announcement', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
     await tester.pumpWidget(
@@ -791,9 +791,43 @@ void main() {
     // "Collapsed".
     expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
     handle.dispose();
-  });
+  }, skip: defaultTargetPlatform == TargetPlatform.iOS); // [intended] https://github.com/flutter/flutter/issues/122101.
 
-  testWidgetsWithLeakTracking('Semantics with the onTapHint is an ancestor of ListTile', (WidgetTester tester) async {
+  // This is a regression test for https://github.com/flutter/flutter/issues/132264.
+  testWidgets('ExpansionTile Semantics announcement is delayed on iOS', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            title: Text('Title'),
+            children: <Widget>[
+              SizedBox(height: 100, width: 100),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // There is no semantics announcement without tap action.
+    expect(tester.takeAnnouncements(), isEmpty);
+
+    // Tap the title to expand ExpansionTile.
+    await tester.tap(find.text('Title'));
+    await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
+
+    expect(tester.takeAnnouncements().first.message, localizations.collapsedHint);
+
+    // Tap the title to collapse ExpansionTile.
+    await tester.tap(find.text('Title'));
+    await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
+
+    expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
+    handle.dispose();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  testWidgets('Semantics with the onTapHint is an ancestor of ListTile', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/pull/121624
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
@@ -845,7 +879,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Semantics hint for iOS and macOS', (WidgetTester tester) async {
+  testWidgets('Semantics hint for iOS and macOS', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
 
@@ -893,7 +927,7 @@ void main() {
     handle.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Collapsed ExpansionTile properties can be updated with setState', (WidgetTester tester) async {
+  testWidgets('Collapsed ExpansionTile properties can be updated with setState', (WidgetTester tester) async {
     const Key expansionTileKey = Key('expansionTileKey');
     ShapeBorder collapsedShape = const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(4)),
@@ -941,14 +975,15 @@ void main() {
       ),
     ));
 
-    ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(expansionTileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    // When a custom shape is provided, ExpansionTile will use the
+    // Material widget to draw the shape and background color
+    // instead of a Container.
+    Material material = getMaterial(tester);
 
     // Test initial ExpansionTile properties.
-    expect(shapeDecoration.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
-    expect(shapeDecoration.color, const Color(0xffff0000));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
+    expect(material.color, const Color(0xffff0000));
+    expect(material.clipBehavior, Clip.antiAlias);
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xffffffff));
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xffffffff));
 
@@ -956,19 +991,17 @@ void main() {
     await tester.tap(find.text('Update collapsed properties'));
     await tester.pumpAndSettle();
 
-    shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(expansionTileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    material = getMaterial(tester);
 
     // Test updated ExpansionTile properties.
-    expect(shapeDecoration.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))));
-    expect(shapeDecoration.color, const Color(0xffffff00));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))));
+    expect(material.color, const Color(0xffffff00));
+    expect(material.clipBehavior, Clip.antiAlias);
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xff000000));
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xff000000));
   });
 
-  testWidgetsWithLeakTracking('Expanded ExpansionTile properties can be updated with setState', (WidgetTester tester) async {
+  testWidgets('Expanded ExpansionTile properties can be updated with setState', (WidgetTester tester) async {
     const Key expansionTileKey = Key('expansionTileKey');
     ShapeBorder shape = const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -1020,14 +1053,15 @@ void main() {
     await tester.tap(find.text('title'));
     await tester.pumpAndSettle();
 
-    ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(expansionTileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    // When a custom shape is provided, ExpansionTile will use the
+    // Material widget to draw the shape and background color
+    // instead of a Container.
+    Material material = getMaterial(tester);
 
     // Test initial ExpansionTile properties.
-    expect(shapeDecoration.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))));
-    expect(shapeDecoration.color, const Color(0xff0000ff));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))));
+    expect(material.color, const Color(0xff0000ff));
+    expect(material.clipBehavior, Clip.antiAlias);
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xff00ffff));
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xff00ffff));
 
@@ -1035,18 +1069,219 @@ void main() {
     await tester.tap(find.text('Update collapsed properties'));
     await tester.pumpAndSettle();
 
-    shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(expansionTileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    material = getMaterial(tester);
     iconColor = tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
     textColor = tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
 
     // Test updated ExpansionTile properties.
-    expect(shapeDecoration.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))));
-    expect(shapeDecoration.color, const Color(0xff123456));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))));
+    expect(material.color, const Color(0xff123456));
+    expect(material.clipBehavior, Clip.antiAlias);
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xffffffff));
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xffffffff));
+  });
+
+  testWidgets('Override ExpansionTile animation using AnimationStyle', (WidgetTester tester) async {
+    const Key expansionTileKey = Key('expansionTileKey');
+
+    Widget buildExpansionTile({ AnimationStyle? animationStyle }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              key: expansionTileKey,
+              expansionAnimationStyle: animationStyle,
+              title: const TestText('title'),
+              children: const <Widget>[
+                SizedBox(height: 100, width: 100),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildExpansionTile());
+
+    double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
+
+    // Test initial ExpansionTile height.
+    expect(getHeight(expansionTileKey), 58.0);
+
+    // Test the default expansion animation.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(67.4, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(89.6, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 158.0);
+
+    // Tap to collapse the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    // Override the animation duration.
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(duration: const Duration(milliseconds: 800))));
+    await tester.pumpAndSettle();
+
+    // Test the overridden animation duration.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(67.4, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 200)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(89.6, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 158.0);
+
+    // Tap to collapse the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    // Override the animation curve.
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(
+      curve: Easing.emphasizedDecelerate,
+      reverseCurve: Easing.emphasizedAccelerate,
+    )));
+    await tester.pumpAndSettle();
+
+    // Test the overridden animation curve.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(141.2, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(153, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 158.0);
+
+    // Test the overridden reverse (collapse) animation curve.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(98.6, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(73.4, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 58.0);
+
+    // Test no animation.
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle.noAnimation));
+
+    // Tap to expand the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+
+    expect(getHeight(expansionTileKey), 158.0);
+  });
+
+  testWidgets('Material3 - ExpansionTile draws Inkwell splash on top of background color', (WidgetTester tester) async {
+    const Key expansionTileKey = Key('expansionTileKey');
+    const ShapeBorder shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(16)),
+    );
+    const ShapeBorder collapsedShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(16)),
+    );
+    const Color collapsedBackgroundColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xffff0000);
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.0),
+            child: ExpansionTile(
+              key: expansionTileKey,
+              shape: shape,
+              collapsedBackgroundColor: collapsedBackgroundColor,
+              backgroundColor: backgroundColor,
+              collapsedShape: collapsedShape,
+              title: TestText('title'),
+              trailing: TestIcon(),
+              children: <Widget>[
+                SizedBox(height: 100, width: 100),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    // Tap and hold the ExpansionTile to trigger ink splash.
+    final Offset center = tester.getCenter(find.byKey(expansionTileKey));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // Start the splash animation.
+    await tester.pump(const Duration(milliseconds: 100)); // Splash is underway.
+
+    // Material 3 uses the InkSparkle which uses a shader, so we can't capture
+    // the effect with paint methods. Use a golden test instead.
+    // Check if the ink sparkle is drawn on top of the background color.
+    await expectLater(
+      find.byKey(expansionTileKey),
+      matchesGoldenFile('expansion_tile.ink_splash.drawn_on_top_of_background_color.png'),
+    );
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+ testWidgets('Default clipBehavior when a shape is provided', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: ExpansionTile(
+            title: Text('Title'),
+            subtitle: Text('Subtitle'),
+            shape: StadiumBorder(),
+            children: <Widget>[ListTile(title: Text('0'))],
+          ),
+        ),
+      ),
+    );
+
+    expect(getMaterial(tester).clipBehavior, Clip.antiAlias);
+  });
+
+ testWidgets('Can override clipBehavior when a shape is provided', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: ExpansionTile(
+            title: Text('Title'),
+            subtitle: Text('Subtitle'),
+            shape: StadiumBorder(),
+            clipBehavior: Clip.none,
+            children: <Widget>[ListTile(title: Text('0'))],
+          ),
+        ),
+      ),
+    );
+
+    expect(getMaterial(tester).clipBehavior, Clip.none);
   });
 
   group('Material 2', () {
@@ -1054,7 +1289,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
+    testWidgets('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
 
       await tester.pumpWidget(MaterialApp(
@@ -1082,9 +1317,59 @@ void main() {
       expect(getIconColor(), theme.colorScheme.primary);
       expect(getTextColor(), theme.colorScheme.primary);
     });
+
+    testWidgets('Material2 - ExpansionTile draws inkwell splash on top of background color', (WidgetTester tester) async {
+      const Key expansionTileKey = Key('expansionTileKey');
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      const ShapeBorder shape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      );
+      const ShapeBorder collapsedShape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      );
+      const Color collapsedBackgroundColor = Color(0xff00ff00);
+      const Color backgroundColor = Color(0xffff0000);
+
+      await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: const Material(
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.0),
+              child: ExpansionTile(
+                key: expansionTileKey,
+                shape: shape,
+                collapsedBackgroundColor: collapsedBackgroundColor,
+                backgroundColor: backgroundColor,
+                collapsedShape: collapsedShape,
+                title: TestText('title'),
+                trailing: TestIcon(),
+                children: <Widget>[
+                  SizedBox(height: 100, width: 100),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      // Tap and hold the ExpansionTile to trigger ink splash.
+      final Offset center = tester.getCenter(find.byKey(expansionTileKey));
+      final TestGesture gesture = await tester.startGesture(center);
+      await tester.pump(); // Start the splash animation.
+      await tester.pump(const Duration(milliseconds: 100)); // Splash is underway.
+
+      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+      // Check if the ink splash is drawn on top of the background color.
+      expect(inkFeatures, paints..path(color: collapsedBackgroundColor)..circle(color: theme.splashColor));
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
   });
 
-  testWidgetsWithLeakTracking('ExpansionTileController isExpanded, expand() and collapse()', (WidgetTester tester) async {
+  testWidgets('ExpansionTileController isExpanded, expand() and collapse()', (WidgetTester tester) async {
     final ExpansionTileController controller = ExpansionTileController();
 
     await tester.pumpWidget(MaterialApp(
@@ -1112,7 +1397,7 @@ void main() {
     expect(find.text('Child 0'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Calling ExpansionTileController.expand/collapsed has no effect if it is already expanded/collapsed', (WidgetTester tester) async {
+  testWidgets('Calling ExpansionTileController.expand/collapsed has no effect if it is already expanded/collapsed', (WidgetTester tester) async {
     final ExpansionTileController controller = ExpansionTileController();
 
     await tester.pumpWidget(MaterialApp(
@@ -1148,7 +1433,7 @@ void main() {
     expect(tester.hasRunningAnimations, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Call to ExpansionTileController.of()', (WidgetTester tester) async {
+  testWidgets('Call to ExpansionTileController.of()', (WidgetTester tester) async {
     final GlobalKey titleKey = GlobalKey();
     final GlobalKey childKey = GlobalKey();
     await tester.pumpWidget(MaterialApp(
@@ -1172,7 +1457,7 @@ void main() {
     expect(controller1, controller2);
   });
 
-  testWidgetsWithLeakTracking('Call to ExpansionTile.maybeOf()', (WidgetTester tester) async {
+  testWidgets('Call to ExpansionTile.maybeOf()', (WidgetTester tester) async {
     final GlobalKey titleKey = GlobalKey();
     final GlobalKey nonDescendantKey = GlobalKey();
     await tester.pumpWidget(MaterialApp(
@@ -1197,5 +1482,107 @@ void main() {
 
     final ExpansionTileController? controller2 = ExpansionTileController.maybeOf(nonDescendantKey.currentContext!);
     expect(controller2, isNull);
+  });
+
+  testWidgets('Check if dense, enableFeedback, visualDensity parameter is working', (WidgetTester tester) async {
+    final GlobalKey titleKey = GlobalKey();
+    final GlobalKey nonDescendantKey = GlobalKey();
+
+    const bool dense = true;
+    const bool enableFeedback = false;
+    const VisualDensity visualDensity = VisualDensity.compact;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              dense: dense,
+              enableFeedback: enableFeedback,
+              visualDensity: visualDensity,
+              title: Text('Title', key: titleKey),
+              children: const <Widget>[
+                Text('Child 0'),
+              ],
+            ),
+            Text('Non descendant', key: nonDescendantKey),
+          ],
+        ),
+      ),
+    ));
+
+    final Finder tileFinder = find.byType(ListTile);
+    final ListTile tileWidget = tester.widget<ListTile>(tileFinder);
+    expect(tileWidget.dense, dense);
+    expect(tileWidget.enableFeedback, enableFeedback);
+    expect(tileWidget.visualDensity, visualDensity);
+  });
+
+  testWidgets('ExpansionTileController should not toggle if disabled', (WidgetTester tester) async {
+    final ExpansionTileController controller = ExpansionTileController();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          enabled: false,
+          controller: controller,
+          title: const Text('Title'),
+          children: const <Widget>[
+            Text('Child 0'),
+          ],
+        ),
+      ),
+    ));
+
+    expect(find.text('Child 0'), findsNothing);
+    expect(controller.isExpanded, isFalse);
+    await tester.tap(find.widgetWithText(ExpansionTile, 'Title'));
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsNothing);
+    expect(controller.isExpanded, isFalse);
+    controller.expand();
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(controller.isExpanded, isTrue);
+    await tester.tap(find.widgetWithText(ExpansionTile, 'Title'));
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(controller.isExpanded, isTrue);
+  });
+
+  testWidgets('ExpansionTile does not include the default trailing icon when showTrailingIcon: false (#145268)', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          enabled: false,
+          tilePadding: EdgeInsets.zero,
+          title: ColoredBox(color: Colors.red, child: Text('Title')),
+          showTrailingIcon: false,
+        ),
+      ),
+    ));
+
+    final Size materialAppSize = tester.getSize(find.byType(MaterialApp));
+    final Size titleSize = tester.getSize(find.byType(ColoredBox));
+
+    expect(titleSize.width, materialAppSize.width);
+  });
+
+  testWidgets('ExpansionTile with smaller trailing widget allocates at least 32.0 units of space (preserves original behavior) (#145268)', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          enabled: false,
+          tilePadding: EdgeInsets.zero,
+          title: ColoredBox(color: Colors.red, child: Text('Title')),
+          trailing: SizedBox.shrink(),
+        ),
+      ),
+    ));
+
+    final Size materialAppSize = tester.getSize(find.byType(MaterialApp));
+    final Size titleSize = tester.getSize(find.byType(ColoredBox));
+
+    expect(titleSize.width, materialAppSize.width - 32.0);
   });
 }

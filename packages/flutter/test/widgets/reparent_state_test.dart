@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class StateMarker extends StatefulWidget {
   const StateMarker({ super.key, this.child });
@@ -20,15 +19,12 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child != null) {
-      return widget.child!;
-    }
-    return Container();
+    return widget.child ?? Container();
   }
 }
 
 class DeactivateLogger extends StatefulWidget {
-  const DeactivateLogger({ required Key key, required this.log }) : super(key: key);
+  const DeactivateLogger({ required Key super.key, required this.log });
 
   final List<String> log;
 
@@ -51,7 +47,7 @@ class DeactivateLoggerState extends State<DeactivateLogger> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('can reparent state', (WidgetTester tester) async {
+  testWidgets('can reparent state', (WidgetTester tester) async {
     final GlobalKey left = GlobalKey();
     final GlobalKey right = GlobalKey();
 
@@ -131,7 +127,7 @@ void main() {
     expect(right.currentState, isNull);
   });
 
-  testWidgetsWithLeakTracking('can reparent state with multichild widgets', (WidgetTester tester) async {
+  testWidgets('can reparent state with multichild widgets', (WidgetTester tester) async {
     final GlobalKey left = GlobalKey();
     final GlobalKey right = GlobalKey();
 
@@ -199,7 +195,7 @@ void main() {
     expect(right.currentState, isNull);
   });
 
-  testWidgetsWithLeakTracking('can with scrollable list', (WidgetTester tester) async {
+  testWidgets('can with scrollable list', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(StateMarker(key: key));
@@ -232,7 +228,7 @@ void main() {
     expect(keyState.marker, equals('marked'));
   });
 
-  testWidgetsWithLeakTracking('Reparent during update children', (WidgetTester tester) async {
+  testWidgets('Reparent during update children', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(Stack(
@@ -269,7 +265,7 @@ void main() {
     expect(keyState.marker, equals('marked'));
   });
 
-  testWidgetsWithLeakTracking('Reparent to child during update children', (WidgetTester tester) async {
+  testWidgets('Reparent to child during update children', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(Stack(
@@ -331,7 +327,7 @@ void main() {
     expect(keyState.marker, equals('marked'));
   });
 
-  testWidgetsWithLeakTracking('Deactivate implies build', (WidgetTester tester) async {
+  testWidgets('Deactivate implies build', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final List<String> log = <String>[];
     final DeactivateLogger logger = DeactivateLogger(key: key, log: log);
@@ -353,7 +349,7 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('Reparenting with multiple moves', (WidgetTester tester) async {
+  testWidgets('Reparenting with multiple moves', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
     final GlobalKey key3 = GlobalKey();

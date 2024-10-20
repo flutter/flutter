@@ -5,10 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('!pinned && !floating && !bottom ==> fade opacity', (WidgetTester tester) async {
+  testWidgets('!pinned && !floating && !bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -28,7 +27,68 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgetsWithLeakTracking('!pinned && !floating && bottom ==> fade opacity', (WidgetTester tester) async {
+  testWidgets('a11y mode ===> 1.0 opacity', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(accessibleNavigation: true),
+        child:  _TestWidget(
+          pinned: false,
+          floating: false,
+          bottom: false,
+          controller: controller,
+        ),
+      ),
+    );
+
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
+    expect(render.text.style!.color!.opacity, 1.0);
+
+    controller.jumpTo(100.0);
+    await tester.pumpAndSettle();
+    expect(render.text.style!.color!.opacity, 1.0);
+  });
+
+  testWidgets('turn on/off a11y mode to change opacity', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+    addTearDown(tester.view.reset);
+
+    tester.platformDispatcher
+      ..textScaleFactorTestValue = 123
+      ..platformBrightnessTestValue = Brightness.dark
+      ..accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
+
+    await tester.pumpWidget(
+      _TestWidget(
+        pinned: false,
+        floating: false,
+        bottom: false,
+        controller: controller,
+      ),
+    );
+
+    // AccessibleNavigation is off
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
+    controller.jumpTo(100.0);
+    await tester.pumpAndSettle();
+    expect(render.text.style!.color!.opacity < 1.0, true);
+
+    // Turn on accessibleNavigation
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(accessibleNavigation: true);
+    await tester.pumpAndSettle();
+    expect(render.text.style!.color!.opacity, 1.0);
+
+    // Turn off accessibleNavigation
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures();
+    await tester.pumpAndSettle();
+    expect(render.text.style!.color!.opacity < 1.0, true);
+  });
+  testWidgets('!pinned && !floating && bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -48,7 +108,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgetsWithLeakTracking('!pinned && floating && !bottom ==> fade opacity', (WidgetTester tester) async {
+  testWidgets('!pinned && floating && !bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -68,7 +128,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgetsWithLeakTracking('!pinned && floating && bottom ==> fade opacity', (WidgetTester tester) async {
+  testWidgets('!pinned && floating && bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -88,7 +148,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgetsWithLeakTracking('pinned && !floating && !bottom ==> 1.0 opacity', (WidgetTester tester) async {
+  testWidgets('pinned && !floating && !bottom ==> 1.0 opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -108,7 +168,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
-  testWidgetsWithLeakTracking('pinned && !floating && bottom ==> 1.0 opacity', (WidgetTester tester) async {
+  testWidgets('pinned && !floating && bottom ==> 1.0 opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -128,7 +188,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
-  testWidgetsWithLeakTracking('pinned && floating && !bottom ==> 1.0 opacity', (WidgetTester tester) async {
+  testWidgets('pinned && floating && !bottom ==> 1.0 opacity', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25000.
 
     final ScrollController controller = ScrollController();
@@ -150,7 +210,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
-  testWidgetsWithLeakTracking('pinned && floating && bottom && extraToolbarHeight == 0.0 ==> fade opacity', (WidgetTester tester) async {
+  testWidgets('pinned && floating && bottom && extraToolbarHeight == 0.0 ==> fade opacity', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25993.
 
     final ScrollController controller = ScrollController();
@@ -172,7 +232,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgetsWithLeakTracking('pinned && floating && bottom && extraToolbarHeight != 0.0 ==> 1.0 opacity', (WidgetTester tester) async {
+  testWidgets('pinned && floating && bottom && extraToolbarHeight != 0.0 ==> 1.0 opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -193,7 +253,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
-  testWidgetsWithLeakTracking('!pinned && !floating && !bottom && extraToolbarHeight != 0.0 ==> fade opacity', (WidgetTester tester) async {
+  testWidgets('!pinned && !floating && !bottom && extraToolbarHeight != 0.0 ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     const double collapsedHeight = 100.0;
