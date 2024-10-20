@@ -160,7 +160,7 @@ abstract class _UbiquitousInheritedWidget extends InheritedWidget {
 /// Directionality(
 ///   textDirection: TextDirection.rtl,
 ///   child: Padding(
-///     padding: EdgeInsetsDirectional.only(start: 8),
+///     padding: const EdgeInsetsDirectional.only(start: 8),
 ///       child: Container(
 ///       color: Colors.blue,
 ///     ),
