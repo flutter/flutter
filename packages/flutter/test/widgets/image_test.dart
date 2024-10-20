@@ -824,7 +824,7 @@ void main() {
   });
 
   testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
   (WidgetTester tester) async {
     final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
     final _TestImageProvider provider = _TestImageProvider(streamCompleter: imageStreamCompleter);
@@ -1097,7 +1097,7 @@ void main() {
   });
 
   testWidgets('Image invokes frameBuilder with correct wasSynchronouslyLoaded=true',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
   (WidgetTester tester) async {
     final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter(ImageInfo(image: image10x10.clone()));
     final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
@@ -1157,7 +1157,7 @@ void main() {
   });
 
   testWidgets('Image state handles enabling and disabling of tickers',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
   (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
       return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
@@ -1622,7 +1622,7 @@ void main() {
   });
 
   testWidgets('precacheImage allows time to take over weak reference',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
   (WidgetTester tester) async {
     final _TestImageProvider provider = _TestImageProvider();
     late Future<void> precache;
@@ -1674,9 +1674,7 @@ void main() {
     expect(provider.loadCallCount, 1);
   });
 
-  testWidgets('evict an image during precache',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
-  (WidgetTester tester) async {
+  testWidgets('evict an image during precache', (WidgetTester tester) async {
     // This test checks that the live image tracking does not hold on to a
     // pending image that will never complete because it has been evicted from
     // the cache.
@@ -1706,6 +1704,8 @@ void main() {
       await tester.pump();
       expect(imageCache.statusForKey(provider).keepAlive, true);
       expect(imageCache.statusForKey(provider).live, false);
+
+      imageCache.clear();
     });
   });
 
@@ -1790,9 +1790,7 @@ void main() {
   }
 
   testWidgets(
-    'Rotated images',
-    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
-    (WidgetTester tester) async {
+    'Rotated images', (WidgetTester tester) async {
       await testRotatedImage(tester, true);
       await testRotatedImage(tester, false);
     },
@@ -1800,9 +1798,7 @@ void main() {
   );
 
   testWidgets(
-    'Image opacity',
-    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
-    (WidgetTester tester) async {
+    'Image opacity', (WidgetTester tester) async {
       final Key key = UniqueKey();
       await tester.pumpWidget(RepaintBoundary(
         key: key,
@@ -2190,6 +2186,11 @@ class _TestImageProvider extends ImageProvider<Object> {
   String toString() => '${describeIdentity(this)}()';
 }
 
+/// An [ImageStreamCompleter] that gives access to the added listeners.
+///
+/// Such an access to listeners is hacky,
+/// because it breaks encapsulation by allowing to invoke listeners without
+/// taking care about lifecycle of the created images.
 class _TestImageStreamCompleter extends ImageStreamCompleter {
   _TestImageStreamCompleter([this._currentImage]);
 
