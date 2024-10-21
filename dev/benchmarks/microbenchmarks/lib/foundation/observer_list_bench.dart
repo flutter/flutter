@@ -20,7 +20,7 @@ class TestAnimationController extends AnimationController {
   void notifyListeners() => super.notifyListeners();
 }
 
-void main() {
+Future<void> execute() async {
   assert(false,
       "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 

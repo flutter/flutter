@@ -16,13 +16,13 @@ import 'foundation/change_notifier_bench.dart' as change_notifier_bench;
 import 'foundation/clamp.dart' as clamp;
 import 'foundation/decode_and_parse_asset_manifest.dart'
     as decode_and_parse_asset_manifest;
+import 'foundation/observer_list_bench.dart' as observer_list_bench;
 import 'foundation/platform_asset_bundle.dart' as platform_asset_bundle;
 import 'foundation/standard_message_codec_bench.dart'
     as standard_message_codec_bench;
 import 'foundation/standard_method_codec_bench.dart'
     as standard_method_codec_bench;
 import 'foundation/timeline_bench.dart' as timeline_bench;
-import 'foundation/observer_list_bench.dart' as observer_list_bench;
 import 'geometry/matrix_utils_transform_bench.dart'
     as matrix_utils_transform_bench;
 import 'geometry/rrect_contains_bench.dart' as rrect_contains_bench;
@@ -65,6 +65,7 @@ Future<void> main() async {
       'foundation/decode_and_parse_asset_manifest.dart',
       decode_and_parse_asset_manifest.execute
     ),
+    ('foundation/observer_list_bench.dart', observer_list_bench.execute),
     (
       'geometry/matrix_utils_transform_bench.dart',
       matrix_utils_transform_bench.execute
@@ -94,7 +95,6 @@ Future<void> main() async {
         await all_elements_bench.execute();
       }
     ),
-    ('foundation/observer_list_bench.dart', observer_list_bench.execute),
   ];
 
   // Parses the optional compile-time dart variables; we can't have
