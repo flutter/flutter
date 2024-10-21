@@ -4672,6 +4672,7 @@ class SemanticsConfiguration {
   /// in which case it will not be flagged as selected.
   bool get isSelected => _hasFlag(SemanticsFlag.isSelected);
   set isSelected(bool value) {
+    _setFlag(SemanticsFlag.hasSelectedState, true);
     _setFlag(SemanticsFlag.isSelected, value);
   }
 
