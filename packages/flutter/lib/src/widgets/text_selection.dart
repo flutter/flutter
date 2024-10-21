@@ -1908,6 +1908,11 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
       math.max((interactiveRect.height - handleRect.height) / 2, 0),
     );
 
+    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
+      widget.type,
+      widget.preferredLineHeight,
+    );
+
     // Make sure a drag is eagerly accepted. This is used on iOS to match the
     // behavior where a drag directly on a collapse handle will always win against
     // other drag gestures.
@@ -1915,7 +1920,8 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
 
     return CompositedTransformFollower(
       link: widget.handleLayerLink,
-      offset: interactiveRect.topLeft,
+      // Put the handle's anchor point on the leader's anchor point.
+      offset: -handleAnchor - Offset(padding.left, padding.top),
       showWhenUnlinked: false,
       child: FadeTransition(
         opacity: _opacity,
