@@ -235,7 +235,7 @@ enum WidgetState implements WidgetStatesConstraint {
 
   /// {@template flutter.widgets.WidgetState.any}
   /// To prevent a situation where each [WidgetStatesConstraint]
-  /// isn't satisfied by the given set of states, consier adding
+  /// isn't satisfied by the given set of states, consider adding
   /// [WidgetState.any] as the final [WidgetStateMap] key.
   /// {@endtemplate}
   static const WidgetStatesConstraint any = _AnyWidgetStates();

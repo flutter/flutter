@@ -646,8 +646,8 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     if (index == firstVisibleIndex) {
       final double firstVisibleItemExtent = _buildItemExtent(index, _currentLayoutDimensions);
 
-      // If the first item is collapsed to be less than `effectievMinExtent`,
-      // then it should stop changinng its size and should start to scroll off screen.
+      // If the first item is collapsed to be less than `effectiveMinExtent`,
+      // then it should stop changing its size and should start to scroll off screen.
       if (firstVisibleItemExtent <= effectiveMinExtent) {
         return maxExtent * index - effectiveMinExtent + maxExtent;
       }

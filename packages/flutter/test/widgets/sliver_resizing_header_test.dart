@@ -199,7 +199,7 @@ void main() {
     expect(find.text('header'), findsNothing);
   });
 
-  testWidgets('SliverResizingHeader with identcial min/max prototypes is effectively a pinned header', (WidgetTester tester) async {
+  testWidgets('SliverResizingHeader with identical min/max prototypes is effectively a pinned header', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

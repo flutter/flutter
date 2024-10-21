@@ -137,10 +137,10 @@ class CupertinoTheme extends StatelessWidget {
   }
 }
 
-/// Provides a [CupertinoTheme] to all decendents.
+/// Provides a [CupertinoTheme] to all descendents.
 class InheritedCupertinoTheme extends InheritedTheme {
   /// Creates an [InheritedTheme] that provides a [CupertinoTheme] to all
-  /// decendents.
+  /// descendents.
   const InheritedCupertinoTheme({
     super.key,
     required this.theme,

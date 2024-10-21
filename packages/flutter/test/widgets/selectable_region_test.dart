@@ -1109,7 +1109,7 @@ void main() {
       // on native Android is 2 when the pointer device kind is not precise like
       // for a touch.
       //
-      // On iOS the selection is maintained because the tap occured on the active
+      // On iOS the selection is maintained because the tap occurred on the active
       // selection.
       expect(paragraph.selections[0], defaultTargetPlatform == TargetPlatform.iOS ? const TextSelection(baseOffset: 0, extentOffset: 5) : const TextSelection.collapsed(offset: 2));
     },

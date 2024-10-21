@@ -5924,7 +5924,7 @@ void main() {
       ),
     );
 
-    // Test the chechmark is not visible yet.
+    // Test the checkmark is not visible yet.
     expect(materialBox, isNot(paints..path(color:checkmarkColor)));
     expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
 

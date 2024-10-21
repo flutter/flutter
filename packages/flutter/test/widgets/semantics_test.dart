@@ -1819,7 +1819,7 @@ void main() {
     }
   });
 
-  testWidgets('parent heading level takes precendence when it absorbs a child', (WidgetTester tester) async {
+  testWidgets('parent heading level takes precedence when it absorbs a child', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     Future<SemanticsConfiguration> pumpHeading(int? level) async {

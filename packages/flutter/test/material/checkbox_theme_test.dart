@@ -501,16 +501,16 @@ void main() {
     await tester.pumpWidget(buildCheckbox(seedColor: Colors.red));
     await tester.pumpAndSettle();
 
-    RenderBox getCheckboxRendeBox() {
+    RenderBox getCheckboxRenderBox() {
       return tester.renderObject<RenderBox>(find.byType(Checkbox));
     }
 
-    expect(getCheckboxRendeBox(), paints..drrect(color: colorScheme.primary));
+    expect(getCheckboxRenderBox(), paints..drrect(color: colorScheme.primary));
 
     await tester.pumpWidget(buildCheckbox(seedColor: Colors.blue));
     await tester.pump(kPressTimeout);
 
-    expect(getCheckboxRendeBox(), paints..drrect(color: colorScheme.primary));
+    expect(getCheckboxRenderBox(), paints..drrect(color: colorScheme.primary));
   });
 }
 
