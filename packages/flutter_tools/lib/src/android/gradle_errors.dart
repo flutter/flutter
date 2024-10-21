@@ -688,9 +688,6 @@ ${_getAgpLocation(project)}''',
 );
 
 @visibleForTesting
-const String jlinkErrorMessage = '> Error while executing process';
-
-@visibleForTesting
 final GradleHandledError jlinkErrorWithJava21AndSourceCompatibility = GradleHandledError(
     test: (String line) => line.contains('> Error while executing process')&& line.contains('jlink'),
     handler: ({
