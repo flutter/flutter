@@ -1026,7 +1026,7 @@ void main() {
   });
 
   testWidgets('Image invokes frameBuilder with correct frameNumber argument',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
   (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
       return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
@@ -1847,7 +1847,7 @@ void main() {
   );
 
   testWidgets('Reports image size when painted',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
   (WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
     int count = 0;
@@ -1958,7 +1958,7 @@ void main() {
   });
 
   testWidgets('Load a good image after a bad image was loaded should not call errorBuilder',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
   (WidgetTester tester) async {
     final UniqueKey errorKey = UniqueKey();
     final ui.Image image = (await tester.runAsync(() => createTestImage()))!;
@@ -2058,7 +2058,7 @@ void main() {
   });
 
   testWidgets('Animated GIFs do not require layout for subsequent frames',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
   (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
       return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
@@ -2190,7 +2190,7 @@ class _TestImageProvider extends ImageProvider<Object> {
 ///
 /// Such an access to listeners is hacky,
 /// because it breaks encapsulation by allowing to invoke listeners without
-/// taking care about lifecycle of the created images.
+/// taking care about lifecycle of the created images, that may result in not disposed images.
 class _TestImageStreamCompleter extends ImageStreamCompleter {
   _TestImageStreamCompleter([this._currentImage]);
 

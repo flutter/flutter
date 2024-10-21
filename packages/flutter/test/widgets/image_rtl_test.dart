@@ -9,10 +9,21 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+/// An [_TestImageProvider] interrupts the way to .
+///
+///
+/// Such an access to listeners is hacky,
+/// because it breaks encapsulation by allowing to invoke listeners without
+/// taking care about lifecycle of the created images, that may result in not disposed images.
 class _TestImageProvider extends ImageProvider<_TestImageProvider> {
-  const _TestImageProvider(this.image);
+  _TestImageProvider(this.image) {
+    _completer = OneFrameImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(ImageInfo(image: image)),
+    );
+  }
 
   final ui.Image image;
+  late final OneFrameImageStreamCompleter _completer;
 
   @override
   Future<_TestImageProvider> obtainKey(ImageConfiguration configuration) {
@@ -21,9 +32,7 @@ class _TestImageProvider extends ImageProvider<_TestImageProvider> {
 
   @override
   ImageStreamCompleter loadImage(_TestImageProvider key, ImageDecoderCallback decode) {
-    return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(ImageInfo(image: image)),
-    );
+    return _completer;
   }
 }
 
@@ -299,7 +308,7 @@ void main() {
   });
 
   testWidgets('Image RTL with alignment topEnd and match',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
+   experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(), // The test leaks by design, because of hacky way dealing with images.
   (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -335,6 +344,7 @@ void main() {
       ..restore(),
     );
     expect(find.byType(SizedBox), isNot(paints..scale()..scale()));
+    // imageCache.clear();
   });
 
   testWidgets('Image LTR with alignment topEnd (and pointless match)',
