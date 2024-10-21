@@ -2203,11 +2203,11 @@ class ShaderMaskLayer extends ContainerLayer {
 @immutable
 final class BackdropKey {
   /// Create a new [BackdropKey].
-  BackdropKey() : _id = _nextId++;
+  BackdropKey() : _key = _nextKey++;
 
-  static int _nextId = 0;
+  static int _nextKey = 0;
 
-  final int _id;
+  final int _key;
 }
 
 /// A composited layer that applies a filter to the existing contents of the scene.
@@ -2254,9 +2254,10 @@ class BackdropFilterLayer extends ContainerLayer {
     }
   }
 
-  /// The backdrop key that identifies the backdrop this filter will apply to.
+  /// The backdrop key that identifies the [BackdropGroup] this filter will apply to.
   ///
-  /// The default value for the backdrop key is `null`.
+  /// The default value for the backdrop key is `null`, meaning that it's not
+  /// part of a [BackdropGroup].
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
@@ -2276,7 +2277,7 @@ class BackdropFilterLayer extends ContainerLayer {
       filter!,
       blendMode: blendMode,
       oldLayer: _engineLayer as ui.BackdropFilterEngineLayer?,
-      backdropId: _backdropKey?._id
+      backdropId: _backdropKey?._key
     );
     addChildrenToScene(builder);
     builder.pop();
@@ -2287,7 +2288,7 @@ class BackdropFilterLayer extends ContainerLayer {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter));
     properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
-    properties.add(IntProperty('backdropKey', _backdropKey?._id));
+    properties.add(IntProperty('backdropKey', _backdropKey?._key));
   }
 }
 

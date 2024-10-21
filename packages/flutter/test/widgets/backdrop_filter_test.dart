@@ -17,7 +17,7 @@ void main() {
   testWidgets('Backdrop key is passed to backdrop Layer', (WidgetTester tester) async {
     final BackdropKey backdropKey = BackdropKey();
 
-    Widget build(bool enableKeys) {
+    Widget build({required bool enableKeys}) {
       return  MaterialApp(
         home: Scaffold(
           body: ListView(
@@ -25,7 +25,7 @@ void main() {
               ClipRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                  backdropKey: enableKeys ? backdropKey : null,
+                  backdropGroupKey: enableKeys ? backdropKey : null,
                   child: Container(
                     color: Colors.black.withAlpha(40),
                     height: 200,
@@ -36,7 +36,7 @@ void main() {
               ClipRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                  backdropKey: enableKeys ? backdropKey : null,
+                  backdropGroupKey: enableKeys ? backdropKey : null,
                   child: Container(
                     color: Colors.black.withAlpha(40),
                     height: 200,
@@ -50,7 +50,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(build(true));
+    await tester.pumpWidget(build(enableKeys: true));
 
     List<BackdropFilterLayer> layers = tester.layers.whereType<BackdropFilterLayer>().toList();
 
@@ -58,7 +58,7 @@ void main() {
     expect(layers[0].backdropKey, backdropKey);
     expect(layers[1].backdropKey, backdropKey);
 
-    await tester.pumpWidget(build(false));
+    await tester.pumpWidget(build(enableKeys: false));
 
     layers = tester.layers.whereType<BackdropFilterLayer>().toList();
 
@@ -75,7 +75,7 @@ void main() {
             child: ListView(
               children: <Widget>[
                 ClipRect(
-                  child: BackdropFilter.shared(
+                  child: BackdropFilter.group(
                     filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                     child: Container(
                       color: Colors.black.withAlpha(40),
@@ -85,7 +85,7 @@ void main() {
                   ),
                 ),
                 ClipRect(
-                  child: BackdropFilter.shared(
+                  child: BackdropFilter.group(
                     filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                     child: Container(
                       color: Colors.black.withAlpha(40),

@@ -1263,7 +1263,8 @@ class RenderBackdropFilter extends RenderProxyBox {
     _blendMode = value;
     markNeedsPaint();
   }
-  /// The backdrop key that identifies the backdrop this filter will apply to.
+  /// The backdrop key that identifies the [BackdropGroup] this filter will
+  /// read from.
   ///
   /// The default value for the backdrop key is `null`.
   BackdropKey? get backdropKey => _backdropKey;
