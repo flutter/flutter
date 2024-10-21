@@ -78,6 +78,9 @@ void runSemanticsTests() {
   group('checkboxes, radio buttons and switches', () {
     _testCheckables();
   });
+  group('selectables', () {
+    _testSelectables();
+  });
   group('tappable', () {
     _testTappable();
   });
@@ -2280,6 +2283,114 @@ void _testCheckables() {
       ],
     );
     capturedActions.clear();
+
+    semantics().semanticsEnabled = false;
+  });
+}
+
+void _testSelectables() {
+  test('renders and updates non-selectable, selected, and unselected nodes', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          isSelectable: false,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
+        ),
+        tester.updateNode(
+          id: 2,
+          isSelectable: true,
+          isSelected: false,
+          rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+        ),
+        tester.updateNode(
+          id: 3,
+          isSelectable: true,
+          isSelected: true,
+          rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+  <sem-c>
+    <sem></sem>
+    <sem aria-selected="false"></sem>
+    <sem aria-selected="true"></sem>
+  </sem-c>
+</sem>
+''');
+
+    // Missing attributes cannot be expressed using HTML patterns, so check directly.
+    final nonSelectable = owner().debugSemanticsTree![1]!.element;
+    expect(nonSelectable.getAttribute('aria-selected'), isNull);
+
+    // Flip the values and check that that ARIA attribute is updated.
+    tester.updateNode(
+      id: 2,
+      isSelectable: true,
+      isSelected: true,
+      rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+    );
+    tester.updateNode(
+      id: 3,
+      isSelectable: true,
+      isSelected: false,
+      rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+  <sem-c>
+    <sem></sem>
+    <sem aria-selected="true"></sem>
+    <sem aria-selected="false"></sem>
+  </sem-c>
+</sem>
+''');
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('Checkable takes precedence over selectable', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      isSelectable: true,
+      isSelected: true,
+      hasCheckedState: true,
+      isChecked: true,
+      hasTap: true,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+    );
+    tester.apply();
+
+    expectSemanticsTree(
+      owner(),
+      '<sem flt-tappable role="checkbox" aria-checked="true"></sem>',
+    );
+
+    final node = owner().debugSemanticsTree![0]!;
+    expect(node.semanticRole!.kind, SemanticRoleKind.checkable);
+    expect(
+      node.semanticRole!.debugSemanticBehaviorTypes,
+      isNot(contains(Selectable)),
+    );
+    expect(node.element.getAttribute('aria-selected'), isNull);
 
     semantics().semanticsEnabled = false;
   });
