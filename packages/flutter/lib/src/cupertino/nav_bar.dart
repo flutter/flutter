@@ -354,6 +354,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.padding,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
+    this.bottom,
   }) : middle = null,
        automaticallyImplyMiddle = automaticallyImplyTitle,
        assert(
@@ -676,6 +677,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       ? Color.lerp(parentPageScaffoldBackgroundColor, backgroundColor, _scrollAnimationValue) ?? backgroundColor
       : backgroundColor;
 
+    final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
     final double persistentHeight = _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top;
     final double maxHeight = persistentHeight + _kNavBarLargeTitleHeightExtension;
 
@@ -694,62 +696,66 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       staticBar: true, // This one does not scroll
     );
 
-    Widget navBar = Column(
-      children: [
-        _PersistentNavigationBar(
-          components: components,
-          padding: widget.padding,
-          middleVisible: widget.middle != null,
-        ),
-        if (widget.bottom != null) widget.bottom!,
-      ],
+    // Standard persistent components
+    Widget navBar = _PersistentNavigationBar(
+      components: components,
+      padding: widget.padding,
+      middleVisible: widget.middle != null,
     );
 
+    // Large nav bar
     if (widget.largeTitle != null) {
       navBar = ConstrainedBox(
         constraints: BoxConstraints(maxHeight: maxHeight),
         child: Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          Positioned(
-            top: persistentHeight,
-            left: 0.0,
-            right: 0.0,
-            bottom: 0.0,
-            child: ClipRect(
-              child: Padding(
-                padding: const EdgeInsetsDirectional.only(
-                  start: _kNavBarEdgePadding,
-                  bottom: _kNavBarBottomPadding
-                ),
-                child: SafeArea(
-                  top: false,
-                  bottom: false,
-                  child: Semantics(
-                    header: true,
-                    child: DefaultTextStyle(
-                      style: CupertinoTheme.of(context)
-                          .textTheme
-                          .navLargeTitleTextStyle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      child: _LargeTitle(
-                        child: components.largeTitle,
+          fit: StackFit.expand,
+          children: <Widget>[
+            Positioned(
+              top: persistentHeight,
+              left: 0.0,
+              right: 0.0,
+              bottom: 0.0,
+              child: ClipRect(
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: _kNavBarEdgePadding,
+                    bottom: _kNavBarBottomPadding
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    bottom: false,
+                    child: Semantics(
+                      header: true,
+                      child: DefaultTextStyle(
+                        style: CupertinoTheme.of(context)
+                            .textTheme
+                            .navLargeTitleTextStyle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        child: _LargeTitle(child: components.largeTitle),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            left: 0.0,
-            right: 0.0,
-            top: 0.0,
-            child: navBar,
-          ),
+            Positioned(
+              left: 0.0,
+              right: 0.0,
+              top: 0.0,
+              child: navBar,
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (widget.bottom != null) {
+      navBar = Column(
+        children: <Widget>[
+          navBar,
+          if (widget.bottom != null) SizedBox(height: bottomHeight, child: widget.bottom),
         ],
-      ),
       );
     }
 
