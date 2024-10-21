@@ -4718,6 +4718,14 @@ void main() {
       tester.renderObject(find.byWidget(rootOverlay)),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/156572.
+  testWidgets('Unattached MenuController does not throw when calling close', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    controller.close();
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
 }
 
 List<Widget> createTestMenus({
