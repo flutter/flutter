@@ -572,8 +572,6 @@ class BrowserPlatform extends PlatformPlugin {
 <script>
   _flutter.loader.load({
     config: {
-      // Some of our tests rely on color emoji
-      useColorEmoji: true,
       canvasKitVariant: "${getCanvasKitVariant()}",
       canvasKitBaseUrl: "/canvaskit",
     },

@@ -21,6 +21,7 @@ dev_dependencies:
   archive: 3.6.1
   args: any
   async: any
+  csslib: 1.0.0
   convert: any
   crypto: any
   html: 0.15.4

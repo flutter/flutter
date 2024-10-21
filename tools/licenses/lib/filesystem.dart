@@ -86,6 +86,9 @@ FileType identifyFile(String name, Reader reader) {
       path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/angle/src/common/fuchsia_egl/fuchsia_egl_backend.h') { // has bogus but benign "authors" reference, reported to author and legal team
     return FileType.binary;
   }
+  if (path.split(name).reversed.take(6).toList().reversed.join('/') == 'flutter/third_party/brotli/c/common/dictionary.bin.br') { // Brotli-compressed Brotli dictionary
+    return FileType.binary;
+  }
   final String base = path.basename(name);
   if (base.startsWith('._')) {
     bytes ??= reader();

@@ -795,6 +795,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_enable_skottie'] = False
   gn_args['icu_use_data_file'] = False
   gn_args['skia_use_freetype'] = True
+  gn_args['flutter_use_freetype_woff2'] = True
   gn_args['skia_use_harfbuzz'] = True
   gn_args['skia_use_fontconfig'] = False
   gn_args['skia_use_libheif'] = False
