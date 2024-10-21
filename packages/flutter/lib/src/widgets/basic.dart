@@ -475,31 +475,40 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// [BackdropKey]. The backdrop key uniquely identifies the input for a backdrop
 /// filter, and when shared, indicates the filtering can be performed once. This
 /// can significantly reduce the overhead of using multiple backdrop filters in
-/// a scene. For example, the following snippet demonstrates how to use the
-/// backdrop key to allow each list item to have an efficient blur. This widget
-/// will perform only one backdrop blur.
+/// a scene.
+///
+/// Backdrop filters that overlap with eachother should not use the same
+/// backdrop key, otherwise the results may look as if only one filter applied
+/// in the overlapping regions.
+///
+/// The following snippet demonstrates how to use the backdrop key to allow each
+/// list item to have an efficient blur. The engine will perform only one
+/// backdrop blur but the results will be visually identical to multiple blurs.
 ///
 /// ```dart
-/// final listItems = BackdropKey();
+/// final BackdropKey listKey = BackdropKey();
 ///
-/// ListView.builder(
-///   itemCount: 60,
-///   itemBuilder: (BuildContext context, int index) {
-///     return ClipRect(
-///       child: BackdropFilter(
-///         backdropKey: listItems,
-///         filter: ui.ImageFilter.blur(
-///           sigmaX: 40,
-///           sigmaY: 40,
-///         ),
-///         child: Container(
-///           color: Colors.black.withOpacity(0.2),
-///           child: Text('Blur item'),
+/// Widget build(BuildContext context) {
+///   return ListView.builder(
+///     itemCount: 60,
+///     itemBuilder: (BuildContext context, int index) {
+///       return ClipRect(
+///         child: BackdropFilter(
+///           backdropKey: listKey,
+///           filter: ui.ImageFilter.blur(
+///             sigmaX: 40,
+///             sigmaY: 40,
+///           ),
+///           child: Container(
+///             color: Colors.black.withOpacity(0.2),
+///             height: 200,
+///             child: Text('Blur item'),
+///           ),
 ///         ),
 ///       ),
-///     ),
-///   },
-/// )
+///     },
+///   );
+/// }
 /// ```
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=dYRs7Q1vfYI}
