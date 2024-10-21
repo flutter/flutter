@@ -86,10 +86,6 @@ void testMain() {
       expect(defaultConfig.canvasKitVariant, CanvasKitVariant.auto);
     });
 
-    test('useColorEmoji', () {
-      expect(defaultConfig.useColorEmoji, isFalse);
-    });
-
     test('multiViewEnabled', () {
       expect(defaultConfig.multiViewEnabled, isFalse);
     });
@@ -131,14 +127,6 @@ void testMain() {
         );
         expect(config.canvasKitVariant, CanvasKitVariant.chromium);
       });
-    });
-
-    test('useColorEmoji', () {
-      final FlutterConfiguration config = FlutterConfiguration();
-      config.setUserConfiguration(
-        js_util.jsify(<String, Object?>{'useColorEmoji': true}) as JsFlutterConfiguration,
-      );
-      expect(config.useColorEmoji, isTrue);
     });
 
     test('multiViewEnabled', () {
