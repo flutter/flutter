@@ -554,8 +554,8 @@ class FlutterPlugin implements Plugin<Project> {
                 }
                                 appLinkIntent.data.each { data ->
                                     data.attributes().each { entry ->
-                                        if (entry.key instanceof QName) {
-                                            switch (entry.key.getLocalPart()) {
+                                        def key = entry.key.toString()
+                                            switch (key) {
                                                 case "scheme":
                                                     schemes.add(entry.value)
                                                     break
@@ -574,7 +574,6 @@ class FlutterPlugin implements Plugin<Project> {
                                                     paths.add(".*${entry.value}")
                                                     break
                                             }
-                                        }
                                     }
                                 }
                                 if(!hosts.isEmpty() || !paths.isEmpty()){
