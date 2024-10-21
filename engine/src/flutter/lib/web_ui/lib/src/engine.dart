@@ -147,7 +147,6 @@ export 'engine/scene_view.dart';
 export 'engine/semantics/accessibility.dart';
 export 'engine/semantics/checkable.dart';
 export 'engine/semantics/focusable.dart';
-export 'engine/semantics/header.dart';
 export 'engine/semantics/heading.dart';
 export 'engine/semantics/image.dart';
 export 'engine/semantics/incrementable.dart';
