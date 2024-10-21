@@ -39,11 +39,10 @@ class _DatePickerExampleState extends State<DatePickerExample> {
       firstDate: DateTime(2021),
       lastDate: DateTime(2022),
     );
-    if (mounted && pickedDate != null && pickedDate != selectedDate) {
-      setState(() {
-        selectedDate = pickedDate;
-      });
-    }
+
+    setState(() {
+      selectedDate = pickedDate;
+    });
   }
 
   @override
