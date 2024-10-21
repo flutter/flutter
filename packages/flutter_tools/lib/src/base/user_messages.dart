@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../android/java.dart';
 import 'platform.dart';
 
 /// Class containing some message strings that can be produced by Flutter tools.
@@ -115,7 +116,26 @@ class UserMessages {
       'No Java Development Kit (JDK) found; You must have the environment '
       'variable JAVA_HOME set and the java binary in your PATH. '
       'You can download the JDK from https://www.oracle.com/technetwork/java/javase/downloads/.';
-  String androidJdkLocation(String location) => 'Java binary at: $location';
+  String androidJdkLocation(String location, JavaHomeSource source) {
+    final String setWithConfigBreadcrumb = switch (source) {
+      JavaHomeSource.androidStudio || JavaHomeSource.path || JavaHomeSource.javaHome =>
+        'To configure path to JDK manually, run `flutter config --jdk-dir="path_to_preferred_jdk"`',
+      JavaHomeSource.flutterConfig =>
+        'To change path to JDK, run `flutter config --jdk-dir="path_to_preferred_jdk"`'
+    };
+    final String sourceMessagePart = switch (source) {
+      JavaHomeSource.androidStudio =>
+        'Path to Java binary is gathered from latest Android Studio installation',
+      JavaHomeSource.javaHome =>
+        'Path to Java binary is gathered from JAVA_HOME environment variable',
+      JavaHomeSource.path =>
+        'Path to Java binary is gathered from PATH',
+      JavaHomeSource.flutterConfig =>
+        'Path to Java binary is set in Flutter config',
+    };
+
+    return 'Java binary at: $location\n$sourceMessagePart\n$setWithConfigBreadcrumb';
+  }
   String get androidLicensesAll => 'All Android licenses accepted.';
   String get androidLicensesSome => 'Some Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
   String get androidLicensesNone => 'Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';

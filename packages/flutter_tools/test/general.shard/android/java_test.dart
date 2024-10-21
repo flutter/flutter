@@ -196,6 +196,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           processManager: processManager,
           binaryPath: 'javaHome/bin/java',
           javaHome: 'javaHome',
+          javaHomeSource: JavaHomeSource.javaHome,
         );
       });
 

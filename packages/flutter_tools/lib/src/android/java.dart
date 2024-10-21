@@ -15,11 +15,21 @@ import 'android_studio.dart';
 
 const String _javaExecutable = 'java';
 
+enum JavaHomeSource {
+  androidStudio,
+  javaHome,
+  path,
+  flutterConfig,
+}
+
+typedef _JavaHomePathWithSource = ({String path, JavaHomeSource source});
+
 /// Represents an installation of Java.
 class Java {
   Java({
     required this.javaHome,
     required this.binaryPath,
+    required this.javaHomeSource,
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils os,
@@ -65,7 +75,7 @@ class Java {
       platform: platform,
       processManager: processManager
     );
-    final String? home = _findJavaHome(
+    final _JavaHomePathWithSource? home = _findJavaHome(
       config: config,
       logger: logger,
       androidStudio: androidStudio,
@@ -73,7 +83,7 @@ class Java {
     );
     final String? binary = _findJavaBinary(
       logger: logger,
-      javaHome: home,
+      javaHome: home?.path,
       fileSystem: fileSystem,
       operatingSystemUtils: os,
       platform: platform
@@ -83,9 +93,14 @@ class Java {
       return null;
     }
 
+    // If javaHome will be null and binary is not null, it means that
+    // binary gathered from path as fallback.
+    final JavaHomeSource javaHomeSource = home?.source ?? JavaHomeSource.path;
+
     return Java(
-      javaHome: home,
+      javaHome: home?.path,
       binaryPath: binary,
+      javaHomeSource: javaHomeSource,
       logger: logger,
       fileSystem: fileSystem,
       os: os,
@@ -109,6 +124,9 @@ class Java {
   /// If you need to invoke the binary directly, consider adding a new method
   /// to this class instead.
   final String binaryPath;
+
+  /// TBD: comment
+  final JavaHomeSource javaHomeSource;
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -192,7 +210,7 @@ class Java {
   }
 }
 
-String? _findJavaHome({
+_JavaHomePathWithSource? _findJavaHome({
   required Config config,
   required Logger logger,
   required AndroidStudio? androidStudio,
@@ -200,17 +218,17 @@ String? _findJavaHome({
 }) {
   final Object? configured = config.getValue('jdk-dir');
   if (configured != null) {
-    return configured as String;
+    return (path: configured as String, source: JavaHomeSource.flutterConfig);
   }
 
   final String? androidStudioJavaPath = androidStudio?.javaPath;
   if (androidStudioJavaPath != null) {
-    return androidStudioJavaPath;
+    return (path: androidStudioJavaPath, source: JavaHomeSource.androidStudio);
   }
 
   final String? javaHomeEnv = platform.environment[Java.javaHomeEnvironmentVariable];
   if (javaHomeEnv != null) {
-    return javaHomeEnv;
+    return (path: javaHomeEnv, source: JavaHomeSource.javaHome);
   }
   return null;
 }
