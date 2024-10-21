@@ -318,10 +318,18 @@ abstract class FlutterTestDriver {
     );
   }
 
+  /// Subscribe to the Extension event stream..
+  Future<void> subscribeToExtensionStream() async {
+    await _vmService!.streamListen(EventStreams.kExtension);
+  }
+
   /// Wait for an Extension event matching [kind].
   ///
   /// Returns a future that completes when the first [kind] event is received.
-  Future<Event> waitForExtensionEvent(String kind) {
+  ///
+  /// Note: Must first call [subscribeToExtensionEvent] before calling this
+  /// method.
+  Future<Event> waitForExtensionEvent(String kind) async {
     _debugPrint('Waiting for $kind events...');
 
     return _vmService!.onExtensionEvent

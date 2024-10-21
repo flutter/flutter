@@ -191,6 +191,7 @@ void main() {
   testWithoutContext('Flutter.HotReload event is sent after a hot-reload',
       () async {
     await flutter.run(withDebugger: true);
+    await flutter.subscribeToExtensionStream();
     final Future<Event> extensionEventFuture =
         flutter.waitForExtensionEvent('Flutter.HotReload');
     await flutter.hotReload();
