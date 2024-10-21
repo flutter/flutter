@@ -5,6 +5,8 @@
 import 'dart:io';
 
 import 'package:file/local.dart';
+
+import 'apk_utils.dart';
 import 'task_result.dart';
 import 'utils.dart';
 
@@ -58,7 +60,7 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-GRADLE_REPLACE
 ''';
 
 const String gradleReplacementString = 'GRADLE_REPLACE_ME';
-const String flutterCompileSdkString = 'flutter.compileSdkVersion';
+final RegExp flutterCompileSdkString = RegExp(r'flutter\.compileSdkVersion|flutter\.compileSdk');
 
 /// A simple class containing a Kotlin, Gradle, and AGP version.
 class VersionTuple {
@@ -110,8 +112,7 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
       final String appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
 
       if (versions.compileSdkVersion != null) {
-        final File appGradleBuild = localFileSystem.file(localFileSystem.path.join(
-            appPath, 'android', 'app', 'build.gradle'));
+        final File appGradleBuild = getAndroidBuildFile(localFileSystem.path.join(appPath, 'android', 'app'));
         final String appBuildContent = appGradleBuild.readAsStringSync()
             .replaceFirst(flutterCompileSdkString, versions.compileSdkVersion!);
         appGradleBuild.writeAsStringSync(appBuildContent);
@@ -126,12 +127,14 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
       );
       await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
-      final File gradleSettings = localFileSystem.file(localFileSystem.path.join(
-          appPath, 'android', 'settings.gradle'));
+      final File gradleSettingsFile = getAndroidBuildFile(
+        localFileSystem.path.join(appPath, 'android'),
+        settings: true,
+      );
       final String settingsContent = gradleSettingsFileContent
           .replaceFirst(agpReplacementString, versions.agpVersion)
           .replaceFirst(kgpReplacementString, versions.kotlinVersion);
-      await gradleSettings.writeAsString(settingsContent, flush: true);
+      await gradleSettingsFile.writeAsString(settingsContent, flush: true);
 
 
       // Ensure that gradle files exists from templates.
