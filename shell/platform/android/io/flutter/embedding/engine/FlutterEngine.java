@@ -34,6 +34,7 @@ import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.ProcessTextChannel;
 import io.flutter.embedding.engine.systemchannels.RestorationChannel;
+import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SpellCheckChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
@@ -100,6 +101,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull private final RestorationChannel restorationChannel;
   @NonNull private final PlatformChannel platformChannel;
   @NonNull private final ProcessTextChannel processTextChannel;
+  @NonNull private final ScribeChannel scribeChannel;
   @NonNull private final SettingsChannel settingsChannel;
   @NonNull private final SpellCheckChannel spellCheckChannel;
   @NonNull private final SystemChannel systemChannel;
@@ -337,6 +339,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     platformChannel = new PlatformChannel(dartExecutor);
     processTextChannel = new ProcessTextChannel(dartExecutor, context.getPackageManager());
     restorationChannel = new RestorationChannel(dartExecutor, waitForRestorationData);
+    scribeChannel = new ScribeChannel(dartExecutor);
     settingsChannel = new SettingsChannel(dartExecutor);
     spellCheckChannel = new SpellCheckChannel(dartExecutor);
     systemChannel = new SystemChannel(dartExecutor);
@@ -608,6 +611,12 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull
   public TextInputChannel getTextInputChannel() {
     return textInputChannel;
+  }
+
+  /** System channel that sends and receives Scribe requests and results. */
+  @NonNull
+  public ScribeChannel getScribeChannel() {
+    return scribeChannel;
   }
 
   /** System channel that sends and receives spell check requests and results. */

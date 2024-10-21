@@ -14,6 +14,7 @@ import android.view.inputmethod.EditorInfo;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.KeyboardManager;
+import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import java.util.ArrayList;
 import org.junit.Before;
@@ -280,6 +281,7 @@ public class ListenableEditingStateTest {
             testView,
             0,
             mock(TextInputChannel.class),
+            mock(ScribeChannel.class),
             mockKeyboardManager,
             editingState,
             new EditorInfo());
@@ -305,6 +307,7 @@ public class ListenableEditingStateTest {
             testView,
             0,
             mock(TextInputChannel.class),
+            mock(ScribeChannel.class),
             mockKeyboardManager,
             editingState,
             new EditorInfo());
@@ -339,6 +342,7 @@ public class ListenableEditingStateTest {
             testView,
             0,
             mock(TextInputChannel.class),
+            mock(ScribeChannel.class),
             mockKeyboardManager,
             editingState,
             new EditorInfo());
@@ -399,6 +403,7 @@ public class ListenableEditingStateTest {
             testView,
             0,
             mock(TextInputChannel.class),
+            mock(ScribeChannel.class),
             mockKeyboardManager,
             editingState,
             new EditorInfo());
