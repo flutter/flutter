@@ -5,7 +5,7 @@
 
 import com.android.build.OutputFile
 import groovy.json.JsonGenerator
-import groovy.namespace.QName
+import javax.xml.namespace.QName
 import java.nio.file.Paths
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
