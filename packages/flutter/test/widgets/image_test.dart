@@ -2240,7 +2240,7 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
   }
 
   void dispose() {
-    final listenersCopy = this.listeners.toList();
+    final List<ImageStreamListener> listenersCopy = listeners.toList();
     listenersCopy.forEach(removeListener);
   }
 }
