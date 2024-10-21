@@ -798,7 +798,6 @@ $javaGradleCompatUrl
         'gradleVersion': gradle.templateDefaultGradleVersion,
         'compileSdkVersion': gradle.compileSdkVersion,
         'minSdkVersion': gradle.minSdkVersion,
-        'ndkVersion': gradle.ndkVersion,
         'targetSdkVersion': gradle.targetSdkVersion,
       },
       printStatusWhenWriting: false,
