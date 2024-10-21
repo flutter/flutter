@@ -516,26 +516,26 @@ class BackdropGroup extends InheritedWidget {
 /// backdrop blur but the results will be visually identical to multiple blurs.
 ///
 /// ```dart
-/// Widget build(BuildContext context) {
-///   return BackdropGroup(
-///     child: ListView.builder(
-///       itemCount: 60,
-///       itemBuilder: (BuildContext context, int index) {
-///         return ClipRect(
-///           child: BackdropFilter.shared(
-///             filter: ui.ImageFilter.blur(
-///               sigmaX: 40,
-///               sigmaY: 40,
-///             ),
-///             child: Container(
-///               color: Colors.black.withOpacity(0.2),
-///               height: 200,
-///               child: const Text('Blur item'),
-///             ),
-///           ),
-///         ),
-///       );
-///     }),
+///  Widget build(BuildContext context) {
+///    return BackdropGroup(
+///      child: ListView.builder(
+///        itemCount: 60,
+///        itemBuilder: (BuildContext context, int index) {
+///          return ClipRect(
+///            child: BackdropFilter.shared(
+///              filter: ui.ImageFilter.blur(
+///                sigmaX: 40,
+///                sigmaY: 40,
+///              ),
+///              child: Container(
+///                color: Colors.black.withOpacity(0.2),
+///                height: 200,
+///                child: const Text('Blur item'),
+///              ),
+///            ),
+///          );
+///       }
+///     ),
 ///   );
 /// }
 /// ```
