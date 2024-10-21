@@ -456,7 +456,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///
 /// Sharing a backdrop filter layer will improve the performance of multiple
 /// backdrop filters. To opt into using a shared [BackdropGroup], the special
-/// [BackdropFilter.shared] constructor must be used.
+/// [BackdropFilter.grouped] constructor must be used.
 class BackdropGroup extends InheritedWidget {
   /// Create a new [BackdropGroup] widget.
   BackdropGroup({
@@ -505,7 +505,7 @@ class BackdropGroup extends InheritedWidget {
 /// can significantly reduce the overhead of using multiple backdrop filters in
 /// a scene. The key can either be provided manually via the `backdropKey`
 /// constructor parameter or looked up from a [BackdropGroup] inherited widget
-/// via the `.group` constructor.
+/// via the `.grouped` constructor.
 ///
 /// Backdrop filters that overlap with each other should not use the same
 /// backdrop key, otherwise the results may look as if only one filter is
@@ -649,7 +649,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// This constructor will automatically look up the nearest [BackdropGroup]
   /// and will share the backdrop input with sibling and child [BackdropFilter]
   /// widgets.
-  const BackdropFilter.group({
+  const BackdropFilter.grouped({
     super.key,
     required this.filter,
     super.child,

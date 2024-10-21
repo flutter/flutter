@@ -75,7 +75,7 @@ void main() {
             child: ListView(
               children: <Widget>[
                 ClipRect(
-                  child: BackdropFilter.group(
+                  child: BackdropFilter.grouped(
                     filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                     child: Container(
                       color: Colors.black.withAlpha(40),
@@ -85,7 +85,7 @@ void main() {
                   ),
                 ),
                 ClipRect(
-                  child: BackdropFilter.group(
+                  child: BackdropFilter.grouped(
                     filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                     child: Container(
                       color: Colors.black.withAlpha(40),
