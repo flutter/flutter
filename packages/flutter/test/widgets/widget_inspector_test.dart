@@ -1983,6 +1983,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             return childJson['createdByLocalProject'] == true;
           }
 
+          /// Returns whether the child is missing the "type" field.
+          /// 
+          /// This should always be true for nodes in the abbreviated widget
+          /// tree.
+          bool isMissingType(Map<String, Object?> childJson) {
+            return childJson['type'] == null;
+          }
+
           /// Returns whether the child has a description matching [description].
           bool hasDescription(
             Map<String, Object?> childJson, {
@@ -2281,6 +2289,79 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
             expect(
               allChildrenSatisfyCondition(rootJson,
+                condition: isMissingType,
+              ),
+              isFalse,
+            );
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: wasCreatedByLocalProject,
+              ),
+              isFalse,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    !hasTextPreview(child, preview: 'a');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    !hasTextPreview(child, preview: 'b');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    !hasTextPreview(child, preview: 'c');
+                },
+              ),
+              isTrue,
+            );
+          });
+
+          testWidgets(
+              'abbreviated tree using ext.flutter.inspector.getRootWidgetTree',
+              (WidgetTester tester) async {
+            const String group = 'test-group';
+
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
+            final Map<String, dynamic> jsonA =
+                await selectedWidgetResponseForElement(elementA);
+
+            final Map<String, Object?> creationLocation =
+                verifyAndReturnCreationLocation(jsonA);
+            final String testFile = verifyAndReturnTestFile(creationLocation);
+            addPubRootDirectoryFor(testFile);
+
+            final Map<String, Object?> rootJson = (await service.testExtension(
+              WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+              <String, String>{
+                'groupName': group,
+                'isSummaryTree': 'false',
+                'withPreviews': 'false',
+                'abbreviated': 'true',
+              },
+            ))! as Map<String, Object?>;
+
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: isMissingType,
+              ),
+              isTrue,
+            );
+
+            expect(
+              allChildrenSatisfyCondition(rootJson,
                 condition: wasCreatedByLocalProject,
               ),
               isFalse,
@@ -2338,6 +2419,79 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               },
             ))! as Map<String, Object?>;
 
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: isMissingType,
+              ),
+              isFalse,
+            );
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: wasCreatedByLocalProject,
+              ),
+              isFalse,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    hasTextPreview(child, preview: 'a');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    hasTextPreview(child, preview: 'b');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    hasTextPreview(child, preview: 'c');
+                },
+              ),
+              isTrue,
+            );
+          });
+
+          testWidgets(
+              'abbreviated tree with previews using ext.flutter.inspector.getRootWidgetTree',
+              (WidgetTester tester) async {
+            const String group = 'test-group';
+
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
+            final Map<String, dynamic> jsonA =
+                await selectedWidgetResponseForElement(elementA);
+
+            final Map<String, Object?> creationLocation =
+                verifyAndReturnCreationLocation(jsonA);
+            final String testFile = verifyAndReturnTestFile(creationLocation);
+            addPubRootDirectoryFor(testFile);
+
+            final Map<String, Object?> rootJson = (await service.testExtension(
+              WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+              <String, String>{
+                'groupName': group,
+                'isSummaryTree': 'false',
+                'withPreviews': 'true',
+                'abbreviated': 'true',
+              },
+            ))! as Map<String, Object?>;
+
+
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: isMissingType,
+              ),
+              isTrue,
+            );
             expect(
               allChildrenSatisfyCondition(rootJson,
                 condition: wasCreatedByLocalProject,
