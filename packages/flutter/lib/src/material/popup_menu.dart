@@ -356,6 +356,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     widget.onTap?.call();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -1544,6 +1545,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     };
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);

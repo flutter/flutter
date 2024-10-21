@@ -636,6 +636,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     return _pendingRefreshFuture;
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));

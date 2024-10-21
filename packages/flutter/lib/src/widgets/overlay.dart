@@ -604,6 +604,7 @@ class Overlay extends StatefulWidget {
 class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   final List<OverlayEntry> _entries = <OverlayEntry>[];
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -808,6 +809,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     });
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     // This list is filled backwards and then reversed below before
