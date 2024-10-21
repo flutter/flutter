@@ -86,7 +86,7 @@ std::unique_ptr<Surface> SurfaceContextVK::AcquireNextSurface() {
     impeller::PipelineLibraryVK::Cast(*pipeline_library)
         .DidAcquireSurfaceFrame();
   }
-  parent_->GetCommandPoolRecycler()->Dispose();
+  parent_->DisposeThreadLocalCachedResources();
   parent_->GetResourceAllocator()->DebugTraceMemoryStatistics();
   return surface;
 }
