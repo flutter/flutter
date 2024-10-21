@@ -824,7 +824,7 @@ void main() {
   });
 
   testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
   (WidgetTester tester) async {
     final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
     final _TestImageProvider provider = _TestImageProvider(streamCompleter: imageStreamCompleter);
@@ -1026,7 +1026,7 @@ void main() {
   });
 
   testWidgets('Image invokes frameBuilder with correct frameNumber argument',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
   (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
       return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
@@ -1097,7 +1097,7 @@ void main() {
   });
 
   testWidgets('Image invokes frameBuilder with correct wasSynchronouslyLoaded=true',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
   (WidgetTester tester) async {
     final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter(ImageInfo(image: image10x10.clone()));
     final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
@@ -1157,7 +1157,7 @@ void main() {
   });
 
   testWidgets('Image state handles enabling and disabling of tickers',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
   (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
       return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
@@ -1622,7 +1622,7 @@ void main() {
   });
 
   testWidgets('precacheImage allows time to take over weak reference',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
   (WidgetTester tester) async {
     final _TestImageProvider provider = _TestImageProvider();
     late Future<void> precache;
@@ -1847,7 +1847,7 @@ void main() {
   );
 
   testWidgets('Reports image size when painted',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
   (WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
     int count = 0;
@@ -1958,7 +1958,7 @@ void main() {
   });
 
   testWidgets('Load a good image after a bad image was loaded should not call errorBuilder',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
   (WidgetTester tester) async {
     final UniqueKey errorKey = UniqueKey();
     final ui.Image image = (await tester.runAsync(() => createTestImage()))!;
@@ -2058,7 +2058,7 @@ void main() {
   });
 
   testWidgets('Animated GIFs do not require layout for subsequent frames',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, as it uses hacky _TestImageStreamCompleter.
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
   (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
       return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
@@ -2191,6 +2191,9 @@ class _TestImageProvider extends ImageProvider<Object> {
 /// Such an access to listeners is hacky,
 /// because it breaks encapsulation by allowing to invoke listeners without
 /// taking care about lifecycle of the created images, that may result in not disposed images.
+///
+/// That's why some tests that use it
+/// are opted out from leak tracking.
 class _TestImageStreamCompleter extends ImageStreamCompleter {
   _TestImageStreamCompleter([this._currentImage]);
 
