@@ -14,6 +14,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.Task
+import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.LogLevel
@@ -438,9 +439,10 @@ class FlutterPlugin implements Plugin<Project> {
     private static void addApiDependencies(Project project, String variantName, Object dependency, Closure config = null) {
         String configuration
         // `compile` dependencies are now `api` dependencies.
-        if (project.getConfigurations().findByName("api")) {
+        try{
+            project.getConfigurations().named("api")
             configuration = "${variantName}Api"
-        } else {
+        }catch(UnknownTaskException ignored){
             configuration = "${variantName}Compile"
         }
         project.dependencies.add(configuration, dependency, config)
