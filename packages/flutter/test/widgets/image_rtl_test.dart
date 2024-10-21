@@ -8,12 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// An [_TestImageProvider] interrupts the way to .
-///
-///
-/// Such an access to listeners is hacky,
-/// because it breaks encapsulation by allowing to invoke listeners without
-/// taking care about lifecycle of the created images, that may result in not disposed images.
 class _TestImageProvider extends ImageProvider<_TestImageProvider> {
   _TestImageProvider(ui.Image image) {
     _completer = OneFrameImageStreamCompleter(
