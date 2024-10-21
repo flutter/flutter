@@ -1549,14 +1549,14 @@ void main() {
     // The selected value should be displayed when the button is enabled.
     await tester.pumpWidget(build(onChanged: onChanged, value: 'two'));
     // The dropdown icon and the selected menu item are vertically aligned.
-    expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
+    expect(tester.getCenter(find.byType(DropdownButtonFormField<String>)).dy, tester.getCenter(find.byType(Icon)).dy);
     // Selected item has a normal color from [DropdownButtonFormField.style]
     // when the button is enabled.
     expect(textColor('two'), Colors.yellow);
 
     // The selected value should be displayed when the button is disabled.
     await tester.pumpWidget(build(value: 'two'));
-    expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
+    expect(tester.getCenter(find.byType(DropdownButtonFormField<String>)).dy, tester.getCenter(find.byType(Icon)).dy);
     // Selected item has a disabled color from [theme.disabledColor]
     // when the button is disable.
     expect(textColor('two'), Colors.pink);
@@ -4084,5 +4084,39 @@ void main() {
     // dropdowns with padding should be that much larger than with no padding
     expect(noPaddingSize.height, equals(paddedSize.height - padVertical * 2));
     expect(noPaddingSize.width, equals(paddedSize.width - padHorizontal * 2));
+  });
+
+  testWidgets('DropdownButton Icon should be centered', (WidgetTester tester) async {
+    Widget build({ String? value, String? labelText }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(children: <Widget>[
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(labelText: labelText),
+                items: const <DropdownMenuItem<String>>[
+                  DropdownMenuItem<String>(
+                    value: 'one',
+                    child: Text('one'),
+                  ),
+                  DropdownMenuItem<String>(
+                    value: 'two',
+                    child: Text('two'),
+                  ),
+                ],
+                value: value,
+                onChanged: onChanged,
+              ),
+            ]),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(value: 'two', labelText: 'Label text'));
+    expect(tester.getCenter(find.byType(DropdownButtonFormField<String>)).dy, tester.getCenter(find.byType(Icon)).dy);
+
+    await tester.pumpWidget(build(value: 'two'));
+    expect(tester.getCenter(find.byType(DropdownButtonFormField<String>)).dy, tester.getCenter(find.byType(Icon)).dy);
   });
 }

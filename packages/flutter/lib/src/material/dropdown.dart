@@ -1526,6 +1526,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
 
     const Icon defaultIcon = Icon(Icons.arrow_drop_down);
+    final Widget iconWidget = IconTheme(
+      data: IconThemeData(
+        color: _iconColor,
+        size: widget.iconSize,
+      ),
+      child: widget.icon ?? defaultIcon,
+    );
 
     Widget result = DefaultTextStyle(
       style: _enabled ? _textStyle! : _textStyle!.copyWith(color: Theme.of(context).disabledColor),
@@ -1541,13 +1548,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
                 Expanded(child: innerItemsWidget)
               else
                 innerItemsWidget,
-              IconTheme(
-                data: IconThemeData(
-                  color: _iconColor,
-                  size: widget.iconSize,
-                ),
-                child: widget.icon ?? defaultIcon,
-              ),
+              // If _inputDecoration exists, use InputDecoration.suffixIcon
+              // to layout the icon so that the icon can be properly centered.
+              if (widget._inputDecoration == null)
+                iconWidget,
             ],
           ),
         ),
@@ -1588,7 +1592,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     if (widget._inputDecoration != null) {
       result = InputDecorator(
-        decoration: widget._inputDecoration!,
+        decoration: widget._inputDecoration!.copyWith(
+          suffixIcon: iconWidget,
+        ),
         isEmpty: widget._isEmpty,
         isFocused: widget._isFocused,
         child: result,
