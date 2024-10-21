@@ -676,12 +676,8 @@ void main() {
         child: Text('XXX'),
       ),
     );
-    bool popupMenu(Widget widget) {
-      final String widgetType = widget.runtimeType.toString();
-      // TODO(mraleph): Remove the old case below.
-      return widgetType == '_PopupMenu<int?>' // normal case
-          || widgetType == '_PopupMenu'; // for old versions of Dart that don't reify method type arguments
-    }
+
+    bool popupMenu(Widget widget) => widget.runtimeType.toString() == '_PopupMenu<int?>';
 
     Future<void> openMenu(TextDirection textDirection, Alignment alignment) async {
       return TestAsyncUtils.guard<void>(() async {
