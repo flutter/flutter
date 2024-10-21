@@ -386,37 +386,12 @@ enum WidgetInspectorServiceExtensions {
   /// If the parameter `withPreviews` is true, text previews will be included
   /// for [Element]s with a corresponding [RenderObject] of type
   /// [RenderParagraph].
-  /// 
-  /// Note: This service extension returns detailed [DiagnosticsNode] data for
-  /// the entire tree, and as such the payload can be quite large. If you need a
-  /// lightweight response without all the details, use [getLightRootWidgetTree]
-  /// instead.
   ///
   /// See also:
   ///
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   getRootWidgetTree,
-
-  /// Name of service extension that, when called, will return lightweight
-  /// [DiagnosticsNode] data for the root [Element] of the widget tree.
-  ///
-  /// If the parameter `isSummaryTree` is true, the tree will only include
-  /// [Element]s that were created by user code.
-  ///
-  /// If the parameter `withPreviews` is true, text previews will be included
-  /// for [Element]s with a corresponding [RenderObject] of type
-  /// [RenderParagraph].
-  ///
-  /// Note: This service extension returns only the information required to
-  /// build a representation of the widget tree. If you need more detailed 
-  /// [DiagnosticsNode] data, use [getRootWidgetTree] instead.
-  /// 
-  /// See also:
-  ///
-  /// * [WidgetInspectorService.initServiceExtensions], where the service
-  ///   extension is registered.
-  getLightRootWidgetTree,
 
   /// Name of service extension that, when called, will return the
   /// [DiagnosticsNode] data for the root [Element] of the summary tree, which

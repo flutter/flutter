@@ -5429,9 +5429,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             'callbackExecuted': true,
           },
       );
-      final Map<String, Object?> json = node.toJsonMap(
-        delegate
-      );
+      final Map<String, Object?> json = node.toJsonMap(delegate);
       expect(json['callbackExecuted'], true);
       expect(json.containsKey('renderObject'), true);
       expect(json['renderObject'], isA<Map<String, Object?>>());
@@ -5543,9 +5541,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(node.name, isEmpty);
       expect(node.value, equals('http://the-deeplink/'));
       expect(
-        node.toJsonMap(
-          const DiagnosticsSerializationDelegate()
-        ),
+        node.toJsonMap(const DiagnosticsSerializationDelegate()),
         equals(<String, dynamic>{
           'description': 'description of the deep link',
           'type': 'DevToolsDeepLinkProperty',
@@ -5562,11 +5558,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
   }
 
   static String generateTestPubRootDirectory(TestWidgetInspectorService service) {
-    final Map<String, Object?> jsonObject = const SizedBox()
-        .toDiagnosticsNode()
-        .toJsonMap(
-          InspectorSerializationDelegate(service: service)
-        );
+    final Map<String, Object?> jsonObject = const SizedBox().toDiagnosticsNode().toJsonMap(InspectorSerializationDelegate(service: service));
     final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
     expect(creationLocation, isNotNull);
     final String file = creationLocation['file']! as String;
