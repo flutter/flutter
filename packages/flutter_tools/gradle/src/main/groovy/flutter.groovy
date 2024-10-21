@@ -442,7 +442,7 @@ class FlutterPlugin implements Plugin<Project> {
         try{
             project.getConfigurations().named("api")
             configuration = "${variantName}Api"
-        }catch(UnknownTaskException ignored){
+        } catch(UnknownTaskException ignored) {
             configuration = "${variantName}Compile"
         }
         project.dependencies.add(configuration, dependency, config)
