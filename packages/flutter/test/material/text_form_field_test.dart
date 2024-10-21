@@ -388,6 +388,31 @@ void main() {
     expect(asserted, false);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/135292.
+  testWidgets('TextFormField shows widget returned by errorBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              autovalidateMode: AutovalidateMode.always,
+              validator: (String? value) {
+                return 'validation error';
+              },
+              errorBuilder: (String errorText) {
+                return Text('**$errorText**');
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('**validation error**'), findsOneWidget);
+  });
+
   testWidgets('Passes textAlign to underlying TextField', (WidgetTester tester) async {
     const TextAlign alignment = TextAlign.center;
 
