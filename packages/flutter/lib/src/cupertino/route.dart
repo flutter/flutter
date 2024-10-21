@@ -20,6 +20,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -1059,6 +1060,55 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   }
 }
 
+// The stiffness used by dialogs and action sheets.
+//
+// Derived by dumping description of [CASpringAnimation] from XCode.
+const double _kStandardStiffness = 522.35;
+
+// Create a spring description in iOS's terms.
+//
+// See
+//  [1]: https://developer.apple.com/documentation/SwiftUI/Animation/spring(duration:bounce:blendDuration:)
+//  [2]: https://developer.apple.com/documentation/quartzcore/caspringanimation/4173018-init
+//  [3]: https://developer.apple.com/documentation/swiftui/spring/init(duration:bounce:)
+//
+// The `bounce` parameter determines the spring's bounciness and ranges from -1
+// to 1. A value of 0 indicates no bounces (a critically damped spring),
+// positive values (up to 1.0) represent increasing bounciness (up to undamped
+// oscillation), and negative values (down to -1.0) indicate overdamped springs.
+// This parameter directly corresponds to the `bounce` value used in the iOS
+// APIs listed above.
+//
+// The `stiffness` parameter matches the `stiffness` value in
+// [SpringDescription.stiffness] and can also be aligned with
+// `CASpringAnimation.stiffness` values from iOS. For iOS APIs, the `duration` or
+// `perceptualDuration` corresponds to (2 * pi / stiffness)^2. However, note
+// that this calculated duration may not match the `duration` displayed in
+// `CASpringAnimation.description` or Apple's official definitions of
+// "perceptual duration" or "settling duration." In Flutter, the settling
+// duration is instead controlled by [Simulation.tolerance].
+//
+// The mass of the spring is fixed at 1.0.
+SpringDescription _createIosSpring({
+  double stiffness = _kStandardStiffness,
+  double bounce = 0,
+}) {
+  assert(bounce >= -1 && bounce <= 1);
+  final double dampingRatio = switch(bounce) {
+    >= 0 => 1 - bounce,
+    <= 0 => 1 / (1 + bounce),
+    _ => throw UnsupportedError('Unreachable'),
+  };
+
+  const double mass = 1;
+
+  return SpringDescription.withDampingRatio(
+    mass: mass,
+    stiffness: stiffness,
+    ratio: dampingRatio,
+  );
+}
+
 /// A route that shows a modal iOS-style popup that slides up from the
 /// bottom of the screen.
 ///
@@ -1109,6 +1159,9 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   }) : _barrierDismissible = barrierDismissible,
        _semanticsDismissible = semanticsDismissible;
 
+  @override
+  bool get useSimulation => true;
+
   /// A builder that builds the widget tree for the [CupertinoModalPopupRoute].
   ///
   /// The [builder] argument typically builds a [CupertinoActionSheet] widget.
@@ -1138,29 +1191,18 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
-  CurvedAnimation? _animation;
-
-  late Tween<Offset> _offsetTween;
+  final Tween<Offset> _offsetTween = Tween<Offset>(
+    begin: const Offset(0.0, 1.0),
+    end: Offset.zero,
+  );
 
   /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
 
   @override
-  Animation<double> createAnimation() {
-    assert(_animation == null);
-    _animation = CurvedAnimation(
-      parent: super.createAnimation(),
-
-      // These curves were initially measured from native iOS horizontal page
-      // route animations and seemed to be a good match here as well.
-      curve: Curves.linearToEaseOut,
-      reverseCurve: Curves.linearToEaseOut.flipped,
-    );
-    _offsetTween = Tween<Offset>(
-      begin: const Offset(0.0, 1.0),
-      end: Offset.zero,
-    );
-    return _animation!;
+  Simulation createSimulation({required double end}) {
+    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
+    return SpringSimulation(_createIosSpring(), controller!.value, end, 0);
   }
 
   @override
@@ -1179,7 +1221,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     return Align(
       alignment: Alignment.bottomCenter,
       child: FractionalTranslation(
-        translation: _offsetTween.evaluate(_animation!),
+        translation: _offsetTween.evaluate(animation!),
         child: child,
       ),
     );
@@ -1187,7 +1229,6 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   @override
   void dispose() {
-    _animation?.dispose();
     super.dispose();
   }
 }
