@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:process/process.dart';
@@ -23,15 +24,16 @@ class ArchivePublisher {
     this.outputFile,
     this.dryRun, {
     ProcessManager? processManager,
-    bool subprocessOutput = true,
     required this.fs,
     this.platform = const LocalPlatform(),
+    this.print = _kDefaultPrint,
+    this.printError = _kDefaultPrintError,
   })  : assert(revision.length == 40),
         platformName = platform.operatingSystem.toLowerCase(),
         metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
         _processRunner = ProcessRunner(
           processManager: processManager,
-          subprocessOutput: subprocessOutput,
+          printError: printError,
         );
 
   final Platform platform;
@@ -45,6 +47,12 @@ class ArchivePublisher {
   final File outputFile;
   final ProcessRunner _processRunner;
   final bool dryRun;
+  final void Function([Object?]) print;
+  final void Function([Object?]) printError;
+
+  static void _kDefaultPrint([Object? msg]) {}
+  static void _kDefaultPrintError([Object? msg]) {}
+
   String get destinationArchivePath => '${branch.name}/$platformName/${path.basename(outputFile.path)}';
   static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
 
@@ -64,7 +72,7 @@ class ArchivePublisher {
   ///
   /// This method will throw if the target archive already exists on cloud
   /// storage.
-  Future<void> publishArchive([bool forceUpload = false]) async {
+  Future<void> publishArchive(MetadataFile metadataFile, [bool forceUpload = false]) async {
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
     if (!forceUpload) {
       if (await _cloudPathExists(destGsPath) && !dryRun) {
@@ -78,13 +86,12 @@ class ArchivePublisher {
       dest: destGsPath,
     );
     assert(tempDir.existsSync());
-    final String gcsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
-    await _publishMetadata(gcsPath);
+    await metadataFile.upload(_cloudCopy);
   }
 
   /// Downloads and updates the metadata file without publishing it.
-  Future<void> generateLocalMetadata() async {
-    await _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
+  Future<MetadataFile> generateLocalMetadata() {
+    return _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
   }
 
   Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData) async {
@@ -124,18 +131,22 @@ class ArchivePublisher {
     return jsonData;
   }
 
-  Future<void> _updateMetadata(String gsPath) async {
+  Future<MetadataFile> _updateMetadata(String gsPath) async {
     // We can't just cat the metadata from the server with 'gsutil cat', because
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
     // back in.
-    final File metadataFile = fs.file(
+    final File localFile = fs.file(
       path.join(tempDir.absolute.path, getMetadataFilename(platform)),
     );
-    await _runGsUtil(<String>['cp', gsPath, metadataFile.absolute.path]);
-    Map<String, dynamic> jsonData = <String, dynamic>{};
+    final MetadataFile metadataFile = await MetadataFile.download(
+      remotePath: gsPath,
+      localFile: localFile,
+      publisher: this,
+    );
+    Map<String, Object?> jsonData = <String, Object?>{};
     if (!dryRun) {
-      final String currentMetadata = metadataFile.readAsStringSync();
+      final String currentMetadata = metadataFile.localFile.readAsStringSync();
       if (currentMetadata.isEmpty) {
         throw PreparePackageException('Empty metadata received from server');
       }
@@ -151,22 +162,8 @@ class ArchivePublisher {
     jsonData = await _addRelease(jsonData);
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    metadataFile.writeAsStringSync(encoder.convert(jsonData));
-  }
-
-  /// Publishes the metadata file to GCS.
-  Future<void> _publishMetadata(String gsPath) async {
-    final File metadataFile = fs.file(
-      path.join(tempDir.absolute.path, getMetadataFilename(platform)),
-    );
-    await _cloudCopy(
-      src: metadataFile.absolute.path,
-      dest: gsPath,
-      // This metadata file is used by the website, so we don't want a long
-      // latency between publishing a release and it being available on the
-      // site.
-      cacheSeconds: shortCacheSeconds,
-    );
+    metadataFile.localFile.writeAsStringSync(encoder.convert(jsonData));
+    return metadataFile;
   }
 
   Future<String> _runGsUtil(
@@ -226,4 +223,113 @@ class ArchivePublisher {
       dest,
     ]);
   }
+}
+
+/// An abstraction over the release metadata file the Flutter website uses to
+/// track releases.
+class MetadataFile {
+  @visibleForTesting
+  const MetadataFile({
+    required this.remotePath,
+    required this.localFile,
+    required this.generation,
+    required this.publisher,
+  });
+
+  // Two attempts should be sufficient, as there are at most 2 builds (1
+  // per architecture) running concurrently that would edit the same OS
+  // metadata file.
+  static const int _kDownloadAttempts = 2;
+
+  static Future<MetadataFile> download({
+    required String remotePath,
+    required File localFile,
+    required ArchivePublisher publisher,
+  }) async {
+    int? generation;
+    for (int attempt = 0; attempt < _kDownloadAttempts; attempt+= 1) {
+      String statOutput = await publisher._runGsUtil(<String>['stat', remotePath]);
+      final int firstGeneration = _parseGenerationFromStat(statOutput);
+
+      await publisher._runGsUtil(<String>['cp', remotePath, localFile.absolute.path]);
+
+      statOutput = await publisher._runGsUtil(<String>['stat', remotePath]);
+      final int secondGeneration = _parseGenerationFromStat(statOutput);
+
+      if (firstGeneration != secondGeneration) {
+        publisher.printError(
+'''
+Error! The file $remotePath was at generation $firstGeneration before downloading,
+but generation $secondGeneration after on attempt $attempt.
+''');
+        continue;
+      }
+
+      generation = firstGeneration;
+      break;
+    }
+    if (generation == null) {
+      throw StateError('The generation number of the file $remotePath was changed by another process $_kDownloadAttempts');
+    }
+    return MetadataFile(
+      remotePath: remotePath,
+      localFile: localFile,
+      generation: generation,
+      publisher: publisher,
+    );
+  }
+
+  Future<void> upload(Future<String> Function({required String src, required String dest, int? cacheSeconds}) cloudCopy) async {
+    // Print the contents to the log should uploading fail, so that it can be
+    // manually recovered.
+    publisher.print('''
+Uploading ${localFile.path} to $remotePath with contents:
+
+${localFile.readAsStringSync()}
+''');
+    await cloudCopy(
+      src: localFile.absolute.path,
+      dest: remotePath,
+      // This metadata file is used by the website, so we don't want a long
+      // latency between publishing a release and it being available on the
+      // site.
+      cacheSeconds: shortCacheSeconds,
+    );
+  }
+
+  static final RegExp _parseGenerationFromStatPattern = RegExp(r'^\s+Generation:\s+(\d+)$');
+
+  // $ gsutil.py stat gs://flutter_infra_release/releases/releases_macos.json
+  //
+  // gs://flutter_infra_release/releases/releases_macos.json:
+  //     Creation time:          Tue, 06 Aug 2024 19:33:19 GMT
+  //     Update time:            Tue, 06 Aug 2024 19:33:19 GMT
+  //     Storage class:          STANDARD
+  //     Content-Length:         267810
+  //     Content-Type:           application/json
+  //     Hash (crc32c):          tgFuZw==
+  //     Hash (md5):             xPUCBPIzd9nMUBpFfh6W2w==
+  //     ETag:                   CIWpkO2N4YcDEAE=
+  //     Generation:             1722972798981253
+  //     Metageneration:         1
+  static int _parseGenerationFromStat(String statOutput) {
+    final List<String> lines = statOutput.split('\n');
+    for (final String line in lines) {
+      final RegExpMatch? match = _parseGenerationFromStatPattern.firstMatch(line);
+      if (match == null) {
+        continue;
+      }
+      final int? maybeGeneration = int.tryParse(match.group(1) ?? '');
+      if (maybeGeneration == null) {
+        throw StateError('Could not parse the output of `gsutil.py stat`:\n\n$statOutput');
+      }
+      return maybeGeneration;
+    }
+    throw StateError('Could not parse the output of `gsutil.py stat`:\n\n$statOutput');
+  }
+
+  final String remotePath;
+  final File localFile;
+  final int generation;
+  final ArchivePublisher publisher;
 }
