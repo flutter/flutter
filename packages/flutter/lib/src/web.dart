@@ -91,6 +91,11 @@ extension type HTMLStyleElement._(JSObject _) implements HTMLElement, JSObject {
   external CSSStyleSheet? get sheet;
 }
 
+extension type HTMLImgElement._(JSObject _) implements HTMLElement, JSObject {
+  external String get src;
+  external set src(String value);
+}
+
 extension type MediaQueryList._(JSObject _) implements EventTarget, JSObject {
   external bool get matches;
 }
