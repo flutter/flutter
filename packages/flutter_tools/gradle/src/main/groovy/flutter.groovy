@@ -553,6 +553,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
                                 appLinkIntent.data.each { data ->
+                                    data.attributes().each { entry ->
                                     if (entry.key instanceof QName) {
                                             switch (entry.key.getLocalPart()) {
                                                 case "scheme":
