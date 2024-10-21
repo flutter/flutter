@@ -1729,9 +1729,11 @@ mixin WidgetInspectorService {
 
   Map<String, Object?>? _nodeToJson(
     DiagnosticsNode? node,
-    InspectorSerializationDelegate delegate,
+    InspectorSerializationDelegate delegate, {
+    bool fullDetails = true,
+  }
   ) {
-    return node?.toJsonMap(delegate);
+    return node?.toJsonMap(delegate, fullDetails: fullDetails);
   }
 
   bool _isValueCreatedByLocalProject(Object? value) {
@@ -1801,8 +1803,14 @@ mixin WidgetInspectorService {
     List<DiagnosticsNode> nodes,
     InspectorSerializationDelegate delegate, {
     required DiagnosticsNode? parent,
+    bool fullDetails = true,
   }) {
-    return DiagnosticsNode.toJsonList(nodes, parent, delegate);
+    return DiagnosticsNode.toJsonList(
+      nodes,
+      parent,
+      delegate,
+      fullDetails: fullDetails,
+    );
   }
 
   /// Returns a JSON representation of the properties of the [DiagnosticsNode]
@@ -1976,11 +1984,13 @@ mixin WidgetInspectorService {
     final String groupName = parameters['groupName']!;
     final bool isSummaryTree = parameters['isSummaryTree'] == 'true';
     final bool withPreviews = parameters['withPreviews'] == 'true';
+    final bool fullDetails = parameters['abbreviated'] != 'true';
 
     final Map<String, Object?>? result = _getRootWidgetTreeImpl(
       groupName: groupName,
       isSummaryTree: isSummaryTree,
       withPreviews: withPreviews,
+      fullDetails: fullDetails,
     );
 
     return Future<Map<String, dynamic>>.value(<String, dynamic>{
@@ -1992,6 +2002,7 @@ mixin WidgetInspectorService {
     required String groupName,
     required bool isSummaryTree,
     required bool withPreviews,
+    bool fullDetails = true,
     Map<String, Object>? Function(
             DiagnosticsNode, InspectorSerializationDelegate)?
         addAdditionalPropertiesCallback,
@@ -2032,6 +2043,7 @@ mixin WidgetInspectorService {
             ? combinedAddAdditionalPropertiesCallback
             : null,
       ),
+      fullDetails: fullDetails,
     );
   }
 
@@ -2196,7 +2208,10 @@ mixin WidgetInspectorService {
             if (value is! RenderObject && delegate.expandPropertyValues)
               'renderObject': renderObject
                   .toDiagnosticsNode()
-                  .toJsonMap(renderObjectSerializationDelegate),
+                  .toJsonMap(
+                    renderObjectSerializationDelegate,
+                    fullDetails: true,
+                  ),
           };
 
           final RenderObject? renderParent = renderObject.parent;
@@ -2211,6 +2226,7 @@ mixin WidgetInspectorService {
                           subtreeDepth: 0,
                           includeProperties: true,
                         ),
+                        fullDetails: true,
                       );
               // TODO(jacobr): also describe the path back up the tree to
               // the RenderParentElement from the current element. It
@@ -3788,19 +3804,24 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   bool get _interactive => groupName != null;
 
   @override
-  Map<String, Object?> additionalNodeProperties(DiagnosticsNode node) {
+  Map<String, Object?> additionalNodeProperties(
+    DiagnosticsNode node, {
+    required bool fullDetails,
+  }) {
     final Map<String, Object?> result = <String, Object?>{};
     final Object? value = node.value;
+    if (summaryTree && fullDetails) {
+      result['summaryTree'] = true;
+    }
     if (_interactive) {
       result['valueId'] = service.toId(value, groupName!);
     }
-    if (summaryTree) {
-      result['summaryTree'] = true;
-    }
     final _Location? creationLocation = _getCreationLocation(value);
     if (creationLocation != null) {
-      result['locationId'] = _toLocationId(creationLocation);
-      result['creationLocation'] = creationLocation.toJsonMap();
+      if (fullDetails) {
+        result['locationId'] = _toLocationId(creationLocation);
+        result['creationLocation'] = creationLocation.toJsonMap();
+      }
       if (service._isLocalCreationLocation(creationLocation.file)) {
         _nodesCreatedByLocalProject.add(node);
         result['createdByLocalProject'] = true;
