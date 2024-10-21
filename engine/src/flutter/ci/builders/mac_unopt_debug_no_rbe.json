@@ -9,6 +9,7 @@
   ],
   "builds": [
     {
+      "cas_archive": false,
       "drone_dimensions": [
         "device_type=none",
         "os=Mac-13|Mac-14",
