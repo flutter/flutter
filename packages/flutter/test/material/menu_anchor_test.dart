@@ -4667,12 +4667,18 @@ void main() {
       return results;
     }
 
+    late final OverlayEntry overlayEntry;
+    addTearDown((){
+      overlayEntry.remove();
+      overlayEntry.dispose();
+    });
+
     Widget boilerplate() {
       return MaterialApp(
         home: Overlay(
           key: overlayKey,
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            overlayEntry = OverlayEntry(
               builder: (BuildContext context) {
                 return Scaffold(
                   body: Center(
