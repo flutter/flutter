@@ -472,11 +472,9 @@ void main() {
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(renderSelectionSpy.events.length, 2);
-      expect(renderSelectionSpy.events[0], isA<SelectionEdgeUpdateEvent>());
-      expect((renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent).type, SelectionEventType.startEdgeUpdate);
-      expect(renderSelectionSpy.events[1], isA<SelectionEdgeUpdateEvent>());
-      expect((renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent).type, SelectionEventType.endEdgeUpdate);
+      expect(renderSelectionSpy.events.length, 1);
+      expect(renderSelectionSpy.events[0], isA<CollapseSelectionEvent>());
+      expect((renderSelectionSpy.events[0] as CollapseSelectionEvent).type, SelectionEventType.collapseSelection);
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
 
     testWidgets('touch long press sends select-word event', (WidgetTester tester) async {
@@ -647,10 +645,8 @@ void main() {
       addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
-      expect(
-        renderSelectionSpy.events.every((SelectionEvent element) => element is SelectionEdgeUpdateEvent),
-        isTrue,
-      );
+      expect(renderSelectionSpy.events.length, 1);
+      expect(renderSelectionSpy.events[0], isA<CollapseSelectionEvent>());
     });
   });
 
