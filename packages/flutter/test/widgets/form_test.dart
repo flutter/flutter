@@ -1457,4 +1457,38 @@ void main() {
 
     expect(focusNode2.hasFocus, isTrue);
   });
+
+  testWidgets('AutovalidateMode.always should validate on first build', (WidgetTester tester) async {
+    String errorText(String? value) => '$value/error';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(),
+        home: Center(
+          child: Form(
+            autovalidateMode: AutovalidateMode.always,
+            child: Material(
+              child: Column(
+                children: <Widget>[
+                  TextFormField(
+                    initialValue: 'foo',
+                    validator: errorText,
+                  ),
+                  TextFormField(
+                    initialValue: 'bar',
+                    validator: errorText,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )
+      )
+    );
+
+    await tester.pump();
+
+    expect(find.text(errorText('foo')), findsOneWidget);
+    expect(find.text(errorText('bar')), findsOneWidget);
+  });
 }
