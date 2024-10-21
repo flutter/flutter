@@ -3615,6 +3615,7 @@ void main() {
                         id: 4,
                         actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         flags: <SemanticsFlag>[
+                          SemanticsFlag.hasSelectedState,
                           SemanticsFlag.isSelected,
                           SemanticsFlag.isFocusable,
                         ],
@@ -3624,7 +3625,10 @@ void main() {
                       ),
                       TestSemantics(
                         id: 5,
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasSelectedState,
+                          SemanticsFlag.isFocusable,
+                        ],
                         actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'TAB #1\nTab 2 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
@@ -3672,7 +3676,7 @@ void main() {
     const String tab0title = 'This is a very wide tab #0\nTab 1 of 20';
     const String tab10title = 'This is a very wide tab #10\nTab 11 of 20';
 
-    const List<SemanticsFlag> hiddenFlags = <SemanticsFlag>[SemanticsFlag.isHidden, SemanticsFlag.isFocusable];
+    const List<SemanticsFlag> hiddenFlags = <SemanticsFlag>[SemanticsFlag.isHidden, SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState];
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
     expect(semantics, includesNodeWith(label: tab0title));
     expect(semantics, includesNodeWith(label: tab10title, flags: hiddenFlags));
@@ -3881,6 +3885,7 @@ void main() {
                       TestSemantics(
                         id: 4,
                         flags: <SemanticsFlag>[
+                          SemanticsFlag.hasSelectedState,
                           SemanticsFlag.isSelected,
                           SemanticsFlag.isFocusable,
                         ],
@@ -3891,7 +3896,10 @@ void main() {
                       ),
                       TestSemantics(
                         id: 5,
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasSelectedState,
+                          SemanticsFlag.isFocusable,
+                        ],
                         actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'Semantics override 1\nTab 2 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
@@ -5670,14 +5678,21 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               label: 'TAB1\nTab 1 of 2',
-              flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.isSelected],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.isSelected,
+                SemanticsFlag.hasSelectedState,
+              ],
               id: 2,
               rect: TestSemantics.fullScreen,
               actions: 1 | SemanticsAction.focus.index,
             ),
             TestSemantics(
               label: 'TAB2\nTab 2 of 2',
-              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.hasSelectedState,
+              ],
               id: 3,
               rect: TestSemantics.fullScreen,
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
