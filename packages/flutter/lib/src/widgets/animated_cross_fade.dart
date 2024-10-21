@@ -374,14 +374,12 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         ),
       ),
     );
-    return ClipRect(
-      child: AnimatedSize(
-        alignment: widget.alignment,
-        duration: widget.duration,
-        reverseDuration: widget.reverseDuration,
-        curve: widget.sizeCurve,
-        child: widget.layoutBuilder(topChild, topKey, bottomChild, bottomKey),
-      ),
+    return AnimatedSize(
+      alignment: widget.alignment,
+      duration: widget.duration,
+      reverseDuration: widget.reverseDuration,
+      curve: widget.sizeCurve,
+      child: widget.layoutBuilder(topChild, topKey, bottomChild, bottomKey),
     );
   }
 
