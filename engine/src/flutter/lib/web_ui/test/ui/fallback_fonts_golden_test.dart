@@ -149,7 +149,7 @@ void testMain() {
           renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
           <String>[
             'Roboto',
-            'Noto Color Emoji',
+            'Noto Color Emoji 9',
             'Noto Sans Arabic',
           ]);
     });
@@ -171,7 +171,7 @@ void testMain() {
       await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
 
       expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
-          contains('Noto Color Emoji'));
+          contains('Noto Color Emoji 9'));
 
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final ui.Canvas canvas = ui.Canvas(recorder);
@@ -270,17 +270,9 @@ void testMain() {
       renderer.fontCollection.fontFallbackManager!.codePointToComponents
           .forEachRange((int start, int end, FallbackFontComponent component) {
         if (component.fonts.isNotEmpty) {
-          bool componentHasEnabledFont = false;
-          for (final NotoFont font in component.fonts) {
-            if (font.enabled) {
-              testedFonts.add(font.name);
-              componentHasEnabledFont = true;
-            }
-          }
-          if (componentHasEnabledFont) {
-            for (int codePoint = start; codePoint <= end; codePoint++) {
-              supportedUniqueCodePoints.add(codePoint);
-            }
+          testedFonts.addAll(component.fonts.map((font) => font.name));
+          for (int codePoint = start; codePoint <= end; codePoint++) {
+            supportedUniqueCodePoints.add(codePoint);
           }
         }
       });
@@ -290,7 +282,18 @@ void testMain() {
       expect(
           testedFonts,
           unorderedEquals(<String>{
-            'Noto Color Emoji',
+            'Noto Color Emoji 0',
+            'Noto Color Emoji 1',
+            'Noto Color Emoji 2',
+            'Noto Color Emoji 3',
+            'Noto Color Emoji 4',
+            'Noto Color Emoji 5',
+            'Noto Color Emoji 6',
+            'Noto Color Emoji 7',
+            'Noto Color Emoji 8',
+            'Noto Color Emoji 9',
+            'Noto Color Emoji 10',
+            'Noto Color Emoji 11',
             'Noto Music',
             'Noto Sans',
             'Noto Sans Symbols',
@@ -496,7 +499,7 @@ void testMain() {
 
       // Make sure we didn't download the fallback font.
       expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
-          isNot(contains('Noto Color Emoji')));
+          isNot(contains('Noto Color Emoji 9')));
     });
   },
       // HTML renderer doesn't use the fallback font manager.

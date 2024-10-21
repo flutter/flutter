@@ -4,7 +4,7 @@
 
 import("//build/toolchain/wasm.gni")
 
-# This toolchain is only to be used by the canvaskit target below.
+# This toolchain is only to be used by canvaskit_group below.
 wasm_toolchain("canvaskit") {
   extra_toolchain_args = {
     # Include ICU data.

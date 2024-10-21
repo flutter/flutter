@@ -9,6 +9,8 @@ import 'dart:typed_data';
 import 'package:args/command_runner.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart' as crypto;
+import 'package:csslib/parser.dart' as csslib;
+import 'package:csslib/visitor.dart' show StyleSheet, UriTerm, Visitor;
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
@@ -58,29 +60,12 @@ class RollFallbackFontsCommand extends Command<bool>
   }
 
   Future<void> _generateFallbackFontData() async {
-    if (apiKey.isEmpty) {
-      throw UsageException('No Google Fonts API key provided', argParser.usage);
-    }
     final http.Client client = http.Client();
-    final http.Response response = await client.get(Uri.parse(
-        'https://www.googleapis.com/webfonts/v1/webfonts?key=$apiKey'));
-    if (response.statusCode != 200) {
-      throw ToolExit('Failed to download Google Fonts list.');
-    }
-    final Map<String, dynamic> googleFontsResult =
-        jsonDecode(response.body) as Map<String, dynamic>;
-    final List<Map<String, dynamic>> fontDatas =
-        (googleFontsResult['items'] as List<dynamic>)
-            .cast<Map<String, dynamic>>();
+    final List<String> fallbackFonts = <String>[];
     final Map<String, Uri> urlForFamily = <String, Uri>{};
-    for (final Map<String, Object?> fontData in fontDatas) {
-      if (fallbackFonts.contains(fontData['family'])) {
-        final files = fontData['files']! as Map<String, Object?>;
-        final Uri uri = Uri.parse(files['regular']! as String)
-            .replace(scheme: 'https');
-        urlForFamily[fontData['family']! as String] = uri;
-      }
-    }
+    await _addApiFallbackFonts(client, fallbackFonts, urlForFamily);
+    await _addSplitFallbackFonts(client, fallbackFonts, urlForFamily);
+
     final Map<String, String> charsetForFamily = <String, String>{};
     final io.Directory fontDir = await io.Directory.systemTemp.createTemp('flutter_fallback_fonts');
     print('Downloading fonts into temp directory: ${fontDir.path}');
@@ -106,7 +91,7 @@ class RollFallbackFontsCommand extends Command<bool>
           io.File(path.join(fontDir.path, urlSuffix));
 
       final Uint8List bodyBytes = fontResponse.bodyBytes;
-      if (!_checkForLicenseAttribution(bodyBytes)) {
+      if (!await _checkForLicenseAttribution(client, urlSuffix, bodyBytes)) {
         throw ToolExit(
             'Expected license attribution not found in file: $urlString');
       }
@@ -159,24 +144,17 @@ class RollFallbackFontsCommand extends Command<bool>
     sb.writeln('// dev/roll_fallback_fonts.dart');
     sb.writeln("import 'noto_font.dart';");
     sb.writeln();
-    sb.writeln('List<NotoFont> getFallbackFontList(bool useColorEmoji) => <NotoFont>[');
+    sb.writeln('List<NotoFont> getFallbackFontList() => <NotoFont>[');
 
     for (final _Font font in fonts) {
       final String family = font.family;
-      String enabledArgument = '';
-      if (family == 'Noto Emoji') {
-        enabledArgument = 'enabled: !useColorEmoji, ';
-      }
-      if (family == 'Noto Color Emoji') {
-        enabledArgument = 'enabled: useColorEmoji, ';
-      }
       final String urlString = urlForFamily[family]!.toString();
       if (!urlString.startsWith(expectedUrlPrefix)) {
         throw ToolExit(
             'Unexpected url format received from Google Fonts API: $urlString.');
       }
       final String urlSuffix = urlString.substring(expectedUrlPrefix.length);
-      sb.writeln(" NotoFont('$family', $enabledArgument'$urlSuffix'),");
+      sb.writeln(" NotoFont('$family', '$urlSuffix'),");
     }
     sb.writeln('];');
     sb.writeln();
@@ -328,12 +306,80 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       '--deps-file=$depFilePath'
     ]);
   }
+
+  Future<void> _addApiFallbackFonts(
+    http.Client client,
+    List<String> fallbackFonts,
+    Map<String, Uri> urlForFamily,
+  ) async {
+    if (apiKey.isEmpty) {
+      throw UsageException('No Google Fonts API key provided', argParser.usage);
+    }
+    final http.Response response = await client.get(Uri.parse(
+        'https://www.googleapis.com/webfonts/v1/webfonts?key=$apiKey'));
+    if (response.statusCode != 200) {
+      throw ToolExit('Failed to download Google Fonts list.');
+    }
+    final Map<String, dynamic> googleFontsResult =
+        jsonDecode(response.body) as Map<String, dynamic>;
+    final List<Map<String, dynamic>> fontDatas =
+        (googleFontsResult['items'] as List<dynamic>)
+            .cast<Map<String, dynamic>>();
+    for (final Map<String, Object?> fontData in fontDatas) {
+      final String family = fontData['family']! as String;
+      if (apiFallbackFonts.contains(family)) {
+        final files = fontData['files']! as Map<String, Object?>;
+        final Uri uri = Uri.parse(files['regular']! as String)
+            .replace(scheme: 'https');
+        urlForFamily[family] = uri;
+        fallbackFonts.add(family);
+      }
+    }
+  }
+
+  Future<void> _addSplitFallbackFonts(
+    http.Client client,
+    List<String> fallbackFonts,
+    Map<String, Uri> urlForFamily,
+  ) async {
+    for (final String font in splitFallbackFonts) {
+      final String modifiedFontName = font.replaceAll(' ', '+');
+      final Uri cssUri = Uri.parse(
+          'https://fonts.googleapis.com/css2?family=$modifiedFontName');
+      final http.Response response =
+          await client.get(cssUri, headers: <String, String>{
+        // Spoof the User-Agent so Google Fonts serves WOFF2 fonts
+        'User-Agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/112.0.0.0 Safari/537.36'
+      });
+      final String cssString = response.body;
+      final StyleSheet stylesheet = csslib.parse(cssString);
+      final UriCollector uriCollector = UriCollector();
+      stylesheet.visit(uriCollector);
+      int familyCount = 0;
+      for (final Uri uri in uriCollector.uris) {
+        final String fontName = '$font $familyCount';
+        fallbackFonts.add(fontName);
+        urlForFamily[fontName] = uri;
+        familyCount += 1;
+      }
+    }
+  }
 }
 
-const List<String> fallbackFonts = <String>[
+class UriCollector extends Visitor {
+  final List<Uri> uris = <Uri>[];
+
+  @override
+  void visitUriTerm(UriTerm uriTerm) {
+    uris.add(Uri.parse(uriTerm.value as String));
+  }
+}
+
+/// Fonts that should be downloaded directly from the Google Fonts API.
+const List<String> apiFallbackFonts = <String>[
   'Noto Sans',
-  'Noto Color Emoji',
-  'Noto Emoji',
   'Noto Music',
   'Noto Sans Symbols',
   'Noto Sans Symbols 2',
@@ -478,24 +524,31 @@ const List<String> fallbackFonts = <String>[
   'Noto Serif Tibetan',
 ];
 
-bool _checkForLicenseAttribution(Uint8List fontBytes) {
-  final ByteData fontData = fontBytes.buffer.asByteData();
-  final int codePointCount = fontData.lengthInBytes ~/ 2;
+/// Fonts which are split up into several smaller subfonts. These need special
+/// handling.
+const List<String> splitFallbackFonts = <String>[
+  'Noto Color Emoji',
+];
+
+Future<bool> _checkForLicenseAttribution(
+  http.Client client,
+  String urlSuffix,
+  Uint8List fontBytes,
+) async {
+  const String googleFontsUpstream =
+      'https://github.com/google/fonts/tree/main/ofl';
   const String attributionString =
       'This Font Software is licensed under the SIL Open Font License, Version 1.1.';
-  for (int i = 0; i < codePointCount - attributionString.length; i++) {
-    bool match = true;
-    for (int j = 0; j < attributionString.length; j++) {
-      if (fontData.getUint16((i + j) * 2) != attributionString.codeUnitAt(j)) {
-        match = false;
-        break;
-      }
-    }
-    if (match) {
-      return true;
-    }
+
+  final String fontPackageName = urlSuffix.split('/').first;
+  final String fontLicenseUrl = '$googleFontsUpstream/$fontPackageName/OFL.txt';
+  final http.Response response = await client.get(Uri.parse(fontLicenseUrl));
+  if (response.statusCode != 200) {
+    throw ToolExit('Failed to download `$fontPackageName` license at $fontLicenseUrl');
   }
-  return false;
+  final String licenseString = response.body;
+
+  return licenseString.contains(attributionString);
 }
 
 class _Font {

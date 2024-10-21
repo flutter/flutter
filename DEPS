@@ -158,6 +158,7 @@ vars = {
   "upstream_boolean_selector": "https://github.com/dart-lang/boolean_selector.git",
   "upstream_boringssl_gen": "https://github.com/dart-lang/boringssl_gen.git",
   "upstream_boringssl": "https://github.com/openssl/openssl.git",
+  "upstream_brotli": "https://github.com/google/brotli.git",
   "upstream_browser_launcher": "https://github.com/dart-lang/browser_launcher.git",
   "upstream_buildroot": "https://github.com/flutter/buildroot.git",
   "upstream_cli_util": "https://github.com/dart-lang/cli_util.git",
@@ -319,6 +320,9 @@ deps = {
 
   'src/flutter/third_party/boringssl':
    Var('dart_git') + '/boringssl_gen.git' + '@' + Var('dart_boringssl_gen_rev'),
+
+  'src/flutter/third_party/brotli':
+   Var('skia_git') + '/external/github.com/google/brotli.git' + '@' + '350100a5bb9d9671aca85213b2ec7a70a361b0cd',
 
   'src/flutter/third_party/yapf':
   Var('flutter_git') + '/third_party/yapf' + '@' + '212c5b5ad8e172d2d914ae454c121c89cccbcb35',
@@ -1006,7 +1010,7 @@ deps = {
       'packages': [
         {
           'package': 'flutter/flutter_font_fallbacks',
-          'version': 'c81f5a2b369b48df3728d2b247a27901bb76bbce0c40b343fe1cc924a36b36ea'
+          'version': '91f2de34d4a309816a182ce7552201d95388e2e0bceea951a6dd04693ed6fe30'
         }
       ],
       'dep_type': 'cipd',
