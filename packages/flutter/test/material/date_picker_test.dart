@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -1581,6 +1582,7 @@ void main() {
 
         // Input mode toggle button
         expect(tester.getSemantics(switchToInputIcon), matchesSemantics(
+          label: Platform.isAndroid ? 'Switch to input' : '',
           tooltip: 'Switch to input',
           isButton: true,
           hasTapAction: true,
@@ -1634,6 +1636,7 @@ void main() {
 
         // Input mode toggle button
         expect(tester.getSemantics(switchToCalendarIcon), matchesSemantics(
+          label: Platform.isAndroid ? 'Switch to calendar' : '',
           tooltip: 'Switch to calendar',
           isButton: true,
           hasTapAction: true,
