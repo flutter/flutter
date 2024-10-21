@@ -160,7 +160,9 @@ abstract class ChromiumDevice extends Device {
     ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
-    await _chrome?.close();
+    final Future<void>? future = _chrome?.close();
+    _chrome = null;
+    await future;
     return true;
   }
 
