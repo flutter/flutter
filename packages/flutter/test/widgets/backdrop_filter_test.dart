@@ -10,9 +10,63 @@ library;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('Backdrop key is passed to backdrop Layer', (WidgetTester tester) async {
+    final BackdropKey backdropKey = BackdropKey();
+
+    Widget build(bool enableKeys) {
+      return  MaterialApp(
+        home: Scaffold(
+          body: ListView(
+            children: <Widget>[
+              ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                  backdropKey: enableKeys ? backdropKey : null,
+                  child: Container(
+                    color: Colors.black.withAlpha(40),
+                    height: 200,
+                    child: const Text('Item 1'),
+                  ),
+                ),
+              ),
+              ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                  backdropKey: enableKeys ? backdropKey : null,
+                  child: Container(
+                    color: Colors.black.withAlpha(40),
+                    height: 200,
+                    child: const Text('Item 1'),
+                  ),
+                ),
+              ),
+            ],
+          )
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(true));
+
+    List<BackdropFilterLayer> layers = tester.layers.whereType<BackdropFilterLayer>().toList();
+
+    expect(layers.length, 2);
+    expect(layers[0].backdropKey, backdropKey);
+    expect(layers[1].backdropKey, backdropKey);
+
+    await tester.pumpWidget(build(false));
+
+    layers = tester.layers.whereType<BackdropFilterLayer>().toList();
+
+    expect(layers.length, 2);
+    expect(layers[0].backdropKey, null);
+    expect(layers[1].backdropKey, null);
+  });
+
   testWidgets("Material2 - BackdropFilter's cull rect does not shrink", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

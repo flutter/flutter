@@ -36,6 +36,7 @@ export 'package:flutter/rendering.dart' show
   AlignmentGeometryTween,
   AlignmentTween,
   Axis,
+  BackdropKey,
   BoxConstraints,
   BoxConstraintsTransform,
   CrossAxisAlignment,
@@ -469,6 +470,38 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// html renderer for web applications.
 /// {@endtemplate}
 ///
+/// Multiple backdrop filters can be combined into a single rendering operation
+/// bt the Flutter engine if these backdrop filters widgets all share a common
+/// [BackdropKey]. The backdrop key uniquely identifies the input for a backdrop
+/// filter, and when shared, indicates the filtering can be performed once. This
+/// can significantly reduce the overhead of using multiple backdrop filters in
+/// a scene. For example, the following snippet demonstrates how to use the
+/// backdrop key to allow each list item to have an efficient blur. This widget
+/// will perform only one backdrop blur.
+///
+/// ```dart
+/// final listItems = BackdropKey();
+///
+/// ListView.builder(
+///   itemCount: 60,
+///   itemBuilder: (BuildContext context, int index) {
+///     return ClipRect(
+///       child: BackdropFilter(
+///         backdropKey: listItems,
+///         filter: ui.ImageFilter.blur(
+///           sigmaX: 40,
+///           sigmaY: 40,
+///         ),
+///         child: Container(
+///           color: Colors.black.withOpacity(0.2),
+///           child: Text('Blur item'),
+///         ),
+///       ),
+///     ),
+///   },
+/// )
+/// ```
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=dYRs7Q1vfYI}
 ///
 /// {@tool snippet}
@@ -566,6 +599,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
+    this.backdropKey,
   });
 
   /// The image filter to apply to the existing painted content before painting the child.
@@ -587,9 +621,14 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// type for performance reasons.
   final bool enabled;
 
+  /// The backdrop key that identifies the backdrop this filter will apply to.
+  ///
+  /// The default value for the backdrop key is [null].
+  final BackdropKey? backdropKey;
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
-    return RenderBackdropFilter(filter: filter, blendMode: blendMode, enabled: enabled);
+    return RenderBackdropFilter(filter: filter, blendMode: blendMode, enabled: enabled, backdropKey: backdropKey);
   }
 
   @override
@@ -597,7 +636,8 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     renderObject
       ..filter = filter
       ..enabled = enabled
-      ..blendMode = blendMode;
+      ..blendMode = blendMode
+      ..backdropKey = backdropKey;
   }
 }
 
