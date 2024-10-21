@@ -1300,7 +1300,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                   InspectorSerializationDelegate(
                     service: service,
                     includeProperties: true,
-                  )
+                  ),
                 ),
             isNotNull,
           );
@@ -5424,7 +5424,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           (DiagnosticsNode node, InspectorSerializationDelegate delegate) => <String, Object>{
             if (node.value case Element(:final RenderObject renderObject))
               'renderObject': renderObject.toDiagnosticsNode().toJsonMap(
-                  delegate.copyWith(subtreeDepth: 0)
+                  delegate.copyWith(subtreeDepth: 0),
                 ),
             'callbackExecuted': true,
           },

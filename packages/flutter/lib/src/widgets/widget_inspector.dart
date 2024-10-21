@@ -2208,9 +2208,7 @@ mixin WidgetInspectorService {
             if (value is! RenderObject && delegate.expandPropertyValues)
               'renderObject': renderObject
                   .toDiagnosticsNode()
-                  .toJsonMap(
-                    renderObjectSerializationDelegate
-                  ),
+                  .toJsonMap(renderObjectSerializationDelegate),
           };
 
           final RenderObject? renderParent = renderObject.parent;
@@ -2224,7 +2222,7 @@ mixin WidgetInspectorService {
                         delegate.copyWith(
                           subtreeDepth: 0,
                           includeProperties: true,
-                        )
+                        ),
                       );
               // TODO(jacobr): also describe the path back up the tree to
               // the RenderParentElement from the current element. It
