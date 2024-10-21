@@ -850,6 +850,7 @@ class EditableText extends StatefulWidget {
     this.onSelectionHandleTapped,
     this.groupId = EditableText,
     this.onTapOutside,
+    this.onTapUpOutside,
     List<TextInputFormatter>? inputFormatters,
     this.mouseCursor,
     this.rendererIgnoresPointer = false,
@@ -1492,8 +1493,8 @@ class EditableText extends StatefulWidget {
   final Object groupId;
 
   /// {@template flutter.widgets.editableText.onTapOutside}
-  /// Called for each tap that occurs outside of the[TextFieldTapRegion] group
-  /// when the text field is focused.
+  /// Called for each tap down that occurs outside of the [TextFieldTapRegion]
+  /// group when the text field is focused.
   ///
   /// If this is null, [EditableTextTapOutsideIntent] will be invoked. In the
   /// default implementation, [FocusNode.unfocus] will be called on the
@@ -1530,9 +1531,26 @@ class EditableText extends StatefulWidget {
   /// See also:
   ///
   ///  * [TapRegion] for how the region group is determined.
+  ///  * [onTapUpOutside] which is called for each tap up.
   ///  * [EditableTextTapOutsideIntent] for the intent that is invoked if
   ///  this is null.
   final TapRegionCallback? onTapOutside;
+
+  /// {@template flutter.widgets.editableText.onTapUpOutside}
+  /// Called for each tap up that occurs outside of the [TextFieldTapRegion]
+  /// group when the text field is focused.
+  ///
+  /// The [PointerUpEvent] passed to the function is the event that caused the
+  /// notification. It is possible that the event may occur outside of the
+  /// immediate bounding box defined by the text field, although it will be
+  /// within the bounding box of a [TextFieldTapRegion] member.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [TapRegion] for how the region group is determined.
+  ///  * [onTapOutside], which is called for each tap down.
+  final TapRegionUpCallback? onTapUpOutside;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
@@ -5172,6 +5190,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             return TextFieldTapRegion(
               groupId: widget.groupId,
               onTapOutside: _hasFocus ? widget.onTapOutside ?? (PointerDownEvent event) => _defaultOnTapOutside(context, event) : null,
+              onTapUpOutside: widget.onTapUpOutside,
               debugLabel: kReleaseMode ? null : 'EditableText',
               child: MouseRegion(
                 cursor: widget.mouseCursor ?? SystemMouseCursors.text,
