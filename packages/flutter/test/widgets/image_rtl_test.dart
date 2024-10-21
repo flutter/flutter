@@ -7,7 +7,7 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+// import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 /// An [_TestImageProvider] interrupts the way to .
 ///
@@ -546,11 +546,8 @@ void main() {
     expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgets('Image - Switch needing direction',
-   experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(), // The test leaks by design, because of hacky way dealing with images.
-  (WidgetTester tester) async {
-
-    final provider = _TestImageProvider(testImage);
+  testWidgets('Image - Switch needing direction', (WidgetTester tester) async {
+    final _TestImageProvider provider = _TestImageProvider(testImage);
 
     await tester.pumpWidget(
       Directionality(
