@@ -223,7 +223,7 @@ bool _isTransitionable(BuildContext context) {
 /// normally a page title.
 ///
 /// It also supports [leading] and [trailing] widgets on either end of the
-/// toolbar for actions and navigation.
+/// toolbar, typically for actions and navigation.
 ///
 /// The [leading] widget will automatically be a back chevron icon button (or a
 /// close button in case of a fullscreen dialog) to pop the current route if none
