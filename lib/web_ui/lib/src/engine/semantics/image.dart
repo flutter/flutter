@@ -21,6 +21,7 @@ class SemanticImage extends SemanticRole {
     addLiveRegion();
     addRouteName();
     addTappable();
+    addSelectableBehavior();
   }
 
   @override
