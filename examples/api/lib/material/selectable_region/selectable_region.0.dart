@@ -64,23 +64,24 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
   final SelectionRegistrar registrar;
 
   @override
-  _RenderSelectableAdapter createRenderObject(BuildContext context) {
-    return _RenderSelectableAdapter(
+  RenderSelectableAdapter createRenderObject(BuildContext context) {
+    return RenderSelectableAdapter(
       DefaultSelectionStyle.of(context).selectionColor!,
       registrar,
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderSelectableAdapter renderObject) {
+  void updateRenderObject(BuildContext context, RenderSelectableAdapter renderObject) {
     renderObject
       ..selectionColor = DefaultSelectionStyle.of(context).selectionColor!
       ..registrar = registrar;
   }
 }
 
-class _RenderSelectableAdapter extends RenderProxyBox with Selectable, SelectionRegistrant {
-  _RenderSelectableAdapter(
+@visibleForTesting
+class RenderSelectableAdapter extends RenderProxyBox with Selectable, SelectionRegistrant {
+  RenderSelectableAdapter(
     Color selectionColor,
     SelectionRegistrar registrar,
   )   : _selectionColor = selectionColor,
@@ -322,6 +323,8 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   @override
   void dispose() {
     _geometry.dispose();
+    _startHandle = null;
+    _endHandle = null;
     super.dispose();
   }
 }
