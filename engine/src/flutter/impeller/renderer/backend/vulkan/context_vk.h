@@ -10,7 +10,6 @@
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/unique_fd.h"
-#include "fml/thread.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/base/strings.h"
 #include "impeller/core/formats.h"
@@ -40,6 +39,7 @@ class SurfaceContextVK;
 class GPUTracerVK;
 class DescriptorPoolRecyclerVK;
 class CommandQueueVK;
+class DescriptorPoolVK;
 
 class ContextVK final : public Context,
                         public BackendCast<ContextVK, Context>,
@@ -224,12 +224,17 @@ class ContextVK final : public Context,
   std::shared_ptr<const Capabilities> device_capabilities_;
   std::shared_ptr<FenceWaiterVK> fence_waiter_;
   std::shared_ptr<ResourceManagerVK> resource_manager_;
+  std::shared_ptr<DescriptorPoolRecyclerVK> descriptor_pool_recycler_;
   std::shared_ptr<CommandPoolRecyclerVK> command_pool_recycler_;
   std::string device_name_;
   std::shared_ptr<fml::ConcurrentMessageLoop> raster_message_loop_;
   std::shared_ptr<GPUTracerVK> gpu_tracer_;
-  std::shared_ptr<DescriptorPoolRecyclerVK> descriptor_pool_recycler_;
   std::shared_ptr<CommandQueue> command_queue_vk_;
+
+  using DescriptorPoolMap =
+      std::unordered_map<std::thread::id, std::shared_ptr<DescriptorPoolVK>>;
+
+  mutable DescriptorPoolMap cached_descriptor_pool_;
   bool should_disable_surface_control_ = false;
   bool should_batch_cmd_buffers_ = false;
   std::vector<std::shared_ptr<CommandBuffer>> pending_command_buffers_;

@@ -20,6 +20,7 @@ class TrackedObjectsVK {
  public:
   explicit TrackedObjectsVK(const std::weak_ptr<const ContextVK>& context,
                             const std::shared_ptr<CommandPoolVK>& pool,
+                            std::shared_ptr<DescriptorPoolVK> descriptor_pool,
                             std::unique_ptr<GPUProbe> probe);
 
   ~TrackedObjectsVK();
@@ -43,7 +44,7 @@ class TrackedObjectsVK {
   GPUProbe& GetGPUProbe() const;
 
  private:
-  DescriptorPoolVK desc_pool_;
+  std::shared_ptr<DescriptorPoolVK> desc_pool_;
   // `shared_ptr` since command buffers have a link to the command pool.
   std::shared_ptr<CommandPoolVK> pool_;
   vk::UniqueCommandBuffer buffer_;
