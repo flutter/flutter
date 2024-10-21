@@ -766,7 +766,7 @@ class _SelectableTextContainer extends StatefulWidget {
     required this.selectionColor,
   });
 
-  final InlineSpan text;
+  final TextSpan text;
   final TextAlign textAlign;
   final TextDirection? textDirection;
   final bool softWrap;
@@ -883,9 +883,7 @@ class _RichText extends StatelessWidget {
 const double _kSelectableVerticalComparingThreshold = 3.0;
 
 class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  _SelectableTextContainerDelegate(
-    GlobalKey textKey,
-  ) : _textKey = textKey;
+  _SelectableTextContainerDelegate(GlobalKey textKey) : _textKey = textKey;
 
   final GlobalKey _textKey;
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
@@ -1226,6 +1224,77 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       return a.left > b.left ? 1 : -1;
     }
     return a.right > b.right ? 1 : -1;
+  }
+
+  /// This method calculates a local [SelectedContentRange] based on the list
+  /// of [ranges] that are accumulated from the [Selectable] children under this
+  /// delegate. This calculation takes into account the accumulated content
+  /// length before the active selection, and returns a [SelectedContentRange.empty]
+  /// when either selection edge has not been set.
+  SelectedContentRange _calculateLocalRange(List<SelectedContentRange> ranges) {
+    // Calculate content length.
+    final int totalContentLength = ranges.fold<int>(0, (int sum, SelectedContentRange range) => sum + range.contentLength);
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      return SelectedContentRange.empty(contentLength: totalContentLength);
+    }
+    int startOffset = 0;
+    int endOffset = 0;
+    bool foundStart = false;
+    bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+    if (currentSelectionEndIndex == currentSelectionStartIndex) {
+      // Determining selection direction is innacurate if currentSelectionStartIndex == currentSelectionEndIndex.
+      // Use the range from the selectable within the selection as the source of truth for selection direction.
+      final SelectedContentRange rangeAtSelectableInSelection = selectables[currentSelectionStartIndex].getSelection();
+      forwardSelection = rangeAtSelectableInSelection.endOffset >= rangeAtSelectableInSelection.startOffset;
+    }
+    for (int index = 0; index < ranges.length; index++) {
+      final SelectedContentRange range = ranges[index];
+      if (!range.isValid) {
+        if (foundStart) {
+          return SelectedContentRange(
+            contentLength: totalContentLength,
+            startOffset: forwardSelection ? startOffset : endOffset,
+            endOffset: forwardSelection ? endOffset : startOffset,
+          );
+        }
+        startOffset += range.contentLength;
+        endOffset = startOffset;
+        continue;
+      }
+      final int selectionStartNormalized = min(range.startOffset, range.endOffset);
+      final int selectionEndNormalized = max(range.startOffset, range.endOffset);
+      if (!foundStart) {
+        // Because a RenderParagraph may split its content into multiple selectables
+        // we have to consider at what offset a selectable starts at relative
+        // to the RenderParagraph, when the selectable is not the start of the content.
+        final bool shouldConsiderContentStart = index > 0 && paragraph.selectableBelongsToParagraph(selectables[index]);
+        startOffset += (selectionStartNormalized - (shouldConsiderContentStart ? paragraph.getPositionForOffset(selectables[index].boundingBoxes.first.centerLeft).offset : 0)).abs();
+        endOffset = startOffset + (selectionEndNormalized - selectionStartNormalized).abs();
+        foundStart = true;
+      } else {
+        endOffset += (selectionEndNormalized - selectionStartNormalized).abs();
+      }
+    }
+    return SelectedContentRange(
+      contentLength: totalContentLength,
+      startOffset: forwardSelection ? startOffset : endOffset,
+      endOffset: forwardSelection ? endOffset : startOffset,
+    );
+  }
+
+  /// Returns a [SelectedContentRange] considering the [SelectedContentRange]
+  /// from each [Selectable] child managed under this delegate.
+  ///
+  /// When nothing is selected or either selection edge has not been set,
+  /// this method will return a [SelectedContentRange.empty] with a content
+  /// length accumulated from each [Selectable] child managed under this delegate.
+  @override
+  SelectedContentRange getSelection() {
+    final List<SelectedContentRange> selections = <SelectedContentRange>[
+      for (final Selectable selectable in selectables)
+        selectable.getSelection(),
+    ];
+    return _calculateLocalRange(selections);
   }
 
   // From [SelectableRegion].
