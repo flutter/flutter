@@ -142,11 +142,11 @@ void main() {
     expect(find.text('hello, world'), findsOneWidget);
     expect(find.text('你好，世界'), findsOneWidget);
 
-    expect(tester.getTopLeft(find.text('hello, world')).dy, 298.0);
-    expect(tester.getBottomLeft(find.text('hello, world')).dy, 318.0);
+    expect(tester.getTopLeft(find.text('hello, world')).dy, 296.0);
+    expect(tester.getBottomLeft(find.text('hello, world')).dy, 320.0);
 
-    expect(tester.getTopLeft(find.text('你好，世界')).dy, 346.0);
-    expect(tester.getBottomLeft(find.text('你好，世界')).dy, 366.0);
+    expect(tester.getTopLeft(find.text('你好，世界')).dy, 344.0);
+    expect(tester.getBottomLeft(find.text('你好，世界')).dy, 368.0);
   });
 
   testWidgets('Material2 - Text baseline with EN locale', (WidgetTester tester) async {
@@ -284,10 +284,10 @@ void main() {
     expect(find.text('hello, world'), findsOneWidget);
     expect(find.text('你好，世界'), findsOneWidget);
 
-    expect(tester.getTopLeft(find.text('hello, world')).dy, 298.0);
-    expect(tester.getBottomLeft(find.text('hello, world')).dy, 318.0);
+    expect(tester.getTopLeft(find.text('hello, world')).dy, 296.0);
+    expect(tester.getBottomLeft(find.text('hello, world')).dy, 320.0);
 
-    expect(tester.getTopLeft(find.text('你好，世界')).dy, 346.0);
-    expect(tester.getBottomLeft(find.text('你好，世界')).dy, 366.0);
+    expect(tester.getTopLeft(find.text('你好，世界')).dy, 344.0);
+    expect(tester.getBottomLeft(find.text('你好，世界')).dy, 368.0);
   });
 }
