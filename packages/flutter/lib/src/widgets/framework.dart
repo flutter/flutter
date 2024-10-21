@@ -5381,7 +5381,7 @@ class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
   @override
   Map<String, Object?> toJsonMap(
     DiagnosticsSerializationDelegate delegate, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     final Map<String, Object?> json = super.toJsonMap(delegate, fullDetails: fullDetails,);
     final Element element = value as Element;

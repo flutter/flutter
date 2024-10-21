@@ -1607,7 +1607,7 @@ abstract class DiagnosticsNode {
   @mustCallSuper
   Map<String, Object?> toJsonMap(
     DiagnosticsSerializationDelegate delegate, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     Map<String, Object?> result = <String, Object?>{};
     assert(() {
@@ -1677,7 +1677,7 @@ abstract class DiagnosticsNode {
     List<DiagnosticsNode>? nodes,
     DiagnosticsNode? parent,
     DiagnosticsSerializationDelegate delegate, {
-      required bool fullDetails,
+      bool fullDetails = true,
     }
   ) {
     bool truncated = false;
@@ -1876,7 +1876,7 @@ class StringProperty extends DiagnosticsProperty<String> {
   @override
   Map<String, Object?> toJsonMap(
     DiagnosticsSerializationDelegate delegate, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     final Map<String, Object?> json = super.toJsonMap(
       delegate,
@@ -1941,7 +1941,7 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
   @override
   Map<String, Object?> toJsonMap(
     DiagnosticsSerializationDelegate delegate, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     final Map<String, Object?> json = super.toJsonMap(
       delegate,
@@ -2135,7 +2135,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
   @override
   Map<String, Object?> toJsonMap(
     DiagnosticsSerializationDelegate delegate, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     final Map<String, Object?> json = super.toJsonMap(
       delegate,
@@ -2266,7 +2266,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   @override
   Map<String, Object?> toJsonMap(
     DiagnosticsSerializationDelegate delegate, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     final Map<String, Object?> json = super.toJsonMap(
       delegate,
@@ -2413,7 +2413,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   @override
   Map<String, Object?> toJsonMap(
     DiagnosticsSerializationDelegate delegate, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     final Map<String, Object?> json = super.toJsonMap(
       delegate,
@@ -2500,7 +2500,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   @override
   Map<String, Object?> toJsonMap(
     DiagnosticsSerializationDelegate delegate, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     final Map<String, Object?> json = super.toJsonMap(
       delegate,
@@ -2629,7 +2629,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   @override
   Map<String, Object?> toJsonMap(
     DiagnosticsSerializationDelegate delegate, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     final T? v = value;
     List<Map<String, Object?>>? properties;
@@ -3587,7 +3587,7 @@ abstract class DiagnosticsSerializationDelegate {
   /// the serialization.
   Map<String, Object?> additionalNodeProperties(
     DiagnosticsNode node, {
-    required bool fullDetails,
+    bool fullDetails = true,
   });
 
   /// Filters the list of [DiagnosticsNode]s that will be included as children
@@ -3682,7 +3682,7 @@ class _DefaultDiagnosticsSerializationDelegate implements DiagnosticsSerializati
   @override
   Map<String, Object?> additionalNodeProperties(
     DiagnosticsNode node, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     return const <String, Object?>{};
   }

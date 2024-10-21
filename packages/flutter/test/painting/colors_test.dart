@@ -473,8 +473,7 @@ void main() {
   test('ColorDiagnosticsProperty includes valueProperties in JSON', () {
     ColorProperty property = ColorProperty('foo', const Color.fromARGB(10, 20, 30, 40));
     final Map<String, Object> valueProperties = property.toJsonMap(
-      const DiagnosticsSerializationDelegate(),
-      fullDetails: true,
+      const DiagnosticsSerializationDelegate()
     )['valueProperties']! as Map<String, Object>;
     expect(valueProperties['alpha'], 10);
     expect(valueProperties['red'], 20);
@@ -483,8 +482,7 @@ void main() {
 
     property = ColorProperty('foo', null);
     final Map<String, Object?> json = property.toJsonMap(
-      const DiagnosticsSerializationDelegate(),
-      fullDetails: true,
+      const DiagnosticsSerializationDelegate()
     );
     expect(json.containsKey('valueProperties'), isFalse);
   });

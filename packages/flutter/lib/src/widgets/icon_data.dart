@@ -123,7 +123,7 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
   @override
   Map<String, Object?> toJsonMap(
     DiagnosticsSerializationDelegate delegate, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     final Map<String, Object?> json = super.toJsonMap(
       delegate,

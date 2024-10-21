@@ -1300,8 +1300,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                   InspectorSerializationDelegate(
                     service: service,
                     includeProperties: true,
-                  ),
-                  fullDetails: true,
+                  )
                 ),
             isNotNull,
           );
@@ -5425,15 +5424,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           (DiagnosticsNode node, InspectorSerializationDelegate delegate) => <String, Object>{
             if (node.value case Element(:final RenderObject renderObject))
               'renderObject': renderObject.toDiagnosticsNode().toJsonMap(
-                  delegate.copyWith(subtreeDepth: 0),
-                  fullDetails: true,
+                  delegate.copyWith(subtreeDepth: 0)
                 ),
             'callbackExecuted': true,
           },
       );
       final Map<String, Object?> json = node.toJsonMap(
-        delegate,
-        fullDetails: true,
+        delegate
       );
       expect(json['callbackExecuted'], true);
       expect(json.containsKey('renderObject'), true);
@@ -5455,10 +5452,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           service: service,
           includeProperties: true,
         );
-      expect(
-        node.toJsonMap(emptyDelegate, fullDetails: true),
-        node.toJsonMap(defaultDelegate, fullDetails: true),
-      );
+      expect(node.toJsonMap(emptyDelegate), node.toJsonMap(defaultDelegate));
     });
 
     testWidgets('debugIsLocalCreationLocation test', (WidgetTester tester) async {
@@ -5550,8 +5544,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(node.value, equals('http://the-deeplink/'));
       expect(
         node.toJsonMap(
-          const DiagnosticsSerializationDelegate(),
-          fullDetails: true,
+          const DiagnosticsSerializationDelegate()
         ),
         equals(<String, dynamic>{
           'description': 'description of the deep link',
@@ -5572,8 +5565,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     final Map<String, Object?> jsonObject = const SizedBox()
         .toDiagnosticsNode()
         .toJsonMap(
-          InspectorSerializationDelegate(service: service),
-          fullDetails: true,
+          InspectorSerializationDelegate(service: service)
         );
     final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
     expect(creationLocation, isNotNull);

@@ -11,8 +11,7 @@ void main() {
     final Element element = _TestElement();
 
     final Map<String, Object?> json = element.toDiagnosticsNode().toJsonMap(
-          const DiagnosticsSerializationDelegate(),
-          fullDetails: true,
+          const DiagnosticsSerializationDelegate()
         );
     expect(json['widgetRuntimeType'], 'Placeholder');
     expect(json['stateful'], isFalse);
@@ -22,8 +21,7 @@ void main() {
     final Element element = StatefulElement(const Tooltip(message: 'foo'));
 
     final Map<String, Object?> json = element.toDiagnosticsNode().toJsonMap(
-          const DiagnosticsSerializationDelegate(),
-          fullDetails: true,
+          const DiagnosticsSerializationDelegate()
         );
     expect(json['widgetRuntimeType'], 'Tooltip');
     expect(json['stateful'], isTrue);
@@ -76,8 +74,7 @@ void main() {
       final Map<String, Object?> result = testTree
         .toDiagnosticsNode()
         .toJsonMap(
-          const DiagnosticsSerializationDelegate(),
-          fullDetails: true,
+          const DiagnosticsSerializationDelegate()
         );
       expect(result.containsKey('properties'), isFalse);
       expect(result.containsKey('children'), isFalse);
@@ -87,8 +84,7 @@ void main() {
       final Map<String, Object?> result = testTree
         .toDiagnosticsNode()
         .toJsonMap(
-          const DiagnosticsSerializationDelegate(subtreeDepth: 1),
-          fullDetails: true,
+          const DiagnosticsSerializationDelegate(subtreeDepth: 1)
         );
       expect(result.containsKey('properties'), isFalse);
       final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
@@ -101,8 +97,7 @@ void main() {
       final Map<String, Object?> result = testTree
         .toDiagnosticsNode()
         .toJsonMap(
-          const DiagnosticsSerializationDelegate(subtreeDepth: 5),
-          fullDetails: true,
+          const DiagnosticsSerializationDelegate(subtreeDepth: 5)
         );
       expect(result.containsKey('properties'), isFalse);
       final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
@@ -115,8 +110,7 @@ void main() {
       final Map<String, Object?> result = testTree
         .toDiagnosticsNode()
         .toJsonMap(
-          const DiagnosticsSerializationDelegate(includeProperties: true),
-          fullDetails: true,
+          const DiagnosticsSerializationDelegate(includeProperties: true)
         );
       expect(result.containsKey('children'), isFalse);
       expect(result['properties'], hasLength(7));
@@ -129,8 +123,7 @@ void main() {
           const DiagnosticsSerializationDelegate(
             subtreeDepth: 1,
             includeProperties: true
-          ),
-          fullDetails: true,
+          )
         );
       expect(result['properties'], hasLength(7));
       final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
@@ -150,8 +143,7 @@ void main() {
             additionalNodePropertiesMap: <String, Object>{
               'foo': true,
             },
-          ),
-          fullDetails: true,
+          )
         );
       expect(result['foo'], isTrue);
       final List<Map<String, Object?>> properties = result['properties']! as List<Map<String, Object?>>;
@@ -172,8 +164,7 @@ void main() {
             propertyFilter: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
               return nodes.whereType<StringProperty>().toList();
             },
-          ),
-          fullDetails: true,
+          )
         );
       final List<Map<String, Object?>> properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(3));
@@ -196,8 +187,7 @@ void main() {
                 StringProperty('foo', 'bar'),
               ];
             },
-          ),
-          fullDetails: true,
+          )
         );
       final List<Map<String, Object?>> properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(1));
@@ -213,8 +203,7 @@ void main() {
             childFilter: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
               return nodes.where((DiagnosticsNode node) => node.getProperties().isEmpty).toList();
             },
-          ),
-          fullDetails: true,
+          )
         );
       final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
       expect(children, hasLength(1));
@@ -229,8 +218,7 @@ void main() {
             childFilter: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
               return nodes.expand((DiagnosticsNode node) => node.getChildren()).toList();
             },
-          ),
-          fullDetails: true,
+          )
         );
       final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
       expect(children, hasLength(3));
@@ -247,8 +235,7 @@ void main() {
             nodeTruncator: (List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
               return nodes.take(2).toList();
             },
-          ),
-          fullDetails: true,
+          )
         );
       final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
       expect(children, hasLength(3));
@@ -269,8 +256,7 @@ void main() {
             nodeDelegator: (DiagnosticsNode node, DiagnosticsSerializationDelegate delegate) {
               return delegate.copyWith(includeProperties: false);
             },
-          ),
-          fullDetails: true,
+          )
         );
       final List<Map<String, Object?>> properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(7));
@@ -347,7 +333,7 @@ class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDe
   @override
   Map<String, Object> additionalNodeProperties(
     DiagnosticsNode node, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     return additionalNodePropertiesMap;
   }

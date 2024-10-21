@@ -50,8 +50,7 @@ enum ExampleEnum {
 /// [DiagnosticsNode] are valid JSON.
 Map<String, Object?> simulateJsonSerialization(DiagnosticsNode node) {
   return json.decode(json.encode(node.toJsonMap(
-    const DiagnosticsSerializationDelegate(),
-    fullDetails: true,
+    const DiagnosticsSerializationDelegate()
   ))) as Map<String, Object?>;
 }
 

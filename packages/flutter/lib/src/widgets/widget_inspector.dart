@@ -2209,8 +2209,7 @@ mixin WidgetInspectorService {
               'renderObject': renderObject
                   .toDiagnosticsNode()
                   .toJsonMap(
-                    renderObjectSerializationDelegate,
-                    fullDetails: true,
+                    renderObjectSerializationDelegate
                   ),
           };
 
@@ -2225,8 +2224,7 @@ mixin WidgetInspectorService {
                         delegate.copyWith(
                           subtreeDepth: 0,
                           includeProperties: true,
-                        ),
-                        fullDetails: true,
+                        )
                       );
               // TODO(jacobr): also describe the path back up the tree to
               // the RenderParentElement from the current element. It
@@ -3806,7 +3804,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   @override
   Map<String, Object?> additionalNodeProperties(
     DiagnosticsNode node, {
-    required bool fullDetails,
+    bool fullDetails = true,
   }) {
     final Map<String, Object?> result = <String, Object?>{};
     final Object? value = node.value;
