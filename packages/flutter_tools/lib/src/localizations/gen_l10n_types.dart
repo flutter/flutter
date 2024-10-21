@@ -19,9 +19,9 @@ import 'message_parser.dart';
 // DateFormat.yMMMMd("en_US").format(DateTime.utc(1996, 7, 10)) results
 // in the string "July 10, 1996".
 //
-// Since the tool generates code that uses DateFormat's constructor, it is
-// necessary to verify that the constructor exists, or the
-// tool will generate code that may cause a compile-time error.
+// Since the code generates code that uses DateFormat's constructor and its
+// add_* methods, it is necessary to verify that the constructor/method exists,
+// or the tool will generate code that may cause a compile-time error.
 //
 // See also:
 //
@@ -71,6 +71,8 @@ const Set<String> validDateFormats = <String>{
   'ms',
   's',
 };
+
+const String dateFormatPartsDelimiter = '+';
 
 // The set of number formats that can be automatically localized.
 //
@@ -252,7 +254,7 @@ class Placeholder {
   bool get requiresNumFormatting => <String>['int', 'num', 'double'].contains(type) && format != null;
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
-  bool get hasValidDateFormat => validDateFormats.contains(format);
+  bool get hasValidDateFormat => format?.split(dateFormatPartsDelimiter).every(validDateFormats.contains) ?? false;
 
   static String? _stringAttribute(
     String resourceId,
