@@ -309,6 +309,12 @@ enum SelectionEventType {
   /// Used by [SelectParagraphSelectionEvent].
   selectParagraph,
 
+  /// An event to select a line at the location
+  /// [SelectLineSelectionEvent.globalPosition].
+  ///
+  /// Used by [SelectLineSelectionEvent].
+  selectLine,
+
   /// An event that extends the selection by a specific [TextGranularity].
   granularlyExtendSelection,
 
@@ -347,6 +353,8 @@ enum TextGranularity {
 /// * [SelectAllSelectionEvent], for events to select all contents.
 /// * [ClearSelectionEvent], for events to clear selections.
 /// * [SelectWordSelectionEvent], for events to select words at the locations.
+/// * [SelectParagraphSelectionEvent], for events to select paragraphs at the locations.
+/// * [SelectLineSelectionEvent], for events to select lines at the locations.
 /// * [SelectionEdgeUpdateEvent], for events to update selection edges.
 /// * [SelectionEventType], for determining the subclass types.
 abstract class SelectionEvent {
@@ -372,30 +380,65 @@ class ClearSelectionEvent extends SelectionEvent {
   const ClearSelectionEvent(): super._(SelectionEventType.clear);
 }
 
+/// An abstract base class for selection events that select a boundary at a location.
+///
+/// See also:
+/// * [SelectWordSelectionEvent], for an event that selects the word at the location.
+/// * [SelectParagraphSelectionEvent], for an event that selects the paragraph at the location.
+/// * [SelectLineSelectionEvent], for an event that selects the line at the location.
+/// * [SelectionEventType], for determining the subclass types.
+abstract class SelectBoundarySelectionEvent extends SelectionEvent {
+  const SelectBoundarySelectionEvent._(this.globalPosition, SelectionEventType type) : super._(type);
+
+  /// The position in global coordinates to select the boundary at.
+  final Offset globalPosition;
+}
+
+/// An abstract base class for selection events that select a boundary that
+/// may span multiple [Selectable]s.
+///
+/// See also:
+/// * [SelectParagraphSelectionEvent], for an event that selects the paragraph at the location.
+/// * [SelectLineSelectionEvent], for an event that selects the line at the location.
+/// * [SelectionEventType], for determining the subclass types.
+abstract class SelectMultiSelectableBoundarySelectionEvent extends SelectBoundarySelectionEvent {
+  const SelectMultiSelectableBoundarySelectionEvent._(this.absorb, Offset globalPosition, SelectionEventType type) : super._(globalPosition, type);
+
+  /// Whether the [Selectable] receiving the event should be completely
+  /// absorbed into a boundary.
+  ///
+  /// For example, when [absorb] is set to true, and a [Selectable] that is inline
+  /// within a boundary receives this event, it should select all of its content,
+  /// and continue searching for the end of the boundary.
+  ///
+  /// When [absorb] is set to false, and a [Selectable] that is inline with a boundary
+  /// receives this event, it should find the end of the boundary relative to itself
+  /// and stop searching.
+  final bool absorb;
+}
+
 /// Selects the whole word at the location.
 ///
 /// This event can be sent as the result of mobile long press selection.
-class SelectWordSelectionEvent extends SelectionEvent {
+class SelectWordSelectionEvent extends SelectBoundarySelectionEvent {
   /// Creates a select word event at the [globalPosition].
-  const SelectWordSelectionEvent({required this.globalPosition}): super._(SelectionEventType.selectWord);
-
-  /// The position in global coordinates to select word at.
-  final Offset globalPosition;
+  const SelectWordSelectionEvent({required Offset globalPosition}): super._(globalPosition, SelectionEventType.selectWord);
 }
 
 /// Selects the entire paragraph at the location.
 ///
 /// This event can be sent as the result of a triple click to select.
-class SelectParagraphSelectionEvent extends SelectionEvent {
+class SelectParagraphSelectionEvent extends SelectMultiSelectableBoundarySelectionEvent {
   /// Creates a select paragraph event at the [globalPosition].
-  const SelectParagraphSelectionEvent({required this.globalPosition, this.absorb = false}): super._(SelectionEventType.selectParagraph);
+  const SelectParagraphSelectionEvent({required Offset globalPosition, bool absorb = false}): super._(absorb, globalPosition, SelectionEventType.selectParagraph);
+}
 
-  /// The position in global coordinates to select paragraph at.
-  final Offset globalPosition;
-
-  /// Whether the selectable receiving the event should be absorbed into
-  /// an encompassing paragraph.
-  final bool absorb;
+/// Selects the entire line at the location.
+///
+/// This event can be sent as the result of a triple click to select on Linux.
+class SelectLineSelectionEvent extends SelectMultiSelectableBoundarySelectionEvent {
+  /// Creates a select line event at the [globalPosition].
+  const SelectLineSelectionEvent({required Offset globalPosition, bool absorb = false}): super._(absorb, globalPosition, SelectionEventType.selectLine);
 }
 
 /// Updates a selection edge.

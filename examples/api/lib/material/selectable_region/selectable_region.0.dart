@@ -186,6 +186,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
       case SelectionEventType.selectParagraph:
+      case SelectionEventType.selectLine:
         _start = Offset.zero;
         _end = Offset.infinite;
       case SelectionEventType.granularlyExtendSelection:
