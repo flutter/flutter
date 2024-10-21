@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/navigation_rail/navigation_rail.ext
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Navigation rail should animated itself between the normal and extended state',
+  testWidgets('Navigation rail animates itself between the normal and extended state',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const example.ExtendedAnimationExampleApp(),
