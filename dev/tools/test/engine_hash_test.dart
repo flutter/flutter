@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: always_specify_types
-
 import 'dart:io' as io;
 
 import 'package:collection/collection.dart';
@@ -13,11 +11,12 @@ import '../bin/engine_hash.dart' show GitRevisionStrategy, engineHash;
 
 void main() {
   test('Produces an engine hash for merge-base', () async {
-    final runProcess = _fakeProcesses(processes: <FakeProcess>[
+    final Future<io.ProcessResult> Function(List<String>) runProcess =
+        _fakeProcesses(processes: <FakeProcess>[
       (
         exe: 'git',
         command: 'merge-base',
-        rest: ['upstream/main', 'HEAD'],
+        rest: <String>['upstream/main', 'HEAD'],
         exitCode: 0,
         stdout: 'abcdef1234',
         stderr: null
@@ -25,54 +24,56 @@ void main() {
       (
         exe: 'git',
         command: 'ls-tree',
-        rest: ['-r', 'abcdef1234', 'engine', 'DEPS'],
+        rest: <String>['-r', 'abcdef1234', 'engine', 'DEPS'],
         exitCode: 0,
         stdout: 'one\r\ntwo\r\n',
         stderr: null
       ),
     ]);
 
-    final result = await engineHash(runProcess);
+    final Future<String> result = engineHash(runProcess);
 
-    expect(result,
-        (result: 'c708d7ef841f7e1748436b8ef5670d0b2de1a227', error: null));
+    expect(result, completion('c708d7ef841f7e1748436b8ef5670d0b2de1a227'));
   });
 
   test('Produces an engine hash for HEAD', () async {
-    final runProcess = _fakeProcesses(processes: <FakeProcess>[
-      (
-        exe: 'git',
-        command: 'ls-tree',
-        rest: ['-r', 'HEAD', 'engine', 'DEPS'],
-        exitCode: 0,
-        stdout: 'one\ntwo\n',
-        stderr: null
-      ),
-    ]);
+    final Future<io.ProcessResult> Function(List<String>) runProcess =
+        _fakeProcesses(
+      processes: <FakeProcess>[
+        (
+          exe: 'git',
+          command: 'ls-tree',
+          rest: <String>['-r', 'HEAD', 'engine', 'DEPS'],
+          exitCode: 0,
+          stdout: 'one\ntwo\n',
+          stderr: null
+        ),
+      ],
+    );
 
-    final result = await engineHash(runProcess,
-        revisionStrategy: GitRevisionStrategy.head);
+    final Future<String> result =
+        engineHash(runProcess, revisionStrategy: GitRevisionStrategy.head);
 
-    expect(result,
-        (result: 'c708d7ef841f7e1748436b8ef5670d0b2de1a227', error: null));
+    expect(result, completion('c708d7ef841f7e1748436b8ef5670d0b2de1a227'));
   });
 
   test('Returns error in non-monorepo', () async {
-    final runProcess = _fakeProcesses(processes: <FakeProcess>[
+    final Future<io.ProcessResult> Function(List<String>) runProcess =
+        _fakeProcesses(processes: <FakeProcess>[
       (
         exe: 'git',
         command: 'ls-tree',
-        rest: ['-r', 'HEAD', 'engine', 'DEPS'],
+        rest: <String>['-r', 'HEAD', 'engine', 'DEPS'],
         exitCode: 0,
         stdout: '',
         stderr: null
       ),
     ]);
 
-    final result = await engineHash(runProcess,
-        revisionStrategy: GitRevisionStrategy.head);
+    final Future<String> result =
+        engineHash(runProcess, revisionStrategy: GitRevisionStrategy.head);
 
-    expect(result, (result: '', error: 'Not in a monorepo'));
+    expect(result, throwsA('Not in a monorepo'));
   });
 }
 
@@ -89,7 +90,7 @@ Future<io.ProcessResult> Function(List<String>) _fakeProcesses({
   required List<FakeProcess> processes,
 }) =>
     (List<String> cmd) async {
-      for (final process in processes) {
+      for (final FakeProcess process in processes) {
         if (process.exe.endsWith(cmd[0]) &&
             process.command.endsWith(cmd[1]) &&
             process.rest.equals(cmd.sublist(2))) {

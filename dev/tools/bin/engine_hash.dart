@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: always_specify_types
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -16,15 +14,15 @@ enum GitRevisionStrategy {
   head,
 }
 
-final _hashRegex = RegExp(r'^([a-fA-F0-9]+)');
+final RegExp _hashRegex = RegExp(r'^([a-fA-F0-9]+)');
 
-final parser = ArgParser()
+final ArgParser parser = ArgParser()
   ..addOption(
     'strategy',
     abbr: 's',
-    allowed: ['head', 'mergeBase'],
+    allowed: <String>['head', 'mergeBase'],
     defaultsTo: 'head',
-    allowedHelp: {
+    allowedHelp: <String, String>{
       'head': 'hash from git HEAD',
       'mergeBase': 'hash from the merge-base of HEAD and upstream/master',
     },
@@ -32,11 +30,12 @@ final parser = ArgParser()
   ..addFlag('help', abbr: 'h', negatable: false);
 
 Never printHelp({String? error}) {
+  final Stdout out = error != null ? stderr : stdout;
   if (error != null) {
-    stdout.writeln(error);
-    stdout.writeln();
+    out.writeln(error);
+    out.writeln();
   }
-  stdout.writeln('''
+  out.writeln('''
 Calculate the hash signature for the Flutter Engine
 ${parser.usage}
 ''');
@@ -55,29 +54,30 @@ Future<int> main(List<String> args) async {
     printHelp();
   }
 
-  final result = await engineHash(
-    (List<String> command) => Process.run(
-      command.first,
-      command.sublist(1),
-      stdoutEncoding: utf8,
-    ),
-    revisionStrategy: GitRevisionStrategy.values.byName(
-      arguments.option('strategy')!,
-    ),
-  );
-
-  if (result.error != null) {
-    stderr.writeln('Error calculating engine hash: ${result.error}');
+  final String result;
+  try {
+    result = await engineHash(
+      (List<String> command) => Process.run(
+        command.first,
+        command.sublist(1),
+        stdoutEncoding: utf8,
+      ),
+      revisionStrategy: GitRevisionStrategy.values.byName(
+        arguments.option('strategy')!,
+      ),
+    );
+  } catch (e) {
+    stderr.writeln('Error calculating engine hash: $e');
     return 1;
   }
 
-  stdout.writeln(result.result);
+  stdout.writeln(result);
 
   return 0;
 }
 
 /// Returns the hash signature for the engine source code.
-Future<({String result, String? error})> engineHash(
+Future<String> engineHash(
   Future<ProcessResult> Function(List<String> command) runProcess, {
   GitRevisionStrategy revisionStrategy = GitRevisionStrategy.mergeBase,
 }) async {
@@ -87,7 +87,7 @@ Future<({String result, String? error})> engineHash(
     case GitRevisionStrategy.head:
       base = 'HEAD';
     case GitRevisionStrategy.mergeBase:
-      final processResult = await runProcess(
+      final ProcessResult processResult = await runProcess(
         <String>[
           'git',
           'merge-base',
@@ -97,66 +97,56 @@ Future<({String result, String? error})> engineHash(
       );
 
       if (processResult.exitCode != 0) {
-        return (
-          result: '',
-          error: '''
+        throw '''
 Unable to find merge-base hash of the repository:
-${processResult.stderr}''',
-        );
+${processResult.stderr}''';
       }
 
-      final baseHash = _hashRegex.matchAsPrefix(processResult.stdout as String);
-      if (baseHash == null || baseHash.groupCount != 1) {
-        return (
-          result: '',
-          error: '''
+      final Match? baseHash =
+          _hashRegex.matchAsPrefix(processResult.stdout as String);
+      if (baseHash?.groupCount != 1) {
+        throw '''
 Unable to parse merge-base hash of the repository
-${processResult.stdout}''',
-        );
+${processResult.stdout}''';
       }
-      base = baseHash[1]!;
+      base = baseHash![1]!;
   }
 
   // List the tree (not the working tree) recursively for the merge-base.
   // This is important for future filtering of files, but also do not include
   // the developer's changes / in flight PRs.
   // The presence `engine` and `DEPS` are signals that you live in a monorepo world.
-  final processResult = await runProcess(
+  final ProcessResult processResult = await runProcess(
     <String>['git', 'ls-tree', '-r', base, 'engine', 'DEPS'],
   );
 
   if (processResult.exitCode != 0) {
-    return (
-      result: '',
-      error: '''
+    throw '''
 Unable to list tree
-${processResult.stderr}''',
-    );
+${processResult.stderr}''';
   }
 
   // Ensure stable line endings so our hash calculation is stable
-  final lsTree = processResult.stdout as String;
+  final String lsTree = processResult.stdout as String;
   if (lsTree.trim().isEmpty) {
-    return (
-      result: '',
-      error: 'Not in a monorepo',
-    );
+    throw 'Not in a monorepo';
   }
 
-  final treeLines = LineSplitter.split(processResult.stdout as String);
+  final Iterable<String> treeLines =
+      LineSplitter.split(processResult.stdout as String);
 
   // We could call `git hash-object --stdin` which would just take the input, calculate the size,
   // and then sha1sum it like: `blob $size\0$string'. However, that can have different line endings.
   // Instead this is equivalent to:
   //     git ls-tree -r $(git merge-base upstream/main HEAD) | <only newlines> | sha1sum
-  final output = StreamController<Digest>();
-  final sink = sha1.startChunkedConversion(output);
-  for (final line in treeLines) {
+  final StreamController<Digest> output = StreamController<Digest>();
+  final ByteConversionSink sink = sha1.startChunkedConversion(output);
+  for (final String line in treeLines) {
     sink.add(utf8.encode(line));
-    sink.add([0x0a]);
+    sink.add(<int>[0x0a]);
   }
   sink.close();
-  final digest = await output.stream.first;
+  final Digest digest = await output.stream.first;
 
-  return (result: '$digest', error: null);
+  return '$digest';
 }
