@@ -365,17 +365,19 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   /// The navigation bar's title, when using [CupertinoNavigationBar.large].
   ///
-  /// If null and [automaticallyImplyMiddle] is true, an appropriate [Text]
+  /// If null and `automaticallyImplyTitle` is true, an appropriate [Text]
   /// title will be created if the current route is a [CupertinoPageRoute] and
   /// has a `title`.
   ///
   /// This property is null for the base [CupertinoNavigationBar] constructor,
-  /// which shows a collapsed navigation bar and assigns [middle] instead.
+  /// which shows a collapsed navigation bar and uses [middle] for the title
+  /// instead.
   ///
   /// See also:
-  ///  * [CupertinoSliverNavigationBar.largeTitle], a similar property 
-  ///    in the expanded state of [CupertinoSliverNavigationBar], which can
-  ///    dynamically change size in response to scrolling.
+  ///
+  ///   * [CupertinoSliverNavigationBar.largeTitle], a similar property
+  ///     in the expanded state of [CupertinoSliverNavigationBar], which can
+  ///     dynamically change size in response to scrolling.
   final Widget? largeTitle;
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.leading}
@@ -424,17 +426,20 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final String? previousPageTitle;
 
-  /// Widget to place in the middle of the navigation bar. Normally a title or
-  /// a segmented control.
-  ///
-  /// The title is displayed similar to the collapsed state of
-  /// [CupertinoSliverNavigationBar], which can dynamically change size in
-  /// response to scrolling. For the large, or expanded, version of this static
-  /// navigation bar, use [CupertinoNavigationBar.large] and [largeTitle].
+  /// The navigation bar's default title.
   ///
   /// If null and [automaticallyImplyMiddle] is true, an appropriate [Text]
   /// title will be created if the current route is a [CupertinoPageRoute] and
   /// has a `title`.
+  ///
+  /// This property is null for the [CupertinoNavigationBar.large] constructor,
+  /// which shows an expanded navigation bar and uses [largeTitle] instead.
+  ///
+  /// See also:
+  ///
+  /// * [CupertinoSliverNavigationBar.middle], a similar property
+  ///    in the collapsed state of [CupertinoSliverNavigationBar], which can
+  ///    dynamically change size in response to scrolling.
   final Widget? middle;
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.trailing}
@@ -680,8 +685,8 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       : backgroundColor;
 
     final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
-    final double persistentHeight = _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top;
-    final double maxHeight = persistentHeight + _kNavBarLargeTitleHeightExtension;
+    final double persistentHeight = _kNavBarPersistentHeight + bottomHeight + MediaQuery.paddingOf(context).top;
+    final double largeHeight = persistentHeight + _kNavBarLargeTitleHeightExtension;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
@@ -702,62 +707,49 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     Widget navBar = _PersistentNavigationBar(
       components: components,
       padding: widget.padding,
-      middleVisible: widget.middle != null,
+      middleVisible: widget.largeTitle == null,
     );
 
-    // Large nav bar
     if (widget.largeTitle != null) {
+      // Large nav bar
       navBar = ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: maxHeight),
-        child: Stack(
-          fit: StackFit.expand,
+        constraints: BoxConstraints(maxHeight: largeHeight),
+        child: Column(
           children: <Widget>[
-            Positioned(
-              top: persistentHeight,
-              left: 0.0,
-              right: 0.0,
-              bottom: 0.0,
-              child: ClipRect(
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.only(
+            navBar,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(
                     start: _kNavBarEdgePadding,
                     bottom: _kNavBarBottomPadding
                   ),
-                  child: SafeArea(
-                    top: false,
-                    bottom: false,
-                    child: Semantics(
-                      header: true,
-                      child: DefaultTextStyle(
-                        style: CupertinoTheme.of(context)
-                            .textTheme
-                            .navLargeTitleTextStyle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        child: _LargeTitle(child: components.largeTitle),
-                      ),
-                    ),
+                child: Semantics(
+                  header: true,
+                  child: DefaultTextStyle(
+                    style: CupertinoTheme.of(context)
+                        .textTheme
+                        .navLargeTitleTextStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    child: _LargeTitle(child: components.largeTitle),
                   ),
                 ),
               ),
             ),
-            Positioned(
-              left: 0.0,
-              right: 0.0,
-              top: 0.0,
-              child: navBar,
-            ),
+            if (widget.bottom != null) SizedBox(height: bottomHeight, child: widget.bottom),
           ],
         ),
       );
-    }
-
-    if (widget.bottom != null) {
-      navBar = Column(
-        children: <Widget>[
-          navBar,
-          if (widget.bottom != null) SizedBox(height: bottomHeight, child: widget.bottom),
-        ],
+    } else {
+      // Small nav bar
+      navBar = ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: persistentHeight),
+        child: Column(
+          children: <Widget>[
+            navBar,
+            if (widget.bottom != null) SizedBox(height: bottomHeight, child: widget.bottom),
+          ],
+        ),
       );
     }
 
@@ -1762,9 +1754,9 @@ class _NavigationBarStaticComponents {
   }) {
     Widget? middleContent = userMiddle;
 
-    if (middleContent == null && large && staticBar) {
+    if (large && staticBar) {
       // Static bar only displays the middle, or the large, not both.
-      // A scrolling bar cerates both middle and large to transition between.
+      // A scrolling bar creates both middle and large to transition between.
       return null;
     }
 
