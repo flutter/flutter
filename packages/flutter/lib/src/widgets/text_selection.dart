@@ -94,6 +94,24 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 ///  * [SelectionArea], which selects appropriate text selection controls
 ///    based on the current platform.
 abstract class TextSelectionControls {
+  /// Returns the bounding [Rect] of the text selection handle in local
+  /// coordinates.
+  ///
+  /// When interacting with a text seletion handle through a touch event, the
+  /// interactive area should be at least [kMinInteractiveDimension] square,
+  /// which this method does not consider.
+  Rect getHandleRect(TextSelectionHandleType type, double preferredLineHeight) {
+    final Size handleSize = getHandleSize(
+      preferredLineHeight,
+    );
+    return Rect.fromLTWH(
+      0.0,
+      0.0,
+      handleSize.width,
+      handleSize.height,
+    );
+  }
+
   /// Builds a selection handle of the given `type`.
   ///
   /// The top left corner of this widget is positioned at the bottom of the
@@ -697,6 +715,7 @@ class TextSelectionOverlay {
   late double _endHandleDragTarget;
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
+    print('justin _handleSelectionEndHandleDragStart.');
     if (!renderObject.attached) {
       return;
     }
@@ -757,6 +776,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
+    print('justin _handleSelectionEndHandleDragUpdate.');
     if (!renderObject.attached) {
       return;
     }
@@ -835,6 +855,7 @@ class TextSelectionOverlay {
   late double _startHandleDragTarget;
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
+    print('justin _handleSelectionStartHandleDragStart');
     if (!renderObject.attached) {
       return;
     }
@@ -870,6 +891,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
+    print('justin _handleSelectionStartHandleDragUpdate');
     if (!renderObject.attached) {
       return;
     }
@@ -937,6 +959,7 @@ class TextSelectionOverlay {
   }
 
   void _handleAnyDragEnd(DragEndDetails details) {
+    print('justin _handleAnyDragEnd');
     if (!context.mounted) {
       return;
     }
@@ -1169,6 +1192,7 @@ class SelectionOverlay {
   final ValueChanged<DragStartDetails>? onStartHandleDragStart;
 
   void _handleStartHandleDragStart(DragStartDetails details) {
+    print('justin _handleStartHandleDragStart.');
     assert(!_isDraggingStartHandle);
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
@@ -1181,6 +1205,7 @@ class SelectionOverlay {
   }
 
   void _handleStartHandleDragUpdate(DragUpdateDetails details) {
+    print('justin _handleStartHandleDragUpdate.');
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
@@ -1198,6 +1223,7 @@ class SelectionOverlay {
   final ValueChanged<DragEndDetails>? onStartHandleDragEnd;
 
   void _handleStartHandleDragEnd(DragEndDetails details) {
+    print('justin _handleStartHandleDragEnd.');
     _isDraggingStartHandle = false;
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
@@ -1249,6 +1275,7 @@ class SelectionOverlay {
   final ValueChanged<DragStartDetails>? onEndHandleDragStart;
 
   void _handleEndHandleDragStart(DragStartDetails details) {
+    print('justin _handleEndHandleDragStart.');
     assert(!_isDraggingEndHandle);
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
@@ -1261,6 +1288,7 @@ class SelectionOverlay {
   }
 
   void _handleEndHandleDragUpdate(DragUpdateDetails details) {
+    print('justin _handleEndHandleDragUpdate.');
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
@@ -1278,6 +1306,7 @@ class SelectionOverlay {
   final ValueChanged<DragEndDetails>? onEndHandleDragEnd;
 
   void _handleEndHandleDragEnd(DragEndDetails details) {
+    print('justin _handleEndHandleDragEnd.');
     _isDraggingEndHandle = false;
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
@@ -1874,19 +1903,9 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
 
   @override
   Widget build(BuildContext context) {
-    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
+    final Rect handleRect = widget.selectionControls.getHandleRect(
       widget.type,
       widget.preferredLineHeight,
-    );
-    final Size handleSize = widget.selectionControls.getHandleSize(
-      widget.preferredLineHeight,
-    );
-
-    final Rect handleRect = Rect.fromLTWH(
-      -handleAnchor.dx,
-      -handleAnchor.dy,
-      handleSize.width,
-      handleSize.height,
     );
 
     // Make sure the GestureDetector is big enough to be easily interactive.
