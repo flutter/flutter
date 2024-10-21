@@ -451,6 +451,34 @@ class ShaderMask extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A widget that establishes a shared backdrop layer for all child [BackdropFilter]
+/// widgets that opt into using it.
+///
+/// Sharing a backdrop filter layer will improve the performance of multiple
+/// backdrop filters. To opt into using a shared [BackdropGroup], the special
+/// [BackdropFilter.shared] constructor must be used.
+class BackdropGroup extends InheritedWidget {
+  /// Create a new [BackdropGroup] widget.
+  BackdropGroup({
+    super.key,
+    required super.child,
+    BackdropKey? backdropKey,
+  }) : backdropKey = backdropKey ?? BackdropKey();
+
+  /// The backdrop key this backdrop group will use with shared child layers.
+  final BackdropKey backdropKey;
+
+  @override
+  bool updateShouldNotify(covariant BackdropGroup oldWidget) {
+    return oldWidget.backdropKey != backdropKey;
+  }
+
+  /// Look up the nearest [BackdropGroup], or `null` if there is not one.
+  static BackdropGroup? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<BackdropGroup>();
+  }
+}
+
 /// A widget that applies a filter to the existing painted content and then
 /// paints [child].
 ///
@@ -475,7 +503,9 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// [BackdropKey]. The backdrop key uniquely identifies the input for a backdrop
 /// filter, and when shared, indicates the filtering can be performed once. This
 /// can significantly reduce the overhead of using multiple backdrop filters in
-/// a scene.
+/// a scene. The key can either be provided manually via the `backdropKey`
+/// constructor parameter or looked up from a [BackdropGroup] inherited widget
+/// via the `.shared` constructor.
 ///
 /// Backdrop filters that overlap with eachother should not use the same
 /// backdrop key, otherwise the results may look as if only one filter applied
@@ -486,23 +516,22 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// backdrop blur but the results will be visually identical to multiple blurs.
 ///
 /// ```dart
-/// final BackdropKey listKey = BackdropKey();
-///
 /// Widget build(BuildContext context) {
-///   return ListView.builder(
-///     itemCount: 60,
-///     itemBuilder: (BuildContext context, int index) {
-///       return ClipRect(
-///         child: BackdropFilter(
-///           backdropKey: listKey,
-///           filter: ui.ImageFilter.blur(
-///             sigmaX: 40,
-///             sigmaY: 40,
-///           ),
-///           child: Container(
-///             color: Colors.black.withOpacity(0.2),
-///             height: 200,
-///             child: const Text('Blur item'),
+///   return BackdropGroup(
+///     child: ListView.builder(
+///       itemCount: 60,
+///       itemBuilder: (BuildContext context, int index) {
+///         return ClipRect(
+///           child: BackdropFilter.shared(
+///             filter: ui.ImageFilter.blur(
+///               sigmaX: 40,
+///               sigmaY: 40,
+///             ),
+///             child: Container(
+///               color: Colors.black.withOpacity(0.2),
+///               height: 200,
+///               child: const Text('Blur item'),
+///             ),
 ///           ),
 ///         ),
 ///       );
@@ -609,7 +638,24 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
     this.backdropKey,
-  });
+  }) : useSharedKey = false;
+
+  /// Creates a backdrop filter.
+  ///
+  /// The [blendMode] argument will default to [BlendMode.srcOver] and must not be
+  /// null if provided.
+  ///
+  /// This constructor will automatically look up the nearested [BackdropGroup]
+  /// and use this widget to established a shared backdrop filter layer with
+  /// other backdrop widgets.
+  const BackdropFilter.shared({
+    super.key,
+    required this.filter,
+    super.child,
+    this.blendMode = BlendMode.srcOver,
+    this.enabled = true,
+  }) : backdropKey = null,
+       useSharedKey = true;
 
   /// The image filter to apply to the existing painted content before painting the child.
   ///
@@ -635,9 +681,19 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// The default value for the backdrop key is `null`.
   final BackdropKey? backdropKey;
 
+  /// Whether to look up the [backdropKey] from a parent [BackdropGroup].
+  final bool useSharedKey;
+
+  BackdropKey? _getKey(BuildContext context) {
+    if (useSharedKey) {
+      return BackdropGroup.of(context)?.backdropKey;
+    }
+    return backdropKey;
+  }
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
-    return RenderBackdropFilter(filter: filter, blendMode: blendMode, enabled: enabled, backdropKey: backdropKey);
+    return RenderBackdropFilter(filter: filter, blendMode: blendMode, enabled: enabled, backdropKey: _getKey(context));
   }
 
   @override
@@ -646,7 +702,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
       ..filter = filter
       ..enabled = enabled
       ..blendMode = blendMode
-      ..backdropKey = backdropKey;
+      ..backdropKey = _getKey(context);
   }
 }
 

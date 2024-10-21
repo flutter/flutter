@@ -67,6 +67,48 @@ void main() {
     expect(layers[1].backdropKey, null);
   });
 
+  testWidgets('Backdrop key is passed to backdrop Layer via backdrop group', (WidgetTester tester) async {
+    Widget build() {
+      return MaterialApp(
+        home: Scaffold(
+          body: BackdropGroup(
+            child: ListView(
+              children: <Widget>[
+                ClipRect(
+                  child: BackdropFilter.shared(
+                    filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                    child: Container(
+                      color: Colors.black.withAlpha(40),
+                      height: 200,
+                      child: const Text('Item 1'),
+                    ),
+                  ),
+                ),
+                ClipRect(
+                  child: BackdropFilter.shared(
+                    filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                    child: Container(
+                      color: Colors.black.withAlpha(40),
+                      height: 200,
+                      child: const Text('Item 1'),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+
+    final List<BackdropFilterLayer> layers = tester.layers.whereType<BackdropFilterLayer>().toList();
+
+    expect(layers.length, 2);
+    expect(layers[0].backdropKey, layers[1].backdropKey);
+  });
+
   testWidgets("Material2 - BackdropFilter's cull rect does not shrink", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
