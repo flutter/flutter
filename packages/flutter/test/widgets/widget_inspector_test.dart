@@ -5426,12 +5426,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             if (node.value case Element(:final RenderObject renderObject))
               'renderObject': renderObject.toDiagnosticsNode().toJsonMap(
                   delegate.copyWith(subtreeDepth: 0),
-                                    fullDetails: true,
+                  fullDetails: true,
                 ),
             'callbackExecuted': true,
           },
       );
-      final Map<String, Object?> json = node.toJsonMap(delegate,                   fullDetails: true,);
+      final Map<String, Object?> json = node.toJsonMap(
+        delegate,
+        fullDetails: true,
+      );
       expect(json['callbackExecuted'], true);
       expect(json.containsKey('renderObject'), true);
       expect(json['renderObject'], isA<Map<String, Object?>>());
@@ -5546,7 +5549,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(node.name, isEmpty);
       expect(node.value, equals('http://the-deeplink/'));
       expect(
-        node.toJsonMap(const DiagnosticsSerializationDelegate(),                   fullDetails: true,),
+        node.toJsonMap(
+          const DiagnosticsSerializationDelegate(),
+          fullDetails: true,
+        ),
         equals(<String, dynamic>{
           'description': 'description of the deep link',
           'type': 'DevToolsDeepLinkProperty',
