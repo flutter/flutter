@@ -417,6 +417,8 @@ class ImageCache {
         sizeBytes = info.sizeBytes;
         info.dispose();
       }
+
+      ////
       final _CachedImage image = _CachedImage(
         result!,
         sizeBytes: sizeBytes,
@@ -645,7 +647,10 @@ abstract class _CachedImageBase {
 }
 
 class _CachedImage extends _CachedImageBase {
-  _CachedImage(super.completer, {super.sizeBytes});
+  _CachedImage(super.completer, {super.sizeBytes}) {
+    print('created _CachedImage ${identityHashCode(this)}, with handle ${identityHashCode(this.handle)}');
+    print(StackTrace.current);
+  }
 }
 
 class _LiveImage extends _CachedImageBase {
