@@ -1369,12 +1369,11 @@ class FlutterPlugin implements Plugin<Project> {
                     project.tasks.named(taskTocheck).configure { task ->
                         task.dependsOn(copyFlutterAssetsTask)
                     }
-                } catch (Exception ignored) {
+                } catch (UnknownTaskException ignored) {
                 }
             }
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
-        
         if (isFlutterAppProject()) {
             project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)
