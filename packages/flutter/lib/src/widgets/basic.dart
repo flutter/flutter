@@ -632,7 +632,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 
   /// The backdrop key that identifies the backdrop this filter will apply to.
   ///
-  /// The default value for the backdrop key is [null].
+  /// The default value for the backdrop key is `null`.
   final BackdropKey? backdropKey;
 
   @override

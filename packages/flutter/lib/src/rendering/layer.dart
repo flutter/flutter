@@ -2256,7 +2256,7 @@ class BackdropFilterLayer extends ContainerLayer {
 
   /// The backdrop key that identifies the backdrop this filter will apply to.
   ///
-  /// The default value for the backdrop key is [null].
+  /// The default value for the backdrop key is `null`.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).

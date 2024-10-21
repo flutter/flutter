@@ -1265,7 +1265,7 @@ class RenderBackdropFilter extends RenderProxyBox {
   }
   /// The backdrop key that identifies the backdrop this filter will apply to.
   ///
-  /// The default value for the backdrop key is [null].
+  /// The default value for the backdrop key is `null`.
   BackdropKey? get backdropKey => _backdropKey;
   BackdropKey? _backdropKey;
   set backdropKey(BackdropKey? value) {
