@@ -365,15 +365,17 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   /// The navigation bar's title, when using [CupertinoNavigationBar.large].
   ///
-  /// The title is displayed similar to the expanded state of
-  /// [CupertinoSliverNavigationBar], which can dynamically change size in
-  /// response to scrolling. For the smaller, or collapsed, version of this static
-  /// navigation bar, use the base [CupertinoNavigationBar] constructor and
-  /// [middle].
-  ///
   /// If null and [automaticallyImplyMiddle] is true, an appropriate [Text]
   /// title will be created if the current route is a [CupertinoPageRoute] and
   /// has a `title`.
+  ///
+  /// This property is null for the base [CupertinoNavigationBar] constructor,
+  /// which shows a collapsed navigation bar and assigns [middle] instead.
+  ///
+  /// See also:
+  ///  * [CupertinoSliverNavigationBar.largeTitle], a similar property 
+  ///    in the expanded state of [CupertinoSliverNavigationBar], which can
+  ///    dynamically change size in response to scrolling.
   final Widget? largeTitle;
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.leading}
