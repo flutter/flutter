@@ -35,10 +35,7 @@ void main() {
     await tester.pump();
 
     bottomAppBar = tester.widget(find.byType(BottomAppBar));
-    expect(
-      bottomAppBar.shape,
-      isNull,
-    );
+    expect(bottomAppBar.shape, isNull);
   });
 
   testWidgets('FAB location can be changed', (WidgetTester tester) async {
