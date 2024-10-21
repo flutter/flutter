@@ -216,6 +216,10 @@ Future<T> inTempDir<T>(Future<T> Function(Directory tempDirectory) fun) async {
   try {
     return await fun(tempDirectory);
   } finally {
-    tempDirectory.deleteSync(recursive: true);
+    try {
+      tempDirectory.deleteSync(recursive: true);
+    } catch (_) {
+      // Ignore failures to delete a temporary directory.
+    }
   }
 }

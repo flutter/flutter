@@ -217,6 +217,7 @@ void main() {
           SemanticsFlag.isEnabled,
           SemanticsFlag.isFocusable,
           SemanticsFlag.isChecked,
+          if (isCupertino) SemanticsFlag.hasSelectedState,
           if (isCupertino) SemanticsFlag.isSelected,
         ],
         actions: <SemanticsAction>[

@@ -41,7 +41,6 @@ import 'src/shader_mask_cache.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
 import 'src/sliders.dart';
-import 'src/stack_size.dart';
 import 'src/text.dart';
 import 'src/very_long_picture_scrolling.dart';
 
@@ -83,7 +82,6 @@ class MacrobenchmarksApp extends StatelessWidget {
         kRasterCacheUseMemory: (BuildContext context) => const RasterCacheUseMemory(),
         kShaderMaskCacheRouteName: (BuildContext context) => const ShaderMaskCachePage(),
         kSimpleScrollRouteName: (BuildContext context) => const SimpleScroll(),
-        kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
         kAnimationWithMicrotasksRouteName: (BuildContext context) => const AnimationWithMicrotasks(),
         kAnimatedImageRouteName: (BuildContext context) => const AnimatedImagePage(),
         kOpacityPeepholeRouteName: (BuildContext context) => const OpacityPeepholePage(),
@@ -277,13 +275,6 @@ class HomePage extends StatelessWidget {
             child: const Text('Large Image Changer'),
             onPressed: () {
               Navigator.pushNamed(context, kLargeImageChangerRouteName);
-            },
-          ),
-          ElevatedButton(
-            key: const Key(kStackSizeRouteName),
-            child: const Text('Stack Size'),
-            onPressed: () {
-              Navigator.pushNamed(context, kStackSizeRouteName);
             },
           ),
           ElevatedButton(

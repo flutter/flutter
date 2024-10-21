@@ -766,24 +766,26 @@ void main() {
       await tester.pumpAndSettle();
       expect(frameworkHandlesBacks.last, isFalse);
 
-      // Set the app state to inactive, where setFrameworkHandlesBack shouldn't
-      // be called.
+      // Set the app state to inactive, where setFrameworkHandlesBack is still
+      // called. This could happen when responding to a tap on a notification
+      // when the app is not active and immediately navigating, for example.
+      // See https://github.com/flutter/flutter/pull/154313.
       await setAppLifeCycleState(AppLifecycleState.inactive);
 
-      final int finalCallsLength = frameworkHandlesBacks.length;
+      final int inactiveStartCallsLength = frameworkHandlesBacks.length;
       const NavigationNotification(canHandlePop: true).dispatch(currentContext);
       await tester.pumpAndSettle();
-      expect(frameworkHandlesBacks, hasLength(finalCallsLength));
+      expect(frameworkHandlesBacks, hasLength(inactiveStartCallsLength + 1));
 
       const NavigationNotification(canHandlePop: false).dispatch(currentContext);
       await tester.pumpAndSettle();
-      expect(frameworkHandlesBacks, hasLength(finalCallsLength));
+      expect(frameworkHandlesBacks, hasLength(inactiveStartCallsLength + 2));
 
-      // Set the app state to detached, which also shouldn't call
-      // setFrameworkHandlesBack. Must go to paused, then detached.
-      await setAppLifeCycleState(AppLifecycleState.paused);
+      // Set the app state to detached, where setFrameworkHandlesBack shouldn't
+      // be called.
       await setAppLifeCycleState(AppLifecycleState.detached);
 
+      final int finalCallsLength = frameworkHandlesBacks.length;
       const NavigationNotification(canHandlePop: true).dispatch(currentContext);
       await tester.pumpAndSettle();
       expect(frameworkHandlesBacks, hasLength(finalCallsLength));

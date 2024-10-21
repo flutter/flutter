@@ -1753,6 +1753,9 @@ abstract class DiagnosticsNode {
   /// `minLevel` specifies the minimum [DiagnosticLevel] for properties included
   /// in the output.
   ///
+  /// `wrapWidth` specifies the column number where word wrapping will be
+  /// applied.
+  ///
   /// The [toStringDeep] method takes other arguments, but those are intended
   /// for internal use when recursing to the descendants, and so can be ignored.
   ///
@@ -1768,12 +1771,13 @@ abstract class DiagnosticsNode {
     String? prefixOtherLines,
     TextTreeConfiguration? parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    int wrapWidth = 65,
   }) {
     String result = '';
     assert(() {
       result = TextTreeRenderer(
         minLevel: minLevel,
-        wrapWidth: 65,
+        wrapWidth: wrapWidth,
       ).render(
         this,
         prefixLineOne: prefixLineOne,
@@ -2139,13 +2143,11 @@ class FlagProperty extends DiagnosticsProperty<bool> {
   }
 
   @override
-  DiagnosticLevel get level {
-    return switch (value) {
-      true  when ifTrue == null => DiagnosticLevel.hidden,
-      false when ifFalse == null => DiagnosticLevel.hidden,
-      _ => super.level,
-    };
-  }
+  DiagnosticLevel get level => switch (value) {
+    true  when ifTrue == null => DiagnosticLevel.hidden,
+    false when ifFalse == null => DiagnosticLevel.hidden,
+    _ => super.level,
+  };
 }
 
 /// Property with an `Iterable<T>` [value] that can be displayed with
@@ -3315,6 +3317,9 @@ abstract class DiagnosticableTree with Diagnosticable {
   /// `minLevel` specifies the minimum [DiagnosticLevel] for properties included
   /// in the output.
   ///
+  /// `wrapWidth` specifies the column number where word wrapping will be
+  /// applied.
+  ///
   /// The [toStringDeep] method takes other arguments, but those are intended
   /// for internal use when recursing to the descendants, and so can be ignored.
   ///
@@ -3327,8 +3332,9 @@ abstract class DiagnosticableTree with Diagnosticable {
     String prefixLineOne = '',
     String? prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    int wrapWidth = 65,
   }) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
+    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel, wrapWidth: wrapWidth);
   }
 
   @override
@@ -3400,8 +3406,9 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
     String prefixLineOne = '',
     String? prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    int wrapWidth = 65,
   }) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
+    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel, wrapWidth: wrapWidth);
   }
 
   @override

@@ -258,19 +258,20 @@ abstract class UnpackIOS extends Target {
 
   @override
   List<Source> get inputs => <Source>[
-        const Source.pattern(
-            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
-        Source.artifact(
-          Artifact.flutterXcframework,
-          platform: TargetPlatform.ios,
-          mode: buildMode,
-        ),
-      ];
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+    ),
+    Source.artifact(
+      Artifact.flutterXcframework,
+      platform: TargetPlatform.ios,
+      mode: buildMode,
+    ),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[
-        Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter'),
-      ];
+    Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter'),
+  ];
 
   @override
   List<Target> get dependencies => <Target>[];
@@ -300,6 +301,7 @@ abstract class UnpackIOS extends Target {
   }
 
   Future<void> _copyFramework(Environment environment, String sdkRoot) async {
+    // Copy Flutter framework.
     final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem);
     final String basePath = environment.artifacts.getArtifactPath(
       Artifact.flutterFramework,
@@ -323,6 +325,34 @@ abstract class UnpackIOS extends Target {
         'Failed to copy framework (exit ${result.exitCode}:\n'
         '${result.stdout}\n---\n${result.stderr}',
       );
+    }
+
+    // Copy Flutter framework dSYM (debug symbol) bundle, if present.
+    final Directory frameworkDsym = environment.fileSystem.directory(
+      environment.artifacts.getArtifactPath(
+        Artifact.flutterFrameworkDsym,
+        platform: TargetPlatform.ios,
+        mode: buildMode,
+        environmentType: environmentType,
+      )
+    );
+    if (frameworkDsym.existsSync()) {
+      final ProcessResult result = await environment.processManager.run(<String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        frameworkDsym.path,
+        environment.outputDir.path,
+      ]);
+      if (result.exitCode != 0) {
+        throw Exception(
+          'Failed to copy framework dSYM (exit ${result.exitCode}:\n'
+          '${result.stdout}\n---\n${result.stderr}',
+        );
+      }
     }
   }
 
@@ -348,7 +378,12 @@ abstract class UnpackIOS extends Target {
     ]);
 
     if (verifyResult.exitCode != 0) {
-      throw Exception('Binary $frameworkBinaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
+      throw Exception(
+        'Binary $frameworkBinaryPath does not contain architectures "$archs".\n'
+        '\n'
+        'lipo -info:\n'
+        '$lipoInfo',
+      );
     }
 
     // Skip thinning for non-fat executables.
@@ -371,7 +406,14 @@ abstract class UnpackIOS extends Target {
     ]);
 
     if (extractResult.exitCode != 0) {
-      throw Exception('Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
+      throw Exception(
+        'Failed to extract architectures "$archs" for $frameworkBinaryPath.\n'
+        '\n'
+        'stderr:\n'
+        '${extractResult.stderr}\n\n'
+        'lipo -info:\n'
+        '$lipoInfo',
+      );
     }
   }
 }

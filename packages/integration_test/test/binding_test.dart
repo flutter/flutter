@@ -130,6 +130,10 @@ Future<void> main() async {
 
       expect(find.byType(RepaintBoundary), findsOneWidget);
     });
+
+    testWidgets('integration test has no label', (WidgetTester tester) async {
+      expect(binding.label, null);
+    });
   });
 
   tearDownAll(() async {

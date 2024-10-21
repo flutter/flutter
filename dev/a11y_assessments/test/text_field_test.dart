@@ -64,4 +64,11 @@ void main() {
         find.bySemanticsLabel(RegExp(textFieldLabel));
     expect(semanticsWidgets, findsExactly(2));
   });
+
+  testWidgets('text field demo page has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, TextFieldUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('TextField Demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }

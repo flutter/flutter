@@ -59,13 +59,9 @@ class DesktopProductCardColumn extends StatelessWidget {
                 final int productCardIndex = index ~/ 2;
                 card = DesktopProductCard(
                   product: products[productCardIndex],
-                  imageWidth: startLarge
-                      ? ((productCardIndex.isEven)
-                          ? largeImageWidth
-                          : smallImageWidth)
-                      : ((productCardIndex.isEven)
-                          ? smallImageWidth
-                          : largeImageWidth),
+                  imageWidth: startLarge == productCardIndex.isEven
+                      ? largeImageWidth
+                      : smallImageWidth,
                 );
               } else {
                 // This is just a divider.

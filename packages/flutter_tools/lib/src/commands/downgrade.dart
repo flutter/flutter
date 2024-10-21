@@ -110,9 +110,18 @@ class DowngradeCommand extends FlutterCommand {
     final String? lastFlutterVersion = persistentToolState.lastActiveVersion(channel);
     final String? currentFlutterVersion = _flutterVersion?.frameworkRevision;
     if (lastFlutterVersion == null || currentFlutterVersion == lastFlutterVersion) {
-      final String trailing = await _createErrorMessage(workingDirectory, channel);
+      final String trailing = await _createErrorMessage(
+        workingDirectory,
+        channel,
+      );
       throwToolExit(
-        'There is no previously recorded version for channel "$currentChannel".\n'
+        "It looks like you haven't run "
+        '"flutter upgrade" on channel "$currentChannel".\n'
+        '\n'
+        '"flutter downgrade" undoes the last "flutter upgrade".\n'
+        '\n'
+        'To switch to a specific Flutter version, see: '
+        'https://flutter.dev/to/switch-flutter-version'
         '$trailing'
       );
     }
@@ -181,7 +190,10 @@ class DowngradeCommand extends FlutterCommand {
   }
 
   // Formats an error message that lists the currently stored versions.
-  Future<String> _createErrorMessage(String workingDirectory, Channel currentChannel) async {
+  Future<String> _createErrorMessage(
+    String workingDirectory,
+    Channel currentChannel,
+  ) async {
     final StringBuffer buffer = StringBuffer();
     for (final Channel channel in Channel.values) {
       if (channel == currentChannel) {
@@ -191,11 +203,19 @@ class DowngradeCommand extends FlutterCommand {
       if (sha == null) {
         continue;
       }
-      final RunResult parseResult = await _processUtils!.run(<String>[
-        'git', 'describe', '--tags', sha,
-      ], workingDirectory: workingDirectory);
+      final RunResult parseResult = await _processUtils!.run(
+        <String>['git', 'describe', '--tags', sha],
+        workingDirectory: workingDirectory,
+      );
       if (parseResult.exitCode == 0) {
-        buffer.writeln('Channel "${getNameForChannel(channel)}" was previously on: ${parseResult.stdout}.');
+        if (buffer.isEmpty) {
+          buffer.writeln();
+        }
+        buffer.writeln();
+        buffer.writeln(
+          'Channel "${getNameForChannel(channel)}" was previously on: '
+          '${parseResult.stdout}.'
+        );
       }
     }
     return buffer.toString();

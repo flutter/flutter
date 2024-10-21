@@ -4,12 +4,13 @@
 
 // Shared logic between iOS and macOS implementations of native assets.
 
+import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:native_assets_cli/native_assets_cli_internal.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../base/io.dart';
-import '../../../build_info.dart';
+import '../../../build_info.dart' as build_info;
 import '../../../convert.dart';
 import '../../../globals.dart' as globals;
 
@@ -64,14 +65,14 @@ Future<void> createInfoPlist(
 /// The dylibs must have different architectures. E.g. a dylib targeting
 /// arm64 ios simulator cannot be combined with a dylib targeting arm64
 /// ios device or macos arm64.
-Future<void> lipoDylibs(File target, List<Uri> sources) async {
+Future<void> lipoDylibs(File target, List<File> sources) async {
   final ProcessResult lipoResult = await globals.processManager.run(
     <String>[
       'lipo',
       '-create',
       '-output',
       target.path,
-      for (final Uri source in sources) source.toFilePath(),
+      for (final File source in sources) source.path,
     ],
   );
   if (lipoResult.exitCode != 0) {
@@ -81,32 +82,69 @@ Future<void> lipoDylibs(File target, List<Uri> sources) async {
   globals.logger.printTrace(lipoResult.stderr as String);
 }
 
-/// Sets the install name in a dylib with a Mach-O format.
+/// Sets the install names in a dylib with a Mach-O format.
 ///
 /// On macOS and iOS, opening a dylib at runtime fails if the path inside the
 /// dylib itself does not correspond to the path that the file is at. Therefore,
 /// native assets copied into their final location also need their install name
 /// updated with the `install_name_tool`.
-Future<void> setInstallNameDylib(File dylibFile) async {
-  final String fileName = dylibFile.basename;
-  final ProcessResult installNameResult = await globals.processManager.run(
+///
+/// [oldToNewInstallNames] is a map from old to new install names, that should
+/// be applied to the dependencies of the dylib. Entries in this map for
+/// dependencies that are not present in the dylib are ignored. The install
+/// name of a dependencies needs to be updated if the location of the dependency
+/// has changed.
+Future<void> setInstallNamesDylib(
+  File dylibFile,
+  String newInstallName,
+  Map<String, String> oldToNewInstallNames,
+) async {
+  final ProcessResult setInstallNamesResult = await globals.processManager.run(
     <String>[
       'install_name_tool',
       '-id',
-      '@rpath/$fileName.framework/$fileName',
+      newInstallName,
+      for (final MapEntry<String, String> entry in oldToNewInstallNames
+          .entries) ...<String>['-change', entry.key, entry.value],
+      dylibFile.path,
+    ],
+  );
+  if (setInstallNamesResult.exitCode != 0) {
+    throwToolExit(
+      'Failed to change install names in $dylibFile:\n'
+      'id -> $newInstallName\n'
+      'dependencies -> $newInstallName\n'
+      '${setInstallNamesResult.stderr}',
+    );
+  }
+}
+
+Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
+  final ProcessResult installNameResult = await globals.processManager.run(
+    <String>[
+      'otool',
+      '-D',
       dylibFile.path,
     ],
   );
   if (installNameResult.exitCode != 0) {
     throwToolExit(
-      'Failed to change the install name of $dylibFile:\n${installNameResult.stderr}',
+      'Failed to get the install name of $dylibFile:\n${installNameResult.stderr}',
     );
   }
+
+  return <String>{
+    for (final List<String> architectureSection
+        in parseOtoolArchitectureSections(installNameResult.stdout as String).values)
+      // For each architecture, a separate install name is reported, which are
+      // not necessarily the same.
+      architectureSection.single,
+  };
 }
 
 Future<void> codesignDylib(
   String? codesignIdentity,
-  BuildMode buildMode,
+  build_info.BuildMode buildMode,
   FileSystemEntity target,
 ) async {
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
@@ -117,7 +155,7 @@ Future<void> codesignDylib(
     '--force',
     '--sign',
     codesignIdentity,
-    if (buildMode != BuildMode.release) ...<String>[
+    if (buildMode != build_info.BuildMode.release) ...<String>[
       // Mimic Xcode's timestamp codesigning behavior on non-release binaries.
       '--timestamp=none',
     ],
@@ -205,4 +243,54 @@ Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
   }
   alreadyTakenNames.add(fileName);
   return Uri(path: '$fileName.framework/$fileName');
+}
+
+Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
+  // The output of `otool -D`, for example, looks like below. For each
+  // architecture, there is a separate section.
+  //
+  // /build/native_assets/ios/buz.framework/buz (architecture x86_64):
+  // @rpath/libbuz.dylib
+  // /build/native_assets/ios/buz.framework/buz (architecture arm64):
+  // @rpath/libbuz.dylib
+  //
+  // Some versions of `otool` don't print the architecture name if the
+  // binary only has one architecture:
+  //
+  // /build/native_assets/ios/buz.framework/buz:
+  // @rpath/libbuz.dylib
+
+  const Map<String, Architecture> outputArchitectures = <String, Architecture>{
+    'arm': Architecture.arm,
+    'arm64': Architecture.arm64,
+    'x86_64': Architecture.x64,
+  };
+  final RegExp architectureHeaderPattern = RegExp(r'^[^(]+( \(architecture (.+)\))?:$');
+  final Iterator<String> lines = output.trim().split('\n').iterator;
+  Architecture? currentArchitecture;
+  final Map<Architecture?, List<String>> architectureSections =
+      <Architecture?, List<String>>{};
+
+  while (lines.moveNext()) {
+    final String line = lines.current;
+    final Match? architectureHeader = architectureHeaderPattern.firstMatch(line);
+    if (architectureHeader != null) {
+      if (architectureSections.containsKey(null)) {
+        throwToolExit('Expected a single architecture section in otool output: $output');
+      }
+      final String? architectureString = architectureHeader.group(2);
+      if (architectureString != null) {
+        currentArchitecture = outputArchitectures[architectureString];
+        if (currentArchitecture == null) {
+          throwToolExit('Unknown architecture in otool output: $architectureString');
+        }
+      }
+      architectureSections[currentArchitecture] = <String>[];
+      continue;
+    } else {
+      architectureSections[currentArchitecture]!.add(line.trim());
+    }
+  }
+
+  return architectureSections;
 }

@@ -150,6 +150,7 @@ void main() {
           SemanticsFlag.isEnabled,
           SemanticsFlag.isFocusable,
           SemanticsFlag.isChecked,
+          if (isApple) SemanticsFlag.hasSelectedState,
           if (isApple) SemanticsFlag.isSelected,
         ],
         actions: <SemanticsAction>[
@@ -718,7 +719,11 @@ void main() {
   testWidgets('Radio is focusable and has correct focus colors', (WidgetTester tester) async {
     const Color activeInnerColor = Color(0xffffffff);
     const Color activeOuterColor = Color(0xff007aff);
-    const Color defaultFocusColor = Color(0xcc6eadf2);
+    final Color defaultFocusColor = HSLColor
+      .fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
+      .withLightness(kCupertinoFocusColorBrightness)
+      .withSaturation(kCupertinoFocusColorSaturation)
+      .toColor();
     const double innerRadius = 2.975;
     const double outerRadius = 7.0;
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -819,7 +824,7 @@ void main() {
           value: 1,
           groupValue: 1,
           onChanged: (int? i) { },
-          mouseCursor: const RadioMouseCursor(),
+          mouseCursor: const _RadioMouseCursor(),
           focusNode: focusNode
         ),
       ),
@@ -854,7 +859,7 @@ void main() {
           value: 1,
           groupValue: 1,
           onChanged: null,
-          mouseCursor: RadioMouseCursor(),
+          mouseCursor: _RadioMouseCursor(),
         ),
       ),
     ));
@@ -892,8 +897,8 @@ void main() {
   });
 }
 
-class RadioMouseCursor extends WidgetStateMouseCursor {
-  const RadioMouseCursor();
+class _RadioMouseCursor extends WidgetStateMouseCursor {
+  const _RadioMouseCursor();
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
@@ -907,5 +912,5 @@ class RadioMouseCursor extends WidgetStateMouseCursor {
   }
 
   @override
-  String get debugDescription => 'RadioMouseCursor()';
+  String get debugDescription => '_RadioMouseCursor()';
 }

@@ -26,6 +26,17 @@ class IconData {
   /// Rarely used directly. Instead, consider using one of the predefined icons
   /// like the [Icons] collection.
   ///
+  /// The [fontFamily] argument is normally required when using custom icons.
+  ///
+  /// e.g. When using a [codePoint] from a `CustomIcons` font
+  /// ```yaml
+  /// fonts:
+  ///   - family: CustomIcons
+  ///     fonts:
+  ///       - asset: assets/fonts/CustomIcons.ttf
+  /// ```
+  /// `IconData` usages should specify `fontFamily: 'CustomIcons'`.
+  ///
   /// The [fontPackage] argument must be non-null when using a font family that
   /// is included in a package. This is used when selecting the font.
   ///

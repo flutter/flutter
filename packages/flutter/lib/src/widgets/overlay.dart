@@ -1307,6 +1307,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
   @override
   bool get sizedByParent => false;
 
+  bool _layingOutSizeDeterminingChild = false;
   @override
   void performLayout() {
     RenderBox? sizeDeterminingChild;
@@ -1314,7 +1315,9 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
       size = constraints.biggest;
     } else {
       sizeDeterminingChild = _findSizeDeterminingChild();
+      _layingOutSizeDeterminingChild = true;
       layoutChild(sizeDeterminingChild, constraints);
+      _layingOutSizeDeterminingChild = false;
       size = sizeDeterminingChild.size;
     }
 
@@ -2302,7 +2305,17 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
       assert(false, '$this is not attached to parent');
       return;
     }
-    super.layout(BoxConstraints.tight(theater.constraints.biggest));
+    if (theater._layingOutSizeDeterminingChild) {
+      theater.invokeLayoutCallback((BoxConstraints constraints) { markNeedsLayout(); });
+    } else {
+      final BoxConstraints theaterConstraints = theater.constraints;
+      final Size boxSize = theaterConstraints.biggest.isFinite
+        ? theaterConstraints.biggest
+        // Accessing the theater's size is only unsafe if it is laying out the
+        // size-determining child.
+        : theater.size;
+      super.layout(BoxConstraints.tight(boxSize));
+    }
   }
 
   bool _theaterDoingThisLayout = false;

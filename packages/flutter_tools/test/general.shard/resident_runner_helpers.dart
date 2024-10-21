@@ -138,13 +138,6 @@ const FakeVmServiceRequest evictShader = FakeVmServiceRequest(
   }
 );
 
-const DartDevelopmentServiceInstance fakeDartDevelopmentServiceInstance = (
-  process: null,
-  serviceUri: null,
-  devToolsUri: null,
-  dtdUri: null,
-);
-
 final Uri testUri = Uri.parse('foo://bar');
 
 class FakeDartDevelopmentService extends Fake with DartDevelopmentServiceLocalOperationsMixin implements DartDevelopmentService {
@@ -164,6 +157,11 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
   @override
   final String message;
   static const String defaultMessage = 'A DDS instance is already connected at http://localhost:8181';
+
+  @override
+  Map<String, Object?> toJson() {
+    throw UnimplementedError();
+  }
 }
 
 class TestFlutterDevice extends FlutterDevice {
@@ -230,7 +228,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Future<void> stopEchoingDeviceLog() async { }
 
   @override
-  Future<void> initLogReader() async { }
+  Future<void> tryInitLogReader() async { }
 
   @override
   Future<Uri> setupDevFS(String fsName, Directory rootDirectory) async {

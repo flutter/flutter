@@ -130,6 +130,7 @@ class CarouselView extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     this.onTap,
+    this.enableSplash = true,
     required double this.itemExtent,
     required this.children,
   }) : consumeMaxWeight = true,
@@ -190,6 +191,7 @@ class CarouselView extends StatefulWidget {
     this.reverse = false,
     this.consumeMaxWeight = true,
     this.onTap,
+    this.enableSplash = true,
     required List<int> this.flexWeights,
     required this.children,
   }) : itemExtent = null;
@@ -289,6 +291,16 @@ class CarouselView extends StatefulWidget {
 
   /// Called when one of the [children] is tapped.
   final ValueChanged<int>? onTap;
+
+  /// Determines whether an [InkWell] will cover each Carousel item.
+  ///
+  /// If true, tapping an item will create an ink splash
+  /// as defined by the [ThemeData.splashFactory].
+  ///
+  /// Setting this to false allows the [children] to respond to user gestures.
+  ///
+  /// Defaults to true.
+  final bool enableSplash;
 
   /// The extent the children are forced to have in the main axis.
   ///
@@ -401,6 +413,28 @@ class _CarouselViewState extends State<CarouselView> {
         return null;
       });
 
+    Widget contents = widget.children[index];
+    if (widget.enableSplash) {
+      contents = Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          contents,
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => widget.onTap?.call(index),
+              overlayColor: effectiveOverlayColor,
+            ),
+          ),
+        ],
+      );
+    } else if (widget.onTap != null) {
+      contents = GestureDetector(
+        onTap: () => widget.onTap!(index),
+        child: contents,
+      );
+    }
+
     return Padding(
       padding: effectivePadding,
       child: Material(
@@ -408,21 +442,7 @@ class _CarouselViewState extends State<CarouselView> {
         color: effectiveBackgroundColor,
         elevation: effectiveElevation,
         shape: effectiveShape,
-        child: Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            widget.children[index],
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  widget.onTap?.call(index);
-                },
-                overlayColor: effectiveOverlayColor,
-              ),
-            ),
-          ],
-        ),
+        child: contents,
       ),
     );
   }
@@ -529,7 +549,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFixedExtentCarousel renderObject) {
     renderObject.maxExtent = itemExtent;
-    renderObject.minExtent = itemExtent;
+    renderObject.minExtent = minExtent;
   }
 }
 
@@ -626,8 +646,8 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     if (index == firstVisibleIndex) {
       final double firstVisibleItemExtent = _buildItemExtent(index, _currentLayoutDimensions);
 
-      // If the first item is collapsed to be less than `effectievMinExtent`,
-      // then it should stop changinng its size and should start to scroll off screen.
+      // If the first item is collapsed to be less than `effectiveMinExtent`,
+      // then it should stop changing its size and should start to scroll off screen.
       if (firstVisibleItemExtent <= effectiveMinExtent) {
         return maxExtent * index - effectiveMinExtent + maxExtent;
       }

@@ -862,6 +862,7 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
       // No state to change.
       return;
     }
+
     setState(() {
       node._expanded = !node._expanded;
       if (widget.onNodeToggle != null) {
@@ -870,6 +871,15 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
       if (_currentAnimationForParent[node] != null) {
         // Dispose of the old animation if this node was already animating.
         _currentAnimationForParent[node]!.animation.dispose();
+      }
+
+      // If animation is disabled or the duration is zero, we skip the animation
+      // and immediately update the active nodes. This prevents the app from freezing
+      // due to the tree being incorrectly updated when the animation duration is zero.
+      // This is because, in this case, the node's children are no longer active.
+      if (widget.toggleAnimationStyle == AnimationStyle.noAnimation || widget.toggleAnimationStyle?.duration == Duration.zero) {
+        _unpackActiveNodes();
+        return;
       }
 
       final AnimationController controller = _currentAnimationForParent[node]?.controller
@@ -886,6 +896,12 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
               _currentAnimationForParent[node]!.controller.dispose();
               _currentAnimationForParent.remove(node);
               _updateActiveAnimations();
+              // If the node is collapsing, we need to unpack the active
+              // nodes to remove the ones that were removed from the tree.
+              // This is only necessary if the node is collapsing.
+              if (!node._expanded) {
+                _unpackActiveNodes();
+              }
             case AnimationStatus.forward:
             case AnimationStatus.reverse:
           }
@@ -922,9 +938,7 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
           controller.forward();
         case false:
           // Collapsing
-          controller.reverse().then((_) {
-            _unpackActiveNodes();
-          });
+          controller.reverse();
       }
     });
   }

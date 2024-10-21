@@ -14,6 +14,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.Task
+import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.LogLevel
@@ -42,7 +43,7 @@ import org.gradle.internal.os.OperatingSystem
 class FlutterExtension {
 
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    public final int compileSdkVersion = 34
+    public final int compileSdkVersion = 35
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     public  final int minSdkVersion = 21
@@ -53,14 +54,14 @@ class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    public final int targetSdkVersion = 34
+    public final int targetSdkVersion = 35
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    public final String ndkVersion = "23.1.7779620"
+    public final String ndkVersion = "26.1.10909125"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
@@ -340,7 +341,7 @@ class FlutterPlugin implements Plugin<Project> {
                         "dependency_version_checker.gradle.kts")
                 project.apply from: dependencyCheckerPluginPath
             } catch (Exception e) {
-                if (!project.usesUnsupportedDependencyVersions) {
+                if (!project.hasProperty("usesUnsupportedDependencyVersions") || !project.usesUnsupportedDependencyVersions) {
                     // Possible bug in dependency checking code - warn and do not block build.
                     project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
                             "AGP, and KGP versions. Skipping dependency version checking. Error was: "
@@ -381,7 +382,7 @@ class FlutterPlugin implements Plugin<Project> {
                     shrinkResources(isBuiltAsApp(project))
                     // Fallback to `android/app/proguard-rules.pro`.
                     // This way, custom Proguard rules can be configured as needed.
-                    proguardFiles(project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro")
+                    proguardFiles(project.android.getDefaultProguardFile("proguard-android-optimize.txt"), flutterProguardRules, "proguard-rules.pro")
                 }
             }
         }
@@ -637,11 +638,6 @@ class FlutterPlugin implements Plugin<Project> {
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
         List<String> platforms = getTargetPlatforms().collect()
-        // Debug mode includes x86 and x64, which are commonly used in emulators.
-        if (flutterBuildMode == "debug" && !useLocalEngine()) {
-            platforms.add("android-x86")
-            platforms.add("android-x64")
-        }
         platforms.each { platform ->
             String arch = PLATFORM_ARCH_MAP[platform].replace("-", "_")
             // Add the `libflutter.so` dependency.
@@ -765,6 +761,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (pluginProject == null) {
             return
         }
+        // Apply the "flutter" Gradle extension to plugins so that they can use it's vended
+        // compile/target/min sdk values.
+        pluginProject.extensions.create("flutter", FlutterExtension)
         // Add plugin dependency to the app project.
         project.dependencies {
             api(pluginProject)
@@ -888,7 +887,7 @@ class FlutterPlugin implements Plugin<Project> {
                         if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
                             project.logger.error("Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugin(s) require to be compiled against a higher Android SDK version:")
                             for (Tuple2<String, String> pluginToCompileSdkVersion : pluginsWithHigherSdkVersion) {
-                                project.logger.error("- ${pluginToCompileSdkVersion.first} compiles against Android SDK ${pluginToCompileSdkVersion.second}")
+                                project.logger.error("- ${pluginToCompileSdkVersion.v1} compiles against Android SDK ${pluginToCompileSdkVersion.v2}")
                             }
                             project.logger.error("""\
                                 Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
@@ -903,7 +902,7 @@ class FlutterPlugin implements Plugin<Project> {
                         if (maxPluginNdkVersion != projectNdkVersion) {
                             project.logger.error("Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:")
                             for (Tuple2<String, String> pluginToNdkVersion : pluginsWithDifferentNdkVersion) {
-                                project.logger.error("- ${pluginToNdkVersion.first} requires Android NDK ${pluginToNdkVersion.second}")
+                                project.logger.error("- ${pluginToNdkVersion.v1} requires Android NDK ${pluginToNdkVersion.v2}")
                             }
                             project.logger.error("""\
                                 Fix this issue by using the highest Android NDK version (they are backward compatible).
@@ -1361,24 +1360,21 @@ class FlutterPlugin implements Plugin<Project> {
             // The following tasks use the output of copyFlutterAssetsTask,
             // so it's necessary to declare it as an dependency since Gradle 8.
             // See https://docs.gradle.org/8.1/userguide/validation_problems.html#implicit_dependency.
-            def compressAssetsTask = project.tasks.findByName("compress${variant.name.capitalize()}Assets")
-            if (compressAssetsTask) {
-                compressAssetsTask.dependsOn(copyFlutterAssetsTask)
+            def tasksToCheck = [
+                    "compress${variant.name.capitalize()}Assets",
+                    "bundle${variant.name.capitalize()}Aar",
+                    "bundle${variant.name.capitalize()}LocalLintAar"
+            ]
+            tasksToCheck.each { taskTocheck ->
+                try {
+                    project.tasks.named(taskTocheck).configure { task ->
+                        task.dependsOn(copyFlutterAssetsTask)
+                    }
+                } catch (UnknownTaskException ignored) {
+                }
             }
-
-            def bundleAarTask = project.tasks.findByName("bundle${variant.name.capitalize()}Aar")
-            if (bundleAarTask) {
-                bundleAarTask.dependsOn(copyFlutterAssetsTask)
-            }
-
-            def bundleAarTaskWithLint = project.tasks.findByName("bundle${variant.name.capitalize()}LocalLintAar")
-            if (bundleAarTaskWithLint) {
-                bundleAarTaskWithLint.dependsOn(copyFlutterAssetsTask)
-            }
-
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
-
         if (isFlutterAppProject()) {
             project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)
@@ -1420,17 +1416,20 @@ class FlutterPlugin implements Plugin<Project> {
                         filename += "-${buildModeFor(variant.buildType)}"
                         project.copy {
                             from new File("$outputDirectoryStr/${output.outputFileName}")
-                            into new File("${project.buildDir}/outputs/flutter-apk")
+                            into new File("${project.layout.buildDirectory.dir("outputs/flutter-apk").get()}")
                             rename {
                                 return "${filename}.apk"
                             }
                         }
                     }
                 }
-                // Copy the native assets created by build.dart and placed here by flutter assemble.
-                String nativeAssetsDir = "${project.buildDir}/../native_assets/android/jniLibs/lib/"
-                project.android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             }
+            // Copy the native assets created by build.dart and placed here by flutter assemble.
+            // This path is not flavor specific and must only be added once.
+            // If support for flavors is added to native assets, then they must only be added
+            // once per flavor; see https://github.com/dart-lang/native/issues/1359.
+            String nativeAssetsDir = "${project.buildDir}/../native_assets/android/jniLibs/lib/"
+            project.android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             configurePlugins(project)
             detectLowCompileSdkVersionOrNdkVersion()
             return

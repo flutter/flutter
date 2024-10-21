@@ -9,8 +9,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_utils.dart';
 
 void main() {
-  testWidgets('action chip can run', (WidgetTester tester) async {
+  testWidgets('expansion tile can run', (WidgetTester tester) async {
     await pumpsUseCase(tester, ExpansionTileUseCase());
     expect(find.byType(ExpansionTile), findsExactly(3));
+  });
+
+  testWidgets('exapansion tile has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, ExpansionTileUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('ExpansionTile Demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
   });
 }
