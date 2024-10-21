@@ -27,6 +27,9 @@ const String kCoreProcessPattern = r'Topaz\s+OFD\\Warsaw\\core\.exe';
 
 /// Validator for supported Windows host machine operating system version.
 class WindowsVersionValidator extends DoctorValidator {
+  // See https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information
+  static const int _lowestWindows11BuildNumber = 22000;
+
   const WindowsVersionValidator({
     required OperatingSystemUtils operatingSystemUtils,
     required ProcessLister processLister,
@@ -93,7 +96,7 @@ class WindowsVersionValidator extends DoctorValidator {
       final WindowsVersionExtractionResult details = await _versionExtractor.getDetails();
       String? caption = details.caption;
       if (caption == null || caption.isEmpty) {
-        final bool isWindows11 = int.parse(matches.elementAt(0).group(3)!) > 20000;
+        final bool isWindows11 = int.parse(matches.elementAt(0).group(3)!) > _lowestWindows11BuildNumber;
         if (isWindows11) {
           caption = 'Windows 11 or higher';
         } else {
@@ -154,6 +157,11 @@ class ProcessLister {
   }
 }
 
+/// This helper class takes the Windows edition and processor architecture from the Windows management interface (WMI)
+/// with the wmic command. The Windows ReleaseId and DisplayVersion are taken from the registry key
+/// HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion via the reg command. The extracted data are caption (consists of
+/// the edition and the processor architecture), releaseId and displayVersion and are returned via the
+/// [WindowsVersionExtractionResult] class.
 class WindowsVersionExtractor {
   WindowsVersionExtractor({
     required ProcessManager processManager,
@@ -212,6 +220,8 @@ class WindowsVersionExtractor {
   }
 }
 
+/// The result of the Windows version extraction. Typically values would be for [caption] e.g. "11 Pro 64-bit", for
+/// [releaseId] e.g. "2009" and for [displayVersion] e.g. "22H2". All values could be null when the extraction fails.
 final class WindowsVersionExtractionResult {
   WindowsVersionExtractionResult({
     required this.caption,
