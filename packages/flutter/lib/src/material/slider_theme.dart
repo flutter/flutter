@@ -296,6 +296,7 @@ class SliderThemeData with Diagnosticable {
     this.thumbSelector,
     this.mouseCursor,
     this.allowedInteraction,
+    this.padding,
   });
 
   /// Generates a SliderThemeData from three main colors.
@@ -588,6 +589,14 @@ class SliderThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Slider.allowedInteraction].
   final SliderInteraction? allowedInteraction;
 
+  /// Determines the padding around the [Slider].
+  ///
+  /// If specified, this padding overrides the default vertical padding of
+  /// the [Slider], which is equal to the height of the [overlayShape], and
+  /// the horizontal padding, which is equal to the width of the [thumbShape]
+  /// or [overlayShape], whichever is larger.
+  final EdgeInsetsGeometry? padding;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SliderThemeData copyWith({
@@ -623,6 +632,7 @@ class SliderThemeData with Diagnosticable {
     RangeThumbSelector? thumbSelector,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     SliderInteraction? allowedInteraction,
+    EdgeInsetsGeometry? padding,
   }) {
     return SliderThemeData(
       trackHeight: trackHeight ?? this.trackHeight,
@@ -657,6 +667,7 @@ class SliderThemeData with Diagnosticable {
       thumbSelector: thumbSelector ?? this.thumbSelector,
       mouseCursor: mouseCursor ?? this.mouseCursor,
       allowedInteraction: allowedInteraction ?? this.allowedInteraction,
+      padding: padding ?? this.padding,
     );
   }
 
@@ -700,6 +711,7 @@ class SliderThemeData with Diagnosticable {
       thumbSelector: t < 0.5 ? a.thumbSelector : b.thumbSelector,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
       allowedInteraction: t < 0.5 ? a.allowedInteraction : b.allowedInteraction,
+      padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
     );
   }
 
@@ -737,6 +749,7 @@ class SliderThemeData with Diagnosticable {
       thumbSelector,
       mouseCursor,
       allowedInteraction,
+      padding,
     ),
   );
 
@@ -780,7 +793,8 @@ class SliderThemeData with Diagnosticable {
         && other.minThumbSeparation == minThumbSeparation
         && other.thumbSelector == thumbSelector
         && other.mouseCursor == mouseCursor
-        && other.allowedInteraction == allowedInteraction;
+        && other.allowedInteraction == allowedInteraction
+        && other.padding == padding;
   }
 
   @override
@@ -819,6 +833,7 @@ class SliderThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<RangeThumbSelector>('thumbSelector', thumbSelector, defaultValue: defaultData.thumbSelector));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: defaultData.mouseCursor));
     properties.add(EnumProperty<SliderInteraction>('allowedInteraction', allowedInteraction, defaultValue: defaultData.allowedInteraction));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultData.padding));
   }
 }
 
@@ -1528,16 +1543,20 @@ mixin BaseSliderTrackShape {
     required SliderThemeData sliderTheme,
     bool isEnabled = false,
     bool isDiscrete = false,
+    TextDirection textDirection = TextDirection.ltr,
   }) {
     final double thumbWidth = sliderTheme.thumbShape!.getPreferredSize(isEnabled, isDiscrete).width;
     final double overlayWidth = sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
+    final double? leftPadding = sliderTheme.padding?.resolve(textDirection).left;
+    final double? rightPadding = sliderTheme.padding?.resolve(textDirection).right;
     final double trackHeight = sliderTheme.trackHeight!;
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
 
-    final double trackLeft = offset.dx + math.max(overlayWidth / 2, thumbWidth / 2);
+    final double trackLeft = offset.dx + (leftPadding ?? math.max(overlayWidth / 2, thumbWidth / 2));
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackRight = trackLeft + parentBox.size.width - math.max(thumbWidth, overlayWidth);
+    final double trackRight = trackLeft + (parentBox.size.width - (leftPadding ?? 0))
+      - (rightPadding ?? math.max(thumbWidth, overlayWidth));
     final double trackBottom = trackTop + trackHeight;
     // If the parentBox's size less than slider's size the trackRight will be less than trackLeft, so switch them.
     return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
@@ -1619,6 +1638,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       sliderTheme: sliderTheme,
       isEnabled: isEnabled,
       isDiscrete: isDiscrete,
+      textDirection: textDirection,
     );
 
     final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, thumbCenter.dx, trackRect.bottom);
@@ -1721,6 +1741,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       sliderTheme: sliderTheme,
       isEnabled: isEnabled,
       isDiscrete: isDiscrete,
+      textDirection: textDirection,
     );
     final Radius trackRadius = Radius.circular(trackRect.height / 2);
     final Radius activeTrackRadius = Radius.circular((trackRect.height + additionalActiveTrackHeight) / 2);

@@ -1145,8 +1145,14 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // centered on the track.
   double get _maxSliderPartWidth => _sliderPartSizes.map((Size size) => size.width).reduce(math.max);
   double get _maxSliderPartHeight => _sliderPartSizes.map((Size size) => size.height).reduce(math.max);
+  double get _thumbSizeHeight => _sliderTheme.thumbShape!.getPreferredSize(isInteractive, isDiscrete).height;
+  double get _overlayHeight => _sliderTheme.overlayShape!.getPreferredSize(isInteractive, isDiscrete).height;
+  double get _verticalPadding => _sliderTheme.padding?.vertical ?? (_overlayHeight - _thumbSizeHeight);
   List<Size> get _sliderPartSizes => <Size>[
-    _sliderTheme.overlayShape!.getPreferredSize(isInteractive, isDiscrete),
+    Size(
+      _sliderTheme.overlayShape!.getPreferredSize(isInteractive, isDiscrete).width,
+      _thumbSizeHeight + _verticalPadding,
+    ),
     _sliderTheme.thumbShape!.getPreferredSize(isInteractive, isDiscrete),
     _sliderTheme.tickMarkShape!.getPreferredSize(isEnabled: isInteractive, sliderTheme: sliderTheme),
   ];
