@@ -241,7 +241,7 @@ bool _isTransitionable(BuildContext context) {
 /// layout in response to scrolling, this static version can reflect the same
 /// large (expanded) layout, or the small (collapsed) layout.
 ///
-/// The default navigation bar will display the collapsed version of the
+/// The default constructor will display the collapsed version of the
 /// [CupertinoSliverNavigationBar]. The [middle] widget will automatically be a
 /// title text from the current [CupertinoPageRoute] if none is provided and
 /// [automaticallyImplyMiddle] is true (true by default).
