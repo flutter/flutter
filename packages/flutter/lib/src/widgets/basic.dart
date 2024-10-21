@@ -535,7 +535,7 @@ class BackdropGroup extends InheritedWidget {
 ///           ),
 ///         ),
 ///       );
-///     },
+///     }),
 ///   );
 /// }
 /// ```
