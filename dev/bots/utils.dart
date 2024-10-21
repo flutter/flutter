@@ -606,7 +606,7 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   // We derive this from the toal number items in previous buckets and the number
   // of items in this bucket.
   final int numberOfItemsInPreviousBuckets = subShardIndex == 0 ? 0 : buckets.sublist(0, subShardIndex - 1).sum;
-  final int start = (numberOfItemsInPreviousBuckets + 1) - 1;
+  final int start = numberOfItemsInPreviousBuckets;
   final int end = start + buckets[subShardIndex - 1];
 
   return (start, end);
