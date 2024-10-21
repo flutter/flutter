@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include <thread>
+#include <unordered_map>
 
 #include "fml/concurrent_message_loop.h"
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
+#include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
 #include "impeller/renderer/render_target.h"
 
@@ -30,6 +33,7 @@
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 #include "impeller/renderer/backend/vulkan/debug_report_vk.h"
+#include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
@@ -497,8 +501,22 @@ std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
     return nullptr;
   }
 
+  // look up a cached descriptor pool for the current frame and reuse it
+  // if it exists, otherwise create a new pool.
+  DescriptorPoolMap::iterator current_pool =
+      cached_descriptor_pool_.find(std::this_thread::get_id());
+  std::shared_ptr<DescriptorPoolVK> descriptor_pool;
+  if (current_pool == cached_descriptor_pool_.end()) {
+    descriptor_pool =
+        (cached_descriptor_pool_[std::this_thread::get_id()] =
+             std::make_shared<DescriptorPoolVK>(weak_from_this()));
+  } else {
+    descriptor_pool = current_pool->second;
+  }
+
   auto tracked_objects = std::make_shared<TrackedObjectsVK>(
-      weak_from_this(), std::move(tls_pool), GetGPUTracer()->CreateGPUProbe());
+      weak_from_this(), std::move(tls_pool), std::move(descriptor_pool),
+      GetGPUTracer()->CreateGPUProbe());
   auto queue = GetGraphicsQueue();
 
   if (!tracked_objects || !tracked_objects->IsValid() || !queue) {
@@ -517,10 +535,9 @@ std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
       tracked_objects->GetCommandBuffer());
 
   return std::shared_ptr<CommandBufferVK>(new CommandBufferVK(
-      shared_from_this(),          //
-      GetDeviceHolder(),           //
-      std::move(tracked_objects),  //
-      GetFenceWaiter()             //
+      shared_from_this(),         //
+      GetDeviceHolder(),          //
+      std::move(tracked_objects)  //
       ));
 }
 
@@ -651,6 +668,7 @@ void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
 }
 
 void ContextVK::DisposeThreadLocalCachedResources() {
+  cached_descriptor_pool_.erase(std::this_thread::get_id());
   command_pool_recycler_->Dispose();
 }
 

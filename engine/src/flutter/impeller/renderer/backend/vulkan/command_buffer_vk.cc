@@ -22,12 +22,10 @@ namespace impeller {
 CommandBufferVK::CommandBufferVK(
     std::weak_ptr<const Context> context,
     std::weak_ptr<const DeviceHolderVK> device_holder,
-    std::shared_ptr<TrackedObjectsVK> tracked_objects,
-    std::shared_ptr<FenceWaiterVK> fence_waiter)
+    std::shared_ptr<TrackedObjectsVK> tracked_objects)
     : CommandBuffer(std::move(context)),
       device_holder_(std::move(device_holder)),
-      tracked_objects_(std::move(tracked_objects)),
-      fence_waiter_(std::move(fence_waiter)) {}
+      tracked_objects_(std::move(tracked_objects)) {}
 
 CommandBufferVK::~CommandBufferVK() = default;
 
@@ -210,6 +208,10 @@ void CommandBufferVK::InsertDebugMarker(std::string_view label) const {
   if (auto command_buffer = GetCommandBuffer()) {
     command_buffer.insertDebugUtilsLabelEXT(label_info);
   }
+}
+
+DescriptorPoolVK& CommandBufferVK::GetDescriptorPool() const {
+  return tracked_objects_->GetDescriptorPool();
 }
 
 }  // namespace impeller
