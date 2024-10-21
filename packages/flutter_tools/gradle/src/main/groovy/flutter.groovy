@@ -445,9 +445,7 @@ class FlutterPlugin implements Plugin<Project> {
         }catch(UnknownTaskException ignored){
             configuration = "${variantName}Compile"
         }
-        finally {
-            project.dependencies.add(configuration, dependency, config)    
-        }
+        project.dependencies.add(configuration, dependency, config)
     }
 
     // Add a task that can be called on flutter projects that prints the Java version used in Gradle.
