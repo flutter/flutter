@@ -424,6 +424,7 @@ abstract class SemanticRole {
     addLiveRegion();
     addRouteName();
     addLabelAndValue(preferredRepresentation: preferredLabelRepresentation);
+    addSelectableBehavior();
   }
 
   /// Initializes a blank role for a [semanticsObject].
@@ -567,6 +568,16 @@ abstract class SemanticRole {
   /// Adds generic functionality for handling taps and clicks.
   void addTappable() {
     addSemanticBehavior(Tappable(semanticsObject, this));
+  }
+
+  /// Adds the [Selectable] behavior, if the node is selectable but not checkable.
+  void addSelectableBehavior() {
+    // Do not use the [Selectable] behavior on checkables. Checkables use
+    // special ARIA roles and `aria-checked`. Adding `aria-selected` in addition
+    // to `aria-checked` would be confusing.
+    if (semanticsObject.isSelectable && !semanticsObject.isCheckable) {
+      addSemanticBehavior(Selectable(semanticsObject, this));
+    }
   }
 
   /// Adds a semantic behavior to this role.
@@ -1778,9 +1789,34 @@ class SemanticsObject {
   /// "hamburger" menu, etc.
   bool get isTappable => hasAction(ui.SemanticsAction.tap);
 
+  /// If true, this node represents something that can be in a "checked" or
+  /// "toggled" state, such as checkboxes, radios, and switches.
+  ///
+  /// Because such widgets require the use of specific ARIA roles and HTML
+  /// elements, they are managed by the [SemanticCheckable] role, and they do
+  /// not use the [Selectable] behavior.
   bool get isCheckable =>
       hasFlag(ui.SemanticsFlag.hasCheckedState) ||
       hasFlag(ui.SemanticsFlag.hasToggledState);
+
+  /// If true, this node represents something that can be annotated as
+  /// "selected", such as a tab, or an item in a list.
+  ///
+  /// Selectability is managed by `aria-selected` and is compatible with
+  /// multiple ARIA roles (tabs, gridcells, options, rows, etc). It is therefore
+  /// mapped onto the [Selectable] behavior.
+  ///
+  /// [Selectable] and [SemanticCheckable] are not used together on the same
+  /// node. [SemanticCheckable] has precendence over [Selectable].
+  ///
+  /// See also:
+  ///
+  ///   * [isSelected], which indicates whether the node is currently selected.
+  bool get isSelectable => hasFlag(ui.SemanticsFlag.hasSelectedState);
+
+  /// If [isSelectable] is true, indicates whether the node is currently
+  /// selected.
+  bool get isSelected => hasFlag(ui.SemanticsFlag.isSelected);
 
   /// Role-specific adjustment of the vertical position of the child container.
   ///

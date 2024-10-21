@@ -15,6 +15,7 @@ class SemanticHeading extends SemanticRole {
     addLiveRegion();
     addRouteName();
     addLabelAndValue(preferredRepresentation: LabelRepresentation.domText);
+    addSelectableBehavior();
   }
 
   @override

@@ -32,6 +32,7 @@ class SemanticsTester {
     int flags = 0,
     bool? hasCheckedState,
     bool? isChecked,
+    bool? isSelectable,
     bool? isSelected,
     bool? isButton,
     bool? isLink,
@@ -121,6 +122,9 @@ class SemanticsTester {
     }
     if (isChecked ?? false) {
       flags |= ui.SemanticsFlag.isChecked.index;
+    }
+    if (isSelectable ?? false) {
+      flags |= ui.SemanticsFlag.hasSelectedState.index;
     }
     if (isSelected ?? false) {
       flags |= ui.SemanticsFlag.isSelected.index;
