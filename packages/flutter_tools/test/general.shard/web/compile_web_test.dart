@@ -107,7 +107,7 @@ void main() {
         label: 'web-compile',
             parameters: CustomDimensions(
               buildEventSettings:
-                  'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+                  'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
 
       ),
           ),
@@ -121,7 +121,7 @@ void main() {
         Event.flutterBuildInfo(
           label: 'web-compile',
           buildType: 'web',
-          settings: 'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+          settings: 'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
         ),
       ]),
     );
