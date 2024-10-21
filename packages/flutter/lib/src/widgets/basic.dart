@@ -502,10 +502,10 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///           child: Container(
 ///             color: Colors.black.withOpacity(0.2),
 ///             height: 200,
-///             child: Text('Blur item'),
+///             child: const Text('Blur item'),
 ///           ),
 ///         ),
-///       ),
+///       );
 ///     },
 ///   );
 /// }
