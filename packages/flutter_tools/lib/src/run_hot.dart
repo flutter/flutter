@@ -814,10 +814,13 @@ class HotRunner extends ResidentRunner {
         final List<FlutterView> views =
             viewsForDevice[device] ?? <FlutterView>[];
         for (final FlutterView view in views) {
-          await device.vmService?.flutterSendExtensionEvent(
-            isolateId: view.uiIsolate!.id!,
-            eventKind: 'Flutter.HotReload',
-          );
+          final String? isolateId = view.uiIsolate?.id;
+          if (isolateId != null) {
+            await device.vmService?.flutterSendExtensionEvent(
+              isolateId: isolateId,
+              eventKind: 'Flutter.HotReload',
+            );
+          }
         }
       }
     }
