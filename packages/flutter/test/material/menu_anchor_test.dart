@@ -4650,9 +4650,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/155034.
-  testWidgets('Content is shown in the root overlay',
-  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
-  (WidgetTester tester) async {
+  testWidgets('Content is shown in the root overlay', (WidgetTester tester) async {
     final MenuController controller = MenuController();
     final UniqueKey overlayKey = UniqueKey();
     final UniqueKey menuItemKey = UniqueKey();
