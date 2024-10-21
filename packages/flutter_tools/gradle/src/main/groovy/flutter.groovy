@@ -14,6 +14,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.Task
+import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.LogLevel
@@ -1359,24 +1360,21 @@ class FlutterPlugin implements Plugin<Project> {
             // The following tasks use the output of copyFlutterAssetsTask,
             // so it's necessary to declare it as an dependency since Gradle 8.
             // See https://docs.gradle.org/8.1/userguide/validation_problems.html#implicit_dependency.
-            def compressAssetsTask = project.tasks.findByName("compress${variant.name.capitalize()}Assets")
-            if (compressAssetsTask) {
-                compressAssetsTask.dependsOn(copyFlutterAssetsTask)
+            def tasksToCheck = [
+                    "compress${variant.name.capitalize()}Assets",
+                    "bundle${variant.name.capitalize()}Aar",
+                    "bundle${variant.name.capitalize()}LocalLintAar"
+            ]
+            tasksToCheck.each { taskTocheck ->
+                try {
+                    project.tasks.named(taskTocheck).configure { task ->
+                        task.dependsOn(copyFlutterAssetsTask)
+                    }
+                } catch (UnknownTaskException ignored) {
+                }
             }
-
-            def bundleAarTask = project.tasks.findByName("bundle${variant.name.capitalize()}Aar")
-            if (bundleAarTask) {
-                bundleAarTask.dependsOn(copyFlutterAssetsTask)
-            }
-
-            def bundleAarTaskWithLint = project.tasks.findByName("bundle${variant.name.capitalize()}LocalLintAar")
-            if (bundleAarTaskWithLint) {
-                bundleAarTaskWithLint.dependsOn(copyFlutterAssetsTask)
-            }
-
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
-
         if (isFlutterAppProject()) {
             project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)
