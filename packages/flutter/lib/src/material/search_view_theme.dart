@@ -242,8 +242,8 @@ class SearchViewTheme extends InheritedTheme {
   /// SearchViewThemeData theme = SearchViewTheme.of(context);
   /// ```
   static SearchViewThemeData of(BuildContext context) {
-    final SearchViewTheme? searchViewTheme = context.dependOnInheritedWidgetOfExactType<SearchViewTheme>();
-    return searchViewTheme?.data ?? Theme.of(context).searchViewTheme;
+    return context.dependOnInheritedWidgetOfExactType<SearchViewTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.searchViewTheme);
   }
 
   @override

@@ -243,9 +243,17 @@ class ButtonBarThemeData with Diagnosticable {
 ///
 ///  * [ButtonBarThemeData], which describes the actual configuration of a button
 ///    bar theme.
+@Deprecated(
+  'Use OverflowBar instead. '
+  'This feature was deprecated after v3.21.0-10.0.pre.',
+)
 class ButtonBarTheme extends InheritedWidget {
   /// Constructs a button bar theme that configures all descendant [ButtonBar]
   /// widgets.
+  @Deprecated(
+    'Use OverflowBar instead. '
+    'This feature was deprecated after v3.21.0-10.0.pre.',
+  )
   const ButtonBarTheme({
     super.key,
     required this.data,

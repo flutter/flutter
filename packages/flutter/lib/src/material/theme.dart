@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:collection';
 /// @docImport 'app.dart';
 /// @docImport 'color_scheme.dart';
 /// @docImport 'text_theme.dart';
@@ -18,6 +19,8 @@ export 'theme_data.dart' show Brightness, ThemeData;
 
 /// The duration over which theme changes animate by default.
 const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
+
+final ThemeData _kFallbackTheme = ThemeData.fallback();
 
 /// Applies a theme to descendant widgets.
 ///
@@ -54,8 +57,6 @@ class Theme extends StatelessWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
-
-  static final ThemeData _kFallbackTheme = ThemeData.fallback();
 
   /// The data from the closest [Theme] instance that encloses the given
   /// context.
@@ -116,14 +117,49 @@ class Theme extends StatelessWidget {
   /// * [IconTheme.of], that returns [ThemeData.iconTheme] from the closest [Theme] or
   ///   [IconThemeData.fallback] if there is no [IconTheme] ancestor.
   static ThemeData of(BuildContext context) {
-    final _InheritedTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
+    final ThemeData? data = context.dependOnInheritedWidgetOfExactType<_InheritedThemeFilter>(
+      aspect: const ThemeSelector<ThemeData>.from(_selectAll),
+    )?.data;
+
+    return data ?? _fallback(context);
+  }
+  static ThemeData _selectAll(ThemeData theme) => theme;
+
+  static ThemeData _fallback(BuildContext context, [ThemeData? data]) {
     final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
     final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
     final InheritedCupertinoTheme? inheritedCupertinoTheme = context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
-    final ThemeData theme = inheritedTheme?.theme.data ?? (
+    final ThemeData theme = data ?? (
       inheritedCupertinoTheme != null ? CupertinoBasedMaterialThemeData(themeData: inheritedCupertinoTheme.theme.data).materialTheme : _kFallbackTheme
     );
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
+  }
+
+  /// {@template flutter.material.Theme.select}
+  /// Evaluates [ThemeSelector.select] using [ThemeData] provided by the
+  /// nearest ancestor [Theme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  /// {@endtemplate}
+  @optionalTypeArgs
+  static T select<T>(BuildContext context, T Function(ThemeData theme) select) {
+    final ThemeData? data = context.dependOnInheritedWidgetOfExactType<_InheritedThemeFilter>(
+      aspect: ThemeSelector<T>.from(select),
+    )?.data;
+
+    return select(data ?? _fallback(context));
+  }
+
+  /// Locates a [ThemeExtension] of the specified type using [data] provided
+  /// by the nearest ancestor [Theme] widget, and returns the result.
+  ///
+  /// Returns null if the extension was not found.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T? extension<T extends ThemeExtension<T>>(BuildContext context) {
+    return Theme.select(context, (ThemeData theme) => theme.extension<T>());
   }
 
   // The inherited themes in widgets library can not infer their values from
@@ -150,12 +186,14 @@ class Theme extends StatelessWidget {
   Widget build(BuildContext context) {
     return _InheritedTheme(
       theme: this,
-      child: CupertinoTheme(
-        // If a CupertinoThemeData doesn't exist, we're using a
-        // MaterialBasedCupertinoThemeData here instead of a CupertinoThemeData
-        // because it defers some properties to the Material ThemeData.
-        data: _inheritedCupertinoThemeData(context),
-        child: _wrapsWidgetThemes(context, child),
+      child: _ThemeFilter(
+        child: CupertinoTheme(
+          // If a CupertinoThemeData doesn't exist, we're using a
+          // MaterialBasedCupertinoThemeData here instead of a CupertinoThemeData
+          // because it defers some properties to the Material ThemeData.
+          data: _inheritedCupertinoThemeData(context),
+          child: _wrapsWidgetThemes(context, child),
+        ),
       ),
     );
   }
@@ -165,6 +203,94 @@ class Theme extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ThemeData>('data', data, showName: false));
   }
+}
+
+/// Stores instructions for how to obtain relevant information from [ThemeData].
+///
+/// {@tool snippet}
+/// A widget can be notified to rebuild only when the [Brightness] changes
+/// as follows:
+///
+/// ```dart
+/// class ThemeBrightness with ThemeSelector<Brightness> {
+///   const ThemeBrightness();
+///
+///   @override
+///   Brightness select(ThemeData theme) => theme.brightness;
+/// }
+///
+/// class MyWidget extends StatelessWidget {
+///   const MyWidget({super.key});
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     final Brightness brightness = const ThemeBrightness().resolve(context);
+///
+///     final IconData icon = switch (brightness) {
+///       Brightness.light => Icons.sunny,
+///       Brightness.dark => Icons.nightlight,
+///     };
+///
+///     return Icon(icon);
+///   }
+/// }
+/// ```
+/// {@end-tool}
+abstract mixin class ThemeSelector<T> {
+  /// Creates a [ThemeSelector] using the provided callback.
+  ///
+  /// Global functions can be used to make `const` theme selectors, and the
+  /// `static` keyword can be used to do the same inside a class declaration.
+  ///
+  /// Since [ColorScheme.of] is used frequently, it defines a `const` selector
+  /// so that each [InheritedFilter] aspect refers to the same instance.
+  const factory ThemeSelector.from(T Function(ThemeData theme) select) = _SelectFrom<T>;
+
+  /// Selects a value from the [ThemeData].
+  ///
+  /// Multiple values can be selected if [T] is a [Record] type.
+  T select(ThemeData theme);
+
+  /// {@macro flutter.material.Theme.select}
+  T resolve(BuildContext context) {
+    return select(
+      context.dependOnInheritedWidgetOfExactType<_InheritedThemeFilter>(aspect: this)?.data
+        ?? Theme._fallback(context),
+    );
+  }
+}
+
+class _SelectFrom<T> with ThemeSelector<T> {
+  const _SelectFrom(this._select);
+
+  final T Function(ThemeData theme) _select;
+
+  @override
+  T select(ThemeData theme) => _select(theme);
+}
+
+class _ThemeFilter extends StatelessWidget {
+  const _ThemeFilter({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final Theme theme = context.dependOnInheritedWidgetOfExactType<_InheritedTheme>()!.theme;
+    return _InheritedThemeFilter(
+      data: Theme._fallback(context, theme.data),
+      child: child,
+    );
+  }
+}
+
+class _InheritedThemeFilter extends InheritedFilter<ThemeSelector<Object?>> {
+  const _InheritedThemeFilter({required this.data, required super.child});
+
+  final ThemeData data;
+
+  @override
+  Object? select(ThemeSelector<Object?> selector) => selector.select(data);
 }
 
 class _InheritedTheme extends InheritedTheme {

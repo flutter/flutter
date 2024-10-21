@@ -243,8 +243,8 @@ class SearchBarTheme extends InheritedWidget {
   /// SearchBarThemeData theme = SearchBarTheme.of(context);
   /// ```
   static SearchBarThemeData of(BuildContext context) {
-    final SearchBarTheme? searchBarTheme = context.dependOnInheritedWidgetOfExactType<SearchBarTheme>();
-    return searchBarTheme?.data ?? Theme.of(context).searchBarTheme;
+    return context.dependOnInheritedWidgetOfExactType<SearchBarTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.searchBarTheme);
   }
 
   @override

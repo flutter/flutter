@@ -182,8 +182,8 @@ class TextSelectionTheme extends InheritedTheme {
   /// TextSelectionThemeData theme = TextSelectionTheme.of(context);
   /// ```
   static TextSelectionThemeData of(BuildContext context) {
-    final TextSelectionTheme? selectionTheme = context.dependOnInheritedWidgetOfExactType<TextSelectionTheme>();
-    return selectionTheme?.data ?? Theme.of(context).textSelectionTheme;
+    return context.dependOnInheritedWidgetOfExactType<TextSelectionTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.textSelectionTheme);
   }
 
   @override

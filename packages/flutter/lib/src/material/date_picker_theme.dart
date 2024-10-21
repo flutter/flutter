@@ -670,7 +670,8 @@ class DatePickerTheme extends InheritedTheme {
   ///  * [defaults], which will return the default properties used when no
   ///    other [DatePickerTheme] has been provided.
   static DatePickerThemeData of(BuildContext context) {
-    return maybeOf(context) ?? Theme.of(context).datePickerTheme;
+    return maybeOf(context)
+      ?? Theme.select(context, (ThemeData theme) => theme.datePickerTheme);
   }
 
   /// The data from the closest instance of this class that encloses the given

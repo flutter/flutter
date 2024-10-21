@@ -185,8 +185,8 @@ class BadgeTheme extends InheritedTheme {
   /// BadgeThemeData theme = BadgeTheme.of(context);
   /// ```
   static BadgeThemeData of(BuildContext context) {
-    final BadgeTheme? badgeTheme = context.dependOnInheritedWidgetOfExactType<BadgeTheme>();
-    return badgeTheme?.data ?? Theme.of(context).badgeTheme;
+    return context.dependOnInheritedWidgetOfExactType<BadgeTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.badgeTheme);
   }
 
   @override

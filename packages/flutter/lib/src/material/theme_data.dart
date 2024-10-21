@@ -945,7 +945,7 @@ class ThemeData with Diagnosticable {
 
   /// Used to obtain a particular [ThemeExtension] from [extensions].
   ///
-  /// Obtain with `Theme.of(context).extension<MyThemeExtension>()`.
+  /// Obtain with `Theme.extension<MyThemeExtension>(context)`.
   ///
   /// See [extensions] for an interactive example.
   T? extension<T>() => extensions[T] as T?;

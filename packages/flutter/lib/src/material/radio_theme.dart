@@ -195,8 +195,8 @@ class RadioTheme extends InheritedWidget {
   /// RadioThemeData theme = RadioTheme.of(context);
   /// ```
   static RadioThemeData of(BuildContext context) {
-    final RadioTheme? radioTheme = context.dependOnInheritedWidgetOfExactType<RadioTheme>();
-    return radioTheme?.data ?? Theme.of(context).radioTheme;
+    return context.dependOnInheritedWidgetOfExactType<RadioTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.radioTheme);
   }
 
   @override

@@ -114,8 +114,8 @@ class ElevatedButtonTheme extends InheritedTheme {
   /// ElevatedButtonThemeData theme = ElevatedButtonTheme.of(context);
   /// ```
   static ElevatedButtonThemeData of(BuildContext context) {
-    final ElevatedButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<ElevatedButtonTheme>();
-    return buttonTheme?.data ?? Theme.of(context).elevatedButtonTheme;
+    return context.dependOnInheritedWidgetOfExactType<ElevatedButtonTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.elevatedButtonTheme);
   }
 
   @override

@@ -266,8 +266,8 @@ class ScrollbarTheme extends InheritedTheme {
   /// ScrollbarThemeData theme = ScrollbarTheme.of(context);
   /// ```
   static ScrollbarThemeData of(BuildContext context) {
-    final ScrollbarTheme? scrollbarTheme = context.dependOnInheritedWidgetOfExactType<ScrollbarTheme>();
-    return scrollbarTheme?.data ?? Theme.of(context).scrollbarTheme;
+    return context.dependOnInheritedWidgetOfExactType<ScrollbarTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.scrollbarTheme);
   }
 
   @override
