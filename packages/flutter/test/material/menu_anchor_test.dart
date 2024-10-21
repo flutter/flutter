@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -4649,7 +4650,9 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/155034.
-  testWidgets('Content is shown in the root overlay', (WidgetTester tester) async {
+  testWidgets('Content is shown in the root overlay',
+  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
+  (WidgetTester tester) async {
     final MenuController controller = MenuController();
     final UniqueKey overlayKey = UniqueKey();
     final UniqueKey menuItemKey = UniqueKey();
@@ -4667,12 +4670,18 @@ void main() {
       return results;
     }
 
+    late final OverlayEntry overlayEntry;
+    addTearDown((){
+      overlayEntry.remove();
+      overlayEntry.dispose();
+    });
+
     Widget boilerplate() {
       return MaterialApp(
         home: Overlay(
           key: overlayKey,
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            overlayEntry = OverlayEntry(
               builder: (BuildContext context) {
                 return Scaffold(
                   body: Center(
