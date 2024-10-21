@@ -49,6 +49,7 @@ import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
 import io.flutter.embedding.engine.systemchannels.NavigationChannel;
+import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -1481,6 +1482,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(engine.getSettingsChannel()).thenReturn(fakeSettingsChannel);
     when(engine.getSystemChannel()).thenReturn(mock(SystemChannel.class));
     when(engine.getTextInputChannel()).thenReturn(mock(TextInputChannel.class));
+    when(engine.getScribeChannel()).thenReturn(mock(ScribeChannel.class));
 
     return engine;
   }

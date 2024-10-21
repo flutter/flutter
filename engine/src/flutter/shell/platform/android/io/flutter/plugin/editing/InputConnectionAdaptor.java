@@ -33,6 +33,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -51,6 +52,7 @@ public class InputConnectionAdaptor extends BaseInputConnection
 
   private final View mFlutterView;
   private final int mClient;
+  private final ScribeChannel scribeChannel;
   private final TextInputChannel textInputChannel;
   private final ListenableEditingState mEditable;
   private final EditorInfo mEditorInfo;
@@ -69,6 +71,7 @@ public class InputConnectionAdaptor extends BaseInputConnection
       View view,
       int client,
       TextInputChannel textInputChannel,
+      ScribeChannel scribeChannel,
       KeyboardDelegate keyboardDelegate,
       ListenableEditingState editable,
       EditorInfo editorInfo,
@@ -77,6 +80,7 @@ public class InputConnectionAdaptor extends BaseInputConnection
     mFlutterView = view;
     mClient = client;
     this.textInputChannel = textInputChannel;
+    this.scribeChannel = scribeChannel;
     mEditable = editable;
     mEditable.addEditingStateListener(this);
     mEditorInfo = editorInfo;
@@ -100,10 +104,19 @@ public class InputConnectionAdaptor extends BaseInputConnection
       View view,
       int client,
       TextInputChannel textInputChannel,
+      ScribeChannel scribeChannel,
       KeyboardDelegate keyboardDelegate,
       ListenableEditingState editable,
       EditorInfo editorInfo) {
-    this(view, client, textInputChannel, keyboardDelegate, editable, editorInfo, new FlutterJNI());
+    this(
+        view,
+        client,
+        textInputChannel,
+        scribeChannel,
+        keyboardDelegate,
+        editable,
+        editorInfo,
+        new FlutterJNI());
   }
 
   private ExtractedText getExtractedText(ExtractedTextRequest request) {
@@ -261,6 +274,10 @@ public class InputConnectionAdaptor extends BaseInputConnection
     endBatchEdit();
     return result;
   }
+
+  // TODO(justinmc): Scribe stylus gestures should be supported here via
+  // performHandwritingGesture.
+  // https://github.com/flutter/flutter/issues/156018
 
   // Sanitizes the index to ensure the index is within the range of the
   // contents of editable.

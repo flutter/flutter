@@ -56,6 +56,7 @@ import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
 import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
+import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -237,7 +238,11 @@ public class FlutterView extends SurfaceView
     PlatformViewsController platformViewsController =
         mNativeView.getPluginRegistry().getPlatformViewsController();
     mTextInputPlugin =
-        new TextInputPlugin(this, new TextInputChannel(dartExecutor), platformViewsController);
+        new TextInputPlugin(
+            this,
+            new TextInputChannel(dartExecutor),
+            new ScribeChannel(dartExecutor),
+            platformViewsController);
     mKeyboardManager = new KeyboardManager(this);
 
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
