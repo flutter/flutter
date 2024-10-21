@@ -535,7 +535,7 @@ Future<void> runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
 }
 /// Parse (one-)index/total-named subshards from environment variable SUBSHARD
 /// and equally distribute [tests] between them.
-/// Subshard format is "{index}_{total number of shards}".
+/// The format of SUBSHARD is "{index}_{total number of shards}".
 /// The scheduler can change the number of total shards without needing an additional
 /// commit in this repository.
 ///
