@@ -42,7 +42,7 @@ import 'media_query.dart';
 /// ```
 /// {@end-tool}
 ///
-/// ### MediaQuery impact
+/// ### [MediaQuery] impact
 ///
 /// The padding on the [MediaQuery] for the [child] will be suitably adjusted
 /// to zero out any sides that were avoided by this widget.
