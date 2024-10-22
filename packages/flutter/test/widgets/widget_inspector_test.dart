@@ -5544,6 +5544,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         node.toJsonMap(const DiagnosticsSerializationDelegate()),
         equals(<String, dynamic>{
           'description': 'description of the deep link',
+          'shouldIndent': true,
           'type': 'DevToolsDeepLinkProperty',
           'name': '',
           'style': 'singleLine',
