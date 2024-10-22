@@ -27,9 +27,6 @@ const String kCoreProcessPattern = r'Topaz\s+OFD\\Warsaw\\core\.exe';
 
 /// Validator for supported Windows host machine operating system version.
 class WindowsVersionValidator extends DoctorValidator {
-  // See https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information
-  static const int _lowestWindows11BuildNumber = 22000;
-
   const WindowsVersionValidator({
     required OperatingSystemUtils operatingSystemUtils,
     required ProcessLister processLister,
@@ -38,6 +35,9 @@ class WindowsVersionValidator extends DoctorValidator {
         _processLister = processLister,
         _versionExtractor = versionExtractor,
         super('Windows Version');
+
+  // See https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information
+  static const int _lowestWindows11BuildNumber = 22000;
 
   final OperatingSystemUtils _operatingSystemUtils;
   final ProcessLister _processLister;
