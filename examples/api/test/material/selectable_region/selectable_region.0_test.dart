@@ -20,8 +20,8 @@ void main() {
     await tester.sendKeyDownEvent(modifier);
     await tester.sendKeyDownEvent(key);
     await tester.sendKeyUpEvent(key);
-    await tester.pump();
     await tester.sendKeyUpEvent(modifier);
+    await tester.pump();
   }
 
   testWidgets('The icon can be selected with the text', (WidgetTester tester) async {
@@ -49,5 +49,5 @@ void main() {
     await sendKeyCombination(tester,LogicalKeyboardKey.keyC);
 
     expect(clipboard, 'SelectableRegion SampleSelect this iconCustom Text');
-    }, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.all());
 }
