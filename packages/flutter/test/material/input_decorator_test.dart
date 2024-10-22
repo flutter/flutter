@@ -4234,7 +4234,7 @@ void main() {
           );
 
           // 12 is the left padding.
-          // TODO(bleroux): consider changing this padding because from M3 soec this should be 16.
+          // TODO(bleroux): consider changing this padding because from M3 spec this should be 16.
           expect(getLabelRect(tester).left, 12.0);
           // TODO(bleroux): consider changing the input text position because, based on M3 spec,
           // the expected horizontal position is 52 (12 padding, 24 icon, 16 gap between icon and input).

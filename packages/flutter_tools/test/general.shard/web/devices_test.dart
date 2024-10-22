@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -30,6 +31,29 @@ void main() {
     );
 
     expect(await webDevices.pollingGetDevices(), isEmpty);
+  });
+
+  testWithoutContext('Successive calls of ChromiumDevice.stopApp() do not try to close chrome', () async {
+    final TestChromiumLauncher launcher = TestChromiumLauncher(
+      launcher: () => _OnceClosableChromium(),
+    );
+
+    final _FakeChromiumDevice chromiumDevice = _FakeChromiumDevice(
+      chromiumLauncher: launcher,
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+    );
+
+    await chromiumDevice.startApp(
+      null,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      platformArgs: <String, Object?>{
+        'uri': '/',
+      }
+    );
+
+    await chromiumDevice.stopApp(null);
+    await chromiumDevice.stopApp(null);
   });
 
   testWithoutContext('GoogleChromeDevice defaults', () async {
@@ -392,7 +416,11 @@ void main() {
 
 /// A test implementation of the [ChromiumLauncher] that launches a fixed instance.
 class TestChromiumLauncher implements ChromiumLauncher {
-  TestChromiumLauncher();
+  TestChromiumLauncher({Chromium Function()? launcher}) {
+    _launcher = launcher ?? () => _UnimplementedChromium();
+  }
+
+  late Chromium Function() _launcher;
 
   @override
   Completer<Chromium> currentCompleter = Completer<Chromium>();
@@ -422,6 +450,7 @@ class TestChromiumLauncher implements ChromiumLauncher {
     Directory? cacheDir,
     List<String> webBrowserFlags = const <String>[],
   }) async {
+    currentCompleter.complete(_launcher());
     return currentCompleter.future;
   }
 
@@ -430,3 +459,34 @@ class TestChromiumLauncher implements ChromiumLauncher {
     return currentCompleter.future;
   }
 }
+
+class _FakeChromiumDevice extends ChromiumDevice {
+  _FakeChromiumDevice(
+      {required ChromiumLauncher chromiumLauncher,
+      required super.fileSystem,
+      required super.logger})
+      : super(
+          name: 'fake name',
+          chromeLauncher: chromiumLauncher,
+        );
+
+  @override
+  Future<String> get sdkNameAndVersion async => 'fake sdkNameAndVersion';
+
+  @override
+  String get name => 'fake name';
+}
+
+class _OnceClosableChromium extends Fake implements Chromium {
+  bool _closed = false;
+
+  @override
+  Future<void> close() async {
+    if (_closed) {
+      throw Exception('Already closed');
+    }
+    _closed = true;
+  }
+}
+
+class _UnimplementedChromium extends Fake implements Chromium { }

@@ -456,7 +456,7 @@ end
           platform: globals.platform,
           usage: globals.flutterUsage,
           analytics: globals.analytics,
-          engineVersion: globals.artifacts!.isLocalEngine
+          engineVersion: globals.artifacts!.usesLocalArtifacts
               ? null
               : globals.flutterVersion.engineRevision,
           generateDartPluginRegistry: true,
