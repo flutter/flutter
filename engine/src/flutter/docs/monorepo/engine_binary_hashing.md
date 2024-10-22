@@ -61,7 +61,7 @@ git ls-tree -r HEAD engine DEPS | git hash-object --stdin
 When developing a pull request (PR), your branch might contain multiple commits. To enable A/B testing against the engine version at the time of branching, we can modify the hash calculation to use the merge-base. This ensures that the generated hash reflects the engine state at the branch point, facilitating accurate comparisons.
 
 ```bash
-git ls-tree -R $(git merge-base HEAD master) engine DEPS | git hash-object --stdin
+git ls-tree -r $(git merge-base HEAD master) engine DEPS | git hash-object --stdin
 ```
 
 ## Recommended Formula and Implementation
@@ -69,7 +69,7 @@ git ls-tree -R $(git merge-base HEAD master) engine DEPS | git hash-object --std
 For now, the recommended formula for calculating the engine hash is:
 
 ```bash
-git ls-tree -R $(git merge-base HEAD master) engine DEPS | git hash-object --stdin
+git ls-tree -r $(git merge-base HEAD master) engine DEPS | git hash-object --stdin
 ```
 
 To ensure backwards compatibility and allow for future updates, this formula should be implemented in both `.sh` and `.bat` scripts checked into the repository. This approach enables controlled updates to the hash calculation logic without disrupting existing workflows.
