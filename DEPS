@@ -67,6 +67,7 @@ vars = {
   'dart_clock_rev': '7956d60042f4ea979c4554d43eeb57d087627869',
   'dart_collection_rev': '887b826b50f48d6a9cd2c0684aa353e8e3a0fad0',
   'dart_devtools_rev': 'dcef4f6efe986f110f55dbbe7f3731802e86690a',
+  'dart_http_rev': '5e2281edd25f9addbf26242a0658d8f2dfa1134b',
   'dart_libprotobuf_rev': '24487dd1045c7f3d64a21f38a3f0c06cc4cf2edb',
   'dart_perfetto_rev': '13ce0c9e13b0940d2476cd0cff2301708a9a2e2b',
   'dart_protobuf_gn_rev': 'ca669f79945418f6229e4fef89b666b2a88cbb10',
@@ -183,7 +184,6 @@ vars = {
   "upstream_harfbuzz": "https://github.com/harfbuzz/harfbuzz.git",
   "upstream_html": "https://github.com/dart-lang/html.git",
   "upstream_http_multi_server": "https://github.com/dart-lang/http_multi_server.git",
-  "upstream_http_parser": "https://github.com/dart-lang/http_parser.git",
   "upstream_http": "https://github.com/dart-lang/http.git",
   "upstream_icu": "https://github.com/unicode-org/icu.git",
   "upstream_intl": "https://github.com/dart-lang/intl.git",
@@ -400,13 +400,10 @@ deps = {
    Var('dart_git') + '/html.git@6d3bc86cf2ab530ef3fa5f84b5980dc318a02af4',
 
   'src/flutter/third_party/dart/third_party/pkg/http':
-   Var('dart_git') + '/http.git@5e2281edd25f9addbf26242a0658d8f2dfa1134b',
+   Var('dart_git') + '/http.git' + '@' + Var('dart_http_rev'),
 
   'src/flutter/third_party/dart/third_party/pkg/http_multi_server':
    Var('dart_git') + '/http_multi_server.git@e7515b5896b83d522189802a1e14e103e19426c0',
-
-  'src/flutter/third_party/dart/third_party/pkg/http_parser':
-   Var('dart_git') + '/http_parser.git@23d775898ee90be9daf3297e298a8869bc755d84',
 
   'src/flutter/third_party/dart/third_party/pkg/intl':
    Var('dart_git') + '/intl.git@5d65e3808ce40e6282e40881492607df4e35669f',
