@@ -142,6 +142,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         WindowsVersionValidator(
           operatingSystemUtils: globals.os,
           processLister: ProcessLister(globals.processManager),
+          versionExtractor: WindowsVersionExtractor(
+            processManager: globals.processManager,
+            logger: globals.logger,
+          ),
         ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
