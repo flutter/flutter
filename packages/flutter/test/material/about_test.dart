@@ -1841,6 +1841,141 @@ void main() {
       expect(renderParagraph.text.style!.color, theme.primaryTextTheme.titleLarge!.color);
     });
   });
+
+  testWidgets('Adaptive AboutDialog shows correct widget on each platform',(WidgetTester tester) async {
+    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: const Material(
+            child: Center(
+              child: ElevatedButton(
+                onPressed: null,
+                child: Text('Go'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Go'));
+
+      showAdaptiveAboutDialog(
+        context: context,
+        applicationIcon: const Icon(Icons.abc),
+        applicationName: 'Test',
+        applicationVersion: '1.0.0',
+        applicationLegalese: 'Application Legalese',
+        children: <Widget>[
+          const Text('Test1'),
+        ],
+      );
+
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      expect(find.byType(CupertinoDialogAction), findsWidgets);
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    ]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: const Material(
+            child: Center(
+              child: ElevatedButton(
+                onPressed: null,
+                child: Text('Go'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Go'));
+
+      showAboutDialog(
+        context: context,
+        applicationIcon: const Icon(Icons.abc),
+        applicationName: 'Test',
+        applicationVersion: '1.0.0',
+      );
+
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      expect(find.byType(CupertinoDialogAction), findsNothing);
+    }
+  });
+
+  testWidgets('Adaptive AboutDialog closes correctly on each platform', (WidgetTester tester) async {
+    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: const Material(
+              child: Center(
+              child: ElevatedButton(
+                onPressed: null,
+                child: Text('Go'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Go'));
+
+      showAdaptiveAboutDialog(
+        context: context,
+        applicationName: 'Test',
+        applicationVersion: '1.0.0',
+      );
+
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      expect(find.byType(CupertinoDialogAction), findsWidgets);
+
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoAlertDialog), findsNothing);
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    ]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: const Material(
+            child: Center(
+              child: ElevatedButton(
+                onPressed: null,
+                child: Text('Go'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Go'));
+
+      showAdaptiveAboutDialog(
+        context: context,
+        applicationName: 'Test',
+        applicationVersion: '1.0.0',
+      );
+
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      expect(find.byType(TextButton), findsWidgets);
+
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+    }});
 }
 
 class FakeLicenseEntry extends LicenseEntry {
