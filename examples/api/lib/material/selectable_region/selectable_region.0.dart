@@ -322,6 +322,8 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   @override
   void dispose() {
     _geometry.dispose();
+    _startHandle = null;
+    _endHandle = null;
     super.dispose();
   }
 }
