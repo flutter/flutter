@@ -385,6 +385,75 @@ void main() {
 
       expect(createdElement, fakePlatformView.htmlElement);
     });
+
+    group('hitTestBehavior', () {
+      testWidgets('opaque by default', (WidgetTester tester) async {
+        final Key containerKey = UniqueKey();
+        int taps = 0;
+
+        await tester.pumpWidget(
+          GestureDetector(
+            onTap: () => taps++,
+            child: Container(
+              key: containerKey,
+              width: 200,
+              height: 200,
+              // Add a color to make it a visible container. This ensures that
+              // GestureDetector's default hit test behavior works.
+              color: const Color(0xFF00FF00),
+              child: HtmlElementView.fromTagName(tagName: 'div'),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(taps, isZero);
+
+        await tester.tap(
+          find.byKey(containerKey),
+          warnIfMissed: false,
+        );
+
+        // Taps are still zero on the container because the HtmlElementView is
+        // opaque and prevents widgets behind it from receiving pointer events.
+        expect(taps, isZero);
+      });
+
+      testWidgets('can be set to transparent', (WidgetTester tester) async {
+        final Key containerKey = UniqueKey();
+        int taps = 0;
+
+        await tester.pumpWidget(
+          GestureDetector(
+            onTap: () => taps++,
+            child: Container(
+              key: containerKey,
+              width: 200,
+              height: 200,
+              // Add a color to make it a visible container. This ensures that
+              // GestureDetector's default hit test behavior works.
+              color: const Color(0xFF00FF00),
+              child: HtmlElementView.fromTagName(
+                tagName: 'div',
+                hitTestBehavior: PlatformViewHitTestBehavior.transparent,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(taps, isZero);
+
+        await tester.tap(
+          find.byKey(containerKey),
+          warnIfMissed: false,
+        );
+
+        // The container can receive taps because the HtmlElementView is
+        // transparent from a hit testing perspective.
+        expect(taps, 1);
+      });
+    });
   });
 }
 
