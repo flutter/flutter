@@ -26,7 +26,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
-import 'app_lifecycle_listener.dart';
 import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -2363,9 +2362,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   Orientation? _lastOrientation;
 
-  late final AppLifecycleListener _appLifecycleListener;
-  bool _justResumed = false;
-
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
@@ -2988,9 +2984,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.focusNode.addListener(_handleFocusChanged);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
-    _appLifecycleListener = AppLifecycleListener(
-      onResume: () => _justResumed = true,
-    );
     _initProcessTextActions();
   }
 
@@ -3205,7 +3198,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     clipboardStatus.removeListener(_onChangedClipboardStatus);
     clipboardStatus.dispose();
     _cursorVisibilityNotifier.dispose();
-    _appLifecycleListener.dispose();
     FocusManager.instance.removeListener(_unflagInternalFocus);
     _disposeScrollNotificationObserver();
     super.dispose();
@@ -4408,9 +4400,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool shouldSelectAll = widget.selectionEnabled
         && (kIsWeb || isDesktop)
         && !_isMultiline
-        && !_nextFocusChangeIsInternal
-        && !_justResumed;
-    _justResumed = false;
+        && !_nextFocusChangeIsInternal;
     if (shouldSelectAll) {
       // On native web and desktop platforms, single line <input> tags
       // select all when receiving focus.
