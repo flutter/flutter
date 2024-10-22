@@ -5,12 +5,9 @@
 #include "impeller/entity/entity.h"
 
 #include <algorithm>
-#include <limits>
 #include <optional>
 
-#include "impeller/base/validation.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/vector.h"
@@ -70,14 +67,6 @@ std::optional<Rect> Entity::GetCoverage() const {
   }
 
   return contents_->GetCoverage(*this);
-}
-
-Contents::ClipCoverage Entity::GetClipCoverage(
-    const std::optional<Rect>& current_clip_coverage) const {
-  if (!contents_) {
-    return {};
-  }
-  return contents_->GetClipCoverage(*this, current_clip_coverage);
 }
 
 void Entity::SetContents(std::shared_ptr<Contents> contents) {

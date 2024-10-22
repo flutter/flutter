@@ -16,81 +16,68 @@
 
 namespace impeller {
 
-static Scalar GetShaderClipDepth(const Entity& entity) {
+static Scalar GetShaderClipDepth(uint32_t clip_depth) {
   // Draw the clip at the max of the clip entity's depth slice, so that other
   // draw calls with this same depth value will be culled even if they have a
   // perspective transform.
-  return std::nextafterf(Entity::GetShaderClipDepth(entity.GetClipDepth() + 1),
-                         0.0f);
+  return std::nextafterf(Entity::GetShaderClipDepth(clip_depth + 1), 0.0f);
 }
 
 /*******************************************************************************
  ******* ClipContents
  ******************************************************************************/
 
-ClipContents::ClipContents() = default;
+ClipContents::ClipContents(Rect coverage_rect, bool is_axis_aligned_rect)
+    : coverage_rect_(coverage_rect),
+      is_axis_aligned_rect_(is_axis_aligned_rect) {}
 
 ClipContents::~ClipContents() = default;
 
-void ClipContents::SetGeometry(const Geometry* geometry) {
-  geometry_ = geometry;
+void ClipContents::SetGeometry(GeometryResult clip_geometry) {
+  clip_geometry_ = std::move(clip_geometry);
 }
 
 void ClipContents::SetClipOperation(Entity::ClipOperation clip_op) {
   clip_op_ = clip_op;
 }
 
-std::optional<Rect> ClipContents::GetCoverage(const Entity& entity) const {
-  return std::nullopt;
-};
-
-Contents::ClipCoverage ClipContents::GetClipCoverage(
-    const Entity& entity,
+ClipCoverage ClipContents::GetClipCoverage(
     const std::optional<Rect>& current_clip_coverage) const {
   if (!current_clip_coverage.has_value()) {
-    return {.type = ClipCoverage::Type::kAppend, .coverage = std::nullopt};
+    return {.coverage = std::nullopt};
   }
   switch (clip_op_) {
     case Entity::ClipOperation::kDifference:
       // This can be optimized further by considering cases when the bounds of
       // the current stencil will shrink.
       return {
-          .type = ClipCoverage::Type::kAppend,  //
           .is_difference_or_non_square = true,  //
           .coverage = current_clip_coverage     //
       };
     case Entity::ClipOperation::kIntersect:
-      if (!geometry_) {
-        return {.type = ClipCoverage::Type::kAppend, .coverage = std::nullopt};
-      }
-      auto coverage = geometry_->GetCoverage(entity.GetTransform());
-      if (!coverage.has_value() || !current_clip_coverage.has_value()) {
-        return {.type = ClipCoverage::Type::kAppend, .coverage = std::nullopt};
+      if (coverage_rect_.IsEmpty() || !current_clip_coverage.has_value()) {
+        return {.coverage = std::nullopt};
       }
       return {
-          .type = ClipCoverage::Type::kAppend,                                //
-          .is_difference_or_non_square = !geometry_->IsAxisAlignedRect(),     //
-          .coverage = current_clip_coverage->Intersection(coverage.value()),  //
+          .is_difference_or_non_square = !is_axis_aligned_rect_,            //
+          .coverage = current_clip_coverage->Intersection(coverage_rect_),  //
       };
   }
   FML_UNREACHABLE();
 }
 
-void ClipContents::SetInheritedOpacity(Scalar opacity) {}
-
 bool ClipContents::Render(const ContentContext& renderer,
-                          const Entity& entity,
-                          RenderPass& pass) const {
-  if (!geometry_) {
+                          RenderPass& pass,
+                          uint32_t clip_depth) const {
+  if (!clip_geometry_.vertex_buffer) {
     return true;
   }
 
   using VS = ClipPipeline::VertexShader;
 
   VS::FrameInfo info;
-  info.depth = GetShaderClipDepth(entity);
+  info.depth = GetShaderClipDepth(clip_depth);
 
-  auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kDestination;
 
@@ -99,9 +86,9 @@ bool ClipContents::Render(const ContentContext& renderer,
   /// Stencil preparation draw.
 
   options.depth_write_enabled = false;
-  options.primitive_type = geometry_result.type;
-  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
-  switch (geometry_result.mode) {
+  options.primitive_type = clip_geometry_.type;
+  pass.SetVertexBuffer(clip_geometry_.vertex_buffer);
+  switch (clip_geometry_.mode) {
     case GeometryResult::Mode::kNonZero:
       pass.SetCommandLabel("Clip stencil preparation (NonZero)");
       options.stencil_mode =
@@ -121,7 +108,7 @@ bool ClipContents::Render(const ContentContext& renderer,
   }
   pass.SetPipeline(renderer.GetClipPipeline(options));
 
-  info.mvp = geometry_result.transform;
+  info.mvp = clip_geometry_.transform;
   VS::BindFrameInfo(pass, renderer.GetTransientsBuffer().EmplaceUniform(info));
 
   if (!pass.Draw().ok()) {
@@ -143,12 +130,7 @@ bool ClipContents::Render(const ContentContext& renderer,
     case Entity::ClipOperation::kDifference:
       pass.SetCommandLabel("Difference Clip");
       options.stencil_mode = ContentContextOptions::StencilMode::kCoverCompare;
-      std::optional<Rect> maybe_cover_area =
-          geometry_->GetCoverage(entity.GetTransform());
-      if (!maybe_cover_area.has_value()) {
-        return true;
-      }
-      cover_area = maybe_cover_area.value();
+      cover_area = coverage_rect_;
       break;
   }
   auto points = cover_area.GetPoints();
@@ -167,39 +149,10 @@ bool ClipContents::Render(const ContentContext& renderer,
  ******* ClipRestoreContents
  ******************************************************************************/
 
-ClipRestoreContents::ClipRestoreContents() = default;
-
-ClipRestoreContents::~ClipRestoreContents() = default;
-
-void ClipRestoreContents::SetRestoreHeight(size_t clip_height) {
-  restore_height_ = clip_height;
-}
-
-size_t ClipRestoreContents::GetRestoreHeight() const {
-  return restore_height_;
-}
-
-void ClipRestoreContents::SetRestoreCoverage(
-    std::optional<Rect> restore_coverage) {
-  restore_coverage_ = restore_coverage;
-}
-
-std::optional<Rect> ClipRestoreContents::GetCoverage(
-    const Entity& entity) const {
-  return std::nullopt;
-};
-
-Contents::ClipCoverage ClipRestoreContents::GetClipCoverage(
-    const Entity& entity,
-    const std::optional<Rect>& current_clip_coverage) const {
-  return {.type = ClipCoverage::Type::kRestore, .coverage = std::nullopt};
-}
-
-void ClipRestoreContents::SetInheritedOpacity(Scalar opacity) {}
-
-bool ClipRestoreContents::Render(const ContentContext& renderer,
-                                 const Entity& entity,
-                                 RenderPass& pass) const {
+bool RenderClipRestore(const ContentContext& renderer,
+                       RenderPass& pass,
+                       uint32_t clip_depth,
+                       std::optional<Rect> restore_coverage) {
   using VS = ClipPipeline::VertexShader;
 
   pass.SetCommandLabel("Restore Clip");
@@ -214,7 +167,7 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
   // Create a rect that covers either the given restore area, or the whole
   // render target texture.
   auto ltrb =
-      restore_coverage_.value_or(Rect::MakeSize(pass.GetRenderTargetSize()))
+      restore_coverage.value_or(Rect::MakeSize(pass.GetRenderTargetSize()))
           .GetLTRB();
 
   std::array<VS::PerVertexData, 4> vertices = {
@@ -227,7 +180,7 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
       CreateVertexBuffer(vertices, renderer.GetTransientsBuffer()));
 
   VS::FrameInfo info;
-  info.depth = GetShaderClipDepth(entity);
+  info.depth = GetShaderClipDepth(clip_depth);
   info.mvp = pass.GetOrthographicTransform();
   VS::BindFrameInfo(pass, renderer.GetTransientsBuffer().EmplaceUniform(info));
 

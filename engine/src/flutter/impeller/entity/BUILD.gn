@@ -235,7 +235,7 @@ impeller_component("entity_unittests") {
   testonly = true
 
   sources = [
-    "contents/clip_contents_unittests.cc",
+    "clip_stack_unittests.cc",
     "contents/filters/blend_filter_contents_unittests.cc",
     "contents/filters/gaussian_blur_filter_contents_unittests.cc",
     "contents/filters/inputs/filter_input_unittests.cc",
@@ -244,7 +244,6 @@ impeller_component("entity_unittests") {
     "contents/tiled_texture_contents_unittests.cc",
     "draw_order_resolver_unittests.cc",
     "entity_pass_target_unittests.cc",
-    "entity_pass_unittests.cc",
     "entity_playground.cc",
     "entity_playground.h",
     "entity_unittests.cc",

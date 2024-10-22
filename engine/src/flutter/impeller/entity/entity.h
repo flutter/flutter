@@ -92,9 +92,6 @@ class Entity {
 
   std::optional<Rect> GetCoverage() const;
 
-  Contents::ClipCoverage GetClipCoverage(
-      const std::optional<Rect>& current_clip_coverage) const;
-
   void SetContents(std::shared_ptr<Contents> contents);
 
   const std::shared_ptr<Contents>& GetContents() const;

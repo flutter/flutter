@@ -11,81 +11,67 @@
 
 namespace impeller {
 
-class ClipContents final : public Contents {
+struct ClipCoverage {
+  // TODO(jonahwilliams): this should probably use the Entity::ClipOperation
+  // enum, but that has transitive import errors.
+  bool is_difference_or_non_square = false;
+
+  /// @brief This coverage is the outer coverage of the clip.
+  ///
+  /// For example, if the clip is a circular clip, this is the rectangle that
+  /// contains the circle and not the rectangle that is contained within the
+  /// circle. This means that we cannot use the coverage alone to determine if
+  /// a clip can be culled, and instead also use the somewhat hacky
+  /// "is_difference_or_non_square" field.
+  std::optional<Rect> coverage = std::nullopt;
+};
+
+class ClipContents {
  public:
-  ClipContents();
+  ClipContents(Rect coverage_rect, bool is_axis_aligned_rect);
 
   ~ClipContents();
 
-  void SetGeometry(const Geometry* geometry);
+  /// @brief Set the pre-tessellated clip geometry.
+  void SetGeometry(GeometryResult geometry);
 
   void SetClipOperation(Entity::ClipOperation clip_op);
 
-  // |Contents|
-  std::optional<Rect> GetCoverage(const Entity& entity) const override;
-
-  // |Contents|
-  ClipCoverage GetClipCoverage(
-      const Entity& entity,
-      const std::optional<Rect>& current_clip_coverage) const override;
-
-  // |Contents|
-  bool Render(const ContentContext& renderer,
-              const Entity& entity,
-              RenderPass& pass) const override;
-
-  // |Contents|
-  void SetInheritedOpacity(Scalar opacity) override;
-
- private:
-  const Geometry* geometry_ = nullptr;
-  Entity::ClipOperation clip_op_ = Entity::ClipOperation::kIntersect;
-
-  ClipContents(const ClipContents&) = delete;
-
-  ClipContents& operator=(const ClipContents&) = delete;
-};
-
-class ClipRestoreContents final : public Contents {
- public:
-  ClipRestoreContents();
-
-  ~ClipRestoreContents();
-
-  void SetRestoreHeight(size_t clip_height);
-
-  size_t GetRestoreHeight() const;
-
-  /// @brief  The area on the pass texture where this clip restore will be
-  ///         applied. If unset, the entire pass texture will be restored.
+  //----------------------------------------------------------------------------
+  /// @brief Given the current pass space bounding rectangle of the clip
+  ///        buffer, return the expected clip coverage after this draw call.
+  ///        This should only be implemented for contents that may write to the
+  ///        clip buffer.
   ///
-  /// @note   This rectangle is not transformed by the entity's transform.
-  void SetRestoreCoverage(std::optional<Rect> coverage);
-
-  // |Contents|
-  std::optional<Rect> GetCoverage(const Entity& entity) const override;
-
-  // |Contents|
+  ///        During rendering, coverage coordinates count pixels from the top
+  ///        left corner of the framebuffer.
+  ///
   ClipCoverage GetClipCoverage(
-      const Entity& entity,
-      const std::optional<Rect>& current_clip_coverage) const override;
+      const std::optional<Rect>& current_clip_coverage) const;
 
-  // |Contents|
   bool Render(const ContentContext& renderer,
-              const Entity& entity,
-              RenderPass& pass) const override;
-
-  // |Contents|
-  void SetInheritedOpacity(Scalar opacity) override;
+              RenderPass& pass,
+              uint32_t clip_depth) const;
 
  private:
-  std::optional<Rect> restore_coverage_;
-  size_t restore_height_ = 0;
-
-  ClipRestoreContents(const ClipRestoreContents&) = delete;
-
-  ClipRestoreContents& operator=(const ClipRestoreContents&) = delete;
+  // Pre-tessellated clip geometry.
+  GeometryResult clip_geometry_;
+  // Coverage rect of the tessellated geometry.
+  Rect coverage_rect_;
+  bool is_axis_aligned_rect_ = false;
+  Entity::ClipOperation clip_op_ = Entity::ClipOperation::kIntersect;
 };
+
+/// @brief Render a restore clip.
+///
+/// This is is intended to be used for prevent overdraw mechanism. The clip
+/// depth should be the depth of the entity that is currently being drawn, and
+/// restore_coverage should be its coverage. If restore_coverage is
+/// std::nullopt, the render pass coverage is used instead.
+bool RenderClipRestore(const ContentContext& renderer,
+                       RenderPass& pass,
+                       uint32_t clip_depth,
+                       std::optional<Rect> restore_coverage);
 
 }  // namespace impeller
 
