@@ -2238,6 +2238,7 @@ const Set<String> kExecutableAllowlist = <String>{
 
   'dev/tools/gen_keycodes/bin/gen_keycodes',
   'dev/tools/repackage_gradle_wrapper.sh',
+  'dev/tools/bin/engine_hash.sh',
 
   'packages/flutter_tools/bin/macos_assemble.sh',
   'packages/flutter_tools/bin/tool_backend.sh',
