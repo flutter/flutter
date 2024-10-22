@@ -257,7 +257,7 @@ ContentContext::ContentContext(
 
   {
     TextureDescriptor desc;
-    desc.storage_mode = StorageMode::kHostVisible;
+    desc.storage_mode = StorageMode::kDevicePrivate;
     desc.format = PixelFormat::kR8G8B8A8UNormInt;
     desc.size = ISize{1, 1};
     empty_texture_ = GetContext()->GetResourceAllocator()->CreateTexture(desc);

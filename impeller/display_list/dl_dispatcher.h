@@ -260,7 +260,8 @@ class CanvasDlDispatcher : public DlDispatcherBase {
 
   ~CanvasDlDispatcher() = default;
 
-  void SetBackdropData(std::unordered_map<int64_t, BackdropData> backdrop);
+  void SetBackdropData(std::unordered_map<int64_t, BackdropData> backdrop,
+                       size_t backdrop_count);
 
   // |flutter::DlOpReceiver|
   void save() override {
@@ -364,7 +365,7 @@ class TextFrameDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   // |flutter::DlOpReceiver|
   void setImageFilter(const flutter::DlImageFilter* filter) override;
 
-  std::unordered_map<int64_t, BackdropData> TakeBackdropData();
+  std::pair<std::unordered_map<int64_t, BackdropData>, size_t> TakeBackdropData();
 
  private:
   const Rect GetCurrentLocalCullingBounds() const;
@@ -376,6 +377,7 @@ class TextFrameDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   // note: cull rects are always in the global coordinate space.
   std::vector<Rect> cull_rect_state_;
   bool has_image_filter_ = false;
+  size_t backdrop_count_ = 0;
   Paint paint_;
 };
 
