@@ -522,7 +522,7 @@ class BackdropGroup extends InheritedWidget {
 ///        itemCount: 60,
 ///        itemBuilder: (BuildContext context, int index) {
 ///          return ClipRect(
-///            child: BackdropFilter.group(
+///            child: BackdropFilter.grouped(
 ///              filter: ui.ImageFilter.blur(
 ///                sigmaX: 40,
 ///                sigmaY: 40,
