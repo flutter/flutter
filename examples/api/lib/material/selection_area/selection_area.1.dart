@@ -38,7 +38,7 @@ class MyHomePage extends StatefulWidget {
 typedef _LocalSpanRange = ({int startOffset, int endOffset});
 
 class _MyHomePageState extends State<MyHomePage> {
-  final SelectionListenerController _selectionListenerController = SelectionListenerController();
+  final SelectionListenerNotifier _selectionNotifier = SelectionListenerNotifier();
   final ContextMenuController _menuController = ContextMenuController();
   final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
 
@@ -58,13 +58,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _initData();
-    _selectionListenerController.addStatusListener(_handleOnSelectionControllerChanged);
+    _selectionNotifier.addStatusListener(_handleOnSelectionStateChanged);
   }
 
   @override
   void dispose() {
-    _selectionListenerController.removeStatusListener(_handleOnSelectionControllerChanged);
-    _selectionListenerController.dispose();
+    _selectionNotifier.removeStatusListener(_handleOnSelectionStateChanged);
+    _selectionNotifier.dispose();
     super.dispose();
   }
 
@@ -119,11 +119,11 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _handleOnSelectionControllerChanged(SelectionListenerStatus status) {
+  void _handleOnSelectionStateChanged(SelectionListenerStatus status) {
     if (_menuController.isShown) {
       ContextMenuController.removeAny();
     }
-    if (_selectionListenerController.selectionStatus != SelectionStatus.uncollapsed
+    if (_selectionNotifier.status != SelectionStatus.uncollapsed
         || status != SelectionListenerStatus.finalized) {
       return;
     }
@@ -132,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
         || selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor == null) {
       return;
     }
-    final SelectedContentRange selectedContentRange = _selectionListenerController.value;
+    final SelectedContentRange selectedContentRange = _selectionNotifier.range;
     _menuController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
@@ -316,7 +316,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SelectionArea(
         key: selectionAreaKey,
         child: SelectionListener(
-          controller: _selectionListenerController,
+          selectionNotifier: _selectionNotifier,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
