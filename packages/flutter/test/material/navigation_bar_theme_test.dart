@@ -265,7 +265,7 @@ void main() {
 
     // This test extracts the controller from the allRenderObjects iterable
     // in order to prevent some wonkiness when running via skwasm.
-    final RenderObject controller = tester.allRenderObjects.firstWhere((RenderObject object) => object is SplashController);
+    final RenderObject controller = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderSplashes');
 
     // Test hovered state.
     expect(

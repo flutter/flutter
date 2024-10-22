@@ -52,11 +52,11 @@ void main() {
     final MaterialInkController controller = Material.of(tester.element(buttonFinder));
     expect(controller, paintsExactlyCountTimes(#drawRect, 1));
 
-    expect(controller.debugSplashes, hasLength(1));
+    expect(controller.splashes, hasLength(1));
 
     await tester.pumpAndSettle();
     // ink feature is disposed.
-    expect(controller.debugSplashes, isEmpty);
+    expect(controller.splashes, isEmpty);
   },
     skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );

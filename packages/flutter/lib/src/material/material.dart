@@ -87,6 +87,67 @@ const Map<MaterialType, BorderRadius?> kMaterialEdges = <MaterialType, BorderRad
 // https://github.com/flutter/flutter/issues/150139
 typedef MaterialInkController = SplashController;
 
+/// Used by [InteractiveInkFeatureFactory] to create [Splash]es.
+///
+/// Splash effects can be painted on an ancestor [Material] widget by obtaining
+/// an instance of this controller via [Material.of] and calling [addSplash].
+extension type SplashController._(_RenderSplashes _renderSplashes) {
+  /// The [TickerProvider] used by this controller.
+  ///
+  /// [Splash]es added to this controller with [addSplash] use this vsync
+  /// to drive their animations.
+  TickerProvider get vsync => _renderSplashes.vsync;
+
+  /// Suggests a color for the surface where splashes are painted.
+  ///
+  /// This color does not directly determine the appearance of the splash;
+  /// it serves as a reference value that descendants can optionally use
+  /// via `Material.of(context).color`.
+  ///
+  /// Unlike standard [InheritedWidget] patterns, changes to this
+  /// color will **not** trigger automatic updates through `of(context)`.
+  ///
+  /// Additionally, if this color is non-null, the associated [RenderBox]
+  /// will absorb hit tests. However, this behavior usually has minimal impact
+  /// since splash controllers are often nested within widgets that are
+  /// either fully opaque, or have opaque children.
+  Color? get color => _renderSplashes.color;
+
+  /// A list containing each [Splash] effect managed by this controller.
+  ///
+  /// Accessed during tests to verify that splashes are properly
+  /// being added & removed.
+  @protected
+  @visibleForTesting
+  List<Splash>? get splashes => _renderSplashes._splashes;
+
+  /// Adds an [InkFeature], such as an [InkSplash] or an [InkHighlight].
+  ///
+  /// The ink feature will paint as part of this controller.
+  // TODO(nate-thegrate): deprecate this method once Splash is officially introduced!
+  // https://github.com/flutter/flutter/issues/150139
+  void addInkFeature(InkFeature feature) => addSplash(feature);
+
+  /// Adds a [Splash] to the collection of splashes that this controller paints.
+  void addSplash(Splash splash) {
+    assert(!splash._debugDisposed);
+    assert(splash.controller == this);
+    final List<Splash> splashes = _renderSplashes._splashes ??= <Splash>[];
+    assert(!splashes.contains(splash));
+    splashes.add(splash);
+    markNeedsPaint();
+  }
+
+  void _removeSplash(Splash splash) {
+    assert(splashes != null);
+    splashes!.remove(splash);
+    markNeedsPaint();
+  }
+
+  /// Notifies the controller that one of its ink features needs to repaint.
+  void markNeedsPaint() => _renderSplashes.markNeedsPaint();
+}
+
 /// A piece of material.
 ///
 /// The Material widget is responsible for:
@@ -358,7 +419,7 @@ class Material extends StatefulWidget {
   /// * [Material.of], which is similar to this method, but asserts if
   ///   no [Material] ancestor is found.
   static MaterialInkController? maybeOf(BuildContext context) {
-    return LookupBoundary.findAncestorRenderObjectOfType<SplashController>(context);
+    return LookupBoundary.findAncestorRenderObjectOfType<_RenderSplashes>(context)?.asController;
   }
 
   /// The ink controller from the closest instance of [Material] that encloses
@@ -383,7 +444,7 @@ class Material extends StatefulWidget {
     final MaterialInkController? controller = maybeOf(context);
     assert(() {
       if (controller == null) {
-        if (LookupBoundary.debugIsHidingAncestorRenderObjectOfType<SplashController>(context)) {
+        if (LookupBoundary.debugIsHidingAncestorRenderObjectOfType<_RenderSplashes>(context)) {
           throw FlutterError(
             'Material.of() was called with a context that does not have access to a Material widget.\n'
             'The context provided to Material.of() does have a Material widget ancestor, but it is '
@@ -429,7 +490,7 @@ class Material extends StatefulWidget {
 }
 
 class _MaterialState extends State<Material> with TickerProviderStateMixin {
-  final GlobalKey _inkFeatureRenderer = GlobalKey(debugLabel: 'ink renderer');
+  final GlobalKey _splashRenderer = GlobalKey(debugLabel: 'splash renderer');
 
   @override
   Widget build(BuildContext context) {
@@ -459,12 +520,12 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     }
     contents = NotificationListener<LayoutChangedNotification>(
       onNotification: (LayoutChangedNotification notification) {
-        final SplashController renderer = _inkFeatureRenderer.currentContext!.findRenderObject()! as SplashController;
+        final _RenderSplashes renderer = _splashRenderer.currentContext!.findRenderObject()! as _RenderSplashes;
         renderer._didChangeLayout();
         return false;
       },
-      child: _InkFeatures(
-        key: _inkFeatureRenderer,
+      child: _Splashes(
+        key: _splashRenderer,
         color: widget.type == MaterialType.transparency ? null : backgroundColor,
         vsync: this,
         child: contents,
@@ -535,65 +596,16 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   }
 }
 
-/// A [RenderBox] that paints [Splash]es.
-///
-/// Splash effects can be painted on an ancestor [Material] widget by obtaining
-/// an instance of this controller via [Material.of] and calling [addSplash].
-class SplashController extends RenderProxyBox {
-  /// Creates a splash controller.
-  SplashController({required this.vsync, this.color}) : super(null);
+class _RenderSplashes extends RenderProxyBox {
+  _RenderSplashes({required this.vsync, this.color}) : super(null);
 
-  /// The [TickerProvider] used by this controller.
-  ///
-  /// [Splash]es added to this controller with [addSplash] use this vsync
-  /// to drive their animations.
   final TickerProvider vsync;
 
-  /// Suggests a color for the surface where splashes are painted.
-  ///
-  /// This color does not directly determine the appearance of the splash;
-  /// it serves as a reference value that descendants can optionally use
-  /// via `Material.of(context).color`.
-  ///
-  /// Unlike standard [InheritedWidget] patterns, changes to this
-  /// color will **not** trigger automatic updates through `of(context)`.
-  ///
-  /// Additionally, if this color is non-null, the associated [RenderBox]
-  /// will absorb hit tests. However, this behavior usually has minimal impact
-  /// since splash controllers are often nested within widgets that are
-  /// either fully opaque, or have opaque children.
   Color? color;
 
-  /// A list containing each [Splash] effect managed by this controller.
-  ///
-  /// Accessed during tests to verify that splashes are properly
-  /// being added & removed.
-  @visibleForTesting
-  List<Splash>? get debugSplashes => kDebugMode ? _splashes : null;
   List<Splash>? _splashes;
 
-  /// Add an [InkFeature], such as an [InkSplash] or an [InkHighlight].
-  ///
-  /// The ink feature will paint as part of this controller.
-  // TODO(nate-thegrate): deprecate this method once Splash is officially introduced!
-  // https://github.com/flutter/flutter/issues/150139
-  void addInkFeature(InkFeature feature) => addSplash(feature);
-
-  /// Adds a [Splash] to the collection of splashes that this controller paints.
-  void addSplash(Splash splash) {
-    assert(!splash._debugDisposed);
-    assert(splash.controller == this);
-    _splashes ??= <Splash>[];
-    assert(!_splashes!.contains(splash));
-    _splashes!.add(splash);
-    markNeedsPaint();
-  }
-
-  void _removeSplash(Splash splash) {
-    assert(_splashes != null);
-    _splashes!.remove(splash);
-    markNeedsPaint();
-  }
+  SplashController get asController => SplashController._(this);
 
   void _didChangeLayout() {
     if (_splashes?.isNotEmpty ?? false) {
@@ -601,11 +613,9 @@ class SplashController extends RenderProxyBox {
     }
   }
 
-  @protected
   @override
   bool hitTestSelf(Offset position) => color != null;
 
-  @protected
   @override
   void paint(PaintingContext context, Offset offset) {
     final List<Splash>? splashes = _splashes;
@@ -624,8 +634,8 @@ class SplashController extends RenderProxyBox {
   }
 }
 
-class _InkFeatures extends SingleChildRenderObjectWidget {
-  const _InkFeatures({
+class _Splashes extends SingleChildRenderObjectWidget {
+  const _Splashes({
     super.key,
     this.color,
     required this.vsync,
@@ -640,12 +650,12 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
   final TickerProvider vsync;
 
   @override
-  SplashController createRenderObject(BuildContext context) {
-    return SplashController(color: color, vsync: vsync);
+  _RenderSplashes createRenderObject(BuildContext context) {
+    return _RenderSplashes(color: color, vsync: vsync);
   }
 
   @override
-  void updateRenderObject(BuildContext context, SplashController renderObject) {
+  void updateRenderObject(BuildContext context, _RenderSplashes renderObject) {
     renderObject.color = color;
     assert(vsync == renderObject.vsync);
   }
@@ -655,8 +665,8 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-/// * [SplashController], the [RenderBox] responsible for painting splashes.
-/// * [Material], which as of now is the only widget that enables splash effects.
+/// * [SplashController], which is responsible for painting splashes.
+/// * [Material], the only widget (as of now) that enables splash effects.
 /// * [InteractiveInkFeatureFactory], a class that creates splashes through
 ///   a specific function signature.
 /// * [InkResponse], which creates splashes using an [InteractiveInkFeatureFactory].
@@ -684,10 +694,10 @@ abstract class InkFeature {
     }
   }
 
-  /// The [MaterialInkController] associated with this [InkFeature].
+  /// The [SplashController] associated with this [InkFeature].
   ///
   /// Typically used by subclasses to call
-  /// [MaterialInkController.markNeedsPaint] when they need to repaint.
+  /// [SplashController.markNeedsPaint] when they need to repaint.
   final SplashController controller;
 
   /// The render box whose visual position defines the frame of reference for this ink feature.
@@ -776,7 +786,7 @@ abstract class InkFeature {
     assert(referenceBox.attached);
     assert(!_debugDisposed);
     // determine the transform that gets our coordinate system to be like theirs
-    final Matrix4? transform = _getPaintTransform(controller, referenceBox);
+    final Matrix4? transform = _getPaintTransform(controller._renderSplashes, referenceBox);
     if (transform != null) {
       paintFeature(canvas, transform);
     }
