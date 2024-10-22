@@ -81,16 +81,6 @@ class _TestScribeWidget extends StatefulWidget {
 }
 
 class _TestScribeWidgetState extends State<_TestScribeWidget> implements ScribeClient {
-  // Begin ScribeClient.
-
-  @override
-  double get devicePixelRatio => MediaQuery.devicePixelRatioOf(context);
-
-  @override
-  bool get isActive => true;
-
-  // End ScribeClient.
-
   @override
   Widget build(BuildContext context) {
     return const Placeholder();
