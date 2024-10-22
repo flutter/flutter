@@ -13,6 +13,8 @@
 namespace flutter {
 namespace gpu {
 
+bool SupportsNormalOffscreenMSAA(const impeller::Context& context);
+
 class Context : public RefCountedDartWrappable<Context> {
   DEFINE_WRAPPERTYPEINFO();
   FML_FRIEND_MAKE_REF_COUNTED(Context);
@@ -72,6 +74,10 @@ extern int InternalFlutterGpu_Context_GetDefaultDepthStencilFormat(
 
 FLUTTER_GPU_EXPORT
 extern int InternalFlutterGpu_Context_GetMinimumUniformByteAlignment(
+    flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(
     flutter::gpu::Context* wrapper);
 
 }  // extern "C"
