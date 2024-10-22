@@ -197,6 +197,16 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'App.framework.dSYM'
     );
     checkDirectoryExists(appFrameworkDsymPath);
+
+    checkDirectoryNotExists(path.join(
+      outputPath,
+      mode,
+      'App.xcframework',
+      'ios-arm64',
+      'dSYMs',
+      'Flutter.framework.dSYM'
+    ));
+
     await _checkDsym(path.join(
       appFrameworkDsymPath,
       'Contents',
