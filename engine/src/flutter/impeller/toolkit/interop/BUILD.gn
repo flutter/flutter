@@ -123,6 +123,10 @@ zip_bundle("sdk") {
       source = "impeller.h"
       destination = "include/impeller.h"
     },
+    {
+      source = "README.md"
+      destination = "README.md"
+    },
   ]
 
   if (is_mac) {
