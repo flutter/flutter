@@ -184,9 +184,9 @@ class TextFormField extends FormField<String> {
     Clip clipBehavior = Clip.hardEdge,
     @Deprecated(
       'Use `stylusHandwritingEnabled` instead. '
-      'This feature was deprecated after v3.26.0-0.1.pre.',
+      'This feature was deprecated after v3.27.0-0.1.pre.',
     )
-    bool scribbleEnabled = true,
+    bool scribbleEnabled = EditableText.defaultScribbleEnabled,
     bool stylusHandwritingEnabled = true,
     bool canRequestFocus = true,
   }) : assert(initialValue == null || controller == null),

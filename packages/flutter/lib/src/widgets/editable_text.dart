@@ -885,9 +885,9 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     @Deprecated(
       'Use `stylusHandwritingEnabled` instead. '
-      'This feature was deprecated after v3.26.0-0.1.pre.',
+      'This feature was deprecated after v3.27.0-0.1.pre.',
     )
-    this.scribbleEnabled = true,
+    this.scribbleEnabled = defaultScribbleEnabled,
     this.stylusHandwritingEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contentInsertionConfiguration,
@@ -1745,7 +1745,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   @Deprecated(
     'Use `stylusHandwritingEnabled` instead. '
-    'This feature was deprecated after v3.26.0-0.1.pre.',
+    'This feature was deprecated after v3.27.0-0.1.pre.',
   )
   final bool scribbleEnabled;
 
@@ -2005,6 +2005,9 @@ class EditableText extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
+
+  /// The default value for [scribbleEnabled].
+  static const bool defaultScribbleEnabled = true;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 

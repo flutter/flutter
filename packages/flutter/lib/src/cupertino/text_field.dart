@@ -297,9 +297,9 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     @Deprecated(
       'Use `stylusHandwritingEnabled` instead. '
-      'This feature was deprecated after v3.26.0-0.1.pre.',
+      'This feature was deprecated after v3.27.0-0.1.pre.',
     )
-    this.scribbleEnabled = true,
+    this.scribbleEnabled = EditableText.defaultScribbleEnabled,
     this.stylusHandwritingEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
@@ -432,7 +432,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     @Deprecated(
       'Use `stylusHandwritingEnabled` instead. '
-      'This feature was deprecated after v3.26.0-0.1.pre.',
+      'This feature was deprecated after v3.27.0-0.1.pre.',
     )
     this.scribbleEnabled = true,
     this.stylusHandwritingEnabled = true,
@@ -774,7 +774,7 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scribbleEnabled}
   @Deprecated(
     'Use `stylusHandwritingEnabled` instead. '
-    'This feature was deprecated after v3.26.0-0.1.pre.',
+    'This feature was deprecated after v3.27.0-0.1.pre.',
   )
   final bool scribbleEnabled;
 
