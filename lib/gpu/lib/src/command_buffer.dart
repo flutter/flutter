@@ -9,13 +9,15 @@ part of flutter_gpu;
 typedef CompletionCallback<T> = void Function(bool success);
 
 base class CommandBuffer extends NativeFieldWrapperClass1 {
+  final GpuContext _gpuContext;
+
   /// Creates a new CommandBuffer.
-  CommandBuffer._(GpuContext gpuContext) {
-    _initialize(gpuContext);
+  CommandBuffer._(this._gpuContext) {
+    _initialize(_gpuContext);
   }
 
   RenderPass createRenderPass(RenderTarget renderTarget) {
-    return RenderPass._(this, renderTarget);
+    return RenderPass._(_gpuContext, this, renderTarget);
   }
 
   void submit({CompletionCallback? completionCallback}) {

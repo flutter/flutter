@@ -118,6 +118,7 @@ extern void InternalFlutterGpu_RenderPass_Initialize(Dart_Handle wrapper);
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Context* context,
     int color_attachment_index,
     int load_action,
     int store_action,
