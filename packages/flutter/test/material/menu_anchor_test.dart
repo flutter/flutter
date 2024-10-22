@@ -4732,6 +4732,11 @@ void main() {
     await tester.pump();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Unattached MenuController returns false when calling isOpen', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    expect(controller.isOpen, false);
+  });
 }
 
 List<Widget> createTestMenus({
