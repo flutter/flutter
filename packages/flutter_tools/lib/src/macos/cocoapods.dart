@@ -167,7 +167,7 @@ class CocoaPods {
   }) async {
     if (!xcodeProject.podfile.existsSync()) {
       // Swift Package Manager doesn't need Podfile, so don't error.
-      if (xcodeProject.parent.usesSwiftPackageManager) {
+      if (xcodeProject.usesSwiftPackageManager) {
         return false;
       }
       throwToolExit('Podfile missing');

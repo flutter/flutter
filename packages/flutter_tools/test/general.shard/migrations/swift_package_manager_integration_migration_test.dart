@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart';
 
 const List<SupportedPlatform> supportedPlatforms = <SupportedPlatform>[
   SupportedPlatform.ios,
@@ -22,7 +23,71 @@ const List<SupportedPlatform> supportedPlatforms = <SupportedPlatform>[
 ];
 
 void main() {
+  final TestFeatureFlags swiftPackageManagerFullyEnabledFlags = TestFeatureFlags(
+    isSwiftPackageManagerEnabled: true,
+    isSwiftPackageManagerMigrationEnabled: true,
+  );
+
   group('Flutter Package Migration', () {
+    testWithoutContext('skips if swift package manager is off', () async {
+      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+      final BufferLogger testLogger = BufferLogger.test();
+
+      final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
+        FakeXcodeProject(
+          platform: SupportedPlatform.ios.name,
+          fileSystem: memoryFileSystem,
+          logger: testLogger,
+        ),
+        SupportedPlatform.ios,
+        BuildInfo.debug,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        logger: testLogger,
+        fileSystem: memoryFileSystem,
+        plistParser: FakePlistParser(),
+        features: TestFeatureFlags(
+          isSwiftPackageManagerMigrationEnabled: true,
+        ),
+      );
+      await projectMigration.migrate();
+      expect(
+        testLogger.traceText,
+        contains('The Swift Package Manager feature is off. Skipping...'),
+      );
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('skips if swift package manager migration is off', () async {
+      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+      final BufferLogger testLogger = BufferLogger.test();
+
+      final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
+        FakeXcodeProject(
+          platform: SupportedPlatform.ios.name,
+          fileSystem: memoryFileSystem,
+          logger: testLogger,
+        ),
+        SupportedPlatform.ios,
+        BuildInfo.debug,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        logger: testLogger,
+        fileSystem: memoryFileSystem,
+        plistParser: FakePlistParser(),
+        features: TestFeatureFlags(
+          isSwiftPackageManagerEnabled: true,
+        ),
+      );
+      await projectMigration.migrate();
+      expect(
+        testLogger.traceText,
+        contains(
+          'The automatic migration to add Swift Package Manager integration is off. '
+          'Skipping...',
+        ),
+      );
+      expect(testLogger.statusText, isEmpty);
+    });
+
     testWithoutContext('fails if Xcode project not found', () async {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
       final BufferLogger testLogger = BufferLogger.test();
@@ -39,6 +104,7 @@ void main() {
         logger: testLogger,
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
+        features: swiftPackageManagerFullyEnabledFlags,
       );
       await expectLater(
         () => projectMigration.migrate(),
@@ -68,6 +134,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(),
+          features: swiftPackageManagerFullyEnabledFlags,
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -96,6 +163,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(),
+          features: swiftPackageManagerFullyEnabledFlags,
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -129,6 +197,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(),
+          features: swiftPackageManagerFullyEnabledFlags,
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -160,6 +229,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(),
+          features: swiftPackageManagerFullyEnabledFlags,
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -194,6 +264,7 @@ void main() {
         logger: testLogger,
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
+        features: swiftPackageManagerFullyEnabledFlags,
       );
       await projectMigration.migrate();
       expect(testLogger.traceText, isEmpty);
@@ -233,6 +304,7 @@ void main() {
           plistParser: FakePlistParser(
             json: _plutilOutput(settingsAsJsonBeforeMigration),
           ),
+          features: swiftPackageManagerFullyEnabledFlags,
         );
         await expectLater(() => projectMigration.migrate(), throwsToolExit());
         expect(
@@ -262,6 +334,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: FakePlistParser(),
+              features: swiftPackageManagerFullyEnabledFlags,
             );
             await expectLater(
               () => projectMigration.migrate(),
@@ -296,6 +369,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: FakePlistParser(),
+              features: swiftPackageManagerFullyEnabledFlags,
             );
 
             await expectLater(
@@ -331,6 +405,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: FakePlistParser(),
+              features: swiftPackageManagerFullyEnabledFlags,
             );
 
             await expectLater(
@@ -366,6 +441,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: FakePlistParser(),
+              features: swiftPackageManagerFullyEnabledFlags,
             );
 
             await expectLater(
@@ -395,6 +471,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: FakePlistParser(),
+              features: swiftPackageManagerFullyEnabledFlags,
             );
 
             await expectLater(
@@ -423,6 +500,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: FakePlistParser(),
+              features: swiftPackageManagerFullyEnabledFlags,
             );
 
             await expectLater(
@@ -455,6 +533,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
+              features: swiftPackageManagerFullyEnabledFlags,
             );
 
             await projectMigration.migrate();
@@ -489,6 +568,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
+              features: swiftPackageManagerFullyEnabledFlags,
             );
 
             await projectMigration.migrate();
@@ -531,6 +611,7 @@ void main() {
           plistParser: FakePlistParser(
             json: _plutilOutput(settingsAsJsonBeforeMigration),
           ),
+          features: swiftPackageManagerFullyEnabledFlags,
         );
         await projectMigration.migrate();
         expect(
@@ -558,6 +639,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
+            features: swiftPackageManagerFullyEnabledFlags,
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -583,6 +665,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(json: '[]'),
+            features: swiftPackageManagerFullyEnabledFlags,
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -608,6 +691,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(json: 'this is not json'),
+            features: swiftPackageManagerFullyEnabledFlags,
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -636,6 +720,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
+            features: swiftPackageManagerFullyEnabledFlags,
           );
           expect(
             () => projectMigration.migrate(),
@@ -662,6 +747,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
+            features: swiftPackageManagerFullyEnabledFlags,
           );
           expect(
             () => projectMigration.migrate(),
@@ -688,6 +774,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
+            features: swiftPackageManagerFullyEnabledFlags,
           );
           expect(
             () => projectMigration.migrate(),
@@ -719,6 +806,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(<String>[]),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               expect(
                 () => projectMigration.migrate(),
@@ -760,6 +848,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(<String>[]),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               expect(
                 () => projectMigration.migrate(),
@@ -802,6 +891,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(<String>[]),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               expect(
                 () => projectMigration.migrate(),
@@ -844,6 +934,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -893,6 +984,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -935,6 +1027,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -981,6 +1074,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1020,6 +1114,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1075,6 +1170,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1122,6 +1218,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1184,6 +1281,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1232,6 +1330,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1271,6 +1370,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1312,6 +1412,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1357,6 +1458,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1412,6 +1514,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1460,6 +1563,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1518,6 +1622,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1566,6 +1671,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1609,6 +1715,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1656,6 +1763,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1695,6 +1803,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1752,6 +1861,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1800,6 +1910,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1858,6 +1969,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1899,6 +2011,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1945,6 +2058,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1993,6 +2107,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2049,6 +2164,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2090,6 +2206,7 @@ void main() {
                 plistParser: FakePlistParser(
                   json: _plutilOutput(settingsAsJsonBeforeMigration),
                 ),
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2131,6 +2248,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2179,6 +2297,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2235,6 +2354,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                features: swiftPackageManagerFullyEnabledFlags,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2276,6 +2396,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
+              features: swiftPackageManagerFullyEnabledFlags,
             );
             await expectLater(
               () => projectMigration.migrate(),
@@ -2340,6 +2461,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: plistParser,
+          features: swiftPackageManagerFullyEnabledFlags,
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -2379,6 +2501,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: plistParser,
+          features: swiftPackageManagerFullyEnabledFlags,
           validateBackup: true,
         );
         await expectLater(
@@ -3229,6 +3352,7 @@ class FakeSwiftPackageManagerIntegrationMigration extends SwiftPackageManagerInt
     required super.logger,
     required super.fileSystem,
     required super.plistParser,
+    required super.features,
     this.validateBackup = false,
   }) : _xcodeProject = project;
 

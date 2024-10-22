@@ -54,6 +54,10 @@ abstract class FeatureFlags {
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
 
+  /// Whether apps are automatically migrated to add Swift Package Manager
+  /// integration. Requires [isSwiftPackageManagerEnabled].
+  bool get isSwiftPackageManagerMigrationEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -74,6 +78,7 @@ const List<Feature> allFeatures = <Feature>[
   nativeAssets,
   previewDevice,
   swiftPackageManager,
+  swiftPackageManagerMigration,
 ];
 
 /// All current Flutter feature flags that can be configured.
@@ -183,6 +188,21 @@ const Feature swiftPackageManager = Feature(
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'SWIFT_PACKAGE_MANAGER',
   master: FeatureChannelSetting(
+    available: true,
+  ),
+  beta: FeatureChannelSetting(
+    available: true,
+  ),
+  stable: FeatureChannelSetting(
+    available: true,
+  ),
+);
+
+const Feature swiftPackageManagerMigration = Feature(
+  name: 'migrate iOS and macOS apps to add Swift Package Manager integration',
+  configSetting: 'enable-swift-package-manager-migration',
+  environmentOverride: 'SWIFT_PACKAGE_MANAGER_MIGRATION',
+    master: FeatureChannelSetting(
     available: true,
   ),
   beta: FeatureChannelSetting(

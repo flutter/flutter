@@ -22,7 +22,7 @@ Future<void> processPodsIfNeeded(
 
   // When using Swift Package Manager, the Podfile may not exist so if there
   // isn't a Podfile, skip processing pods.
-  if (project.usesSwiftPackageManager && !xcodeProject.podfile.existsSync() && !forceCocoaPodsOnly) {
+  if (xcodeProject.usesSwiftPackageManager && !xcodeProject.podfile.existsSync() && !forceCocoaPodsOnly) {
     return;
   }
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
@@ -47,7 +47,7 @@ Future<void> processPodsIfNeeded(
 
   // If forcing the use of only CocoaPods, but the project is using Swift
   // Package Manager, print a warning that CocoaPods will be used.
-  if (forceCocoaPodsOnly && project.usesSwiftPackageManager) {
+  if (forceCocoaPodsOnly && xcodeProject.usesSwiftPackageManager) {
     globals.logger.printWarning(
         'Swift Package Manager does not yet support this command. '
         'CocoaPods will be used instead.');

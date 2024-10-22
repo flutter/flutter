@@ -814,6 +814,7 @@ void createFakePlugins(
 class FakeIosProject extends Fake implements IosProject {
   FakeIosProject({
     required MemoryFileSystem fileSystem,
+    this.usesSwiftPackageManager = false,
   }) : hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
 
   @override
@@ -830,6 +831,9 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   File get podfile => hostAppRoot.childFile('Podfile');
+
+  @override
+  final bool usesSwiftPackageManager;
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
@@ -839,7 +843,8 @@ class FakeFlutterProject extends Fake implements FlutterProject {
     this.isModule = false,
   });
 
-  MemoryFileSystem fileSystem;
+  final MemoryFileSystem fileSystem;
+  final bool usesSwiftPackageManager;
 
   @override
   late final Directory directory = fileSystem.directory('app_name');
@@ -854,10 +859,10 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
 
   @override
-  late final IosProject ios = FakeIosProject(fileSystem: fileSystem);
-
-  @override
-  final bool usesSwiftPackageManager;
+  late final IosProject ios = FakeIosProject(
+    fileSystem: fileSystem,
+    usesSwiftPackageManager: usesSwiftPackageManager,
+  );
 
   @override
   final bool isModule;

@@ -482,6 +482,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isNativeAssetsEnabled = false,
     this.isPreviewDeviceEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
+    this.isSwiftPackageManagerMigrationEnabled = false,
   });
 
   @override
@@ -519,6 +520,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isSwiftPackageManagerEnabled;
+
+  @override
+  final bool isSwiftPackageManagerMigrationEnabled;
 
   @override
   bool isEnabled(Feature feature) {

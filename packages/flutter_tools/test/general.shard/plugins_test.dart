@@ -545,7 +545,15 @@ dependencies:
         expect(jsonContent['dependencyGraph'], expectedDependencyGraph);
         expect(jsonContent['date_created'], dateCreated.toString());
         expect(jsonContent['version'], '1.0.0');
-        expect(jsonContent['swift_package_manager_enabled'], false);
+
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
+          'ios': false,
+          'macos': false,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
 
         // Make sure tests are updated if a new object is added/removed.
         final List<String> expectedKeys = <String>[
@@ -653,16 +661,29 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        flutterProject.usesSwiftPackageManager = true;
+        iosProject.usesSwiftPackageManager = true;
+        macosProject.usesSwiftPackageManager = true;
 
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
+        await refreshPluginsList(
+          flutterProject,
+          iosPlatform: true,
+          macOSPlatform: true,
+          writeLegacyPluginsList: true,
+        );
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile
             .readAsStringSync();
         final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-        expect(jsonContent['swift_package_manager_enabled'], true);
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
+          'ios': true,
+          'macos': true,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -690,16 +711,30 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        flutterProject.usesSwiftPackageManager = true;
+        iosProject.usesSwiftPackageManager = true;
+        macosProject.usesSwiftPackageManager = true;
 
-        await refreshPluginsList(flutterProject, forceCocoaPodsOnly: true, writeLegacyPluginsList: true);
+        await refreshPluginsList(
+          flutterProject,
+          iosPlatform: true,
+          macOSPlatform: true,
+          forceCocoaPodsOnly: true,
+          writeLegacyPluginsList: true,
+        );
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile
             .readAsStringSync();
         final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-        expect(jsonContent['swift_package_manager_enabled'], false);
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
+          'ios': false,
+          'macos': false,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -2068,9 +2103,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   bool isModule = false;
 
   @override
-  bool usesSwiftPackageManager = false;
-
-  @override
   late FlutterManifest manifest;
 
   @override
@@ -2117,6 +2149,9 @@ class FakeMacOSProject extends Fake implements MacOSProject {
   late Directory managedDirectory;
 
   @override
+  bool usesSwiftPackageManager = false;
+
+  @override
   bool existsSync() => exists;
 }
 
@@ -2146,6 +2181,9 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   late File podManifestLock;
+
+  @override
+  bool usesSwiftPackageManager = false;
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {
