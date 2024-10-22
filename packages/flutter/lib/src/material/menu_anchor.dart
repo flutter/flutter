@@ -650,8 +650,7 @@ class MenuController {
 
   /// Whether or not the associated menu is currently open.
   bool get isOpen {
-    assert(_anchor != null);
-    return _anchor!._isOpen;
+    return _anchor?._isOpen ?? false;
   }
 
   /// Close the menu that this menu controller is associated with.
