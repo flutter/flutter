@@ -51,7 +51,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8739520057779466577"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8735216702926189361"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -68,7 +68,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "android_virtual_device", "version": "android_34_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8739520057779466577"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8735216702926189361"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -358,11 +358,15 @@ targets:
       tags: >
         ["framework","hostonly","shard","linux"]
 
+  # This is a benchmark that does not require an attached device. However, we
+  # are intentionally running it in the devicelab to ensure that it does not
+  # run on a VM in order to avoid noisy results from the benchmark.
   - name: Linux analyzer_benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
+      os: Linux
+      device_type: "mokey"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
@@ -370,9 +374,8 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
-      cores: "32"
       tags: >
-        ["devicelab", "hostonly", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: analyzer_benchmark
 
   - name: Linux coverage
@@ -1001,7 +1004,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux module_test
+  - name: Linux build_android_host_app_with_module_aar
+    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -1013,7 +1017,27 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
-      task_name: module_test
+      task_name: build_android_host_app_with_module_aar
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux build_android_host_app_with_module_source
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: build_android_host_app_with_module_source
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1348,7 +1372,6 @@ targets:
 
   - name: Linux android_java11_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -1362,10 +1385,12 @@ targets:
       tags: >
         ["devicelab", "hostonly", "linux"]
       test_timeout_secs: "2700"
+    runIf:
+      - packages/flutter_tools/templates/**
+      - .ci.yaml
 
   - name: Linux android_java17_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -1379,6 +1404,9 @@ targets:
       tags: >
         ["devicelab", "hostonly", "linux"]
       test_timeout_secs: "2700"
+    runIf:
+      - packages/flutter_tools/templates/**
+      - .ci.yaml
 
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
@@ -3800,6 +3828,7 @@ targets:
       - .ci.yaml
 
   - name: Mac flavors_test_macos
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/156943
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4067,7 +4096,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac module_test
+  - name: Mac build_android_host_app_with_module_aar
+    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4078,7 +4108,26 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: module_test
+      task_name: build_android_host_app_with_module_aar
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac build_android_host_app_with_module_source
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: build_android_host_app_with_module_source
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5703,7 +5752,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows module_test
+  - name: Windows build_android_host_app_with_module_aar
+    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -5715,7 +5765,27 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
-      task_name: module_test
+      task_name: build_android_host_app_with_module_aar
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows build_android_host_app_with_module_source
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: build_android_host_app_with_module_source
     runIf:
       - dev/**
       - packages/flutter_tools/**

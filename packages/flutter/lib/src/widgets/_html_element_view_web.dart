@@ -21,12 +21,16 @@ extension HtmlElementViewImpl on HtmlElementView {
     required String tagName,
     bool isVisible = true,
     ElementCreatedCallback? onElementCreated,
+    required PlatformViewHitTestBehavior hitTestBehavior,
   }) {
     return HtmlElementView(
       key: key,
-      viewType: isVisible ? ui_web.PlatformViewRegistry.defaultVisibleViewType : ui_web.PlatformViewRegistry.defaultInvisibleViewType,
+      viewType: isVisible
+          ? ui_web.PlatformViewRegistry.defaultVisibleViewType
+          : ui_web.PlatformViewRegistry.defaultInvisibleViewType,
       onPlatformViewCreated: _createPlatformViewCallbackForElementCallback(onElementCreated),
       creationParams: <dynamic, dynamic>{'tagName': tagName},
+      hitTestBehavior: hitTestBehavior,
     );
   }
 
@@ -45,7 +49,7 @@ extension HtmlElementViewImpl on HtmlElementView {
         return PlatformViewSurface(
           controller: controller,
           gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          hitTestBehavior: hitTestBehavior,
         );
       },
     );

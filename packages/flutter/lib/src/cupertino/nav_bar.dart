@@ -289,6 +289,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.padding,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
+    this.bottom,
   }) : assert(
          !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
          'Cannot specify a heroTag override if this navigation bar does not '
@@ -465,6 +466,23 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Object heroTag;
 
+  /// A widget to place at the bottom of the navigation bar.
+  ///
+  /// Only widgets that implement [PreferredSizeWidget] can be used at the
+  /// bottom of a navigation bar.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a [CupertinoSearchTextField] at the bottom of a
+  /// [CupertinoNavigationBar].
+  ///
+  /// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_navigation_bar.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
+  final PreferredSizeWidget? bottom;
+
   /// True if the navigation bar's background color has no transparency.
   @override
   bool shouldFullyObstruct(BuildContext context) {
@@ -475,7 +493,8 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   @override
   Size get preferredSize {
-    return const Size.fromHeight(_kNavBarPersistentHeight);
+    final double heightForDrawer = bottom?.preferredSize.height ?? 0.0;
+    return Size.fromHeight(_kNavBarPersistentHeight + heightForDrawer);
   }
 
   @override
@@ -586,9 +605,14 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
-        child: _PersistentNavigationBar(
-          components: components,
-          padding: widget.padding,
+        child: Column(
+          children: <Widget>[
+            _PersistentNavigationBar(
+              components: components,
+              padding: widget.padding,
+            ),
+            if (widget.bottom != null) widget.bottom!,
+          ],
         ),
       ),
     );
@@ -897,11 +921,59 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 // lose their own states.
 class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar> {
   late _NavigationBarStaticComponentsKeys keys;
+  ScrollableState? _scrollableState;
 
   @override
   void initState() {
     super.initState();
     keys = _NavigationBarStaticComponentsKeys();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
+    _scrollableState = Scrollable.maybeOf(context);
+    _scrollableState?.position.isScrollingNotifier.addListener(_handleScrollChange);
+  }
+
+  @override
+  void dispose() {
+    if (_scrollableState?.position != null) {
+      _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
+    }
+    super.dispose();
+  }
+
+  void _handleScrollChange() {
+    final ScrollPosition? position = _scrollableState?.position;
+    if (position == null || !position.hasPixels || position.pixels <= 0.0) {
+      return;
+    }
+
+    double? target;
+    final bool canScrollBottom = widget.bottom != null && (widget.bottomMode == NavigationBarBottomMode.automatic || widget.bottomMode == null);
+    final double bottomScrollOffset = canScrollBottom ? widget.bottom!.preferredSize.height : 0.0;
+
+    if (canScrollBottom && position.pixels < bottomScrollOffset) {
+      target = position.pixels > bottomScrollOffset / 2
+        ? bottomScrollOffset
+        : 0.0;
+    }
+    else if (position.pixels > bottomScrollOffset && position.pixels < bottomScrollOffset + _kNavBarLargeTitleHeightExtension) {
+      target = position.pixels > bottomScrollOffset + (_kNavBarLargeTitleHeightExtension / 2)
+        ? bottomScrollOffset + _kNavBarLargeTitleHeightExtension
+        : bottomScrollOffset;
+    }
+
+    if (target != null) {
+      position.animateTo(
+        target,
+        // Eyeballed on an iPhone 16 simulator running iOS 18.
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.fastEaseInToSlowEaseOut,
+      );
+    }
   }
 
   @override
@@ -1094,7 +1166,7 @@ class _LargeTitleNavigationBarSliverDelegate
                       bottom: 0.0,
                       child: SizedBox(
                         height: bottomHeight * (1.0 - bottomShrinkFactor),
-                        child: bottom,
+                        child: ClipRect(child: bottom),
                       ),
                     ),
                 ],
