@@ -434,7 +434,7 @@ static bool BindUniform(
       return false;
   }
 
-  if (!buffer || static_cast<size_t>(offset_in_bytes + length_in_bytes) >=
+  if (!buffer || static_cast<size_t>(offset_in_bytes + length_in_bytes) >
                      buffer->GetDeviceBufferDescriptor().size) {
     return false;
   }
