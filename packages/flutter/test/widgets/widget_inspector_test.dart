@@ -1983,7 +1983,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           }
 
           /// Returns whether the child is missing the "type" field.
-          /// 
+          ///
           /// This should always be true for nodes in the abbreviated widget
           /// tree.
           bool isMissingType(Map<String, Object?> childJson) {

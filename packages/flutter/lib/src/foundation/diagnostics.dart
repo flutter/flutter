@@ -1630,7 +1630,7 @@ abstract class DiagnosticsNode {
         result = essentialDetails;
       } else {
         result = <String, Object?>{
-          ...essentialDetails, 
+          ...essentialDetails,
           'type': runtimeType.toString(),
           if (name != null)
             'name': name,
