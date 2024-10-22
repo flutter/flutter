@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'dart:js_util' as js_util;
 
 import 'package:test/bootstrap/browser.dart';
@@ -292,6 +293,29 @@ void testMain() {
       },
       skip: !Surface.offscreenCanvasSupported,
     );
+
+    test('can recover from MakeSWCanvasSurface failure', () async {
+      debugOverrideJsConfiguration(<String, Object?>{
+        'canvasKitForceCpuOnly': true,
+      }.jsify() as JsFlutterConfiguration?);
+      addTearDown(() => debugOverrideJsConfiguration(null));
+
+      final Surface surface = Surface();
+      surface.debugThrowOnSoftwareSurfaceCreation = true;
+      expect(
+        () => surface.createOrUpdateSurface(const BitmapSize(12, 34)),
+        throwsA(isA<CanvasKitError>()),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(surface.debugForceNewContext, isFalse);
+
+      surface.debugThrowOnSoftwareSurfaceCreation = false;
+      final ckSurface = surface.createOrUpdateSurface(const BitmapSize(12, 34));
+
+      expect(ckSurface.surface.width(), 12);
+      expect(ckSurface.surface.height(), 34);
+    });
   });
 }
 
