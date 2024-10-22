@@ -314,6 +314,22 @@ void main() {
       bottom: BorderSide(width: 20),
     );
     expect(nonUniformBorderDirectional.dimensions, const EdgeInsetsDirectional.fromSTEB(5, 5, 0, 20));
+
+    const Border uniformWidthNonUniformStrokeAlignBorder = Border(
+      left: BorderSide(width: 10),
+      top: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
+      right: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside),
+      bottom: BorderSide(width: 10),
+    );
+    expect(uniformWidthNonUniformStrokeAlignBorder.dimensions, const EdgeInsets.fromLTRB(10, 5, 0, 10));
+
+    const BorderDirectional uniformWidthNonUniformStrokeAlignBorderDirectional = BorderDirectional(
+      start: BorderSide(width: 10),
+      top: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
+      end: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside),
+      bottom: BorderSide(width: 10),
+    );
+    expect(uniformWidthNonUniformStrokeAlignBorderDirectional.dimensions, const EdgeInsetsDirectional.fromSTEB(10, 5, 0, 10));
   });
 
   testWidgets('Non-Uniform Border variations', (WidgetTester tester) async {
