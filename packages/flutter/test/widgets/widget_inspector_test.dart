@@ -1984,8 +1984,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
           /// Returns whether the child is missing the "type" field.
           ///
-          /// This should always be true for nodes in the abbreviated widget
-          /// tree.
+          /// This should always be true for nodes in the widget tree without
+          /// full details.
           bool isMissingType(Map<String, Object?> childJson) {
             return childJson['type'] == null;
           }
@@ -2328,7 +2328,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           });
 
           testWidgets(
-              'abbreviated tree using ext.flutter.inspector.getRootWidgetTree',
+              'tree without full details using ext.flutter.inspector.getRootWidgetTree',
               (WidgetTester tester) async {
             const String group = 'test-group';
 
@@ -2348,7 +2348,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 'groupName': group,
                 'isSummaryTree': 'false',
                 'withPreviews': 'false',
-                'abbreviated': 'true',
+                'fullDetails': 'false',
               },
             ))! as Map<String, Object?>;
 
@@ -2460,7 +2460,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           });
 
           testWidgets(
-              'abbreviated tree with previews using ext.flutter.inspector.getRootWidgetTree',
+              'tree without full details and with previews using ext.flutter.inspector.getRootWidgetTree',
               (WidgetTester tester) async {
             const String group = 'test-group';
 
@@ -2480,7 +2480,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 'groupName': group,
                 'isSummaryTree': 'false',
                 'withPreviews': 'true',
-                'abbreviated': 'true',
+                'fullDetails': 'false',
               },
             ))! as Map<String, Object?>;
 
