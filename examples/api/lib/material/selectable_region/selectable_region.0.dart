@@ -64,24 +64,23 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
   final SelectionRegistrar registrar;
 
   @override
-  RenderSelectableAdapter createRenderObject(BuildContext context) {
-    return RenderSelectableAdapter(
+  _RenderSelectableAdapter createRenderObject(BuildContext context) {
+    return _RenderSelectableAdapter(
       DefaultSelectionStyle.of(context).selectionColor!,
       registrar,
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSelectableAdapter renderObject) {
+  void updateRenderObject(BuildContext context, _RenderSelectableAdapter renderObject) {
     renderObject
       ..selectionColor = DefaultSelectionStyle.of(context).selectionColor!
       ..registrar = registrar;
   }
 }
 
-@visibleForTesting
-class RenderSelectableAdapter extends RenderProxyBox with Selectable, SelectionRegistrant {
-  RenderSelectableAdapter(
+class _RenderSelectableAdapter extends RenderProxyBox with Selectable, SelectionRegistrant {
+  _RenderSelectableAdapter(
     Color selectionColor,
     SelectionRegistrar registrar,
   )   : _selectionColor = selectionColor,
