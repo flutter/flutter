@@ -566,7 +566,7 @@ void main() {
                       child: Text(val),
                     );
                   }).toList(),
-                  validator: (String? v) => v == null ? 'Must select value' : null,
+                  validator: (BuildContext context, String? v) => v == null ? 'Must select value' : null,
                   onChanged: (String? newValue) {},
                   onSaved: (String? v) {
                     setState(() {

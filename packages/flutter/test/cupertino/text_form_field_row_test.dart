@@ -182,7 +182,7 @@ void main() {
         home: Center(
           child: CupertinoTextFormFieldRow(
             autovalidateMode: AutovalidateMode.always,
-            validator: (String? value) {
+            validator: (BuildContext context, String? value) {
               validateCalled++;
               return null;
             },
@@ -206,7 +206,7 @@ void main() {
           child: CupertinoTextFormFieldRow(
             enabled: true,
             autovalidateMode: AutovalidateMode.always,
-            validator: (String? value) {
+            validator: (BuildContext context, String? value) {
               validateCalled += 1;
               return null;
             },
@@ -247,8 +247,7 @@ void main() {
     expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
     expect(find.text('Paste'), findsNothing);
 
-    final EditableTextState editableTextState =
-        tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     // Make sure it does not paint caret for a period of time.
@@ -318,8 +317,7 @@ void main() {
 
     expect(find.text('initialValue'), findsOneWidget);
 
-    final FormFieldState<String> state = tester
-        .state<FormFieldState<String>>(find.byType(CupertinoTextFormFieldRow));
+    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(CupertinoTextFormFieldRow));
     state.didChange('changedValue');
 
     expect(find.text('initialValue'), findsNothing);
@@ -344,8 +342,7 @@ void main() {
       ),
     );
 
-    state = tester
-        .state<FormFieldState<String>>(find.byType(CupertinoTextFormFieldRow));
+    state = tester.state<FormFieldState<String>>(find.byType(CupertinoTextFormFieldRow));
 
     await tester.enterText(find.byType(CupertinoTextField), 'Soup');
 
@@ -363,8 +360,7 @@ void main() {
       ),
     );
 
-    final CupertinoTextField widget =
-        tester.widget(find.byType(CupertinoTextField));
+    final CupertinoTextField widget = tester.widget(find.byType(CupertinoTextField));
     expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
   });
 
@@ -376,7 +372,7 @@ void main() {
         home: CupertinoPageScaffold(
           child: CupertinoTextFormFieldRow(
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (String? value) {
+            validator: (BuildContext context, String? value) {
               validateCalled++;
               return null;
             },
@@ -398,7 +394,7 @@ void main() {
           child: CupertinoTextFormFieldRow(
             initialValue: 'Value',
             autovalidateMode: AutovalidateMode.always,
-            validator: (String? value) => 'Error',
+            validator: (BuildContext context, String? value) => 'Error',
           ),
         ),
       ),
@@ -420,7 +416,7 @@ void main() {
           child: CupertinoTextFormFieldRow(
             controller: controller,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (String? value) => 'Error',
+            validator: (BuildContext context, String? value) => 'Error',
           ),
         ),
       ),
@@ -491,8 +487,7 @@ void main() {
     expect(rtlTextFieldWidget.textDirection, TextDirection.rtl);
   });
 
-  testWidgets(
-      'CupertinoTextFormFieldRow onChanged is called when the form is reset', (WidgetTester tester) async {
+  testWidgets('CupertinoTextFormFieldRow onChanged is called when the form is reset', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123009.
     final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -521,13 +516,13 @@ void main() {
 
     // Change value to 'changedValue'.
     await tester.enterText(find.byType(CupertinoTextField), 'changedValue');
-    expect(stateKey.currentState!.value,'changedValue');
+    expect(stateKey.currentState!.value, 'changedValue');
     expect(value, 'changedValue');
 
     // Should be back to 'initialValue' when the form is reset.
     formKey.currentState!.reset();
     await tester.pump();
-    expect(stateKey.currentState!.value,'initialValue');
+    expect(stateKey.currentState!.value, 'initialValue');
     expect(value, 'initialValue');
   });
 }

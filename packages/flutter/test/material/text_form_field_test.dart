@@ -579,7 +579,7 @@ void main() {
           child: Center(
             child: TextFormField(
               autovalidateMode: AutovalidateMode.always,
-              validator: (String? value) {
+              validator: (BuildContext context, String? value) {
                 validateCalled++;
                 return null;
               },
@@ -605,7 +605,7 @@ void main() {
             child: TextFormField(
               enabled: true,
               autovalidateMode: AutovalidateMode.always,
-              validator: (String? value) {
+              validator: (BuildContext context, String? value) {
                 validateCalled += 1;
                 return null;
               },
@@ -1080,7 +1080,7 @@ void main() {
           child: Scaffold(
             body: TextFormField(
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: (String? value) {
+              validator: (BuildContext context, String? value) {
                 validateCalled++;
                 return null;
               },
@@ -1638,7 +1638,7 @@ void main() {
                 ),
               ),
               cursorErrorColor: cursorErrorColor,
-              validator: (String? value) {
+              validator: (BuildContext context, String? value) {
                 return 'Please enter value';
               },
             ),
@@ -1722,7 +1722,7 @@ void main() {
       final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
       const String forceErrorText = 'Forcing error.';
       const String validString = 'Valid string';
-      String? validator(String? s) => s == validString ? null : 'Error text';
+      String? validator(BuildContext c, String? s) => s == validString ? null : 'Error text';
 
       await tester.pumpWidget(
         MaterialApp(

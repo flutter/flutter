@@ -35,8 +35,9 @@ void main() {
   });
 
   testWidgets('State restoration (No Form ancestor) - onUserInteraction error text validation', (WidgetTester tester) async {
-    String? errorText(String? value) => '$value/error';
+    String? errorText(BuildContext context, String? value) => '$value/error';
     late GlobalKey<FormFieldState<String>> formState;
+    late BuildContext capturedContext;
 
     Widget builder() {
       return CupertinoApp(
@@ -49,6 +50,7 @@ void main() {
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter state) {
                   formState = GlobalKey<FormFieldState<String>>();
+                  capturedContext = context;
                   return Material(
                     child: CupertinoTextFormFieldRow(
                       key: formState,
@@ -69,32 +71,33 @@ void main() {
     await tester.pumpWidget(builder());
 
     // No error text is visible yet.
-    expect(find.text(errorText('foo')!), findsNothing);
+    expect(find.text(errorText(capturedContext, 'foo')!), findsNothing);
 
     await tester.enterText(find.byType(CupertinoTextFormFieldRow), 'bar');
     await tester.pumpAndSettle();
-    expect(find.text(errorText('bar')!), findsOneWidget);
+    expect(find.text(errorText(capturedContext, 'bar')!), findsOneWidget);
 
     final TestRestorationData data = await tester.getRestorationData();
     await tester.restartAndRestore();
     // Error text should be present after restart and restore.
-    expect(find.text(errorText('bar')!), findsOneWidget);
+    expect(find.text(errorText(capturedContext, 'bar')!), findsOneWidget);
 
     // Resetting the form state should remove the error text.
     formState.currentState!.reset();
     await tester.pumpAndSettle();
-    expect(find.text(errorText('bar')!), findsNothing);
+    expect(find.text(errorText(capturedContext, 'bar')!), findsNothing);
     await tester.restartAndRestore();
     // Error text should still be removed after restart and restore.
-    expect(find.text(errorText('bar')!), findsNothing);
+    expect(find.text(errorText(capturedContext, 'bar')!), findsNothing);
 
     await tester.restoreFrom(data);
-    expect(find.text(errorText('bar')!), findsOneWidget);
+    expect(find.text(errorText(capturedContext, 'bar')!), findsOneWidget);
   });
 
   testWidgets('State Restoration (No Form ancestor) - validator sets the error text only when validate is called', (WidgetTester tester) async {
-    String? errorText(String? value) => '$value/error';
+    String? errorText(BuildContext context, String? value) => '$value/error';
     late GlobalKey<FormFieldState<String>> formState;
+    late BuildContext capturedContext;
 
     Widget builder(AutovalidateMode mode) {
       return CupertinoApp(
@@ -107,6 +110,7 @@ void main() {
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter state) {
                   formState = GlobalKey<FormFieldState<String>>();
+                  capturedContext = context;
                   return Material(
                     child: CupertinoTextFormFieldRow(
                       key: formState,
@@ -134,21 +138,21 @@ void main() {
       await tester.pump();
 
       // We have to manually validate if we're not autovalidating.
-      expect(find.text(errorText(testValue)!), findsNothing);
+      expect(find.text(errorText(capturedContext, testValue)!), findsNothing);
       formState.currentState!.validate();
       await tester.pump();
-      expect(find.text(errorText(testValue)!), findsOneWidget);
+      expect(find.text(errorText(capturedContext, testValue)!), findsOneWidget);
       final TestRestorationData data = await tester.getRestorationData();
       await tester.restartAndRestore();
       // Error text should be present after restart and restore.
-      expect(find.text(errorText(testValue)!), findsOneWidget);
+      expect(find.text(errorText(capturedContext, testValue)!), findsOneWidget);
 
       formState.currentState!.reset();
       await tester.pumpAndSettle();
-      expect(find.text(errorText(testValue)!), findsNothing);
+      expect(find.text(errorText(capturedContext, testValue)!), findsNothing);
 
       await tester.restoreFrom(data);
-      expect(find.text(errorText(testValue)!), findsOneWidget);
+      expect(find.text(errorText(capturedContext, testValue)!), findsOneWidget);
 
       // Try again with autovalidation. Should validate immediately.
       formState.currentState!.reset();
@@ -156,10 +160,10 @@ void main() {
       await tester.enterText(find.byType(CupertinoTextFormFieldRow), testValue);
       await tester.pump();
 
-      expect(find.text(errorText(testValue)!), findsOneWidget);
+      expect(find.text(errorText(capturedContext, testValue)!), findsOneWidget);
       await tester.restartAndRestore();
       // Error text should be present after restart and restore.
-      expect(find.text(errorText(testValue)!), findsOneWidget);
+      expect(find.text(errorText(capturedContext, testValue)!), findsOneWidget);
     }
 
     await checkErrorText('Test');
