@@ -7189,6 +7189,57 @@ void main() {
     expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
   });
 
+  testWidgets('InputDecoration with WidgetStateInputBorder', (WidgetTester tester) async {
+    const WidgetStateInputBorder outlineInputBorder = WidgetStateInputBorder.fromMap(
+      <WidgetStatesConstraint, InputBorder>{
+        WidgetState.focused: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue, width: 4.0),
+        ),
+        WidgetState.hovered: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.cyan, width: 8.0),
+        ),
+        WidgetState.any: OutlineInputBorder(),
+      },
+    );
+
+    RenderObject getBorder() {
+      return tester.renderObject(
+        find.descendant(
+          of: find.byType(TextField),
+          matching: find.byType(CustomPaint),
+        ),
+      );
+    }
+
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            focusNode: focusNode,
+            decoration: const InputDecoration(
+              border: outlineInputBorder,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(getBorder(), paints..rrect(strokeWidth: 1.0));
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(getBorder(), paints..rrect(color: Colors.blue, strokeWidth: 4.0));
+
+    focusNode.unfocus();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(TextField)));
+    await tester.pumpAndSettle();
+    expect(getBorder(), paints..rrect(color: Colors.cyan, strokeWidth: 8.0));
+
+    focusNode.dispose();
+  });
+
   testWidgets('InputDecorator constrained to 0x0', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17710
     await tester.pumpWidget(
