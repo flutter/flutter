@@ -4667,12 +4667,18 @@ void main() {
       return results;
     }
 
+    late final OverlayEntry overlayEntry;
+    addTearDown((){
+      overlayEntry.remove();
+      overlayEntry.dispose();
+    });
+
     Widget boilerplate() {
       return MaterialApp(
         home: Overlay(
           key: overlayKey,
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            overlayEntry = OverlayEntry(
               builder: (BuildContext context) {
                 return Scaffold(
                   body: Center(
@@ -4717,6 +4723,14 @@ void main() {
       ancestorRenderTheaters(tester.renderObject(find.byKey(menuItemKey))).single,
       tester.renderObject(find.byWidget(rootOverlay)),
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/156572.
+  testWidgets('Unattached MenuController does not throw when calling close', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    controller.close();
+    await tester.pump();
+    expect(tester.takeException(), isNull);
   });
 }
 
