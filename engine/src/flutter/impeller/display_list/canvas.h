@@ -121,24 +121,25 @@ class Canvas {
       Entity::RenderingMode rendering_mode)>;
 
   Canvas(ContentContext& renderer,
-         RenderTarget& render_target,
+         const RenderTarget& render_target,
          bool requires_readback);
 
   explicit Canvas(ContentContext& renderer,
-                  RenderTarget& render_target,
+                  const RenderTarget& render_target,
                   bool requires_readback,
                   Rect cull_rect);
 
   explicit Canvas(ContentContext& renderer,
-                  RenderTarget& render_target,
+                  const RenderTarget& render_target,
                   bool requires_readback,
                   IRect cull_rect);
 
   ~Canvas() = default;
 
   /// @brief Update the backdrop data used to group together backdrop filters
-  ///        within the same layer.
-  void SetBackdropData(std::unordered_map<int64_t, BackdropData> backdrop_data);
+  ///        within the same layer
+  void SetBackdropData(std::unordered_map<int64_t, BackdropData> backdrop_data,
+                       size_t backdrop_count);
 
   /// @brief Return the culling bounds of the current render target, or nullopt
   ///        if there is no coverage.
@@ -238,17 +239,36 @@ class Canvas {
     Rect coverage;
   };
 
+  // Visible for testing.
+  bool RequiresReadback() const { return requires_readback_; }
+
  private:
   ContentContext& renderer_;
-  RenderTarget& render_target_;
-  const bool requires_readback_;
+  RenderTarget render_target_;
+  bool requires_readback_;
   EntityPassClipStack clip_coverage_stack_;
 
   std::deque<CanvasStackEntry> transform_stack_;
   std::optional<Rect> initial_cull_rect_;
   std::vector<LazyRenderingConfig> render_passes_;
   std::vector<SaveLayerState> save_layer_state_;
+
+  /// Backdrop layers identified by an optional backdrop id.
+  ///
+  /// This is not the same as the [backdrop_count_] below as not
+  /// all backdrop filters will have an identified backdrop id. The
+  /// backdrop_count_ is also mutated during rendering.
   std::unordered_map<int64_t, BackdropData> backdrop_data_;
+
+  /// The remaining number of backdrop filters.
+  ///
+  /// This value is decremented while rendering. When it reaches 0, then
+  /// the FlipBackdrop can use the onscreen render target instead of
+  /// another offscreen.
+  ///
+  /// This optimization is disabled on devices that do not support framebuffer
+  /// fetch (iOS Simulator and certain OpenGLES devices).
+  size_t backdrop_count_ = 0u;
 
   // All geometry objects created for regular draws can be stack allocated,
   // but clip geometries must be cached for record/replay for backdrop filters
@@ -270,6 +290,27 @@ class Canvas {
   void SkipUntilMatchingRestore(size_t total_content_depth);
 
   void SetupRenderPass();
+
+  /// @brief  Ends the current render pass, saving the result as a texture, and
+  ///         thenrestart it with the backdrop cleared to the previous contents.
+  ///
+  /// The returned texture is used as the input for backdrop filters and
+  /// emulated advanced blends. Returns nullptr if there was a validation
+  /// failure.
+  ///
+  /// [should_remove_texture] defaults to false. If true, the render target
+  /// texture is removed from the entity pass target. This allows the texture to
+  /// be cached by the canvas dispatcher for usage in the backdrop filter reuse
+  /// mechanism.
+  ///
+  /// [should_use_onscreen] defaults to false. If true, the results are flipped
+  /// to the onscreen render target. This will set requires_readback_ to false.
+  /// This action is only safe to perform when there are no more backdrop
+  /// filters or advanced blends, or no more backdrop filters and the device
+  /// supports framebuffer fetch.
+  std::shared_ptr<Texture> FlipBackdrop(Point global_pass_position,
+                                        bool should_remove_texture = false,
+                                        bool should_use_onscreen = false);
 
   bool BlitToOnscreen();
 
