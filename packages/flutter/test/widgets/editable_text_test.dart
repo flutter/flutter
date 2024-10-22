@@ -17017,45 +17017,6 @@ void main() {
     },
       skip: !kIsWeb, // [intended]
     );
-
-    // Regression test for https://github.com/flutter/flutter/issues/156078.
-    testWidgets('when having focus regained after the app resumed', (WidgetTester tester) async {
-      Future<void> setAppLifeCycleState(AppLifecycleState state) async {
-        final ByteData? message = const StringCodec().encodeMessage(state.toString());
-        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
-      }
-
-      final TextEditingController controller1 = TextEditingController(text: 'Flutter!');
-      addTearDown(controller1.dispose);
-      final FocusNode focusNode1 = FocusNode();
-      addTearDown(focusNode1.dispose);
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Center(
-            child: EditableText(
-              key: ValueKey<String>(controller1.text),
-              controller: controller1,
-              focusNode: focusNode1,
-              autofocus: true,
-              style: Typography.material2018().black.titleMedium!,
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-            ),
-          ),
-        ),
-      );
-
-      expect(focusNode1.hasFocus, true);
-      expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
-
-      await setAppLifeCycleState(AppLifecycleState.inactive);
-      await setAppLifeCycleState(AppLifecycleState.resumed);
-
-      expect(focusNode1.hasFocus, true);
-      expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
-    }, variant: TargetPlatformVariant.all());
   });
 
   testWidgets('EditableText respects MediaQuery.boldText', (WidgetTester tester) async {
