@@ -16,6 +16,7 @@
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
+#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/geometry/geometry.h"
@@ -225,8 +226,7 @@ class Canvas {
   void DrawAtlas(const std::shared_ptr<AtlasContents>& atlas_contents,
                  const Paint& paint);
 
-  void ClipGeometry(std::unique_ptr<Geometry> geometry,
-                    Entity::ClipOperation clip_op);
+  void ClipGeometry(const Geometry& geometry, Entity::ClipOperation clip_op);
 
   void EndReplay();
 
@@ -326,10 +326,6 @@ class Canvas {
                                                bool reuse_depth = false);
 
   void AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth = false);
-
-  void AddClipEntityToCurrentPass(Entity& entity);
-
-  void RestoreClip();
 
   bool AttemptDrawBlurredRRect(const Rect& rect,
                                Size corner_radii,
