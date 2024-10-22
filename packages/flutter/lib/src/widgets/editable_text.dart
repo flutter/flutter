@@ -5831,7 +5831,12 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
 
     final RenderBox renderBox = widget.editableKey.currentContext!.findRenderObject()! as RenderBox;
 
-    // TODO(justinmc): Hit test the field before the handles?
+    final Rect renderBoxRect = _localToGlobalRect(renderBox.paintBounds, renderBox);
+    final Rect hitRect = _pad(renderBoxRect, _handwritingPadding);
+    if (!hitRect.contains(event.position)) {
+      return;
+    }
+
     // A stylus event that starts on a selection handle does not start
     // handwriting, it moves the handle.
     final Offset? startHandleOffset = _renderEditable.startHandleLayerLink.leader?.offset;
@@ -5855,12 +5860,6 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
           return;
         }
       }
-    }
-
-    final Rect renderBoxRect = _localToGlobalRect(renderBox.paintBounds, renderBox);
-    final Rect hitRect = _pad(renderBoxRect, _handwritingPadding);
-    if (!hitRect.contains(event.position)) {
-      return;
     }
 
     if (!widget.focusNode.hasFocus) {
