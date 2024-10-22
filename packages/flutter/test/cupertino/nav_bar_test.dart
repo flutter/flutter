@@ -2089,6 +2089,7 @@ void main() {
 
   testWidgets('Large title snaps up to persistent nav bar when partially scrolled over halfway up', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     const double largeTitleHeight = 52.0;
 
     await tester.pumpWidget(
@@ -2130,6 +2131,7 @@ void main() {
 
   testWidgets('Large title snaps back to extended height when partially scrolled halfway up or less', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     const double largeTitleHeight = 52.0;
 
     await tester.pumpWidget(
@@ -2170,6 +2172,7 @@ void main() {
 
   testWidgets('Large title and bottom snap up when partially scrolled over halfway up in automatic mode', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     const double largeTitleHeight = 52.0;
     const double bottomHeight = 100.0;
 
@@ -2228,6 +2231,7 @@ void main() {
 
   testWidgets('Large title and bottom snap down when partially scrolled halfway up or less in automatic mode', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     const double largeTitleHeight = 52.0;
     const double bottomHeight = 100.0;
 
