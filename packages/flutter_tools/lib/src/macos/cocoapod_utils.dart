@@ -25,13 +25,6 @@ Future<void> processPodsIfNeeded(
   if (project.usesSwiftPackageManager && !xcodeProject.podfile.existsSync() && !forceCocoaPodsOnly) {
     return;
   }
-  // Ensure that the plugin list is up to date, since hasPlugins relies on it.
-  await refreshPluginsList(
-    project,
-    iosPlatform: project.ios.existsSync(),
-    macOSPlatform: project.macos.existsSync(),
-    forceCocoaPodsOnly: forceCocoaPodsOnly,
-  );
 
   // If there are no plugins and if the project is a not module with an existing
   // podfile, skip processing pods

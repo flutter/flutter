@@ -1131,7 +1131,7 @@ Future<void> injectPlugins(
 ///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 bool hasPlugins(FlutterProject project) {
-  return _readFileContent(project.flutterPluginsFile) != null;
+  return _readFileContent(project.flutterPluginsDependenciesFile) != null;
 }
 
 /// Resolves the plugin implementations for all platforms.
