@@ -5,6 +5,8 @@
 import 'dart:io';
 
 import 'package:file/local.dart';
+
+import 'apk_utils.dart';
 import 'task_result.dart';
 import 'utils.dart';
 
@@ -16,13 +18,13 @@ import 'utils.dart';
 /// by an easily find/replaceable string.
 const String gradleSettingsFileContent = r'''
 pluginManagement {
-    def flutterSdkPath = {
-        def properties = new Properties()
-        file("local.properties").withInputStream { properties.load(it) }
-        def flutterSdkPath = properties.getProperty("flutter.sdk")
-        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
-        return flutterSdkPath
-    }()
+    val flutterSdkPath = run {
+        val properties = java.util.Properties()
+        file("local.properties").inputStream().use { properties.load(it) }
+        val flutterSdkPath = properties.getProperty("flutter.sdk")
+        require(flutterSdkPath != null) { "flutter.sdk not set in local.properties" }
+        flutterSdkPath
+    }
 
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
@@ -34,12 +36,12 @@ pluginManagement {
 }
 
 plugins {
-    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "AGP_REPLACE_ME" apply false
-    id "org.jetbrains.kotlin.android" version "KGP_REPLACE_ME" apply false
+    id("dev.flutter.flutter-plugin-loader") version "1.0.0"
+    id("com.android.application") version "AGP_REPLACE_ME" apply false
+    id("org.jetbrains.kotlin.android") version "KGP_REPLACE_ME" apply false
 }
 
-include ":app"
+include(":app")
 
 ''';
 
@@ -58,7 +60,7 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-GRADLE_REPLACE
 ''';
 
 const String gradleReplacementString = 'GRADLE_REPLACE_ME';
-const String flutterCompileSdkString = 'flutter.compileSdkVersion';
+final RegExp flutterCompileSdkString = RegExp(r'flutter\.compileSdkVersion|flutter\.compileSdk');
 
 /// A simple class containing a Kotlin, Gradle, and AGP version.
 class VersionTuple {
@@ -110,8 +112,7 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
       final String appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
 
       if (versions.compileSdkVersion != null) {
-        final File appGradleBuild = localFileSystem.file(localFileSystem.path.join(
-            appPath, 'android', 'app', 'build.gradle'));
+        final File appGradleBuild = getAndroidBuildFile(localFileSystem.path.join(appPath, 'android', 'app'));
         final String appBuildContent = appGradleBuild.readAsStringSync()
             .replaceFirst(flutterCompileSdkString, versions.compileSdkVersion!);
         appGradleBuild.writeAsStringSync(appBuildContent);
@@ -126,12 +127,14 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
       );
       await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
-      final File gradleSettings = localFileSystem.file(localFileSystem.path.join(
-          appPath, 'android', 'settings.gradle'));
+      final File gradleSettingsFile = getAndroidBuildFile(
+        localFileSystem.path.join(appPath, 'android'),
+        settings: true,
+      );
       final String settingsContent = gradleSettingsFileContent
           .replaceFirst(agpReplacementString, versions.agpVersion)
           .replaceFirst(kgpReplacementString, versions.kotlinVersion);
-      await gradleSettings.writeAsString(settingsContent, flush: true);
+      await gradleSettingsFile.writeAsString(settingsContent, flush: true);
 
 
       // Ensure that gradle files exists from templates.

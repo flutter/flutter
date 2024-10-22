@@ -54,8 +54,15 @@ for (final String agpVersion in agpVersions) {
           final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
           final Directory exampleDirectory = packageDirectory.childDirectory('example');
 
-        final File buildGradleFile = exampleDirectory.childDirectory('android').childFile('build.gradle');
-        final File appBuildGradleFile = exampleDirectory.childDirectory('android').childDirectory('app').childFile('build.gradle');
+        File buildGradleFile = exampleDirectory.childDirectory('android').childFile('build.gradle');
+        if (!buildGradleFile.existsSync()) {
+          buildGradleFile = exampleDirectory.childDirectory('android').childFile('build.gradle.kts');
+        }
+
+        File appBuildGradleFile = exampleDirectory.childDirectory('android').childDirectory('app').childFile('build.gradle');
+        if (!appBuildGradleFile.existsSync()) {
+          appBuildGradleFile = exampleDirectory.childDirectory('android').childDirectory('app').childFile('build.gradle.kts');
+        }
 
         expect(buildGradleFile, exists);
         expect(appBuildGradleFile, exists);
