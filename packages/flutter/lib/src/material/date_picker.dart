@@ -156,6 +156,13 @@ const double _fontSizeToScale = 14.0;
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how to create a basic date picker.
+/// Tapping the button displays a date picker which returns the selected date.
+///
+/// ** See code in examples/api/lib/material/date_picker/show_date_picker.1.dart **
+/// {@end-tool}
+///
 /// ### State Restoration
 ///
 /// Using this method will not enable state restoration for the date picker.
