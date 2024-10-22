@@ -925,6 +925,17 @@ class ClipRRect extends SingleChildRenderObjectWidget {
 /// prevents its child from painting outside that oval, but the size and
 /// location of the clip oval can be customized using a custom [clipper].
 ///
+/// {@tool snippet}
+///
+/// This example clips an image of a cat using an oval.
+///
+/// ```dart
+/// ClipOval(
+///   child: Image.asset('images/cat.png'),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CustomClipper], for information about creating custom clips.
