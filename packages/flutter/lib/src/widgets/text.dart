@@ -1243,7 +1243,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     }
     for (int index = 0; index < ranges.length; index++) {
       final SelectedContentRange range = ranges[index];
-      if (!range.isValid) {
+      if (range.isEmpty) {
         if (foundStart) {
           return SelectedContentRange(
             contentLength: totalContentLength,

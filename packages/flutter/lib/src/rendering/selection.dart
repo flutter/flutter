@@ -186,8 +186,8 @@ class SelectedContentRange with Diagnosticable {
   /// {@macro flutter.rendering.selection.SelectedContentRange.selectionOffsets}
   final int endOffset;
 
-  /// Whether this range represents a valid position in the content.
-  bool get isValid => startOffset >= 0 && endOffset >= 0;
+  /// Whether this range represents an empty selection.
+  bool get isEmpty => startOffset == -1 && endOffset == -1;
 
   @override
   bool operator ==(Object other) {
