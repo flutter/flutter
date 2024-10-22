@@ -1626,43 +1626,39 @@ abstract class DiagnosticsNode {
           ),
       };
 
-      if (!fullDetails) {
-        result = essentialDetails;
-      } else {
-        result = <String, Object?>{
-          ...essentialDetails,
-          'type': runtimeType.toString(),
-          if (name != null)
-            'name': name,
-          if (!showSeparator)
-            'showSeparator': showSeparator,
-          if (level != DiagnosticLevel.info)
-            'level': level.name,
-          if (!showName)
-            'showName': showName,
-          if (emptyBodyDescription != null)
-            'emptyBodyDescription': emptyBodyDescription,
-          if (style != DiagnosticsTreeStyle.sparse)
-            'style': style!.name,
-          if (allowTruncate)
-            'allowTruncate': allowTruncate,
-          if (hasChildren)
-            'hasChildren': hasChildren,
-          if (linePrefix?.isNotEmpty ?? false)
-            'linePrefix': linePrefix,
-          if (!allowWrap)
-            'allowWrap': allowWrap,
-          if (allowNameWrap)
-            'allowNameWrap': allowNameWrap,
-          if (delegate.includeProperties)
-            'properties': toJsonList(
-              delegate.filterProperties(getProperties(), this),
-              this,
-              delegate,
-              fullDetails: fullDetails,
-            ),
-        };
-      }
+      result = !fullDetails ? essentialDetails : <String, Object?>{
+        ...essentialDetails,
+        'type': runtimeType.toString(),
+        if (name != null)
+          'name': name,
+        if (!showSeparator)
+          'showSeparator': showSeparator,
+        if (level != DiagnosticLevel.info)
+          'level': level.name,
+        if (!showName)
+          'showName': showName,
+        if (emptyBodyDescription != null)
+          'emptyBodyDescription': emptyBodyDescription,
+        if (style != DiagnosticsTreeStyle.sparse)
+          'style': style!.name,
+        if (allowTruncate)
+          'allowTruncate': allowTruncate,
+        if (hasChildren)
+          'hasChildren': hasChildren,
+        if (linePrefix?.isNotEmpty ?? false)
+          'linePrefix': linePrefix,
+        if (!allowWrap)
+          'allowWrap': allowWrap,
+        if (allowNameWrap)
+          'allowNameWrap': allowNameWrap,
+        if (delegate.includeProperties)
+          'properties': toJsonList(
+            delegate.filterProperties(getProperties(), this),
+            this,
+            delegate,
+            fullDetails: fullDetails,
+          ),
+      };
       return true;
     }());
     return result;
@@ -1677,9 +1673,8 @@ abstract class DiagnosticsNode {
     List<DiagnosticsNode>? nodes,
     DiagnosticsNode? parent,
     DiagnosticsSerializationDelegate delegate, {
-      bool fullDetails = true,
-    }
-  ) {
+    bool fullDetails = true,
+  }) {
     bool truncated = false;
     if (nodes == null) {
       return const <Map<String, Object?>>[];
@@ -1691,7 +1686,10 @@ abstract class DiagnosticsNode {
       truncated = true;
     }
     final List<Map<String, Object?>> json = nodes.map<Map<String, Object?>>((DiagnosticsNode node) {
-      return node.toJsonMap(delegate.delegateForNode(node), fullDetails: fullDetails,);
+      return node.toJsonMap(
+        delegate.delegateForNode(node),
+        fullDetails: fullDetails,
+      );
     }).toList();
     if (truncated) {
       json.last['truncated'] = true;

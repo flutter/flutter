@@ -1984,7 +1984,8 @@ mixin WidgetInspectorService {
     final String groupName = parameters['groupName']!;
     final bool isSummaryTree = parameters['isSummaryTree'] == 'true';
     final bool withPreviews = parameters['withPreviews'] == 'true';
-    final bool fullDetails = parameters['abbreviated'] != 'true';
+    // If the "fullDetails" parameter is not provided, default to true.
+    final bool fullDetails = parameters['fullDetails'] != 'false';
 
     final Map<String, Object?>? result = _getRootWidgetTreeImpl(
       groupName: groupName,
