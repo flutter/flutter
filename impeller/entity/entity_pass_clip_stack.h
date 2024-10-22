@@ -5,8 +5,7 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_ENTITY_PASS_CLIP_STACK_H_
 #define FLUTTER_IMPELLER_ENTITY_ENTITY_PASS_CLIP_STACK_H_
 
-#include "impeller/entity/contents/contents.h"
-#include "impeller/entity/entity.h"
+#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/geometry/rect.h"
 
 namespace impeller {
@@ -24,8 +23,10 @@ struct ClipCoverageLayer {
 class EntityPassClipStack {
  public:
   struct ReplayResult {
-    Entity entity;
+    ClipContents clip_contents;
+    Matrix transform;
     std::optional<Rect> clip_coverage;
+    uint32_t clip_depth = 0;
   };
 
   struct ClipStateResult {
@@ -50,17 +51,18 @@ class EntityPassClipStack {
 
   bool HasCoverage() const;
 
-  /// @brief  Applies the current clip state to an Entity. If the given Entity
-  ///         is a clip operation, then the clip state is updated accordingly.
-  ClipStateResult ApplyClipState(Contents::ClipCoverage global_clip_coverage,
-                                 Entity& entity,
-                                 size_t clip_height_floor,
-                                 Point global_pass_position);
+  ClipStateResult RecordClip(const ClipContents& clip_contents,
+                             Matrix transform,
+                             Point global_pass_position,
+                             uint32_t clip_depth,
+                             size_t clip_height_floor);
 
-  // Visible for testing.
-  void RecordEntity(const Entity& entity,
-                    Contents::ClipCoverage::Type type,
-                    std::optional<Rect> clip_coverage);
+  ReplayResult& GetLastReplayResult() {
+    return GetCurrentSubpassState().rendered_clip_entities.back();
+  }
+
+  ClipStateResult RecordRestore(Point global_pass_position,
+                                size_t restore_height);
 
   const std::vector<ReplayResult>& GetReplayEntities() const;
 

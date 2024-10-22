@@ -53,13 +53,6 @@ bool Contents::IsOpaque(const Matrix& transform) const {
   return false;
 }
 
-Contents::ClipCoverage Contents::GetClipCoverage(
-    const Entity& entity,
-    const std::optional<Rect>& current_clip_coverage) const {
-  return {.type = ClipCoverage::Type::kNoChange,
-          .coverage = current_clip_coverage};
-}
-
 std::optional<Snapshot> Contents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,

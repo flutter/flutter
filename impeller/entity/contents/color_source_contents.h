@@ -260,10 +260,8 @@ class ColorSourceContents : public Contents {
     // was incremented by 1 in order to self-clip. So simply append a clip
     // restore to clean it up.
     if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw) {
-      auto restore = ClipRestoreContents();
-      restore.SetRestoreCoverage(GetCoverage(entity));
-      Entity restore_entity = entity.Clone();
-      return restore.Render(renderer, restore_entity, pass);
+      return RenderClipRestore(renderer, pass, entity.GetClipDepth(),
+                               GetCoverage(entity));
     }
     return true;
   }

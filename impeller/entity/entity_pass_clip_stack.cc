@@ -6,7 +6,6 @@
 
 #include "flutter/fml/logging.h"
 #include "impeller/entity/contents/clip_contents.h"
-#include "impeller/entity/entity.h"
 
 namespace impeller {
 
@@ -52,128 +51,124 @@ EntityPassClipStack::GetClipCoverageLayers() const {
   return subpass_state_.back().clip_coverage;
 }
 
-EntityPassClipStack::ClipStateResult EntityPassClipStack::ApplyClipState(
-    Contents::ClipCoverage global_clip_coverage,
-    Entity& entity,
-    size_t clip_height_floor,
-    Point global_pass_position) {
+EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordRestore(
+    Point global_pass_position,
+    size_t restore_height) {
   ClipStateResult result = {.should_render = false, .clip_did_change = false};
-
   auto& subpass_state = GetCurrentSubpassState();
-  switch (global_clip_coverage.type) {
-    case Contents::ClipCoverage::Type::kNoChange:
-      break;
-    case Contents::ClipCoverage::Type::kAppend: {
-      auto maybe_coverage = CurrentClipCoverage();
 
-      // Compute the previous clip height.
-      size_t previous_clip_height = 0;
-      if (!subpass_state.clip_coverage.empty()) {
-        previous_clip_height = subpass_state.clip_coverage.back().clip_height;
-      } else {
-        // If there is no clip coverage, then the previous clip height is the
-        // clip height floor.
-        previous_clip_height = clip_height_floor;
-      }
-
-      if (!maybe_coverage.has_value()) {
-        // Running this append op won't impact the clip buffer because the
-        // whole screen is already being clipped, so skip it.
-        return result;
-      }
-      auto op = maybe_coverage.value();
-
-      // If the new clip coverage is bigger than the existing coverage for
-      // intersect clips, we do not need to change the clip region.
-      if (!global_clip_coverage.is_difference_or_non_square &&
-          global_clip_coverage.coverage.has_value() &&
-          global_clip_coverage.coverage.value().Contains(op)) {
-        subpass_state.clip_coverage.push_back(ClipCoverageLayer{
-            .coverage = op, .clip_height = previous_clip_height + 1});
-
-        return result;
-      }
-
-      subpass_state.clip_coverage.push_back(
-          ClipCoverageLayer{.coverage = global_clip_coverage.coverage,
-                            .clip_height = previous_clip_height + 1});
-      result.clip_did_change = true;
-
-      FML_DCHECK(subpass_state.clip_coverage.back().clip_height ==
-                 subpass_state.clip_coverage.front().clip_height +
-                     subpass_state.clip_coverage.size() - 1);
-
-    } break;
-    case Contents::ClipCoverage::Type::kRestore: {
-      ClipRestoreContents* restore_contents =
-          reinterpret_cast<ClipRestoreContents*>(entity.GetContents().get());
-      size_t restore_height = restore_contents->GetRestoreHeight();
-
-      if (subpass_state.clip_coverage.back().clip_height <= restore_height) {
-        // Drop clip restores that will do nothing.
-        return result;
-      }
-
-      auto restoration_index =
-          restore_height - subpass_state.clip_coverage.front().clip_height;
-      FML_DCHECK(restoration_index < subpass_state.clip_coverage.size());
-
-      // We only need to restore the area that covers the coverage of the
-      // clip rect at target height + 1.
-      std::optional<Rect> restore_coverage =
-          (restoration_index + 1 < subpass_state.clip_coverage.size())
-              ? subpass_state.clip_coverage[restoration_index + 1].coverage
-              : std::nullopt;
-      if (restore_coverage.has_value()) {
-        // Make the coverage rectangle relative to the current pass.
-        restore_coverage = restore_coverage->Shift(-global_pass_position);
-      }
-      subpass_state.clip_coverage.resize(restoration_index + 1);
-      result.clip_did_change = true;
-
-      // Skip all clip restores when stencil-then-cover is enabled.
-      if (subpass_state.clip_coverage.back().coverage.has_value()) {
-        RecordEntity(entity, global_clip_coverage.type, Rect());
-      }
-      return result;
-
-    } break;
+  if (subpass_state.clip_coverage.back().clip_height <= restore_height) {
+    // Drop clip restores that will do nothing.
+    return result;
   }
 
-  RecordEntity(entity, global_clip_coverage.type,
-               subpass_state.clip_coverage.back().coverage);
+  auto restoration_index =
+      restore_height - subpass_state.clip_coverage.front().clip_height;
+  FML_DCHECK(restoration_index < subpass_state.clip_coverage.size());
 
-  result.should_render = true;
+  // We only need to restore the area that covers the coverage of the
+  // clip rect at target height + 1.
+  std::optional<Rect> restore_coverage =
+      (restoration_index + 1 < subpass_state.clip_coverage.size())
+          ? subpass_state.clip_coverage[restoration_index + 1].coverage
+          : std::nullopt;
+  if (restore_coverage.has_value()) {
+    // Make the coverage rectangle relative to the current pass.
+    restore_coverage = restore_coverage->Shift(-global_pass_position);
+  }
+
+  subpass_state.clip_coverage.resize(restoration_index + 1);
+  result.clip_did_change = true;
+
+  if (subpass_state.clip_coverage.back().coverage.has_value()) {
+    FML_DCHECK(next_replay_index_ <=
+               subpass_state.rendered_clip_entities.size());
+    if (!subpass_state.rendered_clip_entities.empty()) {
+      subpass_state.rendered_clip_entities.pop_back();
+
+      if (next_replay_index_ > subpass_state.rendered_clip_entities.size()) {
+        next_replay_index_ = subpass_state.rendered_clip_entities.size();
+      }
+    }
+  }
   return result;
 }
 
-void EntityPassClipStack::RecordEntity(const Entity& entity,
-                                       Contents::ClipCoverage::Type type,
-                                       std::optional<Rect> clip_coverage) {
-  auto& subpass_state = GetCurrentSubpassState();
-  switch (type) {
-    case Contents::ClipCoverage::Type::kNoChange:
-      return;
-    case Contents::ClipCoverage::Type::kAppend:
-      FML_DCHECK(next_replay_index_ ==
-                 subpass_state.rendered_clip_entities.size())
-          << "Not all clips have been replayed before appending new clip.";
-      subpass_state.rendered_clip_entities.push_back(
-          {.entity = entity.Clone(), .clip_coverage = clip_coverage});
-      next_replay_index_++;
-      break;
-    case Contents::ClipCoverage::Type::kRestore:
-      FML_DCHECK(next_replay_index_ <=
-                 subpass_state.rendered_clip_entities.size());
-      if (!subpass_state.rendered_clip_entities.empty()) {
-        subpass_state.rendered_clip_entities.pop_back();
+EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordClip(
+    const ClipContents& clip_contents,
+    Matrix transform,
+    Point global_pass_position,
+    uint32_t clip_depth,
+    size_t clip_height_floor) {
+  ClipStateResult result = {.should_render = false, .clip_did_change = false};
 
-        if (next_replay_index_ > subpass_state.rendered_clip_entities.size()) {
-          next_replay_index_ = subpass_state.rendered_clip_entities.size();
-        }
-      }
-      break;
+  std::optional<Rect> maybe_clip_coverage = CurrentClipCoverage();
+  // Running this append op won't impact the clip buffer because the
+  // whole screen is already being clipped, so skip it.
+  if (!maybe_clip_coverage.has_value()) {
+    return result;
   }
+  auto current_clip_coverage = maybe_clip_coverage.value();
+  // Entity transforms are relative to the current pass position, so we need
+  // to check clip coverage in the same space.
+  current_clip_coverage = current_clip_coverage.Shift(-global_pass_position);
+
+  ClipCoverage clip_coverage =
+      clip_contents.GetClipCoverage(current_clip_coverage);
+  if (clip_coverage.coverage.has_value()) {
+    clip_coverage.coverage =
+        clip_coverage.coverage->Shift(global_pass_position);
+  }
+
+  auto& subpass_state = GetCurrentSubpassState();
+
+  // Compute the previous clip height.
+  size_t previous_clip_height = 0;
+  if (!subpass_state.clip_coverage.empty()) {
+    previous_clip_height = subpass_state.clip_coverage.back().clip_height;
+  } else {
+    // If there is no clip coverage, then the previous clip height is the
+    // clip height floor.
+    previous_clip_height = clip_height_floor;
+  }
+
+  // If the new clip coverage is bigger than the existing coverage for
+  // intersect clips, we do not need to change the clip region.
+  if (!clip_coverage.is_difference_or_non_square &&
+      clip_coverage.coverage.has_value() &&
+      clip_coverage.coverage.value().Contains(current_clip_coverage)) {
+    subpass_state.clip_coverage.push_back(ClipCoverageLayer{
+        .coverage = current_clip_coverage,       //
+        .clip_height = previous_clip_height + 1  //
+    });
+
+    return result;
+  }
+
+  subpass_state.clip_coverage.push_back(ClipCoverageLayer{
+      .coverage = clip_coverage.coverage,      //
+      .clip_height = previous_clip_height + 1  //
+
+  });
+  result.clip_did_change = true;
+  result.should_render = true;
+
+  FML_DCHECK(subpass_state.clip_coverage.back().clip_height ==
+             subpass_state.clip_coverage.front().clip_height +
+                 subpass_state.clip_coverage.size() - 1);
+
+  FML_DCHECK(next_replay_index_ == subpass_state.rendered_clip_entities.size())
+      << "Not all clips have been replayed before appending new clip.";
+
+  subpass_state.rendered_clip_entities.push_back(ReplayResult{
+      .clip_contents = clip_contents,           //
+      .transform = transform,                   //
+      .clip_coverage = clip_coverage.coverage,  //
+      .clip_depth = clip_depth                  //
+  });
+  next_replay_index_++;
+
+  return result;
 }
 
 EntityPassClipStack::SubpassState&
@@ -199,7 +194,7 @@ EntityPassClipStack::GetNextReplayResult(size_t current_clip_depth) {
   }
   ReplayResult* next_replay =
       &subpass_state_.back().rendered_clip_entities[next_replay_index_];
-  if (next_replay->entity.GetClipDepth() < current_clip_depth) {
+  if (next_replay->clip_depth < current_clip_depth) {
     // The next replay clip doesn't affect the current entity, so don't replay
     // it yet.
     return nullptr;
