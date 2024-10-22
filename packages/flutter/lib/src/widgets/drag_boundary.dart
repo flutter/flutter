@@ -11,7 +11,7 @@ import 'framework.dart';
 /// See also:
 ///  * [DragBoundary], which uses this class.
 ///
-/// [T] is the drag object position.
+/// `T` is a data class that defines the shape being dragged. For example, when dragging a rectangle within the boundary, `T` should be a `Rect`. 
 abstract class DragBoundaryDelegate<T> {
   /// Returns whether the specified drag object position is within the boundary.
   bool isWithinBoundary(T position);
