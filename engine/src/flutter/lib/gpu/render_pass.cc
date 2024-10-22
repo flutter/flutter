@@ -20,6 +20,7 @@
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
+#include "lib/gpu/context.h"
 #include "lib/ui/ui_dart_state.h"
 #include "tonic/converter/dart_converter.h"
 
@@ -222,6 +223,7 @@ void InternalFlutterGpu_RenderPass_Initialize(Dart_Handle wrapper) {
 
 Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Context* context,
     int color_attachment_index,
     int load_action,
     int store_action,
@@ -242,6 +244,14 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
         tonic::DartConverter<flutter::gpu::Texture*>::FromDart(
             resolve_texture_wrapper);
     desc.resolve_texture = resolve_texture->GetTexture();
+
+    // If the backend doesn't support normal MSAA, gracefully fallback to
+    // rendering without MSAA.
+    if (!flutter::gpu::SupportsNormalOffscreenMSAA(*context->GetContext())) {
+      desc.texture = desc.resolve_texture;
+      desc.resolve_texture = nullptr;
+      desc.store_action = impeller::StoreAction::kStore;
+    }
   }
   wrapper->GetRenderTarget().SetColorAttachment(desc, color_attachment_index);
   return Dart_Null();

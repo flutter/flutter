@@ -21,6 +21,37 @@ base class ColorAttachment {
 
   Texture texture;
   Texture? resolveTexture;
+
+  void _validate() {
+    if (resolveTexture != null) {
+      if (resolveTexture!.format != texture.format) {
+        throw Exception(
+            "ColorAttachment MSAA resolve texture must have the same format as the texture");
+      }
+      if (resolveTexture!.width != texture.width ||
+          resolveTexture!.height != texture.height) {
+        throw Exception(
+            "ColorAttachment MSAA resolve texture must have the same dimensions as the texture");
+      }
+      if (resolveTexture!.sampleCount != 1) {
+        throw Exception(
+            "ColorAttachment MSAA resolve texture must have a sample count of 1");
+      }
+      if (texture.sampleCount <= 1) {
+        throw Exception(
+            "ColorAttachment must have a sample count greater than 1 when a MSAA resolve texture is set");
+      }
+      if (storeAction != StoreAction.multisampleResolve &&
+          storeAction != StoreAction.storeAndMultisampleResolve) {
+        throw Exception(
+            "ColorAttachment StoreAction must be multisampleResolve or storeAndMultisampleResolve when a resolve texture is set");
+      }
+      if (resolveTexture!.storageMode == StorageMode.deviceTransient) {
+        throw Exception(
+            "ColorAttachment MSAA resolve texture must not have a storage mode of deviceTransient");
+      }
+    }
+  }
 }
 
 base class DepthStencilAttachment {
@@ -43,6 +74,19 @@ base class DepthStencilAttachment {
   int stencilClearValue;
 
   Texture texture;
+
+  void _validate() {
+    if (texture.storageMode == StorageMode.deviceTransient) {
+      if (depthLoadAction == LoadAction.load) {
+        throw Exception(
+            "DepthStencilAttachment depthLoadAction must not be load when the texture has a storage mode of deviceTransient");
+      }
+      if (stencilLoadAction == LoadAction.load) {
+        throw Exception(
+            "DepthStencilAttachment stencilLoadAction must not be load when the texture has a storage mode of deviceTransient");
+      }
+    }
+  }
 }
 
 base class StencilConfig {
@@ -117,17 +161,33 @@ base class RenderTarget {
             colorAttachments: [colorAttachment],
             depthStencilAttachment: depthStencilAttachment);
 
+  _validate() {
+    for (final color in colorAttachments) {
+      color._validate();
+    }
+    if (depthStencilAttachment != null) {
+      depthStencilAttachment!._validate();
+    }
+  }
+
   final List<ColorAttachment> colorAttachments;
   final DepthStencilAttachment? depthStencilAttachment;
 }
 
 base class RenderPass extends NativeFieldWrapperClass1 {
   /// Creates a new RenderPass.
-  RenderPass._(CommandBuffer commandBuffer, RenderTarget renderTarget) {
+  RenderPass._(GpuContext gpuContext, CommandBuffer commandBuffer,
+      RenderTarget renderTarget) {
+    assert(() {
+      renderTarget._validate();
+      return true;
+    }());
+
     _initialize();
     String? error;
     for (final (index, color) in renderTarget.colorAttachments.indexed) {
       error = _setColorAttachment(
+          gpuContext,
           index,
           color.loadAction.index,
           color.storeAction.index,
@@ -288,6 +348,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   @Native<
       Handle Function(
           Pointer<Void>,
+          Pointer<Void>,
           Int,
           Int,
           Int,
@@ -298,6 +359,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
           Pointer<Void>,
           Handle)>(symbol: 'InternalFlutterGpu_RenderPass_SetColorAttachment')
   external String? _setColorAttachment(
+      GpuContext context,
       int colorAttachmentIndex,
       int loadAction,
       int storeAction,
@@ -432,7 +494,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       symbol: 'InternalFlutterGpu_RenderPass_SetPrimitiveType')
   external void _setPrimitiveType(int primitiveType);
 
-    @Native<Void Function(Pointer<Void>, Int)>(
+  @Native<Void Function(Pointer<Void>, Int)>(
       symbol: 'InternalFlutterGpu_RenderPass_SetWindingOrder')
   external void _setWindingOrder(int windingOrder);
 
