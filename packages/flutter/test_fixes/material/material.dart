@@ -308,10 +308,10 @@ void main() {
   final Widget bodyValue = platformMenuBar.body;
 
   // Changes made in https://github.com/flutter/flutter/pull/154972
-  final Object outlineBorder = MaterialStateOutlineInputBorder.resolveWith(
+  final InputBorder outlineBorder = MaterialStateOutlineInputBorder.resolveWith(
     (states) => const OutlineInputBorder(),
   );
-  final Object underlineBorder = MaterialStateUnderlineInputBorder.resolveWith(
+  final InputBorder underlineBorder = MaterialStateUnderlineInputBorder.resolveWith(
     (states) => const UnderlineInputBorder(),
   );
 }
