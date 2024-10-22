@@ -253,7 +253,8 @@ copy("copy_framework_module_map") {
 copy("copy_framework_privacy_manifest") {
   visibility = [ ":*" ]
   sources = [ "framework/PrivacyInfo.xcprivacy" ]
-  outputs = [ "$_flutter_framework_dir/PrivacyInfo.xcprivacy" ]
+  outputs =
+      [ "$_flutter_framework_dir/Versions/A/Resources/PrivacyInfo.xcprivacy" ]
 }
 
 action("copy_framework_headers") {
