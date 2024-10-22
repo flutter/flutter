@@ -4698,9 +4698,9 @@ void main() {
       'Hello world, ',
       'how are you today.',
     ];
-    final SelectionListenerController controller = SelectionListenerController();
+    final SelectionListenerNotifier selectionNotifier = SelectionListenerNotifier();
     addTearDown(focusNode.dispose);
-    addTearDown(controller.dispose);
+    addTearDown(selectionNotifier.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -4708,7 +4708,7 @@ void main() {
           focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
           child: SelectionListener(
-            controller: controller,
+            selectionNotifier: selectionNotifier,
             child: Column(
               children: <Widget>[
                 Text.rich(
@@ -4742,9 +4742,8 @@ void main() {
     // Selection on paragraph1.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 1));
     await tester.pumpAndSettle();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isFalse);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 0);
     expect(selectedRange.endOffset, 1);
@@ -4752,9 +4751,8 @@ void main() {
     // Selection on paragraph1.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 10));
     await tester.pumpAndSettle();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isFalse);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 0);
     expect(selectedRange.endOffset, 10);
@@ -4762,17 +4760,15 @@ void main() {
     // Selection on paragraph1 and paragraph2.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph2, 10));
     await tester.pumpAndSettle();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isFalse);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 0);
     expect(selectedRange.endOffset, 23);
     await mouseGesture.up();
     await tester.pump();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isTrue);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 0);
     expect(selectedRange.endOffset, 23);
@@ -4782,9 +4778,8 @@ void main() {
     await tester.pump();
     await mouseGesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
-    expect(controller.selectionStatus, SelectionStatus.collapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isTrue);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.collapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 16);
     expect(selectedRange.endOffset, 16);
@@ -4794,17 +4789,15 @@ void main() {
     await tester.pump();
     await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 0));
     await tester.pumpAndSettle();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isFalse);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 17);
     expect(selectedRange.endOffset, 0);
     await mouseGesture.up();
     await tester.pump();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isTrue);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 17);
     expect(selectedRange.endOffset, 0);
@@ -4814,9 +4807,8 @@ void main() {
     await tester.pumpAndSettle();
     await mouseGesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
-    expect(controller.selectionStatus, SelectionStatus.collapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isTrue);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.collapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 0);
     expect(selectedRange.endOffset, 0);
@@ -4829,10 +4821,10 @@ void main() {
       'Good, and you?',
       'Fine, thank you.',
     ];
-    final SelectionListenerController controller = SelectionListenerController();
+    final SelectionListenerNotifier selectionNotifier = SelectionListenerNotifier();
     SelectedContentRange? selectedRange;
     addTearDown(focusNode.dispose);
-    addTearDown(controller.dispose);
+    addTearDown(selectionNotifier.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -4840,7 +4832,7 @@ void main() {
           focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
           child: SelectionListener(
-            controller: controller,
+            selectionNotifier: selectionNotifier,
             child: Column(
               children: <Widget>[
                 Text(
@@ -4870,9 +4862,8 @@ void main() {
     // Selection on paragraph1.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 7));
     await tester.pumpAndSettle();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isFalse);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 4);
     expect(selectedRange.endOffset, 7);
@@ -4880,9 +4871,8 @@ void main() {
     // Selection on paragraph1.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 10));
     await tester.pumpAndSettle();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isFalse);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 4);
     expect(selectedRange.endOffset, 10);
@@ -4890,9 +4880,8 @@ void main() {
     // Selection on paragraph1 and paragraph2.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph2, 10));
     await tester.pumpAndSettle();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isFalse);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 4);
     expect(selectedRange.endOffset, 22);
@@ -4900,17 +4889,15 @@ void main() {
     // Selection on paragraph1, paragraph2, and paragraph3.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph3, 10));
     await tester.pumpAndSettle();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isFalse);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 4);
     expect(selectedRange.endOffset, 36);
     await mouseGesture.up();
     await tester.pump();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isTrue);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 4);
     expect(selectedRange.endOffset, 36);
@@ -4920,9 +4907,8 @@ void main() {
     await tester.pump();
     await mouseGesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
-    expect(controller.selectionStatus, SelectionStatus.collapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isTrue);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.collapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 3);
     expect(selectedRange.endOffset, 3);
@@ -4932,17 +4918,15 @@ void main() {
     await tester.pump();
     await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 0));
     await tester.pumpAndSettle();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isFalse);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 30);
     expect(selectedRange.endOffset, 0);
     await mouseGesture.up();
     await tester.pump();
-    expect(controller.selectionStatus, SelectionStatus.uncollapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isTrue);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 30);
     expect(selectedRange.endOffset, 0);
@@ -4952,9 +4936,8 @@ void main() {
     await tester.pumpAndSettle();
     await mouseGesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
-    expect(controller.selectionStatus, SelectionStatus.collapsed);
-    // expect(currentSelectionDetails!.selectionFinalized, isTrue);
-    selectedRange = controller.value;
+    expect(selectionNotifier.status, SelectionStatus.collapsed);
+    selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
     expect(selectedRange.startOffset, 0);
     expect(selectedRange.endOffset, 0);
