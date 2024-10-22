@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ---------------------------------- NOTE ----------------------------------
+//
+// We must keep the logic in this file consistent with the logic in the
+// `engine_hash.sh` script in the same directory to ensure that Flutter
+// continues to work across all platforms!
+//
+// --------------------------------------------------------------------------
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -91,7 +99,7 @@ Future<String> engineHash(
         <String>[
           'git',
           'merge-base',
-          'upstream/main',
+          'upstream/master',
           'HEAD',
         ],
       );
