@@ -549,17 +549,19 @@ class SplashController extends RenderProxyBox {
   /// to drive their animations.
   final TickerProvider vsync;
 
-  /// Optionally specifies the color of the surface on which
-  /// splashes are being painted.
+  /// Suggests a color for the surface where splashes are painted.
   ///
-  /// The splash controller doesn't paint this color—the value is stored here,
-  /// and descendants can access it via `Material.of(context).color`.
-  /// Unlike typical [InheritedWidget] `.of(context)` methods, no updates
-  /// are sent when the color changes.
+  /// This color does not directly determine the appearance of the splash;
+  /// it serves as a reference value that descendants can optionally use
+  /// via `Material.of(context).color`.
   ///
-  /// If non-null, this [RenderBox] will absorb hit tests.
-  /// (The hit test behavior is usually inconsequential, since a splash
-  /// controller typically has an opaque parent, an opaque child, or both.)
+  /// Unlike standard [InheritedWidget] patterns, changes to this
+  /// color will **not** trigger automatic updates through `of(context)`.
+  ///
+  /// Additionally, if this color is non-null, the associated [RenderBox]
+  /// will absorb hit tests. However, this behavior usually has minimal impact
+  /// since splash controllers are often nested within widgets that are
+  /// either fully opaque, or have opaque children.
   Color? color;
 
   /// A list containing each [Splash] effect managed by this controller.
