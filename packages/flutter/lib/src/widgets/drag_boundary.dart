@@ -6,7 +6,10 @@ import 'dart:ui';
 
 import 'framework.dart';
 
-/// An abstract class that defines drag boundaries
+/// The interface for defining the algorithm that a boundary handles the specified type of shape to be dragged within.
+///
+/// See also:
+///  * [DragBoundary], which uses this class.
 ///
 /// [T] is the drag object position.
 abstract class DragBoundaryDelegate<T> {
