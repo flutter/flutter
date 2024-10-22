@@ -71,6 +71,10 @@ class Surface extends DisplayCanvas {
   bool _contextLost = false;
   bool get debugContextLost => _contextLost;
 
+  /// Forces AssertionError when attempting to create a CPU-based surface.
+  /// Only for tests.
+  bool debugThrowOnSoftwareSurfaceCreation = false;
+
   /// A cached copy of the most recently created `webglcontextlost` listener.
   ///
   /// We must cache this function because each time we access the tear-off it
@@ -182,7 +186,6 @@ class Surface extends DisplayCanvas {
   }
 
   BitmapSize? _currentCanvasPhysicalSize;
-  BitmapSize? _currentSurfaceSize;
 
   /// Sets the CSS size of the canvas so that canvas pixels are 1:1 with device
   /// pixels.
@@ -250,7 +253,7 @@ class Surface extends DisplayCanvas {
     if (!_forceNewContext) {
       // Check if the window is the same size as before, and if so, don't allocate
       // a new canvas as the previous canvas is big enough to fit everything.
-      final BitmapSize? previousSurfaceSize = _currentSurfaceSize;
+      final BitmapSize? previousSurfaceSize = _surface?._size;
       if (previousSurfaceSize != null &&
           size.width == previousSurfaceSize.width &&
           size.height == previousSurfaceSize.height) {
@@ -299,10 +302,8 @@ class Surface extends DisplayCanvas {
       _currentCanvasPhysicalSize = size;
     }
 
-    _currentSurfaceSize = size;
     _surface?.dispose();
-    _surface = _createNewSurface(size);
-    return _surface!;
+    return _surface = _createNewSurface(size);
   }
 
   JSVoid _contextRestoredListener(DomEvent event) {
@@ -462,11 +463,17 @@ class Surface extends DisplayCanvas {
   CkSurface _createNewSurface(BitmapSize size) {
     assert(_offscreenCanvas != null || _canvasElement != null);
     if (webGLVersion == -1) {
-      return _makeSoftwareCanvasSurface('WebGL support not detected');
+      return _makeSoftwareCanvasSurface('WebGL support not detected', size);
     } else if (configuration.canvasKitForceCpuOnly) {
-      return _makeSoftwareCanvasSurface('CPU rendering forced by application');
+      return _makeSoftwareCanvasSurface(
+        'CPU rendering forced by application',
+        size,
+      );
     } else if (_glContext == 0) {
-      return _makeSoftwareCanvasSurface('Failed to initialize WebGL context');
+      return _makeSoftwareCanvasSurface(
+        'Failed to initialize WebGL context',
+        size,
+      );
     } else {
       final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
           _grContext!,
@@ -477,31 +484,37 @@ class Surface extends DisplayCanvas {
           _stencilBits);
 
       if (skSurface == null) {
-        return _makeSoftwareCanvasSurface('Failed to initialize WebGL surface');
+        return _makeSoftwareCanvasSurface(
+          'Failed to initialize WebGL surface',
+          size,
+        );
       }
 
-      return CkSurface(skSurface, _glContext);
+      return CkSurface(skSurface, _glContext, size);
     }
   }
 
   static bool _didWarnAboutWebGlInitializationFailure = false;
 
-  CkSurface _makeSoftwareCanvasSurface(String reason) {
+  CkSurface _makeSoftwareCanvasSurface(String reason, BitmapSize size) {
     if (!_didWarnAboutWebGlInitializationFailure) {
       printWarning('WARNING: Falling back to CPU-only rendering. $reason.');
       _didWarnAboutWebGlInitializationFailure = true;
     }
 
-    SkSurface surface;
-    if (useOffscreenCanvas) {
-      surface = canvasKit.MakeOffscreenSWCanvasSurface(_offscreenCanvas!);
-    } else {
-      surface = canvasKit.MakeSWCanvasSurface(_canvasElement!);
+    try {
+      assert(!debugThrowOnSoftwareSurfaceCreation);
+
+      SkSurface surface;
+      if (useOffscreenCanvas) {
+        surface = canvasKit.MakeOffscreenSWCanvasSurface(_offscreenCanvas!);
+      } else {
+        surface = canvasKit.MakeSWCanvasSurface(_canvasElement!);
+      }
+      return CkSurface(surface, null, size);
+    } catch (error) {
+      throw CanvasKitError('Failed to create CPU-based surface: $error.');
     }
-    return CkSurface(
-      surface,
-      null,
-    );
   }
 
   bool _presentSurface() {
@@ -534,9 +547,9 @@ class Surface extends DisplayCanvas {
       browserSupportsOffscreenCanvas && !isSafari;
 }
 
-/// A Dart wrapper around Skia's CkSurface.
+/// A Dart wrapper around Skia's SkSurface.
 class CkSurface {
-  CkSurface(this.surface, this._glContext);
+  CkSurface(this.surface, this._glContext, this._size);
 
   CkCanvas getCanvas() {
     assert(!_isDisposed, 'Attempting to use the canvas of a disposed surface');
@@ -548,6 +561,8 @@ class CkSurface {
   /// Only borrow this value temporarily. Do not store it as it may be deleted
   /// at any moment. Storing it may lead to dangling pointer bugs.
   final SkSurface surface;
+
+  final BitmapSize _size;
 
   final int? _glContext;
 
