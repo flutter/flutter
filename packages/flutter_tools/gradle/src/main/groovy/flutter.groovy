@@ -271,17 +271,11 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        Object flutterVersionCode = localProperties.getProperty("flutter.versionCode")
-        if (flutterVersionCode == null) {
-            flutterVersionCode = "1"
-        }
-        extension.flutterVersionCode = flutterVersionCode
+        String flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+        extension.flutterVersionCode = flutterVersionCode?: "1"
 
-        Object flutterVersionName = localProperties.getProperty("flutter.versionName")
-        if (flutterVersionName == null) {
-            flutterVersionName = "1.0"
-        }
-        extension.flutterVersionName = flutterVersionName
+        String flutterVersionName = localProperties.getProperty("flutter.versionName")
+        extension.flutterVersionName = flutterVersionName ?: "1.0"
 
         this.addFlutterTasks(project)
 
@@ -1465,9 +1459,7 @@ class FlutterPlugin implements Plugin<Project> {
                     if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
                         return
                     }
-                    if (copyFlutterAssetsTask == null) {
-                        copyFlutterAssetsTask = addFlutterDeps(libraryVariant)
-                    }
+                    copyFlutterAssetsTask = copyFlutterAssetsTask ?: addFlutterDeps(libraryVariant)
                     Task mergeAssets = project
                         .tasks
                         .findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
