@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../widgets.dart';
+
 /// Returns [true] if the bytes at [url] can be fetched.
 ///
 /// The bytes may be unable to be fetched if they aren't from the same origin
@@ -10,3 +12,6 @@ Future<bool> checkIfImageBytesCanBeFetched(String url) {
   // On mobile, there are no cross-origin restrictions.
   return Future<bool>.value(true);
 }
+
+/// Returns a widget which displays the [src] in an <img> tag.
+Widget createImgElementWidget(String src) => throw UnimplementedError();

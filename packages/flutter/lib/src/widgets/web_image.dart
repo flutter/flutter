@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui_web' as ui_web;
-
 import '../../widgets.dart';
-import '../web.dart' as web;
 import '_web_image_io.dart' if (dart.library.js_interop) '_web_image_web.dart';
 
 /// A widget that displays an image from the web.
@@ -53,60 +50,7 @@ class _WebImageState extends State<WebImage> {
     } else if (imageBytesCanBeFetched) {
       return Image.network(widget.src);
     } else {
-      return ImgElementImage(widget.src);
+      return createImgElementWidget(widget.src);
     }
-  }
-}
-
-class ImgElementImage extends StatelessWidget {
-  ImgElementImage(
-    this.src, {
-    super.key,
-  }) {
-    if (_registeredViewType == null) {
-      _register();
-    }
-  }
-
-  final String src;
-
-  // Keeps track if this widget has already registered its view factories or not.
-  static String? _registeredViewType;
-
-  /// Override this to provide a custom implementation of [ui_web.platformViewRegistry.registerViewFactory].
-  ///
-  /// This should only be used for testing.
-  // See `_platform_selectable_region_context_menu_io.dart`.
-  @visibleForTesting
-  // ignore: invalid_use_of_visible_for_testing_member
-  static RegisterViewFactory? debugOverrideRegisterViewFactory;
-
-  // ignore: invalid_use_of_visible_for_testing_member
-  static RegisterViewFactory get _registerViewFactory =>
-      debugOverrideRegisterViewFactory ??
-      ui_web.platformViewRegistry.registerViewFactory;
-
-  static const String _viewType = 'Browser__ImageElementType__';
-
-  static void _register() {
-    assert(_registeredViewType == null);
-    _registerViewFactory(_viewType, (int viewId, {Object? params}) {
-      final String paramSrc = params! as String;
-      final web.HTMLImgElement imgElement =
-          web.document.createElement('img') as web.HTMLImgElement;
-      imgElement
-        ..style.width = '100%'
-        ..style.height = '100%'
-        ..src = paramSrc;
-      return imgElement;
-    }, isVisible: true);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return HtmlElementView(
-      viewType: _viewType,
-      creationParams: src,
-    );
   }
 }
