@@ -111,7 +111,7 @@ class Scribe {
   ///
   /// See also:
   ///
-  /// * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#isStylusHandwritingAvailable()],
+  /// * <https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#isStylusHandwritingAvailable()>,
   ///   which is the corresponding API on Android.
   static Future<bool?> isStylusHandwritingAvailable() {
     return _channel.invokeMethod<bool?>(
@@ -127,7 +127,7 @@ class Scribe {
   ///
   /// See also:
   ///
-  /// * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#startStylusHandwriting(android.view.View)],
+  /// * <https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#startStylusHandwriting(android.view.View)>,
   ///   which is the corresponding API on Android.
   static Future<void> startStylusHandwriting() {
     return _channel.invokeMethod<void>(
