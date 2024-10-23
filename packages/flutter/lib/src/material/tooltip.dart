@@ -12,6 +12,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -416,6 +417,48 @@ class Tooltip extends StatefulWidget {
   }
 }
 
+class _TooltipStateController {
+  _TooltipStateController({required bool useMultiWindow})
+    : _isMultiWindow = useMultiWindow {
+    if (useMultiWindow) {
+      _windowCreatorController = WindowCreatorController();
+    } else {
+      _overlayController = OverlayPortalController();
+    }
+  }
+
+  final bool _isMultiWindow;
+  late final OverlayPortalController _overlayController;
+  late final WindowCreatorController _windowCreatorController;
+  bool get isMultiWindow => _isMultiWindow;
+
+  OverlayPortalController get overlayController {
+    assert(!_isMultiWindow);
+    return _overlayController;
+  }
+
+  WindowCreatorController get windowCreatorController {
+    assert(_isMultiWindow);
+    return _windowCreatorController;
+  }
+
+  Future<void> show(BuildContext context) async {
+    if (!_isMultiWindow) {
+      _overlayController.show();
+    } else {
+      await _windowCreatorController.show(context);
+    }
+  }
+
+  Future<void> hide(BuildContext context) async {
+    if (!_isMultiWindow) {
+      _overlayController.hide();
+    } else {
+      await _windowCreatorController.hide(context);
+    }
+  }
+}
+
 /// Contains the state for a [Tooltip].
 ///
 /// This class can be used to programmatically show the Tooltip, see the
@@ -434,7 +477,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const bool _defaultEnableFeedback = true;
   static const TextAlign _defaultTextAlign = TextAlign.start;
 
-  final OverlayPortalController _overlayController = OverlayPortalController();
+  _TooltipStateController? _tooltipStateController;
 
   // From InheritedWidgets
   late bool _visible;
@@ -484,9 +527,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     switch ((_animationStatus.isDismissed, status.isDismissed)) {
       case (false, true):
         Tooltip._openedTooltips.remove(this);
-        _overlayController.hide();
+        _tooltipStateController!.hide(context);
       case (true, false):
-        _overlayController.show();
+        _tooltipStateController!.show(context);
         Tooltip._openedTooltips.add(this);
         SemanticsService.tooltip(_tooltipMessage);
       case (true, true) || (false, false):
@@ -756,13 +799,16 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
   }
 
-  Widget _buildTooltipOverlay(BuildContext context) {
-    final OverlayState overlayState = Overlay.of(context, debugRequiredFor: widget);
-    final RenderBox box = this.context.findRenderObject()! as RenderBox;
-    final Offset target = box.localToGlobal(
-      box.size.center(Offset.zero),
-      ancestor: overlayState.context.findRenderObject(),
-    );
+  Widget _buildTooltipOverlay(BuildContext context, bool isMultiWindow) {
+    Offset target = Offset.zero;
+    if (!isMultiWindow) {
+      final OverlayState overlayState = Overlay.of(context, debugRequiredFor: widget);
+      final RenderBox box = this.context.findRenderObject()! as RenderBox;
+      target = box.localToGlobal(
+        box.size.center(Offset.zero),
+        ancestor: overlayState.context.findRenderObject(),
+      );
+    }
 
     final (TextStyle defaultTextStyle, BoxDecoration defaultDecoration) = switch (Theme.of(context)) {
       ThemeData(brightness: Brightness.dark, :final TextTheme textTheme, :final TargetPlatform platform) => (
@@ -790,6 +836,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       target: target,
       verticalOffset: widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
       preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
+      isMultiWindow: isMultiWindow,
     );
 
     return SelectionContainer.maybeOf(context) == null
@@ -817,6 +864,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    _tooltipStateController ??= _TooltipStateController(
+      useMultiWindow: MultiWindowAppContext.of(context) != null);
+
     // If message is empty then no need to create a tooltip overlay to show
     // the empty black container so just return the wrapped child as is or
     // empty container if child is not specified.
@@ -842,11 +892,51 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         ),
       );
     }
-    return OverlayPortal(
-      controller: _overlayController,
-      overlayChildBuilder: _buildTooltipOverlay,
-      child: result,
-    );
+
+    if (_tooltipStateController!.isMultiWindow) {
+      final BuildContext parentContext = context;
+      final WindowContext windowContext = WindowContext.of(context)!;
+      return AutoSizedWindowCreator(
+          widgetBuilder: (BuildContext context) =>
+            _buildTooltipOverlay(context, true),
+          windowBuilder:
+              (WidgetBuilder builder, Size windowSize, Window parent) {
+            final RenderBox box = parentContext.findRenderObject()! as RenderBox;
+            final Offset position = box.localToGlobal(Offset.zero);
+            WindowPositionerAnchor parentAnchor = WindowPositionerAnchor.top;
+            WindowPositionerAnchor childAnchor = WindowPositionerAnchor.bottom;
+            if (widget.preferBelow ?? false) {
+              parentAnchor = WindowPositionerAnchor.bottom;
+              childAnchor = WindowPositionerAnchor.top;
+            }
+
+            return createPopup(
+                context: context,
+                parent: windowContext.window,
+                size: Size(windowSize.width + 1, windowSize.height),
+                anchorRect: Rect.fromPoints(
+                    position,
+                    Offset(position.dx + box.size.width,
+                        position.dy + box.size.height)),
+                positioner: WindowPositioner(
+                    parentAnchor: parentAnchor,
+                    childAnchor: childAnchor),
+                builder: (BuildContext context) {
+                  return MaterialApp(debugShowCheckedModeBanner: false,
+                    home: Scaffold(body: builder(context)));
+                });
+          },
+          controller: _tooltipStateController!.windowCreatorController,
+          child: result);
+    }
+    else {
+      return OverlayPortal(
+        controller: _tooltipStateController!.overlayController,
+        overlayChildBuilder: (BuildContext context) =>
+          _buildTooltipOverlay(context, false),
+        child: result,
+      );
+    }
   }
 }
 
@@ -911,6 +1001,7 @@ class _TooltipOverlay extends StatelessWidget {
     required this.preferBelow,
     this.onEnter,
     this.onExit,
+    this.isMultiWindow = false
   });
 
   final InlineSpan richMessage;
@@ -926,6 +1017,7 @@ class _TooltipOverlay extends StatelessWidget {
   final bool preferBelow;
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
+  final bool isMultiWindow;
 
   @override
   Widget build(BuildContext context) {
@@ -962,6 +1054,11 @@ class _TooltipOverlay extends StatelessWidget {
         child: result,
       );
     }
+
+    if (isMultiWindow) {
+      return result;
+    }
+
     return Positioned.fill(
       bottom: MediaQuery.maybeViewInsetsOf(context)?.bottom ?? 0.0,
       child: CustomSingleChildLayout(
