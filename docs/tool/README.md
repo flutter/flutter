@@ -57,7 +57,7 @@ You can run the tool from source by running `bin/flutter-dev`.
 
 Alternatively, delete the `bin/cache/flutter_tools.snapshot` file or locally commit
 your change in git and then run `flutter` again. This will rebuild the tool
-from local sources.
+from local source.
 
 This step is not required if you are launching `flutter_tools.dart` (either by running or testing) from an IDE.
 
