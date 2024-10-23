@@ -1086,7 +1086,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (hasChild(_ScaffoldSlot.body)) {
       double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
-
+      // extendBody locked when keyboard is open and the height is less than bottomWidgetsHeight.
+      final bool extendBody = this.extendBody && minInsets.bottom <= bottomWidgetsHeight;
       if (extendBody) {
         bodyMaxHeight += bottomWidgetsHeight;
         bodyMaxHeight = clampDouble(bodyMaxHeight, 0.0, looseConstraints.maxHeight - contentTop);
@@ -3086,9 +3087,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       bottom: _resizeToAvoidBottomInset && MediaQuery.viewInsetsOf(context).bottom != 0.0 ? 0.0 : null,
     );
 
-    // extendBody locked when keyboard is open
-    final bool extendBody = minInsets.bottom <= 0 && widget.extendBody;
-
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
@@ -3102,7 +3100,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
               },
               child: CustomMultiChildLayout(
                 delegate: _ScaffoldLayout(
-                  extendBody: extendBody,
+                  extendBody: widget.extendBody,
                   extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
                   minInsets: minInsets,
                   minViewPadding: minViewPadding,
