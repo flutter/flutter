@@ -14,7 +14,7 @@ void main() {
     );
   }
 
-  testWidgets('Smoke test', (WidgetTester tester) async {
+  testWidgets('Initial content is visible', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.StarBorderApp(),
     );
@@ -35,7 +35,6 @@ void main() {
     expect(find.text('Inner Radius'), findsOne);
     expect(find.widgetWithText(ElevatedButton, 'Reset'), findsOne);
   });
-
 
   testWidgets('StartBorder uses the values from the sliders', (WidgetTester tester) async {
     await tester.pumpWidget(
