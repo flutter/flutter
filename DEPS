@@ -66,6 +66,7 @@ vars = {
   'dart_browser_launcher_rev': 'e5fc5d488eb5038bfec2a6690c72ab8dd353e101',
   'dart_clock_rev': '7956d60042f4ea979c4554d43eeb57d087627869',
   'dart_collection_rev': '887b826b50f48d6a9cd2c0684aa353e8e3a0fad0',
+  'dart_core_rev': '3a3ed8e36626b0c72b6edd152fff68d33997b236',
   'dart_devtools_rev': 'dcef4f6efe986f110f55dbbe7f3731802e86690a',
   'dart_http_rev': '5e2281edd25f9addbf26242a0658d8f2dfa1134b',
   'dart_libprotobuf_rev': '24487dd1045c7f3d64a21f38a3f0c06cc4cf2edb',
@@ -152,8 +153,6 @@ vars = {
   "upstream_abseil-cpp": "https://github.com/abseil/abseil-cpp.git",
   "upstream_angle": "https://github.com/google/angle.git",
   "upstream_archive": "https://github.com/brendan-duncan/archive.git",
-  "upstream_args": "https://github.com/dart-lang/args.git",
-  "upstream_async": "https://github.com/dart-lang/async.git",
   "upstream_bazel_worker": "https://github.com/dart-lang/bazel_worker.git",
   "upstream_benchmark": "https://github.com/google/benchmark.git",
   "upstream_boolean_selector": "https://github.com/dart-lang/boolean_selector.git",
@@ -165,14 +164,11 @@ vars = {
   "upstream_cli_util": "https://github.com/dart-lang/cli_util.git",
   "upstream_clock": "https://github.com/dart-lang/clock.git",
   "upstream_collection": "https://github.com/dart-lang/collection.git",
-  "upstream_convert": "https://github.com/dart-lang/convert.git",
-  "upstream_crypto": "https://github.com/dart-lang/crypto.git",
   "upstream_csslib": "https://github.com/dart-lang/csslib.git",
   "upstream_dart_style": "https://github.com/dart-lang/dart_style.git",
   "upstream_dartdoc": "https://github.com/dart-lang/dartdoc.git",
   "upstream_equatable": "https://github.com/felangel/equatable.git",
   "upstream_ffi": "https://github.com/dart-lang/ffi.git",
-  "upstream_fixnum": "https://github.com/dart-lang/fixnum.git",
   "upstream_flatbuffers": "https://github.com/google/flatbuffers.git",
   "upstream_freetype2": "https://gitlab.freedesktop.org/freetype/freetype.git",
   "upstream_gcloud": "https://github.com/dart-lang/gcloud.git",
@@ -199,15 +195,12 @@ vars = {
   "upstream_libtess2": "https://github.com/memononen/libtess2.git",
   "upstream_libwebp": "https://chromium.googlesource.com/webm/libwebp.git",
   "upstream_leak_tracker": "https://github.com/dart-lang/leak_tracker.git",
-  "upstream_logging": "https://github.com/dart-lang/logging.git",
   "upstream_markdown": "https://github.com/dart-lang/markdown.git",
   "upstream_matcher": "https://github.com/dart-lang/matcher.git",
   "upstream_mockito": "https://github.com/dart-lang/mockito.git",
   "upstream_ocmock": "https://github.com/erikdoe/ocmock.git",
   "upstream_package_config": "https://github.com/dart-lang/package_config.git",
   "upstream_packages": "https://github.com/flutter/packages.git",
-  "upstream_path": "https://github.com/dart-lang/path.git",
-  "upstream_platform": "https://github.com/google/platform.dart.git",
   "upstream_pool": "https://github.com/dart-lang/pool.git",
   "upstream_process_runner": "https://github.com/google/process_runner.git",
   "upstream_process": "https://github.com/google/process.dart.git",
@@ -233,7 +226,6 @@ vars = {
   "upstream_term_glyph": "https://github.com/dart-lang/term_glyph.git",
   "upstream_test_reflective_loader": "https://github.com/dart-lang/test_reflective_loader.git",
   "upstream_test": "https://github.com/dart-lang/test.git",
-  "upstream_typed_data": "https://github.com/dart-lang/typed_data.git",
   "upstream_usage": "https://github.com/dart-lang/usage.git",
   "upstream_vector_math": "https://github.com/google/vector_math.dart.git",
   "upstream_VulkanMemoryAllocator": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git",
@@ -351,12 +343,6 @@ deps = {
   'src/flutter/third_party/dart/third_party/devtools':
    {'dep_type': 'cipd', 'packages': [{'package': 'dart/third_party/flutter/devtools', 'version': 'git_revision:dcef4f6efe986f110f55dbbe7f3731802e86690a'}]},
 
-  'src/flutter/third_party/dart/third_party/pkg/args':
-   Var('dart_git') + '/args.git@09c0fca1785c9df39288a48f767994eed80bed40',
-
-  'src/flutter/third_party/dart/third_party/pkg/async':
-   Var('dart_git') + '/async.git@5f70a996f673d625e3502597084653686c3e754c',
-
   'src/flutter/third_party/dart/third_party/pkg/bazel_worker':
    Var('dart_git') + '/bazel_worker.git@aa3cc9e826350b960e0c5a67e6065bcedba8b0ac',
 
@@ -375,11 +361,8 @@ deps = {
   'src/flutter/third_party/dart/third_party/pkg/collection':
    Var('dart_git') + '/collection.git' + '@' + Var('dart_collection_rev'),
 
-  'src/flutter/third_party/dart/third_party/pkg/convert':
-   Var('dart_git') + '/convert.git@d361833e117cb2438d2a2a6d0b0acb28ff0910fb',
-
-  'src/flutter/third_party/dart/third_party/pkg/crypto':
-   Var('dart_git') + '/crypto.git@3d26ef4cf22d4b218ba30e616544ad3cf52f64a1',
+  'src/flutter/third_party/dart/third_party/pkg/core':
+   Var('dart_git') + '/core.git' + '@' + Var('dart_core_rev'),
 
   'src/flutter/third_party/dart/third_party/pkg/csslib':
    Var('dart_git') + '/csslib.git@a3700b05bbcc42782e8a7024790dbf019d89c249',
@@ -389,9 +372,6 @@ deps = {
 
   'src/flutter/third_party/dart/third_party/pkg/dartdoc':
    Var('dart_git') + '/dartdoc.git@80c6f18f34b387d4b9ce89ddd2e3049093335f9d',
-
-  'src/flutter/third_party/dart/third_party/pkg/fixnum':
-   Var('dart_git') + '/fixnum.git@83293b8ed86ccd574a94fcf4a2da43f31c1b43e0',
 
   'src/flutter/third_party/dart/third_party/pkg/glob':
    Var('dart_git') + '/glob.git@00a9c82d31c01ae88ec9ae4021d842e9b832aa52',
@@ -414,9 +394,6 @@ deps = {
   'src/flutter/third_party/dart/third_party/pkg/leak_tracker':
    Var('dart_git') + '/leak_tracker.git@f5620600a5ce1c44f65ddaa02001e200b096e14c',
 
-  'src/flutter/third_party/dart/third_party/pkg/logging':
-   Var('dart_git') + '/logging.git@6fa056098ceca03d399bff64592822b2ae5dee6e',
-
   'src/flutter/third_party/dart/third_party/pkg/markdown':
    Var('dart_git') + '/markdown.git@d53feae0760a4f0aae5ffdfb12d8e6acccf14b40',
 
@@ -431,9 +408,6 @@ deps = {
 
   'src/flutter/third_party/dart/third_party/pkg/package_config':
    Var('dart_git') + '/package_config.git@bafff8e90be25e1985f7e3ee40ea1d22571a93e6',
-
-  'src/flutter/third_party/dart/third_party/pkg/path':
-   Var('dart_git') + '/path.git@e969f42ed112dd702a9453beb9df6c12ae2d3805',
 
   'src/flutter/third_party/dart/third_party/pkg/pool':
    Var('dart_git') + '/pool.git@7bfc71b39742753a88688e56e55a828a2f5dc0bf',
@@ -482,9 +456,6 @@ deps = {
 
   'src/flutter/third_party/dart/third_party/pkg/tools':
    Var('dart_git') + '/tools.git' + '@' + Var('dart_tools_rev'),
-
-  'src/flutter/third_party/dart/third_party/pkg/typed_data':
-   Var('dart_git') + '/typed_data.git@6abfafdcf661cd8a814619d7e2a3e99edb3a3862',
 
   'src/flutter/third_party/dart/third_party/pkg/watcher':
    Var('dart_git') + '/watcher.git' + '@' + Var('dart_watcher_rev'),
@@ -658,17 +629,17 @@ deps = {
   'src/flutter/third_party/pyyaml':
    Var('flutter_git') + '/third_party/pyyaml.git' + '@' + '03c67afd452cdff45b41bfe65e19a2fb5b80a0e8',
 
-   'src/flutter/third_party/swiftshader':
-   Var('swiftshader_git') + '/SwiftShader.git' + '@' + '2fa7e9b99ae4e70ea5ae2cc9c8d3afb43391384f',
+  'src/flutter/third_party/swiftshader':
+  Var('swiftshader_git') + '/SwiftShader.git' + '@' + '2fa7e9b99ae4e70ea5ae2cc9c8d3afb43391384f',
 
-   'src/flutter/third_party/angle':
-   Var('chromium_git') + '/angle/angle.git' + '@' + '6a09e41ce6ea8c93524faae1a925eb01562f53b1',
+  'src/flutter/third_party/angle':
+  Var('chromium_git') + '/angle/angle.git' + '@' + '6a09e41ce6ea8c93524faae1a925eb01562f53b1',
 
-   'src/flutter/third_party/vulkan_memory_allocator':
-   Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + '7de5cc00de50e71a3aab22dea52fbb7ff4efceb6',
+  'src/flutter/third_party/vulkan_memory_allocator':
+  Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + '7de5cc00de50e71a3aab22dea52fbb7ff4efceb6',
 
-   'src/flutter/third_party/abseil-cpp':
-   Var('flutter_git') + '/third_party/abseil-cpp.git' + '@' + 'ff6504dc527b25fef0f3c531e7dba0ed6b69c162',
+  'src/flutter/third_party/abseil-cpp':
+  Var('flutter_git') + '/third_party/abseil-cpp.git' + '@' + 'ff6504dc527b25fef0f3c531e7dba0ed6b69c162',
 
    # Dart packages
   'src/flutter/third_party/pkg/archive':
@@ -694,9 +665,6 @@ deps = {
 
   'src/flutter/third_party/pkg/node_preamble':
   Var('flutter_git') + '/third_party/node_preamble.dart.git' + '@' + '47245865175929ec452d8058e563c267b64c3d64', # 2.0.2
-
-  'src/flutter/third_party/pkg/platform':
-  Var('dart_git') + '/platform.dart' + '@' + '1ffad63428bbd1b3ecaa15926bacfb724023648c', # 3.1.0
 
   'src/flutter/third_party/pkg/process':
   Var('dart_git') + '/process.dart' + '@' + '0c9aeac86dcc4e3a6cf760b76fed507107e244d5', # 4.2.1
