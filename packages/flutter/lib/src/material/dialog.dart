@@ -30,6 +30,7 @@ import 'theme_data.dart';
 // late BuildContext context;
 
 const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
+const EdgeInsets _defaultInsetPaddingMultiWindow = EdgeInsets.zero;
 
 /// A Material Design dialog.
 ///
@@ -232,7 +233,9 @@ class Dialog extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final DialogThemeData dialogTheme = DialogTheme.of(context);
     final EdgeInsets effectivePadding = MediaQuery.viewInsetsOf(context)
-      + (insetPadding ?? dialogTheme.insetPadding ?? _defaultInsetPadding);
+      + (insetPadding ?? dialogTheme.insetPadding ?? (MultiWindowAppContext.of(context) != null
+          ? _defaultInsetPaddingMultiWindow
+          : _defaultInsetPadding));
     final DialogThemeData defaults = theme.useMaterial3
       ? (_fullscreen ? _DialogFullscreenDefaultsM3(context) : _DialogDefaultsM3(context))
       : _DialogDefaultsM2(context);
@@ -1359,6 +1362,16 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// The `routeSettings` argument is passed to [showGeneralDialog],
 /// see [RouteSettings] for details.
 ///
+/// If not null, the `onWindowOpened` argument will be called when the window
+/// is shown on screen. This only applies to a multi-window application.
+///
+/// If not null, the `onWindowClosed` argument will be called when the window
+/// is removed from the screen. This only applies to a multi-window application.
+///
+/// If set to true, `forceNoMultiWindow` will always make sure that the dialog
+/// will not be shown in a new window, regarldess of whether or not the feature
+/// is available in the application.
+///
 /// If not null, the `traversalEdgeBehavior` argument specifies the transfer of
 /// focus beyond the first and the last items of the dialog route. By default,
 /// [TraversalEdgeBehavior.closedLoop] is used, because it's typical for dialogs
@@ -1428,6 +1441,9 @@ Future<T?> showDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
+  void Function(Window)? onWindowOpened,
+  void Function(Window)? onWindowClosed,
+  bool forceNoMultiWindow = false
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1440,21 +1456,33 @@ Future<T?> showDialog<T>({
     ).context,
   );
 
-  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(DialogRoute<T>(
-    context: context,
-    builder: builder,
-    barrierColor: barrierColor
-      ?? DialogTheme.of(context).barrierColor
-      ?? Theme.of(context).dialogTheme.barrierColor
-      ?? Colors.black54,
-    barrierDismissible: barrierDismissible,
-    barrierLabel: barrierLabel,
-    useSafeArea: useSafeArea,
-    settings: routeSettings,
-    themes: themes,
-    anchorPoint: anchorPoint,
-    traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
-  ));
+  final MultiWindowAppContext? multiWindowAppContext =
+    MultiWindowAppContext.of(context);
+
+  if (multiWindowAppContext != null && !forceNoMultiWindow) {
+      return Navigator.of(context, rootNavigator: useRootNavigator)
+        .push<T>(ModalWindowRoute<T>(
+          context: context,
+          onWindowOpened: onWindowOpened,
+          onWindowClosed: onWindowClosed,
+          builder: builder));
+  } else {
+    return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(DialogRoute<T>(
+      context: context,
+      builder: builder,
+      barrierColor: barrierColor
+        ?? DialogTheme.of(context).barrierColor
+        ?? Theme.of(context).dialogTheme.barrierColor
+        ?? Colors.black54,
+      barrierDismissible: barrierDismissible,
+      barrierLabel: barrierLabel,
+      useSafeArea: useSafeArea,
+      settings: routeSettings,
+      themes: themes,
+      anchorPoint: anchorPoint,
+      traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
+    ));
+  }
 }
 
 /// Displays either a Material or Cupertino dialog depending on platform.

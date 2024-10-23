@@ -1252,6 +1252,42 @@ abstract class _WindowRoute<T> extends Route<T> {
   }
 }
 
+/// A route that displays widgets in a modal dialog [Window] with
+/// the help of the [Navigator].
+///
+/// See also:
+///
+///  * [Route], which documents the meaning of the `T` generic type argument.
+class ModalWindowRoute<T> extends _WindowRoute<T> {
+  /// Creates a [Route] that creates a new modal dialog [Window].
+  ///
+  /// [context] the build conext
+  /// [builder] the content that will end up in the dialog
+  /// [size] the [Size] of the dialog. If not provided, the dialog
+  ///        will be sized to fit the content from [builder].
+  /// [settings] settings for the [Route]
+  ModalWindowRoute(
+      {required super.context,
+      required WidgetBuilder builder,
+      super.size,
+      super.settings,
+      super.onWindowOpened,
+      super.onWindowClosed})
+      : _builder = builder;
+
+  final WidgetBuilder _builder;
+
+  @override
+  WidgetBuilder get builder => _builder;
+
+  @override
+  Future<Window> _createWindow(
+      BuildContext context, WidgetBuilder builder, Size size, Window? parent) {
+    return createDialog(
+        context: context, parent: parent, size: size, builder: builder);
+  }
+}
+
 /// A route that displays widgets in a popup dialog [Window] with
 /// the help of the [Navigator].
 ///
