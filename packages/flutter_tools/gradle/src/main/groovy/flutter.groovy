@@ -33,6 +33,7 @@ import org.gradle.internal.os.OperatingSystem
  * For apps only. Provides the flutter extension used in the app-level Gradle
  * build file (app/build.gradle or app/build.gradle.kts).
  *
+ *
  * The versions specified here should match the values in
  * packages/flutter_tools/lib/src/android/gradle_utils.dart, so when bumping,
  * make sure to update the versions specified there.
