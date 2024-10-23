@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:multi_window_ref_app/app/dialog_window.dart';
 import 'package:multi_window_ref_app/app/popup_window.dart';
 
 import 'custom_positioner_dialog.dart';
@@ -261,6 +262,25 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
                         });
                   },
                   child: const Text('Regular'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: () async {
+                    final selectedParent =
+                        _canBeParentOf(WindowArchetype.dialog)
+                            ? widget.selectedWindow
+                            : null;
+                    await createDialog(
+                        context: context,
+                        parent: selectedParent,
+                        size: _settings.dialogSize,
+                        builder: (BuildContext context) {
+                          return const MaterialApp(home: DialogWindowContent());
+                        });
+                  },
+                  child: Text(_canBeParentOf(WindowArchetype.dialog)
+                      ? 'Dialog of ID ${widget.selectedWindow!.view.viewId}'
+                      : 'Dialog'),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton(

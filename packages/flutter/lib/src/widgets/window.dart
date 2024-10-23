@@ -399,6 +399,27 @@ class PopupWindow extends Window {
   }
 }
 
+class DialogWindow extends Window {
+  DialogWindow(
+      {required super.view,
+      required super.builder,
+      required super.size,
+      required Window? parentWindow})
+      : _parent = parentWindow;
+
+  final Window? _parent;
+
+  @override
+  WindowArchetype get archetype {
+    return WindowArchetype.dialog;
+  }
+
+  @override
+  Window? get parent {
+    return _parent;
+  }
+}
+
 /// Creates a new regular [Window].
 ///
 /// [context] the current [BuildContext], which must include a [MultiWindowAppContext]
@@ -449,6 +470,29 @@ Future<PopupWindow> createPopup(
       anchorRect: anchorRect,
       positioner: positioner,
       builder: builder);
+}
+
+
+/// Creates a new dialog [Window]
+///
+/// [context] the current [BuildContext], which must include a [MultiWindowAppContext]
+/// [parent] the [Window] to which this dialog is associated
+/// [size] the [Size] of the dialog
+/// [builder] a builder function that returns the contents of the new [Window]
+Future<DialogWindow> createDialog(
+    {required BuildContext context,
+    Window? parent,
+    required Size size,
+    required WidgetBuilder builder}) async {
+  final MultiWindowAppContext? multiViewAppContext =
+      MultiWindowAppContext.of(context);
+  if (multiViewAppContext == null) {
+    throw Exception(
+        'Cannot create a window: your application does not use MultiViewApp. Try wrapping your toplevel application in a MultiViewApp widget');
+  }
+
+  return multiViewAppContext.windowController
+      .createDialog(parent: parent, size: size, builder: builder);
 }
 
 /// Destroys the provided [Window]
@@ -627,6 +671,47 @@ class WindowController extends State<MultiWindowApp> {
         builder: builder,
         size: metadata.size,
         parentWindow: metadata.parent!);
+    _add(window);
+    return window;
+  }
+
+  /// Creates a new dialog [Window]
+  ///
+  /// [parent] the [Window] to which this dialog is associated
+  /// [size] the [Size] of the dialog
+  /// [builder] a builder function that returns the contents of the new [Window]
+  Future<DialogWindow> createDialog(
+      {Window? parent,
+      required Size size,
+      required WidgetBuilder builder}) async {
+    if (parent != null) {
+      if (!parent!.canBeParentOf(WindowArchetype.dialog)) {
+        throw ArgumentError(
+            'Incompatible parent window. The parent window must have one of '
+            'the following archetypes: WindowArchetype.regular, '
+            'WindowArchetype.floatingRegular, WindowArchetype.dialog, or '
+            'WindowArchetype.satellite. Additionally, if the parent is a '
+            'satellite window, its closest non-satellite ancestor must not '
+            'have any dialog descendants. If the parent is not a satellite, '
+            'it must not have any dialog descendants itself.');
+      }
+    }
+
+    final _WindowMetadata metadata = await _createWindow(
+        viewBuilder: (MethodChannel channel) async {
+          return await channel
+              .invokeMethod('createDialog', <String, dynamic>{
+            'parent': parent?.view.viewId,
+            'size': <int>[size.width.toInt(), size.height.toInt()],
+          }) as Map<Object?, Object?>;
+        },
+        builder: builder);
+
+    final DialogWindow window = DialogWindow(
+        view: metadata.flView,
+        builder: builder,
+        size: metadata.size,
+        parentWindow: metadata.parent);
     _add(window);
     return window;
   }
