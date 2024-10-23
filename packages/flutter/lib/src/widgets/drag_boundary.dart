@@ -76,8 +76,8 @@ class DragBoundary extends InheritedWidget {
   /// Retrieve the [DragBoundary] from the nearest ancestor to
   /// get its [DragBoundaryDelegate] of [Rect].
   ///
-  /// [useGlobalPosition] Specifies whether to use global position.
-  /// If false, the local position of the bounds are used.
+  /// The [useGlobalPosition] flag specifies whether to use global position.
+  /// If false, the local position of the bounds are used. It defaults to false.
   ///
   /// If no [DragBoundary] ancestor is found, the delegate will return a delegate that allows the drag object to move freely.
   static DragBoundaryDelegate<Rect> forRectOf(BuildContext context, {bool useGlobalPosition = false}) {
