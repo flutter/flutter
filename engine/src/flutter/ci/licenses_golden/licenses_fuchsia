@@ -1,4 +1,4 @@
-Signature: 2829b435d5a0d50b1030bb687c538b9f
+Signature: f89d9fe5c857103958b299e04ef491ff
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -5100,7 +5100,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/driver_runtime_shared_lib/driver_runtime.if
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/heapdump_instrumentation.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/heapdump_instrumentation_shard.json
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.ifs
@@ -13056,7 +13056,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/driver_runtime_shared_lib/driver_runtime.if
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/heapdump_instrumentation.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/heapdump_instrumentation_shard.json
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.ifs
@@ -15394,7 +15394,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/natural_messaging.cc 
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/inline_any.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/inline_any.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/input_report_reader/reader.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/component.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/component.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/service.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -15747,7 +15746,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/natural_messaging.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/inline_any.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/inline_any.h
 FILE: ../../../fuchsia/sdk/linux/pkg/input_report_reader/reader.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/component.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/component.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/service.h
@@ -15912,8 +15910,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/collector.shard.
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/bind.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/snapshot.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/stats.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-ops.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sync_cpp/include/lib/sync/cpp/mutex.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_handler.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -16020,8 +16016,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/collector.shard.cm
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/bind.h
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/snapshot.h
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/stats.h
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect/offer.shard.cml
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-ops.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sync_cpp/include/lib/sync/cpp/mutex.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_handler.cc
@@ -16137,6 +16131,9 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/types.cc + ../../../fuch
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/wake-lease.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_testing_scoped_global_logger_cpp/scoped_global_logger.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/time.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
@@ -16223,6 +16220,9 @@ FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/types.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/wake-lease.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_testing_scoped_global_logger_cpp/scoped_global_logger.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/time.h
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect/offer.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml
@@ -21357,7 +21357,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/driver_runtime_shared_lib/driver_runtime.if
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/heapdump_instrumentation.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/heapdump_instrumentation_shard.json
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.ifs
