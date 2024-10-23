@@ -186,8 +186,8 @@ class TextFormField extends FormField<String> {
       'Use `stylusHandwritingEnabled` instead. '
       'This feature was deprecated after v3.27.0-0.1.pre.',
     )
-    bool scribbleEnabled = EditableText.defaultScribbleEnabled,
-    bool stylusHandwritingEnabled = true,
+    bool scribbleEnabled = true,
+    bool stylusHandwritingEnabled = EditableText.defaultStylusHandwritingEnabled,
     bool canRequestFocus = true,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),

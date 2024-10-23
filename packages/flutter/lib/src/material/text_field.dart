@@ -305,8 +305,8 @@ class TextField extends StatefulWidget {
       'Use `stylusHandwritingEnabled` instead. '
       'This feature was deprecated after v3.27.0-0.1.pre.',
     )
-    this.scribbleEnabled = EditableText.defaultScribbleEnabled,
-    this.stylusHandwritingEnabled = true,
+    this.scribbleEnabled = true,
+    this.stylusHandwritingEnabled = EditableText.defaultStylusHandwritingEnabled,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.canRequestFocus = true,

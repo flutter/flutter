@@ -884,8 +884,8 @@ class EditableText extends StatefulWidget {
       'Use `stylusHandwritingEnabled` instead. '
       'This feature was deprecated after v3.27.0-0.1.pre.',
     )
-    this.scribbleEnabled = defaultScribbleEnabled,
-    this.stylusHandwritingEnabled = true,
+    this.scribbleEnabled = true,
+    this.stylusHandwritingEnabled = defaultStylusHandwritingEnabled,
     this.enableIMEPersonalizedLearning = true,
     this.contentInsertionConfiguration,
     this.contextMenuBuilder,
@@ -2004,7 +2004,7 @@ class EditableText extends StatefulWidget {
   final TextMagnifierConfiguration magnifierConfiguration;
 
   /// The default value for [scribbleEnabled].
-  static const bool defaultScribbleEnabled = true;
+  static const bool defaultStylusHandwritingEnabled = true;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
