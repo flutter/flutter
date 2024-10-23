@@ -7,7 +7,6 @@
 
 // ignore_for_file: avoid_relative_lib_imports
 
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -398,13 +397,6 @@ void main() async {
 
   // Regression test for https://github.com/flutter/flutter/issues/157324
   test('Can bind uniforms in range', () async {
-    // TODO(bdero): createDeviceBufferWithCopy triggers an assert in
-    //              third_party/dart on Linux.
-    //              https://github.com/flutter/flutter/issues/157336
-    if (Platform.isLinux) {
-      return;
-    }
-
     final state = createSimpleRenderPass();
 
     final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
