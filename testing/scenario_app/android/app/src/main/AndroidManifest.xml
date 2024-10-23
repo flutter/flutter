@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:name="io.flutter.app.FlutterApplication"
         android:label="Scenarios App"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
