@@ -60,19 +60,8 @@ static void fl_mock_keyboard_handler_delegate_init(
 static void fl_mock_keyboard_handler_delegate_class_init(
     FlMockKeyboardHandlerDelegateClass* klass) {}
 
-static GHashTable* fl_mock_view_keyboard_get_keyboard_state(
-    FlKeyboardViewDelegate* view_delegate) {
-  GHashTable* result = g_hash_table_new(g_direct_hash, g_direct_equal);
-  g_hash_table_insert(result, reinterpret_cast<gpointer>(kMockPhysicalKey),
-                      reinterpret_cast<gpointer>(kMockLogicalKey));
-
-  return result;
-}
-
 static void fl_mock_keyboard_handler_delegate_keyboard_view_delegate_iface_init(
-    FlKeyboardViewDelegateInterface* iface) {
-  iface->get_keyboard_state = fl_mock_view_keyboard_get_keyboard_state;
-}
+    FlKeyboardViewDelegateInterface* iface) {}
 
 static FlMockKeyboardHandlerDelegate* fl_mock_keyboard_handler_delegate_new() {
   FlMockKeyboardHandlerDelegate* self = FL_MOCK_KEYBOARD_HANDLER_DELEGATE(
@@ -87,9 +76,26 @@ static FlMockKeyboardHandlerDelegate* fl_mock_keyboard_handler_delegate_new() {
 TEST(FlKeyboardHandlerTest, KeyboardChannelGetPressedState) {
   ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
 
-  g_autoptr(FlKeyboardHandler) handler = fl_keyboard_handler_new(
-      messenger,
-      FL_KEYBOARD_VIEW_DELEGATE(fl_mock_keyboard_handler_delegate_new()));
+  g_autoptr(FlEngine) engine =
+      FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
+                             FL_BINARY_MESSENGER(messenger), nullptr));
+  g_autoptr(FlMockKeyboardHandlerDelegate) view_delegate =
+      fl_mock_keyboard_handler_delegate_new();
+  g_autoptr(FlKeyboardManager) manager =
+      fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view_delegate));
+  fl_keyboard_manager_set_get_pressed_state_handler(
+      manager,
+      [](gpointer user_data) {
+        GHashTable* result = g_hash_table_new(g_direct_hash, g_direct_equal);
+        g_hash_table_insert(result,
+                            reinterpret_cast<gpointer>(kMockPhysicalKey),
+                            reinterpret_cast<gpointer>(kMockLogicalKey));
+
+        return result;
+      },
+      nullptr);
+  g_autoptr(FlKeyboardHandler) handler =
+      fl_keyboard_handler_new(messenger, manager);
   EXPECT_NE(handler, nullptr);
 
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
