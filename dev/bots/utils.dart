@@ -11,6 +11,7 @@ import 'dart:math' as math;
 
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:collection/collection.dart';
 import 'package:file/file.dart' as fs;
 import 'package:file/local.dart';
 import 'package:meta/meta.dart';
@@ -534,7 +535,7 @@ Future<void> runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
 }
 /// Parse (one-)index/total-named subshards from environment variable SUBSHARD
 /// and equally distribute [tests] between them.
-/// Subshard format is "{index}_{total number of shards}".
+/// The format of SUBSHARD is "{index}_{total number of shards}".
 /// The scheduler can change the number of total shards without needing an additional
 /// commit in this repository.
 ///
@@ -569,12 +570,46 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
     return <T>[];
   }
 
-  final int testsPerShard = (tests.length / total).ceil();
-  final int start = (index - 1) * testsPerShard;
-  final int end = math.min(index * testsPerShard, tests.length);
-
+  final (int start, int end) = selectTestsForSubShard(
+    testCount: tests.length,
+    subShardIndex: index,
+    subShardCount: total,
+  );
   print('Selecting subshard $index of $total (tests ${start + 1}-$end of ${tests.length})');
   return tests.sublist(start, end);
+}
+
+/// Finds the interval of tests that a subshard is responsible for testing.
+@visibleForTesting
+(int start, int end) selectTestsForSubShard({
+  required int testCount,
+  required int subShardIndex,
+  required int subShardCount,
+}) {
+  // While there exists a closed formula figuring out the range of tests the
+  // subshard is resposible for, modeling this as a simulation of distributing
+  // items equally into buckets is more intuitive.
+  //
+  // A bucket represents how many tests a subshard should be allocated.
+  final List<int> buckets = List<int>.filled(subShardCount, 0);
+  // First, allocate an equal number of items to each bucket.
+  for (int i = 0; i < buckets.length; i++) {
+    buckets[i] = (testCount / subShardCount).floor();
+  }
+  // For the N leftover items, put one into each of the first N buckets.
+  final int remainingItems = testCount % buckets.length;
+  for (int i = 0; i < remainingItems; i++) {
+    buckets[i] += 1;
+  }
+
+  // Lastly, compute the indices of the items in buckets[index].
+  // We derive this from the toal number items in previous buckets and the number
+  // of items in this bucket.
+  final int numberOfItemsInPreviousBuckets = subShardIndex == 0 ? 0 : buckets.sublist(0, subShardIndex - 1).sum;
+  final int start = numberOfItemsInPreviousBuckets;
+  final int end = start + buckets[subShardIndex - 1];
+
+  return (start, end);
 }
 
 Future<void> _runFromList(Map<String, ShardRunner> items, String key, String name, int positionInTaskName) async {
