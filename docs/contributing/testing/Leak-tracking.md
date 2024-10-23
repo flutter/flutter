@@ -40,14 +40,14 @@ on how to enable/disable leak tracking for individual tests and files.
 
 ## What are defaults?
 
-Leak tracking is disabled for local runs and for all bots except two:
+Leak tracking is disabled for local test runs and for all bots except two:
 
 - [Windows framework_tests_libraries_leak_tracking](https://github.com/flutter/flutter/blob/9441f8f6c806fb0a3b7d058a40b5e59c373e6055/.ci.yaml#L5553)
 - [Windows framework_tests_widgets_leak_tracking](https://github.com/flutter/flutter/blob/9441f8f6c806fb0a3b7d058a40b5e59c373e6055/.ci.yaml#L5640C11-L5640C56)
 
-To forcefully enable leak tracking for flutter tests, pass
+To enable leak tracking for flutter tests, pass
 `--dart-define LEAK_TRACKING=true` to `flutter test`.
 
-You can see the bots status on [Flutter dashboard](https://flutter-dashboard.appspot.com/#/build).
+You can see the bot's status on [Flutter dashboard](https://flutter-dashboard.appspot.com/#/build).
 The bots are not blocking yet.
 See [a proposal to convert them to be blocking](http://flutter.dev/go/leak-tracker-make-bots-blocking).
