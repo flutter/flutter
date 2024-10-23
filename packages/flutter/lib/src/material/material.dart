@@ -94,14 +94,14 @@ typedef MaterialInkController = SplashController;
 extension type SplashController._(_RenderSplashes _renderSplashes) {
   /// The [TickerProvider] used by this controller.
   ///
-  /// [Splash]es added to this controller with [addSplash] use this vsync
-  /// to drive their animations.
+  /// [Splash]es added to this controller with [addSplash]
+  /// use this vsync to drive their animations.
   TickerProvider get vsync => _renderSplashes.vsync;
 
   /// Suggests a color for the surface where splashes are painted.
   ///
   /// This color does not directly determine the appearance of the splash;
-  /// it serves as a reference value that descendants can optionally use
+  /// it serves as a reference value that descendants can optionally access
   /// via `Material.of(context).color`.
   ///
   /// Unlike standard [InheritedWidget] patterns, changes to this
@@ -121,14 +121,15 @@ extension type SplashController._(_RenderSplashes _renderSplashes) {
   @visibleForTesting
   List<Splash>? get splashes => _renderSplashes._splashes;
 
-  /// Adds an [InkFeature], such as an [InkSplash] or an [InkHighlight].
+  /// Add an [InkFeature], such as an [InkSplash] or an [InkHighlight].
   ///
   /// The ink feature will paint as part of this controller.
+  //
   // TODO(nate-thegrate): deprecate this method once Splash is officially introduced!
   // https://github.com/flutter/flutter/issues/150139
   void addInkFeature(InkFeature feature) => addSplash(feature);
 
-  /// Adds a [Splash] to the collection of splashes that this controller paints.
+  /// Adds a [Splash] to the collection of [splashes] painted by this controller.
   void addSplash(Splash splash) {
     assert(!splash._debugDisposed);
     assert(splash.controller == this);
@@ -599,6 +600,9 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 class _RenderSplashes extends RenderProxyBox {
   _RenderSplashes({required this.vsync, this.color}) : super(null);
 
+  // This class should exist in a 1:1 relationship with a MaterialState object,
+  // since there's no current support for dynamically changing the ticker
+  // provider.
   final TickerProvider vsync;
 
   Color? color;
