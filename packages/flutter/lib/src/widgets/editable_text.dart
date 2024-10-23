@@ -5901,6 +5901,8 @@ class _ScribeState extends State<_Scribe> {
   }
 }
 
+// Enables support for Android Scribe active stylus handwriting input and iOS
+// Scribble handwriting input with Apple Pencil for its child.
 class _StylusHandwriting extends StatelessWidget {
   const _StylusHandwriting({
     required this.child,

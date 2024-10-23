@@ -9,6 +9,8 @@ import 'system_channels.dart';
 
 /// An interface into Android's stylus handwriting text input.
 ///
+/// Allows handwriting directly on top of a text input using a stylus.
+///
 /// See also:
 ///
 ///  * [EditableText.stylusHandwritingEnabled], which controls whether Flutter's
@@ -46,7 +48,9 @@ class Scribe {
   /// See also:
   ///
   /// * [isStylusHandwritingAvailable], which is similar, but throws an error
-  ///   when called by an unsupported API level.
+  ///   when called by an unsupported API level. It directly corresponds to the
+  ///   underlying Android API
+  ///   <https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#isStylusHandwritingAvailable()>.
   static Future<bool?> isFeatureAvailable() {
     return _channel.invokeMethod<bool?>(
       'Scribe.isFeatureAvailable',
@@ -101,7 +105,8 @@ class Scribe {
 
   /// Tell Android to begin receiving stylus handwriting input.
   ///
-  /// This is typically called after detecting the start of stylus input.
+  /// This is typically called after detecting a [PointerDownEvent] indicating
+  /// the start of stylus input.
   ///
   /// Supported on Android API 33 and above.
   ///

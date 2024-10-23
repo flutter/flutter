@@ -286,6 +286,13 @@ abstract final class SystemChannels {
   ///
   ///  * `Scribe.startStylusHandwriting`: Indicates that stylus input has been
   ///  detected and Android should start handwriting input.
+  ///  * `Scribe.isStylusHandwritingAvailable`: Returns a boolean representing
+  ///  whether or not the device currently supports accepting stylus handwriting
+  ///  input. Throws if the device's API level is not sufficient.
+  ///  * `Scribe.isFeatureAvailable`: Returns a boolean representing whether or
+  ///  not the device currently supports accepting stylus handwriting input.
+  ///  Returns false and does not throw if the device's API level is not
+  ///  sufficient.
   ///
   /// See also:
   ///

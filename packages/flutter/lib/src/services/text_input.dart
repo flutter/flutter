@@ -1256,6 +1256,7 @@ mixin TextInputClient {
 ///
 /// See also:
 ///
+///  * [Scribe], which provides similar functionality for Anroid.
 ///  * [UIIndirectScribbleInteraction](https://developer.apple.com/documentation/uikit/uiindirectscribbleinteraction),
 ///    which is iOS's API for Scribble.
 abstract class ScribbleClient {
