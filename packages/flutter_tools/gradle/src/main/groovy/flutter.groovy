@@ -79,7 +79,7 @@ class FlutterExtension {
     public String flutterVersionName = null
 
     /** Returns flutterVersionCode as an integer with error handling. */
-    public Integer getVersionCode() {
+    Integer getVersionCode() {
         if (flutterVersionCode == null) {
             throw new GradleException("flutterVersionCode must not be null.")
         }
@@ -92,7 +92,7 @@ class FlutterExtension {
     }
 
     /** Returns flutterVersionName with error handling. */
-    public String getVersionName() {
+    String getVersionName() {
         if (flutterVersionName == null) {
             throw new GradleException("flutterVersionName must not be null.")
         }
@@ -712,7 +712,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns `true` if the given project is a plugin project having an `android` directory
      * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    private Boolean pluginSupportsAndroidPlatform(Project project) {
+    private static Boolean pluginSupportsAndroidPlatform(Project project) {
         File buildGradle = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle")
         File buildGradleKts = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle.kts")
         return buildGradle.exists() || buildGradleKts.exists()
@@ -723,7 +723,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Kotlin variants exist, then Groovy (build.gradle) is preferred over
      * Kotlin (build.gradle.kts). This is the same behavior as Gradle 8.5.
      */
-    private File buildGradleFile(Project project) {
+    private static File buildGradleFile(Project project) {
         File buildGradle = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle")
         File buildGradleKts = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle.kts")
         if (buildGradle.exists() && buildGradleKts.exists()) {
@@ -741,7 +741,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Kotlin variants exist, then Groovy (settings.gradle) is preferred over
      * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
      */
-    private File settingsGradleFile(Project project) {
+    private static File settingsGradleFile(Project project) {
         File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
         if (settingsGradle.exists() && settingsGradleKts.exists()) {
@@ -924,7 +924,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
      * or string version.
      */
-    private String getCompileSdkFromProject(Project gradleProject) {
+    private static String getCompileSdkFromProject(Project gradleProject) {
         return gradleProject.android.compileSdkVersion.substring(8)
     }
 
@@ -992,17 +992,14 @@ class FlutterPlugin implements Plugin<Project> {
         if (localProperties == null) {
             localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
         }
-        String result
-        if (project.hasProperty(name)) {
-            result = project.property(name)
-        }
-        if (result == null) {
-            result = localProperties.getProperty(name)
-        }
-        if (result == null) {
-            result = defaultValue
-        }
-        return result
+        // First, try to get the property from the project
+        String result = project.hasProperty(name) ? project.property(name) : null
+
+        // then, if result is still null, try and get it from local properties
+        result = result ?: localProperties?.getProperty(name)
+
+        // Return the defaultValue if no result found
+        return result ?: defaultValue
     }
 
     private List<String> getTargetPlatforms() {
@@ -1130,7 +1127,7 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
-    private Task getAssembleTask(variant) {
+    private static Task getAssembleTask(variant) {
         // `assemble` became `assembleProvider` in AGP 3.3.0.
         return variant.hasProperty("assembleProvider") ? variant.assembleProvider.get() : variant.assemble
     }
