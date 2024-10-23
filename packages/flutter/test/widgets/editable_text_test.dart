@@ -12791,6 +12791,41 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb); // [intended]
 
+  testWidgets('can change tap outside behavior by overriding actions', (WidgetTester tester) async {
+    bool myIntentWasCalled = false;
+    final CallbackAction<EditableTextTapOutsideIntent> overrideAction = CallbackAction<EditableTextTapOutsideIntent>(
+      onInvoke: (EditableTextTapOutsideIntent intent) { myIntentWasCalled = true; return null; },
+    );
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          SizedBox(
+            key: key,
+            width: 200,
+            height: 200,
+          ),
+          Actions(
+            actions: <Type, Action<Intent>>{ EditableTextTapOutsideIntent: overrideAction, },
+            child: EditableText(
+              autofocus: true,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byKey(key), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(myIntentWasCalled, isTrue);
+    expect(focusNode.hasFocus, true);
+  });
+
   testWidgets('ignore key event from web platform', (WidgetTester tester) async {
     controller.text = 'test\ntest';
     controller.selection = const TextSelection(
@@ -13452,6 +13487,11 @@ void main() {
       selection: TextSelection.collapsed(offset: textA.length),
     );
 
+    const TextEditingValue textASelected = TextEditingValue(
+      text: textA,
+      selection: TextSelection(baseOffset: 0, extentOffset: textA.length),
+    );
+
     const TextEditingValue textABCollapsedAtEnd = TextEditingValue(
       text: textAB,
       selection: TextSelection.collapsed(offset: textAB.length),
@@ -13461,6 +13501,12 @@ void main() {
       text: textAC,
       selection: TextSelection.collapsed(offset: textAC.length),
     );
+
+    bool isDeskop() {
+      return debugDefaultTargetPlatformOverride == TargetPlatform.macOS
+          || debugDefaultTargetPlatformOverride == TargetPlatform.windows
+          || debugDefaultTargetPlatformOverride == TargetPlatform.linux;
+    }
 
     testWidgets('Should have no effect on an empty and non-focused field', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
@@ -13644,7 +13690,7 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
       await waitForThrottling(tester);
-      expect(controller.value, textACollapsedAtEnd);
+      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
 
       // Insert some text.
       await tester.enterText(find.byType(EditableText), textAB);
@@ -13653,7 +13699,7 @@ void main() {
       // Undo the insertion without waiting for the throttling delay.
       await sendUndo(tester);
       expect(controller.value.selection.isValid, true);
-      expect(controller.value, textACollapsedAtEnd);
+      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
@@ -13668,7 +13714,7 @@ void main() {
       await tester.pump();
       await sendUndo(tester);
       await waitForThrottling(tester);
-      expect(controller.value, textACollapsedAtEnd);
+      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
 
       // Insert some text.
       await tester.enterText(find.byType(EditableText), textAB);
@@ -13678,7 +13724,7 @@ void main() {
       await sendUndo(tester);
 
       // Initial text should have been recorded and restored.
-      expect(controller.value, textACollapsedAtEnd);
+      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
@@ -16698,6 +16744,10 @@ void main() {
 
   group('selection behavior when receiving focus', () {
     testWidgets('tabbing between fields', (WidgetTester tester) async {
+      final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS
+          || debugDefaultTargetPlatformOverride == TargetPlatform.windows
+          || debugDefaultTargetPlatformOverride == TargetPlatform.linux;
+
       final TextEditingController controller1 = TextEditingController();
       addTearDown(controller1.dispose);
       final TextEditingController controller2 = TextEditingController();
@@ -16757,7 +16807,7 @@ void main() {
       expect(focusNode2.hasFocus, isFalse);
       expect(
         controller1.selection,
-        kIsWeb
+        kIsWeb || isDesktop
           ? TextSelection(
               baseOffset: 0,
               extentOffset: controller1.text.length,
@@ -16814,7 +16864,7 @@ void main() {
       expect(focusNode2.hasFocus, isFalse);
       expect(
         controller1.selection,
-        kIsWeb
+        kIsWeb || isDesktop
           ? TextSelection(
               baseOffset: 0,
               extentOffset: controller1.text.length,
@@ -16835,7 +16885,7 @@ void main() {
           offset: controller2.text.length - 1,
         ),
       );
-    });
+    }, variant: TargetPlatformVariant.all());
 
     testWidgets('Selection is updated when the field has focus and the new selection is invalid', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/120631.
@@ -16967,6 +17017,45 @@ void main() {
     },
       skip: !kIsWeb, // [intended]
     );
+
+    // Regression test for https://github.com/flutter/flutter/issues/156078.
+    testWidgets('when having focus regained after the app resumed', (WidgetTester tester) async {
+      Future<void> setAppLifeCycleState(AppLifecycleState state) async {
+        final ByteData? message = const StringCodec().encodeMessage(state.toString());
+        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      }
+
+      final TextEditingController controller = TextEditingController(text: 'Flutter!');
+      addTearDown(controller.dispose);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: EditableText(
+              key: ValueKey<String>(controller.text),
+              controller: controller,
+              focusNode: focusNode,
+              autofocus: true,
+              style: Typography.material2018().black.titleMedium!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      );
+
+      expect(focusNode.hasFocus, true);
+      expect(controller.selection, collapsedAtEnd('Flutter!').selection);
+
+      await setAppLifeCycleState(AppLifecycleState.inactive);
+      await setAppLifeCycleState(AppLifecycleState.resumed);
+
+      expect(focusNode.hasFocus, true);
+      expect(controller.selection, collapsedAtEnd('Flutter!').selection);
+    }, variant: TargetPlatformVariant.all());
   });
 
   testWidgets('EditableText respects MediaQuery.boldText', (WidgetTester tester) async {

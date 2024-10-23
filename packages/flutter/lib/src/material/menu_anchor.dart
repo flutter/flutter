@@ -403,7 +403,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
-    Widget child = OverlayPortal(
+    Widget child = OverlayPortal.targetsRootOverlay(
       controller: _overlayController,
       overlayChildBuilder: (BuildContext context) {
         return _Submenu(
@@ -432,11 +432,22 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
-    return _MenuAnchorScope(
-      anchorKey: _anchorKey,
-      anchor: this,
-      isOpen: _isOpen,
-      child: child,
+    // This `Shortcuts` is needed so that shortcuts work when the focus is on
+    // MenuAnchor (specifically, the root menu, since submenus have their own
+    // `Shortcuts`).
+    return
+    Shortcuts(
+      shortcuts: _kMenuTraversalShortcuts,
+      // Ignore semantics here and since the same information is typically
+      // also provided by the children.
+      includeSemantics: false,
+      child:
+      _MenuAnchorScope(
+        anchorKey: _anchorKey,
+        anchor: this,
+        isOpen: _isOpen,
+        child: child,
+      ),
     );
   }
 
@@ -639,8 +650,7 @@ class MenuController {
 
   /// Whether or not the associated menu is currently open.
   bool get isOpen {
-    assert(_anchor != null);
-    return _anchor!._isOpen;
+    return _anchor?._isOpen ?? false;
   }
 
   /// Close the menu that this menu controller is associated with.
@@ -653,8 +663,7 @@ class MenuController {
   /// scrolled by an ancestor, or the view changes size, then any open menu will
   /// automatically close.
   void close() {
-    assert(_anchor != null);
-    _anchor!._close();
+    _anchor?._close();
   }
 
   /// Opens the menu that this menu controller is associated with.
@@ -996,6 +1005,13 @@ class MenuItemButton extends StatefulWidget {
   /// [disabledBackgroundColor] to specify the button's disabled icon and fill
   /// color.
   ///
+  /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
+  /// parameters are used to construct [ButtonStyle.mouseCursor].
+  ///
+  /// The [iconColor], [disabledIconColor] are used to construct
+  /// [ButtonStyle.iconColor] and [iconSize] is used to construct
+  /// [ButtonStyle.iconSize].
+  ///
   /// All of the other parameters are either used directly or used to create a
   /// [WidgetStateProperty] with a single value for all states.
   ///
@@ -1025,6 +1041,8 @@ class MenuItemButton extends StatefulWidget {
     Color? shadowColor,
     Color? surfaceTintColor,
     Color? iconColor,
+    double? iconSize,
+    Color? disabledIconColor,
     TextStyle? textStyle,
     Color? overlayColor,
     double? elevation,
@@ -1051,6 +1069,8 @@ class MenuItemButton extends StatefulWidget {
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
       iconColor: iconColor,
+      iconSize: iconSize,
+      disabledIconColor: disabledIconColor,
       textStyle: textStyle,
       overlayColor: overlayColor,
       elevation: elevation,
@@ -1777,6 +1797,13 @@ class SubmenuButton extends StatefulWidget {
   /// [disabledBackgroundColor] to specify the button's disabled icon and fill
   /// color.
   ///
+  /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
+  /// parameters are used to construct [ButtonStyle.mouseCursor].
+  ///
+  /// The [iconColor], [disabledIconColor] are used to construct
+  /// [ButtonStyle.iconColor] and [iconSize] is used to construct
+  /// [ButtonStyle.iconSize].
+  ///
   /// All of the other parameters are either used directly or used to create a
   /// [WidgetStateProperty] with a single value for all states.
   ///
@@ -1804,6 +1831,8 @@ class SubmenuButton extends StatefulWidget {
     Color? shadowColor,
     Color? surfaceTintColor,
     Color? iconColor,
+    double? iconSize,
+    Color? disabledIconColor,
     TextStyle? textStyle,
     Color? overlayColor,
     double? elevation,
@@ -1830,6 +1859,8 @@ class SubmenuButton extends StatefulWidget {
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
       iconColor: iconColor,
+      disabledIconColor: disabledIconColor,
+      iconSize: iconSize,
       textStyle: textStyle,
       overlayColor: overlayColor,
       elevation: elevation,

@@ -1267,8 +1267,8 @@ target-device (mobile) • xxx • ios • iOS 16 (unsupported)
 
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
-          expect(logger.statusText, equals('''
-To use 'target-device' for development, enable Developer Mode in Settings → Privacy & Security.
+          expect(logger.statusText, equals(r'''
+To use 'target-device' for development, enable Developer Mode in Settings → Privacy & Security on the device. If this does not work, open Xcode, reconnect the device, and look for a popup on the device asking you to trust this computer.
 '''));
           expect(devices, isNull);
         });
@@ -1279,7 +1279,7 @@ To use 'target-device' for development, enable Developer Mode in Settings → Pr
 
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
           expect(logger.statusText, equals('''
-To use 'target-device-1' for development, enable Developer Mode in Settings → Privacy & Security.
+To use 'target-device-1' for development, enable Developer Mode in Settings → Privacy & Security on the device. If this does not work, open Xcode, reconnect the device, and look for a popup on the device asking you to trust this computer.
 Checking for wireless devices...
 '''));
           expect(devices, isNotNull);
@@ -1292,8 +1292,8 @@ Checking for wireless devices...
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
           expect(logger.statusText, equals('''
-To use 'target-device-1' for development, enable Developer Mode in Settings → Privacy & Security.
-To use 'target-device-2' for development, enable Developer Mode in Settings → Privacy & Security.
+To use 'target-device-1' for development, enable Developer Mode in Settings → Privacy & Security on the device. If this does not work, open Xcode, reconnect the device, and look for a popup on the device asking you to trust this computer.
+To use 'target-device-2' for development, enable Developer Mode in Settings → Privacy & Security on the device. If this does not work, open Xcode, reconnect the device, and look for a popup on the device asking you to trust this computer.
 No devices found yet. Checking for wireless devices...
 
 No supported devices found with name or id matching 'target-device'.

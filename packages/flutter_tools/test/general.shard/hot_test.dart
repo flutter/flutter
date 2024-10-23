@@ -132,9 +132,14 @@ void main() {
       });
 
       testUsingContext('setupHotRestart function fails', () async {
-        fileSystem.file('.packages')
+        fileSystem.directory('.dart_tool').childFile('package_config.json')
           ..createSync(recursive: true)
-          ..writeAsStringSync('\n');
+          ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": []
+}
+''');
         final FakeDevice device = FakeDevice();
         final List<FlutterDevice> devices = <FlutterDevice>[
           FakeFlutterDevice(device),
@@ -158,9 +163,14 @@ void main() {
       });
 
       testUsingContext('setupHotReload function fails', () async {
-        fileSystem.file('.packages')
+        fileSystem.directory('.dart_tool').childFile('package_config.json')
           ..createSync(recursive: true)
-          ..writeAsStringSync('\n');
+          ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": []
+}
+''');
         final FakeDevice device = FakeDevice();
         final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
         final List<FlutterDevice> devices = <FlutterDevice>[
@@ -203,9 +213,14 @@ void main() {
       });
 
       testUsingContext('shutdown hook called after signal', () async {
-        fileSystem.file('.packages')
+        fileSystem.directory('.dart_tool').childFile('package_config.json')
           ..createSync(recursive: true)
-          ..writeAsStringSync('\n');
+          ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": []
+}
+''');
         final FakeDevice device = FakeDevice();
         final List<FlutterDevice> devices = <FlutterDevice>[
           FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler()),
@@ -226,9 +241,14 @@ void main() {
       });
 
       testUsingContext('shutdown hook called after app stop', () async {
-        fileSystem.file('.packages')
+        fileSystem.directory('.dart_tool').childFile('package_config.json')
           ..createSync(recursive: true)
-          ..writeAsStringSync('\n');
+          ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": []
+}
+''');
         final FakeDevice device = FakeDevice();
         final List<FlutterDevice> devices = <FlutterDevice>[
           FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler()),
@@ -545,9 +565,14 @@ void main() {
 
     testUsingContext('Exits with code 2 when HttpException is thrown '
       'during VM service connection', () async {
-      fileSystem.file('.packages')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('\n');
+      fileSystem.directory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": []
+}
+''');
 
       final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
       final FakeDevice device = FakeDevice();

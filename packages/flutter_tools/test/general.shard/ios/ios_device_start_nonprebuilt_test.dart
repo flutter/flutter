@@ -114,9 +114,6 @@ void main() {
       );
       fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(projectInfo: projectInfo);
       xcode = Xcode.test(processManager: FakeProcessManager.any(), xcodeProjectInterpreter: fakeXcodeProjectInterpreter);
-      fileSystem.file('foo/.packages')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('\n');
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
@@ -421,9 +418,6 @@ void main() {
       );
       fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(projectInfo: projectInfo);
       xcode = Xcode.test(processManager: FakeProcessManager.any(), xcodeProjectInterpreter: fakeXcodeProjectInterpreter);
-      fileSystem.file('foo/.packages')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('\n');
     });
 
     group('in release mode', () {
@@ -920,7 +914,10 @@ void main() {
 
 void setUpIOSProject(FileSystem fileSystem, {bool createWorkspace = true}) {
   fileSystem.file('pubspec.yaml').createSync();
-  fileSystem.file('.packages').writeAsStringSync('\n');
+  fileSystem
+    .directory('.dart_tool')
+    .childFile('package_config.json')
+    .createSync(recursive: true);
   fileSystem.directory('ios').createSync();
   if (createWorkspace) {
     fileSystem.directory('ios/Runner.xcworkspace').createSync();

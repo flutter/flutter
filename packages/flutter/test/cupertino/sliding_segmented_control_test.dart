@@ -960,6 +960,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isButton,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
+                SemanticsFlag.hasSelectedState,
                 SemanticsFlag.isSelected,
               ],
               actions: <SemanticsAction>[
@@ -971,6 +972,8 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isButton,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
+                // Declares that it is selectable, but not currently selected.
+                SemanticsFlag.hasSelectedState,
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
@@ -997,6 +1000,8 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isButton,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
+                // Declares that it is selectable, but not currently selected.
+                SemanticsFlag.hasSelectedState,
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
@@ -1007,6 +1012,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isButton,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
+                SemanticsFlag.hasSelectedState,
                 SemanticsFlag.isSelected,
               ],
               actions: <SemanticsAction>[
@@ -1052,7 +1058,7 @@ void main() {
     expect(groupValue, 1);
   });
 
-  testWidgets('Non-centered taps work on propotional segments', (WidgetTester tester) async {
+  testWidgets('Non-centered taps work on proportional segments', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const SizedBox(width: 50, height: 30);
     children[1] = const SizedBox();

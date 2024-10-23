@@ -127,7 +127,10 @@ void main() {
       .._devFS = webDevFS
       ..device = mockDevice
       ..generator = residentCompiler;
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: test_fakes.FakeFlutterVersion(),

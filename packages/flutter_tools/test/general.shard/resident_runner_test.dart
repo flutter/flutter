@@ -51,8 +51,6 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      globals.fs.file('.packages')
-        .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
@@ -1173,9 +1171,6 @@ dependencies:
   ]
 }
 ''');
-    globals.fs.file('.packages').writeAsStringSync('''
-path_provider_linux:/path_provider_linux/lib/
-''');
     final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
     final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');
     pluginPubspec.createSync(recursive: true);
@@ -1949,6 +1944,7 @@ flutter:
     final TestFlutterDevice flutterDevice = TestFlutterDevice(device);
     flutterDevice.vmService = fakeVmServiceHost!.vmService;
     await flutterDevice.tryInitLogReader();
+
     final BufferLogger logger = globals.logger as BufferLogger;
     expect(
       logger.traceText,
@@ -1957,13 +1953,12 @@ flutter:
         'Service connection disposed\n',
       ),
     );
-    expect(
-      logger.errorText,
-      contains(
-        'Unable to initiate log reader for deviceFakeDevice, because '
-        'the Flutter VM service connection is closed.\n',
-      ),
-    );
+    // We should not print a warning since the device does not have a connected
+    // adb log reader.
+    // TODO(andrewkolos): This test is a bit fragile, and is something that
+    //  should be corrected in a follow-up PR (see
+    //  https://github.com/flutter/flutter/issues/155795).
+    expect(logger.errorText, isEmpty);
   }, overrides: <Type, Generator>{
     Logger: () => BufferLogger.test(),
     Artifacts: () => Artifacts.test(),

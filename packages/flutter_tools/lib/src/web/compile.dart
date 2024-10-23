@@ -111,7 +111,7 @@ class WebBuilder {
             usage: _flutterUsage,
             analytics: _analytics,
             cacheDir: globals.cache.getRoot(),
-            engineVersion: globals.artifacts!.isLocalEngine ? null : _flutterVersion.engineRevision,
+            engineVersion: globals.artifacts!.usesLocalArtifacts ? null : _flutterVersion.engineRevision,
             flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
             // Web uses a different Dart plugin registry.
             // https://github.com/flutter/flutter/issues/80406
@@ -198,6 +198,21 @@ enum WebRendererMode implements CliEnum {
 
   static const WebRendererMode defaultForJs = WebRendererMode.canvaskit;
   static const WebRendererMode defaultForWasm = WebRendererMode.skwasm;
+
+  /// Returns whether the WebRendererMode is considered deprecated or not.
+  ///
+  /// Deprecated modes: auto, html.
+  bool get isDeprecated => switch (this) {
+        auto => true,
+        canvaskit => false,
+        html => true,
+        skwasm => false
+      };
+
+  /// Returns a consistent deprecation warning for the WebRendererMode.
+  String get deprecationWarning =>
+    'The HTML Renderer is deprecated. Do not use "--web-renderer=$name".'
+    '\nSee: https://docs.flutter.dev/to/web-html-renderer-deprecation';
 
   @override
   String get cliName => kebabCase(name);
