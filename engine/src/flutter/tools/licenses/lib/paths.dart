@@ -153,7 +153,6 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/pkg/flutter_packages',
   r'flutter/third_party/pkg/gcloud',
   r'flutter/third_party/pkg/googleapis',
-  r'flutter/third_party/pkg/platform',
   r'flutter/third_party/pkg/process',
   r'flutter/third_party/pkg/process_runner',
   r'flutter/third_party/pkg/vector_math',

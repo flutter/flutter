@@ -103,7 +103,7 @@ dart_library("meta") {
 }
 
 dart_library("args") {
-  package_root = "$dart_src/third_party/pkg/args"
+  package_root = "$dart_src/third_party/pkg/core/pkgs/args"
   package_name = "args"
 
   language_version = "2.17"
@@ -167,7 +167,7 @@ dart_library("collection") {
 }
 
 dart_library("logging") {
-  package_root = "$dart_src/third_party/pkg/logging"
+  package_root = "$dart_src/third_party/pkg/core/pkgs/logging"
   package_name = "logging"
 
   pubspec = "$package_root/pubspec.yaml"
@@ -183,7 +183,7 @@ dart_library("logging") {
 }
 
 dart_library("path") {
-  package_root = "$dart_src/third_party/pkg/path"
+  package_root = "$dart_src/third_party/pkg/core/pkgs/path"
   package_name = "path"
 
   pubspec = "$package_root/pubspec.yaml"

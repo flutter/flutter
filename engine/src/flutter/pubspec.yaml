@@ -174,9 +174,9 @@ dependency_overrides:
   archive:
     path: ./third_party/pkg/archive
   args:
-    path: ./third_party/dart/third_party/pkg/args
+    path: ./third_party/dart/third_party/pkg/core/pkgs/args
   async:
-    path: ./third_party/dart/third_party/pkg/async
+    path: ./third_party/dart/third_party/pkg/core/pkgs/async
   async_helper:
     path: ./third_party/dart/pkg/async_helper
   boolean_selector:
@@ -184,11 +184,11 @@ dependency_overrides:
   collection:
     path: ./third_party/dart/third_party/pkg/collection
   convert:
-    path: ./third_party/dart/third_party/pkg/convert
+    path: ./third_party/dart/third_party/pkg/core/pkgs/convert
   coverage:
     path: ./third_party/pkg/coverage
   crypto:
-    path: ./third_party/dart/third_party/pkg/crypto
+    path: ./third_party/dart/third_party/pkg/core/pkgs/crypto
   equatable:
     path: ./third_party/pkg/equatable
   expect:
@@ -198,7 +198,7 @@ dependency_overrides:
   ffi:
     path: ./third_party/dart/third_party/pkg/native/pkgs/ffi
   fixnum:
-    path: ./third_party/dart/third_party/pkg/fixnum
+    path: ./third_party/dart/third_party/pkg/core/pkgs/fixnum
   frontend_server_client:
     path: ./third_party/dart/third_party/pkg/webdev/frontend_server_client
   gcloud:
@@ -222,7 +222,7 @@ dependency_overrides:
   kernel:
     path: ./third_party/dart/pkg/kernel
   logging:
-    path: ./third_party/dart/third_party/pkg/logging
+    path: ./third_party/dart/third_party/pkg/core/pkgs/logging
   macros:
     path: ./third_party/dart/pkg/macros
   matcher:
@@ -238,9 +238,9 @@ dependency_overrides:
   package_config:
     path: ./third_party/dart/third_party/pkg/package_config
   path:
-    path: ./third_party/dart/third_party/pkg/path
+    path: ./third_party/dart/third_party/pkg/core/pkgs/path
   platform:
-    path: ./third_party/pkg/platform
+    path: ./third_party/dart/third_party/pkg/core/pkgs/platform
   pool:
     path: ./third_party/dart/third_party/pkg/pool
   process:
@@ -284,7 +284,7 @@ dependency_overrides:
   test_core:
     path: ./third_party/dart/third_party/pkg/test/pkgs/test_core
   typed_data:
-    path: ./third_party/dart/third_party/pkg/typed_data
+    path: ./third_party/dart/third_party/pkg/core/pkgs/typed_data
   vector_math:
     path: ./third_party/pkg/vector_math
   vm_service:

@@ -2584,7 +2584,6 @@
 ../../../flutter/third_party/pkg/node_preamble/example
 ../../../flutter/third_party/pkg/node_preamble/package.json
 ../../../flutter/third_party/pkg/node_preamble/pubspec.yaml
-../../../flutter/third_party/pkg/platform
 ../../../flutter/third_party/pkg/process
 ../../../flutter/third_party/pkg/process_runner
 ../../../flutter/third_party/pkg/vector_math
