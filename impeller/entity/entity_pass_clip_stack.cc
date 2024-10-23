@@ -99,7 +99,8 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordClip(
     Matrix transform,
     Point global_pass_position,
     uint32_t clip_depth,
-    size_t clip_height_floor) {
+    size_t clip_height_floor,
+    bool is_aa) {
   ClipStateResult result = {.should_render = false, .clip_did_change = false};
 
   std::optional<Rect> maybe_clip_coverage = CurrentClipCoverage();
@@ -120,7 +121,7 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordClip(
         clip_coverage.coverage->Shift(global_pass_position);
   }
 
-  auto& subpass_state = GetCurrentSubpassState();
+  SubpassState& subpass_state = GetCurrentSubpassState();
 
   // Compute the previous clip height.
   size_t previous_clip_height = 0;
@@ -145,13 +146,38 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordClip(
     return result;
   }
 
+  // If the clip is an axis aligned rect and either is_aa is false or
+  // the clip is very nearly integral, then the depth write can be
+  // skipped for intersect clips. Since we use 4x MSAA, anything within
+  // < ~0.125 of an integral value in either axis can be treated as
+  // approximately the same as an integral value.
+  bool should_render = true;
+  std::optional<Rect> coverage_value = clip_coverage.coverage;
+  if (!clip_coverage.is_difference_or_non_square &&
+      coverage_value.has_value()) {
+    const Rect& coverage = coverage_value.value();
+    constexpr Scalar threshold = 0.124;
+    if (!is_aa ||
+        (std::abs(std::round(coverage.GetLeft()) - coverage.GetLeft()) <=
+             threshold &&
+         std::abs(std::round(coverage.GetTop()) - coverage.GetTop()) <=
+             threshold &&
+         std::abs(std::round(coverage.GetRight()) - coverage.GetRight()) <=
+             threshold &&
+         std::abs(std::round(coverage.GetBottom()) - coverage.GetBottom()) <=
+             threshold)) {
+      coverage_value = Rect::Round(clip_coverage.coverage.value());
+      should_render = false;
+    }
+  }
+
   subpass_state.clip_coverage.push_back(ClipCoverageLayer{
-      .coverage = clip_coverage.coverage,      //
+      .coverage = coverage_value,              //
       .clip_height = previous_clip_height + 1  //
 
   });
   result.clip_did_change = true;
-  result.should_render = true;
+  result.should_render = should_render;
 
   FML_DCHECK(subpass_state.clip_coverage.back().clip_height ==
              subpass_state.clip_coverage.front().clip_height +
@@ -161,10 +187,10 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordClip(
       << "Not all clips have been replayed before appending new clip.";
 
   subpass_state.rendered_clip_entities.push_back(ReplayResult{
-      .clip_contents = clip_contents,           //
-      .transform = transform,                   //
-      .clip_coverage = clip_coverage.coverage,  //
-      .clip_depth = clip_depth                  //
+      .clip_contents = clip_contents,   //
+      .transform = transform,           //
+      .clip_coverage = coverage_value,  //
+      .clip_depth = clip_depth          //
   });
   next_replay_index_++;
 
