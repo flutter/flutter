@@ -4980,7 +4980,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
     expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.fuchsia, }));
 
   group('a11y copy/cut/paste', () {
     Future<void> buildApp(MockTextSelectionControls controls, WidgetTester tester) {
