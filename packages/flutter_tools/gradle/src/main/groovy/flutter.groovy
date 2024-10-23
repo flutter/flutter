@@ -1063,10 +1063,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Gets the target file. This is typically `lib/main.dart`.
      */
     private String getFlutterTarget() {
-        String target = project.flutter.target
-        if (target == null) {
-            target = "lib/main.dart"
-        }
+        String target = project.flutter.target ?: "lib/main.dart"
         final String propTarget = "target"
         if (project.hasProperty(propTarget)) {
             target = project.property(propTarget)
