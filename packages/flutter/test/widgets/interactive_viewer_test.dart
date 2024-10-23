@@ -1436,15 +1436,16 @@ void main() {
       );
     });
 
-    testWidgets('transformChild set to false does not translate child', (WidgetTester tester) async {
+    testWidgets('InteractiveViewer.raw set does not translate child', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: InteractiveViewer(
-                transformChild: false,
+              child: InteractiveViewer.raw(
                 transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
+                builder: (BuildContext context, Quad viewportQuad) {
+                  return const SizedBox(width: 200.0, height: 200.0);
+                },
               ),
             ),
           ),

@@ -83,7 +83,6 @@ class InteractiveViewer extends StatefulWidget {
     this.transformationController,
     this.alignment,
     this.trackpadScrollCausesScale = false,
-    this.transformChild = true,
     required Widget this.child,
   }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
@@ -99,6 +98,7 @@ class InteractiveViewer extends StatefulWidget {
            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
            && boundaryMargin.left.isFinite),
        ),
+       _transformChild = true,
        builder = null;
 
   /// Creates an InteractiveViewer for a child that is created on demand.
@@ -128,7 +128,6 @@ class InteractiveViewer extends StatefulWidget {
     this.alignment,
     this.trackpadScrollCausesScale = false,
     required InteractiveViewerWidgetBuilder this.builder,
-    this.transformChild = true,
   }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
        assert(minScale.isFinite),
@@ -145,15 +144,13 @@ class InteractiveViewer extends StatefulWidget {
                  boundaryMargin.left.isFinite),
        ),
        constrained = false,
+       _transformChild = true,
        child = null;
 
-  /// Setting `transformChild` to false will prevent InteractiveViewer from transforming the
+  /// Using `InteractiveViewer.raw` will prevent InteractiveViewer from transforming the
   /// child based on the [Matrix4] in the [TransformationController]. This is done to always
   /// keep the child static and allow for custom dynamic layout widgets like
   /// [Stack] and [CustomMultiChildLayout].
-  ///
-  /// Setting `transformChild` to true will transform the child `Rect` and hit tests based on the [Matrix4]
-  /// defined in the [TransformationController].
   ///
   /// Due to the way gestures work in Flutter the parts of a child that are outside of the parent
   /// [RenderBox] will not receive hit tests. For example you could have a [Stack] with [Clip.none]
@@ -222,9 +219,8 @@ class InteractiveViewer extends StatefulWidget {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return InteractiveViewer.builder(
+  ///     return InteractiveViewer.raw(
   ///       transformationController: controller,
-  ///       transformChild: false,
   ///       builder: (BuildContext context, Quad viewport) {
   ///         final Matrix4 matrix = controller.value;
   ///         return Stack(
@@ -247,7 +243,46 @@ class InteractiveViewer extends StatefulWidget {
   /// ```
   ///
   /// Now the child will never exceed the bounds of the parent and always stay static, preserving hit tests.
-  final bool transformChild;
+  InteractiveViewer.raw({
+    super.key,
+    this.clipBehavior = Clip.hardEdge,
+    this.panAxis = PanAxis.free,
+    this.boundaryMargin = EdgeInsets.zero,
+    // These default scale values were eyeballed as reasonable limits for common
+    // use cases.
+    this.maxScale = 2.5,
+    this.minScale = 0.8,
+    this.interactionEndFrictionCoefficient = _kDrag,
+    this.onInteractionEnd,
+    this.onInteractionStart,
+    this.onInteractionUpdate,
+    this.panEnabled = true,
+    this.scaleEnabled = true,
+    this.scaleFactor = 200.0,
+    this.transformationController,
+    this.trackpadScrollCausesScale = false,
+    required InteractiveViewerWidgetBuilder this.builder,
+  }) : assert(minScale > 0),
+       assert(interactionEndFrictionCoefficient > 0),
+       assert(minScale.isFinite),
+       assert(maxScale > 0),
+       assert(!maxScale.isNaN),
+       assert(maxScale >= minScale),
+       // boundaryMargin must be either fully infinite or fully finite, but not
+       // a mix of both.
+       assert(
+         (boundaryMargin.horizontal.isInfinite && boundaryMargin.vertical.isInfinite) ||
+             (boundaryMargin.top.isFinite &&
+                 boundaryMargin.right.isFinite &&
+                 boundaryMargin.bottom.isFinite &&
+                 boundaryMargin.left.isFinite),
+       ),
+       constrained = false,
+       alignment = null,
+       _transformChild = false,
+       child = null;
+
+  final bool _transformChild;
 
   /// The alignment of the child's origin, relative to the size of the box.
   final Alignment? alignment;
@@ -561,7 +596,7 @@ class InteractiveViewer extends StatefulWidget {
     );
   }
 
-  /// Returns true iff the point is inside the rectangle given by the Quad,
+  /// Returns true if the point is inside the rectangle given by the Quad,
   /// inclusively.
   /// Algorithm from https://math.stackexchange.com/a/190373.
   @visibleForTesting
@@ -809,7 +844,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
   }
 
-  // Returns true iff the given _GestureType is enabled.
+  // Returns true if the given _GestureType is enabled.
   bool _gestureIsSupported(_GestureType? gestureType) {
     return switch (gestureType) {
       _GestureType.rotate => _rotateEnabled,
@@ -1216,7 +1251,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         constrained: widget.constrained,
         matrix: _transformer.value,
         alignment: widget.alignment,
-        transformChild: widget.transformChild,
         child: widget.child!,
       );
     } else {
@@ -1227,17 +1261,23 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       child = LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final Matrix4 matrix = _transformer.value;
+          final Widget child = widget.builder!(
+            context,
+            _transformViewport(matrix, Offset.zero & constraints.biggest),
+          );
+          if (!widget._transformChild) {
+            return KeyedSubtree(
+              key: _childKey,
+              child: child,
+            );
+          }
           return _InteractiveViewerBuilt(
             childKey: _childKey,
             clipBehavior: widget.clipBehavior,
             constrained: widget.constrained,
             alignment: widget.alignment,
             matrix: matrix,
-            transformChild: widget.transformChild,
-            child: widget.builder!(
-              context,
-              _transformViewport(matrix, Offset.zero & constraints.biggest),
-            ),
+            child: child,
           );
         },
       );
@@ -1269,7 +1309,6 @@ class _InteractiveViewerBuilt extends StatelessWidget {
     required this.constrained,
     required this.matrix,
     required this.alignment,
-    required this.transformChild,
   });
 
   final Widget child;
@@ -1278,22 +1317,17 @@ class _InteractiveViewerBuilt extends StatelessWidget {
   final bool constrained;
   final Matrix4 matrix;
   final Alignment? alignment;
-  final bool transformChild;
 
   @override
   Widget build(BuildContext context) {
-   Widget child = KeyedSubtree(
-      key: childKey,
-      child: this.child,
+    Widget child = Transform(
+      transform: matrix,
+      alignment: alignment,
+      child: KeyedSubtree(
+        key: childKey,
+        child: this.child,
+      ),
     );
-
-    if (transformChild) {
-      child = Transform(
-        transform: matrix,
-        alignment: alignment,
-        child: child,
-      );
-    }
 
     if (!constrained) {
       child = OverflowBox(
