@@ -289,7 +289,7 @@ abstract final class SystemChannels {
   ///
   /// See also:
   ///
-  ///  * [ScribeClient], which uese this channel.
+  ///  * [Scribe], which uese this channel.
   ///  * [ScribbleClient], which implements the iOS version of this feature,
   ///  [Scribble](https://support.apple.com/guide/ipad/enter-text-with-scribble-ipad355ab2a7/ipados).
   static const MethodChannel scribe = OptionalMethodChannel(

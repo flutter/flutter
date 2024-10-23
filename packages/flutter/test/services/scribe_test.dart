@@ -4,17 +4,12 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
   test('when receiving an unsupported message', () async {
-    // Make sure Scribe is initialized and listening.
-    final ScribeClient scribeClient = _TestScribeWidgetState();
-    Scribe.client = scribeClient;
-
     final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
       'method': 'Scribe.unsupportedMessage',
     });
@@ -70,19 +65,4 @@ void main() {
     expect(calls, hasLength(1));
     expect(calls.first.method, 'Scribe.startStylusHandwriting');
   }, skip: kIsWeb); // [intended]
-}
-
-// A widget that uses ScribeClient.
-class _TestScribeWidget extends StatefulWidget {
-  const _TestScribeWidget();
-
-  @override
-  State<_TestScribeWidget> createState() => _TestScribeWidgetState();
-}
-
-class _TestScribeWidgetState extends State<_TestScribeWidget> implements ScribeClient {
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
 }

@@ -1760,8 +1760,6 @@ class EditableText extends StatefulWidget {
   ///
   ///   * [ScribbleClient], which can be mixed into an arbirtrary widget to
   ///     provide iOS Scribble functionality.
-  ///   * [ScribeClient], which can be mixed into an arbitrary widget to provide
-  ///     Android Scribe functionality.
   ///   * [Scribe], which can be used to interact with Android Scribe directly.
   final bool stylusHandwritingEnabled;
 
@@ -2003,7 +2001,7 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
 
-  /// The default value for [scribbleEnabled].
+  /// The default value for [stylusHandwritingEnabled].
   static const bool defaultStylusHandwritingEnabled = true;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
@@ -2273,7 +2271,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
     properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>('stylusHandwritingEnabled', stylusHandwritingEnabled, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('stylusHandwritingEnabled', stylusHandwritingEnabled, defaultValue: defaultStylusHandwritingEnabled));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<UndoHistoryController>('undoController', undoController, defaultValue: null));
@@ -5784,7 +5782,7 @@ class _Scribe extends StatefulWidget {
   State<_Scribe> createState() => _ScribeState();
 }
 
-class _ScribeState extends State<_Scribe> implements ScribeClient {
+class _ScribeState extends State<_Scribe> {
   // The handwriting bounds padding of EditText in Android API 34.
   static const EdgeInsets _handwritingPadding = EdgeInsets.symmetric(
     horizontal: 10.0,

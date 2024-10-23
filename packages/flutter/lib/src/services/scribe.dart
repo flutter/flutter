@@ -9,36 +9,16 @@ import 'system_channels.dart';
 
 /// An interface into Android's stylus handwriting text input.
 ///
-/// This is typically used by implemeting the methods in [ScribeClient] in a
-/// class, usually a [State], and setting an instance of it to [client]. The
-/// relevant methods on [ScribeClient] will be called in response to method
-/// channel calls on [SystemChannels.scribe].
-///
 /// See also:
 ///
 ///  * [EditableText.stylusHandwritingEnabled], which controls whether Flutter's
-///    built-in text fields support handwriting input. On Android it uses this
-///    class via [ScribeClient].
+///    built-in text fields support handwriting input.
 ///  * [SystemChannels.scribe], which is the [MethodChannel] used by this
 ///    class, and which has a list of the methods that this class handles.
 class Scribe {
   Scribe._() {
     _channel.setMethodCallHandler(_loudlyHandleScribeInputInvocation);
   }
-
-  static final Scribe _instance = Scribe._();
-
-  /// Set the given [ScribeClient] as the single active client.
-  ///
-  /// This is usually based on the [ScribeClient] receiving focus.
-  static set client(ScribeClient? client) {
-    _instance._client = client;
-  }
-
-  /// Return the current active [ScribeClient], or null if none.
-  static ScribeClient? get client => _instance._client;
-
-  ScribeClient? _client;
 
   static const MethodChannel _channel = SystemChannels.scribe;
 
@@ -157,17 +137,4 @@ class Scribe {
     // https://github.com/flutter/flutter/issues/156018
     throw MissingPluginException();
   }
-}
-
-/// An interface into Android's stylus handwriting text input.
-///
-/// This is typically mixed into a [State].
-///
-/// See also:
-///
-///  * [ScribbleClient], which implements the iOS version of this feature,
-///  [Scribble](https://support.apple.com/guide/ipad/enter-text-with-scribble-ipad355ab2a7/ipados).
-mixin ScribeClient {
-  // TODO(justinmc): Scribe stylus gestures should be supported here.
-  // https://github.com/flutter/flutter/issues/156018
 }
