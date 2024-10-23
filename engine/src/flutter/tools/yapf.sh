@@ -42,8 +42,8 @@ else
   python3 -c "
 import sys
 version = sys.version_info
-if (version.major, version.minor) > (3, 10):
-    print(f'Error: python3 version {version.major}.{version.minor} is greater than 3.10.', file=sys.stderr)
+if (version.major, version.minor) > (3, 11):
+    print(f'Error: python3 version {version.major}.{version.minor} is greater than 3.11.', file=sys.stderr)
     sys.exit(1)
 else:
     print(f'Using python3 version {version.major}.{version.minor}.')
