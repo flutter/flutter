@@ -13,6 +13,8 @@ In general, leak tracking should be enabled, to verify that all
 disposables are disposed.
 All exceptions should be clearly explained in the comments.
 
+It is ok to opt out a test from leak tracking in these cases:
+
 1. Hacky tests
 
     A test leaks because it uses APIs in non-recommended way
