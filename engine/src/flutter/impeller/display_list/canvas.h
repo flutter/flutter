@@ -226,7 +226,9 @@ class Canvas {
   void DrawAtlas(const std::shared_ptr<AtlasContents>& atlas_contents,
                  const Paint& paint);
 
-  void ClipGeometry(const Geometry& geometry, Entity::ClipOperation clip_op);
+  void ClipGeometry(const Geometry& geometry,
+                    Entity::ClipOperation clip_op,
+                    bool is_aa = true);
 
   void EndReplay();
 

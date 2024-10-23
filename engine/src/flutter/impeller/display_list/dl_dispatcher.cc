@@ -439,7 +439,7 @@ void DlDispatcherBase::clipRect(const DlRect& rect,
   AUTO_DEPTH_WATCHER(0u);
 
   RectGeometry geom(rect);
-  GetCanvas().ClipGeometry(geom, ToClipOperation(clip_op));
+  GetCanvas().ClipGeometry(geom, ToClipOperation(clip_op), /*is_aa=*/is_aa);
 }
 
 // |flutter::DlOpReceiver|
@@ -461,7 +461,7 @@ void DlDispatcherBase::clipRoundRect(const DlRoundRect& rrect,
   auto clip_op = ToClipOperation(sk_op);
   if (rrect.IsRect()) {
     RectGeometry geom(rrect.GetBounds());
-    GetCanvas().ClipGeometry(geom, clip_op);
+    GetCanvas().ClipGeometry(geom, clip_op, /*is_aa=*/is_aa);
   } else if (rrect.IsOval()) {
     EllipseGeometry geom(rrect.GetBounds());
     GetCanvas().ClipGeometry(geom, clip_op);
@@ -483,7 +483,7 @@ void DlDispatcherBase::clipPath(const DlPath& path, ClipOp sk_op, bool is_aa) {
   DlRect rect;
   if (path.IsRect(&rect)) {
     RectGeometry geom(rect);
-    GetCanvas().ClipGeometry(geom, clip_op);
+    GetCanvas().ClipGeometry(geom, clip_op, /*is_aa=*/is_aa);
   } else if (path.IsOval(&rect)) {
     EllipseGeometry geom(rect);
     GetCanvas().ClipGeometry(geom, clip_op);

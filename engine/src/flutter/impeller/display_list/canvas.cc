@@ -551,7 +551,8 @@ void Canvas::DrawCircle(const Point& center,
 }
 
 void Canvas::ClipGeometry(const Geometry& geometry,
-                          Entity::ClipOperation clip_op) {
+                          Entity::ClipOperation clip_op,
+                          bool is_aa) {
   if (IsSkipping()) {
     return;
   }
@@ -587,12 +588,13 @@ void Canvas::ClipGeometry(const Geometry& geometry,
   clip_contents.SetClipOperation(clip_op);
 
   EntityPassClipStack::ClipStateResult clip_state_result =
-      clip_coverage_stack_.RecordClip(clip_contents,            //
-                                      clip_transform,           //
-                                      GetGlobalPassPosition(),  //
-                                      clip_depth,               //
-                                      GetClipHeightFloor()      //
-      );
+      clip_coverage_stack_.RecordClip(
+          clip_contents,                                     //
+          /*transform=*/clip_transform,                      //
+          /*global_pass_position=*/GetGlobalPassPosition(),  //
+          /*clip_depth=*/clip_depth,                         //
+          /*clip_height_floor=*/GetClipHeightFloor(),        //
+          /*is_aa=*/is_aa);
 
   if (clip_state_result.clip_did_change) {
     // We only need to update the pass scissor if the clip state has changed.
