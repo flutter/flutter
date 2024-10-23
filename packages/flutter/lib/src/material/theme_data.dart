@@ -362,7 +362,7 @@ class ThemeData with Diagnosticable {
     ButtonBarThemeData? buttonBarTheme,
     @Deprecated(
       'Use DialogThemeData.backgroundColor instead. '
-      'This feature was deprecated after v3.26.0-0.1.pre.',
+      'This feature was deprecated after v3.27.0-0.1.pre.',
     )
     Color? dialogBackgroundColor,
   }) {
@@ -766,7 +766,7 @@ class ThemeData with Diagnosticable {
     ButtonBarThemeData? buttonBarTheme,
     @Deprecated(
       'Use DialogThemeData.backgroundColor instead. '
-      'This feature was deprecated after v3.26.0-0.1.pre.',
+      'This feature was deprecated after v3.27.0-0.1.pre.',
     )
     Color? dialogBackgroundColor,
   }) : // DEPRECATED (newest deprecations at the bottom)
@@ -1433,7 +1433,7 @@ class ThemeData with Diagnosticable {
   /// The background color of [Dialog] elements.
   @Deprecated(
     'Use DialogThemeData.backgroundColor instead. '
-    'This feature was deprecated after v3.26.0-0.1.pre.',
+    'This feature was deprecated after v3.27.0-0.1.pre.',
   )
   Color? get dialogBackgroundColor => _dialogBackgroundColor;
   final Color? _dialogBackgroundColor;
@@ -1552,7 +1552,7 @@ class ThemeData with Diagnosticable {
     ButtonBarThemeData? buttonBarTheme,
     @Deprecated(
       'Use DialogThemeData.backgroundColor instead. '
-      'This feature was deprecated after v3.26.0-0.1.pre.',
+      'This feature was deprecated after v3.27.0-0.1.pre.',
     )
     Color? dialogBackgroundColor,
   }) {
