@@ -2199,7 +2199,12 @@ class ShaderMaskLayer extends ContainerLayer {
 /// When multiple backdrop filters share the same key, the Flutter engine can
 /// more efficiently perform the backdrop operations.
 ///
-/// For more information, see `BackdropFilter`.
+/// Instead of using a [BackdropKey] directly, consider using a [BackdropGroup]
+/// and the [BackdropFilter.shared] constructor. The framework will
+/// automatically group child backdrop filters that use the `.shared`
+/// constructor when they are placed as children of a [BackdropGroup].
+///
+/// For more information, see [BackdropFilter].
 @immutable
 final class BackdropKey {
   /// Create a new [BackdropKey].
