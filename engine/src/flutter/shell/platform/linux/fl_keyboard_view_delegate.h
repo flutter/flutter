@@ -36,8 +36,6 @@ struct _FlKeyboardViewDelegateInterface {
 
   gboolean (*text_filter_key_press)(FlKeyboardViewDelegate* delegate,
                                     FlKeyEvent* event);
-
-  GHashTable* (*get_keyboard_state)(FlKeyboardViewDelegate* delegate);
 };
 
 /**
@@ -51,16 +49,6 @@ struct _FlKeyboardViewDelegateInterface {
 gboolean fl_keyboard_view_delegate_text_filter_key_press(
     FlKeyboardViewDelegate* delegate,
     FlKeyEvent* event);
-
-/**
- * fl_keyboard_view_delegate_get_keyboard_state:
- *
- * Returns the keyboard pressed state. The hash table contains one entry per
- * pressed keys, mapping from the logical key to the physical key.*
- *
- */
-GHashTable* fl_keyboard_view_delegate_get_keyboard_state(
-    FlKeyboardViewDelegate* delegate);
 
 G_END_DECLS
 

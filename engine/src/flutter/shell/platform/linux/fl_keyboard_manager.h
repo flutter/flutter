@@ -148,6 +148,20 @@ void fl_keyboard_manager_set_redispatch_handler(
     FlKeyboardManagerRedispatchEventHandler redispatch_handler,
     gpointer user_data);
 
+typedef GHashTable* (*FlKeyboardManagerGetPressedStateHandler)(
+    gpointer user_data);
+
+/**
+ * fl_keyboard_manager_set_get_pressed_state_handler:
+ * @manager: the #FlKeyboardManager self.
+ *
+ * Set the handler for gettting the keyboard state, for testing purposes only.
+ */
+void fl_keyboard_manager_set_get_pressed_state_handler(
+    FlKeyboardManager* manager,
+    FlKeyboardManagerGetPressedStateHandler get_pressed_state_handler,
+    gpointer user_data);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_KEYBOARD_MANAGER_H_

@@ -13,7 +13,7 @@ static constexpr char kGetKeyboardStateMethod[] = "getKeyboardState";
 struct _FlKeyboardHandler {
   GObject parent_instance;
 
-  GWeakRef view_delegate;
+  FlKeyboardManager* keyboard_manager;
 
   // The channel used by the framework to query the keyboard pressed state.
   FlMethodChannel* channel;
@@ -25,11 +25,8 @@ G_DEFINE_TYPE(FlKeyboardHandler, fl_keyboard_handler, G_TYPE_OBJECT);
 static FlMethodResponse* get_keyboard_state(FlKeyboardHandler* self) {
   g_autoptr(FlValue) result = fl_value_new_map();
 
-  g_autoptr(FlKeyboardViewDelegate) view_delegate =
-      FL_KEYBOARD_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
-
   GHashTable* pressing_records =
-      fl_keyboard_view_delegate_get_keyboard_state(view_delegate);
+      fl_keyboard_manager_get_pressed_state(self->keyboard_manager);
 
   g_hash_table_foreach(
       pressing_records,
@@ -69,7 +66,7 @@ static void method_call_handler(FlMethodChannel* channel,
 static void fl_keyboard_handler_dispose(GObject* object) {
   FlKeyboardHandler* self = FL_KEYBOARD_HANDLER(object);
 
-  g_weak_ref_clear(&self->view_delegate);
+  g_clear_object(&self->keyboard_manager);
   g_clear_object(&self->channel);
 
   G_OBJECT_CLASS(fl_keyboard_handler_parent_class)->dispose(object);
@@ -83,13 +80,11 @@ static void fl_keyboard_handler_init(FlKeyboardHandler* self) {}
 
 FlKeyboardHandler* fl_keyboard_handler_new(
     FlBinaryMessenger* messenger,
-    FlKeyboardViewDelegate* view_delegate) {
-  g_return_val_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(view_delegate), nullptr);
-
+    FlKeyboardManager* keyboard_manager) {
   FlKeyboardHandler* self = FL_KEYBOARD_HANDLER(
       g_object_new(fl_keyboard_handler_get_type(), nullptr));
 
-  g_weak_ref_init(&self->view_delegate, view_delegate);
+  self->keyboard_manager = FL_KEYBOARD_MANAGER(g_object_ref(keyboard_manager));
 
   // Setup the flutter/keyboard channel.
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();

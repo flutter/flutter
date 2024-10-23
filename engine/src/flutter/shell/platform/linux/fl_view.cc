@@ -4,8 +4,6 @@
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
-#include "flutter/shell/platform/linux/fl_view_private.h"
-
 #include <atk/atk.h>
 #include <gtk/gtk-a11y.h>
 
@@ -146,12 +144,12 @@ static void init_keyboard(FlView* self) {
   g_clear_object(&self->text_input_handler);
   self->text_input_handler = fl_text_input_handler_new(
       messenger, im_context, FL_TEXT_INPUT_VIEW_DELEGATE(self));
-  g_clear_object(&self->keyboard_handler);
-  self->keyboard_handler =
-      fl_keyboard_handler_new(messenger, FL_KEYBOARD_VIEW_DELEGATE(self));
   g_clear_object(&self->keyboard_manager);
   self->keyboard_manager =
       fl_keyboard_manager_new(self->engine, FL_KEYBOARD_VIEW_DELEGATE(self));
+  g_clear_object(&self->keyboard_handler);
+  self->keyboard_handler =
+      fl_keyboard_handler_new(messenger, self->keyboard_manager);
 }
 
 static void init_scrolling(FlView* self) {
@@ -369,12 +367,6 @@ static void fl_view_keyboard_delegate_iface_init(
     FlView* self = FL_VIEW(view_delegate);
     return fl_text_input_handler_filter_keypress(self->text_input_handler,
                                                  event);
-  };
-
-  iface->get_keyboard_state =
-      [](FlKeyboardViewDelegate* view_delegate) -> GHashTable* {
-    FlView* self = FL_VIEW(view_delegate);
-    return fl_view_get_keyboard_state(self);
   };
 }
 
@@ -866,9 +858,4 @@ G_MODULE_EXPORT void fl_view_set_background_color(FlView* self,
   g_return_if_fail(FL_IS_VIEW(self));
   gdk_rgba_free(self->background_color);
   self->background_color = gdk_rgba_copy(color);
-}
-
-GHashTable* fl_view_get_keyboard_state(FlView* self) {
-  g_return_val_if_fail(FL_IS_VIEW(self), nullptr);
-  return fl_keyboard_manager_get_pressed_state(self->keyboard_manager);
 }
