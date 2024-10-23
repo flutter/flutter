@@ -24,9 +24,10 @@ All exceptions should be clearly explained in the comments.
     Some leaks happen because exceptions are thrown and
     the code did not finalize properly.
 
-    While some exceptions should not result in leaking objects,
+    While some exceptions should be finalized properly
+    and should not result in leaking objects,
     the project to make sure disposables are disposed
-    in exceptional situations was not prioritized yet.
+    in exceptional code paths was not prioritized yet.
 
 ## Where leak tracking is configured?
 
