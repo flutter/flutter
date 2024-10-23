@@ -7,6 +7,7 @@
     "targets are specified, the build will fail, and if an empty list of ",
     "targets are specified, all targets are built (wasteful/slow)"
   ],
+  "cas_archive": false,
   "gn": [
     "--runtime-mode",
     "debug",
@@ -15,13 +16,14 @@
     "--no-lto",
     "--no-rbe",
     "--no-goma",
+    "--xcode-symlinks",
     "--target-dir",
-    "ci/linux_unopt_debug_no_rbe"
+    "ci/mac_unopt_debug_no_rbe"
   ],
-  "name": "ci/linux_unopt_debug_no_rbe",
-  "description": "Tests clangd on Linux.",
+  "name": "ci/mac_unopt_debug_no_rbe",
+  "description": "Tests clangd on macOS.",
   "ninja": {
-    "config": "ci/linux_unopt_debug_no_rbe",
+    "config": "ci/mac_unopt_debug_no_rbe",
     "targets": ["flutter/tools/font_subset"]
   },
   "tests": [
@@ -30,8 +32,8 @@
       "name": "clangd",
       "script": "flutter/tools/clangd_check/bin/main.dart",
       "parameters": [
-        "--clangd=buildtools/linux-x64/clang/bin/clangd",
-        "--compile-commands-dir=../out/ci/linux_unopt_debug_no_rbe"
+        "--clangd=buildtools/mac-x64/clang/bin/clangd",
+        "--compile-commands-dir=../out/ci/mac_unopt_debug_no_rbe"
       ]
     }
   ]

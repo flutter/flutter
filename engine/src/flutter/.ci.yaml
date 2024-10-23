@@ -406,7 +406,7 @@ targets:
   - name: Linux clangd
     recipe: engine_v2/builder
     properties:
-      config_name: linux_unopt_debug_no_rbe
+      config_name: linux_clangd
 
   - name: Linux linux_unopt
     recipe: engine_v2/engine_v2
@@ -503,7 +503,7 @@ targets:
     drone_dimensions:
       - os=Mac-13|Mac-14
 
-  # Avoid using a Mac orchestrator to save ~5 minutes of Mac host time.
+  # TODO(jmagman) Replace with "Mac clangd" when bringup is removed.
   - name: Linux mac_clangd
     recipe: engine_v2/engine_v2
     timeout: 90
@@ -513,6 +513,13 @@ targets:
       - os=Linux
     properties:
       config_name: mac_unopt_debug_no_rbe
+
+  - name: Mac clangd
+    recipe: engine_v2/builder
+    bringup: true
+    properties:
+      config_name: mac_clangd
+      cpu: x86
 
   - name: Mac mac_unopt
     recipe: engine_v2/engine_v2
