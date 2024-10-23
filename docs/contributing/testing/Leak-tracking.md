@@ -33,18 +33,18 @@ All exceptions should be clearly explained in the comments.
 
 Leak tracker is configured in [flutter_test_config.dart](https://github.com/flutter/flutter/blob/9441f8f6c806fb0a3b7d058a40b5e59c373e6055/packages/flutter/test/flutter_test_config.dart#L45).
 
-To forcefully enable (or disable) leak tracking for flutter tests, pass
-`--dart-define LEAK_TRACKING=true` (or false) to `flutter test`.
-
 See [leak_tracker documentation](https://github.com/dart-lang/leak_tracker/blob/main/doc/leak_tracking/TROUBLESHOOT.md)
 on how to enable/disable leak tracking for individual tests and files.
 
-## What are defaults and how leaks are monitored?
+## What are defaults?
 
-Leak tracker is disabled for local runs and for all bots except two:
+Leak tracking is disabled for local runs and for all bots except two:
 
 - [Windows framework_tests_libraries_leak_tracking](https://github.com/flutter/flutter/blob/9441f8f6c806fb0a3b7d058a40b5e59c373e6055/.ci.yaml#L5553)
 - [Windows framework_tests_widgets_leak_tracking](https://github.com/flutter/flutter/blob/9441f8f6c806fb0a3b7d058a40b5e59c373e6055/.ci.yaml#L5640C11-L5640C56)
+
+To forcefully enable (or disable) leak tracking for flutter tests, pass
+`--dart-define LEAK_TRACKING=true` (or false) to `flutter test`.
 
 You can see the bots status on [Flutter dashboard](https://flutter-dashboard.appspot.com/#/build).
 The bots are not blocking yet.
