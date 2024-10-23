@@ -691,7 +691,7 @@ class FlutterPlugin implements Plugin<Project> {
         // TODO(matanlurey): https://github.com/flutter/flutter/issues/48918.
         project.logger.quiet("Warning: This project is still reading the deprecated '.flutter-plugins. file.")
         project.logger.quiet("In an upcoming stable release support for this file will be completely removed and your build will fail.")
-        project.logger.quiet("For an example of updating Android build scripts, see https://docs.flutter.dev/release/breaking-changes/flutter-gradle-plugin-apply.")
+        project.logger.quiet("See https:/flutter.dev/to/flutter-plugins-configuration.")
         List<Map<String, Object>> deps = getPluginDependencies(project)
         List<String> plugins = getPluginList(project).collect { it.name as String }
         deps.removeIf { plugins.contains(it.name) }
