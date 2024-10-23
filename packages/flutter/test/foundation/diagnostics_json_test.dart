@@ -24,6 +24,16 @@ void main() {
   });
 
   group('Serialization', () {
+    const List<String> essentialDiagnosticKeys = <String>[
+      'description',
+      'shouldIndent',
+    ];
+    const List<String> detailedDiagnosticKeys = <String>[
+      'type',
+      'hasChildren',
+      'allowWrap',
+    ];
+
     final TestTree testTree = TestTree(
       properties: <DiagnosticsNode>[
         StringProperty('stringProperty1', 'value1', quoted: false),
@@ -70,6 +80,46 @@ void main() {
       final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());
       expect(result.containsKey('properties'), isFalse);
       expect(result.containsKey('children'), isFalse);
+
+      for (final String keyName in essentialDiagnosticKeys) {
+        expect(
+          result.containsKey(keyName),
+          isTrue,
+          reason: '$keyName is included.',
+        );
+      }
+      for (final String keyName in detailedDiagnosticKeys) {
+        expect(
+          result.containsKey(keyName),
+          isTrue,
+          reason: '$keyName is included.',
+        );
+      }
+    });
+
+    test('without full details', () {
+      final Map<String, Object?> result = testTree
+        .toDiagnosticsNode()
+        .toJsonMap(
+          const DiagnosticsSerializationDelegate(), fullDetails: false
+        );
+      expect(result.containsKey('properties'), isFalse);
+      expect(result.containsKey('children'), isFalse);
+
+      for (final String keyName in essentialDiagnosticKeys) {
+        expect(
+          result.containsKey(keyName),
+          isTrue,
+          reason: '$keyName is included.',
+        );
+      }
+      for (final String keyName in detailedDiagnosticKeys) {
+        expect(
+          result.containsKey(keyName),
+          isFalse,
+          reason: '$keyName is  not included.',
+        );
+      }
     });
 
     test('subtreeDepth 1', () {
@@ -279,7 +329,10 @@ class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDe
   final NodeDelegator? nodeDelegator;
 
   @override
-  Map<String, Object> additionalNodeProperties(DiagnosticsNode node) {
+  Map<String, Object> additionalNodeProperties(
+    DiagnosticsNode node, {
+    bool fullDetails = true,
+  }) {
     return additionalNodePropertiesMap;
   }
 
