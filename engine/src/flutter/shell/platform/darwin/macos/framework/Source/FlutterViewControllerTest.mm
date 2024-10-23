@@ -21,6 +21,9 @@
 
 #pragma mark - Test Helper Classes
 
+static const FlutterPointerEvent kDefaultFlutterPointerEvent = {};
+static const FlutterKeyEvent kDefaultFlutterKeyEvent = {};
+
 // A wrap to convert FlutterKeyEvent to a ObjC class.
 @interface KeyEventWrapper : NSObject
 @property(nonatomic) FlutterKeyEvent* data;
@@ -339,7 +342,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
       .andReturn(binaryMessengerMock);
-  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:kDefaultFlutterKeyEvent
                                                   callback:nil
                                                   userData:nil])
       .andCall([FlutterViewControllerTestObjC class],
@@ -375,7 +378,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
 - (bool)testCtrlTabKeyEventIsPropagated:(id)engineMock {
   __block bool called = false;
   __block FlutterKeyEvent last_event;
-  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:kDefaultFlutterKeyEvent
                                                   callback:nil
                                                   userData:nil])
       .andDo((^(NSInvocation* invocation) {
@@ -419,7 +422,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
 - (bool)testKeyEquivalentIsPassedToTextInputPlugin:(id)engineMock {
   __block bool called = false;
   __block FlutterKeyEvent last_event;
-  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:kDefaultFlutterKeyEvent
                                                   callback:nil
                                                   userData:nil])
       .andDo((^(NSInvocation* invocation) {
@@ -471,7 +474,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
       .andReturn(binaryMessengerMock);
-  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:kDefaultFlutterKeyEvent
                                                   callback:nil
                                                   userData:nil])
       .andCall([FlutterViewControllerTestObjC class],
@@ -545,7 +548,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
       .andReturn(binaryMessengerMock);
-  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:kDefaultFlutterKeyEvent
                                                   callback:nil
                                                   userData:nil])
       .andCall([FlutterViewControllerTestObjC class],
@@ -598,7 +601,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
       .andReturn(binaryMessengerMock);
-  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:kDefaultFlutterKeyEvent
                                                   callback:nil
                                                   userData:nil])
       .andCall([FlutterViewControllerTestObjC class],
@@ -655,7 +658,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
       .andReturn(binaryMessengerMock);
   __block bool called = false;
   __block FlutterKeyEvent last_event;
-  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:kDefaultFlutterKeyEvent
                                                   callback:nil
                                                   userData:nil])
       .andDo((^(NSInvocation* invocation) {
@@ -715,7 +718,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   OCMStub([engineMock renderer]).andReturn(renderer_);
   __block bool called = false;
   __block FlutterPointerEvent last_event;
-  OCMStub([[engineMock ignoringNonObjectArgs] sendPointerEvent:FlutterPointerEvent{}])
+  OCMStub([[engineMock ignoringNonObjectArgs] sendPointerEvent:kDefaultFlutterPointerEvent])
       .andDo((^(NSInvocation* invocation) {
         FlutterPointerEvent* event;
         [invocation getArgument:&event atIndex:2];
@@ -1139,7 +1142,7 @@ static void SwizzledNoop(id self, SEL _cmd) {}
 
   // Capture calls to sendKeyEvent
   __block NSMutableArray<KeyEventWrapper*>* events = [NSMutableArray array];
-  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:kDefaultFlutterKeyEvent
                                                   callback:nil
                                                   userData:nil])
       .andDo((^(NSInvocation* invocation) {
