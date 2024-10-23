@@ -132,7 +132,7 @@ void main() {
       final List<String> logMessages = logEvents.map((Event l) => (l.body! as Map<String, Object?>)['message']! as String).toList();
       expect(
         logMessages,
-        contains(startsWith('<== [Flutter] [stderr] Could not find an option named "not-a-valid-flag"')),
+        contains(startsWith('<== [Flutter] [stderr] Could not find an option named "--not-a-valid-flag"')),
       );
     });
 

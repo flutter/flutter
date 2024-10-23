@@ -54,7 +54,7 @@ const double _inputFormPortraitHeight = 98.0;
 const double _inputFormLandscapeHeight = 108.0;
 
 // 3.0 is the maximum scale factor on mobile phones. As of 07/30/24, iOS goes up
-// to a max of 3.0 text sxale factor, and Android goes up to 2.0. This is the
+// to a max of 3.0 text scale factor, and Android goes up to 2.0. This is the
 // default used for non-range date pickers. This default is changed to a lower
 // value at different parts of the date pickers depending on content, and device
 // orientation.
@@ -155,6 +155,13 @@ const double _fontSizeToScale = 14.0;
 /// [DatePickerMode.day] mode. It defaults to [DatePickerMode.day].
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to create a basic date picker.
+/// Tapping the button displays a date picker which returns the selected date.
+///
+/// ** See code in examples/api/lib/material/date_picker/show_date_picker.1.dart **
+/// {@end-tool}
 ///
 /// ### State Restoration
 ///

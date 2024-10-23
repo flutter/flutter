@@ -838,17 +838,4 @@ flutter:
       );
     });
   });
-
-  test('Current settings.gradle is in our legacy settings.gradle file set', () {
-    // If this test fails, you probably edited templates/app/android.tmpl.
-    // That's fine, but you now need to add a copy of that file to gradle/settings.gradle.legacy_versions, separated
-    // from the previous versions by a line that just says ";EOF".
-    final File templateSettingsDotGradle = globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates', 'app', 'android.tmpl', 'settings.gradle'));
-    final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'packages','flutter_tools', 'gradle', 'settings.gradle.legacy_versions'));
-    expect(
-      legacySettingsDotGradleFiles.readAsStringSync().split(';EOF').map<String>((String body) => body.trim()),
-      contains(templateSettingsDotGradle.readAsStringSync().trim()),
-    );
-    // TODO(zanderso): This is an integration test and should be moved to the integration shard.
-  }, skip: true); // https://github.com/flutter/flutter/issues/87922
 }

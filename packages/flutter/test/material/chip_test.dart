@@ -2839,6 +2839,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -2888,6 +2889,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -2948,6 +2950,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
@@ -3006,6 +3009,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
@@ -3062,6 +3066,7 @@ void main() {
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.isSelected,
                             ],
                             actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
@@ -3113,6 +3118,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -3163,7 +3169,10 @@ void main() {
                           TestSemantics(
                             label: 'test',
                             textDirection: TextDirection.ltr,
-                            flags: <SemanticsFlag>[], // Must not be a button when tapping is disabled.
+                            // Must not be a button when tapping is disabled.
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState
+                            ],
                             actions: <SemanticsAction>[],
                           ),
                         ],
@@ -3213,6 +3222,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
@@ -3265,6 +3275,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -5913,7 +5924,7 @@ void main() {
       ),
     );
 
-    // Test the chechmark is not visible yet.
+    // Test the checkmark is not visible yet.
     expect(materialBox, isNot(paints..path(color:checkmarkColor)));
     expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
 

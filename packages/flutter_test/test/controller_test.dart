@@ -1093,7 +1093,7 @@ void main() {
           ..removeAt(0)
           ..removeLast()
           ..mapIndexed<Matcher?>((int i, Matcher element) => i.isEven ? element : null)
-          .whereNotNull();
+          .nonNulls;
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(),

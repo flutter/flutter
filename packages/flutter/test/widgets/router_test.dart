@@ -41,9 +41,7 @@ void main() {
     expect(find.text('update'), findsOneWidget);
   });
 
-  testWidgets('Router respects update order',
-  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
-  (WidgetTester tester) async {
+  testWidgets('Router respects update order', (WidgetTester tester) async {
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
     addTearDown(provider.dispose);
     provider.value = RouteInformation(

@@ -1476,12 +1476,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       return buildTransitions(context, animation, secondaryAnimation, child);
     }
 
-    // Create a static proxy animation to supress the original secondary transition.
+    // Create a static proxy animation to suppress the original secondary transition.
     final ProxyAnimation proxyAnimation = ProxyAnimation();
 
     final Widget proxiedOriginalTransitions = buildTransitions(context, animation, proxyAnimation, child);
 
-    // If recievedTransitions return null, then we want to return the original transitions,
+    // If receivedTransitions return null, then we want to return the original transitions,
     // but with the secondary animation still proxied. This keeps a desynched
     // animation from playing.
     return receivedTransition!(context, animation, secondaryAnimation, allowSnapshotting, proxiedOriginalTransitions) ??

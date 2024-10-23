@@ -972,7 +972,7 @@ extension type const BaselineOffset(double? offset) {
   ///
   /// When both `this` and `other` are [noBaseline], this method returns
   /// [noBaseline]. When one of them is [noBaseline], this method returns the
-  /// other oprand that's not [noBaseline].
+  /// other operand that's not [noBaseline].
   BaselineOffset minOf(BaselineOffset other) {
     return switch ((this, other)) {
       (final double lhs?, final double rhs?) => lhs >= rhs ? other : this,
