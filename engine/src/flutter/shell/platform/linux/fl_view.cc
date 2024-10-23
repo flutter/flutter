@@ -151,7 +151,7 @@ static void init_keyboard(FlView* self) {
       fl_keyboard_handler_new(messenger, FL_KEYBOARD_VIEW_DELEGATE(self));
   g_clear_object(&self->keyboard_manager);
   self->keyboard_manager =
-      fl_keyboard_manager_new(messenger, FL_KEYBOARD_VIEW_DELEGATE(self));
+      fl_keyboard_manager_new(self->engine, FL_KEYBOARD_VIEW_DELEGATE(self));
 }
 
 static void init_scrolling(FlView* self) {
@@ -364,15 +364,6 @@ static void fl_view_plugin_registry_iface_init(
 
 static void fl_view_keyboard_delegate_iface_init(
     FlKeyboardViewDelegateInterface* iface) {
-  iface->send_key_event =
-      [](FlKeyboardViewDelegate* view_delegate, const FlutterKeyEvent* event,
-         FlutterKeyEventCallback callback, void* user_data) {
-        FlView* self = FL_VIEW(view_delegate);
-        if (self->engine != nullptr) {
-          fl_engine_send_key_event(self->engine, event, callback, user_data);
-        };
-      };
-
   iface->text_filter_key_press = [](FlKeyboardViewDelegate* view_delegate,
                                     FlKeyEvent* event) {
     FlView* self = FL_VIEW(view_delegate);

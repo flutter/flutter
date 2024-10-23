@@ -116,7 +116,12 @@ static FlKeyboardManagerUserData* fl_keyboard_manager_user_data_new(
 struct _FlKeyboardManager {
   GObject parent_instance;
 
+  GWeakRef engine;
+
   GWeakRef view_delegate;
+
+  FlKeyboardManagerSendKeyEventHandler send_key_event_handler;
+  gpointer send_key_event_handler_user_data;
 
   FlKeyboardManagerLookupKeyHandler lookup_key_handler;
   gpointer lookup_key_handler_user_data;
@@ -410,6 +415,7 @@ static void guarantee_layout(FlKeyboardManager* self, FlKeyEvent* event) {
 static void fl_keyboard_manager_dispose(GObject* object) {
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(object);
 
+  g_weak_ref_clear(&self->engine);
   g_weak_ref_clear(&self->view_delegate);
 
   self->keycode_to_goals.reset();
@@ -458,29 +464,34 @@ static void fl_keyboard_manager_init(FlKeyboardManager* self) {
 }
 
 FlKeyboardManager* fl_keyboard_manager_new(
-    FlBinaryMessenger* messenger,
+    FlEngine* engine,
     FlKeyboardViewDelegate* view_delegate) {
   g_return_val_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(view_delegate), nullptr);
 
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(
       g_object_new(fl_keyboard_manager_get_type(), nullptr));
 
+  g_weak_ref_init(&self->engine, engine);
   g_weak_ref_init(&self->view_delegate, view_delegate);
 
   self->key_embedder_responder = fl_key_embedder_responder_new(
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
          void* callback_user_data, void* send_key_event_user_data) {
         FlKeyboardManager* self = FL_KEYBOARD_MANAGER(send_key_event_user_data);
-        g_autoptr(FlKeyboardViewDelegate) view_delegate =
-            FL_KEYBOARD_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
-        if (view_delegate == nullptr) {
-          return;
+        if (self->send_key_event_handler != nullptr) {
+          self->send_key_event_handler(event, callback, callback_user_data,
+                                       self->send_key_event_handler_user_data);
+        } else {
+          g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+          if (engine != nullptr) {
+            fl_engine_send_key_event(engine, event, callback,
+                                     callback_user_data);
+          }
         }
-        fl_keyboard_view_delegate_send_key_event(view_delegate, event, callback,
-                                                 callback_user_data);
       },
       self);
-  self->key_channel_responder = fl_key_channel_responder_new(messenger);
+  self->key_channel_responder =
+      fl_key_channel_responder_new(fl_engine_get_binary_messenger(engine));
 
   return self;
 }
@@ -534,6 +545,15 @@ GHashTable* fl_keyboard_manager_get_pressed_state(FlKeyboardManager* self) {
   g_return_val_if_fail(FL_IS_KEYBOARD_MANAGER(self), nullptr);
   return fl_key_embedder_responder_get_pressed_state(
       self->key_embedder_responder);
+}
+
+void fl_keyboard_manager_set_send_key_event_handler(
+    FlKeyboardManager* self,
+    FlKeyboardManagerSendKeyEventHandler send_key_event_handler,
+    gpointer user_data) {
+  g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
+  self->send_key_event_handler = send_key_event_handler;
+  self->send_key_event_handler_user_data = user_data;
 }
 
 void fl_keyboard_manager_set_lookup_key_handler(

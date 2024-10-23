@@ -11,17 +11,6 @@ G_DEFINE_INTERFACE(FlKeyboardViewDelegate,
 static void fl_keyboard_view_delegate_default_init(
     FlKeyboardViewDelegateInterface* iface) {}
 
-void fl_keyboard_view_delegate_send_key_event(FlKeyboardViewDelegate* self,
-                                              const FlutterKeyEvent* event,
-                                              FlutterKeyEventCallback callback,
-                                              void* user_data) {
-  g_return_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(self));
-  g_return_if_fail(event != nullptr);
-
-  FL_KEYBOARD_VIEW_DELEGATE_GET_IFACE(self)->send_key_event(
-      self, event, callback, user_data);
-}
-
 gboolean fl_keyboard_view_delegate_text_filter_key_press(
     FlKeyboardViewDelegate* self,
     FlKeyEvent* event) {
