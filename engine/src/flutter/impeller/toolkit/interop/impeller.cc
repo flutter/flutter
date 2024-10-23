@@ -168,6 +168,12 @@ void ImpellerDisplayListBuilderSetTransform(ImpellerDisplayListBuilder builder,
 }
 
 IMPELLER_EXTERN_C
+void ImpellerDisplayListBuilderTransform(ImpellerDisplayListBuilder builder,
+                                         const ImpellerMatrix* transform) {
+  GetPeer(builder)->Transform(ToImpellerType(*transform));
+}
+
+IMPELLER_EXTERN_C
 void ImpellerDisplayListBuilderGetTransform(ImpellerDisplayListBuilder builder,
                                             ImpellerMatrix* out_transform) {
   FromImpellerType(GetPeer(builder)->GetTransform(), *out_transform);

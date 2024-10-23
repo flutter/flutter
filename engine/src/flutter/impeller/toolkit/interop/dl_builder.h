@@ -51,6 +51,8 @@ class DisplayListBuilder final
 
   void SetTransform(const Matrix& matrix);
 
+  void Transform(const Matrix& matrix);
+
   void ResetTransform();
 
   uint32_t GetSaveCount() const;

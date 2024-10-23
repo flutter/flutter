@@ -55,6 +55,11 @@ void DisplayListBuilder::SetTransform(const Matrix& matrix) {
   builder_.SetTransform(&sk_matrix);
 }
 
+void DisplayListBuilder::Transform(const Matrix& matrix) {
+  const auto sk_matrix = SkM44::ColMajor(matrix.m);
+  builder_.Transform(&sk_matrix);
+}
+
 void DisplayListBuilder::ResetTransform() {
   builder_.TransformReset();
 }
