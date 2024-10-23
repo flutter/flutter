@@ -8,7 +8,7 @@ This page contains Flutter Framework related information.
 See leak_tracker documentation for
 [general leak troubleshooting](https://github.com/dart-lang/leak_tracker/blob/main/doc/leak_tracking/TROUBLESHOOT.md).
 
-Output of leak tracker looks like this:
+Test failures cause by leaks look like this:
 
 ```
 Expected: leak free
