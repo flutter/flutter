@@ -18,7 +18,7 @@ import java.util.ArrayList;
 /// The current editing state (text, selection range, composing range) the text input plugin holds.
 ///
 /// As the name implies, this class also notifies its listeners when the editing state changes. When
-/// there're ongoing batch edits, change notifications will be deferred until all batch edits end
+/// there are ongoing batch edits, change notifications will be deferred until all batch edits end
 /// (i.e. when the outermost batch edit ends). Listeners added during a batch edit will always be
 /// notified when all batch edits end, even if there's no real change.
 ///

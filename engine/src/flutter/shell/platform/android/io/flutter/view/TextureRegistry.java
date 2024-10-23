@@ -13,8 +13,8 @@ import androidx.annotation.Nullable;
 
 // TODO(mattcarroll): re-evalute docs in this class and add nullability annotations.
 /**
- * Registry of backend textures used with a single {@link FlutterView} instance. Entries may be
- * embedded into the Flutter view using the <a
+ * Registry of backend textures used with a single {@link io.flutter.embedding.android.FlutterView}
+ * instance. Entries may be embedded into the Flutter view using the <a
  * href="https://api.flutter.dev/flutter/widgets/Texture-class.html">Texture</a> widget.
  */
 public interface TextureRegistry {
