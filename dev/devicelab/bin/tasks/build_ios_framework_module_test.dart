@@ -203,8 +203,8 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     );
     checkDirectoryExists(appFrameworkDsymPath);
 
-    if (Directory(dsymPath).listSync().length != 1) {
-      throw TaskResult.failure('App.framework/dSYMs should only contain App.framework');
+    if (Directory(dsymPath).listSync().whereType<Directory>().length != 1) {
+      throw TaskResult.failure('App.framework/dSYMs should ONLY contain App.xcframework.dSYM');
     }
 
     await _checkDsym(path.join(
