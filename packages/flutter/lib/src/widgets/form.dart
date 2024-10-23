@@ -257,7 +257,6 @@ class FormState extends State<Form> {
     _fields.remove(field);
   }
 
-
   @override
   Widget build(BuildContext context) {
     switch (widget.autovalidateMode) {
@@ -699,7 +698,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
           }
         });
       case AutovalidateMode.onUnfocus:
-        _focusNode.addListener(_updateField);
       case AutovalidateMode.onUserInteraction:
       case AutovalidateMode.disabled:
       case null:
@@ -707,16 +705,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     }
   }
 
-  void _updateField() {
-    if (!_focusNode.hasFocus) {
-      _validate();
-    }
-  }
-
   @override
   void dispose() {
     _errorText.dispose();
-    _focusNode.removeListener(_updateField);
     _focusNode.dispose();
     _hasInteractedByUser.dispose();
     super.dispose();
