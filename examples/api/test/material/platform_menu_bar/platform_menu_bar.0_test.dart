@@ -56,7 +56,7 @@ void main() {
                 'label': 'Show Message',
                 'enabled': true,
                 'shortcutCharacter': 'm',
-                'shortcutModifiers': 0
+                'shortcutModifiers': 0,
               },
               <String, Object>{
                 'id': 8,
@@ -68,22 +68,22 @@ void main() {
                     'label': 'I am not throwing away my shot.',
                     'enabled': true,
                     'shortcutTrigger': 49,
-                    'shortcutModifiers': 1
+                    'shortcutModifiers': 1,
                   },
                   <String, Object>{
                     'id': 7,
                     'label': "There's a million things I haven't done, but just you wait.",
                     'enabled': true,
                     'shortcutTrigger': 50,
-                    'shortcutModifiers': 1
-                  }
-                ]
+                    'shortcutModifiers': 1,
+                  },
+                ],
               },
               <String, Object>{'id': 9, 'isDivider': true},
-              <String, Object>{'id': 10, 'enabled': true, 'platformProvidedMenu': 1}
-            ]
-          }
-        ]
+              <String, Object>{'id': 10, 'enabled': true, 'platformProvidedMenu': 1},
+            ],
+          },
+        ],
       }),
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}));
