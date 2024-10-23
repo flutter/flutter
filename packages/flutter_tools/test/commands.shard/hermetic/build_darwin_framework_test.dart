@@ -558,6 +558,8 @@ void main() {
       final Directory parentA = fileSystem.directory('FrameworkA')..createSync();
       final File dSYMA = parentA.childFile('FrameworkA.framework.dSYM')..createSync();
       final Directory frameworkA = parentA.childDirectory('FrameworkA.framework')..createSync();
+      // Flutter.framework.dSYM should be correctly filtered out.
+      parentA.childFile('Flutter.framework.dSYM').createSync();
 
       final Directory parentB = fileSystem.directory('FrameworkB')..createSync();
       final File dSYMB = parentB.childFile('FrameworkB.framework.dSYM')..createSync();
