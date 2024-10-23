@@ -53,7 +53,7 @@ dart --enable-asserts dev/bots/analyze.dart
 
 ## Making changes to the `flutter` tool
 
-You can run the tool from source using `bin/flutter-dev`.
+You can run the tool from source by running `bin/flutter-dev`.
 
 Alternatively, delete the `bin/cache/flutter_tools.snapshot` file or locally commit
 your change in git and then run `flutter` again. This will rebuild the tool
