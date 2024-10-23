@@ -178,6 +178,7 @@ Future<void> main() async {
             flutterDirectory.path,
             'dev',
             'integration_tests',
+            'pure_android_host_apps',
             'android_custom_host_app',
           ),
         ),

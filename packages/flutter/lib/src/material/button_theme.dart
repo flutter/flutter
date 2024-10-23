@@ -254,13 +254,11 @@ class ButtonThemeData with Diagnosticable {
   ///
   ///  * [getPadding], which is used to calculate padding for the button's
   ///    child (typically the button's label).
-  EdgeInsetsGeometry get padding {
-    return _padding ?? switch (textTheme) {
-      ButtonTextTheme.normal  => const EdgeInsets.symmetric(horizontal: 16.0),
-      ButtonTextTheme.accent  => const EdgeInsets.symmetric(horizontal: 16.0),
-      ButtonTextTheme.primary => const EdgeInsets.symmetric(horizontal: 24.0),
-    };
-  }
+  EdgeInsetsGeometry get padding => _padding ?? switch (textTheme) {
+    ButtonTextTheme.normal  => const EdgeInsets.symmetric(horizontal: 16.0),
+    ButtonTextTheme.accent  => const EdgeInsets.symmetric(horizontal: 16.0),
+    ButtonTextTheme.primary => const EdgeInsets.symmetric(horizontal: 24.0),
+  };
   final EdgeInsetsGeometry? _padding;
 
   /// The shape of a button's material.
@@ -277,14 +275,12 @@ class ButtonThemeData with Diagnosticable {
   ///
   ///  * [getShape], which is used to calculate the shape of the button's
   ///    [Material].
-  ShapeBorder get shape {
-    return _shape ?? switch (textTheme) {
-      ButtonTextTheme.normal || ButtonTextTheme.accent =>
-        const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
-      ButtonTextTheme.primary =>
-        const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
-    };
-  }
+  ShapeBorder get shape => _shape ?? switch (textTheme) {
+    ButtonTextTheme.normal || ButtonTextTheme.accent =>
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
+    ButtonTextTheme.primary =>
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+  };
   final ShapeBorder? _shape;
 
   /// If true, then a [DropdownButton] menu's width will match the button's
