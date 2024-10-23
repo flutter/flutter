@@ -16,7 +16,7 @@ void main() {
       (
         exe: 'git',
         command: 'merge-base',
-        rest: <String>['upstream/main', 'HEAD'],
+        rest: <String>['upstream/master', 'HEAD'],
         exitCode: 0,
         stdout: 'abcdef1234',
         stderr: null
