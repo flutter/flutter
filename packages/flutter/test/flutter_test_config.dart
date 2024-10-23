@@ -45,7 +45,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
     LeakTesting.enable();
     LeakTracking.warnForUnsupportedPlatforms = false;
     LeakTracking.troubleshootingDocumentationLink =
-        'https://github.com/flutter/flutter/blob/master/docs/contributing/testing/Leak-tracking.md';
+        'https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Leak-tracking.md';
     LeakTesting.settings = LeakTesting.settings.withIgnored(
       createdByTestHelpers: true,
     );
