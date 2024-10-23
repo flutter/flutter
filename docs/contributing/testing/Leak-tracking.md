@@ -1,6 +1,6 @@
 # Leak tracking in Flutter framework
 
-Flutter Framework tests use [leak_tracker](https://github.com/dart-lang/leak_tracker/blob/main/doc/leak_tracking/
+Flutter Framework widget tests use [leak_tracker](https://github.com/dart-lang/leak_tracker/blob/main/doc/leak_tracking/
 OVERVIEW.md) to detect leaks from objects that have not been disposed.
 
 This page contains Flutter Framework related information.
