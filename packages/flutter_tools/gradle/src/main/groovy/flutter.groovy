@@ -1793,7 +1793,7 @@ class FlutterTask extends BaseFlutterTask {
             //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
             String depText = dependenciesFile.text
             // So we split list of files by non-escaped(by backslash) space,
-            def matcher = depText.split(": ")[inputs ? 1 : 0] =~ /(\\ |[^\s])+/
+            def matcher = depText.split(": ")[inputs ? 1 : 0] =~ /(\\ |\S)+/
             // then we replace all escaped spaces with regular spaces
             def depList = matcher.collect{ it[0].replaceAll("\\\\ ", " ") }
             return project.files(depList)
