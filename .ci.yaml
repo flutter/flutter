@@ -5773,7 +5773,6 @@ targets:
       - .ci.yaml
 
   - name: Windows build_android_host_app_with_module_source
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
