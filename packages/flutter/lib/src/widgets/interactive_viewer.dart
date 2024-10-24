@@ -1218,6 +1218,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         constrained: widget.constrained,
         matrix: _transformer.value,
         alignment: widget.alignment,
+        transformChild: widget._transformChild,
         child: widget.child!,
       );
     } else {
@@ -1228,33 +1229,17 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       child = LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final Matrix4 matrix = _transformer.value;
-          final Widget child = widget.builder!(
-            context,
-            _transformViewport(matrix, Offset.zero & constraints.biggest),
-          );
-          if (!widget._transformChild) {
-            return ClipRect(
-              clipBehavior: widget.clipBehavior,
-              child: OverflowBox(
-                alignment: Alignment.topLeft,
-                minWidth: 0.0,
-                minHeight: 0.0,
-                maxWidth: double.infinity,
-                maxHeight: double.infinity,
-                child: KeyedSubtree(
-                  key: _childKey,
-                  child: child,
-                ),
-              ),
-            );
-          }
           return _InteractiveViewerBuilt(
             childKey: _childKey,
             clipBehavior: widget.clipBehavior,
             constrained: widget.constrained,
             alignment: widget.alignment,
             matrix: matrix,
-            child: child,
+            transformChild: widget._transformChild,
+            child: widget.builder!(
+              context,
+              _transformViewport(matrix, Offset.zero & constraints.biggest),
+            ),
           );
         },
       );
@@ -1286,6 +1271,7 @@ class _InteractiveViewerBuilt extends StatelessWidget {
     required this.constrained,
     required this.matrix,
     required this.alignment,
+    required this.transformChild,
   });
 
   final Widget child;
@@ -1294,17 +1280,22 @@ class _InteractiveViewerBuilt extends StatelessWidget {
   final bool constrained;
   final Matrix4 matrix;
   final Alignment? alignment;
+  final bool transformChild;
 
   @override
   Widget build(BuildContext context) {
-    Widget child = Transform(
-      transform: matrix,
-      alignment: alignment,
-      child: KeyedSubtree(
-        key: childKey,
-        child: this.child,
-      ),
+    Widget child = KeyedSubtree(
+      key: childKey,
+      child: this.child,
     );
+
+    if (transformChild) {
+      child = Transform(
+        transform: matrix,
+        alignment: alignment,
+        child: child,
+      );
+    }
 
     if (!constrained) {
       child = OverflowBox(
