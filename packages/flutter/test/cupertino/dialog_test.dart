@@ -679,7 +679,7 @@ void main() {
 
     expect(
       find.byType(CupertinoAlertDialog),
-      paints..rect(color: const Color(0xBF1E1E1E)),
+      paints..rect(color: const Color(0xCC2D2D2D)),
     );
   });
 
