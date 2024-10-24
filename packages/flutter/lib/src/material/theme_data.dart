@@ -768,11 +768,10 @@ class ThemeData with Diagnosticable {
       'Use DialogThemeData.backgroundColor instead. '
       'This feature was deprecated after v3.27.0-0.1.pre.',
     )
-    Color? dialogBackgroundColor,
+    required this.dialogBackgroundColor,
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
        _buttonBarTheme = buttonBarTheme,
-       _dialogBackgroundColor = dialogBackgroundColor,
        assert(buttonBarTheme != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
@@ -1435,8 +1434,7 @@ class ThemeData with Diagnosticable {
     'Use DialogThemeData.backgroundColor instead. '
     'This feature was deprecated after v3.27.0-0.1.pre.',
   )
-  Color? get dialogBackgroundColor => _dialogBackgroundColor;
-  final Color? _dialogBackgroundColor;
+  final Color dialogBackgroundColor;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
@@ -1872,7 +1870,7 @@ class ThemeData with Diagnosticable {
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
       // DEPRECATED (newest deprecations at the bottom)
       buttonBarTheme: ButtonBarThemeData.lerp(a.buttonBarTheme, b.buttonBarTheme, t),
-      dialogBackgroundColor: Color.lerp(a.dialogBackgroundColor, b.dialogBackgroundColor, t),
+      dialogBackgroundColor: Color.lerp(a.dialogBackgroundColor, b.dialogBackgroundColor, t)!,
     );
   }
 
