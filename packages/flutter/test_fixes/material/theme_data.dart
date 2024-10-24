@@ -242,8 +242,6 @@ void main() {
   ThemeData themeData = ThemeData();
   themeData = ThemeData(dialogBackgroundColor: Colors.orange);
   themeData = ThemeData(dialogBackgroundColor: Colors.orange, dialogTheme: DialogThemeData(backgroundColor: Colors.red));
-  themeData = ThemeData.raw(dialogBackgroundColor: Colors.orange);
-  themeData = ThemeData.raw(dialogBackgroundColor: Colors.orange, dialogTheme: DialogThemeData(backgroundColor: Colors.red));
   themeData = themeData.copyWith(dialogBackgroundColor: Colors.orange);
   themeData = themeData.copyWith(dialogBackgroundColor: Colors.orange, dialogTheme: DialogThemeData(backgroundColor: Colors.red));
   themeData.dialogBackgroundColor; // Removing field reference not supported.
