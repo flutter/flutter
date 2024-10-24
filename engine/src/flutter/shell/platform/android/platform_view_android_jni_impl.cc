@@ -1584,8 +1584,11 @@ PlatformViewAndroidJNIImpl::ImageProducerTextureEntryAcquireLatestImage(
   JavaLocalRef r = JavaLocalRef(
       env, env->CallObjectMethod(image_producer_texture_entry_local_ref.obj(),
                                  g_acquire_latest_image_method));
-  FML_CHECK(fml::jni::CheckException(env));
-  return r;
+  if (fml::jni::CheckException(env)) {
+    return r;
+  }
+  // Return null.
+  return JavaLocalRef();
 }
 
 JavaLocalRef PlatformViewAndroidJNIImpl::ImageGetHardwareBuffer(
