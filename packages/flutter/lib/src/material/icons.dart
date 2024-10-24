@@ -9,6 +9,9 @@ library;
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/widgets.dart';
 
+import '../../foundation.dart';
+import 'theme.dart';
+
 // ignore_for_file: non_constant_identifier_names
 
 /// A set of platform-adaptive Material Design icons.
@@ -2134,6 +2137,24 @@ abstract final class Icons {
 
   /// <i class="material-icons md-36">arrow_back</i> &#x2014; material icon named "arrow back".
   static const IconData arrow_back = IconData(0xe092, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  static IconData arrow_back_adaptive(BuildContext context) {
+     if (kIsWeb) {
+      // Always use 'Icons.arrow_back' as a back_button icon in web.
+      return Icons.arrow_back;
+    }
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return Icons.arrow_back;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return Icons.arrow_back_ios_new_rounded;
+    }
+    return Icons.arrow_back;
+  }
 
   /// <i class="material-icons-sharp md-36">arrow_back</i> &#x2014; material icon named "arrow back" (sharp).
   static const IconData arrow_back_sharp = IconData(0xe793, fontFamily: 'MaterialIcons', matchTextDirection: true);
