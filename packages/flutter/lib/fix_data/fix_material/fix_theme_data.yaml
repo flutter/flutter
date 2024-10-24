@@ -26,6 +26,79 @@
 #     * WidgetState: fix_widget_state.yaml
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/155072
+  - title: "Migrate 'ThemeData.dialogBackgroundColor' to 'DialogThemeData.backgroundColor'"
+    date: 2024-09-12
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "dialogBackgroundColor != '' && dialogTheme != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'dialogBackgroundColor'
+      - if: "dialogBackgroundColor != '' && dialogTheme == ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'dialogBackgroundColor'
+          - kind: 'addParameter'
+            index: 135
+            name: 'dialogTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'DialogThemeData(backgroundColor: {% dialogBackgroundColor %})'
+              requiredIf: "dialogBackgroundColor != ''"
+    variables:
+      dialogBackgroundColor:
+        kind: 'fragment'
+        value: 'arguments[dialogBackgroundColor]'
+      dialogTheme:
+        kind: 'fragment'
+        value: 'arguments[dialogTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/155072
+  - title: "Migrate 'ThemeData.dialogBackgroundColor' to 'DialogThemeData.backgroundColor'"
+    date: 2024-09-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "dialogBackgroundColor != '' && dialogTheme != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'dialogBackgroundColor'
+      - if: "dialogBackgroundColor != '' && dialogTheme == ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'dialogBackgroundColor'
+          - kind: 'addParameter'
+            index: 135
+            name: 'dialogTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'DialogThemeData(backgroundColor: {% dialogBackgroundColor %})'
+              requiredIf: "dialogBackgroundColor != ''"
+    variables:
+      dialogBackgroundColor:
+        kind: 'fragment'
+        value: 'arguments[dialogBackgroundColor]'
+      dialogTheme:
+        kind: 'fragment'
+        value: 'arguments[dialogTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/145523
+  - title: "Remove 'buttonBarTheme'"
+    date: 2024-04-28
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonBarTheme'
+
   # Changes made in https://github.com/flutter/flutter/pull/87281
   - title: "Remove 'fixTextFieldOutlineLabel'"
     date: 2021-04-30
@@ -1697,16 +1770,5 @@ transforms:
     changes:
       - kind: 'removeParameter'
         name: 'useMaterial3'
-
-  # Changes made in https://github.com/flutter/flutter/pull/145523
-  - title: "Remove 'buttonBarTheme'"
-    date: 2024-04-28
-    element:
-      uris: [ 'material.dart' ]
-      constructor: ''
-      inClass: 'ThemeData'
-    changes:
-      - kind: 'removeParameter'
-        name: 'buttonBarTheme'
 
 # Before adding a new fix: read instructions at the top of this file.
