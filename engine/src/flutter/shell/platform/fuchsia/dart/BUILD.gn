@@ -127,7 +127,7 @@ dart_library("args") {
 }
 
 dart_library("collection") {
-  package_root = "$dart_src/third_party/pkg/collection"
+  package_root = "$dart_src/third_party/pkg/core/pkgs/collection"
   package_name = "collection"
 
   pubspec = "$package_root/pubspec.yaml"
@@ -230,7 +230,7 @@ dart_library("stack_trace") {
 }
 
 dart_library("matcher") {
-  package_root = "$dart_src/third_party/pkg/matcher"
+  package_root = "$dart_src/third_party/pkg/test/pkgs/matcher"
   package_name = "matcher"
 
   pubspec = "$package_root/pubspec.yaml"
