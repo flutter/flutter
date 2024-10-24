@@ -53,10 +53,12 @@ dart --enable-asserts dev/bots/analyze.dart
 
 ## Making changes to the `flutter` tool
 
-If you want to alter and re-test the tool's behavior itself, locally commit your tool change
-in git and the tool will be rebuilt from Dart sources in `packages/flutter_tools` the next
-time you run `flutter`. Alternatively, delete the `bin/cache/flutter_tools.snapshot` file.
-Doing so will force a rebuild of the tool from your local sources the next time you run `flutter`.
+You can run the tool from source by running `bin/flutter-dev`.
+
+Alternatively, delete the `bin/cache/flutter_tools.snapshot` file or locally commit
+your change in git and then run `flutter` again. This will rebuild the tool
+from local source.
+
 This step is not required if you are launching `flutter_tools.dart` (either by running or testing) from an IDE.
 
 The `flutter_tools` tests run inside the Dart command line VM rather than in the
@@ -78,7 +80,7 @@ under "Environment Variables" section, enter `FLUTTER_ROOT=directory_to_your_flu
 
 The pre-built flutter tool runs in release mode with the observatory off by default.
 To enable debugging mode and the observatory on the `flutter` tool, uncomment the
-`FLUTTER_TOOL_ARGS` line in the `bin/flutter` shell script.
+`FLUTTER_TOOL_ARGS` line in the `bin/flutter` (or `bin/flutter-dev`) shell script.
 
 ## Debugging the `flutter` command-line tool in VS Code
 
