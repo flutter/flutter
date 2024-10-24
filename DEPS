@@ -65,7 +65,6 @@ vars = {
   'dart_boringssl_rev': '2db0eb3f96a5756298dcd7f9319e56a98585bd10',
   'dart_browser_launcher_rev': 'e5fc5d488eb5038bfec2a6690c72ab8dd353e101',
   'dart_clock_rev': '7956d60042f4ea979c4554d43eeb57d087627869',
-  'dart_collection_rev': '887b826b50f48d6a9cd2c0684aa353e8e3a0fad0',
   'dart_core_rev': '2a436d5c21964c2658a3b669d9bdef802637dd81',
   'dart_devtools_rev': 'dcef4f6efe986f110f55dbbe7f3731802e86690a',
   'dart_http_rev': '5e2281edd25f9addbf26242a0658d8f2dfa1134b',
@@ -155,7 +154,6 @@ vars = {
   "upstream_archive": "https://github.com/brendan-duncan/archive.git",
   "upstream_bazel_worker": "https://github.com/dart-lang/bazel_worker.git",
   "upstream_benchmark": "https://github.com/google/benchmark.git",
-  "upstream_boolean_selector": "https://github.com/dart-lang/boolean_selector.git",
   "upstream_boringssl_gen": "https://github.com/dart-lang/boringssl_gen.git",
   "upstream_boringssl": "https://github.com/openssl/openssl.git",
   "upstream_brotli": "https://github.com/google/brotli.git",
@@ -163,7 +161,6 @@ vars = {
   "upstream_buildroot": "https://github.com/flutter/buildroot.git",
   "upstream_cli_util": "https://github.com/dart-lang/cli_util.git",
   "upstream_clock": "https://github.com/dart-lang/clock.git",
-  "upstream_collection": "https://github.com/dart-lang/collection.git",
   "upstream_csslib": "https://github.com/dart-lang/csslib.git",
   "upstream_dart_style": "https://github.com/dart-lang/dart_style.git",
   "upstream_dartdoc": "https://github.com/dart-lang/dartdoc.git",
@@ -196,7 +193,6 @@ vars = {
   "upstream_libwebp": "https://chromium.googlesource.com/webm/libwebp.git",
   "upstream_leak_tracker": "https://github.com/dart-lang/leak_tracker.git",
   "upstream_markdown": "https://github.com/dart-lang/markdown.git",
-  "upstream_matcher": "https://github.com/dart-lang/matcher.git",
   "upstream_mockito": "https://github.com/dart-lang/mockito.git",
   "upstream_ocmock": "https://github.com/erikdoe/ocmock.git",
   "upstream_package_config": "https://github.com/dart-lang/package_config.git",
@@ -346,9 +342,6 @@ deps = {
   'src/flutter/third_party/dart/third_party/pkg/bazel_worker':
    Var('dart_git') + '/bazel_worker.git@aa3cc9e826350b960e0c5a67e6065bcedba8b0ac',
 
-  'src/flutter/third_party/dart/third_party/pkg/boolean_selector':
-   Var('dart_git') + '/boolean_selector.git@d6c7c36ae1111f11cc24306d71d3ab2deea8fa68',
-
   'src/flutter/third_party/dart/third_party/pkg/browser_launcher':
    Var('dart_git') + '/browser_launcher.git' + '@' + Var('dart_browser_launcher_rev'),
 
@@ -357,9 +350,6 @@ deps = {
 
   'src/flutter/third_party/dart/third_party/pkg/clock':
    Var('dart_git') + '/clock.git' + '@' + Var('dart_clock_rev'),
-
-  'src/flutter/third_party/dart/third_party/pkg/collection':
-   Var('dart_git') + '/collection.git' + '@' + Var('dart_collection_rev'),
 
   'src/flutter/third_party/dart/third_party/pkg/core':
    Var('dart_git') + '/core.git' + '@' + Var('dart_core_rev'),
@@ -396,9 +386,6 @@ deps = {
 
   'src/flutter/third_party/dart/third_party/pkg/markdown':
    Var('dart_git') + '/markdown.git@d53feae0760a4f0aae5ffdfb12d8e6acccf14b40',
-
-  'src/flutter/third_party/dart/third_party/pkg/matcher':
-   Var('dart_git') + '/matcher.git@31f13583630e093731c8cf2b843c14196d748c5c',
 
   'src/flutter/third_party/dart/third_party/pkg/mockito':
    Var('dart_git') + '/mockito.git@57d484f9b8e7f6a504966a901174358a42fa932a',
