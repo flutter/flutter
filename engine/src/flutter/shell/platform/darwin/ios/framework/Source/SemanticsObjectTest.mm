@@ -16,6 +16,9 @@ FLUTTER_ASSERT_ARC
 
 const float kFloatCompareEpsilon = 0.001;
 
+@interface SemanticsObject (UIFocusSystem) <UIFocusItem, UIFocusItemContainer>
+@end
+
 @interface TextInputSemanticsObject (Test)
 - (UIView<UITextInput>*)textInputSurrogate;
 @end
@@ -1152,4 +1155,55 @@ const float kFloatCompareEpsilon = 0.001;
   [self waitForExpectationsWithTimeout:1 handler:nil];
 }
 
+- (void)testUIFocusItemConformance {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  parent.children = @[ child ];
+
+  // parentFocusEnvironment
+  XCTAssertTrue([parent.parentFocusEnvironment isKindOfClass:[UIView class]]);
+  XCTAssertEqual(child.parentFocusEnvironment, child.parent);
+
+  // canBecomeFocused
+  flutter::SemanticsNode childNode;
+  childNode.flags = static_cast<int32_t>(flutter::SemanticsFlags::kIsHidden);
+  childNode.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  [child setSemanticsNode:&childNode];
+  XCTAssertFalse(child.canBecomeFocused);
+  childNode.flags = 0;
+  [child setSemanticsNode:&childNode];
+  XCTAssertTrue(child.canBecomeFocused);
+  childNode.actions = 0;
+  [child setSemanticsNode:&childNode];
+  XCTAssertFalse(child.canBecomeFocused);
+
+  CGFloat scale = ((bridge->view().window.screen ?: UIScreen.mainScreen)).scale;
+
+  childNode.rect = SkRect::MakeXYWH(0, 0, 100 * scale, 100 * scale);
+  [child setSemanticsNode:&childNode];
+  flutter::SemanticsNode parentNode;
+  parentNode.rect = SkRect::MakeXYWH(0, 0, 200, 200);
+  [parent setSemanticsNode:&parentNode];
+
+  XCTAssertTrue(CGRectEqualToRect(child.frame, CGRectMake(0, 0, 100, 100)));
+}
+
+- (void)testUIFocusItemContainerConformance {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* child1 = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* child2 = [[SemanticsObject alloc] initWithBridge:bridge uid:2];
+  parent.childrenInHitTestOrder = @[ child1, child2 ];
+
+  // focusItemsInRect
+  NSArray<id<UIFocusItem>>* itemsInRect = [parent focusItemsInRect:CGRectMake(0, 0, 100, 100)];
+  XCTAssertEqual(itemsInRect.count, (unsigned long)2);
+  XCTAssertTrue([itemsInRect containsObject:child1]);
+  XCTAssertTrue([itemsInRect containsObject:child2]);
+}
 @end

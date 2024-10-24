@@ -108,6 +108,7 @@ source_set("flutter_framework_source_arc") {
     "framework/Source/FlutterViewResponder.h",
     "framework/Source/KeyCodeMap.g.mm",
     "framework/Source/KeyCodeMap_Internal.h",
+    "framework/Source/SemanticsObject+UIFocusSystem.mm",
     "framework/Source/SemanticsObject.h",
     "framework/Source/SemanticsObject.mm",
     "framework/Source/TextInputSemanticsObject.h",
