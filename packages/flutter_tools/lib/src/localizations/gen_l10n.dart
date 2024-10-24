@@ -135,7 +135,7 @@ List<String> generateMethodParameters(Message message, LocaleInfo? locale, bool 
       throw L10nException(
           'The placeholder, ${placeholder.name}, has its "type" resource attribute set to '
           'the "${localePlaceholder.type}" type in locale "$locale", but it is "${placeholder.type}" '
-          'in the template placeholders. For compatibility with template placeholders, change '
+          'in the template placeholder. For compatibility with template placeholder, change '
           'the "type" attribute to "${placeholder.type}".');
     }
     return '${useNamedParameters ? 'required ' : ''}${placeholder.type} ${placeholder.name}';
