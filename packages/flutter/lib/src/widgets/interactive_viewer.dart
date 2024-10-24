@@ -1178,6 +1178,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   void didUpdateWidget(InteractiveViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    if (oldWidget.scaleEnabled != widget.scaleEnabled ||
+        oldWidget.panEnabled != widget.panEnabled) {
+      if (mounted) {
+        _handleTransformation();
+      }
+    }
+
     final TransformationController? newController = widget.transformationController;
     if (newController == oldWidget.transformationController) {
       return;
