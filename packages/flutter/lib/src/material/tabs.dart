@@ -159,6 +159,31 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   /// If null, the height will be calculated based on the content of the [Tab]. When `icon` is not
   /// null along with `child` or `text`, the default height is 72.0 pixels. Without an `icon`, the
   /// height is 46.0 pixels.
+  ///
+  /// {@tool snippet}
+  ///
+  /// The provided tab height cannot be lower than the default height. Use
+  /// [PreferredSize] widget to adjust the overall [TabBar] height and match
+  /// the provided tab [height]:
+  ///
+  /// ```dart
+  /// bottom: const PreferredSize(
+  ///   preferredSize: Size.fromHeight(20.0),
+  ///   child: TabBar(
+  ///     tabs: <Widget>[
+  ///       Tab(
+  ///         text: 'Tab 1',
+  ///         height: 20.0,
+  ///       ),
+  ///       Tab(
+  ///         text: 'Tab 2',
+  ///         height: 20.0,
+  ///       ),
+  ///     ],
+  ///   ),
+  /// ),
+  /// ```
+  /// {@end-tool}
   final double? height;
 
   Widget _buildLabelText() {
