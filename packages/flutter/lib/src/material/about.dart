@@ -295,14 +295,31 @@ void showLicensePage({
   String? applicationLegalese,
   bool useRootNavigator = false,
 }) {
-  Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute<void>(
-    builder: (BuildContext context) => LicensePage(
-      applicationName: applicationName,
-      applicationVersion: applicationVersion,
-      applicationIcon: applicationIcon,
-      applicationLegalese: applicationLegalese,
-    ),
-  ));
+  final MultiWindowAppContext? multiWindowAppContext =
+      MultiWindowAppContext.of(context);
+
+  if (multiWindowAppContext == null) {
+    Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute<void>(
+      builder: (BuildContext context) => LicensePage(
+        applicationName: applicationName,
+        applicationVersion: applicationVersion,
+        applicationIcon: applicationIcon,
+        applicationLegalese: applicationLegalese,
+      ),
+    ));
+  }
+  else {
+    Navigator.of(context, rootNavigator: useRootNavigator)
+        .push<void>(ModalWindowRoute<void>(
+          context: context,
+          size: const Size(640, 480),
+          builder: (BuildContext context) => LicensePage(
+        applicationName: applicationName,
+        applicationVersion: applicationVersion,
+        applicationIcon: applicationIcon,
+        applicationLegalese: applicationLegalese,
+      )));
+  }
 }
 
 /// The amount of vertical space to separate chunks of text.

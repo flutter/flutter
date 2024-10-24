@@ -1710,7 +1710,8 @@ class _DialogDefaultsM3 extends DialogThemeData {
     : super(
         alignment: Alignment.center,
         elevation: 6.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(MultiWindowAppContext.of(context) == null ? 28.0 : 0))),
         clipBehavior: Clip.none,
       );
 

@@ -156,6 +156,7 @@ class MenuAnchor extends StatefulWidget {
     this.onOpen,
     this.onClose,
     this.crossAxisUnconstrained = true,
+    this.positioner,
     required this.menuChildren,
     this.builder,
     this.child,
@@ -284,6 +285,8 @@ class MenuAnchor extends StatefulWidget {
   /// If not supplied, then the [MenuAnchor] will be the size that its parent
   /// allocates for it.
   final MenuAnchorChildBuilder? builder;
+
+  final WindowPositioner? positioner;
 
   /// The optional child to be passed to the [builder].
   ///
@@ -448,6 +451,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
     if (multiWindowAppContext != null && windowContext != null) {
       _anchorStateController.supportsMultiWindow = true;
+      final WindowPositioner positioner = anchorWidget.positioner ??
+        const WindowPositioner(
+          parentAnchor: WindowPositionerAnchor.topRight,
+          childAnchor: WindowPositionerAnchor.topLeft);
       child = AutoSizedWindowCreator(
           widgetBuilder: (BuildContext context) {
             return _MenuPanel(
@@ -470,9 +477,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
                     position,
                     Offset(position.dx + box.size.width,
                         position.dy + box.size.height)),
-                positioner: const WindowPositioner(
-                    parentAnchor: WindowPositionerAnchor.bottomRight,
-                    childAnchor: WindowPositionerAnchor.topLeft),
+                positioner: positioner,
                 builder: (BuildContext context) {
                   return MaterialApp(home: builder(context));
                 });
@@ -1759,6 +1764,7 @@ class SubmenuButton extends StatefulWidget {
     this.statesController,
     this.leadingIcon,
     this.trailingIcon,
+    this.positioner,
     required this.menuChildren,
     required this.child,
   });
@@ -1825,6 +1831,8 @@ class SubmenuButton extends StatefulWidget {
 
   /// An optional icon to display after the [child].
   final Widget? trailingIcon;
+
+  final WindowPositioner? positioner;
 
   /// The list of widgets that appear in the menu when it is opened.
   ///
@@ -2060,6 +2068,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         onClose: _onClose,
         onOpen: _onOpen,
         style: widget.menuStyle,
+        positioner: widget.positioner,
         builder: (BuildContext context, MenuController controller, Widget? child) {
           // Since we don't want to use the theme style or default style from the
           // TextButton, we merge the styles, merging them in the right order when
