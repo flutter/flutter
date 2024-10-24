@@ -80,6 +80,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   remoteTerminatedHandshakeHandler,
   couldNotOpenCacheDirectoryHandler,
   incompatibleCompileSdk35AndAgpVersionHandler,
+  jlinkErrorWithJava21AndSourceCompatibility,
   incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
 
@@ -634,15 +635,15 @@ final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
   eventLabel: 'could-not-open-cache-directory',
 );
 
-
 String _getAgpLocation(FlutterProject project) {
   return '''
  The version of AGP that your project uses is likely defined in:
 ${project.android.settingsGradleFile.path},
-in the 'plugins' closure.
+in the 'plugins' closure (by the number following "com.android.application").
  Alternatively, if your project was created with an older version of the templates, it is likely
 in the buildscript.dependencies closure of the top-level build.gradle:
-${project.android.hostAppGradleFile.path}.''';
+${project.android.hostAppGradleFile.path},
+as the number following "com.android.tools.build:gradle:".''';
 }
 
 @visibleForTesting
@@ -684,4 +685,29 @@ ${_getAgpLocation(project)}''',
     return GradleBuildStatus.exit;
   },
   eventLabel: 'r8-dexing-bug-in-AGP-7.3'
+);
+
+@visibleForTesting
+final GradleHandledError jlinkErrorWithJava21AndSourceCompatibility = GradleHandledError(
+    test: (String line) => line.contains('> Error while executing process')&& line.contains('jlink'),
+    handler: ({
+      required String line,
+      required FlutterProject project,
+      required bool usesAndroidX,
+    }) async {
+      globals.printBox('''
+${globals.logger.terminal.warningMark} This is likely due to a known bug in Android Gradle Plugin (AGP) versions less than 8.2.1, when
+  1. setting a value for SourceCompatibility and
+  2. using Java 21 or above.
+To fix this error, please upgrade your AGP version to at least 8.2.1.${_getAgpLocation(project)}
+
+For more information, see:
+https://issuetracker.google.com/issues/294137077
+https://github.com/flutter/flutter/issues/156304''',
+        title: _boxTitle,
+      );
+
+      return GradleBuildStatus.exit;
+    },
+    eventLabel: 'java21-and-source-compatibility'
 );

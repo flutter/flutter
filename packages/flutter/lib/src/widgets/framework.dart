@@ -187,17 +187,10 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// The current state is null if (1) there is no widget in the tree that
   /// matches this global key, (2) that widget is not a [StatefulWidget], or the
   /// associated [State] object is not a subtype of `T`.
-  T? get currentState {
-    final Element? element = _currentElement;
-    if (element is StatefulElement) {
-      final StatefulElement statefulElement = element;
-      final State state = statefulElement.state;
-      if (state is T) {
-        return state;
-      }
-    }
-    return null;
-  }
+  T? get currentState => switch (_currentElement) {
+    StatefulElement(:final T state) => state,
+    _ => null,
+  };
 }
 
 /// A global key with a debugging label.
@@ -5386,13 +5379,18 @@ class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
   final bool stateful;
 
   @override
-  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    final Map<String, Object?> json = super.toJsonMap(delegate);
+  Map<String, Object?> toJsonMap(
+    DiagnosticsSerializationDelegate delegate, {
+    bool fullDetails = true,
+  }) {
+    final Map<String, Object?> json = super.toJsonMap(delegate, fullDetails: fullDetails,);
     final Element element = value as Element;
     if (!element.debugIsDefunct) {
       json['widgetRuntimeType'] = element.widget.runtimeType.toString();
     }
-    json['stateful'] = stateful;
+    if (fullDetails) {
+      json['stateful'] = stateful;
+    }
     return json;
   }
 }

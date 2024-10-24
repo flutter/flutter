@@ -579,7 +579,7 @@ class RenderStack extends RenderBox
   Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     bool hasNonPositionedChildren = false;
     if (childCount == 0) {
-      return (constraints.biggest.isFinite) ? constraints.biggest : constraints.smallest;
+      return constraints.biggest.isFinite ? constraints.biggest : constraints.smallest;
     }
 
     double width = constraints.minWidth;

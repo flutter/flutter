@@ -4234,7 +4234,7 @@ void main() {
           );
 
           // 12 is the left padding.
-          // TODO(bleroux): consider changing this padding because from M3 soec this should be 16.
+          // TODO(bleroux): consider changing this padding because from M3 spec this should be 16.
           expect(getLabelRect(tester).left, 12.0);
           // TODO(bleroux): consider changing the input text position because, based on M3 spec,
           // the expected horizontal position is 52 (12 padding, 24 icon, 16 gap between icon and input).
@@ -4504,6 +4504,120 @@ void main() {
       final Finder hintTextFinder = find.text(hintText);
       final Text hintTextWidget = tester.widget(hintTextFinder);
       expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
+    });
+
+    testWidgets('Widget height collapses from hint height when maintainHintHeight is false', (WidgetTester tester) async {
+      final String hintText = 'hint' * 20;
+      final InputDecoration decoration = InputDecoration(
+        hintText: hintText,
+        hintMaxLines: 3,
+        maintainHintHeight: false,
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+        ),
+      );
+      expect(tester.getSize(find.byType(InputDecorator)).height, 48.0);
+    });
+
+    testWidgets('Widget height stays at hint height by default', (WidgetTester tester) async {
+      final String hintText = 'hint' * 20;
+      final InputDecoration decoration = InputDecoration(
+        hintMaxLines: 3,
+        hintText: hintText,
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+        ),
+      );
+      final double hintHeight = tester.getSize(find.text(hintText)).height;
+      final double inputHeight = tester.getSize(find.byType(InputDecorator)).height;
+      expect(inputHeight, hintHeight + 16.0);
+    });
+
+    testWidgets('hintFadeDuration applies to hint fade-in when maintainHintHeight is false', (WidgetTester tester) async {
+      const InputDecoration decoration = InputDecoration(
+        hintText: hintText,
+        hintMaxLines: 3,
+        hintFadeDuration: Duration(milliseconds: 120),
+        maintainHintHeight: false,
+      );
+
+      // Build once with empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+        ),
+      );
+
+      // Hint is not exist.
+      expect(find.text(hintText), findsNothing);
+
+      // Rebuild with empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: decoration,
+        ),
+      );
+
+      // The hint's opacity animates from 0.0 to 1.0.
+      // The animation's default duration is 20ms.
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getHintOpacity(tester);
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getHintOpacity(tester);
+      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 20));
+      final double hintOpacity120ms = getHintOpacity(tester);
+      expect(hintOpacity120ms, 1.0);
+    });
+
+    testWidgets('hintFadeDuration applies to hint fade-out when maintainHintHeight is false', (WidgetTester tester) async {
+      const InputDecoration decoration = InputDecoration(
+        hintText: hintText,
+        hintMaxLines: 3,
+        hintFadeDuration: Duration(milliseconds: 120),
+        maintainHintHeight: false,
+      );
+
+      // Build once with empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: decoration,
+        ),
+      );
+
+      // Hint is visible (opacity 1.0).
+      expect(getHintOpacity(tester), 1.0);
+
+      // Rebuild with non-empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+        ),
+      );
+
+      // The hint's opacity animates from 1.0 to 0.0.
+      // The animation's default duration is 20ms.
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getHintOpacity(tester);
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getHintOpacity(tester);
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 20));
+      final double hintOpacity120ms = getHintOpacity(tester);
+      expect(hintOpacity120ms, 0);
+      await tester.pump(const Duration(milliseconds: 1));
+      // The hintText replaced with SizeBox.
+      expect(find.text(hintText), findsNothing);
     });
   });
 
@@ -7073,6 +7187,57 @@ void main() {
     expect(decoration.border, isA<MaterialStateOutlineInputBorder>());
     expect(decoration.alignLabelWithHint, false);
     expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
+  });
+
+  testWidgets('InputDecoration with WidgetStateInputBorder', (WidgetTester tester) async {
+    const WidgetStateInputBorder outlineInputBorder = WidgetStateInputBorder.fromMap(
+      <WidgetStatesConstraint, InputBorder>{
+        WidgetState.focused: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue, width: 4.0),
+        ),
+        WidgetState.hovered: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.cyan, width: 8.0),
+        ),
+        WidgetState.any: OutlineInputBorder(),
+      },
+    );
+
+    RenderObject getBorder() {
+      return tester.renderObject(
+        find.descendant(
+          of: find.byType(TextField),
+          matching: find.byType(CustomPaint),
+        ),
+      );
+    }
+
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            focusNode: focusNode,
+            decoration: const InputDecoration(
+              border: outlineInputBorder,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(getBorder(), paints..rrect(strokeWidth: 1.0));
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(getBorder(), paints..rrect(color: Colors.blue, strokeWidth: 4.0));
+
+    focusNode.unfocus();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(TextField)));
+    await tester.pumpAndSettle();
+    expect(getBorder(), paints..rrect(color: Colors.cyan, strokeWidth: 8.0));
+
+    focusNode.dispose();
   });
 
   testWidgets('InputDecorator constrained to 0x0', (WidgetTester tester) async {
