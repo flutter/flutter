@@ -3489,4 +3489,68 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     // Scrolling is now possible, so there are scrollbar (thumb and track) gesture recognizers.
     expect(getScrollbarGestureDetector().gestures.length, greaterThan(1));
   });
+
+  testWidgets('Drag horizontal and vertical scrollbars', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/87697
+    final ScrollController verticalScrollController = ScrollController();
+    addTearDown(verticalScrollController.dispose);
+    final ScrollController horizontalScrollController = ScrollController();
+    addTearDown(horizontalScrollController.dispose);
+
+    final GlobalKey key1 = GlobalKey();
+    Widget buildFrame() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            thumbVisibility: true,
+            controller: verticalScrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              controller: horizontalScrollController,
+              key: key1,
+              notificationPredicate: (ScrollNotification notification) => notification.depth == 1,
+              child: SingleChildScrollView(
+                controller: verticalScrollController,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller: horizontalScrollController,
+                  child: const SizedBox(
+                    width: 1000.0,
+                    height: 1000.0,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+
+    expect(verticalScrollController.offset, 0.0);
+    expect(horizontalScrollController.offset, 0.0);
+
+    const double scrollAmount = 10.0;
+
+    final TestGesture verticalScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await verticalScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await verticalScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    final TestGesture horizontalScrollbarGesture = await tester.startGesture(const Offset(45.0, 597.0));
+    await tester.pumpAndSettle();
+    await horizontalScrollbarGesture.moveBy(const Offset(scrollAmount, 0.0));
+    await tester.pumpAndSettle();
+    await horizontalScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    expect(verticalScrollController.offset, greaterThan(0.0));
+    expect(horizontalScrollController.offset, greaterThan(0.0));
+  });
 }

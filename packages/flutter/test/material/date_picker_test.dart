@@ -603,7 +603,7 @@ void main() {
       expect(defaultDialogMaterial.elevation, datePickerDefaultDialogTheme.elevation);
 
       // Test that it honors ThemeData.dialogTheme settings
-      const DialogTheme customDialogTheme = DialogTheme(
+      const DialogThemeData customDialogTheme = DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(40.0)),
         ),

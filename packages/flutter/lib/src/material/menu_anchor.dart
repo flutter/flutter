@@ -403,7 +403,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
-    Widget child = OverlayPortal(
+    Widget child = OverlayPortal.targetsRootOverlay(
       controller: _overlayController,
       overlayChildBuilder: (BuildContext context) {
         return _Submenu(
@@ -432,11 +432,22 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
-    return _MenuAnchorScope(
-      anchorKey: _anchorKey,
-      anchor: this,
-      isOpen: _isOpen,
-      child: child,
+    // This `Shortcuts` is needed so that shortcuts work when the focus is on
+    // MenuAnchor (specifically, the root menu, since submenus have their own
+    // `Shortcuts`).
+    return
+    Shortcuts(
+      shortcuts: _kMenuTraversalShortcuts,
+      // Ignore semantics here and since the same information is typically
+      // also provided by the children.
+      includeSemantics: false,
+      child:
+      _MenuAnchorScope(
+        anchorKey: _anchorKey,
+        anchor: this,
+        isOpen: _isOpen,
+        child: child,
+      ),
     );
   }
 
@@ -639,8 +650,7 @@ class MenuController {
 
   /// Whether or not the associated menu is currently open.
   bool get isOpen {
-    assert(_anchor != null);
-    return _anchor!._isOpen;
+    return _anchor?._isOpen ?? false;
   }
 
   /// Close the menu that this menu controller is associated with.
@@ -653,8 +663,7 @@ class MenuController {
   /// scrolled by an ancestor, or the view changes size, then any open menu will
   /// automatically close.
   void close() {
-    assert(_anchor != null);
-    _anchor!._close();
+    _anchor?._close();
   }
 
   /// Opens the menu that this menu controller is associated with.
