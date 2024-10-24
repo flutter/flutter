@@ -127,31 +127,41 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
   pipelines_[descriptor] = pipeline_future;
   auto weak_this = weak_from_this();
 
-  auto completion_handler =
-      ^(id<MTLRenderPipelineState> _Nullable render_pipeline_state,
-        NSError* _Nullable error) {
-        if (error != nil) {
-          VALIDATION_LOG << "Could not create render pipeline for "
-                         << descriptor.GetLabel() << " :"
-                         << error.localizedDescription.UTF8String;
-          promise->set_value(nullptr);
-          return;
-        }
+  // Extra info for https://github.com/flutter/flutter/issues/148320.
+  std::optional<std::string> thread_name =
+#if FLUTTER_RELEASE
+      std::nullopt;
+#else
+      [NSThread isMainThread] ? "main"
+                              : [[[NSThread currentThread] name] UTF8String];
+#endif
+  auto completion_handler = ^(
+      id<MTLRenderPipelineState> _Nullable render_pipeline_state,
+      NSError* _Nullable error) {
+    if (error != nil) {
+      VALIDATION_LOG << "Could not create render pipeline for "
+                     << descriptor.GetLabel() << " :"
+                     << error.localizedDescription.UTF8String << " (thread: "
+                     << (thread_name.has_value() ? *thread_name : "unknown")
+                     << ")";
+      promise->set_value(nullptr);
+      return;
+    }
 
-        auto strong_this = weak_this.lock();
-        if (!strong_this) {
-          promise->set_value(nullptr);
-          return;
-        }
+    auto strong_this = weak_this.lock();
+    if (!strong_this) {
+      promise->set_value(nullptr);
+      return;
+    }
 
-        auto new_pipeline = std::shared_ptr<PipelineMTL>(new PipelineMTL(
-            weak_this,
-            descriptor,                                        //
-            render_pipeline_state,                             //
-            CreateDepthStencilDescriptor(descriptor, device_)  //
-            ));
-        promise->set_value(new_pipeline);
-      };
+    auto new_pipeline = std::shared_ptr<PipelineMTL>(new PipelineMTL(
+        weak_this,
+        descriptor,                                        //
+        render_pipeline_state,                             //
+        CreateDepthStencilDescriptor(descriptor, device_)  //
+        ));
+    promise->set_value(new_pipeline);
+  };
   GetMTLRenderPipelineDescriptor(
       descriptor, [device = device_, completion_handler](
                       MTLRenderPipelineDescriptor* descriptor) {
