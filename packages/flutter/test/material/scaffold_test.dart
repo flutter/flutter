@@ -3441,8 +3441,10 @@ void main() {
     }
     await tester.pumpWidget(buildFrame());
     expect(tester.getSize(find.byKey(bodyKey)).height, 600);
+
     await tester.pumpWidget(buildFrame(keyboardHeight: 100));
     expect(tester.getSize(find.byKey(bodyKey)).height, 600);
+
     await tester.pumpWidget(buildFrame(keyboardHeight: 200));
     expect(tester.getSize(find.byKey(bodyKey)).height, 400);
   });
