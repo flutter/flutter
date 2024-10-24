@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/navigator/navigator.restorable_push_
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('It pushes and restorable route and pops it', (WidgetTester tester) async {
+  testWidgets('It pushes a restorable route and pops it', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.RestorablePushAndRemoveUntilExampleApp(),
     );
@@ -24,7 +24,7 @@ void main() {
     expect(find.byType(BackButton), findsNothing);
   });
 
-  testWidgets('It pushes and restorable route and restores it', (WidgetTester tester) async {
+  testWidgets('It pushes a restorable route and restores it', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.RestorablePushAndRemoveUntilExampleApp(),
     );
