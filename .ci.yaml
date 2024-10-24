@@ -1387,6 +1387,7 @@ targets:
     runIf:
       - packages/flutter_tools/templates/**
       - .ci.yaml
+      - dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart
 
   - name: Linux android_java17_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
@@ -1406,6 +1407,7 @@ targets:
     runIf:
       - packages/flutter_tools/templates/**
       - .ci.yaml
+      - dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart
 
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
