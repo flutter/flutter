@@ -300,6 +300,17 @@ void main() {
         'darwin-x64',
       );
     });
+
+    testWithoutContext('CachedLocalWebSdkArtifacts wrapping a versioned engine sets usesLocalArtifacts', () {
+      final CachedLocalWebSdkArtifacts webArtifacts = CachedLocalWebSdkArtifacts(
+        parent: artifacts,
+        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
+        fileSystem: fileSystem,
+        platform: platform,
+        operatingSystemUtils: FakeOperatingSystemUtils()
+      );
+      expect(webArtifacts.usesLocalArtifacts, true);
+    });
   });
 
   group('LocalEngineArtifacts', () {
@@ -575,12 +586,6 @@ void main() {
           platform: TargetPlatform.web_javascript),
         throwsToolExit(message: failureMessage),
       );
-      expect(
-        () => artifacts.getArtifactPath(
-          Artifact.dart2jsSnapshot,
-          platform: TargetPlatform.web_javascript),
-        throwsToolExit(message: failureMessage),
-      );
 
       fileSystem
           .directory('flutter')
@@ -611,10 +616,9 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(
-          Artifact.dart2jsSnapshot,
+          Artifact.engineDartAotRuntime,
           platform: TargetPlatform.web_javascript),
-        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk',
-            'bin', 'snapshots', 'dart2js.dart.snapshot'),
+        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk', 'bin', 'dartaotruntime'),
       );
     });
 

@@ -51,7 +51,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8739520057779466577"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8735216702926189361"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -68,7 +68,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "android_virtual_device", "version": "android_34_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8739520057779466577"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8735216702926189361"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -358,11 +358,15 @@ targets:
       tags: >
         ["framework","hostonly","shard","linux"]
 
+  # This is a benchmark that does not require an attached device. However, we
+  # are intentionally running it in the devicelab to ensure that it does not
+  # run on a VM in order to avoid noisy results from the benchmark.
   - name: Linux analyzer_benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
+      os: Linux
+      device_type: "mokey"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
@@ -370,9 +374,8 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
-      cores: "32"
       tags: >
-        ["devicelab", "hostonly", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: analyzer_benchmark
 
   - name: Linux coverage
@@ -1001,7 +1004,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux module_test
+  - name: Linux build_android_host_app_with_module_aar
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -1013,7 +1016,26 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
-      task_name: module_test
+      task_name: build_android_host_app_with_module_aar
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux build_android_host_app_with_module_source
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: build_android_host_app_with_module_source
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1348,7 +1370,6 @@ targets:
 
   - name: Linux android_java11_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -1362,10 +1383,12 @@ targets:
       tags: >
         ["devicelab", "hostonly", "linux"]
       test_timeout_secs: "2700"
+    runIf:
+      - packages/flutter_tools/templates/**
+      - .ci.yaml
 
   - name: Linux android_java17_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -1379,6 +1402,9 @@ targets:
       tags: >
         ["devicelab", "hostonly", "linux"]
       test_timeout_secs: "2700"
+    runIf:
+      - packages/flutter_tools/templates/**
+      - .ci.yaml
 
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
@@ -2383,16 +2409,6 @@ targets:
       tags: >
         ["devicelab","android","linux","mokey"]
       task_name: color_filter_with_unstable_child_perf__e2e_summary
-
-  # linux mokey benchmark
-  - name: Linux_mokey raster_cache_use_memory_perf__e2e_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux","mokey"]
-      task_name: raster_cache_use_memory_perf__e2e_summary
 
   # linux mokey benchmark
   - name: Linux_mokey shader_mask_cache_perf__e2e_summary
@@ -3810,6 +3826,7 @@ targets:
       - .ci.yaml
 
   - name: Mac flavors_test_macos
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/156943
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4077,7 +4094,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac module_test
+  - name: Mac build_android_host_app_with_module_aar
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4088,7 +4105,25 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: module_test
+      task_name: build_android_host_app_with_module_aar
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac build_android_host_app_with_module_source
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: build_android_host_app_with_module_source
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5323,7 +5358,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows build_tests_1_7
+  - name: Windows build_tests_1_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5337,11 +5372,11 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "1_7"
+      subshard: "1_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_2_7
+  - name: Windows build_tests_2_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5355,11 +5390,11 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "2_7"
+      subshard: "2_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_3_7
+  - name: Windows build_tests_3_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5373,11 +5408,11 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "3_7"
+      subshard: "3_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_4_7
+  - name: Windows build_tests_4_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5391,11 +5426,11 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "4_7"
+      subshard: "4_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_5_7
+  - name: Windows build_tests_5_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5409,11 +5444,11 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "5_7"
+      subshard: "5_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_6_7
+  - name: Windows build_tests_6_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5427,11 +5462,11 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "6_7"
+      subshard: "6_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_7_7
+  - name: Windows build_tests_7_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5445,7 +5480,25 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "7_7"
+      subshard: "7_8"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+
+  - name: Windows build_tests_8_8
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: build_tests
+      subshard: "8_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
@@ -5687,7 +5740,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows module_test
+  - name: Windows build_android_host_app_with_module_aar
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -5699,7 +5752,26 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
-      task_name: module_test
+      task_name: build_android_host_app_with_module_aar
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows build_android_host_app_with_module_source
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: build_android_host_app_with_module_source
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5882,7 +5954,6 @@ targets:
   - name: Windows tool_integration_tests_1_9
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5907,7 +5978,6 @@ targets:
   - name: Windows tool_integration_tests_2_9
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5932,7 +6002,6 @@ targets:
   - name: Windows tool_integration_tests_3_9
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5957,7 +6026,6 @@ targets:
   - name: Windows tool_integration_tests_4_9
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5982,7 +6050,6 @@ targets:
   - name: Windows tool_integration_tests_5_9
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6007,7 +6074,6 @@ targets:
   - name: Windows tool_integration_tests_6_9
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6032,7 +6098,6 @@ targets:
   - name: Windows tool_integration_tests_7_9
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6057,7 +6122,6 @@ targets:
   - name: Windows tool_integration_tests_8_9
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6082,7 +6146,6 @@ targets:
   - name: Windows tool_integration_tests_9_9
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-

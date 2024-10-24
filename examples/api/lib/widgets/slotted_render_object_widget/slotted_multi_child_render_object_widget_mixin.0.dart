@@ -97,12 +97,10 @@ class RenderDiagonal extends RenderBox
 
   // Returns children in hit test order.
   @override
-  Iterable<RenderBox> get children {
-    return <RenderBox>[
-      if (_topLeft != null) _topLeft!,
-      if (_bottomRight != null) _bottomRight!,
-    ];
-  }
+  Iterable<RenderBox> get children => <RenderBox>[
+    if (_topLeft != null) _topLeft!,
+    if (_bottomRight != null) _bottomRight!,
+  ];
 
   // LAYOUT
 

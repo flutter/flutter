@@ -638,19 +638,15 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     );
   }
 
-  AlignmentDirectional get _drawerOuterAlignment {
-    return switch (widget.alignment) {
-      DrawerAlignment.start => AlignmentDirectional.centerStart,
-      DrawerAlignment.end   => AlignmentDirectional.centerEnd,
-    };
-  }
+  AlignmentDirectional get _drawerOuterAlignment => switch (widget.alignment) {
+    DrawerAlignment.start => AlignmentDirectional.centerStart,
+    DrawerAlignment.end   => AlignmentDirectional.centerEnd,
+  };
 
-  AlignmentDirectional get _drawerInnerAlignment {
-    return switch (widget.alignment) {
-      DrawerAlignment.start => AlignmentDirectional.centerEnd,
-      DrawerAlignment.end => AlignmentDirectional.centerStart,
-    };
-  }
+  AlignmentDirectional get _drawerInnerAlignment => switch (widget.alignment) {
+    DrawerAlignment.start => AlignmentDirectional.centerEnd,
+    DrawerAlignment.end => AlignmentDirectional.centerStart,
+  };
 
   Widget _buildDrawer(BuildContext context) {
     final bool isDesktop = switch (Theme.of(context).platform) {
