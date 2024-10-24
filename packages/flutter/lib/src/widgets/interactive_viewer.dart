@@ -90,7 +90,7 @@ class InteractiveViewer extends StatefulWidget {
        assert(maxScale > 0),
        assert(!maxScale.isNaN),
        assert(maxScale >= minScale),
-       // boundaryMargin must be either fully infinite or fully finite, but not
+       // The boundaryMargin must be either fully infinite or fully finite, but not
        // a mix of both.
        assert(
          (boundaryMargin.horizontal.isInfinite
@@ -134,7 +134,7 @@ class InteractiveViewer extends StatefulWidget {
        assert(maxScale > 0),
        assert(!maxScale.isNaN),
        assert(maxScale >= minScale),
-       // boundaryMargin must be either fully infinite or fully finite, but not
+       // The boundaryMargin must be either fully infinite or fully finite, but not
        // a mix of both.
        assert(
          (boundaryMargin.horizontal.isInfinite && boundaryMargin.vertical.isInfinite) ||
@@ -266,7 +266,7 @@ class InteractiveViewer extends StatefulWidget {
        assert(maxScale > 0),
        assert(!maxScale.isNaN),
        assert(maxScale >= minScale),
-       // boundaryMargin must be either fully infinite or fully finite, but not
+       // The boundaryMargin must be either fully infinite or fully finite, but not
        // a mix of both.
        assert(
          (boundaryMargin.horizontal.isInfinite && boundaryMargin.vertical.isInfinite) ||
