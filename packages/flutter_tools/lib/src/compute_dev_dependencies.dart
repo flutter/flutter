@@ -40,6 +40,7 @@ Future<Set<String>> computeDevDependencies(
     jsonResult = json.decode(stdout) as Map<String, Object?>;
   } on FormatException catch (e) {
     logger.printError('dart pub deps --json had invalid output: $e');
+    logger.printTrace(processResult.stdout.toString());
     throwToolExit(null);
   }
 
