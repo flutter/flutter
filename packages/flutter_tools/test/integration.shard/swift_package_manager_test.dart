@@ -476,6 +476,102 @@ void main() {
     }
   }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
 
+  test('Build ios-framework with non module app uses CocoaPods', () async {
+    final Directory workingDirectory = fileSystem.systemTempDirectory
+        .createTempSync('swift_package_manager_build_framework_non_module.');
+    final String workingDirectoryPath = workingDirectory.path;
+    try {
+      // Create and build a regular app and framework using the CocoaPods version of
+      // integration_test even though Swift Package Manager is enabled.
+      await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+
+      final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+        flutterBin,
+        workingDirectoryPath,
+        iosLanguage: 'swift',
+        platform: 'ios',
+        usesSwiftPackageManager: true,
+        options: <String>[],
+      );
+      final SwiftPackageManagerPlugin integrationTestPlugin = SwiftPackageManagerUtils.integrationTestPlugin('ios');
+      SwiftPackageManagerUtils.addDependency(appDirectoryPath: appDirectoryPath, plugin: integrationTestPlugin);
+
+      await SwiftPackageManagerUtils.cleanApp(flutterBin, appDirectoryPath);
+
+      await SwiftPackageManagerUtils.buildApp(
+        flutterBin,
+        appDirectoryPath,
+        options: <String>[
+          'ios-framework',
+          '--xcframework',
+          '--no-debug',
+          '--no-profile',
+          '-v',
+        ],
+        expectedLines: <String>[
+          'Swift Package Manager does not yet support this command. CocoaPods will be used instead.',
+        ],
+        unexpectedLines: <String>[
+          'Adding Swift Package Manager integration...',
+        ]
+      );
+
+      expect(
+        fileSystem
+          .directory(appDirectoryPath)
+          .childDirectory('.ios')
+          .existsSync(),
+        isFalse,
+      );
+
+      // TODO(loic-sharma): A Swift package manifest should not be generated.
+      // https://github.com/flutter/flutter/issues/146957
+      // expect(
+      //   fileSystem
+      //     .directory(appDirectoryPath)
+      //     .childDirectory('ios')
+      //     .childDirectory('Flutter')
+      //     .childDirectory('ephemeral')
+      //     .childDirectory('Packages')
+      //     .childDirectory('FlutterGeneratedPluginSwiftPackage')
+      //     .childFile('Package.swift'),
+      //   isFalse,
+      // );
+
+      expect(
+        fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('build')
+            .childDirectory('ios')
+            .childDirectory('framework')
+            .childDirectory('Release')
+            .childDirectory('${integrationTestPlugin.pluginName}.xcframework')
+            .existsSync(),
+        isTrue,
+      );
+
+      final File flutterPluginsDependenciesFile = fileSystem
+        .directory(appDirectoryPath)
+        .childFile('.flutter-plugins-dependencies');
+
+      expect(flutterPluginsDependenciesFile.existsSync(), isTrue);
+      expect(
+        flutterPluginsDependenciesFile.readAsStringSync(),
+        isNot(contains('"swift_package_manager_enabled":true')),
+      );
+      expect(
+        flutterPluginsDependenciesFile.readAsStringSync(),
+        contains('"swift_package_manager_enabled":false'),
+      );
+    } finally {
+      await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+      ErrorHandlingFileSystem.deleteIfExists(
+        workingDirectory,
+        recursive: true,
+      );
+    }
+  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+
   test("Generated Swift package uses iOS's project minimum deployment", () async {
     final Directory workingDirectory = fileSystem.systemTempDirectory
       .createTempSync('swift_package_manager_minimum_deployment_ios.');
