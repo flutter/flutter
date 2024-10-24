@@ -147,12 +147,11 @@ class InteractiveViewer extends StatefulWidget {
        _transformChild = true,
        child = null;
 
-  /// Using `InteractiveViewer.raw` will prevent InteractiveViewer from transforming the
-  /// child based on the [Matrix4] in the [TransformationController]. This is done to always
-  /// keep the child static and allow for custom dynamic layout widgets like
-  /// [Stack] and [CustomMultiChildLayout].
+  /// Using [InteractiveViewer.raw] will not transform the child based on the [Matrix4]
+  /// in the [TransformationController] enabling the direct child to stay static while
+  /// delegating layout to widgets like [Stack] and [CustomMultiChildLayout].
   ///
-  /// Due to the way gestures work in Flutter the parts of a child that are outside of the parent
+  /// Due to the way gestures work in Flutter, the parts of a child that are outside of the parent
   /// [RenderBox] will not receive hit tests. For example you could have a [Stack] with [Clip.none]
   /// and a negative offset for the [Positioned] widget which will not handle gestures.
   ///
@@ -193,13 +192,15 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// In the above example 'B' can receive hit tests, but 'A' will not register any interactions. This happens
   /// for [Stack], [CustomMultiChildLayout], or any widget that can position children irregardless
-  /// if the parent is InteractiveViewer.
+  /// if the parent is an InteractiveViewer.
   ///
-  /// This is fine for non interactive elements and in most cases having transformChild set to true will be
+  /// This is fine for non-interactive elements and in most cases using [InteractiveViewer] or [InteractiveViewer.builder] will be
   /// the desired behavior.
   ///
-  /// However if you need hit tests for all children you can set transformChild to false and
+  /// However if you need hit tests for all transformed children you can use [InteractiveViewer.raw] and
   /// handle child transforms manually.
+  ///
+  /// With the following example the child will never exceed the bounds of the parent and always stay static, preserving hit tests.
   ///
   /// ```dart
   /// import 'package:flutter/widgets.dart';
@@ -241,8 +242,6 @@ class InteractiveViewer extends StatefulWidget {
   ///   }
   /// }
   /// ```
-  ///
-  /// Now the child will never exceed the bounds of the parent and always stay static, preserving hit tests.
   InteractiveViewer.raw({
     super.key,
     this.clipBehavior = Clip.hardEdge,

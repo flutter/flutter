@@ -1436,7 +1436,7 @@ void main() {
       );
     });
 
-    testWidgets('InteractiveViewer.raw set does not translate child', (WidgetTester tester) async {
+    testWidgets('InteractiveViewer.raw constructor does not translate child', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
