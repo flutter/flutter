@@ -83,25 +83,6 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('Refuses to build a debug build for web', () async {
-    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
-      artifacts: artifacts,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: fileSystem,
-      logger: logger,
-      processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
-    ));
-
-    expect(() => runner.run(<String>['build', 'web', '--debug', '--no-pub']),
-      throwsA(isA<UsageException>()));
-  }, overrides: <Type, Generator>{
-    Platform: () => fakePlatform,
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => processManager,
-  });
-
   testUsingContext('Refuses to build for web when feature is disabled', () async {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
       artifacts: artifacts,
@@ -179,7 +160,7 @@ void main() {
         'build',
         'web',
         '--no-pub', '--no-web-resources-cdn', '--dart-define=foo=a', '--dart2js-optimization=O0']),
-      throwsUsageException(message: '"O0" is not an allowed value for option "dart2js-optimization"'),
+      throwsUsageException(message: '"O0" is not an allowed value for option "--dart2js-optimization"'),
     );
 
     final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
@@ -453,8 +434,8 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
   final List<String> dependencies = <String>[
     fileSystem.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),
     fileSystem.path.join('bin', 'cache', 'flutter_web_sdk'),
-    fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
     fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+    fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dartaotruntime'),
     fileSystem.path.join('bin', 'cache', 'dart-sdk '),
   ];
   for (final String dependency in dependencies) {

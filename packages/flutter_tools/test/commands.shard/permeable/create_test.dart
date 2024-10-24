@@ -3126,9 +3126,9 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    expect(globals.fs.isFileSync('${projectDir.path}/android/app/build.gradle'), true);
+    expect(globals.fs.isFileSync('${projectDir.path}/android/app/build.gradle.kts'), true);
 
-    final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle').readAsString();
+    final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle.kts').readAsString();
 
     expect(buildContent.contains('compileSdk = flutter.compileSdkVersion'), true);
     expect(buildContent.contains('ndkVersion = flutter.ndkVersion'), true);

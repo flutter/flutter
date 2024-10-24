@@ -278,20 +278,20 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     if (tooltipAndLabel.isEmpty) {
       message = annotations.join('; ');
     } else {
-      final String effectivelabel;
+      final String effectiveLabel;
       if (data.textDirection == null) {
-        effectivelabel = '${Unicode.FSI}$tooltipAndLabel${Unicode.PDI}';
+        effectiveLabel = '${Unicode.FSI}$tooltipAndLabel${Unicode.PDI}';
         annotations.insert(0, 'MISSING TEXT DIRECTION');
       } else {
-        effectivelabel = switch (data.textDirection!) {
+        effectiveLabel = switch (data.textDirection!) {
           TextDirection.rtl => '${Unicode.RLI}$tooltipAndLabel${Unicode.PDI}',
           TextDirection.ltr => tooltipAndLabel,
         };
       }
       if (annotations.isEmpty) {
-        message = effectivelabel;
+        message = effectiveLabel;
       } else {
-        message = '$effectivelabel (${annotations.join('; ')})';
+        message = '$effectiveLabel (${annotations.join('; ')})';
       }
     }
 
