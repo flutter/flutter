@@ -678,7 +678,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       : widget.border;
     final Border? effectiveBorder = widget.border == null
       ? null
-      : Border.lerp(initialBorder, widget.border, _scrollAnimationValue,);
+      : Border.lerp(initialBorder, widget.border, _scrollAnimationValue);
 
     final Color effectiveBackgroundColor = widget.automaticBackgroundVisibility && parentPageScaffoldBackgroundColor != null
       ? Color.lerp(parentPageScaffoldBackgroundColor, backgroundColor, _scrollAnimationValue) ?? backgroundColor
