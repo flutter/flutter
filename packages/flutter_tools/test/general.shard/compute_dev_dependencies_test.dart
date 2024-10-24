@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/compute_dev_dependencies.dart';
 
 import '../src/common.dart';
@@ -19,6 +20,12 @@ import '../src/fake_process_manager.dart';
 //   /package_c
 //     pubspec.yaml
 void main() {
+  late BufferLogger logger;
+
+  setUp(() {
+    logger = BufferLogger.test();
+  });
+
   test('no dev dependencies at all', () async {
     // Simulates the following:
     //
@@ -66,9 +73,10 @@ void main() {
       ]
     }''');
 
-    final Set<String> dependencies = await computeDevDependencies(
+    final Set<String> dependencies = await computeExclusiveDevDependencies(
       processes,
       projectPath: _fakeProjectPath,
+      logger: logger,
     );
 
     expect(
@@ -112,7 +120,7 @@ void main() {
         {
           "name": "package_a",
           "kind": "direct",
-          "dependencies": []
+          "dependencies": [],
           "directDependencies": []
         },
         {
@@ -124,9 +132,10 @@ void main() {
       ]
     }''');
 
-    final Set<String> dependencies = await computeDevDependencies(
+    final Set<String> dependencies = await computeExclusiveDevDependencies(
       processes,
       projectPath: _fakeProjectPath,
+      logger: logger,
     );
 
     expect(
@@ -174,7 +183,7 @@ void main() {
           "kind": "direct",
           "dependencies": [
             "package_b"
-          ]
+          ],
           "directDependencies": [
             "package_b"
           ]
@@ -188,9 +197,10 @@ void main() {
       ]
     }''');
 
-    final Set<String> dependencies = await computeDevDependencies(
+    final Set<String> dependencies = await computeExclusiveDevDependencies(
       processes,
       projectPath: _fakeProjectPath,
+      logger: logger,
     );
 
     expect(
@@ -246,7 +256,7 @@ void main() {
           "kind": "direct",
           "dependencies": [
             "package_b"
-          ]
+          ],
           "directDependencies": [
             "package_b"
           ]
@@ -261,18 +271,19 @@ void main() {
             "package_c"
           ]
         },
-                {
-          "name": "package_b",
+        {
+          "name": "package_c",
           "kind": "dev",
           "dependencies": [],
           "directDependencies": []
-        },
+        }
       ]
     }''');
 
-    final Set<String> dependencies = await computeDevDependencies(
+    final Set<String> dependencies = await computeExclusiveDevDependencies(
       processes,
       projectPath: _fakeProjectPath,
+      logger: logger,
     );
 
     expect(
@@ -282,11 +293,110 @@ void main() {
     );
   });
 
-  test('throws on non-zero exit code', () async {});
+  test('throws and logs on non-zero exit code', () async {
+    final ProcessManager processes = _dartPubDepsFails(
+      'Bad thing',
+      exitCode: 1,
+    );
 
-  test('throws on unexpected output type', () async {});
+    await expectLater(
+      computeExclusiveDevDependencies(
+        processes,
+        projectPath: _fakeProjectPath,
+        logger: logger,
+      ),
+      throwsA(
+        isA<StateError>().having(
+          (StateError e) => e.message,
+          'message',
+          contains('dart pub deps --json failed'),
+        ),
+      ),
+    );
 
-  test('throws on invalid JSON', () async {});
+    expect(logger.traceText, isEmpty);
+  });
+
+  test('throws and logs on unexpected output type', () async {
+    final ProcessManager processes = _dartPubDepsReturns(
+      'Not JSON haha!',
+    );
+
+    await expectLater(
+      computeExclusiveDevDependencies(
+        processes,
+        projectPath: _fakeProjectPath,
+        logger: logger,
+      ),
+      throwsA(
+        isA<StateError>().having(
+          (StateError e) => e.message,
+          'message',
+          contains('dart pub deps --json had unexpected output'),
+        ),
+      ),
+    );
+
+    expect(logger.traceText, contains('Not JSON haha'));
+  });
+
+  test('throws and logs on invalid JSON', () async {
+    final ProcessManager processes = _dartPubDepsReturns('''
+    {
+      "root": "my_app",
+      "packages": [
+        {
+          "name": "my_app",
+          "kind": "root",
+          "dependencies": [
+            "package_a",
+            "package_b"
+          ],
+          "directDependencies": [
+            1
+          ],
+          "devDependencies": []
+        },
+        {
+          "name": "package_a",
+          "kind": "direct",
+          "dependencies": [
+            "package_b"
+          ],
+          "directDependencies": [
+            "package_b"
+          ]
+        },
+        {
+          "name": "package_b",
+          "kind": "transitive",
+          "dependencies": [],
+          "directDependencies": []
+        }
+      ]
+    }''');
+
+    await expectLater(
+      computeExclusiveDevDependencies(
+        processes,
+        projectPath: _fakeProjectPath,
+        logger: logger,
+      ),
+      throwsA(
+        isA<StateError>().having(
+          (StateError e) => e.message,
+          'message',
+          contains('dart pub deps --json had unexpected output'),
+        ),
+      ),
+    );
+
+    expect(
+      logger.traceText,
+      contains('"root": "my_app"'),
+      reason: 'Stdout should include the JSON blob',
+    );
+  });
 }
 
 const String _fakeProjectPath = '/path/to/project';

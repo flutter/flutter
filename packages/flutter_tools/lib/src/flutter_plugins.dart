@@ -17,6 +17,7 @@ import 'base/platform.dart';
 import 'base/template.dart';
 import 'base/version.dart';
 import 'cache.dart';
+import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
@@ -40,8 +41,13 @@ Future<void> _renderTemplateToFile(
   await file.writeAsString(renderedTemplate);
 }
 
-Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies,
-    {FileSystem? fileSystem}) async {
+Future<Plugin?> _pluginFromPackage(
+  String name,
+  Uri packageRoot,
+  Set<String> appDependencies, {
+  required Set<String> devDependencies,
+  FileSystem? fileSystem,
+}) async {
   final FileSystem fs = fileSystem ?? globals.fs;
   final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
   if (!pubspecFile.existsSync()) {
@@ -76,10 +82,14 @@ Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> app
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
     fileSystem: fs,
     appDependencies: appDependencies,
+    isDevDependency: devDependencies.contains(name),
   );
 }
 
-Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = true}) async {
+Future<List<Plugin>> findPlugins(
+  FlutterProject project, {
+  bool throwOnError = true,
+}) async {
   final List<Plugin> plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
   final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
@@ -88,12 +98,18 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     logger: globals.logger,
     throwOnError: throwOnError,
   );
+  final Set<String> devDependencies = await computeExclusiveDevDependencies(
+    globals.processManager,
+    logger: globals.logger,
+    projectPath: project.directory.path,
+  );
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');
     final Plugin? plugin = await _pluginFromPackage(
       package.name,
       packageRoot,
       project.manifest.dependencies,
+      devDependencies: devDependencies,
       fileSystem: fs,
     );
     if (plugin != null) {

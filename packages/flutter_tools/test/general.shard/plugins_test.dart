@@ -1705,6 +1705,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           },
           dependencies: <String>[],
           isDirectDependency: true,
+          isDevDependency: false,
         );
 
         expect(
@@ -1730,6 +1731,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           },
           dependencies: <String>[],
           isDirectDependency: true,
+          isDevDependency: false,
         );
 
         expect(
@@ -1754,6 +1756,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           },
           dependencies: <String>[],
           isDirectDependency: true,
+          isDevDependency: false,
         );
 
         expect(
@@ -1783,6 +1786,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           },
           dependencies: <String>[],
           isDirectDependency: true,
+          isDevDependency: false,
         );
 
         expect(
@@ -1808,6 +1812,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           },
           dependencies: <String>[],
           isDirectDependency: true,
+          isDevDependency: false,
         );
 
         expect(
@@ -1832,6 +1837,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           },
           dependencies: <String>[],
           isDirectDependency: true,
+          isDevDependency: false,
         );
 
         expect(plugin.pluginPodspecPath(fs, IOSPlugin.kConfigKey), isNull);
