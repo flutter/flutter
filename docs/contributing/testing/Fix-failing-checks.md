@@ -8,15 +8,15 @@
 
 ![Tree is currently broken.](https://github.com/user-attachments/assets/b611d540-c4cb-47dc-a27f-bef8709f24ce)
 
-A **tree-status** failure indicates that the main branch has problems
-that should be addressed before anything else is merged in.
-The result of this check usually goes back and forth a few times each day,
-for a variety of reasons.
+Unlike other checks, **tree-status** isn't tied to the pull request:
+instead, it shows whether checks are passing in the main branch.\
+Failures can happen for a variety of reasons and should be addressed
+before anything else is merged in.
 
 **What to do:** Once [review requirements](../Tree-hygiene.md#getting-a-code-review)
-are met and all other checks are passing, adding the
-[**`autosubmit`**](../../infra/Landing-Changes-With-Autosubmit.md) label
-signals a bot to merge the PR once the tree-status check succeeds.
+are met and all other checks are passing, a reviewer will add the
+[**`autosubmit`**](../../infra/Landing-Changes-With-Autosubmit.md) label,
+and then a bot will merge the PR once **tree-status** succeeds.
 
 <br>
 
