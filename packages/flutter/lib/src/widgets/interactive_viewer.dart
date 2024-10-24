@@ -244,7 +244,6 @@ class InteractiveViewer extends StatefulWidget {
   /// ```
   InteractiveViewer.raw({
     super.key,
-    this.clipBehavior = Clip.hardEdge,
     this.panAxis = PanAxis.free,
     this.boundaryMargin = EdgeInsets.zero,
     // These default scale values were eyeballed as reasonable limits for common
@@ -279,6 +278,7 @@ class InteractiveViewer extends StatefulWidget {
        constrained = false,
        alignment = null,
        _transformChild = false,
+       clipBehavior = Clip.hardEdge,
        child = null;
 
   final bool _transformChild;
