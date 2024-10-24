@@ -2200,8 +2200,8 @@ class ShaderMaskLayer extends ContainerLayer {
 /// more efficiently perform the backdrop operations.
 ///
 /// Instead of using a backdrop key directly, consider using a [BackdropGroup]
-/// and the [BackdropFilter.shared] constructor. The framework will
-/// automatically group child backdrop filters that use the `.shared`
+/// and the [BackdropFilter.grouped] constructor. The framework will
+/// automatically group child backdrop filters that use the `.grouped`
 /// constructor when they are placed as children of a [BackdropGroup].
 ///
 /// For more information, see [BackdropFilter].
