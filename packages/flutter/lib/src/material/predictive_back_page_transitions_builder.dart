@@ -39,20 +39,20 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
+      PageRoute<T> route,
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child,
+      ) {
     return _PredictiveBackGestureDetector(
       route: route,
-      builder: (BuildContext context) {
+      builder: (BuildContext context, _, __) {
         // Only do a predictive back transition when the user is performing a
         // pop gesture. Otherwise, for things like button presses or other
         // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
         if (route.popGestureInProgress) {
-          return _PredictiveBackPageTransition(
+          return _PredictiveBackPageFullScreenTransition(
             animation: animation,
             secondaryAnimation: secondaryAnimation,
             getIsCurrent: () => route.isCurrent,
@@ -72,13 +72,61 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
+// TODO(maRci002): add docs
+class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsBuilder {
+  /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
+  /// predictive back transition.
+  const PredictiveBackPageSharedElementTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return _PredictiveBackGestureDetector(
+      route: route,
+      builder: (BuildContext context, PredictiveBackEvent? startBackEvent, PredictiveBackEvent? currentBackEvent) {
+        // Only do a predictive back transition when the user is performing a
+        // pop gesture. Otherwise, for things like button presses or other
+        // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
+        if (route.popGestureInProgress) {
+          return _PredictiveBackPageSharedElementTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            startBackEvent: startBackEvent,
+            currentBackEvent: currentBackEvent,
+            child: child,
+          );
+        }
+
+        return const ZoomPageTransitionsBuilder().buildTransitions(
+          route,
+          context,
+          animation,
+          secondaryAnimation,
+          child,
+        );
+      },
+    );
+  }
+}
+
+typedef _PredictiveBackGestureDetectorWidgetBuilder = Widget Function(
+    BuildContext context,
+    PredictiveBackEvent? startBackEvent,
+    PredictiveBackEvent? currentBackEvent,
+);
+
 class _PredictiveBackGestureDetector extends StatefulWidget {
   const _PredictiveBackGestureDetector({
     required this.route,
     required this.builder,
   });
 
-  final WidgetBuilder builder;
+  final _PredictiveBackGestureDetectorWidgetBuilder builder;
   final PredictiveBackRoute route;
 
   @override
@@ -164,13 +212,14 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context);
+    return widget.builder(context, startBackEvent, currentBackEvent);
   }
 }
 
-/// Android's predictive back page transition.
-class _PredictiveBackPageTransition extends StatelessWidget {
-  const _PredictiveBackPageTransition({
+/// Android's predictive back page transition for full screen surfaces.
+/// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces
+class _PredictiveBackPageFullScreenTransition extends StatelessWidget {
+  const _PredictiveBackPageFullScreenTransition({
     required this.animation,
     required this.secondaryAnimation,
     required this.getIsCurrent,
@@ -322,6 +371,86 @@ class _PredictiveBackPageTransition extends StatelessWidget {
         animation: animation,
         builder: _primaryAnimatedBuilder,
         child: child,
+      ),
+    );
+  }
+}
+
+/// Android's predictive back page shared element transition.
+/// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition
+class _PredictiveBackPageSharedElementTransition extends StatelessWidget {
+  const _PredictiveBackPageSharedElementTransition({
+    required this.animation,
+    required this.secondaryAnimation,
+    required this.startBackEvent,
+    required this.currentBackEvent,
+    required this.child,
+  });
+
+  // Constants as per the motion specs
+  // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
+  static const double scalePercentage = 0.90;
+  static const double divisionFactor = 20.0;
+  static const double margin = 8.0;
+  static const double borderRadius = 32.0;
+
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+  final PredictiveBackEvent? startBackEvent;
+  final PredictiveBackEvent? currentBackEvent;
+  final Widget child;
+
+  double get _startTouchY => startBackEvent?.touchOffset?.dy ?? 0;
+  double get _currentTouchY => currentBackEvent?.touchOffset?.dy ?? 0;
+  SwipeEdge get _currentSwipeEdge => currentBackEvent?.swipeEdge ?? SwipeEdge.left;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: _animatedBuilder,
+      child: child,
+    );
+  }
+
+  Widget _animatedBuilder(BuildContext context, Widget? child) {
+    final Size size = MediaQuery.of(context).size;
+    final double screenWidth = size.width;
+    final double screenHeight = size.height;
+
+    // Constants calculated based on screen size
+    final double xShift = (screenWidth / divisionFactor) - margin;
+    final double yShiftMax = (screenHeight / divisionFactor) - margin;
+
+    final double rawYShift = _currentTouchY - _startTouchY;
+    final double easedYShift = Curves.easeOut
+        .transform((rawYShift.abs() / screenHeight).clamp(0.0, 1.0)) *
+        rawYShift.sign *
+        yShiftMax;
+    final double yShift = easedYShift.clamp(-yShiftMax, yShiftMax);
+
+    final Tween<double> xShiftTween = Tween<double>(
+        begin: _currentSwipeEdge == SwipeEdge.left ? xShift : -xShift,
+        end: 0.0);
+    final Tween<double> scaleTween = Tween<double>(begin: scalePercentage, end: 1.0);
+    final Tween<double> gapTween = Tween<double>(begin: margin, end: 0.0);
+    final Tween<double> borderRadiusTween = Tween<double>(begin: borderRadius, end: 0.0);
+
+    return Transform.translate(
+      offset: Offset(xShiftTween.animate(animation).value, yShift),
+      child: Transform.scale(
+        scale: scaleTween.animate(animation).value,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: gapTween.animate(animation).value,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(
+              borderRadiusTween.animate(animation).value,
+            ),
+            child: child,
+          ),
+        ),
       ),
     );
   }
