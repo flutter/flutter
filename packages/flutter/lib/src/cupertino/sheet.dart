@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// import 'package:flutter/foundation.dart';
-// import 'package:flutter/gestures.dart';
-// import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 
 // Offset from offscreen below to stopping below the top of the screen.
 final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
@@ -14,15 +12,21 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   end: const Offset(0.0, 0.08),
 );
 
-// final Animatable<Offset> _kFullBottomUpTween = Tween<Offset>(
-//   begin: const Offset(0.0, 1.0),
-//   end: Offset.zero,
-// );
+final Animatable<Offset> _kFullBottomUpTween = Tween<Offset>(
+  begin: const Offset(0.0, 1.0),
+  end: const Offset(0.0, -0.1),
+);
 
 // Offset from offscreen below to stopping below the top of the screen.
 final Animatable<Offset> _kMidUpTween = Tween<Offset>(
   begin: Offset.zero,
-  end: const Offset(0.0, -0.05),
+  end: const Offset(0.0, -0.01),
+);
+
+// Offset from top of screen to slightly down when covered by a sheet.
+final Animatable<Offset> _kTopDownTween = Tween<Offset>(
+  begin: Offset.zero,
+  end: const Offset(0.0, 0.07),
 );
 
 // Amount the sheet in the background scales down. Found by measuring the width
@@ -30,46 +34,20 @@ final Animatable<Offset> _kMidUpTween = Tween<Offset>(
 // scale transition will go from a default of 1.0 to 1.0 - _kSheetScaleFactor.
 const double _kSheetScaleFactor = 0.0835;
 
+final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kSheetScaleFactor);
+
 /// Docs placeholder
 class CupertinoSheetTransition extends StatelessWidget {
   /// Docs placeholder
-  CupertinoSheetTransition({
+  const CupertinoSheetTransition({
     super.key,
-    required Animation<double> primaryRouteAnimation,
+    required this.primaryRouteAnimation,
     required this.secondaryRouteAnimation,
     required this.child,
-  }) : _primaryPositionAnimation =
-           CurvedAnimation(
-                 parent: primaryRouteAnimation,
-                 curve: Curves.fastEaseInToSlowEaseOut,
-                 reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
-               ).drive(_kBottomUpTween),
-      _secondaryPositionAnimation =
-           CurvedAnimation(
-                 parent: secondaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-                 reverseCurve: Curves.easeInToLinear,
-               )
-           .drive(_kMidUpTween);
-      // _primaryPositionAnimationCupertinoSheet =
-      //       CurvedAnimation(
-      //            parent: primaryRouteAnimation,
-      //            curve: Curves.linearToEaseOut,
-      //            reverseCurve: Curves.easeInToLinear,
-      //          )
-      //      .drive(_kFullBottomUpTween);
+  });
 
-  // When this page is coming in to cover another page.
-  final Animation<Offset> _primaryPositionAnimation;
-
-  // When this page is coming in to cover another CupertinoSheet. Because it's nested within
-  // a CupertinoSheet, a 0 y offset is not the top of the physical screen, but the top of
-  // the previous CupertinoSheet.
-  // final Animation<Offset> _primaryPositionAnimationCupertinoSheet;
-
-  // When this page is being covered by another CupertinoSheet. It slides up slightly to
-  // look like it's joining the stack of previous routes.
-  final Animation<Offset> _secondaryPositionAnimation;
+  /// Animation
+  final Animation<double> primaryRouteAnimation;
 
   /// Animation
   final Animation<double> secondaryRouteAnimation;
@@ -77,14 +55,15 @@ class CupertinoSheetTransition extends StatelessWidget {
   /// The widget below this widget in the tree.
   final Widget child;
 
-  /// The primary delegated transition. Will slide a non CupertinoSheet page down.
+  /// The primary delegated transition. Will slide a non [CupertinoSheetRoute] page down.
+  ///
+  /// If a [CupertinoSheetController] already exists in the stack, then it will
+  /// slide the previous sheet upwards instead.
   static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {
     if (CupertinoSheetController.maybeOf(context) != null) {
-      return _coverSheetDelegatedTransition(secondaryAnimation, child);
+      return _coverSheetSecondaryTransition(secondaryAnimation, child);
     }
 
-    const Offset begin = Offset.zero;
-    const Offset end = Offset(0.0, 0.025);
     const Curve curve = Curves.linearToEaseOut;
     const Curve reverseCurve = Curves.easeInToLinear;
     final Animation<double> curvedAnimation = CurvedAnimation(
@@ -101,14 +80,12 @@ class CupertinoSheetTransition extends StatelessWidget {
 
     final Animation<BorderRadiusGeometry> radiusAnimation = curvedAnimation.drive(decorationTween);
 
-    final Animatable<Offset> slideTween = Tween<Offset>(begin: begin, end: end);
-    final Animatable<double> scaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kSheetScaleFactor);
-
     return SlideTransition(
-      position: curvedAnimation.drive(slideTween),
+      position: curvedAnimation.drive(_kTopDownTween),
       child: ScaleTransition(
-        scale: curvedAnimation.drive(scaleTween),
+        scale: curvedAnimation.drive(_kScaleTween),
         filterQuality: FilterQuality.medium,
+        alignment: Alignment.topCenter,
         child: AnimatedBuilder(
           animation: radiusAnimation,
           child: child,
@@ -123,10 +100,26 @@ class CupertinoSheetTransition extends StatelessWidget {
     );
   }
 
-  static Widget _coverSheetDelegatedTransition(Animation<double> secondaryAnimation, Widget? child) {
+  static Widget _coverSheetPrimaryTransition(BuildContext context, Animation<double> animation, Widget? child) {
+    final Animatable<Offset> offsetTween =
+      CupertinoSheetController.maybeOf(context) == null ?
+      _kBottomUpTween :
+      _kFullBottomUpTween;
 
-    const Offset begin = Offset.zero;
-    const Offset end = Offset(0.0, -0.05);
+    final Animation<Offset> positionAnimation =
+      CurvedAnimation(
+            parent: animation,
+            curve: Curves.fastEaseInToSlowEaseOut,
+            reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
+          ).drive(offsetTween);
+
+    return SlideTransition(
+      position: positionAnimation,
+      child: child,
+    );
+  }
+
+  static Widget _coverSheetSecondaryTransition(Animation<double> secondaryAnimation, Widget? child) {
     const Curve curve = Curves.linearToEaseOut;
     const Curve reverseCurve = Curves.easeInToLinear;
     final Animation<double> curvedAnimation = CurvedAnimation(
@@ -135,48 +128,34 @@ class CupertinoSheetTransition extends StatelessWidget {
       parent: secondaryAnimation
     );
 
-    final Animatable<Offset> slideTween = Tween<Offset>(begin: begin, end: end);
-    final Animatable<double> scaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kSheetScaleFactor);
-
     return SlideTransition(
-      position: curvedAnimation.drive(slideTween),
+      position: curvedAnimation.drive(_kMidUpTween),
+      transformHitTests: false,
       child: ScaleTransition(
-        scale: curvedAnimation.drive(scaleTween),
+        scale: curvedAnimation.drive(_kScaleTween),
         filterQuality: FilterQuality.medium,
-        child: child,
+        alignment: Alignment.topCenter,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          child: child,
+        ),
       ),
     );
   }
 
-  /// The secondary delegated transition. Will slide a CupertinoSheet page up.
-  // static Widget secondaryDelegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
-  //   const Offset begin = Offset.zero;
-  //   const Offset end = Offset(0.0, -0.05);
-  //   const Curve curve = Curves.ease;
-
-  //   final Animatable<Offset> tween = Tween<Offset>(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-  //   return SlideTransition(
-  //     position: secondaryAnimation.drive(tween),
-  //     child: child,
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasDirectionality(context));
-    final TextDirection textDirection = Directionality.of(context);
-    // const bool topLevelCupertinoSheet = true;
-    return SlideTransition(
-      position: _secondaryPositionAnimation,
-      textDirection: textDirection,
-      transformHitTests: false,
-      child: SlideTransition(
-        position: _primaryPositionAnimation,
-        textDirection: textDirection,
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-          child: child,
+    return ColoredBox(
+      color: CupertinoColors.transparent,
+      child: _coverSheetSecondaryTransition(
+        secondaryRouteAnimation,
+        _coverSheetPrimaryTransition(
+          context,
+          primaryRouteAnimation,
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: child,
+          ),
         ),
       ),
     );
@@ -198,8 +177,10 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with CupertinoSheetRouteTransi
 
   @override
   Widget buildContent(BuildContext context) {
+    final BuildContext? topLevelContext = CupertinoSheetController.maybeOf(context)?.topLevelContext;
     return CupertinoSheetController(
       context: context,
+      topLevelContext: topLevelContext ?? context,
       child: pageBuilder(context),
     );
   }
@@ -236,15 +217,27 @@ class CupertinoSheetController extends InheritedWidget {
   const CupertinoSheetController({
     super.key,
     required this.context,
+    required this.topLevelContext,
     required super.child,
   });
 
-  /// Docs placeholder
+  /// Context for the location of the [CupertinoSheetController].
+  ///
+  /// Used to pop the whole sheet route at once from any location below the sheet
+  /// on the tree.
   final BuildContext context;
+
+  /// Context for the location of the top level [CupertinoSheetController].
+  ///
+  /// If there is a [Navigator] within a [CupertinoSheetRoute], then this
+  /// `topLevelContext` is useful for pushing routes to the [Navigator] that
+  /// wraps all of the sheets in the stack. Usefull for adding a new
+  /// [CupertinoSheetRoute], or any page route that needs to animate outside the
+  /// bounds of the sheet.
+  final BuildContext topLevelContext;
 
   /// Docs placeholder
   static CupertinoSheetController? maybeOf(BuildContext context) {
-    print("checking...");
     return context.dependOnInheritedWidgetOfExactType<CupertinoSheetController>();
   }
 
