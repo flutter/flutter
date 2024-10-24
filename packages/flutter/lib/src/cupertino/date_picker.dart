@@ -301,43 +301,38 @@ class CupertinoDatePicker extends StatefulWidget {
     this.itemExtent = _kItemExtent,
     this.selectionOverlayBuilder,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
-       assert(
-         itemExtent > 0,
-         'item extent should be greater than 0',
-       ),
-       assert(
-         minuteInterval > 0 && 60 % minuteInterval == 0,
-         'minute interval is not a positive integer factor of 60',
-       ) {
-    assert(
-      mode != CupertinoDatePickerMode.dateAndTime || minimumDate == null || !this.initialDateTime.isBefore(minimumDate!),
-      'initial date is before minimum date',
-    );
-    assert(
-      mode != CupertinoDatePickerMode.dateAndTime || maximumDate == null || !this.initialDateTime.isAfter(maximumDate!),
-      'initial date is after maximum date',
-    );
-    assert(
-      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || (minimumYear >= 1 && this.initialDateTime.year >= minimumYear),
-      'initial year is not greater than minimum year, or minimum year is not positive',
-    );
-    assert(
-      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || maximumYear == null || this.initialDateTime.year <= maximumYear!,
-      'initial year is not smaller than maximum year',
-    );
-    assert(
-      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || minimumDate == null || !minimumDate!.isAfter(this.initialDateTime),
-      'initial date ${this.initialDateTime} is not greater than or equal to minimumDate $minimumDate',
-    );
-    assert(
-      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || maximumDate == null || !maximumDate!.isBefore(this.initialDateTime),
-      'initial date ${this.initialDateTime} is not less than or equal to maximumDate $maximumDate',
-    );
-    assert(
-      this.initialDateTime.minute % minuteInterval == 0,
-      'initial minute is not divisible by minute interval',
-    );
-  }
+      assert(itemExtent > 0, 'item extent should be greater than 0'),
+      assert(minuteInterval > 0 && 60 % minuteInterval == 0, 'minute interval is not a positive integer factor of 60'),
+      assert(
+        mode != CupertinoDatePickerMode.dateAndTime || minimumDate == null || !(initialDateTime ?? DateTime.now()).isBefore(minimumDate),
+        'initial date is before minimum date',
+      ),
+      assert(
+        mode != CupertinoDatePickerMode.dateAndTime || maximumDate == null || !(initialDateTime ?? DateTime.now()).isAfter(maximumDate),
+        'initial date is after maximum date',
+      ),
+      assert(
+        (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || (minimumYear >= 1 && (initialDateTime ?? DateTime.now()).year >= minimumYear),
+        'initial year is not greater than minimum year, or minimum year is not positive',
+      ),
+      assert(
+        (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || maximumYear == null || (initialDateTime ?? DateTime.now()).year <= maximumYear,
+        'initial year is not smaller than maximum year',
+      ),
+      assert(
+        (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || minimumDate == null || !minimumDate.isAfter(initialDateTime ?? DateTime.now()),
+        'initial date ${initialDateTime ?? DateTime.now()} is not greater than or equal to minimumDate $minimumDate',
+      ),
+      assert(
+        (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || maximumDate == null || !maximumDate.isBefore(initialDateTime ?? DateTime.now()),
+        'initial date ${initialDateTime ?? DateTime.now()} is not less than or equal to maximumDate $maximumDate',
+      ),
+      assert(
+        (mode == CupertinoDatePickerMode.date) || !showDayOfWeek,
+        'showDayOfWeek is only supported in date mode',
+      ),
+      assert((initialDateTime ?? DateTime.now()).minute % minuteInterval == 0, 'initial minute is not divisible by minute interval');
+
 
   /// The mode of the date picker as one of [CupertinoDatePickerMode]. Defaults
   /// to [CupertinoDatePickerMode.dateAndTime]. Value cannot change after
@@ -414,7 +409,9 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Defaults to null, which disables background painting entirely.
   final Color? backgroundColor;
 
-  /// Whether to show day of week alongside day. Defaults to false.
+  /// Whether to show the day of week alongside the day in [CupertinoDatePickerMode.date] mode.
+  ///
+  /// Defaults to false.
   final bool showDayOfWeek;
 
   /// {@macro flutter.cupertino.picker.itemExtent}

@@ -51,7 +51,7 @@ void main() {
     final Directory exampleAppDir =
         tempDir.childDirectory(testName).childDirectory('example');
 
-    final File buildGradleFile = exampleAppDir.childDirectory('android').childFile('build.gradle');
+    final File buildGradleFile = exampleAppDir.childDirectory('android').childFile('build.gradle.kts');
     expect(buildGradleFile, exists);
 
     final String buildGradle = buildGradleFile.readAsStringSync();

@@ -4980,7 +4980,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
     expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.fuchsia, }));
 
   group('a11y copy/cut/paste', () {
     Future<void> buildApp(MockTextSelectionControls controls, WidgetTester tester) {
@@ -17026,18 +17026,18 @@ void main() {
             .handlePlatformMessage('flutter/lifecycle', message, (_) {});
       }
 
-      final TextEditingController controller1 = TextEditingController(text: 'Flutter!');
-      addTearDown(controller1.dispose);
-      final FocusNode focusNode1 = FocusNode();
-      addTearDown(focusNode1.dispose);
+      final TextEditingController controller = TextEditingController(text: 'Flutter!');
+      addTearDown(controller.dispose);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
             child: EditableText(
-              key: ValueKey<String>(controller1.text),
-              controller: controller1,
-              focusNode: focusNode1,
+              key: ValueKey<String>(controller.text),
+              controller: controller,
+              focusNode: focusNode,
               autofocus: true,
               style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
@@ -17047,14 +17047,14 @@ void main() {
         ),
       );
 
-      expect(focusNode1.hasFocus, true);
-      expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
+      expect(focusNode.hasFocus, true);
+      expect(controller.selection, collapsedAtEnd('Flutter!').selection);
 
       await setAppLifeCycleState(AppLifecycleState.inactive);
       await setAppLifeCycleState(AppLifecycleState.resumed);
 
-      expect(focusNode1.hasFocus, true);
-      expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
+      expect(focusNode.hasFocus, true);
+      expect(controller.selection, collapsedAtEnd('Flutter!').selection);
     }, variant: TargetPlatformVariant.all());
   });
 

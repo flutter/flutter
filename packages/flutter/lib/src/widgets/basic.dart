@@ -150,6 +150,22 @@ abstract class _UbiquitousInheritedWidget extends InheritedWidget {
 ///
 /// For example, [Padding] depends on the [Directionality] to resolve
 /// [EdgeInsetsDirectional] objects into absolute [EdgeInsets] objects.
+///
+/// {@tool snippet}
+///
+/// This example uses a right-to-left [TextDirection] and draws a blue box with
+/// a right margin of 8 pixels.
+///
+/// ```dart
+/// Directionality(
+///   textDirection: TextDirection.rtl,
+///   child: Container(
+///     margin: const EdgeInsetsDirectional.only(start: 8),
+///     color: Colors.blue,
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 class Directionality extends _UbiquitousInheritedWidget {
   /// Creates a widget that determines the directionality of text and
   /// text-direction-sensitive render objects.
@@ -924,6 +940,17 @@ class ClipRRect extends SingleChildRenderObjectWidget {
 /// By default, inscribes an axis-aligned oval into its layout dimensions and
 /// prevents its child from painting outside that oval, but the size and
 /// location of the clip oval can be customized using a custom [clipper].
+///
+/// {@tool snippet}
+///
+/// This example clips an image of a cat using an oval.
+///
+/// ```dart
+/// ClipOval(
+///   child: Image.asset('images/cat.png'),
+/// )
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
