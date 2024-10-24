@@ -420,6 +420,27 @@ class DialogWindow extends Window {
   }
 }
 
+class SatelliteWindow extends Window {
+  SatelliteWindow(
+      {required super.view,
+      required super.builder,
+      required super.size,
+      required Window parentWindow})
+      : _parent = parentWindow;
+
+  final Window _parent;
+
+  @override
+  WindowArchetype get archetype {
+    return WindowArchetype.satellite;
+  }
+
+  @override
+  Window? get parent {
+    return _parent;
+  }
+}
+
 /// Creates a new regular [Window].
 ///
 /// [context] the current [BuildContext], which must include a [MultiWindowAppContext]
@@ -493,6 +514,38 @@ Future<DialogWindow> createDialog(
 
   return multiViewAppContext.windowController
       .createDialog(parent: parent, size: size, builder: builder);
+}
+
+/// Creates a new satellite [Window]
+///
+/// [context] the current [BuildContext], which must include a [MultiWindowAppContext]
+/// [parent] the [Window] to which this satellite is associated
+/// [size] the [Size] of the satellite
+/// [anchorRect] the [Rect] to which this satellite is anchored, relative to the
+///              client area of the parent [Window]. If null, the satellite is
+///              anchored to the window frame of the parent [Window].
+/// [positioner] defines the constraints by which the satellite is positioned
+/// [builder] a builder function that returns the contents of the new [Window]
+Future<SatelliteWindow> createSatellite(
+    {required BuildContext context,
+    required Window parent,
+    required Size size,
+    Rect? anchorRect,
+    required WindowPositioner positioner,
+    required WidgetBuilder builder}) async {
+  final MultiWindowAppContext? multiViewAppContext =
+      MultiWindowAppContext.of(context);
+  if (multiViewAppContext == null) {
+    throw Exception(
+        'Cannot create a window: your application does not use MultiViewApp. Try wrapping your toplevel application in a MultiViewApp widget');
+  }
+
+  return multiViewAppContext.windowController.createSatellite(
+      parent: parent,
+      size: size,
+      anchorRect: anchorRect,
+      positioner: positioner,
+      builder: builder);
 }
 
 /// Destroys the provided [Window]
@@ -712,6 +765,70 @@ class WindowController extends State<MultiWindowApp> {
         builder: builder,
         size: metadata.size,
         parentWindow: metadata.parent);
+    _add(window);
+    return window;
+  }
+
+  /// Creates a new satellite [Window]
+  ///
+  /// [parent] the [Window] to which this satellite is associated
+  /// [size] the [Size] of the satellite
+  /// [anchorRect] the [Rect] to which this satellite is anchored, relative to
+  ///              the client area of the parent [Window]. If null, the
+  ///              satellite is anchored to the window frame of the parent
+  ///              [Window].
+  /// [positioner] defines the constraints by which the satellite is positioned
+  /// [builder] a builder function that returns the contents of the new [Window]
+  Future<SatelliteWindow> createSatellite(
+      {required Window parent,
+      required Size size,
+      Rect? anchorRect,
+      required WindowPositioner positioner,
+      required WidgetBuilder builder}) async {
+    if (!parent.canBeParentOf(WindowArchetype.satellite)) {
+      throw ArgumentError(
+          'Incompatible parent window. The parent window must have one of '
+          'the following archetypes: WindowArchetype.regular, '
+          'WindowArchetype.floatingRegular, or WindowArchetype.dialog. '
+          'Additionally, it must not have any dialog descendants.');
+    }
+
+    int constraintAdjustmentBitmask = 0;
+    for (final WindowPositionerConstraintAdjustment adjustment
+        in positioner.constraintAdjustment) {
+      constraintAdjustmentBitmask |= 1 << adjustment.index;
+    }
+
+    final _WindowMetadata metadata = await _createWindow(
+        viewBuilder: (MethodChannel channel) async {
+          return await channel
+              .invokeMethod('createSatellite', <String, dynamic>{
+            'parent': parent.view.viewId,
+            'size': <int>[size.width.toInt(), size.height.toInt()],
+            'anchorRect': anchorRect != null
+                ? [
+                    anchorRect.left.toInt(),
+                    anchorRect.top.toInt(),
+                    anchorRect.width.toInt(),
+                    anchorRect.height.toInt()
+                  ]
+                : null,
+            'positionerParentAnchor': positioner.parentAnchor.index,
+            'positionerChildAnchor': positioner.childAnchor.index,
+            'positionerOffset': <int>[
+              positioner.offset.dx.toInt(),
+              positioner.offset.dy.toInt()
+            ],
+            'positionerConstraintAdjustment': constraintAdjustmentBitmask
+          }) as Map<Object?, Object?>;
+        },
+        builder: builder);
+
+    final SatelliteWindow window = SatelliteWindow(
+        view: metadata.flView,
+        builder: builder,
+        size: metadata.size,
+        parentWindow: metadata.parent!);
     _add(window);
     return window;
   }

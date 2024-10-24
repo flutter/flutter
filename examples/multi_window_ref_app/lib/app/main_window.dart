@@ -7,6 +7,7 @@ import 'positioner_settings.dart';
 import 'regular_window.dart';
 import 'window_settings.dart';
 import 'window_settings_dialog.dart';
+import 'satellite_window.dart';
 
 class PositionerSettingsModifier with ChangeNotifier {
   int _positionerIndex = 0;
@@ -281,6 +282,46 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
                   child: Text(_canBeParentOf(WindowArchetype.dialog)
                       ? 'Dialog of ID ${widget.selectedWindow!.view.viewId}'
                       : 'Dialog'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: _canBeParentOf(WindowArchetype.satellite)
+                      ? () async {
+                          final selectedPositionerSettings = widget
+                                  .positionerSettingsModifier
+                                  .mapping
+                                  .positionerSettingsList[
+                              widget
+                                  .positionerSettingsModifier.positionerIndex];
+                          if (widget.selectedWindow == null) {
+                            return;
+                          }
+
+                          await createSatellite(
+                              context: context,
+                              parent: widget.selectedWindow!,
+                              size: _settings.satelliteSize,
+                              anchorRect: _settings.anchorToWindow
+                                  ? null
+                                  : _clampRectToSize(_settings.anchorRect,
+                                      widget.selectedWindow!.size),
+                              positioner: WindowPositioner(
+                                parentAnchor:
+                                    selectedPositionerSettings.parentAnchor,
+                                childAnchor:
+                                    selectedPositionerSettings.childAnchor,
+                                offset: selectedPositionerSettings.offset,
+                                constraintAdjustment: selectedPositionerSettings
+                                    .constraintAdjustments,
+                              ),
+                              builder: (BuildContext context) {
+                                return const SatelliteWindowContent();
+                              });
+                        }
+                      : null,
+                  child: Text(_canBeParentOf(WindowArchetype.satellite)
+                      ? 'Satellite of ID ${widget.selectedWindow!.view.viewId}'
+                      : 'Satellite'),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton(
