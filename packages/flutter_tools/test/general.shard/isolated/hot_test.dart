@@ -58,11 +58,11 @@ void main() {
 
       (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
-      final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+      final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],
-        buildDryRunResult: FakeNativeAssetsBuilderResult(
+        buildDryRunResult: FakeFlutterNativeAssetsBuilderResult(
           assets: <AssetImpl>[
             NativeCodeAssetImpl(
               id: 'package:bar/bar.dart',
@@ -127,11 +127,11 @@ void main() {
 
       (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
-      final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+      final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],
-        buildDryRunResult: FakeNativeAssetsBuilderResult(
+        buildDryRunResult: FakeFlutterNativeAssetsBuilderResult(
           assets: <AssetImpl>[
             NativeCodeAssetImpl(
               id: 'package:bar/bar.dart',
