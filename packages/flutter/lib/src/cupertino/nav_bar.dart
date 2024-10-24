@@ -281,7 +281,7 @@ bool _isTransitionable(BuildContext context) {
 /// {@tool dartpad}
 /// This example shows the resulting layout from [CupertinoNavigationBar.large]
 /// constructor, showing a large title similar to the expanded state of
-/// [CupertinoSliverNavigationBar]
+/// [CupertinoSliverNavigationBar].
 ///
 /// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_navigation_bar.2.dart **
 /// {@end-tool}
