@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 
 #include "flutter/fml/platform/darwin/cf_utils.h"
 
@@ -224,6 +225,32 @@ static BOOL _forceSoftwareRendering;
   // https://github.com/flutter/flutter/issues/76808.
   [self.delegate flutterViewAccessibilityDidCall];
   return NO;
+}
+
+// Enables keyboard-based navigation when the user turns on
+// full keyboard access (FKA), using existing accessibility information.
+//
+// iOS does not provide any API for monitoring or querying whether FKA is on,
+// but it does call isAccessibilityElement if FKA is on,
+// so the isAccessibilityElement implementation above will be called
+// when the view appears and the accessibility information will most likely
+// be available by the time the user starts to interact with the app using FKA.
+//
+// See SemanticsObject+UIFocusSystem.mm for more details.
+- (NSArray<id<UIFocusItem>>*)focusItemsInRect:(CGRect)rect {
+  NSObject* rootAccessibilityElement =
+      [self.accessibilityElements count] > 0 ? self.accessibilityElements[0] : nil;
+  return [rootAccessibilityElement isKindOfClass:[SemanticsObjectContainer class]]
+             ? @[ [rootAccessibilityElement accessibilityElementAtIndex:0] ]
+             : nil;
+}
+
+- (NSArray<id<UIFocusEnvironment>>*)preferredFocusEnvironments {
+  // Occasionally we add subviews to FlutterView (text fields for example).
+  // These views shouldn't be directly visible to the iOS focus engine, instead
+  // the focus engine should only interact with the designated focus items
+  // (SemanticsObjects).
+  return nil;
 }
 
 @end
