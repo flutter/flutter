@@ -177,16 +177,16 @@ Never reportErrorsAndExit(String message) {
   _hideTimer = null;
   print('$clock $message$reset');
   print(redLine);
-  print('${red}For your convenience, the error messages reported above are repeated here:$reset');
+  print('${red}The error messages reported above are repeated here:$reset');
   final bool printSeparators = _errorMessages.any((List<String> messages) => messages.length > 1);
   if (printSeparators) {
-    print('  🙙  🙛  ');
+    print('  -- This line intentionally left blank --  ');
   }
   for (int index = 0; index < _errorMessages.length * 2 - 1; index += 1) {
     if (index.isEven) {
       _errorMessages[index ~/ 2].forEach(print);
     } else if (printSeparators) {
-      print('  🙙  🙛  ');
+      print('  -- This line intentionally left blank --  ');
     }
   }
   print(redLine);
