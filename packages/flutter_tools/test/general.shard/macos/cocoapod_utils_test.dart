@@ -86,6 +86,7 @@ void main() {
             ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', name));
       }
 
+      flutterProject.flutterPluginsDependenciesFile.createSync();
       packageConfigFile.writeAsStringSync(jsonEncode(packageConfig));
     }
 
