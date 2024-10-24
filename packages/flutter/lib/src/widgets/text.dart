@@ -1275,6 +1275,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         endOffset += (selectionEndNormalized - selectionStartNormalized).abs();
       }
     }
+    assert(foundStart, 'The start of the selection has not been found despite this selection delegate having an existing currentSelectionStartIndex and currentSelectionEndIndex.');
     return SelectedContentRange(
       contentLength: totalContentLength,
       startOffset: forwardSelection ? startOffset : endOffset,
