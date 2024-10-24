@@ -205,6 +205,7 @@ class InteractiveViewer extends StatefulWidget {
   /// ```
   InteractiveViewer.raw({
     super.key,
+    this.clipBehavior = Clip.hardEdge,
     this.panAxis = PanAxis.free,
     this.boundaryMargin = EdgeInsets.zero,
     // These default scale values were eyeballed as reasonable limits for common
@@ -239,7 +240,6 @@ class InteractiveViewer extends StatefulWidget {
        constrained = false,
        alignment = null,
        _transformChild = false,
-       clipBehavior = Clip.hardEdge,
        child = null;
 
   final bool _transformChild;
@@ -1233,9 +1233,19 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
             _transformViewport(matrix, Offset.zero & constraints.biggest),
           );
           if (!widget._transformChild) {
-            return KeyedSubtree(
-              key: _childKey,
-              child: child,
+            return ClipRect(
+              clipBehavior: widget.clipBehavior,
+              child: OverflowBox(
+                alignment: Alignment.topLeft,
+                minWidth: 0.0,
+                minHeight: 0.0,
+                maxWidth: double.infinity,
+                maxHeight: double.infinity,
+                child: KeyedSubtree(
+                  key: _childKey,
+                  child: child,
+                ),
+              ),
             );
           }
           return _InteractiveViewerBuilt(
