@@ -147,60 +147,14 @@ class InteractiveViewer extends StatefulWidget {
        _transformChild = true,
        child = null;
 
+  /// Creates an [InteractiveViewer] that does not apply its current transform to its child widget.
+  ///
   /// Using [InteractiveViewer.raw] will not transform the child based on the [Matrix4]
   /// in the [TransformationController] enabling the direct child to stay static while
   /// delegating layout to widgets like [Stack] and [CustomMultiChildLayout].
   ///
-  /// Due to the way gestures work in Flutter, the parts of a child that are outside of the parent
-  /// [RenderBox] will not receive hit tests. For example you could have a [Stack] with [Clip.none]
-  /// and a negative offset for the [Positioned] widget which will not handle gestures.
-  ///
-  /// ```dart
-  /// import 'package:flutter/widgets.dart';
-  ///
-  /// class Example extends StatelessWidget {
-  ///   const Example({super.key});
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return InteractiveViewer(
-  ///       child: Stack(
-  ///         clipBehavior: Clip.none,
-  ///         children: <Widget>[
-  ///           Positioned(
-  ///             top: -20,
-  ///             left: -20,
-  ///             child: GestureDetector(
-  ///               onTap: () => print('A clicked'),
-  ///               child: const Text('A'),
-  ///             ),
-  ///           ),
-  ///           Positioned(
-  ///             top: 50,
-  ///             left: 20,
-  ///             child: GestureDetector(
-  ///               onTap: () => print('B clicked'),
-  ///               child: const Text('B'),
-  ///             ),
-  ///           ),
-  ///         ],
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// In the above example 'B' can receive hit tests, but 'A' will not register any interactions. This happens
-  /// for [Stack], [CustomMultiChildLayout], or any widget that can position children irregardless
-  /// if the parent is an InteractiveViewer.
-  ///
-  /// This is fine for non-interactive elements and in most cases using [InteractiveViewer] or [InteractiveViewer.builder] will be
-  /// the desired behavior.
-  ///
-  /// However if you need hit tests for all transformed children you can use [InteractiveViewer.raw] and
-  /// handle child transforms manually.
-  ///
-  /// With the following example the child will never exceed the bounds of the parent and always stay static, preserving hit tests.
+  /// The following example is how to construct an infinite canvas where the background is static
+  /// and the nodes are positioned manually.
   ///
   /// ```dart
   /// import 'package:flutter/widgets.dart';
@@ -222,20 +176,27 @@ class InteractiveViewer extends StatefulWidget {
   ///   Widget build(BuildContext context) {
   ///     return InteractiveViewer.raw(
   ///       transformationController: controller,
+  ///       boundaryMargin: EdgeInsets.all(double.infinity),
   ///       builder: (BuildContext context, Quad viewport) {
   ///         final Matrix4 matrix = controller.value;
   ///         return Stack(
-  ///           clipBehavior: Clip.none,
-  ///           children: nodes.map((Node node) {
-  ///             final Rect rect = MatrixUtils.transformRect(matrix, node.rect);
-  ///             return Positioned.fromRect(
-  ///               rect: rect,
-  ///               child: GestureDetector(
-  ///                 onTap: () => print('Node clicked'),
-  ///                 child: node.child,
-  ///               ),
-  ///             );
-  ///           }).toList(),
+  ///           children: [
+  ///             Positioned.fill(
+  ///                // Could be a grid background based on the current viewport
+  ///                child: Placeholder(),
+  ///             ),
+  ///             for (final Node node in nodes)
+  ///               (){
+  ///                 final Rect rect = MatrixUtils.transformRect(matrix, node.rect);
+  ///                 return  Positioned.fromRect(
+  ///                   rect: rect,
+  ///                   child: GestureDetector(
+  ///                     onTap: () => print('Node clicked'),
+  ///                     child: node.child,
+  ///                   ),
+  ///                 );
+  ///               }(),
+  ///           ],
   ///         );
   ///       },
   ///     );
