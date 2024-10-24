@@ -17,10 +17,9 @@
 #include "flutter/display_list/utils/dl_accumulation_rect.h"
 #include "flutter/display_list/utils/dl_comparable.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
+#include "flutter/fml/macros.h"
 
 namespace flutter {
-
-uint64_t NextPowerOfTwo(uint64_t x);
 
 // The primary class used to build a display list. The list of methods
 // here matches the list of methods invoked on a |DlOpReceiver| combined
