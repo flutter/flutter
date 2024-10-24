@@ -14,13 +14,13 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
 
 final Animatable<Offset> _kFullBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
-  end: const Offset(0.0, -0.1),
+  end: const Offset(0.0, -0.02),
 );
 
-// Offset from offscreen below to stopping below the top of the screen.
+// Offset slightly up when a sheet gets covered by another sheet.
 final Animatable<Offset> _kMidUpTween = Tween<Offset>(
   begin: Offset.zero,
-  end: const Offset(0.0, -0.01),
+  end: const Offset(0.0, -0.005),
 );
 
 // Offset from top of screen to slightly down when covered by a sheet.
