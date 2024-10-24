@@ -1086,20 +1086,22 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (hasChild(_ScaffoldSlot.body)) {
       double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
+
       // When extendBody is true, the body is visible underneath the bottom widgets.
       // This does not apply when the area is obscured by the device keyboard.
-      final bool effectiveExtendBody = extendBody && minInsets.bottom <= bottomWidgetsHeight;
-      if (effectiveExtendBody) {
+      if (extendBody && minInsets.bottom <= bottomWidgetsHeight) {
         bodyMaxHeight += bottomWidgetsHeight;
         bodyMaxHeight = clampDouble(bodyMaxHeight, 0.0, looseConstraints.maxHeight - contentTop);
         assert(bodyMaxHeight <= math.max(0.0, looseConstraints.maxHeight - contentTop));
+      } else {
+        bottomWidgetsHeight = 0.0;
       }
 
       final BoxConstraints bodyConstraints = _BodyBoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: bodyMaxHeight,
         materialBannerHeight: materialBannerSize.height,
-        bottomWidgetsHeight: effectiveExtendBody ? bottomWidgetsHeight : 0.0,
+        bottomWidgetsHeight: bottomWidgetsHeight,
         appBarHeight: appBarHeight,
       );
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
