@@ -835,7 +835,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         return;
       }
       setState(() {});
-    }, debugLabel: 'DropdownMenu._onMenuChanged');
+    }, debugLabel: 'DropdownMenu._onMenuClose');
   }
 
   @override
