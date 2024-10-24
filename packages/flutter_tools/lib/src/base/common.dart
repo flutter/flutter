@@ -37,7 +37,7 @@ Never throwToolExit(String? message, { int? exitCode }) {
 /// A specialized exception to exit with an actionable [message].
 /// 
 /// See [throwToolExit].
-class ToolExit implements Exception {
+final class ToolExit implements Exception {
   ToolExit._(this.message, { this.exitCode });
 
   final String? message;
