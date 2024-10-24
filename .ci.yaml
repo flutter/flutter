@@ -1005,7 +1005,6 @@ targets:
       - .ci.yaml
 
   - name: Linux build_android_host_app_with_module_aar
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -1387,6 +1386,7 @@ targets:
     runIf:
       - packages/flutter_tools/templates/**
       - .ci.yaml
+      - dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart
 
   - name: Linux android_java17_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
@@ -1406,6 +1406,7 @@ targets:
     runIf:
       - packages/flutter_tools/templates/**
       - .ci.yaml
+      - dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart
 
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
@@ -3913,6 +3914,7 @@ targets:
   - name: Mac framework_tests_impeller
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true # https://github.com/flutter/flutter/issues/157552
     properties:
       cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
@@ -4096,7 +4098,6 @@ targets:
       - .ci.yaml
 
   - name: Mac build_android_host_app_with_module_aar
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -5361,7 +5362,6 @@ targets:
       - .ci.yaml
 
   - name: Windows build_tests_1_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5380,7 +5380,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_2_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5399,7 +5398,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_3_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5418,7 +5416,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_4_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5437,7 +5434,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_5_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5456,7 +5452,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_6_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5475,7 +5470,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_7_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5494,7 +5488,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_8_8
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5751,7 +5744,6 @@ targets:
       - .ci.yaml
 
   - name: Windows build_android_host_app_with_module_aar
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
