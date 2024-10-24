@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 // Offset from offscreen below to stopping below the top of the screen.
 final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
-  end: const Offset(0.0, 0.1),
+  end: const Offset(0.0, 0.08),
 );
 
 // final Animatable<Offset> _kFullBottomUpTween = Tween<Offset>(
@@ -24,6 +24,11 @@ final Animatable<Offset> _kMidUpTween = Tween<Offset>(
   begin: Offset.zero,
   end: const Offset(0.0, -0.05),
 );
+
+// Amount the sheet in the background scales down. Found by measuring the width
+// of the sheet in the background and comparing against the screen width. The
+// scale transition will go from a default of 1.0 to 1.0 - _kSheetScaleFactor.
+const double _kSheetScaleFactor = 0.0835;
 
 /// Docs placeholder
 class CupertinoSheetTransition extends StatelessWidget {
@@ -74,15 +79,72 @@ class CupertinoSheetTransition extends StatelessWidget {
 
   /// The primary delegated transition. Will slide a non CupertinoSheet page down.
   static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {
-    const Offset begin = Offset.zero;
-    const Offset end = Offset(0.0, 0.05);
-    const Curve curve = Curves.ease;
+    if (CupertinoSheetController.maybeOf(context) != null) {
+      return _coverSheetDelegatedTransition(secondaryAnimation, child);
+    }
 
-    final Animatable<Offset> tween = Tween<Offset>(begin: begin, end: end).chain(CurveTween(curve: curve));
+    const Offset begin = Offset.zero;
+    const Offset end = Offset(0.0, 0.025);
+    const Curve curve = Curves.linearToEaseOut;
+    const Curve reverseCurve = Curves.easeInToLinear;
+    final Animation<double> curvedAnimation = CurvedAnimation(
+      curve: curve,
+      reverseCurve: reverseCurve,
+      parent: secondaryAnimation
+    );
+    final double deviceCornerRadius = MediaQuery.maybeViewPaddingOf(context)?.top ?? 0;
+
+    final Animatable<BorderRadiusGeometry> decorationTween = Tween<BorderRadiusGeometry>(
+      begin: BorderRadius.circular(deviceCornerRadius),
+      end: BorderRadius.circular(12),
+    );
+
+    final Animation<BorderRadiusGeometry> radiusAnimation = curvedAnimation.drive(decorationTween);
+
+    final Animatable<Offset> slideTween = Tween<Offset>(begin: begin, end: end);
+    final Animatable<double> scaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kSheetScaleFactor);
 
     return SlideTransition(
-      position: secondaryAnimation.drive(tween),
-      child: child,
+      position: curvedAnimation.drive(slideTween),
+      child: ScaleTransition(
+        scale: curvedAnimation.drive(scaleTween),
+        filterQuality: FilterQuality.medium,
+        child: AnimatedBuilder(
+          animation: radiusAnimation,
+          child: child,
+          builder: (BuildContext context, Widget? child) {
+            return ClipRRect(
+              borderRadius: radiusAnimation.value,
+              child: child
+            );
+          }
+        )
+      ),
+    );
+  }
+
+  static Widget _coverSheetDelegatedTransition(Animation<double> secondaryAnimation, Widget? child) {
+
+    const Offset begin = Offset.zero;
+    const Offset end = Offset(0.0, -0.05);
+    const Curve curve = Curves.linearToEaseOut;
+    const Curve reverseCurve = Curves.easeInToLinear;
+    final Animation<double> curvedAnimation = CurvedAnimation(
+      curve: curve,
+      reverseCurve: reverseCurve,
+      parent: secondaryAnimation
+    );
+
+    final Animatable<Offset> slideTween = Tween<Offset>(begin: begin, end: end);
+    final Animatable<double> scaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kSheetScaleFactor);
+
+    return SlideTransition(
+      position: curvedAnimation.drive(slideTween),
+      child: ScaleTransition(
+        scale: curvedAnimation.drive(scaleTween),
+        filterQuality: FilterQuality.medium,
+        child: child,
+      ),
     );
   }
 
@@ -135,7 +197,22 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with CupertinoSheetRouteTransi
   DelegatedTransitionBuilder? get delegatedTransition => CupertinoSheetTransition.delegateTransition;
 
   @override
-  Widget buildContent(BuildContext context) => pageBuilder(context);
+  Widget buildContent(BuildContext context) {
+    return CupertinoSheetController(
+      context: context,
+      child: pageBuilder(context),
+    );
+  }
+
+  /// Docs placeholder
+  static CupertinoSheetController? maybeOf(BuildContext context) {
+    return CupertinoSheetController.maybeOf(context);
+  }
+
+  /// Docs placeholder
+  static CupertinoSheetController of(BuildContext context) {
+    return CupertinoSheetController.of(context);
+  }
 
   @override
   Color? get barrierColor => const Color(0x20000000);
@@ -151,6 +228,40 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with CupertinoSheetRouteTransi
 
   @override
   bool get opaque => false;
+}
+
+/// Docs placeholder
+class CupertinoSheetController extends InheritedWidget {
+  /// Docs placeholder
+  const CupertinoSheetController({
+    super.key,
+    required this.context,
+    required super.child,
+  });
+
+  /// Docs placeholder
+  final BuildContext context;
+
+  /// Docs placeholder
+  static CupertinoSheetController? maybeOf(BuildContext context) {
+    print("checking...");
+    return context.dependOnInheritedWidgetOfExactType<CupertinoSheetController>();
+  }
+
+  /// Docs placeholder
+  static CupertinoSheetController of(BuildContext context) {
+    final CupertinoSheetController? result = maybeOf(context);
+    assert(result != null, 'No CupertinoSheetController found in context');
+    return result!;
+  }
+
+  /// Docs placeholder
+  void popSheet() {
+    Navigator.of(context).pop();
+  }
+
+  @override
+  bool updateShouldNotify(CupertinoSheetController oldWidget) => context != oldWidget.context;
 }
 
 /// Docs placeholder
