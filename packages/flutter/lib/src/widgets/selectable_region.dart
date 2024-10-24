@@ -3308,7 +3308,6 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
       _selectionNotifier.notifyListeners();
       _selectionNotifier.notifyStatusListeners(status);
     } else if (status == SelectionListenerStatus.finalized && _lastFinalizedSelectionGeometry != value) {
-      _selectionNotifier.notifyListeners();
       _selectionNotifier.notifyStatusListeners(status);
       _lastFinalizedSelectionGeometry = value;
     }
@@ -3359,7 +3358,16 @@ final class SelectionListenerNotifier extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Calls listener every time the status of the selection changes.
+  /// Calls the listener every time the [SelectionGeometry] of the selection changes under
+  /// a [SelectionListener].
+  ///
+  /// Listeners can be removed with [removeListener].
+  void addListener(VoidCallback listener) {
+    super.addListener(listener);
+  }
+
+  /// Calls the listener every time the [SelectionListenerStatus] of a [SelectionListener]
+  /// is updated.
   ///
   /// Listeners can be removed with [removeStatusListener].
   void addStatusListener(SelectionListenerStatusCallback listener) {
