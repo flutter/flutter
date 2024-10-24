@@ -10,6 +10,8 @@
 ///
 ///  * [flutter.dev/widgets](https://flutter.dev/widgets/)
 ///    for a catalog of commonly-used Flutter widgets.
+///
+/// Test frob.
 library widgets;
 
 export 'package:characters/characters.dart';
