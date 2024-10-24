@@ -2,17 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
-import 'package:process/process.dart';
-
 import 'base/file_system.dart';
-import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'cache.dart';
-import 'convert.dart';
-import 'dart_pub_json_formatter.dart';
 import 'flutter_manifest.dart';
 import 'project.dart';
 import 'project_validator_result.dart';
