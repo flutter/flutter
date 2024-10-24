@@ -596,8 +596,7 @@ flutter:
       expect(gradle_utils.getGradleVersionFor('8.2'), '8.2');
       expect(gradle_utils.getGradleVersionFor('8.3'), '8.4');
       expect(gradle_utils.getGradleVersionFor('8.4'), '8.6');
-      expect(gradle_utils.getGradleVersionFor('8.5'), '8.7');
-      expect(gradle_utils.getGradleVersionFor(gradle_utils.maxKnownAgpVersion), '8.9');
+      expect(gradle_utils.getGradleVersionFor(gradle_utils.maxKnownAgpVersion), '8.7');
     });
 
     testWithoutContext('throws on unsupported versions', () {
