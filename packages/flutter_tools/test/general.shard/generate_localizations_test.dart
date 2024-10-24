@@ -1853,7 +1853,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
-            contains('The placeholder, springStartDate, has its "type" resource attribute set to the "String" type in locale "ja", but it is "DateTime" in the template placeholders.'),
+            contains('The placeholder, springStartDate, has its "type" resource attribute set to the "String" type in locale "ja", but it is "DateTime" in the template placeholder.'),
           )),
         );
       });
@@ -1894,7 +1894,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
-            contains('The placeholder, springStartDate, has its "type" resource attribute set to the "null" type in locale "ja", but it is "DateTime" in the template placeholders.'),
+            contains('The placeholder, springStartDate, has its "type" resource attribute set to the "null" type in locale "ja", but it is "DateTime" in the template placeholder.'),
           )),
         );
       });
