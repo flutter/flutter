@@ -74,9 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
       for (int i = 1; i <= 7; i += 1)
         '• Bullet $i'
     ];
-
-    int currentOffset = 0;
-    dataSourceMap[(startOffset: 0, endOffset: bulletListTitle.length + bullets.join().length)] = TextSpan(
+    final TextSpan bulletedList = TextSpan(
       text: bulletListTitle,
       children: <InlineSpan>[
         WidgetSpan(
@@ -92,8 +90,14 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ],
     );
+
+    int currentOffset = 0;
+    // Map bulleted list span to a local range using its concrete length calculated
+    // from the length of its title and each individual bullet.
+    dataSourceMap[(startOffset: currentOffset, endOffset: bulletListTitle.length + bullets.join().length)] = bulletedList;
     currentOffset += bulletListTitle.length;
     widgetSpanMaps[currentOffset] = bulletSourceMap;
+    // Map individual bullets to a local range.
     for (final String bullet in bullets) {
       bulletSourceMap[(startOffset: currentOffset, endOffset: currentOffset + bullet.length)] = TextSpan(text: bullet);
       currentOffset += bullet.length;
@@ -103,9 +107,10 @@ class _MyHomePageState extends State<MyHomePage> {
       text: 'This is some text in a text widget.',
       children: <InlineSpan>[TextSpan(text: ' This is some more text in the same text widget.')],
     );
+    const TextSpan thirdTextParagraph = TextSpan(text: 'This is some text in another text widget.');
+    // Map second and third paragraphs to local ranges.
     dataSourceMap[(startOffset: currentOffset, endOffset: currentOffset + secondTextParagraph.toPlainText(includeSemanticsLabels: false).length)] = secondTextParagraph;
     currentOffset += secondTextParagraph.toPlainText(includeSemanticsLabels: false).length;
-    const TextSpan thirdTextParagraph = TextSpan(text: 'This is some text in another text widget.');
     dataSourceMap[(startOffset: currentOffset, endOffset: currentOffset + thirdTextParagraph.toPlainText(includeSemanticsLabels: false).length)] = thirdTextParagraph;
 
     // Save the origin data so we can revert our changes.
