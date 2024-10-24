@@ -1007,13 +1007,23 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return testCompleter.future;
   }
 
+  /// If set to true, the test will call [runApp] with a pre-test message
+  /// before running the test provided by the suite.
+  bool get showPreTestMessage => true;
+
+  /// If set to true, the test will call [runApp] with a post-test message
+  /// after running the test provided by the suite.
+  bool get showPostTestMessage => true;
+
   Future<void> _runTestBody(Future<void> Function() testBody, VoidCallback invariantTester) async {
     assert(inTest);
     // So that we can assert that it remains the same after the test finishes.
     _beforeTestCheckIntrinsicSizes = debugCheckIntrinsicSizes;
 
-    runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
-    await pump();
+    if (showPreTestMessage) {
+      runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
+      await pump();
+    }
     // Pretend that the first frame produced in the test body is the first frame
     // sent to the engine.
     resetFirstFrameSent();
@@ -1031,8 +1041,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // We only try to clean up and verify invariants if we didn't already
       // fail. If we got an exception already, then we instead leave everything
       // alone so that we don't cause more spurious errors.
-      runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
-      await pump();
+      if (showPostTestMessage) {
+        runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
+        await pump();
+      }
       if (registerTestTextInput) {
         _testTextInput.unregister();
       }
