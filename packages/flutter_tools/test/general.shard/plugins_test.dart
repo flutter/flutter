@@ -458,8 +458,8 @@ dependencies:
 
         await refreshPluginsList(flutterProject, writeLegacyPluginsList: false);
 
-        expect(flutterProject.flutterPluginsFile.existsSync(), false);
-        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsFile, isNot(exists));
+        expect(flutterProject.flutterPluginsDependenciesFile, exists);
       });
 
       testUsingContext(
