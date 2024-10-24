@@ -1696,7 +1696,8 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
     if (widget.child != null) {
       return Tooltip(
-        message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+        message: widget.tooltip,
+        noMultiWindow: true,
         child: InkWell(
           borderRadius: widget.borderRadius,
           onTap: widget.enabled ? showButtonMenu : null,
@@ -1715,7 +1716,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       splashRadius: widget.splashRadius,
       iconSize: widget.iconSize ?? popupMenuTheme.iconSize ?? iconTheme.size,
       color: widget.iconColor ?? popupMenuTheme.iconColor ?? iconTheme.color,
-      tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+      tooltip: widget.tooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
       enableFeedback: enableFeedback,
       style: widget.style,

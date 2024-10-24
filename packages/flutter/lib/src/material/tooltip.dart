@@ -196,6 +196,7 @@ class Tooltip extends StatefulWidget {
     this.triggerMode,
     this.enableFeedback,
     this.onTriggered,
+    this.noMultiWindow = false,
     this.child,
   }) :  assert((message == null) != (richMessage == null), 'Either `message` or `richMessage` must be specified'),
         assert(
@@ -363,6 +364,8 @@ class Tooltip extends StatefulWidget {
   /// The tooltip is triggered after a tap when [triggerMode] is [TooltipTriggerMode.tap]
   /// or after a long press when [triggerMode] is [TooltipTriggerMode.longPress].
   final TooltipTriggeredCallback? onTriggered;
+
+  final bool noMultiWindow;
 
   static final List<TooltipState> _openedTooltips = <TooltipState>[];
 
@@ -865,7 +868,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     _tooltipStateController ??= _TooltipStateController(
-      useMultiWindow: MultiWindowAppContext.of(context) != null);
+      useMultiWindow: MultiWindowAppContext.of(context) != null && !widget.noMultiWindow);
 
     // If message is empty then no need to create a tooltip overlay to show
     // the empty black container so just return the wrapped child as is or
