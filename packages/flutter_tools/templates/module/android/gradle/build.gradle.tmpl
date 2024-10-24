@@ -1,16 +1,8 @@
 // Generated file. Do not edit.
 
-buildscript {
-    ext.kotlin_version = "{{kotlinVersion}}"
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("com.android.tools.build:gradle:{{agpVersionForModule}}")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
-    }
+plugins {
+    id "com.android.library"
+    id "kotlin-android"
 }
 
 allprojects {
@@ -19,9 +11,6 @@ allprojects {
         mavenCentral()
     }
 }
-
-apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
 
 android {
     namespace = "{{androidIdentifier}}"
