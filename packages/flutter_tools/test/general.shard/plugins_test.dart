@@ -448,6 +448,20 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
+      testUsingContext('Opting out of writeLegacyPluginsList omits .flutter-plugins', () async {
+        createFakePlugins(fs, <String>[
+          'plugin_d',
+          'plugin_a',
+          '/local_plugins/plugin_c',
+          '/local_plugins/plugin_b',
+        ]);
+
+        await refreshPluginsList(flutterProject, writeLegacyPluginsList: false);
+
+        expect(flutterProject.flutterPluginsFile, isNot(exists));
+        expect(flutterProject.flutterPluginsDependenciesFile, exists);
+      });
+
       testUsingContext(
         'Refreshing the plugin list modifies .flutter-plugins '
         'and .flutter-plugins-dependencies when there are plugins', () async {

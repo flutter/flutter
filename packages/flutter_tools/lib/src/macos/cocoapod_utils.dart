@@ -31,6 +31,12 @@ Future<void> processPodsIfNeeded(
     iosPlatform: project.ios.existsSync(),
     macOSPlatform: project.macos.existsSync(),
     forceCocoaPodsOnly: forceCocoaPodsOnly,
+    // TODO(matanlurey): As-per discussion on https://github.com/flutter/flutter/pull/157393
+    //  we'll assume that iOS/MacOS builds do not use or rely on the `.flutter-plugins` legacy
+    //  file being generated. A better long-term fix would be not to have a call to refreshPluginsList
+    //  at all, and instead have it implicitly run by the FlutterCommand instead. See
+    //  https://github.com/flutter/flutter/issues/157391 for details.
+    writeLegacyPluginsList: false,
   );
 
   // If there are no plugins and if the project is a not module with an existing
