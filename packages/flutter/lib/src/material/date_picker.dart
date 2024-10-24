@@ -328,7 +328,6 @@ class DatePickerDialog extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
     this.insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-    this.onDateChanged,
   }) : initialDate = initialDate == null ? null : DateUtils.dateOnly(initialDate),
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate),
@@ -431,7 +430,6 @@ class DatePickerDialog extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
-
   /// Called when the [DatePickerDialog] is toggled between
   /// [DatePickerEntryMode.calendar],[DatePickerEntryMode.input].
   ///
@@ -452,9 +450,6 @@ class DatePickerDialog extends StatefulWidget {
   ///
   /// Defaults to `EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0)`.
   final EdgeInsets insetPadding;
-
-  /// Called when the user selects a date in the picker.
-  final ValueChanged<DateTime>? onDateChanged;
 
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
@@ -526,7 +521,6 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
   void _handleDateChanged(DateTime date) {
     setState(() => _selectedDate.value = date);
-    widget.onDateChanged?.call(date);
   }
 
   Size _dialogSize(BuildContext context) {
@@ -1316,8 +1310,6 @@ class DateRangePickerDialog extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
     this.selectableDayPredicate,
-    this.onStartDateChanged,
-    this.onEndDateChanged,
   });
 
   /// The date range that the date range picker starts with when it opens.
@@ -1449,12 +1441,6 @@ class DateRangePickerDialog extends StatefulWidget {
   /// Function to provide full control over which [DateTime] can be selected.
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
-  /// Called when the user selects a start date in the picker.
-  final ValueChanged<DateTime?>? onStartDateChanged;
-
-  /// Called when the user selects an end date in the picker.
-  final ValueChanged<DateTime?>? onEndDateChanged;
-
   @override
   State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
 }
@@ -1548,12 +1534,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
 
   void _handleStartDateChanged(DateTime? date) {
     setState(() => _selectedStart.value = date);
-    widget.onStartDateChanged?.call(date);
   }
 
   void _handleEndDateChanged(DateTime? date) {
     setState(() => _selectedEnd.value = date);
-    widget.onEndDateChanged?.call(date);
   }
 
   bool get _hasSelectedDateRange => _selectedStart.value != null && _selectedEnd.value != null;
