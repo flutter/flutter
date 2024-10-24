@@ -15,27 +15,7 @@
 
 namespace flutter {
 
-static const constexpr size_t kDLPageSize = 16384u;
-
-/// @brief Return the next power of 2.
-///
-/// If the provided value is a power of 2, returns as is.
-uint64_t NextPowerOfTwo(uint64_t x) {
-  if (x == 0) {
-    return 1;
-  }
-
-  x--;
-  x |= x >> 1;
-  x |= x >> 2;
-  x |= x >> 4;
-  x |= x >> 8;
-  x |= x >> 16;
-  x |= x >> 32;
-  x++;
-
-  return x;
-}
+#define DL_BUILDER_PAGE 4096
 
 // CopyV(dst, src,n, src,n, ...) copies any number of typed srcs into dst.
 static void CopyV(void* dst) {}
@@ -62,12 +42,12 @@ static constexpr inline bool is_power_of_two(int value) {
 template <typename T, typename... Args>
 void* DisplayListBuilder::Push(size_t pod, Args&&... args) {
   size_t size = SkAlignPtr(sizeof(T) + pod);
+  FML_CHECK(size < (1 << 24));
   if (used_ + size > allocated_) {
-    static_assert(is_power_of_two(kDLPageSize),
+    static_assert(is_power_of_two(DL_BUILDER_PAGE),
                   "This math needs updating for non-pow2.");
-    // Round up the allocated size + used size to the next power of 2, with a
-    // minimum increment of kDLPageSize.
-    allocated_ = NextPowerOfTwo(used_ + std::max(size, kDLPageSize));
+    // Next greater multiple of DL_BUILDER_PAGE.
+    allocated_ = (used_ + size + DL_BUILDER_PAGE) & ~(DL_BUILDER_PAGE - 1);
     storage_.realloc(allocated_);
     FML_CHECK(storage_.get());
     memset(storage_.get() + used_, 0, allocated_ - used_);
