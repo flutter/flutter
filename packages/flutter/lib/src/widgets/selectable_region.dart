@@ -3362,6 +3362,7 @@ final class SelectionListenerNotifier extends ChangeNotifier {
   /// a [SelectionListener].
   ///
   /// Listeners can be removed with [removeListener].
+  @override
   void addListener(VoidCallback listener) {
     super.addListener(listener);
   }
