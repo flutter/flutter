@@ -58,12 +58,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _initData();
-    _selectionNotifier.addStatusListener(_handleOnSelectionStateChanged);
+    _selectionNotifier.addStatusListener(_handleSelectionStatusChanged);
   }
 
   @override
   void dispose() {
-    _selectionNotifier.removeStatusListener(_handleOnSelectionStateChanged);
+    _selectionNotifier.removeStatusListener(_handleSelectionStatusChanged);
     _selectionNotifier.dispose();
     super.dispose();
   }
@@ -119,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _handleOnSelectionStateChanged(SelectionListenerStatus status) {
+  void _handleSelectionStatusChanged(SelectionListenerStatus status) {
     if (_menuController.isShown) {
       ContextMenuController.removeAny();
     }

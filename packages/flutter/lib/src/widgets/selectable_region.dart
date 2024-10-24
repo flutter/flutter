@@ -3210,10 +3210,17 @@ class _SelectableRegionScope extends InheritedNotifier<_SelectableRegionSelectio
 /// an additional [SelectionListener] under each one.
 ///
 /// {@tool dartpad}
-/// This example shows how to color the active selection red
+/// This example shows how to use [SelectionListener] to listen to selection changes
 /// under a [SelectionArea] or [SelectableRegion].
 ///
 /// ** See code in examples/api/lib/material/selection_area/selection_area.1.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to color the active selection red
+/// under a [SelectionArea] or [SelectableRegion].
+///
+/// ** See code in examples/api/lib/material/selection_area/selection_area.2.dart **
 /// {@end-tool}
 ///
 /// See also:
