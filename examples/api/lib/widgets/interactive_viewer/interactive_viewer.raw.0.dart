@@ -89,7 +89,7 @@ class _IVRawExampleState extends State<_IVRawExample> {
                   ),
                 ),
               ),
-              for (final node in nodes)
+              for (final Node node in nodes)
                 AnimatedBuilder(
                   animation: node,
                   builder: (BuildContext context, Widget? child) {
