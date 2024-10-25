@@ -84,27 +84,44 @@ Point TextFrame::ComputeSubpixelPosition(
   }
 }
 
-void TextFrame::CollectUniqueFontGlyphPairs(
-    FontGlyphMap& glyph_map,
-    Scalar scale,
-    Point offset,
-    const GlyphProperties& properties) const {
-  std::optional<GlyphProperties> lookup =
-      (properties.stroke || HasColor())
-          ? std::optional<GlyphProperties>(properties)
-          : std::nullopt;
-  for (const TextRun& run : GetRuns()) {
-    const Font& font = run.GetFont();
-    auto rounded_scale =
-        RoundScaledFontSize(scale, font.GetMetrics().point_size);
-    auto& set = glyph_map[ScaledFont{font, rounded_scale}];
-    for (const TextRun::GlyphPosition& glyph_position :
-         run.GetGlyphPositions()) {
-      Point subpixel = ComputeSubpixelPosition(
-          glyph_position, font.GetAxisAlignment(), offset, scale);
-      set.emplace(glyph_position.glyph, subpixel, lookup);
-    }
+void TextFrame::SetPerFrameData(Scalar scale,
+                                Point offset,
+                                std::optional<GlyphProperties> properties) {
+  scale_ = scale;
+  offset_ = offset;
+  properties_ = properties;
+}
+
+Scalar TextFrame::GetScale() const {
+  return scale_;
+}
+
+Point TextFrame::GetOffset() const {
+  return offset_;
+}
+
+std::optional<GlyphProperties> TextFrame::GetProperties() const {
+  return properties_;
+}
+
+void TextFrame::AppendFrameBounds(const FrameBounds& frame_bounds) {
+  bound_values_.push_back(frame_bounds);
+}
+
+void TextFrame::ClearFrameBounds() {
+  bound_values_.clear();
+}
+
+bool TextFrame::IsFrameComplete() const {
+  size_t run_size = 0;
+  for (const auto& x : runs_) {
+    run_size += x.GetGlyphCount();
   }
+  return bound_values_.size() == run_size;
+}
+
+const FrameBounds& TextFrame::GetFrameBounds(size_t index) const {
+  return bound_values_.at(index);
 }
 
 }  // namespace impeller

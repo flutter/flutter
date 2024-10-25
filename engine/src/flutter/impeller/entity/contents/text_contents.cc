@@ -17,7 +17,6 @@
 #include "impeller/geometry/point.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/typographer/glyph_atlas.h"
-#include "impeller/typographer/lazy_glyph_atlas.h"
 
 namespace impeller {
 
@@ -88,6 +87,10 @@ bool TextContents::Render(const ContentContext& renderer,
 
   if (!atlas || !atlas->IsValid()) {
     VALIDATION_LOG << "Cannot render glyphs without prepared atlas.";
+    return false;
+  }
+  if (!frame_->IsFrameComplete()) {
+    VALIDATION_LOG << "Failed to find font glyph bounds.";
     return false;
   }
 
@@ -169,16 +172,12 @@ bool TextContents::Render(const ContentContext& renderer,
         VS::PerVertexData* vtx_contents =
             reinterpret_cast<VS::PerVertexData*>(contents);
         size_t i = 0u;
+        size_t bounds_offset = 0u;
         for (const TextRun& run : frame_->GetRuns()) {
           const Font& font = run.GetFont();
           Scalar rounded_scale = TextFrame::RoundScaledFontSize(
               scale_, font.GetMetrics().point_size);
-          const FontGlyphAtlas* font_atlas =
-              atlas->GetFontGlyphAtlas(font, rounded_scale);
-          if (!font_atlas) {
-            VALIDATION_LOG << "Could not find font in the atlas.";
-            continue;
-          }
+          FontGlyphAtlas* font_atlas = nullptr;
 
           // Adjust glyph position based on the subpixel rounding
           // used by the font.
@@ -201,22 +200,44 @@ bool TextContents::Render(const ContentContext& renderer,
           Point screen_offset = (entity_transform * Point(0, 0));
           for (const TextRun::GlyphPosition& glyph_position :
                run.GetGlyphPositions()) {
-            // Note: uses unrounded scale for more accurate subpixel position.
-            Point subpixel = TextFrame::ComputeSubpixelPosition(
-                glyph_position, font.GetAxisAlignment(), offset_, scale_);
-            std::optional<std::pair<Rect, Rect>> maybe_atlas_glyph_bounds =
-                font_atlas->FindGlyphBounds(SubpixelGlyph{
-                    glyph_position.glyph, subpixel,
-                    (properties_.stroke || frame_->HasColor())
-                        ? std::optional<GlyphProperties>(properties_)
-                        : std::nullopt});
-            if (!maybe_atlas_glyph_bounds.has_value()) {
-              VALIDATION_LOG << "Could not find glyph position in the atlas.";
-              continue;
+            const FrameBounds& frame_bounds =
+                frame_->GetFrameBounds(bounds_offset);
+            bounds_offset++;
+            auto atlas_glyph_bounds = frame_bounds.atlas_bounds;
+            auto glyph_bounds = frame_bounds.glyph_bounds;
+
+            // If frame_bounds.is_placeholder is true, this is the first frame
+            // the glyph has been rendered and so its atlas position was not
+            // known when the glyph was recorded. Perform a slow lookup into the
+            // glyph atlas hash table.
+            if (frame_bounds.is_placeholder) {
+              if (!font_atlas) {
+                font_atlas = atlas->GetOrCreateFontGlyphAtlas(
+                    ScaledFont{font, rounded_scale});
+              }
+
+              if (!font_atlas) {
+                VALIDATION_LOG << "Could not find font in the atlas.";
+                continue;
+              }
+              // Note: uses unrounded scale for more accurate subpixel position.
+              Point subpixel = TextFrame::ComputeSubpixelPosition(
+                  glyph_position, font.GetAxisAlignment(), offset_, scale_);
+
+              std::optional<FrameBounds> maybe_atlas_glyph_bounds =
+                  font_atlas->FindGlyphBounds(SubpixelGlyph{
+                      glyph_position.glyph,  //
+                      subpixel,              //
+                      GetGlyphProperties()   //
+                  });
+              if (!maybe_atlas_glyph_bounds.has_value()) {
+                VALIDATION_LOG << "Could not find glyph position in the atlas.";
+                continue;
+              }
+              atlas_glyph_bounds =
+                  maybe_atlas_glyph_bounds.value().atlas_bounds;
             }
-            const Rect& atlas_glyph_bounds =
-                maybe_atlas_glyph_bounds.value().first;
-            Rect glyph_bounds = maybe_atlas_glyph_bounds.value().second;
+
             Rect scaled_bounds = glyph_bounds.Scale(1.0 / rounded_scale);
             // For each glyph, we compute two rectangles. One for the vertex
             // positions and one for the texture coordinates (UVs). The atlas
@@ -261,6 +282,12 @@ bool TextContents::Render(const ContentContext& renderer,
   pass.SetElementCount(vertex_count);
 
   return pass.Draw().ok();
+}
+
+std::optional<GlyphProperties> TextContents::GetGlyphProperties() const {
+  return (properties_.stroke || frame_->HasColor())
+             ? std::optional<GlyphProperties>(properties_)
+             : std::nullopt;
 }
 
 }  // namespace impeller
