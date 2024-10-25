@@ -207,6 +207,7 @@ TEST_P(InteropPlaygroundTest, CanCreateParagraphs) {
   auto style = Adopt<ParagraphStyle>(ImpellerParagraphStyleNew());
   ASSERT_TRUE(style);
   ImpellerParagraphStyleSetFontSize(style.GetC(), 150.0f);
+  ImpellerParagraphStyleSetHeight(style.GetC(), 2.0f);
 
   {
     auto paint = Adopt<Paint>(ImpellerPaintNew());
