@@ -237,11 +237,10 @@ class MDnsVmServiceDiscovery {
             timeout: timeout
         );
       } on SocketException catch (e) {
-        _logger.printTrace(e.message);
         throwToolExit('You may be having a permissions issue with your IDE. '
             'Please try going to '
             'System Settings -> Privacy & Security -> Local Network -> '
-            '[Find your IDE] -> Toggle ON, then restart your phone.');
+            '[Find your IDE] -> Toggle ON, then restarting your phone.');
       }
 
       await for (final PtrResourceRecord ptr in ptrResourceStream) {

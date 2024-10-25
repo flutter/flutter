@@ -577,7 +577,7 @@ void main() {
         );
       });
 
-      testWithoutContext('Throws tool exception with a helpful message when client throws a SocketError on lookup', () async {
+      testWithoutContext('Throws tool exit with a helpful message when client throws a SocketException on lookup', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[], <String, List<SrvResourceRecord>>{},
           socketErrorOnStart: true);
@@ -594,7 +594,7 @@ void main() {
           throwsToolExit(message: 'You may be having a permissions issue with your IDE. '
               'Please try going to '
               'System Settings -> Privacy & Security -> Local Network -> '
-              '[Find your IDE] -> Toggle ON, then restart your phone.')
+              '[Find your IDE] -> Toggle ON, then restarting your phone.')
         );
       });
 
