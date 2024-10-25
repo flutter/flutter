@@ -295,16 +295,17 @@ class CanvasDlDispatcher : public DlDispatcherBase {
   Canvas& GetCanvas() override;
 };
 
-/// Performs a first pass over the display list to collect all text frames.
-class TextFrameDispatcher : public flutter::IgnoreAttributeDispatchHelper,
+/// Performs a first pass over the display list to collect infomation.
+/// Collects things like text frames and backdrop filters.
+class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
                             public flutter::IgnoreClipDispatchHelper,
                             public flutter::IgnoreDrawDispatchHelper {
  public:
-  TextFrameDispatcher(const ContentContext& renderer,
+  FirstPassDispatcher(const ContentContext& renderer,
                       const Matrix& initial_matrix,
                       const Rect cull_rect);
 
-  ~TextFrameDispatcher();
+  ~FirstPassDispatcher();
 
   void save() override;
 
