@@ -12,7 +12,6 @@
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
-#include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/fl_keyboard_handler.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
@@ -35,16 +34,19 @@ static constexpr int kMicrosecondsPerMillisecond = 1000;
 struct _FlView {
   GtkBox parent_instance;
 
+  // The widget rendering the Flutter view.
+  GtkGLArea* gl_area;
+
   // Engine this view is showing.
   FlEngine* engine;
 
-  // Handler for engine restart signal.
-  guint on_pre_engine_restart_handler;
+  // Signal subscription for engine restarts.
+  guint on_pre_engine_restart_cb_id;
 
   // ID for this view.
   FlutterViewId view_id;
 
-  // Rendering output.
+  // Object that performs the view rendering.
   FlRendererGdk* renderer;
 
   // Background color.
@@ -59,8 +61,10 @@ struct _FlView {
   // Monitor to track window state.
   FlWindowStateMonitor* window_state_monitor;
 
+  // Manages scrolling events.
   FlScrollingManager* scrolling_manager;
 
+  // Manages keyboard events.
   FlKeyboardManager* keyboard_manager;
 
   // Flutter system channel handlers.
@@ -68,10 +72,7 @@ struct _FlView {
   FlTextInputHandler* text_input_handler;
   FlMouseCursorHandler* mouse_cursor_handler;
 
-  GtkWidget* event_box;
-  GtkGLArea* gl_area;
-
-  // Tracks whether mouse pointer is inside the view.
+  // TRUE if the mouse pointer is inside the view.
   gboolean pointer_inside;
 
   // Accessible tree from Flutter, exposed as an AtkPlug.
@@ -668,10 +669,10 @@ static void fl_view_dispose(GObject* object) {
                           nullptr);
   }
 
-  if (self->on_pre_engine_restart_handler != 0) {
+  if (self->on_pre_engine_restart_cb_id != 0) {
     g_signal_handler_disconnect(self->engine,
-                                self->on_pre_engine_restart_handler);
-    self->on_pre_engine_restart_handler = 0;
+                                self->on_pre_engine_restart_cb_id);
+    self->on_pre_engine_restart_cb_id = 0;
   }
 
   g_clear_object(&self->engine);
@@ -745,35 +746,35 @@ static void fl_view_init(FlView* self) {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   self->background_color = gdk_rgba_copy(&default_background);
 
-  self->event_box = gtk_event_box_new();
-  gtk_widget_set_hexpand(self->event_box, TRUE);
-  gtk_widget_set_vexpand(self->event_box, TRUE);
-  gtk_container_add(GTK_CONTAINER(self), self->event_box);
-  gtk_widget_show(self->event_box);
-  gtk_widget_add_events(self->event_box,
+  GtkWidget* event_box = gtk_event_box_new();
+  gtk_widget_set_hexpand(event_box, TRUE);
+  gtk_widget_set_vexpand(event_box, TRUE);
+  gtk_container_add(GTK_CONTAINER(self), event_box);
+  gtk_widget_show(event_box);
+  gtk_widget_add_events(event_box,
                         GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
                             GDK_BUTTON_RELEASE_MASK | GDK_SCROLL_MASK |
                             GDK_SMOOTH_SCROLL_MASK);
 
-  g_signal_connect_swapped(self->event_box, "button-press-event",
+  g_signal_connect_swapped(event_box, "button-press-event",
                            G_CALLBACK(button_press_event_cb), self);
-  g_signal_connect_swapped(self->event_box, "button-release-event",
+  g_signal_connect_swapped(event_box, "button-release-event",
                            G_CALLBACK(button_release_event_cb), self);
-  g_signal_connect_swapped(self->event_box, "scroll-event",
+  g_signal_connect_swapped(event_box, "scroll-event",
                            G_CALLBACK(scroll_event_cb), self);
-  g_signal_connect_swapped(self->event_box, "motion-notify-event",
+  g_signal_connect_swapped(event_box, "motion-notify-event",
                            G_CALLBACK(motion_notify_event_cb), self);
-  g_signal_connect_swapped(self->event_box, "enter-notify-event",
+  g_signal_connect_swapped(event_box, "enter-notify-event",
                            G_CALLBACK(enter_notify_event_cb), self);
-  g_signal_connect_swapped(self->event_box, "leave-notify-event",
+  g_signal_connect_swapped(event_box, "leave-notify-event",
                            G_CALLBACK(leave_notify_event_cb), self);
-  GtkGesture* zoom = gtk_gesture_zoom_new(self->event_box);
+  GtkGesture* zoom = gtk_gesture_zoom_new(event_box);
   g_signal_connect_swapped(zoom, "begin", G_CALLBACK(gesture_zoom_begin_cb),
                            self);
   g_signal_connect_swapped(zoom, "scale-changed",
                            G_CALLBACK(gesture_zoom_update_cb), self);
   g_signal_connect_swapped(zoom, "end", G_CALLBACK(gesture_zoom_end_cb), self);
-  GtkGesture* rotate = gtk_gesture_rotate_new(self->event_box);
+  GtkGesture* rotate = gtk_gesture_rotate_new(event_box);
   g_signal_connect_swapped(rotate, "begin",
                            G_CALLBACK(gesture_rotation_begin_cb), self);
   g_signal_connect_swapped(rotate, "angle-changed",
@@ -784,7 +785,7 @@ static void fl_view_init(FlView* self) {
   self->gl_area = GTK_GL_AREA(gtk_gl_area_new());
   gtk_gl_area_set_has_alpha(self->gl_area, TRUE);
   gtk_widget_show(GTK_WIDGET(self->gl_area));
-  gtk_container_add(GTK_CONTAINER(self->event_box), GTK_WIDGET(self->gl_area));
+  gtk_container_add(GTK_CONTAINER(event_box), GTK_WIDGET(self->gl_area));
   g_signal_connect_swapped(self->gl_area, "render", G_CALLBACK(render_cb),
                            self);
 
@@ -804,7 +805,7 @@ G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
 
   fl_engine_set_update_semantics_handler(self->engine, update_semantics_cb,
                                          self, nullptr);
-  self->on_pre_engine_restart_handler =
+  self->on_pre_engine_restart_cb_id =
       g_signal_connect_swapped(engine, "on-pre-engine-restart",
                                G_CALLBACK(on_pre_engine_restart_cb), self);
 
@@ -826,7 +827,7 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
   g_assert(FL_IS_RENDERER_GDK(renderer));
   self->renderer = FL_RENDERER_GDK(g_object_ref(renderer));
 
-  self->on_pre_engine_restart_handler =
+  self->on_pre_engine_restart_cb_id =
       g_signal_connect_swapped(engine, "on-pre-engine-restart",
                                G_CALLBACK(on_pre_engine_restart_cb), self);
 
