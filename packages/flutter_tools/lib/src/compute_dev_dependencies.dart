@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:process/process.dart';
 
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'convert.dart';
 
@@ -128,7 +127,8 @@ Future<Set<String>> computeExclusiveDevDependencies(
   // as a dev dependency.
   final Set<String> visited = <String>{};
   void visitPackage(String packageName) {
-    if (!visited.add(packageName)) {
+    final bool wasAlreadyVisited = !visited.add(packageName);
+    if (wasAlreadyVisited) {
       return;
     }
 
@@ -153,7 +153,7 @@ Future<Set<String>> computeExclusiveDevDependencies(
     // a signal that the package can be ignored/removed.
     devDependencies.removeAll(directDependencies);
 
-    // And continue visiting.
+    // And continue visiting (visitPackage checks for circular loops).
     directDependencies.forEach(visitPackage);
   }
 
