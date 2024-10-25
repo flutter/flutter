@@ -28,6 +28,7 @@ void ParagraphStyle::SetFontSize(double size) {
 
 void ParagraphStyle::SetHeight(double height) {
   style_.height = height;
+  style_.has_height_override = (height != 0.0);
 }
 
 void ParagraphStyle::SetTextAlignment(txt::TextAlign alignment) {
