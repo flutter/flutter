@@ -416,12 +416,12 @@ class Plugin {
   final bool isDirectDependency;
 
   /// Whether this plugin is exclusively used as a dev dependency of the app.
-  /// 
+  ///
   /// If [false], the plugin is either:
   /// - _Not_ a dev dependency
   /// - _Not_ a dev dependency of some dependency that itself is not a dev
   ///   dependency
-  /// 
+  ///
   /// Dev dependencies are intended to be stripped out in release builds.
   final bool isDevDependency;
 
