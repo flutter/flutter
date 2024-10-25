@@ -284,8 +284,9 @@ void main() {
 
     objectWithDelegate.markNeedsSemanticsUpdate();
     await tester.pump();
-    // object with delegate rebuilds up to grand parent boundary;
-    expect(innerObject.hasRebuildSemantics, isTrue);
+    // object with delegate rebuilds up to grand parent boundary except the
+    // the inner object since it is not dirty.
+    expect(innerObject.hasRebuildSemantics, isFalse);
     expect(boundaryParentObject.hasRebuildSemantics, isTrue);
     expect(grandBoundaryParentObject.hasRebuildSemantics, isTrue);
     resetBuildState();
@@ -295,7 +296,7 @@ void main() {
     // Render objects in between child delegate and grand boundary parent does
     // not mark the grand boundary parent dirty because it should not change the
     // generated sibling nodes.
-    expect(innerObject.hasRebuildSemantics, isTrue);
+    expect(innerObject.hasRebuildSemantics, isFalse);
     expect(boundaryParentObject.hasRebuildSemantics, isTrue);
     expect(grandBoundaryParentObject.hasRebuildSemantics, isFalse);
   });
@@ -323,6 +324,7 @@ class RenderMarkSemanticsDirtySpy extends RenderProxyBox {
     Iterable<SemanticsNode> children,
   ) {
     hasRebuildSemantics = true;
+    super.assembleSemanticsNode(node, config, children);
   }
 }
 

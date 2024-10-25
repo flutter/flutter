@@ -1058,11 +1058,13 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     _semanticsInfo = text.getSemanticsInformation();
     bool needsAssembleSemanticsNode = false;
     bool needsChildConfigurationsDelegate = false;
+    bool hasTextSpan = false;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
       if (info.recognizer != null) {
         needsAssembleSemanticsNode = true;
         break;
       }
+      hasTextSpan = hasTextSpan || !info.isPlaceholder;
       needsChildConfigurationsDelegate = needsChildConfigurationsDelegate || info.isPlaceholder;
     }
 
@@ -1071,6 +1073,19 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       config.isSemanticBoundary = true;
     } else if (needsChildConfigurationsDelegate) {
       config.childConfigurationsDelegate = _childSemanticsConfigurationsDelegate;
+      // TODO(chunhtai): Figure out what to do when text spans are asked to form
+      // a semantics node.
+      //
+      // this is a workaround to get around cases where text span can't formed
+      // a semantics node by itself. In `childConfigurationsDelegate`, the
+      // text spans are converted into SemanticsConfigurations to be merge up
+      // This can become a problem if parent has explicit child set to true.
+      // Setting the hasBeenAnnotated will force this render object to absorb
+      // all the text spans' SemanticsConfigurations.
+      if (hasTextSpan) {
+        // Text Span will contribute
+        config.hasBeenAnnotated = true;
+      }
     } else {
       if (_cachedAttributedLabels == null) {
         final StringBuffer buffer = StringBuffer();
