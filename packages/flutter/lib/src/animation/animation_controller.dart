@@ -812,16 +812,18 @@ class AnimationController extends Animation<double>
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
   ///
-  /// The [status] is always [AnimationStatus.forward] for the entire duration
-  /// of the simulation.
-  TickerFuture animateWith(Simulation simulation) {
+  /// The [status] will be [AnimationStatus.forward] or
+  /// [AnimationStatus.reverse] for the entire duration of the simulation
+  /// depending on `isReverse`, which affects the reported status when the
+  /// animation is completed.
+  TickerFuture animateWith(Simulation simulation, {bool isReverse = false}) {
     assert(
       _ticker != null,
       'AnimationController.animateWith() called after AnimationController.dispose()\n'
       'AnimationController methods should not be used after calling dispose.',
     );
     stop();
-    _direction = _AnimationDirection.forward;
+    _direction = isReverse ? _AnimationDirection.reverse : _AnimationDirection.forward;
     return _startSimulation(simulation);
   }
 

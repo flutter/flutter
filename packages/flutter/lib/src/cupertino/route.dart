@@ -20,6 +20,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -1059,6 +1060,16 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   }
 }
 
+// The stiffness used by dialogs and action sheets.
+//
+// Derived by dumping description of [CASpringAnimation] from XCode.
+const double _kStandardStiffness = 522.35;
+const SpringDescription _kStandardSpring = SpringDescription.withDampingRatio(
+  mass: 1,
+  stiffness: _kStandardStiffness,
+  ratio: 1,
+);
+
 /// A route that shows a modal iOS-style popup that slides up from the
 /// bottom of the screen.
 ///
@@ -1109,6 +1120,9 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   }) : _barrierDismissible = barrierDismissible,
        _semanticsDismissible = semanticsDismissible;
 
+  @override
+  bool get useSimulation => true;
+
   /// A builder that builds the widget tree for the [CupertinoModalPopupRoute].
   ///
   /// The [builder] argument typically builds a [CupertinoActionSheet] widget.
@@ -1138,29 +1152,18 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
-  CurvedAnimation? _animation;
-
-  late Tween<Offset> _offsetTween;
+  final Tween<Offset> _offsetTween = Tween<Offset>(
+    begin: const Offset(0.0, 1.0),
+    end: Offset.zero,
+  );
 
   /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
 
   @override
-  Animation<double> createAnimation() {
-    assert(_animation == null);
-    _animation = CurvedAnimation(
-      parent: super.createAnimation(),
-
-      // These curves were initially measured from native iOS horizontal page
-      // route animations and seemed to be a good match here as well.
-      curve: Curves.linearToEaseOut,
-      reverseCurve: Curves.linearToEaseOut.flipped,
-    );
-    _offsetTween = Tween<Offset>(
-      begin: const Offset(0.0, 1.0),
-      end: Offset.zero,
-    );
-    return _animation!;
+  Simulation createSimulation({required double end}) {
+    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
+    return SpringSimulation(_createIosSpring(), controller!.value, end, 0);
   }
 
   @override
@@ -1179,7 +1182,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     return Align(
       alignment: Alignment.bottomCenter,
       child: FractionalTranslation(
-        translation: _offsetTween.evaluate(_animation!),
+        translation: _offsetTween.evaluate(animation!),
         child: child,
       ),
     );
@@ -1187,7 +1190,6 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   @override
   void dispose() {
-    _animation?.dispose();
     super.dispose();
   }
 }
