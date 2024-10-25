@@ -417,7 +417,7 @@ class _FormScope extends InheritedWidget {
 /// otherwise.
 ///
 /// Used by [FormField.validator].
-typedef FormFieldValidator<T> = String? Function(T? value);
+typedef FormFieldValidator<T> = String? Function(BuildContext context, T? value);
 
 /// Signature for being notified when a form field changes value.
 ///
@@ -596,7 +596,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   ///  * [validate], which may update [errorText] and [hasError].
   ///
   ///  * [FormField.forceErrorText], which also may update [errorText] and [hasError].
-  bool get isValid => widget.forceErrorText == null && widget.validator?.call(_value) == null;
+  bool get isValid => widget.forceErrorText == null && widget.validator?.call(context, _value) == null;
 
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
@@ -635,7 +635,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       return;
     }
     if (widget.validator != null) {
-      _errorText.value = widget.validator!(_value);
+      _errorText.value = widget.validator!(context, _value);
     } else {
       _errorText.value = null;
     }

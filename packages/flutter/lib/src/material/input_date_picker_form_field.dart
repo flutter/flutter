@@ -219,7 +219,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       (widget.selectableDayPredicate == null || widget.selectableDayPredicate!(date));
   }
 
-  String? _validateDate(String? text) {
+  String? _validateDate(BuildContext context, String? text) {
     if ((text == null || text.isEmpty) && widget.acceptEmptyDate) {
       return null;
     }

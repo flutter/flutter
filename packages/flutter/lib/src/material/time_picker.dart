@@ -1736,7 +1736,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     _TimePickerModel.setSelectedTime(context, _selectedTime.value);
   }
 
-  String? _validateHour(String? value) {
+  String? _validateHour(BuildContext context, String? value) {
     final int? newHour = _parseHour(value);
     setState(() {
       hourHasError.value = newHour == null;
@@ -1747,7 +1747,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     return newHour == null ? '' : null;
   }
 
-  String? _validateMinute(String? value) {
+  String? _validateMinute(BuildContext context, String? value) {
     final int? newMinute = _parseMinute(value);
     setState(() {
       minuteHasError.value = newMinute == null;

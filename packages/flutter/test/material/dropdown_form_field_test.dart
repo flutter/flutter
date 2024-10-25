@@ -463,7 +463,7 @@ void main() {
                     value = newValue;
                   });
                 },
-                validator: (String? currentValue) {
+                validator: (BuildContext context, String? currentValue) {
                   validateCalled++;
                   return currentValue == null ? 'Must select value' : null;
                 },
@@ -1100,7 +1100,7 @@ void main() {
                 );
               }).toList(),
               onChanged: onChanged,
-              validator: (String? value) {
+              validator: (BuildContext context, String? value) {
                 validateCalled++;
                 return null;
               },
