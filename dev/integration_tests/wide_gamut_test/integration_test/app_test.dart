@@ -175,5 +175,45 @@ void main() {
           await channel.invokeMethod('test') as List<Object?>;
       expect(_findColor(result, _deepRed), isTrue);
     });
+
+    testWidgets('draw wide gamut linear gradient works', (WidgetTester tester) async {
+      app.run(app.Setup.linearGradient);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findColor(result, _deepRed), isTrue);
+    });
+
+    testWidgets('draw wide gamut radial gradient works', (WidgetTester tester) async {
+      app.run(app.Setup.radialGradient);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findColor(result, _deepRed), isTrue);
+    });
+
+    testWidgets('draw wide gamut conical gradient works', (WidgetTester tester) async {
+      app.run(app.Setup.conicalGradient);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findColor(result, _deepRed), isTrue);
+    });
+
+    testWidgets('draw wide gamut sweep gradient works', (WidgetTester tester) async {
+      app.run(app.Setup.sweepGradient);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findColor(result, _deepRed), isTrue);
+    });
   });
 }
