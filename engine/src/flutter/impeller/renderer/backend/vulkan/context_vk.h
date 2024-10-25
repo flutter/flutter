@@ -234,7 +234,9 @@ class ContextVK final : public Context,
   using DescriptorPoolMap =
       std::unordered_map<std::thread::id, std::shared_ptr<DescriptorPoolVK>>;
 
-  mutable DescriptorPoolMap cached_descriptor_pool_;
+  mutable Mutex desc_pool_mutex_;
+  mutable DescriptorPoolMap IPLR_GUARDED_BY(desc_pool_mutex_)
+      cached_descriptor_pool_;
   bool should_disable_surface_control_ = false;
   bool should_batch_cmd_buffers_ = false;
   std::vector<std::shared_ptr<CommandBuffer>> pending_command_buffers_;
