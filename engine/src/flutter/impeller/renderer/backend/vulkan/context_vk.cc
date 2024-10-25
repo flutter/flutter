@@ -503,15 +503,18 @@ std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
 
   // look up a cached descriptor pool for the current frame and reuse it
   // if it exists, otherwise create a new pool.
-  DescriptorPoolMap::iterator current_pool =
-      cached_descriptor_pool_.find(std::this_thread::get_id());
   std::shared_ptr<DescriptorPoolVK> descriptor_pool;
-  if (current_pool == cached_descriptor_pool_.end()) {
-    descriptor_pool =
-        (cached_descriptor_pool_[std::this_thread::get_id()] =
-             std::make_shared<DescriptorPoolVK>(weak_from_this()));
-  } else {
-    descriptor_pool = current_pool->second;
+  {
+    Lock lock(desc_pool_mutex_);
+    DescriptorPoolMap::iterator current_pool =
+        cached_descriptor_pool_.find(std::this_thread::get_id());
+    if (current_pool == cached_descriptor_pool_.end()) {
+      descriptor_pool =
+          (cached_descriptor_pool_[std::this_thread::get_id()] =
+               std::make_shared<DescriptorPoolVK>(weak_from_this()));
+    } else {
+      descriptor_pool = current_pool->second;
+    }
   }
 
   auto tracked_objects = std::make_shared<TrackedObjectsVK>(
@@ -668,7 +671,10 @@ void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
 }
 
 void ContextVK::DisposeThreadLocalCachedResources() {
-  cached_descriptor_pool_.erase(std::this_thread::get_id());
+  {
+    Lock lock(desc_pool_mutex_);
+    cached_descriptor_pool_.erase(std::this_thread::get_id());
+  }
   command_pool_recycler_->Dispose();
 }
 
