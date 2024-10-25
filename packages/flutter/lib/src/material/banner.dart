@@ -324,7 +324,10 @@ class _MaterialBannerState extends State<MaterialBanner> {
     super.dispose();
   }
 
+  void _test() {}
+
   void _onAnimationStatusChanged(AnimationStatus status) {
+    _test();
     if (status.isCompleted) {
       if (widget.onVisible != null && !_wasVisible) {
         widget.onVisible!();
