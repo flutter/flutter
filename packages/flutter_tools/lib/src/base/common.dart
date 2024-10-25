@@ -8,8 +8,6 @@
 /// gracefully with a human actionable error [message]", and should be used in
 /// scenarios where a human (developer) can make a decision based on the result.
 /// 
-/// A stack trace is included in the tool output when `--verbose` is specified.
-/// 
 /// For example:
 /// 
 /// - An invalid set of command-line arguments were passed.
@@ -20,6 +18,8 @@
 /// 
 /// - An internal tool (such as invoking `dart`) returns an unexpected response.
 /// - An unrecoverable state is detected deeper in execution.
+/// 
+/// A stack trace is included in the tool output when `--verbose` is specified.
 /// 
 /// While supported, avoid passing `null` for [message]; this is a legacy
 /// behavior that is not intended. For example, provide the message directly
