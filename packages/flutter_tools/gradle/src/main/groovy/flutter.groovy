@@ -46,7 +46,7 @@ class FlutterExtension {
     public final int compileSdkVersion = 35
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
-    public  final int minSdkVersion = 21
+    public final int minSdkVersion = 21
 
     /**
      * Sets the targetSdkVersion used by default in Flutter app projects.
@@ -1432,7 +1432,7 @@ class FlutterPlugin implements Plugin<Project> {
             // This path is not flavor specific and must only be added once.
             // If support for flavors is added to native assets, then they must only be added
             // once per flavor; see https://github.com/dart-lang/native/issues/1359.
-            String nativeAssetsDir = "${project.buildDir}/../native_assets/android/jniLibs/lib/"
+            String nativeAssetsDir = "${project.layout.buildDirectory.dir("../native_assets/android/jniLibs/lib").get()}/"
             project.android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             configurePlugins(project)
             detectLowCompileSdkVersionOrNdkVersion()
