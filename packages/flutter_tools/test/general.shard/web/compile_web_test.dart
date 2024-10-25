@@ -138,6 +138,8 @@ void main() {
       ),
       true,
     );
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('WebBuilder throws tool exit on failure', () async {
@@ -176,5 +178,7 @@ void main() {
     expect(logger.errorText, contains('Target hello failed: FormatException: illegal character in input string'));
     expect(testUsage.timings, isEmpty);
     expect(fakeAnalytics.sentEvents, isEmpty);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
