@@ -236,7 +236,7 @@ class MDnsVmServiceDiscovery {
             ResourceRecordQuery.serverPointer(dartVmServiceName),
             timeout: timeout
         );
-      } on SocketException catch (e) {
+      } on SocketException {
         throwToolExit('You may be having a permissions issue with your IDE. '
             'Please try going to '
             'System Settings -> Privacy & Security -> Local Network -> '
