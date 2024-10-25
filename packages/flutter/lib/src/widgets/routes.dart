@@ -218,7 +218,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// After [dispose] is called, this object can no longer be used.
   ///
   /// This method only works if assert is enabled. Otherwise it always returns
-  /// true.
+  /// false.
   @protected
   bool debugIsDisposed() {
     bool disposed = false;

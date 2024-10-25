@@ -1064,50 +1064,11 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 //
 // Derived by dumping description of [CASpringAnimation] from XCode.
 const double _kStandardStiffness = 522.35;
-
-// Create a spring description in iOS's terms.
-//
-// See
-//  [1]: https://developer.apple.com/documentation/SwiftUI/Animation/spring(duration:bounce:blendDuration:)
-//  [2]: https://developer.apple.com/documentation/quartzcore/caspringanimation/4173018-init
-//  [3]: https://developer.apple.com/documentation/swiftui/spring/init(duration:bounce:)
-//
-// The `bounce` parameter determines the spring's bounciness and ranges from -1
-// to 1. A value of 0 indicates no bounces (a critically damped spring),
-// positive values (up to 1.0) represent increasing bounciness (up to undamped
-// oscillation), and negative values (down to -1.0) indicate overdamped springs.
-// This parameter directly corresponds to the `bounce` value used in the iOS
-// APIs listed above.
-//
-// The `stiffness` parameter matches the `stiffness` value in
-// [SpringDescription.stiffness] and can also be aligned with
-// `CASpringAnimation.stiffness` values from iOS. For iOS APIs, the `duration` or
-// `perceptualDuration` corresponds to (2 * pi / stiffness)^2. However, note
-// that this calculated duration may not match the `duration` displayed in
-// `CASpringAnimation.description` or Apple's official definitions of
-// "perceptual duration" or "settling duration." In Flutter, the settling
-// duration is instead controlled by [Simulation.tolerance].
-//
-// The mass of the spring is fixed at 1.0.
-SpringDescription _createIosSpring({
-  double stiffness = _kStandardStiffness,
-  double bounce = 0,
-}) {
-  assert(bounce >= -1 && bounce <= 1);
-  final double dampingRatio = switch(bounce) {
-    >= 0 => 1 - bounce,
-    <= 0 => 1 / (1 + bounce),
-    _ => throw UnsupportedError('Unreachable'),
-  };
-
-  const double mass = 1;
-
-  return SpringDescription.withDampingRatio(
-    mass: mass,
-    stiffness: stiffness,
-    ratio: dampingRatio,
-  );
-}
+const SpringDescription _kStandardSpring = SpringDescription.withDampingRatio(
+  mass: 1,
+  stiffness: _kStandardStiffness,
+  ratio: 1,
+);
 
 /// A route that shows a modal iOS-style popup that slides up from the
 /// bottom of the screen.
