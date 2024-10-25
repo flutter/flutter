@@ -892,18 +892,19 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
 
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
-    final SelectionResult result = _handleSelectParagraph(event);
-    if (currentSelectionStartIndex != -1) {
-      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
-    }
-    if (currentSelectionEndIndex != -1) {
-      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
-    }
-    _updateLastEdgeEventsFromGeometries();
+    final SelectionResult result = _handleSelectMultiSelectableBoundary(event);
+    _didReceiveSelectionBoundaryEvents();
     return result;
   }
 
-  SelectionResult _handleSelectParagraph(SelectParagraphSelectionEvent event) {
+  @override
+  SelectionResult handleSelectLine(SelectLineSelectionEvent event) {
+    final SelectionResult result = _handleSelectMultiSelectableBoundary(event);
+    _didReceiveSelectionBoundaryEvents();
+    return result;
+  }
+
+  SelectionResult _handleSelectMultiSelectableBoundary(SelectMultiSelectableBoundarySelectionEvent event) {
     if (event.absorb) {
       for (int index = 0; index < selectables.length; index += 1) {
         dispatchSelectionEventToChild(selectables[index], event);
@@ -931,11 +932,16 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     SelectionResult? lastSelectionResult;
     bool foundStart = false;
     int? lastNextIndex;
+    late final SelectionEvent? maybeSynthesizedEvent;
+    if (event.type == SelectionEventType.selectParagraph) {
+      maybeSynthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
+    } else if (event.type == SelectionEventType.selectLine) {
+      maybeSynthesizedEvent = SelectLineSelectionEvent(globalPosition: event.globalPosition, absorb: true);
+    }
     for (int index = 0; index < selectables.length; index += 1) {
       if (!paragraph.selectableBelongsToParagraph(selectables[index])) {
         if (foundStart) {
-          final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
-          final SelectionResult result = dispatchSelectionEventToChild(selectables[index], synthesizedEvent);
+          final SelectionResult result = dispatchSelectionEventToChild(selectables[index], maybeSynthesizedEvent!);
           if (selectables.length - 1 == index) {
             currentSelectionEndIndex = index;
             _flushInactiveSelections();
@@ -969,8 +975,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
             startIndex = lastNextIndex == null && selectionAtStartOfSelectable ? 0 : index;
           }
           for (int i = startIndex; i < index; i += 1) {
-            final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
-            dispatchSelectionEventToChild(selectables[i], synthesizedEvent);
+            dispatchSelectionEventToChild(selectables[i], maybeSynthesizedEvent!);
           }
           currentSelectionStartIndex = startIndex;
           foundStart = true;
@@ -984,12 +989,11 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         if (!foundStart && lastNextIndex == null) {
           currentSelectionStartIndex = 0;
           for (int i = 0; i < index; i += 1) {
-            final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
-            dispatchSelectionEventToChild(selectables[i], synthesizedEvent);
+            dispatchSelectionEventToChild(selectables[i], maybeSynthesizedEvent!);
           }
         }
         currentSelectionEndIndex = index;
-        // Geometry has changed as a result of select paragraph, need to clear the
+        // Geometry has changed as a result of select boundary, need to clear the
         // selection of other selectables to keep selection in sync.
         _flushInactiveSelections();
       }
@@ -1289,12 +1293,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   @override
   SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
     final SelectionResult result = super.handleSelectAll(event);
-    for (final Selectable selectable in selectables) {
-      _hasReceivedStartEvent.add(selectable);
-      _hasReceivedEndEvent.add(selectable);
-    }
-    // Synthesize last update event so the edge updates continue to work.
-    _updateLastEdgeEventsFromGeometries();
+    _didReceiveSelectionBoundaryEvents();
     return result;
   }
 
@@ -1303,14 +1302,21 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   @override
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     final SelectionResult result = super.handleSelectWord(event);
-    if (currentSelectionStartIndex != -1) {
-      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
+    _didReceiveSelectionBoundaryEvents();
+    return result;
+  }
+
+  void _didReceiveSelectionBoundaryEvents() {
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      return;
     }
-    if (currentSelectionEndIndex != -1) {
-      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
+    final int start = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int end = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    for (int index = start; index <= end; index += 1) {
+      _hasReceivedStartEvent.add(selectables[index]);
+      _hasReceivedEndEvent.add(selectables[index]);
     }
     _updateLastEdgeEventsFromGeometries();
-    return result;
   }
 
   @override
@@ -1331,7 +1337,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       _lastStartEdgeUpdateGlobalPosition = event.globalPosition;
     }
 
-    if (event.granularity == TextGranularity.paragraph) {
+    if (event.granularity == TextGranularity.paragraph || event.granularity == TextGranularity.line) {
       if (event.type == SelectionEventType.endEdgeUpdate) {
         return currentSelectionEndIndex == -1 ? _initSelection(event, isEnd: true) : _adjustSelection(event, isEnd: true);
       }
@@ -1363,6 +1369,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
       case SelectionEventType.selectParagraph:
+      case SelectionEventType.selectLine:
         break;
       case SelectionEventType.granularlyExtendSelection:
       case SelectionEventType.directionallyExtendSelection:
