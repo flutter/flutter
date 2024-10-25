@@ -582,6 +582,32 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   }
 }
 
+class _PopupMenuInterface<T> {
+  _PopupMenuInterface({
+    required this.items,
+    required this.itemSizes,
+    required this.animation,
+    this.initialValue,
+    this.menuPadding,
+    this.shape,
+    this.color,
+    this.shadowColor,
+    this.surfaceTintColor,
+    this.elevation
+  });
+
+  final List<PopupMenuEntry<T>> items;
+  final List<Size?> itemSizes;
+  final Animation<double>? animation;
+  final T? initialValue;
+  final EdgeInsetsGeometry? menuPadding;
+  final ShapeBorder? shape;
+  final Color? color;
+  final Color? shadowColor;
+  final Color? surfaceTintColor;
+  final double? elevation;
+}
+
 class _PopupMenu<T> extends StatefulWidget {
   const _PopupMenu({
     super.key,
@@ -593,7 +619,7 @@ class _PopupMenu<T> extends StatefulWidget {
   });
 
   final List<GlobalKey> itemKeys;
-  final _PopupMenuRoute<T> route;
+  final _PopupMenuInterface<T> route;
   final String? semanticLabel;
   final BoxConstraints? constraints;
   final Clip clipBehavior;
@@ -706,8 +732,17 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
     return AnimatedBuilder(
       animation: widget.route.animation!,
       builder: (BuildContext context, Widget? child) {
+        final AutoSizedWindowCreatorContext? autoSizedWindowCreatorContext =
+          AutoSizedWindowCreatorContext.of(context);
+        final bool isAutoSized = autoSizedWindowCreatorContext != null;
+        final Animation<double> animation = isAutoSized
+          ? const AlwaysStoppedAnimation<double>(1.0)
+          : opacity.animate(widget.route.animation!);
+        final double widthFactor =  width.evaluate(animation);
+        final double heightFactor = height.evaluate(animation);
+
         return FadeTransition(
-          opacity: opacity.animate(widget.route.animation!),
+          opacity: animation,
           child: Material(
             shape: widget.route.shape ?? popupMenuTheme.shape ?? defaults.shape,
             color: widget.route.color ?? popupMenuTheme.color ?? defaults.color,
@@ -718,8 +753,8 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
             surfaceTintColor: widget.route.surfaceTintColor ?? popupMenuTheme.surfaceTintColor ?? defaults.surfaceTintColor,
             child: Align(
               alignment: AlignmentDirectional.topEnd,
-              widthFactor: width.evaluate(widget.route.animation!),
-              heightFactor: height.evaluate(widget.route.animation!),
+              widthFactor: widthFactor,
+              heightFactor: heightFactor,
               child: child,
             ),
           ),
@@ -940,7 +975,18 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     }
 
     final Widget menu = _PopupMenu<T>(
-      route: this,
+      route: _PopupMenuInterface<T>(
+        items: items,
+        itemSizes: itemSizes,
+        animation: animation,
+        initialValue: initialValue,
+        menuPadding: menuPadding,
+        shape: shape,
+        color: color,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
+        elevation: elevation
+      ),
       itemKeys: itemKeys,
       semanticLabel: semanticLabel,
       constraints: constraints,
@@ -979,6 +1025,65 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   void dispose() {
     _animation?.dispose();
     super.dispose();
+  }
+}
+
+class _PopupMenuWindowRouteContent<T> extends StatelessWidget {
+  _PopupMenuWindowRouteContent({
+    required this.position,
+    required this.items,
+    required this.itemKeys,
+    this.initialValue,
+    this.elevation,
+    this.surfaceTintColor,
+    this.shadowColor,
+    this.semanticLabel,
+    this.shape,
+    this.menuPadding,
+    this.color,
+    required this.capturedThemes,
+    this.constraints,
+    required this.clipBehavior,
+    required this.animation,
+  }) : itemSizes = List<Size?>.filled(items.length, null);
+
+  final RelativeRect position;
+  final List<PopupMenuEntry<T>> items;
+  final List<GlobalKey> itemKeys;
+  final List<Size?> itemSizes;
+  final T? initialValue;
+  final double? elevation;
+  final Color? surfaceTintColor;
+  final Color? shadowColor;
+  final String? semanticLabel;
+  final ShapeBorder? shape;
+  final EdgeInsetsGeometry? menuPadding;
+  final Color? color;
+  final CapturedThemes capturedThemes;
+  final BoxConstraints? constraints;
+  final Clip clipBehavior;
+  final Animation<double>? animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return _PopupMenu<T>(
+      route: _PopupMenuInterface<T>(
+        items: items,
+        itemSizes: itemSizes,
+        animation: animation,
+        initialValue: initialValue,
+        menuPadding: menuPadding,
+        shape: shape,
+        color: color,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
+        elevation: elevation
+      ),
+      itemKeys: itemKeys,
+      semanticLabel: semanticLabel,
+      constraints: constraints,
+      clipBehavior: clipBehavior,
+    );
   }
 }
 
@@ -1078,26 +1183,62 @@ Future<T?> showMenu<T>({
 
   final List<GlobalKey> menuItemKeys = List<GlobalKey>.generate(items.length, (int index) => GlobalKey());
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
-  return navigator.push(_PopupMenuRoute<T>(
-    position: position,
-    items: items,
-    itemKeys: menuItemKeys,
-    initialValue: initialValue,
-    elevation: elevation,
-    shadowColor: shadowColor,
-    surfaceTintColor: surfaceTintColor,
-    semanticLabel: semanticLabel,
-    barrierLabel: MaterialLocalizations.of(context).menuDismissLabel,
-    shape: shape,
-    menuPadding: menuPadding,
-    color: color,
-    capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
-    constraints: constraints,
-    clipBehavior: clipBehavior,
-    settings: routeSettings,
-    popUpAnimationStyle: popUpAnimationStyle,
-    requestFocus: requestFocus,
-  ));
+  final MultiWindowAppContext? multiWindowAppContext =
+      MultiWindowAppContext.of(context);
+
+  if (multiWindowAppContext == null) {
+    return navigator.push(_PopupMenuRoute<T>(
+      position: position,
+      items: items,
+      itemKeys: menuItemKeys,
+      initialValue: initialValue,
+      elevation: elevation,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
+      semanticLabel: semanticLabel,
+      barrierLabel: MaterialLocalizations.of(context).menuDismissLabel,
+      shape: shape,
+      menuPadding: menuPadding,
+      color: color,
+      capturedThemes:
+          InheritedTheme.capture(from: context, to: navigator.context),
+      constraints: constraints,
+      clipBehavior: clipBehavior,
+      settings: routeSettings,
+      popUpAnimationStyle: popUpAnimationStyle,
+      requestFocus: requestFocus,
+    ));
+  } else {
+    return navigator.push(PopupWindowRoute<T>(
+      context: context,
+      builder: (BuildContext context, Animation<double>? animation) {
+        return _PopupMenuWindowRouteContent<T>(
+          position: position,
+          items: items,
+          itemKeys: menuItemKeys,
+          initialValue: initialValue,
+          elevation: elevation,
+          shadowColor: shadowColor,
+          surfaceTintColor: surfaceTintColor,
+          semanticLabel: semanticLabel,
+          shape: shape,
+          menuPadding: menuPadding,
+          color: color,
+          capturedThemes:
+              InheritedTheme.capture(from: context, to: navigator.context),
+          constraints: constraints,
+          clipBehavior: clipBehavior,
+          animation: animation
+        );
+      },
+      navigator: navigator,
+      popUpAnimationStyle: popUpAnimationStyle,
+      anchorRect: Rect.fromLTRB(position.left, position.top, position.right, position.bottom),
+      positioner: const WindowPositioner(
+        parentAnchor: WindowPositionerAnchor.topLeft,
+        childAnchor: WindowPositionerAnchor.topLeft
+      )));
+  }
 }
 
 /// Signature for the callback invoked when a menu item is selected. The
