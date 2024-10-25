@@ -915,7 +915,8 @@ class MenuItemButton extends StatefulWidget {
   /// An optional Semantics label, applied to the entire [MenuItemButton].
   ///
   /// A screen reader will default to reading the derived text on the
-  /// [MenuItemButton] itself, which is not guaranteed to be readable. (For some shortcuts, such as comma, semicolon, and other
+  /// [MenuItemButton] itself, which is not guaranteed to be readable.
+  /// (For some shortcuts, such as comma, semicolon, and other
   /// punctuation, screen readers read silence).
   ///
   /// Setting this label overwrites the semantics properties of the entire
