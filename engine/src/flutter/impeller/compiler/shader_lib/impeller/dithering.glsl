@@ -45,9 +45,6 @@ vec4 IPOrderedDither8x8(vec4 color, vec2 dest) {
   // Apply the dither to the color.
   color.rgb += dither * kDitherRate;
 
-  // Clamp the color values to [0,1].
-  color.rgb = clamp(color.rgb, 0.0, 1.0);
-
   return color;
 }
 
