@@ -16,6 +16,10 @@
 #include "impeller/renderer/backend/metal/shader_function_mtl.h"
 #include "impeller/renderer/backend/metal/vertex_descriptor_mtl.h"
 
+#if !__has_feature(objc_arc)
+#error ARC must be enabled !
+#endif
+
 namespace impeller {
 
 PipelineLibraryMTL::PipelineLibraryMTL(id<MTLDevice> device)
@@ -127,6 +131,17 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
   pipelines_[descriptor] = pipeline_future;
   auto weak_this = weak_from_this();
 
+  auto get_pipeline_descriptor =
+      [descriptor,
+       device = device_](MTLNewRenderPipelineStateCompletionHandler handler) {
+        GetMTLRenderPipelineDescriptor(
+            descriptor,
+            [device, handler](MTLRenderPipelineDescriptor* descriptor) {
+              [device newRenderPipelineStateWithDescriptor:descriptor
+                                         completionHandler:handler];
+            });
+      };
+
   // Extra info for https://github.com/flutter/flutter/issues/148320.
   std::optional<std::string> thread_name =
 #if FLUTTER_RELEASE
@@ -162,12 +177,27 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
         ));
     promise->set_value(new_pipeline);
   };
-  GetMTLRenderPipelineDescriptor(
-      descriptor, [device = device_, completion_handler](
-                      MTLRenderPipelineDescriptor* descriptor) {
-        [device newRenderPipelineStateWithDescriptor:descriptor
-                                   completionHandler:completion_handler];
-      });
+  auto retry_handler =
+      ^(id<MTLRenderPipelineState> _Nullable render_pipeline_state,
+        NSError* _Nullable error) {
+        if (error) {
+          FML_LOG(INFO) << "pipeline creation retry";
+          // The dispatch here is just to minimize the number of threads calling
+          // this. Executing on the platform thread matches the ContentContext
+          // path. It also serializes the retries. It may not be necessary.
+          dispatch_async(dispatch_get_main_queue(), ^{
+            get_pipeline_descriptor(completion_handler);
+          });
+        } else {
+          completion_handler(render_pipeline_state, error);
+        }
+      };
+#if defined(FML_ARCH_CPU_X86_64)
+  get_pipeline_descriptor(retry_handler);
+#else
+  get_pipeline_descriptor(completion_handler);
+  (void)retry_handler;
+#endif
   return pipeline_future;
 }
 
