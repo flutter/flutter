@@ -25,6 +25,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
+    usesNoEmitLegacyFlutterPluginsOption(hide: !verboseHelp);
     addBuildModeFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
     usesPubOption();

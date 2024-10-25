@@ -458,6 +458,7 @@ class CreateCommand extends CreateBase {
           macOSPlatform: includeMacos,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,
+          writeLegacyPluginsList: boolArg('emit-legacy-flutter-plugins'),
         );
       }
     }

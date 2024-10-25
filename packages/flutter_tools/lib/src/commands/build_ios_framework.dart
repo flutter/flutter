@@ -40,6 +40,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
        super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
+    usesNoEmitLegacyFlutterPluginsOption(hide: !verboseHelp);
     usesPubOption();
     usesDartDefineOption();
     addSplitDebugInfoOption();

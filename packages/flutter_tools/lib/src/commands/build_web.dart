@@ -24,6 +24,7 @@ class BuildWebCommand extends BuildSubCommand {
   }) : _fileSystem = fileSystem, super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
+    usesNoEmitLegacyFlutterPluginsOption(hide: !verboseHelp);
     usesOutputDir();
     usesPubOption();
     usesBuildNumberOption();

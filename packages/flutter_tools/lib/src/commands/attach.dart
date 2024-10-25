@@ -81,6 +81,7 @@ class AttachCommand extends FlutterCommand {
        _nativeAssetsBuilder = nativeAssetsBuilder {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
+    usesNoEmitLegacyFlutterPluginsOption(hide: !verboseHelp);
     usesPortOptions(verboseHelp: verboseHelp);
     usesIpv6Flag(verboseHelp: verboseHelp);
     usesFilesystemOptions(hide: !verboseHelp);
