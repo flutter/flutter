@@ -439,9 +439,10 @@ class FlutterPlugin implements Plugin<Project> {
     private static void addApiDependencies(Project project, String variantName, Object dependency, Closure config = null) {
         String configuration
         // `compile` dependencies are now `api` dependencies.
-        if (project.getConfigurations().findByName("api")) {
+        try{
+            project.getConfigurations().named("api")
             configuration = "${variantName}Api"
-        } else {
+        } catch(UnknownTaskException ignored) {
             configuration = "${variantName}Compile"
         }
         project.dependencies.add(configuration, dependency, config)
