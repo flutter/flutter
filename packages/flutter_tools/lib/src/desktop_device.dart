@@ -19,6 +19,7 @@ import 'device_port_forwarder.dart';
 import 'globals.dart' as globals;
 import 'macos/macos_device.dart';
 import 'protocol_discovery.dart';
+import 'vmservice.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
 /// from, containing implementations that are common to all desktop devices.
@@ -384,4 +385,7 @@ class DesktopLogReader extends DeviceLogReader {
   void dispose() {
     // Nothing to dispose.
   }
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async { }
 }

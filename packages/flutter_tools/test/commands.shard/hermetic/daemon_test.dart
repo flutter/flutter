@@ -1263,12 +1263,6 @@ class FakeDeviceLogReader implements DeviceLogReader {
   bool disposeCalled = false;
 
   @override
-  int? appPid;
-
-  @override
-  FlutterVmService? connectedVMService;
-
-  @override
   void dispose() {
     disposeCalled = true;
   }
@@ -1279,6 +1273,8 @@ class FakeDeviceLogReader implements DeviceLogReader {
   @override
   String get name => 'device';
 
+  @override
+  Future<void> provideVmService(FlutterVmService? connectedVmService) async { }
 }
 
 class FakeApplicationPackageFactory implements ApplicationPackageFactory {
