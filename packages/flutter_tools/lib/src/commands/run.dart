@@ -188,7 +188,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
-    usesNoEmitLegacyFlutterPluginsOption(hide: !verboseHelp);
     usesPortOptions(verboseHelp: verboseHelp);
     usesIpv6Flag(verboseHelp: verboseHelp);
     usesPubOption();

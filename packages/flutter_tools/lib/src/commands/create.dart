@@ -26,6 +26,7 @@ import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 import 'create_base.dart';
 
 const String kPlatformHelp =
@@ -458,7 +459,7 @@ class CreateCommand extends CreateBase {
           macOSPlatform: includeMacos,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,
-          writeLegacyPluginsList: boolArg('emit-legacy-flutter-plugins'),
+          writeLegacyPluginsList: boolArg(FlutterGlobalOptions.kEmitLegacyFlutterPluginsFlag, global: true),
         );
       }
     }

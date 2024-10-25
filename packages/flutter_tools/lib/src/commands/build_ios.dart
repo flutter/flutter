@@ -616,7 +616,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     usesTargetOption();
-    usesNoEmitLegacyFlutterPluginsOption(hide: !verboseHelp);
     usesFlavorOption();
     usesPubOption();
     usesBuildNumberOption();

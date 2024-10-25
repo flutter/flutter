@@ -22,7 +22,6 @@ class BuildBundleCommand extends BuildSubCommand {
     BundleBuilder? bundleBuilder,
   }) :  _bundleBuilder = bundleBuilder ?? BundleBuilder(), super(verboseHelp: verboseHelp) {
     usesTargetOption();
-    usesNoEmitLegacyFlutterPluginsOption(hide: !verboseHelp);
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);

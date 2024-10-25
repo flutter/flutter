@@ -148,7 +148,7 @@ void main() {
       });
       _testInMemory('does nothing in plugin or package root project', () async {
         final FlutterProject project = await aPluginProject();
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         expectNotExists(project.ios.hostAppRoot
             .childDirectory('Runner')
             .childFile('GeneratedPluginRegistrant.h'));
@@ -166,7 +166,8 @@ void main() {
         // that a project was a plugin, but shouldn't be as this creates false
         // positives.
         project.directory.childDirectory('example').createSync();
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(
+            writeLegacyPluginsList: true);
         expectExists(project.ios.hostAppRoot
             .childDirectory('Runner')
             .childFile('GeneratedPluginRegistrant.h'));
@@ -180,27 +181,27 @@ void main() {
       });
       _testInMemory('injects plugins for iOS', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         expectExists(project.ios.hostAppRoot
             .childDirectory('Runner')
             .childFile('GeneratedPluginRegistrant.h'));
       });
       _testInMemory('generates Xcode configuration for iOS', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         expectExists(project.ios.hostAppRoot
             .childDirectory('Flutter')
             .childFile('Generated.xcconfig'));
       });
       _testInMemory('injects plugins for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         expectExists(androidPluginRegistrant(
             project.android.hostAppGradleRoot.childDirectory('app')));
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         expectExists(
             project.android.hostAppGradleRoot.childFile('local.properties'));
       });
@@ -267,7 +268,7 @@ void main() {
         final FlutterProject project = await aPluginProject();
         project.example.directory.deleteSync();
 
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         expect(
             testLogger.statusText,
             isNot(contains(
@@ -275,14 +276,14 @@ void main() {
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         expectExists(
             project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       testUsingContext('injects plugins for macOS', () async {
         final FlutterProject project = await someProject();
         project.macos.managedDirectory.createSync(recursive: true);
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         expectExists(project.macos.pluginRegistrantImplementation);
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
@@ -296,7 +297,7 @@ void main() {
       testUsingContext('generates Xcode configuration for macOS', () async {
         final FlutterProject project = await someProject();
         project.macos.managedDirectory.createSync(recursive: true);
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         expectExists(project.macos.generatedXcodePropertiesFile);
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
@@ -310,7 +311,7 @@ void main() {
       testUsingContext('injects plugins for Linux', () async {
         final FlutterProject project = await someProject();
         project.linux.cmakeFile.createSync(recursive: true);
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         expectExists(project.linux.managedDirectory
             .childFile('generated_plugin_registrant.h'));
         expectExists(project.linux.managedDirectory
@@ -327,7 +328,7 @@ void main() {
       testUsingContext('injects plugins for Windows', () async {
         final FlutterProject project = await someProject();
         project.windows.cmakeFile.createSync(recursive: true);
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         expectExists(project.windows.managedDirectory
             .childFile('generated_plugin_registrant.h'));
         expectExists(project.windows.managedDirectory
@@ -343,7 +344,7 @@ void main() {
       });
       _testInMemory('creates Android library in module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         expectExists(
             project.android.hostAppGradleRoot.childFile('settings.gradle'));
         expectExists(
@@ -353,7 +354,7 @@ void main() {
       });
       _testInMemory('creates iOS pod in module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.regeneratePlatformSpecificTooling();
+        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
         final Directory flutter =
             project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));

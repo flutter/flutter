@@ -28,6 +28,7 @@ abstract final class FlutterGlobalOptions {
   static const String kContinuousIntegrationFlag = 'ci';
   static const String kDeviceIdOption = 'device-id';
   static const String kDisableAnalyticsFlag = 'disable-analytics';
+  static const String kEmitLegacyFlutterPluginsFlag = 'emit-legacy-flutter-plugins';
   static const String kEnableAnalyticsFlag = 'enable-analytics';
   static const String kLocalEngineOption = 'local-engine';
   static const String kLocalEngineSrcPathOption = 'local-engine-src-path';
@@ -124,6 +125,23 @@ class FlutterCommandRunner extends CommandRunner<void> {
       help: 'Print the address of the Dart Tooling Daemon, if one is hosted by the Flutter CLI.',
       hide: !verboseHelp,
     );
+
+    // TODO(matanlurey): Remove after the Q4 2024 stable release; this is intended
+    // to give application developers a single stable release where the .flutter-plugins
+    // file is still supported, but is deprecated, and let folks ensure (with CI or local
+    // testing) that their workflows do not depend on the file.
+    //
+    // See https://github.com/flutter/flutter/issues/157532.
+    argParser.addFlag(FlutterGlobalOptions.kEmitLegacyFlutterPluginsFlag,
+      defaultsTo: true,
+      help: 'Whether to write a ".flutter-plugins" as tooling output.\n'
+            'If true, both ".flutter-plugins" and ".flutter-plugins-dependnecies" '
+            'are written for application packages that use plugins, otherwise if '
+            'false only ".flutter-plugins-dependencies" is written.\n'
+            'See https://docs.flutter.dev/release/breaking-changes/flutter-plugins-configuration.',
+      hide: !verboseHelp,
+    );
+
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
     }
