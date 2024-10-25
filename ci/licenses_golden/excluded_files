@@ -34,6 +34,7 @@
 ../../../flutter/display_list/display_list_unittests.cc
 ../../../flutter/display_list/dl_color_unittests.cc
 ../../../flutter/display_list/dl_paint_unittests.cc
+../../../flutter/display_list/dl_storage_unittests.cc
 ../../../flutter/display_list/dl_vertices_unittests.cc
 ../../../flutter/display_list/effects/dl_color_filter_unittests.cc
 ../../../flutter/display_list/effects/dl_color_source_unittests.cc
