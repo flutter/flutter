@@ -1200,9 +1200,9 @@ enum ResizeImagePolicy {
 /// The decoded image may still be displayed at sizes other than the
 /// cached size provided here.
 ///
-/// The [width] and [height] parameters determine the image's height in
-/// physical pixels. The image's width & height in logical pixels will
-/// also match these values if it is unconstrained.
+/// The [width] and [height] parameters determine the image resolution.
+/// These values also set the image's width & height in logical pixels
+/// if it is unconstrained.
 ///
 /// {@tool snippet}
 /// This example shows how to size the image to half of the screen's width.
