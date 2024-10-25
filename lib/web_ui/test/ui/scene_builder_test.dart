@@ -77,6 +77,23 @@ Future<void> testMain() async {
           region: region);
     });
 
+    test('Devtools rendering regression test', () async {
+      // This is a regression test for https://github.com/flutter/devtools/issues/8401
+      final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
+
+      sceneBuilder.pushClipRect(const ui.Rect.fromLTRB(12.0, 0.0, 300.0, 27.0));
+      sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
+        canvas.drawOval(
+          const ui.Rect.fromLTRB(15.0, 5.0, 64.0, 21.0),
+          ui.Paint()..color = const ui.Color(0xFF0000FF),
+        );
+      }));
+
+      await renderScene(sceneBuilder.build());
+      await matchGoldenFile('scene_builder_oval_clip_rect.png',
+          region: region);
+    });
+
     test('Test clipRRect layer', () async {
       final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
       sceneBuilder.pushClipRRect(
@@ -224,7 +241,7 @@ Future<void> testMain() async {
           region: region);
     });
 
-    test('image filter layer', () async {
+    test('blur image filter layer', () async {
       final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
       sceneBuilder.pushImageFilter(ui.ImageFilter.blur(
         sigmaX: 5.0,
@@ -238,6 +255,23 @@ Future<void> testMain() async {
 
       await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_image_filter.png', region: region);
+    });
+
+    test('matrix image filter layer', () async {
+      final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
+      sceneBuilder.pushOffset(50.0, 50.0);
+
+      final Matrix4 matrix = Matrix4.rotationZ(math.pi / 18);
+      final ui.ImageFilter matrixFilter = ui.ImageFilter.matrix(toMatrix64(matrix.storage));
+      sceneBuilder.pushImageFilter(matrixFilter);
+      sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
+        canvas.drawRect(
+          region,
+          ui.Paint()..color = const ui.Color(0xFF00FF00)
+        );
+      }));
+      await renderScene(sceneBuilder.build());
+      await matchGoldenFile('scene_builder_matrix_image_filter.png', region: region);
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/154303
