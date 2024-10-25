@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show exit, stderr;
+import 'dart:io' show exit, stderr, stdout;
 
 import 'package:args/args.dart';
 import 'package:file/file.dart';
@@ -127,6 +127,7 @@ Future<void> main(List<String> rawArguments) async {
     branch,
     fs: fs,
     strict: publish && !dryRun,
+    printError: stderr.writeln,
   );
   int exitCode = 0;
   late String message;
@@ -141,10 +142,12 @@ Future<void> main(List<String> rawArguments) async {
       outputFile,
       dryRun,
       fs: fs,
+      print: stdout.writeln,
+      printError: stderr.writeln,
     );
-    await publisher.generateLocalMetadata();
+    final MetadataFile metadataFile = await publisher.generateLocalMetadata();
     if (parsedArguments['publish'] as bool) {
-      await publisher.publishArchive(parsedArguments['force'] as bool);
+      await publisher.publishArchive(metadataFile, parsedArguments['force'] as bool);
     }
   } on PreparePackageException catch (e) {
     exitCode = e.exitCode;
