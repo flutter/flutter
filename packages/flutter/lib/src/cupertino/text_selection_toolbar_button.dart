@@ -133,7 +133,6 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
       color: isPressed
         ? _kToolbarPressedColor.resolveFrom(context)
         : CupertinoColors.transparent,
-      borderRadius: null,
       disabledColor: CupertinoColors.transparent,
       // This CupertinoButton does not actually handle the onPressed callback,
       // this is only here to correctly enable/disable the button (see

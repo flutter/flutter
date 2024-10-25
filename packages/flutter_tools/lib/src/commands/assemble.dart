@@ -236,6 +236,7 @@ class AssembleCommand extends FlutterCommand {
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build'),
       projectDir: _flutterProject.directory,
+      packageConfigPath: packageConfigPath(),
       defines: _parseDefines(stringsArg('define')),
       inputs: _parseDefines(stringsArg('input')),
       cacheDir: globals.cache.getRoot(),
@@ -247,7 +248,7 @@ class AssembleCommand extends FlutterCommand {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       platform: globals.platform,
-      engineVersion: artifacts.isLocalEngine
+      engineVersion: artifacts.usesLocalArtifacts
         ? null
         : globals.flutterVersion.engineRevision,
       generateDartPluginRegistry: true,

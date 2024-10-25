@@ -217,6 +217,7 @@ end
     try {
       final Environment environment = Environment(
         projectDir: globals.fs.currentDirectory,
+        packageConfigPath: packageConfigPath(),
         outputDir: macosBuildOutput,
         buildDir: project.dartTool.childDirectory('flutter_build'),
         cacheDir: globals.cache.getRoot(),
@@ -236,7 +237,7 @@ end
         platform: globals.platform,
         usage: globals.flutterUsage,
         analytics: globals.analytics,
-        engineVersion: globals.artifacts!.isLocalEngine ? null : globals.flutterVersion.engineRevision,
+        engineVersion: globals.artifacts!.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,
         generateDartPluginRegistry: true,
       );
       Target target;

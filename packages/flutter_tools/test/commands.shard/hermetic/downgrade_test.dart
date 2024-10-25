@@ -77,10 +77,16 @@ void main() {
       logger: bufferLogger,
     );
 
-    expect(createTestCommandRunner(command).run(const <String>['downgrade']),
-      throwsToolExit(message:
-        'There is no previously recorded version for channel "beta".\n'
-        'Channel "master" was previously on: v1.2.3.'
+    expect(
+      createTestCommandRunner(command).run(const <String>['downgrade']),
+      throwsToolExit(message: '''
+It looks like you haven't run "flutter upgrade" on channel "beta".
+
+"flutter downgrade" undoes the last "flutter upgrade".
+
+To switch to a specific Flutter version, see: https://flutter.dev/to/switch-flutter-version
+
+Channel "master" was previously on: v1.2.3.''',
       ),
     );
   });

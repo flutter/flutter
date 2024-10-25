@@ -470,8 +470,8 @@ class CommonFinders {
 
   /// Finds a standard "back" button.
   ///
-  /// A common element on many user interfaces is the "back" button. This is the
-  /// button which takes the user back to the previous page/screen/state.
+  /// A common element on many user interfaces is the "back" button. This is
+  /// the button which takes the user back to the previous page/screen/state.
   ///
   /// It is useful in tests to be able to find these buttons, both for tapping
   /// them or verifying their existence, but because different platforms and
@@ -555,11 +555,49 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
+  Finder bySemanticsLabel(Pattern label, {bool skipOffstage = true}) {
+    return _bySemanticsProperty(
+      label,
+      (SemanticsNode? semantics) => semantics?.label,
+      skipOffstage: skipOffstage,
+    );
+  }
+
+  /// Finds [Semantics] widgets matching the given `identifier`, either by
+  /// [RegExp.hasMatch] or string equality.
+  ///
+  /// This allows matching against the identifier of a [Semantics] widget, which
+  /// is a unique identifier for the widget in the semantics tree. This is
+  /// exposed to offer a unified way widget tests and e2e tests can match
+  /// against a [Semantics] widget.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.bySemanticsIdentifier('Back'), findsOneWidget);
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder bySemanticsIdentifier(Pattern identifier, {bool skipOffstage = true}) {
+    return _bySemanticsProperty(
+      identifier,
+      (SemanticsNode? semantics) => semantics?.identifier,
+      skipOffstage: skipOffstage,
+    );
+  }
+
+  Finder _bySemanticsProperty(
+    Pattern pattern,
+    String? Function(SemanticsNode?) propertyGetter,
+    {bool skipOffstage = true}
+  ) {
     if (!SemanticsBinding.instance.semanticsEnabled) {
-      throw StateError('Semantics are not enabled. '
-                       'Make sure to call tester.ensureSemantics() before using '
-                       'this finder, and call dispose on its return value after.');
+      throw StateError(
+        'Semantics are not enabled. '
+        'Make sure to call tester.ensureSemantics() before using '
+        'this finder, and call dispose on its return value after.',
+      );
     }
     return byElementPredicate(
       (Element element) {
@@ -568,13 +606,13 @@ class CommonFinders {
         if (element is! RenderObjectElement) {
           return false;
         }
-        final String? semanticsLabel = element.renderObject.debugSemantics?.label;
-        if (semanticsLabel == null) {
+        final String? propertyValue = propertyGetter(element.renderObject.debugSemantics);
+        if (propertyValue == null) {
           return false;
         }
-        return label is RegExp
-            ? label.hasMatch(semanticsLabel)
-            : label == semanticsLabel;
+        return pattern is RegExp
+            ? pattern.hasMatch(propertyValue)
+            : pattern == propertyValue;
       },
       skipOffstage: skipOffstage,
     );

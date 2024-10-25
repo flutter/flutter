@@ -22,7 +22,7 @@ export 'package:flutter/foundation.dart' show Brightness;
 const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
   null,
   CupertinoColors.systemBlue,
-  CupertinoColors.systemBackground,
+  CupertinoColors.white,
   CupertinoDynamicColor.withBrightness(
     color: Color(0xF0F9F9F9),
     darkColor: Color(0xF01D1D1D),
@@ -137,10 +137,10 @@ class CupertinoTheme extends StatelessWidget {
   }
 }
 
-/// Provides a [CupertinoTheme] to all decendents.
+/// Provides a [CupertinoTheme] to all descendents.
 class InheritedCupertinoTheme extends InheritedTheme {
   /// Creates an [InheritedTheme] that provides a [CupertinoTheme] to all
-  /// decendents.
+  /// descendents.
   const InheritedCupertinoTheme({
     super.key,
     required this.theme,

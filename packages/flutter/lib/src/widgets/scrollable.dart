@@ -469,10 +469,10 @@ class Scrollable extends StatefulWidget {
     return false;
   }
 
-  /// Scrolls the scrollables that enclose the given context so as to make the
+  /// Scrolls all scrollables that enclose the given context so as to make the
   /// given context visible.
   ///
-  /// If the [Scrollable] of the provided [BuildContext] is a
+  /// If a [Scrollable] enclosing the provided [BuildContext] is a
   /// [TwoDimensionalScrollable], both vertical and horizontal axes will ensure
   /// the target is made visible.
   static Future<void> ensureVisible(
@@ -570,14 +570,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   ///
   /// Used by [EdgeDraggingAutoScroller] to progress the position forward when a
   /// drag gesture reaches the edge of the [Viewport].
-  Offset get deltaToScrollOrigin {
-    return switch (axisDirection) {
-      AxisDirection.up    => Offset(0, -position.pixels),
-      AxisDirection.down  => Offset(0, position.pixels),
-      AxisDirection.left  => Offset(-position.pixels, 0),
-      AxisDirection.right => Offset(position.pixels, 0),
-    };
-  }
+  Offset get deltaToScrollOrigin => switch (axisDirection) {
+    AxisDirection.up    => Offset(0, -position.pixels),
+    AxisDirection.down  => Offset(0, position.pixels),
+    AxisDirection.left  => Offset(-position.pixels, 0),
+    AxisDirection.right => Offset(position.pixels, 0),
+  };
 
   ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
 

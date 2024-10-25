@@ -96,8 +96,6 @@ enum _ScaffoldSlot {
 /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger.0.dart **
 /// {@end-tool}
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=lytQi-slT5Y}
-///
 /// See also:
 ///
 ///  * [SnackBar], which is a temporary notification typically shown near the
@@ -2993,13 +2991,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           child: SafeArea(
             top: false,
             child: IntrinsicHeight(
-              child: Container(
-                alignment: widget.persistentFooterAlignment,
+              child: Padding(
                 padding: const EdgeInsets.all(8),
-                child: OverflowBar(
-                  spacing: 8,
-                  overflowAlignment: OverflowBarAlignment.end,
-                  children: widget.persistentFooterButtons!,
+                child: Align(
+                  alignment: widget.persistentFooterAlignment,
+                  child: OverflowBar(
+                    spacing: 8,
+                    overflowAlignment: OverflowBarAlignment.end,
+                    children: widget.persistentFooterButtons!,
+                  ),
                 ),
               ),
             ),

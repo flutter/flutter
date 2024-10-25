@@ -729,7 +729,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
 
     return widget._buildSemanticsWrapper(
       context: context,
-      child: Container(
+      child: ConstrainedBox(
         constraints: const BoxConstraints(
           minWidth: _kMinCircularProgressIndicatorSize,
           minHeight: _kMinCircularProgressIndicatorSize,
@@ -1000,32 +1000,33 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
     return widget._buildSemanticsWrapper(
       context: context,
-      child: Container(
-        width: _indicatorSize,
-        height: _indicatorSize,
-        margin: widget.indicatorMargin,
-        child: Material(
-          type: MaterialType.circle,
-          color: backgroundColor,
-          elevation: widget.elevation,
-          child: Padding(
-            padding: widget.indicatorPadding,
-            child: Opacity(
-              opacity: opacity,
-              child: Transform.rotate(
-                angle: rotation,
-                child: CustomPaint(
-                  painter: _RefreshProgressIndicatorPainter(
-                    valueColor: valueColor,
-                    value: null, // Draw the indeterminate progress indicator.
-                    headValue: headValue,
-                    tailValue: tailValue,
-                    offsetValue: offsetValue,
-                    rotationValue: rotationValue,
-                    strokeWidth: widget.strokeWidth,
-                    strokeAlign: widget.strokeAlign,
-                    arrowheadScale: arrowheadScale,
-                    strokeCap: widget.strokeCap,
+      child: Padding(
+        padding: widget.indicatorMargin,
+        child: SizedBox.fromSize(
+          size: const Size.square(_indicatorSize),
+          child: Material(
+            type: MaterialType.circle,
+            color: backgroundColor,
+            elevation: widget.elevation,
+            child: Padding(
+              padding: widget.indicatorPadding,
+              child: Opacity(
+                opacity: opacity,
+                child: Transform.rotate(
+                  angle: rotation,
+                  child: CustomPaint(
+                    painter: _RefreshProgressIndicatorPainter(
+                      valueColor: valueColor,
+                      value: null, // Draw the indeterminate progress indicator.
+                      headValue: headValue,
+                      tailValue: tailValue,
+                      offsetValue: offsetValue,
+                      rotationValue: rotationValue,
+                      strokeWidth: widget.strokeWidth,
+                      strokeAlign: widget.strokeAlign,
+                      arrowheadScale: arrowheadScale,
+                      strokeCap: widget.strokeCap,
+                    ),
                   ),
                 ),
               ),

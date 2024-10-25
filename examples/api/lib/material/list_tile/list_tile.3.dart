@@ -45,7 +45,7 @@ class _ListTileExampleState extends State<ListTileExample> {
               _selected = !_selected;
             });
           },
-          iconColor: WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+          iconColor: const WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
             WidgetState.disabled: Colors.red,
             WidgetState.selected: Colors.green,
             WidgetState.any:      Colors.black,

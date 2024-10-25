@@ -423,14 +423,11 @@ abstract class FlutterTestDriver {
         final StringBuffer error = StringBuffer();
         error.write('Received app.stop event while waiting for $interestingOccurrence\n\n$_errorBuffer');
         final Object? jsonParams = json['params'];
-        if (jsonParams is Map<String, Object?>) {
-          if (jsonParams['error'] != null) {
-            error.write('${jsonParams['error']}\n\n');
-          }
-          final Object? trace = jsonParams['trace'];
-          if (trace != null) {
-            error.write('$trace\n\n');
-          }
+        if (jsonParams case {'error': final Object errorObject}) {
+          error.write('$errorObject\n\n');
+        }
+        if (jsonParams case {'trace': final Object trace}) {
+          error.write('$trace\n\n');
         }
         response.completeError(Exception(error.toString()));
       }
@@ -510,6 +507,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool expressionEvaluation = true,
     bool structuredErrors = false,
     bool serveObservatory = false,
+    bool noDevtools = false,
     bool verbose = false,
     String? script,
     List<String>? additionalCommandArgs,
@@ -521,6 +519,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           '--disable-service-auth-codes',
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
+        if (noDevtools) '--no-devtools',
         '--${serveObservatory ? '' : 'no-'}serve-observatory',
         ...getLocalEngineArguments(),
         '-d',

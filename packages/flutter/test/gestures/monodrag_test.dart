@@ -153,7 +153,7 @@ void main() {
     bool wasPanStartCalled = false;
 
     // Pump a tree with panable widget inside a CustomScrollView. The CustomScrollView
-    // has a more aggresive drag recognizer that will typically beat other drag
+    // has a more aggressive drag recognizer that will typically beat other drag
     // recognizers in the arena. This pan recognizer uses a smaller threshold to
     // accept the gesture, that should make it win the arena.
     await tester.pumpWidget(

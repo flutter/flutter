@@ -4,6 +4,7 @@
 
 /// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
 ///
 /// @docImport 'editable_text.dart';
 /// @docImport 'list_wheel_scroll_view.dart';
@@ -394,12 +395,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Track Offsets
   // The track is offset by only padding.
   double get _totalTrackMainAxisOffsets => _isVertical ? padding.vertical : padding.horizontal;
-  double get _leadingTrackMainAxisOffset {
-    return switch (_resolvedOrientation) {
-      ScrollbarOrientation.left || ScrollbarOrientation.right => padding.top,
-      ScrollbarOrientation.top || ScrollbarOrientation.bottom => padding.left,
-    };
-  }
+
+  double get _leadingTrackMainAxisOffset => switch (_resolvedOrientation) {
+    ScrollbarOrientation.left || ScrollbarOrientation.right => padding.top,
+    ScrollbarOrientation.top || ScrollbarOrientation.bottom => padding.left,
+  };
 
   Rect? _thumbRect;
   // The current scroll position + _leadingThumbMainAxisOffset
@@ -1992,7 +1992,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return gestures;
     }
 
-    switch (_axis) {
+    switch (_effectiveScrollController!.position.axis) {
       case Axis.horizontal:
         gestures[_HorizontalThumbDragGestureRecognizer] =
           GestureRecognizerFactoryWithHandlers<_HorizontalThumbDragGestureRecognizer>(
@@ -2011,8 +2011,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             ),
             _initThumbDragGestureRecognizer,
           );
-      case null:
-        return gestures;
     }
 
     gestures[_TrackTapGestureRecognizer] =

@@ -663,10 +663,10 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// ```
   final List<Widget> children;
 
-  /// A map to cache key to index lookup for children.
-  ///
-  /// _keyToIndex[null] is used as current index during the lazy loading process
-  /// in [_findChildIndex]. _keyToIndex should never be used for looking up null key.
+  // A map to cache key to index lookup for children.
+  //
+  // _keyToIndex[null] is used as current index during the lazy loading process
+  // in [_findChildIndex]. _keyToIndex should never be used for looking up null key.
   final Map<Key?, int>? _keyToIndex;
 
   bool get _isConstantInstance => _keyToIndex == null;

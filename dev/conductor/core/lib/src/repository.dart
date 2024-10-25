@@ -32,12 +32,10 @@ class Remote {
   final RemoteName _name;
 
   /// The name of the remote.
-  String get name {
-    return switch (_name) {
-      RemoteName.upstream => 'upstream',
-      RemoteName.mirror   => 'mirror',
-    };
-  }
+  String get name => switch (_name) {
+    RemoteName.upstream => 'upstream',
+    RemoteName.mirror   => 'mirror',
+  };
 
   /// The URL of the remote.
   final String url;
@@ -258,14 +256,21 @@ abstract class Repository {
     );
   }
 
-  /// Verify the repository's git checkout is clean.
-  Future<bool> gitCheckoutClean() async {
-    final String output = await git.getOutput(
+  /// Get the working tree status.
+  ///
+  /// Calls `git status --porcelain` which should output in a stable format
+  /// across git versions.
+  Future<String> gitStatus() async {
+    return git.getOutput(
       <String>['status', '--porcelain'],
       'check that the git checkout is clean',
       workingDirectory: (await checkoutDirectory).path,
     );
-    return output == '';
+  }
+
+  /// Verify the repository's git checkout is clean.
+  Future<bool> gitCheckoutClean() async {
+    return (await gitStatus()).isEmpty;
   }
 
   /// Return the revision for the branch point between two refs.
@@ -373,7 +378,7 @@ abstract class Repository {
 
   /// Determines if one ref is an ancestor for another.
   Future<bool> isAncestor(String possibleAncestor, String possibleDescendant) async {
-    final int exitcode = await git.run(
+    final io.ProcessResult result = await git.run(
       <String>[
         'merge-base',
         '--is-ancestor',
@@ -384,18 +389,18 @@ abstract class Repository {
       allowNonZeroExitCode: true,
       workingDirectory: (await checkoutDirectory).path,
     );
-    return exitcode == 0;
+    return result.exitCode == 0;
   }
 
   /// Determines if a given commit has a tag.
   Future<bool> isCommitTagged(String commit) async {
-    final int exitcode = await git.run(
+    final io.ProcessResult result = await git.run(
       <String>['describe', '--exact-match', '--tags', commit],
       'verify $commit is already tagged',
       allowNonZeroExitCode: true,
       workingDirectory: (await checkoutDirectory).path,
     );
-    return exitcode == 0;
+    return result.exitCode == 0;
   }
 
   /// Resets repository HEAD to [ref].
@@ -473,16 +478,27 @@ abstract class Repository {
       }
       authorArg = '--author="$author"';
     }
-    await git.run(
-      <String>[
-        'commit',
-        '--message',
-        message,
-        if (authorArg != null) authorArg,
-      ],
+    final List<String> commitCmd = <String>[
+      'commit',
+      '--message',
+      message,
+      if (authorArg != null) authorArg,
+    ];
+    stdio.printTrace('Executing git $commitCmd...');
+    final io.ProcessResult commitResult = await git.run(
+      commitCmd,
       'commit changes',
       workingDirectory: (await checkoutDirectory).path,
     );
+    final String stdout = commitResult.stdout as String;
+    if (stdout.isNotEmpty) {
+      stdio.printTrace(stdout);
+    }
+    final String stderr = commitResult.stderr as String;
+    if (stderr.isNotEmpty) {
+      stdio.printTrace(stderr);
+    }
+
     return reverseParse('HEAD');
   }
 
@@ -603,10 +619,29 @@ class FrameworkRepository extends Repository {
 
   Future<io.ProcessResult> runFlutter(List<String> args) async {
     await _ensureToolReady();
-    return processManager.run(<String>[
-      fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
-      ...args,
-    ]);
+    final String workingDirectory = (await checkoutDirectory).path;
+    return processManager.run(
+      <String>[
+        fileSystem.path.join(workingDirectory, 'bin', 'flutter'),
+        ...args,
+      ],
+      workingDirectory: workingDirectory,
+    );
+  }
+
+  Future<void> streamDart(
+    List<String> args, {
+    String? workingDirectory,
+  }) async {
+    final String repoWorkingDirectory = (await checkoutDirectory).path;
+
+    await _streamProcess(
+      <String>[
+        fileSystem.path.join(repoWorkingDirectory, 'bin', 'dart'),
+        ...args,
+      ],
+      workingDirectory: workingDirectory ?? repoWorkingDirectory,
+    );
   }
 
   Future<io.Process> streamFlutter(
@@ -614,11 +649,28 @@ class FrameworkRepository extends Repository {
     void Function(String)? stdoutCallback,
     void Function(String)? stderrCallback,
   }) async {
-    await _ensureToolReady();
-    final io.Process process = await processManager.start(<String>[
-      fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
-      ...args,
-    ]);
+    final String workingDirectory = (await checkoutDirectory).path;
+
+    return _streamProcess(
+      <String>[
+        fileSystem.path.join(workingDirectory, 'bin', 'flutter'),
+        ...args,
+      ],
+      workingDirectory: workingDirectory,
+    );
+  }
+
+  Future<io.Process> _streamProcess(
+    List<String> cmd, {
+    void Function(String)? stdoutCallback,
+    void Function(String)? stderrCallback,
+    String? workingDirectory,
+  }) async {
+    stdio.printTrace('Executing $cmd...');
+    final io.Process process = await processManager.start(
+      cmd,
+      workingDirectory: workingDirectory,
+    );
     process
         .stdout
         .transform(utf8.decoder)
@@ -629,6 +681,15 @@ class FrameworkRepository extends Repository {
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(stderrCallback ?? stdio.printError);
+    final int exitCode = await process.exitCode;
+    if (exitCode != 0) {
+      throw io.ProcessException(
+        cmd.first,
+        cmd.sublist(1),
+        'Process failed',
+        exitCode,
+      );
+    }
     return process;
   }
 

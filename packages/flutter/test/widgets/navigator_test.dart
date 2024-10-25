@@ -4350,14 +4350,14 @@ void main() {
     }
 
     await tester.pumpWidget(build());
-    observer._checkInvocations(<Symbol>[#navigator, #didPush]);
+    observer._checkInvocations(<Symbol>[#navigator, #didPush, #didChangeTop]);
     await tester.pumpWidget(Container(child: build()));
-    observer._checkInvocations(<Symbol>[#navigator, #didPush, #navigator]);
+    observer._checkInvocations(<Symbol>[#navigator, #didPush, #didChangeTop]);
     await tester.pumpWidget(Container());
-    observer._checkInvocations(<Symbol>[#navigator]);
+    observer._checkInvocations(<Symbol>[]);
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(build(key));
-    observer._checkInvocations(<Symbol>[#navigator, #didPush]);
+    observer._checkInvocations(<Symbol>[#navigator, #didPush, #didChangeTop]);
     await tester.pumpWidget(Container(child: build(key)));
     observer._checkInvocations(<Symbol>[#navigator, #navigator]);
   });
@@ -5352,7 +5352,129 @@ void main() {
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
         skip: isBrowser, // [intended] only non-web Android supports predictive back.
       );
+
+      testWidgets('canPop and onPopInvoked', (WidgetTester tester) async {
+        bool page2CanPop = false;
+        bool page3CanPop = false;
+        final CanPopPage<int> page1 = CanPopPage<int>(name: 'page1', pageCanPop: () => false);
+        final CanPopPage<String> page2 = CanPopPage<String>(name: 'page2', pageCanPop: () => page2CanPop);
+        final CanPopPage<bool> page3 = CanPopPage<bool>(name: 'page3', pageCanPop: () => page3CanPop);
+        final List<Page<Object?>> pages = <Page<Object?>>[page1, page2, page3];
+        final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Navigator(
+              key: key,
+              pages: pages,
+              onDidRemovePage: (Page<Object?> page) => pages.remove(page),
+            ),
+          ),
+        );
+
+        expect(find.text('page3'), findsOneWidget);
+
+        key.currentState!.maybePop(true);
+        await tester.pumpAndSettle();
+        expect(find.text('page3'), findsOneWidget);
+        expect(page3.popInvoked, <CanPopPageInvoke>[(false, true)]);
+
+        page3CanPop = true;
+        key.currentState!.maybePop(false);
+        await tester.pumpAndSettle();
+        expect(find.text('page3'), findsNothing);
+        expect(find.text('page2'), findsOneWidget);
+        expect(page3.popInvoked, <CanPopPageInvoke>[(false, true), (true, false)]);
+
+        key.currentState!.maybePop('some string');
+        await tester.pumpAndSettle();
+        expect(find.text('page2'), findsOneWidget);
+        expect(page2.popInvoked, <CanPopPageInvoke>[(false, 'some string')]);
+
+        page2CanPop = true;
+        key.currentState!.maybePop('another string');
+        await tester.pumpAndSettle();
+        expect(find.text('page2'), findsNothing);
+        expect(find.text('page1'), findsOneWidget);
+        expect(page2.popInvoked, <CanPopPageInvoke>[(false, 'some string'), (true, 'another string')]);
+
+        key.currentState!.maybePop(1);
+        await tester.pumpAndSettle();
+        expect(find.text('page1'), findsOneWidget);
+        expect(page1.popInvoked, <CanPopPageInvoke>[(false, 1)]);
+      });
     });
+  });
+
+  testWidgets('NavigatorPopHandler.onPopWithResult', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> nestedNav = GlobalKey<NavigatorState>();
+    const String result = 'i am a result';
+    final List<String?> results = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: nav,
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => _LinksPage(
+            title: 'Home page',
+            buttons: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/one');
+                },
+                child: const Text('Go to one'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/nested');
+                },
+                child: const Text('Go to nested'),
+              ),
+            ],
+          ),
+          '/one': (BuildContext context) => _LinksPage(
+            title: 'Page one',
+            buttons: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/one/one');
+                },
+                child: const Text('Go to one/one'),
+              ),
+            ],
+          ),
+          '/nested': (BuildContext context) => _NestedNavigatorsPage(
+            navigatorKey: nestedNav,
+            onPopWithResult: (String? result) {
+              results.add(result);
+            },
+          ),
+        },
+      ),
+    );
+
+    expect(find.text('Home page'), findsOneWidget);
+
+    await tester.tap(find.text('Go to nested'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nested - home'), findsOneWidget);
+
+    await tester.tap(find.text('Go to nested/one'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nested - page one'), findsOneWidget);
+    expect(results, isEmpty);
+
+    // Pop the root Navigator, despite being on a route in the nested
+    // Navigator. This is to trigger NavigatorPopHandler.onPopWithResult with
+    // a the given result.
+    await nav.currentState?.maybePop(result);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nested - home'), findsOneWidget);
+    expect(results, hasLength(1));
+    expect(results.first, result);
   });
 }
 
@@ -5483,6 +5605,36 @@ class ZeroTransitionPage extends Page<void> {
     return NoAnimationPageRoute(
       settings: this,
       pageBuilder: (BuildContext context) => Text(name!),
+    );
+  }
+}
+
+typedef CanPopPageInvoke = (bool didPop, Object? result);
+
+class CanPopPage<T> extends Page<T> {
+  CanPopPage({
+    super.key,
+    super.name,
+    required this.pageCanPop,
+    super.arguments,
+  });
+
+  final List<CanPopPageInvoke> popInvoked = <CanPopPageInvoke>[];
+
+  @override
+  bool get canPop => pageCanPop();
+  final ValueGetter<bool> pageCanPop;
+
+  @override
+  PopInvokedWithResultCallback<T> get onPopInvoked => (bool didPop, T? result) {
+    popInvoked.add((didPop, result));
+  };
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return MaterialPageRoute<T>(
+      builder: (BuildContext context) => Text(name!),
+      settings: this,
     );
   }
 }
@@ -5703,6 +5855,7 @@ class _NestedNavigatorsPage extends StatefulWidget {
   const _NestedNavigatorsPage({
     this.popScopePageEnabled,
     this.navigatorKey,
+    this.onPopWithResult,
   });
 
   /// Whether the PopScope on the /popscope page is enabled.
@@ -5711,6 +5864,8 @@ class _NestedNavigatorsPage extends StatefulWidget {
   final bool? popScopePageEnabled;
 
   final GlobalKey<NavigatorState>? navigatorKey;
+
+  final PopResultCallback<String>? onPopWithResult;
 
   @override
   State<_NestedNavigatorsPage> createState() => _NestedNavigatorsPageState();
@@ -5728,12 +5883,13 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
   @override
   Widget build(BuildContext context) {
     final BuildContext rootContext = context;
-    return NavigatorPopHandler(
-      onPop: () {
+    return NavigatorPopHandler<String>(
+      onPopWithResult: (String? result) {
+        widget.onPopWithResult?.call(result);
         if (widget.popScopePageEnabled == false) {
           return;
         }
-        _navigatorKey.currentState!.pop();
+        _navigatorKey.currentState!.pop(result);
       },
       child: Navigator(
         key: _navigatorKey,

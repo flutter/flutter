@@ -14317,7 +14317,7 @@ void main() {
     expect(description, <String>[
       'enabled: false',
       'decoration: InputDecoration(labelText: "foo")',
-      'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
+      'style: TextStyle(inherit: true, color: ${const Color(0xff00ff00)})',
       'autofocus: true',
       'autocorrect: false',
       'smartDashesType: disabled',
@@ -14331,7 +14331,7 @@ void main() {
       'cursorWidth: 1.0',
       'cursorHeight: 1.0',
       'cursorRadius: Radius.circular(0.0)',
-      'cursorColor: Color(0xff00ff00)',
+      'cursorColor: ${const Color(0xff00ff00)}',
       'keyboardAppearance: Brightness.dark',
       'scrollPadding: EdgeInsets.zero',
       'selection disabled',

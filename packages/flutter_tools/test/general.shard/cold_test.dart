@@ -165,7 +165,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   }
 
   @override
-  Future<void> initLogReader() async { }
+  Future<void> tryInitLogReader() async { }
 }
 
 class FakeDevice extends Fake implements Device {
