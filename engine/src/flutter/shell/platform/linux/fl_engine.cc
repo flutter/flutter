@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/linux/fl_dart_project_private.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_private.h"
+#include "flutter/shell/platform/linux/fl_platform_handler.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_renderer.h"
 #include "flutter/shell/platform/linux/fl_renderer_gdk.h"
@@ -42,6 +43,7 @@ struct _FlEngine {
   FlRenderer* renderer;
   FlBinaryMessenger* binary_messenger;
   FlSettingsHandler* settings_handler;
+  FlPlatformHandler* platform_handler;
   FlTextureRegistrar* texture_registrar;
   FlTaskRunner* task_runner;
   FlutterEngineAOTData aot_data;
@@ -426,6 +428,7 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->texture_registrar);
   g_clear_object(&self->binary_messenger);
   g_clear_object(&self->settings_handler);
+  g_clear_object(&self->platform_handler);
   g_clear_object(&self->task_runner);
 
   if (self->platform_message_handler_destroy_notify) {
@@ -603,6 +606,8 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   g_autoptr(FlSettings) settings = fl_settings_new();
   self->settings_handler = fl_settings_handler_new(self);
   fl_settings_handler_start(self->settings_handler, settings);
+
+  self->platform_handler = fl_platform_handler_new(self->binary_messenger);
 
   result = self->embedder_api.UpdateSemanticsEnabled(self->engine, TRUE);
   if (result != kSuccess) {
@@ -1022,9 +1027,16 @@ void fl_engine_update_accessibility_features(FlEngine* self, int32_t flags) {
 }
 
 GPtrArray* fl_engine_get_switches(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
+
   GPtrArray* switches = g_ptr_array_new_with_free_func(g_free);
   for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
     g_ptr_array_add(switches, g_strdup(env_switch.c_str()));
   }
   return switches;
+}
+
+void fl_engine_request_app_exit(FlEngine* self) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+  fl_platform_handler_request_app_exit(self->platform_handler);
 }
