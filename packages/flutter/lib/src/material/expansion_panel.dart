@@ -395,14 +395,11 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           ignoring: child.canTapOnHeader,
           child: ExpandIcon(
             color: widget.expandIconColor,
-            disabledColor: child.canTapOnHeader ? widget.expandIconColor : null,
             isExpanded: _isChildExpanded(index),
             padding: _kExpandIconPadding,
             splashColor: child.splashColor,
             highlightColor: child.highlightColor,
-            onPressed: !child.canTapOnHeader
-                ? (bool isExpanded) => _handlePressed(isExpanded, index)
-                : null,
+            onPressed: (bool isExpanded) => _handlePressed(isExpanded, index)
           ),
         ),
       );
