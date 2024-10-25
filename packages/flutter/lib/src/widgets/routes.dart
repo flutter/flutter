@@ -315,10 +315,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
 
   @override
   bool didPop(T? result) {
-    assert(_controller != null, '$runtimeType.didPop called before calling install() or after calling dispose().');
-    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    assert(_controller != null || _animation != null, '$runtimeType.didPop called before calling install() or after calling dispose().');
+    assert(!_animation!.isCompleted || (_animation!.isCompleted && !_transitionCompleter.isCompleted), 'Cannot reuse a $runtimeType after disposing it.');
     _result = result;
-    _controller!.reverse();
+    if (_animation!.isCompleted || _animation!.isAnimating) {
+      _controller!.reverse();
+    }
     return super.didPop(result);
   }
 
