@@ -20,7 +20,7 @@ void main() {
     expect(iconMenu, findsOneWidget);
 
     Finder findMenuItem(String label) {
-      return find.widgetWithText(MenuItemButton, label).last;
+      return find.widgetWithText(MenuItemButton, label).first;
     }
 
     await tester.tap(colorMenu);

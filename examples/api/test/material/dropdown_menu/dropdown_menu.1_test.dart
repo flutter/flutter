@@ -17,7 +17,7 @@ void main() {
     expect(menu, findsOne);
 
     Finder findMenuItem(String label) {
-      return find.widgetWithText(MenuItemButton, label).last;
+      return find.widgetWithText(MenuItemButton, label).first;
     }
 
     await tester.tap(menu);
