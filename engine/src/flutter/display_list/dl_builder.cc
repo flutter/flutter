@@ -15,8 +15,6 @@
 
 namespace flutter {
 
-#define DL_BUILDER_PAGE 4096
-
 // CopyV(dst, src,n, src,n, ...) copies any number of typed srcs into dst.
 static void CopyV(void* dst) {}
 
@@ -35,32 +33,29 @@ static void CopyV(void* dst, const S* src, int n, Rest&&... rest) {
   CopyV(dst, std::forward<Rest>(rest)...);
 }
 
-static constexpr inline bool is_power_of_two(int value) {
-  return (value & (value - 1)) == 0;
-}
-
 template <typename T, typename... Args>
 void* DisplayListBuilder::Push(size_t pod, Args&&... args) {
+  // Plan out where and how large a space we need
   size_t size = SkAlignPtr(sizeof(T) + pod);
-  FML_CHECK(size < (1 << 24));
-  if (used_ + size > allocated_) {
-    static_assert(is_power_of_two(DL_BUILDER_PAGE),
-                  "This math needs updating for non-pow2.");
-    // Next greater multiple of DL_BUILDER_PAGE.
-    allocated_ = (used_ + size + DL_BUILDER_PAGE) & ~(DL_BUILDER_PAGE - 1);
-    storage_.realloc(allocated_);
-    FML_CHECK(storage_.get());
-    memset(storage_.get() + used_, 0, allocated_ - used_);
-  }
-  FML_CHECK(used_ + size <= allocated_);
-  auto op = reinterpret_cast<T*>(storage_.get() + used_);
-  used_ += size;
+  size_t offset = storage_.size();
+
+  // Allocate the space
+  auto ptr = storage_.allocate(size);
+  FML_CHECK(ptr);
+
+  // Initialize the space via the constructor
+  auto op = reinterpret_cast<T*>(ptr);
   new (op) T{std::forward<Args>(args)...};
-  op->type = T::kType;
-  op->size = size;
+  FML_DCHECK(op->type == T::kType);
+
+  // Adjust the counters and offsets (the memory is mostly initialized
+  // at this point except that the caller might do some pod-based copying
+  // past the end of the DlOp structure itself when we return)
+  offsets_.push_back(offset);
   render_op_count_ += T::kRenderOpInc;
   depth_ += T::kDepthInc * render_op_depth_cost_;
   op_index_++;
+
   return op + 1;
 }
 
@@ -69,7 +64,6 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
     restore();
   }
 
-  size_t bytes = used_;
   int count = render_op_count_;
   size_t nested_bytes = nested_bytes_;
   int nested_count = nested_op_count_;
@@ -97,7 +91,7 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
     bounds = current_layer().global_space_accumulator.bounds();
   }
 
-  used_ = allocated_ = render_op_count_ = op_index_ = 0;
+  render_op_count_ = op_index_ = 0;
   nested_bytes_ = nested_op_count_ = 0;
   depth_ = 0;
   is_ui_thread_safe_ = true;
@@ -108,9 +102,14 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
   save_stack_.pop_back();
   Init(rtree != nullptr);
 
-  storage_.realloc(bytes);
+  storage_.trim();
+  DisplayListStorage storage;
+  std::vector<size_t> offsets;
+  std::swap(offsets, offsets_);
+  std::swap(storage, storage_);
+
   return sk_sp<DisplayList>(new DisplayList(
-      std::move(storage_), bytes, count, nested_bytes, nested_count,
+      std::move(storage), std::move(offsets), count, nested_bytes, nested_count,
       total_depth, bounds, opacity_compatible, is_safe, affects_transparency,
       max_root_blend_mode, root_has_backdrop_filter, root_is_unbounded,
       std::move(rtree)));
@@ -141,10 +140,7 @@ void DisplayListBuilder::Init(bool prepare_rtree) {
 }
 
 DisplayListBuilder::~DisplayListBuilder() {
-  uint8_t* ptr = storage_.get();
-  if (ptr) {
-    DisplayList::DisposeOps(ptr, ptr + used_);
-  }
+  DisplayList::DisposeOps(storage_, offsets_);
 }
 
 DlISize DisplayListBuilder::GetBaseLayerDimensions() const {
@@ -390,7 +386,7 @@ void DisplayListBuilder::SetAttributesFromPaint(
 
 void DisplayListBuilder::checkForDeferredSave() {
   if (current_info().has_deferred_save_op) {
-    size_t save_offset = used_;
+    size_t save_offset = storage_.size();
     Push<SaveOp>(0);
     current_info().save_offset = save_offset;
     current_info().save_depth = depth_;
@@ -435,7 +431,7 @@ void DisplayListBuilder::saveLayer(const DlRect& bounds,
   // Snapshot these values before we do any work as we need the values
   // from before the method was called, but some of the operations below
   // might update them.
-  size_t save_offset = used_;
+  size_t save_offset = storage_.size();
   uint32_t save_depth = depth_;
 
   // A backdrop will affect up to the entire surface, bounded by the clip
@@ -568,7 +564,7 @@ void DisplayListBuilder::Restore() {
   }
 
   if (!current_info().has_deferred_save_op) {
-    SaveOpBase* op = reinterpret_cast<SaveOpBase*>(storage_.get() +
+    SaveOpBase* op = reinterpret_cast<SaveOpBase*>(storage_.base() +
                                                    current_info().save_offset);
     FML_CHECK(op->type == DisplayListOpType::kSave ||
               op->type == DisplayListOpType::kSaveLayer ||
@@ -605,7 +601,7 @@ void DisplayListBuilder::RestoreLayer() {
   SkRect content_bounds = current_layer().layer_local_accumulator.bounds();
 
   SaveLayerOpBase* layer_op = reinterpret_cast<SaveLayerOpBase*>(
-      storage_.get() + current_info().save_offset);
+      storage_.base() + current_info().save_offset);
   FML_CHECK(layer_op->type == DisplayListOpType::kSaveLayer ||
             layer_op->type == DisplayListOpType::kSaveLayerBackdrop);
 
