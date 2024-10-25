@@ -6,7 +6,7 @@ import 'dart:ui';
 
 import 'framework.dart';
 
-/// The interface for defining the algorithm that a boundary handles the specified type of shape to be dragged within.
+/// The interface for defining the algorithm for a boundary that a specified shape is dragged within.
 ///
 /// See also:
 ///  * [DragBoundary], which uses this class.
@@ -14,50 +14,50 @@ import 'framework.dart';
 /// `T` is a data class that defines the shape being dragged. For example, when dragging a rectangle within the boundary,
 /// `T` should be a `Rect`.
 abstract class DragBoundaryDelegate<T> {
-  /// Returns whether the specified drag object position is within the boundary.
-  bool isWithinBoundary(T position);
+  /// Returns whether the specified dragged object is within the boundary.
+  bool isWithinBoundary(T draggedObject);
 
-  /// Returns the position of the given drag object after moving it fully inside
+  /// Returns the given dragged object after moving it fully inside
   /// the boundary with the shortest distance.
   ///
   /// If the bounds cannot contain the dragged object, an exception is thrown.
-  T nearestPositionWithinBoundary(T position);
+  T nearestPositionWithinBoundary(T draggedObject);
 }
 
 class _DragBoundaryDelegateForRect extends DragBoundaryDelegate<Rect> {
   _DragBoundaryDelegateForRect(this.boundary);
   final Rect? boundary;
   @override
-  bool isWithinBoundary(Rect position) {
+  bool isWithinBoundary(Rect draggedObject) {
     if (boundary == null) {
       return true;
     }
-    return boundary!.contains(position.topLeft) && boundary!.contains(position.bottomRight);
+    return boundary!.contains(draggedObject.topLeft) && boundary!.contains(draggedObject.bottomRight);
   }
 
   @override
-  Rect nearestPositionWithinBoundary(Rect position) {
+  Rect nearestPositionWithinBoundary(Rect draggedObject) {
     if (boundary == null) {
-      return position;
+      return draggedObject;
     }
-    if (boundary!.right - position.width < boundary!.left ||
-        boundary!.bottom - position.height < boundary!.top) {
+    if (boundary!.right - draggedObject.width < boundary!.left ||
+        boundary!.bottom - draggedObject.height < boundary!.top) {
       throw FlutterError(
         'The rect is larger than the boundary. '
         'The rect width must be less than the boundary width, and the rect height must be less than the boundary height.',
       );
     }
     final double left = clampDouble(
-      position.left,
+      draggedObject.left,
       boundary!.left,
-      boundary!.right - position.width,
+      boundary!.right - draggedObject.width,
     );
     final double top = clampDouble(
-      position.top,
+      draggedObject.top,
       boundary!.top,
-      boundary!.bottom - position.height,
+      boundary!.bottom - draggedObject.height,
     );
-    return Rect.fromLTWH(left, top, position.width, position.height);
+    return Rect.fromLTWH(left, top, draggedObject.width, draggedObject.height);
   }
 }
 
@@ -77,10 +77,10 @@ class DragBoundary extends InheritedWidget {
   /// get its [DragBoundaryDelegate] of [Rect].
   ///
   /// The [useGlobalPosition] flag specifies whether to use global position.
-  /// If false, the local position of the bounds are used. It defaults to false.
+  /// If false, the local position of the bounds are used. It defaults to true.
   ///
   /// If no [DragBoundary] ancestor is found, the delegate will return a delegate that allows the drag object to move freely.
-  static DragBoundaryDelegate<Rect> forRectOf(BuildContext context, {bool useGlobalPosition = false}) {
+  static DragBoundaryDelegate<Rect> forRectOf(BuildContext context, {bool useGlobalPosition = true}) {
     final InheritedElement? element =
         context.getElementForInheritedWidgetOfExactType<DragBoundary>();
     if (element == null) {

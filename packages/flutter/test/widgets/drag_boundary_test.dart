@@ -21,7 +21,7 @@ void main() {
         ),
       ),
     );
-    final DragBoundaryDelegate<Rect> boundary = DragBoundary.forRectOf(key.currentContext!, useGlobalPosition: true);
+    final DragBoundaryDelegate<Rect> boundary = DragBoundary.forRectOf(key.currentContext!);
     expect(boundary, isNotNull);
     expect(boundary.isWithinBoundary(const Rect.fromLTWH(50, 50, 20, 20)), isFalse);
     expect(boundary.isWithinBoundary(const Rect.fromLTWH(100, 100, 20, 20)), isTrue);
@@ -44,7 +44,7 @@ void main() {
         ),
       ),
     );
-    final DragBoundaryDelegate<Rect> boundary = DragBoundary.forRectOf(key.currentContext!);
+    final DragBoundaryDelegate<Rect> boundary = DragBoundary.forRectOf(key.currentContext!, useGlobalPosition: false);
     expect(boundary, isNotNull);
     expect(boundary.isWithinBoundary(const Rect.fromLTWH(50, 50, 20, 20)), isTrue);
     expect(boundary.isWithinBoundary(const Rect.fromLTWH(90, 90, 20, 20)), isFalse);

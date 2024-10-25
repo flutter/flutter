@@ -43,11 +43,12 @@ class DragBoundaryExampleAppState extends State<DragBoundaryExampleApp> {
                         },
                         onPanUpdate: (DragUpdateDetails details) {
                           _currentPosition = details.localPosition - _initialPosition;
-                          final Rect withinBoundary = DragBoundary.forRectOf(context).nearestPositionWithinBoundary(
+                          final Rect withinBoundary = DragBoundary.forRectOf(context, useGlobalPosition: false).nearestPositionWithinBoundary(
                             _currentPosition & _boxSize,
                           );
-                          _currentPosition = withinBoundary.topLeft;
-                          setState(() {});
+                          setState(() {
+                            _currentPosition = withinBoundary.topLeft;
+                          });
                         },
                         child: Container(
                           width: _boxSize.width,
