@@ -310,7 +310,6 @@ class SampleChecker {
 // See https://github.com/flutter/flutter/issues/130459
 final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/color_scheme/dynamic_content_color.0_test.dart',
-  'examples/api/test/widgets/navigator/navigator.restorable_push_and_remove_until.0_test.dart',
   'examples/api/test/widgets/navigator/navigator.restorable_push.0_test.dart',
   'examples/api/test/widgets/navigator/navigator_state.restorable_push_replacement.0_test.dart',
   'examples/api/test/widgets/navigator/navigator_state.restorable_push_and_remove_until.0_test.dart',
@@ -318,7 +317,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/navigator/restorable_route_future.0_test.dart',
   'examples/api/test/widgets/navigator/navigator_state.restorable_push.0_test.dart',
   'examples/api/test/widgets/focus_manager/focus_node.unfocus.0_test.dart',
-  'examples/api/test/widgets/framework/build_owner.0_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view_state.0_test.dart',
   'examples/api/test/widgets/scroll_position/scroll_metrics_notification.0_test.dart',
   'examples/api/test/widgets/media_query/media_query_data.system_gesture_insets.0_test.dart',
@@ -337,6 +335,5 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/overscroll_indicator/glowing_overscroll_indicator.1_test.dart',
   'examples/api/test/widgets/overscroll_indicator/glowing_overscroll_indicator.0_test.dart',
   'examples/api/test/widgets/restoration/restoration_mixin.0_test.dart',
-  'examples/api/test/widgets/actions/focusable_action_detector.0_test.dart',
   'examples/api/test/widgets/focus_scope/focus_scope.0_test.dart',
 };
