@@ -460,6 +460,9 @@ dependencies:
 
         expect(flutterProject.flutterPluginsFile, isNot(exists));
         expect(flutterProject.flutterPluginsDependenciesFile, exists);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext(
@@ -1464,7 +1467,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => fsWindows,
-        ProcessManager: () => FakeProcessManager.empty(),
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('iOS and macOS project setup up Darwin Dependency Management', () async {
