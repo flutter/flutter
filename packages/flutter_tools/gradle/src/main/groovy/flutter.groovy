@@ -79,7 +79,7 @@ class FlutterExtension {
     public String flutterVersionName = null
 
     /** Returns flutterVersionCode as an integer with error handling. */
-    public Integer getVersionCode() {
+    Integer getVersionCode() {
         if (flutterVersionCode == null) {
             throw new GradleException("flutterVersionCode must not be null.")
         }
@@ -92,7 +92,7 @@ class FlutterExtension {
     }
 
     /** Returns flutterVersionName with error handling. */
-    public String getVersionName() {
+    String getVersionName() {
         if (flutterVersionName == null) {
             throw new GradleException("flutterVersionName must not be null.")
         }
@@ -271,17 +271,11 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        Object flutterVersionCode = localProperties.getProperty("flutter.versionCode")
-        if (flutterVersionCode == null) {
-            flutterVersionCode = "1"
-        }
-        extension.flutterVersionCode = flutterVersionCode
+        String flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+        extension.flutterVersionCode = flutterVersionCode?: "1"
 
-        Object flutterVersionName = localProperties.getProperty("flutter.versionName")
-        if (flutterVersionName == null) {
-            flutterVersionName = "1.0"
-        }
-        extension.flutterVersionName = flutterVersionName
+        String flutterVersionName = localProperties.getProperty("flutter.versionName")
+        extension.flutterVersionName = flutterVersionName ?: "1.0"
 
         this.addFlutterTasks(project)
 
@@ -716,7 +710,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns `true` if the given project is a plugin project having an `android` directory
      * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    private Boolean pluginSupportsAndroidPlatform(Project project) {
+    private static Boolean pluginSupportsAndroidPlatform(Project project) {
         File buildGradle = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle")
         File buildGradleKts = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle.kts")
         return buildGradle.exists() || buildGradleKts.exists()
@@ -727,7 +721,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Kotlin variants exist, then Groovy (build.gradle) is preferred over
      * Kotlin (build.gradle.kts). This is the same behavior as Gradle 8.5.
      */
-    private File buildGradleFile(Project project) {
+    private static File buildGradleFile(Project project) {
         File buildGradle = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle")
         File buildGradleKts = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle.kts")
         if (buildGradle.exists() && buildGradleKts.exists()) {
@@ -745,7 +739,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Kotlin variants exist, then Groovy (settings.gradle) is preferred over
      * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
      */
-    private File settingsGradleFile(Project project) {
+    private static File settingsGradleFile(Project project) {
         File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
         if (settingsGradle.exists() && settingsGradleKts.exists()) {
@@ -823,25 +817,17 @@ class FlutterPlugin implements Plugin<Project> {
      * TODO: Remove this or compareVersionStrings. This does not handle strings like "8.6-rc-2".
      */
     static String mostRecentSemanticVersion(String version1, String version2) {
-        List version1Tokenized = version1.tokenize(".")
-        List version2Tokenized = version2.tokenize(".")
-        int version1numTokens = version1Tokenized.size()
-        int version2numTokens = version2Tokenized.size()
-        int minNumTokens = Math.min(version1numTokens, version2numTokens)
-        for (int i = 0; i < minNumTokens; i++) {
-            int num1 = version1Tokenized[i].toInteger()
-            int num2 = version2Tokenized[i].toInteger()
-            if (num1 > num2) {
-                return version1
-            }
-            if (num2 > num1) {
-                return version2
+        List<Integer> version1Tokenized = version1.tokenize(".")*.toInteger()
+        List<Integer> version2Tokenized = version2.tokenize(".")*.toInteger()
+        int minTokens = Math.min(version1Tokenized.size(), version2Tokenized.size())
+        for (int i = 0; i < minTokens; i++) {
+            int num1 = version1Tokenized[i]
+            int num2 = version2Tokenized[i]
+            if (num1 != num2) {
+                return num1 > num2 ? version1 : version2
             }
         }
-        if (version1numTokens > version2numTokens) {
-            return version1
-        }
-        return version2
+        return version1Tokenized.size() > version2Tokenized.size() ? version1 : version2
     }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
@@ -928,7 +914,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
      * or string version.
      */
-    private String getCompileSdkFromProject(Project gradleProject) {
+    private static String getCompileSdkFromProject(Project gradleProject) {
         return gradleProject.android.compileSdkVersion.substring(8)
     }
 
@@ -996,17 +982,14 @@ class FlutterPlugin implements Plugin<Project> {
         if (localProperties == null) {
             localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
         }
-        String result
-        if (project.hasProperty(name)) {
-            result = project.property(name)
-        }
-        if (result == null) {
-            result = localProperties.getProperty(name)
-        }
-        if (result == null) {
-            result = defaultValue
-        }
-        return result
+        // First, try to get the property from the project
+        String result = project.hasProperty(name) ? project.property(name) : null
+
+        // then, if result is still null, try and get it from local properties
+        result = result ?: localProperties?.getProperty(name)
+
+        // Return the defaultValue if no result found
+        return result ?: defaultValue
     }
 
     private List<String> getTargetPlatforms() {
@@ -1070,10 +1053,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Gets the target file. This is typically `lib/main.dart`.
      */
     private String getFlutterTarget() {
-        String target = project.flutter.target
-        if (target == null) {
-            target = "lib/main.dart"
-        }
+        String target = project.flutter.target ?: "lib/main.dart"
         final String propTarget = "target"
         if (project.hasProperty(propTarget)) {
             target = project.property(propTarget)
@@ -1134,7 +1114,7 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
-    private Task getAssembleTask(variant) {
+    private static Task getAssembleTask(variant) {
         // `assemble` became `assembleProvider` in AGP 3.3.0.
         return variant.hasProperty("assembleProvider") ? variant.assembleProvider.get() : variant.assemble
     }
@@ -1475,9 +1455,7 @@ class FlutterPlugin implements Plugin<Project> {
                     if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
                         return
                     }
-                    if (copyFlutterAssetsTask == null) {
-                        copyFlutterAssetsTask = addFlutterDeps(libraryVariant)
-                    }
+                    copyFlutterAssetsTask = copyFlutterAssetsTask ?: addFlutterDeps(libraryVariant)
                     Task mergeAssets = project
                         .tasks
                         .findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
