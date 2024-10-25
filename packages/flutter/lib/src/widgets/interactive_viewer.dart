@@ -153,56 +153,12 @@ class InteractiveViewer extends StatefulWidget {
   /// in the [TransformationController] enabling the direct child to stay static while
   /// delegating layout to widgets like [Stack] and [CustomMultiChildLayout].
   ///
+  /// {@tool dartpad}
   /// The following example is how to construct an infinite canvas where the background is static
   /// and the nodes are positioned manually.
   ///
-  /// ```dart
-  /// import 'package:flutter/widgets.dart';
-  /// import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad;
-  ///
-  /// typedef Node = ({Rect rect, Widget child});
-  ///
-  /// class Example extends StatelessWidget {
-  ///   const Example({
-  ///     super.key,
-  ///     required this.controller,
-  ///     required this.nodes,
-  ///   });
-  ///
-  ///   final TransformationController controller;
-  ///   final List<Node> nodes;
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return InteractiveViewer.raw(
-  ///       transformationController: controller,
-  ///       boundaryMargin: EdgeInsets.all(double.infinity),
-  ///       builder: (BuildContext context, Quad viewport) {
-  ///         final Matrix4 matrix = controller.value;
-  ///         return Stack(
-  ///           children: [
-  ///             Positioned.fill(
-  ///                // Could be a grid background based on the current viewport
-  ///                child: Placeholder(),
-  ///             ),
-  ///             for (final Node node in nodes)
-  ///               (){
-  ///                 final Rect rect = MatrixUtils.transformRect(matrix, node.rect);
-  ///                 return  Positioned.fromRect(
-  ///                   rect: rect,
-  ///                   child: GestureDetector(
-  ///                     onTap: () => print('Node clicked'),
-  ///                     child: node.child,
-  ///                   ),
-  ///                 );
-  ///               }(),
-  ///           ],
-  ///         );
-  ///       },
-  ///     );
-  ///   }
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/interactive_viewer/interactive_viewer.raw.0.dart **
+  /// {@end-tool}
   InteractiveViewer.raw({
     super.key,
     this.clipBehavior = Clip.hardEdge,
