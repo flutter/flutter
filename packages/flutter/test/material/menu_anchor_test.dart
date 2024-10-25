@@ -4738,6 +4738,7 @@ void main() {
     expect(controller.isOpen, false);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/157606.
   testWidgets('MenuAnchor updates isOpen state correctly', (WidgetTester tester) async {
     bool isOpen = false;
     int openCount = 0;
