@@ -388,6 +388,7 @@ class ReorderableListState extends State<ReorderableList> {
     _sliverReorderableListKey.currentState!.cancelReorder();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -630,6 +631,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   Axis get _scrollDirection => axisDirectionToAxis(_scrollable.axisDirection);
   bool get _reverse => axisDirectionIsReversed(_scrollable.axisDirection);
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -644,6 +646,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     }
   }
 
+  @protected
   @override
   void didUpdateWidget(covariant SliverReorderableList oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -661,6 +664,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     }
   }
 
+  @protected
   @override
   void dispose() {
     _dragReset();
@@ -1030,6 +1034,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     );
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));

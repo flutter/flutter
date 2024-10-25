@@ -468,6 +468,7 @@ class DrawerController extends StatefulWidget {
 ///
 /// Typically used by a [Scaffold] to [open] and [close] the drawer.
 class DrawerControllerState extends State<DrawerController> with SingleTickerProviderStateMixin {
+  @protected
   @override
   void initState() {
     super.initState();
@@ -481,6 +482,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       ..addStatusListener(_animationStatusChanged);
   }
 
+  @protected
   @override
   void dispose() {
     _historyEntry?.remove();
@@ -489,12 +491,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     super.dispose();
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _scrimColorTween = _buildScrimColorTween();
   }
 
+  @protected
   @override
   void didUpdateWidget(DrawerController oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -751,6 +755,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));

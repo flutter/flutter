@@ -425,6 +425,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
 
   _NestedScrollCoordinator? _coordinator;
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -436,12 +437,14 @@ class NestedScrollViewState extends State<NestedScrollView> {
     );
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _coordinator!.setParent(widget.controller);
   }
 
+  @protected
   @override
   void didUpdateWidget(NestedScrollView oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -450,6 +453,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
     }
   }
 
+  @protected
   @override
   void dispose() {
     _coordinator!.dispose();
@@ -476,6 +480,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
     }
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     final ScrollPhysics scrollPhysics = widget.physics?.applyTo(const ClampingScrollPhysics())

@@ -373,6 +373,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// The list of native text processing actions provided by the engine.
   final List<ProcessTextAction> _processTextActions = <ProcessTextAction>[];
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -396,6 +397,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _processTextActions.addAll(await _processTextService.queryTextActions());
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -422,6 +424,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
   }
 
+  @protected
   @override
   void didUpdateWidget(SelectableRegion oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1696,6 +1699,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectable = null;
   }
 
+  @protected
   @override
   void dispose() {
     _selectable?.removeListener(_updateSelectionStatus);
@@ -1709,6 +1713,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     super.dispose();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
