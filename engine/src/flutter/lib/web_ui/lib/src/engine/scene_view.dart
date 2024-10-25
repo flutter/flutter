@@ -95,23 +95,24 @@ class EngineSceneView {
       flutterView.physicalSize.width,
       flutterView.physicalSize.height,
     );
-    final List<LayerSlice> slices = scene.rootLayer.slices;
+    final List<LayerSlice?> slices = scene.rootLayer.slices;
     final List<ScenePicture> picturesToRender = <ScenePicture>[];
     final List<ScenePicture> originalPicturesToRender = <ScenePicture>[];
-    for (final LayerSlice slice in slices) {
-      if (slice is PictureSlice) {
-        final ui.Rect clippedRect = slice.picture.cullRect.intersect(screenBounds);
-        if (clippedRect.isEmpty) {
-          // This picture is completely offscreen, so don't render it at all
-          continue;
-        } else if (clippedRect == slice.picture.cullRect) {
-          // The picture doesn't need to be clipped, just render the original
-          originalPicturesToRender.add(slice.picture);
-          picturesToRender.add(slice.picture);
-        } else {
-          originalPicturesToRender.add(slice.picture);
-          picturesToRender.add(pictureRenderer.clipPicture(slice.picture, clippedRect));
-        }
+    for (final LayerSlice? slice in slices) {
+      if (slice == null) {
+        continue;
+      }
+      final ui.Rect clippedRect = slice.picture.cullRect.intersect(screenBounds);
+      if (clippedRect.isEmpty) {
+        // This picture is completely offscreen, so don't render it at all
+        continue;
+      } else if (clippedRect == slice.picture.cullRect) {
+        // The picture doesn't need to be clipped, just render the original
+        originalPicturesToRender.add(slice.picture);
+        picturesToRender.add(slice.picture);
+      } else {
+        originalPicturesToRender.add(slice.picture);
+        picturesToRender.add(pictureRenderer.clipPicture(slice.picture, clippedRect));
       }
     }
     final Map<ScenePicture, DomImageBitmap> renderMap;
@@ -132,58 +133,55 @@ class EngineSceneView {
 
     final List<SliceContainer?> reusableContainers = List<SliceContainer?>.from(containers);
     final List<SliceContainer> newContainers = <SliceContainer>[];
-    for (final LayerSlice slice in slices) {
-      switch (slice) {
-        case PictureSlice():
-          final DomImageBitmap? bitmap = renderMap[slice.picture];
-          if (bitmap == null) {
-            // We didn't render this slice because no part of it is visible.
-            continue;
+    for (final LayerSlice? slice in slices) {
+      if (slice == null) {
+        continue;
+      }
+      final DomImageBitmap? bitmap = renderMap[slice.picture];
+      if (bitmap != null) {
+        PictureSliceContainer? container;
+        for (int j = 0; j < reusableContainers.length; j++) {
+          final SliceContainer? candidate = reusableContainers[j];
+          if (candidate is PictureSliceContainer) {
+            container = candidate;
+            reusableContainers[j] = null;
+            break;
           }
-          PictureSliceContainer? container;
-          for (int j = 0; j < reusableContainers.length; j++) {
-            final SliceContainer? candidate = reusableContainers[j];
-            if (candidate is PictureSliceContainer) {
-              container = candidate;
-              reusableContainers[j] = null;
-              break;
-            }
-          }
+        }
 
-          final ui.Rect clippedBounds = slice.picture.cullRect.intersect(screenBounds);
-          if (container != null) {
-            container.bounds = clippedBounds;
-          } else {
-            container = PictureSliceContainer(clippedBounds);
-          }
-          container.updateContents();
-          container.renderBitmap(bitmap);
-          newContainers.add(container);
+        final ui.Rect clippedBounds = slice.picture.cullRect.intersect(screenBounds);
+        if (container != null) {
+          container.bounds = clippedBounds;
+        } else {
+          container = PictureSliceContainer(clippedBounds);
+        }
+        container.updateContents();
+        container.renderBitmap(bitmap);
+        newContainers.add(container);
+      }
 
-        case PlatformViewSlice():
-          for (final PlatformView view in slice.views) {
-            // TODO(harryterkelsen): Inject the FlutterView instance from `renderScene`,
-            // instead of using `EnginePlatformDispatcher...implicitView` directly,
-            // or make the FlutterView "register" like in canvaskit.
-            // Ensure the platform view contents are injected in the DOM.
-            EnginePlatformDispatcher.instance.implicitView?.dom.injectPlatformView(view.viewId);
+      for (final PlatformView view in slice.platformViews) {
+        // TODO(harryterkelsen): Inject the FlutterView instance from `renderScene`,
+        // instead of using `EnginePlatformDispatcher...implicitView` directly,
+        // or make the FlutterView "register" like in canvaskit.
+        // Ensure the platform view contents are injected in the DOM.
+        EnginePlatformDispatcher.instance.implicitView?.dom.injectPlatformView(view.viewId);
 
-            // Attempt to reuse a container for the existing view
-            PlatformViewContainer? container;
-            for (int j = 0; j < reusableContainers.length; j++) {
-              final SliceContainer? candidate = reusableContainers[j];
-              if (candidate is PlatformViewContainer && candidate.viewId == view.viewId) {
-                container = candidate;
-                reusableContainers[j] = null;
-                break;
-              }
-            }
-            container ??= PlatformViewContainer(view.viewId);
-            container.bounds = view.bounds;
-            container.styling = view.styling;
-            container.updateContents();
-            newContainers.add(container);
+        // Attempt to reuse a container for the existing view
+        PlatformViewContainer? container;
+        for (int j = 0; j < reusableContainers.length; j++) {
+          final SliceContainer? candidate = reusableContainers[j];
+          if (candidate is PlatformViewContainer && candidate.viewId == view.viewId) {
+            container = candidate;
+            reusableContainers[j] = null;
+            break;
           }
+        }
+        container ??= PlatformViewContainer(view.viewId);
+        container.bounds = view.bounds;
+        container.styling = view.styling;
+        container.updateContents();
+        newContainers.add(container);
       }
     }
 
