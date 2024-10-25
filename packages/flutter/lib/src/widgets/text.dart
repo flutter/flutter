@@ -101,7 +101,7 @@ class DefaultTextStyle extends InheritedTheme {
   /// essentially what this constructor does).
   ///
   /// If a [textHeightBehavior] is provided, the existing configuration will be
-  /// replaced compeletely. To retain part of the original [textHeightBehavior],
+  /// replaced completely. To retain part of the original [textHeightBehavior],
   /// manually obtain the ambient [DefaultTextStyle] using [DefaultTextStyle.of].
   static Widget merge({
     Key? key,

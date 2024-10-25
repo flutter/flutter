@@ -24,7 +24,7 @@ void main() {
           TestSemantics(
             id: 1,
             rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-            flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+            flags: <SemanticsFlag>[SemanticsFlag.hasSelectedState, SemanticsFlag.isSelected],
           ),
         ],
       ), ignoreTransform: true,
