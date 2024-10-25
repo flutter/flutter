@@ -15,8 +15,7 @@ const SaveLayerOptions SaveLayerOptions::kWithAttributes =
     kNoAttributes.with_renders_with_attributes();
 
 DisplayList::DisplayList()
-    : byte_count_(0),
-      op_count_(0),
+    : op_count_(0),
       nested_byte_count_(0),
       nested_op_count_(0),
       total_depth_(0),
@@ -27,25 +26,13 @@ DisplayList::DisplayList()
       modifies_transparent_black_(false),
       root_has_backdrop_filter_(false),
       root_is_unbounded_(false),
-      max_root_blend_mode_(DlBlendMode::kClear) {}
-
-// Eventually we should rework DisplayListBuilder to compute these and
-// deliver the vector alongside the storage.
-static std::vector<size_t> MakeOffsets(const DisplayListStorage& storage,
-                                       size_t byte_count) {
-  std::vector<size_t> offsets;
-  const uint8_t* start = storage.get();
-  const uint8_t* end = start + byte_count;
-  const uint8_t* ptr = start;
-  while (ptr < end) {
-    offsets.push_back(ptr - start);
-    ptr += reinterpret_cast<const DLOp*>(ptr)->size;
-  }
-  return offsets;
+      max_root_blend_mode_(DlBlendMode::kClear) {
+  FML_DCHECK(offsets_.size() == 0u);
+  FML_DCHECK(storage_.size() == 0u);
 }
 
 DisplayList::DisplayList(DisplayListStorage&& storage,
-                         size_t byte_count,
+                         std::vector<size_t>&& offsets,
                          uint32_t op_count,
                          size_t nested_byte_count,
                          uint32_t nested_op_count,
@@ -59,8 +46,7 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
                          bool root_is_unbounded,
                          sk_sp<const DlRTree> rtree)
     : storage_(std::move(storage)),
-      offsets_(MakeOffsets(storage_, byte_count)),
-      byte_count_(byte_count),
+      offsets_(std::move(offsets)),
       op_count_(op_count),
       nested_byte_count_(nested_byte_count),
       nested_op_count_(nested_op_count),
@@ -73,11 +59,12 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
       root_has_backdrop_filter_(root_has_backdrop_filter),
       root_is_unbounded_(root_is_unbounded),
       max_root_blend_mode_(max_root_blend_mode),
-      rtree_(std::move(rtree)) {}
+      rtree_(std::move(rtree)) {
+  FML_DCHECK(storage_.capacity() == storage_.size());
+}
 
 DisplayList::~DisplayList() {
-  const uint8_t* ptr = storage_.get();
-  DisposeOps(ptr, ptr + byte_count_);
+  DisposeOps(storage_, offsets_);
 }
 
 uint32_t DisplayList::next_unique_id() {
@@ -132,7 +119,7 @@ void DisplayList::RTreeResultsToIndexVector(
         return;
       }
     }
-    const uint8_t* ptr = storage_.get() + offsets_[index];
+    const uint8_t* ptr = storage_.base() + offsets_[index];
     const DLOp* op = reinterpret_cast<const DLOp*>(ptr);
     switch (GetOpCategory(op->type)) {
       case DisplayListOpCategory::kAttribute:
@@ -193,7 +180,7 @@ void DisplayList::RTreeResultsToIndexVector(
 }
 
 void DisplayList::Dispatch(DlOpReceiver& receiver) const {
-  const uint8_t* base = storage_.get();
+  const uint8_t* base = storage_.base();
   for (size_t offset : offsets_) {
     DispatchOneOp(receiver, base + offset);
   }
@@ -213,7 +200,7 @@ void DisplayList::Dispatch(DlOpReceiver& receiver,
     Dispatch(receiver);
   } else {
     auto op_indices = GetCulledIndices(cull_rect);
-    const uint8_t* base = storage_.get();
+    const uint8_t* base = storage_.base();
     for (DlIndex index : op_indices) {
       DispatchOneOp(receiver, base + offsets_[index]);
     }
@@ -240,11 +227,14 @@ void DisplayList::DispatchOneOp(DlOpReceiver& receiver,
   }
 }
 
-void DisplayList::DisposeOps(const uint8_t* ptr, const uint8_t* end) {
-  while (ptr < end) {
-    auto op = reinterpret_cast<const DLOp*>(ptr);
-    ptr += op->size;
-    FML_DCHECK(ptr <= end);
+void DisplayList::DisposeOps(const DisplayListStorage& storage,
+                             const std::vector<size_t>& offsets) {
+  const uint8_t* base = storage.base();
+  if (!base) {
+    return;
+  }
+  for (size_t offset : offsets) {
+    auto op = reinterpret_cast<const DLOp*>(base + offset);
     switch (op->type) {
 #define DL_OP_DISPOSE(name)                            \
   case DisplayListOpType::k##name:                     \
@@ -362,10 +352,9 @@ DisplayListOpType DisplayList::GetOpType(DlIndex index) const {
   }
 
   size_t offset = offsets_[index];
-  FML_DCHECK(offset < byte_count_);
-  auto ptr = storage_.get() + offset;
+  FML_DCHECK(offset < storage_.size());
+  auto ptr = storage_.base() + offset;
   auto op = reinterpret_cast<const DLOp*>(ptr);
-  FML_DCHECK(ptr + op->size <= storage_.get() + byte_count_);
   return op->type;
 }
 
@@ -399,34 +388,32 @@ bool DisplayList::Dispatch(DlOpReceiver& receiver, DlIndex index) const {
   }
 
   size_t offset = offsets_[index];
-  FML_DCHECK(offset < byte_count_);
-  auto ptr = storage_.get() + offset;
-  FML_DCHECK(offset + reinterpret_cast<const DLOp*>(ptr)->size <= byte_count_);
+  FML_DCHECK(offset < storage_.size());
+  auto ptr = storage_.base() + offset;
 
   DispatchOneOp(receiver, ptr);
 
   return true;
 }
 
-static bool CompareOps(const uint8_t* ptrA,
-                       const uint8_t* endA,
-                       const uint8_t* ptrB,
-                       const uint8_t* endB) {
+static bool CompareOps(const DisplayListStorage& storageA,
+                       const std::vector<size_t>& offsetsA,
+                       const DisplayListStorage& storageB,
+                       const std::vector<size_t>& offsetsB) {
+  const uint8_t* base_a = storageA.base();
+  const uint8_t* base_b = storageB.base();
   // These conditions are checked by the caller...
-  FML_DCHECK((endA - ptrA) == (endB - ptrB));
-  FML_DCHECK(ptrA != ptrB);
-  const uint8_t* bulk_start_a = ptrA;
-  const uint8_t* bulk_start_b = ptrB;
-  while (ptrA < endA && ptrB < endB) {
-    auto opA = reinterpret_cast<const DLOp*>(ptrA);
-    auto opB = reinterpret_cast<const DLOp*>(ptrB);
-    if (opA->type != opB->type || opA->size != opB->size) {
+  FML_DCHECK(offsetsA.size() == offsetsB.size());
+  FML_DCHECK(base_a != base_b);
+  size_t bulk_start = 0u;
+  for (size_t i = 0; i < offsetsA.size(); i++) {
+    size_t offset = offsetsA[i];
+    FML_DCHECK(offsetsB[i] == offset);
+    auto opA = reinterpret_cast<const DLOp*>(base_a + offset);
+    auto opB = reinterpret_cast<const DLOp*>(base_b + offset);
+    if (opA->type != opB->type) {
       return false;
     }
-    ptrA += opA->size;
-    ptrB += opB->size;
-    FML_DCHECK(ptrA <= endA);
-    FML_DCHECK(ptrB <= endB);
     DisplayListCompare result;
     switch (opA->type) {
 #define DL_OP_EQUALS(name)                              \
@@ -451,23 +438,23 @@ static bool CompareOps(const uint8_t* ptrA,
       case DisplayListCompare::kEqual:
         // Check if we have a backlog of bytes to bulk compare and then
         // reset the bulk compare pointers to the address following this op
-        auto bulk_bytes = reinterpret_cast<const uint8_t*>(opA) - bulk_start_a;
-        if (bulk_bytes > 0) {
-          if (memcmp(bulk_start_a, bulk_start_b, bulk_bytes) != 0) {
+        if (bulk_start < offset) {
+          const uint8_t* bulk_start_a = base_a + bulk_start;
+          const uint8_t* bulk_start_b = base_b + bulk_start;
+          if (memcmp(bulk_start_a, bulk_start_b, offset - bulk_start) != 0) {
             return false;
           }
         }
-        bulk_start_a = ptrA;
-        bulk_start_b = ptrB;
+        bulk_start =
+            i + 1 < offsetsA.size() ? offsetsA[i + 1] : storageA.size();
         break;
     }
   }
-  if (ptrA != endA || ptrB != endB) {
-    return false;
-  }
-  if (bulk_start_a < ptrA) {
+  if (bulk_start < storageA.size()) {
     // Perform a final bulk compare if we have remaining bytes waiting
-    if (memcmp(bulk_start_a, bulk_start_b, ptrA - bulk_start_a) != 0) {
+    const uint8_t* bulk_start_a = base_a + bulk_start;
+    const uint8_t* bulk_start_b = base_b + bulk_start;
+    if (memcmp(bulk_start_a, bulk_start_b, storageA.size() - bulk_start) != 0) {
       return false;
     }
   }
@@ -478,15 +465,15 @@ bool DisplayList::Equals(const DisplayList* other) const {
   if (this == other) {
     return true;
   }
-  if (byte_count_ != other->byte_count_ || op_count_ != other->op_count_) {
+  if (offsets_.size() != other->offsets_.size() ||
+      storage_.size() != other->storage_.size() ||
+      op_count_ != other->op_count_) {
     return false;
   }
-  const uint8_t* ptr = storage_.get();
-  const uint8_t* o_ptr = other->storage_.get();
-  if (ptr == o_ptr) {
+  if (storage_.base() == other->storage_.base()) {
     return true;
   }
-  return CompareOps(ptr, ptr + byte_count_, o_ptr, o_ptr + other->byte_count_);
+  return CompareOps(storage_, offsets_, other->storage_, other->offsets_);
 }
 
 }  // namespace flutter

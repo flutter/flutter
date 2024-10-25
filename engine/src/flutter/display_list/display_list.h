@@ -5,14 +5,10 @@
 #ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_H_
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_H_
 
-#include <memory>
-#include <optional>
-
 #include "flutter/display_list/dl_blend_mode.h"
-#include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/dl_storage.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/geometry/dl_rtree.h"
-#include "flutter/fml/logging.h"
 
 // The Flutter DisplayList mechanism encapsulates a persistent sequence of
 // rendering operations.
@@ -263,28 +259,6 @@ class SaveLayerOptions {
   };
 };
 
-// Manages a buffer allocated with malloc.
-class DisplayListStorage {
- public:
-  DisplayListStorage() = default;
-  DisplayListStorage(DisplayListStorage&&) = default;
-
-  uint8_t* get() { return ptr_.get(); }
-
-  const uint8_t* get() const { return ptr_.get(); }
-
-  void realloc(size_t count) {
-    ptr_.reset(static_cast<uint8_t*>(std::realloc(ptr_.release(), count)));
-    FML_CHECK(ptr_);
-  }
-
- private:
-  struct FreeDeleter {
-    void operator()(uint8_t* p) { std::free(p); }
-  };
-  std::unique_ptr<uint8_t, FreeDeleter> ptr_;
-};
-
 using DlIndex = uint32_t;
 
 // The base class that contains a sequence of rendering operations
@@ -304,7 +278,7 @@ class DisplayList : public SkRefCnt {
   // but nested ops are only included if requested. The defaults used
   // here for these accessors follow that pattern.
   size_t bytes(bool nested = true) const {
-    return sizeof(DisplayList) + byte_count_ +
+    return sizeof(DisplayList) + storage_.size() +
            (nested ? nested_byte_count_ : 0);
   }
 
@@ -530,7 +504,7 @@ class DisplayList : public SkRefCnt {
 
  private:
   DisplayList(DisplayListStorage&& ptr,
-              size_t byte_count,
+              std::vector<size_t>&& offsets,
               uint32_t op_count,
               size_t nested_byte_count,
               uint32_t nested_op_count,
@@ -546,13 +520,13 @@ class DisplayList : public SkRefCnt {
 
   static uint32_t next_unique_id();
 
-  static void DisposeOps(const uint8_t* ptr, const uint8_t* end);
+  static void DisposeOps(const DisplayListStorage& storage,
+                         const std::vector<size_t>& offsets);
 
   const DisplayListStorage storage_;
   const std::vector<size_t> offsets_;
-  const size_t byte_count_;
-  const uint32_t op_count_;
 
+  const uint32_t op_count_;
   const size_t nested_byte_count_;
   const uint32_t nested_op_count_;
 

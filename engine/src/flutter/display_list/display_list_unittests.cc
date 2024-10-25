@@ -253,6 +253,25 @@ TEST_F(DisplayListTest, EmptyRebuild) {
   ASSERT_TRUE(dl2->Equals(dl3));
 }
 
+TEST_F(DisplayListTest, NopReusedBuildIsReallyEmpty) {
+  DisplayListBuilder builder;
+  builder.DrawRect(DlRect::MakeLTRB(0.0f, 0.0f, 10.0f, 10.0f), DlPaint());
+
+  {
+    auto dl1 = builder.Build();
+    EXPECT_EQ(dl1->op_count(), 1u);
+    EXPECT_GT(dl1->bytes(), sizeof(DisplayList));
+    EXPECT_EQ(dl1->GetBounds(), DlRect::MakeLTRB(0.0f, 0.0f, 10.0f, 10.0f));
+  }
+
+  {
+    auto dl2 = builder.Build();
+    EXPECT_EQ(dl2->op_count(), 0u);
+    EXPECT_EQ(dl2->bytes(), sizeof(DisplayList));
+    EXPECT_EQ(dl2->GetBounds(), DlRect());
+  }
+}
+
 TEST_F(DisplayListTest, GeneralReceiverInitialValues) {
   DisplayListGeneralReceiver receiver;
 
@@ -5892,6 +5911,38 @@ TEST_F(DisplayListTest, BackdropFilterCulledAlongsideClipAndTransform) {
 
     EXPECT_TRUE(DisplayListsEQ_Verbose(culled_dl, expected_dl));
   }
+}
+
+TEST_F(DisplayListTest, RecordManyLargeDisplayListOperations) {
+  DisplayListBuilder builder;
+
+  // 2050 points is sizeof(DlPoint) * 2050 = 16400 bytes, this is more
+  // than the page size of 16384 bytes.
+  std::vector<DlPoint> points(2050);
+  builder.DrawPoints(PointMode::kPoints, points.size(), points.data(),
+                     DlPaint{});
+  builder.DrawPoints(PointMode::kPoints, points.size(), points.data(),
+                     DlPaint{});
+  builder.DrawPoints(PointMode::kPoints, points.size(), points.data(),
+                     DlPaint{});
+  builder.DrawPoints(PointMode::kPoints, points.size(), points.data(),
+                     DlPaint{});
+  builder.DrawPoints(PointMode::kPoints, points.size(), points.data(),
+                     DlPaint{});
+  builder.DrawPoints(PointMode::kPoints, points.size(), points.data(),
+                     DlPaint{});
+
+  EXPECT_TRUE(!!builder.Build());
+}
+
+TEST_F(DisplayListTest, RecordSingleLargeDisplayListOperation) {
+  DisplayListBuilder builder;
+
+  std::vector<DlPoint> points(40000);
+  builder.DrawPoints(PointMode::kPoints, points.size(), points.data(),
+                     DlPaint{});
+
+  EXPECT_TRUE(!!builder.Build());
 }
 
 }  // namespace testing

@@ -497,8 +497,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void checkForDeferredSave();
 
   DisplayListStorage storage_;
-  size_t used_ = 0u;
-  size_t allocated_ = 0u;
+  std::vector<size_t> offsets_;
   uint32_t render_op_count_ = 0u;
   uint32_t depth_ = 0u;
   // Most rendering ops will use 1 depth value, but some attributes may

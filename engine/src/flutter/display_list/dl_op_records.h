@@ -58,8 +58,9 @@ struct DLOp {
   static constexpr uint32_t kDepthInc = 0;
   static constexpr uint32_t kRenderOpInc = 0;
 
-  DisplayListOpType type : 8;
-  uint32_t size : 24;
+  explicit DLOp(DisplayListOpType type) : type(type) {}
+
+  const DisplayListOpType type;
 
   DisplayListCompare equals(const DLOp* other) const {
     return DisplayListCompare::kUseBulkCompare;
@@ -67,34 +68,35 @@ struct DLOp {
 };
 
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
-#define DEFINE_SET_BOOL_OP(name)                                 \
-  struct Set##name##Op final : DLOp {                            \
-    static constexpr auto kType = DisplayListOpType::kSet##name; \
-                                                                 \
-    explicit Set##name##Op(bool value) : value(value) {}         \
-                                                                 \
-    const bool value;                                            \
-                                                                 \
-    void dispatch(DlOpReceiver& receiver) const {                \
-      receiver.set##name(value);                                 \
-    }                                                            \
+#define DEFINE_SET_BOOL_OP(name)                                      \
+  struct Set##name##Op final : DLOp {                                 \
+    static constexpr auto kType = DisplayListOpType::kSet##name;      \
+                                                                      \
+    explicit Set##name##Op(bool value) : DLOp(kType), value(value) {} \
+                                                                      \
+    const bool value;                                                 \
+                                                                      \
+    void dispatch(DlOpReceiver& receiver) const {                     \
+      receiver.set##name(value);                                      \
+    }                                                                 \
   };
 DEFINE_SET_BOOL_OP(AntiAlias)
 DEFINE_SET_BOOL_OP(InvertColors)
 #undef DEFINE_SET_BOOL_OP
 
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
-#define DEFINE_SET_ENUM_OP(name)                                         \
-  struct SetStroke##name##Op final : DLOp {                              \
-    static constexpr auto kType = DisplayListOpType::kSetStroke##name;   \
-                                                                         \
-    explicit SetStroke##name##Op(DlStroke##name value) : value(value) {} \
-                                                                         \
-    const DlStroke##name value;                                          \
-                                                                         \
-    void dispatch(DlOpReceiver& receiver) const {                        \
-      receiver.setStroke##name(value);                                   \
-    }                                                                    \
+#define DEFINE_SET_ENUM_OP(name)                                       \
+  struct SetStroke##name##Op final : DLOp {                            \
+    static constexpr auto kType = DisplayListOpType::kSetStroke##name; \
+                                                                       \
+    explicit SetStroke##name##Op(DlStroke##name value)                 \
+        : DLOp(kType), value(value) {}                                 \
+                                                                       \
+    const DlStroke##name value;                                        \
+                                                                       \
+    void dispatch(DlOpReceiver& receiver) const {                      \
+      receiver.setStroke##name(value);                                 \
+    }                                                                  \
   };
 DEFINE_SET_ENUM_OP(Cap)
 DEFINE_SET_ENUM_OP(Join)
@@ -104,7 +106,7 @@ DEFINE_SET_ENUM_OP(Join)
 struct SetStyleOp final : DLOp {
   static constexpr auto kType = DisplayListOpType::kSetStyle;
 
-  explicit SetStyleOp(DlDrawStyle style) : style(style) {}
+  explicit SetStyleOp(DlDrawStyle style) : DLOp(kType), style(style) {}
 
   const DlDrawStyle style;
 
@@ -116,7 +118,7 @@ struct SetStyleOp final : DLOp {
 struct SetStrokeWidthOp final : DLOp {
   static constexpr auto kType = DisplayListOpType::kSetStrokeWidth;
 
-  explicit SetStrokeWidthOp(float width) : width(width) {}
+  explicit SetStrokeWidthOp(float width) : DLOp(kType), width(width) {}
 
   const float width;
 
@@ -128,7 +130,7 @@ struct SetStrokeWidthOp final : DLOp {
 struct SetStrokeMiterOp final : DLOp {
   static constexpr auto kType = DisplayListOpType::kSetStrokeMiter;
 
-  explicit SetStrokeMiterOp(float limit) : limit(limit) {}
+  explicit SetStrokeMiterOp(float limit) : DLOp(kType), limit(limit) {}
 
   const float limit;
 
@@ -141,7 +143,7 @@ struct SetStrokeMiterOp final : DLOp {
 struct SetColorOp final : DLOp {
   static constexpr auto kType = DisplayListOpType::kSetColor;
 
-  explicit SetColorOp(DlColor color) : color(color) {}
+  explicit SetColorOp(DlColor color) : DLOp(kType), color(color) {}
 
   const DlColor color;
 
@@ -151,7 +153,7 @@ struct SetColorOp final : DLOp {
 struct SetBlendModeOp final : DLOp {
   static constexpr auto kType = DisplayListOpType::kSetBlendMode;
 
-  explicit SetBlendModeOp(DlBlendMode mode) : mode(mode) {}
+  explicit SetBlendModeOp(DlBlendMode mode) : DLOp(kType), mode(mode) {}
 
   const DlBlendMode mode;
 
@@ -170,7 +172,7 @@ struct SetBlendModeOp final : DLOp {
   struct Clear##name##Op final : DLOp {                                     \
     static constexpr auto kType = DisplayListOpType::kClear##name;          \
                                                                             \
-    Clear##name##Op() {}                                                    \
+    Clear##name##Op() : DLOp(kType) {}                                      \
                                                                             \
     void dispatch(DlOpReceiver& receiver) const {                           \
       receiver.set##name(nullptr);                                          \
@@ -179,7 +181,7 @@ struct SetBlendModeOp final : DLOp {
   struct SetPod##name##Op final : DLOp {                                    \
     static constexpr auto kType = DisplayListOpType::kSetPod##name;         \
                                                                             \
-    SetPod##name##Op() {}                                                   \
+    SetPod##name##Op() : DLOp(kType) {}                                     \
                                                                             \
     void dispatch(DlOpReceiver& receiver) const {                           \
       const Dl##name* filter = reinterpret_cast<const Dl##name*>(this + 1); \
@@ -198,7 +200,8 @@ struct SetImageColorSourceOp : DLOp {
   static constexpr auto kType = DisplayListOpType::kSetImageColorSource;
 
   explicit SetImageColorSourceOp(const DlImageColorSource* source)
-      : source(source->image(),
+      : DLOp(kType),
+        source(source->image(),
                source->horizontal_tile_mode(),
                source->vertical_tile_mode(),
                source->sampling(),
@@ -218,7 +221,8 @@ struct SetRuntimeEffectColorSourceOp : DLOp {
 
   explicit SetRuntimeEffectColorSourceOp(
       const DlRuntimeEffectColorSource* source)
-      : source(source->runtime_effect(),
+      : DLOp(kType),
+        source(source->runtime_effect(),
                source->samplers(),
                source->uniform_data()) {}
 
@@ -239,7 +243,7 @@ struct SetSharedImageFilterOp : DLOp {
   static constexpr auto kType = DisplayListOpType::kSetSharedImageFilter;
 
   explicit SetSharedImageFilterOp(const DlImageFilter* filter)
-      : filter(filter->shared()) {}
+      : DLOp(kType), filter(filter->shared()) {}
 
   const std::shared_ptr<DlImageFilter> filter;
 
@@ -259,10 +263,14 @@ struct SaveOpBase : DLOp {
   static constexpr uint32_t kDepthInc = 0;
   static constexpr uint32_t kRenderOpInc = 1;
 
-  SaveOpBase() : options(), restore_index(0) {}
+  explicit SaveOpBase(DisplayListOpType type)
+      : DLOp(type), options(), restore_index(0), total_content_depth(0) {}
 
-  explicit SaveOpBase(const SaveLayerOptions& options)
-      : options(options), restore_index(0), total_content_depth(0) {}
+  SaveOpBase(DisplayListOpType type, const SaveLayerOptions& options)
+      : DLOp(type),
+        options(options),
+        restore_index(0),
+        total_content_depth(0) {}
 
   // options parameter is only used by saveLayer operations, but since
   // it packs neatly into the empty space created by laying out the rest
@@ -276,7 +284,7 @@ struct SaveOpBase : DLOp {
 struct SaveOp final : SaveOpBase {
   static constexpr auto kType = DisplayListOpType::kSave;
 
-  SaveOp() : SaveOpBase() {}
+  SaveOp() : SaveOpBase(kType) {}
 
   void dispatch(DlOpReceiver& receiver) const {
     receiver.save(total_content_depth);
@@ -285,8 +293,10 @@ struct SaveOp final : SaveOpBase {
 // The base struct for all saveLayer() ops
 // 16 byte SaveOpBase + 20 byte payload packs into 36 bytes
 struct SaveLayerOpBase : SaveOpBase {
-  SaveLayerOpBase(const SaveLayerOptions& options, const DlRect& rect)
-      : SaveOpBase(options), rect(rect) {}
+  SaveLayerOpBase(DisplayListOpType type,
+                  const SaveLayerOptions& options,
+                  const DlRect& rect)
+      : SaveOpBase(type, options), rect(rect) {}
 
   DlRect rect;
   DlBlendMode max_blend_mode = DlBlendMode::kClear;
@@ -297,7 +307,7 @@ struct SaveLayerOp final : SaveLayerOpBase {
   static constexpr auto kType = DisplayListOpType::kSaveLayer;
 
   SaveLayerOp(const SaveLayerOptions& options, const DlRect& rect)
-      : SaveLayerOpBase(options, rect) {}
+      : SaveLayerOpBase(kType, options, rect) {}
 
   void dispatch(DlOpReceiver& receiver) const {
     receiver.saveLayer(rect, options, total_content_depth, max_blend_mode);
@@ -312,7 +322,7 @@ struct SaveLayerBackdropOp final : SaveLayerOpBase {
                       const DlRect& rect,
                       const DlImageFilter* backdrop,
                       std::optional<int64_t> backdrop_id)
-      : SaveLayerOpBase(options, rect),
+      : SaveLayerOpBase(kType, options, rect),
         backdrop(backdrop->shared()),
         backdrop_id_(backdrop_id) {}
 
@@ -338,7 +348,7 @@ struct RestoreOp final : DLOp {
   static constexpr uint32_t kDepthInc = 0;
   static constexpr uint32_t kRenderOpInc = 1;
 
-  RestoreOp() {}
+  RestoreOp() : DLOp(kType) {}
 
   void dispatch(DlOpReceiver& receiver) const {  //
     receiver.restore();
@@ -348,13 +358,16 @@ struct RestoreOp final : DLOp {
 struct TransformClipOpBase : DLOp {
   static constexpr uint32_t kDepthInc = 0;
   static constexpr uint32_t kRenderOpInc = 1;
+
+  explicit TransformClipOpBase(DisplayListOpType type) : DLOp(type) {}
 };
 // 4 byte header + 8 byte payload uses 12 bytes but is rounded up to 16 bytes
 // (4 bytes unused)
 struct TranslateOp final : TransformClipOpBase {
   static constexpr auto kType = DisplayListOpType::kTranslate;
 
-  TranslateOp(DlScalar tx, DlScalar ty) : tx(tx), ty(ty) {}
+  TranslateOp(DlScalar tx, DlScalar ty)
+      : TransformClipOpBase(kType), tx(tx), ty(ty) {}
 
   const DlScalar tx;
   const DlScalar ty;
@@ -368,7 +381,8 @@ struct TranslateOp final : TransformClipOpBase {
 struct ScaleOp final : TransformClipOpBase {
   static constexpr auto kType = DisplayListOpType::kScale;
 
-  ScaleOp(DlScalar sx, DlScalar sy) : sx(sx), sy(sy) {}
+  ScaleOp(DlScalar sx, DlScalar sy)
+      : TransformClipOpBase(kType), sx(sx), sy(sy) {}
 
   const DlScalar sx;
   const DlScalar sy;
@@ -381,7 +395,8 @@ struct ScaleOp final : TransformClipOpBase {
 struct RotateOp final : TransformClipOpBase {
   static constexpr auto kType = DisplayListOpType::kRotate;
 
-  explicit RotateOp(DlScalar degrees) : degrees(degrees) {}
+  explicit RotateOp(DlScalar degrees)
+      : TransformClipOpBase(kType), degrees(degrees) {}
 
   const DlScalar degrees;
 
@@ -394,7 +409,8 @@ struct RotateOp final : TransformClipOpBase {
 struct SkewOp final : TransformClipOpBase {
   static constexpr auto kType = DisplayListOpType::kSkew;
 
-  SkewOp(DlScalar sx, DlScalar sy) : sx(sx), sy(sy) {}
+  SkewOp(DlScalar sx, DlScalar sy)
+      : TransformClipOpBase(kType), sx(sx), sy(sy) {}
 
   const DlScalar sx;
   const DlScalar sy;
@@ -411,7 +427,9 @@ struct Transform2DAffineOp final : TransformClipOpBase {
   // clang-format off
   Transform2DAffineOp(DlScalar mxx, DlScalar mxy, DlScalar mxt,
                       DlScalar myx, DlScalar myy, DlScalar myt)
-      : mxx(mxx), mxy(mxy), mxt(mxt), myx(myx), myy(myy), myt(myt) {}
+      : TransformClipOpBase(kType),
+        mxx(mxx), mxy(mxy), mxt(mxt),
+        myx(myx), myy(myy), myt(myt) {}
   // clang-format on
 
   const DlScalar mxx, mxy, mxt;
@@ -433,7 +451,8 @@ struct TransformFullPerspectiveOp final : TransformClipOpBase {
       DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
       DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
       DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt)
-      : mxx(mxx), mxy(mxy), mxz(mxz), mxt(mxt),
+      : TransformClipOpBase(kType),
+        mxx(mxx), mxy(mxy), mxz(mxz), mxt(mxt),
         myx(myx), myy(myy), myz(myz), myt(myt),
         mzx(mzx), mzy(mzy), mzz(mzz), mzt(mzt),
         mwx(mwx), mwy(mwy), mwz(mwz), mwt(mwt) {}
@@ -456,7 +475,7 @@ struct TransformFullPerspectiveOp final : TransformClipOpBase {
 struct TransformResetOp final : TransformClipOpBase {
   static constexpr auto kType = DisplayListOpType::kTransformReset;
 
-  TransformResetOp() = default;
+  TransformResetOp() : TransformClipOpBase(kType) {}
 
   void dispatch(DlOpReceiver& receiver) const {  //
     receiver.transformReset();
@@ -478,7 +497,7 @@ struct TransformResetOp final : TransformClipOpBase {
     static constexpr auto kType = DisplayListOpType::kClip##clipop##shapename; \
                                                                                \
     Clip##clipop##shapename##Op(shapetype shape, bool is_aa)                   \
-        : is_aa(is_aa), shape(shape) {}                                        \
+        : TransformClipOpBase(kType), is_aa(is_aa), shape(shape) {}            \
                                                                                \
     const bool is_aa;                                                          \
     const shapetype shape;                                                     \
@@ -501,7 +520,7 @@ DEFINE_CLIP_SHAPE_OP(RoundRect, DlRoundRect, Difference)
     static constexpr auto kType = DisplayListOpType::kClip##clipop##Path; \
                                                                           \
     Clip##clipop##PathOp(const DlPath& path, bool is_aa)                  \
-        : is_aa(is_aa), path(path) {}                                     \
+        : TransformClipOpBase(kType), is_aa(is_aa), path(path) {}         \
                                                                           \
     const bool is_aa;                                                     \
     const DlPath path;                                                    \
@@ -523,13 +542,15 @@ DEFINE_CLIP_PATH_OP(Difference)
 struct DrawOpBase : DLOp {
   static constexpr uint32_t kDepthInc = 1;
   static constexpr uint32_t kRenderOpInc = 1;
+
+  explicit DrawOpBase(DisplayListOpType type) : DLOp(type) {}
 };
 
 // 4 byte header + no payload uses minimum 8 bytes (4 bytes unused)
 struct DrawPaintOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawPaint;
 
-  DrawPaintOp() {}
+  DrawPaintOp() : DrawOpBase(kType) {}
 
   void dispatch(DlOpReceiver& receiver) const {  //
     receiver.drawPaint();
@@ -540,7 +561,8 @@ struct DrawPaintOp final : DrawOpBase {
 struct DrawColorOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawColor;
 
-  DrawColorOp(DlColor color, DlBlendMode mode) : color(color), mode(mode) {}
+  DrawColorOp(DlColor color, DlBlendMode mode)
+      : DrawOpBase(kType), color(color), mode(mode) {}
 
   const DlColor color;
   const DlBlendMode mode;
@@ -556,17 +578,18 @@ struct DrawColorOp final : DrawOpBase {
 // SkOval is same as DlRect
 // DlRoundRect is 48 more bytes, using 52 bytes which rounds up to 56 bytes
 //        total (4 bytes unused)
-#define DEFINE_DRAW_1ARG_OP(op_name, arg_type, arg_name)                  \
-  struct Draw##op_name##Op final : DrawOpBase {                           \
-    static constexpr auto kType = DisplayListOpType::kDraw##op_name;      \
-                                                                          \
-    explicit Draw##op_name##Op(arg_type arg_name) : arg_name(arg_name) {} \
-                                                                          \
-    const arg_type arg_name;                                              \
-                                                                          \
-    void dispatch(DlOpReceiver& receiver) const {                         \
-      receiver.draw##op_name(arg_name);                                   \
-    }                                                                     \
+#define DEFINE_DRAW_1ARG_OP(op_name, arg_type, arg_name)             \
+  struct Draw##op_name##Op final : DrawOpBase {                      \
+    static constexpr auto kType = DisplayListOpType::kDraw##op_name; \
+                                                                     \
+    explicit Draw##op_name##Op(arg_type arg_name)                    \
+        : DrawOpBase(kType), arg_name(arg_name) {}                   \
+                                                                     \
+    const arg_type arg_name;                                         \
+                                                                     \
+    void dispatch(DlOpReceiver& receiver) const {                    \
+      receiver.draw##op_name(arg_name);                              \
+    }                                                                \
   };
 DEFINE_DRAW_1ARG_OP(Rect, DlRect, rect)
 DEFINE_DRAW_1ARG_OP(Oval, DlRect, oval)
@@ -578,7 +601,7 @@ DEFINE_DRAW_1ARG_OP(RoundRect, DlRoundRect, rrect)
 struct DrawPathOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawPath;
 
-  explicit DrawPathOp(const DlPath& path) : path(path) {}
+  explicit DrawPathOp(const DlPath& path) : DrawOpBase(kType), path(path) {}
 
   const DlPath path;
 
@@ -603,7 +626,7 @@ struct DrawPathOp final : DrawOpBase {
     static constexpr auto kType = DisplayListOpType::kDraw##op_name; \
                                                                      \
     Draw##op_name##Op(type1 name1, type2 name2)                      \
-        : name1(name1), name2(name2) {}                              \
+        : DrawOpBase(kType), name1(name1), name2(name2) {}           \
                                                                      \
     const type1 name1;                                               \
     const type2 name2;                                               \
@@ -625,7 +648,11 @@ struct DrawDashedLineOp final : DrawOpBase {
                    const DlPoint& p1,
                    DlScalar on_length,
                    DlScalar off_length)
-      : p0(p0), p1(p1), on_length(on_length), off_length(off_length) {}
+      : DrawOpBase(kType),
+        p0(p0),
+        p1(p1),
+        on_length(on_length),
+        off_length(off_length) {}
 
   const DlPoint p0;
   const DlPoint p1;
@@ -642,7 +669,11 @@ struct DrawArcOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawArc;
 
   DrawArcOp(DlRect bounds, DlScalar start, DlScalar sweep, bool center)
-      : bounds(bounds), start(start), sweep(sweep), center(center) {}
+      : DrawOpBase(kType),
+        bounds(bounds),
+        start(start),
+        sweep(sweep),
+        center(center) {}
 
   const DlRect bounds;
   const DlScalar start;
@@ -664,7 +695,8 @@ struct DrawArcOp final : DrawOpBase {
   struct Draw##name##Op final : DrawOpBase {                           \
     static constexpr auto kType = DisplayListOpType::kDraw##name;      \
                                                                        \
-    explicit Draw##name##Op(uint32_t count) : count(count) {}          \
+    explicit Draw##name##Op(uint32_t count)                            \
+        : DrawOpBase(kType), count(count) {}                           \
                                                                        \
     const uint32_t count;                                              \
                                                                        \
@@ -684,7 +716,7 @@ struct DrawVerticesOp final : DrawOpBase {
 
   explicit DrawVerticesOp(const std::shared_ptr<DlVertices>& vertices,
                           DlBlendMode mode)
-      : mode(mode), vertices(vertices) {}
+      : DrawOpBase(kType), mode(mode), vertices(vertices) {}
 
   const DlBlendMode mode;
   const std::shared_ptr<DlVertices> vertices;
@@ -696,29 +728,32 @@ struct DrawVerticesOp final : DrawOpBase {
 
 // 4 byte header + 40 byte payload uses 44 bytes but is rounded up to 48 bytes
 // (4 bytes unused)
-#define DEFINE_DRAW_IMAGE_OP(name, with_attributes)                    \
-  struct name##Op final : DrawOpBase {                                 \
-    static constexpr auto kType = DisplayListOpType::k##name;          \
-                                                                       \
-    name##Op(const sk_sp<DlImage>& image,                              \
-             const DlPoint& point,                                     \
-             DlImageSampling sampling)                                 \
-        : point(point), sampling(sampling), image(std::move(image)) {} \
-                                                                       \
-    const DlPoint point;                                               \
-    const DlImageSampling sampling;                                    \
-    const sk_sp<DlImage> image;                                        \
-                                                                       \
-    void dispatch(DlOpReceiver& receiver) const {                      \
-      receiver.drawImage(image, point, sampling, with_attributes);     \
-    }                                                                  \
-                                                                       \
-    DisplayListCompare equals(const name##Op* other) const {           \
-      return (point == other->point && sampling == other->sampling &&  \
-              image->Equals(other->image))                             \
-                 ? DisplayListCompare::kEqual                          \
-                 : DisplayListCompare::kNotEqual;                      \
-    }                                                                  \
+#define DEFINE_DRAW_IMAGE_OP(name, with_attributes)                   \
+  struct name##Op final : DrawOpBase {                                \
+    static constexpr auto kType = DisplayListOpType::k##name;         \
+                                                                      \
+    name##Op(const sk_sp<DlImage>& image,                             \
+             const DlPoint& point,                                    \
+             DlImageSampling sampling)                                \
+        : DrawOpBase(kType),                                          \
+          point(point),                                               \
+          sampling(sampling),                                         \
+          image(std::move(image)) {}                                  \
+                                                                      \
+    const DlPoint point;                                              \
+    const DlImageSampling sampling;                                   \
+    const sk_sp<DlImage> image;                                       \
+                                                                      \
+    void dispatch(DlOpReceiver& receiver) const {                     \
+      receiver.drawImage(image, point, sampling, with_attributes);    \
+    }                                                                 \
+                                                                      \
+    DisplayListCompare equals(const name##Op* other) const {          \
+      return (point == other->point && sampling == other->sampling && \
+              image->Equals(other->image))                            \
+                 ? DisplayListCompare::kEqual                         \
+                 : DisplayListCompare::kNotEqual;                     \
+    }                                                                 \
   };
 DEFINE_DRAW_IMAGE_OP(DrawImage, false)
 DEFINE_DRAW_IMAGE_OP(DrawImageWithAttr, true)
@@ -735,7 +770,8 @@ struct DrawImageRectOp final : DrawOpBase {
                   DlImageSampling sampling,
                   bool render_with_attributes,
                   DlCanvas::SrcRectConstraint constraint)
-      : src(src),
+      : DrawOpBase(kType),
+        src(src),
         dst(dst),
         sampling(sampling),
         render_with_attributes(render_with_attributes),
@@ -765,33 +801,37 @@ struct DrawImageRectOp final : DrawOpBase {
 };
 
 // 4 byte header + 44 byte payload packs efficiently into 48 bytes
-#define DEFINE_DRAW_IMAGE_NINE_OP(name, render_with_attributes)            \
-  struct name##Op final : DrawOpBase {                                     \
-    static constexpr auto kType = DisplayListOpType::k##name;              \
-    static constexpr uint32_t kDepthInc = 9;                               \
-                                                                           \
-    name##Op(const sk_sp<DlImage>& image,                                  \
-             const DlIRect& center,                                        \
-             const DlRect& dst,                                            \
-             DlFilterMode mode)                                            \
-        : center(center), dst(dst), mode(mode), image(std::move(image)) {} \
-                                                                           \
-    const DlIRect center;                                                  \
-    const DlRect dst;                                                      \
-    const DlFilterMode mode;                                               \
-    const sk_sp<DlImage> image;                                            \
-                                                                           \
-    void dispatch(DlOpReceiver& receiver) const {                          \
-      receiver.drawImageNine(image, center, dst, mode,                     \
-                             render_with_attributes);                      \
-    }                                                                      \
-                                                                           \
-    DisplayListCompare equals(const name##Op* other) const {               \
-      return (center == other->center && dst == other->dst &&              \
-              mode == other->mode && image->Equals(other->image))          \
-                 ? DisplayListCompare::kEqual                              \
-                 : DisplayListCompare::kNotEqual;                          \
-    }                                                                      \
+#define DEFINE_DRAW_IMAGE_NINE_OP(name, render_with_attributes)   \
+  struct name##Op final : DrawOpBase {                            \
+    static constexpr auto kType = DisplayListOpType::k##name;     \
+    static constexpr uint32_t kDepthInc = 9;                      \
+                                                                  \
+    name##Op(const sk_sp<DlImage>& image,                         \
+             const DlIRect& center,                               \
+             const DlRect& dst,                                   \
+             DlFilterMode mode)                                   \
+        : DrawOpBase(kType),                                      \
+          center(center),                                         \
+          dst(dst),                                               \
+          mode(mode),                                             \
+          image(std::move(image)) {}                              \
+                                                                  \
+    const DlIRect center;                                         \
+    const DlRect dst;                                             \
+    const DlFilterMode mode;                                      \
+    const sk_sp<DlImage> image;                                   \
+                                                                  \
+    void dispatch(DlOpReceiver& receiver) const {                 \
+      receiver.drawImageNine(image, center, dst, mode,            \
+                             render_with_attributes);             \
+    }                                                             \
+                                                                  \
+    DisplayListCompare equals(const name##Op* other) const {      \
+      return (center == other->center && dst == other->dst &&     \
+              mode == other->mode && image->Equals(other->image)) \
+                 ? DisplayListCompare::kEqual                     \
+                 : DisplayListCompare::kNotEqual;                 \
+    }                                                             \
   };
 DEFINE_DRAW_IMAGE_NINE_OP(DrawImageNine, false)
 DEFINE_DRAW_IMAGE_NINE_OP(DrawImageNineWithAttr, true)
@@ -805,13 +845,15 @@ DEFINE_DRAW_IMAGE_NINE_OP(DrawImageNineWithAttr, true)
 // DlColor list only packs well if the count is even, otherwise there
 // can be 4 unusued bytes at the end.
 struct DrawAtlasBaseOp : DrawOpBase {
-  DrawAtlasBaseOp(const sk_sp<DlImage>& atlas,
+  DrawAtlasBaseOp(DisplayListOpType type,
+                  const sk_sp<DlImage>& atlas,
                   int count,
                   DlBlendMode mode,
                   DlImageSampling sampling,
                   bool has_colors,
                   bool render_with_attributes)
-      : count(count),
+      : DrawOpBase(type),
+        count(count),
         mode_index(static_cast<uint16_t>(mode)),
         has_colors(has_colors),
         render_with_attributes(render_with_attributes),
@@ -854,7 +896,8 @@ struct DrawAtlasOp final : DrawAtlasBaseOp {
               DlImageSampling sampling,
               bool has_colors,
               bool render_with_attributes)
-      : DrawAtlasBaseOp(atlas,
+      : DrawAtlasBaseOp(kType,
+                        atlas,
                         count,
                         mode,
                         sampling,
@@ -894,7 +937,8 @@ struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
                     bool has_colors,
                     const DlRect& cull_rect,
                     bool render_with_attributes)
-      : DrawAtlasBaseOp(atlas,
+      : DrawAtlasBaseOp(kType,
+                        atlas,
                         count,
                         mode,
                         sampling,
@@ -931,7 +975,7 @@ struct DrawDisplayListOp final : DrawOpBase {
 
   explicit DrawDisplayListOp(const sk_sp<DisplayList>& display_list,
                              DlScalar opacity)
-      : opacity(opacity), display_list(display_list) {}
+      : DrawOpBase(kType), opacity(opacity), display_list(display_list) {}
 
   DlScalar opacity;
   const sk_sp<DisplayList> display_list;
@@ -954,7 +998,7 @@ struct DrawTextBlobOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawTextBlob;
 
   DrawTextBlobOp(const sk_sp<SkTextBlob>& blob, DlScalar x, DlScalar y)
-      : x(x), y(y), blob(blob) {}
+      : DrawOpBase(kType), x(x), y(y), blob(blob) {}
 
   const DlScalar x;
   const DlScalar y;
@@ -971,7 +1015,7 @@ struct DrawTextFrameOp final : DrawOpBase {
   DrawTextFrameOp(const std::shared_ptr<impeller::TextFrame>& text_frame,
                   DlScalar x,
                   DlScalar y)
-      : x(x), y(y), text_frame(text_frame) {}
+      : DrawOpBase(kType), x(x), y(y), text_frame(text_frame) {}
 
   const DlScalar x;
   const DlScalar y;
@@ -991,7 +1035,11 @@ struct DrawTextFrameOp final : DrawOpBase {
                    DlColor color,                                             \
                    DlScalar elevation,                                        \
                    DlScalar dpr)                                              \
-        : color(color), elevation(elevation), dpr(dpr), path(path) {}         \
+        : DrawOpBase(kType),                                                  \
+          color(color),                                                       \
+          elevation(elevation),                                               \
+          dpr(dpr),                                                           \
+          path(path) {}                                                       \
                                                                               \
     const DlColor color;                                                      \
     const DlScalar elevation;                                                 \
