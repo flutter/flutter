@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:process/process.dart';
 
 import 'base/logger.dart';
+import 'convert.dart';
 
 /// Returns dependencies of [project] that are _only_ used as `dev_dependency`.
 ///
