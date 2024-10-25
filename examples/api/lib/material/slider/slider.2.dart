@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [Slider].
+/// Flutter code sample for [Slider] with secondary track value.
 
 void main() => runApp(const SliderApp());
 
@@ -33,9 +33,10 @@ class _SliderExampleState extends State<SliderExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Slider')),
+      appBar: AppBar(title: const Text('Slider Secondary Track Value')),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 20.0,
         children: <Widget>[
           Slider(
             value: _currentSliderPrimaryValue,
