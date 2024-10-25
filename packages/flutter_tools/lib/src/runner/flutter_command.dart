@@ -1896,7 +1896,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     if (_usesTargetOption) {
       final String targetPath = targetFile;
       if (!globals.fs.isFileSync(targetPath)) {
-        throw ToolExit(globals.userMessages.flutterTargetFileMissing(targetPath));
+        throwToolExit(globals.userMessages.flutterTargetFileMissing(targetPath));
       }
     }
   }

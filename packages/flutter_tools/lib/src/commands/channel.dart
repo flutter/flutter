@@ -57,7 +57,7 @@ class ChannelCommand extends FlutterCommand {
         await _switchChannel(rest[0]);
         return FlutterCommandResult.success();
       default:
-        throw ToolExit('Too many arguments.\n$usage');
+        throwToolExit('Too many arguments.\n$usage');
     }
   }
 
