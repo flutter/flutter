@@ -169,9 +169,9 @@ class GridBackgroundPainter extends CustomPainter {
     for (int row = firstRow; row < lastRow; row++) {
       for (int col = firstCol; col < lastCol; col++) {
         final offset = Offset(col * cW, row * cH);
-        var rect = offset & Size.square(dotDimension);
+        Rect rect = offset & Size.square(dotDimension);
         rect = MatrixUtils.transformRect(transform, rect);
-        final rrect = RRect.fromRectAndRadius(rect, cellRadius);
+        RRect rrect = RRect.fromRectAndRadius(rect, cellRadius);
         canvas.drawRRect(rrect, fgPaint);
       }
     }
