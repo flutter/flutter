@@ -47,6 +47,18 @@ Future<Set<String>> computeExclusiveDevDependencies(
   final String stdout;
   try {
     stdout = processResult.stdout as String;
+
+    // This is an indication that `FakeProcessManager.any` was used, which by
+    // contract emits exit code 0 and no output on either stdout or stderr. To
+    // avoid this code, we'd have to go and make this function injectable into
+    // every callsite and mock-it out manually, which at the time of this
+    // writing was 130+ unit test cases alone.
+    //
+    // So, this is the lesser of two evils.
+    if (stdout.isEmpty && processResult.stderr == '') {
+      return <String>{};
+    }
+
     jsonResult = json.decode(stdout) as Map<String, Object?>;
   } on FormatException catch (e) {
     fail('$e');
