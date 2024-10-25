@@ -1957,6 +1957,56 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
   });
 
+  testWidgets('errorBuilder should handle exception under disabled ticker mode', (WidgetTester tester) async {
+    final Widget image = Image(
+      image: _FailingImageProvider(failOnLoad: true, throws: 'threw', image: image10x10),
+      errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+        return const SizedBox.expand();
+      },
+    );
+
+    await tester.pumpWidget(
+      TickerMode(
+        enabled: false,
+        child: image,
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('errorBuilder should handle exception even while ticker mode is changing', (WidgetTester tester) async {
+    final Widget image = Image(
+      image: _FailingImageProvider(failOnLoad: true, throws: 'threw', image: image10x10),
+      errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+        return const SizedBox.expand();
+      },
+    );
+
+    await tester.pumpWidget(
+      TickerMode(
+        enabled: true,
+        child: image,
+      )
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      TickerMode(
+        enabled: false,
+        child: image,
+      )
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      TickerMode(
+        enabled: true,
+        child: image,
+      )
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Load a good image after a bad image was loaded should not call errorBuilder',
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
   (WidgetTester tester) async {
