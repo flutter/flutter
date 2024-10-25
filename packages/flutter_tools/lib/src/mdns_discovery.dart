@@ -229,10 +229,21 @@ class MDnsVmServiceDiscovery {
       final Set<String> uniqueDomainNamesInResults = <String>{};
 
       // Listen for mDNS connections until timeout.
-      final Stream<PtrResourceRecord> ptrResourceStream = client.lookup<PtrResourceRecord>(
-        ResourceRecordQuery.serverPointer(dartVmServiceName),
-        timeout: timeout
-      );
+      final Stream<PtrResourceRecord> ptrResourceStream;
+
+      try {
+        ptrResourceStream = client.lookup<PtrResourceRecord>(
+            ResourceRecordQuery.serverPointer(dartVmServiceName),
+            timeout: timeout
+        );
+      } on SocketException catch (e) {
+        _logger.printTrace(e.message);
+        throwToolExit('You may be having a permissions issue with your IDE. '
+            'Please try going to '
+            'System Settings -> Privacy & Security -> Local Network -> '
+            '[Find your IDE] -> Toggle ON, then restart your phone.');
+      }
+
       await for (final PtrResourceRecord ptr in ptrResourceStream) {
         uniqueDomainNames.add(ptr.domainName);
 

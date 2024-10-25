@@ -577,6 +577,27 @@ void main() {
         );
       });
 
+      testWithoutContext('Throws tool exception with a helpful message when client throws a SocketError on lookup', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[], <String, List<SrvResourceRecord>>{},
+          socketErrorOnStart: true);
+
+        final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: client,
+          logger: BufferLogger.test(),
+          flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
+        );
+
+        expect(
+          portDiscovery.firstMatchingVmService(client),
+          throwsToolExit(message: 'You may be having a permissions issue with your IDE. '
+              'Please try going to '
+              'System Settings -> Privacy & Security -> Local Network -> '
+              '[Find your IDE] -> Toggle ON, then restart your phone.')
+        );
+      });
+
       testWithoutContext('Correctly builds VM Service URI with hostVmservicePort == 0', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
@@ -991,6 +1012,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     this.txtResponse = const <String, List<TxtResourceRecord>>{},
     this.ipResponse = const <String, List<IPAddressResourceRecord>>{},
     this.osErrorOnStart = false,
+    this.socketErrorOnStart = false
   });
 
   final List<PtrResourceRecord> ptrRecords;
@@ -998,6 +1020,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
   final Map<String, List<TxtResourceRecord>> txtResponse;
   final Map<String, List<IPAddressResourceRecord>> ipResponse;
   final bool osErrorOnStart;
+  final bool socketErrorOnStart;
 
   @override
   Future<void> start({
@@ -1016,6 +1039,9 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     ResourceRecordQuery query, {
     Duration timeout = const Duration(seconds: 5),
   }) {
+    if (socketErrorOnStart) {
+      throw const SocketException('Socket Exception');
+    }
     if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsVmServiceDiscovery.dartVmServiceName) {
       return Stream<PtrResourceRecord>.fromIterable(ptrRecords) as Stream<T>;
     }
