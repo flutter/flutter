@@ -26,6 +26,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
+import 'app_lifecycle_listener.dart';
 import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -850,6 +851,7 @@ class EditableText extends StatefulWidget {
     this.onSelectionHandleTapped,
     this.groupId = EditableText,
     this.onTapOutside,
+    this.onTapUpOutside,
     List<TextInputFormatter>? inputFormatters,
     this.mouseCursor,
     this.rendererIgnoresPointer = false,
@@ -1492,8 +1494,8 @@ class EditableText extends StatefulWidget {
   final Object groupId;
 
   /// {@template flutter.widgets.editableText.onTapOutside}
-  /// Called for each tap that occurs outside of the[TextFieldTapRegion] group
-  /// when the text field is focused.
+  /// Called for each tap down that occurs outside of the [TextFieldTapRegion]
+  /// group when the text field is focused.
   ///
   /// If this is null, [EditableTextTapOutsideIntent] will be invoked. In the
   /// default implementation, [FocusNode.unfocus] will be called on the
@@ -1530,9 +1532,26 @@ class EditableText extends StatefulWidget {
   /// See also:
   ///
   ///  * [TapRegion] for how the region group is determined.
+  ///  * [onTapUpOutside] which is called for each tap up.
   ///  * [EditableTextTapOutsideIntent] for the intent that is invoked if
   ///  this is null.
   final TapRegionCallback? onTapOutside;
+
+  /// {@template flutter.widgets.editableText.onTapUpOutside}
+  /// Called for each tap up that occurs outside of the [TextFieldTapRegion]
+  /// group when the text field is focused.
+  ///
+  /// The [PointerUpEvent] passed to the function is the event that caused the
+  /// notification. It is possible that the event may occur outside of the
+  /// immediate bounding box defined by the text field, although it will be
+  /// within the bounding box of a [TextFieldTapRegion] member.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [TapRegion] for how the region group is determined.
+  ///  * [onTapOutside], which is called for each tap down.
+  final TapRegionUpCallback? onTapUpOutside;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
@@ -2344,6 +2363,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   Orientation? _lastOrientation;
 
+  late final AppLifecycleListener _appLifecycleListener;
+  bool _justResumed = false;
+
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
@@ -2966,6 +2988,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.focusNode.addListener(_handleFocusChanged);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
+    _appLifecycleListener = AppLifecycleListener(
+      onResume: () => _justResumed = true,
+    );
     _initProcessTextActions();
   }
 
@@ -3180,6 +3205,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     clipboardStatus.removeListener(_onChangedClipboardStatus);
     clipboardStatus.dispose();
     _cursorVisibilityNotifier.dispose();
+    _appLifecycleListener.dispose();
     FocusManager.instance.removeListener(_unflagInternalFocus);
     _disposeScrollNotificationObserver();
     super.dispose();
@@ -4382,7 +4408,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool shouldSelectAll = widget.selectionEnabled
         && (kIsWeb || isDesktop)
         && !_isMultiline
-        && !_nextFocusChangeIsInternal;
+        && !_nextFocusChangeIsInternal
+        && !_justResumed;
+    _justResumed = false;
     if (shouldSelectAll) {
       // On native web and desktop platforms, single line <input> tags
       // select all when receiving focus.
@@ -5172,6 +5200,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             return TextFieldTapRegion(
               groupId: widget.groupId,
               onTapOutside: _hasFocus ? widget.onTapOutside ?? (PointerDownEvent event) => _defaultOnTapOutside(context, event) : null,
+              onTapUpOutside: widget.onTapUpOutside,
               debugLabel: kReleaseMode ? null : 'EditableText',
               child: MouseRegion(
                 cursor: widget.mouseCursor ?? SystemMouseCursors.text,
@@ -5328,10 +5357,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
       // Reveal the latest character in an obscured field only on mobile.
-      // Newer versions of iOS (iOS 15+) no longer reveal the most recently
-      // entered character.
       const Set<TargetPlatform> mobilePlatforms = <TargetPlatform> {
-        TargetPlatform.android, TargetPlatform.fuchsia,
+        TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.iOS,
       };
       final bool brieflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && mobilePlatforms.contains(defaultTargetPlatform);

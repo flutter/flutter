@@ -150,7 +150,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         ...framework.parent
             .listSync()
             .where((FileSystemEntity entity) =>
-        entity.basename.endsWith('dSYM'))
+        entity.basename.endsWith('dSYM') && !entity.basename.startsWith('Flutter'))
             .map((FileSystemEntity entity) => <String>['-debug-symbols', entity.path])
             .expand<String>((List<String> parameter) => parameter),
       ],
@@ -456,7 +456,7 @@ end
           platform: globals.platform,
           usage: globals.flutterUsage,
           analytics: globals.analytics,
-          engineVersion: globals.artifacts!.isLocalEngine
+          engineVersion: globals.artifacts!.usesLocalArtifacts
               ? null
               : globals.flutterVersion.engineRevision,
           generateDartPluginRegistry: true,

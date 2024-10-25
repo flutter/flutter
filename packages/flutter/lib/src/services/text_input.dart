@@ -2576,7 +2576,7 @@ class SystemContextMenuController with SystemContextMenuClient {
 
   @override
   String toString() {
-    return 'SystemContextMenuController(onSystemHide=$onSystemHide, _hiddenBySystem=$_hiddenBySystem, _isVisible=$_isVisible, _isDiposed=$_isDisposed)';
+    return 'SystemContextMenuController(onSystemHide=$onSystemHide, _hiddenBySystem=$_hiddenBySystem, _isVisible=$_isVisible, _isDisposed=$_isDisposed)';
   }
 
   /// Used to release resources when this instance will never be used again.

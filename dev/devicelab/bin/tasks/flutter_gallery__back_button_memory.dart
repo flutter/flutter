@@ -32,10 +32,7 @@ class BackButtonMemoryTest extends MemoryTest {
       // Push back button, wait for it to be seen by the Flutter app.
       prepareForNextMessage('AppLifecycleState.paused');
       await device!.shellExec('input', <String>['keyevent', 'KEYCODE_BACK']);
-
-      // Note: post UI/platform merge, we consistently miss this message. From
-      // local logcat it seems to be printed but it does not reach the tool.
-      await receivedNextMessage?.timeout(const Duration(seconds: 4), onTimeout: () {});
+      await receivedNextMessage;
 
       // Give Android time to settle (e.g. run GCs) after closing the app.
       await Future<void>.delayed(const Duration(milliseconds: 100));
