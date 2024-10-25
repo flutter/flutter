@@ -1747,8 +1747,7 @@ void main() {
     );
   });
 
-  testWidgets('DraggableScrollableSheet respects shouldCloseOnMinExtent',
-      (WidgetTester tester) async {
+  testWidgets('DraggableScrollableSheet respects shouldCloseOnMinExtent', (WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
     DraggableScrollableNotification? receivedNotification;
 
