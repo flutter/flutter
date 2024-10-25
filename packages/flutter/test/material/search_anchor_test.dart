@@ -1386,6 +1386,36 @@ void main() {
     expect(find.byType(GridView), findsOneWidget);
   });
 
+  testWidgets('SearchAnchor.bar respects viewBuilder property', (WidgetTester tester) async {
+    Widget buildAnchor({ViewBuilder? viewBuilder}) {
+      return MaterialApp(
+        home: Material(
+          child: SearchAnchor.bar(
+            viewBuilder: viewBuilder,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildAnchor());
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    // Default is a ListView.
+    expect(find.byType(ListView), findsOneWidget);
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildAnchor(viewBuilder: (Iterable<Widget> suggestions)
+      => GridView.count(crossAxisCount: 5, children: suggestions.toList(),)
+    ));
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    expect(find.byType(ListView), findsNothing);
+    expect(find.byType(GridView), findsOneWidget);
+  });
+
   testWidgets('SearchAnchor respects viewLeading property', (WidgetTester tester) async {
     Widget buildAnchor({Widget? viewLeading}) {
       return MaterialApp(
