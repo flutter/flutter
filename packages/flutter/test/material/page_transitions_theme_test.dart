@@ -257,6 +257,46 @@ void main() {
     expect(findFadeUpwardsPageTransition(), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
+  testWidgets('PageTransitionsTheme override builds a _SharedXAxisPageTransition', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('page b'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: SharedXAxisPageTransitionsBuilder(), // creates a _SharedXAxisPageTransition
+            },
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    Finder findSharedXAxisPageTransition() {
+      return find.descendant(
+        of: find.byType(MaterialApp),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SharedXAxisPageTransition'),
+      );
+    }
+
+    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
+    expect(findSharedXAxisPageTransition(), findsOneWidget);
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('page b'), findsOneWidget);
+    expect(findSharedXAxisPageTransition(), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
   Widget boilerplate({
     required bool themeAllowSnapshotting,
     bool secondRouteAllowSnapshotting = true,

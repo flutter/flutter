@@ -30,6 +30,8 @@ import 'page_transitions_theme.dart';
 ///    that's similar to the one provided by Android P.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided in Android Q.
+///  * [SharedXAxisPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android U.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {

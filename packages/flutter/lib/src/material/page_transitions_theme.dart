@@ -534,6 +534,215 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   }
 }
 
+/// Slides and fades the new page in, sliding out the old page for a bit. This
+/// transition is designed to match the Android U activity transition.
+class _SharedXAxisPageTransition extends StatelessWidget {
+  const _SharedXAxisPageTransition({
+    required this.animation,
+    required this.secondaryAnimation,
+    this.backgroundColor,
+    this.child,
+  });
+
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+  final Color? backgroundColor;
+  final Widget? child;
+
+  static const int animationDurationMs = 450;
+  static const int fadeDurationMs = 83;
+  static const double slideDeltaX = 96;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = backgroundColor ?? Theme.of(context).colorScheme.surface;
+    return DualTransitionBuilder(
+      animation: animation,
+      forwardBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Widget? child,
+      ) {
+        return _SharedXAxisEnterTransition(
+          animation: animation,
+          backgroundColor: color,
+          child: child,
+        );
+      },
+      reverseBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Widget? child,
+      ) {
+        return _SharedXAxisExitTransition(
+          animation: animation,
+          backward: true,
+          backgroundColor: color,
+          child: child,
+        );
+      },
+      child: DualTransitionBuilder(
+        animation: ReverseAnimation(secondaryAnimation),
+        forwardBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Widget? child,
+        ) {
+          return _SharedXAxisEnterTransition(
+            animation: animation,
+            backward: true,
+            backgroundColor: color,
+            child: child,
+          );
+        },
+        reverseBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Widget? child,
+        ) {
+          return _SharedXAxisExitTransition(
+            animation: animation,
+            backgroundColor: color,
+            child: child,
+          );
+        },
+        child: child,
+      ),
+    );
+  }
+}
+
+class _SharedXAxisEnterTransition extends StatelessWidget {
+  const _SharedXAxisEnterTransition({
+    required this.animation,
+    this.backward = false,
+    required this.backgroundColor,
+    this.child,
+  });
+
+  final Animation<double> animation;
+
+  /// Whether the whole x-axis transition is backward; that is, a page is being
+  /// popped off.
+  final bool backward;
+  final Color backgroundColor;
+  final Widget? child;
+
+  static const int _fadeInStartOffsetMs = 50;
+  static const double _fadeInBegin = _fadeInStartOffsetMs / _SharedXAxisPageTransition.animationDurationMs;
+  static const double _fadeInEnd = (
+    _fadeInStartOffsetMs +
+    _SharedXAxisPageTransition.fadeDurationMs
+  ) / _SharedXAxisPageTransition.animationDurationMs;
+
+  static final Animatable<double> _fadeInTransition = CurveTween(
+    curve: const Interval(_fadeInBegin, _fadeInEnd),
+  );
+
+  static final Animatable<Offset> _slideInTransition = Tween<Offset>(
+    begin: const Offset(_SharedXAxisPageTransition.slideDeltaX, 0.0),
+    end: Offset.zero,
+  ).chain(CurveTween(curve: Curves.easeInOutCubicEmphasized));
+
+  @override
+  Widget build(BuildContext context) {
+    final Animation<double> opacity = backward ? kAlwaysCompleteAnimation : _fadeInTransition.animate(animation);
+    double offsetScaleFactor = backward ? -1.0 : 1.0;
+    if (Directionality.of(context) == TextDirection.rtl) {
+      offsetScaleFactor *= -1.0;
+    }
+    return FadeTransition(
+      opacity: opacity,
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (BuildContext context, Widget? child) {
+          // Both enter and exit transitions paint a background, to fade in and
+          // out the old page, and to prevent the old page sliding in and out
+          // from leaking the content below.
+          //
+          // When the exit transition fades out the new page, the background
+          // painted by the transition also fades out, which should reveal the
+          // old page below. However, the background painted by the *enter*
+          // transition does not fade out, due to how DualTransitionBuilder
+          // works. When a page is being popped off, this background will
+          // obscure the old page, until the navigator removes the new page
+          // after the transition ended.
+          //
+          // Hide the background after the enter transition has completed to
+          // avoid this.
+          final bool shouldHideBackground = animation.isCompleted;
+          return ColoredBox(
+            color: shouldHideBackground ? Colors.transparent : backgroundColor,
+            child: Transform.translate(
+              offset: _slideInTransition.evaluate(animation) * offsetScaleFactor,
+              child: child,
+            ),
+          );
+        },
+        child: child,
+      ),
+    );
+  }
+}
+
+class _SharedXAxisExitTransition extends StatelessWidget {
+  const _SharedXAxisExitTransition({
+    required this.animation,
+    this.backward = false,
+    required this.backgroundColor,
+    this.child,
+  });
+
+  final Animation<double> animation;
+
+  /// Whether the whole x-axis transition is backward; that is, a page is being
+  /// popped off.
+  final bool backward;
+  final Color backgroundColor;
+  final Widget? child;
+
+  static const int _fadeOutStartOffsetMs = 35;
+  static const double _fadeOutBegin = _fadeOutStartOffsetMs / _SharedXAxisPageTransition.animationDurationMs;
+  static const double _fadeOutEnd = (
+    _fadeOutStartOffsetMs +
+    _SharedXAxisPageTransition.fadeDurationMs
+  ) / _SharedXAxisPageTransition.animationDurationMs;
+
+  static final Animatable<double> _fadeOutTransition = Tween<double>(begin: 1.0, end: 0.0).chain(
+    CurveTween(curve: const Interval(_fadeOutBegin, _fadeOutEnd)),
+  );
+
+  static final Animatable<Offset> _slideOutTransition = Tween<Offset>(
+    begin: Offset.zero,
+    end: const Offset(-_SharedXAxisPageTransition.slideDeltaX, 0.0),
+  ).chain(CurveTween(curve: Curves.easeInOutCubicEmphasized));
+
+  @override
+  Widget build(BuildContext context) {
+    final Animation<double> opacity = backward ? _fadeOutTransition.animate(animation) : kAlwaysCompleteAnimation;
+    double offsetScaleFactor = backward ? -1.0 : 1.0;
+    if (Directionality.of(context) == TextDirection.rtl) {
+      offsetScaleFactor *= -1.0;
+    }
+    return FadeTransition(
+      opacity: opacity,
+      child: ColoredBox(
+        color: backgroundColor,
+        child: AnimatedBuilder(
+          animation: animation,
+          builder: (BuildContext context, Widget? child) {
+            return Transform.translate(
+              offset: _slideOutTransition.evaluate(animation) * offsetScaleFactor,
+              child: child,
+            );
+          },
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation.
 ///
@@ -549,6 +758,8 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
 ///    that's similar to the one provided by Android P.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided in Android Q.
+///  * [SharedXAxisPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android U.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 abstract class PageTransitionsBuilder {
@@ -590,6 +801,8 @@ abstract class PageTransitionsBuilder {
 ///    that's similar to the one provided by Android P.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided in Android Q.
+///  * [SharedXAxisPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android U.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 ///  * [PredictiveBackPageTransitionsBuilder], which defines a page
@@ -621,6 +834,8 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    that's similar to the one provided by Android O.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided in Android Q.
+///  * [SharedXAxisPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android U.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 ///  * [PredictiveBackPageTransitionsBuilder], which defines a page
@@ -656,6 +871,8 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    that's similar to the one provided by Android O.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
+///  * [SharedXAxisPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android U.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 ///  * [PredictiveBackPageTransitionsBuilder], which defines a page
@@ -779,6 +996,38 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 }
 
 /// Used by [PageTransitionsTheme] to define a horizontal [MaterialPageRoute]
+/// page transition animation that looks like the default page transition used
+/// on Android U.
+class SharedXAxisPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Constructs a page transition animation that matches the transition used on
+  /// Android U.
+  const SharedXAxisPageTransitionsBuilder({
+    this.backgroundColor,
+  });
+
+  /// The color to use for the background color during the transition.
+  ///
+  /// This defaults to the current [Theme]'s [ColorScheme.surface] color.
+  final Color? backgroundColor;
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T>? route,
+    BuildContext? context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return _SharedXAxisPageTransition(
+      animation: animation,
+      secondaryAnimation: secondaryAnimation,
+      backgroundColor: backgroundColor,
+      child: child,
+    );
+  }
+}
+
+/// Used by [PageTransitionsTheme] to define a horizontal [MaterialPageRoute]
 /// page transition animation that matches native iOS page transitions.
 ///
 /// See also:
@@ -789,6 +1038,8 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    that's similar to the one provided by Android P.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided in Android Q.
+///  * [SharedXAxisPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android U.
 ///  * [PredictiveBackPageTransitionsBuilder], which defines a page
 ///    transition that allows peeking behind the current route on Android.
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
@@ -836,6 +1087,8 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    that's similar to the one provided by Android P.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided by Android Q.
+///  * [SharedXAxisPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android U.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 @immutable
