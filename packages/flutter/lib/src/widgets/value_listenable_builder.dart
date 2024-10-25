@@ -16,16 +16,21 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
-/// Builds a [Widget] when given a concrete value of a [ValueListenable<T>].
+/// {@template flutter.widgets.ValueWidgetBuilder}
+/// Builds a [Widget] when given a concrete value.
 ///
-/// If the `child` parameter provided to the [ValueListenableBuilder] is not
-/// null, the same `child` widget is passed back to this [ValueWidgetBuilder]
-/// and should typically be incorporated in the returned widget tree.
+/// If a subtree does not depend on the current `value`, it can be passed as
+/// the `child` of the enclosing [ValueListenableBuilder] or [AnimatedValue]
+/// widget, and it will be passed to this callback instead of being reconfigured
+/// each tick.
+/// {@endtemplate}
 ///
 /// See also:
 ///
-///  * [ValueListenableBuilder], a widget which invokes this builder each time
-///    a [ValueListenable] changes value.
+///  * [ValueListenableBuilder], a widget which calls this function each time
+///    an [Animation] (or other [ValueListenable]) changes value.
+///  * [AnimatedValue.builder], a widget which calls this function to smoothly
+///    transition from one [value] to another.
 typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, Widget? child);
 
 /// A widget whose content stays synced with a [ValueListenable].
@@ -61,6 +66,8 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///
 ///  * [AnimatedBuilder], which also triggers rebuilds from a [Listenable]
 ///    without passing back a specific value from a [ValueListenable].
+///  * [AnimatedValue.builder], for transitioning between values
+///    without directly interacting with an [Animation] object.
 ///  * [NotificationListener], which lets you rebuild based on [Notification]
 ///    coming from its descendant widgets rather than a [ValueListenable] that
 ///    you have a direct reference to.
