@@ -132,14 +132,6 @@ bool CommandBufferVK::Track(const std::shared_ptr<const DeviceBuffer>& buffer) {
   return true;
 }
 
-bool CommandBufferVK::IsTracking(
-    const std::shared_ptr<const DeviceBuffer>& buffer) const {
-  if (!IsValid()) {
-    return false;
-  }
-  return tracked_objects_->IsTracking(buffer);
-}
-
 bool CommandBufferVK::Track(std::shared_ptr<const TextureSourceVK> texture) {
   if (!IsValid()) {
     return false;
@@ -156,16 +148,6 @@ bool CommandBufferVK::Track(const std::shared_ptr<const Texture>& texture) {
     return true;
   }
   return Track(TextureVK::Cast(*texture).GetTextureSource());
-}
-
-bool CommandBufferVK::IsTracking(
-    const std::shared_ptr<const Texture>& texture) const {
-  if (!IsValid()) {
-    return false;
-  }
-  std::shared_ptr<const TextureSourceVK> source =
-      TextureVK::Cast(*texture).GetTextureSource();
-  return tracked_objects_->IsTracking(source);
 }
 
 fml::StatusOr<vk::DescriptorSet> CommandBufferVK::AllocateDescriptorSets(
