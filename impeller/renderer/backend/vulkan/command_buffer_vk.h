@@ -77,12 +77,6 @@ class CommandBufferVK final
       const ContextVK& context);
 
   // Visible for testing.
-  bool IsTracking(const std::shared_ptr<const DeviceBuffer>& texture) const;
-
-  // Visible for testing.
-  bool IsTracking(const std::shared_ptr<const Texture>& texture) const;
-
-  // Visible for testing.
   DescriptorPoolVK& GetDescriptorPool() const;
 
  private:
