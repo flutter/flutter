@@ -94,6 +94,24 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 ///  * [SelectionArea], which selects appropriate text selection controls
 ///    based on the current platform.
 abstract class TextSelectionControls {
+  /// Returns the bounding [Rect] of the text selection handle in local
+  /// coordinates.
+  ///
+  /// When interacting with a text seletion handle through a touch event, the
+  /// interactive area should be at least [kMinInteractiveDimension] square,
+  /// which this method does not consider.
+  Rect getHandleRect(TextSelectionHandleType type, double preferredLineHeight) {
+    final Size handleSize = getHandleSize(
+      preferredLineHeight,
+    );
+    return Rect.fromLTWH(
+      0.0,
+      0.0,
+      handleSize.width,
+      handleSize.height,
+    );
+  }
+
   /// Builds a selection handle of the given `type`.
   ///
   /// The top left corner of this widget is positioned at the bottom of the
@@ -1874,19 +1892,9 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
 
   @override
   Widget build(BuildContext context) {
-    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
+    final Rect handleRect = widget.selectionControls.getHandleRect(
       widget.type,
       widget.preferredLineHeight,
-    );
-    final Size handleSize = widget.selectionControls.getHandleSize(
-      widget.preferredLineHeight,
-    );
-
-    final Rect handleRect = Rect.fromLTWH(
-      -handleAnchor.dx,
-      -handleAnchor.dy,
-      handleSize.width,
-      handleSize.height,
     );
 
     // Make sure the GestureDetector is big enough to be easily interactive.
@@ -1900,6 +1908,11 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
       math.max((interactiveRect.height - handleRect.height) / 2, 0),
     );
 
+    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
+      widget.type,
+      widget.preferredLineHeight,
+    );
+
     // Make sure a drag is eagerly accepted. This is used on iOS to match the
     // behavior where a drag directly on a collapse handle will always win against
     // other drag gestures.
@@ -1907,7 +1920,8 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
 
     return CompositedTransformFollower(
       link: widget.handleLayerLink,
-      offset: interactiveRect.topLeft,
+      // Put the handle's anchor point on the leader's anchor point.
+      offset: -handleAnchor - Offset(padding.left, padding.top),
       showWhenUnlinked: false,
       child: FadeTransition(
         opacity: _opacity,

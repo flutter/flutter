@@ -20,7 +20,7 @@ import 'dart:ui' as ui hide TextStyle;
 
 import 'package:characters/characters.dart' show CharacterRange, StringCharacters;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/gestures.dart' show DragStartBehavior, GestureBinding;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -880,7 +880,12 @@ class EditableText extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scrollBehavior,
+    @Deprecated(
+      'Use `stylusHandwritingEnabled` instead. '
+      'This feature was deprecated after v3.27.0-0.1.pre.',
+    )
     this.scribbleEnabled = true,
+    this.stylusHandwritingEnabled = defaultStylusHandwritingEnabled,
     this.enableIMEPersonalizedLearning = true,
     this.contentInsertionConfiguration,
     this.contextMenuBuilder,
@@ -1735,7 +1740,28 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to true.
   /// {@endtemplate}
+  @Deprecated(
+    'Use `stylusHandwritingEnabled` instead. '
+    'This feature was deprecated after v3.27.0-0.1.pre.',
+  )
   final bool scribbleEnabled;
+
+  /// {@template flutter.widgets.editableText.stylusHandwritingEnabled}
+  /// Whether this input supports stylus handwriting, where the user can write
+  /// directly on top of a field.
+  ///
+  /// Currently only the following devices are supported:
+  ///
+  ///  * iPads running iOS 14 and above using an Apple Pencil.
+  ///  * Android devices running API 34 and above and using an active stylus.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   * [ScribbleClient], which can be mixed into an arbirtrary widget to
+  ///     provide iOS Scribble functionality.
+  ///   * [Scribe], which can be used to interact with Android Scribe directly.
+  final bool stylusHandwritingEnabled;
 
   /// {@template flutter.widgets.editableText.selectionEnabled}
   /// Same as [enableInteractiveSelection].
@@ -1974,6 +2000,9 @@ class EditableText extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
+
+  /// The default value for [stylusHandwritingEnabled].
+  static const bool defaultStylusHandwritingEnabled = true;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -2242,6 +2271,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
     properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('stylusHandwritingEnabled', stylusHandwritingEnabled, defaultValue: defaultStylusHandwritingEnabled));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<UndoHistoryController>('undoController', undoController, defaultValue: null));
@@ -2362,6 +2392,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AnimationController? _floatingCursorResetController;
 
   Orientation? _lastOrientation;
+
+  bool get _stylusHandwritingEnabled {
+    // During the deprecation period, respect scribbleEnabled being explicitly
+    // set.
+    if (!widget.scribbleEnabled) {
+      return widget.scribbleEnabled;
+    }
+    return widget.stylusHandwritingEnabled;
+  }
 
   late final AppLifecycleListener _appLifecycleListener;
   bool _justResumed = false;
@@ -4460,7 +4499,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   _ScribbleCacheKey? _scribbleCacheKey;
 
   void _updateSelectionRects({bool force = false}) {
-    if (!widget.scribbleEnabled || defaultTargetPlatform != TargetPlatform.iOS) {
+    if (!_stylusHandwritingEnabled || defaultTargetPlatform != TargetPlatform.iOS) {
       return;
     }
 
@@ -4751,7 +4790,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void insertTextPlaceholder(Size size) {
-    if (!widget.scribbleEnabled) {
+    if (!_stylusHandwritingEnabled) {
       return;
     }
 
@@ -4766,7 +4805,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void removeTextPlaceholder() {
-    if (!widget.scribbleEnabled || _placeholderLocation == -1) {
+    if (!_stylusHandwritingEnabled || _placeholderLocation == -1) {
       return;
     }
 
@@ -5278,10 +5317,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                               onCopy: _semanticsOnCopy(controls),
                               onCut: _semanticsOnCut(controls),
                               onPaste: _semanticsOnPaste(controls),
-                              child: _ScribbleFocusable(
-                                focusNode: widget.focusNode,
+                              child: _StylusHandwriting(
                                 editableKey: _editableKey,
-                                enabled: widget.scribbleEnabled,
+                                enabled: _stylusHandwritingEnabled,
+                                focusNode: widget.focusNode,
+                                selectionControls: widget.selectionControls,
                                 updateSelectionRects: () {
                                   _openInputConnection();
                                   _updateSelectionRects(force: true);
@@ -5718,6 +5758,185 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
   @override
   Widget build(BuildContext context) {
     return widget.child;
+  }
+}
+
+class _Scribe extends StatefulWidget {
+  const _Scribe({
+    required this.child,
+    required this.editableKey,
+    required this.enabled,
+    required this.focusNode,
+    required this.selectionControls,
+  });
+
+  final Widget child;
+  final GlobalKey editableKey;
+  final bool enabled;
+  final FocusNode focusNode;
+  final TextSelectionControls? selectionControls;
+
+  @override
+  State<_Scribe> createState() => _ScribeState();
+}
+
+class _ScribeState extends State<_Scribe> {
+  // The handwriting bounds padding of EditText in Android API 34.
+  static const EdgeInsets _handwritingPadding = EdgeInsets.symmetric(
+    horizontal: 10.0,
+    vertical: 40.0,
+  );
+
+  /// Returns a new Rect whose size has changed by the given padding while
+  /// remaining centered.
+  static Rect _pad(Rect rect, EdgeInsets padding) {
+    return Rect.fromLTRB(
+      rect.left - padding.left,
+      rect.top - padding.top,
+      rect.right + padding.right,
+      rect.bottom + padding.bottom,
+    );
+  }
+
+  /// Given a [Rect] in a [RenderBox]'s local coordinate space, returns that
+  /// [Rect] in global coordinates.
+  static Rect _localToGlobalRect(Rect rect, RenderBox renderBox) {
+    return Rect.fromPoints(
+      renderBox.localToGlobal(rect.topLeft),
+      renderBox.localToGlobal(rect.bottomRight),
+    );
+  }
+
+  Rect? _getHandleRect(TextSelectionHandleType type) {
+    if (widget.selectionControls == null) {
+      return null;
+    }
+    // Do not expand the Rect to kMinInteractiveDimension because it will
+    // targeted by a precise pointing device.
+    return widget.selectionControls!.getHandleRect(type, _renderEditable.preferredLineHeight);
+  }
+
+  RenderEditable get _renderEditable => widget.editableKey.currentContext!.findRenderObject()! as RenderEditable;
+
+  Future<void> _handlePointerEvent(PointerEvent event) async {
+    if (event is! PointerDownEvent
+      || event.kind != ui.PointerDeviceKind.stylus
+      || !(await Scribe.isFeatureAvailable() ?? false)) {
+      return;
+    }
+
+    final RenderBox renderBox = widget.editableKey.currentContext!.findRenderObject()! as RenderBox;
+
+    final Rect renderBoxRect = _localToGlobalRect(renderBox.paintBounds, renderBox);
+    final Rect hitRect = _pad(renderBoxRect, _handwritingPadding);
+    if (!hitRect.contains(event.position)) {
+      return;
+    }
+
+    // A stylus event that starts on a selection handle does not start
+    // handwriting, it moves the handle.
+    final Offset? startHandleOffset = _renderEditable.startHandleLayerLink.leader?.offset;
+    if (startHandleOffset != null) {
+      final Rect? leftHandleRectLocal = _getHandleRect(TextSelectionHandleType.left);
+      if (leftHandleRectLocal != null && !leftHandleRectLocal.isEmpty) {
+        final Rect leftHandleRectGlobal = _localToGlobalRect(leftHandleRectLocal, renderBox);
+        final Rect leftHandleRect = leftHandleRectGlobal.shift(startHandleOffset);
+        if (leftHandleRect.contains(event.position)) {
+          return;
+        }
+      }
+    }
+    final Offset? endHandleOffset = _renderEditable.endHandleLayerLink.leader?.offset;
+    if (endHandleOffset != null) {
+      final Rect? rightHandleRectLocal = _getHandleRect(TextSelectionHandleType.right);
+      if (rightHandleRectLocal != null && !rightHandleRectLocal.isEmpty) {
+        final Rect rightHandleRectGlobal = _localToGlobalRect(rightHandleRectLocal, renderBox);
+        final Rect rightHandleRect = rightHandleRectGlobal.shift(endHandleOffset);
+        if (rightHandleRect.contains(event.position)) {
+          return;
+        }
+      }
+    }
+
+    if (!widget.focusNode.hasFocus) {
+      widget.focusNode.requestFocus();
+    }
+
+    return Scribe.startStylusHandwriting();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.enabled) {
+      GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    }
+  }
+
+  @override
+  void didUpdateWidget(_Scribe oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.enabled && widget.enabled) {
+      GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    }
+    if (oldWidget.enabled && !widget.enabled) {
+      GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+    }
+  }
+
+  @override
+  void dispose() {
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+    super.dispose();
+  }
+
+  // TODO(justinmc): Scribe stylus gestures should be supported here.
+  // https://github.com/flutter/flutter/issues/156018
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
+// Enables support for Android Scribe active stylus handwriting input and iOS
+// Scribble handwriting input with Apple Pencil for its child.
+class _StylusHandwriting extends StatelessWidget {
+  const _StylusHandwriting({
+    required this.child,
+    required this.editableKey,
+    required this.enabled,
+    required this.focusNode,
+    required this.updateSelectionRects,
+    required this.selectionControls,
+  });
+
+  final Widget child;
+  final GlobalKey editableKey;
+  final bool enabled;
+  final FocusNode focusNode;
+  final VoidCallback updateSelectionRects;
+  final TextSelectionControls? selectionControls;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!enabled) {
+      return child;
+    }
+
+    return _ScribbleFocusable(
+      focusNode: focusNode,
+      editableKey: editableKey,
+      enabled: enabled,
+      updateSelectionRects: updateSelectionRects,
+      child: _Scribe(
+        enabled: enabled,
+        focusNode: focusNode,
+        editableKey: editableKey,
+        selectionControls: selectionControls,
+        child: child,
+      ),
+    );
   }
 }
 
