@@ -5,16 +5,14 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
-import 'package:fixnum/fixnum.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'context.dart';
+import 'enums.dart';
 import 'git.dart';
 import 'globals.dart';
-import 'proto/conductor_state.pb.dart' as pb;
-import 'proto/conductor_state.pbenum.dart';
 import 'repository.dart';
 import 'state.dart' as state_import;
 import 'stdio.dart';
@@ -293,46 +291,30 @@ class StartContext extends Context {
       );
     }
 
-    final Int64 unixDate = Int64(DateTime.now().millisecondsSinceEpoch);
-    final pb.ConductorState state = pb.ConductorState();
-
-    state.releaseChannel = releaseChannel;
-    state.createdDate = unixDate;
-    state.lastUpdatedDate = unixDate;
+    final DateTime now = DateTime.now();
+    final String workingBranchName = 'cherrypicks-$candidateBranch';
 
     // Create a new branch so that we don't accidentally push to upstream
     // candidateBranch.
-    final String workingBranchName = 'cherrypicks-$candidateBranch';
     await engine.newBranch(workingBranchName);
-
     if (dartRevision != null && dartRevision!.isNotEmpty) {
       await engine.updateDartRevision(dartRevision!);
       await engine.commit('Update Dart SDK to $dartRevision', addFirst: true);
     }
 
     final String engineHead = await engine.reverseParse('HEAD');
-    state.engine = (pb.Repository.create()
-      ..candidateBranch = candidateBranch
-      ..workingBranch = workingBranchName
-      ..startingGitHead = engineHead
-      ..currentGitHead = engineHead
-      ..checkoutPath = (await engine.checkoutDirectory).path
-      ..upstream = (pb.Remote.create()
-        ..name = 'upstream'
-        ..url = engine.upstreamRemote.url
-      )
-      ..mirror = (pb.Remote.create()
-        ..name = 'mirror'
-        ..url = engine.mirrorRemote!.url
-      )
+    final RepositoryState engineState = RepositoryState(
+      candidateBranch: candidateBranch,
+      workingBranch: workingBranchName,
+      startingGitHead: engineHead,
+      currentGitHead: engineHead,
+      checkoutPath: (await engine.checkoutDirectory).path,
+      dartRevision: dartRevision,
+      upstream: RemoteState(name: 'upstream', url: engine.upstreamRemote.url),
+      mirror: RemoteState(name: 'mirror', url: engine.mirrorRemote!.url),
     );
-    if (dartRevision != null && dartRevision!.isNotEmpty) {
-      state.engine.dartRevision = dartRevision!;
-    }
 
     await framework.newBranch(workingBranchName);
-
-    // Get framework version
     final Version lastVersion = Version.fromString(await framework.getFullTag(
       framework.upstreamRemote.name,
       candidateBranch,
@@ -345,15 +327,11 @@ class StartContext extends Context {
       '${framework.upstreamRemote.name}/${FrameworkRepository.defaultBranch}',
     );
     final bool atBranchPoint = branchPoint == frameworkHead;
-
-    final ReleaseType releaseType =
-        computeReleaseType(lastVersion, atBranchPoint);
-    state.releaseType = releaseType;
+    final ReleaseType releaseType = computeReleaseType(lastVersion, atBranchPoint);
 
     try {
       lastVersion.ensureValid(candidateBranch, releaseType);
     } on ConductorException catch (e) {
-      // Let the user know, but resume execution
       stdio.printError(e.message);
     }
 
@@ -369,32 +347,31 @@ class StartContext extends Context {
       );
     }
 
-    state.releaseVersion = nextVersion.toString();
-
-    state.framework = (pb.Repository.create()
-      ..candidateBranch = candidateBranch
-      ..workingBranch = workingBranchName
-      ..startingGitHead = frameworkHead
-      ..currentGitHead = frameworkHead
-      ..checkoutPath = (await framework.checkoutDirectory).path
-      ..upstream = (pb.Remote.create()
-        ..name = 'upstream'
-        ..url = framework.upstreamRemote.url
-      )
-      ..mirror = (pb.Remote.create()
-        ..name = 'mirror'
-        ..url = framework.mirrorRemote!.url
-      )
+    final RepositoryState frameworkState = RepositoryState(
+      candidateBranch: candidateBranch,
+      workingBranch: workingBranchName,
+      startingGitHead: frameworkHead,
+      currentGitHead: frameworkHead,
+      checkoutPath: (await framework.checkoutDirectory).path,
+      upstream: RemoteState(name: 'upstream', url: framework.upstreamRemote.url),
+      mirror: RemoteState(name: 'mirror', url: framework.mirrorRemote!.url),
     );
 
-    state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
-
-    state.conductorVersion = conductorVersion;
+    final ConductorState state = ConductorState(
+      releaseChannel: releaseChannel,
+      releaseVersion: nextVersion.toString(),
+      engine: engineState,
+      framework: frameworkState,
+      createdDate: now,
+      lastUpdatedDate: now,
+      logs: <String>[],
+      currentPhase: ReleasePhase.VERIFY_ENGINE_CI,
+      conductorVersion: conductorVersion,
+      releaseType: releaseType,
+    );
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
-
     updateState(state, stdio.logs);
-
     stdio.printStatus(state_import.presentState(state));
   }
 

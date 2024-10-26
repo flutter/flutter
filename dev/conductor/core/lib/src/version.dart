@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'enums.dart';
 import 'globals.dart' show ConductorException, releaseCandidateBranchRegex;
-
-import 'proto/conductor_state.pbenum.dart';
 
 /// Possible string formats that `flutter --version` can return.
 enum VersionType {

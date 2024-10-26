@@ -6,10 +6,11 @@ import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:platform/platform.dart';
 
-import './proto/conductor_state.pb.dart' as pb;
 import './repository.dart';
 import './state.dart';
 import './stdio.dart';
+
+import 'enums.dart';
 
 const String kVerboseFlag = 'verbose';
 const String kStateOption = 'state-file';
@@ -53,7 +54,7 @@ class StatusCommand extends Command<void> {
           'No persistent state file found at ${argResults![kStateOption]}.');
       return;
     }
-    final pb.ConductorState state = readStateFromFile(stateFile);
+    final ConductorState state = readStateFromFile(stateFile);
 
     stdio.printStatus(presentState(state));
     if (argResults![kVerboseFlag] as bool) {

@@ -4,8 +4,8 @@
 
 import 'package:file/file.dart' show File;
 
+import 'enums.dart' as enums;
 import 'globals.dart';
-import 'proto/conductor_state.pb.dart' as pb;
 import 'repository.dart';
 import 'state.dart';
 import 'stdio.dart' show Stdio;
@@ -48,7 +48,7 @@ abstract class Context {
   /// This can be overridden by frontends that may not persist the state to
   /// disk, and/or may need to call additional update hooks each time the state
   /// is updated.
-  void updateState(pb.ConductorState state, [List<String> logs = const <String>[]]) {
+  void updateState(enums.ConductorState state, [List<String> logs = const <String>[]]) {
     writeStateToFile(stateFile, state, logs);
   }
 }

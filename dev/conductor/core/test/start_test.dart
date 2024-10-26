@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show jsonDecode;
-
 import 'package:args/command_runner.dart';
-import 'package:conductor_core/src/proto/conductor_state.pb.dart' as pb;
-import 'package:conductor_core/src/proto/conductor_state.pbenum.dart';
+import 'package:conductor_core/src/enums.dart';
 import 'package:conductor_core/src/repository.dart';
 import 'package:conductor_core/src/start.dart';
 import 'package:conductor_core/src/state.dart';
@@ -390,10 +387,7 @@ void main() {
 
       final File stateFile = fileSystem.file(stateFilePath);
 
-      final pb.ConductorState state = pb.ConductorState();
-      state.mergeFromProto3Json(
-        jsonDecode(stateFile.readAsStringSync()),
-      );
+      final ConductorState state = readStateFromFile(stateFile);
 
       expect(state.releaseType, ReleaseType.BETA_HOTFIX);
       expect(
@@ -401,7 +395,6 @@ void main() {
           isNot(contains(
               'Tried to tag the branch point, however the target version')));
       expect(processManager, hasNoRemainingExpectations);
-      expect(state.isInitialized(), true);
       expect(state.releaseChannel, releaseChannel);
       expect(state.releaseVersion, nextVersion);
       expect(state.engine.candidateBranch, candidateBranch);
@@ -412,7 +405,7 @@ void main() {
       expect(state.framework.startingGitHead, revision3);
       expect(
           state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
-      expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
+      expect(state.currentPhase, ReleasePhase.VERIFY_ENGINE_CI);
       expect(state.conductorVersion, conductorVersion);
     });
 
@@ -590,11 +583,7 @@ void main() {
       ]);
 
       final File stateFile = fileSystem.file(stateFilePath);
-
-      final pb.ConductorState state = pb.ConductorState();
-      state.mergeFromProto3Json(
-        jsonDecode(stateFile.readAsStringSync()),
-      );
+      final ConductorState state = readStateFromFile(stateFile);
 
       expect(processManager, hasNoRemainingExpectations);
       expect(state.releaseVersion, versionOverride);
@@ -784,16 +773,11 @@ void main() {
       ]);
 
       final File stateFile = fileSystem.file(stateFilePath);
-
-      final pb.ConductorState state = pb.ConductorState();
-      state.mergeFromProto3Json(
-        jsonDecode(stateFile.readAsStringSync()),
-      );
+      final ConductorState state = readStateFromFile(stateFile);
 
       expect(stdio.error,
           isNot(contains('Tried to tag the branch point, however')));
       expect(processManager, hasNoRemainingExpectations);
-      expect(state.isInitialized(), true);
       expect(state.releaseChannel, releaseChannel);
       expect(state.releaseVersion, nextVersion);
       expect(state.engine.candidateBranch, candidateBranch);
@@ -804,7 +788,7 @@ void main() {
       expect(state.framework.startingGitHead, revision3);
       expect(
           state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
-      expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
+      expect(state.currentPhase, ReleasePhase.VERIFY_ENGINE_CI);
       expect(state.conductorVersion, conductorVersion);
       expect(state.releaseType, ReleaseType.BETA_HOTFIX);
       expect(
@@ -993,14 +977,9 @@ void main() {
       ]);
 
       final File stateFile = fileSystem.file(stateFilePath);
-
-      final pb.ConductorState state = pb.ConductorState();
-      state.mergeFromProto3Json(
-        jsonDecode(stateFile.readAsStringSync()),
-      );
+      final ConductorState state = readStateFromFile(stateFile);
 
       expect(processManager.hasRemainingExpectations, false);
-      expect(state.isInitialized(), true);
       expect(state.releaseChannel, 'stable');
       expect(state.releaseVersion, nextVersion);
       expect(state.engine.candidateBranch, candidateBranch);
@@ -1008,7 +987,7 @@ void main() {
       expect(state.engine.dartRevision, nextDartRevision);
       expect(state.framework.candidateBranch, candidateBranch);
       expect(state.framework.startingGitHead, revision3);
-      expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
+      expect(state.currentPhase, ReleasePhase.VERIFY_ENGINE_CI);
       expect(state.conductorVersion, conductorVersion);
       expect(state.releaseType, ReleaseType.STABLE_INITIAL);
     });
@@ -1233,11 +1212,7 @@ void main() {
       );
 
       await startContext.run();
-
-      final pb.ConductorState state = pb.ConductorState();
-      state.mergeFromProto3Json(
-        jsonDecode(stateFile.readAsStringSync()),
-      );
+      final ConductorState state = readStateFromFile(stateFile);
 
       expect((await startContext.engine.checkoutDirectory).path,
           equals(engine.path));

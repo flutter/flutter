@@ -7,10 +7,9 @@ import 'package:file/file.dart' show File;
 import 'package:meta/meta.dart' show visibleForTesting;
 
 import 'context.dart';
+import 'enums.dart';
 import 'git.dart';
 import 'globals.dart';
-import 'proto/conductor_state.pb.dart' as pb;
-import 'proto/conductor_state.pbenum.dart';
 import 'repository.dart';
 import 'state.dart' as state_import;
 
@@ -60,7 +59,7 @@ class NextCommand extends Command<void> {
           'No persistent state file found at ${stateFile.path}.',
       );
     }
-    final pb.ConductorState state = state_import.readStateFromFile(stateFile);
+    final ConductorState state = state_import.readStateFromFile(stateFile);
 
     await NextContext(
       autoAccept: argResults![kYesFlag] as bool,
@@ -86,57 +85,9 @@ class NextContext extends Context {
   final bool autoAccept;
   final bool force;
 
-  Future<void> run(pb.ConductorState state) async {
-    const List<CherrypickState> finishedStates = <CherrypickState>[
-      CherrypickState.COMPLETED,
-      CherrypickState.ABANDONED,
-    ];
+  Future<void> run(ConductorState state) async {
     switch (state.currentPhase) {
-      case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
-        final Remote upstream = Remote.upstream(state.engine.upstream.url);
-        final EngineRepository engine = EngineRepository(
-            checkouts,
-            initialRef: state.engine.workingBranch,
-            upstreamRemote: upstream,
-            previousCheckoutLocation: state.engine.checkoutPath,
-        );
-        if (!state_import.requiresEnginePR(state)) {
-          stdio.printStatus(
-              'This release has no engine cherrypicks. No Engine PR is necessary.\n',
-          );
-          break;
-        }
-
-        final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[
-          for (final pb.Cherrypick cherrypick in state.engine.cherrypicks)
-            if (!finishedStates.contains(cherrypick.state)) cherrypick,
-        ];
-
-        if (unappliedCherrypicks.isEmpty) {
-          stdio.printStatus('All engine cherrypicks have been auto-applied by the conductor.\n');
-        } else {
-          if (unappliedCherrypicks.length == 1) {
-            stdio.printStatus('There was ${unappliedCherrypicks.length} cherrypick that was not auto-applied.');
-          } else {
-            stdio.printStatus('There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
-          }
-          stdio.printStatus('These must be applied manually in the directory '
-              '${state.engine.checkoutPath} before proceeding.\n');
-        }
-        if (!autoAccept) {
-          final bool response = await prompt(
-            'Are you ready to push your engine branch to the repository '
-            '${state.engine.mirror.url}?',
-          );
-          if (!response) {
-            stdio.printError('Aborting command.');
-            updateState(state, stdio.logs);
-            return;
-          }
-        }
-
-        await pushWorkingBranch(engine, state.engine);
-      case pb.ReleasePhase.VERIFY_ENGINE_CI:
+      case ReleasePhase.VERIFY_ENGINE_CI:
         stdio.printStatus('You must validate post-submit CI for your engine PR and merge it');
         if (!autoAccept) {
           final bool response = await prompt(
@@ -149,91 +100,8 @@ class NextContext extends Context {
             return;
           }
         }
-      case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-        final Remote engineUpstreamRemote = Remote.upstream(state.engine.upstream.url);
-        final EngineRepository engine = EngineRepository(
-            checkouts,
-            // We explicitly want to check out the merged version from upstream
-            initialRef: '${engineUpstreamRemote.name}/${state.engine.candidateBranch}',
-            upstreamRemote: engineUpstreamRemote,
-            previousCheckoutLocation: state.engine.checkoutPath,
-        );
 
-        final String engineRevision = await engine.reverseParse('HEAD');
-
-        final Remote upstream = Remote.upstream(state.framework.upstream.url);
-        final FrameworkRepository framework = FrameworkRepository(
-          checkouts,
-          initialRef: state.framework.workingBranch,
-          upstreamRemote: upstream,
-          previousCheckoutLocation: state.framework.checkoutPath,
-        );
-        stdio.printStatus('Writing candidate branch...');
-        bool needsCommit = await framework.updateCandidateBranchVersion(state.framework.candidateBranch);
-        if (needsCommit) {
-          final String revision = await framework.commit(
-              'Create candidate branch version ${state.framework.candidateBranch} for ${state.releaseChannel}',
-              addFirst: true,
-          );
-          // append to list of cherrypicks so we know a PR is required
-          state.framework.cherrypicks.add(pb.Cherrypick.create()
-                  ..appliedRevision = revision
-                  ..state = pb.CherrypickState.COMPLETED
-          );
-        }
-        stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
-        needsCommit = await framework.updateEngineRevision(engineRevision);
-        if (needsCommit) {
-          final String revision = await framework.commit(
-              'Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}',
-              addFirst: true,
-          );
-          // append to list of cherrypicks so we know a PR is required
-          state.framework.cherrypicks.add(pb.Cherrypick.create()
-                  ..appliedRevision = revision
-                  ..state = pb.CherrypickState.COMPLETED
-          );
-        }
-
-        final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[
-          for (final pb.Cherrypick cherrypick in state.framework.cherrypicks)
-            if (!finishedStates.contains(cherrypick.state)) cherrypick,
-        ];
-
-        if (state.framework.cherrypicks.isEmpty) {
-          stdio.printStatus(
-              'This release has no framework cherrypicks. However, a framework PR is still\n'
-              'required to roll engine cherrypicks.',
-          );
-        } else if (unappliedCherrypicks.isEmpty) {
-          stdio.printStatus('All framework cherrypicks were auto-applied by the conductor.');
-        } else {
-          if (unappliedCherrypicks.length == 1) {
-            stdio.printStatus('There was ${unappliedCherrypicks.length} cherrypick that was not auto-applied.',);
-          }
-          else {
-            stdio.printStatus('There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.',);
-          }
-          stdio.printStatus(
-              'These must be applied manually in the directory '
-              '${state.framework.checkoutPath} before proceeding.\n',
-          );
-        }
-
-        if (!autoAccept) {
-          final bool response = await prompt(
-            'Are you ready to push your framework branch to the repository '
-            '${state.framework.mirror.url}?',
-          );
-          if (!response) {
-            stdio.printError('Aborting command.');
-            updateState(state, stdio.logs);
-            return;
-          }
-        }
-
-        await pushWorkingBranch(framework, state.framework);
-      case pb.ReleasePhase.PUBLISH_VERSION:
+      case ReleasePhase.PUBLISH_VERSION:
         final String command = '''
           tool-proxy-cli --tool_proxy=/abns/dart-eng-tool-proxy/prod-dart-eng-tool-proxy-tool-proxy.annealed-tool-proxy \\
           --block_on_mpa -I flutter_release \\
@@ -246,7 +114,8 @@ class NextContext extends Context {
         stdio.printStatus('and post-submit CI has finished successfully.\n');
         stdio.printStatus('Run the following command, and ask a Googler');
         stdio.printStatus('to review the request\n\n$command');
-      case pb.ReleasePhase.VERIFY_RELEASE:
+
+      case ReleasePhase.VERIFY_RELEASE:
         stdio.printStatus(
             'The current status of packaging builds can be seen at:\n'
             '\t$kLuciPackagingConsoleLink',
@@ -260,12 +129,13 @@ class NextContext extends Context {
             return;
           }
         }
-      case pb.ReleasePhase.RELEASE_COMPLETED:
+
+      case ReleasePhase.RELEASE_COMPLETED:
         throw ConductorException('This release is finished.');
     }
-    final ReleasePhase nextPhase = state_import.getNextPhase(state.currentPhase);
-    stdio.printStatus('\nUpdating phase from ${state.currentPhase} to $nextPhase...\n');
-    state.currentPhase = nextPhase;
+    final ReleasePhase getNextPhase = nextPhase(state.currentPhase);
+    stdio.printStatus('\nUpdating phase from ${state.currentPhase} to $getNextPhase...\n');
+    state.currentPhase = getNextPhase;
     stdio.printStatus(state_import.phaseInstructions(state));
 
     updateState(state, stdio.logs);
@@ -282,20 +152,20 @@ class NextContext extends Context {
   /// of the same name on their mirror, or a [GitException] for any other
   /// failures from the underlying git process call.
   @visibleForTesting
-  Future<void> pushWorkingBranch(Repository repository, pb.Repository pbRepository) async {
+  Future<void> pushWorkingBranch(Repository repository, RepositoryState repoState) async {
     try {
       await repository.pushRef(
           fromRef: 'HEAD',
           // Explicitly create new branch
-          toRef: 'refs/heads/${pbRepository.workingBranch}',
-          remote: pbRepository.mirror.name,
+          toRef: 'refs/heads/${repoState.workingBranch}',
+          remote: repoState.mirror.name,
           force: force,
       );
     } on GitException catch (exception) {
       if (exception.type == GitExceptionType.PushRejected && !force) {
         throw ConductorException(
           'Push failed because the working branch named '
-          '${pbRepository.workingBranch} already exists on your mirror. '
+          '${repoState.workingBranch} already exists on your mirror. '
           'Re-run this command with --force to overwrite the remote branch.\n'
           '${exception.message}',
         );
