@@ -1295,7 +1295,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
       return prebuiltPath;
     }
 
-    throw ToolExit('Unable to find a built dart sdk at: "$builtPath" or a prebuilt dart sdk at: "$prebuiltPath"');
+    throwToolExit('Unable to find a built dart sdk at: "$builtPath" or a prebuilt dart sdk at: "$prebuiltPath"');
   }
 
   String _getFlutterPrebuiltsPath() {
@@ -1520,7 +1520,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       return prebuiltPath;
     }
 
-    throw ToolExit('Unable to find a prebuilt dart sdk at: "$prebuiltPath"');
+    throwToolExit('Unable to find a prebuilt dart sdk at: "$prebuiltPath"');
   }
 
   String _getFlutterPrebuiltsPath() {
