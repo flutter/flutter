@@ -41,4 +41,46 @@ void main() {
       lessThan(initialAppBarHeight),
     );
   });
+
+  testWidgets('Maintains scroll position of inactive tab', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.NestedScrollViewExampleApp());
+
+    final Finder finder = find.text('Item 14', skipOffstage: false);
+    Future<void> scroll(VerticalDirection direction) async {
+      switch (direction) {
+        case VerticalDirection.down:
+          await tester.ensureVisible(finder);
+        case VerticalDirection.up:
+          await tester.fling(find.byType(Scaffold), const Offset(0, 20), 20);
+          await tester.pumpAndSettle();
+      }
+    }
+
+    double getScrollPosition() {
+      return Scrollable.of(tester.element(finder)).position.pixels;
+    }
+
+    expect(getScrollPosition(), 0.0);
+
+    // Scroll toward the bottom of Tab 1.
+    await scroll(VerticalDirection.down);
+    final double tab1Position = getScrollPosition();
+
+    // Switch to Tab 2.
+    await tester.tap(find.text('Tab 2'));
+    await tester.pumpAndSettle();
+
+    // Scroll toward the bottom of Tab 2.
+    await scroll(VerticalDirection.down);
+    final double tab2Position = getScrollPosition();
+
+    // Scroll up a bit in Tab 2.
+    await scroll(VerticalDirection.up);
+    expect(getScrollPosition(), lessThan(tab2Position));
+
+    // Switch back to Tab 1.
+    await tester.tap(find.text('Tab 1'));
+    await tester.pumpAndSettle();
+    expect(getScrollPosition(), tab1Position);
+  });
 }
