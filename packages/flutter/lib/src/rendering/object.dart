@@ -3041,6 +3041,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     // If this was not previously a repaint boundary it will not have
     // a layer we can paint from.
     if (isRepaintBoundary && _wasRepaintBoundary) {
+      if (_needsCompositedLayerUpdate) {
+        return;
+      }
       assert(() {
         if (debugPrintMarkNeedsPaintStacks) {
           debugPrintStack(label: 'markNeedsPaint() called for $this');
