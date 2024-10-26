@@ -311,7 +311,6 @@ class SampleChecker {
 final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/color_scheme/dynamic_content_color.0_test.dart',
   'examples/api/test/widgets/navigator/navigator_state.restorable_push_replacement.0_test.dart',
-  'examples/api/test/widgets/navigator/navigator_state.restorable_push_and_remove_until.0_test.dart',
   'examples/api/test/widgets/navigator/navigator.restorable_push_replacement.0_test.dart',
   'examples/api/test/widgets/navigator/restorable_route_future.0_test.dart',
   'examples/api/test/widgets/navigator/navigator_state.restorable_push.0_test.dart',
