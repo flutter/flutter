@@ -3411,7 +3411,11 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spmi/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.temperature/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.trippoint/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.dci/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.descriptor/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.endpoint/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.phy/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.request/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/meta.json
