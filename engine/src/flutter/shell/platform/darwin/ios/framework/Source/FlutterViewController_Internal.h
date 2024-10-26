@@ -46,7 +46,7 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 @property(class, nonatomic, readonly) BOOL accessibilityIsOnOffSwitchLabelsEnabled;
 @property(nonatomic, readonly) BOOL isPresentingViewController;
 @property(nonatomic, readonly) BOOL isVoiceOverRunning;
-@property(nonatomic, retain) FlutterKeyboardManager* keyboardManager;
+@property(nonatomic, strong) FlutterKeyboardManager* keyboardManager;
 
 /**
  * @brief Whether the status bar is preferred hidden.
