@@ -9,7 +9,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyCustomScrollView extends StatelessWidget {
-  const MyCustomScrollView({Key? key}) : super(key: key);
+  const MyCustomScrollView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +37,10 @@ class MyCustomScrollView extends StatelessWidget {
                 return MyListItem(index: index);
               },
             ),
-            // Set to true to keep the state of each item alive while scrolling.
-            // Change this to false to observe the loss of state in each item
+            // By default, addAutomaticKeepAlives is true.
+            // Set to false to observe the loss of state in each item
             // when it is scrolled out of view. Selected items will revert to
-            // their default state if this is false.
-            addAutomaticKeepAlives: true, // Change this to false to see the impact
+            // their default state if false.
           ),
         ),
       ],
@@ -49,16 +48,21 @@ class MyCustomScrollView extends StatelessWidget {
   }
 }
 
+/// A stateful list item that maintains its state when scrolled out of view
+/// due to AutomaticKeepAliveClientMixin.
 class MyListItem extends StatefulWidget {
+  const MyListItem({
+    super.key,
+    required this.index,
+  });
+
   final int index;
 
-  const MyListItem({required this.index, Key? key}) : super(key: key);
-
   @override
-  _MyListItemState createState() => _MyListItemState();
+  State<MyListItem> createState() => MyListItemState();
 }
 
-class _MyListItemState extends State<MyListItem>
+class MyListItemState extends State<MyListItem>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;

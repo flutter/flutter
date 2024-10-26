@@ -37,7 +37,7 @@ class AutomaticKeepAliveExample extends StatelessWidget {
       ),
       body: ListView.builder(
         itemCount: 100,
-        itemBuilder: (context, index) {
+        itemBuilder: (BuildContext context, int index) {
           // Each child in the ListView applies AutomaticKeepAliveClientMixin
           return KeepAliveItem(index: index);
         },
@@ -46,15 +46,22 @@ class AutomaticKeepAliveExample extends StatelessWidget {
   }
 }
 
+/// A widget that demonstrates the usage of AutomaticKeepAliveClientMixin
+/// by maintaining a counter state even when scrolled out of view.
 class KeepAliveItem extends StatefulWidget {
+  const KeepAliveItem({
+    super.key,
+    required this.index,
+  });
+
   final int index;
-  const KeepAliveItem({Key? key, required this.index}) : super(key: key);
 
   @override
-  _KeepAliveItemState createState() => _KeepAliveItemState();
+  State<KeepAliveItem> createState() => KeepAliveItemState();
 }
 
-class _KeepAliveItemState extends State<KeepAliveItem> with AutomaticKeepAliveClientMixin<KeepAliveItem> {
+class KeepAliveItemState extends State<KeepAliveItem>
+    with AutomaticKeepAliveClientMixin<KeepAliveItem> {
   int _counter = 0;
 
   @override
