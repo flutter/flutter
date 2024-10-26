@@ -10,7 +10,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
           itemCount: 100,
           itemBuilder: (BuildContext context, int index) {
             return KeepAlive(
-              keepAlive: index % 2 == 0,
+              keepAlive: index.isEven,
               child: ListItem(index: index),
             );
           },
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
 }
 
 class ListItem extends StatefulWidget {
-  const ListItem({Key? key, required this.index}) : super(key: key);
+  const ListItem({super.key, required this.index});
 
   final int index;
 
@@ -46,7 +46,7 @@ class _ListItemState extends State<ListItem> {
   @override
   void initState() {
     super.initState();
-    label = 'Item ${widget.index} (${widget.index % 2 == 0 ? 'kept alive' : 'can be disposed'})';
+    label = 'Item ${widget.index} (${widget.index.isEven ? 'kept alive' : 'can be disposed'})';
     print('Created: $label');
   }
 
@@ -60,7 +60,7 @@ class _ListItemState extends State<ListItem> {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(label),
-      tileColor: widget.index % 2 == 0 ? Colors.lightBlue[50] : null,
+      tileColor: widget.index.isEven ? Colors.lightBlue[50] : null,
     );
   }
 }
