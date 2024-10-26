@@ -663,9 +663,9 @@ class _SharedXAxisEnterTransition extends StatelessWidget {
           // When the exit transition fades out the new page, the background
           // painted by the transition also fades out, which should reveal the
           // old page below. However, the background painted by the *enter*
-          // transition does not fade out, due to how DualTransitionBuilder
-          // works. When a page is being popped off, this background will
-          // obscure the old page, until the navigator removes the new page
+          // transition does not fade out, as exit transitions are nested in
+          // enter transitions. When a page is being popped off, this background
+          // will obscure the old page, until the navigator removes the new page
           // after the transition ended.
           //
           // Hide the background after the enter transition has completed to
