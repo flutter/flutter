@@ -105,6 +105,8 @@ source_set("flutter_framework_source_arc") {
     "framework/Source/FlutterUndoManagerPlugin.mm",
     "framework/Source/FlutterView.h",
     "framework/Source/FlutterView.mm",
+    "framework/Source/FlutterViewController.mm",
+    "framework/Source/FlutterViewController_Internal.h",
     "framework/Source/FlutterViewResponder.h",
     "framework/Source/KeyCodeMap.g.mm",
     "framework/Source/KeyCodeMap_Internal.h",
@@ -175,6 +177,7 @@ source_set("flutter_framework_source_arc") {
     "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/profiling:profiling",
+    "//flutter/third_party/spring_animation",
   ]
 }
 
@@ -189,8 +192,6 @@ source_set("flutter_framework_source") {
     # iOS embedder is migrating to ARC.
     # New files are highly encouraged to be in ARC.
     # To add new files in ARC, add them to the `flutter_framework_source_arc` target.
-    "framework/Source/FlutterViewController.mm",
-    "framework/Source/FlutterViewController_Internal.h",
     "platform_view_ios.h",
     "platform_view_ios.mm",
   ]
@@ -210,7 +211,6 @@ source_set("flutter_framework_source") {
     "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/profiling:profiling",
-    "//flutter/third_party/spring_animation",
   ]
 
   public_configs = [
