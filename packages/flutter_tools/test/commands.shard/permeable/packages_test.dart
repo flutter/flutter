@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -35,12 +28,18 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   late FakeStdio mockStdio;
-
+  
   setUp(() {
     mockStdio = FakeStdio()..stdout.terminalColumns = 80;
+
+    // Some tests below override this with a blank root, always reset it.
+    Cache.flutterRoot = null;
   });
 
-  Cache.disableLocking();
+  setUpAll(() {
+    Cache.disableLocking();
+  });  
+
   group('packages get/upgrade', () {
     late Directory tempDir;
     late FakeAnalytics fakeAnalytics;
