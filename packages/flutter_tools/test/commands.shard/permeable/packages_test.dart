@@ -28,7 +28,7 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   late FakeStdio mockStdio;
-  
+
   setUp(() {
     mockStdio = FakeStdio()..stdout.terminalColumns = 80;
 
