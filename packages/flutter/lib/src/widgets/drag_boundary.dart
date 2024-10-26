@@ -9,7 +9,7 @@ import 'framework.dart';
 /// The interface for defining the algorithm for a boundary that a specified shape is dragged within.
 ///
 /// See also:
-///  * [DragBoundary], which uses this class.
+///  * [DragBoundary], an [InheritedWidget] that provides a [DragBoundaryDelegate] to its descendants.
 ///
 /// `T` is a data class that defines the shape being dragged. For example, when dragging a rectangle within the boundary,
 /// `T` should be a `Rect`.
@@ -63,6 +63,8 @@ class _DragBoundaryDelegateForRect extends DragBoundaryDelegate<Rect> {
 
 /// Provides a [DragBoundaryDelegate] for its descendants whose bounds are those defined by this widget.
 ///
+/// [forRectOf] and [forRectMaybeOf] returns a delegate for a drag object of type [Rect].
+///
 /// {@tool dartpad}
 /// This example demonstrates dragging a red box, constrained within the bounds
 /// of a green box.
@@ -73,18 +75,26 @@ class DragBoundary extends InheritedWidget {
   /// Creates a widget that provides a boundary to its descendants.
   const DragBoundary({required super.child, super.key});
 
+  /// {@template flutter.widgets.DragBoundary.forRectOf}
   /// Retrieve the [DragBoundary] from the nearest ancestor to
   /// get its [DragBoundaryDelegate] of [Rect].
   ///
-  /// The [useGlobalPosition] flag specifies whether to use global position.
-  /// If false, the local position of the bounds are used. It defaults to true.
+  /// The [useGlobalPosition] specifies whether to retrieve the [DragBoundaryDelegate] of type
+  /// [Rect] in global coordinates. If false, the local coordinates of the boundary are used. Defaults to true.
+  /// {@endtemplate}
   ///
   /// If no [DragBoundary] ancestor is found, the delegate will return a delegate that allows the drag object to move freely.
   static DragBoundaryDelegate<Rect> forRectOf(BuildContext context, {bool useGlobalPosition = true}) {
+    return forRectMaybeOf(context, useGlobalPosition: useGlobalPosition)
+      ?? _DragBoundaryDelegateForRect(null);
+  }
+
+  /// {@macro flutter.widgets.DragBoundary.forRectOf}
+  static DragBoundaryDelegate<Rect>? forRectMaybeOf(BuildContext context, {bool useGlobalPosition = true}) {
     final InheritedElement? element =
         context.getElementForInheritedWidgetOfExactType<DragBoundary>();
     if (element == null) {
-      return _DragBoundaryDelegateForRect(null);
+      return null;
     }
     final RenderBox? rb = element.findRenderObject() as RenderBox?;
     assert(rb != null && rb.hasSize, 'DragBoundary is not available');
