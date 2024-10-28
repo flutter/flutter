@@ -2159,8 +2159,8 @@ class TimePickerDialog extends StatefulWidget {
     this.initialEntryMode = TimePickerEntryMode.dial,
     this.orientation,
     this.onEntryModeChanged,
-    this.switchToInputEntryModeIcon = const Icon(Icons.keyboard_outlined),
-    this.switchToTimerEntryModeIcon = const Icon(Icons.access_time),
+    this.switchToInputEntryModeIcon,
+    this.switchToTimerEntryModeIcon,
   });
 
   /// The time initially selected when the dialog is shown.
@@ -2222,10 +2222,10 @@ class TimePickerDialog extends StatefulWidget {
   final EntryModeChangeCallback? onEntryModeChanged;
 
   /// {@macro flutter.material.time_picker.switchToInputEntryModeIcon}
-  final Icon switchToInputEntryModeIcon;
+  final Icon? switchToInputEntryModeIcon;
 
   /// {@macro flutter.material.time_picker.switchToTimerEntryModeIcon}
-  final Icon switchToTimerEntryModeIcon;
+  final Icon? switchToTimerEntryModeIcon;
 
   @override
   State<TimePickerDialog> createState() => _TimePickerDialogState();
@@ -2425,8 +2425,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
               style: theme.useMaterial3 ? IconButton.styleFrom(foregroundColor: entryModeIconColor) : null,
               onPressed: _toggleEntryMode,
               icon: _entryMode.value == TimePickerEntryMode.dial
-                  ? widget.switchToInputEntryModeIcon
-                  : widget.switchToTimerEntryModeIcon,
+                  ? widget.switchToInputEntryModeIcon ?? const Icon(Icons.keyboard_outlined)
+                  : widget.switchToTimerEntryModeIcon ?? const Icon(Icons.access_time),
               tooltip: _entryMode.value == TimePickerEntryMode.dial
                   ? MaterialLocalizations.of(context).inputTimeModeButtonLabel
                   : MaterialLocalizations.of(context).dialModeButtonLabel,
@@ -2552,8 +2552,8 @@ class _TimePicker extends StatefulWidget {
     this.entryMode = TimePickerEntryMode.dial,
     this.orientation,
     this.onEntryModeChanged,
-    this.switchToInputEntryModeIcon = const Icon(Icons.keyboard_outlined),
-    this.switchToTimerEntryModeIcon = const Icon(Icons.access_time),
+    this.switchToInputEntryModeIcon,
+    this.switchToTimerEntryModeIcon,
   });
 
   /// Optionally provide your own text for the help text at the top of the
@@ -2623,10 +2623,10 @@ class _TimePicker extends StatefulWidget {
   final EntryModeChangeCallback? onEntryModeChanged;
 
   /// {@macro flutter.material.time_picker.switchToInputEntryModeIcon}
-  final Icon switchToInputEntryModeIcon;
+  final Icon? switchToInputEntryModeIcon;
 
   /// {@macro flutter.material.time_picker.switchToTimerEntryModeIcon}
-  final Icon switchToTimerEntryModeIcon;
+  final Icon? switchToTimerEntryModeIcon;
 
   @override
   State<_TimePicker> createState() => _TimePickerState();
@@ -2962,7 +2962,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
 /// portrait or landscape mode.
 ///
 /// {@template flutter.material.time_picker.switchToInputEntryModeIcon}
-/// The [switchToInputEntryModeIcon] argument can be used to customize
+/// The optional [switchToInputEntryModeIcon] argument can be used to customize
 /// the input method icon that is shown when the [TimePickerEntryMode]
 /// is [TimePickerEntryMode.dial].
 ///
@@ -2970,7 +2970,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
 /// {@endtemplate}
 ///
 /// {@template flutter.material.time_picker.switchToTimerEntryModeIcon}
-/// The [switchToTimerEntryModeIcon] argument can be used to customize
+/// The optional [switchToTimerEntryModeIcon] argument can be used to customize
 /// the input method icon that is shown when the [TimePickerEntryMode]
 /// is [TimePickerEntryMode.input].
 ///
@@ -3051,8 +3051,8 @@ Future<TimeOfDay?> showTimePicker({
   EntryModeChangeCallback? onEntryModeChanged,
   Offset? anchorPoint,
   Orientation? orientation,
-  Icon switchToInputEntryModeIcon = const Icon(Icons.keyboard_outlined),
-  Icon switchToTimerEntryModeIcon = const Icon(Icons.access_time),
+  Icon? switchToInputEntryModeIcon,
+  Icon? switchToTimerEntryModeIcon,
 }) async {
   assert(debugCheckHasMaterialLocalizations(context));
 
