@@ -25,9 +25,27 @@ class WebImage extends StatefulWidget {
     this.errorBuilder,
   });
 
+
+  /// The URL from which the image will be fetched.
   final String src;
+
+
+  /// A builder that specifies the widget to display to the user while an image
+  /// is still loading.
+  ///
+  /// See [Image.network] for a fuller description.
   final ImageLoadingBuilder? loadingBuilder;
+
+
+  /// A builder function responsible for creating the widget that represents
+  /// this image.
+  ///
+  /// See [Image.network] for a fuller description.
   final ImageFrameBuilder? frameBuilder;
+
+  /// A builder function that is called if an error occurs during image loading.
+  ///
+  /// See [Image.network] for a fuller description.
   final ImageErrorWidgetBuilder? errorBuilder;
 
   @override
