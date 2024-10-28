@@ -55,7 +55,7 @@ AccessibilityBridge::AccessibilityBridge(
       weak_factory_(this) {
   accessibility_channel_.reset([[FlutterBasicMessageChannel alloc]
          initWithName:@"flutter/accessibility"
-      binaryMessenger:platform_view->GetOwnerViewController().get().engine.binaryMessenger
+      binaryMessenger:platform_view->GetOwnerViewController().engine.binaryMessenger
                 codec:[FlutterStandardMessageCodec sharedInstance]]);
   [accessibility_channel_.get() setMessageHandler:^(id message, FlutterReply reply) {
     HandleEvent((NSDictionary*)message);
@@ -69,7 +69,7 @@ AccessibilityBridge::~AccessibilityBridge() {
 }
 
 UIView<UITextInput>* AccessibilityBridge::textInputView() {
-  return [[platform_view_->GetOwnerViewController().get().engine textInputPlugin] textInputView];
+  return [[platform_view_->GetOwnerViewController().engine textInputPlugin] textInputView];
 }
 
 void AccessibilityBridge::AccessibilityObjectDidBecomeFocused(int32_t id) {

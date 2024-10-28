@@ -153,11 +153,7 @@ typedef struct MouseState {
 @end
 
 @implementation FlutterViewController {
-  // TODO(cbracken): https://github.com/flutter/flutter/issues/137801
-  // Eliminate once we can use weak pointers in platform_view_ios.h.
-  std::unique_ptr<fml::WeakNSObjectFactory<FlutterViewController>> _weakFactory;
   FlutterEngine* _engine;
-
   flutter::ViewportMetrics _viewportMetrics;
   MouseState _mouseState;
 }
@@ -189,7 +185,6 @@ typedef struct MouseState {
     _flutterView = [[FlutterView alloc] initWithDelegate:_engine
                                                   opaque:self.isViewOpaque
                                          enableWideGamut:engine.project.isWideGamutEnabled];
-    _weakFactory = std::make_unique<fml::WeakNSObjectFactory<FlutterViewController>>(self);
     _ongoingTouches = [[NSMutableSet alloc] init];
 
     // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
@@ -256,7 +251,6 @@ typedef struct MouseState {
     project = [[FlutterDartProject alloc] init];
   }
   FlutterView.forceSoftwareRendering = project.settings.enable_software_rendering;
-  _weakFactory = std::make_unique<fml::WeakNSObjectFactory<FlutterViewController>>(self);
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
                                                       project:project
                                        allowHeadlessExecution:self.engineAllowHeadlessExecution
@@ -310,10 +304,6 @@ typedef struct MouseState {
 
 - (FlutterEngine*)engine {
   return _engine;
-}
-
-- (fml::WeakNSObject<FlutterViewController>)getWeakNSObject {
-  return _weakFactory->GetWeakNSObject();
 }
 
 - (void)setUpNotificationCenterObservers {
@@ -980,10 +970,6 @@ static void SendFakeTouchEvent(UIScreen* screen,
 }
 
 - (void)dealloc {
-  // It will be destroyed and invalidate its weak pointers
-  // before any other members are destroyed.
-  _weakFactory.reset();
-
   // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
   // Eliminate method calls in initializers and dealloc.
   [self removeInternalPlugins];

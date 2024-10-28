@@ -14,6 +14,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
+FLUTTER_ASSERT_ARC
+
 namespace flutter {
 
 PlatformViewIOS::AccessibilityBridgeManager::AccessibilityBridgeManager(
@@ -74,12 +76,11 @@ void PlatformViewIOS::HandlePlatformMessage(std::unique_ptr<flutter::PlatformMes
   platform_message_handler_->HandlePlatformMessage(std::move(message));
 }
 
-fml::WeakNSObject<FlutterViewController> PlatformViewIOS::GetOwnerViewController() const {
+FlutterViewController* PlatformViewIOS::GetOwnerViewController() const {
   return owner_controller_;
 }
 
-void PlatformViewIOS::SetOwnerViewController(
-    const fml::WeakNSObject<FlutterViewController>& owner_controller) {
+void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner_controller) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
   std::lock_guard<std::mutex> guard(ios_surface_mutex_);
   if (ios_surface_ || !owner_controller) {
@@ -91,17 +92,17 @@ void PlatformViewIOS::SetOwnerViewController(
 
   // Add an observer that will clear out the owner_controller_ ivar and
   // the accessibility_bridge_ in case the view controller is deleted.
-  dealloc_view_controller_observer_.reset(
-      [[[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
-                                                         object:owner_controller_.get()
-                                                          queue:[NSOperationQueue mainQueue]
-                                                     usingBlock:^(NSNotification* note) {
-                                                       // Implicit copy of 'this' is fine.
-                                                       accessibility_bridge_.Clear();
-                                                       owner_controller_.reset();
-                                                     }] retain]);
+  dealloc_view_controller_observer_.reset([[NSNotificationCenter defaultCenter]
+      addObserverForName:FlutterViewControllerWillDealloc
+                  object:owner_controller_
+                   queue:[NSOperationQueue mainQueue]
+              usingBlock:^(NSNotification* note) {
+                // Implicit copy of 'this' is fine.
+                accessibility_bridge_.Clear();
+                owner_controller_ = nil;
+              }]);
 
-  if (owner_controller_ && [owner_controller_.get() isViewLoaded]) {
+  if (owner_controller_ && owner_controller_.isViewLoaded) {
     this->attachView();
   }
   // Do not call `NotifyCreated()` here - let FlutterViewController take care
@@ -112,17 +113,16 @@ void PlatformViewIOS::SetOwnerViewController(
 
 void PlatformViewIOS::attachView() {
   FML_DCHECK(owner_controller_);
-  FML_DCHECK(owner_controller_.get().isViewLoaded)
-      << "FlutterViewController's view should be loaded "
-         "before attaching to PlatformViewIOS.";
-  auto flutter_view = static_cast<FlutterView*>(owner_controller_.get().view);
-  auto ca_layer = fml::scoped_nsobject<CALayer>{[[flutter_view layer] retain]};
+  FML_DCHECK(owner_controller_.isViewLoaded) << "FlutterViewController's view should be loaded "
+                                                "before attaching to PlatformViewIOS.";
+  FlutterView* flutter_view = static_cast<FlutterView*>(owner_controller_.view);
+  auto ca_layer = fml::scoped_nsobject<CALayer>{[flutter_view layer]};
   ios_surface_ = IOSSurface::Create(ios_context_, ca_layer);
   FML_DCHECK(ios_surface_ != nullptr);
 
   if (accessibility_bridge_) {
     accessibility_bridge_.Set(std::make_unique<AccessibilityBridge>(
-        owner_controller_.get(), this, [owner_controller_.get() platformViewsController]));
+        owner_controller_, this, owner_controller_.platformViewsController));
   }
 }
 
@@ -135,7 +135,7 @@ PointerDataDispatcherMaker PlatformViewIOS::GetDispatcherMaker() {
 void PlatformViewIOS::RegisterExternalTexture(int64_t texture_id,
                                               NSObject<FlutterTexture>* texture) {
   RegisterTexture(ios_context_->CreateExternalTexture(
-      texture_id, fml::scoped_nsobject<NSObject<FlutterTexture>>{[texture retain]}));
+      texture_id, fml::scoped_nsobject<NSObject<FlutterTexture>>{texture}));
 }
 
 // |PlatformView|
@@ -174,7 +174,7 @@ void PlatformViewIOS::SetSemanticsEnabled(bool enabled) {
   }
   if (enabled && !accessibility_bridge_) {
     accessibility_bridge_.Set(std::make_unique<AccessibilityBridge>(
-        owner_controller_.get(), this, [owner_controller_.get() platformViewsController]));
+        owner_controller_, this, owner_controller_.platformViewsController));
   } else if (!enabled && accessibility_bridge_) {
     accessibility_bridge_.Clear();
   } else {
@@ -194,7 +194,7 @@ void PlatformViewIOS::UpdateSemantics(flutter::SemanticsNodeUpdates update,
   if (accessibility_bridge_) {
     accessibility_bridge_.get()->UpdateSemantics(std::move(update), actions);
     [[NSNotificationCenter defaultCenter] postNotificationName:FlutterSemanticsUpdateNotification
-                                                        object:owner_controller_.get()];
+                                                        object:owner_controller_];
   }
 }
 
@@ -210,8 +210,8 @@ void PlatformViewIOS::OnPreEngineRestart() const {
   if (!owner_controller_) {
     return;
   }
-  [owner_controller_.get() platformViewsController]->Reset();
-  [[owner_controller_.get() restorationPlugin] reset];
+  owner_controller_.platformViewsController->Reset();
+  [owner_controller_.restorationPlugin reset];
 }
 
 std::unique_ptr<std::vector<std::string>> PlatformViewIOS::ComputePlatformResolvedLocales(
@@ -253,7 +253,6 @@ PlatformViewIOS::ScopedObserver::ScopedObserver() {}
 PlatformViewIOS::ScopedObserver::~ScopedObserver() {
   if (observer_) {
     [[NSNotificationCenter defaultCenter] removeObserver:observer_];
-    [observer_ release];
   }
 }
 
@@ -261,7 +260,6 @@ void PlatformViewIOS::ScopedObserver::reset(id<NSObject> observer) {
   if (observer != observer_) {
     if (observer_) {
       [[NSNotificationCenter defaultCenter] removeObserver:observer_];
-      [observer_ release];
     }
     observer_ = observer;
   }

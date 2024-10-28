@@ -12,7 +12,6 @@
 #include "flutter/common/constants.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/platform/darwin/platform_version.h"
-#include "flutter/fml/platform/darwin/weak_nsobject.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/runtime/ptrace_check.h"
 #include "flutter/shell/common/engine.h"
@@ -151,10 +150,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 @implementation FlutterEngine {
   std::shared_ptr<flutter::ThreadHost> _threadHost;
   std::unique_ptr<flutter::Shell> _shell;
-
-  // TODO(cbracken): https://github.com/flutter/flutter/issues/155943
-  // Migrate to @property(nonatomic, weak).
-  fml::WeakNSObject<FlutterViewController> _viewController;
 
   std::shared_ptr<flutter::PlatformViewsController> _platformViewsController;
   flutter::IOSRenderingAPI _renderingApi;
@@ -406,8 +401,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 - (void)setViewController:(FlutterViewController*)viewController {
   FML_DCHECK(self.iosPlatformView);
-  _viewController = viewController ? [viewController getWeakNSObject]
-                                   : fml::WeakNSObject<FlutterViewController>();
+  _viewController = viewController;
   self.iosPlatformView->SetOwnerViewController(_viewController);
   [self maybeSetupPlatformViewChannels];
   [self updateDisplays];
@@ -454,7 +448,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     }
   }
   [self.textInputPlugin resetViewResponder];
-  _viewController.reset();
+  _viewController = nil;
 }
 
 - (void)destroyContext {
@@ -464,13 +458,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _profiler.reset();
   _threadHost.reset();
   _platformViewsController.reset();
-}
-
-- (FlutterViewController*)viewController {
-  if (!_viewController) {
-    return nil;
-  }
-  return _viewController.get();
 }
 
 - (std::shared_ptr<flutter::PlatformViewsController>&)platformViewsController {
