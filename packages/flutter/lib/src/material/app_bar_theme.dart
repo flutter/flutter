@@ -41,6 +41,7 @@ class AppBarTheme with Diagnosticable {
     this.iconTheme,
     this.actionsIconTheme,
     this.centerTitle,
+    this.centerLeading,
     this.titleSpacing,
     this.toolbarHeight,
     this.toolbarTextStyle,
@@ -117,6 +118,10 @@ class AppBarTheme with Diagnosticable {
   /// property in all descendant [AppBar] widgets.
   final bool? centerTitle;
 
+  /// Overrides the default value of [AppBar.centerLeading]
+  /// property in all descendant [AppBar] widgets.
+  final bool? centerLeading;
+
   /// Overrides the default value of the obsolete [AppBar.titleSpacing]
   /// property in all descendant [AppBar] widgets.
   ///
@@ -172,6 +177,7 @@ class AppBarTheme with Diagnosticable {
     ShapeBorder? shape,
     IconThemeData? iconTheme,
     bool? centerTitle,
+    bool? centerLeading,
     double? titleSpacing,
     double? toolbarHeight,
     TextStyle? toolbarTextStyle,
@@ -194,6 +200,7 @@ class AppBarTheme with Diagnosticable {
       iconTheme: iconTheme ?? this.iconTheme,
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       centerTitle: centerTitle ?? this.centerTitle,
+      centerLeading: centerLeading ?? this.centerLeading,
       titleSpacing: titleSpacing ?? this.titleSpacing,
       toolbarHeight: toolbarHeight ?? this.toolbarHeight,
       toolbarTextStyle: toolbarTextStyle ?? this.toolbarTextStyle,
@@ -226,6 +233,7 @@ class AppBarTheme with Diagnosticable {
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
+      centerLeading: t < 0.5 ? a?.centerLeading : b?.centerLeading,
       titleSpacing: lerpDouble(a?.titleSpacing, b?.titleSpacing, t),
       toolbarHeight: lerpDouble(a?.toolbarHeight, b?.toolbarHeight, t),
       toolbarTextStyle: TextStyle.lerp(a?.toolbarTextStyle, b?.toolbarTextStyle, t),
@@ -247,6 +255,7 @@ class AppBarTheme with Diagnosticable {
     iconTheme,
     actionsIconTheme,
     centerTitle,
+    centerLeading,
     titleSpacing,
     toolbarHeight,
     toolbarTextStyle,
@@ -274,6 +283,7 @@ class AppBarTheme with Diagnosticable {
         && other.iconTheme == iconTheme
         && other.actionsIconTheme == actionsIconTheme
         && other.centerTitle == centerTitle
+        && other.centerLeading == centerLeading
         && other.titleSpacing == titleSpacing
         && other.toolbarHeight == toolbarHeight
         && other.toolbarTextStyle == toolbarTextStyle
@@ -295,6 +305,7 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('centerLeading', centerLeading, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('titleSpacing', titleSpacing, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('toolbarHeight', toolbarHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('toolbarTextStyle', toolbarTextStyle, defaultValue: null));
