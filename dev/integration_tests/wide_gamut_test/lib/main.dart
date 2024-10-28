@@ -137,7 +137,7 @@ const String _displayP3Logo =
     'gr3yrjmlwqXLjmWw1O2I5Wmp9Xxjyh+AVIZ6ADIAqcwClakzeMgApDILVKbO4CED'
     'kMosUJk6g4dUBuRfvf1am9VRqzYAAAAASUVORK5CYII=';
 
-void main() => run(Setup.container);
+void main() => run(Setup.sweepGradient);
 
 enum Setup {
   none,
@@ -146,6 +146,10 @@ enum Setup {
   blur,
   drawnImage,
   container,
+  linearGradient,
+  radialGradient,
+  conicalGradient,
+  sweepGradient,
 }
 
 void run(Setup setup) {
@@ -265,7 +269,14 @@ class _MyHomePageState extends State<MyHomePage> {
         _loadImage().then((ui.Image? value) => setState(() { _image = value; }));
       case Setup.drawnImage:
         _drawImage().then((ui.Image? value) => setState(() { _image = value; }));
-      case Setup.image || Setup.blur || Setup.none || Setup.container:
+      case Setup.image ||
+            Setup.blur ||
+            Setup.none ||
+            Setup.container ||
+            Setup.linearGradient ||
+            Setup.radialGradient ||
+            Setup.conicalGradient ||
+            Setup.sweepGradient:
         break;
     }
     super.initState();
@@ -308,6 +319,97 @@ class _MyHomePageState extends State<MyHomePage> {
                 green: 0,
                 blue: 0,
                 colorSpace: ui.ColorSpace.displayP3));
+      case Setup.linearGradient:
+        imageWidget = Container(
+          width: 100,
+          height: 100,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: <Color>[
+                Color.from(
+                  alpha: 1,
+                  red: 1,
+                  green: 0,
+                  blue: 0,
+                  colorSpace: ui.ColorSpace.displayP3),
+                Color.from(
+                  alpha: 1,
+                  red: 0,
+                  green: 1,
+                  blue: 0,
+                  colorSpace: ui.ColorSpace.displayP3)],
+            ),
+          ),
+        );
+      case Setup.radialGradient:
+        imageWidget = Container(
+          width: 100,
+          height: 100,
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              colors: <Color>[
+                Color.from(
+                  alpha: 1,
+                  red: 1,
+                  green: 0,
+                  blue: 0,
+                  colorSpace: ui.ColorSpace.displayP3),
+                Color.from(
+                  alpha: 1,
+                  red: 0,
+                  green: 1,
+                  blue: 0,
+                  colorSpace: ui.ColorSpace.displayP3)],
+            ),
+          ),
+        );
+      case Setup.conicalGradient:
+        imageWidget = Container(
+          width: 100,
+          height: 100,
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              focal: Alignment(0.2, 0.2),
+              colors: <Color>[
+                Color.from(
+                  alpha: 1,
+                  red: 1,
+                  green: 0,
+                  blue: 0,
+                  colorSpace: ui.ColorSpace.displayP3),
+                Color.from(
+                  alpha: 1,
+                  red: 0,
+                  green: 1,
+                  blue: 0,
+                  colorSpace: ui.ColorSpace.displayP3)],
+            ),
+          ),
+        );
+      case Setup.sweepGradient:
+        imageWidget = Container(
+          width: 100,
+          height: 100,
+          decoration: const BoxDecoration(
+            gradient: SweepGradient(
+              colors: <Color>[
+                Color.from(
+                  alpha: 1,
+                  red: 1,
+                  green: 0,
+                  blue: 0,
+                  colorSpace: ui.ColorSpace.displayP3),
+                Color.from(
+                  alpha: 1,
+                  red: 0,
+                  green: 1,
+                  blue: 0,
+                  colorSpace: ui.ColorSpace.displayP3)],
+            ),
+          ),
+        );
     }
 
     return Scaffold(
