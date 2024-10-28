@@ -171,8 +171,39 @@ void main() async {
 
     final gpu.BufferView view1 = hostBuffer
         .emplace(Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData());
-    expect(view1.offsetInBytes >= 4, true);
+    expect(view1.offsetInBytes, greaterThanOrEqualTo(4));
     expect(view1.lengthInBytes, 4);
+  }, skip: !impellerEnabled);
+
+  test('HostBuffer.reset', () async {
+    final gpu.HostBuffer hostBuffer = gpu.gpuContext.createHostBuffer();
+
+    final gpu.BufferView view0 = hostBuffer
+        .emplace(Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData());
+    expect(view0.offsetInBytes, 0);
+    expect(view0.lengthInBytes, 4);
+
+    hostBuffer.reset();
+
+    final gpu.BufferView view1 = hostBuffer
+        .emplace(Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData());
+    expect(view1.offsetInBytes, 0);
+    expect(view1.lengthInBytes, 4);
+  }, skip: !impellerEnabled);
+
+  test('HostBuffer reuses DeviceBuffers after N frames', () async {
+    final gpu.HostBuffer hostBuffer = gpu.gpuContext.createHostBuffer();
+
+    final gpu.BufferView view0 = hostBuffer
+        .emplace(Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData());
+
+    for (int i = 0; i < hostBuffer.frameCount; i++) {
+      hostBuffer.reset();
+    }
+    final gpu.BufferView view1 = hostBuffer
+        .emplace(Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData());
+
+    expect(view0.buffer, equals(view1.buffer));
   }, skip: !impellerEnabled);
 
   test('GpuContext.createDeviceBuffer', () async {

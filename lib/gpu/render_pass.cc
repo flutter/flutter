@@ -337,24 +337,6 @@ void InternalFlutterGpu_RenderPass_BindVertexBufferDevice(
                    length_in_bytes, vertex_count);
 }
 
-void InternalFlutterGpu_RenderPass_BindVertexBufferHost(
-    flutter::gpu::RenderPass* wrapper,
-    flutter::gpu::HostBuffer* host_buffer,
-    int offset_in_bytes,
-    int length_in_bytes,
-    int vertex_count) {
-  std::optional<impeller::BufferView> view =
-      host_buffer->GetBufferViewForOffset(offset_in_bytes);
-  if (!view.has_value()) {
-    FML_LOG(ERROR)
-        << "Failed to bind vertex buffer due to invalid HostBuffer offset: "
-        << offset_in_bytes;
-    return;
-  }
-  BindVertexBuffer(wrapper, view->buffer, view->range.offset,
-                   view->range.length, vertex_count);
-}
-
 static void BindIndexBuffer(
     flutter::gpu::RenderPass* wrapper,
     const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
@@ -385,24 +367,6 @@ void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
     int index_count) {
   BindIndexBuffer(wrapper, device_buffer->GetBuffer(), offset_in_bytes,
                   length_in_bytes, index_type, index_count);
-}
-
-void InternalFlutterGpu_RenderPass_BindIndexBufferHost(
-    flutter::gpu::RenderPass* wrapper,
-    flutter::gpu::HostBuffer* host_buffer,
-    int offset_in_bytes,
-    int length_in_bytes,
-    int index_type,
-    int index_count) {
-  auto view = host_buffer->GetBufferViewForOffset(offset_in_bytes);
-  if (!view.has_value()) {
-    FML_LOG(ERROR)
-        << "Failed to bind index buffer due to invalid HostBuffer offset: "
-        << offset_in_bytes;
-    return;
-  }
-  BindIndexBuffer(wrapper, view->buffer, view->range.offset, view->range.length,
-                  index_type, index_count);
 }
 
 static bool BindUniform(
@@ -463,24 +427,6 @@ bool InternalFlutterGpu_RenderPass_BindUniformDevice(
   return BindUniform(wrapper, shader, uniform_name_handle,
                      device_buffer->GetBuffer(), offset_in_bytes,
                      length_in_bytes);
-}
-
-bool InternalFlutterGpu_RenderPass_BindUniformHost(
-    flutter::gpu::RenderPass* wrapper,
-    flutter::gpu::Shader* shader,
-    Dart_Handle uniform_name_handle,
-    flutter::gpu::HostBuffer* host_buffer,
-    int offset_in_bytes,
-    int length_in_bytes) {
-  auto view = host_buffer->GetBufferViewForOffset(offset_in_bytes);
-  if (!view.has_value()) {
-    FML_LOG(ERROR)
-        << "Failed to bind index buffer due to invalid HostBuffer offset: "
-        << offset_in_bytes;
-    return false;
-  }
-  return BindUniform(wrapper, shader, uniform_name_handle, view->buffer,
-                     view->range.offset, view->range.length);
 }
 
 bool InternalFlutterGpu_RenderPass_BindTexture(

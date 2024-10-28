@@ -17,7 +17,6 @@
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 #include "lib/gpu/device_buffer.h"
-#include "lib/gpu/host_buffer.h"
 #include "lib/gpu/render_pipeline.h"
 #include "lib/gpu/texture.h"
 
@@ -159,26 +158,9 @@ extern void InternalFlutterGpu_RenderPass_BindVertexBufferDevice(
     int vertex_count);
 
 FLUTTER_GPU_EXPORT
-extern void InternalFlutterGpu_RenderPass_BindVertexBufferHost(
-    flutter::gpu::RenderPass* wrapper,
-    flutter::gpu::HostBuffer* host_buffer,
-    int offset_in_bytes,
-    int length_in_bytes,
-    int vertex_count);
-
-FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::DeviceBuffer* device_buffer,
-    int offset_in_bytes,
-    int length_in_bytes,
-    int index_type,
-    int index_count);
-
-FLUTTER_GPU_EXPORT
-extern void InternalFlutterGpu_RenderPass_BindIndexBufferHost(
-    flutter::gpu::RenderPass* wrapper,
-    flutter::gpu::HostBuffer* host_buffer,
     int offset_in_bytes,
     int length_in_bytes,
     int index_type,
@@ -190,15 +172,6 @@ extern bool InternalFlutterGpu_RenderPass_BindUniformDevice(
     flutter::gpu::Shader* shader,
     Dart_Handle uniform_name_handle,
     flutter::gpu::DeviceBuffer* device_buffer,
-    int offset_in_bytes,
-    int length_in_bytes);
-
-FLUTTER_GPU_EXPORT
-extern bool InternalFlutterGpu_RenderPass_BindUniformHost(
-    flutter::gpu::RenderPass* wrapper,
-    flutter::gpu::Shader* shader,
-    Dart_Handle uniform_name_handle,
-    flutter::gpu::HostBuffer* host_buffer,
     int offset_in_bytes,
     int length_in_bytes);
 
