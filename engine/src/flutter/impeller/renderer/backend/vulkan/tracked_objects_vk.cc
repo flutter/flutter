@@ -43,28 +43,30 @@ bool TrackedObjectsVK::IsValid() const {
   return is_valid_;
 }
 
-void TrackedObjectsVK::Track(std::shared_ptr<SharedObjectVK> object) {
+void TrackedObjectsVK::Track(const std::shared_ptr<SharedObjectVK>& object) {
   if (!object || (!tracked_objects_.empty() &&
                   object.get() == tracked_objects_.back().get())) {
     return;
   }
-  tracked_objects_.emplace_back(std::move(object));
+  tracked_objects_.emplace_back(object);
 }
 
-void TrackedObjectsVK::Track(std::shared_ptr<const DeviceBuffer> buffer) {
+void TrackedObjectsVK::Track(
+    const std::shared_ptr<const DeviceBuffer>& buffer) {
   if (!buffer || (!tracked_buffers_.empty() &&
                   buffer.get() == tracked_buffers_.back().get())) {
     return;
   }
-  tracked_buffers_.emplace_back(std::move(buffer));
+  tracked_buffers_.emplace_back(buffer);
 }
 
-void TrackedObjectsVK::Track(std::shared_ptr<const TextureSourceVK> texture) {
+void TrackedObjectsVK::Track(
+    const std::shared_ptr<const TextureSourceVK>& texture) {
   if (!texture || (!tracked_textures_.empty() &&
                    texture.get() == tracked_textures_.back().get())) {
     return;
   }
-  tracked_textures_.emplace_back(std::move(texture));
+  tracked_textures_.emplace_back(texture);
 }
 
 vk::CommandBuffer TrackedObjectsVK::GetCommandBuffer() const {

@@ -27,11 +27,11 @@ class TrackedObjectsVK {
 
   bool IsValid() const;
 
-  void Track(std::shared_ptr<SharedObjectVK> object);
+  void Track(const std::shared_ptr<SharedObjectVK>& object);
 
-  void Track(std::shared_ptr<const DeviceBuffer> buffer);
+  void Track(const std::shared_ptr<const DeviceBuffer>& buffer);
 
-  void Track(std::shared_ptr<const TextureSourceVK> texture);
+  void Track(const std::shared_ptr<const TextureSourceVK>& texture);
 
   vk::CommandBuffer GetCommandBuffer() const;
 
