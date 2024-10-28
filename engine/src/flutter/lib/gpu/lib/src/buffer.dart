@@ -8,8 +8,8 @@ part of flutter_gpu;
 
 /// A reference to a byte range within a GPU-resident [Buffer].
 class BufferView {
-  /// The buffer of this view.
-  final Buffer buffer;
+  /// The device buffer of this view.
+  final DeviceBuffer buffer;
 
   /// The start of the view, in bytes starting from the beginning of the
   /// [buffer].
@@ -23,21 +23,9 @@ class BufferView {
       {required this.offsetInBytes, required this.lengthInBytes});
 }
 
-/// A buffer that can be referenced by commands on the GPU.
-mixin Buffer {
-  void _bindAsVertexBuffer(RenderPass renderPass, int offsetInBytes,
-      int lengthInBytes, int vertexCount);
-
-  void _bindAsIndexBuffer(RenderPass renderPass, int offsetInBytes,
-      int lengthInBytes, IndexType indexType, int indexCount);
-
-  bool _bindAsUniform(RenderPass renderPass, UniformSlot slot,
-      int offsetInBytes, int lengthInBytes);
-}
-
 /// [DeviceBuffer] is a region of memory allocated on the device heap
 /// (GPU-resident memory).
-base class DeviceBuffer extends NativeFieldWrapperClass1 with Buffer {
+base class DeviceBuffer extends NativeFieldWrapperClass1 {
   bool _valid = false;
   get isValid {
     return _valid;
@@ -61,21 +49,18 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 with Buffer {
   final StorageMode storageMode;
   final int sizeInBytes;
 
-  @override
   void _bindAsVertexBuffer(RenderPass renderPass, int offsetInBytes,
       int lengthInBytes, int vertexCount) {
     renderPass._bindVertexBufferDevice(
         this, offsetInBytes, lengthInBytes, vertexCount);
   }
 
-  @override
   void _bindAsIndexBuffer(RenderPass renderPass, int offsetInBytes,
       int lengthInBytes, IndexType indexType, int indexCount) {
     renderPass._bindIndexBufferDevice(
         this, offsetInBytes, lengthInBytes, indexType.index, indexCount);
   }
 
-  @override
   bool _bindAsUniform(RenderPass renderPass, UniformSlot slot,
       int offsetInBytes, int lengthInBytes) {
     return renderPass._bindUniformDevice(
@@ -156,49 +141,94 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 with Buffer {
   external void _flush(int offsetInBytes, int lengthInBytes);
 }
 
-/// [HostBuffer] is a [Buffer] which is allocated on the host (native CPU
-/// resident memory) and lazily uploaded to the GPU. A [HostBuffer] can be
-/// safely mutated or extended at any time on the host, and will be
-/// automatically re-uploaded to the GPU the next time a GPU operation needs to
-/// access it.
+/// [HostBuffer] is a bump allocator that managed a [DeviceBuffer] block list.
 ///
-/// This is useful for efficiently chunking sparse data uploads, especially
-/// ephemeral uniform data that needs to change from frame to frame.
+/// This is useful for chunking sparse data uploads, especially ephemeral
+/// uniform or vertex data that needs to change from frame to frame.
 ///
-/// Different platforms have different data alignment requirements for accessing
-/// device buffer data. The [HostBuffer] takes these requirements into account
-/// and automatically inserts padding between emplaced data if necessary.
-base class HostBuffer extends NativeFieldWrapperClass1 with Buffer {
+/// Different platforms have different data alignment requirements when reading
+/// [DeviceBuffer] data for shader uniforms. [HostBuffer] uses
+/// [GpuContext.minimumUniformByteAlignment] to align each emplacement
+/// automatically, so that they may be used in uniform bindings.
+///
+/// The length of each [DeviceBuffer] block is determined by
+/// [blockLengthInBytes] and cannot be changed after creation of the
+/// [HostBuffer]. If [HostBuffer.emplace] is given a [ByteData] that is larger
+/// than [blockLengthInBytes], a new [DeviceBuffer] block is created that
+/// matches the size of the oversized [ByteData].
+base class HostBuffer {
+  /// The default length to use for each [DeviceBuffer] block.
+  static const int kDefaultBlockLengthInBytes = 1024000; // 1024 Kb
+
+  /// The length to use for each [DeviceBuffer] block.
+  final int blockLengthInBytes;
+
+  static const int _kFrameCount = 4;
+
+  /// The number of frames to cycle through before reusing device buffers.
+  /// Cycling to the next frame happens when [reset] is called.
+  int get frameCount {
+    return _kFrameCount;
+  }
+
+  final GpuContext _gpuContext;
+
+  /// The current frame. Rotates through [frameCount] frames when [reset] is
+  /// called.
+  int _frameCursor = 0;
+
+  /// The buffer within the current frame to be used for the next emplacement.
+  int _bufferCursor = 0;
+
+  /// The offset within the current block to be used for the next emplacement.
+  int _offsetCursor = 0;
+
+  final List<List<DeviceBuffer>> _buffers = [];
+
   /// Creates a new HostBuffer.
-  HostBuffer._initialize(GpuContext gpuContext) {
-    _initialize(gpuContext);
+  HostBuffer._initialize(this._gpuContext,
+      {this.blockLengthInBytes = HostBuffer.kDefaultBlockLengthInBytes}) {
+    for (int i = 0; i < frameCount; i++) {
+      List<DeviceBuffer> frame = [];
+      _buffers.add(frame);
+      _buffers[i].add(_allocateNewBlock(blockLengthInBytes));
+    }
   }
 
-  @override
-  void _bindAsVertexBuffer(RenderPass renderPass, int offsetInBytes,
-      int lengthInBytes, int vertexCount) {
-    renderPass._bindVertexBufferHost(
-        this, offsetInBytes, lengthInBytes, vertexCount);
+  DeviceBuffer _allocateNewBlock(length) {
+    final buffer =
+        _gpuContext.createDeviceBuffer(StorageMode.hostVisible, length);
+    if (buffer == null) {
+      throw Exception('Failed to allocate DeviceBuffer of length $length');
+    }
+    return buffer;
   }
 
-  @override
-  void _bindAsIndexBuffer(RenderPass renderPass, int offsetInBytes,
-      int lengthInBytes, IndexType indexType, int indexCount) {
-    renderPass._bindIndexBufferHost(
-        this, offsetInBytes, lengthInBytes, indexType.index, indexCount);
-  }
+  /// Prepare a new buffer range to be used for storing the given bytes.
+  /// Allocates a new block if necessary.
+  BufferView _allocateEmplacement(ByteData bytes) {
+    if (bytes.lengthInBytes > blockLengthInBytes) {
+      return BufferView(_allocateNewBlock(bytes.lengthInBytes),
+          offsetInBytes: 0, lengthInBytes: bytes.lengthInBytes);
+    }
 
-  @override
-  bool _bindAsUniform(RenderPass renderPass, UniformSlot slot,
-      int offsetInBytes, int lengthInBytes) {
-    return renderPass._bindUniformHost(
-        slot.shader, slot.uniformName, this, offsetInBytes, lengthInBytes);
-  }
+    int padding = _offsetCursor % _gpuContext.minimumUniformByteAlignment;
+    if (_offsetCursor + padding >= blockLengthInBytes) {
+      DeviceBuffer buffer = _allocateNewBlock(blockLengthInBytes);
+      _buffers[_frameCursor].add(buffer);
+      _bufferCursor++;
+      _offsetCursor = bytes.lengthInBytes;
 
-  /// Wrap with native counterpart.
-  @Native<Void Function(Handle, Pointer<Void>)>(
-      symbol: 'InternalFlutterGpu_HostBuffer_Initialize')
-  external void _initialize(GpuContext gpuContext);
+      return BufferView(buffer,
+          offsetInBytes: 0, lengthInBytes: blockLengthInBytes);
+    }
+
+    _offsetCursor += padding;
+    final view = BufferView(_buffers[_frameCursor][_bufferCursor],
+        offsetInBytes: _offsetCursor, lengthInBytes: bytes.lengthInBytes);
+    _offsetCursor += bytes.lengthInBytes;
+    return view;
+  }
 
   /// Append byte data to the end of the [HostBuffer] and produce a [BufferView]
   /// that references the new data in the buffer.
@@ -207,15 +237,26 @@ base class HostBuffer extends NativeFieldWrapperClass1 with Buffer {
   /// buffer if necessary to abide by platform-specific uniform alignment
   /// requirements.
   ///
-  /// The updated buffer will be uploaded to the GPU if the returned
-  /// [BufferView] is used by a rendering command.
+  /// The [DeviceBuffer] referenced in the [BufferView] has already been
+  /// flushed, so there is no need to call [DeviceBuffer.flush] before
+  /// referencing it in a command.
   BufferView emplace(ByteData bytes) {
-    int resultOffset = _emplaceBytes(bytes);
-    return BufferView(this,
-        offsetInBytes: resultOffset, lengthInBytes: bytes.lengthInBytes);
+    BufferView view = _allocateEmplacement(bytes);
+    if (!view.buffer
+        .overwrite(bytes, destinationOffsetInBytes: view.offsetInBytes)) {
+      throw Exception(
+          'Failed to write range (offset=${view.offsetInBytes}, length=${view.lengthInBytes}) '
+          'to HostBuffer-managed DeviceBuffer (frame=$_frameCursor, buffer=$_bufferCursor, offset=$_offsetCursor).');
+    }
+
+    return view;
   }
 
-  @Native<Uint64 Function(Pointer<Void>, Handle)>(
-      symbol: 'InternalFlutterGpu_HostBuffer_EmplaceBytes')
-  external int _emplaceBytes(ByteData bytes);
+  /// Resets the bump allocator to the beginning of the first [DeviceBuffer]
+  /// block.
+  void reset() {
+    _frameCursor = (_frameCursor + 1) % frameCount;
+    _bufferCursor = 0;
+    _offsetCursor = 0;
+  }
 }

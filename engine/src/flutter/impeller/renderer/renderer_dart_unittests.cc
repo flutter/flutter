@@ -295,10 +295,6 @@ TEST_P(RendererDartTest, CanReflectUniformStructs) {
   ASSERT_TRUE(RunDartFunction("canReflectUniformStructs"));
 }
 
-TEST_P(RendererDartTest, UniformBindFailsForInvalidHostBufferOffset) {
-  ASSERT_TRUE(RunDartFunction("uniformBindFailsForInvalidHostBufferOffset"));
-}
-
 TEST_P(RendererDartTest, CanCreateRenderPassAndSubmit) {
   ASSERT_TRUE(RenderDartToPlayground("canCreateRenderPassAndSubmit"));
 }

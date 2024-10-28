@@ -87,8 +87,12 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return result.isValid ? result : null;
   }
 
-  HostBuffer createHostBuffer() {
-    return HostBuffer._initialize(this);
+  /// Creates a bump allocator that managed a [DeviceBuffer] block list.
+  ///
+  /// See also [HostBuffer].
+  HostBuffer createHostBuffer(
+      {int blockLengthInBytes = HostBuffer.kDefaultBlockLengthInBytes}) {
+    return HostBuffer._initialize(this, blockLengthInBytes: blockLengthInBytes);
   }
 
   /// Allocates a new texture in GPU-resident memory.
