@@ -69,7 +69,7 @@ void testMain() {
       final CkCanvas canvas = recorder.beginRecording(kDefaultRegion);
       canvas.drawImage(testImage as CkImage, ui.Offset.zero, CkPaint());
       await matchPictureGolden(
-        'canvaskit_picture.png',
+        'canvaskit_null_viewembedder_with_platformview.png',
         recorder.endRecording(),
         region: kDefaultRegion,
       );
