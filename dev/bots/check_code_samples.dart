@@ -328,6 +328,5 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/notification_listener/notification.0_test.dart',
   'examples/api/test/widgets/overscroll_indicator/glowing_overscroll_indicator.1_test.dart',
   'examples/api/test/widgets/overscroll_indicator/glowing_overscroll_indicator.0_test.dart',
-  'examples/api/test/widgets/restoration/restoration_mixin.0_test.dart',
   'examples/api/test/widgets/focus_scope/focus_scope.0_test.dart',
 };
