@@ -4,8 +4,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -38,8 +37,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -73,8 +71,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -107,8 +104,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -141,8 +137,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -176,8 +171,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -213,8 +207,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "use_rbe": true
@@ -325,8 +318,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "use_rbe": true
@@ -359,8 +351,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "use_rbe": true
@@ -444,8 +435,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "use_rbe": true
@@ -529,8 +519,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -562,8 +551,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -596,8 +584,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -630,8 +617,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -770,8 +756,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -855,8 +840,7 @@
       "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13|Mac-14",
-        "device_type=none",
-        "cpu=arm64"
+        "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
