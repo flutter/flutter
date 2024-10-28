@@ -42,6 +42,8 @@
     - any-glob-to-any-file:
       - '**/text/*'
       - '**/*text*'
+    - all-globs-to-all-files:
+      - '!**/*context*'
 
 'd: api docs':
   - changed-files:
