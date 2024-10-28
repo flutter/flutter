@@ -7,22 +7,22 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 
+static_assert(__has_feature(objc_arc), "ARC must be enabled.");
+
 namespace flutter {
 namespace {
 class NSDataMapping : public fml::Mapping {
  public:
-  explicit NSDataMapping(NSData* data) : data_([data retain]) {}
+  explicit NSDataMapping(NSData* data) : data_(data) {}
 
-  size_t GetSize() const override { return [data_.get() length]; }
+  size_t GetSize() const override { return data_.length; }
 
-  const uint8_t* GetMapping() const override {
-    return static_cast<const uint8_t*>([data_.get() bytes]);
-  }
+  const uint8_t* GetMapping() const override { return static_cast<const uint8_t*>(data_.bytes); }
 
   bool IsDontNeedSafe() const override { return false; }
 
  private:
-  fml::scoped_nsobject<NSData> data_;
+  NSData* data_;
   FML_DISALLOW_COPY_AND_ASSIGN(NSDataMapping);
 };
 }  // namespace

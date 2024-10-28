@@ -6,6 +6,8 @@
 
 #import <Foundation/Foundation.h>
 
+static_assert(__has_feature(objc_arc), "ARC must be enabled.");
+
 namespace flutter {
 
 fml::CommandLine CommandLineFromNSProcessInfo(NSProcessInfo* processInfoOrNil) {
