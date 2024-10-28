@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/vulkan/queue_vk.h"
 
+#include <utility>
+
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 
 namespace impeller {
@@ -45,19 +47,37 @@ void QueueVK::InsertDebugMarker(std::string_view label) const {
 
 QueuesVK::QueuesVK() = default;
 
-QueuesVK::QueuesVK(const vk::Device& device,
-                   QueueIndexVK graphics,
-                   QueueIndexVK compute,
-                   QueueIndexVK transfer) {
+QueuesVK::QueuesVK(std::shared_ptr<QueueVK> graphics_queue,
+                   std::shared_ptr<QueueVK> compute_queue,
+                   std::shared_ptr<QueueVK> transfer_queue)
+    : graphics_queue(std::move(graphics_queue)),
+      compute_queue(std::move(compute_queue)),
+      transfer_queue(std::move(transfer_queue)) {}
+
+// static
+QueuesVK QueuesVK::FromEmbedderQueue(vk::Queue queue,
+                                     uint32_t queue_family_index) {
+  auto graphics_queue = std::make_shared<QueueVK>(
+      QueueIndexVK{.family = queue_family_index, .index = 0}, queue);
+
+  return QueuesVK(graphics_queue, graphics_queue, graphics_queue);
+}
+
+// static
+QueuesVK QueuesVK::FromQueueIndices(const vk::Device& device,
+                                    QueueIndexVK graphics,
+                                    QueueIndexVK compute,
+                                    QueueIndexVK transfer) {
   auto vk_graphics = device.getQueue(graphics.family, graphics.index);
   auto vk_compute = device.getQueue(compute.family, compute.index);
   auto vk_transfer = device.getQueue(transfer.family, transfer.index);
 
   // Always set up the graphics queue.
-  graphics_queue = std::make_shared<QueueVK>(graphics, vk_graphics);
+  auto graphics_queue = std::make_shared<QueueVK>(graphics, vk_graphics);
   ContextVK::SetDebugName(device, vk_graphics, "ImpellerGraphicsQ");
 
   // Setup the compute queue if its different from the graphics queue.
+  std::shared_ptr<QueueVK> compute_queue;
   if (compute == graphics) {
     compute_queue = graphics_queue;
   } else {
@@ -67,6 +87,7 @@ QueuesVK::QueuesVK(const vk::Device& device,
 
   // Setup the transfer queue if its different from the graphics or compute
   // queues.
+  std::shared_ptr<QueueVK> transfer_queue;
   if (transfer == graphics) {
     transfer_queue = graphics_queue;
   } else if (transfer == compute) {
@@ -75,6 +96,9 @@ QueuesVK::QueuesVK(const vk::Device& device,
     transfer_queue = std::make_shared<QueueVK>(transfer, vk_transfer);
     ContextVK::SetDebugName(device, vk_transfer, "ImpellerTransferQ");
   }
+
+  return QueuesVK(std::move(graphics_queue), std::move(compute_queue),
+                  std::move(transfer_queue));
 }
 
 bool QueuesVK::IsValid() const {

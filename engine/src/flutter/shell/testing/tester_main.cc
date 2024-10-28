@@ -211,7 +211,7 @@ class TesterPlatformView : public PlatformView,
     if (delegate_.OnPlatformViewGetSettings().enable_impeller) {
       FML_DCHECK(impeller_context_holder_.context);
       auto surface = std::make_unique<GPUSurfaceVulkanImpeller>(
-          impeller_context_holder_.surface_context);
+          nullptr, impeller_context_holder_.surface_context);
       FML_DCHECK(surface->IsValid());
       return surface;
     }
