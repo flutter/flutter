@@ -34,7 +34,7 @@ void testMain() {
       expect(canvas.runtimeType, CkCanvas);
       drawTestPicture(canvas);
       await matchPictureGolden(
-        'canvaskit_picture.png',
+        'canvaskit_weakref_picture.png',
         recorder.endRecording(),
         region: kDefaultRegion,
       );
