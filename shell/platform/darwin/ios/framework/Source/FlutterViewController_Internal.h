@@ -5,7 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLER_INTERNAL_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLER_INTERNAL_H_
 
-#include "flutter/fml/platform/darwin/weak_nsobject.h"
 #include "flutter/fml/time/time_point.h"
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
@@ -57,7 +56,6 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
  */
 @property(nonatomic, assign, readwrite) BOOL prefersStatusBarHidden;
 
-- (fml::WeakNSObject<FlutterViewController>)getWeakNSObject;
 - (std::shared_ptr<flutter::PlatformViewsController>&)platformViewsController;
 - (FlutterRestorationPlugin*)restorationPlugin;
 
