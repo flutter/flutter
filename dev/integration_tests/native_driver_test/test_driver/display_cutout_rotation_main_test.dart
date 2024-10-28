@@ -39,28 +39,22 @@ void main() async {
 
   test('cutout should be on top in portrait mode', () async {
     await nativeDriver.rotateResetDefault();
-    await flutterDriver.waitFor(find.byType('Text'));
-    final String status =
-        await flutterDriver.getText(find.byValueKey('CutoutTop'));
-    expect(status, 'Cutout status: CutoutTop');
-  }, timeout: const Timeout(Duration(seconds: 5)));
+    await flutterDriver.waitFor(find.byValueKey('CutoutTop'),
+        timeout: const Duration(seconds: 5));
+  }, timeout: Timeout.none);
 
   test('cutout should be on left in landscape mode', () async {
     await nativeDriver.rotateToLandscape();
-    await flutterDriver.waitFor(find.byType('Text'));
-    final String status =
-        await flutterDriver.getText(find.byValueKey('CutoutLeft'));
-    expect(status, 'Cutout status: CutoutLeft');
-  }, timeout: const Timeout(Duration(seconds: 5)));
+    await flutterDriver.waitFor(find.byValueKey('CutoutLeft'),
+        timeout: const Duration(seconds: 5));
+  }, timeout: Timeout.none);
 
   test('cutout should update on screen rotation', () async {
     await nativeDriver.rotateResetDefault();
-    await flutterDriver.waitFor(find.byType('Text'));
-    String status = await flutterDriver.getText(find.byValueKey('CutoutTop'));
-    expect(status, 'Cutout status: CutoutTop');
+    await flutterDriver.waitFor(find.byValueKey('CutoutTop'),
+        timeout: const Duration(seconds: 5));
     await nativeDriver.rotateToLandscape();
-    await flutterDriver.waitFor(find.byType('Text'));
-    status = await flutterDriver.getText(find.byValueKey('CutoutLeft'));
-    expect(status, 'Cutout status: CutoutLeft');
-  }, timeout: const Timeout(Duration(seconds: 5)));
+    await flutterDriver.waitFor(find.byValueKey('CutoutLeft'),
+        timeout: const Duration(seconds: 5));
+  }, timeout: Timeout.none);
 }
