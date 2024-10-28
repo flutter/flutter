@@ -696,6 +696,7 @@ class TextSelectionOverlay {
   // corresponds to, in global coordinates.
   late double _endHandleDragTarget;
 
+  int? _oppositeEdge;
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
       return;
@@ -721,6 +722,7 @@ class TextSelectionOverlay {
         centerOfLineGlobal,
       ),
     );
+    _oppositeEdge = _selection.extentOffset == position.offset ? _selection.baseOffset : _selection.extentOffset;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -756,10 +758,15 @@ class TextSelectionOverlay {
     return handleDy + linesDragged * renderObject.preferredLineHeight;
   }
 
+  bool? _selectionDuringDragBeganForward;
+  bool? _selectionDuringDragBeganCollapsed;
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
     if (!renderObject.attached) {
       return;
     }
+    _selectionDuringDragBeganForward ??= _selection.extentOffset >= _selection.baseOffset;
+    _selectionDuringDragBeganCollapsed ??= _selection.isCollapsed;
+    debugPrint('end handle drag update selection;\nwas forward during beg: $_selectionDuringDragBeganForward\n, selection was collapsed during beg: $_selectionDuringDragBeganCollapsed\n, prev selection: $_selection\n, opposite edge: $_oppositeEdge\n');
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
@@ -780,7 +787,8 @@ class TextSelectionOverlay {
 
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
-    if (_selection.isCollapsed) {
+    if (_selectionDuringDragBeganCollapsed!) {
+      debugPrint('collapsed on end handle drag update');
       _selectionOverlay.updateMagnifier(_buildMagnifier(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
@@ -795,15 +803,47 @@ class TextSelectionOverlay {
     final TextSelection newSelection;
     switch (defaultTargetPlatform) {
       // On Apple platforms, dragging the base handle makes it the extent.
+      // How do we figure out the opposite edge so we can keep it in place?
+      // We know the position.offset and the old selection, and we know we are the end handle.
+      // The drag has to start near the previous selection end points.
+      // When the selection is forward the end handle will be near the extentOffset.
+      // When the selection is backward the 
+      // we have (20,30), i move the extent
+      // When do we swap handles?
+      // baseOffset should be set to opposite edge when 
+      // If backwards selection and position.offset is greater than baseOffset, then we are swapping.
+      // If forward selection and position.offset is less than baseOffset, then we are swapping.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        final bool previousSelectionForward = _selection.extentOffset >= _selection.baseOffset;
+        final bool swapHandles = (previousSelectionForward && position.offset <= _selection.baseOffset) || (!previousSelectionForward && position.offset >= _selection.baseOffset);
+        // if (swapHandles) {
+        //   debugPrint('swap handles');
+        //   newSelection = TextSelection(
+        //     // (13,12) to 14, should go to (13,14), holding the baseOffset in place, in this one i'm dragging the handle controlling the 12.
+        //     // With LTR text, this likely means my selection was initially forward and is in the middle of a drag.
+        //     // (13,8) to 14, should go to (8,14), holding the extentOffset in place, in this one i'm dragging the handle controlling the 13.
+        //     // With LTR text, this likely means my selection was initially backward and is in the middle of a drag.
+        //     // The difference between these two cases is, 
+        //     // Scenario: started with inverted selection, and inverted again, and inverted back. So started with (13, 4),went to (4, 13), tried to go back (4, 2), then went to (2,4)
+        //     baseOffset: previousSelectionForward || _selectionDuringDragBeganForward! ? _selection.baseOffset : _selection.extentOffset,
+        //     // baseOffset: _selection.baseOffset,
+        //     extentOffset: position.offset,
+        //   );
+        // } else {
+        //   debugPrint('dont swap');
+        //   // save the extent and baseOffset,
+        //   newSelection = TextSelection(
+        //     // baseOffset: previousSelectionForward ? _selection.start : _selection.end,
+        //     baseOffset: _selection.baseOffset,
+        //     extentOffset: position.offset,
+        //   );
+        // }
         newSelection = TextSelection(
+          baseOffset: _oppositeEdge!,
           extentOffset: position.offset,
-          baseOffset: _selection.start,
         );
-        if (position.offset <= _selection.start) {
-          return; // Don't allow order swapping.
-        }
+        debugPrint('$_selection , $newSelection');
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -859,6 +899,7 @@ class TextSelectionOverlay {
         centerOfLineGlobal,
       ),
     );
+    _oppositeEdge = _selection.extentOffset == position.offset ? _selection.baseOffset : _selection.extentOffset;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -873,6 +914,10 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
+    debugPrint('$_selectionDuringDragBeganForward $_selectionDuringDragBeganCollapsed');
+    _selectionDuringDragBeganForward ??= _selection.baseOffset >= _selection.extentOffset;
+    _selectionDuringDragBeganCollapsed ??= _selection.isCollapsed;
+    debugPrint('start handle drag update selection;\nwas forward during beg: $_selectionDuringDragBeganForward\n, selection was collapsed during beg: $_selectionDuringDragBeganCollapsed\n, prev selection: $_selection\n, opposite edge: $_oppositeEdge\n');
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
@@ -890,7 +935,8 @@ class TextSelectionOverlay {
     );
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
-    if (_selection.isCollapsed) {
+    if (_selectionDuringDragBeganCollapsed!) {
+      debugPrint('start handle drag update collapsed');
       _selectionOverlay.updateMagnifier(_buildMagnifier(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
@@ -907,13 +953,30 @@ class TextSelectionOverlay {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        final bool previousSelectionForward = _selection.extentOffset >= _selection.baseOffset;
+        final bool swapHandles = (previousSelectionForward && position.offset > _selection.extentOffset) || (!previousSelectionForward && position.offset > _selection.baseOffset);
+        // if (swapHandles) {
+        //   debugPrint('swap handles');
+        //   newSelection = TextSelection(
+        //     baseOffset: previousSelectionForward ? _selection.extentOffset : _selection.baseOffset,
+        //     extentOffset: position.offset,
+        //   );
+        // } else {
+        //   debugPrint('dont swap');
+        //   newSelection = TextSelection(
+        //     baseOffset: _selection.end,
+        //     extentOffset: position.offset,
+        //   );
+        // }
         newSelection = TextSelection(
+          baseOffset: _oppositeEdge!,
           extentOffset: position.offset,
-          baseOffset: _selection.end,
         );
-        if (newSelection.extentOffset >= _selection.end) {
-          return; // Don't allow order swapping.
-        }
+        debugPrint('$_selection , $newSelection');
+        // newSelection = TextSelection(
+        //   baseOffset: _selection.end,
+        //   extentOffset: position.offset,
+        // );
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -940,6 +1003,9 @@ class TextSelectionOverlay {
     if (!context.mounted) {
       return;
     }
+    _selectionDuringDragBeganForward = null;
+    _selectionDuringDragBeganCollapsed = null;
+    _oppositeEdge = null;
     if (selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay.hideMagnifier();
       if (!_selection.isCollapsed) {
@@ -968,9 +1034,9 @@ class TextSelectionOverlay {
       TextSelectionHandleType ltrType,
       TextSelectionHandleType rtlType,
       ) {
-    if (_selection.isCollapsed) {
-      return TextSelectionHandleType.collapsed;
-    }
+    // if (_selection.isCollapsed) {
+    //   return TextSelectionHandleType.collapsed;
+    // }
 
     return switch (textDirection) {
       TextDirection.ltr => ltrType,
