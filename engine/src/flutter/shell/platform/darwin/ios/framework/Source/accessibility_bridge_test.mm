@@ -1402,9 +1402,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   fml::AutoResetWaitableEvent latch;
   thread_task_runner->PostTask([&] {
-    auto weakFactory =
-        std::make_unique<fml::WeakNSObjectFactory<FlutterViewController>>(flutterViewController);
-    platform_view->SetOwnerViewController(weakFactory->GetWeakNSObject());
+    platform_view->SetOwnerViewController(flutterViewController);
     auto bridge =
         std::make_unique<flutter::AccessibilityBridge>(/*view=*/nil,
                                                        /*platform_view=*/platform_view.get(),
@@ -2091,9 +2089,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   fml::AutoResetWaitableEvent latch;
   thread_task_runner->PostTask([&] {
-    auto weakFactory =
-        std::make_unique<fml::WeakNSObjectFactory<FlutterViewController>>(flutterViewController);
-    platform_view->SetOwnerViewController(weakFactory->GetWeakNSObject());
+    platform_view->SetOwnerViewController(flutterViewController);
     auto bridge =
         std::make_unique<flutter::AccessibilityBridge>(/*view=*/nil,
                                                        /*platform_view=*/platform_view.get(),
@@ -2184,9 +2180,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
     OCMStub([mockFlutterViewController platformViewsController])
         .andReturn(flutterPlatformViewsController.get());
-    auto weakFactory = std::make_unique<fml::WeakNSObjectFactory<FlutterViewController>>(
-        mockFlutterViewController);
-    platform_view->SetOwnerViewController(weakFactory->GetWeakNSObject());
+    platform_view->SetOwnerViewController(mockFlutterViewController);
 
     platform_view->SetSemanticsEnabled(true);
     XCTAssertNotEqual(test_delegate.set_semantics_enabled_calls, 0);

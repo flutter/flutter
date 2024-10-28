@@ -39,7 +39,7 @@ _flutter_framework_headers = [
 
 _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
 
-source_set("flutter_framework_source_arc") {
+source_set("flutter_framework_source") {
   visibility = [ ":*" ]
   cflags_objc = flutter_cflags_objc_arc
   cflags_objcc = flutter_cflags_objcc_arc
@@ -48,15 +48,10 @@ source_set("flutter_framework_source_arc") {
   if (darwin_extension_safe) {
     defines += [ "APPLICATION_EXTENSION_API_ONLY=1" ]
   }
-  allow_circular_includes_from = [ ":flutter_framework_source" ]
-  deps = [
-    ":flutter_framework_source",
-    "//flutter/fml",
-    "//flutter/shell/platform/common:common_cpp_input",
-    "//flutter/shell/platform/darwin/common:framework_common",
-    "//flutter/third_party/icu",
+  public_configs = [
+    ":ios_gpu_configuration_config",
+    "//flutter:config",
   ]
-  public_configs = [ "//flutter:config" ]
 
   sources = [
     "framework/Source/FlutterAppDelegate.mm",
@@ -157,71 +152,18 @@ source_set("flutter_framework_source_arc") {
     "ios_surface_software.mm",
     "platform_message_handler_ios.h",
     "platform_message_handler_ios.mm",
+    "platform_view_ios.h",
+    "platform_view_ios.mm",
     "rendering_api_selection.h",
     "rendering_api_selection.mm",
   ]
-
-  frameworks = [
-    "UIKit.framework",
-    "IOSurface.framework",
-  ]
-
-  deps += [
-    ":ios_gpu_configuration",
-    "//flutter/common:common",
-    "//flutter/common/graphics",
-    "//flutter/lib/ui",
-    "//flutter/runtime",
-    "//flutter/shell/common",
-    "//flutter/shell/platform/darwin/common",
-    "//flutter/shell/platform/darwin/graphics",
-    "//flutter/shell/platform/embedder:embedder_as_internal_library",
-    "//flutter/shell/profiling:profiling",
-    "//flutter/third_party/spring_animation",
-  ]
-}
-
-source_set("flutter_framework_source") {
-  visibility = [ ":*" ]
-  cflags_objc = flutter_cflags_objc
-  cflags_objcc = flutter_cflags_objcc
-
-  deps = []
-
-  sources = [
-    # iOS embedder is migrating to ARC.
-    # New files are highly encouraged to be in ARC.
-    # To add new files in ARC, add them to the `flutter_framework_source_arc` target.
-    "platform_view_ios.h",
-    "platform_view_ios.mm",
-  ]
-
   sources += _flutter_framework_headers
-
-  defines = [ "FLUTTER_FRAMEWORK=1" ]
-  if (darwin_extension_safe) {
-    defines += [ "APPLICATION_EXTENSION_API_ONLY=1" ]
-  }
-
-  deps += [
-    "//flutter/fml",
-    "//flutter/runtime",
-    "//flutter/shell/common",
-    "//flutter/shell/platform/darwin/common",
-    "//flutter/shell/platform/darwin/common:framework_common",
-    "//flutter/shell/platform/embedder:embedder_as_internal_library",
-    "//flutter/shell/profiling:profiling",
-  ]
-
-  public_configs = [
-    ":ios_gpu_configuration_config",
-    "//flutter:config",
-  ]
 
   frameworks = [
     "AudioToolbox.framework",
     "CoreMedia.framework",
     "CoreVideo.framework",
+    "IOSurface.framework",
     "QuartzCore.framework",
     "UIKit.framework",
   ]
@@ -230,6 +172,24 @@ source_set("flutter_framework_source") {
     # Usage in release builds will cause rejection from the App Store.
     frameworks += [ "IOKit.framework" ]
   }
+
+  deps = [
+    ":ios_gpu_configuration",
+    "//flutter/common:common",
+    "//flutter/common/graphics",
+    "//flutter/fml",
+    "//flutter/lib/ui",
+    "//flutter/runtime",
+    "//flutter/shell/common",
+    "//flutter/shell/platform/common:common_cpp_input",
+    "//flutter/shell/platform/darwin/common",
+    "//flutter/shell/platform/darwin/common:framework_common",
+    "//flutter/shell/platform/darwin/graphics",
+    "//flutter/shell/platform/embedder:embedder_as_internal_library",
+    "//flutter/shell/profiling:profiling",
+    "//flutter/third_party/icu",
+    "//flutter/third_party/spring_animation",
+  ]
 }
 
 platform_frameworks_path =
@@ -296,7 +256,6 @@ shared_library("ios_test_flutter") {
   deps = [
     ":flutter_framework",
     ":flutter_framework_source",
-    ":flutter_framework_source_arc",
     ":ios_gpu_configuration",
     "//flutter/common:common",
     "//flutter/lib/ui:ui",
@@ -333,10 +292,7 @@ shared_library("create_flutter_framework_dylib") {
 
   public = _flutter_framework_headers
 
-  deps = [
-    ":flutter_framework_source",
-    ":flutter_framework_source_arc",
-  ]
+  deps = [ ":flutter_framework_source" ]
 
   public_configs = [ "//flutter:config" ]
 }
