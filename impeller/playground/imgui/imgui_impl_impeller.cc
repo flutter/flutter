@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 
+#include "fml/mapping.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/platform.h"
@@ -78,8 +79,8 @@ bool ImGui_ImplImpeller_Init(
     int width, height;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
-    auto texture_descriptor = impeller::TextureDescriptor{};
-    texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
+    impeller::TextureDescriptor texture_descriptor;
+    texture_descriptor.storage_mode = impeller::StorageMode::kDevicePrivate;
     texture_descriptor.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
     texture_descriptor.size = {width, height};
     texture_descriptor.mip_count = 1u;
@@ -90,8 +91,20 @@ bool ImGui_ImplImpeller_Init(
               "Could not allocate ImGui font texture.");
     bd->font_texture->SetLabel("ImGui Font Texture");
 
-    [[maybe_unused]] bool uploaded = bd->font_texture->SetContents(
-        pixels, texture_descriptor.GetByteSizeOfBaseMipLevel());
+    auto command_buffer = context->CreateCommandBuffer();
+    auto blit_pass = command_buffer->CreateBlitPass();
+    auto mapping = std::make_shared<fml::NonOwnedMapping>(
+        reinterpret_cast<const uint8_t*>(pixels),
+        texture_descriptor.GetByteSizeOfBaseMipLevel());
+    auto device_buffer =
+        context->GetResourceAllocator()->CreateBufferWithCopy(*mapping);
+
+    blit_pass->AddCopy(impeller::DeviceBuffer::AsBufferView(device_buffer),
+                       bd->font_texture);
+    blit_pass->EncodeCommands(context->GetResourceAllocator());
+
+    [[maybe_unused]] bool uploaded =
+        context->GetCommandQueue()->Submit({command_buffer}).ok();
     IM_ASSERT(uploaded &&
               "Could not upload ImGui font texture to device memory.");
   }
