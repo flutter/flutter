@@ -1,7 +1,6 @@
 ../../../.clang-format
 ../../../.git
 ../../../.gitattributes
-../../../.github
 ../../../.gitignore
 ../../../.gn
 ../../../AUTHORS
