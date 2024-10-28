@@ -32,18 +32,24 @@ final class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
-    final List<DisplayFeature> displayFeatures = MediaQuery.of(context).displayFeatures;
-    displayFeatures.retainWhere((DisplayFeature feature) => feature.type == DisplayFeatureType.cutout);
+    final List<DisplayFeature> displayFeatures =
+        MediaQuery.of(context).displayFeatures;
+    displayFeatures.retainWhere(
+        (DisplayFeature feature) => feature.type == DisplayFeatureType.cutout);
     String text;
     if (displayFeatures.isEmpty) {
       text = 'CutoutNone';
-    } else if (displayFeatures.length > 1) {text = 'CutoutMany';}
-    else {
-      final Rect cutout =displayFeatures[0].bounds;
+    } else if (displayFeatures.length > 1) {
+      text = 'CutoutMany';
+    } else {
+      final Rect cutout = displayFeatures[0].bounds;
       if (cutout.top == 0) {
         text = 'CutoutTop';
-      } else if (cutout.left == 0) {text = 'CutoutLeft';}
-      else {text = 'CutoutNeither';}
+      } else if (cutout.left == 0) {
+        text = 'CutoutLeft';
+      } else {
+        text = 'CutoutNeither';
+      }
     }
     return MaterialApp(
       debugShowCheckedModeBanner: false,

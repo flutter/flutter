@@ -11,7 +11,6 @@ import 'package:test/test.dart';
 const String _tallCutout = 'com.android.internal.display.cutout.emulation.tall';
 
 void main() async {
-
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
 
@@ -20,9 +19,17 @@ void main() async {
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
     await flutterDriver.waitUntilFirstFrameRasterized();
     // Enable developer settings in order to simulate a cutout.
-    await Process.run('adb', <String>['shell', 'settings', 'put', 'global', 'development_settings_enabled', '1']);
+    await Process.run('adb', <String>[
+      'shell',
+      'settings',
+      'put',
+      'global',
+      'development_settings_enabled',
+      '1'
+    ]);
     // Simulate the tall cutout. A singular cutout that aligns to the "top" of the display.
-    await Process.run('adb', <String>['shell', 'cmd', 'overlay', 'enable', _tallCutout]);
+    await Process.run(
+        'adb', <String>['shell', 'cmd', 'overlay', 'enable', _tallCutout]);
   });
 
   tearDownAll(() async {
@@ -33,14 +40,16 @@ void main() async {
   test('cutout should be on top in portrait mode', () async {
     await nativeDriver.rotateResetDefault();
     await flutterDriver.waitFor(find.byType('Text'));
-    final String status = await flutterDriver.getText(find.byValueKey('CutoutTop'));
+    final String status =
+        await flutterDriver.getText(find.byValueKey('CutoutTop'));
     expect(status, 'Cutout status: CutoutTop');
   }, timeout: const Timeout(Duration(seconds: 5)));
 
   test('cutout should be on left in landscape mode', () async {
     await nativeDriver.rotateToLandscape();
     await flutterDriver.waitFor(find.byType('Text'));
-    final String status = await flutterDriver.getText(find.byValueKey('CutoutLeft'));
+    final String status =
+        await flutterDriver.getText(find.byValueKey('CutoutLeft'));
     expect(status, 'Cutout status: CutoutLeft');
   }, timeout: const Timeout(Duration(seconds: 5)));
 
