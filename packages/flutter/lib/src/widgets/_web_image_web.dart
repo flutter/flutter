@@ -219,7 +219,7 @@ class _CachedImageInfo {
   ValueNotifier<_ImageLoadingState> state =
       ValueNotifier<_ImageLoadingState>(_ImageLoadingState.loading);
 
-  Object? _error;
+  late Object? _error;
   Object get error {
     assert(hasError);
     return _error!;
