@@ -116,11 +116,11 @@ vk::CommandBuffer CommandBufferVK::GetCommandBuffer() const {
   return {};
 }
 
-bool CommandBufferVK::Track(std::shared_ptr<SharedObjectVK> object) {
+bool CommandBufferVK::Track(const std::shared_ptr<SharedObjectVK>& object) {
   if (!IsValid()) {
     return false;
   }
-  tracked_objects_->Track(std::move(object));
+  tracked_objects_->Track(object);
   return true;
 }
 
@@ -132,11 +132,12 @@ bool CommandBufferVK::Track(const std::shared_ptr<const DeviceBuffer>& buffer) {
   return true;
 }
 
-bool CommandBufferVK::Track(std::shared_ptr<const TextureSourceVK> texture) {
+bool CommandBufferVK::Track(
+    const std::shared_ptr<const TextureSourceVK>& texture) {
   if (!IsValid()) {
     return false;
   }
-  tracked_objects_->Track(std::move(texture));
+  tracked_objects_->Track(texture);
   return true;
 }
 
