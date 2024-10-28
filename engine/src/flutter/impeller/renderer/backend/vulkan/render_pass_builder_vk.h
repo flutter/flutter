@@ -24,11 +24,13 @@ class RenderPassBuilderVK {
 
   RenderPassBuilderVK& operator=(const RenderPassBuilderVK&) = delete;
 
-  RenderPassBuilderVK& SetColorAttachment(size_t index,
-                                          PixelFormat format,
-                                          SampleCount sample_count,
-                                          LoadAction load_action,
-                                          StoreAction store_action);
+  RenderPassBuilderVK& SetColorAttachment(
+      size_t index,
+      PixelFormat format,
+      SampleCount sample_count,
+      LoadAction load_action,
+      StoreAction store_action,
+      vk::ImageLayout current_layout = vk::ImageLayout::eUndefined);
 
   RenderPassBuilderVK& SetDepthStencilAttachment(PixelFormat format,
                                                  SampleCount sample_count,
