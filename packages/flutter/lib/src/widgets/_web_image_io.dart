@@ -14,4 +14,9 @@ Future<bool> checkIfImageBytesCanBeFetched(String url) {
 }
 
 /// Returns a widget which displays the [src] in an <img> tag.
-Widget createImgElementWidget(String src) => throw UnimplementedError();
+Widget createImgElementWidget(String src,
+        {Key? key,
+        ImageLoadingBuilder? loadingBuilder,
+        ImageFrameBuilder? frameBuilder,
+        ImageErrorWidgetBuilder? errorBuilder}) =>
+    throw UnimplementedError();

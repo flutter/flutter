@@ -20,9 +20,15 @@ class WebImage extends StatefulWidget {
   const WebImage(
     this.src, {
     super.key,
+    this.loadingBuilder,
+    this.frameBuilder,
+    this.errorBuilder,
   });
 
   final String src;
+  final ImageLoadingBuilder? loadingBuilder;
+  final ImageFrameBuilder? frameBuilder;
+  final ImageErrorWidgetBuilder? errorBuilder;
 
   @override
   State<WebImage> createState() => _WebImageState();
@@ -50,7 +56,13 @@ class _WebImageState extends State<WebImage> {
     } else if (imageBytesCanBeFetched) {
       return Image.network(widget.src);
     } else {
-      return createImgElementWidget(widget.src);
+      return createImgElementWidget(
+        widget.src,
+        key: widget.key,
+        loadingBuilder: widget.loadingBuilder,
+        frameBuilder: widget.frameBuilder,
+        errorBuilder: widget.errorBuilder,
+      );
     }
   }
 }
