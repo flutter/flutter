@@ -909,7 +909,7 @@ void main() {
         '--no-minify',
         '--no-source-maps',
         '--enable-asserts',
-        '-O4',
+        '-O1',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
         environment.buildDir.childFile('app.dill').absolute.path,

@@ -91,17 +91,15 @@ class SwiftPackage {
   final TemplateRenderer _templateRenderer;
 
   /// Context for the [_swiftPackageTemplate] template.
-  Map<String, Object> get _templateContext {
-    return <String, Object>{
-      'swiftToolsVersion': minimumSwiftToolchainVersion,
-      'packageName': _name,
-      // Supported platforms can't be empty, so only include if not null.
-      'platforms': _formatPlatforms() ?? false,
-      'products': _formatProducts(),
-      'dependencies': _formatDependencies(),
-      'targets': _formatTargets(),
-    };
-  }
+  Map<String, Object> get _templateContext => <String, Object>{
+    'swiftToolsVersion': minimumSwiftToolchainVersion,
+    'packageName': _name,
+    // Supported platforms can't be empty, so only include if not null.
+    'platforms': _formatPlatforms() ?? false,
+    'products': _formatProducts(),
+    'dependencies': _formatDependencies(),
+    'targets': _formatTargets(),
+  };
 
   /// Create a Package.swift using settings from [_templateContext].
   void createSwiftPackage() {
