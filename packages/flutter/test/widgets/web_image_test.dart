@@ -20,8 +20,7 @@ void main() {
   tearDown(() {
     debugRestoreHttpRequestFactory();
   });
-  // Test that if the src URL is cross-origin and CORS is not enabled, it uses
-  // an HtmlElementView with an <img> tag to show the image
+
   group('WebImage', () {
     testWidgets('defaults to Image.network if src is same origin',
         (WidgetTester tester) async {
