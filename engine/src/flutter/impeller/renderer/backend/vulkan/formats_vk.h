@@ -16,6 +16,18 @@
 
 namespace impeller {
 
+constexpr std::optional<PixelFormat> VkFormatToImpellerFormat(
+    vk::Format format) {
+  switch (format) {
+    case vk::Format::eR8G8B8A8Unorm:
+      return PixelFormat::kR8G8B8A8UNormInt;
+    case vk::Format::eB8G8R8A8Unorm:
+      return PixelFormat::kB8G8R8A8UNormInt;
+    default:
+      return std::nullopt;
+  }
+}
+
 constexpr vk::SampleCountFlagBits ToVKSampleCountFlagBits(SampleCount count) {
   switch (count) {
     case SampleCount::kCount1:

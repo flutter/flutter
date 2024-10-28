@@ -9,6 +9,7 @@
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
+#include "vulkan/vulkan_core.h"
 
 namespace impeller {
 namespace testing {
@@ -258,6 +259,48 @@ TEST(ContextVKTest, HasDefaultColorFormat) {
   const CapabilitiesVK* capabilites_vk =
       reinterpret_cast<const CapabilitiesVK*>(context->GetCapabilities().get());
   ASSERT_NE(capabilites_vk->GetDefaultColorFormat(), PixelFormat::kUnknown);
+}
+
+TEST(ContextVKTest, EmbedderOverridesUsesInstanceExtensions) {
+  ContextVK::EmbedderData data;
+  auto other_context = MockVulkanContextBuilder().Build();
+
+  data.instance = other_context->GetInstance();
+  data.device = other_context->GetDevice();
+  data.physical_device = other_context->GetPhysicalDevice();
+  data.queue = VkQueue{};
+  data.queue_family_index = 0;
+  // Missing surface extension.
+  data.instance_extensions = {};
+  data.device_extensions = {"VK_KHR_swapchain"};
+
+  ScopedValidationDisable scoped;
+  auto context = MockVulkanContextBuilder().SetEmbedderData(data).Build();
+
+  EXPECT_EQ(context, nullptr);
+}
+
+TEST(ContextVKTest, EmbedderOverrides) {
+  ContextVK::EmbedderData data;
+  auto other_context = MockVulkanContextBuilder().Build();
+
+  data.instance = other_context->GetInstance();
+  data.device = other_context->GetDevice();
+  data.physical_device = other_context->GetPhysicalDevice();
+  data.queue = VkQueue{};
+  data.queue_family_index = 0;
+  data.instance_extensions = {"VK_KHR_surface",
+                              "VK_KHR_portability_enumeration"};
+  data.device_extensions = {"VK_KHR_swapchain"};
+
+  auto context = MockVulkanContextBuilder().SetEmbedderData(data).Build();
+
+  EXPECT_TRUE(context->IsValid());
+  EXPECT_EQ(context->GetInstance(), other_context->GetInstance());
+  EXPECT_EQ(context->GetDevice(), other_context->GetDevice());
+  EXPECT_EQ(context->GetPhysicalDevice(), other_context->GetPhysicalDevice());
+  EXPECT_EQ(context->GetGraphicsQueue()->GetIndex().index, 0u);
+  EXPECT_EQ(context->GetGraphicsQueue()->GetIndex().family, 0u);
 }
 
 TEST(ContextVKTest, BatchSubmitCommandBuffersOnArm) {

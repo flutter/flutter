@@ -76,6 +76,12 @@ class SurfaceContextVK : public Context,
 
   std::unique_ptr<Surface> AcquireNextSurface();
 
+  /// @brief Performs frame incrementing processes like AcquireNextSurface but
+  ///        without the surface.
+  ///
+  /// Used by the embedder.h implementations.
+  void MarkFrameEnd();
+
   /// @brief Mark the current swapchain configuration as dirty, forcing it to be
   ///        recreated on the next frame.
   void UpdateSurfaceSize(const ISize& size) const;

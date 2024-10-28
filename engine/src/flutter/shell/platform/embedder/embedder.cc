@@ -615,7 +615,8 @@ InferVulkanPlatformViewCreationCallback(
     const flutter::PlatformViewEmbedder::PlatformDispatchTable&
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
-        external_view_embedder) {
+        external_view_embedder,
+    bool enable_impeller) {
   if (config->type != kVulkan) {
     return nullptr;
   }
@@ -655,15 +656,88 @@ InferVulkanPlatformViewCreationCallback(
   auto proc_addr =
       vulkan_get_instance_proc_address(vk_instance, "vkGetInstanceProcAddr");
 
+  std::shared_ptr<flutter::EmbedderExternalViewEmbedder> view_embedder =
+      std::move(external_view_embedder);
+
+#if IMPELLER_SUPPORTS_RENDERING
+  if (enable_impeller) {
+    flutter::EmbedderSurfaceVulkanImpeller::VulkanDispatchTable
+        vulkan_dispatch_table = {
+            .get_instance_proc_address =
+                reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
+            .get_next_image = vulkan_get_next_image,
+            .present_image = vulkan_present_image_callback,
+        };
+
+    std::unique_ptr<flutter::EmbedderSurfaceVulkanImpeller> embedder_surface =
+        std::make_unique<flutter::EmbedderSurfaceVulkanImpeller>(
+            config->vulkan.version, vk_instance,
+            config->vulkan.enabled_instance_extension_count,
+            config->vulkan.enabled_instance_extensions,
+            config->vulkan.enabled_device_extension_count,
+            config->vulkan.enabled_device_extensions,
+            static_cast<VkPhysicalDevice>(config->vulkan.physical_device),
+            static_cast<VkDevice>(config->vulkan.device),
+            config->vulkan.queue_family_index,
+            static_cast<VkQueue>(config->vulkan.queue), vulkan_dispatch_table,
+            view_embedder);
+
+    return fml::MakeCopyable(
+        [embedder_surface = std::move(embedder_surface),
+         platform_dispatch_table,
+         external_view_embedder =
+             std::move(view_embedder)](flutter::Shell& shell) mutable {
+          return std::make_unique<flutter::PlatformViewEmbedder>(
+              shell,                             // delegate
+              shell.GetTaskRunners(),            // task runners
+              std::move(embedder_surface),       // embedder surface
+              platform_dispatch_table,           // platform dispatch table
+              std::move(external_view_embedder)  // external view embedder
+          );
+        });
+  } else {
+    flutter::EmbedderSurfaceVulkan::VulkanDispatchTable vulkan_dispatch_table =
+        {
+            .get_instance_proc_address =
+                reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
+            .get_next_image = vulkan_get_next_image,
+            .present_image = vulkan_present_image_callback,
+        };
+
+    std::unique_ptr<flutter::EmbedderSurfaceVulkan> embedder_surface =
+        std::make_unique<flutter::EmbedderSurfaceVulkan>(
+            config->vulkan.version, vk_instance,
+            config->vulkan.enabled_instance_extension_count,
+            config->vulkan.enabled_instance_extensions,
+            config->vulkan.enabled_device_extension_count,
+            config->vulkan.enabled_device_extensions,
+            static_cast<VkPhysicalDevice>(config->vulkan.physical_device),
+            static_cast<VkDevice>(config->vulkan.device),
+            config->vulkan.queue_family_index,
+            static_cast<VkQueue>(config->vulkan.queue), vulkan_dispatch_table,
+            view_embedder);
+
+    return fml::MakeCopyable(
+        [embedder_surface = std::move(embedder_surface),
+         platform_dispatch_table,
+         external_view_embedder =
+             std::move(view_embedder)](flutter::Shell& shell) mutable {
+          return std::make_unique<flutter::PlatformViewEmbedder>(
+              shell,                             // delegate
+              shell.GetTaskRunners(),            // task runners
+              std::move(embedder_surface),       // embedder surface
+              platform_dispatch_table,           // platform dispatch table
+              std::move(external_view_embedder)  // external view embedder
+          );
+        });
+  }
+#else
   flutter::EmbedderSurfaceVulkan::VulkanDispatchTable vulkan_dispatch_table = {
       .get_instance_proc_address =
           reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
       .get_next_image = vulkan_get_next_image,
       .present_image = vulkan_present_image_callback,
   };
-
-  std::shared_ptr<flutter::EmbedderExternalViewEmbedder> view_embedder =
-      std::move(external_view_embedder);
 
   std::unique_ptr<flutter::EmbedderSurfaceVulkan> embedder_surface =
       std::make_unique<flutter::EmbedderSurfaceVulkan>(
@@ -690,6 +764,7 @@ InferVulkanPlatformViewCreationCallback(
             std::move(external_view_embedder)  // external view embedder
         );
       });
+#endif  //  // IMPELLER_SUPPORTS_RENDERING
 #else   // SHELL_ENABLE_VULKAN
   FML_LOG(ERROR) << "This Flutter Engine does not support Vulkan rendering.";
   return nullptr;
@@ -762,7 +837,7 @@ InferPlatformViewCreationCallback(
     case kVulkan:
       return InferVulkanPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder));
+          std::move(external_view_embedder), enable_impeller);
     default:
       return nullptr;
   }
@@ -1434,11 +1509,16 @@ CreateEmbedderRenderTarget(
       break;
     }
     case kFlutterBackingStoreTypeVulkan: {
-      auto skia_surface =
-          MakeSkSurfaceFromBackingStore(context, config, &backing_store.vulkan);
-      render_target = MakeRenderTargetFromSkSurface(
-          backing_store, std::move(skia_surface), collect_callback.Release());
-      break;
+      if (enable_impeller) {
+        FML_LOG(ERROR) << "Unimplemented";
+        break;
+      } else {
+        auto skia_surface = MakeSkSurfaceFromBackingStore(
+            context, config, &backing_store.vulkan);
+        render_target = MakeRenderTargetFromSkSurface(
+            backing_store, std::move(skia_surface), collect_callback.Release());
+        break;
+      }
     }
   };
 
