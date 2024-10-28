@@ -51,6 +51,12 @@ const Duration _kDisableDuration = Duration(milliseconds: 75);
 const Color _kSelectScrimColor = Color(0x60191919);
 const Icon _kDefaultDeleteIcon = Icon(Icons.cancel);
 
+enum SelectGesture {
+  tap,
+  doubleTap,
+  longPress,
+}
+
 /// An interface defining the base attributes for a Material Design chip.
 ///
 /// Chips are compact elements that represent an attribute, text, entity, or
@@ -851,6 +857,7 @@ class RawChip extends StatefulWidget
     this.deleteButtonTooltipMessage,
     this.onPressed,
     this.onSelected,
+    this.selectGestures = const <SelectGesture>{SelectGesture.tap},
     this.pressElevation,
     this.tapEnabled = true,
     this.selected = false,
@@ -908,6 +915,7 @@ class RawChip extends StatefulWidget
   final ValueChanged<bool>? onSelected;
   @override
   final VoidCallback? onPressed;
+  final Set<SelectGesture> selectGestures;
   @override
   final double? pressElevation;
   @override
@@ -1403,7 +1411,9 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         canRequestFocus: widget.isEnabled,
-        onTap: canTap ? _handleTap : null,
+        onTap: canTap && widget.selectGestures.contains(SelectGesture.tap) ? _handleTap : null,
+        onDoubleTap: canTap && widget.selectGestures.contains(SelectGesture.doubleTap) ? _handleTap : null,
+        onLongPress: canTap && widget.selectGestures.contains(SelectGesture.longPress) ? _handleTap : null,
         onTapDown: canTap ? _handleTapDown : null,
         onTapCancel: canTap ? _handleTapCancel : null,
         onHover: canTap ? updateMaterialState(MaterialState.hovered) : null,

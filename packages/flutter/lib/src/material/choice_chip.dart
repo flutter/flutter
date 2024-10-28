@@ -84,6 +84,7 @@ class ChoiceChip extends StatelessWidget
     this.side,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.selectGestures = const <SelectGesture>{SelectGesture.tap},
     this.focusNode,
     this.autofocus = false,
     this.color,
@@ -118,6 +119,7 @@ class ChoiceChip extends StatelessWidget
     this.labelStyle,
     this.labelPadding,
     this.onSelected,
+    this.selectGestures = const <SelectGesture>{SelectGesture.tap},
     this.pressElevation,
     required this.selected,
     this.selectedColor,
@@ -157,6 +159,7 @@ class ChoiceChip extends StatelessWidget
   final EdgeInsetsGeometry? labelPadding;
   @override
   final ValueChanged<bool>? onSelected;
+  final Set<SelectGesture> selectGestures;
   @override
   final double? pressElevation;
   @override
@@ -227,6 +230,7 @@ class ChoiceChip extends StatelessWidget
       labelStyle: labelStyle ?? (selected ? chipTheme.secondaryLabelStyle : null),
       labelPadding: labelPadding,
       onSelected: onSelected,
+      selectGestures: selectGestures,
       pressElevation: pressElevation,
       selected: selected,
       showCheckmark: showCheckmark ?? chipTheme.showCheckmark ?? Theme.of(context).useMaterial3,
