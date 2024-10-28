@@ -68,18 +68,14 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
     return nullptr;
   }
 
-  SurfaceFrame::EncodeCallback encode_callback =
-      [image = image, delegate = delegate_](const SurfaceFrame&,
-                                            DlCanvas* canvas) -> bool {
+  SurfaceFrame::EncodeCallback encode_callback = [](const SurfaceFrame&,
+                                                    DlCanvas* canvas) -> bool {
     if (canvas == nullptr) {
       FML_DLOG(ERROR) << "Canvas not available.";
       return false;
     }
-
     canvas->Flush();
-
-    return delegate->PresentImage(reinterpret_cast<VkImage>(image.image),
-                                  static_cast<VkFormat>(image.format));
+    return true;
   };
 
   SurfaceFrame::SubmitCallback submit_callback =

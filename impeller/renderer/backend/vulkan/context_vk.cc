@@ -160,8 +160,19 @@ void ContextVK::Setup(Settings settings) {
   auto& dispatcher = VULKAN_HPP_DEFAULT_DISPATCHER;
   dispatcher.init(settings.proc_address_callback);
 
+  std::vector<std::string> embedder_instance_extensions;
+  std::vector<std::string> embedder_device_extensions;
+  if (settings.embedder_data.has_value()) {
+    embedder_instance_extensions = settings.embedder_data->instance_extensions;
+    embedder_device_extensions = settings.embedder_data->device_extensions;
+  }
   auto caps = std::shared_ptr<CapabilitiesVK>(new CapabilitiesVK(
-      settings.enable_validation, settings.fatal_missing_validations));
+      settings.enable_validation,                                      //
+      settings.fatal_missing_validations,                              //
+      /*use_embedder_extensions=*/settings.embedder_data.has_value(),  //
+      embedder_instance_extensions,                                    //
+      embedder_device_extensions                                       //
+      ));
 
   if (!caps->IsValid()) {
     VALIDATION_LOG << "Could not determine device capabilities.";
@@ -226,7 +237,7 @@ void ContextVK::Setup(Settings settings) {
   instance_info.setFlags(instance_flags);
 
   auto device_holder = std::make_shared<DeviceHolderImpl>();
-  {
+  if (!settings.embedder_data.has_value()) {
     auto instance = vk::createInstanceUnique(instance_info);
     if (instance.result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Could not create Vulkan instance: "
@@ -234,6 +245,9 @@ void ContextVK::Setup(Settings settings) {
       return;
     }
     device_holder->instance = std::move(instance.value);
+  } else {
+    device_holder->instance.reset(settings.embedder_data->instance);
+    device_holder->owned = false;
   }
   dispatcher.init(device_holder->instance.get());
 
@@ -254,7 +268,7 @@ void ContextVK::Setup(Settings settings) {
   //----------------------------------------------------------------------------
   /// Pick the physical device.
   ///
-  {
+  if (!settings.embedder_data.has_value()) {
     auto physical_device =
         PickPhysicalDevice(*caps, device_holder->instance.get());
     if (!physical_device.has_value()) {
@@ -262,6 +276,8 @@ void ContextVK::Setup(Settings settings) {
       return;
     }
     device_holder->physical_device = physical_device.value();
+  } else {
+    device_holder->physical_device = settings.embedder_data->physical_device;
   }
 
   //----------------------------------------------------------------------------
@@ -320,7 +336,7 @@ void ContextVK::Setup(Settings settings) {
   device_info.setPEnabledExtensionNames(enabled_device_extensions_c);
   // Device layers are deprecated and ignored.
 
-  {
+  if (!settings.embedder_data.has_value()) {
     auto device_result =
         device_holder->physical_device.createDeviceUnique(device_info);
     if (device_result.result != vk::Result::eSuccess) {
@@ -328,6 +344,8 @@ void ContextVK::Setup(Settings settings) {
       return;
     }
     device_holder->device = std::move(device_result.value);
+  } else {
+    device_holder->device.reset(settings.embedder_data->device);
   }
 
   if (!caps->SetPhysicalDevice(device_holder->physical_device,
@@ -413,11 +431,18 @@ void ContextVK::Setup(Settings settings) {
   //----------------------------------------------------------------------------
   /// Fetch the queues.
   ///
-  QueuesVK queues(device_holder->device.get(),  //
-                  graphics_queue.value(),       //
-                  compute_queue.value(),        //
-                  transfer_queue.value()        //
-  );
+  QueuesVK queues;
+  if (!settings.embedder_data.has_value()) {
+    queues = QueuesVK::FromQueueIndices(device_holder->device.get(),  //
+                                        graphics_queue.value(),       //
+                                        compute_queue.value(),        //
+                                        transfer_queue.value()        //
+    );
+  } else {
+    queues =
+        QueuesVK::FromEmbedderQueue(settings.embedder_data->queue,
+                                    settings.embedder_data->queue_family_index);
+  }
   if (!queues.IsValid()) {
     VALIDATION_LOG << "Could not fetch device queues.";
     return;

@@ -171,6 +171,13 @@ template("embedder_source_set") {
         "embedder_surface_vulkan.h",
       ]
 
+      if (impeller_supports_rendering) {
+        sources += [
+          "embedder_surface_vulkan_impeller.cc",
+          "embedder_surface_vulkan_impeller.h",
+        ]
+      }
+
       deps += [
         "//flutter/flutter_vma:flutter_skia_vma",
         "//flutter/vulkan/procs",

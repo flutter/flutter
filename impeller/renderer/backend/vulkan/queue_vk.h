@@ -67,10 +67,17 @@ struct QueuesVK {
 
   QueuesVK();
 
-  QueuesVK(const vk::Device& device,
-           QueueIndexVK graphics,
-           QueueIndexVK compute,
-           QueueIndexVK transfer);
+  QueuesVK(std::shared_ptr<QueueVK> graphics_queue,
+           std::shared_ptr<QueueVK> compute_queue,
+           std::shared_ptr<QueueVK> transfer_queue);
+
+  static QueuesVK FromEmbedderQueue(vk::Queue queue,
+                                    uint32_t queue_family_index);
+
+  static QueuesVK FromQueueIndices(const vk::Device& device,
+                                   QueueIndexVK graphics,
+                                   QueueIndexVK compute,
+                                   QueueIndexVK transfer);
 
   bool IsValid() const;
 };
