@@ -16,7 +16,8 @@ void main() {
         const example.UnfocusExampleApp(),
       );
 
-      await tester.tap(find.byType(TextField).first); // Focuses the first text field.
+      // Focuses the first text field.
+      await tester.tap(find.byType(TextField).first);
       await tester.pump();
 
       // Changes the focus to the unfocus button.
@@ -32,15 +33,8 @@ void main() {
       await tester.pump();
 
       // After pressing tab once, the focus is on the first text field.
-      expect(
-        find.descendant(
-          of: find.byType(TextField).first,
-          matching: find.byWidgetPredicate(
-            (Widget focus) => focus is Focus && (focus.focusNode?.hasFocus ?? false),
-          ),
-        ),
-        findsOne,
-      );
+      final EditableText firstEditableText = tester.firstWidget(find.byType(EditableText));
+      expect(firstEditableText.focusNode.hasFocus, true);
     },
   );
 
@@ -51,7 +45,8 @@ void main() {
         const example.UnfocusExampleApp(),
       );
 
-      await tester.tap(find.byType(TextField).first); // Focuses the first text field.
+      // Focuses the first text field.
+      await tester.tap(find.byType(TextField).first);
       await tester.pump();
 
       // Changes the focus to the second radio button.
@@ -76,15 +71,8 @@ void main() {
         await tester.pump();
       }
 
-      expect(
-        find.descendant(
-          of: find.byType(TextField).first,
-          matching: find.byWidgetPredicate(
-            (Widget focus) => focus is Focus && (focus.focusNode?.hasFocus ?? false),
-          ),
-        ),
-        findsOne,
-      );
+      final EditableText firstEditableText = tester.firstWidget(find.byType(EditableText));
+      expect(firstEditableText.focusNode.hasFocus, true);
     },
   );
 }
