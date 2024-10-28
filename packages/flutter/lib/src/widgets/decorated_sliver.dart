@@ -25,8 +25,17 @@ import 'image.dart';
 ///
 /// Commonly used with [BoxDecoration].
 ///
-/// The [child] is not clipped. To clip a child to the shape of a particular
-/// [ShapeDecoration], consider using a [ClipPath] widget.
+/// [clipBehavior] is set by parent [Widget], which is often a
+/// scrollable [Widget] such as [CustomScrollView]
+/// where [clipBehavior] defaults to [Clip.hardEdge].
+/// This result in [Decoration] properties particularly
+/// [BoxShadow], which render outside the widget's boundaries,
+/// appear clipped. To prevent this,
+/// consider setting [clipBehavior] to [Clip.none] to ensure
+/// they render correctly outside the widgets's bounds.
+///
+/// To clip a child to the shape of a
+/// particular [ShapeDecoration], consider using a [ClipPath] widget.
 ///
 /// {@tool dartpad}
 /// This sample shows a radial gradient that draws a moon on a night sky:
