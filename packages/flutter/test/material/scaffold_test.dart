@@ -2867,7 +2867,47 @@ void main() {
       expect(tester.takeException(), isNull);
   });
 
-   testWidgets('ScaffoldMessenger showSnackBar default animation', (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/issues/115924.
+  testWidgets('Default ScaffoldMessenger can access ambient theme', (WidgetTester tester) async {
+    ScaffoldMessengerState? scaffoldMessenger;
+    const Key tapTarget = Key('tap-target');
+
+    final ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple);
+    final ThemeData customTheme = ThemeData(
+      colorScheme: colorScheme,
+      visualDensity: VisualDensity.comfortable,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      theme: customTheme,
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pump();
+
+    final ThemeData messengerTheme = Theme.of(scaffoldMessenger!.context);
+    expect(messengerTheme.colorScheme, colorScheme);
+    expect(messengerTheme.visualDensity, VisualDensity.comfortable);
+  });
+
+  testWidgets('ScaffoldMessenger showSnackBar default animation', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
