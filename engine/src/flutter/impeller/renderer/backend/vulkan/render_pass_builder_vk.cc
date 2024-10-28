@@ -6,7 +6,9 @@
 
 #include <vector>
 
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
+#include "vulkan/vulkan_enums.hpp"
 
 namespace impeller {
 
@@ -31,7 +33,8 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
     PixelFormat format,
     SampleCount sample_count,
     LoadAction load_action,
-    StoreAction store_action) {
+    StoreAction store_action,
+    vk::ImageLayout current_layout) {
   vk::AttachmentDescription desc;
   desc.format = ToVKImageFormat(format);
   desc.samples = ToVKSampleCount(sample_count);
@@ -39,7 +42,11 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
   desc.storeOp = ToVKAttachmentStoreOp(store_action, false);
   desc.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
   desc.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-  desc.initialLayout = vk::ImageLayout::eUndefined;
+  if (load_action == LoadAction::kLoad) {
+    desc.initialLayout = current_layout;
+  } else {
+    desc.initialLayout = vk::ImageLayout::eUndefined;
+  }
   desc.finalLayout = vk::ImageLayout::eGeneral;
   colors_[index] = desc;
 

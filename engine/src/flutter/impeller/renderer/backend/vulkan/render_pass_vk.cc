@@ -89,7 +89,8 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
         color.texture->GetTextureDescriptor().format,        //
         color.texture->GetTextureDescriptor().sample_count,  //
         color.load_action,                                   //
-        color.store_action                                   //
+        color.store_action,                                  //
+        TextureVK::Cast(*color.texture).GetLayout()          //
     );
     TextureVK::Cast(*color.texture)
         .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);

@@ -388,8 +388,8 @@ static std::shared_ptr<Texture> CreateTextureForDecompressedImage(
     const std::shared_ptr<Context>& context,
     DecompressedImage& decompressed_image,
     bool enable_mipmapping) {
-  auto texture_descriptor = TextureDescriptor{};
-  texture_descriptor.storage_mode = StorageMode::kHostVisible;
+  TextureDescriptor texture_descriptor;
+  texture_descriptor.storage_mode = StorageMode::kDevicePrivate;
   texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
   texture_descriptor.size = decompressed_image.GetSize();
   texture_descriptor.mip_count =
@@ -463,8 +463,8 @@ std::shared_ptr<Texture> Playground::CreateTextureCubeForFixture(
     images[i] = image.value();
   }
 
-  auto texture_descriptor = TextureDescriptor{};
-  texture_descriptor.storage_mode = StorageMode::kHostVisible;
+  TextureDescriptor texture_descriptor;
+  texture_descriptor.storage_mode = StorageMode::kDevicePrivate;
   texture_descriptor.type = TextureType::kTextureCube;
   texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
   texture_descriptor.size = images[0].GetSize();
