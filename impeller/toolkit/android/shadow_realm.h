@@ -18,7 +18,6 @@ class ShadowRealm {
 
   // For testing.
   static bool ShouldDisableAHBInternal(std::string_view clientidbase,
-                                       std::string_view first_api_level,
                                        uint32_t api_level);
 };
 
