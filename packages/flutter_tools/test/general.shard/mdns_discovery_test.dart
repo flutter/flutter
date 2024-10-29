@@ -578,13 +578,14 @@ void main() {
       });
 
       testWithoutContext('Throws tool exit with a helpful message when client throws a SocketException on lookup', () async {
+        final logger = BufferLogger.test();
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[], <String, List<SrvResourceRecord>>{},
           socketErrorOnStart: true);
 
         final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
           mdnsClient: client,
-          logger: BufferLogger.test(),
+          logger: logger,
           flutterUsage: TestUsage(),
           analytics: const NoOpAnalytics(),
         );
@@ -595,6 +596,11 @@ void main() {
               'Please try going to '
               'System Settings -> Privacy & Security -> Local Network -> '
               '[Find your IDE] -> Toggle ON, then restarting your phone.')
+        );
+
+        expect(
+            logger.errorText,
+            'Socket Exception'
         );
       });
 
