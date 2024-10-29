@@ -269,8 +269,8 @@ class _TabStyle extends AnimatedWidget {
   final TabBarThemeData defaults;
   final Widget child;
 
-  MaterialStateColor _resolveWithLabelColor({
-    required BuildContext context,
+  MaterialStateColor _resolveWithLabelColor(
+    BuildContext context, {
     IconThemeData? iconTheme,
   }) {
     final ThemeData themeData = Theme.of(context);
@@ -344,8 +344,8 @@ class _TabStyle extends AnimatedWidget {
       final IconThemeData iconTheme when iconTheme.color != defaultIconColor => iconTheme,
       _ => null,
     };
-    final Color iconColor = _resolveWithLabelColor(context: context, iconTheme: customIconTheme).resolve(states);
-    final Color labelColor = _resolveWithLabelColor(context: context).resolve(states);
+    final Color iconColor = _resolveWithLabelColor(context, iconTheme: customIconTheme).resolve(states);
+    final Color labelColor = _resolveWithLabelColor(context).resolve(states);
 
     return DefaultTextStyle(
       style: textStyle.copyWith(color: labelColor),
