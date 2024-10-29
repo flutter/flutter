@@ -252,7 +252,7 @@ class CupertinoMagnifier extends StatelessWidget {
   /// Creates a [RawMagnifier] in the Cupertino style.
   ///
   /// The default constructor parameters and constants were eyeballed on
-  /// an iPhone XR iOS v15.5.
+  /// an iPhone 16 iOS v18.1.
   const CupertinoMagnifier({
     super.key,
     this.size = kDefaultSize,
@@ -268,7 +268,10 @@ class CupertinoMagnifier extends StatelessWidget {
     ],
     this.clipBehavior = Clip.none,
     this.borderSide =
-        const BorderSide(color: Color.fromARGB(255, 232, 232, 232)),
+        const BorderSide(
+          color: Color.fromARGB(255, 0, 124, 255),
+          width: 2.0,
+        ),
     this.inOutAnimation,
     this.magnificationScale = 1.0,
   }) : assert(magnificationScale > 0, 'The magnification scale should be greater than zero.');
