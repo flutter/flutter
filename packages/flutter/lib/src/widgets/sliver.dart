@@ -872,7 +872,25 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     try {
       final SplayTreeMap<int, Element?> newChildren = SplayTreeMap<int, Element?>();
       final Map<int, double> indexToLayoutOffset = HashMap<int, double>();
+      final List<int> indices = _childElements.keys.toList();
       final SliverMultiBoxAdaptorWidget adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
+      bool hasDuplicateKey(Key? key) {
+        if (key == null || _childElements.isEmpty) {
+          return false;
+        }
+
+        bool hasBeenFound = false;
+        for (final Element child in _childElements.values.whereType<Element>()) {
+          if (child.widget.key == key) {
+            if (hasBeenFound) {
+              return true;
+            }
+            hasBeenFound = true;
+          }
+        }
+        return false;
+      }
+
       void processElement(int index) {
         _currentlyUpdatingChildIndex = index;
         if (_childElements[index] != null && _childElements[index] != newChildren[index]) {
@@ -913,8 +931,19 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           if (childParentData != null) {
             childParentData.layoutOffset = null;
           }
+          if (!hasDuplicateKey(key)) {
+            // The child is being moved to a new index.
+            childParentData?.layoutOffset = null;
 
-          newChildren[newIndex] = _childElements[index];
+            newChildren[newIndex] = _childElements[index];
+          } else {
+            // Handle duplicates: skip direct reordering, and add to the next available slot later.
+            int availableIndex = newIndex;
+            while (newChildren.containsKey(availableIndex)) {
+              availableIndex++; // Finds the next free spot.
+            }
+            newChildren[availableIndex] = _childElements[index];
+          }
           if (_replaceMovedChildren) {
             // We need to make sure the original index gets processed.
             newChildren.putIfAbsent(index, () => null);
@@ -946,6 +975,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     } finally {
       _currentlyUpdatingChildIndex = null;
       renderObject.debugChildIntegrityEnabled = true;
+      renderObject.markNeedsLayout();
     }
   }
 
