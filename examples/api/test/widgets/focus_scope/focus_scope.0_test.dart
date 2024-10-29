@@ -42,7 +42,6 @@ void main() {
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
 
-
     expect(hasFocus(tester, Icons.close), true);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
