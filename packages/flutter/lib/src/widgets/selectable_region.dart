@@ -3336,25 +3336,65 @@ final class SelectionListenerNotifier extends ChangeNotifier {
     _selectionDelegate = null;
   }
 
-  // From ChangeNotifier.
-  static final List<SelectionListenerStatusCallback?> _emptyStatusListeners =
-      List<SelectionListenerStatusCallback?>.filled(0, null);
-  List<SelectionListenerStatusCallback?> _statusListeners = _emptyStatusListeners;
-  int _statusCount = 0;
-  int _statusNotificationCallStackDepth = 0;
-  int _reentrantlyRemovedStatusListeners = 0;
+  final ObserverList<SelectionListenerStatusCallback> _statusListeners = ObserverList<SelectionListenerStatusCallback>();
 
+  /// Calls the listener every time the [SelectionListenerStatus] of a [SelectionListener]
+  /// is updated.
+  ///
+  /// Listeners can be removed with [removeStatusListener].
+  void addStatusListener(SelectionListenerStatusCallback listener) => _statusListeners.add(listener);
+
+  /// Stops calling the listener every time the status of the selection changes.
+  ///
+  /// Listeners can be added with [addStatusListener].
+  void removeStatusListener(SelectionListenerStatusCallback listener) => _statusListeners.remove(listener);
+
+  /// Call all the registered status listeners.
+  ///
+  /// Call this method whenever the selection status changes, to notify any clients the
+  /// [SelectionListenerStatus] may have changed. Status listeners that are added during this
+  /// iteration will not be visited. Status listeners that are removed during this iteration
+  /// will not be visited after they are removed.
+  @protected
+  @pragma('vm:notify-debugger-on-exception')
+  void notifyStatusListeners(SelectionListenerStatus status) {
+    if (_statusListeners.isEmpty) {
+      return;
+    }
+    final List<SelectionListenerStatusCallback> localListeners = List<SelectionListenerStatusCallback>.of(_statusListeners);
+    for (final SelectionListenerStatusCallback listener in localListeners) {
+      try {
+        if (_statusListeners.contains(listener)) {
+          listener(status);
+        }
+      } catch (exception, stack) {
+        InformationCollector? collector;
+        assert(() {
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<SelectionListenerNotifier>(
+              'The $runtimeType notifying status listeners was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ];
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while notifying status listeners for $runtimeType'),
+          informationCollector: collector,
+        ));
+      }
+    }
+  }
+
+  // From ChangeNotifier.
   @override
   void dispose() {
-    assert(
-      _statusNotificationCallStackDepth == 0,
-      'The "dispose()" method on $this was called during the call to '
-      '"notifyStatusListeners()". This is likely to cause errors since it modifies '
-      'the list of listeners while the list is being used.',
-    );
     _unregisterSelectionListenerDelegate();
-    _statusListeners = _emptyStatusListeners;
-    _statusCount = 0;
+    _statusListeners.clear();
     super.dispose();
   }
 
@@ -3366,184 +3406,4 @@ final class SelectionListenerNotifier extends ChangeNotifier {
   void addListener(VoidCallback listener) {
     super.addListener(listener);
   }
-
-  /// Calls the listener every time the [SelectionListenerStatus] of a [SelectionListener]
-  /// is updated.
-  ///
-  /// Listeners can be removed with [removeStatusListener].
-  void addStatusListener(SelectionListenerStatusCallback listener) {
-    assert(ChangeNotifier.debugAssertNotDisposed(this));
-
-    if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
-    }
-
-    if (_statusCount == _statusListeners.length) {
-      if (_statusCount == 0) {
-        _statusListeners = List<SelectionListenerStatusCallback?>.filled(1, null);
-      } else {
-        final List<SelectionListenerStatusCallback?> newStatusListeners =
-            List<SelectionListenerStatusCallback?>.filled(_statusListeners.length * 2, null);
-        for (int i = 0; i < _statusCount; i++) {
-          newStatusListeners[i] = _statusListeners[i];
-        }
-        _statusListeners = newStatusListeners;
-      }
-    }
-    _statusListeners[_statusCount++] = listener;
-  }
-
-  /// Stops calling the listener every time the status of the selection changes.
-  ///
-  /// Listeners can be added with [addStatusListener].
-  void removeStatusListener(SelectionListenerStatusCallback listener) {
-    // This method is allowed to be called on disposed instances for usability
-    // reasons. Due to how our frame scheduling logic between render objects and
-    // overlays, it is common that the owner of this instance would be disposed a
-    // frame earlier than the listeners. Allowing calls to this method after it
-    // is disposed makes it easier for listeners to properly clean up.
-    for (int i = 0; i < _statusCount; i++) {
-      final SelectionListenerStatusCallback? listenerAtIndex = _statusListeners[i];
-      if (listenerAtIndex == listener) {
-        if (_statusNotificationCallStackDepth > 0) {
-          // We don't resize the list during notifyStatusListeners iterations
-          // but we set to null, the listeners we want to remove. We will
-          // effectively resize the list at the end of all notifyStatusListeners
-          // iterations.
-          _statusListeners[i] = null;
-          _reentrantlyRemovedStatusListeners++;
-        } else {
-          // When we are outside the notifyStatusListeners iterations we can
-          // effectively shrink the list.
-          _removeStatusAt(i);
-        }
-        break;
-      }
-    }
-  }
-
-  void _removeStatusAt(int index) {
-    // The list holding the listeners is not growable for performances reasons.
-    // We still want to shrink this list if a lot of listeners have been added
-    // and then removed outside a notifyStatusListeners iteration.
-    // We do this only when the real number of listeners is half the length
-    // of our list.
-    _statusCount -= 1;
-    if (_statusCount * 2 <= _statusListeners.length) {
-      final List<SelectionListenerStatusCallback?> newStatusListeners =
-          List<SelectionListenerStatusCallback?>.filled(_statusCount, null);
-
-      // Listeners before the index are at the same place.
-      for (int i = 0; i < index; i++) {
-        newStatusListeners[i] = _statusListeners[i];
-      }
-
-      // Listeners after the index move towards the start of the list.
-      for (int i = index; i < _statusCount; i++) {
-        newStatusListeners[i] = _statusListeners[i + 1];
-      }
-
-      _statusListeners = newStatusListeners;
-    } else {
-      // When there are more listeners than half the length of the list, we only
-      // shift our listeners, so that we avoid to reallocate memory for the
-      // whole list.
-      for (int i = index; i < _statusCount; i++) {
-        _statusListeners[i] = _statusListeners[i + 1];
-      }
-      _statusListeners[_statusCount] = null;
-    }
-  }
-
-  /// Call all the registered status listeners.
-  ///
-  /// Call this method whenever the selection status changes, to notify any clients the
-  /// selectionstatus may have changed. Status listeners that are added during this iteration
-  /// will not be visited. Status listeners that are removed during this iteration will
-  /// not be visited after they are removed.
-  @protected
-  @pragma('vm:notify-debugger-on-exception')
-  void notifyStatusListeners(SelectionListenerStatus status) {
-    assert(ChangeNotifier.debugAssertNotDisposed(this));
-    if (_statusCount == 0) {
-      return;
-    }
-
-    // To make sure that listeners removed during this iteration are not called,
-    // we set them to null, but we don't shrink the list right away.
-    // By doing this, we can continue to iterate on our list until it reaches
-    // the last listener added before the call to this method.
-
-    // To allow potential listeners to recursively call notifyStatusListener, we track
-    // the number of times this method is called in _statusNotificationCallStackDepth.
-    // Once every recursive iteration is finished (i.e. when _statusNotificationCallStackDepth == 0),
-    // we can safely shrink our list so that it will only contain not null
-    // listeners.
-
-    _statusNotificationCallStackDepth++;
-
-    final int end = _statusCount;
-    for (int i = 0; i < end; i++) {
-      try {
-        _statusListeners[i]?.call(status);
-      } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'foundation library',
-          context: ErrorDescription('while dispatching status notifications for $runtimeType'),
-          informationCollector: () => <DiagnosticsNode>[
-            DiagnosticsProperty<SelectionListenerNotifier>(
-              'The $runtimeType sending status notification was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ],
-        ));
-      }
-    }
-
-    _statusNotificationCallStackDepth--;
-
-    if (_statusNotificationCallStackDepth == 0 && _reentrantlyRemovedStatusListeners > 0) {
-      // We really remove the listeners when all notifications are done.
-      final int newLength = _statusCount - _reentrantlyRemovedStatusListeners;
-      if (newLength * 2 <= _statusListeners.length) {
-        // As in _removeAt, we only shrink the list when the real number of
-        // listeners is half the length of our list.
-        final List<SelectionListenerStatusCallback?> newStatusListeners =
-            List<SelectionListenerStatusCallback?>.filled(newLength, null);
-
-        int newIndex = 0;
-        for (int i = 0; i < _statusCount; i++) {
-          final SelectionListenerStatusCallback? listener = _statusListeners[i];
-          if (listener != null) {
-            newStatusListeners[newIndex++] = listener;
-          }
-        }
-
-        _statusListeners = newStatusListeners;
-      } else {
-        // Otherwise we put all the null references at the end.
-        for (int i = 0; i < newLength; i += 1) {
-          if (_statusListeners[i] == null) {
-            // We swap this item with the next not null item.
-            int swapIndex = i + 1;
-            while (_statusListeners[swapIndex] == null) {
-              swapIndex += 1;
-            }
-            _statusListeners[i] = _statusListeners[swapIndex];
-            _statusListeners[swapIndex] = null;
-          }
-        }
-      }
-
-      _reentrantlyRemovedStatusListeners = 0;
-      _statusCount = newLength;
-    }
-  }
-
-  /// Whether any status listeners are currently registered.
-  @protected
-  bool get hasStatusListeners => _statusCount > 0;
 }
