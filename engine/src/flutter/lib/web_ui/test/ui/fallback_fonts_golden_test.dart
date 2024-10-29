@@ -222,6 +222,33 @@ void testMain() {
       expect(downloadedFontFamilies, isEmpty);
     }
 
+    /// Asserts that a given [partialFontFamilyName] is downloaded to render
+    /// a given [charCode].
+    ///
+    /// The match on [partialFontFamilyName] is "starts with", so this method
+    /// supports split fonts, without hardcoding the shard number (which we
+    /// don't own).
+    Future<void> checkDownloadedFamilyForCharCode(
+        int charCode, String partialFontFamilyName) async {
+      // Try rendering text that requires fallback fonts, initially before the fonts are loaded.
+      final ui.ParagraphBuilder pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.addText(String.fromCharCode(charCode));
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
+
+      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+
+      expect(
+        downloadedFontFamilies,
+        hasLength(1),
+        reason:
+          'Downloaded more than one font family for character: 0x${charCode.toRadixString(16)}'
+      );
+      expect(
+        downloadedFontFamilies.first,
+        startsWith(partialFontFamilyName),
+      );
+    }
+
     // Regression test for https://github.com/flutter/flutter/issues/75836
     // When we had this bug our font fallback resolution logic would end up in an
     // infinite loop and this test would freeze and time out.
@@ -259,6 +286,11 @@ void testMain() {
       await checkDownloadedFamiliesForString('ኢትዮጵያ', <String>[
         'Noto Sans Ethiopic',
       ]);
+    });
+
+    // https://github.com/flutter/flutter/issues/157763
+    test('prioritizes Noto Color Emoji over Noto Sans Symbols', () async {
+      await checkDownloadedFamilyForCharCode(0x1f3d5, 'Noto Color Emoji');
     });
 
     test('findMinimumFontsForCodePoints for all supported code points',
