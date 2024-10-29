@@ -171,7 +171,8 @@ void main() async {
 
     final gpu.BufferView view1 = hostBuffer
         .emplace(Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData());
-    expect(view1.offsetInBytes, greaterThanOrEqualTo(4));
+    expect(view1.offsetInBytes,
+        equals(gpu.gpuContext.minimumUniformByteAlignment));
     expect(view1.lengthInBytes, 4);
   }, skip: !impellerEnabled);
 
@@ -413,6 +414,29 @@ void main() async {
     } catch (e) {
       expect(e.toString(),
           contains('The stencil write mask must be in the range'));
+    }
+  }, skip: !impellerEnabled);
+
+  test('RenderPass.bindTexture throws for deviceTransient Textures', () async {
+    final state = createSimpleRenderPass();
+
+    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+    // Although this is a non-texture uniform slot, it'll work fine for the
+    // purposes of testing this error.
+    final gpu.UniformSlot vertInfo =
+        pipeline.vertexShader.getUniformSlot('VertInfo');
+
+    final gpu.Texture texture = gpu.gpuContext
+        .createTexture(gpu.StorageMode.deviceTransient, 100, 100)!;
+
+    try {
+      state.renderPass.bindTexture(vertInfo, texture);
+      fail('Exception not thrown when binding a transient texture.');
+    } catch (e) {
+      expect(
+          e.toString(),
+          contains(
+              'Textures with StorageMode.deviceTransient cannot be bound to a RenderPass'));
     }
   }, skip: !impellerEnabled);
 
