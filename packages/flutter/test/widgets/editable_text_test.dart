@@ -4980,7 +4980,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
     expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.fuchsia, }));
 
   group('a11y copy/cut/paste', () {
     Future<void> buildApp(MockTextSelectionControls controls, WidgetTester tester) {
@@ -12791,6 +12791,41 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb); // [intended]
 
+  testWidgets('can change tap outside behavior by overriding actions', (WidgetTester tester) async {
+    bool myIntentWasCalled = false;
+    final CallbackAction<EditableTextTapOutsideIntent> overrideAction = CallbackAction<EditableTextTapOutsideIntent>(
+      onInvoke: (EditableTextTapOutsideIntent intent) { myIntentWasCalled = true; return null; },
+    );
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          SizedBox(
+            key: key,
+            width: 200,
+            height: 200,
+          ),
+          Actions(
+            actions: <Type, Action<Intent>>{ EditableTextTapOutsideIntent: overrideAction, },
+            child: EditableText(
+              autofocus: true,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byKey(key), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(myIntentWasCalled, isTrue);
+    expect(focusNode.hasFocus, true);
+  });
+
   testWidgets('ignore key event from web platform', (WidgetTester tester) async {
     controller.text = 'test\ntest';
     controller.selection = const TextSelection(
@@ -16982,6 +17017,45 @@ void main() {
     },
       skip: !kIsWeb, // [intended]
     );
+
+    // Regression test for https://github.com/flutter/flutter/issues/156078.
+    testWidgets('when having focus regained after the app resumed', (WidgetTester tester) async {
+      Future<void> setAppLifeCycleState(AppLifecycleState state) async {
+        final ByteData? message = const StringCodec().encodeMessage(state.toString());
+        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      }
+
+      final TextEditingController controller = TextEditingController(text: 'Flutter!');
+      addTearDown(controller.dispose);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: EditableText(
+              key: ValueKey<String>(controller.text),
+              controller: controller,
+              focusNode: focusNode,
+              autofocus: true,
+              style: Typography.material2018().black.titleMedium!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      );
+
+      expect(focusNode.hasFocus, true);
+      expect(controller.selection, collapsedAtEnd('Flutter!').selection);
+
+      await setAppLifeCycleState(AppLifecycleState.inactive);
+      await setAppLifeCycleState(AppLifecycleState.resumed);
+
+      expect(focusNode.hasFocus, true);
+      expect(controller.selection, collapsedAtEnd('Flutter!').selection);
+    }, variant: TargetPlatformVariant.all());
   });
 
   testWidgets('EditableText respects MediaQuery.boldText', (WidgetTester tester) async {

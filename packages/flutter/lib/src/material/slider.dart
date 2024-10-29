@@ -1391,14 +1391,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  bool get showValueIndicator {
-    return switch (_sliderTheme.showValueIndicator!) {
-      ShowValueIndicator.onlyForDiscrete   => isDiscrete,
-      ShowValueIndicator.onlyForContinuous => !isDiscrete,
-      ShowValueIndicator.always => true,
-      ShowValueIndicator.never  => false,
-    };
-  }
+  bool get showValueIndicator => switch (_sliderTheme.showValueIndicator!) {
+    ShowValueIndicator.onlyForDiscrete   => isDiscrete,
+    ShowValueIndicator.onlyForContinuous => !isDiscrete,
+    ShowValueIndicator.always => true,
+    ShowValueIndicator.never  => false,
+  };
 
   double get _adjustmentUnit {
     switch (_platform) {

@@ -513,7 +513,7 @@ Future<void> main() async {
     expect(semantics, includesNodeWith(
       label: 'Tab 1',
       hint: 'Tab 1 of 2',
-      flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+      flags: <SemanticsFlag>[SemanticsFlag.hasSelectedState, SemanticsFlag.isSelected],
       textDirection: TextDirection.ltr,
     ));
 

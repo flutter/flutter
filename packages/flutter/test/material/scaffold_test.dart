@@ -3418,6 +3418,36 @@ void main() {
     ));
     expect(scaffoldMaterial.color, theme.colorScheme.surface);
   });
+
+  testWidgets('Body height remains Scaffold height when keyboard is smaller than bottomNavigationBar and extendBody is true', (WidgetTester tester) async {
+    final Key bodyKey = UniqueKey();
+    Widget buildFrame({double keyboardHeight = 0}) {
+      return MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                viewInsets: EdgeInsets.only(bottom: keyboardHeight),
+              ),
+              child: Scaffold(
+                extendBody: true,
+                body: SizedBox.expand(key: bodyKey),
+                bottomNavigationBar:const SizedBox(height: 100),
+              ),
+            );
+          },
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getSize(find.byKey(bodyKey)).height, 600);
+
+    await tester.pumpWidget(buildFrame(keyboardHeight: 100));
+    expect(tester.getSize(find.byKey(bodyKey)).height, 600);
+
+    await tester.pumpWidget(buildFrame(keyboardHeight: 200));
+    expect(tester.getSize(find.byKey(bodyKey)).height, 400);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {

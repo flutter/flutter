@@ -273,6 +273,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
+    this.onTapUpOutside,
     this.inputFormatters,
     this.enabled = true,
     this.cursorWidth = 2.0,
@@ -402,6 +403,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
+    this.onTapUpOutside,
     this.inputFormatters,
     this.enabled = true,
     this.cursorWidth = 2.0,
@@ -670,6 +672,9 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.onTapOutside}
   final TapRegionCallback? onTapOutside;
+
+  /// {@macro flutter.widgets.editableText.onTapUpOutside}
+  final TapRegionCallback? onTapUpOutside;
 
   /// {@macro flutter.widgets.editableText.inputFormatters}
   final List<TextInputFormatter>? inputFormatters;
