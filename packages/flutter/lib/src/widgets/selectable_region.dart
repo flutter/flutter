@@ -3291,6 +3291,10 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
   _SelectionListenerDelegate({
     required SelectionListenerNotifier selectionNotifier,
   }) : _selectionNotifier = selectionNotifier {
+    assert(
+      _selectionNotifier._selectionDelegate == null,
+      'The SelectionListenerNotifier provided is already attached to another [SelectionListener]. Try providing a new SelectionListenerNotifier.',
+    );
     _selectionNotifier._selectionDelegate = this;
   }
 
