@@ -1010,13 +1010,14 @@ Future<void> refreshPluginsList(
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
+  bool writeLegacyPluginsList = true,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
   plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
-  // TODO(franciscojma): Remove once migration is complete.
+  // TODO(matanlurey): Remove once migration is complete.
   // Write the legacy plugin files to avoid breaking existing apps.
-  final bool legacyChanged = _writeFlutterPluginsListLegacy(project, plugins);
+  final bool legacyChanged = writeLegacyPluginsList && _writeFlutterPluginsListLegacy(project, plugins);
 
   final bool changed = _writeFlutterPluginsList(
     project,
@@ -1131,7 +1132,7 @@ Future<void> injectPlugins(
 ///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 bool hasPlugins(FlutterProject project) {
-  return _readFileContent(project.flutterPluginsFile) != null;
+  return _readFileContent(project.flutterPluginsDependenciesFile) != null;
 }
 
 /// Resolves the plugin implementations for all platforms.
