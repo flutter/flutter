@@ -126,7 +126,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       hide: !verboseHelp,
     );
 
-    // TODO(matanlurey): Remove after the Q4 2024 stable release; this is intended
+    // TODO(matanlurey): Remove after the Q2 2025 stable release; this is intended
     // to give application developers a single stable release where the .flutter-plugins
     // file is still supported, but is deprecated, and let folks ensure (with CI or local
     // testing) that their workflows do not depend on the file.
