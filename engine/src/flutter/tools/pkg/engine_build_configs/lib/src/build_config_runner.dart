@@ -8,6 +8,7 @@ import 'dart:ffi' as ffi;
 import 'dart:io' as io show Directory, File, Process, ProcessResult;
 import 'dart:math';
 
+import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:path/path.dart' as p;
 import 'package:platform/platform.dart';
 import 'package:process_runner/process_runner.dart';
@@ -579,6 +580,28 @@ final class BuildRunner extends Runner {
     return min(multiplier * cores, 1000);
   }();
 
+  static final RegExp _gccRegex =
+      RegExp(r'^(.+)(:\d+:\d+:\s+(?:error|note|warning):\s+.*)$');
+
+  /// Converts relative [path], who is relative to [dirPath] to a relative path
+  /// of the `CWD`.
+  static String _makeRelative(String path, String dirPath) {
+    final String abs = p.join(dirPath, path);
+    return './${p.relative(abs)}';
+  }
+
+  /// Takes a [line] from compilation and makes the path relative to `CWD` where
+  /// the paths are relative to [outDir].
+  @visibleForTesting
+  static String fixGccPaths(String line, String outDir) {
+    final Match? match = _gccRegex.firstMatch(line);
+    if (match == null) {
+      return line;
+    } else {
+      return '${_makeRelative(match.group(1)!, outDir)}${match.group(2)}';
+    }
+  }
+
   Future<bool> _runNinja(RunnerEventHandler eventHandler) async {
     if (_isRbe) {
       if (!await _bootstrapRbe(eventHandler)) {
@@ -637,6 +660,8 @@ final class BuildRunner extends Runner {
             if (_ninjaProgress(eventHandler, command, line)) {
               return;
             }
+            // TODO(157816): Forward errors to `et`.
+            line = fixGccPaths(line, outDir);
             final List<int> bytes = utf8.encode('$line\n');
             stdoutOutput.addAll(bytes);
           },
