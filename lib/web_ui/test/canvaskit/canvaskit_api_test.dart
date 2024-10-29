@@ -1126,11 +1126,12 @@ void _canvasTests() {
       toSkRect(const ui.Rect.fromLTRB(0, 0, 100, 100)),
       null,
       null,
+      canvasKit.TileMode.Clamp,
     );
   });
 
   test('saveLayer without bounds', () {
-    canvas.saveLayer(SkPaint(), null, null, null);
+    canvas.saveLayer(SkPaint(), null, null, null, canvasKit.TileMode.Clamp);
   });
 
   test('saveLayer with filter', () {
@@ -1139,6 +1140,7 @@ void _canvasTests() {
       toSkRect(const ui.Rect.fromLTRB(0, 0, 100, 100)),
       canvasKit.ImageFilter.MakeBlur(1, 2, canvasKit.TileMode.Repeat, null),
       0,
+      canvasKit.TileMode.Repeat,
     );
   });
 

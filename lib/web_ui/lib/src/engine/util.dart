@@ -887,7 +887,7 @@ class LruCache<K extends Object, V extends Object> {
 }
 
 /// Returns the VM-compatible string for the tile mode.
-String tileModeString(ui.TileMode tileMode) {
+String tileModeString(ui.TileMode? tileMode) {
   switch (tileMode) {
     case ui.TileMode.clamp:
       return 'clamp';
@@ -897,6 +897,8 @@ String tileModeString(ui.TileMode tileMode) {
       return 'repeated';
     case ui.TileMode.decal:
       return 'decal';
+    case null:
+      return 'unspecified';
   }
 }
 

@@ -18,9 +18,10 @@ class Paint {
   Paint(Dart_Handle paint_objects, Dart_Handle paint_data);
 
   const DlPaint* paint(DlPaint& paint,
-                       const DisplayListAttributeFlags& flags) const;
+                       const DisplayListAttributeFlags& flags,
+                       DlTileMode tile_mode) const;
 
-  void toDlPaint(DlPaint& paint) const;
+  void toDlPaint(DlPaint& paint, DlTileMode tile_mode) const;
 
   bool isNull() const { return Dart_IsNull(paint_data_); }
   bool isNotNull() const { return !Dart_IsNull(paint_data_); }

@@ -33,8 +33,10 @@ constexpr SkScalar kShadowLightYOffset = -450;
 SKWASM_EXPORT void canvas_saveLayer(SkCanvas* canvas,
                                     SkRect* rect,
                                     SkPaint* paint,
-                                    SkImageFilter* backdrop) {
-  canvas->saveLayer(SkCanvas::SaveLayerRec(rect, paint, backdrop, 0));
+                                    SkImageFilter* backdrop,
+                                    SkTileMode backdropTileMode) {
+  canvas->saveLayer(SkCanvas::SaveLayerRec(rect, paint, backdrop,
+                                           backdropTileMode, nullptr, 0));
 }
 
 SKWASM_EXPORT void canvas_save(SkCanvas* canvas) {
