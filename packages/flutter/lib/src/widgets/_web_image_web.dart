@@ -130,7 +130,9 @@ class _ImgElementImageState extends State<_ImgElementImage> {
   void initState() {
     super.initState();
     _cachedImage = _WebImageCache._getOrCreateCachedImage(widget.src);
-    _cachedImage.state.addListener(_onCachedImageStateChange);
+    if (_cachedImage.state.value == _ImageLoadingState.loading) {
+      _cachedImage.state.addListener(_onCachedImageStateChange);
+    }
   }
 
   @override
@@ -188,14 +190,7 @@ class _WebImageCache {
     return info;
   }
 
-  static void _remove(String url) {
-    final _CachedImageInfo? info = _imageCache.remove(url);
-    info?.dispose();
-  }
-
   static void _clear() {
-    final Iterable<String> urlsInCache = _imageCache.keys;
-    urlsInCache.forEach(_remove);
     _imageCache.clear();
   }
 }
@@ -240,9 +235,6 @@ class _CachedImageInfo {
       state.value = _ImageLoadingState.error;
       _error = e;
     }
-  }
-
-  void dispose() {
     state.dispose();
   }
 }
