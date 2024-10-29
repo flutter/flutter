@@ -3366,7 +3366,7 @@ final class SelectionListenerNotifier extends ChangeNotifier {
     if (_statusListeners.isEmpty) {
       return;
     }
-    final List<SelectionListenerStatusCallback> localListeners = List<SelectionListenerStatusCallback>.of(_statusListeners);
+    final List<SelectionListenerStatusCallback> localListeners = List<SelectionListenerStatusCallback>.of(_statusListeners, growable: false);
     for (final SelectionListenerStatusCallback listener in localListeners) {
       try {
         if (_statusListeners.contains(listener)) {
