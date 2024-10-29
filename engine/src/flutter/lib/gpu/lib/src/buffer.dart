@@ -212,7 +212,11 @@ base class HostBuffer {
           offsetInBytes: 0, lengthInBytes: bytes.lengthInBytes);
     }
 
-    int padding = _offsetCursor % _gpuContext.minimumUniformByteAlignment;
+    int padding = _gpuContext.minimumUniformByteAlignment -
+        (_offsetCursor % _gpuContext.minimumUniformByteAlignment);
+    // If the padding is the full alignment size, then we're already aligned.
+    // So reset the padding to zero.
+    padding %= _gpuContext.minimumUniformByteAlignment;
     if (_offsetCursor + padding >= blockLengthInBytes) {
       DeviceBuffer buffer = _allocateNewBlock(blockLengthInBytes);
       _buffers[_frameCursor].add(buffer);

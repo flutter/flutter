@@ -250,6 +250,14 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       sampler = SamplerOptions();
     }
 
+    assert(() {
+      if (texture.storageMode == StorageMode.deviceTransient) {
+        throw Exception(
+            "Textures with StorageMode.deviceTransient cannot be bound to a RenderPass");
+      }
+      return true;
+    }());
+
     bool success = _bindTexture(
         slot.shader,
         slot.uniformName,
