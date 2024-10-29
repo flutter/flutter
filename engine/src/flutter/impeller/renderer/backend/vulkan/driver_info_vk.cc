@@ -338,13 +338,17 @@ bool DriverInfoVK::IsKnownBadDriver() const {
   if (adreno_gpu_.has_value()) {
     auto adreno = adreno_gpu_.value();
     switch (adreno) {
-      // see:
+      // See:
       // https://github.com/flutter/flutter/issues/154103
       //
       // Reports "VK_INCOMPLETE" when compiling certain entity shader with
       // vkCreateGraphicsPipelines, which is not a valid return status.
       // See https://github.com/flutter/flutter/issues/155185 .
       case AdrenoGPU::kAdreno630:
+      // See:
+      // https://github.com/flutter/flutter/issues/155185
+      // Unknown crashes but device is not easily acquirable.
+      case AdrenoGPU::kAdreno506:
         return true;
       default:
         return false;

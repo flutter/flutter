@@ -126,9 +126,10 @@ TEST(DriverInfoVKTest, EnabledDevicesAdreno) {
   EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 512"));
   EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 509"));
   EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 508"));
-  EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 506"));
   EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 505"));
   EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 504"));
+
+  EXPECT_TRUE(IsBadVersionTest("Adreno (TM) 506"));
 }
 
 }  // namespace impeller::testing
