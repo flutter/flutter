@@ -16,7 +16,7 @@ class SkwasmPaint implements ui.Paint {
   ///
   /// It is the responsibility of the caller to dispose of the returned handle
   /// when it's no longer needed.
-  PaintHandle toRawPaint() {
+  PaintHandle toRawPaint({ui.TileMode defaultBlurTileMode = ui.TileMode.decal}) {
     final rawPaint = paintCreate(
       isAntiAlias,
       blendMode.index,
@@ -47,7 +47,7 @@ class SkwasmPaint implements ui.Paint {
       final skwasmImageFilter = SkwasmImageFilter.fromUiFilter(filter);
       skwasmImageFilter.withRawImageFilter((nativeHandle) {
         paintSetImageFilter(rawPaint, nativeHandle);
-      });
+      }, defaultBlurTileMode: defaultBlurTileMode);
     }
 
     return rawPaint;

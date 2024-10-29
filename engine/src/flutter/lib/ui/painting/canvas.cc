@@ -60,7 +60,8 @@ void Canvas::saveLayerWithoutBounds(Dart_Handle paint_objects,
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     DlPaint dl_paint;
-    const DlPaint* save_paint = paint.paint(dl_paint, kSaveLayerWithPaintFlags);
+    const DlPaint* save_paint =
+        paint.paint(dl_paint, kSaveLayerWithPaintFlags, DlTileMode::kDecal);
     FML_DCHECK(save_paint);
     TRACE_EVENT0("flutter", "ui.Canvas::saveLayer (Recorded)");
     builder()->SaveLayer(nullptr, save_paint);
@@ -80,7 +81,8 @@ void Canvas::saveLayer(double left,
                                    SafeNarrow(right), SafeNarrow(bottom));
   if (display_list_builder_) {
     DlPaint dl_paint;
-    const DlPaint* save_paint = paint.paint(dl_paint, kSaveLayerWithPaintFlags);
+    const DlPaint* save_paint =
+        paint.paint(dl_paint, kSaveLayerWithPaintFlags, DlTileMode::kDecal);
     FML_DCHECK(save_paint);
     TRACE_EVENT0("flutter", "ui.Canvas::saveLayer (Recorded)");
     builder()->SaveLayer(&bounds, save_paint);
@@ -229,7 +231,7 @@ void Canvas::drawLine(double x1,
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawLineFlags);
+    paint.paint(dl_paint, kDrawLineFlags, DlTileMode::kDecal);
     builder()->DrawLine(SkPoint::Make(SafeNarrow(x1), SafeNarrow(y1)),
                         SkPoint::Make(SafeNarrow(x2), SafeNarrow(y2)),
                         dl_paint);
@@ -242,7 +244,7 @@ void Canvas::drawPaint(Dart_Handle paint_objects, Dart_Handle paint_data) {
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawPaintFlags);
+    paint.paint(dl_paint, kDrawPaintFlags, DlTileMode::kClamp);
     std::shared_ptr<const DlImageFilter> filter = dl_paint.getImageFilter();
     if (filter && !filter->asColorFilter()) {
       // drawPaint does an implicit saveLayer if an SkImageFilter is
@@ -264,7 +266,7 @@ void Canvas::drawRect(double left,
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawRectFlags);
+    paint.paint(dl_paint, kDrawRectFlags, DlTileMode::kDecal);
     builder()->DrawRect(SkRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
                                          SafeNarrow(right), SafeNarrow(bottom)),
                         dl_paint);
@@ -279,7 +281,7 @@ void Canvas::drawRRect(const RRect& rrect,
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawRRectFlags);
+    paint.paint(dl_paint, kDrawRRectFlags, DlTileMode::kDecal);
     builder()->DrawRRect(rrect.sk_rrect, dl_paint);
   }
 }
@@ -293,7 +295,7 @@ void Canvas::drawDRRect(const RRect& outer,
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawDRRectFlags);
+    paint.paint(dl_paint, kDrawDRRectFlags, DlTileMode::kDecal);
     builder()->DrawDRRect(outer.sk_rrect, inner.sk_rrect, dl_paint);
   }
 }
@@ -309,7 +311,7 @@ void Canvas::drawOval(double left,
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawOvalFlags);
+    paint.paint(dl_paint, kDrawOvalFlags, DlTileMode::kDecal);
     builder()->DrawOval(SkRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
                                          SafeNarrow(right), SafeNarrow(bottom)),
                         dl_paint);
@@ -326,7 +328,7 @@ void Canvas::drawCircle(double x,
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawCircleFlags);
+    paint.paint(dl_paint, kDrawCircleFlags, DlTileMode::kDecal);
     builder()->DrawCircle(SkPoint::Make(SafeNarrow(x), SafeNarrow(y)),
                           SafeNarrow(radius), dl_paint);
   }
@@ -346,9 +348,9 @@ void Canvas::drawArc(double left,
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, useCenter  //
-                              ? kDrawArcWithCenterFlags
-                              : kDrawArcNoCenterFlags);
+    paint.paint(dl_paint,
+                useCenter ? kDrawArcWithCenterFlags : kDrawArcNoCenterFlags,
+                DlTileMode::kDecal);
     builder()->DrawArc(
         SkRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top), SafeNarrow(right),
                          SafeNarrow(bottom)),
@@ -371,7 +373,7 @@ void Canvas::drawPath(const CanvasPath* path,
   }
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawPathFlags);
+    paint.paint(dl_paint, kDrawPathFlags, DlTileMode::kDecal);
     builder()->DrawPath(path->path(), dl_paint);
   }
 }
@@ -401,7 +403,8 @@ Dart_Handle Canvas::drawImage(const CanvasImage* image,
   auto sampling = ImageFilter::SamplingFromIndex(filterQualityIndex);
   if (display_list_builder_) {
     DlPaint dl_paint;
-    const DlPaint* opt_paint = paint.paint(dl_paint, kDrawImageWithPaintFlags);
+    const DlPaint* opt_paint =
+        paint.paint(dl_paint, kDrawImageWithPaintFlags, DlTileMode::kClamp);
     builder()->DrawImage(dl_image, SkPoint::Make(SafeNarrow(x), SafeNarrow(y)),
                          sampling, opt_paint);
   }
@@ -444,7 +447,7 @@ Dart_Handle Canvas::drawImageRect(const CanvasImage* image,
   if (display_list_builder_) {
     DlPaint dl_paint;
     const DlPaint* opt_paint =
-        paint.paint(dl_paint, kDrawImageRectWithPaintFlags);
+        paint.paint(dl_paint, kDrawImageRectWithPaintFlags, DlTileMode::kClamp);
     builder()->DrawImageRect(dl_image, src, dst, sampling, opt_paint,
                              DlCanvas::SrcRectConstraint::kFast);
   }
@@ -489,7 +492,7 @@ Dart_Handle Canvas::drawImageNine(const CanvasImage* image,
   if (display_list_builder_) {
     DlPaint dl_paint;
     const DlPaint* opt_paint =
-        paint.paint(dl_paint, kDrawImageNineWithPaintFlags);
+        paint.paint(dl_paint, kDrawImageNineWithPaintFlags, DlTileMode::kClamp);
     builder()->DrawImageNine(dl_image, icenter, dst, filter, opt_paint);
   }
   return Dart_Null();
@@ -524,13 +527,13 @@ void Canvas::drawPoints(Dart_Handle paint_objects,
     DlPaint dl_paint;
     switch (point_mode) {
       case DlCanvas::PointMode::kPoints:
-        paint.paint(dl_paint, kDrawPointsAsPointsFlags);
+        paint.paint(dl_paint, kDrawPointsAsPointsFlags, DlTileMode::kDecal);
         break;
       case DlCanvas::PointMode::kLines:
-        paint.paint(dl_paint, kDrawPointsAsLinesFlags);
+        paint.paint(dl_paint, kDrawPointsAsLinesFlags, DlTileMode::kDecal);
         break;
       case DlCanvas::PointMode::kPolygon:
-        paint.paint(dl_paint, kDrawPointsAsPolygonFlags);
+        paint.paint(dl_paint, kDrawPointsAsPolygonFlags, DlTileMode::kDecal);
         break;
     }
     builder()->DrawPoints(point_mode,
@@ -554,7 +557,7 @@ void Canvas::drawVertices(const Vertices* vertices,
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawVerticesFlags);
+    paint.paint(dl_paint, kDrawVerticesFlags, DlTileMode::kDecal);
     builder()->DrawVertices(vertices->vertices(), blend_mode, dl_paint);
   }
 }
@@ -603,7 +606,8 @@ Dart_Handle Canvas::drawAtlas(Dart_Handle paint_objects,
     }
 
     DlPaint dl_paint;
-    const DlPaint* opt_paint = paint.paint(dl_paint, kDrawAtlasWithPaintFlags);
+    const DlPaint* opt_paint =
+        paint.paint(dl_paint, kDrawAtlasWithPaintFlags, DlTileMode::kClamp);
     builder()->DrawAtlas(
         dl_image, reinterpret_cast<const SkRSXform*>(transforms.data()),
         reinterpret_cast<const SkRect*>(rects.data()), dl_color.data(),

@@ -2089,7 +2089,7 @@ class PlatformViewWithOtherBackDropFilter extends PlatformViewScenario {
     final Picture picture = recorder.endRecording();
     builder.addPicture(Offset.zero, picture);
 
-    final ImageFilter filter = ImageFilter.blur(sigmaX: 8, sigmaY: 8);
+    final ImageFilter filter = ImageFilter.blur(sigmaX: 8, sigmaY: 8, tileMode: TileMode.clamp);
     builder.pushBackdropFilter(filter);
 
     final PictureRecorder recorder2 = PictureRecorder();
@@ -2190,7 +2190,7 @@ class TwoPlatformViewsWithOtherBackDropFilter extends Scenario
     final Picture picture2 = recorder2.endRecording();
     builder.addPicture(const Offset(100, 100), picture2);
 
-    final ImageFilter filter = ImageFilter.blur(sigmaX: 8, sigmaY: 8);
+    final ImageFilter filter = ImageFilter.blur(sigmaX: 8, sigmaY: 8, tileMode: TileMode.clamp);
     builder.pushBackdropFilter(filter);
 
     builder.pushOffset(0, 600);
@@ -2277,7 +2277,7 @@ class PlatformViewWithNegativeBackDropFilter extends Scenario
     final Picture picture2 = recorder2.endRecording();
     builder.addPicture(const Offset(100, 100), picture2);
 
-    final ImageFilter filter = ImageFilter.blur(sigmaX: -8, sigmaY: 8);
+    final ImageFilter filter = ImageFilter.blur(sigmaX: -8, sigmaY: 8, tileMode: TileMode.clamp);
     builder.pushBackdropFilter(filter);
 
     final Scene scene = builder.build();

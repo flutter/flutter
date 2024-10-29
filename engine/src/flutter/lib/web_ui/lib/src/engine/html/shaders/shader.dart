@@ -717,7 +717,7 @@ abstract class EngineImageFilter implements ui.ImageFilter {
   factory EngineImageFilter.blur({
     required double sigmaX,
     required double sigmaY,
-    required ui.TileMode tileMode,
+    required ui.TileMode? tileMode,
   }) = _BlurEngineImageFilter;
 
   factory EngineImageFilter.matrix({
@@ -732,11 +732,11 @@ abstract class EngineImageFilter implements ui.ImageFilter {
 }
 
 class _BlurEngineImageFilter extends EngineImageFilter {
-  _BlurEngineImageFilter({ this.sigmaX = 0.0, this.sigmaY = 0.0, this.tileMode = ui.TileMode.clamp }) : super._();
+  _BlurEngineImageFilter({ this.sigmaX = 0.0, this.sigmaY = 0.0, this.tileMode }) : super._();
 
   final double sigmaX;
   final double sigmaY;
-  final ui.TileMode tileMode;
+  final ui.TileMode? tileMode;
 
   // TODO(ferhat): implement TileMode.
   @override

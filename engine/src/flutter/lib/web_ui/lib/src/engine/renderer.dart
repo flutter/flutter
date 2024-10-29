@@ -120,7 +120,7 @@ abstract class Renderer {
   ui.ImageFilter createBlurImageFilter({
     double sigmaX = 0.0,
     double sigmaY = 0.0,
-    ui.TileMode tileMode = ui.TileMode.clamp});
+    ui.TileMode? tileMode});
   ui.ImageFilter createDilateImageFilter({ double radiusX = 0.0, double radiusY = 0.0});
   ui.ImageFilter createErodeImageFilter({ double radiusX = 0.0, double radiusY = 0.0});
   ui.ImageFilter createMatrixImageFilter(

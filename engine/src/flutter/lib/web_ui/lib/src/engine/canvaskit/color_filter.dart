@@ -71,7 +71,9 @@ abstract class CkColorFilter implements CkManagedSkImageFilterConvertible {
   SkColorFilter _initRawColorFilter();
 
   @override
-  void withSkImageFilter(SkImageFilterBorrow borrow) {
+  void withSkImageFilter(SkImageFilterBorrow borrow, {
+    ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
+  }) {
     // Since ColorFilter has a const constructor it cannot store dynamically
     // created Skia objects. Therefore a new SkImageFilter is created every time
     // it's used. However, once used it's no longer needed, so it's deleted
@@ -80,6 +82,13 @@ abstract class CkColorFilter implements CkManagedSkImageFilterConvertible {
     borrow(skImageFilter);
     skImageFilter.delete();
   }
+
+  /// The blur ImageFilter will override this and return the necessary
+  /// value to hand to the saveLayer call. It is the only filter type that
+  /// needs to pass along a tile mode so we just return a default value of
+  /// clamp for color filters.
+  @override
+  ui.TileMode? get backdropTileMode => ui.TileMode.clamp;
 
   @override
   Matrix4 get transform => Matrix4.identity();

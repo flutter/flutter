@@ -21,12 +21,14 @@ external void canvasSave(CanvasHandle canvas);
   RawRect,
   PaintHandle,
   ImageFilterHandle,
+  Int
 )>(symbol: 'canvas_saveLayer', isLeaf: true)
 external void canvasSaveLayer(
   CanvasHandle canvas,
   RawRect rect,
   PaintHandle paint,
   ImageFilterHandle handle,
+  int backdropTileMode,
 );
 
 @Native<Void Function(CanvasHandle)>(symbol: 'canvas_restore', isLeaf: true)

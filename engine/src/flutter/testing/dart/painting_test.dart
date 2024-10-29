@@ -109,7 +109,7 @@ void main() {
     redClippedPicture.dispose();
   });
 
-  Image backdropBlurWithTileMode(TileMode tileMode) {
+  Image backdropBlurWithTileMode(TileMode? tileMode) {
     Picture makePicture(CanvasCallback callback) {
       final PictureRecorder recorder = PictureRecorder();
       final Canvas canvas = Canvas(recorder);
@@ -190,6 +190,20 @@ void main() {
 
     final ImageComparer comparer = await ImageComparer.create();
     await comparer.addGoldenImage(image, 'dart_ui_backdrop_filter_blur_repeated_tile_mode.png');
+
+    image.dispose();
+  });
+
+  test('BackdropFilter with Blur default TileMode acts as TileMode.mirror', () async {
+    final Image image = backdropBlurWithTileMode(null);
+
+    final ImageComparer comparer = await ImageComparer.create();
+    // It would be nice to compare the output here to the "mirror" golden
+    // image generated above, but this file name is where the results of
+    // this test will be written and the comparison will be done independently
+    // in a separate step. If we repeated the name of the "mirror" golden,
+    // we would just overwrite the results of the mirror test above.
+    await comparer.addGoldenImage(image, 'dart_ui_backdrop_filter_blur_default_tile_mode.png');
 
     image.dispose();
   });

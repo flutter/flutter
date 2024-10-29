@@ -28,14 +28,14 @@ class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
   static DlImageSampling SamplingFromIndex(int filterQualityIndex);
   static DlFilterMode FilterModeFromIndex(int index);
 
-  void initBlur(double sigma_x, double sigma_y, DlTileMode tile_mode);
+  void initBlur(double sigma_x, double sigma_y, int tile_mode_index);
   void initDilate(double radius_x, double radius_y);
   void initErode(double radius_x, double radius_y);
   void initMatrix(const tonic::Float64List& matrix4, int filter_quality_index);
   void initColorFilter(ColorFilter* colorFilter);
   void initComposeFilter(ImageFilter* outer, ImageFilter* inner);
 
-  const std::shared_ptr<const DlImageFilter> filter() const { return filter_; }
+  const std::shared_ptr<const DlImageFilter> filter(DlTileMode mode) const;
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
@@ -43,6 +43,7 @@ class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
   ImageFilter();
 
   std::shared_ptr<const DlImageFilter> filter_;
+  bool is_dynamic_tile_mode_ = false;
 };
 
 }  // namespace flutter

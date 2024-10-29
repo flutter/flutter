@@ -336,7 +336,7 @@ void main() {
       return builder.pushOpacity(100, oldLayer: oldLayer as OpacityEngineLayer?);
     });
     testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
-      return builder.pushBackdropFilter(ImageFilter.blur(), oldLayer: oldLayer as BackdropFilterEngineLayer?);
+      return builder.pushBackdropFilter(ImageFilter.blur(sigmaX: 1.0), oldLayer: oldLayer as BackdropFilterEngineLayer?);
     });
     testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
       return builder.pushShaderMask(

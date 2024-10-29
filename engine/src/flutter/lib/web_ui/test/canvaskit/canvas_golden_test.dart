@@ -450,7 +450,7 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.drawCircle(const ui.Offset(30, 30), 10, CkPaint());
   {
     canvas.saveLayerWithFilter(
-        kDefaultRegion, ui.ImageFilter.blur(sigmaX: 5, sigmaY: 10));
+        kDefaultRegion, ui.ImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp));
     canvas.drawCircle(const ui.Offset(10, 10), 10, CkPaint());
     canvas.drawCircle(const ui.Offset(50, 50), 10, CkPaint());
     canvas.restore();

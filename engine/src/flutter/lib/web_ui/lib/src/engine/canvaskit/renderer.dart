@@ -184,7 +184,7 @@ class CanvasKitRenderer implements Renderer {
   ui.ImageFilter createBlurImageFilter(
           {double sigmaX = 0.0,
           double sigmaY = 0.0,
-          ui.TileMode tileMode = ui.TileMode.clamp}) =>
+          ui.TileMode? tileMode}) =>
       CkImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
   @override
