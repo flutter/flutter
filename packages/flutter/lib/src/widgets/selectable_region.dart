@@ -1050,7 +1050,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
  }
 
  void _onAnyDragEnd(DragEndDetails details) {
-  debugPrint('any handle drag end');
    if (widget.selectionControls is! TextSelectionHandleControls) {
     _selectionOverlay!.hideMagnifier();
     _selectionOverlay!.showToolbar();
@@ -1129,7 +1128,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
-    debugPrint('start handle drag update');
     _selectionStartHandleDragPosition = _selectionStartHandleDragPosition + details.delta;
     // The value corresponds to the paint origin of the selection handle.
     // Offset it to the center of the line to make it feel more natural.
@@ -1158,7 +1156,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
-    debugPrint('end handle drag update');
     _selectionEndHandleDragPosition = _selectionEndHandleDragPosition + details.delta;
     // The value corresponds to the paint origin of the selection handle.
     // Offset it to the center of the line to make it feel more natural.
