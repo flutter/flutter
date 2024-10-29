@@ -679,9 +679,28 @@ void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
     return;
   }
 
+  std::optional<Rect> clipped_source =
+      source.Intersection(Rect::MakeSize(size));
+  if (!clipped_source) {
+    return;
+  }
+  if (*clipped_source != source) {
+    Scalar sx = dest.GetWidth() / source.GetWidth();
+    Scalar sy = dest.GetHeight() / source.GetHeight();
+    Scalar tx = dest.GetLeft() - source.GetLeft() * sx;
+    Scalar ty = dest.GetTop() - source.GetTop() * sy;
+    // clang-format off
+    Matrix src_to_dest(  sx, 0.0f, 0.0f, 0.0f,
+                       0.0f,   sy, 0.0f, 0.0f,
+                       0.0f, 0.0f, 1.0f, 0.0f,
+                         tx,   ty, 0.0f, 1.0f);
+    // clang-format on
+    dest = clipped_source->TransformBounds(src_to_dest);
+  }
+
   auto texture_contents = TextureContents::MakeRect(dest);
   texture_contents->SetTexture(image);
-  texture_contents->SetSourceRect(source);
+  texture_contents->SetSourceRect(*clipped_source);
   texture_contents->SetStrictSourceRect(src_rect_constraint ==
                                         SourceRectConstraint::kStrict);
   texture_contents->SetSamplerDescriptor(std::move(sampler));

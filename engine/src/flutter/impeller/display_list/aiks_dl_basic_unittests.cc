@@ -233,6 +233,26 @@ TEST_P(AiksTest, CanRenderImageRect) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, DrawImageRectSrcOutsideBounds) {
+  DisplayListBuilder builder;
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  // Use a source rect that is partially outside the bounds of the image.
+  auto source_rect = SkRect::MakeXYWH(
+      image->dimensions().fWidth * 0.25f, image->dimensions().fHeight * 0.4f,
+      image->dimensions().fWidth, image->dimensions().fHeight);
+
+  auto dest_rect = SkRect::MakeXYWH(100, 100, 600, 600);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kMidGrey());
+  builder.DrawRect(dest_rect, paint);
+
+  builder.DrawImageRect(image, source_rect, dest_rect,
+                        DlImageSampling::kNearestNeighbor);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderSimpleClips) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
