@@ -8,6 +8,7 @@ import 'dart:ui_web' as ui_web;
 
 import '../../rendering.dart';
 import '../../widgets.dart';
+import '../foundation/synchronous_future.dart';
 import '../painting/_network_image_web.dart';
 import '../web.dart' as web;
 
@@ -15,11 +16,11 @@ import '../web.dart' as web;
 ///
 /// The bytes may be unable to be fetched if they aren't from the same origin
 /// and the server hosting them does not allow cross-origin requests.
-Future<bool> checkIfImageBytesCanBeFetched(String url) async {
+Future<bool> checkIfImageBytesCanBeFetched(String url) {
   // First check if url is same origin.
   final Uri uri = Uri.parse(url);
   if (uri.origin == web.window.origin) {
-    return true;
+    return SynchronousFuture<bool>(true);
   }
 
   final Completer<web.XMLHttpRequest> completer =
@@ -59,18 +60,21 @@ Future<bool> checkIfImageBytesCanBeFetched(String url) async {
 }
 
 /// Returns a widget which displays the [src] in an <img> tag.
-Widget createImgElementWidget(String src,
-        {Key? key,
-        ImageLoadingBuilder? loadingBuilder,
-        ImageFrameBuilder? frameBuilder,
-        ImageErrorWidgetBuilder? errorBuilder}) =>
-    _ImgElementImage(
-      src,
-      key: key,
-      loadingBuilder: loadingBuilder,
-      frameBuilder: frameBuilder,
-      errorBuilder: errorBuilder,
-    );
+Widget createImgElementWidget(
+  String src, {
+  Key? key,
+  ImageLoadingBuilder? loadingBuilder,
+  ImageFrameBuilder? frameBuilder,
+  ImageErrorWidgetBuilder? errorBuilder,
+}) {
+  return _ImgElementImage(
+    src,
+    key: key,
+    loadingBuilder: loadingBuilder,
+    frameBuilder: frameBuilder,
+    errorBuilder: errorBuilder,
+  );
+}
 
 class _ImgElementImage extends StatefulWidget {
   const _ImgElementImage(
@@ -104,13 +108,16 @@ class _ImgElementImageState extends State<_ImgElementImage> {
 
   void _onCachedImageStateChange() {
     // Rebuild when the image state changes.
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
-  static const String _viewType = 'Browser__ImageElementType__';
+  static const String _viewType = 'Flutter__ImgElementImage__';
 
   static void _register() {
     assert(_registeredViewType == null);
+    _registeredViewType = _viewType;
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId,
         {Object? params}) {
       final Map<Object?, Object?> paramsMap = params! as Map<Object?, Object?>;
@@ -119,25 +126,17 @@ class _ImgElementImageState extends State<_ImgElementImage> {
     });
   }
 
-  HtmlElementView? htmlElementView;
-
-  num? naturalWidth;
-  num? naturalHeight;
-
-  int? imgElementId;
-
   @override
   void initState() {
     super.initState();
-    _cachedImage =
-        _WebImageCache._getOrCreateCachedImage(widget.src);
+    _cachedImage = _WebImageCache._getOrCreateCachedImage(widget.src);
     _cachedImage.state.addListener(_onCachedImageStateChange);
   }
 
   @override
   void dispose() {
-    super.dispose();
     _cachedImage.state.removeListener(_onCachedImageStateChange);
+    super.dispose();
   }
 
   @override
@@ -155,7 +154,8 @@ class _ImgElementImageState extends State<_ImgElementImage> {
           _ImageLoadingState.success =>
             widget.frameBuilder?.call(context, child!, 0, true),
           _ImageLoadingState.error =>
-            widget.errorBuilder?.call(context, info.error, null) ?? Container(),
+            widget.errorBuilder?.call(context, info.error, null) ??
+                const SizedBox.shrink(),
         };
         return builtWidget ?? child!;
       },
@@ -164,17 +164,13 @@ class _ImgElementImageState extends State<_ImgElementImage> {
         child: SizedBox(
           width: naturalWidth,
           height: naturalHeight,
-          child: _buildHtmlImage(),
+          child: HtmlElementView(
+            viewType: _ImgElementImageState._viewType,
+            creationParams: <String, String>{'src': widget.src},
+            hitTestBehavior: PlatformViewHitTestBehavior.transparent,
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildHtmlImage() {
-    return HtmlElementView(
-      viewType: _viewType,
-      creationParams: <String, String>{'src': widget.src},
-      hitTestBehavior: PlatformViewHitTestBehavior.transparent,
     );
   }
 }
@@ -190,6 +186,17 @@ class _WebImageCache {
       _imageCache[url] = info;
     }
     return info;
+  }
+
+  static void _remove(String url) {
+    final _CachedImageInfo? info = _imageCache.remove(url);
+    info?.dispose();
+  }
+
+  static void _clear() {
+    final Iterable<String> urlsInCache = _imageCache.keys;
+    urlsInCache.forEach(_remove);
+    _imageCache.clear();
   }
 }
 
@@ -221,13 +228,9 @@ class _CachedImageInfo {
 
   late Object? _error;
   Object get error {
-    assert(hasError);
+    assert(state.value == _ImageLoadingState.error);
     return _error!;
   }
-
-  bool get isLoading => state.value == _ImageLoadingState.loading;
-  bool get isSuccess => state.value == _ImageLoadingState.success;
-  bool get hasError => state.value == _ImageLoadingState.error;
 
   Future<void> _startDecoding() async {
     try {
@@ -237,5 +240,9 @@ class _CachedImageInfo {
       state.value = _ImageLoadingState.error;
       _error = e;
     }
+  }
+
+  void dispose() {
+    state.dispose();
   }
 }

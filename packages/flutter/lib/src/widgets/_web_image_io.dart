@@ -9,7 +9,7 @@ import '../../widgets.dart';
 /// The bytes may be unable to be fetched if they aren't from the same origin
 /// and the sever hosting them does not allow cross-origin requests.
 Future<bool> checkIfImageBytesCanBeFetched(String url) {
-  // On mobile, there are no cross-origin restrictions.
+  // On mobile and desktop there are no cross-origin restrictions.
   return Future<bool>.value(true);
 }
 
@@ -19,4 +19,5 @@ Widget createImgElementWidget(String src,
         ImageLoadingBuilder? loadingBuilder,
         ImageFrameBuilder? frameBuilder,
         ImageErrorWidgetBuilder? errorBuilder}) =>
-    throw UnimplementedError();
+    throw UnsupportedError('Creating an Image widget using an <img> tag is '
+        'only supported on Web.');

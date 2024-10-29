@@ -715,6 +715,7 @@ class Image extends StatefulWidget {
   /// The image to display.
   final ImageProvider image;
 
+  /// {@template flutter.widgets.Image.framebuilder}
   /// A builder function responsible for creating the widget that represents
   /// this image.
   ///
@@ -774,8 +775,10 @@ class Image extends StatefulWidget {
   ///
   /// ** See code in examples/api/lib/widgets/image/image.frame_builder.0.dart **
   /// {@end-tool}
+  /// {@endtemplate}
   final ImageFrameBuilder? frameBuilder;
 
+  /// {@template flutter.widgets.Image.loadingBuilder}
   /// A builder that specifies the widget to display to the user while an image
   /// is still loading.
   ///
@@ -817,8 +820,10 @@ class Image extends StatefulWidget {
   /// before rendering the completed image.
   ///
   /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/loading_progress_image.mp4}
+  /// {@endtemplate}
   final ImageLoadingBuilder? loadingBuilder;
 
+  /// {@template flutter.widgets.Image.errorBuilder}
   /// A builder function that is called if an error occurs during image loading.
   ///
   /// If this builder is not provided, any exceptions will be reported to
@@ -831,6 +836,7 @@ class Image extends StatefulWidget {
   ///
   /// ** See code in examples/api/lib/widgets/image/image.error_builder.0.dart **
   /// {@end-tool}
+  /// {@endtemplate}
   final ImageErrorWidgetBuilder? errorBuilder;
 
   /// If non-null, require the image to have this width (in logical pixels).
