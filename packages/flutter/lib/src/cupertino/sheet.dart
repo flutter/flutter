@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'route.dart';
 
 // Offset from offscreen below to stopping below the top of the screen.
 final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
@@ -35,6 +37,49 @@ final Animatable<Offset> _kTopDownTween = Tween<Offset>(
 const double _kSheetScaleFactor = 0.0835;
 
 final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kSheetScaleFactor);
+
+/// Docs placeholder
+Future<T?> showCupertinoSheet<T>({
+  required BuildContext context,
+  required WidgetBuilder pageBuilder,
+  bool useRootNavigator = true,
+  bool useNestedNavigation = false,
+}) {
+  final BuildContext topLevelSheetContext = CupertinoSheetController.maybeOf(context)?.topLevelContext ?? context;
+
+  final WidgetBuilder builder = switch (useNestedNavigation) {
+    false => pageBuilder,
+    true => (BuildContext context) {
+      return Navigator(
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          return CupertinoPageRoute<void>(
+            builder: (BuildContext context) {
+              return PopScope(
+                canPop: settings.name != '/',
+                onPopInvokedWithResult: (bool didPop, Object? result) {
+                  if (didPop) {
+                    return;
+                  }
+                  Navigator.of(topLevelSheetContext).pop();
+                },
+                child: Semantics(
+                  scopesRoute: true,
+                  explicitChildNodes: true,
+                  child: pageBuilder(context),
+                ),
+              );
+            }
+          );
+        },
+      );
+    }
+  };
+
+  return Navigator.of(topLevelSheetContext, rootNavigator: useRootNavigator).push<T>(CupertinoSheetRoute<T>(
+    pageBuilder: builder,
+  ));
+}
 
 /// Docs placeholder
 class CupertinoSheetTransition extends StatelessWidget {
@@ -79,6 +124,8 @@ class CupertinoSheetTransition extends StatelessWidget {
     );
 
     final Animation<BorderRadiusGeometry> radiusAnimation = curvedAnimation.drive(decorationTween);
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
 
     return SlideTransition(
       position: curvedAnimation.drive(_kTopDownTween),
@@ -253,8 +300,11 @@ class CupertinoSheetController extends InheritedWidget {
     Navigator.of(context).pop();
   }
 
+  // FOR REVIEW: Not sure what the smartest way to do this is. My intinct is to
+  // always have this return false. But if so, should this widget not be an
+  // InheritedWidget?
   @override
-  bool updateShouldNotify(CupertinoSheetController oldWidget) => context != oldWidget.context;
+  bool updateShouldNotify(CupertinoSheetController oldWidget) => oldWidget.key != null && key != null && oldWidget.key != key;
 }
 
 /// Docs placeholder
