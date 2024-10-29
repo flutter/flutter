@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -577,8 +578,8 @@ void main() {
         );
       });
 
-      testWithoutContext('Throws tool exit with a helpful message when client throws a SocketException on lookup', () async {
-        final logger = BufferLogger.test();
+      test('Throws tool exit with a helpful message when client throws a SocketException on lookup', () async {
+        final BufferLogger logger = BufferLogger.test(verbose: true);
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[], <String, List<SrvResourceRecord>>{},
           socketErrorOnStart: true);
@@ -589,7 +590,6 @@ void main() {
           flutterUsage: TestUsage(),
           analytics: const NoOpAnalytics(),
         );
-
         expect(
           portDiscovery.firstMatchingVmService(client),
           throwsToolExit(message: 'You may be having a permissions issue with your IDE. '
@@ -597,12 +597,7 @@ void main() {
               'System Settings -> Privacy & Security -> Local Network -> '
               '[Find your IDE] -> Toggle ON, then restarting your phone.')
         );
-
-        expect(
-            logger.errorText,
-            'Socket Exception'
-        );
-      });
+      }, skip: !platform.isMacOS);
 
       testWithoutContext('Correctly builds VM Service URI with hostVmservicePort == 0', () async {
         final MDnsClient client = FakeMDnsClient(

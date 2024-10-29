@@ -15,6 +15,7 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
+import 'globals.dart';
 import 'reporting/reporting.dart';
 
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
@@ -233,16 +234,22 @@ class MDnsVmServiceDiscovery {
 
       try {
         ptrResourceStream = client.lookup<PtrResourceRecord>(
-            ResourceRecordQuery.serverPointer(dartVmServiceName),
-            timeout: timeout
+          ResourceRecordQuery.serverPointer(dartVmServiceName),
+          timeout: timeout,
         );
-      } on SocketException catch (e, stacktrace){
+      } on SocketException catch (e, stacktrace) {
         _logger.printError(e.message);
         _logger.printTrace(stacktrace.toString());
-        throwToolExit('You may be having a permissions issue with your IDE. '
-            'Please try going to '
-            'System Settings -> Privacy & Security -> Local Network -> '
-            '[Find your IDE] -> Toggle ON, then restarting your phone.');
+        if (platform.isMacOS) {
+          throwToolExit(
+            'You may be having a permissions issue with your IDE. '
+                'Please try going to '
+                'System Settings -> Privacy & Security -> Local Network -> '
+                '[Find your IDE] -> Toggle ON, then restarting your phone.',
+          );
+        } else {
+          throwToolExit('');
+        }
       }
 
       await for (final PtrResourceRecord ptr in ptrResourceStream) {
