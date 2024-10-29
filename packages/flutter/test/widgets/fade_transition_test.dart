@@ -36,8 +36,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/157312
-  testWidgets('No exception when calling markNeedsPaint after changing the value and then resetting the animated value to 0',
-  (WidgetTester tester) async {
+  testWidgets('No exception when calling markNeedsPaint during opacity changes', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
