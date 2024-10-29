@@ -38,7 +38,7 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-  });  
+  });
 
   group('packages get/upgrade', () {
     late Directory tempDir;
