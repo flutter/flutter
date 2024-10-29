@@ -102,6 +102,9 @@ std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
 RenderPass::GetOrCreatePipeline() {
   // Infer the pipeline layout based on the shape of the RenderTarget.
   auto pipeline_desc = pipeline_descriptor_;
+
+  pipeline_desc.SetSampleCount(render_target_.GetSampleCount());
+
   for (const auto& it : render_target_.GetColorAttachments()) {
     auto& color = GetColorAttachmentDescriptor(it.first);
     color.format = render_target_.GetRenderTargetPixelFormat();
