@@ -1386,6 +1386,7 @@ targets:
     runIf:
       - packages/flutter_tools/templates/**
       - .ci.yaml
+      - dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart
 
   - name: Linux android_java17_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
@@ -1405,6 +1406,7 @@ targets:
     runIf:
       - packages/flutter_tools/templates/**
       - .ci.yaml
+      - dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart
 
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
@@ -3912,7 +3914,6 @@ targets:
   - name: Mac framework_tests_impeller
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true # https://github.com/flutter/flutter/issues/157552
     properties:
       cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
