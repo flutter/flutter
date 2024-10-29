@@ -530,6 +530,13 @@ void main() {
     expect(events[3].name, equals('generator_task'));
   });
 
+  test('fixes gcc paths', () {
+    final String outDir = path.join(io.Directory.current.path, 'foo', 'bar');
+    const String error = 'flutter/impeller/renderer/backend/metal/allocator_mtl.h:69:33: error: foobar';
+    final String fixed = BuildRunner.fixGccPaths('../../$error', outDir);
+    expect(fixed, './$error');
+  });
+
   test('GlobalBuildRunner skips generators when runGenerators is false',
       () async {
     final Build targetBuild = buildConfig.builds[0];
