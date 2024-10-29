@@ -637,8 +637,6 @@ workspace:
       ),
     });
 
-
-
     testUsingContext('get --no-emit-legacy-flutter-plugins omits ".flutter-plugins"', () async {
       final String projectPath = await createProject(
         tempDir,
