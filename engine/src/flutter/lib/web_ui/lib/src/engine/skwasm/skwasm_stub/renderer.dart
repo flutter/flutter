@@ -28,7 +28,7 @@ class SkwasmRenderer implements Renderer {
   }
 
   @override
-  ui.ImageFilter createBlurImageFilter({double sigmaX = 0.0, double sigmaY = 0.0, ui.TileMode tileMode = ui.TileMode.clamp}) {
+  ui.ImageFilter createBlurImageFilter({double sigmaX = 0.0, double sigmaY = 0.0, ui.TileMode? tileMode}) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 

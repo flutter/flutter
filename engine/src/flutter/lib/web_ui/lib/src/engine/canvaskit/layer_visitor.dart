@@ -402,7 +402,7 @@ class MeasureVisitor extends LayerVisitor {
         transformedBounds = rectFromSkIRect(
           skFilter.getOutputBounds(toSkRect(transformedBounds)),
         );
-      });
+      }, defaultBlurTileMode: ui.TileMode.decal);
     }
     picture.sceneBounds = transformedBounds;
 

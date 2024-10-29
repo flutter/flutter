@@ -29,7 +29,7 @@ class CkPaint implements ui.Paint {
   ///
   /// The caller is responsible for deleting the returned object when it's no
   /// longer needed.
-  SkPaint toSkPaint() {
+  SkPaint toSkPaint({ui.TileMode defaultBlurTileMode = ui.TileMode.decal}) {
     final skPaint = SkPaint();
     skPaint.setAntiAlias(isAntiAlias);
     skPaint.setBlendMode(toSkBlendMode(blendMode));
@@ -65,7 +65,7 @@ class CkPaint implements ui.Paint {
     if (localImageFilter != null) {
       localImageFilter.withSkImageFilter((skImageFilter) {
         skPaint.setImageFilter(skImageFilter);
-      });
+      }, defaultBlurTileMode: defaultBlurTileMode);
     }
 
     return skPaint;

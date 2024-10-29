@@ -591,7 +591,7 @@ class ImageFilter {
   factory ImageFilter.blur({
     double sigmaX = 0.0,
     double sigmaY = 0.0,
-    TileMode tileMode = TileMode.clamp
+    TileMode? tileMode
   }) => engine.renderer.createBlurImageFilter(
     sigmaX: sigmaX,
     sigmaY: sigmaY,

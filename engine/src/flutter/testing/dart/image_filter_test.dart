@@ -68,7 +68,7 @@ void main() async {
     return bytes.buffer.asUint32List();
   }
 
-  ImageFilter makeBlur(double sigmaX, double sigmaY, [TileMode tileMode = TileMode.clamp]) =>
+  ImageFilter makeBlur(double sigmaX, double sigmaY, [TileMode? tileMode]) =>
     ImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
   ImageFilter makeDilate(double radiusX, double radiusY) =>
@@ -106,6 +106,9 @@ void main() async {
     return <ImageFilter>[
       makeBlur(10.0, 10.0),
       makeBlur(10.0, 10.0, TileMode.decal),
+      makeBlur(10.0, 10.0, TileMode.clamp),
+      makeBlur(10.0, 10.0, TileMode.mirror),
+      makeBlur(10.0, 10.0, TileMode.repeated),
       makeBlur(10.0, 20.0),
       makeBlur(20.0, 20.0),
       makeDilate(10.0, 20.0),
@@ -181,6 +184,24 @@ void main() async {
 
     final Uint32List bytes = await getBytesForPaint(paint);
     checkBytes(bytes, greenCenterBlurred, greenSideBlurred, greenCornerBlurred);
+  });
+
+  test('ImageFilter - blur toString', () async {
+
+    var filter = makeBlur(1.9, 2.1);
+    expect(filter.toString(), 'ImageFilter.blur(1.9, 2.1, unspecified)');
+
+    filter = makeBlur(1.9, 2.1, TileMode.decal);
+    expect(filter.toString(), 'ImageFilter.blur(1.9, 2.1, decal)');
+
+    filter = makeBlur(1.9, 2.1, TileMode.clamp);
+    expect(filter.toString(), 'ImageFilter.blur(1.9, 2.1, clamp)');
+
+    filter = makeBlur(1.9, 2.1, TileMode.mirror);
+    expect(filter.toString(), 'ImageFilter.blur(1.9, 2.1, mirror)');
+
+    filter = makeBlur(1.9, 2.1, TileMode.repeated);
+    expect(filter.toString(), 'ImageFilter.blur(1.9, 2.1, repeated)');
   });
 
   test('ImageFilter - dilate', () async {
@@ -279,7 +300,7 @@ void main() async {
   test('Composite ImageFilter toString', () {
     expect(
       ImageFilter.compose(outer: makeBlur(20.0, 20.0, TileMode.decal), inner: makeBlur(10.0, 10.0)).toString(),
-      contains('blur(10.0, 10.0, clamp) -> blur(20.0, 20.0, decal)'),
+      contains('blur(10.0, 10.0, unspecified) -> blur(20.0, 20.0, decal)'),
     );
 
     // Produces a flat list of filters
