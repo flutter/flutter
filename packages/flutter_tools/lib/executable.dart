@@ -28,7 +28,6 @@ import 'src/commands/doctor.dart';
 import 'src/commands/downgrade.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
-import 'src/commands/generate.dart';
 import 'src/commands/generate_localizations.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/install.dart';
@@ -219,7 +218,6 @@ List<FlutterCommand> generateCommands({
     signals: globals.signals,
   ),
   EmulatorsCommand(),
-  GenerateCommand(),
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,
     logger: globals.logger,

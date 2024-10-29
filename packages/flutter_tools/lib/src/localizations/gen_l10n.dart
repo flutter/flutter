@@ -34,6 +34,9 @@ Future<LocalizationsGenerator> generateLocalizations({
     fileSystem: projectDir.fileSystem,
     logger: logger,
   );
+  print(StackTrace.current);
+  print('options.syntheticPackage: ${options.syntheticPackage}');
+  print('flutterManifest.generateSyntheticPackage: ${flutterManifest?.generateSyntheticPackage}');
   if (options.syntheticPackage && (flutterManifest == null || !flutterManifest.generateSyntheticPackage)) {
     throwToolExit(
       'Attempted to generate localizations code without having '

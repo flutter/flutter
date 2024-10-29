@@ -343,7 +343,7 @@ class LocalizationOptions {
        outputLocalizationFile = outputLocalizationFile ?? 'app_localizations.dart',
        outputClass = outputClass ?? 'AppLocalizations',
        useDeferredLoading = useDeferredLoading ?? false,
-       syntheticPackage = syntheticPackage ?? true,
+       syntheticPackage = syntheticPackage ?? false, //
        requiredResourceAttributes = requiredResourceAttributes ?? false,
        nullableGetter = nullableGetter ?? true,
        format = format ?? false,
@@ -476,6 +476,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
   if (contents.trim().isEmpty) {
     return LocalizationOptions(arbDir: defaultArbDir);
   }
+  print(contents);
   final YamlNode yamlNode;
   try {
     yamlNode = loadYamlNode(file.readAsStringSync());
