@@ -6,8 +6,10 @@
 library;
 
 import 'dart:math' as math;
-import 'theme.dart';
+
 import 'package:flutter/widgets.dart';
+
+import 'theme.dart';
 
 /// A [CupertinoMagnifier] used for magnifying text in cases where a user's
 /// finger may be blocking the point of interest, like a selection handle.
