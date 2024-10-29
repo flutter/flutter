@@ -6,6 +6,7 @@
 library;
 
 import 'dart:math' as math;
+import 'theme.dart';
 import 'package:flutter/widgets.dart';
 
 /// A [CupertinoMagnifier] used for magnifying text in cases where a user's
@@ -215,6 +216,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
 
   @override
   Widget build(BuildContext context) {
+    final CupertinoThemeData themeData = CupertinoTheme.of(context);
     return AnimatedPositioned(
       duration: CupertinoTextMagnifier._kDragAnimationDuration,
       curve: widget.animationCurve,
@@ -223,6 +225,10 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
       child: CupertinoMagnifier(
         inOutAnimation: _ioAnimation,
         additionalFocalPointOffset: Offset(0, _verticalFocalPointAdjustment),
+        borderSide: BorderSide(
+          color: themeData.primaryColor,
+          width: 2.0,
+        ),
       ),
     );
   }
