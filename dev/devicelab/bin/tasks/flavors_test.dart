@@ -48,7 +48,7 @@ Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
   );
 
   final Uint8List assetManifestFileData = File(
-    path.join(projectDir, 'build', 'app', 'intermediates', 'assets', 'paidDebug', 'flutter_assets', 'AssetManifest.bin'),
+    path.join(projectDir, 'build', 'app', 'intermediates', 'assets', 'paidDebug', 'mergePaidDebugAssets', 'flutter_assets', 'AssetManifest.bin'),
   ).readAsBytesSync();
 
   final Map<Object?, Object?> assetManifest = const StandardMessageCodec()
