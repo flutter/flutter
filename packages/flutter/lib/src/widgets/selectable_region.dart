@@ -3342,13 +3342,14 @@ final class SelectionListenerNotifier extends ChangeNotifier {
 
   final ObserverList<SelectionListenerStatusCallback> _statusListeners = ObserverList<SelectionListenerStatusCallback>();
 
-  /// Calls the listener every time the [SelectionListenerStatus] of a [SelectionListener]
+  /// Calls the listener every time the [SelectionListenerStatus] of a [SelectableRegion]
   /// is updated.
   ///
   /// Listeners can be removed with [removeStatusListener].
   void addStatusListener(SelectionListenerStatusCallback listener) => _statusListeners.add(listener);
 
-  /// Stops calling the listener every time the status of the selection changes.
+  /// Stops calling the listener every time the [SelectionListenerStatus] of a
+  /// [SelectableRegion] is updated.
   ///
   /// Listeners can be added with [addStatusListener].
   void removeStatusListener(SelectionListenerStatusCallback listener) => _statusListeners.remove(listener);
