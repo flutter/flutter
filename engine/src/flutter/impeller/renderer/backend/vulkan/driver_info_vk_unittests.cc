@@ -36,6 +36,19 @@ TEST_P(DriverInfoVKTest, CanDumpToLog) {
   EXPECT_TRUE(log.str().find("Driver Information") != std::string::npos);
 }
 
+TEST(DriverInfoVKTest, CanIdentifyBadMaleoonDriver) {
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(
+              [](VkPhysicalDevice device, VkPhysicalDeviceProperties* prop) {
+                prop->vendorID = 0x19E5;  // Huawei
+                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+              })
+          .Build();
+
+  EXPECT_TRUE(context->GetDriverInfo()->IsKnownBadDriver());
+}
+
 bool IsBadVersionTest(std::string_view driver_name, bool qc = true) {
   auto const context =
       MockVulkanContextBuilder()
