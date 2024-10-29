@@ -38,12 +38,13 @@
       - packages/integration_test/**/*
 
 'a: text input':
-  - changed-files:
-    - any-glob-to-any-file:
-      - '**/text/*'
-      - '**/*text*'
-    - all-globs-to-all-files:
-      - '!**/*context*'
+  - all:
+    - changed-files:
+      - any-glob-to-any-file:
+        - '**/text/*'
+        - '**/*text*'
+      - all-globs-to-all-files:
+        - '!**/*context*'
 
 'd: api docs':
   - changed-files:
