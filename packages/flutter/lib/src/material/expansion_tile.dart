@@ -606,7 +606,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       curve: Curves.easeIn,
     );
     _iconTurns = _animationController.drive(_halfTween.chain(_easeInTween));
-     _border = _animationController.drive(_borderTween.chain(_easeOutTween));
+    _border = _animationController.drive(_borderTween.chain(_easeOutTween));
     _headerColor = _animationController.drive(_headerColorTween.chain(_easeInTween));
     _iconColor = _animationController.drive(_iconColorTween.chain(_easeInTween));
     _backgroundColor = _animationController.drive(_backgroundColorTween.chain(_easeOutTween));
