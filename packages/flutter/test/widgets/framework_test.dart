@@ -1284,6 +1284,16 @@ void main() {
     );
   });
 
+  test('Widget DiagnosticableTree apis do not break', () {
+    // can construct the widget without code changes
+    final _DiagnosticsOverrideWidget widget = _DiagnosticsOverrideWidget();
+    expect(widget.toString(), 'short');
+    expect(widget.toStringShort(), 'short');
+    expect(widget.toStringShallow(), 'shallow');
+    expect(widget.toStringDeep(), 'deep');
+    expect(widget.debugDescribeChildren(), isEmpty);
+  });
+
   testWidgets('scheduleBuild while debugBuildingDirtyElements is true', (WidgetTester tester) async {
     // ignore here is required for testing purpose because changing the flag properly is hard
     // ignore: invalid_use_of_protected_member
@@ -2494,4 +2504,40 @@ class _NullElement extends Element {
 
   @override
   bool get debugDoingBuild => throw UnimplementedError();
+}
+
+class _DiagnosticsOverrideWidget extends LeafRenderObjectWidget {
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    throw UnimplementedError();
+  }
+
+  @override
+  String toStringShort(/*adding any parameter is a breaking change*/) =>
+      'short';
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren(
+      /*adding any parameter is a breaking change*/) {
+    return const <DiagnosticsNode>[];
+  }
+
+  @override
+  String toStringShallow({
+    String joiner = ', ',
+    DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    // adding any parameter is a breaking change
+  }) {
+    return 'shallow';
+  }
+
+  @override
+  String toStringDeep({
+    String prefixLineOne = '',
+    String? prefixOtherLines,
+    DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    // adding any parameter is a breaking change
+  }) {
+    return 'deep';
+  }
 }
