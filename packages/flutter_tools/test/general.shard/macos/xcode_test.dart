@@ -579,7 +579,6 @@ void main() {
         doneCompleter.complete();
       });
       await doneCompleter.future;
-      // await shutdownHooks.runShutdownHooks(logger);
       xcdevice.dispose();
       expect(logger.traceText, contains('xcdevice observe --usb exited with code 0'));
       expect(logger.traceText, contains('xcdevice observe --wifi exited with code 0'));
