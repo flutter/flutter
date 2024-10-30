@@ -19,14 +19,7 @@ import 'fixtures.dart' as fixtures;
 
 void main() {
   // Find the engine repo.
-  final Engine engine;
-  try {
-    engine = Engine.findWithin();
-  } catch (e) {
-    io.stderr.writeln(e);
-    io.exitCode = 1;
-    return;
-  }
+  final engine = Engine.findWithin();
 
   final BuilderConfig buildConfig = BuilderConfig.fromJson(
     path: 'linux_test_config',
@@ -249,7 +242,9 @@ void main() {
     expect((events[7] as RunnerResult).okMessage, equals('OK'));
   });
 
-  test('GlobalBuildRunner passes the specified -j when explicitly provided in an RBE build', () async {
+  test(
+      'GlobalBuildRunner passes the specified -j when explicitly provided in an RBE build',
+      () async {
     final Build targetBuild = buildConfig.builds[0];
     final BuildRunner buildRunner = BuildRunner(
       platform: FakePlatform(
@@ -329,7 +324,9 @@ void main() {
     );
   });
 
-  test('GlobalBuildRunner sets RBE_disable_remote when remote builds are disabled', () async {
+  test(
+      'GlobalBuildRunner sets RBE_disable_remote when remote builds are disabled',
+      () async {
     final Build targetBuild = buildConfig.builds[0];
     final BuildRunner buildRunner = BuildRunner(
       platform: FakePlatform(
@@ -369,7 +366,9 @@ void main() {
     );
   });
 
-  test('GlobalBuildRunner sets RBE_exec_strategy when a non-default value is passed in the RbeConfig', () async {
+  test(
+      'GlobalBuildRunner sets RBE_exec_strategy when a non-default value is passed in the RbeConfig',
+      () async {
     final Build targetBuild = buildConfig.builds[0];
     final BuildRunner buildRunner = BuildRunner(
       platform: FakePlatform(
@@ -412,7 +411,9 @@ void main() {
     );
   });
 
-  test('GlobalBuildRunner passes the specified -j when explicitly provided in a non-RBE build', () async {
+  test(
+      'GlobalBuildRunner passes the specified -j when explicitly provided in a non-RBE build',
+      () async {
     final Build targetBuild = buildConfig.builds[0];
     final BuildRunner buildRunner = BuildRunner(
       platform: FakePlatform(
@@ -532,7 +533,8 @@ void main() {
 
   test('fixes gcc paths', () {
     final String outDir = path.join(io.Directory.current.path, 'foo', 'bar');
-    const String error = 'flutter/impeller/renderer/backend/metal/allocator_mtl.h:69:33: error: foobar';
+    const String error =
+        'flutter/impeller/renderer/backend/metal/allocator_mtl.h:69:33: error: foobar';
     final String fixed = BuildRunner.fixGccPaths('../../$error', outDir);
     expect(fixed, './$error');
   });

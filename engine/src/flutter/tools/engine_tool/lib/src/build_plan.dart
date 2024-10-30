@@ -16,6 +16,7 @@ const _flagConcurrency = 'concurrency';
 const _flagStrategy = 'build-strategy';
 const _flagRbe = 'rbe';
 const _flagLto = 'lto';
+const _flagExtraGnArgs = 'gn-args';
 
 /// Describes what (platform, targets) and how (strategy, options) to build.
 ///
@@ -75,6 +76,11 @@ final class BuildPlan {
         }
         throw FatalError('Invalid value for --$_flagConcurrency: $value');
       }(),
+      extraGnArgs: () {
+        final value = args.multiOption(_flagExtraGnArgs);
+        _checkExtraGnArgs(value);
+        return value;
+      }(),
     );
   }
 
@@ -84,11 +90,60 @@ final class BuildPlan {
     required this.useRbe,
     required this.useLto,
     required this.concurrency,
-  }) {
+    required Iterable<String> extraGnArgs,
+  }) : extraGnArgs = List.unmodifiable(extraGnArgs) {
     if (!useRbe && strategy == BuildStrategy.remote) {
       throw FatalError(
         'Cannot use remote builds without RBE enabled.\n\n$_rbeInstructions',
       );
+    }
+  }
+
+  /// Arguments that cannot be provided to [BuildPlan.extraGnArgs].
+  ///
+  /// Instead, provide them explicitly as other [BuildPlan] arguments.
+  @visibleForTesting
+  static const reservedGnArgs = {
+    _flagRbe,
+    _flagLto,
+    'no-$_flagRbe',
+    'no-$_flagLto',
+    // If we are to expand this list to include flags that are not a 1:1 mapping
+    // - for example we want to reserve "--foo-bar" but it's called "--use-baz"
+    // in "et", let's (a) re-think having these arguments named differently and
+    // (b) if necessary, consider changing this set to a map instead so a clear
+    // error can be presented below.
+  };
+
+  /// Error thrown when [reservedGnArgs] are used as [extraGnArgs].
+  @visibleForTesting
+  static final reservedGnArgsError = FatalError(
+    'Flags such as ${reservedGnArgs.join(', ')} should be specified as '
+    'direct arguments to "et" and not using "--gn-args". For example, '
+    '`et build --no-lto` instead of `et build --gn-args="--no-lto"`.',
+  );
+
+  /// Error thrown when a non-flag argument is provided as [extraGnArgs].
+  @visibleForTesting
+  static final argumentsMustBeFlagsError = FatalError(
+    'Arguments provided to --gn-args must be flags (booleans) and be '
+    'specified as either in the format "--flag" or "--no-flag". Options '
+    'that are not flags or are abberviated ("-F") are not currently '
+    'supported; consider filing a request: '
+    'https://fluter.dev/to/engine-tool-bug.',
+  );
+
+  static void _checkExtraGnArgs(Iterable<String> gnArgs) {
+    for (final arg in gnArgs) {
+      if (!arg.startsWith('--') || arg.contains('=') || arg.contains(' ')) {
+        throw argumentsMustBeFlagsError;
+      }
+
+      // Strip off the prefix and compare it to reserved flags.
+      final withoutPrefix = arg.replaceFirst('--', '');
+      if (reservedGnArgs.contains(withoutPrefix)) {
+        throw reservedGnArgsError;
+      }
     }
   }
 
@@ -175,6 +230,18 @@ final class BuildPlan {
       help: 'How many jobs to run in parallel.',
     );
 
+    // Add --gn-args.
+    parser.addMultiOption(
+      _flagExtraGnArgs,
+      help: ''
+          'Additional arguments to provide to "gn".\n'
+          'GN arguments change the parameters of the compiler and invalidate '
+          'the current build, and should be used sparingly. If there is an '
+          'engine build that should be reused and tested on CI prefer adding '
+          'the arguments to "//flutter/ci/builders/local_engine.json".',
+      hide: !environment.verbose,
+    );
+
     return builds;
   }
 
@@ -201,6 +268,13 @@ final class BuildPlan {
   /// Whether to build with LTO (link-time optimization).
   final bool useLto;
 
+  /// Additional GN arguments to use for a build.
+  ///
+  /// By contract, these arguments are always strictly _flags_ (not options),
+  /// and specified as either `--flag`, `-F`, or as the negative variant (such
+  /// as `--no-flag`).
+  final List<String> extraGnArgs;
+
   @override
   bool operator ==(Object other) {
     return other is BuildPlan &&
@@ -208,12 +282,20 @@ final class BuildPlan {
         strategy == other.strategy &&
         useRbe == other.useRbe &&
         useLto == other.useLto &&
-        concurrency == other.concurrency;
+        concurrency == other.concurrency &&
+        const ListEquality<Object?>().equals(extraGnArgs, other.extraGnArgs);
   }
 
   @override
   int get hashCode {
-    return Object.hash(build.name, strategy, useRbe, useLto, concurrency);
+    return Object.hash(
+      build.name,
+      strategy,
+      useRbe,
+      useLto,
+      concurrency,
+      Object.hashAll(extraGnArgs),
+    );
   }
 
   /// Converts this build plan to its equivalent [RbeConfig].
@@ -236,6 +318,7 @@ final class BuildPlan {
     return [
       if (!useRbe) '--no-rbe',
       if (useLto) '--lto' else '--no-lto',
+      ...extraGnArgs,
     ];
   }
 
@@ -248,6 +331,7 @@ final class BuildPlan {
     buffer.writeln('  useRbe: $useRbe');
     buffer.writeln('  strategy: $strategy');
     buffer.writeln('  concurrency: $concurrency');
+    buffer.writeln('  extraGnArgs: $extraGnArgs');
     buffer.write('>');
     return buffer.toString();
   }
