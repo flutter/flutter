@@ -588,7 +588,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   late AnimationController _animationController;
   late Animation<double> _iconTurns;
   late CurvedAnimation _heightFactor;
-  late Animation<ShapeBorder?> _border;
   late Animation<Color?> _headerColor;
   late Animation<Color?> _iconColor;
   late Animation<Color?> _backgroundColor;
@@ -606,7 +605,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       curve: Curves.easeIn,
     );
     _iconTurns = _animationController.drive(_halfTween.chain(_easeInTween));
-    _border = _animationController.drive(_borderTween.chain(_easeOutTween));
     _headerColor = _animationController.drive(_headerColorTween.chain(_easeInTween));
     _iconColor = _animationController.drive(_iconColorTween.chain(_easeInTween));
     _backgroundColor = _animationController.drive(_backgroundColorTween.chain(_easeOutTween));
@@ -710,10 +708,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final Color backgroundColor = _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent;
-    final ShapeBorder expansionTileBorder = _border.value ?? const Border(
-      top: BorderSide(color: Colors.transparent),
-      bottom: BorderSide(color: Colors.transparent),
-    );
     final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.antiAlias;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String onTapHint = _isExpanded
@@ -733,65 +727,50 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         break;
     }
 
-    final Decoration decoration = ShapeDecoration(
-      color: backgroundColor,
-      shape: expansionTileBorder,
-    );
-
-    final Widget tile = Padding(
-      padding: decoration.padding,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Semantics(
-            hint: semanticsHint,
-            onTapHint: onTapHint,
-            child: ListTileTheme.merge(
-              iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
-              textColor: _headerColor.value,
-              child: ListTile(
-                enabled: widget.enabled,
-                onTap: _handleTap,
-                dense: widget.dense,
-                visualDensity: widget.visualDensity,
-                enableFeedback: widget.enableFeedback,
-                contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
-                leading: widget.leading ?? _buildLeadingIcon(context),
-                title: widget.title,
-                subtitle: widget.subtitle,
-                trailing: widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
-                minTileHeight: widget.minTileHeight,
-                internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
-              ),
+    final Widget tile = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Semantics(
+          hint: semanticsHint,
+          onTapHint: onTapHint,
+          child: ListTileTheme.merge(
+            iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
+            textColor: _headerColor.value,
+            child: ListTile(
+              enabled: widget.enabled,
+              onTap: _handleTap,
+              dense: widget.dense,
+              visualDensity: widget.visualDensity,
+              enableFeedback: widget.enableFeedback,
+              contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
+              leading: widget.leading ?? _buildLeadingIcon(context),
+              title: widget.title,
+              subtitle: widget.subtitle,
+              trailing: widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
+              minTileHeight: widget.minTileHeight,
+              internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+              shape: ShapeBorder.lerp(widget.shape, widget.collapsedShape, _animationController.value),
             ),
           ),
-          ClipRect(
-            child: Align(
-              alignment: widget.expandedAlignment
-                ?? expansionTileTheme.expandedAlignment
-                ?? Alignment.center,
-              heightFactor: _heightFactor.value,
-              child: child,
-            ),
+        ),
+        ClipRect(
+          child: Align(
+            alignment: widget.expandedAlignment
+              ?? expansionTileTheme.expandedAlignment
+              ?? Alignment.center,
+            heightFactor: _heightFactor.value,
+            child: child,
           ),
-        ],
-      ),
+        ),
+      ],
     );
 
-    final bool isShapeProvided = widget.shape != null || expansionTileTheme.shape != null
-      || widget.collapsedShape != null || expansionTileTheme.collapsedShape != null;
-
-    if (isShapeProvided) {
-      return Material(
-        clipBehavior: clipBehavior,
-        color: backgroundColor,
-        shape: expansionTileBorder,
-        child: tile,
-      );
-    }
-
-    return DecoratedBox(
-      decoration: decoration,
+     return Material(
+      clipBehavior: clipBehavior,
+      color: Color.lerp(widget.collapsedBackgroundColor, backgroundColor,
+          _animationController.value),
+      shape: ShapeBorder.lerp(
+          widget.shape, widget.collapsedShape, _animationController.value),
       child: tile,
     );
   }
