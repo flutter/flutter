@@ -28,12 +28,13 @@ abstract final class FlutterGlobalOptions {
   static const String kContinuousIntegrationFlag = 'ci';
   static const String kDeviceIdOption = 'device-id';
   static const String kDisableAnalyticsFlag = 'disable-analytics';
-  static const String kEmitLegacyFlutterPluginsFlag = 'emit-legacy-flutter-plugins';
   static const String kEnableAnalyticsFlag = 'enable-analytics';
   static const String kLocalEngineOption = 'local-engine';
   static const String kLocalEngineSrcPathOption = 'local-engine-src-path';
   static const String kLocalEngineHostOption = 'local-engine-host';
   static const String kLocalWebSDKOption = 'local-web-sdk';
+  // TODO(matanlurey): Remove one stable after https://github.com/flutter/flutter/issues/157819.
+  static const String kImplicitPubspecResolution = 'implicit-pubspec-resolution';
   static const String kMachineFlag = 'machine';
   static const String kPackagesOption = 'packages';
   static const String kPrefixedErrorsFlag = 'prefixed-errors';
@@ -132,13 +133,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // testing) that their workflows do not depend on the file.
     //
     // See https://github.com/flutter/flutter/issues/157532.
-    argParser.addFlag(FlutterGlobalOptions.kEmitLegacyFlutterPluginsFlag,
+    argParser.addFlag(FlutterGlobalOptions.kImplicitPubspecResolution,
       defaultsTo: true,
-      help: 'Whether to write a ".flutter-plugins" as tooling output.\n'
-            'If true, both ".flutter-plugins" and ".flutter-plugins-dependnecies" '
-            'are written for application packages that use plugins, otherwise if '
-            'false only ".flutter-plugins-dependencies" is written.\n'
-            'See https://docs.flutter.dev/release/breaking-changes/flutter-plugins-configuration.',
+      help: 'Whether to support (deprecated) implicit pubspec resolution '
+            'features, each of which are slated for removal in a future stable '
+            'release. By setting to "true", the following occurs:\n'
+            '  1. The generation of ".flutter-plugins" (https://flutter.dev/to/flutter-plugins-configuration)\n'
+            '  2. Including plugins registered as "dev_dependencies" in release mode\n'
+            '  3. Flutter localizations are by default output to synthetic "flutter_gen" package\n'
+            '\n'
+            'This flag will become "false" by default, and then features removed.',
       hide: !verboseHelp,
     );
 

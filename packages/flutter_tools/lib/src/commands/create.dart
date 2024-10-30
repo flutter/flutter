@@ -459,7 +459,7 @@ class CreateCommand extends CreateBase {
           macOSPlatform: includeMacos,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,
-          writeLegacyPluginsList: boolArg(FlutterGlobalOptions.kEmitLegacyFlutterPluginsFlag, global: true),
+          writeLegacyPluginsList: boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true),
         );
       }
     }

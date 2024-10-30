@@ -637,7 +637,7 @@ workspace:
       ),
     });
 
-    testUsingContext('get --no-emit-legacy-flutter-plugins omits ".flutter-plugins"', () async {
+    testUsingContext('get --no-implicit-pubspec-resolution omits ".flutter-plugins"', () async {
       final String projectPath = await createProject(
         tempDir,
         arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
@@ -647,7 +647,7 @@ workspace:
       removeGeneratedFiles(exampleProjectPath);
 
       // Running flutter packages get also resolves the dependencies in the example/ project.
-      await runCommandIn(projectPath, 'get', globalArgs: <String>['--no-emit-legacy-flutter-plugins']);
+      await runCommandIn(projectPath, 'get', globalArgs: <String>['--no-implicit-pubspec-resolution']);
 
       expectDependenciesResolved(projectPath);
       expectDependenciesResolved(exampleProjectPath);

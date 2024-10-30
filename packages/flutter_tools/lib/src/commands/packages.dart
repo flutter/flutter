@@ -384,7 +384,7 @@ class PackagesGetCommand extends FlutterCommand {
     if (rootProject != null) {
       // We need to regenerate the platform specific tooling for both the project
       // itself and example(if present).
-      final bool writeLegacyPluginsList = boolArg(FlutterGlobalOptions.kEmitLegacyFlutterPluginsFlag, global: true);
+      final bool writeLegacyPluginsList = boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true);
       await rootProject.regeneratePlatformSpecificTooling(
         writeLegacyPluginsList: writeLegacyPluginsList,
       );
