@@ -1,4 +1,4 @@
-Signature: f877d04be9ba846b33a28f123f16bc2d
+Signature: b88bfcf32c741925c5824b2644e96417
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9416,10 +9416,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../flutter/third_party/skia/include/core/SkFontScanner.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/ports/SkFontMgr_Fontations.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/include/ports/SkFontScanner_Fontations.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/include/ports/SkFontScanner_FreeType.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/utils/PreshapeTool.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/utils/TextPreshape.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/utils/TextPreshape.h + ../../../flutter/third_party/skia/LICENSE
@@ -9432,16 +9429,13 @@ ORIGIN: ../../../flutter/third_party/skia/src/codec/SkCrabbyAvifCodec.cpp + ../.
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkCrabbyAvifCodec.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegMetadataDecoderImpl.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegMetadataDecoderImpl.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkFontScanner.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/win/GrGLMakeWinInterface.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontMgr_android_ndk.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontations_empty.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontScanner_FreeType_priv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sfnt/SkOTTable_sbix.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/skia/include/core/SkFontScanner.h
 FILE: ../../../flutter/third_party/skia/include/ports/SkFontMgr_Fontations.h
-FILE: ../../../flutter/third_party/skia/include/ports/SkFontScanner_Fontations.h
-FILE: ../../../flutter/third_party/skia/include/ports/SkFontScanner_FreeType.h
 FILE: ../../../flutter/third_party/skia/modules/skottie/utils/PreshapeTool.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/utils/TextPreshape.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/utils/TextPreshape.h
@@ -9454,10 +9448,10 @@ FILE: ../../../flutter/third_party/skia/src/codec/SkCrabbyAvifCodec.cpp
 FILE: ../../../flutter/third_party/skia/src/codec/SkCrabbyAvifCodec.h
 FILE: ../../../flutter/third_party/skia/src/codec/SkJpegMetadataDecoderImpl.cpp
 FILE: ../../../flutter/third_party/skia/src/codec/SkJpegMetadataDecoderImpl.h
+FILE: ../../../flutter/third_party/skia/src/core/SkFontScanner.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/win/GrGLMakeWinInterface.cpp
 FILE: ../../../flutter/third_party/skia/src/ports/SkFontMgr_android_ndk.cpp
 FILE: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontations_empty.cpp
-FILE: ../../../flutter/third_party/skia/src/ports/SkFontScanner_FreeType_priv.h
 FILE: ../../../flutter/third_party/skia/src/sfnt/SkOTTable_sbix.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2024 Google Inc.
@@ -9816,10 +9810,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontScanner_fontations.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontScanner_fontations_priv.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontScanner_fontations.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/src/ports/SkFontScanner_fontations.cpp
-FILE: ../../../flutter/third_party/skia/src/ports/SkFontScanner_fontations_priv.h
+FILE: ../../../flutter/third_party/skia/src/ports/SkFontScanner_fontations.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2024 The Android Open Source Project
 
