@@ -38,7 +38,7 @@ disposables are disposed.
 If a tests is opted out, the reasons should be clearly explained
 in the comments.
 
-It is ok to opt out a test when a test
+It is ok to opt out a test when the test
 throws an exception and the code did not finalize properly.
 
 While some exceptions should be finalized properly
