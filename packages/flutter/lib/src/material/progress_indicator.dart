@@ -237,7 +237,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     }
 
     // Draw the stop indicator.
-    if (value != null && stopIndicatorRadius != null && stopIndicatorRadius !> 0) {
+    if (value != null && stopIndicatorRadius != null && stopIndicatorRadius! > 0) {
       drawStopIndicator();
     }
 
