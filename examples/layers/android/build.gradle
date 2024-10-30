@@ -13,10 +13,12 @@ allprojects {
     }
 }
 
-rootProject.layout.buildDirectory.set(file('../build'))
+Directory newBuildDir = rootProject.layout.buildDirectory.dir("../../build").get()
+rootProject.layout.buildDirectory.value(newBuildDir)
 
 subprojects {
-    project.layout.buildDirectory.set(file("${rootProject.layout.buildDirectory}/${project.name}"))
+    def newSubprojectBuildDir = newBuildDir.dir(project.name)
+    project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 subprojects {
     project.evaluationDependsOn(':app')
