@@ -1950,9 +1950,7 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
   /// locations for start and end [SelectionEdgeUpdateEvent]s.
   @protected
   void clearInternalSelectionState() {
-    for (Selectable selectable in selectables) {
-      clearInternalSelectionStateForSelectable(selectable);
-    }
+    selectables.forEach(clearInternalSelectionStateForSelectable);
     _lastStartEdgeUpdateGlobalPosition = null;
     _lastEndEdgeUpdateGlobalPosition = null;
   }
