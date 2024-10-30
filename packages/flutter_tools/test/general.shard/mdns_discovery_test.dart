@@ -592,10 +592,13 @@ void main() {
 
         expect(
           portDiscovery.firstMatchingVmService(client),
-          throwsToolExit(message: 'You might be having a permissions issue with your IDE. '
-            'Please try going to '
-            'System Settings -> Privacy & Security -> Local Network -> '
-            '[Find your IDE] -> Toggle ON, then restart your phone.')
+            throwsToolExit(
+              message:
+              'You might be having a permissions issue with your IDE. '
+                  'Please try going to '
+                  'System Settings -> Privacy & Security -> Local Network -> '
+                  '[Find your IDE] -> Toggle ON, then restart your phone.',
+          )
         );
       }, skip: !globals.platform.isMacOS); // [intended] This tool exit message only works for macOS
 
