@@ -21,55 +21,43 @@ class PositionerSettingsContainer {
         parentAnchor: WindowPositionerAnchor.left,
         childAnchor: WindowPositionerAnchor.right,
         offset: const Offset(0, 0),
-        constraintAdjustments: {
-          WindowPositionerConstraintAdjustment.slideX,
-          WindowPositionerConstraintAdjustment.slideY
-        }),
+        constraintAdjustments: {}),
+    PositionerSetting(
+        name: "Top",
+        parentAnchor: WindowPositionerAnchor.top,
+        childAnchor: WindowPositionerAnchor.bottom,
+        offset: const Offset(0, 0),
+        constraintAdjustments: {}),
     PositionerSetting(
         name: "Right",
         parentAnchor: WindowPositionerAnchor.right,
         childAnchor: WindowPositionerAnchor.left,
         offset: const Offset(0, 0),
-        constraintAdjustments: {
-          WindowPositionerConstraintAdjustment.slideX,
-          WindowPositionerConstraintAdjustment.slideY
-        }),
+        constraintAdjustments: {}),
     PositionerSetting(
         name: "Bottom Left",
         parentAnchor: WindowPositionerAnchor.bottomLeft,
         childAnchor: WindowPositionerAnchor.topRight,
         offset: const Offset(0, 0),
-        constraintAdjustments: {
-          WindowPositionerConstraintAdjustment.slideX,
-          WindowPositionerConstraintAdjustment.slideY
-        }),
+        constraintAdjustments: {}),
     PositionerSetting(
         name: "Bottom",
         parentAnchor: WindowPositionerAnchor.bottom,
         childAnchor: WindowPositionerAnchor.top,
         offset: const Offset(0, 0),
-        constraintAdjustments: {
-          WindowPositionerConstraintAdjustment.slideX,
-          WindowPositionerConstraintAdjustment.slideY
-        }),
+        constraintAdjustments: {}),
     PositionerSetting(
         name: "Bottom Right",
         parentAnchor: WindowPositionerAnchor.bottomRight,
         childAnchor: WindowPositionerAnchor.topLeft,
         offset: const Offset(0, 0),
-        constraintAdjustments: {
-          WindowPositionerConstraintAdjustment.slideX,
-          WindowPositionerConstraintAdjustment.slideY
-        }),
+        constraintAdjustments: {}),
     PositionerSetting(
         name: "Center",
         parentAnchor: WindowPositionerAnchor.center,
         childAnchor: WindowPositionerAnchor.center,
         offset: const Offset(0, 0),
-        constraintAdjustments: {
-          WindowPositionerConstraintAdjustment.slideX,
-          WindowPositionerConstraintAdjustment.slideY
-        }),
+        constraintAdjustments: {}),
     PositionerSetting(
         name: "Custom",
         parentAnchor: WindowPositionerAnchor.left,

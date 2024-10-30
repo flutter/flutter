@@ -6,6 +6,7 @@ class SatelliteWindowContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final window = WindowContext.of(context)!.window;
+    final dpr = MediaQuery.of(context).devicePixelRatio;
 
     final widget = Scaffold(
       appBar: AppBar(title: const Text('Satellite')),
@@ -15,9 +16,10 @@ class SatelliteWindowContent extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'View #${window.view.viewId}\n'
-              'Parent View: ${window.parent?.view.viewId}\n'
-              'Logical Size: ${window.size.width}\u00D7${window.size.height}',
+              'View ID: ${window.view.viewId}\n'
+              'Parent View ID: ${window.parent?.view.viewId}\n'
+              'View Size:\n${(window.view.physicalSize.width / dpr).toStringAsFixed(1)}\u00D7${(window.view.physicalSize.height / dpr).toStringAsFixed(1)}\n'
+              'Window Size:\n${window.size.width}\u00D7${window.size.height}',
               textAlign: TextAlign.center,
             ),
           ],

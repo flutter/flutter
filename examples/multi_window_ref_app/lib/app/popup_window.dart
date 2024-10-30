@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'window_settings.dart';
 
 class PopupWindowContent extends StatelessWidget {
   const PopupWindowContent({super.key});
@@ -6,6 +7,7 @@ class PopupWindowContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final window = WindowContext.of(context)!.window;
+    final dpr = MediaQuery.of(context).devicePixelRatio;
 
     final widget = Container(
       decoration: BoxDecoration(
@@ -40,7 +42,7 @@ class PopupWindowContent extends StatelessWidget {
                   await createPopup(
                       context: context,
                       parent: window,
-                      size: const Size(200, 200),
+                      size: WindowSettings().popupSize,
                       anchorRect: Rect.fromLTWH(
                           0, 0, window.size.width, window.size.height),
                       positioner: const WindowPositioner(
@@ -52,15 +54,17 @@ class PopupWindowContent extends StatelessWidget {
                           WindowPositionerConstraintAdjustment.slideY,
                         },
                       ),
-                      builder: (BuildContext context) => const PopupWindowContent());
+                      builder: (BuildContext context) =>
+                          const PopupWindowContent());
                 },
-                child: const Text('Another popup'),
+                child: const Text('Child popup'),
               ),
               const SizedBox(height: 16.0),
               Text(
-                'View #${window.view.viewId}\n'
-                'Parent View: ${window.parent?.view.viewId}\n'
-                'Logical Size: ${window.size.width}\u00D7${window.size.height}',
+                'View ID: ${window.view.viewId}\n'
+                'Parent View ID: ${window.parent?.view.viewId}\n'
+                'View Size: ${(window.view.physicalSize.width / dpr).toStringAsFixed(1)}\u00D7${(window.view.physicalSize.height / dpr).toStringAsFixed(1)}\n'
+                'Window Size: ${window.size.width}\u00D7${window.size.height}',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onPrimary,

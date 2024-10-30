@@ -44,6 +44,7 @@ class _MainWindowState extends State<MainWindow> {
   int selectedRowIndex = -1;
   final positionerSettingsModifier = PositionerSettingsModifier();
   final List<Window> _managedWindows = <Window>[];
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -65,18 +66,38 @@ class _MainWindowState extends State<MainWindow> {
         children: [
           Expanded(
             flex: 60,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: _ActiveWindowsTable(
-                windows: windows,
-                selectedRowIndex: selectedRowIndex,
-                onSelectedRowIndexChanged: (int index) =>
-                    setState(() => selectedRowIndex = index),
-              ),
+            child: Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 0, 0, 10),
+                  child: Text(
+                      textAlign: TextAlign.left,
+                      "Select a row below to set the parent for the next dialog, satellite, or popup window. If no row is selected, the next window will be created without a parent."),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 0, 25),
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      controller: _scrollController,
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        scrollDirection: Axis.vertical,
+                        child: _ActiveWindowsTable(
+                          windows: windows,
+                          selectedRowIndex: selectedRowIndex,
+                          onSelectedRowIndexChanged: (int index) =>
+                              setState(() => selectedRowIndex = index),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
-            flex: 40,
+            flex: 35,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -142,9 +163,11 @@ class _ActiveWindowsTable extends StatelessWidget {
       columns: const [
         DataColumn(
           label: SizedBox(
-            width: 20,
+            width: 60,
             child: Text(
-              'ID',
+              'View ID',
+              textAlign: TextAlign.center,
+              softWrap: true,
               style: TextStyle(
                 fontSize: 16,
               ),
@@ -153,9 +176,11 @@ class _ActiveWindowsTable extends StatelessWidget {
         ),
         DataColumn(
           label: SizedBox(
-            width: 120,
+            width: 200,
             child: Text(
-              'Type',
+              'Window Archetype',
+              textAlign: TextAlign.center,
+              softWrap: true,
               style: TextStyle(
                 fontSize: 16,
               ),
@@ -164,7 +189,7 @@ class _ActiveWindowsTable extends StatelessWidget {
         ),
         DataColumn(
             label: SizedBox(
-              width: 20,
+              width: 40,
               child: Text(''),
             ),
             numeric: true),
@@ -192,17 +217,32 @@ class _ActiveWindowsTable extends StatelessWidget {
           },
           cells: [
             DataCell(
-              Text('$viewId'),
+              SizedBox(
+                width: 60,
+                child: Text(
+                  '$viewId',
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
             DataCell(
-              Text(archetype.toString().replaceFirst('WindowArchetype.', '')),
+              SizedBox(
+                width: 180,
+                child: Text(
+                  archetype.toString().replaceFirst('WindowArchetype.', ''),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
             DataCell(
-              IconButton(
-                icon: const Icon(Icons.delete_outlined),
-                onPressed: () {
-                  destroyWindow(context, window);
-                },
+              SizedBox(
+                width: 40,
+                child: IconButton(
+                  icon: const Icon(Icons.delete_outlined),
+                  onPressed: () {
+                    destroyWindow(context, window);
+                  },
+                ),
               ),
             ),
           ],
@@ -234,9 +274,9 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
   @override
   Widget build(BuildContext context) {
     return Card.outlined(
-      margin: const EdgeInsets.symmetric(horizontal: 25),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(25, 0, 25, 5),
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -259,7 +299,8 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
                         context: context,
                         size: _settings.regularSize,
                         builder: (BuildContext context) {
-                          return const MaterialApp(home: RegularWindowContent());
+                          return const MaterialApp(
+                              home: RegularWindowContent());
                         });
                   },
                   child: const Text('Regular'),
@@ -418,9 +459,9 @@ class _PositionerEditorCardState extends State<_PositionerEditorCard> {
   @override
   Widget build(BuildContext context) {
     return Card.outlined(
-      margin: const EdgeInsets.symmetric(horizontal: 25),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
       child: Padding(
-          padding: const EdgeInsets.fromLTRB(25, 0, 15, 5),
+          padding: const EdgeInsets.fromLTRB(20, 0, 15, 5),
           child: ListenableBuilder(
               listenable: widget.positionerSettingsModifier,
               builder: (BuildContext context, _) {

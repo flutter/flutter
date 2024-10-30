@@ -6,7 +6,7 @@ class WindowSettings {
       this.floatingRegularSize = const Size(300, 300),
       this.dialogSize = const Size(300, 250),
       this.satelliteSize = const Size(150, 300),
-      this.popupSize = const Size(200, 200),
+      this.popupSize = const Size(220, 220),
       this.tipSize = const Size(140, 140),
       this.anchorToWindow = false,
       this.anchorRect = const Rect.fromLTWH(0, 0, 1000, 1000)});
