@@ -574,10 +574,7 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
     return {};
   }
 
-  Scalar min_size =
-      (pass.GetSampleCount() == SampleCount::kCount4 ? kMinStrokeSizeMSAA
-                                                     : kMinStrokeSize) /
-      max_basis;
+  Scalar min_size = kMinStrokeSize / max_basis;
   Scalar stroke_width = std::max(stroke_width_, min_size);
 
   auto& host_buffer = renderer.GetTransientsBuffer();

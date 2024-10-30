@@ -16,11 +16,6 @@ namespace impeller {
 
 class Tessellator;
 
-/// @brief The minimum stroke size can be less than one physical pixel because
-///        of MSAA, but no less that half a physical pixel otherwise we might
-///        not hit one of the sample positions.
-static constexpr Scalar kMinStrokeSizeMSAA = 0.5f;
-
 static constexpr Scalar kMinStrokeSize = 1.0f;
 
 struct GeometryResult {

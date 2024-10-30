@@ -42,11 +42,9 @@ GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                  RenderPass& pass) const {
   auto& transform = entity.GetTransform();
 
-  Scalar half_width = stroke_width_ < 0
-                          ? 0.0
-                          : LineGeometry::ComputePixelHalfWidth(
-                                transform, stroke_width_,
-                                pass.GetSampleCount() == SampleCount::kCount4);
+  Scalar half_width = stroke_width_ < 0 ? 0.0
+                                        : LineGeometry::ComputePixelHalfWidth(
+                                              transform, stroke_width_);
 
   const std::shared_ptr<Tessellator>& tessellator = renderer.GetTessellator();
 
