@@ -1916,7 +1916,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///  * [elevation], the actual elevation of this [SemanticsNode].
   @Deprecated(
     'This was caches for internal calculation and is no longer needed. '
-    'This feature was deprecated after v3.26.0.'
+    'This feature was deprecated after v3.27.0-0.0.pre-307-gb29f972348.'
   )
   double? elevationAdjustment;
 
