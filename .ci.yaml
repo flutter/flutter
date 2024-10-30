@@ -2663,6 +2663,7 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey fast_scroll_large_images__memory
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/157843
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
