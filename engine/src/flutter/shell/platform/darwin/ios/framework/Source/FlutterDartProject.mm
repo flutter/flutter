@@ -218,6 +218,12 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     settings.leak_vm = leakDartVM.boolValue;
   }
 
+  NSNumber* enableMergedPlatformUIThread =
+      [mainBundle objectForInfoDictionaryKey:@"FLTEnableMergedPlatformUIThread"];
+  if (enableMergedPlatformUIThread != nil) {
+    settings.merged_platform_ui_thread = enableMergedPlatformUIThread.boolValue;
+  }
+
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // There are no ownership concerns here as all mappings are owned by the
   // embedder and not the engine.
