@@ -35,7 +35,7 @@ void main() {
 
       final String imageUrl = '${web_shim.window.origin}/images/image.jpg';
 
-      await tester.pumpWidget(WebImage(imageUrl));
+      await tester.pumpWidget(WebImage.network(imageUrl));
       await tester.pumpAndSettle();
 
       // Since the request for the bytes succeeds, this should put an
@@ -55,7 +55,7 @@ void main() {
       };
 
       await tester.pumpWidget(
-          const WebImage('https://www.example.com/images/frame.png'));
+          WebImage.network('https://www.example.com/images/frame.png'));
       await tester.pumpAndSettle();
 
       // Since the request for the bytes succeeds, this should put an
@@ -75,7 +75,7 @@ void main() {
       };
 
       await tester.pumpWidget(
-          const WebImage('https://www.example.com/images/frame.png'));
+          WebImage.network('https://www.example.com/images/frame.png'));
       await tester.pumpAndSettle();
 
       // Since the request for the bytes succeeds, this should put an

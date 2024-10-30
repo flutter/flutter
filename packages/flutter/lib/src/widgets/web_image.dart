@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../foundation.dart';
 import '../../widgets.dart';
-import '_web_image_io.dart' if (dart.library.js_interop) '_web_image_web.dart';
+import '_web_image_io.dart' if (dart.library.js_interop) '_web_image_web.dart'
+    as impl;
 
 /// A substitute for [Image.network] that follows the web's [same origin policy][].
 ///
@@ -42,15 +44,29 @@ import '_web_image_io.dart' if (dart.library.js_interop) '_web_image_web.dart';
 class WebImage extends StatefulWidget {
   /// Creates a web image.
   const WebImage(
-    this.src, {
+    this.provider, {
     super.key,
     this.loadingBuilder,
     this.frameBuilder,
     this.errorBuilder,
   });
 
-  /// The URL from which the image will be fetched.
-  final String src;
+  WebImage.network(
+    String src, {
+    Key? key,
+    ImageLoadingBuilder? loadingBuilder,
+    ImageFrameBuilder? frameBuilder,
+    ImageErrorWidgetBuilder? errorBuilder,
+  }) : this(
+          WebImageProvider(src),
+          key: key,
+          loadingBuilder: loadingBuilder,
+          frameBuilder: frameBuilder,
+          errorBuilder: errorBuilder,
+        );
+
+  /// The resource which provides the image.
+  final WebImageProvider provider;
 
   /// {@macro flutter.widgets.Image.loadingBuilder}
   final ImageLoadingBuilder? loadingBuilder;
@@ -71,8 +87,7 @@ class _WebImageState extends State<WebImage> {
   @override
   void initState() {
     super.initState();
-    // Check if `widget.src` can be fetched.
-    checkIfImageBytesCanBeFetched(widget.src).then((bool canBeFetched) {
+    widget.provider.checkIfImageBytesCanBeFetched().then((bool canBeFetched) {
       // We may have become unmounted in the time it took to check if the bytes
       // could be fetched.
       if (mounted) {
@@ -93,16 +108,16 @@ class _WebImageState extends State<WebImage> {
     }
 
     if (imageBytesCanBeFetched) {
-      return Image.network(
-        widget.src,
+      return Image(
+        image: widget.provider._networkImage!,
         key: widget.key,
         loadingBuilder: widget.loadingBuilder,
         frameBuilder: widget.frameBuilder,
         errorBuilder: widget.errorBuilder,
       );
     } else {
-      return createImgElementWidget(
-        widget.src,
+      return impl.createImgElementWidget(
+        widget.provider._imgElementProvider!,
         key: widget.key,
         loadingBuilder: widget.loadingBuilder,
         frameBuilder: widget.frameBuilder,
@@ -111,3 +126,59 @@ class _WebImageState extends State<WebImage> {
     }
   }
 }
+
+Future<void> precacheWebImage(
+  WebImageProvider provider,
+  BuildContext context, {
+  Size? size,
+  ImageErrorListener? onError,
+}) {
+  return provider.checkIfImageBytesCanBeFetched().then((bool canBeFetched) {
+    if (canBeFetched) {
+      if (context.mounted) {
+        return precacheImage(
+          provider._networkImage!,
+          context,
+          size: size,
+          onError: onError,
+        );
+      }
+    }
+
+    if (context.mounted) {
+      return impl.precacheImgElement(
+        provider._imgElementProvider!,
+        onError: onError,
+      );
+    }
+  });
+}
+
+class WebImageProvider {
+  WebImageProvider(this.src);
+
+  final String src;
+
+  bool? _imageBytesCanBeFetched;
+
+  NetworkImage? _networkImage;
+
+  ImgElementProvider? _imgElementProvider;
+
+  Future<bool> checkIfImageBytesCanBeFetched() {
+    if (_imageBytesCanBeFetched != null) {
+      return SynchronousFuture<bool>(_imageBytesCanBeFetched!);
+    }
+    return impl.checkIfImageBytesCanBeFetched(src).then((bool result) {
+      _imageBytesCanBeFetched = result;
+      if (_imageBytesCanBeFetched!) {
+        _networkImage = NetworkImage(src);
+      } else {
+        _imgElementProvider = impl.createImgElementProvider(src);
+      }
+      return result;
+    });
+  }
+}
+
+abstract class ImgElementProvider {}
