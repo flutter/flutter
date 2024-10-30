@@ -21,6 +21,7 @@ import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 
 /// The function signature of the [print] function.
 typedef PrintFn = void Function(Object?);
@@ -383,10 +384,15 @@ class PackagesGetCommand extends FlutterCommand {
     if (rootProject != null) {
       // We need to regenerate the platform specific tooling for both the project
       // itself and example(if present).
-      await rootProject.regeneratePlatformSpecificTooling();
+      final bool writeLegacyPluginsList = boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true);
+      await rootProject.regeneratePlatformSpecificTooling(
+        writeLegacyPluginsList: writeLegacyPluginsList,
+      );
       if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
         final FlutterProject exampleProject = rootProject.example;
-        await exampleProject.regeneratePlatformSpecificTooling();
+        await exampleProject.regeneratePlatformSpecificTooling(
+          writeLegacyPluginsList: writeLegacyPluginsList,
+        );
       }
     }
 

@@ -33,6 +33,8 @@ abstract final class FlutterGlobalOptions {
   static const String kLocalEngineSrcPathOption = 'local-engine-src-path';
   static const String kLocalEngineHostOption = 'local-engine-host';
   static const String kLocalWebSDKOption = 'local-web-sdk';
+  // TODO(matanlurey): Remove one stable after https://github.com/flutter/flutter/issues/157819.
+  static const String kImplicitPubspecResolution = 'implicit-pubspec-resolution';
   static const String kMachineFlag = 'machine';
   static const String kPackagesOption = 'packages';
   static const String kPrefixedErrorsFlag = 'prefixed-errors';
@@ -124,6 +126,26 @@ class FlutterCommandRunner extends CommandRunner<void> {
       help: 'Print the address of the Dart Tooling Daemon, if one is hosted by the Flutter CLI.',
       hide: !verboseHelp,
     );
+
+    // TODO(matanlurey): Remove after the Q2 2025 stable release; this is intended
+    // to give application developers a single stable release where the .flutter-plugins
+    // file is still supported, but is deprecated, and let folks ensure (with CI or local
+    // testing) that their workflows do not depend on the file.
+    //
+    // See https://github.com/flutter/flutter/issues/157532.
+    argParser.addFlag(FlutterGlobalOptions.kImplicitPubspecResolution,
+      defaultsTo: true,
+      help: 'Whether to support (deprecated) implicit pubspec resolution '
+            'features, each of which are slated for removal in a future stable '
+            'release. By setting to "true", the following occurs:\n'
+            ' 1. The generation of ".flutter-plugins" (https://flutter.dev/to/flutter-plugins-configuration).\n'
+            ' 2. Including plugins registered as "dev_dependencies" in release mode.\n'
+            ' 3. Flutter localizations are by default output to synthetic "flutter_gen" package.\n'
+            '\n'
+            'This flag will become "false" by default, and then features removed.',
+      hide: !verboseHelp,
+    );
+
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
     }
