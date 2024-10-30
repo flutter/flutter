@@ -13,8 +13,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide Target;
+import 'package:native_assets_cli/native_assets_cli_internal.dart' hide Target;
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -48,17 +47,19 @@ void main() {
       ];
 
       fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
-        success: true,
-        invalidatedSourcesCount: 6,
-        syncedBytes: 8,
-        scannedSourcesCount: 16,
-        compileDuration: const Duration(seconds: 16),
-        transferDuration: const Duration(seconds: 32),
-      );
+            success: true,
+            invalidatedSourcesCount: 6,
+            syncedBytes: 8,
+            scannedSourcesCount: 16,
+            compileDuration: const Duration(seconds: 16),
+            transferDuration: const Duration(seconds: 32),
+          );
 
-      (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
+      (fakeFlutterDevice.devFS! as FakeDevFs).baseUri =
+          Uri.parse('file:///base_uri');
 
-      final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+      final FakeFlutterNativeAssetsBuildRunner buildRunner =
+          FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],
@@ -89,6 +90,7 @@ void main() {
         devtoolsHandler: createNoOpHandler,
         nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
         analytics: fakeAnalytics,
+        useImplicitPubspecResolution: true,
       );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
       expect(result.isOk, true);
@@ -105,28 +107,32 @@ void main() {
       FileSystem: () => fileSystem,
       Platform: () => FakePlatform(),
       ProcessManager: () => FakeProcessManager.empty(),
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
+      FeatureFlags: () =>
+          TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     });
 
     testUsingContext('native assets run unsupported', () async {
-      final FakeDevice device = FakeDevice(targetPlatform: TargetPlatform.fuchsia_arm64);
+      final FakeDevice device =
+          FakeDevice(targetPlatform: TargetPlatform.fuchsia_arm64);
       final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
       final List<FlutterDevice> devices = <FlutterDevice>[
         fakeFlutterDevice,
       ];
 
       fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
-        success: true,
-        invalidatedSourcesCount: 6,
-        syncedBytes: 8,
-        scannedSourcesCount: 16,
-        compileDuration: const Duration(seconds: 16),
-        transferDuration: const Duration(seconds: 32),
-      );
+            success: true,
+            invalidatedSourcesCount: 6,
+            syncedBytes: 8,
+            scannedSourcesCount: 16,
+            compileDuration: const Duration(seconds: 16),
+            transferDuration: const Duration(seconds: 32),
+          );
 
-      (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
+      (fakeFlutterDevice.devFS! as FakeDevFs).baseUri =
+          Uri.parse('file:///base_uri');
 
-      final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+      final FakeFlutterNativeAssetsBuildRunner buildRunner =
+          FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],
@@ -157,23 +163,23 @@ void main() {
         devtoolsHandler: createNoOpHandler,
         nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
         analytics: fakeAnalytics,
+        useImplicitPubspecResolution: true,
       );
       expect(
-        () => hotRunner.run(),
-        throwsToolExit( message:
-          'Package(s) bar require the native assets feature. '
-          'This feature has not yet been implemented for `TargetPlatform.fuchsia_arm64`. '
-          'For more info see https://github.com/flutter/flutter/issues/129757.',
-        )
-      );
-
+          () => hotRunner.run(),
+          throwsToolExit(
+            message: 'Package(s) bar require the native assets feature. '
+                'This feature has not yet been implemented for `TargetPlatform.fuchsia_arm64`. '
+                'For more info see https://github.com/flutter/flutter/issues/129757.',
+          ));
     }, overrides: <Type, Generator>{
       HotRunnerConfig: () => testingConfig,
       Artifacts: () => Artifacts.test(),
       FileSystem: () => fileSystem,
       Platform: () => FakePlatform(),
       ProcessManager: () => FakeProcessManager.empty(),
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
+      FeatureFlags: () =>
+          TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     });
   });
 }

@@ -53,6 +53,7 @@ nullable-getter: false
       file: configFile,
       logger: BufferLogger.test(),
       defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+      defaultSyntheticPackage: true,
     );
 
     expect(options.arbDir, Uri.parse('arb').path);
@@ -79,6 +80,7 @@ preferred-supported-locales: ['en_US', 'de']
       file: configFile,
       logger: BufferLogger.test(),
       defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+      defaultSyntheticPackage: true,
     );
 
     expect(options.preferredSupportedLocales, <String>['en_US', 'de']);
@@ -97,6 +99,7 @@ use-deferred-loading: string
         file: configFile,
         logger: BufferLogger.test(),
         defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+        defaultSyntheticPackage: true,
       ),
       throwsException,
     );
@@ -113,6 +116,7 @@ template-arb-file: {name}_en.arb
         file: configFile,
         logger: BufferLogger.test(),
         defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+        defaultSyntheticPackage: true,
       ),
       throwsToolExit(),
     );

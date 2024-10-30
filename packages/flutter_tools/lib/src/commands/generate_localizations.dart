@@ -146,7 +146,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
             'generated as a synthetic package or at a specified directory in '
             'the Flutter project.\n'
             '\n'
-            'This flag is set to true by default.\n'
+            'DEPRECATED: https://flutter.dev/to/flutter-gen-deprecation\n'
+            '\n'
+            'This flag inherits its default from --implicit-pubspec-resolution '
+            'if omitted.\n'
             '\n'
             'When synthetic-package is set to false, it will generate the '
             'localizations files in the directory specified by arb-dir by default.\n'
@@ -246,6 +249,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         file: _fileSystem.file('l10n.yaml'),
         logger: _logger,
         defaultArbDir: defaultArbDir,
+        defaultSyntheticPackage: globalResults!.flag('implicit-pubspec-resolution'),
       );
       _logger.printStatus(
         'Because l10n.yaml exists, the options defined there will be used '
