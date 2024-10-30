@@ -4356,8 +4356,8 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     assert(
       child.parentData is ParentDataType,
       'A child of $runtimeType has parentData of type ${child.parentData.runtimeType}, '
-      'which does not conform to $ParentDataType. parentData should be set by setupParentData() '
-      'implemented by the class using ContainerRenderObjectMixin.',
+      'which does not conform to $ParentDataType. Class using ContainerRenderObjectMixin '
+      'should override setupParentData() to set parentData to type $ParentDataType.',
     );
     _insertIntoChildList(child, after: after);
   }
