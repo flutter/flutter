@@ -493,7 +493,12 @@ class TestRenderObject extends RenderObject with ContainerRenderObjectMixin<Test
 
 class TestRenderObjectWithoutSetupParentData extends TestRenderObject {
   @override
-  void setupParentData(RenderObject child) {}
+  void setupParentData(RenderObject child) {
+    // The default behavior for RenderObject.
+    if (child.parentData is! ParentData) {
+      child.parentData = ParentData();
+    }
+  }
 }
 
 class LeaderLayerRenderObject extends RenderObject {
