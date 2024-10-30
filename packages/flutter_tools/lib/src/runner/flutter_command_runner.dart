@@ -138,9 +138,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
       help: 'Whether to support (deprecated) implicit pubspec resolution '
             'features, each of which are slated for removal in a future stable '
             'release. By setting to "true", the following occurs:\n'
-            '  1. The generation of ".flutter-plugins" (https://flutter.dev/to/flutter-plugins-configuration)\n'
-            '  2. Including plugins registered as "dev_dependencies" in release mode\n'
-            '  3. Flutter localizations are by default output to synthetic "flutter_gen" package\n'
+            ' 1. The generation of ".flutter-plugins" (https://flutter.dev/to/flutter-plugins-configuration).\n'
+            ' 2. Including plugins registered as "dev_dependencies" in release mode.\n'
+            ' 3. Flutter localizations are by default output to synthetic "flutter_gen" package.\n'
             '\n'
             'This flag will become "false" by default, and then features removed.',
       hide: !verboseHelp,
