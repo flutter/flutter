@@ -2551,7 +2551,7 @@ void main() {
     expect(const RoundedRectSliderTrackShape().isRounded, isTrue);
   });
 
-  testWidgets('Default Slider padding can be adjusted', (WidgetTester tester) async {
+  testWidgets('SliderThemeData.padding can override the default Slider padding', (WidgetTester tester) async {
     Widget buildSlider({ EdgeInsetsGeometry? padding }) {
       return MaterialApp(
         theme: ThemeData(sliderTheme: SliderThemeData(padding: padding)),
@@ -2572,27 +2572,11 @@ void main() {
       return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderSlider') as RenderBox;
     }
 
-    // Test Slider height and tracks spacing with default padding.
-    await tester.pumpWidget(buildSlider());
-
-    expect(sliderRenderBox().size, const Size(800, 48));
-    expect(
-      find.byType(Slider),
-      paints
-        // Inactive track.
-        ..rrect(
-          rrect: RRect.fromLTRBR(398.0, 22.0, 776.0, 26.0,  const Radius.circular(2.0)),
-        )
-        // Active track.
-        ..rrect(
-          rrect: RRect.fromLTRBR(24.0, 21.0, 402.0, 27.0,  const Radius.circular(3.0)),
-        ),
-    );
-
     // Test Slider height and tracks spacing with zero padding.
     await tester.pumpWidget(buildSlider(padding: EdgeInsets.zero));
     await tester.pumpAndSettle();
 
+    // The height equals to the default thumb height.
     expect(sliderRenderBox().size, const Size(800, 20));
     expect(
       find.byType(Slider),

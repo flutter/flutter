@@ -592,9 +592,9 @@ class SliderThemeData with Diagnosticable {
   /// Determines the padding around the [Slider].
   ///
   /// If specified, this padding overrides the default vertical padding of
-  /// the [Slider], which is equal to the height of the [overlayShape], and
-  /// the horizontal padding, which is equal to the width of the [thumbShape]
-  /// or [overlayShape], whichever is larger.
+  /// the [Slider], defaults to the height of the overlay shape, and the
+  /// horizontal padding, defaults to the width of the thumb shape or
+  /// overlay shape, whichever is larger.
   final EdgeInsetsGeometry? padding;
 
   /// Creates a copy of this object but with the given fields replaced with the

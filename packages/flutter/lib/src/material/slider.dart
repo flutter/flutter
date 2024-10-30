@@ -196,6 +196,7 @@ class Slider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.allowedInteraction,
+    this.padding,
   }) : _sliderType = _SliderType.material,
        assert(min <= max),
        assert(value >= min && value <= max,
@@ -238,6 +239,7 @@ class Slider extends StatefulWidget {
     this.autofocus = false,
     this.allowedInteraction,
   }) : _sliderType = _SliderType.adaptive,
+       padding = null,
        assert(min <= max),
        assert(value >= min && value <= max,
          'Value $value is not between minimum $min and maximum $max'),
@@ -550,6 +552,14 @@ class Slider extends StatefulWidget {
   /// Defaults to [SliderInteraction.tapAndSlide].
   final SliderInteraction? allowedInteraction;
 
+  /// Determines the padding around the [Slider].
+  ///
+  /// If specified, this padding overrides the default vertical padding of
+  /// the [Slider], defaults to the height of the overlay shape, and the
+  /// horizontal padding, defaults to the width of the thumb shape or
+  /// overlay shape, whichever is larger.
+  final EdgeInsetsGeometry? padding;
+
   final _SliderType _sliderType ;
 
   @override
@@ -853,6 +863,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       valueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
       valueIndicatorTextStyle: valueIndicatorTextStyle,
+      padding: widget.padding ?? sliderTheme.padding,
     );
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
       ?? sliderTheme.mouseCursor?.resolve(states)
@@ -921,9 +932,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       ),
     );
 
-    if (sliderTheme.padding != null) {
+    final EdgeInsetsGeometry? padding = widget.padding ?? sliderTheme.padding;
+    if (padding != null) {
       result = Padding(
-        padding: sliderTheme.padding!,
+        padding: padding,
         child: result,
       );
     }
