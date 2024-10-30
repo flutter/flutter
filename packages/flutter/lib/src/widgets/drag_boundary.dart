@@ -90,6 +90,8 @@ class DragBoundary extends InheritedWidget {
   }
 
   /// {@macro flutter.widgets.DragBoundary.forRectOf}
+  ///
+  /// returns null if not ancestor is found.
   static DragBoundaryDelegate<Rect>? forRectMaybeOf(BuildContext context, {bool useGlobalPosition = true}) {
     final InheritedElement? element =
         context.getElementForInheritedWidgetOfExactType<DragBoundary>();
