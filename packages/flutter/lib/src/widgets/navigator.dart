@@ -225,7 +225,9 @@ abstract class Route<T> extends _RoutePlaceholder {
   void _updateSettings(RouteSettings newSettings) {
     if (_settings != newSettings) {
       _settings = newSettings;
-      changedInternalState();
+      if (_navigator != null) {
+        changedInternalState();
+      }
     }
   }
 
