@@ -578,24 +578,24 @@ void main() {
         );
       });
 
-      test('Throws tool exit with a helpful message when client throws a SocketException on lookup', () async {
-        final BufferLogger logger = BufferLogger.test(verbose: true);
+      test('On macOS, throw tool exit with a helpful message when client throws a SocketException on lookup', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[], <String, List<SrvResourceRecord>>{},
-          socketErrorOnStart: true);
+          socketExceptionOnStart: true);
 
         final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
           mdnsClient: client,
-          logger: logger,
+          logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
           analytics: const NoOpAnalytics(),
         );
+
         expect(
           portDiscovery.firstMatchingVmService(client),
           throwsToolExit(message: 'You might be having a permissions issue with your IDE. '
-              'Please try going to '
-              'System Settings -> Privacy & Security -> Local Network -> '
-              '[Find your IDE] -> Toggle ON, then restarting your phone.')
+            'Please try going to '
+            'System Settings -> Privacy & Security -> Local Network -> '
+            '[Find your IDE] -> Toggle ON, then restart your phone.')
         );
       }, skip: !platform.isMacOS);
 
@@ -1013,7 +1013,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     this.txtResponse = const <String, List<TxtResourceRecord>>{},
     this.ipResponse = const <String, List<IPAddressResourceRecord>>{},
     this.osErrorOnStart = false,
-    this.socketErrorOnStart = false
+    this.socketExceptionOnStart = false
   });
 
   final List<PtrResourceRecord> ptrRecords;
@@ -1021,7 +1021,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
   final Map<String, List<TxtResourceRecord>> txtResponse;
   final Map<String, List<IPAddressResourceRecord>> ipResponse;
   final bool osErrorOnStart;
-  final bool socketErrorOnStart;
+  final bool socketExceptionOnStart;
 
   @override
   Future<void> start({
@@ -1040,7 +1040,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     ResourceRecordQuery query, {
     Duration timeout = const Duration(seconds: 5),
   }) {
-    if (socketErrorOnStart) {
+    if (socketExceptionOnStart) {
       throw const SocketException('Socket Exception');
     }
     if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsVmServiceDiscovery.dartVmServiceName) {
