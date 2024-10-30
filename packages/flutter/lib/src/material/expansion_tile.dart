@@ -582,13 +582,13 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   final ShapeBorderTween _borderTween = ShapeBorderTween();
   final ColorTween _headerColorTween = ColorTween();
   final ColorTween _iconColorTween = ColorTween();
-  late Animation<ShapeBorder?> _border;
   final ColorTween _backgroundColorTween = ColorTween();
   final Tween<double> _heightFactorTween = Tween<double>(begin: 0.0, end: 1.0);
 
   late AnimationController _animationController;
   late Animation<double> _iconTurns;
   late CurvedAnimation _heightFactor;
+  late Animation<ShapeBorder?> _border;
   late Animation<Color?> _headerColor;
   late Animation<Color?> _iconColor;
   late Animation<Color?> _backgroundColor;
