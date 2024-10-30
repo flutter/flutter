@@ -1966,7 +1966,7 @@ void main() {
           '   The onGenerateRoute callback must never return null, unless an\n'
           '   onUnknownRoute callback is provided as well.\n'
           '   The Navigator was:\n'
-          '     NavigatorState#00000(lifecycle state: initialized)\n',
+          '     _NavigatorState#00000(lifecycle state: initialized)\n',
         ),
       );
     });
@@ -1994,7 +1994,7 @@ void main() {
           '   route "/".\n'
           '   The onUnknownRoute callback must never return null.\n'
           '   The Navigator was:\n'
-          '     NavigatorState#00000(lifecycle state: initialized)\n',
+          '     _NavigatorState#00000(lifecycle state: initialized)\n',
         ),
       );
     });
@@ -2841,8 +2841,8 @@ void main() {
         'FlutterError\n'
         '   A HeroController can not be shared by multiple Navigators. The\n'
         '   Navigators that share the same HeroController are:\n'
-        '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
-        '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
+        '   - _NavigatorState#00000(tickers: tracking 1 ticker)\n'
+        '   - _NavigatorState#00000(tickers: tracking 1 ticker)\n'
         '   Please create a HeroControllerScope for each Navigator or use a\n'
         '   HeroControllerScope.none to prevent subtree from receiving a\n'
         '   HeroController.\n',
