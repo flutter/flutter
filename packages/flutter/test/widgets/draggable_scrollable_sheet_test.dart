@@ -1775,5 +1775,6 @@ void main() {
     // Construct the widget a second time, to ensure didUpdateWidget is called.
     await pumpWidgetAndFling();
     expect(receivedNotification!.shouldCloseOnMinExtent, isFalse);
+    controller.dispose();
   });
 }
