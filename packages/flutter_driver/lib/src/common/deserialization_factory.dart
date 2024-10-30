@@ -13,7 +13,7 @@ import 'layer_tree.dart';
 import 'message.dart';
 import 'render_tree.dart';
 import 'request_data.dart';
-import 'screenshot_request.dart';
+import 'screenshot.dart';
 import 'semantics.dart';
 import 'text.dart';
 import 'text_input_action.dart';
