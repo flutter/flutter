@@ -15,7 +15,7 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'reporting/reporting.dart';
 
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
@@ -240,7 +240,7 @@ class MDnsVmServiceDiscovery {
       } on SocketException catch (e, stacktrace) {
         _logger.printError(e.message);
         _logger.printTrace(stacktrace.toString());
-        if (platform.isMacOS) {
+        if (globals.platform.isMacOS) {
           throwToolExit(
               'You might be having a permissions issue with your IDE. '
               'Please try going to '
