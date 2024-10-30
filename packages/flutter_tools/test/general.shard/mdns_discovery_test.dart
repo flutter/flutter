@@ -597,7 +597,7 @@ void main() {
             'System Settings -> Privacy & Security -> Local Network -> '
             '[Find your IDE] -> Toggle ON, then restart your phone.')
         );
-      }, skip: !globals.platform.isMacOS);
+      }, skip: !globals.platform.isMacOS); // [intended] This tool exit message only works for macOS
 
       testWithoutContext('Correctly builds VM Service URI with hostVmservicePort == 0', () async {
         final MDnsClient client = FakeMDnsClient(
