@@ -377,6 +377,12 @@ void main() {
     root.buildScene(ui.SceneBuilder()).dispose();
     expect(calledBack, true);
   });
+
+  test('ContainerParentDataMixin asserts parentData type', () {
+    final TestRenderObject renderObject = TestRenderObjectWithoutSetupParentData();
+    final TestRenderObject child = TestRenderObject();
+    expect(()=>renderObject.add(child),throwsAssertionError);
+  });
 }
 
 
@@ -483,6 +489,11 @@ class TestRenderObject extends RenderObject with ContainerRenderObjectMixin<Test
     config.isSemanticBoundary = true;
     describeSemanticsConfigurationCallCount++;
   }
+}
+
+class TestRenderObjectWithoutSetupParentData extends TestRenderObject {
+  @override
+  void setupParentData(RenderObject child) {}
 }
 
 class LeaderLayerRenderObject extends RenderObject {
