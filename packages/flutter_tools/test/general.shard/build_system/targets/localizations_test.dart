@@ -70,6 +70,65 @@ nullable-getter: false
     expect(options.nullableGetter, false);
   });
 
+  testWithoutContext(
+      'parseLocalizationsOptions uses defaultSyntheticPackage = true', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+arb-dir: arb
+template-arb-file: example.arb
+output-localization-file: bar
+untranslated-messages-file: untranslated
+output-class: Foo
+header-file: header
+header: HEADER
+use-deferred-loading: true
+preferred-supported-locales: en_US
+# Intentionally omitted
+# synthetic-package: ...
+required-resource-attributes: false
+nullable-getter: false
+''');
+
+    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
+      file: configFile,
+      logger: BufferLogger.test(),
+      defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+      defaultSyntheticPackage: true,
+    );
+
+    expect(options.syntheticPackage, true);
+  });
+
+  testWithoutContext(
+      'parseLocalizationsOptions uses defaultSyntheticPackage = false',
+      () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+arb-dir: arb
+template-arb-file: example.arb
+output-localization-file: bar
+untranslated-messages-file: untranslated
+output-class: Foo
+header-file: header
+header: HEADER
+use-deferred-loading: true
+preferred-supported-locales: en_US
+# Intentionally omitted
+# synthetic-package: ...
+required-resource-attributes: false
+nullable-getter: false
+''');
+
+    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
+      file: configFile,
+      logger: BufferLogger.test(),
+      defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+      defaultSyntheticPackage: false,
+    );
+
+    expect(options.syntheticPackage, false);
+  });
+
   testWithoutContext('parseLocalizationsOptions handles preferredSupportedLocales as list', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''

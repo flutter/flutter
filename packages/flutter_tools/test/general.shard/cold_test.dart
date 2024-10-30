@@ -23,8 +23,9 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  testUsingContext('Exits with code 2 when HttpException is thrown '
-    'during VM service connection', () async {
+  testUsingContext(
+      'Exits with code 2 when HttpException is thrown '
+      'during VM service connection', () async {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
     final FakeDevice device = FakeDevice()
       ..supportsHotReload = true
@@ -34,14 +35,17 @@ void main() {
       TestFlutterDevice(
         device: device,
         generator: residentCompiler,
-        exception: const HttpException('Connection closed before full header was received, '
+        exception: const HttpException(
+            'Connection closed before full header was received, '
             'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
       ),
     ];
 
-    final int exitCode = await ColdRunner(devices,
+    final int exitCode = await ColdRunner(
+      devices,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
+      useImplicitPubspecResolution: true,
     ).attach();
     expect(exitCode, 2);
   });
@@ -53,11 +57,16 @@ void main() {
       final FakeFlutterDevice flutterDevice1 = FakeFlutterDevice(device1);
       final FakeFlutterDevice flutterDevice2 = FakeFlutterDevice(device2);
 
-      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
+      final List<FlutterDevice> devices = <FlutterDevice>[
+        flutterDevice1,
+        flutterDevice2
+      ];
 
-      await ColdRunner(devices,
+      await ColdRunner(
+        devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
+        useImplicitPubspecResolution: true,
       ).cleanupAtFinish();
 
       expect(flutterDevice1.stopEchoingDeviceLogCount, 1);
@@ -87,6 +96,7 @@ void main() {
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
+        useImplicitPubspecResolution: true,
       ).run();
 
       expect(result, 1);
@@ -103,10 +113,16 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
         target: 'main.dart',
         traceStartup: true,
+        useImplicitPubspecResolution: true,
       ).run();
 
       expect(result, 0);
-      expect(memoryFileSystem.directory(getBuildDirectory()).childFile('start_up_info.json').existsSync(), true);
+      expect(
+          memoryFileSystem
+              .directory(getBuildDirectory())
+              .childFile('start_up_info.json')
+              .existsSync(),
+          true);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -114,7 +130,8 @@ void main() {
     });
 
     testUsingContext('with traceStartup, env variable', () async {
-      fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
+      fakePlatform.environment[kFlutterTestOutputsDirEnvName] =
+          'test_output_dir';
 
       final FakeDevice device = FakeDevice();
       final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
@@ -126,10 +143,16 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
         target: 'main.dart',
         traceStartup: true,
+        useImplicitPubspecResolution: true,
       ).run();
 
       expect(result, 0);
-      expect(memoryFileSystem.directory('test_output_dir').childFile('start_up_info.json').existsSync(), true);
+      expect(
+          memoryFileSystem
+              .directory('test_output_dir')
+              .childFile('start_up_info.json')
+              .existsSync(),
+          true);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -165,7 +188,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   }
 
   @override
-  Future<void> tryInitLogReader() async { }
+  Future<void> tryInitLogReader() async {}
 }
 
 class FakeDevice extends Fake implements Device {
@@ -200,7 +223,10 @@ class TestFlutterDevice extends FlutterDevice {
     required Device device,
     required this.exception,
     required ResidentCompiler generator,
-  })  : super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
+  }) : super(device,
+            buildInfo: BuildInfo.debug,
+            generator: generator,
+            developmentShaderCompiler: const FakeShaderCompiler());
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
@@ -221,19 +247,23 @@ class TestFlutterDevice extends FlutterDevice {
   }
 }
 
-class FakeResidentCompiler extends Fake implements ResidentCompiler { }
+class FakeResidentCompiler extends Fake implements ResidentCompiler {}
 
 class FakeFlutterVmService extends Fake implements FlutterVmService {
   @override
   VmService get service => FakeVmService();
 
   @override
-  Future<List<FlutterView>> getFlutterViews({bool returnEarly = false, Duration delay = const Duration(milliseconds: 50)}) async {
+  Future<List<FlutterView>> getFlutterViews(
+      {bool returnEarly = false,
+      Duration delay = const Duration(milliseconds: 50)}) async {
     return <FlutterView>[];
   }
 
   @override
-  Future<bool> flutterAlreadyPaintedFirstUsefulFrame({String? isolateId}) async => true;
+  Future<bool> flutterAlreadyPaintedFirstUsefulFrame(
+          {String? isolateId}) async =>
+      true;
 
   @override
   Future<Response?> getTimeline() async {
@@ -266,7 +296,8 @@ class FakeVmService extends Fake implements VmService {
   @override
   Stream<Event> get onExtensionEvent {
     return Stream<Event>.fromIterable(<Event>[
-      Event(kind: 'Extension', extensionKind: 'Flutter.FirstFrame', timestamp: 1),
+      Event(
+          kind: 'Extension', extensionKind: 'Flutter.FirstFrame', timestamp: 1),
     ]);
   }
 }
@@ -275,7 +306,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform? platform) { }
+  void configureCompiler(TargetPlatform? platform) {}
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
