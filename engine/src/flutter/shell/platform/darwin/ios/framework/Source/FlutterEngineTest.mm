@@ -472,16 +472,17 @@ FLUTTER_ASSERT_ARC
 #endif  // defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
 }
 
-- (void)testCanNotUnMergePlatformAndUIThread {
+- (void)testCanUnMergePlatformAndUIThread {
 #if defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
   auto settings = FLTDefaultSettingsForBundle();
   settings.enable_impeller = true;
+  settings.merged_platform_ui_thread = false;
   FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   [engine run];
 
-  XCTAssertEqual(engine.shell.GetTaskRunners().GetUITaskRunner(),
-                 engine.shell.GetTaskRunners().GetPlatformTaskRunner());
+  XCTAssertNotEqual(engine.shell.GetTaskRunners().GetUITaskRunner(),
+                    engine.shell.GetTaskRunners().GetPlatformTaskRunner());
 #endif  // defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
 }
 
