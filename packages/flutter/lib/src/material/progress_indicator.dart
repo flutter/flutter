@@ -378,8 +378,8 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// The border radius of both the indicator and the track.
   ///
   /// If null, then the [ProgressIndicatorThemeData.borderRadius] will be used.
-  /// If that is null, then defaults to radius of 2, which produces a rounded
-  /// shape with a rounded indicator. If [ThemeData.useMaterial3] is false,
+  /// If that is also null, then defaults to radius of 2, which produces a
+  /// rounded shape with a rounded indicator. If [ThemeData.useMaterial3] is false,
   /// then defaults to [BorderRadius.zero], which produces a rectangular shape
   /// with a rectangular indicator.
   final BorderRadiusGeometry? borderRadius;
@@ -404,7 +404,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// If that is null, then defaults to 2.
   final double? stopIndicatorRadius;
 
-  /// The gap between the track and the indicator.
+  /// The gap between the indicator and the track.
   ///
   /// If [year2023] is false or [ThemeData.useMaterial3] is false, then no track
   /// gap will be drawn.
@@ -415,10 +415,11 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// If that is null, then defaults to 4.
   final double? trackGap;
 
-  /// When true, the [LinearProgressIndicator] will use the 2023 Material 3 Design appearance.
+  /// When true, the [LinearProgressIndicator] will use the 2023 Material 3
+  /// Design appearance.
   ///
-  /// Defaults to true. If false, the [LinearProgressIndicator] will use the latest Material 3 Design appearance,
-  /// which was introduced in December 2023.
+  /// Defaults to true. If false, the [LinearProgressIndicator] will use the
+  /// latest Material 3 Design appearance, which was introduced in December 2023.
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
   @Deprecated(
