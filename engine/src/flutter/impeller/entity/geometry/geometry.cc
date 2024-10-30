@@ -133,9 +133,7 @@ bool Geometry::CanApplyMaskFilter() const {
 Scalar Geometry::ComputeStrokeAlphaCoverage(const Matrix& transform,
                                             Scalar stroke_width) {
   Scalar scaled_stroke_width = transform.GetMaxBasisLengthXY() * stroke_width;
-  // If the stroke width is 0 or greater than kMinStrokeSizeMSAA, don't apply
-  // any additional alpha. This is intended to match Skia behavior.
-  if (scaled_stroke_width == 0.0 || scaled_stroke_width >= kMinStrokeSizeMSAA) {
+  if (scaled_stroke_width == 0.0 || scaled_stroke_width >= kMinStrokeSize) {
     return 1.0;
   }
   // This scalling is eyeballed from Skia.
