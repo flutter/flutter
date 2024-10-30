@@ -242,10 +242,11 @@ class MDnsVmServiceDiscovery {
         _logger.printTrace(stacktrace.toString());
         if (globals.platform.isMacOS) {
           throwToolExit(
-              'You might be having a permissions issue with your IDE. '
-              'Please try going to '
-              'System Settings -> Privacy & Security -> Local Network -> '
-              '[Find your IDE] -> Toggle ON, then restart your phone.');
+            'You might be having a permissions issue with your IDE. '
+            'Please try going to '
+            'System Settings -> Privacy & Security -> Local Network -> '
+            '[Find your IDE] -> Toggle ON, then restart your phone.'
+          );
         } else {
           rethrow;
         }
