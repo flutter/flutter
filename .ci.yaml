@@ -3084,6 +3084,7 @@ targets:
 
   # Mokey, Skia
   - name: Linux_mokey new_gallery__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/157848
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
