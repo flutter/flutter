@@ -26,9 +26,9 @@ import 'android_sdk.dart';
 // However, this currently requires to migrate existing integration tests to the latest supported values.
 //
 // Please see the README before changing any of these values.
-const String templateDefaultGradleVersion = '8.3';
-const String templateAndroidGradlePluginVersion = '8.1.0';
-const String templateAndroidGradlePluginVersionForModule = '8.1.0';
+const String templateDefaultGradleVersion = '8.10.2';
+const String templateAndroidGradlePluginVersion = '8.7.0';
+const String templateAndroidGradlePluginVersionForModule = '8.7.0';
 const String templateKotlinGradlePluginVersion = '1.8.22';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
