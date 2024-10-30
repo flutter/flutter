@@ -546,6 +546,98 @@ void main() {
     );
   });
 
+  test('can provide a single extra "--gn-args"', () {
+    final testEnv = TestEnvironment.withTestEngine();
+    addTearDown(testEnv.cleanup);
+
+    final testConfig = TestBuilderConfig();
+    testConfig.addBuild(
+      name: 'linux/host_debug',
+      dimension: TestDroneDimension.linux,
+    );
+
+    final parser = ArgParser();
+    final builds = BuildPlan.configureArgParser(
+      parser,
+      testEnv.environment,
+      configs: {
+        'linux_test_config': testConfig.buildConfig(
+          path: 'ci/builders/linux_test_config.json',
+        ),
+      },
+      help: false,
+    );
+
+    final result = BuildPlan.fromArgResults(
+      parser.parse(['--gn-args', '--foo']),
+      testEnv.environment,
+      builds: builds,
+    );
+    expect(result.extraGnArgs, ['--foo']);
+  });
+
+  test('can provide multiple extra "--gn-arg"s', () {
+    final testEnv = TestEnvironment.withTestEngine();
+    addTearDown(testEnv.cleanup);
+
+    final testConfig = TestBuilderConfig();
+    testConfig.addBuild(
+      name: 'linux/host_debug',
+      dimension: TestDroneDimension.linux,
+    );
+
+    final parser = ArgParser();
+    final builds = BuildPlan.configureArgParser(
+      parser,
+      testEnv.environment,
+      configs: {
+        'linux_test_config': testConfig.buildConfig(
+          path: 'ci/builders/linux_test_config.json',
+        ),
+      },
+      help: false,
+    );
+
+    final result = BuildPlan.fromArgResults(
+      parser.parse(['--gn-args', '--foo', '--gn-args', '--bar']),
+      testEnv.environment,
+      builds: builds,
+    );
+    expect(result.extraGnArgs, ['--foo', '--bar']);
+  });
+
+  test('can provide only long-form "--gn-arg"s', () {
+    final testEnv = TestEnvironment.withTestEngine();
+    addTearDown(testEnv.cleanup);
+
+    final testConfig = TestBuilderConfig();
+    testConfig.addBuild(
+      name: 'linux/host_debug',
+      dimension: TestDroneDimension.linux,
+    );
+
+    final parser = ArgParser();
+    final builds = BuildPlan.configureArgParser(
+      parser,
+      testEnv.environment,
+      configs: {
+        'linux_test_config': testConfig.buildConfig(
+          path: 'ci/builders/linux_test_config.json',
+        ),
+      },
+      help: false,
+    );
+
+    expect(
+      () => BuildPlan.fromArgResults(
+        parser.parse(['--gn-args', '-F']),
+        testEnv.environment,
+        builds: builds,
+      ),
+      throwsA(BuildPlan.argumentsMustBeFlagsError),
+    );
+  });
+
   test('build defaults to host_debug', () {
     final testEnv = TestEnvironment.withTestEngine(
       withRbe: true,
@@ -645,6 +737,116 @@ void main() {
         (e) => e.toString(),
         'toString()',
         contains('Unknown build configuration: host_debug'),
+      )),
+    );
+  });
+
+  test('build fails if an extra "--gn-args" contains a reserved flag', () {
+    final testEnv = TestEnvironment.withTestEngine();
+    addTearDown(testEnv.cleanup);
+
+    final testConfig = TestBuilderConfig();
+    testConfig.addBuild(
+      name: 'linux/host_debug',
+      dimension: TestDroneDimension.linux,
+    );
+
+    final parser = ArgParser();
+    final builds = BuildPlan.configureArgParser(
+      parser,
+      testEnv.environment,
+      configs: {
+        'linux_test_config': testConfig.buildConfig(
+          path: 'ci/builders/linux_test_config.json',
+        ),
+      },
+      help: false,
+    );
+
+    for (final reserved in BuildPlan.reservedGnArgs) {
+      expect(
+        () => BuildPlan.fromArgResults(
+          parser.parse(['--gn-args', '--$reserved']),
+          testEnv.environment,
+          builds: builds,
+        ),
+        throwsA(isA<FatalError>().having(
+          (e) => e.toString(),
+          'toString()',
+          contains(BuildPlan.reservedGnArgsError.toString()),
+        )),
+      );
+    }
+  });
+
+  test('builds fails if a non-flag (without =) is provided to "--gn-args"', () {
+    final testEnv = TestEnvironment.withTestEngine();
+    addTearDown(testEnv.cleanup);
+
+    final testConfig = TestBuilderConfig();
+    testConfig.addBuild(
+      name: 'linux/host_debug',
+      dimension: TestDroneDimension.linux,
+    );
+
+    final parser = ArgParser();
+    final builds = BuildPlan.configureArgParser(
+      parser,
+      testEnv.environment,
+      configs: {
+        'linux_test_config': testConfig.buildConfig(
+          path: 'ci/builders/linux_test_config.json',
+        ),
+      },
+      help: false,
+    );
+
+    expect(
+      () => BuildPlan.fromArgResults(
+        parser.parse(['--gn-args', '--foo name']),
+        testEnv.environment,
+        builds: builds,
+      ),
+      throwsA(isA<FatalError>().having(
+        (e) => e.toString(),
+        'toString()',
+        contains(BuildPlan.argumentsMustBeFlagsError.toString()),
+      )),
+    );
+  });
+
+  test('builds fails if a non-flag (with =) is provided to "--gn-args"', () {
+    final testEnv = TestEnvironment.withTestEngine();
+    addTearDown(testEnv.cleanup);
+
+    final testConfig = TestBuilderConfig();
+    testConfig.addBuild(
+      name: 'linux/host_debug',
+      dimension: TestDroneDimension.linux,
+    );
+
+    final parser = ArgParser();
+    final builds = BuildPlan.configureArgParser(
+      parser,
+      testEnv.environment,
+      configs: {
+        'linux_test_config': testConfig.buildConfig(
+          path: 'ci/builders/linux_test_config.json',
+        ),
+      },
+      help: false,
+    );
+
+    expect(
+      () => BuildPlan.fromArgResults(
+        parser.parse(['--gn-args', '--foo=name']),
+        testEnv.environment,
+        builds: builds,
+      ),
+      throwsA(isA<FatalError>().having(
+        (e) => e.toString(),
+        'toString()',
+        contains('Arguments provided to --gn-args must be flags'),
       )),
     );
   });
@@ -1007,6 +1209,64 @@ void main() {
     expect(
       parser.usage,
       contains('How to prefer remote or local builds'),
+    );
+  });
+
+  test('shows --gn-args if verbose', () {
+    final testEnv = TestEnvironment.withTestEngine(
+      verbose: true,
+    );
+    addTearDown(testEnv.cleanup);
+
+    final testConfig = TestBuilderConfig();
+    testConfig.addBuild(
+      name: 'linux/host_debug',
+      dimension: TestDroneDimension.linux,
+    );
+
+    final parser = ArgParser();
+    final _ = BuildPlan.configureArgParser(
+      parser,
+      testEnv.environment,
+      configs: {
+        'linux_test_config': testConfig.buildConfig(
+          path: 'ci/builders/linux_test_config.json',
+        ),
+      },
+      help: true,
+    );
+
+    expect(
+      parser.usage,
+      contains('Additional arguments to provide to "gn"'),
+    );
+  });
+
+  test('hides --gn-args if not verbose', () {
+    final testEnv = TestEnvironment.withTestEngine();
+    addTearDown(testEnv.cleanup);
+
+    final testConfig = TestBuilderConfig();
+    testConfig.addBuild(
+      name: 'linux/host_debug',
+      dimension: TestDroneDimension.linux,
+    );
+
+    final parser = ArgParser();
+    final _ = BuildPlan.configureArgParser(
+      parser,
+      testEnv.environment,
+      configs: {
+        'linux_test_config': testConfig.buildConfig(
+          path: 'ci/builders/linux_test_config.json',
+        ),
+      },
+      help: true,
+    );
+
+    expect(
+      parser.usage,
+      isNot(contains('Additional arguments to provide to "gn"')),
     );
   });
 }

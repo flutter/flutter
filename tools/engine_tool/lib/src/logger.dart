@@ -367,7 +367,7 @@ class FlutterSpinner extends Spinner {
 }
 
 /// FatalErrors are thrown when a fatal error has occurred.
-class FatalError extends Error {
+final class FatalError extends Error {
   /// Constructs a FatalError with a message.
   FatalError(this._message);
 
