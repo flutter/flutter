@@ -661,6 +661,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// The restoration ID used for the [RestorationBucket] in which the mixin
   /// will store the restoration data of all registered properties.
   ///
+  /// {@template flutter.widgets.RestorationMixin.restorationId}
   /// The restoration ID is used to claim a child [RestorationScope] from the
   /// surrounding [RestorationScope] (accessed via [RestorationScope.of]) and
   /// the ID must be unique in that scope (otherwise an exception is triggered
@@ -678,6 +679,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// The restoration ID returned by this getter is often provided in the
   /// constructor of the [StatefulWidget] that this [State] object is associated
   /// with.
+  /// {@endtemplate}
   @protected
   String? get restorationId;
 
