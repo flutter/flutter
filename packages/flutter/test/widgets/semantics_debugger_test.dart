@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -59,6 +60,26 @@ void main() {
     );
 
     expect(true, isTrue); // expect that we reach here without crashing
+  });
+
+  testWidgets('SemanticsDebugger draw persistent color based on structure', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SemanticsDebugger(
+          child: Stack(
+            children: <Widget>[
+              Semantics(
+                container: true,
+                child: Semantics(container: true),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(SemanticsDebugger), paints..rect()..rect(color: const Color(0xFF9A360F)));
   });
 
   testWidgets('SemanticsDebugger reparents subtree', (WidgetTester tester) async {
