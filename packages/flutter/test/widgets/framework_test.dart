@@ -1261,7 +1261,7 @@ void main() {
 
     expect(element, hasAGoodToStringDeep);
     expect(
-      element.toStringDeep(wrapWidth: 200),
+      element.toStringDeep(),
       equalsIgnoringHashCodes(
         'Column-[GlobalKey#00000](direction: vertical, mainAxisAlignment: start, crossAxisAlignment: center, renderObject: RenderFlex#00000)\n'
         '├Container\n'
