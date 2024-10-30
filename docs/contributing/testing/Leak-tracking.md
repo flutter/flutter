@@ -1,4 +1,4 @@
-# Leak tracking in Flutter framework
+# Leak tracking in Flutter Framework
 
 ## TL;DR;
 
