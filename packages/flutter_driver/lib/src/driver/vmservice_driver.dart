@@ -360,14 +360,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
   }
 
   @override
-  Future<List<int>> screenshot() async {
-    await Future<void>.delayed(const Duration(seconds: 2));
-
-    final vms.Response result = await _serviceClient.callMethod('_flutter.screenshot');
-    return base64.decode(result.json!['screenshot'] as String);
-  }
-
-  @override
   Future<List<Map<String, dynamic>>> getVmFlags() async {
     final vms.FlagList result = await _serviceClient.getFlagList();
     return result.flags != null

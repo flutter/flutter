@@ -26,6 +26,7 @@ import '../common/layer_tree.dart';
 import '../common/message.dart';
 import '../common/render_tree.dart';
 import '../common/request_data.dart';
+import '../common/screenshot.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
 import '../common/text_input_action.dart';
@@ -631,7 +632,9 @@ abstract class FlutterDriver {
   /// two seconds isn't enough, which means that this is still racy and a source
   /// of flakes.
   Future<List<int>> screenshot() async {
-    throw UnimplementedError();
+    await Future<void>.delayed(const Duration(seconds: 2));
+    final Map<String, Object?> jsonResponse = await sendCommand(ScreenshotCommand());
+    return jsonResponse['data']! as List<int>;
   }
 
   /// Returns the Flags set in the Dart VM as JSON.
