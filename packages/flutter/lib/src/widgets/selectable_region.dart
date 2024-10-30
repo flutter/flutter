@@ -1869,6 +1869,9 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
   ///
   /// Call this method when a [SelectionEvent] is dispatched to a child selectable managed
   /// by this delegate.
+  ///
+  /// Subclasses should call [clearInternalSelectionStateForSelectable] to clean up any state
+  /// added by this method, for example when removing a [Selectable] from this delegate.
   @protected
   void didReceiveSelectionEventFor({required Selectable selectable, bool? forEnd}) {
     switch (forEnd) {
@@ -1890,6 +1893,9 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
   /// a [SelectionEvent] that selects a boundary. The [currentSelectionStartIndex]
   /// and [currentSelectionEndIndex] should be set to valid values at the time
   /// this method is called.
+  ///
+  /// Subclasses should call [clearInternalSelectionStateForSelectable] to clean up any state
+  /// added by this method, for example when removing a [Selectable] from this delegate.
   @protected
   void didReceiveSelectionBoundaryEvents() {
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
@@ -1944,8 +1950,9 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
   /// locations for start and end [SelectionEdgeUpdateEvent]s.
   @protected
   void clearInternalSelectionState() {
-    _hasReceivedStartEvent.clear();
-    _hasReceivedEndEvent.clear();
+    for (Selectable selectable in selectables) {
+      clearInternalSelectionStateForSelectable(selectable);
+    }
     _lastStartEdgeUpdateGlobalPosition = null;
     _lastEndEdgeUpdateGlobalPosition = null;
   }
@@ -1954,6 +1961,9 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
   ///
   /// This indicates that the given `selectable` has neither received a
   /// start or end [SelectionEdgeUpdateEvent]s.
+  ///
+  /// Subclasses should call this method to clean up state added in
+  /// [didReceiveSelectionEventFor] and [didReceiveSelectionBoundaryEvents].
   @protected
   void clearInternalSelectionStateForSelectable(Selectable selectable) {
     _hasReceivedStartEvent.remove(selectable);
