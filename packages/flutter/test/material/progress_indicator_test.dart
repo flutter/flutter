@@ -1300,6 +1300,257 @@ void main() {
     expect(padding.padding, testIndicatorMargin);
     expect(innerPadding.padding, testIndicatorPadding);
   });
+
+  testWidgets('LinearProgressIndicator default stop indicator when year2023 is false', (WidgetTester tester) async {
+    Widget buildIndicator({ required TextDirection textDirection }) {
+      return Directionality(
+        textDirection: textDirection,
+        child: const Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              year2023: false,
+              value: 0.5,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildIndicator(textDirection: TextDirection.ltr));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints..circle(x: 198.0, y: 2.0, radius: 2.0, color: theme.colorScheme.primary),
+    );
+
+    await tester.pumpWidget(buildIndicator(textDirection: TextDirection.rtl));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints..circle(x: 2.0, y: 2.0, radius: 2.0, color: theme.colorScheme.primary)
+    );
+  });
+
+  testWidgets('Indeterminate LinearProgressIndicator does not paint stop indicator', (WidgetTester tester) async {
+    Widget buildIndicator({ double? value }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              year2023: false,
+              value: value,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Determinate LinearProgressIndicator paints stop indicator.
+    await tester.pumpWidget(buildIndicator(value: 0.5));
+    expect(
+      find.byType(LinearProgressIndicator),
+      // Stop indicator.
+      paints..circle(x: 198.0, y: 2.0, radius: 2.0, color: theme.colorScheme.primary),
+    );
+
+    // Indeterminate LinearProgressIndicator does not paint stop indicator.
+    await tester.pumpWidget(buildIndicator());
+    expect(
+      find.byType(LinearProgressIndicator),
+      // Stop indicator.
+      isNot(paints..circle(x: 198.0, y: 2.0, radius: 2.0, color: theme.colorScheme.primary)),
+    );
+  });
+
+  testWidgets('Can customise LinearProgressIndicator stop indicator when year2023 is false', (WidgetTester tester) async {
+    const Color stopIndicatorColor = Color(0XFF00FF00);
+    const double stopIndicatorRadius = 5.0;
+    Widget buildIndicator({ Color? stopIndicatorColor, double? stopIndicatorRadius }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              year2023: false,
+              stopIndicatorColor: stopIndicatorColor,
+              stopIndicatorRadius: stopIndicatorRadius,
+              minHeight: 20.0,
+              value: 0.5,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test customized stop indicator.
+    await tester.pumpWidget(buildIndicator(
+      stopIndicatorColor: stopIndicatorColor,
+      stopIndicatorRadius: stopIndicatorRadius,
+    ));
+    expect(
+      find.byType(LinearProgressIndicator),
+      // Stop indicator.
+      paints..circle(x: 190.0, y: 10.0, radius: stopIndicatorRadius, color: stopIndicatorColor),
+    );
+
+    // Remove stop indicator.
+    await tester.pumpWidget(buildIndicator(stopIndicatorRadius: 0));
+    expect(
+      find.byType(LinearProgressIndicator),
+      // Stop indicator.
+      isNot(paints..circle(color: stopIndicatorColor)),
+    );
+
+    // Test stop indicator with transparent color.
+    await tester.pumpWidget(buildIndicator(stopIndicatorColor: const Color(0x00000000)));
+    expect(
+      find.byType(LinearProgressIndicator),
+      // Stop indicator.
+      paints..circle(color: const Color(0x00000000)),
+    );
+  });
+
+  testWidgets('Stop indicator size cannot be larger than the progress indicator', (WidgetTester tester) async {
+    Widget buildIndicator({ double? stopIndicatorRadius, double? minHeight }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              year2023: false,
+              stopIndicatorRadius: stopIndicatorRadius,
+              minHeight: minHeight,
+              value: 0.5,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test stop indicator radius equals to minHeight.
+    await tester.pumpWidget(buildIndicator(stopIndicatorRadius: 10.0, minHeight: 20.0));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints..circle(x: 190.0, y: 10.0, radius: 10.0, color: theme.colorScheme.primary),
+    );
+
+    // Test stop indicator radius larger than minHeight.
+    await tester.pumpWidget(buildIndicator(stopIndicatorRadius: 30.0, minHeight: 20.0));
+    expect(
+      find.byType(LinearProgressIndicator),
+      // Stop indicator radius is clamped to minHeight.
+      paints..circle(x: 190.0, y: 10.0, radius: 10.0, color: theme.colorScheme.primary),
+    );
+  });
+
+  testWidgets('LinearProgressIndicator default track gap when year2023 is false', (WidgetTester tester) async {
+    const double defaultTrackGap = 4.0;
+    Widget buildIndicator({ required TextDirection textDirection }) {
+      return Directionality(
+        textDirection: textDirection,
+        child: const Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              year2023: false,
+              value: 0.5,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default track gap in LTR.
+    await tester.pumpWidget(buildIndicator(textDirection: TextDirection.ltr));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        // Track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(100.0 + defaultTrackGap, 0.0, 200.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.secondaryContainer,
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.primary,
+        ),
+    );
+
+    // Test default track gap in RTL.
+    await tester.pumpWidget(buildIndicator(textDirection: TextDirection.rtl));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        // Track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0 - defaultTrackGap, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.secondaryContainer,
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(100.0, 0.0, 200.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.primary,
+        ),
+    );
+  });
+
+  testWidgets('Can customise LinearProgressIndicator track gap when year2023 is false', (WidgetTester tester) async {
+    const double customTrackGap = 12.0;
+    const double noTrackGap = 0.0;
+    Widget buildIndicator({ double? trackGap }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              year2023: false,
+              trackGap: trackGap,
+              value: 0.5,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test customized track gap.
+    await tester.pumpWidget(buildIndicator(trackGap: customTrackGap));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        // Track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(100.0 + customTrackGap, 0.0, 200.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.secondaryContainer,
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.primary,
+        ),
+    );
+
+    // Remove track gap.
+    await tester.pumpWidget(buildIndicator(trackGap: noTrackGap));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        // Track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 200.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.secondaryContainer,
+        )
+        // Active indicator.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.primary,
+        ),
+    );
+  });
 }
 
 class _RefreshProgressIndicatorGolden extends StatefulWidget {
