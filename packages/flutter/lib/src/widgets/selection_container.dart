@@ -96,7 +96,8 @@ class SelectionContainer extends StatefulWidget {
     return scope?.registrar;
   }
 
-  bool get _disabled => delegate == null;
+  // The selection container is disabled as long as it has no delegate or was not laid out.
+  bool get _disabled => delegate == null || !delegate!.hasSize;
 
   @override
   State<SelectionContainer> createState() => _SelectionContainerState();
@@ -309,11 +310,11 @@ abstract class SelectionContainerDelegate implements SelectionHandler, Selection
   ///
   ///  * [RenderBox.hasSize], which is used internally by this method.
   bool get hasSize {
-    assert(
-    _selectionContainerContext?.findRenderObject() != null,
-    'The _selectionContainerContext must have a renderObject, such as after the first build has completed.',
-    );
-    final RenderBox box = _selectionContainerContext!.findRenderObject()! as RenderBox;
+    final RenderObject? renderObject = _selectionContainerContext?.findRenderObject();
+    if(renderObject == null) {
+      return false;
+    }
+    final RenderBox box = renderObject as RenderBox;
     return box.hasSize;
   }
 
