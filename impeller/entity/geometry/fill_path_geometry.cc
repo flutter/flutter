@@ -38,12 +38,20 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
     };
   }
 
+  bool supports_primitive_restart =
+      renderer.GetDeviceCapabilities().SupportsPrimitiveRestart();
+  bool supports_triangle_fan =
+      renderer.GetDeviceCapabilities().SupportsTriangleFan() &&
+      supports_primitive_restart;
   VertexBuffer vertex_buffer = renderer.GetTessellator().TessellateConvex(
-      path_, host_buffer, entity.GetTransform().GetMaxBasisLengthXY());
+      path_, host_buffer, entity.GetTransform().GetMaxBasisLengthXY(),
+      /*supports_primitive_restart=*/supports_primitive_restart,
+      /*supports_triangle_fan=*/supports_triangle_fan);
 
   return GeometryResult{
-      .type = PrimitiveType::kTriangleStrip,
-      .vertex_buffer = vertex_buffer,
+      .type = supports_triangle_fan ? PrimitiveType::kTriangleFan
+                                    : PrimitiveType::kTriangleStrip,
+      .vertex_buffer = std::move(vertex_buffer),
       .transform = entity.GetShaderTransform(pass),
       .mode = GetResultMode(),
   };

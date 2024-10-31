@@ -5,6 +5,7 @@
 #include "impeller/geometry/path.h"
 
 #include <optional>
+#include <utility>
 
 #include "flutter/fml/logging.h"
 #include "impeller/geometry/path_component.h"
@@ -56,6 +57,45 @@ bool Path::IsEmpty() const {
   return data_->points.empty() ||
          (data_->components.size() == 1 &&
           data_->components[0] == ComponentType::kContour);
+}
+
+/// Determine required storage for points and indices.
+std::pair<size_t, size_t> Path::CountStorage(Scalar scale) const {
+  size_t points = 0;
+  size_t contours = 0;
+
+  auto& path_components = data_->components;
+  auto& path_points = data_->points;
+
+  size_t storage_offset = 0u;
+  for (size_t component_i = 0; component_i < path_components.size();
+       component_i++) {
+    const auto& path_component = path_components[component_i];
+    switch (path_component) {
+      case ComponentType::kLinear: {
+        points += 2;
+        break;
+      }
+      case ComponentType::kQuadratic: {
+        const QuadraticPathComponent* quad =
+            reinterpret_cast<const QuadraticPathComponent*>(
+                &path_points[storage_offset]);
+        points += quad->CountLinearPathComponents(scale);
+        break;
+      }
+      case ComponentType::kCubic: {
+        const CubicPathComponent* cubic =
+            reinterpret_cast<const CubicPathComponent*>(
+                &path_points[storage_offset]);
+        points += cubic->CountLinearPathComponents(scale);
+        break;
+      }
+      case Path::ComponentType::kContour:
+        contours++;
+    }
+    storage_offset += VerbToOffset(path_component);
+  }
+  return std::make_pair(points, contours);
 }
 
 void Path::WritePolyline(Scalar scale, VertexWriter& writer) const {

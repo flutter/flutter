@@ -201,6 +201,10 @@ bool CapabilitiesGLES::IsANGLE() const {
   return is_angle_;
 }
 
+bool CapabilitiesGLES::SupportsPrimitiveRestart() const {
+  return false;
+}
+
 PixelFormat CapabilitiesGLES::GetDefaultGlyphAtlasFormat() const {
   return default_glyph_atlas_format_;
 }
