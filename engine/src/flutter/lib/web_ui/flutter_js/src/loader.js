@@ -79,7 +79,8 @@ export class FlutterLoader {
     const rendererIsCompatible = (renderer) => {
       switch (renderer) {
         case "skwasm":
-          return browserEnvironment.hasChromiumBreakIterators
+          return browserEnvironment.crossOriginIsolated
+            && browserEnvironment.hasChromiumBreakIterators
             && browserEnvironment.hasImageCodecs
             && browserEnvironment.supportsWasmGC;
         default:

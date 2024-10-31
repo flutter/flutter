@@ -11,30 +11,45 @@ mergeInto(LibraryManager.library, {
     const handleToCanvasMap = new Map();
     const associatedObjectsMap = new Map();
 
+    // This value represents the difference between the time origin of the main
+    // thread and whichever web worker this code is running on. This is so that
+    // when we report frame timings, that they are in the same time domain
+    // regardless of whether they are captured on the main thread or the web
+    // worker.
+    let timeOriginDelta;
     _skwasm_setAssociatedObjectOnThread = function(threadId, pointer, object) {
-      skwasm_postMessage({
+      PThread.pthreads[threadId].postMessage({
         skwasmMessage: 'setAssociatedObject',
         pointer,
         object,
-      }, [object], threadId);
+      }, [object]);
     };
     _skwasm_getAssociatedObject = function(pointer) {
       return associatedObjectsMap.get(pointer);
     };
-    _skwasm_connectThread = function(threadId) {
-      const eventListener = function(data) {
+    _skwasm_syncTimeOriginForThread = function(threadId) {
+      PThread.pthreads[threadId].postMessage({
+        skwasmMessage: 'syncTimeOrigin',
+        timeOrigin: performance.timeOrigin,
+      });
+    }
+    _skwasm_registerMessageListener = function(threadId) {
+      const eventListener = function({data}) {
         const skwasmMessage = data.skwasmMessage;
         if (!skwasmMessage) {
           return;
         }
         switch (skwasmMessage) {
+          case 'syncTimeOrigin':
+            timeOriginDelta = performance.timeOrigin - data.timeOrigin;
+            return;
           case 'renderPictures':
             _surface_renderPicturesOnWorker(
               data.surface,
               data.pictures,
               data.pictureCount,
               data.callbackId,
-              skwasm_getCurrentTimestamp());
+              performance.now() + timeOriginDelta);
             return;
           case 'onRenderComplete':
             _surface_onRenderComplete(
@@ -79,16 +94,20 @@ mergeInto(LibraryManager.library, {
             console.warn(`unrecognized skwasm message: ${skwasmMessage}`);
         }
       };
-      skwasm_registerMessageListener(threadId, eventListener);
+      if (!threadId) {
+        addEventListener("message", eventListener);
+      } else {
+        PThread.pthreads[threadId].addEventListener("message", eventListener);
+      }
     };
     _skwasm_dispatchRenderPictures = function(threadId, surfaceHandle, pictures, pictureCount, callbackId) {
-      skwasm_postMessage({
+      PThread.pthreads[threadId].postMessage({
         skwasmMessage: 'renderPictures',
         surface: surfaceHandle,
         pictures,
         pictureCount,
         callbackId,
-      }, [], threadId);
+      });
     };
     _skwasm_createOffscreenCanvas = function(width, height) {
       const canvas = new OffscreenCanvas(width, height);
@@ -121,8 +140,8 @@ mergeInto(LibraryManager.library, {
     };
     _skwasm_resolveAndPostImages = async function(surfaceHandle, imagePromises, rasterStart, callbackId) {
       const imageBitmaps = imagePromises ? await Promise.all(imagePromises) : [];
-      const rasterEnd = skwasm_getCurrentTimestamp();
-      skwasm_postMessage({
+      const rasterEnd = performance.now() + timeOriginDelta;
+      postMessage({
         skwasmMessage: 'onRenderComplete',
         surface: surfaceHandle,
         callbackId,
@@ -147,28 +166,28 @@ mergeInto(LibraryManager.library, {
       return textureId;
     };
     _skwasm_disposeAssociatedObjectOnThread = function(threadId, pointer) {
-      skwasm_postMessage({
+      PThread.pthreads[threadId].postMessage({
         skwasmMessage: 'disposeAssociatedObject',
         pointer,
-      }, [], threadId);
+      });
     };
     _skwasm_dispatchDisposeSurface = function(threadId, surface) {
-      skwasm_postMessage({
+      PThread.pthreads[threadId].postMessage({
         skwasmMessage: 'disposeSurface',
         surface,
-      }, [], threadId);
+      });
     }
     _skwasm_dispatchRasterizeImage = function(threadId, surface, image, format, callbackId) {
-      skwasm_postMessage({
+      PThread.pthreads[threadId].postMessage({
         skwasmMessage: 'rasterizeImage',
         surface,
         image,
         format,
         callbackId,
-      }, [], threadId);
+      });
     }
     _skwasm_postRasterizeResult = function(surface, data, callbackId) {
-      skwasm_postMessage({
+      postMessage({
         skwasmMessage: 'onRasterizeComplete',
         surface,
         data,
@@ -176,15 +195,16 @@ mergeInto(LibraryManager.library, {
       });
     }
   },
-  $skwasm_support_setup__deps: [ '$skwasm_threading_setup'],
   skwasm_setAssociatedObjectOnThread: function () {},
   skwasm_setAssociatedObjectOnThread__deps: ['$skwasm_support_setup'],
   skwasm_getAssociatedObject: function () {},
   skwasm_getAssociatedObject__deps: ['$skwasm_support_setup'],
   skwasm_disposeAssociatedObjectOnThread: function () {},
   skwasm_disposeAssociatedObjectOnThread__deps: ['$skwasm_support_setup'],
-  skwasm_connectThread: function() {},
-  skwasm_connectThread__deps: ['$skwasm_support_setup'],
+  skwasm_syncTimeOriginForThread: function() {},
+  skwasm_syncTimeOriginForThread__deps: ['$skwasm_support_setup'],
+  skwasm_registerMessageListener: function() {},
+  skwasm_registerMessageListener__deps: ['$skwasm_support_setup'],
   skwasm_dispatchRenderPictures: function() {},
   skwasm_dispatchRenderPictures__deps: ['$skwasm_support_setup'],
   skwasm_createOffscreenCanvas: function () {},

@@ -264,7 +264,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '79bb5dfa69db3f72647c65d94dc1815bc84e9bed',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '3f1a1f0b26c22a3de5ffe0d3a081397550a12185',
 
   'src/flutter/third_party/depot_tools':
   Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
@@ -762,7 +762,7 @@ deps = {
   },
 
   'src/flutter/prebuilts/emsdk': {
-   'url': Var('skia_git') + '/external/github.com/emscripten-core/emsdk.git' + '@' + '2514ec738de72cebbba7f4fdba0cf2fabcb779a5',
+   'url': Var('skia_git') + '/external/github.com/emscripten-core/emsdk.git' + '@' + 'a896e3d066448b3530dbcaa48869fafefd738f57',
    'condition': 'download_emsdk',
   },
 

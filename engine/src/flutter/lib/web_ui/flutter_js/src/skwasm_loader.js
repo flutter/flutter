@@ -6,13 +6,12 @@ import { createWasmInstantiator } from "./instantiate_wasm.js";
 import { resolveUrlWithSegments } from "./utils.js";
 
 export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
-  const fileStem = (browserEnvironment.crossOriginIsolated && !config.forceSingleThreadedSkwasm) ? "skwasm" : "skwasm_st";
-  const rawSkwasmUrl = resolveUrlWithSegments(baseUrl, `${fileStem}.js`)
+  const rawSkwasmUrl = resolveUrlWithSegments(baseUrl, "skwasm.js")
   let skwasmUrl = rawSkwasmUrl;
   if (deps.flutterTT.policy) {
     skwasmUrl = deps.flutterTT.policy.createScriptURL(skwasmUrl);
   }
-  const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, `${fileStem}.wasm`));
+  const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, "skwasm.wasm"));
   const skwasm = await import(skwasmUrl);
   return await skwasm.default({
     instantiateWasm: wasmInstantiator,

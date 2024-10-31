@@ -234,9 +234,7 @@ class CopyArtifactsStep implements PipelineStep {
       'skwasm.wasm',
       'skwasm.wasm.map',
       'skwasm.js',
-      'skwasm_st.wasm',
-      'skwasm_st.wasm.map',
-      'skwasm_st.js',
+      'skwasm.worker.js',
     ]) {
       final io.File sourceFile = io.File(pathlib.join(
         outBuildPath,

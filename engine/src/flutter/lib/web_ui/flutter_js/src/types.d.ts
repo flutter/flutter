@@ -57,7 +57,6 @@ export interface FlutterConfiguration {
   hostElement: HtmlElement?;
   fontFallbackBaseUrl: string?;
   entryPointBaseUrl: string?;
-  forceSingleThreadedSkwasm: boolean?;
 }
 
 export interface ServiceWorkerSettings {
