@@ -99,7 +99,7 @@ Future<Plugin?> _pluginFromPackage(
 /// Please reach out to matanlurey@ if you find you need:
 /// ```dart
 /// useImplicitPubspecResolution: true
-/// ``` 
+/// ```
 ///
 /// ... in order for your code to function, as that path is being deprecated:
 /// <https://flutter.dev/to/flutter-gen-deprecation>.
