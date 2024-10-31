@@ -8,7 +8,6 @@
 #import <Cocoa/Cocoa.h>
 
 #include "base/macros.h"
-#include "base/platform/darwin/scoped_nsobject.h"
 
 #include "ax/ax_export.h"
 
@@ -39,7 +38,7 @@ class AXPlatformNodeMac : public AXPlatformNodeBase {
  private:
   ~AXPlatformNodeMac() override;
 
-  base::scoped_nsobject<AXPlatformNodeCocoa> native_node_;
+  AXPlatformNodeCocoa* native_node_;
 
   BASE_DISALLOW_COPY_AND_ASSIGN(AXPlatformNodeMac);
 };
