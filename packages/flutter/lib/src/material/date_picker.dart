@@ -691,7 +691,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         entryModeButton = IconButton(
           icon: widget.switchToCalendarEntryModeIcon ??
               Icon(Icons.calendar_today,
-                  semanticLabel: localizations.calendarModeButtonLabel),
+                  semanticLabel: Platform.isIOS ? null : localizations.calendarModeButtonLabel),
           color: headerForegroundColor,
           tooltip: localizations.calendarModeButtonLabel,
           onPressed: _handleEntryModeToggle,
@@ -1588,7 +1588,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
                 icon: widget.switchToInputEntryModeIcon ??
                       Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit,
                           semanticLabel:
-                              Platform.isAndroid ? localizations.inputDateModeButtonLabel : ''),
+                              Platform.isIOS ? null : localizations.inputDateModeButtonLabel),
                 padding: EdgeInsets.zero,
                 tooltip: localizations.inputDateModeButtonLabel,
                 onPressed: _handleEntryModeToggle,
@@ -1659,7 +1659,8 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
             ? IconButton(
                 icon: widget.switchToCalendarEntryModeIcon ??
                       Icon(Icons.calendar_today,
-                          semanticLabel: Platform.isAndroid ? localizations.calendarModeButtonLabel : ''),
+                          semanticLabel: Platform.isIOS ? null : localizations.calendarModeButtonLabel,
+                      ),
                 padding: EdgeInsets.zero,
                 tooltip: localizations.calendarModeButtonLabel,
                 onPressed: _handleEntryModeToggle,

@@ -802,7 +802,7 @@ class _MonthPickerState extends State<_MonthPicker> {
                   IconButton(
                     icon: Icon(
                       Icons.chevron_left,
-                      semanticLabel: Platform.isAndroid ? _localizations.previousMonthTooltip : '',
+                      semanticLabel: Platform.isIOS ? null : _localizations.previousMonthTooltip,
                     ),
                     color: controlColor,
                     tooltip: _isDisplayingFirstMonth ? null : _localizations.previousMonthTooltip,
@@ -811,7 +811,7 @@ class _MonthPickerState extends State<_MonthPicker> {
                   IconButton(
                     icon: Icon(
                       Icons.chevron_right,
-                      semanticLabel: Platform.isAndroid ? _localizations.nextMonthTooltip : '',
+                      semanticLabel: Platform.isIOS ? null : _localizations.nextMonthTooltip,
                     ),
                     color: controlColor,
                     tooltip: _isDisplayingLastMonth ? null : _localizations.nextMonthTooltip,
