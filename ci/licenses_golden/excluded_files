@@ -136,6 +136,7 @@
 ../../../flutter/impeller/compiler/shader_bundle_unittests.cc
 ../../../flutter/impeller/compiler/switches_unittests.cc
 ../../../flutter/impeller/core/allocator_unittests.cc
+../../../flutter/impeller/core/buffer_view_unittests.cc
 ../../../flutter/impeller/display_list/aiks_dl_atlas_unittests.cc
 ../../../flutter/impeller/display_list/aiks_dl_basic_unittests.cc
 ../../../flutter/impeller/display_list/aiks_dl_blend_unittests.cc

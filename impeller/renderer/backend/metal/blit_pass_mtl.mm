@@ -194,7 +194,7 @@ bool BlitPassMTL::OnCopyBufferToTextureCommand(
     uint32_t mip_level,
     uint32_t slice,
     bool convert_to_read) {
-  auto source_mtl = DeviceBufferMTL::Cast(*source.buffer).GetMTLBuffer();
+  auto source_mtl = DeviceBufferMTL::Cast(*source.GetBuffer()).GetMTLBuffer();
   if (!source_mtl) {
     return false;
   }
@@ -221,7 +221,7 @@ bool BlitPassMTL::OnCopyBufferToTextureCommand(
 #endif  // IMPELLER_DEBUG
   [encoder_
            copyFromBuffer:source_mtl
-             sourceOffset:source.range.offset
+             sourceOffset:source.GetRange().offset
         sourceBytesPerRow:source_bytes_per_row
       sourceBytesPerImage:
           0  // 0 for 2D textures according to
