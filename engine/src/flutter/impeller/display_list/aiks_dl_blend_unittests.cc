@@ -338,6 +338,7 @@ TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
   FLT_FORWARD(mock_capabilities, old_capabilities, SupportsTriangleFan);
   FLT_FORWARD(mock_capabilities, old_capabilities,
               SupportsDecalSamplerAddressMode);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsPrimitiveRestart);
   ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
 
   bool has_color_filter = true;

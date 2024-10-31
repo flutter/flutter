@@ -86,6 +86,9 @@ class Capabilities {
   /// @brief Whether the primitive type TriangleFan is supported by the backend.
   virtual bool SupportsTriangleFan() const = 0;
 
+  /// @brief Whether primitive restart is supported.
+  virtual bool SupportsPrimitiveRestart() const = 0;
+
   /// @brief  Returns a supported `PixelFormat` for textures that store
   ///         4-channel colors (red/green/blue/alpha).
   virtual PixelFormat GetDefaultColorFormat() const = 0;

@@ -1271,6 +1271,7 @@ TEST_P(AiksTest, GaussianBlurWithoutDecalSupport) {
               SupportsTextureToTextureBlits);
   FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultGlyphAtlasFormat);
   FLT_FORWARD(mock_capabilities, old_capabilities, SupportsTriangleFan);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsPrimitiveRestart);
   ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
 
   auto texture = DlImageImpeller::Make(CreateTextureForFixture("boston.jpg"));

@@ -6,15 +6,84 @@
 
 #include <cmath>
 
+#include "impeller/geometry/scalar.h"
 #include "impeller/geometry/wangs_formula.h"
 
 namespace impeller {
 
-VertexWriter::VertexWriter(std::vector<Point>& points,
-                           std::vector<uint16_t>& indices)
+/////////// FanVertexWriter ///////////
+
+FanVertexWriter::FanVertexWriter(Point* point_buffer, uint16_t* index_buffer)
+    : point_buffer_(point_buffer), index_buffer_(index_buffer) {}
+
+FanVertexWriter::~FanVertexWriter() = default;
+
+size_t FanVertexWriter::GetIndexCount() const {
+  return index_count_;
+}
+
+void FanVertexWriter::EndContour() {
+  if (count_ == 0) {
+    return;
+  }
+  index_buffer_[index_count_++] = 0xFFFF;
+}
+
+void FanVertexWriter::Write(Point point) {
+  index_buffer_[index_count_++] = count_;
+  point_buffer_[count_++] = point;
+}
+
+/////////// StripVertexWriter ///////////
+
+StripVertexWriter::StripVertexWriter(Point* point_buffer,
+                                     uint16_t* index_buffer)
+    : point_buffer_(point_buffer), index_buffer_(index_buffer) {}
+
+StripVertexWriter::~StripVertexWriter() = default;
+
+size_t StripVertexWriter::GetIndexCount() const {
+  return index_count_;
+}
+
+void StripVertexWriter::EndContour() {
+  if (count_ == 0u || contour_start_ == count_ - 1) {
+    // Empty or first contour.
+    return;
+  }
+
+  size_t start = contour_start_;
+  size_t end = count_ - 1;
+
+  index_buffer_[index_count_++] = start;
+
+  size_t a = start + 1;
+  size_t b = end;
+  while (a < b) {
+    index_buffer_[index_count_++] = a;
+    index_buffer_[index_count_++] = b;
+    a++;
+    b--;
+  }
+  if (a == b) {
+    index_buffer_[index_count_++] = a;
+  }
+
+  contour_start_ = count_;
+  index_buffer_[index_count_++] = 0xFFFF;
+}
+
+void StripVertexWriter::Write(Point point) {
+  point_buffer_[count_++] = point;
+}
+
+/////////// GLESVertexWriter ///////////
+
+GLESVertexWriter::GLESVertexWriter(std::vector<Point>& points,
+                                   std::vector<uint16_t>& indices)
     : points_(points), indices_(indices) {}
 
-void VertexWriter::EndContour() {
+void GLESVertexWriter::EndContour() {
   if (points_.size() == 0u || contour_start_ == points_.size() - 1) {
     // Empty or first contour.
     return;
@@ -64,7 +133,7 @@ void VertexWriter::EndContour() {
   contour_start_ = points_.size();
 }
 
-void VertexWriter::Write(Point point) {
+void GLESVertexWriter::Write(Point point) {
   points_.push_back(point);
 }
 
@@ -187,6 +256,10 @@ void QuadraticPathComponent::ToLinearPathComponents(
   proc(p2);
 }
 
+size_t QuadraticPathComponent::CountLinearPathComponents(Scalar scale) const {
+  return std::ceilf(ComputeQuadradicSubdivisions(scale, *this)) + 2;
+}
+
 std::vector<Point> QuadraticPathComponent::Extrema() const {
   CubicPathComponent elevated(*this);
   return elevated.Extrema();
@@ -240,6 +313,10 @@ void CubicPathComponent::ToLinearPathComponents(Scalar scale,
     writer.Write(Solve(i / line_count));
   }
   writer.Write(p2);
+}
+
+size_t CubicPathComponent::CountLinearPathComponents(Scalar scale) const {
+  return std::ceilf(ComputeCubicSubdivisions(scale, *this)) + 2;
 }
 
 inline QuadraticPathComponent CubicPathComponent::Lower() const {

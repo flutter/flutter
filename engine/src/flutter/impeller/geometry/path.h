@@ -193,6 +193,9 @@ class Path {
   /// lines.
   void WritePolyline(Scalar scale, VertexWriter& writer) const;
 
+  /// Determine required storage for points and number of contours.
+  std::pair<size_t, size_t> CountStorage(Scalar scale) const;
+
  private:
   friend class PathBuilder;
 

@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 #include "impeller/tessellator/tessellator.h"
+#include <cstdint>
+
+#include "impeller/core/device_buffer.h"
+#include "impeller/geometry/path_component.h"
 
 namespace impeller {
 
@@ -29,7 +33,49 @@ Path::Polyline Tessellator::CreateTempPolyline(const Path& path,
 
 VertexBuffer Tessellator::TessellateConvex(const Path& path,
                                            HostBuffer& host_buffer,
-                                           Scalar tolerance) {
+                                           Scalar tolerance,
+                                           bool supports_primitive_restart,
+                                           bool supports_triangle_fan) {
+  if (supports_primitive_restart) {
+    // Primitive Restart.
+    const auto [point_count, contour_count] = path.CountStorage(tolerance);
+    BufferView point_buffer = host_buffer.Emplace(
+        nullptr, sizeof(Point) * point_count, alignof(Point));
+    BufferView index_buffer = host_buffer.Emplace(
+        nullptr, sizeof(uint16_t) * (point_count + contour_count),
+        alignof(uint16_t));
+
+    if (supports_triangle_fan) {
+      FanVertexWriter writer(
+          reinterpret_cast<Point*>(point_buffer.buffer->OnGetContents() +
+                                   point_buffer.range.offset),
+          reinterpret_cast<uint16_t*>(index_buffer.buffer->OnGetContents() +
+                                      index_buffer.range.offset));
+      path.WritePolyline(tolerance, writer);
+
+      return VertexBuffer{
+          .vertex_buffer = std::move(point_buffer),
+          .index_buffer = std::move(index_buffer),
+          .vertex_count = writer.GetIndexCount(),
+          .index_type = IndexType::k16bit,
+      };
+    } else {
+      StripVertexWriter writer(
+          reinterpret_cast<Point*>(point_buffer.buffer->OnGetContents() +
+                                   point_buffer.range.offset),
+          reinterpret_cast<uint16_t*>(index_buffer.buffer->OnGetContents() +
+                                      index_buffer.range.offset));
+      path.WritePolyline(tolerance, writer);
+
+      return VertexBuffer{
+          .vertex_buffer = std::move(point_buffer),
+          .index_buffer = std::move(index_buffer),
+          .vertex_count = writer.GetIndexCount(),
+          .index_type = IndexType::k16bit,
+      };
+    }
+  }
+
   FML_DCHECK(point_buffer_);
   FML_DCHECK(index_buffer_);
   TessellateConvexInternal(path, *point_buffer_, *index_buffer_, tolerance);
@@ -66,7 +112,7 @@ void Tessellator::TessellateConvexInternal(const Path& path,
   point_buffer.clear();
   index_buffer.clear();
 
-  VertexWriter writer(point_buffer, index_buffer);
+  GLESVertexWriter writer(point_buffer, index_buffer);
 
   path.WritePolyline(tolerance, writer);
 }

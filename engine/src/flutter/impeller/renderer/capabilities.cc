@@ -88,6 +88,9 @@ class StandardCapabilities final : public Capabilities {
     return default_maximum_render_pass_attachment_size_;
   }
 
+  // |Capabilities|
+  bool SupportsPrimitiveRestart() const override { return true; }
+
  private:
   StandardCapabilities(bool supports_offscreen_msaa,
                        bool supports_ssbo,

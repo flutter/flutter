@@ -481,6 +481,10 @@ bool CapabilitiesVK::HasExtension(const std::string& ext) const {
   return false;
 }
 
+bool CapabilitiesVK::SupportsPrimitiveRestart() const {
+  return true;
+}
+
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
   default_color_format_ = pixel_format;
 }
