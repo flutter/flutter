@@ -349,7 +349,7 @@ class FlutterProject {
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,
-    required bool writeLegacyPluginsList,
+    required bool useImplicitPubspecResolution,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
@@ -362,7 +362,7 @@ class FlutterProject {
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
       allowedPlugins: allowedPlugins,
-      useImplicitPubspecResolution: writeLegacyPluginsList,
+      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
   }
 
