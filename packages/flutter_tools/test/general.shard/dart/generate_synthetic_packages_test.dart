@@ -280,7 +280,7 @@ void main() {
     );
     pubspecFile.writeAsStringSync(content);
 
-    // Create a blank l10n.yaml file
+    // Create a blank l10n.yaml file.
     fileSystem.file('l10n.yaml').writeAsStringSync('');
 
     final BufferLogger mockBufferLogger = BufferLogger.test();
