@@ -16,8 +16,7 @@ Future<void> generateLocalizationsSyntheticPackage({
   required BuildTargets buildTargets,
 }) async {
   final FileSystem fileSystem = environment.fileSystem;
-  final File l10nYamlFile = fileSystem
-      .file(fileSystem.path.join(environment.projectDir.path, 'l10n.yaml'));
+  final File l10nYamlFile = fileSystem.file(fileSystem.path.join(environment.projectDir.path, 'l10n.yaml'));
 
   // If pubspec.yaml has generate:true and if l10n.yaml exists in the
   // root project directory, check to see if a synthetic package should
@@ -28,8 +27,7 @@ Future<void> generateLocalizationsSyntheticPackage({
 
   final YamlNode yamlNode = loadYamlNode(l10nYamlFile.readAsStringSync());
   if (yamlNode.value != null && yamlNode is! YamlMap) {
-    throwToolExit(
-        'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode');
+    throwToolExit('Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode');
   }
 
   // If an l10n.yaml file exists and is not empty, attempt to parse settings in
