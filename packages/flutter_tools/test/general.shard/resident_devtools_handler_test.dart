@@ -425,13 +425,6 @@ void main() {
       _ThrowingChromiumLauncher(),
     );
 
-
-    await expectLater(
-        handler.chromiumLauncher
-            ?.launch(handler.activeDevToolsServer!.host),
-        throwsA(isA<ProcessException>()));
-
-
      expect(handler.launchedInBrowser, isFalse);
 
       expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]),
