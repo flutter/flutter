@@ -8,6 +8,7 @@
 #include "flutter/fml/mapping.h"
 #include "impeller/base/allocation_size.h"
 #include "impeller/core/device_buffer_descriptor.h"
+#include "impeller/core/idle_waiter.h"
 #include "impeller/core/texture.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/geometry/size.h"

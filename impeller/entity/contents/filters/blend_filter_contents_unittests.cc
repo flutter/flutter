@@ -54,8 +54,8 @@ TEST_P(BlendFilterContentsTest, AdvancedBlendColorAlignsColorTo4) {
   uint8_t byte = 0xff;
   BufferView buffer_view =
       renderer->GetTransientsBuffer().Emplace(&byte, /*length=*/1, /*align=*/1);
-  EXPECT_EQ(buffer_view.range.offset, 4u);
-  EXPECT_EQ(buffer_view.range.length, 1u);
+  EXPECT_EQ(buffer_view.GetRange().offset, 4u);
+  EXPECT_EQ(buffer_view.GetRange().length, 1u);
   Entity entity;
 
   std::optional<Entity> result = filter_contents.GetEntity(
