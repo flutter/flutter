@@ -407,7 +407,7 @@ class PackagesGetCommand extends FlutterCommand {
       return <Plugin>[];
     }
 
-    return findPlugins(rootProject, throwOnError: false);
+    return findPlugins(rootProject, throwOnError: false, useImplicitPubspecResolution: boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true));
   })();
 
   late final String? _androidEmbeddingVersion = _rootProject?.android.getEmbeddingVersion().toString().split('.').last;
