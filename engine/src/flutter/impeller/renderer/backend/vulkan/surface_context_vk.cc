@@ -58,6 +58,10 @@ const std::shared_ptr<const Capabilities>& SurfaceContextVK::GetCapabilities()
   return parent_->GetCapabilities();
 }
 
+std::shared_ptr<const IdleWaiter> SurfaceContextVK::GetIdleWaiter() const {
+  return parent_->GetIdleWaiter();
+}
+
 void SurfaceContextVK::Shutdown() {
   parent_->Shutdown();
 }

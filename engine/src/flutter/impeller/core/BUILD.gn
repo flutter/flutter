@@ -18,6 +18,7 @@ impeller_component("core") {
     "formats.h",
     "host_buffer.cc",
     "host_buffer.h",
+    "idle_waiter.h",
     "platform.cc",
     "platform.h",
     "range.cc",
@@ -50,7 +51,10 @@ impeller_component("core") {
 impeller_component("allocator_unittests") {
   testonly = true
 
-  sources = [ "allocator_unittests.cc" ]
+  sources = [
+    "allocator_unittests.cc",
+    "buffer_view_unittests.cc",
+  ]
 
   deps = [
     ":core",
