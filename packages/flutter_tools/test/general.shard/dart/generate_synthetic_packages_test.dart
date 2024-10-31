@@ -306,7 +306,7 @@ void main() {
   });
 
   testWithoutContext('synthetic-package: true (explicit) logs a deprecation warning', () async {
-    // Project directory setup for gen_l10n logic
+    // Project directory setup for gen_l10n logic.
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
     // Add generate:true to pubspec.yaml.
