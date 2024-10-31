@@ -38,7 +38,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
     };
   }
 
-  VertexBuffer vertex_buffer = renderer.GetTessellator()->TessellateConvex(
+  VertexBuffer vertex_buffer = renderer.GetTessellator().TessellateConvex(
       path_, host_buffer, entity.GetTransform().GetMaxBasisLengthXY());
 
   return GeometryResult{
