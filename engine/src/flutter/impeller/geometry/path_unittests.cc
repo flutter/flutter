@@ -9,6 +9,7 @@
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/path_component.h"
+#include "impeller/geometry/round_rect.h"
 
 namespace impeller {
 namespace testing {
@@ -556,6 +557,128 @@ TEST(PathTest, CanBeCloned) {
     EXPECT_EQ(poly_a.contours[i].start_direction,
               poly_b.contours[i].start_direction);
   }
+}
+
+TEST(PathTest, FanTessellation) {
+  Path path = PathBuilder{}
+                  .AddRoundRect(RoundRect::MakeRectRadius(
+                      Rect::MakeLTRB(0, 0, 100, 100), 10))
+                  .TakePath();
+  auto [points, contours] = path.CountStorage(1.0);
+
+  std::vector<Point> point_storage(points);
+  std::vector<uint16_t> index_storage(points + (contours - 1));
+
+  FanVertexWriter writer(point_storage.data(), index_storage.data());
+  path.WritePolyline(1.0, writer);
+
+  EXPECT_LE(writer.GetIndexCount(), index_storage.size());
+  EXPECT_EQ(point_storage[0], Point(10, 0));
+}
+
+// Filled Paths without an explicit close should still be closed
+TEST(PathTest, FanTessellationUnclosedPath) {
+  // Create a rectangle that lacks an explicit close.
+  Path path = PathBuilder{}
+                  .LineTo({100, 0})
+                  .LineTo({100, 100})
+                  .LineTo({0, 100})
+                  .TakePath();
+
+  std::vector<Point> expected = {{0, 0},   {100, 0}, {100, 100},
+                                 {0, 100}, {0, 0},   {0, 0}};
+  std::vector<uint16_t> expected_indices = {0, 1, 2, 3, 0xFFFF, 0};
+
+  auto [points, contours] = path.CountStorage(1.0);
+
+  std::vector<Point> point_storage(points);
+  std::vector<uint16_t> index_storage(points + (contours - 1));
+
+  FanVertexWriter writer(point_storage.data(), index_storage.data());
+  path.WritePolyline(1.0, writer);
+
+  EXPECT_LE(index_storage, expected_indices);
+  EXPECT_EQ(point_storage, expected);
+}
+
+// Filled Paths without an explicit close should still be closed
+TEST(PathTest, StripTessellationUnclosedPath) {
+  // Create a rectangle that lacks an explicit close.
+  Path path = PathBuilder{}
+                  .LineTo({100, 0})
+                  .LineTo({100, 100})
+                  .LineTo({0, 100})
+                  .TakePath();
+
+  std::vector<Point> expected = {{0, 0},   {100, 0}, {100, 100},
+                                 {0, 100}, {0, 0},   {0, 0}};
+  std::vector<uint16_t> expected_indices = {0, 1, 3, 2, 0xFFFF, 0};
+
+  auto [points, contours] = path.CountStorage(1.0);
+
+  std::vector<Point> point_storage(points);
+  std::vector<uint16_t> index_storage(points + (contours - 1));
+
+  StripVertexWriter writer(point_storage.data(), index_storage.data());
+  path.WritePolyline(1.0, writer);
+
+  EXPECT_LE(index_storage, expected_indices);
+  EXPECT_EQ(point_storage, expected);
+}
+
+TEST(PathTest, FanTessellationMultiContour) {
+  PathBuilder builder{};
+  for (auto i = 0; i < 10; i++) {
+    builder.AddRoundRect(
+        RoundRect::MakeRectRadius(Rect::MakeLTRB(0 + i, 0 + i, 100, 100), 10));
+  }
+  auto path = builder.TakePath();
+  auto [points, contours] = path.CountStorage(1.0);
+
+  std::vector<Point> point_storage(points);
+  std::vector<uint16_t> index_storage(points + (contours - 1));
+
+  FanVertexWriter writer(point_storage.data(), index_storage.data());
+  path.WritePolyline(1.0, writer);
+
+  EXPECT_LE(writer.GetIndexCount(), index_storage.size());
+  EXPECT_EQ(point_storage[0], Point(10, 0));
+}
+
+TEST(PathTest, StripTessellation) {
+  Path path = PathBuilder{}
+                  .AddRoundRect(RoundRect::MakeRectRadius(
+                      Rect::MakeLTRB(0, 0, 100, 100), 10))
+                  .TakePath();
+  auto [points, contours] = path.CountStorage(1.0);
+
+  std::vector<Point> point_storage(points);
+  std::vector<uint16_t> index_storage(points + (contours - 1));
+
+  StripVertexWriter writer(point_storage.data(), index_storage.data());
+  path.WritePolyline(1.0, writer);
+
+  EXPECT_LE(writer.GetIndexCount(), index_storage.size());
+  EXPECT_EQ(point_storage[0], Point(10, 0));
+}
+
+TEST(PathTest, StripTessellationMultiContour) {
+  PathBuilder builder{};
+  for (auto i = 0; i < 10; i++) {
+    builder.AddRoundRect(
+        RoundRect::MakeRectRadius(Rect::MakeLTRB(0 + i, 0 + i, 100, 100), 10));
+  }
+  auto path = builder.TakePath();
+  auto [points, contours] = path.CountStorage(1.0);
+
+  std::vector<Point> point_storage(points);
+  std::vector<uint16_t> index_storage(points + (contours - 1));
+
+  StripVertexWriter writer(point_storage.data(), index_storage.data());
+  path.WritePolyline(1.0, writer);
+
+  EXPECT_LE(writer.GetIndexCount(), index_storage.size());
+  EXPECT_EQ(point_storage[0], Point(10, 0));
 }
 
 TEST(PathTest, PathBuilderDoesNotMutateCopiedPaths) {

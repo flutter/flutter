@@ -187,7 +187,9 @@ class Tessellator {
   /// @return A vertex buffer containing all data from the provided curve.
   VertexBuffer TessellateConvex(const Path& path,
                                 HostBuffer& host_buffer,
-                                Scalar tolerance);
+                                Scalar tolerance,
+                                bool supports_primitive_restart = false,
+                                bool supports_triangle_fan = false);
 
   /// Visible for testing.
   ///

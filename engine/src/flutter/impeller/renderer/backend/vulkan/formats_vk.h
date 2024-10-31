@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <ostream>
 
+#include "fml/logging.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
@@ -379,6 +380,21 @@ constexpr vk::PolygonMode ToVKPolygonMode(PolygonMode mode) {
       return vk::PolygonMode::eFill;
     case PolygonMode::kLine:
       return vk::PolygonMode::eLine;
+  }
+  FML_UNREACHABLE();
+}
+
+constexpr bool PrimitiveTopologySupportsPrimitiveRestart(
+    PrimitiveType primitive) {
+  switch (primitive) {
+    case PrimitiveType::kTriangleStrip:
+    case PrimitiveType::kLine:
+    case PrimitiveType::kPoint:
+    case PrimitiveType::kTriangleFan:
+      return true;
+    case PrimitiveType::kTriangle:
+    case PrimitiveType::kLineStrip:
+      return false;
   }
   FML_UNREACHABLE();
 }

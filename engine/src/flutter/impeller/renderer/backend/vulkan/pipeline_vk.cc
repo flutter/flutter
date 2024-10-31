@@ -361,6 +361,8 @@ fml::StatusOr<vk::UniquePipeline> MakePipeline(
   vk::PipelineInputAssemblyStateCreateInfo input_assembly;
   const auto topology = ToVKPrimitiveTopology(desc.GetPrimitiveType());
   input_assembly.setTopology(topology);
+  input_assembly.setPrimitiveRestartEnable(
+      PrimitiveTopologySupportsPrimitiveRestart(desc.GetPrimitiveType()));
   pipeline_info.setPInputAssemblyState(&input_assembly);
 
   //----------------------------------------------------------------------------
