@@ -355,7 +355,7 @@ enum BuildStrategy {
   remote(
     'Use remote builds.'
     '\n'
-    'If --$_flagStrategy is not specified, the build will fail.',
+    'If --$_flagRbe is not specified, the build will fail.',
   );
 
   const BuildStrategy(this._help);
