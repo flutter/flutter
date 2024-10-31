@@ -130,9 +130,8 @@ def run_cmd( # pylint: disable=too-many-arguments
 
   for forbidden_string in forbidden_output:
     if forbidden_string in output:
-      matches = [x.group(0) for x in re.findall(f'^.*{forbidden_string}.*$', output)]
       raise RuntimeError(
-          f'command "{command_string}" contained forbidden string "{forbidden_string}": {matches}'
+          'command "%s" contained forbidden string "%s"' % (command_string, forbidden_string)
       )
 
   print_divider('<')

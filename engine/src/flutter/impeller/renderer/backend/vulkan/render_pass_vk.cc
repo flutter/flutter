@@ -377,14 +377,9 @@ bool RenderPassVK::SetVertexBuffer(BufferView vertex_buffers[],
   vk::Buffer buffers[kMaxVertexBuffers];
   vk::DeviceSize vertex_buffer_offsets[kMaxVertexBuffers];
   for (size_t i = 0; i < vertex_buffer_count; i++) {
-    buffers[i] =
-        DeviceBufferVK::Cast(*vertex_buffers[i].GetBuffer()).GetBuffer();
-    vertex_buffer_offsets[i] = vertex_buffers[i].GetRange().offset;
-    std::shared_ptr<const DeviceBuffer> device_buffer =
-        vertex_buffers[i].TakeBuffer();
-    if (device_buffer) {
-      command_buffer_->Track(device_buffer);
-    }
+    buffers[i] = DeviceBufferVK::Cast(*vertex_buffers[i].buffer).GetBuffer();
+    vertex_buffer_offsets[i] = vertex_buffers[i].range.offset;
+    command_buffer_->Track(vertex_buffers[i].buffer);
   }
 
   // Bind the vertex buffers.
@@ -404,27 +399,27 @@ bool RenderPassVK::SetIndexBuffer(BufferView index_buffer,
   if (index_type != IndexType::kNone) {
     has_index_buffer_ = true;
 
-    BufferView index_buffer_view = std::move(index_buffer);
+    const BufferView& index_buffer_view = index_buffer;
     if (!index_buffer_view) {
       return false;
     }
 
-    if (!index_buffer_view.GetBuffer()) {
+    const std::shared_ptr<const DeviceBuffer>& index_buffer =
+        index_buffer_view.buffer;
+    if (!index_buffer) {
       VALIDATION_LOG << "Failed to acquire device buffer"
                      << " for index buffer view";
       return false;
     }
 
-    std::shared_ptr<const DeviceBuffer> index_buffer =
-        index_buffer_view.TakeBuffer();
-    if (index_buffer && !command_buffer_->Track(index_buffer)) {
+    if (!command_buffer_->Track(index_buffer)) {
       return false;
     }
 
     vk::Buffer index_buffer_handle =
-        DeviceBufferVK::Cast(*index_buffer_view.GetBuffer()).GetBuffer();
+        DeviceBufferVK::Cast(*index_buffer).GetBuffer();
     command_buffer_vk_.bindIndexBuffer(index_buffer_handle,
-                                       index_buffer_view.GetRange().offset,
+                                       index_buffer_view.range.offset,
                                        ToVKIndexType(index_type));
   } else {
     has_index_buffer_ = false;
@@ -560,27 +555,27 @@ bool RenderPassVK::BindResource(
 
 bool RenderPassVK::BindResource(size_t binding,
                                 DescriptorType type,
-                                BufferView view) {
+                                const BufferView& view) {
   if (bound_buffer_offset_ >= kMaxBindings) {
     return false;
   }
 
-  auto buffer = DeviceBufferVK::Cast(*view.GetBuffer()).GetBuffer();
+  const std::shared_ptr<const DeviceBuffer>& device_buffer = view.buffer;
+  auto buffer = DeviceBufferVK::Cast(*device_buffer).GetBuffer();
   if (!buffer) {
     return false;
   }
 
-  std::shared_ptr<const DeviceBuffer> device_buffer = view.TakeBuffer();
-  if (device_buffer && !command_buffer_->Track(device_buffer)) {
+  if (!command_buffer_->Track(device_buffer)) {
     return false;
   }
 
-  uint32_t offset = view.GetRange().offset;
+  uint32_t offset = view.range.offset;
 
   vk::DescriptorBufferInfo buffer_info;
   buffer_info.buffer = buffer;
   buffer_info.offset = offset;
-  buffer_info.range = view.GetRange().length;
+  buffer_info.range = view.range.length;
   buffer_workspace_[bound_buffer_offset_++] = buffer_info;
 
   vk::WriteDescriptorSet write_set;

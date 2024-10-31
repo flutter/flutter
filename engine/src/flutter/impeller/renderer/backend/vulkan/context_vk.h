@@ -41,24 +41,6 @@ class DescriptorPoolRecyclerVK;
 class CommandQueueVK;
 class DescriptorPoolVK;
 
-class IdleWaiterVK : public IdleWaiter {
- public:
-  explicit IdleWaiterVK(std::weak_ptr<DeviceHolderVK> device_holder)
-      : device_holder_(std::move(device_holder)) {}
-
-  void WaitIdle() const override {
-    std::shared_ptr<DeviceHolderVK> strong_device_holder_ =
-        device_holder_.lock();
-    if (strong_device_holder_ && strong_device_holder_->GetDevice()) {
-      [[maybe_unused]] auto result =
-          strong_device_holder_->GetDevice().waitIdle();
-    }
-  }
-
- private:
-  std::weak_ptr<DeviceHolderVK> device_holder_;
-};
-
 class ContextVK final : public Context,
                         public BackendCast<ContextVK, Context>,
                         public std::enable_shared_from_this<ContextVK> {
@@ -229,10 +211,6 @@ class ContextVK final : public Context,
   // | Context |
   bool FlushCommandBuffers() override;
 
-  std::shared_ptr<const IdleWaiter> GetIdleWaiter() const override {
-    return idle_waiter_vk_;
-  }
-
  private:
   struct DeviceHolderImpl : public DeviceHolderVK {
     // |DeviceHolder|
@@ -273,7 +251,6 @@ class ContextVK final : public Context,
   std::shared_ptr<fml::ConcurrentMessageLoop> raster_message_loop_;
   std::shared_ptr<GPUTracerVK> gpu_tracer_;
   std::shared_ptr<CommandQueue> command_queue_vk_;
-  std::shared_ptr<const IdleWaiter> idle_waiter_vk_;
 
   using DescriptorPoolMap =
       std::unordered_map<std::thread::id, std::shared_ptr<DescriptorPoolVK>>;

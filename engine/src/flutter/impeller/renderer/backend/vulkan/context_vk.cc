@@ -456,7 +456,6 @@ void ContextVK::Setup(Settings settings) {
   /// All done!
   ///
   device_holder_ = std::move(device_holder);
-  idle_waiter_vk_ = std::make_shared<IdleWaiterVK>(device_holder_);
   driver_info_ =
       std::make_unique<DriverInfoVK>(device_holder_->physical_device);
   debug_report_ = std::move(debug_report);

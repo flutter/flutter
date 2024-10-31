@@ -30,8 +30,7 @@ TEST_P(ComputeTest, CapabilitiesReportSupport) {
 TEST_P(ComputeTest, CanCreateComputePass) {
   using CS = SampleComputeShader;
   auto context = GetContext();
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
@@ -85,7 +84,7 @@ TEST_P(ComputeTest, CanCreateComputePass) {
                 EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
 
                 auto view = DeviceBuffer::AsBufferView(output_buffer);
-                EXPECT_EQ(view.GetRange().length, sizeof(CS::Output<kCount>));
+                EXPECT_EQ(view.range.length, sizeof(CS::Output<kCount>));
 
                 CS::Output<kCount>* output =
                     reinterpret_cast<CS::Output<kCount>*>(
@@ -110,8 +109,7 @@ TEST_P(ComputeTest, CanCreateComputePass) {
 TEST_P(ComputeTest, CanComputePrefixSum) {
   using CS = PrefixSumTestComputeShader;
   auto context = GetContext();
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
@@ -154,7 +152,7 @@ TEST_P(ComputeTest, CanComputePrefixSum) {
                      EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
 
                      auto view = DeviceBuffer::AsBufferView(output_buffer);
-                     EXPECT_EQ(view.GetRange().length,
+                     EXPECT_EQ(view.range.length,
                                sizeof(CS::OutputData<kCount>));
 
                      CS::OutputData<kCount>* output =
@@ -212,7 +210,7 @@ TEST_P(ComputeTest, 1DThreadgroupSizingIsCorrect) {
                      EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
 
                      auto view = DeviceBuffer::AsBufferView(output_buffer);
-                     EXPECT_EQ(view.GetRange().length,
+                     EXPECT_EQ(view.range.length,
                                sizeof(CS::OutputData<kCount>));
 
                      CS::OutputData<kCount>* output =
@@ -231,8 +229,7 @@ TEST_P(ComputeTest, CanComputePrefixSumLargeInteractive) {
   using CS = PrefixSumTestComputeShader;
 
   auto context = GetContext();
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
 
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
@@ -278,8 +275,7 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
   using Stage2PipelineBuilder = ComputePipelineBuilder<CS2>;
 
   auto context = GetContext();
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
@@ -377,8 +373,7 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
 TEST_P(ComputeTest, CanCompute1DimensionalData) {
   using CS = SampleComputeShader;
   auto context = GetContext();
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
@@ -432,7 +427,7 @@ TEST_P(ComputeTest, CanCompute1DimensionalData) {
                 EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
 
                 auto view = DeviceBuffer::AsBufferView(output_buffer);
-                EXPECT_EQ(view.GetRange().length, sizeof(CS::Output<kCount>));
+                EXPECT_EQ(view.range.length, sizeof(CS::Output<kCount>));
 
                 CS::Output<kCount>* output =
                     reinterpret_cast<CS::Output<kCount>*>(
@@ -457,8 +452,7 @@ TEST_P(ComputeTest, CanCompute1DimensionalData) {
 TEST_P(ComputeTest, ReturnsEarlyWhenAnyGridDimensionIsZero) {
   using CS = SampleComputeShader;
   auto context = GetContext();
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 

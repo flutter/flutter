@@ -84,11 +84,11 @@ bool ComputePassMTL::BindResource(ShaderStage stage,
                                   const ShaderUniformSlot& slot,
                                   const ShaderMetadata& metadata,
                                   BufferView view) {
-  if (!view.GetBuffer()) {
+  if (!view.buffer) {
     return false;
   }
 
-  const DeviceBuffer* device_buffer = view.GetBuffer();
+  const std::shared_ptr<const DeviceBuffer>& device_buffer = view.buffer;
   if (!device_buffer) {
     return false;
   }
@@ -99,8 +99,7 @@ bool ComputePassMTL::BindResource(ShaderStage stage,
     return false;
   }
 
-  pass_bindings_cache_.SetBuffer(slot.ext_res_0, view.GetRange().offset,
-                                 buffer);
+  pass_bindings_cache_.SetBuffer(slot.ext_res_0, view.range.offset, buffer);
   return true;
 }
 

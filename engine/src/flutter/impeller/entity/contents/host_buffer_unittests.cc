@@ -4,34 +4,17 @@
 
 #include <limits>
 #include <utility>
-
 #include "flutter/testing/testing.h"
-#include "gmock/gmock.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/host_buffer.h"
-#include "impeller/core/idle_waiter.h"
 #include "impeller/entity/entity_playground.h"
 
 namespace impeller {
 namespace testing {
 
-class MockIdleWaiter : public IdleWaiter {
- public:
-  MOCK_METHOD(void, WaitIdle, (), (const, override));
-};
-
 using HostBufferTest = EntityPlayground;
 INSTANTIATE_PLAYGROUND_SUITE(HostBufferTest);
-
-TEST_P(HostBufferTest, IdleWaiter) {
-  auto mock_idle_waiter = std::make_shared<MockIdleWaiter>();
-  {
-    auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                     mock_idle_waiter);
-    EXPECT_CALL(*mock_idle_waiter, WaitIdle());
-  }
-}
 
 TEST_P(HostBufferTest, CanEmplace) {
   struct Length2 {
@@ -39,13 +22,12 @@ TEST_P(HostBufferTest, CanEmplace) {
   };
   static_assert(sizeof(Length2) == 2u);
 
-  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter());
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
 
   for (size_t i = 0; i < 12500; i++) {
     auto view = buffer->Emplace(Length2{});
     ASSERT_TRUE(view);
-    ASSERT_EQ(view.GetRange(), Range(i * sizeof(Length2), 2u));
+    ASSERT_EQ(view.range, Range(i * sizeof(Length2), 2u));
   }
 }
 
@@ -60,39 +42,37 @@ TEST_P(HostBufferTest, CanEmplaceWithAlignment) {
   static_assert(alignof(Align16) == 16);
   static_assert(sizeof(Align16) == 16);
 
-  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter());
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
   ASSERT_TRUE(buffer);
 
   {
     auto view = buffer->Emplace(Length2{});
     ASSERT_TRUE(view);
-    ASSERT_EQ(view.GetRange(), Range(0u, 2u));
+    ASSERT_EQ(view.range, Range(0u, 2u));
   }
 
   {
     auto view = buffer->Emplace(Align16{});
     ASSERT_TRUE(view);
-    ASSERT_EQ(view.GetRange().offset, 16u);
-    ASSERT_EQ(view.GetRange().length, 16u);
+    ASSERT_EQ(view.range.offset, 16u);
+    ASSERT_EQ(view.range.length, 16u);
   }
   {
     auto view = buffer->Emplace(Length2{});
     ASSERT_TRUE(view);
-    ASSERT_EQ(view.GetRange(), Range(32u, 2u));
+    ASSERT_EQ(view.range, Range(32u, 2u));
   }
 
   {
     auto view = buffer->Emplace(Align16{});
     ASSERT_TRUE(view);
-    ASSERT_EQ(view.GetRange().offset, 48u);
-    ASSERT_EQ(view.GetRange().length, 16u);
+    ASSERT_EQ(view.range.offset, 48u);
+    ASSERT_EQ(view.range.length, 16u);
   }
 }
 
 TEST_P(HostBufferTest, HostBufferInitialState) {
-  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter());
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
 
   EXPECT_EQ(buffer->GetStateForTest().current_buffer, 0u);
   EXPECT_EQ(buffer->GetStateForTest().current_frame, 0u);
@@ -100,8 +80,7 @@ TEST_P(HostBufferTest, HostBufferInitialState) {
 }
 
 TEST_P(HostBufferTest, ResetIncrementsFrameCounter) {
-  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter());
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
 
   EXPECT_EQ(buffer->GetStateForTest().current_frame, 0u);
 
@@ -120,8 +99,7 @@ TEST_P(HostBufferTest, ResetIncrementsFrameCounter) {
 
 TEST_P(HostBufferTest,
        EmplacingLargerThanBlockSizeCreatesOneOffBufferCallback) {
-  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter());
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
 
   // Emplace an amount larger than the block size, to verify that the host
   // buffer does not create a buffer.
@@ -133,8 +111,7 @@ TEST_P(HostBufferTest,
 }
 
 TEST_P(HostBufferTest, EmplacingLargerThanBlockSizeCreatesOneOffBuffer) {
-  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter());
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
 
   // Emplace an amount larger than the block size, to verify that the host
   // buffer does not create a buffer.
@@ -146,8 +123,7 @@ TEST_P(HostBufferTest, EmplacingLargerThanBlockSizeCreatesOneOffBuffer) {
 }
 
 TEST_P(HostBufferTest, UnusedBuffersAreDiscardedWhenResetting) {
-  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter());
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
 
   // Emplace two large allocations to force the allocation of a second buffer.
   auto buffer_view_a = buffer->Emplace(1020000, 0, [](uint8_t* data) {});
@@ -178,14 +154,13 @@ TEST_P(HostBufferTest, UnusedBuffersAreDiscardedWhenResetting) {
 }
 
 TEST_P(HostBufferTest, EmplaceWithProcIsAligned) {
-  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter());
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
 
   BufferView view = buffer->Emplace(std::array<char, 21>());
-  EXPECT_EQ(view.GetRange(), Range(0, 21));
+  EXPECT_EQ(view.range, Range(0, 21));
 
   view = buffer->Emplace(64, 16, [](uint8_t*) {});
-  EXPECT_EQ(view.GetRange(), Range(32, 64));
+  EXPECT_EQ(view.range, Range(32, 64));
 }
 
 static constexpr const size_t kMagicFailingAllocation = 1024000 * 2;
@@ -222,13 +197,13 @@ TEST_P(HostBufferTest, EmplaceWithFailingAllocationDoesntCrash) {
   ScopedValidationDisable disable;
   std::shared_ptr<FailingAllocator> allocator =
       std::make_shared<FailingAllocator>(GetContext()->GetResourceAllocator());
-  auto buffer = HostBuffer::Create(allocator, GetContext()->GetIdleWaiter());
+  auto buffer = HostBuffer::Create(allocator);
 
   auto view = buffer->Emplace(nullptr, kMagicFailingAllocation, 0);
 
-  EXPECT_EQ(view.GetBuffer(), nullptr);
-  EXPECT_EQ(view.GetRange().offset, 0u);
-  EXPECT_EQ(view.GetRange().length, 0u);
+  EXPECT_EQ(view.buffer, nullptr);
+  EXPECT_EQ(view.range.offset, 0u);
+  EXPECT_EQ(view.range.length, 0u);
 }
 
 }  // namespace  testing

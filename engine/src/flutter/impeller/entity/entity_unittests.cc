@@ -1863,9 +1863,8 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   //   8 bytes for iResolution
   //   4 bytes for iTime
   //   4 bytes padding
-  EXPECT_EQ(
-      command.fragment_bindings.buffers[0].view.resource.GetRange().length,
-      16u);
+  EXPECT_EQ(command.fragment_bindings.buffers[0].view.resource.range.length,
+            16u);
 }
 
 TEST_P(EntityTest, ColorFilterWithForegroundColorAdvancedBlend) {
