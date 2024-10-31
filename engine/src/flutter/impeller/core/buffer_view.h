@@ -12,11 +12,34 @@ namespace impeller {
 
 class DeviceBuffer;
 
+/// A specific range in a DeviceBuffer.
+///
+/// BufferView can maintain ownership over the DeviceBuffer or not depending on
+/// if it is created with a std::shared_ptr or a raw pointer.
 struct BufferView {
-  std::shared_ptr<const DeviceBuffer> buffer;
-  Range range;
+ public:
+  BufferView();
 
-  constexpr explicit operator bool() const { return static_cast<bool>(buffer); }
+  BufferView(DeviceBuffer* buffer, Range range);
+
+  BufferView(std::shared_ptr<const DeviceBuffer> buffer, Range range);
+
+  Range GetRange() const { return range_; }
+
+  const DeviceBuffer* GetBuffer() const;
+
+  std::shared_ptr<const DeviceBuffer> TakeBuffer();
+
+  explicit operator bool() const;
+
+ private:
+  std::shared_ptr<const DeviceBuffer> buffer_;
+  /// This is a non-owned DeviceBuffer. Steps should be taken to make sure this
+  /// lives for the duration of the BufferView's life. Usually this is done
+  /// automatically by the graphics API or in the case of Vulkan the HostBuffer
+  /// or TrackedObjectsVK keeps it alive.
+  const DeviceBuffer* raw_buffer_;
+  Range range_;
 };
 
 }  // namespace impeller

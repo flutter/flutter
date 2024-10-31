@@ -276,14 +276,14 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
                                            Allocator& transients_allocator,
                                            const BufferResource& buffer) {
   const auto* metadata = buffer.GetMetadata();
-  auto device_buffer = buffer.resource.buffer;
+  auto device_buffer = buffer.resource.GetBuffer();
   if (!device_buffer) {
     VALIDATION_LOG << "Device buffer not found.";
     return false;
   }
   const auto& device_buffer_gles = DeviceBufferGLES::Cast(*device_buffer);
   const uint8_t* buffer_ptr =
-      device_buffer_gles.GetBufferData() + buffer.resource.range.offset;
+      device_buffer_gles.GetBufferData() + buffer.resource.GetRange().offset;
 
   if (metadata->members.empty()) {
     VALIDATION_LOG << "Uniform buffer had no members. This is currently "

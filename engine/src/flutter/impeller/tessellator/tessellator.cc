@@ -47,10 +47,11 @@ VertexBuffer Tessellator::TessellateConvex(const Path& path,
 
     if (supports_triangle_fan) {
       FanVertexWriter writer(
-          reinterpret_cast<Point*>(point_buffer.buffer->OnGetContents() +
-                                   point_buffer.range.offset),
-          reinterpret_cast<uint16_t*>(index_buffer.buffer->OnGetContents() +
-                                      index_buffer.range.offset));
+          reinterpret_cast<Point*>(point_buffer.GetBuffer()->OnGetContents() +
+                                   point_buffer.GetRange().offset),
+          reinterpret_cast<uint16_t*>(
+              index_buffer.GetBuffer()->OnGetContents() +
+              index_buffer.GetRange().offset));
       path.WritePolyline(tolerance, writer);
 
       return VertexBuffer{
@@ -61,10 +62,11 @@ VertexBuffer Tessellator::TessellateConvex(const Path& path,
       };
     } else {
       StripVertexWriter writer(
-          reinterpret_cast<Point*>(point_buffer.buffer->OnGetContents() +
-                                   point_buffer.range.offset),
-          reinterpret_cast<uint16_t*>(index_buffer.buffer->OnGetContents() +
-                                      index_buffer.range.offset));
+          reinterpret_cast<Point*>(point_buffer.GetBuffer()->OnGetContents() +
+                                   point_buffer.GetRange().offset),
+          reinterpret_cast<uint16_t*>(
+              index_buffer.GetBuffer()->OnGetContents() +
+              index_buffer.GetRange().offset));
       path.WritePolyline(tolerance, writer);
 
       return VertexBuffer{
