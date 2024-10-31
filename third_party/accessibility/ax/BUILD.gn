@@ -86,6 +86,8 @@ source_set("ax") {
       "platform/ax_platform_node_mac.h",
       "platform/ax_platform_node_mac.mm",
     ]
+    cflags_objc = flutter_cflags_objc_arc
+    cflags_objcc = flutter_cflags_objcc_arc
   } else if (is_win) {
     sources += [
       "platform/ax_fragment_root_delegate_win.h",

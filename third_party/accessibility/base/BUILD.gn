@@ -42,12 +42,6 @@ source_set("base") {
     ]
     libs = [ "propsys.lib" ]
   }
-  if (is_mac) {
-    sources += [
-      "platform/darwin/scoped_nsobject.h",
-      "platform/darwin/scoped_nsobject.mm",
-    ]
-  }
 
   public_deps = [
     "$dart_src/third_party/double-conversion/src:libdouble_conversion",
