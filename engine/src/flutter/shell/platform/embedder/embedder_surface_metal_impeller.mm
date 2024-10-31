@@ -20,7 +20,7 @@
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
 
-FLUTTER_ASSERT_NOT_ARC
+FLUTTER_ASSERT_ARC
 
 namespace flutter {
 
@@ -41,11 +41,11 @@ EmbedderSurfaceMetalImpeller::EmbedderSurfaceMetalImpeller(
                                              impeller_framebuffer_blend_shaders_length),
   };
   context_ = impeller::ContextMTL::Create(
-      (id<MTLDevice>)device,                     // device
-      (id<MTLCommandQueue>)command_queue,        // command_queue
-      shader_mappings,                           // shader_libraries_data
-      std::make_shared<fml::SyncSwitch>(false),  // is_gpu_disabled_sync_switch
-      "Impeller Library"                         // library_label
+      (__bridge id<MTLDevice>)device,               // device
+      (__bridge id<MTLCommandQueue>)command_queue,  // command_queue
+      shader_mappings,                              // shader_libraries_data
+      std::make_shared<fml::SyncSwitch>(false),     // is_gpu_disabled_sync_switch
+      "Impeller Library"                            // library_label
   );
   FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Metal).";
 

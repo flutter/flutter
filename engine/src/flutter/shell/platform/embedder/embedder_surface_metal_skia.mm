@@ -13,7 +13,8 @@
 #include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
-FLUTTER_ASSERT_NOT_ARC
+FLUTTER_ASSERT_ARC
+
 namespace flutter {
 
 EmbedderSurfaceMetalSkia::EmbedderSurfaceMetalSkia(
@@ -25,11 +26,11 @@ EmbedderSurfaceMetalSkia::EmbedderSurfaceMetalSkia(
       metal_dispatch_table_(std::move(metal_dispatch_table)),
       external_view_embedder_(std::move(external_view_embedder)) {
   main_context_ =
-      [FlutterDarwinContextMetalSkia createGrContext:(id<MTLDevice>)device
-                                        commandQueue:(id<MTLCommandQueue>)command_queue];
+      [FlutterDarwinContextMetalSkia createGrContext:(__bridge id<MTLDevice>)device
+                                        commandQueue:(__bridge id<MTLCommandQueue>)command_queue];
   resource_context_ =
-      [FlutterDarwinContextMetalSkia createGrContext:(id<MTLDevice>)device
-                                        commandQueue:(id<MTLCommandQueue>)command_queue];
+      [FlutterDarwinContextMetalSkia createGrContext:(__bridge id<MTLDevice>)device
+                                        commandQueue:(__bridge id<MTLCommandQueue>)command_queue];
   valid_ = main_context_ && resource_context_;
 }
 
