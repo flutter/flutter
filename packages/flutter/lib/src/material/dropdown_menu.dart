@@ -1022,8 +1022,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         child: menuAnchor,
       );
       // Put the menu anchor into a Column with CrossAxisAlignment.stretch
-      // to loose just the height constraints. Doing so, the menu anchor
-      // adjusts to the inner text field intrinsic heigth even if it received
+      // to loosen just the height constraints. Doing so, the menu anchor
+      // adjusts to the inner text field intrinsic height even if it received
       // tight constraints from its parent.
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
