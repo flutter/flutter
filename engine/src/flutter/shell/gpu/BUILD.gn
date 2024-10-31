@@ -69,25 +69,30 @@ source_set("gpu_surface_vulkan") {
   }
 }
 
-source_set("gpu_surface_metal") {
-  sources = [
-    "gpu_surface_metal_delegate.cc",
-    "gpu_surface_metal_delegate.h",
-    "gpu_surface_metal_skia.h",
-    "gpu_surface_metal_skia.mm",
-    "gpu_surface_noop.h",
-    "gpu_surface_noop.mm",
-  ]
-
-  public_deps = gpu_common_deps
-
-  if (impeller_enable_metal) {
-    sources += [
-      "gpu_surface_metal_impeller.h",
-      "gpu_surface_metal_impeller.mm",
+if (shell_enable_metal) {
+  source_set("gpu_surface_metal") {
+    sources = [
+      "gpu_surface_metal_delegate.cc",
+      "gpu_surface_metal_delegate.h",
+      "gpu_surface_metal_skia.h",
+      "gpu_surface_metal_skia.mm",
+      "gpu_surface_noop.h",
+      "gpu_surface_noop.mm",
     ]
 
-    public_deps += [ "//flutter/impeller" ]
+    cflags_objc = flutter_cflags_objc_arc
+    cflags_objcc = flutter_cflags_objcc_arc
+
+    public_deps = gpu_common_deps
+
+    if (impeller_enable_metal) {
+      sources += [
+        "gpu_surface_metal_impeller.h",
+        "gpu_surface_metal_impeller.mm",
+      ]
+
+      public_deps += [ "//flutter/impeller" ]
+    }
   }
 }
 

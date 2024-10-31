@@ -91,8 +91,8 @@ FLUTTER_ASSERT_ARC
   GrMtlBackendContext backendContext = {};
   // Skia expect arguments to `MakeMetal` transfer ownership of the reference in for release later
   // when the GrDirectContext is collected.
-  backendContext.fDevice.reset((__bridge_retained void*)device);
-  backendContext.fQueue.reset((__bridge_retained void*)commandQueue);
+  backendContext.fDevice.retain((__bridge void*)device);
+  backendContext.fQueue.retain((__bridge void*)commandQueue);
   return GrDirectContexts::MakeMetal(backendContext, contextOptions);
 }
 

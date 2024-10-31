@@ -13,6 +13,8 @@
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/render_target.h"
 
+static_assert(__has_feature(objc_arc), "ARC must be enabled.");
+
 @protocol FlutterMetalDrawable <MTLDrawable>
 - (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer;
 @end
