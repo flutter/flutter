@@ -16,7 +16,9 @@ Future<void> generateLocalizationsSyntheticPackage({
   required BuildTargets buildTargets,
 }) async {
   final FileSystem fileSystem = environment.fileSystem;
-  final File l10nYamlFile = fileSystem.file(fileSystem.path.join(environment.projectDir.path, 'l10n.yaml'));
+  final File l10nYamlFile = fileSystem.file(
+    fileSystem.path.join(environment.projectDir.path, 'l10n.yaml'),
+  );
 
   // If pubspec.yaml has generate:true and if l10n.yaml exists in the
   // root project directory, check to see if a synthetic package should
@@ -27,7 +29,9 @@ Future<void> generateLocalizationsSyntheticPackage({
 
   final YamlNode yamlNode = loadYamlNode(l10nYamlFile.readAsStringSync());
   if (yamlNode.value != null && yamlNode is! YamlMap) {
-    throwToolExit('Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode');
+    throwToolExit(
+      'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode',
+    );
   }
 
   // If an l10n.yaml file exists and is not empty, attempt to parse settings in
@@ -36,8 +40,9 @@ Future<void> generateLocalizationsSyntheticPackage({
     final YamlMap yamlMap = yamlNode as YamlMap;
     final Object? value = yamlMap['synthetic-package'];
     if (value is! bool && value != null) {
-      throwToolExit('Expected "synthetic-package" to have a bool value, '
-          'instead was "$value"');
+      throwToolExit(
+        'Expected "synthetic-package" to have a bool value, instead was "$value"',
+      );
     }
 
     // Generate gen_l10n synthetic package only if synthetic-package: true or
@@ -66,7 +71,7 @@ Future<void> generateLocalizationsSyntheticPackage({
   environment.logger.printWarning(
     'Synthetic package output (package:flutter_gen) is deprecated: '
     'https://flutter.dev/to/flutter-gen-deprecation. In a future release '
-    'this value will default to `false`, and later support removed '
+    'synthetic-package will default to `false`, and later support removed '
     'entirely',
   );
 
