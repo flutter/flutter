@@ -1060,16 +1060,19 @@ abstract class ResidentRunner extends ResidentHandlers {
       artifactDirectory.createSync(recursive: true);
     }
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    _residentDevtoolsHandler =
-        devtoolsHandler(DevtoolsLauncher.instance, this, globals.logger, ChromiumLauncher(
-
-           fileSystem: globals.fs,
-           platform: globals.platform,
-           processManager: globals.processManager,
-           operatingSystemUtils: globals.os,
-           browserFinder: findChromeExecutable,
-           logger: globals.logger,
-        ) );
+    _residentDevtoolsHandler = devtoolsHandler(
+      DevtoolsLauncher.instance,
+      this,
+      globals.logger,
+      ChromiumLauncher(
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        processManager: globals.processManager,
+        operatingSystemUtils: globals.os,
+        browserFinder: findChromeExecutable,
+        logger: globals.logger,
+      ),
+    );
   }
 
   @override
@@ -1101,7 +1104,6 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   ResidentDevtoolsHandler? get residentDevtoolsHandler => _residentDevtoolsHandler;
   ResidentDevtoolsHandler? _residentDevtoolsHandler;
-
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();

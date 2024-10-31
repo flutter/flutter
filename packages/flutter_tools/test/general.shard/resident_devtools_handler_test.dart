@@ -374,8 +374,7 @@ void main() {
 
   testWithoutContext('launchDevToolsInBrowser launches after _devToolsLauncher.ready completes', () async {
     final Completer<void> completer = Completer<void>();
-    final FlutterResidentDevtoolsHandler handler =
-        FlutterResidentDevtoolsHandler(
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()
         ..devToolsUrl = null
         // We need to set [activeDevToolsServer] to simulate the state we would
@@ -413,8 +412,7 @@ void main() {
     expect(handler.launchedInBrowser, isTrue);
   });
 
-  testWithoutContext('launchDevToolsInBrowser fails without Chrome installed',
-      () async {
+  testWithoutContext('launchDevToolsInBrowser fails without Chrome installed', () async {
     final FlutterResidentDevtoolsHandler handler =
         FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()
@@ -425,35 +423,12 @@ void main() {
       _ThrowingChromiumLauncher(),
     );
 
-     expect(handler.launchedInBrowser, isFalse);
-
-      expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]),
-          isTrue);
+    expect(handler.launchedInBrowser, isFalse);
+    expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isTrue);
   });
 
-  testWithoutContext('launchDevToolsInBrowser does not launch when ChromiumLauncher is null',
-      () async {
-    final FlutterResidentDevtoolsHandler handler =
-        FlutterResidentDevtoolsHandler(
-      FakeDevtoolsLauncher()
-        ..devToolsUrl = Uri(host: 'localhost', port: 8080)
-        ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
-      FakeResidentRunner(),
-      BufferLogger.test(),
-      null,
-    );
-
-     expect(handler.launchedInBrowser, isFalse);
-
-      expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]),
-          isFalse);
-  });
-
-  testWithoutContext(
-      'Converts a VM Service URI with a query parameter to a pretty display string',
-      () {
-    const String value =
-        'http://127.0.0.1:9100?uri=http%3A%2F%2F127.0.0.1%3A57922%2F_MXpzytpH20%3D%2F';
+  testWithoutContext('Converts a VM Service URI with a query parameter to a pretty display string', () {
+    const String value = 'http://127.0.0.1:9100?uri=http%3A%2F%2F127.0.0.1%3A57922%2F_MXpzytpH20%3D%2F';
     final Uri uri = Uri.parse(value);
 
     expect(urlToDisplayString(uri), 'http://127.0.0.1:9100?uri=http://127.0.0.1:57922/_MXpzytpH20=/');

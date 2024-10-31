@@ -18,7 +18,11 @@ import 'vmservice.dart';
 import 'web/chrome.dart';
 
 typedef ResidentDevtoolsHandlerFactory = ResidentDevtoolsHandler Function(
-    DevtoolsLauncher?, ResidentRunner, Logger, ChromiumLauncher);
+  DevtoolsLauncher?,
+  ResidentRunner,
+  Logger,
+  ChromiumLauncher,
+);
 
 ResidentDevtoolsHandler createDefaultHandler(
   DevtoolsLauncher? launcher,
@@ -26,8 +30,7 @@ ResidentDevtoolsHandler createDefaultHandler(
   Logger logger,
   ChromiumLauncher chromiumLauncher,
 ) {
-  return FlutterResidentDevtoolsHandler(
-      launcher, runner, logger, chromiumLauncher);
+  return FlutterResidentDevtoolsHandler(launcher, runner, logger, chromiumLauncher);
 }
 
 /// Helper class to manage the life-cycle of devtools and its interaction with
@@ -73,14 +76,14 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     this._devToolsLauncher,
     this._residentRunner,
     this._logger,
-    this.chromiumLauncher,
+    this._chromiumLauncher,
   );
 
   static const Duration launchInBrowserTimeout = Duration(seconds: 15);
 
   final DevtoolsLauncher? _devToolsLauncher;
   final ResidentRunner _residentRunner;
-  final ChromiumLauncher? chromiumLauncher;
+  final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
   bool _shutdown = false;
 
@@ -168,9 +171,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   // This must be guaranteed not to return a Future that fails.
   @override
   bool launchDevToolsInBrowser({required List<FlutterDevice?> flutterDevices}) {
-    if (!_residentRunner.supportsServiceProtocol ||
-        _devToolsLauncher == null ||
-        chromiumLauncher == null) {
+    if (!_residentRunner.supportsServiceProtocol || _devToolsLauncher == null) {
       return false;
     }
     if (_devToolsLauncher.devToolsUrl == null) {
@@ -190,13 +191,15 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       final String devToolsUrl = activeDevToolsServer!.uri!.replace(
         queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'},
       ).toString();
-      _logger.printStatus(
-          'Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
+      _logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
 
-      chromiumLauncher?.launch(devToolsUrl).catchError((Object e) {
+      _chromiumLauncher.launch(devToolsUrl).catchError((Object e) {
         _logger.printError('Failed to launch web browser: $e');
         throw ProcessException(
-            'Chrome', <String>[devToolsUrl], 'Failed to launch browser');
+          'Chrome',
+          <String>[devToolsUrl],
+          'Failed to launch browser for dev tools',
+        );
 			}).ignore();
     }
     launchedInBrowser = true;
