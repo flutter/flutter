@@ -3133,8 +3133,8 @@ void main() {
     testWidgets('can push and pop pages using page api', (WidgetTester tester) async {
       late Animation<double> secondaryAnimationOfRouteOne;
       late Animation<double> primaryAnimationOfRouteOne;
-      late Animation<double> secondaryAnimationOfRouteTwo;
-      late Animation<double> primaryAnimationOfRouteTwo;
+      Animation<double>? secondaryAnimationOfRouteTwo;
+      Animation<double>? primaryAnimationOfRouteTwo;
       late Animation<double> secondaryAnimationOfRouteThree;
       late Animation<double> primaryAnimationOfRouteThree;
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
@@ -3208,24 +3208,24 @@ void main() {
       // won't start until the third page finishes transition.
       expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteThree.value);
       expect(primaryAnimationOfRouteOne.status, AnimationStatus.completed);
-      expect(secondaryAnimationOfRouteTwo.status, AnimationStatus.dismissed);
-      expect(primaryAnimationOfRouteTwo.status, AnimationStatus.dismissed);
+      expect(secondaryAnimationOfRouteTwo, isNull);
+      expect(primaryAnimationOfRouteTwo, isNull);
       expect(secondaryAnimationOfRouteThree.status, AnimationStatus.dismissed);
       expect(primaryAnimationOfRouteThree.status, AnimationStatus.forward);
 
       await tester.pump(const Duration(milliseconds: 30));
       expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteThree.value);
       expect(primaryAnimationOfRouteOne.status, AnimationStatus.completed);
-      expect(secondaryAnimationOfRouteTwo.status, AnimationStatus.dismissed);
-      expect(primaryAnimationOfRouteTwo.status, AnimationStatus.dismissed);
+      expect(secondaryAnimationOfRouteTwo, isNull);
+      expect(primaryAnimationOfRouteTwo, isNull);
       expect(secondaryAnimationOfRouteThree.status, AnimationStatus.dismissed);
       expect(primaryAnimationOfRouteThree.value, 0.1);
       await tester.pumpAndSettle();
       // After transition finishes, the routes' animations are correctly chained.
-      expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
+      expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo!.value);
       expect(primaryAnimationOfRouteOne.status, AnimationStatus.completed);
-      expect(secondaryAnimationOfRouteTwo.value, primaryAnimationOfRouteThree.value);
-      expect(primaryAnimationOfRouteTwo.status, AnimationStatus.completed);
+      expect(secondaryAnimationOfRouteTwo!.value, primaryAnimationOfRouteThree.value);
+      expect(primaryAnimationOfRouteTwo!.status, AnimationStatus.completed);
       expect(secondaryAnimationOfRouteThree.status, AnimationStatus.dismissed);
       expect(primaryAnimationOfRouteThree.status, AnimationStatus.completed);
       expect(find.text('third'), findsOneWidget);
@@ -3264,17 +3264,17 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 30));
-      expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
+      expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo!.value);
       expect(primaryAnimationOfRouteOne.status, AnimationStatus.completed);
-      expect(secondaryAnimationOfRouteTwo.value, primaryAnimationOfRouteThree.value);
-      expect(primaryAnimationOfRouteTwo.status, AnimationStatus.completed);
+      expect(secondaryAnimationOfRouteTwo!.value, primaryAnimationOfRouteThree.value);
+      expect(primaryAnimationOfRouteTwo!.status, AnimationStatus.completed);
       expect(secondaryAnimationOfRouteThree.status, AnimationStatus.dismissed);
       expect(primaryAnimationOfRouteThree.value, 0.9);
       await tester.pumpAndSettle();
-      expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
+      expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo!.value);
       expect(primaryAnimationOfRouteOne.status, AnimationStatus.completed);
-      expect(secondaryAnimationOfRouteTwo.value, primaryAnimationOfRouteThree.value);
-      expect(primaryAnimationOfRouteTwo.status, AnimationStatus.completed);
+      expect(secondaryAnimationOfRouteTwo!.value, primaryAnimationOfRouteThree.value);
+      expect(primaryAnimationOfRouteTwo!.status, AnimationStatus.completed);
       expect(secondaryAnimationOfRouteThree.status, AnimationStatus.dismissed);
       expect(primaryAnimationOfRouteThree.status, AnimationStatus.dismissed);
     });
@@ -3413,6 +3413,66 @@ void main() {
 
       await tester.pumpWidget(buildNavigator(false));
       expect(find.text('page1'), findsOneWidget);
+    });
+
+    testWidgets("Adds multiple pages won't suddenly jump before top most page finishes pushing", (WidgetTester tester) async {
+      // Regression Test for https://github.com/flutter/flutter/issues/156033.
+      List<Page<Object?>> pages = <Page<Object?>>[
+        MaterialPage<void>(
+          key: UniqueKey(),
+          child: const Text('home'),
+        ),
+      ];
+      final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+      Widget buildNavigator() {
+        return TestDependencies(
+          child: Navigator(
+            key: key,
+            pages: pages,
+            onDidRemovePage: (Page<void> page) {},
+          ),
+        );
+      }
+      await tester.pumpWidget(buildNavigator());
+      expect(find.text('home'), findsOneWidget);
+
+      pages = <Page<Object?>>[
+        ...pages,
+        MaterialPage<void>(
+          key: UniqueKey(),
+          child: const Text('child1'),
+        ),
+        MaterialPage<void>(
+          key: UniqueKey(),
+          child: const Text('child2'),
+        ),
+      ];
+
+      await tester.pumpWidget(buildNavigator());
+      expect(find.text('home'), findsOneWidget);
+      // child 1 should not be created yet because the top-most route is
+      // still in transition.
+      expect(find.text('child1'), findsNothing);
+      expect(find.text('child2'), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(find.text('home'), findsOneWidget);
+      expect(find.text('child1'), findsNothing);
+      expect(find.text('child2'), findsOneWidget);
+
+      await tester.pumpAndSettle();
+
+      // Ensure child1 is indeed in the navigator.
+      key.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('home'), findsNothing);
+      expect(find.text('child1'), findsOneWidget);
+      expect(find.text('child2'), findsNothing);
+
+      key.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('home'), findsOneWidget);
+      expect(find.text('child1'), findsNothing);
     });
 
     testWidgets('can work with pageless route', (WidgetTester tester) async {
