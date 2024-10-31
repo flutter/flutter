@@ -1322,7 +1322,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     }
 
     final double result = delta + offset;
-    if (result > -0.000001 && result < 0.000001) {
+    if (result.abs() < precisionErrorTolerance) {
       return 0.0;
     }
     return result;
