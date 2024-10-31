@@ -1120,6 +1120,23 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux linux_desktop_impeller
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    presubmit: false
+    bringup: true
+    properties:
+      xvfb: "1"
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: linux_desktop_impeller
+
   - name: Linux run_release_test_linux
     recipe: devicelab/devicelab_drone
     timeout: 60
