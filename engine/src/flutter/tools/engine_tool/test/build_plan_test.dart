@@ -891,382 +891,221 @@ void main() {
     );
   });
 
-  test('show builds in help message as long as not a [ci/...] build', () {
-    final testEnv = TestEnvironment.withTestEngine();
-    addTearDown(testEnv.cleanup);
+  // These tests should strictly check the usage (--help) output.
+  group('shows instructions based on verbosity', () {
+    /// Creates a configured [ArgParser] based on then environemnt and builds.
+    ///
+    /// By default a non-verbose, non-RBE, Linux x64 configured [BuildPlan]
+    /// is created and used to configure the available options and instructions
+    /// for the returned [ArgParser].
+    ///
+    /// - To use a different [TestEnvironment], provide [environment].
+    /// - To use a different set of builds, provide [builds].
+    ArgParser createArgParser({
+      TestEnvironment? environment,
+      void Function(TestBuilderConfig)? builds,
+    }) {
+      final testEnv = environment ?? TestEnvironment.withTestEngine();
+      addTearDown(testEnv.cleanup);
 
-    final testConfig = TestBuilderConfig();
-    testConfig.addBuild(
-      name: 'ci/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-    testConfig.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
+      final testConfig = TestBuilderConfig();
+      if (builds != null) {
+        builds(testConfig);
+      } else {
+        testConfig.addBuild(
+          name: 'linux/host_debug',
+          dimension: TestDroneDimension.linux,
+        );
+      }
 
-    final parser = ArgParser();
-    final _ = BuildPlan.configureArgParser(
-      parser,
-      testEnv.environment,
-      configs: {
-        'linux_test_config': testConfig.buildConfig(
-          path: 'ci/builders/linux_test_config.json',
+      final parser = ArgParser();
+      final _ = BuildPlan.configureArgParser(
+        parser,
+        testEnv.environment,
+        configs: {
+          'linux_test_config': testConfig.buildConfig(
+            path: 'ci/builders/linux_test_config.json',
+          ),
+        },
+        help: true,
+      );
+
+      return parser;
+    }
+
+    test('show builds in help message as long as not a [ci/...] build', () {
+      final parser = createArgParser(
+        builds: (testConfig) {
+          testConfig.addBuild(
+            name: 'ci/host_debug',
+            dimension: TestDroneDimension.linux,
+          );
+          testConfig.addBuild(
+            name: 'linux/host_debug',
+            dimension: TestDroneDimension.linux,
+          );
+        },
+      );
+
+      expect(parser.usage, contains('host_debug'));
+      expect(parser.usage, isNot(contains('ci/host_debug')));
+    });
+
+    test('shows [ci/...] builds if verbose is true', () {
+      final parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(
+          verbose: true,
         ),
-      },
-      help: true,
-    );
+        builds: (testConfig) {
+          testConfig.addBuild(
+            name: 'ci/host_debug',
+            dimension: TestDroneDimension.linux,
+          );
+          testConfig.addBuild(
+            name: 'linux/host_debug',
+            dimension: TestDroneDimension.linux,
+          );
+        },
+      );
 
-    expect(parser.usage, contains('host_debug'));
-    expect(parser.usage, isNot(contains('ci/host_debug')));
-  });
+      expect(parser.usage, contains('host_debug'));
+      expect(parser.usage, contains('ci/host_debug'));
+    });
 
-  test('shows [ci/...] builds if verbose is true', () {
-    final testEnv = TestEnvironment.withTestEngine(
-      verbose: true,
-    );
-    addTearDown(testEnv.cleanup);
+    test('hides LTO instructions normally', () {
+      final parser = createArgParser();
 
-    final testConfig = TestBuilderConfig();
-    testConfig.addBuild(
-      name: 'ci/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-    testConfig.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
+      expect(
+        parser.usage,
+        isNot(contains('Whether LTO should be enabled for a build')),
+      );
+    });
 
-    final parser = ArgParser();
-    final _ = BuildPlan.configureArgParser(
-      parser,
-      testEnv.environment,
-      configs: {
-        'linux_test_config': testConfig.buildConfig(
-          path: 'ci/builders/linux_test_config.json',
+    test('shows LTO instructions if verbose', () {
+      final parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(
+          verbose: true,
         ),
-      },
-      help: true,
-    );
+      );
 
-    expect(parser.usage, contains('host_debug'));
-    expect(parser.usage, contains('ci/host_debug'));
-  });
+      expect(
+        parser.usage,
+        contains('Whether LTO should be enabled for a build'),
+      );
+    });
 
-  test('hides LTO instructions normally', () {
-    final testEnv = TestEnvironment.withTestEngine();
-    addTearDown(testEnv.cleanup);
-
-    final testConfig = TestBuilderConfig();
-    testConfig.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-
-    final parser = ArgParser();
-    final _ = BuildPlan.configureArgParser(
-      parser,
-      testEnv.environment,
-      configs: {
-        'linux_test_config': testConfig.buildConfig(
-          path: 'ci/builders/linux_test_config.json',
+    test('shows RBE instructions if not configured', () {
+      final parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(
+          // This is the default, but make it explicit for the test.
+          // ignore: avoid_redundant_argument_values
+          withRbe: false,
         ),
-      },
-      help: true,
-    );
+      );
 
-    expect(
-      parser.usage,
-      isNot(contains('Whether LTO should be enabled for a build')),
-    );
-  });
+      expect(
+        parser.usage,
+        stringContainsInOrder([
+          'Enable pre-configured remote build execution',
+          'https://flutter.dev/to/engine-rbe',
+        ]),
+      );
+    });
 
-  test('shows LTO instructions if verbose', () {
-    final testEnv = TestEnvironment.withTestEngine(
-      verbose: true,
-    );
-    addTearDown(testEnv.cleanup);
-
-    final testConfig = TestBuilderConfig();
-    testConfig.addBuild(
-      name: 'ci/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-    testConfig.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-
-    final parser = ArgParser();
-    final _ = BuildPlan.configureArgParser(
-      parser,
-      testEnv.environment,
-      configs: {
-        'linux_test_config': testConfig.buildConfig(
-          path: 'ci/builders/linux_test_config.json',
+    test('shows RBE instructions if verbose', () {
+      final parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(
+          verbose: true,
         ),
-      },
-      help: true,
-    );
+      );
 
-    expect(
-      parser.usage,
-      contains('Whether LTO should be enabled for a build'),
-    );
-  });
+      expect(
+        parser.usage,
+        stringContainsInOrder([
+          'Enable pre-configured remote build execution',
+          'https://flutter.dev/to/engine-rbe',
+        ]),
+      );
+    });
 
-  test('shows RBE instructions if not configured', () {
-    final testEnv = TestEnvironment.withTestEngine(
-      // This is the default, but make it explicit for the test.
-      // ignore: avoid_redundant_argument_values
-      withRbe: false,
-    );
-    addTearDown(testEnv.cleanup);
-
-    final testConfig = TestBuilderConfig();
-    testConfig.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-
-    final parser = ArgParser();
-    final _ = BuildPlan.configureArgParser(
-      parser,
-      testEnv.environment,
-      configs: {
-        'linux_test_config': testConfig.buildConfig(
-          path: 'ci/builders/linux_test_config.json',
+    test('hides RBE instructions if enabled', () {
+      final parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(
+          withRbe: true,
         ),
-      },
-      help: true,
-    );
+      );
 
-    expect(
-      parser.usage,
-      contains('Enable pre-configured remote build execution'),
-    );
-    expect(
-      parser.usage,
-      contains('https://flutter.dev/to/engine-rbe'),
-    );
-  });
+      expect(
+        parser.usage,
+        contains('Enable pre-configured remote build execution'),
+      );
+      expect(
+        parser.usage,
+        isNot(contains('https://flutter.dev/to/engine-rbe')),
+      );
+    });
 
-  test('shows RBE instructions if verbose', () {
-    final testEnv = TestEnvironment.withTestEngine(
-      withRbe: true,
-      verbose: true,
-    );
-    addTearDown(testEnv.cleanup);
-
-    final testConfig = TestBuilderConfig();
-    testConfig.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-
-    final parser = ArgParser();
-    final _ = BuildPlan.configureArgParser(
-      parser,
-      testEnv.environment,
-      configs: {
-        'linux_test_config': testConfig.buildConfig(
-          path: 'ci/builders/linux_test_config.json',
+    test('hides --build-strategy if RBE not enabled', () {
+      final parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(
+          // This is the default, but make it explicit for the test.
+          // ignore: avoid_redundant_argument_values
+          withRbe: false,
         ),
-      },
-      help: true,
-    );
+      );
 
-    expect(
-      parser.usage,
-      contains('Enable pre-configured remote build execution'),
-    );
-    expect(
-      parser.usage,
-      contains('https://flutter.dev/to/engine-rbe'),
-    );
-  });
+      expect(
+        parser.usage,
+        isNot(contains('How to prefer remote or local builds')),
+      );
+    });
 
-  test('hides RBE intsructions if enabled', () {
-    final testEnv = TestEnvironment.withTestEngine(
-      withRbe: true,
-    );
-    addTearDown(testEnv.cleanup);
-
-    final testConfig = TestBuilderConfig();
-    testConfig.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-
-    final parser = ArgParser();
-    final _ = BuildPlan.configureArgParser(
-      parser,
-      testEnv.environment,
-      configs: {
-        'linux_test_config': testConfig.buildConfig(
-          path: 'ci/builders/linux_test_config.json',
+    test('shows --build-strategy if RBE enabled', () {
+      final parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(
+          withRbe: true,
         ),
-      },
-      help: true,
-    );
+      );
 
-    expect(
-      parser.usage,
-      contains('Enable pre-configured remote build execution'),
-    );
-    expect(
-      parser.usage,
-      isNot(contains('https://flutter.dev/to/engine-rbe')),
-    );
-  });
+      expect(
+        parser.usage,
+        contains('How to prefer remote or local builds'),
+      );
+    });
 
-  test('hides --build-strategy if RBE not enabled', () {
-    final testEnv = TestEnvironment.withTestEngine(
-      // This is the default, but make it explicit for the test.
-      // ignore: avoid_redundant_argument_values
-      withRbe: false,
-    );
-    addTearDown(testEnv.cleanup);
-
-    final testConfig = TestBuilderConfig();
-    testConfig.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-
-    final parser = ArgParser();
-    final _ = BuildPlan.configureArgParser(
-      parser,
-      testEnv.environment,
-      configs: {
-        'linux_test_config': testConfig.buildConfig(
-          path: 'ci/builders/linux_test_config.json',
+    test('shows --build-strategy if verbose', () {
+      final parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(
+          verbose: true,
         ),
-      },
-      help: true,
-    );
+      );
 
-    expect(
-      parser.usage,
-      isNot(contains('How to prefer remote or local builds')),
-    );
-  });
+      expect(
+        parser.usage,
+        contains('How to prefer remote or local builds'),
+      );
+    });
 
-  test('shows --build-strategy if RBE enabled', () {
-    final testEnv = TestEnvironment.withTestEngine(
-      withRbe: true,
-    );
-    addTearDown(testEnv.cleanup);
+    test('hides --gn-args if not verbose', () {
+      final parser = createArgParser();
 
-    final testConfig = TestBuilderConfig();
-    testConfig.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
+      expect(
+        parser.usage,
+        isNot(contains('Additional arguments to provide to "gn"')),
+      );
+    });
 
-    final parser = ArgParser();
-    final _ = BuildPlan.configureArgParser(
-      parser,
-      testEnv.environment,
-      configs: {
-        'linux_test_config': testConfig.buildConfig(
-          path: 'ci/builders/linux_test_config.json',
+    test('shows --gn-args if verbose', () {
+      final parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(
+          verbose: true,
         ),
-      },
-      help: true,
-    );
+      );
 
-    expect(
-      parser.usage,
-      contains('How to prefer remote or local builds'),
-    );
-  });
-
-  test('shows --build-strategy if verbose', () {
-    final testEnv = TestEnvironment.withTestEngine(
-      verbose: true,
-    );
-    addTearDown(testEnv.cleanup);
-
-    final testConfig = TestBuilderConfig();
-    testConfig.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-
-    final parser = ArgParser();
-    final _ = BuildPlan.configureArgParser(
-      parser,
-      testEnv.environment,
-      configs: {
-        'linux_test_config': testConfig.buildConfig(
-          path: 'ci/builders/linux_test_config.json',
-        ),
-      },
-      help: true,
-    );
-
-    expect(
-      parser.usage,
-      contains('How to prefer remote or local builds'),
-    );
-  });
-
-  test('shows --gn-args if verbose', () {
-    final testEnv = TestEnvironment.withTestEngine(
-      verbose: true,
-    );
-    addTearDown(testEnv.cleanup);
-
-    final testConfig = TestBuilderConfig();
-    testConfig.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-
-    final parser = ArgParser();
-    final _ = BuildPlan.configureArgParser(
-      parser,
-      testEnv.environment,
-      configs: {
-        'linux_test_config': testConfig.buildConfig(
-          path: 'ci/builders/linux_test_config.json',
-        ),
-      },
-      help: true,
-    );
-
-    expect(
-      parser.usage,
-      contains('Additional arguments to provide to "gn"'),
-    );
-  });
-
-  test('hides --gn-args if not verbose', () {
-    final testEnv = TestEnvironment.withTestEngine();
-    addTearDown(testEnv.cleanup);
-
-    final testConfig = TestBuilderConfig();
-    testConfig.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-
-    final parser = ArgParser();
-    final _ = BuildPlan.configureArgParser(
-      parser,
-      testEnv.environment,
-      configs: {
-        'linux_test_config': testConfig.buildConfig(
-          path: 'ci/builders/linux_test_config.json',
-        ),
-      },
-      help: true,
-    );
-
-    expect(
-      parser.usage,
-      isNot(contains('Additional arguments to provide to "gn"')),
-    );
+      expect(
+        parser.usage,
+        contains('Additional arguments to provide to "gn"'),
+      );
+    });
   });
 }
