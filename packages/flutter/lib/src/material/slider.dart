@@ -33,6 +33,8 @@ import 'theme.dart';
 // int _duelCommandment = 1;
 // void setState(VoidCallback fn) { }
 
+const Duration _minimumInteractionTime = Duration(milliseconds: 500);
+
 /// [Slider] uses this callback to paint the value indicator on the overlay.
 ///
 /// Since the value indicator is painted on the Overlay; this method paints the
@@ -943,6 +945,23 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     return Semantics(
       container: true,
       slider: true,
+      onTap: _enabled
+        ? () {
+            setState(() {
+              _focused = true;
+            });
+            overlayController.forward();
+            interactionTimer?.cancel();
+            interactionTimer = Timer(_minimumInteractionTime * timeDilation, () {
+              interactionTimer = null;
+              overlayController.reverse();
+              // Reset the focused state after the overlay has fully disappeared.
+              setState(() {
+                _focused = false;
+              });
+            });
+          }
+        : null,
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: FocusableActionDetector(
         actions: _actionMap,
@@ -1156,7 +1175,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
   static const Duration _positionAnimationDuration = Duration(milliseconds: 75);
-  static const Duration _minimumInteractionTime = Duration(milliseconds: 500);
 
   // This value is the touch target, 48, multiplied by 3.
   static const double _minPreferredTrackWidth = 144.0;

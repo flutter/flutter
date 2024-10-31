@@ -1250,7 +1250,7 @@ void main() {
     await testReparenting(true);
   });
 
-  testWidgets('Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Slider Semantics (Android, Fuchsia, and Linux)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -1292,6 +1292,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.tap,
                             SemanticsAction.focus,
                             SemanticsAction.increase,
                             SemanticsAction.decrease,
@@ -1414,7 +1415,7 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux }));
 
-  testWidgets('Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Slider Semantics (iOS and macOS)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1453,8 +1454,14 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
+                          ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.tap,
                             if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
                             SemanticsAction.increase, SemanticsAction.decrease,
                           ],
@@ -1528,7 +1535,7 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Slider Semantics (Windows)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -1570,6 +1577,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.tap,
                             SemanticsAction.focus,
                             SemanticsAction.increase,
                             SemanticsAction.decrease,
@@ -1735,8 +1743,18 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.tap,
+                            SemanticsAction.focus,
+                            SemanticsAction.increase,
+                            SemanticsAction.decrease,
+                          ],
                           value: '40',
                           increasedValue: '60',
                           decreasedValue: '20',
@@ -1795,8 +1813,18 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.tap,
+                            SemanticsAction.focus,
+                            SemanticsAction.increase,
+                            SemanticsAction.decrease,
+                          ],
                           value: '40',
                           increasedValue: '60',
                           decreasedValue: '20',
@@ -2640,6 +2668,7 @@ void main() {
                           SemanticsFlag.isSlider,
                         ],
                         actions: <SemanticsAction>[
+                          SemanticsAction.tap,
                           SemanticsAction.focus,
                           SemanticsAction.increase,
                           SemanticsAction.decrease,
@@ -4685,6 +4714,47 @@ void main() {
         ..rrect(
           rrect: RRect.fromLTRBR(0.0, 7.0, 402.0, 13.0,  const Radius.circular(3.0)),
         ),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/156427
+  testWidgets('Double tap in a11y mode does not change the value', (WidgetTester tester) async {
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    double value = 0.2;
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              onChanged: (double newValue) {
+                value = newValue;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(value, equals(0.2));
+
+    semanticsOwner.performAction(4, SemanticsAction.tap);
+    await tester.pump();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.1)),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    // The slider value should not change.
+    expect(value, equals(0.2));
+    // The thumb overlay should disappear after 500 milliseconds.
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.1)))
     );
   });
 }
