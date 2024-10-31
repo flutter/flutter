@@ -32,24 +32,17 @@ import 'image.dart';
 /// ** See code in examples/api/lib/widgets/sliver/decorated_sliver.0.dart **
 /// {@end-tool}
 ///
-/// [clipBehavior] is set by parent [Widget], which is often a
-/// scrollable [Widget] such as [CustomScrollView]
-/// where [clipBehavior] defaults to [Clip.hardEdge].
-/// This result in [Decoration] properties particularly
-/// [BoxShadow], which render outside the widget's boundaries,
-/// appear clipped. To prevent this,
-/// consider setting [clipBehavior] to [Clip.none] to ensure
-/// they render correctly outside the widgets's bounds.
-///
-/// To clip a child to the shape of a
-/// particular [ShapeDecoration], consider using a [ClipPath] widget.
-///
 /// {@tool dartpad}
 /// This example show [DecoratedSliver] behavior,
 /// a child of unclipped [CustomScrollView] :
 ///
 /// ** See code in examples/api/lib/widgets/sliver/decorated_sliver.1.dart **
 /// {@end-tool}
+///
+/// [clipBehavior] is set by parent [Widget].
+///
+/// To clip a child to the shape of a
+/// particular [ShapeDecoration], consider using a [ClipPath] widget.
 ///
 /// See also:
 ///
