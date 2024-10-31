@@ -581,7 +581,7 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   auto scale = entity.GetTransform().GetMaxBasisLengthXY();
 
   PositionWriter position_writer;
-  auto polyline = renderer.GetTessellator()->CreateTempPolyline(path_, scale);
+  auto polyline = renderer.GetTessellator().CreateTempPolyline(path_, scale);
   CreateSolidStrokeVertices(position_writer, polyline, stroke_width,
                             miter_limit_ * stroke_width_ * 0.5f,
                             GetJoinProc<PositionWriter>(stroke_join_),

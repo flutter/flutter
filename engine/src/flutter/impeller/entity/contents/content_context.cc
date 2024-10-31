@@ -543,8 +543,8 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
   return subpass_target;
 }
 
-std::shared_ptr<Tessellator> ContentContext::GetTessellator() const {
-  return tessellator_;
+Tessellator& ContentContext::GetTessellator() const {
+  return *tessellator_;
 }
 
 std::shared_ptr<Context> ContentContext::GetContext() const {

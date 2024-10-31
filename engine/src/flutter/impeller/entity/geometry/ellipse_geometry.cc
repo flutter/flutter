@@ -18,7 +18,7 @@ GeometryResult EllipseGeometry::GetPositionBuffer(
     RenderPass& pass) const {
   return ComputePositionGeometry(
       renderer,
-      renderer.GetTessellator()->FilledEllipse(entity.GetTransform(), bounds_),
+      renderer.GetTessellator().FilledEllipse(entity.GetTransform(), bounds_),
       entity, pass);
 }
 

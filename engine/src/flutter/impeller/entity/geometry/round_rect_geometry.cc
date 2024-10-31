@@ -16,7 +16,7 @@ GeometryResult RoundRectGeometry::GetPositionBuffer(
     const Entity& entity,
     RenderPass& pass) const {
   return ComputePositionGeometry(renderer,
-                                 renderer.GetTessellator()->FilledRoundRect(
+                                 renderer.GetTessellator().FilledRoundRect(
                                      entity.GetTransform(), bounds_, radii_),
                                  entity, pass);
 }
