@@ -294,6 +294,8 @@
 /dev/devicelab/bin/tasks/web_benchmarks_skwasm.dart @eyebrowsoffire @flutter/web
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
+/dev/devicelab/bin/tasks/windows_desktop_impeller @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/mac_desktop_impeller @jonahwilliams @flutter/engine
 
 ## Host only framework tests
 # Linux docs_deploy_beta
