@@ -42,19 +42,21 @@ class WebEntrypointTarget extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart'),
-  ];
+        Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart'),
+      ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/main.dart'),
-  ];
+        Source.pattern('{BUILD_DIR}/main.dart'),
+      ];
 
   @override
   Future<void> build(Environment environment) async {
     final String? targetFile = environment.defines[kTargetFile];
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
-    final File packageConfigFile = findPackageConfigFileOrDefault(environment.projectDir);
+    final File packageConfigFile =
+        findPackageConfigFileOrDefault(environment.projectDir);
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
@@ -76,15 +78,18 @@ class WebEntrypointTarget extends Target {
     // By construction, this will only be null if the .packages file does not
     // have an entry for the user's application or if the main file is
     // outside of the lib/ directory.
-    final String importedEntrypoint = packageConfig.toPackageUri(importUri)?.toString()
-      ?? importUri.toString();
+    final String importedEntrypoint =
+        packageConfig.toPackageUri(importUri)?.toString() ??
+            importUri.toString();
 
-    await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: environment.buildDir);
+    await injectBuildTimePluginFilesForWebPlatform(flutterProject,
+        destination: environment.buildDir);
     // The below works because `injectBuildTimePluginFiles` is configured to write
     // the web_plugin_registrant.dart file alongside the generated main.dart
     const String generatedImport = 'web_plugin_registrant.dart';
 
-    final String contents = main_dart.generateMainDartFile(importedEntrypoint,
+    final String contents = main_dart.generateMainDartFile(
+      importedEntrypoint,
       languageVersion: languageVersion,
       pluginRegistrantEntrypoint: generatedImport,
     );
@@ -107,9 +112,11 @@ abstract class Dart2WebTarget extends Target {
       decodeDartDefines(environment.defines, kDartDefines),
     );
     if (environment.defines[kUseLocalCanvasKitFlag] != 'true') {
-      final bool canvasKitUrlAlreadySet = dartDefines.any((String define) => define.startsWith('FLUTTER_WEB_CANVASKIT_URL='));
+      final bool canvasKitUrlAlreadySet = dartDefines.any(
+          (String define) => define.startsWith('FLUTTER_WEB_CANVASKIT_URL='));
       if (!canvasKitUrlAlreadySet) {
-        dartDefines.add('FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineRevision}/');
+        dartDefines.add(
+            'FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineRevision}/');
       }
     }
     return dartDefines;
@@ -117,22 +124,24 @@ abstract class Dart2WebTarget extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    WebEntrypointTarget(),
-    GenerateLocalizationsTarget(),
-  ];
+        WebEntrypointTarget(),
+        GenerateLocalizationsTarget(),
+      ];
 
   @override
   List<Source> get inputs => <Source>[
-    const Source.hostArtifact(HostArtifact.flutterWebSdk),
-    const Source.artifact(Artifact.engineDartBinary),
-    const Source.pattern('{BUILD_DIR}/main.dart'),
-    const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
-  ];
+        const Source.hostArtifact(HostArtifact.flutterWebSdk),
+        const Source.artifact(Artifact.engineDartBinary),
+        const Source.pattern('{BUILD_DIR}/main.dart'),
+        const Source.pattern(
+            '{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+      ];
 
   @override
   List<Source> get outputs => <Source>[
-    for (final String stem in buildPatternStems) Source.pattern('{BUILD_DIR}/$stem'),
-  ];
+        for (final String stem in buildPatternStems)
+          Source.pattern('{BUILD_DIR}/$stem'),
+      ];
 
   @override
   String get buildKey => compilerConfig.buildKey;
@@ -150,8 +159,8 @@ class Dart2JSTarget extends Dart2WebTarget {
 
   @override
   List<String> get depfiles => const <String>[
-    'dart2js.d',
-  ];
+        'dart2js.d',
+      ];
 
   @override
   Future<void> build(Environment environment) async {
@@ -161,9 +170,11 @@ class Dart2JSTarget extends Dart2WebTarget {
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Artifacts artifacts = environment.artifacts;
-    final String platformBinariesPath = artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
+    final String platformBinariesPath =
+        artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
     final List<String> sharedCommandOptions = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
+      artifacts.getArtifactPath(Artifact.engineDartBinary,
+          platform: TargetPlatform.web_javascript),
       'compile',
       'js',
       '--platform-binaries=$platformBinariesPath',
@@ -229,30 +240,31 @@ class Dart2JSTarget extends Dart2WebTarget {
 
   @override
   Map<String, Object?> get buildConfig => <String, Object?>{
-    'compileTarget': 'dart2js',
-    'renderer': compilerConfig.renderer.name,
-    'mainJsPath': 'main.dart.js',
-  };
+        'compileTarget': 'dart2js',
+        'renderer': compilerConfig.renderer.name,
+        'mainJsPath': 'main.dart.js',
+      };
 
   @override
-  Iterable<File> buildFiles(Environment environment)
-    => environment.buildDir
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((File file) {
+  Iterable<File> buildFiles(Environment environment) => environment.buildDir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((File file) {
         if (file.basename == 'main.dart.js') {
           return true;
         }
         if (file.basename == 'main.dart.js.map') {
           return compilerConfig.sourceMaps;
         }
-        final RegExp partFileRegex = RegExp(r'main\.dart\.js_[0-9].*\.part\.js');
+        final RegExp partFileRegex =
+            RegExp(r'main\.dart\.js_[0-9].*\.part\.js');
         if (partFileRegex.hasMatch(file.basename)) {
           return true;
         }
 
         if (compilerConfig.sourceMaps) {
-          final RegExp partFileSourceMapRegex = RegExp(r'main\.dart\.js_[0-9].*.part\.js\.map');
+          final RegExp partFileSourceMapRegex =
+              RegExp(r'main\.dart\.js_[0-9].*.part\.js\.map');
           if (partFileSourceMapRegex.hasMatch(file.basename)) {
             return true;
           }
@@ -262,13 +274,13 @@ class Dart2JSTarget extends Dart2WebTarget {
 
   @override
   Iterable<String> get buildPatternStems => <String>[
-    'main.dart.js',
-    'main.dart.js_*.part.js',
-    if (compilerConfig.sourceMaps) ...<String>[
-      'main.dart.js.map',
-      'main.dart.js_*.part.js.map',
-    ],
-  ];
+        'main.dart.js',
+        'main.dart.js_*.part.js',
+        if (compilerConfig.sourceMaps) ...<String>[
+          'main.dart.js.map',
+          'main.dart.js_*.part.js.map',
+        ],
+      ];
 }
 
 /// Compiles a web entry point with dart2wasm.
@@ -280,33 +292,37 @@ class Dart2WasmTarget extends Dart2WebTarget {
 
   /// List the preconfigured build options for a given build mode.
   List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) =>
-    switch (mode) {
-      BuildMode.debug => <String>[
-          // These checks allow the CLI to override the value of this define for unit
-          // testing the framework.
-          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+      switch (mode) {
+        BuildMode.debug => <String>[
+            // These checks allow the CLI to override the value of this define for unit
+            // testing the framework.
+            if (!dartDefines
+                .any((String define) => define.startsWith('dart.vm.profile')))
+              '-Ddart.vm.profile=false',
+            if (!dartDefines
+                .any((String define) => define.startsWith('dart.vm.product')))
+              '-Ddart.vm.product=false',
+          ],
+        BuildMode.profile => <String>[
+            // These checks allow the CLI to override the value of this define for
+            // benchmarks with most timeline traces disabled.
+            if (!dartDefines
+                .any((String define) => define.startsWith('dart.vm.profile')))
+              '-Ddart.vm.profile=true',
+            if (!dartDefines
+                .any((String define) => define.startsWith('dart.vm.product')))
+              '-Ddart.vm.product=false',
+            '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+            '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+          ],
+        BuildMode.release => <String>[
             '-Ddart.vm.profile=false',
-          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
-            '-Ddart.vm.product=false',
-        ],
-      BuildMode.profile => <String>[
-          // These checks allow the CLI to override the value of this define for
-          // benchmarks with most timeline traces disabled.
-          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
-            '-Ddart.vm.profile=true',
-          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
-            '-Ddart.vm.product=false',
-          '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
-          '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
-        ],
-      BuildMode.release => <String>[
-          '-Ddart.vm.profile=false',
-          '-Ddart.vm.product=true',
-          '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
-          '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
-        ],
-      _ => throw Exception('Unknown BuildMode: $mode')
-    };
+            '-Ddart.vm.product=true',
+            '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+            '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+          ],
+        _ => throw Exception('Unknown BuildMode: $mode')
+      };
 
   @override
   Future<void> build(Environment environment) async {
@@ -319,12 +335,15 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final File outputWasmFile =
         environment.buildDir.childFile('main.dart.wasm');
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
-    final String platformBinariesPath = artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
-    final String platformFilePath = environment.fileSystem.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
+    final String platformBinariesPath =
+        artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
+    final String platformFilePath = environment.fileSystem.path
+        .join(platformBinariesPath, 'dart2wasm_platform.dill');
     final List<String> dartDefines = computeDartDefines(environment);
 
     final List<String> compilationArgs = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
+      artifacts.getArtifactPath(Artifact.engineDartBinary,
+          platform: TargetPlatform.web_javascript),
       'compile',
       'wasm',
       '--packages=${findPackageConfigFileOrDefault(environment.projectDir).path}',
@@ -335,8 +354,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
         '--extra-compiler-option=--shared-memory-max-pages=32768',
       ],
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
-      for (final String dartDefine in dartDefines)
-        '-D$dartDefine',
+      for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
 
       ...compilerConfig.toCommandOptions(buildMode),
@@ -361,53 +379,53 @@ class Dart2WasmTarget extends Dart2WebTarget {
 
   @override
   List<String> get depfiles => const <String>[
-    'dart2wasm.d',
-  ];
+        'dart2wasm.d',
+      ];
 
   @override
   Map<String, Object?> get buildConfig => <String, Object?>{
-    'compileTarget': 'dart2wasm',
-    'renderer': compilerConfig.renderer.name,
-    'mainWasmPath': 'main.dart.wasm',
-    'jsSupportRuntimePath': 'main.dart.mjs',
-  };
+        'compileTarget': 'dart2wasm',
+        'renderer': compilerConfig.renderer.name,
+        'mainWasmPath': 'main.dart.wasm',
+        'jsSupportRuntimePath': 'main.dart.mjs',
+      };
 
   @override
-  Iterable<File> buildFiles(Environment environment)
-    => environment.buildDir
+  Iterable<File> buildFiles(Environment environment) => environment.buildDir
       .listSync(recursive: true)
       .whereType<File>()
       .where((File file) => switch (file.basename) {
-        'main.dart.wasm' || 'main.dart.mjs' => true,
-        'main.dart.wasm.map' => compilerConfig.sourceMaps,
-        _ => false,
-      });
+            'main.dart.wasm' || 'main.dart.mjs' => true,
+            'main.dart.wasm.map' => compilerConfig.sourceMaps,
+            _ => false,
+          });
 
   @override
   Iterable<String> get buildPatternStems => <String>[
-    'main.dart.wasm',
-    'main.dart.mjs',
-    if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
-  ];
+        'main.dart.wasm',
+        'main.dart.mjs',
+        if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
+      ];
 }
 
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
 /// output directory.
 class WebReleaseBundle extends Target {
-  WebReleaseBundle(List<WebCompilerConfig> configs) : this._(
-    compileTargets: configs.map((WebCompilerConfig config) =>
-      switch (config) {
-        WasmCompilerConfig() => Dart2WasmTarget(config),
-        JsCompilerConfig() => Dart2JSTarget(config),
-      }
-    ).toList(),
-  );
+  WebReleaseBundle(List<WebCompilerConfig> configs)
+      : this._(
+          compileTargets: configs
+              .map((WebCompilerConfig config) => switch (config) {
+                    WasmCompilerConfig() => Dart2WasmTarget(config),
+                    JsCompilerConfig() => Dart2JSTarget(config),
+                  })
+              .toList(),
+        );
 
   WebReleaseBundle._({
     required this.compileTargets,
-  }) : templatedFilesTarget = WebTemplatedFiles(
-    compileTargets.map((Dart2WebTarget target) => target.buildConfig).toList()
-  );
+  }) : templatedFilesTarget = WebTemplatedFiles(compileTargets
+            .map((Dart2WebTarget target) => target.buildConfig)
+            .toList());
 
   final List<Dart2WebTarget> compileTargets;
   final WebTemplatedFiles templatedFilesTarget;
@@ -417,39 +435,41 @@ class WebReleaseBundle extends Target {
 
   @override
   List<Target> get dependencies => <Target>[
-    ...compileTargets,
-    templatedFilesTarget,
-  ];
+        ...compileTargets,
+        templatedFilesTarget,
+      ];
 
   Iterable<String> get buildPatternStems => compileTargets.expand(
-    (Dart2WebTarget target) => target.buildPatternStems,
-  );
+        (Dart2WebTarget target) => target.buildPatternStems,
+      );
 
   @override
   List<Source> get inputs => <Source>[
-    const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file'))
-  ];
+        const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+        ...buildPatternStems
+            .map((String file) => Source.pattern('{BUILD_DIR}/$file'))
+      ];
 
   @override
   List<Source> get outputs => <Source>[
-    ...buildPatternStems.map((String file) => Source.pattern('{OUTPUT_DIR}/$file'))
-  ];
+        ...buildPatternStems
+            .map((String file) => Source.pattern('{OUTPUT_DIR}/$file'))
+      ];
 
   @override
   List<String> get depfiles => const <String>[
-    'flutter_assets.d',
-    'web_resources.d',
-  ];
+        'flutter_assets.d',
+        'web_resources.d',
+      ];
 
   @override
   Future<void> build(Environment environment) async {
     final FileSystem fileSystem = environment.fileSystem;
     for (final Dart2WebTarget target in compileTargets) {
       for (final File outputFile in target.buildFiles(environment)) {
-        outputFile.copySync(
-          environment.outputDir.childFile(fileSystem.path.basename(outputFile.path)).path
-        );
+        outputFile.copySync(environment.outputDir
+            .childFile(fileSystem.path.basename(outputFile.path))
+            .path);
       }
     }
 
@@ -460,7 +480,8 @@ class WebReleaseBundle extends Target {
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
 
     createVersionFile(environment, environment.defines);
-    final Directory outputDirectory = environment.outputDir.childDirectory('assets');
+    final Directory outputDirectory =
+        environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
 
     final Depfile depfile = await copyAssets(
@@ -475,31 +496,30 @@ class WebReleaseBundle extends Target {
       environment.buildDir.childFile('flutter_assets.d'),
     );
 
-    final Directory webResources = environment.projectDir
-      .childDirectory('web');
-    final List<File> inputResourceFiles = webResources
-      .listSync(recursive: true)
-      .whereType<File>()
-      .toList();
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    final List<File> inputResourceFiles =
+        webResources.listSync(recursive: true).whereType<File>().toList();
 
     // Copy other resource files out of web/ directory.
     final List<File> outputResourcesFiles = <File>[];
     for (final File inputFile in inputResourceFiles) {
-      final String relativePath = fileSystem.path.relative(inputFile.path, from: webResources.path);
-      if (relativePath == 'index.html' || relativePath == 'flutter_bootstrap.js') {
+      final String relativePath =
+          fileSystem.path.relative(inputFile.path, from: webResources.path);
+      if (relativePath == 'index.html' ||
+          relativePath == 'flutter_bootstrap.js') {
         // Skip these, these are handled by the templated file target.
         continue;
       }
-      final File outputFile = fileSystem.file(fileSystem.path.join(
-        environment.outputDir.path,
-        relativePath));
+      final File outputFile = fileSystem
+          .file(fileSystem.path.join(environment.outputDir.path, relativePath));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
       outputResourcesFiles.add(outputFile);
       inputFile.copySync(outputFile.path);
     }
-    final Depfile resourceFile = Depfile(inputResourceFiles, outputResourcesFiles);
+    final Depfile resourceFile =
+        Depfile(inputResourceFiles, outputResourcesFiles);
     depfileService.writeToFile(
       resourceFile,
       environment.buildDir.childFile('web_resources.d'),
@@ -535,13 +555,9 @@ class WebTemplatedFiles extends Target {
   String get buildKey => jsonEncode(buildDescriptions);
 
   void _emitWebTemplateWarning(
-    Environment environment,
-    String filePath,
-    WebTemplateWarning warning
-  ) {
+      Environment environment, String filePath, WebTemplateWarning warning) {
     environment.logger.printWarning(
-      'Warning: In $filePath:${warning.lineNumber}: ${warning.warningText}'
-    );
+        'Warning: In $filePath:${warning.lineNumber}: ${warning.warningText}');
   }
 
   String buildConfigString(Environment environment) {
@@ -561,9 +577,9 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
   @override
   Future<void> build(Environment environment) async {
-    final Directory webResources = environment.projectDir
-      .childDirectory('web');
-    final File inputFlutterBootstrapJs = webResources.childFile('flutter_bootstrap.js');
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    final File inputFlutterBootstrapJs =
+        webResources.childFile('flutter_bootstrap.js');
     final String inputBootstrapContent;
     if (await inputFlutterBootstrapJs.exists()) {
       inputBootstrapContent = await inputFlutterBootstrapJs.readAsString();
@@ -594,18 +610,20 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       buildConfig: buildConfig,
     );
 
-    final File outputFlutterBootstrapJs = fileSystem.file(fileSystem.path.join(
-        environment.outputDir.path,
-        'flutter_bootstrap.js'
-    ));
+    final File outputFlutterBootstrapJs = fileSystem.file(fileSystem.path
+        .join(environment.outputDir.path, 'flutter_bootstrap.js'));
     await outputFlutterBootstrapJs.writeAsString(bootstrapTemplate.content);
 
-    await for (final FileSystemEntity file in webResources.list(recursive: true)) {
+    await for (final FileSystemEntity file
+        in webResources.list(recursive: true)) {
       if (file is File && file.basename == 'index.html') {
-        final WebTemplate indexHtmlTemplate = WebTemplate(file.readAsStringSync());
-        final String relativePath = fileSystem.path.relative(file.path, from: webResources.path);
+        final WebTemplate indexHtmlTemplate =
+            WebTemplate(file.readAsStringSync());
+        final String relativePath =
+            fileSystem.path.relative(file.path, from: webResources.path);
 
-        for (final WebTemplateWarning warning in indexHtmlTemplate.getWarnings()) {
+        for (final WebTemplateWarning warning
+            in indexHtmlTemplate.getWarnings()) {
           _emitWebTemplateWarning(environment, relativePath, warning);
         }
 
@@ -626,25 +644,24 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     }
   }
 
-
   @override
   List<Target> get dependencies => <Target>[];
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/web/*/index.html'),
-    Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js'),
-    Source.hostArtifact(HostArtifact.flutterWebSdk),
-  ];
+        Source.pattern('{PROJECT_DIR}/web/*/index.html'),
+        Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js'),
+        Source.hostArtifact(HostArtifact.flutterWebSdk),
+      ];
 
   @override
   String get name => 'web_templated_files';
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/*/index.html'),
-    Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js'),
-  ];
+        Source.pattern('{OUTPUT_DIR}/*/index.html'),
+        Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js'),
+      ];
 }
 
 /// Static assets provided by the Flutter SDK that do not change, such as
@@ -668,39 +685,41 @@ class WebBuiltInAssets extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.hostArtifact(HostArtifact.flutterWebSdk),
-  ];
+        Source.hostArtifact(HostArtifact.flutterWebSdk),
+      ];
 
   Directory get _canvasKitDirectory =>
-    globals.fs.directory(
-      fileSystem.path.join(
+      globals.fs.directory(fileSystem.path.join(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
         'canvaskit',
-      )
-    );
+      ));
 
-  List<File> get _canvasKitFiles => _canvasKitDirectory.listSync(recursive: true).whereType<File>().toList();
+  List<File> get _canvasKitFiles =>
+      _canvasKitDirectory.listSync(recursive: true).whereType<File>().toList();
 
   String _filePathRelativeToCanvasKitDirectory(File file) =>
-    fileSystem.path.relative(file.path, from: _canvasKitDirectory.path);
+      fileSystem.path.relative(file.path, from: _canvasKitDirectory.path);
 
   @override
   List<Source> get outputs => <Source>[
-    const Source.pattern('{BUILD_DIR}/flutter.js'),
-    for (final File file in _canvasKitFiles)
-      Source.pattern('{BUILD_DIR}/canvaskit/${_filePathRelativeToCanvasKitDirectory(file)}'),
-  ];
+        const Source.pattern('{BUILD_DIR}/flutter.js'),
+        for (final File file in _canvasKitFiles)
+          Source.pattern(
+              '{BUILD_DIR}/canvaskit/${_filePathRelativeToCanvasKitDirectory(file)}'),
+      ];
 
   @override
   Future<void> build(Environment environment) async {
     for (final File file in _canvasKitFiles) {
       final String relativePath = _filePathRelativeToCanvasKitDirectory(file);
-      final String targetPath = fileSystem.path.join(environment.outputDir.path, 'canvaskit', relativePath);
+      final String targetPath = fileSystem.path
+          .join(environment.outputDir.path, 'canvaskit', relativePath);
       file.copySync(targetPath);
     }
 
     // Write the flutter.js file
-    final String flutterJsOut = fileSystem.path.join(environment.outputDir.path, 'flutter.js');
+    final String flutterJsOut =
+        fileSystem.path.join(environment.outputDir.path, 'flutter.js');
     final File flutterJsFile = fileSystem.file(fileSystem.path.join(
       globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
       'flutter.js',
@@ -721,14 +740,14 @@ class WebServiceWorker extends Target {
 
   @override
   List<Target> get dependencies => <Target>[
-    WebReleaseBundle(compileConfigs),
-    WebBuiltInAssets(fileSystem),
-  ];
+        WebReleaseBundle(compileConfigs),
+        WebBuiltInAssets(fileSystem),
+      ];
 
   @override
   List<String> get depfiles => const <String>[
-    'service_worker.d',
-  ];
+        'service_worker.d',
+      ];
 
   @override
   List<Source> get inputs => const <Source>[];
@@ -739,24 +758,26 @@ class WebServiceWorker extends Target {
   @override
   Future<void> build(Environment environment) async {
     final List<File> contents = environment.outputDir
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((File file) => !file.path.endsWith('flutter_service_worker.js')
-        && !environment.fileSystem.path.basename(file.path).startsWith('.'))
-      .toList();
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((File file) =>
+            !file.path.endsWith('flutter_service_worker.js') &&
+            !environment.fileSystem.path.basename(file.path).startsWith('.'))
+        .toList();
 
     final Map<String, String> urlToHash = <String, String>{};
     for (final File file in contents) {
       // Do not force caching of source maps.
       if (file.path.endsWith('main.dart.js.map') ||
-        file.path.endsWith('.part.js.map')) {
+          file.path.endsWith('.part.js.map')) {
         continue;
       }
-      final String url = environment.fileSystem.path.toUri(
-        environment.fileSystem.path.relative(
-          file.path,
-          from: environment.outputDir.path),
-        ).toString();
+      final String url = environment.fileSystem.path
+          .toUri(
+            environment.fileSystem.path
+                .relative(file.path, from: environment.outputDir.path),
+          )
+          .toString();
       final String hash = md5.convert(await file.readAsBytes()).toString();
       urlToHash[url] = hash;
       // Add an additional entry for the base URL.
@@ -765,19 +786,21 @@ class WebServiceWorker extends Target {
       }
     }
 
-    final File serviceWorkerFile = environment.outputDir
-      .childFile('flutter_service_worker.js');
+    final File serviceWorkerFile =
+        environment.outputDir.childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
     final ServiceWorkerStrategy serviceWorkerStrategy =
-        ServiceWorkerStrategy.fromCliName(environment.defines[kServiceWorkerStrategy]);
-    final String fileGeneratorsPath =
-        environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators);
+        ServiceWorkerStrategy.fromCliName(
+            environment.defines[kServiceWorkerStrategy]);
+    final String fileGeneratorsPath = environment.artifacts
+        .getArtifactPath(Artifact.flutterToolsFileGenerators);
     final String serviceWorker = generateServiceWorker(
       fileGeneratorsPath,
       urlToHash,
       <String>[
         'main.dart.js',
-        if (compileConfigs.any((WebCompilerConfig config) => config is WasmCompilerConfig)) ...<String>[
+        if (compileConfigs.any((WebCompilerConfig config) =>
+            config is WasmCompilerConfig)) ...<String>[
           'main.dart.wasm',
           'main.dart.mjs',
         ],
@@ -790,8 +813,7 @@ class WebServiceWorker extends Target {
       ],
       serviceWorkerStrategy: serviceWorkerStrategy,
     );
-    serviceWorkerFile
-      .writeAsStringSync(serviceWorker);
+    serviceWorkerFile.writeAsStringSync(serviceWorker);
     environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('service_worker.d'),
