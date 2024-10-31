@@ -460,6 +460,9 @@ dependencies:
 
         expect(flutterProject.flutterPluginsFile, isNot(exists));
         expect(flutterProject.flutterPluginsDependenciesFile, exists);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext(
