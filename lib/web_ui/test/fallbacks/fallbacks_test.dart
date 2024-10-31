@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:js_interop';
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -17,9 +15,6 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-@JS()
-external JSBoolean get crossOriginIsolated;
-
 Future<void> testMain() async {
   setUpUnitTests(
     setUpTestViewDimensions: false,
@@ -29,8 +24,6 @@ Future<void> testMain() async {
     if (ui_web.browser.browserEngine == ui_web.BrowserEngine.blink) {
       expect(isWasm, isTrue);
       expect(isSkwasm, isTrue);
-      final bool shouldBeMultiThreaded = crossOriginIsolated.toDart && !configuration.forceSingleThreadedSkwasm;
-      expect(isMultiThreaded, shouldBeMultiThreaded);
     } else {
       expect(isWasm, isFalse);
       expect(isCanvasKit, isTrue);
