@@ -397,8 +397,7 @@ void main() {
   });
 
   testWithoutContext('launchDevToolsInBrowser launches successfully', () async {
-    final FlutterResidentDevtoolsHandler handler =
-        FlutterResidentDevtoolsHandler(
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()
         ..devToolsUrl = Uri(host: 'localhost', port: 8080)
         ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
