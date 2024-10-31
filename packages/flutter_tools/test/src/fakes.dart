@@ -793,17 +793,3 @@ class ClosedStdinController extends Fake implements StreamSink<List<int>> {
     return null;
   }
 }
-
-class FakeChromiumLauncher extends Fake implements ChromiumLauncher {
-  @override
-  Future<Chromium> launch(
-    String url, {
-    bool headless = false,
-    int? debugPort,
-    bool skipCheck = false,
-    Directory? cacheDir,
-    List<String> webBrowserFlags = const <String>[],
-  }) async {
-    throw ProcessException('ChromiumLauncher', <String>[url]);
-  }
-}
