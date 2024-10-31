@@ -70,6 +70,7 @@ void main() {
       flutterVersion: flutterVersion,
       fileSystem: fileSystem,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     await webBuilder.buildWeb(
       flutterProject,
@@ -162,6 +163,7 @@ void main() {
       flutterVersion: flutterVersion,
       fileSystem: fileSystem,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     await expectLater(
         () async => webBuilder.buildWeb(

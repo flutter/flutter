@@ -26,9 +26,9 @@ import 'android_sdk.dart';
 // However, this currently requires to migrate existing integration tests to the latest supported values.
 //
 // Please see the README before changing any of these values.
-const String templateDefaultGradleVersion = '8.3';
-const String templateAndroidGradlePluginVersion = '8.1.0';
-const String templateAndroidGradlePluginVersionForModule = '8.1.0';
+const String templateDefaultGradleVersion = '8.10.2';
+const String templateAndroidGradlePluginVersion = '8.7.0';
+const String templateAndroidGradlePluginVersionForModule = '8.7.0';
 const String templateKotlinGradlePluginVersion = '1.8.22';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
@@ -47,24 +47,24 @@ const String ndkVersion = '26.1.10909125';
 // Update these when new major versions of Java are supported by new Gradle
 // versions that we support.
 // Source of truth: https://docs.gradle.org/current/userguide/compatibility.html
-const String oneMajorVersionHigherJavaVersion = '23';
+const String oneMajorVersionHigherJavaVersion = '24';
 
 // Update this when new versions of Gradle come out including minor versions
 // and should correspond to the maximum Gradle version we test in CI.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const String maxKnownAndSupportedGradleVersion = '8.7';
+const String maxKnownAndSupportedGradleVersion = '8.10.2';
 
 // Update this when new versions of AGP come out.
 //
 // Supported here means tooling is aware of this version's Java <-> AGP
 // compatibility.
 @visibleForTesting
-const String maxKnownAndSupportedAgpVersion = '8.4.0';
+const String maxKnownAndSupportedAgpVersion = '8.7.1';
 
 // Update this when new versions of AGP come out.
-const String maxKnownAgpVersion = '8.5';
+const String maxKnownAgpVersion = '8.7.1';
 
 // Oldest documented version of AGP that has a listed minimum
 // compatible Java version.
@@ -714,7 +714,8 @@ String getGradleVersionFor(String androidPluginVersion) {
     GradleForAgp(agpMin: '8.2.0', agpMax: '8.2.99', minRequiredGradle: '8.2'),
     GradleForAgp(agpMin: '8.3.0', agpMax: '8.3.99', minRequiredGradle: '8.4'),
     GradleForAgp(agpMin: '8.4.0', agpMax: '8.4.99', minRequiredGradle: '8.6'),
-    GradleForAgp(agpMin: '8.5.0', agpMax:  '100.100', minRequiredGradle: '8.7'),
+    GradleForAgp(agpMin: '8.5.0', agpMax:  '8.6.99', minRequiredGradle: '8.7'),
+    GradleForAgp(agpMin: '8.7.0', agpMax:  '8.7.99', minRequiredGradle: '8.9'),
   // Assume if AGP is newer than this code know about return the highest gradle
   // version we know about.
     GradleForAgp(agpMin: maxKnownAgpVersion, agpMax: maxKnownAgpVersion, minRequiredGradle: maxKnownAndSupportedGradleVersion),
@@ -904,6 +905,12 @@ String getGradlewFileName(Platform platform) {
 /// of Gradle, as https://docs.gradle.org/current/userguide/compatibility.html
 /// details.
 List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
+    JavaGradleCompat(
+      javaMin: '23',
+      javaMax: '24',
+      gradleMin: '8.10',
+      gradleMax: maxKnownAndSupportedGradleVersion,
+    ),
     JavaGradleCompat(
       javaMin: '22',
       javaMax: '23',

@@ -402,7 +402,7 @@ dependencies:
 
     group('refreshPlugins', () {
       testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () async {
-        await refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
 
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
@@ -415,7 +415,7 @@ dependencies:
         flutterProject.flutterPluginsFile.createSync();
         flutterProject.flutterPluginsDependenciesFile.createSync();
 
-        await refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
 
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
@@ -434,7 +434,7 @@ dependencies:
 
         iosProject.testExists = true;
 
-        await refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
 
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
@@ -476,7 +476,7 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        await refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
 
         // Verify .flutter-plugins-dependencies is configured correctly.
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
@@ -586,7 +586,7 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        await refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
@@ -658,7 +658,7 @@ dependencies:
 
         flutterProject.usesSwiftPackageManager = true;
 
-        await refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile
@@ -695,7 +695,7 @@ dependencies:
 
         flutterProject.usesSwiftPackageManager = true;
 
-        await refreshPluginsList(flutterProject, forceCocoaPodsOnly: true);
+        await refreshPluginsList(flutterProject, forceCocoaPodsOnly: true, writeLegacyPluginsList: true);
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile
@@ -717,7 +717,7 @@ dependencies:
         iosProject.testExists = true;
         macosProject.exists = true;
 
-        await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
+        await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true, writeLegacyPluginsList: true);
         expect(iosProject.podManifestLock.existsSync(), false);
         expect(macosProject.podManifestLock.existsSync(), false);
       }, overrides: <Type, Generator>{
@@ -736,11 +736,11 @@ dependencies:
         // Since there was no plugins list, the lock files will be invalidated.
         // The second call is where the plugins list is compared to the existing one, and if there is no change,
         // the podfiles shouldn't be invalidated.
-        await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
+        await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true, writeLegacyPluginsList: true);
         simulatePodInstallRun(iosProject);
         simulatePodInstallRun(macosProject);
 
-        await refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
         expect(iosProject.podManifestLock.existsSync(), true);
         expect(macosProject.podManifestLock.existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -1511,7 +1511,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         linuxProject.exists = true;
         createFakePlugin(fs);
         // refreshPluginsList should call createPluginSymlinks.
-        await refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
 
         expect(linuxProject.pluginSymlinkDirectory.childLink('some_plugin').existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -1524,7 +1524,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         windowsProject.exists = true;
         createFakePlugin(fs);
         // refreshPluginsList should call createPluginSymlinks.
-        await refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
 
         expect(windowsProject.pluginSymlinkDirectory.childLink('some_plugin').existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -1570,7 +1570,7 @@ The Flutter Preview device does not support the following plugins from your pubs
 
         // refreshPluginsList should remove existing links and recreate on changes.
         createFakePlugin(fs);
-        await refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
 
         for (final File file in dummyFiles) {
           expect(file.existsSync(), false);
@@ -1609,7 +1609,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         linuxProject.exists = true;
         windowsProject.exists = true;
         createFakePlugin(fs);
-        await refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
 
         final List<Link> links = <Link>[
           linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
