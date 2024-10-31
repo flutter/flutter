@@ -178,27 +178,27 @@ bool ComputePassVK::BindResource(
 
 bool ComputePassVK::BindResource(size_t binding,
                                  DescriptorType type,
-                                 const BufferView& view) {
+                                 BufferView view) {
   if (bound_buffer_offset_ >= kMaxBindings) {
     return false;
   }
 
-  const std::shared_ptr<const DeviceBuffer>& device_buffer = view.buffer;
-  auto buffer = DeviceBufferVK::Cast(*device_buffer).GetBuffer();
+  auto buffer = DeviceBufferVK::Cast(*view.GetBuffer()).GetBuffer();
   if (!buffer) {
     return false;
   }
 
-  if (!command_buffer_->Track(device_buffer)) {
+  std::shared_ptr<const DeviceBuffer> device_buffer = view.TakeBuffer();
+  if (device_buffer && !command_buffer_->Track(device_buffer)) {
     return false;
   }
 
-  uint32_t offset = view.range.offset;
+  uint32_t offset = view.GetRange().offset;
 
   vk::DescriptorBufferInfo buffer_info;
   buffer_info.buffer = buffer;
   buffer_info.offset = offset;
-  buffer_info.range = view.range.length;
+  buffer_info.range = view.GetRange().length;
   buffer_workspace_[bound_buffer_offset_++] = buffer_info;
 
   vk::WriteDescriptorSet write_set;
