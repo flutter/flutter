@@ -374,7 +374,7 @@ class ContentContext {
 
   bool IsValid() const;
 
-  std::shared_ptr<Tessellator> GetTessellator() const;
+  Tessellator& GetTessellator() const;
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetFastGradientPipeline(
       ContentContextOptions opts) const {
