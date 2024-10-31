@@ -138,7 +138,7 @@ class VertexBufferBuilder {
     if (!label_.empty()) {
       buffer->SetLabel(SPrintF("%s Vertices", label_.c_str()));
     }
-    return DeviceBuffer::AsBufferView(std::move(buffer));
+    return DeviceBuffer::AsBufferView(buffer);
   }
 
   std::vector<IndexType> CreateIndexBuffer() const { return indices_; }
@@ -167,7 +167,7 @@ class VertexBufferBuilder {
     if (!label_.empty()) {
       buffer->SetLabel(SPrintF("%s Indices", label_.c_str()));
     }
-    return DeviceBuffer::AsBufferView(std::move(buffer));
+    return DeviceBuffer::AsBufferView(buffer);
   }
 };
 

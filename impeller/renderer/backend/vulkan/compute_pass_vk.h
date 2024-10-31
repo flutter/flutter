@@ -82,7 +82,9 @@ class ComputePassVK final : public ComputePass {
                     std::shared_ptr<const Texture> texture,
                     const std::unique_ptr<const Sampler>& sampler) override;
 
-  bool BindResource(size_t binding, DescriptorType type, BufferView view);
+  bool BindResource(size_t binding,
+                    DescriptorType type,
+                    const BufferView& view);
 };
 
 }  // namespace impeller

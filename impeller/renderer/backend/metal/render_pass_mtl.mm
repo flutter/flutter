@@ -189,11 +189,11 @@ static bool Bind(PassBindingsCacheMTL& pass,
                  ShaderStage stage,
                  size_t bind_index,
                  const BufferView& view) {
-  if (!view.GetBuffer()) {
+  if (!view.buffer) {
     return false;
   }
 
-  const DeviceBuffer* device_buffer = view.GetBuffer();
+  auto device_buffer = view.buffer;
   if (!device_buffer) {
     return false;
   }
@@ -204,7 +204,7 @@ static bool Bind(PassBindingsCacheMTL& pass,
     return false;
   }
 
-  return pass.SetBuffer(stage, bind_index, view.GetRange().offset, buffer);
+  return pass.SetBuffer(stage, bind_index, view.range.offset, buffer);
 }
 
 static bool Bind(PassBindingsCacheMTL& pass,
@@ -346,13 +346,13 @@ fml::Status RenderPassMTL::Draw() {
     }
   } else {
     id<MTLBuffer> mtl_index_buffer =
-        DeviceBufferMTL::Cast(*index_buffer_.GetBuffer()).GetMTLBuffer();
+        DeviceBufferMTL::Cast(*index_buffer_.buffer).GetMTLBuffer();
     if (instance_count_ != 1u) {
       [encoder_ drawIndexedPrimitives:ToMTLPrimitiveType(primitive_type_)
                            indexCount:vertex_count_
                             indexType:index_type_
                           indexBuffer:mtl_index_buffer
-                    indexBufferOffset:index_buffer_.GetRange().offset
+                    indexBufferOffset:index_buffer_.range.offset
                         instanceCount:instance_count_
                            baseVertex:base_vertex_
                          baseInstance:0u];
@@ -361,7 +361,7 @@ fml::Status RenderPassMTL::Draw() {
                            indexCount:vertex_count_
                             indexType:index_type_
                           indexBuffer:mtl_index_buffer
-                    indexBufferOffset:index_buffer_.GetRange().offset];
+                    indexBufferOffset:index_buffer_.range.offset];
     }
   }
 

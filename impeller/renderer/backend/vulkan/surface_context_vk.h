@@ -66,8 +66,6 @@ class SurfaceContextVK : public Context,
   // |Context|
   std::shared_ptr<CommandQueue> GetCommandQueue() const override;
 
-  std::shared_ptr<const IdleWaiter> GetIdleWaiter() const override;
-
   // |Context|
   void Shutdown() override;
 

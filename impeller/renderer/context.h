@@ -222,10 +222,6 @@ class Context {
   /// rendering a 2D workload.
   [[nodiscard]] virtual bool FlushCommandBuffers();
 
-  virtual std::shared_ptr<const IdleWaiter> GetIdleWaiter() const {
-    return nullptr;
-  }
-
  protected:
   Context();
 
