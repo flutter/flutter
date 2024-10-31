@@ -102,6 +102,17 @@ run-configs:
     browser: chrome
     canvaskit-variant: chromium
 
+  - name: chrome-coi
+    browser: chrome
+    canvaskit-variant: chromium
+    cross-origin-isolated: true
+
+  - name: chrome-force-st
+    browser: chrome
+    canvaskit-variant: chromium
+    cross-origin-isolated: true
+    force-single-threaded-skwasm: true
+
   - name: chrome-full
     browser: chrome
     canvaskit-variant: full
@@ -253,9 +264,14 @@ test-suites:
     run-config: chrome
     artifact-deps: [ canvaskit_chromium ]
 
-  - name: chrome-dart2wasm-skwasm-ui
+  - name: chrome-coi-dart2wasm-skwasm-ui
     test-bundle: dart2wasm-skwasm-ui
-    run-config: chrome
+    run-config: chrome-coi
+    artifact-deps: [ skwasm ]
+
+  - name: chrome-force-st-dart2wasm-skwasm-ui
+    test-bundle: dart2wasm-skwasm-ui
+    run-config: chrome-force-st
     artifact-deps: [ skwasm ]
 
   - name: chrome-full-dart2wasm-canvaskit-canvaskit
@@ -271,6 +287,16 @@ test-suites:
   - name: chrome-fallbacks
     test-bundle: fallbacks
     run-config: chrome
+    artifact-deps: [ canvaskit, skwasm ]
+
+  - name: chrome-coi-fallbacks
+    test-bundle: fallbacks
+    run-config: chrome-coi
+    artifact-deps: [ canvaskit, skwasm ]
+
+  - name: chrome-force-st-fallbacks
+    test-bundle: fallbacks
+    run-config: chrome-force-st
     artifact-deps: [ canvaskit, skwasm ]
 
   - name: firefox-fallbacks

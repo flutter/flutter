@@ -153,10 +153,6 @@ class BrowserPlatform extends PlatformPlugin {
   /// The URL for this server.
   Uri get url => server.url.resolve('/');
 
-  bool get needsCrossOriginIsolated => suite.testBundle.compileConfigs.any(
-    (CompileConfiguration config) => config.renderer == Renderer.skwasm
-  );
-
   /// A [OneOffHandler] for servicing WebSocket connections for
   /// [BrowserManager]s.
   ///
@@ -507,7 +503,7 @@ class BrowserPlatform extends PlatformPlugin {
         fileInDirectory.readAsBytesSync(),
         headers: <String, Object>{
           HttpHeaders.contentTypeHeader: contentType,
-          if (isScript && needsCrossOriginIsolated)
+          if (isScript && suite.runConfig.crossOriginIsolated)
             ...coopCoepHeaders,
         },
       );
@@ -574,6 +570,7 @@ class BrowserPlatform extends PlatformPlugin {
     config: {
       canvasKitVariant: "${getCanvasKitVariant()}",
       canvasKitBaseUrl: "/canvaskit",
+      forceSingleThreadedSkwasm: ${suite.runConfig.forceSingleThreadedSkwasm},
     },
   });
 </script>
@@ -589,7 +586,7 @@ class BrowserPlatform extends PlatformPlugin {
         </html>
       ''', headers: <String, String>{
         'Content-Type': 'text/html',
-        if (needsCrossOriginIsolated)
+        if (suite.runConfig.crossOriginIsolated)
           ...coopCoepHeaders
       });
     }

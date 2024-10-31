@@ -14,7 +14,7 @@ EMSDK_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', 'prebuilts', 'em
 EMSDK_PATH = os.path.join(EMSDK_ROOT, 'emsdk.py')
 
 # See lib/web_ui/README.md for instructions on updating the EMSDK version.
-EMSDK_VERSION = '3.1.44'
+EMSDK_VERSION = '3.1.70'
 
 
 def main():
