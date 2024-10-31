@@ -80,8 +80,7 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
       context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   SinglePassCallback callback = [&](RenderPass& pass) {
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     static bool wireframe;
@@ -146,8 +145,7 @@ TEST_P(RendererTest, BabysFirstTriangle) {
   auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
 
   // Create a host side buffer to build the vertex and uniform information.
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
 
   // Specify the vertex buffer information.
   VertexBufferBuilder<VS::PerVertexData> vertex_buffer_builder;
@@ -167,8 +165,7 @@ TEST_P(RendererTest, BabysFirstTriangle) {
     FS::FragInfo frag_info;
     frag_info.time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
 
-    auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                          context->GetIdleWaiter());
+    auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
     FS::BindFragInfo(pass, host_buffer->EmplaceUniform(frag_info));
 
     return pass.Draw().ok();
@@ -244,8 +241,7 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
   ASSERT_TRUE(sampler);
 
   Vector3 euler_angles;
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   SinglePassCallback callback = [&](RenderPass& pass) {
     static Degrees fov_y(60);
     static Scalar distance = 10;
@@ -259,14 +255,17 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
     pass.SetPipeline(pipeline);
 
     std::array<BufferView, 2> vertex_buffers = {
-        BufferView(device_buffer,
-                   Range(offsetof(Cube, positions), sizeof(Cube::positions))),
-        BufferView(device_buffer,
-                   Range(offsetof(Cube, colors), sizeof(Cube::colors))),
+        BufferView{
+            .buffer = device_buffer,
+            .range = Range(offsetof(Cube, positions), sizeof(Cube::positions))},
+        BufferView{
+            .buffer = device_buffer,
+            .range = Range(offsetof(Cube, colors), sizeof(Cube::colors))},
     };
 
-    BufferView index_buffer(
-        device_buffer, Range(offsetof(Cube, indices), sizeof(Cube::indices)));
+    BufferView index_buffer = {
+        .buffer = device_buffer,
+        .range = Range(offsetof(Cube, indices), sizeof(Cube::indices))};
     pass.SetVertexBuffer(vertex_buffers.data(), vertex_buffers.size());
     pass.SetElementCount(36);
     pass.SetIndexBuffer(index_buffer, IndexType::k16bit);
@@ -325,8 +324,7 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
       context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   SinglePassCallback callback = [&](RenderPass& pass) {
     for (size_t i = 0; i < 1; i++) {
       for (size_t j = 0; j < 1; j++) {
@@ -379,8 +377,7 @@ TEST_P(RendererTest, CanRenderToTexture) {
   auto box_pipeline =
       context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
   ASSERT_TRUE(box_pipeline);
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
 
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   vertex_builder.SetLabel("Box");
@@ -502,8 +499,7 @@ TEST_P(RendererTest, CanRenderInstanced) {
     instances.colors[i] = Color::Random();
   }
 
-  auto host_buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                        GetContext()->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
   ASSERT_TRUE(OpenPlaygroundHere([&](RenderPass& pass) -> bool {
     pass.SetPipeline(pipeline);
     pass.SetCommandLabel("InstancedDraw");
@@ -574,8 +570,7 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
       vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
   ASSERT_TRUE(vertex_buffer);
 
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
@@ -695,8 +690,7 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
       vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
   ASSERT_TRUE(vertex_buffer);
 
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     {
       auto buffer = context->CreateCommandBuffer();
@@ -757,7 +751,7 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
         auto texture =
             context->GetResourceAllocator()->CreateTexture(texture_desc);
         if (!texture->SetContents(device_buffer->OnGetContents(),
-                                  buffer_view.GetRange().length)) {
+                                  buffer_view.range.length)) {
           VALIDATION_LOG << "Could not upload texture to device memory";
           return false;
         }
@@ -813,8 +807,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
   ASSERT_TRUE(vertex_buffer);
 
   bool first_frame = true;
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     const char* mip_filter_names[] = {"Base", "Nearest", "Linear"};
     const MipFilter mip_filters[] = {MipFilter::kBase, MipFilter::kNearest,
@@ -926,8 +919,7 @@ TEST_P(RendererTest, TheImpeller) {
        "table_mountain_pz.png", "table_mountain_nz.png"});
   const std::unique_ptr<const Sampler>& cube_map_sampler =
       context->GetSamplerLibrary()->GetSampler({});
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
 
   SinglePassCallback callback = [&](RenderPass& pass) {
     auto size = pass.GetRenderTargetSize();
@@ -976,8 +968,7 @@ TEST_P(RendererTest, Planet) {
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
 
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
 
   SinglePassCallback callback = [&](RenderPass& pass) {
     static Scalar speed = 0.1;
@@ -1043,8 +1034,7 @@ TEST_P(RendererTest, ArrayUniforms) {
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
 
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   SinglePassCallback callback = [&](RenderPass& pass) {
     auto size = pass.GetRenderTargetSize();
 
@@ -1101,8 +1091,7 @@ TEST_P(RendererTest, InactiveUniforms) {
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
 
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   SinglePassCallback callback = [&](RenderPass& pass) {
     auto size = pass.GetRenderTargetSize();
 
@@ -1267,8 +1256,7 @@ TEST_P(RendererTest, StencilMask) {
   static int current_back_compare =
       CompareFunctionUI().IndexOf(CompareFunction::kLessEqual);
 
-  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                        context->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
@@ -1481,8 +1469,7 @@ TEST_P(RendererTest, CanSepiaToneWithSubpasses) {
   ASSERT_TRUE(sampler);
 
   SinglePassCallback callback = [&](RenderPass& pass) {
-    auto buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                     context->GetIdleWaiter());
+    auto buffer = HostBuffer::Create(context->GetResourceAllocator());
 
     // Draw the texture.
     {
@@ -1575,8 +1562,7 @@ TEST_P(RendererTest, CanSepiaToneThenSwizzleWithSubpasses) {
   ASSERT_TRUE(sampler);
 
   SinglePassCallback callback = [&](RenderPass& pass) {
-    auto buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                     context->GetIdleWaiter());
+    auto buffer = HostBuffer::Create(context->GetResourceAllocator());
 
     // Draw the texture.
     {

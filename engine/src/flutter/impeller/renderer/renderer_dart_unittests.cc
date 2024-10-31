@@ -224,8 +224,7 @@ class RendererDartTest : public PlaygroundTest,
         return false;
       }
 
-      auto buffer = HostBuffer::Create(context->GetResourceAllocator(),
-                                       context->GetIdleWaiter());
+      auto buffer = HostBuffer::Create(context->GetResourceAllocator());
 
       pass.SetVertexBuffer(texture_vtx_builder.CreateVertexBuffer(
           *context->GetResourceAllocator()));

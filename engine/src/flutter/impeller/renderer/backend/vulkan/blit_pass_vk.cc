@@ -248,10 +248,9 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
 
   // cast destination to TextureVK
   const auto& dst = TextureVK::Cast(*destination);
-  const auto& src = DeviceBufferVK::Cast(*source.GetBuffer());
+  const auto& src = DeviceBufferVK::Cast(*source.buffer);
 
-  std::shared_ptr<const DeviceBuffer> source_buffer = source.TakeBuffer();
-  if ((source_buffer && !command_buffer_->Track(source_buffer)) ||
+  if (!command_buffer_->Track(source.buffer) ||
       !command_buffer_->Track(destination)) {
     return false;
   }
@@ -267,7 +266,7 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
                           vk::PipelineStageFlagBits::eTransfer;
 
   vk::BufferImageCopy image_copy;
-  image_copy.setBufferOffset(source.GetRange().offset);
+  image_copy.setBufferOffset(source.range.offset);
   image_copy.setBufferRowLength(0);
   image_copy.setBufferImageHeight(0);
   image_copy.setImageSubresource(vk::ImageSubresourceLayers(
