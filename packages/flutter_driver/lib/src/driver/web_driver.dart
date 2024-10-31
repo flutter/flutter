@@ -16,7 +16,6 @@ import 'package:webdriver/support/async.dart';
 import '../common/error.dart';
 import '../common/message.dart';
 
-import '../common/screenshot.dart';
 import 'common.dart';
 import 'driver.dart';
 import 'timeline.dart';
