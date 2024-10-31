@@ -89,6 +89,7 @@ void main() {
         devtoolsHandler: createNoOpHandler,
         nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
         analytics: fakeAnalytics,
+        useImplicitPubspecResolution: true,
       );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
       expect(result.isOk, true);
@@ -157,6 +158,7 @@ void main() {
         devtoolsHandler: createNoOpHandler,
         nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
         analytics: fakeAnalytics,
+        useImplicitPubspecResolution: true,
       );
       expect(
         () => hotRunner.run(),

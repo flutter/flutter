@@ -122,7 +122,8 @@ void main() {
       final CustomDevice device = CustomDevice(
         config: testConfig,
         processManager: FakeProcessManager.any(),
-        logger: BufferLogger.test()
+        logger: BufferLogger.test(),
+        useImplicitPubspecResolution: true,
       );
 
       final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
@@ -165,7 +166,8 @@ void main() {
         fileSystem: fs,
         directory: dir,
         logger: BufferLogger.test()
-      )
+      ),
+      useImplicitPubspecResolution: true,
     ).devices(), <Device>[]);
   });
 
@@ -183,7 +185,8 @@ void main() {
         fileSystem: fs,
         directory: dir,
         logger: BufferLogger.test()
-      )
+      ),
+      useImplicitPubspecResolution: true,
     ).devices(), <Device>[]);
   });
 
@@ -207,7 +210,8 @@ void main() {
           fileSystem: fs,
           directory: dir,
           logger: BufferLogger.test()
-        )
+        ),
+        useImplicitPubspecResolution: true,
       ).devices(),
       hasLength(1)
     );
@@ -236,6 +240,7 @@ void main() {
         directory: dir,
         logger: BufferLogger.test(),
       ),
+      useImplicitPubspecResolution: true,
     );
 
     final List<Device> discoveredDevices = await discovery.discoverDevices();
@@ -265,6 +270,7 @@ void main() {
         directory: dir,
         logger: BufferLogger.test(),
       ),
+      useImplicitPubspecResolution: true,
     );
 
     expect(await discovery.discoverDevices(), hasLength(0));
@@ -289,6 +295,7 @@ void main() {
         directory: dir,
         logger: BufferLogger.test(),
       ),
+      useImplicitPubspecResolution: true,
     );
 
     expect(await discovery.discoverDevices(), hasLength(0));
@@ -308,6 +315,7 @@ void main() {
       config: testConfig,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
+      useImplicitPubspecResolution: true,
     ).isSupportedForProject(flutterProject), true);
   });
 
@@ -317,12 +325,13 @@ void main() {
       bool bothCommandsWereExecuted = false;
 
       final CustomDevice device = CustomDevice(
-          config: testConfig,
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.list(<FakeCommand>[
-            FakeCommand(command: testConfig.uninstallCommand),
-            FakeCommand(command: testConfig.installCommand, onRun: (_) => bothCommandsWereExecuted = true),
-          ])
+        config: testConfig,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(command: testConfig.uninstallCommand),
+          FakeCommand(command: testConfig.installCommand, onRun: (_) => bothCommandsWereExecuted = true),
+        ]),
+        useImplicitPubspecResolution: true,
       );
 
       expect(await device.installApp(PrebuiltLinuxApp(executable: 'exe')), true);
@@ -384,7 +393,8 @@ void main() {
       device: CustomDevice(
         config: testConfig,
         logger: BufferLogger.test(),
-        processManager: processManager
+        processManager: processManager,
+        useImplicitPubspecResolution: true,
       ),
       appPackage: PrebuiltLinuxApp(executable: 'testexecutable'),
       logger: BufferLogger.test(),
@@ -421,7 +431,8 @@ void main() {
       device: CustomDevice(
         config: testConfigNonForwarding,
         logger: BufferLogger.test(),
-        processManager: processManager
+        processManager: processManager,
+        useImplicitPubspecResolution: true,
       ),
       appPackage: PrebuiltLinuxApp(executable: 'testexecutable'),
       logger: BufferLogger.test(),
@@ -486,7 +497,8 @@ void main() {
           fileSystem: fs,
           directory: configFileDir,
           logger: BufferLogger.test()
-        )
+        ),
+        useImplicitPubspecResolution: true,
       );
 
       final List<Device> devices = await customDevices.discoverDevices();
@@ -535,7 +547,8 @@ void main() {
     final CustomDevice device = CustomDevice(
       config: testConfig,
       logger: BufferLogger.test(),
-      processManager: processManager
+      processManager: processManager,
+      useImplicitPubspecResolution: true,
     );
 
     expect(device.supportsScreenshot, true);
@@ -563,7 +576,8 @@ void main() {
           explicitScreenshotCommand: true
         ),
         logger: BufferLogger.test(),
-        processManager: processManager
+        processManager: processManager,
+      useImplicitPubspecResolution: true,
     );
 
     expect(device.supportsScreenshot, false);
@@ -581,7 +595,8 @@ void main() {
         platform: TargetPlatform.linux_x64
       ),
       logger: BufferLogger.test(),
-      processManager: FakeProcessManager.empty()
+      processManager: FakeProcessManager.empty(),
+      useImplicitPubspecResolution: true,
     );
 
     expect(await device.targetPlatform, TargetPlatform.linux_x64);
@@ -649,6 +664,7 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? assetDirPath,
     Uri? nativeAssets,
     bool buildNativeAssets = true,
+    required bool useImplicitPubspecResolution,
     @visibleForTesting BuildSystem? buildSystem
   }) async {}
 }

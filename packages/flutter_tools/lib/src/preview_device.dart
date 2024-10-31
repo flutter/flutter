@@ -37,12 +37,14 @@ class PreviewDeviceDiscovery extends PollingDeviceDiscovery {
     required Logger logger,
     required ProcessManager processManager,
     required FeatureFlags featureFlags,
+    required bool useImplicitPubspecResolution,
   }) : _artifacts = artifacts,
        _logger = logger,
        _processManager = processManager,
        _fileSystem = fileSystem,
        _platform = platform,
        _features = featureFlags,
+       _useImplicitPubspecResolution = useImplicitPubspecResolution,
        super('Flutter preview device');
 
   final Platform _platform;
@@ -51,6 +53,7 @@ class PreviewDeviceDiscovery extends PollingDeviceDiscovery {
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
   final FeatureFlags _features;
+  final bool _useImplicitPubspecResolution;
 
   @override
   bool get canListAnything => _platform.isWindows;
@@ -75,6 +78,7 @@ class PreviewDeviceDiscovery extends PollingDeviceDiscovery {
       logger: _logger,
       processManager: _processManager,
       previewBinary: previewBinary,
+      useImplicitPubspecResolution: _useImplicitPubspecResolution,
     );
     return <Device>[
       if (_features.isPreviewDeviceEnabled)
@@ -99,6 +103,7 @@ class PreviewDevice extends Device {
     required FileSystem fileSystem,
     required Artifacts artifacts,
     required File previewBinary,
+    required bool useImplicitPubspecResolution,
     @visibleForTesting BundleBuilderFactory builderFactory = _defaultBundleBuilder,
   }) : _previewBinary = previewBinary,
        _processManager = processManager,
@@ -106,6 +111,7 @@ class PreviewDevice extends Device {
        _fileSystem = fileSystem,
        _bundleBuilderFactory = builderFactory,
        _artifacts = artifacts,
+       _useImplicitPubspecResolution = useImplicitPubspecResolution,
        super('preview', ephemeral: false, category: Category.desktop, platformType: PlatformType.windowsPreview);
 
   final ProcessManager _processManager;
@@ -114,6 +120,7 @@ class PreviewDevice extends Device {
   final BundleBuilderFactory _bundleBuilderFactory;
   final Artifacts _artifacts;
   final File _previewBinary;
+  final bool _useImplicitPubspecResolution;
 
   /// The set of plugins that are allowed to be used by Preview users.
   ///
@@ -184,6 +191,7 @@ class PreviewDevice extends Device {
         mainPath: mainPath,
         platform: TargetPlatform.windows_x64,
         assetDirPath: getAssetBuildDirectory(),
+        useImplicitPubspecResolution: _useImplicitPubspecResolution,
       );
       copyDirectory(_fileSystem.directory(
         getAssetBuildDirectory()),
