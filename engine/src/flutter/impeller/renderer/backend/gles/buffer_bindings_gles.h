@@ -34,14 +34,14 @@ class BufferBindingsGLES {
 
   bool BindVertexAttributes(const ProcTableGLES& gl,
                             size_t binding,
-                            size_t vertex_offset) const;
+                            size_t vertex_offset);
 
   bool BindUniformData(const ProcTableGLES& gl,
                        Allocator& transients_allocator,
                        const Bindings& vertex_bindings,
                        const Bindings& fragment_bindings);
 
-  bool UnbindVertexAttributes(const ProcTableGLES& gl) const;
+  bool UnbindVertexAttributes(const ProcTableGLES& gl);
 
  private:
   //----------------------------------------------------------------------------
@@ -61,6 +61,7 @@ class BufferBindingsGLES {
 
   using BindingMap = std::unordered_map<std::string, std::vector<GLint>>;
   BindingMap binding_map_ = {};
+  GLuint vertex_array_object_ = 0;
 
   const std::vector<GLint>& ComputeUniformLocations(
       const ShaderMetadata* metadata);
