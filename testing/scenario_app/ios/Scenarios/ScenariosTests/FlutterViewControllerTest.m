@@ -91,9 +91,7 @@ FLUTTER_ASSERT_ARC
   [rootVC presentViewController:self.flutterViewController animated:NO completion:nil];
 
   CGColorSpaceRef color_space = CGColorSpaceCreateDeviceRGB();
-
-  __block dispatch_block_t callback;
-  callback = ^{
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC), dispatch_get_main_queue(), ^{
     size_t width = 300u;
     CGContextRef context =
         CGBitmapContextCreate(nil, width, width, 8, 4 * width, color_space,
@@ -104,14 +102,8 @@ FLUTTER_ASSERT_ARC
       [imageRendered fulfill];
       return;
     }
-
     CGContextRelease(context);
-
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC), dispatch_get_main_queue(),
-                   callback);
-  };
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC), dispatch_get_main_queue(),
-                 callback);
+  });
 
   [self waitForExpectationsWithTimeout:30.0 handler:nil];
 
