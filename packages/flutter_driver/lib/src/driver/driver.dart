@@ -9,7 +9,9 @@
 /// @docImport 'package:flutter_test/flutter_test.dart';
 library;
 
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vms;
@@ -634,7 +636,7 @@ abstract class FlutterDriver {
   Future<List<int>> screenshot() async {
     await Future<void>.delayed(const Duration(seconds: 2));
     final Map<String, Object?> jsonResponse = await sendCommand(ScreenshotCommand());
-    return jsonResponse['data']! as List<int>;
+    return base64.decode(jsonResponse['data']! as String);
   }
 
   /// Returns the Flags set in the Dart VM as JSON.
