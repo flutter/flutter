@@ -2869,8 +2869,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/115924.
   testWidgets('Default ScaffoldMessenger can access ambient theme', (WidgetTester tester) async {
-    ScaffoldMessengerState? scaffoldMessenger;
-    const Key tapTarget = Key('tap-target');
+    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
     final ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple);
     final ThemeData customTheme = ThemeData(
@@ -2878,31 +2877,15 @@ void main() {
       visualDensity: VisualDensity.comfortable,
     );
 
-    await tester.pumpWidget(MaterialApp(
-      theme: customTheme,
-      home: Scaffold(
-        body: Builder(
-          builder: (BuildContext context) {
-            return GestureDetector(
-              key: tapTarget,
-              onTap: () {
-                scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
-              },
-              behavior: HitTestBehavior.opaque,
-              child: const SizedBox(
-                height: 100.0,
-                width: 100.0,
-              ),
-            );
-          },
-        ),
+    await tester.pumpWidget(
+      MaterialApp(
+        scaffoldMessengerKey: scaffoldMessengerKey,
+        theme: customTheme,
+        home: const SizedBox.shrink(),
       ),
-    ));
+    );
 
-    await tester.tap(find.byKey(tapTarget));
-    await tester.pump();
-
-    final ThemeData messengerTheme = Theme.of(scaffoldMessenger!.context);
+    final ThemeData messengerTheme = Theme.of(scaffoldMessengerKey.currentContext!);
     expect(messengerTheme.colorScheme, colorScheme);
     expect(messengerTheme.visualDensity, VisualDensity.comfortable);
   });
