@@ -87,7 +87,7 @@ Future<Plugin?> _pluginFromPackage(
 }
 
 /// Returns a list of all plugins to be registered with the provided [project].
-/// 
+///
 /// [useImplicitPubspecResolution] defines if legacy rules for traversing the
 /// pub dependencies of a package implies, namely, that if `true`, all plugins
 /// are assumed to be non-dev dependencies. Code that calls [findPlugins] in
@@ -95,17 +95,17 @@ Future<Plugin?> _pluginFromPackage(
 /// plugin uses a specific language or platform can safely pass either `true`
 /// or `false`; however a value of `false` _will_ cause `dart pub deps --json`
 /// to trigger, which in turn could have other side-effects.
-/// 
+///
 /// Please reach out to matanlurey@ if you find you need:
 /// ```dart
 /// useImplicitPubspecResolution: true
 /// ``` 
-/// 
+///
 /// ... in order for your code to function, as that path is being deprecated:
 /// <https://flutter.dev/to/flutter-gen-deprecation>.
-/// 
+///
 /// ---
-/// 
+///
 /// If [throwOnError] is `true`, an empty package configuration is an error.
 Future<List<Plugin>> findPlugins(
   FlutterProject project, {
