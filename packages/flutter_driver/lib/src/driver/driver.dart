@@ -11,7 +11,6 @@ library;
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vms;
