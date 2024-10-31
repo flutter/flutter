@@ -36,7 +36,7 @@ class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
   const GPUSurfaceMetalDelegate* delegate_;
   const MTLRenderTargetType render_target_type_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
-  fml::scoped_nsprotocol<id<MTLTexture>> last_texture_;
+  id<MTLTexture> last_texture_;
   // TODO(38466): Refactor GPU surface APIs take into account the fact that an
   // external view embedder may want to render to the root surface. This is a
   // hack to make avoid allocating resources for the root surface when an
@@ -45,8 +45,8 @@ class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
   bool disable_partial_repaint_ = false;
   // Accumulated damage for each framebuffer; Key is address of underlying
   // MTLTexture for each drawable
-  std::shared_ptr<std::map<uintptr_t, SkIRect>> damage_ =
-      std::make_shared<std::map<uintptr_t, SkIRect>>();
+  std::shared_ptr<std::map<void*, SkIRect>> damage_ =
+      std::make_shared<std::map<void*, SkIRect>>();
 
   // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(

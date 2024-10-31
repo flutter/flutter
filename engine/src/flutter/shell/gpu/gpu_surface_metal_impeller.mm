@@ -18,7 +18,7 @@
 #include "impeller/renderer/backend/metal/surface_mtl.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
-static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
+static_assert(__has_feature(objc_arc), "ARC must be enabled.");
 
 namespace flutter {
 
@@ -80,40 +80,41 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const SkISiz
 
 std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLayer(
     const SkISize& frame_size) {
-  auto layer = delegate_->GetCAMetalLayer(frame_size);
-
+  CAMetalLayer* layer = (__bridge CAMetalLayer*)delegate_->GetCAMetalLayer(frame_size);
   if (!layer) {
     FML_LOG(ERROR) << "Invalid CAMetalLayer given by the embedder.";
     return nullptr;
   }
 
-  auto* mtl_layer = (CAMetalLayer*)layer;
-
-  auto drawable =
-      impeller::SurfaceMTL::GetMetalDrawableAndValidate(aiks_context_->GetContext(), mtl_layer);
+  id<CAMetalDrawable> drawable =
+      impeller::SurfaceMTL::GetMetalDrawableAndValidate(aiks_context_->GetContext(), layer);
   if (!drawable) {
     return nullptr;
   }
   if (Settings::kSurfaceDataAccessible) {
-    last_texture_.reset([drawable.texture retain]);
+    last_texture_ = drawable.texture;
   }
 
 #ifdef IMPELLER_DEBUG
   impeller::ContextMTL::Cast(*aiks_context_->GetContext()).GetCaptureManager()->StartCapture();
 #endif  // IMPELLER_DEBUG
 
-  id<MTLTexture> last_texture = static_cast<id<MTLTexture>>(last_texture_);
-
+  __weak id<MTLTexture> weak_last_texture = last_texture_;
+  __weak CAMetalLayer* weak_layer = layer;
   SurfaceFrame::EncodeCallback encode_callback =
       fml::MakeCopyable([damage = damage_,
                          disable_partial_repaint = disable_partial_repaint_,  //
                          aiks_context = aiks_context_,                        //
                          drawable,                                            //
-                         last_texture,                                        //
-                         mtl_layer                                            //
+                         weak_last_texture,                                   //
+                         weak_layer                                           //
   ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
-        mtl_layer.presentsWithTransaction = surface_frame.submit_info().present_with_transaction;
-
+        id<MTLTexture> strong_last_texture = weak_last_texture;
+        CAMetalLayer* strong_layer = weak_layer;
+        if (!strong_last_texture || !strong_layer) {
+          return false;
+        }
+        strong_layer.presentsWithTransaction = surface_frame.submit_info().present_with_transaction;
         if (!aiks_context) {
           return false;
         }
@@ -125,8 +126,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         }
 
         if (!disable_partial_repaint && damage) {
-          uintptr_t texture = reinterpret_cast<uintptr_t>(last_texture);
-
+          void* texture = (__bridge void*)strong_last_texture;
           for (auto& entry : *damage) {
             if (entry.first != texture) {
               // Accumulate damage for other framebuffers
@@ -192,7 +192,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
   if (!disable_partial_repaint_) {
     // Provide accumulated damage to rasterizer (area in current framebuffer that lags behind
     // front buffer)
-    uintptr_t texture = reinterpret_cast<uintptr_t>(drawable.texture);
+    void* texture = (__bridge void*)drawable.texture;
     auto i = damage_->find(texture);
     if (i != damage_->end()) {
       framebuffer_info.existing_damage = i->second;
@@ -214,31 +214,34 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
 std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTexture(
     const SkISize& frame_size) {
   GPUMTLTextureInfo texture_info = delegate_->GetMTLTexture(frame_size);
-  id<MTLTexture> mtl_texture = (id<MTLTexture>)(texture_info.texture);
-
+  id<MTLTexture> mtl_texture = (__bridge id<MTLTexture>)texture_info.texture;
   if (!mtl_texture) {
     FML_LOG(ERROR) << "Invalid MTLTexture given by the embedder.";
     return nullptr;
   }
 
   if (Settings::kSurfaceDataAccessible) {
-    last_texture_.reset([mtl_texture retain]);
+    last_texture_ = mtl_texture;
   }
 
 #ifdef IMPELLER_DEBUG
   impeller::ContextMTL::Cast(*aiks_context_->GetContext()).GetCaptureManager()->StartCapture();
 #endif  // IMPELLER_DEBUG
 
+  __weak id<MTLTexture> weak_texture = mtl_texture;
   SurfaceFrame::EncodeCallback encode_callback =
       fml::MakeCopyable([disable_partial_repaint = disable_partial_repaint_,  //
                          damage = damage_,
                          aiks_context = aiks_context_,  //
-                         mtl_texture                    //
+                         weak_texture                   //
   ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
+        id<MTLTexture> strong_texture = weak_texture;
+        if (!strong_texture) {
+          return false;
+        }
         if (!aiks_context) {
           return false;
         }
-
         auto display_list = surface_frame.BuildDisplayList();
         if (!display_list) {
           FML_LOG(ERROR) << "Could not build display list for surface frame.";
@@ -246,8 +249,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
         }
 
         if (!disable_partial_repaint && damage) {
-          uintptr_t texture_ptr = reinterpret_cast<uintptr_t>(mtl_texture);
-
+          void* texture_ptr = (__bridge void*)strong_texture;
           for (auto& entry : *damage) {
             if (entry.first != texture_ptr) {
               // Accumulate damage for other framebuffers
@@ -268,7 +270,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
         }
 
         auto surface = impeller::SurfaceMTL::MakeFromTexture(aiks_context->GetContext(),
-                                                             mtl_texture, clip_rect);
+                                                             strong_texture, clip_rect);
 
         surface->PresentWithTransaction(surface_frame.submit_info().present_with_transaction);
 
@@ -308,7 +310,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
   if (!disable_partial_repaint_) {
     // Provide accumulated damage to rasterizer (area in current framebuffer that lags behind
     // front buffer)
-    uintptr_t texture = reinterpret_cast<uintptr_t>(mtl_texture);
+    void* texture = (__bridge void*)mtl_texture;
     auto i = damage_->find(texture);
     if (i != damage_->end()) {
       framebuffer_info.existing_damage = i->second;
@@ -362,7 +364,7 @@ Surface::SurfaceData GPUSurfaceMetalImpeller::GetSurfaceData() const {
   if (!(last_texture_ && [last_texture_ conformsToProtocol:@protocol(MTLTexture)])) {
     return {};
   }
-  id<MTLTexture> texture = last_texture_.get();
+  id<MTLTexture> texture = last_texture_;
   int bytesPerPixel = 0;
   std::string pixel_format;
   switch (texture.pixelFormat) {

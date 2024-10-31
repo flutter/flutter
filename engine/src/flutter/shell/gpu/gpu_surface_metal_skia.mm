@@ -34,7 +34,7 @@
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
 #include "third_party/skia/include/ports/SkCFObject.h"
 
-static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
+static_assert(__has_feature(objc_arc), "ARC must be enabled.");
 
 namespace flutter {
 
@@ -48,7 +48,7 @@ sk_sp<SkSurface> CreateSurfaceFromMetalTexture(GrDirectContext* context,
                                                SkSurfaces::TextureReleaseProc release_proc,
                                                SkSurface::ReleaseContext release_context) {
   GrMtlTextureInfo info;
-  info.fTexture.reset([texture retain]);
+  info.fTexture.retain((__bridge GrMTLHandle)texture);
   GrBackendTexture backend_texture =
       GrBackendTextures::MakeMtl(texture.width, texture.height, skgpu::Mipmapped::kNo, info);
   return SkSurfaces::WrapBackendTexture(context, backend_texture, origin, 1, color_type,
@@ -127,23 +127,20 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrame(const SkISize& f
 
 std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
     const SkISize& frame_info) {
-  auto layer = delegate_->GetCAMetalLayer(frame_info);
+  CAMetalLayer* layer = (__bridge CAMetalLayer*)delegate_->GetCAMetalLayer(frame_info);
   if (!layer) {
     FML_LOG(ERROR) << "Invalid CAMetalLayer given by the embedder.";
     return nullptr;
   }
 
-  auto* mtl_layer = (CAMetalLayer*)layer;
   // Get the drawable eagerly, we will need texture object to identify target framebuffer
-  fml::scoped_nsprotocol<id<CAMetalDrawable>> drawable(
-      reinterpret_cast<id<CAMetalDrawable>>([[mtl_layer nextDrawable] retain]));
-
-  if (!drawable.get()) {
+  id<CAMetalDrawable> drawable = [layer nextDrawable];
+  if (!drawable) {
     FML_LOG(ERROR) << "Could not obtain drawable from the metal layer.";
     return nullptr;
   }
 
-  auto surface = CreateSurfaceFromMetalTexture(context_.get(), drawable.get().texture,
+  auto surface = CreateSurfaceFromMetalTexture(context_.get(), drawable.texture,
                                                kTopLeft_GrSurfaceOrigin,  // origin
                                                kBGRA_8888_SkColorType,    // color type
                                                nullptr,                   // colorspace
@@ -157,9 +154,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
     return nullptr;
   }
 
+  // drawable is a local and needs to be strongly-captured.
   SurfaceFrame::EncodeCallback encode_callback =
-      [this, drawable, mtl_layer](const SurfaceFrame& surface_frame, DlCanvas* canvas) -> bool {
-    mtl_layer.presentsWithTransaction = surface_frame.submit_info().present_with_transaction;
+      [this, drawable, layer](const SurfaceFrame& surface_frame, DlCanvas* canvas) -> bool {
+    layer.presentsWithTransaction = surface_frame.submit_info().present_with_transaction;
     if (canvas == nullptr) {
       FML_DLOG(ERROR) << "Canvas not available.";
       return false;
@@ -171,7 +169,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
     }
 
     if (!disable_partial_repaint_) {
-      uintptr_t texture = reinterpret_cast<uintptr_t>(drawable.get().texture);
+      void* texture = (__bridge void*)drawable.texture;
       for (auto& entry : damage_) {
         if (entry.first != texture) {
           // Accumulate damage for other framebuffers
@@ -187,10 +185,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
     return true;
   };
 
+  // drawable is a local and needs to be strongly-captured.
   SurfaceFrame::SubmitCallback submit_callback =
       [this, drawable](const SurfaceFrame& surface_frame) -> bool {
     TRACE_EVENT0("flutter", "GPUSurfaceMetal::Submit");
-    return delegate_->PresentDrawable(drawable);
+    return delegate_->PresentDrawable((__bridge GrMTLHandle)drawable);
   };
 
   SurfaceFrame::FramebufferInfo framebuffer_info;
@@ -199,7 +198,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
   if (!disable_partial_repaint_) {
     // Provide accumulated damage to rasterizer (area in current framebuffer that lags behind
     // front buffer)
-    uintptr_t texture = reinterpret_cast<uintptr_t>(drawable.get().texture);
+    void* texture = (__bridge void*)drawable.texture;
     auto i = damage_.find(texture);
     if (i != damage_.end()) {
       framebuffer_info.existing_damage = i->second;
@@ -214,7 +213,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
 std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromMTLTexture(
     const SkISize& frame_info) {
   GPUMTLTextureInfo texture = delegate_->GetMTLTexture(frame_info);
-  id<MTLTexture> mtl_texture = (id<MTLTexture>)(texture.texture);
+  id<MTLTexture> mtl_texture = (__bridge id<MTLTexture>)texture.texture;
 
   if (!mtl_texture) {
     FML_LOG(ERROR) << "Invalid MTLTexture given by the embedder.";
