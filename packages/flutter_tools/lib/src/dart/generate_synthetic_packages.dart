@@ -70,9 +70,9 @@ Future<void> generateLocalizationsSyntheticPackage({
   // Log a warning: synthetic-package: true (or implicit true) is deprecated.
   environment.logger.printWarning(
     'Synthetic package output (package:flutter_gen) is deprecated: '
-    'https://flutter.dev/to/flutter-gen-deprecation. In a future release '
-    'synthetic-package will default to `false`, and later support removed '
-    'entirely',
+    'https://flutter.dev/to/flutter-gen-deprecation. In a future release, '
+    'synthetic-package will default to `false` and will later be removed '
+    'entirely.',
   );
 
   final BuildResult result = await buildSystem.build(
