@@ -16,6 +16,7 @@ import 'package:webdriver/support/async.dart';
 import '../common/error.dart';
 import '../common/message.dart';
 
+import '../common/screenshot.dart';
 import 'common.dart';
 import 'driver.dart';
 import 'timeline.dart';
@@ -181,7 +182,8 @@ class WebFlutterDriver extends FlutterDriver {
   }
 
   @override
-  Future<List<int>> screenshot() async {
+  Future<List<int>> screenshot({ScreenshotFormat format = ScreenshotFormat.png}) async {
+    assert(format == ScreenshotFormat.png, 'Web Driver only supports PNG screenshot format');
     await Future<void>.delayed(const Duration(seconds: 2));
 
     return _connection.screenshot();

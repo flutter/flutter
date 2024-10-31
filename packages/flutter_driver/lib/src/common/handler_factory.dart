@@ -356,12 +356,14 @@ mixin CommandHandlerFactory {
   }
 
   Future<ScreenshotResult> _takeScreenshot(Command command) async {
+    final ScreenshotCommand screenshotCommand = command as ScreenshotCommand;
     final RenderView renderView = RendererBinding.instance.renderViews.first;
     // ignore: invalid_use_of_protected_member
     final ContainerLayer? layer = renderView.layer;
     final OffsetLayer offsetLayer = layer! as OffsetLayer;
     final ui.Image image = await offsetLayer.toImage(renderView.paintBounds);
-    final ByteData buffer = (await image.toByteData(format: ui.ImageByteFormat.png))!;
+    final ui.ImageByteFormat format = ui.ImageByteFormat.values[screenshotCommand.format.index];
+    final ByteData buffer = (await image.toByteData(format: format))!;
     return ScreenshotResult(buffer.buffer.asUint8List());
   }
 

@@ -36,6 +36,7 @@ import 'timeline.dart';
 import 'vmservice_driver.dart';
 import 'web_driver.dart';
 
+export '../common/screenshot.dart' show ScreenshotFormat;
 export 'vmservice_driver.dart';
 export 'web_driver.dart';
 
@@ -632,9 +633,9 @@ abstract class FlutterDriver {
   /// In practice, sometimes the device gets really busy for a while and even
   /// two seconds isn't enough, which means that this is still racy and a source
   /// of flakes.
-  Future<List<int>> screenshot() async {
+  Future<List<int>> screenshot({ScreenshotFormat format = ScreenshotFormat.png}) async {
     await Future<void>.delayed(const Duration(seconds: 2));
-    final Map<String, Object?> jsonResponse = await sendCommand(ScreenshotCommand());
+    final Map<String, Object?> jsonResponse = await sendCommand(ScreenshotCommand(format: format));
     return base64.decode(jsonResponse['data']! as String);
   }
 
