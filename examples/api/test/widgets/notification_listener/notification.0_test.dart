@@ -45,7 +45,6 @@ void main() {
       const example.NotificationExampleApp(),
     );
 
-
     final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
     testPointer.hover(tester.getCenter(find.byType(NestedScrollView)));
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 10)));
@@ -71,7 +70,6 @@ void main() {
       const example.NotificationExampleApp(),
     );
 
-
     final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
     testPointer.hover(tester.getCenter(find.byType(NestedScrollView)));
     await tester.sendEventToBinding(testPointer.scroll(const Offset(500, 0)));
@@ -93,7 +91,6 @@ void main() {
         'Scrolling has ended',
       ]),
     );
-
 
     await tester.tap(find.text('Months'));
     await tester.pump();
