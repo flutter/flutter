@@ -183,7 +183,7 @@ class WebFlutterDriver extends FlutterDriver {
   @override
   Future<List<int>> screenshot({ScreenshotFormat format = ScreenshotFormat.png}) async {
     if (format != ScreenshotFormat.png) {
-      throw ArgumentError('Web Driver only supports PNG screenshot format');
+      throw ArgumentError.value(format, 'format', 'Web Driver only supports PNG screenshot format');
     }
     await Future<void>.delayed(const Duration(seconds: 2));
 
