@@ -25,6 +25,13 @@ import 'image.dart';
 ///
 /// Commonly used with [BoxDecoration].
 ///
+///
+/// {@tool dartpad}
+/// This sample shows a radial gradient that draws a moon on a night sky:
+///
+/// ** See code in examples/api/lib/widgets/sliver/decorated_sliver.0.dart **
+/// {@end-tool}
+///
 /// [clipBehavior] is set by parent [Widget], which is often a
 /// scrollable [Widget] such as [CustomScrollView]
 /// where [clipBehavior] defaults to [Clip.hardEdge].
@@ -38,9 +45,10 @@ import 'image.dart';
 /// particular [ShapeDecoration], consider using a [ClipPath] widget.
 ///
 /// {@tool dartpad}
-/// This sample shows a radial gradient that draws a moon on a night sky:
+/// This example show [DecoratedSliver] behavior,
+/// a child of unclipped [CustomScrollView] :
 ///
-/// ** See code in examples/api/lib/widgets/sliver/decorated_sliver.0.dart **
+/// ** See code in examples/api/lib/widgets/sliver/decorated_sliver.1.dart **
 /// {@end-tool}
 ///
 /// See also:
