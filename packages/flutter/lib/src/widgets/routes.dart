@@ -355,7 +355,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
       _controller!.reverse();
     } else {
       _simulation = createSimulation(end: _controller!.lowerBound);
-      _controller!.animateWith(_simulation!, isReverse: true);
+      _controller!.animateBackWith(_simulation!);
     }
     return super.didPop(result);
   }

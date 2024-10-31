@@ -1062,12 +1062,16 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 
 // The stiffness used by dialogs and action sheets.
 //
-// Derived by dumping description of [CASpringAnimation] from XCode.
+// The stiffness value is obtained by examining the properties of
+// [CASpringAnimation] in Xcode.  The damping value is derived similarly, with
+// additional precision calculated based on `_kStandardStiffness` to ensure a
+// critical damping ratio of 1 (critically damped).
 const double _kStandardStiffness = 522.35;
-const SpringDescription _kStandardSpring = SpringDescription.withDampingRatio(
+const double _kStandardDamping = 45.7099552;
+const SpringDescription _kStandardSpring = SpringDescription(
   mass: 1,
   stiffness: _kStandardStiffness,
-  ratio: 1,
+  damping: _kStandardDamping,
 );
 
 /// A route that shows a modal iOS-style popup that slides up from the
@@ -1163,7 +1167,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Simulation createSimulation({required double end}) {
     assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
-    return SpringSimulation(_createIosSpring(), controller!.value, end, 0);
+    return SpringSimulation(_kStandardSpring, controller!.value, end, 0);
   }
 
   @override

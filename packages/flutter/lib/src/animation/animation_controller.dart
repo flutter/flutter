@@ -812,18 +812,51 @@ class AnimationController extends Animation<double>
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
   ///
-  /// The [status] will be [AnimationStatus.forward] or
-  /// [AnimationStatus.reverse] for the entire duration of the simulation
-  /// depending on `isReverse`, which affects the reported status when the
-  /// animation is completed.
-  TickerFuture animateWith(Simulation simulation, {bool isReverse = false}) {
+  /// The [status] is always [AnimationStatus.forward] for the entire duration
+  /// of the simulation.
+  ///
+  /// See also:
+  ///
+  ///  * [animateBackWith], which is like this method but the status is always
+  ///    [AnimationStatus.reverse].
+  TickerFuture animateWith(Simulation simulation) {
     assert(
       _ticker != null,
       'AnimationController.animateWith() called after AnimationController.dispose()\n'
       'AnimationController methods should not be used after calling dispose.',
     );
     stop();
-    _direction = isReverse ? _AnimationDirection.reverse : _AnimationDirection.forward;
+    _direction = _AnimationDirection.forward;
+    return _startSimulation(simulation);
+  }
+
+  /// Drives the animation according to the given simulation.
+  ///
+  /// The values from the simulation are clamped to the [lowerBound] and
+  /// [upperBound]. To avoid this, consider creating the [AnimationController]
+  /// using the [AnimationController.unbounded] constructor.
+  ///
+  /// Returns a [TickerFuture] that completes when the animation is complete.
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
+  ///
+  /// The [status] is always [AnimationStatus.reverse] for the entire duration
+  /// of the simulation.
+  ///
+  /// See also:
+  ///
+  ///  * [animateWith], which is like this method but the status is always
+  ///    [AnimationStatus.forward].
+  TickerFuture animateBackWith(Simulation simulation) {
+    assert(
+      _ticker != null,
+      'AnimationController.animateWith() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.',
+    );
+    stop();
+    _direction = _AnimationDirection.reverse;
     return _startSimulation(simulation);
   }
 
