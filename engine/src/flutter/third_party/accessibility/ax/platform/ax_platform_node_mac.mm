@@ -28,8 +28,8 @@ using EventMap = std::map<ax::mojom::Event, NSString*>;
 using ActionList = std::vector<std::pair<ax::mojom::Action, NSString*>>;
 
 struct AnnouncementSpec {
-  base::scoped_nsobject<NSString> announcement;
-  base::scoped_nsobject<NSWindow> window;
+  NSString* announcement;
+  NSWindow* window;
   bool is_polite;
 };
 
@@ -434,8 +434,8 @@ bool AlsoUseShowMenuActionForDefaultAction(const ui::AXNodeData& data) {
     return nullptr;
 
   auto announcement = std::make_unique<AnnouncementSpec>();
-  announcement->announcement = base::scoped_nsobject<NSString>([announcementText retain]);
-  announcement->window = base::scoped_nsobject<NSWindow>([[self AXWindowInternal] retain]);
+  announcement->announcement = announcementText;
+  announcement->window = [self AXWindowInternal];
   announcement->is_polite = liveStatus != "assertive";
   return announcement;
 }
@@ -498,7 +498,7 @@ bool AlsoUseShowMenuActionForDefaultAction(const ui::AXNodeData& data) {
   if (!_node)
     return @[];
 
-  base::scoped_nsobject<NSMutableArray> axActions([[NSMutableArray alloc] init]);
+  NSMutableArray* axActions = [[NSMutableArray alloc] init];
 
   const ui::AXNodeData& data = _node->GetData();
   const ActionList& action_list = GetActionList();
@@ -514,7 +514,7 @@ bool AlsoUseShowMenuActionForDefaultAction(const ui::AXNodeData& data) {
   if (AlsoUseShowMenuActionForDefaultAction(data))
     [axActions addObject:NSAccessibilityShowMenuAction];
 
-  return axActions.autorelease();
+  return axActions;
 }
 
 - (void)accessibilityPerformAction:(NSString*)action {
@@ -834,8 +834,7 @@ bool AlsoUseShowMenuActionForDefaultAction(const ui::AXNodeData& data) {
   // accessibility clients from trying to set the selection range, which won't
   // work because of 692362.
   if (selector == @selector(setAccessibilitySelectedText:) ||
-      selector == @selector(setAccessibilitySelectedTextRange:) ||
-      selector == @selector(setAccessibilitySelectedTextMarkerRange:)) {
+      selector == @selector(setAccessibilitySelectedTextRange:)) {
     return restriction != ax::mojom::Restriction::kReadOnly;
   }
 
@@ -973,9 +972,7 @@ bool AlsoUseShowMenuActionForDefaultAction(const ui::AXNodeData& data) {
   if (!_node)
     return nil;
   // TODO(https://crbug.com/958811): Implement this for real.
-  base::scoped_nsobject<NSAttributedString> attributedString(
-      [[NSAttributedString alloc] initWithString:[self accessibilityStringForRange:range]]);
-  return attributedString.autorelease();
+  return [[NSAttributedString alloc] initWithString:[self accessibilityStringForRange:range]];
 }
 
 - (NSData*)accessibilityRTFForRange:(NSRange)range {
@@ -1085,8 +1082,8 @@ bool AXPlatformNodeMac::IsPlatformCheckable() const {
 
 gfx::NativeViewAccessible AXPlatformNodeMac::GetNativeViewAccessible() {
   if (!native_node_)
-    native_node_.reset([[AXPlatformNodeCocoa alloc] initWithNode:this]);
-  return native_node_.get();
+    native_node_ = [[AXPlatformNodeCocoa alloc] initWithNode:this];
+  return native_node_;
 }
 
 void AXPlatformNodeMac::NotifyAccessibilityEvent(ax::mojom::Event event_type) {
