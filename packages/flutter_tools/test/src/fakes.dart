@@ -23,7 +23,6 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:test/fake.dart';
 
 /// Environment with DYLD_LIBRARY_PATH=/path/to/libraries

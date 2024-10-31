@@ -18,13 +18,13 @@ import 'vmservice.dart';
 import 'web/chrome.dart';
 
 typedef ResidentDevtoolsHandlerFactory = ResidentDevtoolsHandler Function(
-    DevtoolsLauncher?, ResidentRunner, Logger, ChromiumLauncher?);
+    DevtoolsLauncher?, ResidentRunner, Logger, ChromiumLauncher);
 
 ResidentDevtoolsHandler createDefaultHandler(
   DevtoolsLauncher? launcher,
   ResidentRunner runner,
   Logger logger,
-  ChromiumLauncher? chromiumLauncher,
+  ChromiumLauncher chromiumLauncher,
 ) {
   return FlutterResidentDevtoolsHandler(
       launcher, runner, logger, chromiumLauncher);
