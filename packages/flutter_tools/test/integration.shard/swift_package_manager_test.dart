@@ -59,21 +59,21 @@ void main() {
           );
           expect(
             fileSystem
-                .directory(appDirectoryPath)
-                .childDirectory(platformName)
-                .childFile('Podfile')
-                .existsSync(),
+              .directory(appDirectoryPath)
+              .childDirectory(platformName)
+              .childFile('Podfile')
+              .existsSync(),
             isTrue,
           );
           expect(
             fileSystem
-                .directory(appDirectoryPath)
-                .childDirectory(platformName)
-                .childDirectory('Flutter')
-                .childDirectory('ephemeral')
-                .childDirectory('Packages')
-                .childDirectory('FlutterGeneratedPluginSwiftPackage')
-                .existsSync(),
+              .directory(appDirectoryPath)
+              .childDirectory(platformName)
+              .childDirectory('Flutter')
+              .childDirectory('ephemeral')
+              .childDirectory('Packages')
+              .childDirectory('FlutterGeneratedPluginSwiftPackage')
+              .existsSync(),
             isFalse,
           );
 
@@ -109,21 +109,21 @@ void main() {
 
           expect(
             fileSystem
-                .directory(appDirectoryPath)
-                .childDirectory(platformName)
-                .childFile('Podfile')
-                .existsSync(),
+              .directory(appDirectoryPath)
+              .childDirectory(platformName)
+              .childFile('Podfile')
+              .existsSync(),
             isTrue,
           );
           expect(
             fileSystem
-                .directory(appDirectoryPath)
-                .childDirectory(platformName)
-                .childDirectory('Flutter')
-                .childDirectory('ephemeral')
-                .childDirectory('Packages')
-                .childDirectory('FlutterGeneratedPluginSwiftPackage')
-                .existsSync(),
+              .directory(appDirectoryPath)
+              .childDirectory(platformName)
+              .childDirectory('Flutter')
+              .childDirectory('ephemeral')
+              .childDirectory('Packages')
+              .childDirectory('FlutterGeneratedPluginSwiftPackage')
+              .existsSync(),
             isTrue,
           );
 
@@ -154,21 +154,21 @@ void main() {
 
           expect(
             fileSystem
-                .directory(appDirectoryPath)
-                .childDirectory(platformName)
-                .childFile('Podfile')
-                .existsSync(),
+              .directory(appDirectoryPath)
+              .childDirectory(platformName)
+              .childFile('Podfile')
+              .existsSync(),
             isTrue,
           );
           expect(
             fileSystem
-                .directory(appDirectoryPath)
-                .childDirectory(platformName)
-                .childDirectory('Flutter')
-                .childDirectory('ephemeral')
-                .childDirectory('Packages')
-                .childDirectory('FlutterGeneratedPluginSwiftPackage')
-                .existsSync(),
+              .directory(appDirectoryPath)
+              .childDirectory(platformName)
+              .childDirectory('Flutter')
+              .childDirectory('ephemeral')
+              .childDirectory('Packages')
+              .childDirectory('FlutterGeneratedPluginSwiftPackage')
+              .existsSync(),
             isTrue,
           );
 
@@ -249,21 +249,21 @@ void main() {
 
         expect(
           fileSystem
-              .directory(appDirectoryPath)
-              .childDirectory(platformName)
-              .childFile('Podfile')
-              .existsSync(),
+            .directory(appDirectoryPath)
+            .childDirectory(platformName)
+            .childFile('Podfile')
+            .existsSync(),
           isFalse,
         );
         expect(
           fileSystem
-              .directory(appDirectoryPath)
-              .childDirectory(platformName)
-              .childDirectory('Flutter')
-              .childDirectory('ephemeral')
-              .childDirectory('Packages')
-              .childDirectory('FlutterGeneratedPluginSwiftPackage')
-              .existsSync(),
+            .directory(appDirectoryPath)
+            .childDirectory(platformName)
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('FlutterGeneratedPluginSwiftPackage')
+            .existsSync(),
           isTrue,
         );
 
@@ -285,13 +285,13 @@ void main() {
 
         expect(
           fileSystem
-              .directory(appDirectoryPath)
-              .childDirectory('build')
-              .childDirectory(platformName)
-              .childDirectory('framework')
-              .childDirectory('Release')
-              .childDirectory('${integrationTestPlugin.pluginName}.xcframework')
-              .existsSync(),
+            .directory(appDirectoryPath)
+            .childDirectory('build')
+            .childDirectory(platformName)
+            .childDirectory('framework')
+            .childDirectory('Release')
+            .childDirectory('${integrationTestPlugin.pluginName}.xcframework')
+            .existsSync(),
           isTrue,
         );
       } finally {
@@ -305,71 +305,71 @@ void main() {
 
     test('Caches build targets between builds with Swift Package Manager on $platformName', () async {
       final Directory workingDirectory = fileSystem.systemTempDirectory
-            .createTempSync('swift_package_manager_caching.');
-        final String workingDirectoryPath = workingDirectory.path;
-        try {
-          // Create and build an app using the Swift Package Manager version of
-          // integration_test.
-          await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+        .createTempSync('swift_package_manager_caching.');
+      final String workingDirectoryPath = workingDirectory.path;
+      try {
+        // Create and build an app using the Swift Package Manager version of
+        // integration_test.
+        await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
 
-          final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
-            flutterBin,
-            workingDirectoryPath,
-            iosLanguage: 'swift',
-            platform: platformName,
-            usesSwiftPackageManager: true,
-            options: <String>['--platforms=$platformName'],
-          );
-          SwiftPackageManagerUtils.addDependency(appDirectoryPath: appDirectoryPath, plugin: integrationTestPlugin);
+        final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+          flutterBin,
+          workingDirectoryPath,
+          iosLanguage: 'swift',
+          platform: platformName,
+          usesSwiftPackageManager: true,
+          options: <String>['--platforms=$platformName'],
+        );
+        SwiftPackageManagerUtils.addDependency(appDirectoryPath: appDirectoryPath, plugin: integrationTestPlugin);
 
-          final String unpackTarget = 'debug_unpack_$platformName';
-          final String bundleFlutterAssetsTarget = 'debug_${platformName}_bundle_flutter_assets';
-          final bool noCodesign = platformName == 'ios';
-          await SwiftPackageManagerUtils.buildApp(
-            flutterBin,
-            appDirectoryPath,
-            options: <String>[
-              platformName,
-              '--debug',
-              '-v',
-              if (noCodesign)
-                '--no-codesign',
-            ],
-            expectedLines: <Pattern>[
-              r'SchemeAction Run\ Prepare\ Flutter\ Framework\ Script',
-              '$unpackTarget: Starting due to',
-              '-dPreBuildAction=PrepareFramework $unpackTarget',
-            ],
-            unexpectedLines: <String>[],
-          );
+        final String unpackTarget = 'debug_unpack_$platformName';
+        final String bundleFlutterAssetsTarget = 'debug_${platformName}_bundle_flutter_assets';
+        final bool noCodesign = platformName == 'ios';
+        await SwiftPackageManagerUtils.buildApp(
+          flutterBin,
+          appDirectoryPath,
+          options: <String>[
+            platformName,
+            '--debug',
+            '-v',
+            if (noCodesign)
+              '--no-codesign',
+          ],
+          expectedLines: <Pattern>[
+            r'SchemeAction Run\ Prepare\ Flutter\ Framework\ Script',
+            '$unpackTarget: Starting due to',
+            '-dPreBuildAction=PrepareFramework $unpackTarget',
+          ],
+          unexpectedLines: <String>[],
+        );
 
-          await SwiftPackageManagerUtils.buildApp(
-            flutterBin,
-            appDirectoryPath,
-            options: <String>[
-              platformName,
-              '--debug',
-              '-v',
-              if (noCodesign)
-                '--no-codesign',
-            ],
-            expectedLines: <Pattern>[
-              r'SchemeAction Run\ Prepare\ Flutter\ Framework\ Script',
-              'Skipping target: $unpackTarget',
-              'Skipping target: $bundleFlutterAssetsTarget',
-            ],
-            unexpectedLines: <String>[
-              'Starting due to',
-            ],
-          );
+        await SwiftPackageManagerUtils.buildApp(
+          flutterBin,
+          appDirectoryPath,
+          options: <String>[
+            platformName,
+            '--debug',
+            '-v',
+            if (noCodesign)
+              '--no-codesign',
+          ],
+          expectedLines: <Pattern>[
+            r'SchemeAction Run\ Prepare\ Flutter\ Framework\ Script',
+            'Skipping target: $unpackTarget',
+            'Skipping target: $bundleFlutterAssetsTarget',
+          ],
+          unexpectedLines: <String>[
+            'Starting due to',
+          ],
+        );
 
-        } finally {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
-          ErrorHandlingFileSystem.deleteIfExists(
-            workingDirectory,
-            recursive: true,
-          );
-        }
+      } finally {
+        await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+        ErrorHandlingFileSystem.deleteIfExists(
+          workingDirectory,
+          recursive: true,
+        );
+      }
     }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
   }
 
@@ -409,36 +409,36 @@ void main() {
       );
       expect(
         fileSystem
-            .directory(appDirectoryPath)
-            .childDirectory('.ios')
-            .childDirectory('Flutter')
-            .childDirectory('ephemeral')
-            .childDirectory('Packages')
-            .childDirectory('FlutterGeneratedPluginSwiftPackage')
-            .existsSync(),
+          .directory(appDirectoryPath)
+          .childDirectory('.ios')
+          .childDirectory('Flutter')
+          .childDirectory('ephemeral')
+          .childDirectory('Packages')
+          .childDirectory('FlutterGeneratedPluginSwiftPackage')
+          .existsSync(),
         isFalse,
       );
       final File pbxprojFile = fileSystem
-          .directory(appDirectoryPath)
-          .childDirectory('.ios')
-          .childDirectory('Runner.xcodeproj')
-          .childFile('project.pbxproj');
+        .directory(appDirectoryPath)
+        .childDirectory('.ios')
+        .childDirectory('Runner.xcodeproj')
+        .childFile('project.pbxproj');
       expect(pbxprojFile.existsSync(), isTrue);
       expect(
-        pbxprojFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage'),
-        isFalse,
+        pbxprojFile.readAsStringSync(),
+        isNot(contains('FlutterGeneratedPluginSwiftPackage')),
       );
       final File xcschemeFile = fileSystem
-          .directory(appDirectoryPath)
-          .childDirectory('.ios')
-          .childDirectory('Runner.xcodeproj')
-          .childDirectory('xcshareddata')
-          .childDirectory('xcschemes')
-          .childFile('Runner.xcscheme');
+        .directory(appDirectoryPath)
+        .childDirectory('.ios')
+        .childDirectory('Runner.xcodeproj')
+        .childDirectory('xcshareddata')
+        .childDirectory('xcschemes')
+        .childFile('Runner.xcscheme');
       expect(xcschemeFile.existsSync(), isTrue);
       expect(
-        xcschemeFile.readAsStringSync().contains('Run Prepare Flutter Framework Script'),
-        isFalse,
+        xcschemeFile.readAsStringSync(),
+        isNot(contains('Run Prepare Flutter Framework Script')),
       );
 
       await SwiftPackageManagerUtils.buildApp(
@@ -458,13 +458,13 @@ void main() {
 
       expect(
         fileSystem
-            .directory(appDirectoryPath)
-            .childDirectory('build')
-            .childDirectory('ios')
-            .childDirectory('framework')
-            .childDirectory('Release')
-            .childDirectory('${integrationTestPlugin.pluginName}.xcframework')
-            .existsSync(),
+          .directory(appDirectoryPath)
+          .childDirectory('build')
+          .childDirectory('ios')
+          .childDirectory('framework')
+          .childDirectory('Release')
+          .childDirectory('${integrationTestPlugin.pluginName}.xcframework')
+          .existsSync(),
         isTrue,
       );
     } finally {
@@ -478,7 +478,7 @@ void main() {
 
   test('Build ios-framework with non module app uses CocoaPods', () async {
     final Directory workingDirectory = fileSystem.systemTempDirectory
-        .createTempSync('swift_package_manager_build_framework_non_module.');
+      .createTempSync('swift_package_manager_build_framework_non_module.');
     final String workingDirectoryPath = workingDirectory.path;
     try {
       // Create and build a regular app and framework using the CocoaPods version of
@@ -540,13 +540,13 @@ void main() {
 
       expect(
         fileSystem
-            .directory(appDirectoryPath)
-            .childDirectory('build')
-            .childDirectory('ios')
-            .childDirectory('framework')
-            .childDirectory('Release')
-            .childDirectory('${integrationTestPlugin.pluginName}.xcframework')
-            .existsSync(),
+          .directory(appDirectoryPath)
+          .childDirectory('build')
+          .childDirectory('ios')
+          .childDirectory('framework')
+          .childDirectory('Release')
+          .childDirectory('${integrationTestPlugin.pluginName}.xcframework')
+          .existsSync(),
         isTrue,
       );
 
@@ -694,7 +694,7 @@ void main() {
     ],
 ''';
 
-      expect(generatedManifest.contains(expected), isTrue);
+      expect(generatedManifest, contains(expected));
     } finally {
       await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
       ErrorHandlingFileSystem.deleteIfExists(
@@ -778,8 +778,8 @@ void main() {
       generatedManifest = generatedManifestFile.readAsStringSync();
       const String emptyDependencies = 'dependencies: [\n        \n    ],\n';
 
-      expect(generatedManifest.contains(generatedSwiftDependency), isFalse);
-      expect(generatedManifest.contains(emptyDependencies), isTrue);
+      expect(generatedManifest, isNot(contains(generatedSwiftDependency)));
+      expect(generatedManifest, contains(emptyDependencies));
     } finally {
       await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
       ErrorHandlingFileSystem.deleteIfExists(
@@ -859,8 +859,8 @@ void main() {
     ],
 ''';
 
-      expect(xcodeProject.contains('FlutterGeneratedPluginSwiftPackage'), isTrue);
-      expect(generatedManifest.contains(generatedSwiftDependency), isTrue);
+      expect(xcodeProject, contains('FlutterGeneratedPluginSwiftPackage'));
+      expect(generatedManifest, contains(generatedSwiftDependency));
 
       // Disable Swift Package Manager and do a clean re-build of the app.
       // The build should succeed.
@@ -886,9 +886,9 @@ void main() {
       generatedManifest = generatedManifestFile.readAsStringSync();
       const String emptyDependencies = 'dependencies: [\n        \n    ],\n';
 
-      expect(xcodeProject.contains('FlutterGeneratedPluginSwiftPackage'), isTrue);
-      expect(generatedManifest.contains('integration_test'), isFalse);
-      expect(generatedManifest.contains(emptyDependencies), isTrue);
+      expect(xcodeProject, contains('FlutterGeneratedPluginSwiftPackage'));
+      expect(generatedManifest, isNot(contains('integration_test')));
+      expect(generatedManifest, contains(emptyDependencies));
       expect(cocoaPodsPluginFramework.existsSync(), isTrue);
     } finally {
       await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
