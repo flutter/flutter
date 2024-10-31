@@ -340,6 +340,7 @@ class FlutterProject {
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,
+    required bool writeLegacyPluginsList,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
@@ -352,6 +353,7 @@ class FlutterProject {
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
       allowedPlugins: allowedPlugins,
+      writeLegacyPluginsList: writeLegacyPluginsList,
     );
   }
 
@@ -366,11 +368,17 @@ class FlutterProject {
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,
+    required bool writeLegacyPluginsList,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;
     }
-    await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
+    await refreshPluginsList(
+      this,
+      iosPlatform: iosPlatform,
+      macOSPlatform: macOSPlatform,
+      writeLegacyPluginsList: writeLegacyPluginsList,
+    );
     if (androidPlatform) {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
