@@ -1213,7 +1213,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This value is not exposed to the users of the app.
   ///
   /// It's usually used for UI testing with tools that work by querying the
-  /// native accessibility, like UIAutomator, XCUITest, or Appium.
+  /// native accessibility, like UIAutomator, XCUITest, or Appium. It can be
+  /// matched with [CommonFinders.bySemanticsIdentifier].
   ///
   /// On Android, this is used for `AccessibilityNodeInfo.setViewIdResourceName`.
   /// It'll be appear in accessibility hierarchy as `resource-id`.
@@ -4671,6 +4672,7 @@ class SemanticsConfiguration {
   /// in which case it will not be flagged as selected.
   bool get isSelected => _hasFlag(SemanticsFlag.isSelected);
   set isSelected(bool value) {
+    _setFlag(SemanticsFlag.hasSelectedState, true);
     _setFlag(SemanticsFlag.isSelected, value);
   }
 

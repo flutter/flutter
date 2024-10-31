@@ -2285,6 +2285,66 @@ void main() {
       expect(opened, isEmpty);
       expect(closed, isNotEmpty);
     });
+
+    // Regression test for
+    // https://github.com/flutter/flutter/issues/119532#issuecomment-2274705565.
+    testWidgets('Shortcuts of MenuAnchor do not rely on WidgetsApp.shortcuts', (WidgetTester tester) async {
+      // MenuAnchor used to rely on WidgetsApp.shortcuts for menu navigation,
+      // which is a problem for Web because the Web uses a special set of
+      // default shortcuts that define arrow keys as scrolling instead of
+      // traversing, and therefore arrow keys won't enter submenus when the
+      // focus is on MenuAnchor.
+      //
+      // This test verifies that `MenuAnchor`'s shortcuts continues to work even
+      // when `WidgetsApp.shortcuts` contains nothing.
+
+      final FocusNode childNode = FocusNode(debugLabel: 'Dropdown Inkwell');
+      addTearDown(childNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          // Clear WidgetsApp.shortcuts to make sure MenuAnchor doesn't rely on
+          // it.
+          shortcuts: const <ShortcutActivator, Intent>{},
+          home: Scaffold(
+            body: MenuAnchor(
+              childFocusNode: childNode,
+              menuChildren: List<Widget>.generate(3, (int i) =>
+                MenuItemButton(
+                  child: Text('Submenu item $i'),
+                  onPressed: () {},
+                )
+              ),
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return InkWell(
+                  focusNode: childNode,
+                  onTap: controller.open,
+                  child: const Text('Main button'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      // Open the drop down menu and focus on the MenuAnchor.
+      await tester.tap(find.text('Main button'));
+      await tester.pumpAndSettle();
+      expect(find.text('Submenu item 0'), findsOneWidget);
+
+      // Press arrowDown, and the first submenu button should be focused.
+      // This is the critical part. It used to not work on Web.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Submenu item 0"))'));
+
+      // Press arrowDown, and the second submenu button should be focused.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Submenu item 1"))'));
+    });
   });
 
   group('Accelerators', () {
@@ -4513,7 +4573,8 @@ void main() {
       });
 
       expect(state.target, isNull);
-    }, skip: kIsWeb // [intended] ForceGC does not work in web and in release mode. See https://api.flutter.dev/flutter/package-leak_tracker_leak_tracker/forceGC.html
+    }, skip: true // Skipped for everyone else: forceGC is flaky, see https://github.com/flutter/flutter/issues/154858
+    // Skipped on Web: [intended] ForceGC does not work in web and in release mode. See https://api.flutter.dev/flutter/package-leak_tracker_leak_tracker/forceGC.html
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/154798.
@@ -4606,12 +4667,18 @@ void main() {
       return results;
     }
 
+    late final OverlayEntry overlayEntry;
+    addTearDown((){
+      overlayEntry.remove();
+      overlayEntry.dispose();
+    });
+
     Widget boilerplate() {
       return MaterialApp(
         home: Overlay(
           key: overlayKey,
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            overlayEntry = OverlayEntry(
               builder: (BuildContext context) {
                 return Scaffold(
                   body: Center(
@@ -4656,6 +4723,76 @@ void main() {
       ancestorRenderTheaters(tester.renderObject(find.byKey(menuItemKey))).single,
       tester.renderObject(find.byWidget(rootOverlay)),
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/156572.
+  testWidgets('Unattached MenuController does not throw when calling close', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    controller.close();
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Unattached MenuController returns false when calling isOpen', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    expect(controller.isOpen, false);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/157606.
+  testWidgets('MenuAnchor updates isOpen state correctly', (WidgetTester tester) async {
+    bool isOpen = false;
+    int openCount = 0;
+    int closeCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: MenuAnchor(
+              menuChildren: const <Widget>[
+                MenuItemButton(child: Text('menu item')),
+              ],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                isOpen = controller.isOpen;
+                return FilledButton(
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: Text(isOpen ? 'close' : 'open'),
+                );
+              },
+              onOpen: () => openCount++,
+              onClose: () => closeCount++,
+            ),
+          ),
+        ),
+      )
+    );
+
+    expect(find.text('open'), findsOneWidget);
+    expect(isOpen, false);
+    expect(openCount, 0);
+    expect(closeCount, 0);
+
+    await tester.tap(find.byType(FilledButton));
+    await tester.pump();
+
+    expect(find.text('close'), findsOneWidget);
+    expect(isOpen, true);
+    expect(openCount, 1);
+    expect(closeCount, 0);
+
+    await tester.tap(find.byType(FilledButton));
+    await tester.pump();
+
+    expect(find.text('open'), findsOneWidget);
+    expect(isOpen, false);
+    expect(openCount, 1);
+    expect(closeCount, 1);
   });
 }
 

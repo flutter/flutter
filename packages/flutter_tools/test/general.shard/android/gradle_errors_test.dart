@@ -51,6 +51,7 @@ void main() {
           remoteTerminatedHandshakeHandler,
           couldNotOpenCacheDirectoryHandler,
           incompatibleCompileSdk35AndAgpVersionHandler,
+          jlinkErrorWithJava21AndSourceCompatibility,
           incompatibleKotlinVersionHandler,
         ])
       );
@@ -917,7 +918,7 @@ A problem occurred evaluating project ':app'.
           "│     + classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'                           │\n"
           '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
           '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
-          '│     + https://services.gradle.org/distributions/gradle-$templateDefaultGradleVersion-all.zip               │\n'
+          '│     + https://services.gradle.org/distributions/gradle-$templateDefaultGradleVersion-all.zip            │\n'
           '└──────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -1314,10 +1315,11 @@ Execution failed for task ':app:bundleReleaseResources'.
                     '│  Please upgrade to a newer AGP version. The version of AGP that your project uses is likely      │\n'
                     '│  defined in:                                                                                     │\n'
                     '│ /android/settings.gradle,                                                                        │\n'
-                    "│ in the 'plugins' closure.                                                                        │\n"
+                    '│ in the \'plugins\' closure (by the number following "com.android.application").                    │\n'
                     '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
                     '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
-                    '│ /android/build.gradle.                                                                           │\n'
+                    '│ /android/build.gradle,                                                                           │\n'
+                    '│ as the number following "com.android.tools.build:gradle:".                                       │\n'
                     '│                                                                                                  │\n'
                     '│  Finally, if you have a strong reason to avoid upgrading AGP, you can temporarily lower the      │\n'
                     '│  compileSdk version in the following file:                                                       │\n'
@@ -1355,14 +1357,63 @@ ERROR:/Users/mackall/.gradle/caches/transforms-3/bd2c84591857c6d4c308221ffece862
                 '│                                                                                                  │\n'
                 '│  The version of AGP that your project uses is likely defined in:                                 │\n'
                 '│ /android/settings.gradle,                                                                        │\n'
-                "│ in the 'plugins' closure.                                                                        │\n"
+                '│ in the \'plugins\' closure (by the number following "com.android.application").                    │\n'
                 '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
                 '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
-                '│ /android/build.gradle.                                                                           │\n'
+                '│ /android/build.gradle,                                                                           │\n'
+                '│ as the number following "com.android.tools.build:gradle:".                                       │\n'
                 '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
                 ''
         )
     );
+  }, overrides: <Type, Generator>{
+    GradleUtils: () => FakeGradleUtils(),
+    Platform: () => fakePlatform('android'),
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('Java 21 and jlink bug', () async {
+    const String errorExample = r'''
+* What went wrong:
+Execution failed for task ':shared_preferences_android:compileReleaseJavaWithJavac'.
+> Could not resolve all files for configuration ':shared_preferences_android:androidJdkImage'.
+   > Failed to transform core-for-system-modules.jar to match attributes {artifactType=_internal_android_jdk_image, org.gradle.libraryelements=jar, org.gradle.usage=java-runtime}.
+      > Execution failed for JdkImageTransform: /Users/mackall/Library/Android/sdk/platforms/android-34/core-for-system-modules.jar.
+         > Error while executing process /Users/mackall/Desktop/JDKs/21/jdk-21.0.2.jdk/Contents/Home/bin/jlink with arguments {--module-path /Users/mackall/.gradle/caches/8.9/transforms/2890fec03da42154757073d3208548e5-79660961-f91d-4df2-90bc-b9a3f2a270bd/transformed/output/temp/jmod --add-modules java.base --output /Users/mackall/.gradle/caches/8.9/transforms/2890fec03da42154757073d3208548e5-79660961-f91d-4df2-90bc-b9a3f2a270bd/transformed/output/jdkImage --disable-plugin system-modules}
+    ''';
+
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    await jlinkErrorWithJava21AndSourceCompatibility.handler(
+      line: errorExample,
+      project: project,
+      usesAndroidX: true,
+    );
+
+    // Main fix text.
+    expect(
+        testLogger.statusText,
+        contains('To fix this error, please upgrade your AGP version to at least 8.2.1.')
+    );
+    // Paths to AGP location.
+    expect(
+        testLogger.statusText,
+        contains('/android/settings.gradle')
+    );
+    expect(
+        testLogger.statusText,
+        contains('/android/build.gradle')
+    );
+    // Links to info.
+    expect(
+        testLogger.statusText,
+        contains('https://issuetracker.google.com/issues/294137077')
+    );
+    expect(
+        testLogger.statusText,
+        contains('https://github.com/flutter/flutter/issues/156304')
+    );
+
   }, overrides: <Type, Generator>{
     GradleUtils: () => FakeGradleUtils(),
     Platform: () => fakePlatform('android'),

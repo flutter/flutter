@@ -219,7 +219,7 @@ class WordBoundary extends TextBoundary {
     };
   }
 
-  static final RegExp _regExpSpaceSeparatorOrPunctuaion = RegExp(r'[\p{Space_Separator}\p{Punctuation}]', unicode: true);
+  static final RegExp _regExpSpaceSeparatorOrPunctuation = RegExp(r'[\p{Space_Separator}\p{Punctuation}]', unicode: true);
   bool _skipSpacesAndPunctuations(int offset, bool forward) {
     // Use code point since some punctuations are supplementary characters.
     // "inner" here refers to the code unit that's before the break in the
@@ -236,7 +236,7 @@ class WordBoundary extends TextBoundary {
     final bool hardBreakRulesApply = innerCodePoint == null || outerCodeUnit == null
     // WB3a & WB3b: always break before and after newlines.
                                   || _isNewline(innerCodePoint) || _isNewline(outerCodeUnit);
-    return hardBreakRulesApply || !_regExpSpaceSeparatorOrPunctuaion.hasMatch(String.fromCharCode(innerCodePoint));
+    return hardBreakRulesApply || !_regExpSpaceSeparatorOrPunctuation.hasMatch(String.fromCharCode(innerCodePoint));
   }
 
   /// Returns a [TextBoundary] suitable for handling keyboard navigation

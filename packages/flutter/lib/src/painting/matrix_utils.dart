@@ -17,23 +17,15 @@ abstract final class MatrixUtils {
   ///
   /// Otherwise, returns null.
   static Offset? getAsTranslation(Matrix4 transform) {
-    final Float64List values = transform.storage;
-    // Values are stored in column-major order.
-    if (values[0] == 1.0 && // col 1
-        values[1] == 0.0 &&
-        values[2] == 0.0 &&
-        values[3] == 0.0 &&
-        values[4] == 0.0 && // col 2
-        values[5] == 1.0 &&
-        values[6] == 0.0 &&
-        values[7] == 0.0 &&
-        values[8] == 0.0 && // col 3
-        values[9] == 0.0 &&
-        values[10] == 1.0 &&
-        values[11] == 0.0 &&
-        values[14] == 0.0 && // bottom of col 4 (values 12 and 13 are the x and y offsets)
-        values[15] == 1.0) {
-      return Offset(values[12], values[13]);
+    // Values are stored in column-major order, so the appearance
+    // of dx is transposed from the top-right to the bottom-left.
+    if (transform.storage case [
+      1.0, 0.0, 0.0, 0.0,
+      0.0, 1.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      final double dx, final double dy, 0.0, 1.0,
+    ]) {
+      return Offset(dx, dy);
     }
     return null;
   }
@@ -43,24 +35,15 @@ abstract final class MatrixUtils {
   ///
   /// Otherwise, returns null.
   static double? getAsScale(Matrix4 transform) {
-    final Float64List values = transform.storage;
-    // Values are stored in column-major order.
-    if (values[1] == 0.0 && // col 1 (value 0 is the scale)
-        values[2] == 0.0 &&
-        values[3] == 0.0 &&
-        values[4] == 0.0 && // col 2 (value 5 is the scale)
-        values[6] == 0.0 &&
-        values[7] == 0.0 &&
-        values[8] == 0.0 && // col 3
-        values[9] == 0.0 &&
-        values[10] == 1.0 &&
-        values[11] == 0.0 &&
-        values[12] == 0.0 && // col 4
-        values[13] == 0.0 &&
-        values[14] == 0.0 &&
-        values[15] == 1.0 &&
-        values[0] == values[5]) { // uniform scale
-      return values[0];
+    // Values are stored in column-major order
+    // (but this symmetric matrix is unaffected).
+    if (transform.storage case [
+      final double diagonal1, 0.0, 0.0, 0.0,
+      0.0, final double diagonal2, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      0.0, 0.0, 0.0, 1.0,
+    ] when diagonal1 == diagonal2) {
+      return diagonal1;
     }
     return null;
   }
