@@ -310,9 +310,12 @@ void Canvas::DrawPaint(const Paint& paint) {
 bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
                                      Size corner_radii,
                                      const Paint& paint) {
+  if (paint.style != Paint::Style::kFill) {
+    return false;
+  }
+
   if (paint.color_source &&
-      (paint.color_source->type() != flutter::DlColorSourceType::kColor ||
-       paint.style != Paint::Style::kFill)) {
+      paint.color_source->type() != flutter::DlColorSourceType::kColor) {
     return false;
   }
 
