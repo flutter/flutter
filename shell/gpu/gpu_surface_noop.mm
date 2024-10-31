@@ -13,7 +13,7 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/trace_event.h"
 
-static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
+static_assert(__has_feature(objc_arc), "ARC must be enabled.");
 
 namespace flutter {
 
