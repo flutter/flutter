@@ -16,8 +16,6 @@ class SkwasmRenderer implements Renderer {
   late SkwasmSurface surface;
   final Map<EngineFlutterView, EngineSceneView> _sceneViews = <EngineFlutterView, EngineSceneView>{};
 
-  bool get isMultiThreaded => skwasmIsMultiThreaded();
-
   @override
   final SkwasmFontCollection fontCollection = SkwasmFontCollection();
 

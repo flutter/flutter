@@ -414,9 +414,8 @@ Future<void> testMain() async {
       expect(bitmap.height.toDartInt, 150);
       final ui.Image uiImage = await renderer.createImageFromImageBitmap(bitmap);
 
-      if (isSkwasm && isMultiThreaded) {
-        // Multi-threaded skwasm transfers the bitmap to the web worker, so it should be
-        // disposed/consumed.
+      if (isSkwasm) {
+        // Skwasm transfers the bitmap to the web worker, so it should be disposed/consumed.
         expect(bitmap.width.toDartInt, 0);
         expect(bitmap.height.toDartInt, 0);
       }
