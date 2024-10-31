@@ -1120,6 +1120,23 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux linux_desktop_impeller
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    presubmit: false
+    bringup: true
+    properties:
+      xvfb: "1"
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: linux_desktop_impeller
+
   - name: Linux run_release_test_linux
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -5363,6 +5380,20 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac_arm64 mac_desktop_impeller
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac", "arm64"]
+      task_name: run_release_test_macos
+
   - name: Windows build_tests_1_8
     recipe: flutter/flutter_drone
     timeout: 60
@@ -6294,6 +6325,20 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       task_name: hello_world_win_desktop__compile
+
+  - name: Windows windows_desktop_impeller
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_desktop_impeller
 
   - name: Windows_arm64 hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone

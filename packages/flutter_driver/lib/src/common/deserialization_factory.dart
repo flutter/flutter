@@ -13,6 +13,7 @@ import 'layer_tree.dart';
 import 'message.dart';
 import 'render_tree.dart';
 import 'request_data.dart';
+import 'screenshot.dart';
 import 'semantics.dart';
 import 'text.dart';
 import 'text_input_action.dart';
@@ -64,6 +65,7 @@ mixin DeserializeCommandFactory {
       'get_semantics_id'              => GetSemanticsId.deserialize(params, finderFactory),
       'get_offset'                    => GetOffset.deserialize(params, finderFactory),
       'get_diagnostics_tree'          => GetDiagnosticsTree.deserialize(params, finderFactory),
+      'screenshot'                    => ScreenshotCommand.deserialize(params),
       final String? kind => throw DriverError('Unsupported command kind $kind'),
     };
   }
