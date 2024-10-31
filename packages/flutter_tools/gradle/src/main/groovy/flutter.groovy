@@ -272,7 +272,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         String flutterVersionCode = localProperties.getProperty("flutter.versionCode")
-        extension.flutterVersionCode = flutterVersionCode?: "1"
+        extension.flutterVersionCode = flutterVersionCode ?: "1"
 
         String flutterVersionName = localProperties.getProperty("flutter.versionName")
         extension.flutterVersionName = flutterVersionName ?: "1.0"
@@ -983,13 +983,8 @@ class FlutterPlugin implements Plugin<Project> {
         if (localProperties == null) {
             localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
         }
-        // First, try to get the property from the project
         String result = project.hasProperty(name) ? project.property(name) : null
-
-        // then, if result is still null, try and get it from local properties
         result = result ?: localProperties?.getProperty(name)
-
-        // Return the defaultValue if no result found
         return result ?: defaultValue
     }
 
