@@ -23,6 +23,7 @@ const int chromeDebugPort = 10000;
 typedef WebBenchmarkOptions = ({
   String webRenderer,
   bool useWasm,
+  bool forceSingleThreadedSkwasm,
 });
 
 Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
@@ -142,8 +143,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       final bool isUncalibratedSmokeTest = io.Platform.environment['CALIBRATED'] != 'true';
       // final bool isUncalibratedSmokeTest =
       //     io.Platform.environment['UNCALIBRATED_SMOKE_TEST'] == 'true';
+      final String urlParams = benchmarkOptions.forceSingleThreadedSkwasm ? '?force_st=true' : '';
       final ChromeOptions options = ChromeOptions(
-        url: 'http://localhost:$benchmarkServerPort/index.html',
+        url: 'http://localhost:$benchmarkServerPort/index.html$urlParams',
         userDataDirectory: userDataDir,
         headless: isUncalibratedSmokeTest,
         debugPort: chromeDebugPort,
