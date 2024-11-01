@@ -33,19 +33,18 @@ import 'image.dart';
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This is a height-resizable window simulating a browser window with [CustomScrollView].
-/// [Slider] adjusts the height of window.
-/// [Switch] toggles the [clipBehavior] of [CustomScrollView].
+/// This example demonstrates how the [CustomScrollView.clipBehavior]
+/// impacts a decorated sliver's appearance.
 ///
-/// Demonstrates the behavior of [DecoratedSliver] in relation to parent clipping.
+/// The [Switch] determines whether clipping is enabled, and
+/// the [Slider] adjusts the height of window.
 ///
 /// ** See code in examples/api/lib/widgets/sliver/decorated_sliver.1.dart **
 /// {@end-tool}
 ///
-/// [clipBehavior] is set by parent [Widget].
-///
-/// To clip a child to the shape of a
-/// particular [ShapeDecoration], consider using a [ClipPath] widget.
+/// This widget does not apply any additional clipping to its [child].
+/// To clip a child based on the [Decoration]'s shape, consider using
+/// a [ClipPath] widget.
 ///
 /// See also:
 ///

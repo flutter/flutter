@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-// Flutter code example for [DecoratedSliver]
-// with clipping turned off in a parent [CustomScrollView].
+/// Flutter code example for [DecoratedSliver]
+/// with clipping turned off in a parent [CustomScrollView].
 
 void main() => runApp(const DecoratedSliverClipExampleApp());
 
@@ -29,12 +29,10 @@ class DecoratedSliverClipExample extends StatefulWidget {
   const DecoratedSliverClipExample({super.key});
 
   @override
-  State<DecoratedSliverClipExample> createState() =>
-      _DecoratedSliverClipExampleState();
+  State<DecoratedSliverClipExample> createState() => _DecoratedSliverClipExampleState();
 }
 
-class _DecoratedSliverClipExampleState
-    extends State<DecoratedSliverClipExample> {
+class _DecoratedSliverClipExampleState extends State<DecoratedSliverClipExample> {
   double _height = 225.0;
   bool isClipped = false;
 
@@ -77,7 +75,7 @@ class _DecoratedSliverClipExampleState
           Stack(
             children: [
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(24.0),
                 child: SizedBox(
                   width: 400,
                   height: _height,
@@ -112,8 +110,8 @@ class ResizableCustomScrollView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
-      clipBehavior:
-          isClipped ? Clip.hardEdge : Clip.none, // defaults to Clip.hardEdge
+      // The clip behavior defaults to Clip.hardEdge if no argument is provided.
+      clipBehavior: isClipped ? Clip.hardEdge : Clip.none,
       slivers: [
         DecoratedSliver(
           decoration: const ShapeDecoration(

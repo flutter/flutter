@@ -7,36 +7,27 @@ import 'package:flutter_api_samples/widgets/sliver/decorated_sliver.1.dart' as e
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets(
-      'CustomScrollView clipBehavior is Clip.none when is Clipped is false',
-      (WidgetTester tester) async {
+  testWidgets('CustomScrollView clipBehavior is Clip.none when is Clipped is false', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: example.DecoratedSliverClipExample(),
       ),
     );
 
-    final Finder customScrollViewFinder = find.byType(CustomScrollView);
-
-    final customScrollView =
-        tester.widget<CustomScrollView>(customScrollViewFinder);
+    final CustomScrollView customScrollView = tester.widget(find.byType(CustomScrollView));
 
     expect(customScrollView.clipBehavior, equals(Clip.none));
   });
 
-  testWidgets('Verify the DecoratedSliver has shadow property in decoration',
-      (WidgetTester tester) async {
+  testWidgets('Verify the DecoratedSliver has shadow property in decoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: example.ResizableCustomScrollView(isClipped: false),
       ),
     );
 
-    final decoratedSliverFinder = find.byType(DecoratedSliver);
-
-    final decoratedSliver =
-        tester.widget<DecoratedSliver>(decoratedSliverFinder);
-    final shapeDecoration = decoratedSliver.decoration as ShapeDecoration;
+    final DecoratedSliver decoratedSliver = tester.widget(find.byType(DecoratedSliver));
+    final ShapeDecoration shapeDecoration = decoratedSliver.decoration as ShapeDecoration;
 
     expect(shapeDecoration.shadows, isNotEmpty);
   });
