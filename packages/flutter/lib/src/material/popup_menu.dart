@@ -1501,15 +1501,8 @@ class PopupMenuButton<T> extends StatefulWidget {
 /// See [showButtonMenu] for a way to programmatically open the popup menu
 /// of your button state.
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
-  /// A method to show a popup menu with the items supplied to
-  /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
-  ///
-  /// By default, it is called when the user taps the button and [PopupMenuButton.enabled]
-  /// is set to `true`. Moreover, you can open the button by calling the method manually.
-  ///
-  /// You would access your [PopupMenuButtonState] using a [GlobalKey] and
-  /// show the menu of the button with `globalKey.currentState.showButtonMenu`.
-  void showButtonMenu() {
+
+  RelativeRect _positionBuilder() {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(
@@ -1535,6 +1528,20 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       ),
       Offset.zero & overlay.size,
     );
+
+    return position;
+  }
+
+  /// A method to show a popup menu with the items supplied to
+  /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
+  ///
+  /// By default, it is called when the user taps the button and [PopupMenuButton.enabled]
+  /// is set to `true`. Moreover, you can open the button by calling the method manually.
+  ///
+  /// You would access your [PopupMenuButtonState] using a [GlobalKey] and
+  /// show the menu of the button with `globalKey.currentState.showButtonMenu`.
+  void showButtonMenu() {
+    final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
@@ -1546,7 +1553,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         surfaceTintColor: widget.surfaceTintColor ?? popupMenuTheme.surfaceTintColor,
         items: items,
         initialValue: widget.initialValue,
-        position: position,
+        positionBuilder: _positionBuilder,
         shape: widget.shape ?? popupMenuTheme.shape,
         menuPadding: widget.menuPadding ?? popupMenuTheme.menuPadding,
         color: widget.color ?? popupMenuTheme.color,
