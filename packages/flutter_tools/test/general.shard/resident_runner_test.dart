@@ -63,6 +63,7 @@ void main() {
         target: 'main.dart',
         analytics: fakeAnalytics,
         devtoolsHandler: createNoOpHandler,
+        useImplicitPubspecResolution: true,
       );
     }, overrides: <Type, Generator>{
       Analytics: () => FakeAnalytics(),
@@ -114,6 +115,7 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: globals.analytics,
+      useImplicitPubspecResolution: true,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -138,6 +140,7 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: globals.analytics,
+      useImplicitPubspecResolution: true,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -159,6 +162,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      useImplicitPubspecResolution: true,
     );
     flutterDevice.runColdCode = 1;
 
@@ -180,6 +184,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      useImplicitPubspecResolution: true,
     );
     flutterDevice.runColdError = Exception('BAD STUFF');
 
@@ -208,6 +213,7 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: globals.analytics,
+      useImplicitPubspecResolution: true,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -268,6 +274,7 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: globals.analytics,
+      useImplicitPubspecResolution: true,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -409,6 +416,7 @@ void main() {
         enableDevTools: false,
       ),
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -473,6 +481,7 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -733,6 +742,7 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     devFS.nextUpdateReport = UpdateFSReport(
       success: true,
@@ -1077,6 +1087,7 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
   }));
@@ -1190,6 +1201,7 @@ flutter:
         target: 'custom_main.dart',
         devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
+        useImplicitPubspecResolution: true,
       );
     await residentRunner.runSourceGenerators();
 
@@ -1250,6 +1262,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -1350,6 +1363,7 @@ flutter:
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      useImplicitPubspecResolution: true,
     );
     residentRunner.printHelp(details: true);
 
@@ -1385,6 +1399,7 @@ flutter:
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      useImplicitPubspecResolution: true,
     );
     residentRunner.printHelp(details: false);
 
@@ -1474,6 +1489,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile, vmserviceOutFile: 'foo', enableDevTools: false),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      useImplicitPubspecResolution: true,
     );
 
     final Future<int?> result = residentRunner.attach();
@@ -1519,6 +1535,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
 
     await residentRunner.run();
@@ -1549,6 +1566,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1580,6 +1598,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1612,6 +1631,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1636,6 +1656,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1661,6 +1682,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1690,6 +1712,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1713,6 +1736,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
 
     await residentRunner.run();
@@ -1734,6 +1758,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
 
     await residentRunner.run();
@@ -1757,6 +1782,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile, vmserviceOutFile: 'foo'),
       devtoolsHandler: createNoOpHandler,
       target: 'main.dart',
+      useImplicitPubspecResolution: true,
     );
 
     await residentRunner.run();
@@ -2101,6 +2127,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     await residentRunner.cleanupAtFinish();
 
@@ -2122,6 +2149,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
 
     (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'asset'};
@@ -2147,6 +2175,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
 
     (flutterDevice.devFS! as FakeDevFS).shaderPathsToEvict = <String>{'foo.frag'};
@@ -2169,6 +2198,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
 
     expect(flutterDevice.devFS!.hasSetAssetDirectory, false);
@@ -2191,6 +2221,7 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
 
     (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'asset'};
@@ -2240,6 +2271,7 @@ flutter:
           devtoolsHandler: createNoOpHandler,
           analytics: globals.analytics,
           nativeAssetsYamlFile: 'foo.yaml',
+          useImplicitPubspecResolution: true,
         );
 
         final int? result = await residentRunner.run();
