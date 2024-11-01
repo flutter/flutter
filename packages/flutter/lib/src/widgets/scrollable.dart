@@ -1071,6 +1071,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return (<Future<void>>[ ensureVisibleFuture ], this);
   }
 
+  @protected
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);

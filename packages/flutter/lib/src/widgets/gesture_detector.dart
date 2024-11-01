@@ -1560,6 +1560,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     return result;
   }
 
+  @protected
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);

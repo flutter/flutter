@@ -352,6 +352,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     end: 0.0,
   );
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -365,12 +366,14 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     _scaleFactor = _scaleController.drive(_oneToZeroTween);
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     _setupColorTween();
     super.didChangeDependencies();
   }
 
+  @protected
   @override
   void didUpdateWidget(covariant RefreshIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -379,6 +382,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     }
   }
 
+  @protected
   @override
   void dispose() {
     _positionController.dispose();

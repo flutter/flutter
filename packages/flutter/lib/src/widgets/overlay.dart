@@ -844,6 +844,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     );
   }
 
+  @protected
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
