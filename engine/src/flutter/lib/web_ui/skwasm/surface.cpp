@@ -14,27 +14,6 @@
 
 using namespace Skwasm;
 
-Surface::Surface() {
-  assert(emscripten_is_main_browser_thread());
-
-  pthread_attr_t attr;
-  pthread_attr_init(&attr);
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-
-  pthread_create(
-      &_thread, &attr,
-      [](void* context) -> void* {
-        static_cast<Surface*>(context)->_runWorker();
-        return nullptr;
-      },
-      this);
-  // Listen to messages from the worker
-  skwasm_registerMessageListener(_thread);
-
-  // Synchronize the time origin for the worker thread
-  skwasm_syncTimeOriginForThread(_thread);
-}
-
 // Worker thread only
 void Surface::dispose() {
   delete this;
@@ -88,7 +67,7 @@ void Surface::_runWorker() {
 // Worker thread only
 void Surface::_init() {
   // Listen to messages from the main thread
-  skwasm_registerMessageListener(0);
+  skwasm_connectThread(0);
   _glContext = skwasm_createOffscreenCanvas(256, 256);
   if (!_glContext) {
     printf("Failed to create context!\n");
