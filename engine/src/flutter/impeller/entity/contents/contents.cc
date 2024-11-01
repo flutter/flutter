@@ -26,7 +26,7 @@ ContentContextOptions OptionsFromPass(const RenderPass& pass) {
   FML_DCHECK(pass.HasDepthAttachment() == pass.HasStencilAttachment());
 
   opts.has_depth_stencil_attachments = has_depth_stencil_attachments;
-  opts.depth_compare = CompareFunction::kGreater;
+  opts.depth_compare = CompareFunction::kGreaterEqual;
   opts.stencil_mode = ContentContextOptions::StencilMode::kIgnore;
   return opts;
 }
