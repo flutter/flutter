@@ -58,7 +58,7 @@ dependencies {
     flutterDebug "io.flutter:x86_64_debug:1.0.0-$engineVersion"
 }
 
-task resolveDependencies {
+tasks.register('resolveDependencies') {
     configurations.each { configuration ->
         if (configuration.name.startsWith("flutter")) {
             configuration.resolve()
