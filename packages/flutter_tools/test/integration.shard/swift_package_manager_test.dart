@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
@@ -69,9 +70,8 @@ void main() {
           fileSystem
             .directory(appDirectoryPath)
             .childDirectory(platformName)
-            .childFile('Podfile')
-            .existsSync(),
-          isTrue,
+            .childFile('Podfile'),
+          exists,
         );
         expect(
           fileSystem
@@ -80,9 +80,8 @@ void main() {
             .childDirectory('Flutter')
             .childDirectory('ephemeral')
             .childDirectory('Packages')
-            .childDirectory('FlutterGeneratedPluginSwiftPackage')
-            .existsSync(),
-          isFalse,
+            .childDirectory('FlutterGeneratedPluginSwiftPackage'),
+          isNot(exists),
         );
 
         final SwiftPackageManagerPlugin createdCocoaPodsPlugin = await SwiftPackageManagerUtils.createPlugin(
@@ -119,9 +118,8 @@ void main() {
           fileSystem
             .directory(appDirectoryPath)
             .childDirectory(platformName)
-            .childFile('Podfile')
-            .existsSync(),
-          isTrue,
+            .childFile('Podfile'),
+          exists,
         );
         expect(
           fileSystem
@@ -130,9 +128,8 @@ void main() {
             .childDirectory('Flutter')
             .childDirectory('ephemeral')
             .childDirectory('Packages')
-            .childDirectory('FlutterGeneratedPluginSwiftPackage')
-            .existsSync(),
-          isTrue,
+            .childDirectory('FlutterGeneratedPluginSwiftPackage'),
+          exists,
         );
 
         // Build an app using both a CocoaPods and Swift Package Manager plugin.
@@ -164,9 +161,8 @@ void main() {
           fileSystem
             .directory(appDirectoryPath)
             .childDirectory(platformName)
-            .childFile('Podfile')
-            .existsSync(),
-          isTrue,
+            .childFile('Podfile'),
+          exists,
         );
         expect(
           fileSystem
@@ -175,9 +171,8 @@ void main() {
             .childDirectory('Flutter')
             .childDirectory('ephemeral')
             .childDirectory('Packages')
-            .childDirectory('FlutterGeneratedPluginSwiftPackage')
-            .existsSync(),
-          isTrue,
+            .childDirectory('FlutterGeneratedPluginSwiftPackage'),
+          exists,
         );
 
         // Build app again but with Swift Package Manager disabled by config.
@@ -260,9 +255,8 @@ void main() {
         fileSystem
           .directory(appDirectoryPath)
           .childDirectory(platformName)
-          .childFile('Podfile')
-          .existsSync(),
-        isFalse,
+          .childFile('Podfile'),
+        isNot(exists),
       );
       expect(
         fileSystem
@@ -271,9 +265,8 @@ void main() {
           .childDirectory('Flutter')
           .childDirectory('ephemeral')
           .childDirectory('Packages')
-          .childDirectory('FlutterGeneratedPluginSwiftPackage')
-          .existsSync(),
-        isTrue,
+          .childDirectory('FlutterGeneratedPluginSwiftPackage'),
+        exists,
       );
 
       // Create and build framework using the CocoaPods version of
@@ -299,9 +292,8 @@ void main() {
           .childDirectory(platformName)
           .childDirectory('framework')
           .childDirectory('Release')
-          .childDirectory('${integrationTestPlugin.pluginName}.xcframework')
-          .existsSync(),
-        isTrue,
+          .childDirectory('${integrationTestPlugin.pluginName}.xcframework'),
+        exists,
       );
     }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
 
@@ -413,9 +405,8 @@ void main() {
       fileSystem
         .directory(appDirectoryPath)
         .childDirectory('.ios')
-        .childFile('Podfile')
-        .existsSync(),
-      isTrue,
+        .childFile('Podfile'),
+      exists,
     );
     expect(
       fileSystem
@@ -424,16 +415,15 @@ void main() {
         .childDirectory('Flutter')
         .childDirectory('ephemeral')
         .childDirectory('Packages')
-        .childDirectory('FlutterGeneratedPluginSwiftPackage')
-        .existsSync(),
-      isFalse,
+        .childDirectory('FlutterGeneratedPluginSwiftPackage'),
+      isNot(exists),
     );
     final File pbxprojFile = fileSystem
       .directory(appDirectoryPath)
       .childDirectory('.ios')
       .childDirectory('Runner.xcodeproj')
       .childFile('project.pbxproj');
-    expect(pbxprojFile.existsSync(), isTrue);
+    expect(pbxprojFile, exists);
     expect(
       pbxprojFile.readAsStringSync(),
       isNot(contains('FlutterGeneratedPluginSwiftPackage')),
@@ -445,7 +435,7 @@ void main() {
       .childDirectory('xcshareddata')
       .childDirectory('xcschemes')
       .childFile('Runner.xcscheme');
-    expect(xcschemeFile.existsSync(), isTrue);
+    expect(xcschemeFile, exists);
     expect(
       xcschemeFile.readAsStringSync(),
       isNot(contains('Run Prepare Flutter Framework Script')),
@@ -473,9 +463,8 @@ void main() {
         .childDirectory('ios')
         .childDirectory('framework')
         .childDirectory('Release')
-        .childDirectory('${integrationTestPlugin.pluginName}.xcframework')
-        .existsSync(),
-      isTrue,
+        .childDirectory('${integrationTestPlugin.pluginName}.xcframework'),
+      exists,
     );
   }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
 
@@ -530,9 +519,8 @@ void main() {
     expect(
       fileSystem
         .directory(appDirectoryPath)
-        .childDirectory('.ios')
-        .existsSync(),
-      isFalse,
+        .childDirectory('.ios'),
+      isNot(exists),
     );
 
     // TODO(loic-sharma): A Swift package manifest should not be generated.
@@ -556,16 +544,15 @@ void main() {
         .childDirectory('ios')
         .childDirectory('framework')
         .childDirectory('Release')
-        .childDirectory('${integrationTestPlugin.pluginName}.xcframework')
-        .existsSync(),
-      isTrue,
+        .childDirectory('${integrationTestPlugin.pluginName}.xcframework'),
+      exists,
     );
 
     final File flutterPluginsDependenciesFile = fileSystem
       .directory(appDirectoryPath)
       .childFile('.flutter-plugins-dependencies');
 
-    expect(flutterPluginsDependenciesFile.existsSync(), isTrue);
+    expect(flutterPluginsDependenciesFile, exists);
     expect(
       flutterPluginsDependenciesFile.readAsStringSync(),
       isNot(contains('"swift_package_manager_enabled":true')),
@@ -631,7 +618,7 @@ void main() {
       .childDirectory('FlutterGeneratedPluginSwiftPackage')
       .childFile('Package.swift');
 
-    expect(generatedManifestFile.existsSync(), isTrue);
+    expect(generatedManifestFile, exists);
 
     final String generatedManifest = generatedManifestFile.readAsStringSync();
     const String expected = '''
@@ -698,7 +685,7 @@ void main() {
       .childDirectory('FlutterGeneratedPluginSwiftPackage')
       .childFile('Package.swift');
 
-    expect(generatedManifestFile.existsSync(), isTrue);
+    expect(generatedManifestFile, exists);
 
     final String generatedManifest = generatedManifestFile.readAsStringSync();
     const String expected = '''
@@ -763,7 +750,7 @@ void main() {
       .childDirectory('FlutterGeneratedPluginSwiftPackage')
       .childFile('Package.swift');
 
-    expect(generatedManifestFile.existsSync(), isTrue);
+    expect(generatedManifestFile, exists);
 
     String generatedManifest = generatedManifestFile.readAsStringSync();
     final String generatedSwiftDependency = '''
@@ -787,7 +774,7 @@ void main() {
     );
 
     // Verify the generated Swift package does not depend on the plugin.
-    expect(generatedManifestFile.existsSync(), isTrue);
+    expect(generatedManifestFile, exists);
 
     generatedManifest = generatedManifestFile.readAsStringSync();
     const String emptyDependencies = 'dependencies: [\n        \n    ],\n';
@@ -862,9 +849,9 @@ void main() {
       .childDirectory('Frameworks')
       .childDirectory('${integrationTestPlugin.pluginName}.framework');
 
-    expect(xcodeProjectFile.existsSync(), isTrue);
-    expect(generatedManifestFile.existsSync(), isTrue);
-    expect(cocoaPodsPluginFramework.existsSync(), isFalse);
+    expect(xcodeProjectFile, exists);
+    expect(generatedManifestFile, exists);
+    expect(cocoaPodsPluginFramework, isNot(exists));
 
     String xcodeProject = xcodeProjectFile.readAsStringSync();
     String generatedManifest = generatedManifestFile.readAsStringSync();
@@ -894,8 +881,8 @@ void main() {
 
     // The app should still have SwiftPM integration,
     // but the plugin should be added using CocoaPods.
-    expect(xcodeProjectFile.existsSync(), isTrue);
-    expect(generatedManifestFile.existsSync(), isTrue);
+    expect(xcodeProjectFile, exists);
+    expect(generatedManifestFile, exists);
 
     xcodeProject = xcodeProjectFile.readAsStringSync();
     generatedManifest = generatedManifestFile.readAsStringSync();
@@ -904,6 +891,6 @@ void main() {
     expect(xcodeProject, contains('FlutterGeneratedPluginSwiftPackage'));
     expect(generatedManifest, isNot(contains('integration_test')));
     expect(generatedManifest, contains(emptyDependencies));
-    expect(cocoaPodsPluginFramework.existsSync(), isTrue);
+    expect(cocoaPodsPluginFramework, exists);
   }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
 }
