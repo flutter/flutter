@@ -28,6 +28,7 @@ uniform sampler2D texture_sampler_src;
 
 uniform FragInfo {
   float16_t src_input_alpha;
+  float16_t dst_input_alpha;
 }
 frag_info;
 
@@ -44,6 +45,7 @@ vec4 Sample(sampler2D texture_sampler, vec2 texture_coords) {
 
 void main() {
   f16vec4 dst = IPHalfUnpremultiply(f16vec4(ReadDestination()));
+  dst.a *= frag_info.dst_input_alpha;
   f16vec4 src = IPHalfUnpremultiply(
       f16vec4(Sample(texture_sampler_src,  // sampler
                      v_src_texture_coords  // texture coordinates
