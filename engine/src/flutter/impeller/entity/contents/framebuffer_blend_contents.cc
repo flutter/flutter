@@ -139,6 +139,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
   frag_info.src_input_alpha = src_snapshot->opacity;
+  frag_info.dst_input_alpha = 1.0;
   FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
 
   return pass.Draw().ok();

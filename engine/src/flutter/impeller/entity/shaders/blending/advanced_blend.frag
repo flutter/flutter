@@ -40,7 +40,7 @@ void main() {
       IPHalfUnpremultiply(Sample(texture_sampler_dst,  // sampler
                                  v_dst_texture_coords  // texture coordinates
                                  ));
-  dst *= blend_info.dst_input_alpha;
+  dst.a *= blend_info.dst_input_alpha;
   f16vec4 src = blend_info.color_factor > 0.0hf
                     ? blend_info.color
                     : IPHalfUnpremultiply(Sample(
