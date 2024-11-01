@@ -202,94 +202,6 @@
       }
     },
     {
-      "name": "web_tests/test_bundles/dart2wasm-html-html",
-      "drone_dimensions": [
-        "device_type=none",
-        "os=Linux"
-      ],
-      "generators": {
-        "tasks": [
-          {
-            "name": "compile bundle dart2wasm-html-html",
-            "parameters": [
-              "test",
-              "--compile",
-              "--bundle=dart2wasm-html-html"
-            ],
-            "scripts": [
-              "flutter/lib/web_ui/dev/felt"
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "web_tests/test_bundles/dart2wasm-html-ui",
-      "drone_dimensions": [
-        "device_type=none",
-        "os=Linux"
-      ],
-      "generators": {
-        "tasks": [
-          {
-            "name": "compile bundle dart2wasm-html-ui",
-            "parameters": [
-              "test",
-              "--compile",
-              "--bundle=dart2wasm-html-ui"
-            ],
-            "scripts": [
-              "flutter/lib/web_ui/dev/felt"
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "web_tests/test_bundles/dart2wasm-canvaskit-canvaskit",
-      "drone_dimensions": [
-        "device_type=none",
-        "os=Linux"
-      ],
-      "generators": {
-        "tasks": [
-          {
-            "name": "compile bundle dart2wasm-canvaskit-canvaskit",
-            "parameters": [
-              "test",
-              "--compile",
-              "--bundle=dart2wasm-canvaskit-canvaskit"
-            ],
-            "scripts": [
-              "flutter/lib/web_ui/dev/felt"
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "web_tests/test_bundles/dart2wasm-canvaskit-ui",
-      "drone_dimensions": [
-        "device_type=none",
-        "os=Linux"
-      ],
-      "generators": {
-        "tasks": [
-          {
-            "name": "compile bundle dart2wasm-canvaskit-ui",
-            "parameters": [
-              "test",
-              "--compile",
-              "--bundle=dart2wasm-canvaskit-ui"
-            ],
-            "scripts": [
-              "flutter/lib/web_ui/dev/felt"
-            ]
-          }
-        ]
-      }
-    },
-    {
       "name": "web_tests/test_bundles/dart2wasm-skwasm-ui",
       "drone_dimensions": [
         "device_type=none",
@@ -354,10 +266,6 @@
         "web_tests/test_bundles/dart2js-canvaskit-canvaskit",
         "web_tests/test_bundles/dart2js-canvaskit-ui",
         "web_tests/test_bundles/dart2wasm-html-engine",
-        "web_tests/test_bundles/dart2wasm-html-html",
-        "web_tests/test_bundles/dart2wasm-html-ui",
-        "web_tests/test_bundles/dart2wasm-canvaskit-canvaskit",
-        "web_tests/test_bundles/dart2wasm-canvaskit-ui",
         "web_tests/test_bundles/dart2wasm-skwasm-ui",
         "web_tests/test_bundles/fallbacks"
       ],
@@ -445,42 +353,6 @@
           "script": "flutter/lib/web_ui/dev/felt"
         },
         {
-          "name": "run suite chrome-dart2wasm-html-html",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-dart2wasm-html-html"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite chrome-dart2wasm-html-ui",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-dart2wasm-html-ui"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite chrome-dart2wasm-canvaskit-canvaskit",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-dart2wasm-canvaskit-canvaskit"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite chrome-dart2wasm-canvaskit-ui",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-dart2wasm-canvaskit-ui"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
           "name": "run suite chrome-coi-dart2wasm-skwasm-ui",
           "parameters": [
             "test",
@@ -495,24 +367,6 @@
             "test",
             "--run",
             "--suite=chrome-force-st-dart2wasm-skwasm-ui"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite chrome-full-dart2wasm-canvaskit-canvaskit",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-full-dart2wasm-canvaskit-canvaskit"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite chrome-full-dart2wasm-canvaskit-ui",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-full-dart2wasm-canvaskit-ui"
           ],
           "script": "flutter/lib/web_ui/dev/felt"
         },
@@ -735,10 +589,6 @@
         "web_tests/test_bundles/dart2js-canvaskit-canvaskit",
         "web_tests/test_bundles/dart2js-canvaskit-ui",
         "web_tests/test_bundles/dart2wasm-html-engine",
-        "web_tests/test_bundles/dart2wasm-html-html",
-        "web_tests/test_bundles/dart2wasm-html-ui",
-        "web_tests/test_bundles/dart2wasm-canvaskit-canvaskit",
-        "web_tests/test_bundles/dart2wasm-canvaskit-ui",
         "web_tests/test_bundles/dart2wasm-skwasm-ui",
         "web_tests/test_bundles/fallbacks"
       ],
@@ -826,42 +676,6 @@
           "script": "flutter/lib/web_ui/dev/felt"
         },
         {
-          "name": "run suite chrome-dart2wasm-html-html",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-dart2wasm-html-html"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite chrome-dart2wasm-html-ui",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-dart2wasm-html-ui"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite chrome-dart2wasm-canvaskit-canvaskit",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-dart2wasm-canvaskit-canvaskit"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite chrome-dart2wasm-canvaskit-ui",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-dart2wasm-canvaskit-ui"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
           "name": "run suite chrome-coi-dart2wasm-skwasm-ui",
           "parameters": [
             "test",
@@ -876,24 +690,6 @@
             "test",
             "--run",
             "--suite=chrome-force-st-dart2wasm-skwasm-ui"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite chrome-full-dart2wasm-canvaskit-canvaskit",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-full-dart2wasm-canvaskit-canvaskit"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite chrome-full-dart2wasm-canvaskit-ui",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-full-dart2wasm-canvaskit-ui"
           ],
           "script": "flutter/lib/web_ui/dev/felt"
         },
