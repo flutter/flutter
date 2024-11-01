@@ -9,6 +9,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/entity.h"
 #include "impeller/entity/texture_downsample.frag.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
@@ -406,6 +407,8 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
           frag_info.edge = edge;
           frag_info.ratio = ratio;
           frag_info.pixel_size = Vector2(1.0f / Size(input_texture->GetSize()));
+          frag_info.use_decal =
+              (tile_mode == Entity::TileMode::kDecal) ? 1.0 : 0.0;
 
           const Quad& uvs = pass_args.uvs;
           std::array<VS::PerVertexData, 4> vertices = {
