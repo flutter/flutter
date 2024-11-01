@@ -1004,10 +1004,9 @@ class WebProject extends FlutterProjectPlatform {
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
     /// See: https://github.com/dart-lang/dart-services/pull/874
-    await injectBuildTimePluginFiles(
+    await injectBuildTimePluginFilesForWebPlatform(
       parent,
       destination: dartpadToolDirectory,
-      webPlatform: true,
     );
   }
 }
