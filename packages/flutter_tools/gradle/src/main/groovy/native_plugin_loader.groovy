@@ -19,6 +19,7 @@ class NativePluginLoader {
      *     "path": "/path/to/plugin-a",
      *     "dependencies": ["plugin-b", "plugin-c"],
      *     "native_build": true
+     *     "dev_dependency": false
      * }
      *
      * Therefore the map value can either be a `String`, a `List<String>` or a `boolean`.
@@ -40,6 +41,7 @@ class NativePluginLoader {
             assert(androidPlugin.name instanceof String)
             assert(androidPlugin.path instanceof String)
             assert(androidPlugin.dependencies instanceof List<String>)
+            assert(androidPlugin.dev_dependency instanceOf boolean)
             // Skip plugins that have no native build (such as a Dart-only implementation
             // of a federated plugin).
             def needsBuild = androidPlugin.containsKey(nativeBuildKey) ? androidPlugin[nativeBuildKey] : true
@@ -66,18 +68,21 @@ class NativePluginLoader {
         //           "path": "/path/to/plugin-a",
         //           "dependencies": ["plugin-b", "plugin-c"],
         //           "native_build": true
+        //           "dev_dependency": true
         //         },
         //         {
         //           "name": "plugin-b",
         //           "path": "/path/to/plugin-b",
         //           "dependencies": ["plugin-c"],
         //           "native_build": true
+        //           "dev_dependency": false
         //         },
         //         {
         //           "name": "plugin-c",
         //           "path": "/path/to/plugin-c",
         //           "dependencies": [],
         //           "native_build": true
+        //           "dev_dependency": false
         //         },
         //       ],
         //     },
