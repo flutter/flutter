@@ -22,6 +22,7 @@ impeller_component("gles_unittests") {
     "test/mock_gles_unittests.cc",
     "test/pipeline_library_gles_unittests.cc",
     "test/proc_table_gles_unittests.cc",
+    "test/reactor_unittests.cc",
     "test/specialization_constants_unittests.cc",
   ]
   deps = [
