@@ -39,16 +39,16 @@ class _DecoratedSliverClipExampleState extends State<DecoratedSliverClipExample>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1C1C1C),
+      backgroundColor: const Color(0xFF1C1C1C),
       body: Column(
-        children: [
+        children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
+            children: <Widget>[
               Switch(
                 inactiveTrackColor: Colors.cyan,
                 activeColor: Colors.pink,
-                onChanged: (value) {
+                onChanged: (bool value) {
                   setState(() {
                     isClipped = value;
                   });
@@ -58,7 +58,7 @@ class _DecoratedSliverClipExampleState extends State<DecoratedSliverClipExample>
               Slider(
                 activeColor: Colors.pink,
                 inactiveColor: Colors.cyan,
-                onChanged: (value) {
+                onChanged: (double value) {
                   setState(() {
                     _height = value;
                   });
@@ -73,7 +73,7 @@ class _DecoratedSliverClipExampleState extends State<DecoratedSliverClipExample>
             height: 20.0,
           ),
           Stack(
-            children: [
+            children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: SizedBox(
@@ -112,7 +112,7 @@ class ResizableCustomScrollView extends StatelessWidget {
     return CustomScrollView(
       // The clip behavior defaults to Clip.hardEdge if no argument is provided.
       clipBehavior: isClipped ? Clip.hardEdge : Clip.none,
-      slivers: [
+      slivers: <Widget>[
         DecoratedSliver(
           decoration: const ShapeDecoration(
             color: Color(0xFF2C2C2C),
@@ -156,4 +156,3 @@ class ResizableCustomScrollView extends StatelessWidget {
     );
   }
 }
-
