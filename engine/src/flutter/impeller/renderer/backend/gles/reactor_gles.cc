@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "flutter/fml/trace_event.h"
+#include "fml/closure.h"
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
 
@@ -83,6 +84,19 @@ bool ReactorGLES::AddOperation(Operation operation) {
   // Attempt a reaction if able but it is not an error if this isn't possible.
   [[maybe_unused]] auto result = React();
   return true;
+}
+
+bool ReactorGLES::RegisterCleanupCallback(const HandleGLES& handle,
+                                          const fml::closure& callback) {
+  if (handle.IsDead()) {
+    return false;
+  }
+  WriterLock handles_lock(handles_mutex_);
+  if (auto found = handles_.find(handle); found != handles_.end()) {
+    found->second.callback = fml::ScopedCleanupClosure(callback);
+    return true;
+  }
+  return false;
 }
 
 static std::optional<GLuint> CreateGLHandle(const ProcTableGLES& gl,
