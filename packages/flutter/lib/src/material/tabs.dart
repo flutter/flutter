@@ -6,7 +6,7 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble;
+import 'dart:ui' show SemanticsRole, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -220,11 +220,14 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       );
     }
 
-    return SizedBox(
-      height: height ?? calculatedHeight,
-      child: Center(
-        widthFactor: 1.0,
-        child: label,
+    return Semantics(
+      role: SemanticsRole.tab,
+      child: SizedBox(
+        height: height ?? calculatedHeight,
+        child: Center(
+          widthFactor: 1.0,
+          child: label,
+        ),
       ),
     );
   }
@@ -1832,21 +1835,24 @@ class _TabBarState extends State<TabBar> {
       }
     }
 
-    Widget tabBar = CustomPaint(
-      painter: _indicatorPainter,
-      child: _TabStyle(
-        animation: kAlwaysDismissedAnimation,
-        isSelected: false,
-        isPrimary: widget._isPrimary,
-        labelColor: widget.labelColor,
-        unselectedLabelColor: widget.unselectedLabelColor,
-        labelStyle: widget.labelStyle,
-        unselectedLabelStyle: widget.unselectedLabelStyle,
-        defaults: _defaults,
-        child: _TabLabelBar(
-          onPerformLayout: _saveTabOffsets,
-          mainAxisSize: effectiveTabAlignment == TabAlignment.fill ? MainAxisSize.max : MainAxisSize.min,
-          children: wrappedTabs,
+    Widget tabBar = Semantics(
+      role: SemanticsRole.tabBar,
+      child: CustomPaint(
+        painter: _indicatorPainter,
+        child: _TabStyle(
+          animation: kAlwaysDismissedAnimation,
+          isSelected: false,
+          isPrimary: widget._isPrimary,
+          labelColor: widget.labelColor,
+          unselectedLabelColor: widget.unselectedLabelColor,
+          labelStyle: widget.labelStyle,
+          unselectedLabelStyle: widget.unselectedLabelStyle,
+          defaults: _defaults,
+          child: _TabLabelBar(
+            onPerformLayout: _saveTabOffsets,
+            mainAxisSize: effectiveTabAlignment == TabAlignment.fill ? MainAxisSize.max : MainAxisSize.min,
+            children: wrappedTabs,
+          ),
         ),
       ),
     );
@@ -2087,7 +2093,14 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   void _updateChildren() {
-    _childrenWithKey = KeyedSubtree.ensureUniqueKeysForList(widget.children);
+    _childrenWithKey = KeyedSubtree.ensureUniqueKeysForList(
+      widget.children.map<Widget>((Widget child) {
+        return Semantics(
+          role: SemanticsRole.tabPanel,
+          child: child,
+        );
+      }).toList(),
+    );
   }
 
   void _handleTabControllerAnimationTick() {

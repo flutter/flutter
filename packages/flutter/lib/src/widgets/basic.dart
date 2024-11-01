@@ -9,7 +9,7 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
+import 'dart:ui' as ui show Image, ImageFilter, SemanticsRole, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -7316,6 +7316,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback? onDidLoseAccessibilityFocus,
     VoidCallback? onFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
+    ui.SemanticsRole role = ui.SemanticsRole.none,
   }) : this.fromProperties(
     key: key,
     child: child,
@@ -7391,6 +7392,7 @@ class Semantics extends SingleChildRenderObjectWidget {
           onTapHint: onTapHint,
           onLongPressHint: onLongPressHint,
         ) : null,
+      role: role,
     ),
   );
 
