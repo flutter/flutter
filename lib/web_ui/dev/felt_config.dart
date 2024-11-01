@@ -52,11 +52,19 @@ enum BrowserName {
 }
 
 class RunConfiguration {
-  RunConfiguration(this.name, this.browser, this.variant);
+  RunConfiguration(
+    this.name,
+    this.browser,
+    this.variant,
+    this.crossOriginIsolated,
+    this.forceSingleThreadedSkwasm
+  );
 
   final String name;
   final BrowserName browser;
   final CanvasKitVariant? variant;
+  final bool crossOriginIsolated;
+  final bool forceSingleThreadedSkwasm;
 }
 
 class ArtifactDependencies {
@@ -184,7 +192,15 @@ class FeltConfig {
       final CanvasKitVariant? variant = variantNode == null
         ? null
         : CanvasKitVariant.values.byName(variantNode as String);
-      final RunConfiguration runConfig = RunConfiguration(name, browser, variant);
+      final bool crossOriginIsolated = runConfigYaml['cross-origin-isolated'] as bool? ?? false;
+      final bool forceSingleThreadedSkwasm = runConfigYaml['force-single-threaded-skwasm'] as bool? ?? false;
+      final RunConfiguration runConfig = RunConfiguration(
+        name,
+        browser,
+        variant,
+        crossOriginIsolated,
+        forceSingleThreadedSkwasm
+      );
       runConfigs.add(runConfig);
       if (runConfigsByName.containsKey(name)) {
         throw AssertionError('Duplicate run config name: $name');

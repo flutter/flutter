@@ -19,8 +19,7 @@ extern void skwasm_setAssociatedObjectOnThread(unsigned long threadId,
 extern SkwasmObject skwasm_getAssociatedObject(void* pointer);
 extern void skwasm_disposeAssociatedObjectOnThread(unsigned long threadId,
                                                    void* pointer);
-extern void skwasm_registerMessageListener(pthread_t threadId);
-extern void skwasm_syncTimeOriginForThread(pthread_t threadId);
+extern void skwasm_connectThread(pthread_t threadId);
 extern void skwasm_dispatchRenderPictures(unsigned long threadId,
                                           Skwasm::Surface* surface,
                                           sk_sp<SkPicture>* pictures,
