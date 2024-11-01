@@ -852,7 +852,8 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
 class _PopupMenuRoute<T> extends PopupRoute<T> {
   _PopupMenuRoute({
-    required this.position,
+    this.position,
+    this.positionBuilder,
     required this.items,
     required this.itemKeys,
     this.initialValue,
@@ -870,12 +871,15 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     super.settings,
     super.requestFocus,
     this.popUpAnimationStyle,
-  }) : itemSizes = List<Size?>.filled(items.length, null),
+  }) : assert(position != null || positionBuilder != null,
+        'Either position or positionBuilder must be provided.'),
+       itemSizes = List<Size?>.filled(items.length, null),
        // Menus always cycle focus through their items irrespective of the
        // focus traversal edge behavior set in the Navigator.
        super(traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop);
 
-  final RelativeRect position;
+  final RelativeRect? position;
+  final PopupMenuPositionBuilder? positionBuilder;
   final List<PopupMenuEntry<T>> items;
   final List<GlobalKey> itemKeys;
   final List<Size?> itemSizes;
@@ -955,11 +959,11 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       removeBottom: true,
       removeLeft: true,
       removeRight: true,
-      child: Builder(
-        builder: (BuildContext context) {
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
           return CustomSingleChildLayout(
             delegate: _PopupMenuRouteLayout(
-              position,
+              positionBuilder?.call() ?? position!,
               itemSizes,
               selectedItemIndex,
               Directionality.of(context),
@@ -984,9 +988,34 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   }
 }
 
-/// Show a popup menu that contains the `items` at `position`.
+/// A builder that creates a [RelativeRect] to position a popup menu.
+///
+/// The returned [RelativeRect] determines the position of the popup menu relative
+/// to the bounds of the [Navigator]'s overlay. The menu dimensions are not yet
+/// known when this callback is invoked, as they depend on the items and other
+/// properties of the menu.
+///
+/// The coordinate system used by the [RelativeRect] has its origin at the top
+/// left of the [Navigator]'s overlay. Positive y coordinates are down (below the
+/// origin), and positive x coordinates are to the right of the origin.
+///
+/// See also:
+///
+///  * [RelativeRect.fromLTRB], which creates a [RelativeRect] from left, top,
+///    right, and bottom coordinates.
+///  * [RelativeRect.fromRect], which creates a [RelativeRect] from two [Rect]s,
+///    one representing the size of the popup menu and one representing the size
+///    of the overlay.
+typedef PopupMenuPositionBuilder = RelativeRect Function();
+
+/// Shows a popup menu that contains the `items` at `position`.
 ///
 /// The `items` parameter must not be empty.
+///
+/// Either [position] or [positionBuilder] must be provided. If both are specified,
+/// [position] takes precedence. The [positionBuilder] is called at the time the
+/// menu is shown to compute its position, which is useful when the position needs
+/// to be determined at runtime based on the current layout.
 ///
 /// If `initialValue` is specified then the first item with a matching value
 /// will be highlighted and the value of `position` gives the rectangle whose
@@ -1047,7 +1076,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///    semantics.
 Future<T?> showMenu<T>({
   required BuildContext context,
-  required RelativeRect position,
+  RelativeRect? position,
+  PopupMenuPositionBuilder? positionBuilder,
   required List<PopupMenuEntry<T>> items,
   T? initialValue,
   double? elevation,
@@ -1066,6 +1096,8 @@ Future<T?> showMenu<T>({
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
+  assert(position != null || positionBuilder != null,
+  'Either position or positionBuilder must be provided.');
 
   switch (Theme.of(context).platform) {
     case TargetPlatform.iOS:
@@ -1082,6 +1114,7 @@ Future<T?> showMenu<T>({
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
   return navigator.push(_PopupMenuRoute<T>(
     position: position,
+    positionBuilder: positionBuilder,
     items: items,
     itemKeys: menuItemKeys,
     initialValue: initialValue,
