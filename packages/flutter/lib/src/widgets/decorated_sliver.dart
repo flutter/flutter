@@ -33,8 +33,11 @@ import 'image.dart';
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example show [DecoratedSliver] behavior,
-/// a child of unclipped [CustomScrollView] :
+/// This is a height-resizable window simulating a browser window with [CustomScrollView].
+/// [Slider] adjusts the height of window.
+/// [Switch] toggles the [clipBehavior] of [CustomScrollView].
+///
+/// Demonstrates the behavior of [DecoratedSliver] in relation to parent clipping.
 ///
 /// ** See code in examples/api/lib/widgets/sliver/decorated_sliver.1.dart **
 /// {@end-tool}
