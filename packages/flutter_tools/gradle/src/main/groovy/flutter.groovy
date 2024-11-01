@@ -818,17 +818,25 @@ class FlutterPlugin implements Plugin<Project> {
      * TODO: Remove this or compareVersionStrings. This does not handle strings like "8.6-rc-2".
      */
     static String mostRecentSemanticVersion(String version1, String version2) {
-        List<Integer> version1Tokenized = version1.tokenize(".")*.toInteger()
-        List<Integer> version2Tokenized = version2.tokenize(".")*.toInteger()
-        int minTokens = Math.min(version1Tokenized.size(), version2Tokenized.size())
-        for (int i = 0; i < minTokens; i++) {
-            int num1 = version1Tokenized[i]
-            int num2 = version2Tokenized[i]
-            if (num1 != num2) {
-                return num1 > num2 ? version1 : version2
+        List version1Tokenized = version1.tokenize(".")
+        List version2Tokenized = version2.tokenize(".")
+        int version1numTokens = version1Tokenized.size()
+        int version2numTokens = version2Tokenized.size()
+        int minNumTokens = Math.min(version1numTokens, version2numTokens)
+        for (int i = 0; i < minNumTokens; i++) {
+            int num1 = version1Tokenized[i].toInteger()
+            int num2 = version2Tokenized[i].toInteger()
+            if (num1 > num2) {
+                return version1
+            }
+            if (num2 > num1) {
+                return version2
             }
         }
-        return version1Tokenized.size() > version2Tokenized.size() ? version1 : version2
+        if (version1numTokens > version2numTokens) {
+            return version1
+        }
+        return version2
     }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
