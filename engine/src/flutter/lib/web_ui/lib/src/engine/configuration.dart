@@ -337,6 +337,8 @@ class FlutterConfiguration {
   /// Defaults to 'https://fonts.gstatic.com/s/'.
   String get fontFallbackBaseUrl =>
       _configuration?.fontFallbackBaseUrl ?? 'https://fonts.gstatic.com/s/';
+
+  bool get forceSingleThreadedSkwasm => _configuration?.forceSingleThreadedSkwasm ?? false;
 }
 
 @JS('window.flutterConfiguration')
@@ -393,6 +395,10 @@ extension JsFlutterConfigurationExtension on JsFlutterConfiguration {
   @JS('fontFallbackBaseUrl')
   external JSString? get _fontFallbackBaseUrl;
   String? get fontFallbackBaseUrl => _fontFallbackBaseUrl?.toDart;
+
+  @JS('forceSingleThreadedSkwasm')
+  external JSBoolean? get _forceSingleThreadedSkwasm;
+  bool? get forceSingleThreadedSkwasm => _forceSingleThreadedSkwasm?.toDart;
 }
 
 /// A JavaScript entrypoint that allows developer to set rendering backend

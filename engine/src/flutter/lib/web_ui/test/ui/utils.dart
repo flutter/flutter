@@ -35,3 +35,5 @@ bool get isCanvasKit => renderer is CanvasKitRenderer;
 bool get isHtml => renderer is HtmlRenderer;
 
 bool get isSkwasm => renderer is SkwasmRenderer;
+
+bool get isMultiThreaded => isSkwasm && (renderer as SkwasmRenderer).isMultiThreaded;
