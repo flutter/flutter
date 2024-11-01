@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/scrollbar/raw_scrollbar.0.dart' as e
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('There are 2 scrollbars', (WidgetTester tester) async {
+  testWidgets('There are two scrollbars', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.RawScrollbarExampleApp(),
     );
