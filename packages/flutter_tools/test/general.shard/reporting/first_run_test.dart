@@ -20,7 +20,7 @@ void main() {
   testWithoutContext('FirstRunMessenger informs user how to disable animations', () {
     final FirstRunMessenger messenger = setUpFirstRunMessenger(redisplayWelcomeMessage: false);
 
-    expect(messenger.licenseTerms, contains('flutter config --no-$kCliAnimationsFeatureName'));
+    expect(messenger.licenseTerms, contains('flutter config --no-${cliAnimation.configSetting}'));
   });
 
   testWithoutContext('FirstRunMessenger requires redisplay if it has never been run before', () {
