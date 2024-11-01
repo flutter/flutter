@@ -933,7 +933,10 @@ dependencies:
           addToPackageConfig('web_plugin_with_nested', webPluginWithNestedFile);
 
           final Directory destination = flutterProject.directory.childDirectory('lib');
-          await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: destination);
+          await injectBuildTimePluginFilesForWebPlatform(
+            flutterProject,
+            destination: destination,
+          );
 
           final File registrant = flutterProject.directory
               .childDirectory('lib')
@@ -986,7 +989,7 @@ dependencies:
           flutterProject.isModule = true;
 
           final Directory destination = flutterProject.directory.childDirectory('lib');
-          await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: destination);
+          await injectBuildTimePluginFilesForWebPlatform(flutterProject, destination: destination);
 
           final File registrant = flutterProject.directory
               .childDirectory('lib')

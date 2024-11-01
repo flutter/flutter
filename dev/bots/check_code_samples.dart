@@ -318,6 +318,4 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/scrollbar/raw_scrollbar.shape.0_test.dart',
   'examples/api/test/widgets/scrollbar/raw_scrollbar.0_test.dart',
   'examples/api/test/widgets/interactive_viewer/interactive_viewer.constrained.0_test.dart',
-  'examples/api/test/widgets/interactive_viewer/interactive_viewer.transformation_controller.0_test.dart',
-  'examples/api/test/widgets/notification_listener/notification.0_test.dart',
 };
