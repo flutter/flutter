@@ -5,7 +5,14 @@
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 
 #include "flutter/fml/logging.h"
-#include "include/core/SkCanvas.h"
+#include "impeller/core/texture_descriptor.h"
+#include "impeller/display_list/aiks_context.h"
+#include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/geometry/size.h"
+#include "impeller/renderer/backend/gles/context_gles.h"
+#include "impeller/renderer/backend/gles/handle_gles.h"
+#include "impeller/renderer/backend/gles/texture_gles.h"
+
 #include "include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -62,6 +69,17 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTexture(
     GrDirectContext* context,
     impeller::AiksContext* aiks_context,
     const SkISize& size) {
+  if (!!aiks_context) {
+    return ResolveTextureImpeller(texture_id, aiks_context, size);
+  } else {
+    return ResolveTextureSkia(texture_id, context, size);
+  }
+}
+
+sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureSkia(
+    int64_t texture_id,
+    GrDirectContext* context,
+    const SkISize& size) {
   context->flushAndSubmit();
   context->resetContext(kAll_GrBackendState);
   std::unique_ptr<FlutterOpenGLTexture> texture =
@@ -108,6 +126,49 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTexture(
 
   // This image should not escape local use by EmbedderExternalTextureGL
   return DlImage::Make(std::move(image));
+}
+
+sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
+    int64_t texture_id,
+    impeller::AiksContext* aiks_context,
+    const SkISize& size) {
+  std::unique_ptr<FlutterOpenGLTexture> texture =
+      external_texture_callback_(texture_id, size.width(), size.height());
+
+  if (!texture) {
+    return nullptr;
+  }
+
+  impeller::TextureDescriptor desc;
+  desc.size = impeller::ISize(texture->width, texture->height);
+
+  impeller::ContextGLES& context =
+      impeller::ContextGLES::Cast(*aiks_context->GetContext());
+  impeller::HandleGLES handle = context.GetReactor()->CreateHandle(
+      impeller::HandleType::kTexture, texture->target);
+  std::shared_ptr<impeller::TextureGLES> image =
+      std::make_shared<impeller::TextureGLES>(context.GetReactor(), desc,
+                                              handle);
+
+  if (!image) {
+    // In case Skia rejects the image, call the release proc so that
+    // embedders can perform collection of intermediates.
+    if (texture->destruction_callback) {
+      texture->destruction_callback(texture->user_data);
+    }
+    FML_LOG(ERROR) << "Could not create external texture";
+    return nullptr;
+  }
+  if (texture->destruction_callback &&
+      !context.GetReactor()->RegisterCleanupCallback(
+          handle,
+          [callback = texture->destruction_callback,
+           user_data = texture->user_data]() { callback(user_data); })) {
+    FML_LOG(ERROR) << "Could not register destruction callback";
+    return nullptr;
+  }
+
+  return impeller::DlImageImpeller::Make(image);
 }
 
 // |flutter::Texture|
