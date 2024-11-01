@@ -267,4 +267,185 @@ void main() {
       throwsToolExit(message: 'to have a bool value, instead was "nonBoolValue"'),
     );
   });
+
+  testWithoutContext('synthetic-package: true (implicit) logs a deprecation warning', () async {
+    // Project directory setup for gen_l10n logic.
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+    // Add generate:true to pubspec.yaml.
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    final String content = pubspecFile.readAsStringSync().replaceFirst(
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
+    pubspecFile.writeAsStringSync(content);
+
+    // Create a blank l10n.yaml file.
+    fileSystem.file('l10n.yaml').writeAsStringSync('');
+
+    final BufferLogger mockBufferLogger = BufferLogger.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: mockBufferLogger,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+    );
+    final TestBuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true));
+
+    await generateLocalizationsSyntheticPackage(
+      environment: environment,
+      buildSystem: buildSystem,
+      buildTargets: const BuildTargetsImpl(),
+    );
+
+    expect(
+      mockBufferLogger.warningText,
+      contains('https://flutter.dev/to/flutter-gen-deprecation'),
+    );
+  });
+
+  testWithoutContext('synthetic-package: true (explicit) logs a deprecation warning', () async {
+    // Project directory setup for gen_l10n logic.
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+    // Add generate:true to pubspec.yaml.
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    final String content = pubspecFile.readAsStringSync().replaceFirst(
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
+    pubspecFile.writeAsStringSync(content);
+    fileSystem.file('l10n.yaml').writeAsStringSync('synthetic-package: true');
+
+    final BufferLogger mockBufferLogger = BufferLogger.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: mockBufferLogger,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+    );
+    final TestBuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true));
+
+    await generateLocalizationsSyntheticPackage(
+      environment: environment,
+      buildSystem: buildSystem,
+      buildTargets: const BuildTargetsImpl(),
+    );
+
+    expect(
+      mockBufferLogger.warningText,
+      contains('https://flutter.dev/to/flutter-gen-deprecation'),
+    );
+  });
+
+  testWithoutContext('synthetic-package: false has no deprecation warning', () async {
+    // Project directory setup for gen_l10n logic
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+    // Add generate:true to pubspec.yaml.
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    final String content = pubspecFile.readAsStringSync().replaceFirst(
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
+    pubspecFile.writeAsStringSync(content);
+    fileSystem.file('l10n.yaml').writeAsStringSync('synthetic-package: false');
+
+    final BufferLogger mockBufferLogger = BufferLogger.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: mockBufferLogger,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+    );
+    final TestBuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true));
+
+    await generateLocalizationsSyntheticPackage(
+      environment: environment,
+      buildSystem: buildSystem,
+      buildTargets: const BuildTargetsImpl(),
+    );
+
+    expect(
+      mockBufferLogger.warningText,
+      isNot(contains('https://flutter.dev/to/flutter-gen-deprecation')),
+    );
+  });
+
+  testWithoutContext('synthetic-package: true with --no-implicit-pubspec-resolution is an error', () async {
+    // Project directory setup for gen_l10n logic
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+    // Add generate:true to pubspec.yaml.
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    final String content = pubspecFile.readAsStringSync().replaceFirst(
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
+    pubspecFile.writeAsStringSync(content);
+
+    // Create an l10n.yaml file
+    fileSystem.file('l10n.yaml').writeAsStringSync('synthetic-package: true');
+
+    final BufferLogger mockBufferLogger = BufferLogger.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: mockBufferLogger,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      useImplicitPubspecResolution: false,
+    );
+    // Will throw if build is called.
+    final TestBuildSystem buildSystem = TestBuildSystem.all(null);
+
+    await expectLater(
+      () => generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: buildSystem,
+        buildTargets: const NoOpBuildTargets(),
+      ),
+      throwsToolExit(message: 'Cannot generate a synthetic package when --no-implicit-pubspec-resolution is passed'),
+    );
+  });
+
+  testWithoutContext('synthetic-package defaults to false if --no-implicit-pubspec-resolution is passed', () async {
+    // Project directory setup for gen_l10n logic
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+    // Add generate:true to pubspec.yaml.
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    final String content = pubspecFile.readAsStringSync().replaceFirst(
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
+    pubspecFile.writeAsStringSync(content);
+
+    // Create an l10n.yaml file
+    fileSystem.file('l10n.yaml').writeAsStringSync('');
+
+    final BufferLogger mockBufferLogger = BufferLogger.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: mockBufferLogger,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      useImplicitPubspecResolution: false,
+    );
+    // Will throw if build is called.
+    final TestBuildSystem buildSystem = TestBuildSystem.all(null);
+
+    await expectLater(
+      () => generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: buildSystem,
+        buildTargets: const NoOpBuildTargets(),
+      ),
+      returnsNormally,
+    );
+  });
 }
