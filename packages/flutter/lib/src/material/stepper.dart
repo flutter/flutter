@@ -888,10 +888,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           Padding(
             key: Key('line$i'),
             padding: _stepIconMargin ?? const EdgeInsets.symmetric(horizontal: 8.0),
-            child: SizedBox(
-              height: widget.steps[i].stepStyle?.connectorThickness ?? widget.connectorThickness ?? 1.0,
-              child: ColoredBox(
-                color: widget.steps[i].stepStyle?.connectorColor ?? _connectorColor(widget.steps[i].isActive),
+            child: Center(
+              child: SizedBox(
+                // TODO(victorsanni): Make width dependent on parent horizontal size/padding, and steps size/number.
+                width: 50.0,
+                height: widget.steps[i].stepStyle?.connectorThickness ?? widget.connectorThickness ?? 1.0,
+                child: ColoredBox(
+                  color: widget.steps[i].stepStyle?.connectorColor ?? _connectorColor(widget.steps[i].isActive),
+                ),
               ),
             ),
           ),
