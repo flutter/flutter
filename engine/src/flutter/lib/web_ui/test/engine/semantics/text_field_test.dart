@@ -9,7 +9,6 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' hide window;
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/test_initialization.dart';
 import 'semantics_tester.dart';
@@ -24,8 +23,8 @@ final InputConfiguration multilineConfig = InputConfiguration(
 );
 
 EngineSemantics semantics() => EngineSemantics.instance;
-EngineSemanticsOwner owner() =>
-    EnginePlatformDispatcher.instance.implicitView!.semantics;
+EngineFlutterView get flutterView => EnginePlatformDispatcher.instance.implicitView!;
+EngineSemanticsOwner owner() => flutterView.semantics;
 
 const MethodCodec codec = JSONMethodCodec();
 
@@ -88,6 +87,8 @@ void testMain() {
 
     tearDown(() {
       semantics().semanticsEnabled = false;
+      // Most tests in this file expect to start with nothing focused.
+      domDocument.activeElement?.blur();
     });
 
     test('renders a text field', () {
@@ -156,8 +157,7 @@ void testMain() {
 
       expect(
           owner().semanticsHost.ownerDocument?.activeElement, isNot(textField));
-      // TODO(yjbanov): https://github.com/flutter/flutter/issues/46638
-    }, skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox);
+    });
 
     test('Syncs semantic state from framework', () async {
       expect(
@@ -226,7 +226,9 @@ void testMain() {
       await Future<void>.delayed(Duration.zero);
       expect(
         owner().semanticsHost.ownerDocument?.activeElement,
-        EnginePlatformDispatcher.instance.implicitView!.dom.rootElement,
+        flutterView.dom.rootElement,
+        reason: 'Focus should be returned to the root element of the Flutter view '
+                'after housekeeping DOM operations (blur/remove)',
       );
 
       // There was no user interaction with the <input> element,
@@ -367,7 +369,9 @@ void testMain() {
       await Future<void>.delayed(Duration.zero);
       expect(
         owner().semanticsHost.ownerDocument?.activeElement,
-        EnginePlatformDispatcher.instance.implicitView!.dom.rootElement,
+        flutterView.dom.rootElement,
+        reason: 'Focus should be returned to the root element of the Flutter view '
+                'after housekeeping DOM operations (blur/remove)',
       );
     });
 
