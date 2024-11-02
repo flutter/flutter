@@ -43,10 +43,7 @@ class ItemList extends StatelessWidget {
 
 /// A widget that demonstrates the usage of AutomaticKeepAliveClientMixin
 class KeepAliveItem extends StatefulWidget {
-  const KeepAliveItem({
-    required this.index,
-    super.key,
-  });
+  const KeepAliveItem({super.key, required this.index});
 
   final int index;
 
