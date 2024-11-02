@@ -72,7 +72,8 @@ class KeepAliveItemState extends State<KeepAliveItem>
     super.build(context); // Important to call super.build to preserve the state
 
     return ListTile(
-      title: Text('Item ${widget.index} - Counter: $_counter'),
+      title: Text('Counter: $_counter'),
+      subtitle: Text('Item ${widget.index}'),
       trailing: IconButton(
         icon: const Icon(Icons.add),
         onPressed: () {
