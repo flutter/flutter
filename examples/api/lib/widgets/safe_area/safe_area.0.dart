@@ -134,8 +134,8 @@ enum Inset implements Value {
 }
 
 enum Toggle implements Value {
-  appBar('show AppBar?'),
-  safeArea('wrap body with SafeArea?');
+  appBar('Build an AppBar?'),
+  safeArea("Wrap Scaffold's body with SafeArea?");
 
   const Toggle(this.label);
 
