@@ -25,6 +25,9 @@ EngineSemanticsOwner owner() => EnginePlatformDispatcher.instance.implicitView!.
 DomElement get platformViewsHost =>
     EnginePlatformDispatcher.instance.implicitView!.dom.platformViewsHost;
 
+DomElement get flutterViewRoot =>
+    EnginePlatformDispatcher.instance.implicitView!.dom.rootElement;
+
 void main() {
   internalBootstrapBrowserTest(() {
     return testMain;
@@ -3567,7 +3570,7 @@ void _testRoute() {
     tester.apply();
 
     expect(capturedActions, isEmpty);
-    expect(domDocument.activeElement, domDocument.body);
+    expect(domDocument.activeElement, flutterViewRoot);
 
     semantics().semanticsEnabled = false;
   });

@@ -1411,9 +1411,9 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
         inputConfiguration.autofillGroup?.formElement != null) {
       _styleAutofillElements(activeDomElement, isOffScreen: true);
       inputConfiguration.autofillGroup?.storeForm();
-      scheduleFocusFlutterView(activeDomElement, activeDomElementView);
+      EnginePlatformDispatcher.instance.viewManager.safeBlur(activeDomElement);
     } else {
-      scheduleFocusFlutterView(activeDomElement, activeDomElementView, removeElement: true);
+      EnginePlatformDispatcher.instance.viewManager.safeRemove(activeDomElement);
 		}
     domElement = null;
   }
@@ -1572,29 +1572,6 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
   /// Moves the focus to the [activeDomElement].
   void moveFocusToActiveDomElement() {
     activeDomElement.focusWithoutScroll();
-  }
-
-  /// Move the focus to the given [EngineFlutterView] in the next timer event.
-  ///
-  /// The timer gives the engine the opportunity to focus on another element.
-  /// Shifting focus immediately can cause the keyboard to jump.
-  static void scheduleFocusFlutterView(
-    DomElement element,
-    EngineFlutterView? view, {
-    bool removeElement = false,
-  }) {
-    Timer(Duration.zero, () {
-      // If by the time the timer fired the focused element is no longer the
-      // editing element whose editing session was disabled, there's no need to
-      // move the focus, as it is likely that another widget already took the
-      // focus.
-      if (element == domDocument.activeElement) {
-        view?.dom.rootElement.focusWithoutScroll();
-      }
-      if (removeElement) {
-        element.remove();
-      }
-    });
   }
 }
 
