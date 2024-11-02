@@ -25,7 +25,14 @@ final class ToolCommandRunner extends CommandRunner<int> {
     required this.environment,
     required this.configs,
     this.help = false,
-  }) : super(toolName, toolDescription, usageLineLength: _usageLineLength) {
+  }) : super(
+          'et',
+          ''
+              'A command line tool for working on '
+              'the Flutter Engine.\n\nThis is a community supported project, '
+              'for more information see https://flutter.dev/to/et.',
+          usageLineLength: _usageLineLength,
+        ) {
     final List<Command<int>> commands = <Command<int>>[
       FetchCommand(
         environment: environment,
@@ -72,16 +79,6 @@ final class ToolCommandRunner extends CommandRunner<int> {
       negatable: false,
     );
   }
-
-  /// The name of the tool as reported in the tool's usage and help
-  /// messages.
-  static const String toolName = 'et';
-
-  /// The description of the tool reported in the tool's usage and help
-  /// messages.
-  static const String toolDescription = 'A command line tool for working on '
-      'the Flutter Engine.\n\nThis is a community supported project, file '
-      'a bug or feature request: https://flutter.dev/to/engine-tool-bug.';
 
   /// The host system environment.
   final Environment environment;

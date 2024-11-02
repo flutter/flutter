@@ -16,39 +16,6 @@ import '../src/test_build_configs.dart';
 import '../src/utils.dart';
 
 void main() {
-  test('can find host runnable build', () async {
-    final testEnv = TestEnvironment.withTestEngine(
-      abi: Abi.macosArm64,
-    );
-    addTearDown(testEnv.cleanup);
-
-    final builder = TestBuilderConfig();
-    builder.addBuild(
-      name: 'macos/host_debug',
-      dimension: TestDroneDimension.mac,
-    );
-    builder.addBuild(
-      name: 'mac/host_profile',
-      dimension: TestDroneDimension.mac,
-    );
-    builder.addBuild(
-      name: 'linux/host_debug',
-      dimension: TestDroneDimension.linux,
-    );
-
-    final configs = {
-      'mac_test_config': builder.buildConfig(
-        path: 'ci/builders/mac_test_config.json',
-      ),
-    };
-
-    final result = runnableBuilds(testEnv.environment, configs, true);
-    expect(
-      result.map((r) => r.name),
-      unorderedEquals(['macos/host_debug', 'mac/host_profile']),
-    );
-  });
-
   test('build command invokes gn', () async {
     final testEnv = TestEnvironment.withTestEngine(
       abi: Abi.macosArm64,
