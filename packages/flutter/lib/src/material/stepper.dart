@@ -869,16 +869,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           canRequestFocus: widget.steps[i].state != StepState.disabled,
           child: Row(
             children: <Widget>[
-              SizedBox(
-                height: _isLabel() ? 104.0 : 72.0,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    if (widget.steps[i].label != null) const SizedBox(height: 24.0,),
-                    Center(child: _buildIcon(i)),
-                    if (widget.steps[i].label != null) SizedBox(height : 24.0, child: _buildLabelText(i),),
-                  ],
-                ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  if (widget.steps[i].label != null) const SizedBox(height: 24.0),
+                  Center(child: _buildIcon(i)),
+                  if (widget.steps[i].label != null) SizedBox(height : 24.0, child: _buildLabelText(i)),
+                ],
               ),
               Padding(
                 padding: _stepIconMargin ?? const EdgeInsetsDirectional.only(start: 12.0),
@@ -888,15 +885,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           ),
         ),
         if (!_isLast(i))
-          Expanded(
-            child: Padding(
-              key: Key('line$i'),
-              padding: _stepIconMargin ?? const EdgeInsets.symmetric(horizontal: 8.0),
-              child: SizedBox(
-                height: widget.steps[i].stepStyle?.connectorThickness ?? widget.connectorThickness ?? 1.0,
-                child: ColoredBox(
-                  color: widget.steps[i].stepStyle?.connectorColor ?? _connectorColor(widget.steps[i].isActive),
-                ),
+          Padding(
+            key: Key('line$i'),
+            padding: _stepIconMargin ?? const EdgeInsets.symmetric(horizontal: 8.0),
+            child: SizedBox(
+              height: widget.steps[i].stepStyle?.connectorThickness ?? widget.connectorThickness ?? 1.0,
+              child: ColoredBox(
+                color: widget.steps[i].stepStyle?.connectorColor ?? _connectorColor(widget.steps[i].isActive),
               ),
             ),
           ),
@@ -919,13 +914,18 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
     return Column(
       children: <Widget>[
-        Material(
-          elevation: widget.elevation ?? 2,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: SizedBox(
-              height: _stepIconHeight != null ? _stepIconHeight! * _heightFactor : null,
-              child: Row(children: children),
+        SizedBox(
+          height: _stepIconHeight != null
+            ? _stepIconHeight! * _heightFactor
+            : _isLabel() ? 104.0 : 72.0,
+          child: Material(
+            elevation: widget.elevation ?? 2,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: children,
+              ),
             ),
           ),
         ),

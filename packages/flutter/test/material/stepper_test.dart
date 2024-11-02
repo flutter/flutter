@@ -1137,7 +1137,12 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         ),
       );
 
-      final ListView listView = tester.widget<ListView>(find.descendant(of: find.byType(Stepper), matching: find.byType(ListView)));
+      final ListView listView = tester.widget<ListView>(
+        find.descendant(
+          of: find.byType(Stepper),
+          matching: find.byType(ListView).last,
+        ),
+      );
       expect(listView.physics, physics);
     }
   });
@@ -1167,9 +1172,11 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       );
 
       final ListView listView = tester.widget<ListView>(
-        find.descendant(of: find.byType(Stepper),
-        matching: find.byType(ListView),
-      ));
+        find.descendant(
+          of: find.byType(Stepper),
+          matching: find.byType(ListView).last,
+        ),
+      );
       expect(listView.controller, controller);
     }
   });
