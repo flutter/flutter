@@ -53,10 +53,8 @@ class KeepAliveItem extends StatefulWidget {
 
 class KeepAliveItemState extends State<KeepAliveItem>
     with AutomaticKeepAliveClientMixin<KeepAliveItem> {
-  bool _keepAlive = false;
-
   @override
-  bool get wantKeepAlive => _keepAlive;
+  bool wantKeepAlive = false;
 
   @override
   Widget build(BuildContext context) {
