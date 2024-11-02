@@ -11,51 +11,6 @@ import 'environment.dart';
 import 'label.dart';
 import 'logger.dart';
 
-/// A function that returns true or false when given a [BuilderConfig] and its
-/// name.
-typedef ConfigFilter = bool Function(String name, BuilderConfig config);
-
-/// A function that returns true or false when given a [BuilderConfig] name
-/// and a [Build].
-typedef BuildFilter = bool Function(String configName, Build build);
-
-/// Returns a filtered copy of [input] filtering out configs where test
-/// returns false.
-Map<String, BuilderConfig> filterBuilderConfigs(
-    Map<String, BuilderConfig> input, ConfigFilter test) {
-  return <String, BuilderConfig>{
-    for (final MapEntry<String, BuilderConfig> entry in input.entries)
-      if (test(entry.key, entry.value)) entry.key: entry.value,
-  };
-}
-
-/// Returns a copy of [input] filtering out configs that are not runnable
-/// on the current platform.
-Map<String, BuilderConfig> runnableBuilderConfigs(
-    Environment env, Map<String, BuilderConfig> input) {
-  return filterBuilderConfigs(input, (String name, BuilderConfig config) {
-    return config.canRunOn(env.platform);
-  });
-}
-
-/// Returns a List of [Build] that match test.
-List<Build> filterBuilds(Map<String, BuilderConfig> input, BuildFilter test) {
-  return <Build>[
-    for (final MapEntry<String, BuilderConfig> entry in input.entries)
-      for (final Build build in entry.value.builds)
-        if (test(entry.key, build)) build,
-  ];
-}
-
-/// Returns a list of runnable builds.
-List<Build> runnableBuilds(
-    Environment env, Map<String, BuilderConfig> input, bool verbose) {
-  return filterBuilds(input, (String configName, Build build) {
-    return build.canRunOn(env.platform) &&
-        (verbose || build.name.startsWith(env.platform.operatingSystem));
-  });
-}
-
 /// Validates the list of builds.
 /// Calls assert.
 void debugCheckBuilds(List<Build> builds) {
@@ -99,8 +54,10 @@ String mangleConfigName(Environment env, String name) {
   if (_doNotMangle(env, name)) {
     return name;
   }
-  throw ArgumentError(
-    'name argument "$name" must start with a valid platform name or "ci"',
+  throw ArgumentError.value(
+    name,
+    'name',
+    'Expected to start with a valid platform name (i.e. $osPrefix) or "ci/"',
   );
 }
 
