@@ -301,6 +301,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       style: textStyle.copyWith(color: CupertinoDynamicColor.maybeResolve(textStyle.color, context)),
       child: Stack(
         children: <Widget>[
+          if (widget.selectionOverlay != null)
+            _buildSelectionOverlay(widget.selectionOverlay!),
           Positioned.fill(
             child: _CupertinoPickerSemantics(
               scrollController: controller,
@@ -323,8 +325,6 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               ),
             ),
           ),
-          if (widget.selectionOverlay != null)
-            _buildSelectionOverlay(widget.selectionOverlay!),
         ],
       ),
     );
