@@ -37,18 +37,27 @@ typedef _PointerDataCallback = void Function(DomEvent event, List<ui.PointerData
 // here, we use an already very large number (30 bits).
 const int _kButtonsMask = 0x3FFFFFFF;
 
-// Intentionally set to -1 or -2 so it doesn't conflict with other device IDs.
+// Assumes the device supports at most one mouse, one touch screen, and one
+// trackpad, therefore these pointer events are assigned fixed device IDs.
 const int _mouseDeviceId = -1;
 const int _trackpadDeviceId = -2;
+// For now only one stylus is supported.
+//
+// Device may support multiple styluses, but `PointerEvent` does not
+// distinguish between them with unique identifiers. Additionally, repeated
+// touches from the same stylus will be assigned different `pointerId`s each
+// time. Since it's really hard to handle, support for multiple styluses is
+// left for when demanded.
+const int _stylusDeviceId = -4;
 
 const int _kPrimaryMouseButton = 0x1;
 const int _kSecondaryMouseButton = 0x2;
-const int _kMiddleMouseButton =0x4;
+const int _kMiddleMouseButton = 0x4;
 
 int _nthButton(int n) => 0x1 << n;
 
-/// Convert the `button` property of PointerEvent or MouseEvent to a bit mask of
-/// its `buttons` property.
+/// Convert the `button` property of PointerEvent to a bit mask of its `buttons`
+/// property.
 ///
 /// The `button` property is a integer describing the button changed in an event,
 /// which is sequentially 0 for LMB, 1 for MMB, 2 for RMB, 3 for backward and
@@ -1009,7 +1018,19 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       }
     });
 
-    // Why `domWindow` you ask? See this fiddle: https://jsfiddle.net/ditman/7towxaqp
+    // Move event listeners should be added to `_globalTarget` instead of
+    // `_viewTarget`. This is because `_viewTarget` (the root) captures pointers
+    // by default, meaning a pointer that starts within `_viewTarget` continues
+    // sending move events to its listener even when dragged outside.
+    //
+    // In contrast, `_globalTarget` (a regular <div>) stops sending move events
+    // when the pointer moves outside its bounds and resumes them only when the
+    // pointer re-enters.
+    //
+    // For demonstration, see this fiddle: https://jsfiddle.net/ditman/7towxaqp
+    //
+    // TODO(dkwingsmt): Investigate whether we can configure the behavior for
+    // `_viewTarget`. https://github.com/flutter/flutter/issues/157968
     _addPointerEventListener(_globalTarget, 'pointermove', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
@@ -1133,12 +1154,21 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   }
 
   int _getPointerId(DomPointerEvent event) {
-    // We force `device: _mouseDeviceId` on mouse pointers because Wheel events
-    // might come before any PointerEvents, and since wheel events don't contain
-    // pointerId we always assign `device: _mouseDeviceId` to them.
-    final ui.PointerDeviceKind kind = _pointerTypeToDeviceKind(event.pointerType!);
-    return kind == ui.PointerDeviceKind.mouse ? _mouseDeviceId :
-        event.pointerId!.toInt();
+    // All mouse pointer events are given `_mouseDeviceId`, including wheel
+    // events, because wheel events might come before any other PointerEvents,
+    // and wheel PointerEvents don't contain pointerIds.
+    return switch(_pointerTypeToDeviceKind(event.pointerType!)) {
+      ui.PointerDeviceKind.mouse => _mouseDeviceId,
+
+      ui.PointerDeviceKind.stylus ||
+      ui.PointerDeviceKind.invertedStylus => _stylusDeviceId,
+
+      // Trackpad processing doesn't call this function.
+      ui.PointerDeviceKind.trackpad => throw Exception('Unreachable'),
+
+      ui.PointerDeviceKind.touch ||
+      ui.PointerDeviceKind.unknown => event.pointerId!.toInt(),
+    };
   }
 
   /// Tilt angle is -90 to + 90. Take maximum deflection and convert to radians.
