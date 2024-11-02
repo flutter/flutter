@@ -547,6 +547,75 @@ void main() {
         contains('Additional arguments to provide to "gn"'),
       );
     });
+
+    /// Returns an [ArgParser] pre-primed with both MacOS and Linux builds.
+    ArgParser createMultiPlatformArgParser({
+      required bool verbose,
+    }) {
+      final testEnv = TestEnvironment.withTestEngine(
+        verbose: verbose,
+      );
+      addTearDown(testEnv.cleanup);
+
+      final linuxConfig = TestBuilderConfig();
+      linuxConfig.addBuild(
+        name: 'linux/host_debug',
+        dimension: TestDroneDimension.linux,
+        description: 'A development build of the Linux host.',
+      );
+      linuxConfig.addBuild(
+        name: 'ci/linux_host_debug',
+        dimension: TestDroneDimension.linux,
+        description: 'A CI-suitable development build of the Linux host.',
+      );
+
+      final macOSConfig = TestBuilderConfig();
+      macOSConfig.addBuild(
+        name: 'macos/host_debug',
+        dimension: TestDroneDimension.mac,
+        description: 'A build we do not expect to see due to filtering.',
+      );
+
+      final parser = ArgParser();
+      final _ = BuildPlan.configureArgParser(
+        parser,
+        testEnv.environment,
+        configs: {
+          'linux_test_config': linuxConfig.buildConfig(
+            path: 'ci/builders/linux_test_config.json',
+          ),
+          'macos_test_config': macOSConfig.buildConfig(
+            path: 'ci/builders/macos_test_config.json',
+          ),
+        },
+        help: true,
+      );
+
+      return parser;
+    }
+
+    test('shows only non-CI builds that can run locally', () {
+      final parser = createMultiPlatformArgParser(verbose: false);
+
+      expect(
+        parser.usage,
+        contains('[host_debug]'),
+      );
+    });
+
+    test('shows builds that can run locally, with details', () {
+      final parser = createMultiPlatformArgParser(verbose: true);
+
+      expect(
+        parser.usage,
+        stringContainsInOrder([
+          '[ci/linux_host_debug]',
+          'A CI-suitable development build of the Linux host.',
+          '[host_debug]',
+          'A development build of the Linux host.',
+        ]),
+      );
+    });
   });
 }
 
