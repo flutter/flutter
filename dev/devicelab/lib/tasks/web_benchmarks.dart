@@ -173,7 +173,13 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           throw 'Benchmark name is empty';
         }
 
-        final String namespace = '$benchmarkName.${benchmarkOptions.webRenderer}';
+        final String webRendererName;
+        if (benchmarkOptions.useWasm && benchmarkOptions.forceSingleThreadedSkwasm) {
+          webRendererName = 'skwasm_st';
+        } else {
+          webRendererName = benchmarkOptions.webRenderer;
+        }
+        final String namespace = '$benchmarkName.$webRendererName';
         final List<String> scoreKeys = List<String>.from(profile['scoreKeys'] as List<dynamic>);
         if (scoreKeys.isEmpty) {
           throw 'No score keys in benchmark "$benchmarkName"';
