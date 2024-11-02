@@ -670,6 +670,7 @@ class CustomScrollView extends ScrollView {
     super.scrollBehavior,
     super.shrinkWrap,
     super.center,
+    this.padding,
     super.anchor,
     super.cacheExtent,
     this.slivers = const <Widget>[],
@@ -779,8 +780,21 @@ class CustomScrollView extends ScrollView {
   /// a [CustomScrollView] and a [SliverList] or [SliverGrid] (respectively).
   final List<Widget> slivers;
 
+  /// The amount of space by which to inset the slivers.
+  final EdgeInsetsGeometry? padding;
+
   @override
   List<Widget> buildSlivers(BuildContext context) => slivers;
+
+  @override
+  Widget buildViewport(BuildContext context, ViewportOffset offset, AxisDirection axisDirection, List<Widget> slivers) {
+    Widget viewPort = super.buildViewport(context, offset, axisDirection, slivers);
+
+    viewPort = padding != null
+        ? Padding(padding: padding!, child: viewPort)
+        : viewPort;
+    return viewPort;
+  }
 }
 
 /// A [ScrollView] that uses a single child layout model.
