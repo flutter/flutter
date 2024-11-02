@@ -802,6 +802,7 @@ class AnimationController extends Animation<double>
 
   /// Drives the animation according to the given simulation.
   ///
+  /// {@template flutter.animation.AnimationController.animateWith}
   /// The values from the simulation are clamped to the [lowerBound] and
   /// [upperBound]. To avoid this, consider creating the [AnimationController]
   /// using the [AnimationController.unbounded] constructor.
@@ -811,6 +812,7 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
+  /// {@endtemplate}
   ///
   /// The [status] is always [AnimationStatus.forward] for the entire duration
   /// of the simulation.
@@ -830,17 +832,10 @@ class AnimationController extends Animation<double>
     return _startSimulation(simulation);
   }
 
-  /// Drives the animation according to the given simulation.
+  /// Drives the animation according to the given simulation with a [status] of
+  /// [AnimationStatus.reverse].
   ///
-  /// The values from the simulation are clamped to the [lowerBound] and
-  /// [upperBound]. To avoid this, consider creating the [AnimationController]
-  /// using the [AnimationController.unbounded] constructor.
-  ///
-  /// Returns a [TickerFuture] that completes when the animation is complete.
-  ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
+  /// {@macro flutter.animation.AnimationController.animateWith}
   ///
   /// The [status] is always [AnimationStatus.reverse] for the entire duration
   /// of the simulation.
