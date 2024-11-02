@@ -1165,8 +1165,9 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   final Offset? anchorPoint;
 
   @override
-  Simulation createSimulation({required double end}) {
+  Simulation createSimulation({ required bool forward }) {
     assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
+    final double end = forward ? 1.0 : 0.0;
     return SpringSimulation(_kStandardSpring, controller!.value, end, 0);
   }
 

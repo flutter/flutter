@@ -239,8 +239,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
     final Duration reverseDuration = reverseTransitionDuration;
-    assert(useSimulation || duration >= Duration.zero,
-        'The `duration` must be positive for a non-simulation animation. Received $duration.');
     return AnimationController(
       duration: duration,
       reverseDuration: reverseDuration,
@@ -258,15 +256,50 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     return _controller!.view;
   }
 
-  bool get useSimulation => false;
-
+  /// The simulation used by the most recent pushing or popping transition, if
+  /// any.
+  ///
+  /// The value is null before the first transition.
+  ///
+  /// See also:
+  ///
+  ///  * [createSimulation], which creates this value.
   Simulation? get simulation => _simulation;
   Simulation? _simulation;
 
-  Simulation createSimulation({required double end}) {
-    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
-    assert(!useSimulation, 'This method must not be called if useSimulation is false.');
-    throw UnimplementedError;
+  /// Creates the simulation that drives the transition animation for this route.
+  ///
+  /// By default, this method returns null, indicating that the route initiates
+  /// the transition by calling either [AnimationController.forward] or
+  /// [AnimationController.reverse] with [transitionDuration] and the controller's
+  /// curve.
+  ///
+  /// Subclasses can override this method to return a non-null [Simulation]. In
+  /// this case, the [controller] will instead use the provided simulation to
+  /// animate the transition using [AnimationController.animateWith] or
+  /// [AnimationController.animateBackWith], and the [controller]'s curve and
+  /// [transitionDuration] are ignored.
+  ///
+  /// This method is invoked each time the navigator pushes or pops this route.
+  /// The `forward` parameter indicates the direction of the transition: true when
+  /// the route is pushed, and false when it is popped.
+  ///
+  /// See also:
+  ///
+  ///  * [simulation], which returns the simulation for the most recent
+  ///    transition.
+  Simulation? createSimulation({ required bool forward }) {
+    assert(transitionDuration >= Duration.zero,
+        'The `duration` must be positive for a non-simulation animation. Received $transitionDuration.');
+    return null;
+  }
+  Simulation? _createSimulationAndVerify({ required bool forward }) {
+    final Simulation? simulation = createSimulation(forward: forward);
+    assert(transitionDuration >= Duration.zero,
+        "The `duration` must be positive for an animation that doesn't use simulation. "
+        'Either set `transitionDuration` or set `createSimulation`. '
+        'Received $transitionDuration.');
+    return simulation;
   }
 
   T? _result;
@@ -320,10 +353,10 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     super.didPush();
-    if (!useSimulation) {
+    _simulation = _createSimulationAndVerify(forward: true);
+    if (_simulation == null) {
       return _controller!.forward();
     } else {
-      _simulation = createSimulation(end: _controller!.upperBound);
       return _controller!.animateWith(_simulation!);
     }
   }
@@ -351,10 +384,10 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     assert(_controller != null, '$runtimeType.didPop called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _result = result;
-    if (!useSimulation) {
+    _simulation = _createSimulationAndVerify(forward: false);
+    if (_simulation == null) {
       _controller!.reverse();
     } else {
-      _simulation = createSimulation(end: _controller!.lowerBound);
       _controller!.animateBackWith(_simulation!);
     }
     return super.didPop(result);
