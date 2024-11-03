@@ -47,8 +47,7 @@ void main() {
       mainPath: globals.fs.path.join('lib', 'main.dart'),
       assetDirPath: 'example',
       depfilePath: 'example.d',
-      buildSystem: buildSystem,
-      useImplicitPubspecResolution: true,
+      buildSystem: buildSystem
     );
     expect(globals.fs.file(globals.fs.path.join('example', 'kernel_blob.bin')).existsSync(), true);
     expect(globals.fs.file(globals.fs.path.join('example', 'LICENSE')).existsSync(), true);
@@ -137,8 +136,7 @@ void main() {
         mainPath: 'lib/main.dart',
         assetDirPath: 'example',
         depfilePath: 'example.d',
-        buildSystem: TestBuildSystem.all(BuildResult(success: false)),
-        useImplicitPubspecResolution: true,
+        buildSystem: TestBuildSystem.all(BuildResult(success: false))
       ),
       throwsToolExit()
     );
@@ -183,8 +181,7 @@ void main() {
       mainPath: mainPath,
       assetDirPath: assetDirPath,
       depfilePath: depfilePath,
-      buildSystem: buildSystem,
-      useImplicitPubspecResolution: true,
+      buildSystem: buildSystem
     );
 
     expect(env, isNotNull);

@@ -56,7 +56,6 @@ class GenerateLocalizationsTarget extends Target {
       file: configFile,
       logger: environment.logger,
       defaultArbDir: defaultArbDir,
-      defaultSyntheticPackage: environment.useImplicitPubspecResolution,
     );
     await generateLocalizations(
       logger: environment.logger,

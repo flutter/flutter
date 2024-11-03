@@ -61,7 +61,6 @@ void main() {
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       ),
-      useImplicitPubspecResolution: true,
     );
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -92,7 +91,6 @@ void main() {
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       ),
-      useImplicitPubspecResolution: true,
     );
 
     expect(() => residentWebRunner.run(), throwsToolExit());
@@ -118,7 +116,6 @@ void main() {
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       ),
-      useImplicitPubspecResolution: true,
     );
 
     expect(() async => residentWebRunner.run(), throwsException);
@@ -143,7 +140,6 @@ void main() {
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       ),
-      useImplicitPubspecResolution: true,
     );
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -173,7 +169,6 @@ void main() {
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       ),
-      useImplicitPubspecResolution: true,
     );
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(

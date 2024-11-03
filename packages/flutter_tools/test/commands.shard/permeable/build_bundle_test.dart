@@ -544,6 +544,5 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? assetDirPath,
     bool buildNativeAssets = true,
     @visibleForTesting BuildSystem? buildSystem,
-    required bool useImplicitPubspecResolution,
   }) async {}
 }

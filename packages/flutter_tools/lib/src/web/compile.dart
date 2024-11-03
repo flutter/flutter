@@ -46,15 +46,13 @@ class WebBuilder {
     required Analytics analytics,
     required FlutterVersion flutterVersion,
     required FileSystem fileSystem,
-    required bool useImplicitPubspecResolution,
   })  : _logger = logger,
         _processManager = processManager,
         _buildSystem = buildSystem,
         _flutterUsage = usage,
         _analytics = analytics,
         _flutterVersion = flutterVersion,
-        _fileSystem = fileSystem,
-        _useImplicitPubspecResolution = useImplicitPubspecResolution;
+        _fileSystem = fileSystem;
 
   final Logger _logger;
   final ProcessManager _processManager;
@@ -63,7 +61,6 @@ class WebBuilder {
   final Analytics _analytics;
   final FlutterVersion _flutterVersion;
   final FileSystem _fileSystem;
-  final bool _useImplicitPubspecResolution;
 
   Future<void> buildWeb(
     FlutterProject flutterProject,
@@ -119,7 +116,6 @@ class WebBuilder {
             // Web uses a different Dart plugin registry.
             // https://github.com/flutter/flutter/issues/80406
             generateDartPluginRegistry: false,
-            useImplicitPubspecResolution: _useImplicitPubspecResolution,
           ));
       if (!result.success) {
         for (final ExceptionMeasurement measurement in result.exceptions.values) {

@@ -21,7 +21,6 @@ import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import '../template.dart';
 
 const List<String> _kAvailablePlatforms = <String>[
@@ -575,7 +574,6 @@ abstract class CreateBase extends FlutterCommand {
         projectDir: project.directory,
         packageConfigPath: packageConfigPath(),
         generateDartPluginRegistry: true,
-        useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
       );
 
       // Generate the l10n synthetic package that will be injected into the
