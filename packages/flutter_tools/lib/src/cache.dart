@@ -447,10 +447,24 @@ class Cache {
   }
   String? _dartSdkBuild;
 
-
   /// The current version of the Flutter engine the flutter tool will download.
   String get engineRevision {
-    _engineRevision ??= getVersionFor('engine');
+    if (_engineRevision != null) {
+      return _engineRevision!;
+    }
+    final String path = _fileSystem.path.join(
+      _rootOverride?.path ?? flutterRoot!,
+      'bin',
+      'cache',
+      'engine-dart-sdk.stamp',
+    );
+    _logger.printBox(path);
+    _logger.printError('@');
+    _logger.printError(path);
+    final File engineStampFile = _fileSystem.file(path);
+    _engineRevision = engineStampFile.existsSync()
+        ? engineStampFile.readAsStringSync().trim()
+        : null;
     if (_engineRevision == null) {
       throwToolExit('Could not determine engine revision.');
     }
