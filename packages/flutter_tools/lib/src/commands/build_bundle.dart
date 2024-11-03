@@ -13,7 +13,6 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
@@ -150,7 +149,6 @@ class BuildBundleCommand extends BuildSubCommand {
       depfilePath: stringArg('depfile'),
       assetDirPath: stringArg('asset-dir'),
       buildNativeAssets: false,
-      useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
     );
     return FlutterCommandResult.success();
   }

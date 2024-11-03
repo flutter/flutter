@@ -53,7 +53,6 @@ class FlutterDeviceManager extends DeviceManager {
     required WindowsWorkflow windowsWorkflow,
     required CustomDevicesConfig customDevicesConfig,
     required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-    required bool useImplicitPubspecResolution,
   }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
       logger: logger,
@@ -80,7 +79,6 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       artifacts: artifacts,
       nativeAssetsBuilder: nativeAssetsBuilder,
-      useImplicitPubspecResolution: useImplicitPubspecResolution,
     ),
     MacOSDevices(
       processManager: processManager,
@@ -105,7 +103,6 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       processManager: processManager,
       featureFlags: featureFlags,
-      useImplicitPubspecResolution: useImplicitPubspecResolution,
     ),
     LinuxDevices(
       platform: platform,
@@ -133,8 +130,7 @@ class FlutterDeviceManager extends DeviceManager {
       featureFlags: featureFlags,
       processManager: processManager,
       logger: logger,
-      config: customDevicesConfig,
-      useImplicitPubspecResolution: useImplicitPubspecResolution,
+      config: customDevicesConfig
     ),
   ];
 
