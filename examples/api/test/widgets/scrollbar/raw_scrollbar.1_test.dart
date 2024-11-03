@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/scrollbar/raw_scrollbar.1.dart' as e
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('When thumbVisibility is true, the scrollbar thumb will remain visible', (WidgetTester tester) async {
+  testWidgets('When thumbVisibility is true, the scrollbar thumb remains visible', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.RawScrollbarExampleApp(),
     );
