@@ -305,7 +305,6 @@ class PackagesGetCommand extends FlutterCommand {
           projectDir: rootProject.directory,
           packageConfigPath: packageConfigPath(),
           generateDartPluginRegistry: true,
-          useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
         );
 
         await generateLocalizationsSyntheticPackage(
@@ -329,7 +328,6 @@ class PackagesGetCommand extends FlutterCommand {
           projectDir: rootProject.directory,
           packageConfigPath: packageConfigPath(),
           generateDartPluginRegistry: true,
-          useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
         );
         final BuildResult result = await globals.buildSystem.build(
           const GenerateLocalizationsTarget(),
