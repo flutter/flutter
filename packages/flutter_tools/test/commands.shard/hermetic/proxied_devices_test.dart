@@ -71,7 +71,6 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         notifyingLogger: notifyingLogger,
-        useImplicitPubspecResolution: true,
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
@@ -93,7 +92,6 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         notifyingLogger: notifyingLogger,
-        useImplicitPubspecResolution: true,
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
@@ -116,7 +114,6 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         notifyingLogger: notifyingLogger,
-        useImplicitPubspecResolution: true,
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
@@ -147,7 +144,6 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         notifyingLogger: notifyingLogger,
-        useImplicitPubspecResolution: true,
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
@@ -201,7 +197,6 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         notifyingLogger: notifyingLogger,
-        useImplicitPubspecResolution: true,
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();

@@ -682,7 +682,6 @@ class RunCommand extends RunCommandBase {
     required String? applicationBinaryPath,
     required FlutterProject flutterProject,
   }) async {
-    final bool useImplicitPubspecResolution = globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution);
     if (hotMode && !webMode) {
       return HotRunner(
         flutterDevices,
@@ -698,7 +697,6 @@ class RunCommand extends RunCommandBase {
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
         nativeAssetsBuilder: _nativeAssetsBuilder,
-        useImplicitPubspecResolution: useImplicitPubspecResolution,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -712,7 +710,6 @@ class RunCommand extends RunCommandBase {
         analytics: globals.analytics,
         logger: globals.logger,
         systemClock: globals.systemClock,
-        useImplicitPubspecResolution: useImplicitPubspecResolution,
       );
     }
     return ColdRunner(
@@ -725,13 +722,11 @@ class RunCommand extends RunCommandBase {
           ? null
           : globals.fs.file(applicationBinaryPath),
       stayResident: stayResident,
-      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
   }
 
   @visibleForTesting
   Daemon createMachineDaemon() {
-    final bool useImplicitPubspecResolution = globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution);
     final Daemon daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
@@ -741,7 +736,6 @@ class RunCommand extends RunCommandBase {
         ? globals.logger as NotifyingLogger
         : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
       logToStdout: true,
-      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
     return daemon;
   }
