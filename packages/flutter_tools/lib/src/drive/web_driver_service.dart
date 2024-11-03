@@ -30,13 +30,16 @@ class WebDriverService extends DriverService {
     required ProcessUtils processUtils,
     required String dartSdkPath,
     required Logger logger,
+    required bool useImplicitPubspecResolution,
   }) : _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
-       _logger = logger;
+       _logger = logger,
+       _useImplicitPubspecResolution = useImplicitPubspecResolution;
 
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
   final Logger _logger;
+  final bool _useImplicitPubspecResolution;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -94,6 +97,7 @@ class WebDriverService extends DriverService {
       analytics: globals.analytics,
       logger: _logger,
       systemClock: globals.systemClock,
+      useImplicitPubspecResolution: _useImplicitPubspecResolution,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(

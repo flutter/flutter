@@ -1051,16 +1051,13 @@ Future<void> refreshPluginsList(
 /// to inject a copy of the plugin registrant for web into .dart_tool/dartpad so
 /// dartpad can get the plugin registrant without needing to build the complete
 /// project. See: https://github.com/dart-lang/dart-services/pull/874
-Future<void> injectBuildTimePluginFiles(
+Future<void> injectBuildTimePluginFilesForWebPlatform(
   FlutterProject project, {
   required Directory destination,
-  bool webPlatform = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(plugins, pluginResolutionType: _PluginResolutionType.nativeOrDart);
-  if (webPlatform) {
-    await _writeWebPluginRegistrant(project, pluginsByPlatform[WebPlugin.kConfigKey]!, destination);
-  }
+  await _writeWebPluginRegistrant(project, pluginsByPlatform[WebPlugin.kConfigKey]!, destination);
 }
 
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
@@ -1071,7 +1068,7 @@ Future<void> injectBuildTimePluginFiles(
 /// Files written by this method end up in platform-specific locations that are
 /// configured by each [FlutterProject] subclass (except for the Web).
 ///
-/// Web tooling uses [injectBuildTimePluginFiles] instead, which places files in the
+/// Web tooling uses [injectBuildTimePluginFilesForWebPlatform] instead, which places files in the
 /// current build (temp) directory, and doesn't modify the users' working copy.
 ///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.

@@ -68,6 +68,7 @@ import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
   FutureOr<T> Function() runner, {
+  bool useImplicitPubspecResolution = true,
   Map<Type, Generator>? overrides,
 }) async {
 
@@ -210,6 +211,7 @@ Future<T> runInContext<T>(
         operatingSystemUtils: globals.os,
         customDevicesConfig: globals.customDevicesConfig,
         nativeAssetsBuilder: globals.nativeAssetsBuilder,
+        useImplicitPubspecResolution: useImplicitPubspecResolution,
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
