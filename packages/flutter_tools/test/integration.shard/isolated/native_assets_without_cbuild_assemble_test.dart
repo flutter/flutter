@@ -51,6 +51,7 @@ void main() {
       buildCommand: buildCommand,
       processManager: processManager,
       nativeAssetsCliVersionConstraint: constraint,
+      codeSign: buildCommand != 'ios',
     );
   }
 }
@@ -59,6 +60,7 @@ void _testBuildCommand({
   required String buildCommand,
   required String nativeAssetsCliVersionConstraint,
   required ProcessManager processManager,
+  required bool codeSign,
 }) {
   testWithoutContext(
     'flutter build "$buildCommand" succeeds without libraries',
@@ -116,8 +118,9 @@ void main(List<String> args) async {
             <String>[
               flutterBin,
               'build',
-              'macos',
+              buildCommand,
               '--debug',
+              if (!codeSign) '--no-codesign',
             ],
             workingDirectory: packageDirectory.path,
           ),
