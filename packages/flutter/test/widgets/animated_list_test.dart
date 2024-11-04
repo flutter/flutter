@@ -616,7 +616,6 @@ void main() {
       }, duration: const Duration(milliseconds: 100));
       await tester.pumpAndSettle();
 
-      // Verifique se o item foi removido
       final List<Text> finalListEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
       expect(finalListEntries.length, 3);
       expect(finalListEntries[0].data, equals('1'));
