@@ -421,5 +421,46 @@ void main() {
         expect(featureFlags.isSwiftPackageManagerEnabled, isTrue);
       });
     });
+
+    group('Swift Package Manager app migration feature', () {
+      test('availability and default enabled', () {
+        expect(swiftPackageManagerMigration.master.enabledByDefault, false);
+        expect(swiftPackageManagerMigration.master.available, true);
+        expect(swiftPackageManagerMigration.beta.enabledByDefault, false);
+        expect(swiftPackageManagerMigration.beta.available, true);
+        expect(swiftPackageManagerMigration.stable.enabledByDefault, false);
+        expect(swiftPackageManagerMigration.stable.available, true);
+      });
+
+      test('requires Swift Package Manager feature', () {
+        platform.environment = <String, String>{
+          'SWIFT_PACKAGE_MANAGER': 'false',
+          'FLUTTER_SWIFT_PACKAGE_MANAGER_MIGRATION': 'true',
+        };
+
+        expect(featureFlags.isSwiftPackageManagerEnabled, isFalse);
+        expect(featureFlags.isSwiftPackageManagerMigrationEnabled, isFalse);
+      });
+
+      test('is separate from the Swift Package Manager feature', () {
+        platform.environment = <String, String>{
+          'SWIFT_PACKAGE_MANAGER': 'true',
+          'FLUTTER_SWIFT_PACKAGE_MANAGER_MIGRATION': 'false',
+        };
+
+        expect(featureFlags.isSwiftPackageManagerEnabled, isTrue);
+        expect(featureFlags.isSwiftPackageManagerMigrationEnabled, isFalse);
+      });
+
+      test('can be enabled', () {
+        platform.environment = <String, String>{
+          'SWIFT_PACKAGE_MANAGER': 'true',
+          'FLUTTER_SWIFT_PACKAGE_MANAGER_MIGRATION': 'true',
+        };
+
+        expect(featureFlags.isSwiftPackageManagerEnabled, isTrue);
+        expect(featureFlags.isSwiftPackageManagerEnabled, isTrue);
+      });
+    });
   });
 }

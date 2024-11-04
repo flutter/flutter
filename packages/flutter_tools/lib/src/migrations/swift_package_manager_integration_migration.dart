@@ -119,6 +119,14 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       return;
     }
 
+    if (!_features.isSwiftPackageManagerMigrationEnabled) {
+      logger.printTrace(
+        'The migration to add Swift Package Manager integration is off. '
+        'Skipping...',
+      );
+      return;
+    }
+
     if (!_xcodeProject.flutterPluginSwiftPackageManifest.existsSync()) {
       logger.printTrace(
         'The tool did not generate a Swift package. '
@@ -181,20 +189,21 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       // TODO(vashworth): Add link to instructions on how to manually integrate
       // once available on website.
       throwToolExit(
-          'An error occurred when adding Swift Package Manager integration:\n'
-          '  $e\n\n'
-          'Swift Package Manager is currently an experimental feature, please file a bug at\n'
-          '  https://github.com/flutter/flutter/issues/new?template=1_activation.yml \n'
-          'Consider including a copy of the following files in your bug report:\n'
-          '  ${_platform.name}/Runner.xcodeproj/project.pbxproj\n'
-          '  ${_platform.name}/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme '
-          '(or the scheme for the flavor used)\n\n'
-          'To avoid this failure, disable Flutter Swift Package Manager integration for the project\n'
-          'by adding the following in the project\'s pubspec.yaml under the "flutter" section:\n'
-          '  "disable-swift-package-manager: true"\n'
-          'Alternatively, disable Flutter Swift Package Manager integration globally with the\n'
-          'following command:\n'
-          '  "flutter config --no-enable-swift-package-manager"\n');
+        'An error occurred when adding Swift Package Manager integration:\n'
+        '  $e\n\n'
+        'Swift Package Manager is currently an experimental feature, please file a bug at\n'
+        '  https://github.com/flutter/flutter/issues/new?template=1_activation.yml \n'
+        'Consider including a copy of the following files in your bug report:\n'
+        '  ${_platform.name}/Runner.xcodeproj/project.pbxproj\n'
+        '  ${_platform.name}/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme '
+        '(or the scheme for the flavor used)\n\n'
+        'To avoid this failure, disable Flutter Swift Package Manager integration for the project\n'
+        'by adding the following in the project\'s pubspec.yaml under the "flutter" section:\n'
+        '  "disable-swift-package-manager: true"\n'
+        'Alternatively, disable Flutter Swift Package Manager integration globally with the\n'
+        'following command:\n'
+        '  "flutter config --no-enable-swift-package-manager"\n',
+      );
     } finally {
       ErrorHandlingFileSystem.deleteIfExists(backupProjectSettings);
       if (schemeInfo?.backupSchemeFile != null) {
@@ -260,7 +269,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     if (index == -1 || index + 3 >= schemeLines.length) {
       throw Exception(
         'Failed to parse ${schemeFile.basename}: Could not find BuildableReference '
-        'for ${_xcodeProject.hostAppProjectName}.');
+        'for ${_xcodeProject.hostAppProjectName}.',
+      );
     }
 
     final String buildableName = schemeLines[index + 1].trim();
