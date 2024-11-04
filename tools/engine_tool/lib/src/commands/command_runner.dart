@@ -7,6 +7,7 @@ import 'package:engine_build_configs/engine_build_configs.dart';
 
 import '../environment.dart';
 import 'build_command.dart';
+import 'cleanup_command.dart';
 import 'fetch_command.dart';
 import 'flags.dart';
 import 'format_command.dart';
@@ -34,6 +35,10 @@ final class ToolCommandRunner extends CommandRunner<int> {
           usageLineLength: _usageLineLength,
         ) {
     final List<Command<int>> commands = <Command<int>>[
+      CleanupCommand(
+        environment: environment,
+        usageLineLength: _usageLineLength,
+      ),
       FetchCommand(
         environment: environment,
         usageLineLength: _usageLineLength,

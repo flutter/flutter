@@ -26,6 +26,7 @@ final class Environment {
     required this.logger,
     required this.platform,
     required this.processRunner,
+    this.now = DateTime.now,
     this.verbose = false,
   });
 
@@ -46,6 +47,9 @@ final class Environment {
 
   /// Facility for commands to run subprocesses.
   final ProcessRunner processRunner;
+
+  /// Returns the current [Datetime].
+  final DateTime Function() now;
 
   /// Whether it appears that the current environment supports remote builds.
   ///
