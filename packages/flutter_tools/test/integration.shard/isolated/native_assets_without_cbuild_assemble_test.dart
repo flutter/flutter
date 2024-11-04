@@ -13,7 +13,20 @@ import '../test_utils.dart';
 import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
-// Regression test as part of https://github.com/flutter/flutter/pull/150742.
+/// Regression test as part of https://github.com/flutter/flutter/pull/150742.
+///
+/// Previously, creating a new (blank, i.e. from `flutter create`) Flutter
+/// project, adding `native_assets_cli`, and adding an otherwise valid build hook
+/// (`/hook/build.dart`) would fail to build due to the accompanying shell script
+/// (at least on macOS) assuming the glob would find at least one output.
+///
+/// This test verifies that a blank Flutter project with native_assets_cli can
+/// build, and does so across all of the host platform and target platform
+/// combinations that could trigger this error.
+///
+/// The version of `native_assets_cli` is derived from the template used by
+/// `flutter create --type=pacakges_ffi`. See
+/// [_getPackageFfiTemplatePubspecVersion].
 void main() {
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
     // TODO(dacoharkes): Implement Fuchsia. https://github.com/flutter/flutter/issues/129757
@@ -21,9 +34,9 @@ void main() {
   }
 
   const ProcessManager processManager = LocalProcessManager();
-  final String nativeAssetsCliVersionConstraint =
-      _getPackageFfiTemplatePubspecVersion();
+  final String constraint = _getPackageFfiTemplatePubspecVersion();
 
+  // Test building a host, iOS, and APK (Android) target where possible.
   for (final String buildCommand in <String>[
     // Current (Host) OS.
     platform.operatingSystem,
@@ -37,7 +50,7 @@ void main() {
     _testBuildCommand(
       buildCommand: buildCommand,
       processManager: processManager,
-      nativeAssetsCliVersionConstraint: nativeAssetsCliVersionConstraint,
+      nativeAssetsCliVersionConstraint: constraint,
     );
   }
 }
