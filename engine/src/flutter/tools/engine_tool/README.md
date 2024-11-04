@@ -108,9 +108,9 @@ See [building a host engine](#building-a-host-engine) and
 > [!CAUTION]
 > Each build configuration (sometimes called a _variant_) produces a different
 > set of output files in `$ENGINE/src/out`, e.g. ``$ENGINE/src/out/host_debug`;
-> these outputs can be multiple GBs, and add up quickly. Consider manually
-> cleaning up a `src/out` directory and/or +1'ing the following feature
-> request: <https://github.com/flutter/flutter/issues/157945>.
+> these outputs can be multiple GBs, and add up quickly. Consider using
+> [`et cleanup`](#reclaiming-older-output-directories) to delete older output
+> directories automatically.
 
 ## Common Tasks
 
@@ -257,8 +257,7 @@ cd to/project/dir
 et run
 ```
 
-> [!NOTE]
-> `et run` will rebuild (if necessary) host and target builds, which can take
+> [!NOTE] > `et run` will rebuild (if necessary) host and target builds, which can take
 > a significant amount of time.
 
 ## Advanced Features
@@ -352,6 +351,25 @@ If you need to build a configuration _not-specified_, consider the following:
 
 > [!TIP]
 > For more information on [build configurations, see the README](../../ci/builders/README.md).
+
+### Reclaiming older output directories
+
+The `et cleanup` command removes older output directories that have not been
+accessed, by default in the last 30 days, but customizable with the command-line
+argument `--untouched-since`.
+
+Consider using `dry-run` to preview what _would_ be deleted:
+
+```sh
+# Deletes all output directories older than 30 days.
+et cleanup
+
+# Shows what output directories would be deleted by the above command.
+et cleanup --dry-run
+
+# Deletes all output directories accessed last in 2023.
+et cleanup --untouched-since=2024-01-01
+```
 
 ## Contributing
 

@@ -61,6 +61,7 @@ class TestEnvironment {
     Logger? logger,
     ffi.Abi abi = ffi.Abi.macosArm64,
     bool verbose = false,
+    DateTime Function() now = DateTime.now,
     this.cannedProcesses = const <CannedProcess>[],
   }) {
     testLogs = <LogRecord>[];
@@ -100,6 +101,7 @@ class TestEnvironment {
       })),
       logger: logger,
       verbose: verbose,
+      now: now,
     );
   }
 
@@ -108,6 +110,7 @@ class TestEnvironment {
     ffi.Abi abi = ffi.Abi.linuxX64,
     List<CannedProcess> cannedProcesses = const <CannedProcess>[],
     bool verbose = false,
+    DateTime Function() now = DateTime.now,
   }) {
     final io.Directory rootDir = io.Directory.systemTemp.createTempSync('et');
     final TestEngine engine = TestEngine.createTemp(rootDir: rootDir);
@@ -135,6 +138,7 @@ class TestEnvironment {
       abi: abi,
       cannedProcesses: cannedProcesses + <CannedProcess>[cannedGn],
       verbose: verbose,
+      now: now,
     );
     return testEnvironment;
   }

@@ -31,8 +31,7 @@ class Logger {
   /// Constructs a logger for use in the tool.
   Logger({
     log.Level level = statusLevel,
-  })
-      : _logger = log.Logger.detached('et'),
+  })  : _logger = log.Logger.detached('et'),
         _test = false {
     _logger.level = level;
     _logger.onRecord.listen(_handler);
@@ -45,8 +44,7 @@ class Logger {
   Logger.test(
     void Function(log.LogRecord) onLog, {
     log.Level level = statusLevel,
-  })
-      : _logger = log.Logger.detached('et'),
+  })  : _logger = log.Logger.detached('et'),
         _test = true {
     _logger.level = level;
     _logger.onRecord.listen(onLog);
@@ -187,6 +185,7 @@ class Logger {
   }
 
   /// Starts printing a progress spinner.
+  @useResult
   Spinner startSpinner({
     void Function()? onFinish,
   }) {
