@@ -125,7 +125,7 @@ enum Inset implements Value {
         max: 50,
         value: of(context),
         onChanged: (double newValue) {
-          InsetsState.instance.newInsets(this, newValue);
+          InsetsState.instance.changeInset(this, newValue);
         },
       ),
     ),
@@ -205,7 +205,7 @@ class InsetsState extends State<Insets> {
   static InsetsState get instance => const Insets().currentState!;
 
   EdgeInsets insets = const EdgeInsets.fromLTRB(8, 25, 8, 12);
-  void newInsets(Inset inset, double value) {
+  void changeInset(Inset inset, double value) {
     setState(() {
       insets = switch (inset) {
         Inset.top    => insets.copyWith(top: value),
