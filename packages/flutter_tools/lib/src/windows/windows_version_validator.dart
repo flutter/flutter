@@ -27,7 +27,7 @@ const String kCoreProcessPattern = r'Topaz\s+OFD\\Warsaw\\core\.exe';
 
 /// Validator for supported Windows host machine operating system version.
 class WindowsVersionValidator extends DoctorValidator {
-  const WindowsVersionValidator({
+  WindowsVersionValidator({
     required OperatingSystemUtils operatingSystemUtils,
     required ProcessLister processLister,
     required WindowsVersionExtractor versionExtractor,
@@ -45,18 +45,18 @@ class WindowsVersionValidator extends DoctorValidator {
 
   Future<ValidationResult> _topazScan() async {
       if (!_processLister.canRunPowershell()) {
-        return const ValidationResult(
+        return ValidationResult(
           ValidationType.missing,
-          <ValidationMessage>[
+          const <ValidationMessage>[
             ValidationMessage.hint('Failed to find ${ProcessLister.powershell} or ${ProcessLister.pwsh} on PATH'),
           ],
         );
       }
       final ProcessResult getProcessesResult = await _processLister.getProcessesWithPath();
       if (getProcessesResult.exitCode != 0) {
-        return const ValidationResult(
+        return ValidationResult(
           ValidationType.missing,
-          <ValidationMessage>[
+          const <ValidationMessage>[
             ValidationMessage.hint('Get-Process failed to complete'),
           ],
         );
@@ -65,9 +65,9 @@ class WindowsVersionValidator extends DoctorValidator {
       final String processes = getProcessesResult.stdout as String;
       final bool topazFound = topazRegex.hasMatch(processes);
       if (topazFound) {
-        return const ValidationResult(
+        return ValidationResult(
           ValidationType.missing,
-          <ValidationMessage>[
+          const <ValidationMessage>[
             ValidationMessage.hint(
               'The Topaz OFD Security Module was detected on your machine. '
               'You may need to disable it to build Flutter applications.',
@@ -75,11 +75,11 @@ class WindowsVersionValidator extends DoctorValidator {
           ],
         );
       }
-      return const ValidationResult(ValidationType.success, <ValidationMessage>[]);
+      return ValidationResult(ValidationType.success, const <ValidationMessage>[]);
   }
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     final RegExp regex =
         RegExp(kWindowsOSVersionSemVerPattern, multiLine: true);
     final String commandResult = _operatingSystemUtils.name;

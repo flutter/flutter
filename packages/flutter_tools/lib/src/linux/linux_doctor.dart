@@ -58,7 +58,7 @@ class LinuxDoctorValidator extends DoctorValidator {
   ];
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     ValidationType validationType = ValidationType.success;
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
