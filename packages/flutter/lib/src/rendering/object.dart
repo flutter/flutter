@@ -4592,22 +4592,22 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   SemanticsNode? cachedSemanticsNode;
 
   /// The semantics nodes produced by this render object.
-  /// 
+  ///
   /// This is filled after [buildSemantics] is called when
   /// [shouldFormSemanticsNode] is true. In most cases, this only contains one
   /// semantics node equals to [cachedSemanticsNode].
-  /// 
+  ///
   /// If there are [siblingMergeGroups], the nodes produced from the sibling
   /// merge groups are also stored in this list.
   final List<SemanticsNode> semanticsNodes = <SemanticsNode>[];
 
   /// Fragments that will merge up to parent rendering object semantics.
   final List<_SemanticsFragment> mergeUp = <_SemanticsFragment>[];
-  
+
   /// A map that record immediate child [_RenderObjectSemantics]s that will form
   /// semantics nodes with their elevation adjustments.
   final Map<_RenderObjectSemantics, double> _childrenAndElevationAdjustments = <_RenderObjectSemantics, double>{};
-  
+
   /// Merge groups that will form additional sibling nodes.
   final List<List<_SemanticsFragment>> siblingMergeGroups = <List<_SemanticsFragment>>[];
   final Map<SemanticsNode, List<_SemanticsFragment>> _producedSiblingNodesAndOwners = <SemanticsNode, List<_SemanticsFragment>>{};
