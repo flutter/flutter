@@ -288,14 +288,20 @@ public class FlutterRendererTest {
     metrics.width = 1000;
     metrics.height = 1000;
     metrics.devicePixelRatio = 2;
-    metrics.displayFeatures.add(
-        new FlutterRenderer.DisplayFeature(
-            new Rect(10, 20, 30, 40),
-            FlutterRenderer.DisplayFeatureType.FOLD,
-            FlutterRenderer.DisplayFeatureState.POSTURE_HALF_OPENED));
-    metrics.displayFeatures.add(
-        new FlutterRenderer.DisplayFeature(
-            new Rect(50, 60, 70, 80), FlutterRenderer.DisplayFeatureType.CUTOUT));
+    metrics
+        .getDisplayFeatures()
+        .add(
+            new FlutterRenderer.DisplayFeature(
+                new Rect(10, 20, 30, 40),
+                FlutterRenderer.DisplayFeatureType.FOLD,
+                FlutterRenderer.DisplayFeatureState.POSTURE_HALF_OPENED));
+    metrics
+        .getDisplayCutouts()
+        .add(
+            new FlutterRenderer.DisplayFeature(
+                new Rect(50, 60, 70, 80),
+                FlutterRenderer.DisplayFeatureType.CUTOUT,
+                FlutterRenderer.DisplayFeatureState.UNKNOWN));
 
     // Execute the behavior under test.
     flutterRenderer.setViewportMetrics(metrics);
