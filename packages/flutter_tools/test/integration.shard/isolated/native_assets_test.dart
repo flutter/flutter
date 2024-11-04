@@ -241,7 +241,7 @@ void main() {
           throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
         }
       });
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/158120
 
     // This could be an hermetic unit test if the native_assets_builder
     // could mock process runs and file system.
