@@ -18,19 +18,13 @@ FLUTTER_ASSERT_ARC
 
 namespace flutter {
 
-static IOSContextMetalSkia* CastToMetalContext(const std::shared_ptr<IOSContext>& context)
-    __attribute__((cf_audited_transfer)) {
-  return (IOSContextMetalSkia*)context.get();
-}
-
-IOSSurfaceMetalSkia::IOSSurfaceMetalSkia(const fml::scoped_nsobject<CAMetalLayer>& layer,
-                                         std::shared_ptr<IOSContext> context)
+IOSSurfaceMetalSkia::IOSSurfaceMetalSkia(CAMetalLayer* layer, std::shared_ptr<IOSContext> context)
     : IOSSurface(std::move(context)),
       GPUSurfaceMetalDelegate(MTLRenderTargetType::kCAMetalLayer),
       layer_(layer) {
   is_valid_ = layer_;
-  auto metal_context = CastToMetalContext(GetContext());
-  auto darwin_context = metal_context->GetDarwinContext().get();
+  IOSContextMetalSkia* metal_context = static_cast<IOSContextMetalSkia*>(GetContext().get());
+  FlutterDarwinContextMetalSkia* darwin_context = metal_context->GetDarwinContext();
   command_queue_ = darwin_context.commandQueue;
   device_ = darwin_context.device;
 }
@@ -58,25 +52,24 @@ std::unique_ptr<Surface> IOSSurfaceMetalSkia::CreateGPUSurface(GrDirectContext* 
 
 // |GPUSurfaceMetalDelegate|
 GPUCAMetalLayerHandle IOSSurfaceMetalSkia::GetCAMetalLayer(const SkISize& frame_info) const {
-  CAMetalLayer* layer = layer_.get();
-  layer.device = device_;
+  layer_.device = device_;
 
-  layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+  layer_.pixelFormat = MTLPixelFormatBGRA8Unorm;
   // Flutter needs to read from the color attachment in cases where there are effects such as
   // backdrop filters. Flutter plugins that create platform views may also read from the layer.
-  layer.framebufferOnly = NO;
+  layer_.framebufferOnly = NO;
 
   const auto drawable_size = CGSizeMake(frame_info.width(), frame_info.height());
-  if (!CGSizeEqualToSize(drawable_size, layer.drawableSize)) {
-    layer.drawableSize = drawable_size;
+  if (!CGSizeEqualToSize(drawable_size, layer_.drawableSize)) {
+    layer_.drawableSize = drawable_size;
   }
 
   // When there are platform views in the scene, the drawable needs to be presented in the same
   // transaction as the one created for platform views. When the drawable are being presented from
   // the raster thread, there is no such transaction.
-  layer.presentsWithTransaction = [[NSThread currentThread] isMainThread];
+  layer_.presentsWithTransaction = [[NSThread currentThread] isMainThread];
 
-  return (__bridge GPUCAMetalLayerHandle)layer;
+  return (__bridge GPUCAMetalLayerHandle)layer_;
 }
 
 // |GPUSurfaceMetalDelegate|

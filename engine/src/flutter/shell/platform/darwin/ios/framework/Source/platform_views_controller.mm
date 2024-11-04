@@ -113,8 +113,8 @@ BOOL canApplyBlurBackdrop = YES;
 PlatformViewsController::PlatformViewsController()
     : layer_pool_(std::make_unique<OverlayLayerPool>()),
       weak_factory_(std::make_unique<fml::WeakPtrFactory<PlatformViewsController>>(this)) {
-  mask_view_pool_.reset(
-      [[FlutterClippingMaskViewPool alloc] initWithCapacity:kFlutterClippingMaskViewPoolCapacity]);
+  mask_view_pool_ =
+      [[FlutterClippingMaskViewPool alloc] initWithCapacity:kFlutterClippingMaskViewPoolCapacity];
 };
 
 void PlatformViewsController::SetTaskRunner(
@@ -127,16 +127,16 @@ fml::WeakPtr<flutter::PlatformViewsController> PlatformViewsController::GetWeakP
 }
 
 void PlatformViewsController::SetFlutterView(UIView* flutter_view) {
-  flutter_view_.reset(flutter_view);
+  flutter_view_ = flutter_view;
 }
 
 void PlatformViewsController::SetFlutterViewController(
     UIViewController<FlutterViewResponder>* flutter_view_controller) {
-  flutter_view_controller_.reset(flutter_view_controller);
+  flutter_view_controller_ = flutter_view_controller;
 }
 
 UIViewController<FlutterViewResponder>* PlatformViewsController::GetFlutterViewController() {
-  return flutter_view_controller_.get();
+  return flutter_view_controller_;
 }
 
 void PlatformViewsController::OnMethodCall(FlutterMethodCall* call, FlutterResult result) {
@@ -167,7 +167,7 @@ void PlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterResult re
     return;
   }
 
-  NSObject<FlutterPlatformViewFactory>* factory = factories_[viewType].get();
+  NSObject<FlutterPlatformViewFactory>* factory = factories_[viewType];
   if (factory == nil) {
     result([FlutterError
         errorWithCode:@"unregistered_view_type"
@@ -209,13 +209,11 @@ void PlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterResult re
   ChildClippingView* clipping_view = [[ChildClippingView alloc] initWithFrame:CGRectZero];
   [clipping_view addSubview:touch_interceptor];
 
-  platform_views_.emplace(
-      viewId, PlatformViewData{
-                  .view = fml::scoped_nsobject<NSObject<FlutterPlatformView>>(embedded_view),  //
-                  .touch_interceptor =
-                      fml::scoped_nsobject<FlutterTouchInterceptingView>(touch_interceptor),  //
-                  .root_view = fml::scoped_nsobject<UIView>(clipping_view)                    //
-              });
+  platform_views_.emplace(viewId, PlatformViewData{
+                                      .view = embedded_view,                   //
+                                      .touch_interceptor = touch_interceptor,  //
+                                      .root_view = clipping_view               //
+                                  });
 
   result(nil);
 }
@@ -246,7 +244,7 @@ void PlatformViewsController::OnAcceptGesture(FlutterMethodCall* call, FlutterRe
     return;
   }
 
-  FlutterTouchInterceptingView* view = platform_views_[viewId].touch_interceptor.get();
+  FlutterTouchInterceptingView* view = platform_views_[viewId].touch_interceptor;
   [view releaseGesture];
 
   result(nil);
@@ -263,7 +261,7 @@ void PlatformViewsController::OnRejectGesture(FlutterMethodCall* call, FlutterRe
     return;
   }
 
-  FlutterTouchInterceptingView* view = platform_views_[viewId].touch_interceptor.get();
+  FlutterTouchInterceptingView* view = platform_views_[viewId].touch_interceptor;
   [view blockGesture];
 
   result(nil);
@@ -275,7 +273,7 @@ void PlatformViewsController::RegisterViewFactory(
     FlutterPlatformViewGestureRecognizersBlockingPolicy gestureRecognizerBlockingPolicy) {
   std::string idString([factoryId UTF8String]);
   FML_CHECK(factories_.count(idString) == 0);
-  factories_[idString] = fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>(factory);
+  factories_[idString] = factory;
   gesture_recognizers_blocking_policies_[idString] = gestureRecognizerBlockingPolicy;
 }
 
@@ -383,12 +381,12 @@ FlutterTouchInterceptingView* PlatformViewsController::GetFlutterTouchIntercepti
   if (platform_views_.empty()) {
     return nil;
   }
-  return platform_views_[view_id].touch_interceptor.get();
+  return platform_views_[view_id].touch_interceptor;
 }
 
 long PlatformViewsController::FindFirstResponderPlatformViewId() {
   for (auto const& [id, platform_view_data] : platform_views_) {
-    UIView* root_view = (UIView*)platform_view_data.root_view.get();
+    UIView* root_view = platform_view_data.root_view;
     if (root_view.flt_hasFirstResponderInViewHierarchySubtree) {
       return id;
     }
@@ -401,11 +399,10 @@ void PlatformViewsController::ClipViewSetMaskView(UIView* clipView) {
   if (clipView.maskView) {
     return;
   }
-  UIView* flutterView = flutter_view_.get();
   CGRect frame =
       CGRectMake(-clipView.frame.origin.x, -clipView.frame.origin.y,
-                 CGRectGetWidth(flutterView.bounds), CGRectGetHeight(flutterView.bounds));
-  clipView.maskView = [mask_view_pool_.get() getMaskViewWithFrame:frame];
+                 CGRectGetWidth(flutter_view_.bounds), CGRectGetHeight(flutter_view_.bounds));
+  clipView.maskView = [mask_view_pool_ getMaskViewWithFrame:frame];
 }
 
 // This method is only called when the `embedded_view` needs to be re-composited at the current
@@ -425,7 +422,7 @@ void PlatformViewsController::ApplyMutators(const MutatorsStack& mutators_stack,
   FML_DCHECK(!clipView.maskView ||
              [clipView.maskView isKindOfClass:[FlutterClippingMaskView class]]);
   if (clipView.maskView) {
-    [mask_view_pool_.get() insertViewToPoolIfNeeded:(FlutterClippingMaskView*)(clipView.maskView)];
+    [mask_view_pool_ insertViewToPoolIfNeeded:(FlutterClippingMaskView*)(clipView.maskView)];
     clipView.maskView = nil;
   }
   CGFloat screenScale = [UIScreen mainScreen].scale;
@@ -484,7 +481,7 @@ void PlatformViewsController::ApplyMutators(const MutatorsStack& mutators_stack,
           break;
         }
         CGRect intersection = CGRectIntersection(filterRect, clipView.frame);
-        CGRect frameInClipView = [flutter_view_.get() convertRect:intersection toView:clipView];
+        CGRect frameInClipView = [flutter_view_ convertRect:intersection toView:clipView];
         // sigma_x is arbitrarily chosen as the radius value because Quartz sets
         // sigma_x and sigma_y equal to each other. DlBlurImageFilter's Tile Mode
         // is not supported in Quartz's gaussianBlur CAFilter, so it is not used
@@ -540,7 +537,7 @@ void PlatformViewsController::ApplyMutators(const MutatorsStack& mutators_stack,
 void PlatformViewsController::CompositeWithParams(int64_t view_id,
                                                   const EmbeddedViewParams& params) {
   CGRect frame = CGRectMake(0, 0, params.sizePoints().width(), params.sizePoints().height());
-  FlutterTouchInterceptingView* touchInterceptor = platform_views_[view_id].touch_interceptor.get();
+  FlutterTouchInterceptingView* touchInterceptor = platform_views_[view_id].touch_interceptor;
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   FML_DCHECK(CGPointEqualToPoint([touchInterceptor embeddedView].frame.origin, CGPointZero));
   if (non_zero_origin_views_.find(view_id) == non_zero_origin_views_.end() &&
@@ -564,7 +561,7 @@ void PlatformViewsController::CompositeWithParams(int64_t view_id,
   touchInterceptor.alpha = 1;
 
   const MutatorsStack& mutatorStack = params.mutatorsStack();
-  UIView* clippingView = platform_views_[view_id].root_view.get();
+  UIView* clippingView = platform_views_[view_id].root_view;
   // The frame of the clipping view should be the final bounding rect.
   // Because the translate matrix in the Mutator Stack also includes the offset,
   // when we apply the transforms matrix in |ApplyMutators|, we need
@@ -584,13 +581,13 @@ void PlatformViewsController::Reset() {
   // Reset will only be called from the raster thread or a merged raster/platform thread.
   // platform_views_ must only be modified on the platform thread, and any operations that
   // read or modify platform views should occur there.
-  fml::TaskRunner::RunNowOrPostTask(
-      platform_task_runner_, [&, composition_order = composition_order_]() {
-        for (int64_t view_id : composition_order_) {
-          [platform_views_[view_id].root_view.get() removeFromSuperview];
-        }
-        platform_views_.clear();
-      });
+  fml::TaskRunner::RunNowOrPostTask(platform_task_runner_,
+                                    [&, composition_order = composition_order_]() {
+                                      for (int64_t view_id : composition_order_) {
+                                        [platform_views_[view_id].root_view removeFromSuperview];
+                                      }
+                                      platform_views_.clear();
+                                    });
 
   composition_order_.clear();
   slices_.clear();
@@ -729,9 +726,9 @@ void PlatformViewsController::CreateMissingOverlays(GrDirectContext* gr_context,
   auto latch = std::make_shared<fml::CountDownLatch>(1u);
   fml::TaskRunner::RunNowOrPostTask(platform_task_runner_, [&]() {
     for (auto i = 0u; i < missing_layer_count; i++) {
-      CreateLayer(gr_context,                                      //
-                  ios_context,                                     //
-                  ((FlutterView*)flutter_view_.get()).pixelFormat  //
+      CreateLayer(gr_context,                                //
+                  ios_context,                               //
+                  ((FlutterView*)flutter_view_).pixelFormat  //
       );
     }
     latch->CountDown();
@@ -791,12 +788,12 @@ void PlatformViewsController::PerformSubmit(
 void PlatformViewsController::BringLayersIntoView(const LayersMap& layer_map,
                                                   const std::vector<int64_t>& composition_order) {
   FML_DCHECK(flutter_view_);
-  UIView* flutter_view = flutter_view_.get();
+  UIView* flutter_view = flutter_view_;
 
   previous_composition_order_.clear();
   NSMutableArray* desired_platform_subviews = [NSMutableArray array];
   for (int64_t platform_view_id : composition_order) {
-    UIView* platform_view_root = platform_views_[platform_view_id].root_view.get();
+    UIView* platform_view_root = platform_views_[platform_view_id].root_view;
     if (platform_view_root != nil) {
       [desired_platform_subviews addObject:platform_view_root];
     }
@@ -854,7 +851,7 @@ void PlatformViewsController::RemoveUnusedLayers(
   // Remove unused platform views.
   for (int64_t view_id : previous_composition_order_) {
     if (composition_order_set.find(view_id) == composition_order_set.end()) {
-      UIView* platform_view_root = platform_views_[view_id].root_view.get();
+      UIView* platform_view_root = platform_views_[view_id].root_view;
       [platform_view_root removeFromSuperview];
     }
   }
@@ -874,7 +871,7 @@ std::vector<UIView*> PlatformViewsController::GetViewsToDispose() {
       views_to_delay_dispose.insert(viewId);
       continue;
     }
-    UIView* root_view = platform_views_[viewId].root_view.get();
+    UIView* root_view = platform_views_[viewId].root_view;
     views.push_back(root_view);
     current_composition_params_.erase(viewId);
     views_to_recomposite_.erase(viewId);

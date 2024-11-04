@@ -9,7 +9,6 @@
 
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/renderer/backend/metal/context_mtl.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"

@@ -11,7 +11,6 @@
 #import <UIKit/UIKit.h>
 
 #include "flow/surface.h"
-#include "fml/platform/darwin/scoped_nsobject.h"
 
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
 
@@ -21,15 +20,15 @@ class IOSSurface;
 
 /// @brief State holder for a Flutter overlay layer.
 struct OverlayLayer {
-  OverlayLayer(const fml::scoped_nsobject<UIView>& overlay_view,
-               const fml::scoped_nsobject<UIView>& overlay_view_wrapper,
+  OverlayLayer(UIView* overlay_view,
+               UIView* overlay_view_wrapper,
                std::unique_ptr<IOSSurface> ios_surface,
                std::unique_ptr<Surface> surface);
 
   ~OverlayLayer() = default;
 
-  fml::scoped_nsobject<UIView> overlay_view;
-  fml::scoped_nsobject<UIView> overlay_view_wrapper;
+  UIView* overlay_view;
+  UIView* overlay_view_wrapper;
   std::unique_ptr<IOSSurface> ios_surface;
   std::unique_ptr<Surface> surface;
 

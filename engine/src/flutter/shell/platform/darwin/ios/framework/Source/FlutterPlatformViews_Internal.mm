@@ -714,7 +714,7 @@ static BOOL _preparedOnce = NO;
   // This gesture recognizer retains the `FlutterViewController` until the
   // end of a gesture sequence, that is all the touches in touchesBegan are concluded
   // with |touchesCancelled| or |touchesEnded|.
-  fml::scoped_nsobject<UIViewController<FlutterViewResponder>> _flutterViewController;
+  UIViewController<FlutterViewResponder>* _flutterViewController;
 }
 
 - (instancetype)initWithTarget:(id)target
@@ -741,18 +741,18 @@ static BOOL _preparedOnce = NO;
     // At the start of each gesture sequence, we reset the `_flutterViewController`,
     // so that all the touch events in the same sequence are forwarded to the same
     // `_flutterViewController`.
-    _flutterViewController.reset(_platformViewsController->GetFlutterViewController());
+    _flutterViewController = _platformViewsController->GetFlutterViewController();
   }
-  [_flutterViewController.get() touchesBegan:touches withEvent:event];
+  [_flutterViewController touchesBegan:touches withEvent:event];
   _currentTouchPointersCount += touches.count;
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
-  [_flutterViewController.get() touchesMoved:touches withEvent:event];
+  [_flutterViewController touchesMoved:touches withEvent:event];
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-  [_flutterViewController.get() touchesEnded:touches withEvent:event];
+  [_flutterViewController touchesEnded:touches withEvent:event];
   _currentTouchPointersCount -= touches.count;
   // Touches in one touch sequence are sent to the touchesEnded method separately if different
   // fingers stop touching the screen at different time. So one touchesEnded method triggering does
@@ -760,7 +760,7 @@ static BOOL _preparedOnce = NO;
   // UIGestureRecognizerStateFailed when all the touches in the current touch sequence is ended.
   if (_currentTouchPointersCount == 0) {
     self.state = UIGestureRecognizerStateFailed;
-    _flutterViewController.reset(nil);
+    _flutterViewController = nil;
     [self forceResetStateIfNeeded];
   }
 }
@@ -771,11 +771,11 @@ static BOOL _preparedOnce = NO;
   // Flutter needs all the cancelled touches to be "cancelled" change types in order to correctly
   // handle gesture sequence.
   // We always override the change type to "cancelled".
-  [_flutterViewController.get() forceTouchesCancelled:touches];
+  [_flutterViewController forceTouchesCancelled:touches];
   _currentTouchPointersCount -= touches.count;
   if (_currentTouchPointersCount == 0) {
     self.state = UIGestureRecognizerStateFailed;
-    _flutterViewController.reset(nil);
+    _flutterViewController = nil;
     [self forceResetStateIfNeeded];
   }
 }

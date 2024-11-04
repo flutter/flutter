@@ -12,7 +12,6 @@
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 
 @class CALayer;
 
@@ -20,8 +19,7 @@ namespace flutter {
 
 class IOSSurface {
  public:
-  static std::unique_ptr<IOSSurface> Create(std::shared_ptr<IOSContext> context,
-                                            const fml::scoped_nsobject<CALayer>& layer);
+  static std::unique_ptr<IOSSurface> Create(std::shared_ptr<IOSContext> context, CALayer* layer);
 
   std::shared_ptr<IOSContext> GetContext() const;
 

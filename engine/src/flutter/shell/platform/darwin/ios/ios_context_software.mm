@@ -33,7 +33,7 @@ std::unique_ptr<GLContextResult> IOSContextSoftware::MakeCurrent() {
 // |IOSContext|
 std::unique_ptr<Texture> IOSContextSoftware::CreateExternalTexture(
     int64_t texture_id,
-    fml::scoped_nsobject<NSObject<FlutterTexture>> texture) {
+    NSObject<FlutterTexture>* texture) {
   // Don't use FML for logging as it will contain engine specific details. This is a user facing
   // message.
   NSLog(@"Flutter: Attempted to composite external texture sources using the software backend. "

@@ -14,7 +14,6 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
@@ -98,10 +97,8 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   // (i.e. the status bar or keyboard)
   int32_t last_focused_semantics_object_id_;
 
-  // TODO(cbracken): https://github.com/flutter/flutter/issues/137801
-  // Eliminate use of fml::scoped_* wrappers here.
-  fml::scoped_nsobject<NSMutableDictionary<NSNumber*, SemanticsObject*>> objects_;
-  fml::scoped_nsprotocol<FlutterBasicMessageChannel*> accessibility_channel_;
+  NSMutableDictionary<NSNumber*, SemanticsObject*>* objects_;
+  FlutterBasicMessageChannel* accessibility_channel_;
   int32_t previous_route_id_ = 0;
   std::unordered_map<int32_t, flutter::CustomAccessibilityAction> actions_;
   std::vector<int32_t> previous_routes_;

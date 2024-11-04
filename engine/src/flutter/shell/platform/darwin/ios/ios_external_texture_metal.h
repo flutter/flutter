@@ -7,7 +7,6 @@
 
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
 
 namespace flutter {
@@ -15,15 +14,13 @@ namespace flutter {
 class IOSExternalTextureMetal final : public Texture {
  public:
   explicit IOSExternalTextureMetal(
-      const fml::scoped_nsobject<FlutterDarwinExternalTextureMetal>&
-          darwin_external_texture_metal);
+      FlutterDarwinExternalTextureMetal* darwin_external_texture_metal);
 
   // |Texture|
   ~IOSExternalTextureMetal();
 
  private:
-  fml::scoped_nsobject<FlutterDarwinExternalTextureMetal>
-      darwin_external_texture_metal_;
+  FlutterDarwinExternalTextureMetal* darwin_external_texture_metal_;
 
   // |Texture|
   void Paint(PaintContext& context,

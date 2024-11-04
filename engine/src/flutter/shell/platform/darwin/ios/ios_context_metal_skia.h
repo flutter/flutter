@@ -11,7 +11,6 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
@@ -24,7 +23,7 @@ class IOSContextMetalSkia final : public IOSContext {
 
   ~IOSContextMetalSkia();
 
-  fml::scoped_nsobject<FlutterDarwinContextMetalSkia> GetDarwinContext() const;
+  FlutterDarwinContextMetalSkia* GetDarwinContext() const;
 
   // |IOSContext|
   IOSRenderingBackend GetBackend() const override;
@@ -35,7 +34,7 @@ class IOSContextMetalSkia final : public IOSContext {
   sk_sp<GrDirectContext> GetResourceContext() const;
 
  private:
-  fml::scoped_nsobject<FlutterDarwinContextMetalSkia> darwin_context_metal_;
+  FlutterDarwinContextMetalSkia* darwin_context_metal_;
 
   // |IOSContext|
   sk_sp<GrDirectContext> CreateResourceContext() override;
@@ -44,9 +43,8 @@ class IOSContextMetalSkia final : public IOSContext {
   std::unique_ptr<GLContextResult> MakeCurrent() override;
 
   // |IOSContext|
-  std::unique_ptr<Texture> CreateExternalTexture(
-      int64_t texture_id,
-      fml::scoped_nsobject<NSObject<FlutterTexture>> texture) override;
+  std::unique_ptr<Texture> CreateExternalTexture(int64_t texture_id,
+                                                 NSObject<FlutterTexture>* texture) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSContextMetalSkia);
 };

@@ -17,13 +17,12 @@ FLUTTER_ASSERT_ARC
 namespace flutter {
 
 IOSContextMetalSkia::IOSContextMetalSkia() {
-  darwin_context_metal_ = fml::scoped_nsobject<FlutterDarwinContextMetalSkia>{
-      [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice]};
+  darwin_context_metal_ = [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
 }
 
 IOSContextMetalSkia::~IOSContextMetalSkia() = default;
 
-fml::scoped_nsobject<FlutterDarwinContextMetalSkia> IOSContextMetalSkia::GetDarwinContext() const {
+FlutterDarwinContextMetalSkia* IOSContextMetalSkia::GetDarwinContext() const {
   return darwin_context_metal_;
 }
 
@@ -32,16 +31,16 @@ IOSRenderingBackend IOSContextMetalSkia::GetBackend() const {
 }
 
 sk_sp<GrDirectContext> IOSContextMetalSkia::GetMainContext() const {
-  return darwin_context_metal_.get().mainContext;
+  return darwin_context_metal_.mainContext;
 }
 
 sk_sp<GrDirectContext> IOSContextMetalSkia::GetResourceContext() const {
-  return darwin_context_metal_.get().resourceContext;
+  return darwin_context_metal_.resourceContext;
 }
 
 // |IOSContext|
 sk_sp<GrDirectContext> IOSContextMetalSkia::CreateResourceContext() {
-  return darwin_context_metal_.get().resourceContext;
+  return darwin_context_metal_.resourceContext;
 }
 
 // |IOSContext|
@@ -53,10 +52,9 @@ std::unique_ptr<GLContextResult> IOSContextMetalSkia::MakeCurrent() {
 // |IOSContext|
 std::unique_ptr<Texture> IOSContextMetalSkia::CreateExternalTexture(
     int64_t texture_id,
-    fml::scoped_nsobject<NSObject<FlutterTexture>> texture) {
+    NSObject<FlutterTexture>* texture) {
   return std::make_unique<IOSExternalTextureMetal>(
-      fml::scoped_nsobject<FlutterDarwinExternalTextureMetal>{
-          [darwin_context_metal_ createExternalTextureWithIdentifier:texture_id texture:texture]});
+      [darwin_context_metal_ createExternalTextureWithIdentifier:texture_id texture:texture]);
 }
 
 }  // namespace flutter
