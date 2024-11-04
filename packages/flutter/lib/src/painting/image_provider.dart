@@ -1411,10 +1411,6 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 ///
 /// The image will be cached regardless of cache headers from the server.
 ///
-/// When a network image is used on the Web platform, the `getTargetSize`
-/// parameter of the [ImageDecoderCallback] is only supported when the
-/// application is running with the CanvasKit renderer.
-///
 /// See also:
 ///
 ///  * [Image.network] for a shorthand of an [Image] widget backed by [NetworkImage].
