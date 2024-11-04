@@ -20,12 +20,16 @@ class DeviceBufferVK final : public DeviceBuffer,
   DeviceBufferVK(DeviceBufferDescriptor desc,
                  std::weak_ptr<Context> context,
                  UniqueBufferVMA buffer,
-                 VmaAllocationInfo info);
+                 VmaAllocationInfo info,
+                 bool is_host_coherent);
 
   // |DeviceBuffer|
   ~DeviceBufferVK() override;
 
   vk::Buffer GetBuffer() const;
+
+  // Visible for testing.
+  bool IsHostCoherent() const;
 
  private:
   friend class AllocatorVK;
@@ -51,6 +55,7 @@ class DeviceBufferVK final : public DeviceBuffer,
 
   std::weak_ptr<Context> context_;
   UniqueResourceVKT<BufferResource> resource_;
+  bool is_host_coherent_ = false;
 
   // |DeviceBuffer|
   uint8_t* OnGetContents() const override;

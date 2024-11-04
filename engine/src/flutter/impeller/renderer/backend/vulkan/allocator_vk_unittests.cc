@@ -5,9 +5,11 @@
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
 #include "impeller/base/allocation_size.h"
+#include "impeller/core/device_buffer.h"
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
+#include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 #include "vulkan/vulkan_enums.hpp"
 
@@ -69,6 +71,19 @@ TEST(AllocatorVKTest, MemoryTypeSelectionTwoHeap) {
   EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(2, properties), 1);
   EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(3, properties), 1);
   EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(4, properties), -1);
+}
+
+TEST(AllocatorVKTest, DeviceBufferCoherency) {
+  auto const context = MockVulkanContextBuilder().Build();
+  auto allocator = context->GetResourceAllocator();
+
+  std::shared_ptr<DeviceBuffer> buffer =
+      allocator->CreateBuffer(DeviceBufferDescriptor{
+          .storage_mode = StorageMode::kHostVisible,
+          .size = 1024,
+      });
+
+  EXPECT_TRUE(DeviceBufferVK::Cast(*buffer).IsHostCoherent());
 }
 
 #ifdef IMPELLER_DEBUG
