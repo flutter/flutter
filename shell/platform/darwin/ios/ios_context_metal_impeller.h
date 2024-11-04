@@ -34,7 +34,7 @@ class IOSContextMetalImpeller final : public IOSContext {
   sk_sp<GrDirectContext> GetResourceContext() const;
 
  private:
-  fml::scoped_nsobject<FlutterDarwinContextMetalImpeller> darwin_context_metal_impeller_;
+  FlutterDarwinContextMetalImpeller* darwin_context_metal_impeller_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
 
   // |IOSContext|
@@ -44,9 +44,8 @@ class IOSContextMetalImpeller final : public IOSContext {
   std::unique_ptr<GLContextResult> MakeCurrent() override;
 
   // |IOSContext|
-  std::unique_ptr<Texture> CreateExternalTexture(
-      int64_t texture_id,
-      fml::scoped_nsobject<NSObject<FlutterTexture>> texture) override;
+  std::unique_ptr<Texture> CreateExternalTexture(int64_t texture_id,
+                                                 NSObject<FlutterTexture>* texture) override;
 
   // |IOSContext|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;

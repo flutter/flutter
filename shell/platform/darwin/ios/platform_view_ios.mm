@@ -116,7 +116,7 @@ void PlatformViewIOS::attachView() {
   FML_DCHECK(owner_controller_.isViewLoaded) << "FlutterViewController's view should be loaded "
                                                 "before attaching to PlatformViewIOS.";
   FlutterView* flutter_view = static_cast<FlutterView*>(owner_controller_.view);
-  auto ca_layer = fml::scoped_nsobject<CALayer>{[flutter_view layer]};
+  CALayer* ca_layer = flutter_view.layer;
   ios_surface_ = IOSSurface::Create(ios_context_, ca_layer);
   FML_DCHECK(ios_surface_ != nullptr);
 
@@ -134,8 +134,7 @@ PointerDataDispatcherMaker PlatformViewIOS::GetDispatcherMaker() {
 
 void PlatformViewIOS::RegisterExternalTexture(int64_t texture_id,
                                               NSObject<FlutterTexture>* texture) {
-  RegisterTexture(ios_context_->CreateExternalTexture(
-      texture_id, fml::scoped_nsobject<NSObject<FlutterTexture>>{texture}));
+  RegisterTexture(ios_context_->CreateExternalTexture(texture_id, texture));
 }
 
 // |PlatformView|

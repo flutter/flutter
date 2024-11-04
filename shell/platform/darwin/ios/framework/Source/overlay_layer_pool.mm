@@ -9,8 +9,8 @@
 
 namespace flutter {
 
-OverlayLayer::OverlayLayer(const fml::scoped_nsobject<UIView>& overlay_view,
-                           const fml::scoped_nsobject<UIView>& overlay_view_wrapper,
+OverlayLayer::OverlayLayer(UIView* overlay_view,
+                           UIView* overlay_view_wrapper,
                            std::unique_ptr<IOSSurface> ios_surface,
                            std::unique_ptr<Surface> surface)
     : overlay_view(overlay_view),
@@ -22,7 +22,6 @@ void OverlayLayer::UpdateViewState(UIView* flutter_view,
                                    SkRect rect,
                                    int64_t view_id,
                                    int64_t overlay_id) {
-  UIView* overlay_view_wrapper = this->overlay_view_wrapper.get();
   auto screenScale = [UIScreen mainScreen].scale;
   // Set the size of the overlay view wrapper.
   // This wrapper view masks the overlay view.
@@ -32,7 +31,6 @@ void OverlayLayer::UpdateViewState(UIView* flutter_view,
   overlay_view_wrapper.accessibilityIdentifier =
       [NSString stringWithFormat:@"platform_view[%lld].overlay[%lld]", view_id, overlay_id];
 
-  UIView* overlay_view = this->overlay_view.get();
   // Set the size of the overlay view.
   // This size is equal to the device screen size.
   overlay_view.frame = [flutter_view convertRect:flutter_view.bounds toView:overlay_view_wrapper];
@@ -59,32 +57,32 @@ void OverlayLayerPool::CreateLayer(GrDirectContext* gr_context,
                                    MTLPixelFormat pixel_format) {
   FML_DCHECK([[NSThread currentThread] isMainThread]);
   std::shared_ptr<OverlayLayer> layer;
-  fml::scoped_nsobject<UIView> overlay_view;
-  fml::scoped_nsobject<UIView> overlay_view_wrapper;
+  UIView* overlay_view;
+  UIView* overlay_view_wrapper;
 
   bool impeller_enabled = !!ios_context->GetImpellerContext();
   if (!gr_context && !impeller_enabled) {
-    overlay_view.reset([[FlutterOverlayView alloc] init]);
-    overlay_view_wrapper.reset([[FlutterOverlayView alloc] init]);
+    overlay_view = [[FlutterOverlayView alloc] init];
+    overlay_view_wrapper = [[FlutterOverlayView alloc] init];
 
-    auto ca_layer = fml::scoped_nsobject<CALayer>{[overlay_view.get() layer]};
+    CALayer* ca_layer = overlay_view.layer;
     std::unique_ptr<IOSSurface> ios_surface = IOSSurface::Create(ios_context, ca_layer);
     std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface();
 
-    layer = std::make_shared<OverlayLayer>(std::move(overlay_view), std::move(overlay_view_wrapper),
+    layer = std::make_shared<OverlayLayer>(overlay_view, overlay_view_wrapper,
                                            std::move(ios_surface), std::move(surface));
   } else {
     CGFloat screenScale = [UIScreen mainScreen].scale;
-    overlay_view.reset([[FlutterOverlayView alloc] initWithContentsScale:screenScale
-                                                             pixelFormat:pixel_format]);
-    overlay_view_wrapper.reset([[FlutterOverlayView alloc] initWithContentsScale:screenScale
-                                                                     pixelFormat:pixel_format]);
+    overlay_view = [[FlutterOverlayView alloc] initWithContentsScale:screenScale
+                                                         pixelFormat:pixel_format];
+    overlay_view_wrapper = [[FlutterOverlayView alloc] initWithContentsScale:screenScale
+                                                                 pixelFormat:pixel_format];
 
-    auto ca_layer = fml::scoped_nsobject<CALayer>{[overlay_view.get() layer]};
+    CALayer* ca_layer = overlay_view.layer;
     std::unique_ptr<IOSSurface> ios_surface = IOSSurface::Create(ios_context, ca_layer);
     std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface(gr_context);
 
-    layer = std::make_shared<OverlayLayer>(std::move(overlay_view), std::move(overlay_view_wrapper),
+    layer = std::make_shared<OverlayLayer>(overlay_view, overlay_view_wrapper,
                                            std::move(ios_surface), std::move(surface));
     layer->gr_context = gr_context;
   }
@@ -102,8 +100,8 @@ void OverlayLayerPool::CreateLayer(GrDirectContext* gr_context,
   // |    |    wrapper   |    |  == mask =>  | overlay_view |
   // |    +--------------+    |              +--------------+
   // +------------------------+
-  layer->overlay_view_wrapper.get().clipsToBounds = YES;
-  [layer->overlay_view_wrapper.get() addSubview:layer->overlay_view];
+  layer->overlay_view_wrapper.clipsToBounds = YES;
+  [layer->overlay_view_wrapper addSubview:layer->overlay_view];
 
   layers_.push_back(layer);
 }

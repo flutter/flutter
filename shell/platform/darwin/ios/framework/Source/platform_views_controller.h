@@ -11,7 +11,6 @@
 
 #include "flutter/flow/surface.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/thread_safety.h"
@@ -242,12 +241,10 @@ class PlatformViewsController {
   // The Slices are deleted by the PlatformViewsController.reset().
   std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices_;
 
-  fml::scoped_nsobject<FlutterMethodChannel> channel_;
-  fml::scoped_nsobject<UIView> flutter_view_;
-  fml::scoped_nsobject<UIViewController<FlutterViewResponder>> flutter_view_controller_;
-  fml::scoped_nsobject<FlutterClippingMaskViewPool> mask_view_pool_;
-  std::unordered_map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>>
-      factories_;
+  UIView* flutter_view_;
+  UIViewController<FlutterViewResponder>* flutter_view_controller_;
+  FlutterClippingMaskViewPool* mask_view_pool_;
+  std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*> factories_;
 
   // The FlutterPlatformViewGestureRecognizersBlockingPolicy for each type of platform view.
   std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
@@ -264,9 +261,9 @@ class PlatformViewsController {
   ///
   /// This data must only be accessed on the platform thread.
   struct PlatformViewData {
-    fml::scoped_nsobject<NSObject<FlutterPlatformView>> view;
-    fml::scoped_nsobject<FlutterTouchInterceptingView> touch_interceptor;
-    fml::scoped_nsobject<UIView> root_view;
+    NSObject<FlutterPlatformView>* view;
+    FlutterTouchInterceptingView* touch_interceptor;
+    UIView* root_view;
   };
 
   /// This data must only be accessed on the platform thread.
