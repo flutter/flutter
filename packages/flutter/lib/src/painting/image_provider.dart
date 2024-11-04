@@ -1413,9 +1413,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 ///
 /// When a network image is used on the Web platform, the `getTargetSize`
 /// parameter of the [ImageDecoderCallback] is only supported when the
-/// application is running with the CanvasKit renderer. When the application is
-/// using the HTML renderer, the web engine delegates image decoding of network
-/// images to the Web, which does not support custom decode sizes.
+/// application is running with the CanvasKit renderer.
 ///
 /// See also:
 ///

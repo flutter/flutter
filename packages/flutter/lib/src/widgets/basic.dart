@@ -508,9 +508,7 @@ class BackdropGroup extends InheritedWidget {
 /// [BlendMode.srcOver] which works well for most scenes. But that value may
 /// produce surprising results when a parent of the [BackdropFilter] uses a
 /// temporary buffer, or save layer, as does an [Opacity] widget. In that
-/// situation, a value of [BlendMode.src] can produce more pleasing results,
-/// but at the cost of incompatibility with some platforms, most notably the
-/// html renderer for web applications.
+/// situation, a value of [BlendMode.src] can produce more pleasing results.
 /// {@endtemplate}
 ///
 /// Multiple backdrop filters can be combined into a single rendering operation
