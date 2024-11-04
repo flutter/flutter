@@ -110,6 +110,16 @@ struct Matrix {
     // clang-format on
   }
 
+  static constexpr Matrix MakeTranslateScale(const Vector3& s,
+                                             const Vector3& t) {
+    // clang-format off
+    return Matrix(s.x, 0.0f, 0.0f, 0.0f,
+                  0.0f, s.y, 0.0f, 0.0f,
+                  0.0f, 0.0f, s.z, 0.0f,
+                  t.x , t.y, t.z, 1.0f);
+    // clang-format on
+  }
+
   static constexpr Matrix MakeScale(const Vector2& s) {
     return MakeScale(Vector3(s.x, s.y, 1.0f));
   }
