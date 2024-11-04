@@ -285,7 +285,7 @@ void main() {
     objectWithDelegate.markNeedsSemanticsUpdate();
     await tester.pump();
     // object with delegate rebuilds up to grand parent boundary except the
-    // the inner object since it is not dirty.
+    // inner object since it is not dirty.
     expect(innerObject.hasRebuildSemantics, isFalse);
     expect(boundaryParentObject.hasRebuildSemantics, isTrue);
     expect(grandBoundaryParentObject.hasRebuildSemantics, isTrue);
