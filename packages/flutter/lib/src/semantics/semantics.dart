@@ -1856,15 +1856,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// Whether is this node is hidden off-screen from parent's bounding box.
-  bool get isHidden => hasFlag(SemanticsFlag.isHidden);
-  set isHidden(bool value) {
-    if (hasFlag(SemanticsFlag.isHidden) != value) {
-      _flags = _flags ^ SemanticsFlag.isHidden.index;
-      _markDirty();
-    }
-  }
-
   /// The semantic clip from an ancestor that was applied to this node.
   ///
   /// Expressed in the coordinate system of the node. May be null if no clip has
@@ -1991,7 +1982,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
   // CHILDREN
 
   /// Contains the children in inverse hit test order (i.e. paint order).
-  List<SemanticsNode>? get children => _children;
   List<SemanticsNode>? _children;
 
   /// A snapshot of `newChildren` passed to [_replaceChildren] that we keep in
@@ -1999,7 +1989,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// of children.
   late List<SemanticsNode> _debugPreviousSnapshot;
 
-  /// Replace current children.
   void _replaceChildren(List<SemanticsNode> newChildren) {
     assert(!newChildren.any((SemanticsNode child) => child == this));
     assert(() {
@@ -2203,7 +2192,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _children?.forEach(_updateChildMergeFlagRecursively);
   }
 
-
   void _adoptChild(SemanticsNode child) {
     assert(child._parent == null);
     assert(() {
@@ -2220,10 +2208,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
     _redepthChild(child);
     // In most cases, child should have up to date `isMergedIntoParent` since
-    // it was set during _SwitchableSemanticsFragment.compileSemanticsNodes.
-    // However, it is still possible that this child was an extra node
-    // introduced in RenderObject.assembleSemanticsNode. We have to make sure
-    // their `isMergedIntoParent` is updated correctly.
+    // it was set during _RenderObjectSemantics.buildSemantics. However, it is
+    // still possible that this child was an extra node introduced in
+    // RenderObject.assembleSemanticsNode. We have to make sure their
+    // `isMergedIntoParent` is updated correctly.
     _updateChildMergeFlagRecursively(child);
   }
 
@@ -4225,7 +4213,6 @@ class SemanticsConfiguration {
   set childConfigurationsDelegate(ChildSemanticsConfigurationsDelegate? value) {
     assert(value != null);
     _childConfigurationsDelegate = value;
-    // hasBeenAnnotated = true;
   }
 
   /// Returns the action handler registered for [action] or null if none was
