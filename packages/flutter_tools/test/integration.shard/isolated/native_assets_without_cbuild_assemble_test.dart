@@ -136,7 +136,7 @@ void main(List<String> args) async {
 ///   native_assets_cli: ^0.8.0
 /// ```
 ///
-/// ... theh this function would return `'^0.8.0'`.
+/// ... then this function would return `'^0.8.0'`.
 String _getPackageFfiTemplatePubspecVersion() {
   final String path = Context().join(
     getFlutterRoot(),
