@@ -1320,7 +1320,12 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       forcePixels(actualNewPixels);
       didUpdateScrollPositionBy(offset);
     }
-    return delta + offset;
+
+    final double result = delta + offset;
+    if (result.abs() < precisionErrorTolerance) {
+      return 0.0;
+    }
+    return result;
   }
 
   // Returns the overscroll.

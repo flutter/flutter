@@ -3628,6 +3628,117 @@ void main() {
     });
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/40740.
+  testWidgets('Maintains scroll position of inactive tab', (WidgetTester tester) async {
+    const List<String> tabs = <String>['Featured', 'Popular', 'Latest'];
+    final List<Widget> tabViews = <Widget>[
+      for (final String name in tabs)
+        SafeArea(
+          top: false,
+          bottom: false,
+          child: Builder(
+            builder: (BuildContext context) => CustomScrollView(
+              key: PageStorageKey<String>(name),
+              slivers: <Widget>[
+                SliverOverlapInjector(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.all(8.0),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      childCount: 30,
+                      (BuildContext context, int index) {
+                        return ListTile(title: Text('Item $index'));
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DefaultTabController(
+            length: tabs.length,
+            child: NestedScrollView(
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
+                SliverOverlapAbsorber(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: SliverSafeArea(
+                    top: false,
+                    sliver: SliverAppBar(
+                      title: const Text('Tab Demo'),
+                      floating: true,
+                      pinned: true,
+                      snap: true,
+                      forceElevated: innerBoxIsScrolled,
+                      bottom: TabBar(
+                        tabs: tabs.map((String name) => Tab(text: name)).toList(),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              body: TabBarView(children: tabViews),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder finder = find.text('Item 14', skipOffstage: false);
+    final Finder findAny = find.descendant(
+      of: find.byType(SliverList),
+      matching: find.byType(ListTile),
+    ).first;
+
+    Future<void> scroll(VerticalDirection direction) async {
+      switch (direction) {
+        case VerticalDirection.down:
+          while (!tester.any(finder)) {
+            await tester.fling(find.byType(Scaffold), const Offset(0, -50), 20);
+            await tester.pumpAndSettle();
+          }
+          await tester.ensureVisible(finder);
+        case VerticalDirection.up:
+          await tester.fling(find.byType(Scaffold), const Offset(0, 20), 20);
+          await tester.pumpAndSettle();
+      }
+    }
+
+    double getScrollPosition() {
+      return Scrollable.of(tester.element(findAny)).position.pixels;
+    }
+
+    expect(getScrollPosition(), 0.0);
+
+    // Scroll toward the bottom of Tab 1.
+    await scroll(VerticalDirection.down);
+    final double tab1Position = getScrollPosition();
+
+    // Switch to second tab.
+    await tester.tap(find.text('Popular'));
+    await tester.pumpAndSettle();
+
+    // Scroll toward the bottom of the second tab.
+    await scroll(VerticalDirection.down);
+    final double tab2Position = getScrollPosition();
+
+    // Scroll up a bit in the second tab.
+    await scroll(VerticalDirection.up);
+    expect(getScrollPosition(), lessThan(tab2Position));
+
+    // Switch back to the first tab.
+    await tester.tap(find.text('Featured'));
+    await tester.pumpAndSettle();
+    expect(getScrollPosition(), tab1Position);
+  });
+
   testWidgets('$SliverOverlapAbsorberHandle dispatches creation in constructor', (WidgetTester widgetTester) async {
     await expectLater(
       await memoryEvents(() => SliverOverlapAbsorberHandle().dispose(), SliverOverlapAbsorberHandle),
