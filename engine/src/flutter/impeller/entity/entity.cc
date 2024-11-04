@@ -52,8 +52,8 @@ Matrix Entity::GetShaderTransform(const RenderPass& pass) const {
 Matrix Entity::GetShaderTransform(Scalar shader_clip_depth,
                                   const RenderPass& pass,
                                   const Matrix& transform) {
-  return Matrix::MakeTranslation({0, 0, shader_clip_depth}) *
-         Matrix::MakeScale({1, 1, Entity::kDepthEpsilon}) *
+  return Matrix::MakeTranslateScale({1, 1, Entity::kDepthEpsilon},
+                                    {0, 0, shader_clip_depth}) *
          pass.GetOrthographicTransform() * transform;
 }
 

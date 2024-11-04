@@ -211,5 +211,20 @@ TEST(MatrixTest, TranslateWithPerspective) {
                                                  0.0, 2.0, 0.0, 430.0)));
 }
 
+TEST(MatrixTest, MakeScaleTranslate) {
+  EXPECT_TRUE(MatrixNear(
+      Matrix::MakeTranslateScale({1, 1, 1.0 / 1024}, {10, 10, 1.0 / 1024}),
+      Matrix::MakeTranslation({10, 10, 1.0 / 1024}) *
+          Matrix::MakeScale({1, 1, 1.0 / 1024})));
+
+  EXPECT_TRUE(MatrixNear(
+      Matrix::MakeTranslateScale({2, 2, 2}, {10, 10, 0}),
+      Matrix::MakeTranslation({10, 10, 0}) * Matrix::MakeScale({2, 2, 2})));
+
+  EXPECT_TRUE(MatrixNear(
+      Matrix::MakeTranslateScale({0, 0, 0}, {0, 0, 0}),
+      Matrix::MakeTranslation({0, 0, 0}) * Matrix::MakeScale({0, 0, 0})));
+}
+
 }  // namespace testing
 }  // namespace impeller
