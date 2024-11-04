@@ -153,13 +153,15 @@ struct ShaderStageBufferLayout {
   }
 };
 
+// These enum values were chosen to match the same values
+// in the VK Descriptor Type enum.
 enum class DescriptorType {
-  kUniformBuffer,
-  kStorageBuffer,
-  kSampledImage,
-  kImage,
-  kSampler,
-  kInputAttachment,
+  kSampler = 0,
+  kSampledImage = 1,
+  kImage = 2,
+  kUniformBuffer = 6,
+  kStorageBuffer = 7,
+  kInputAttachment = 10,
 };
 
 struct DescriptorSetLayout {
