@@ -10,7 +10,8 @@ Future<void> main() async {
   await task(() async {
     return runWebBenchmark((
       webRenderer: 'canvaskit',
-      useWasm: false
+      useWasm: false,
+      forceSingleThreadedSkwasm: false,
     ));
   });
 }

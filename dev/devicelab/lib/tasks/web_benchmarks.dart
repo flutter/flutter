@@ -23,6 +23,7 @@ const int chromeDebugPort = 10000;
 typedef WebBenchmarkOptions = ({
   String webRenderer,
   bool useWasm,
+  bool forceSingleThreadedSkwasm,
 });
 
 Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
@@ -142,8 +143,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       final bool isUncalibratedSmokeTest = io.Platform.environment['CALIBRATED'] != 'true';
       // final bool isUncalibratedSmokeTest =
       //     io.Platform.environment['UNCALIBRATED_SMOKE_TEST'] == 'true';
+      final String urlParams = benchmarkOptions.forceSingleThreadedSkwasm ? '?force_st=true' : '';
       final ChromeOptions options = ChromeOptions(
-        url: 'http://localhost:$benchmarkServerPort/index.html',
+        url: 'http://localhost:$benchmarkServerPort/index.html$urlParams',
         userDataDirectory: userDataDir,
         headless: isUncalibratedSmokeTest,
         debugPort: chromeDebugPort,
@@ -171,7 +173,13 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           throw 'Benchmark name is empty';
         }
 
-        final String namespace = '$benchmarkName.${benchmarkOptions.webRenderer}';
+        final String webRendererName;
+        if (benchmarkOptions.useWasm && benchmarkOptions.forceSingleThreadedSkwasm) {
+          webRendererName = 'skwasm_st';
+        } else {
+          webRendererName = benchmarkOptions.webRenderer;
+        }
+        final String namespace = '$benchmarkName.$webRendererName';
         final List<String> scoreKeys = List<String>.from(profile['scoreKeys'] as List<dynamic>);
         if (scoreKeys.isEmpty) {
           throw 'No score keys in benchmark "$benchmarkName"';
