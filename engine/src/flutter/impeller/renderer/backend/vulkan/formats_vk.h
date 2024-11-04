@@ -276,28 +276,21 @@ constexpr vk::ShaderStageFlags ToVkShaderStage(ShaderStage stage) {
   FML_UNREACHABLE();
 }
 
-constexpr vk::DescriptorType ToVKDescriptorType(DescriptorType type) {
-  switch (type) {
-    case DescriptorType::kSampledImage:
-      return vk::DescriptorType::eCombinedImageSampler;
-      break;
-    case DescriptorType::kUniformBuffer:
-      return vk::DescriptorType::eUniformBuffer;
-      break;
-    case DescriptorType::kStorageBuffer:
-      return vk::DescriptorType::eStorageBuffer;
-      break;
-    case DescriptorType::kImage:
-      return vk::DescriptorType::eSampledImage;
-      break;
-    case DescriptorType::kSampler:
-      return vk::DescriptorType::eSampler;
-      break;
-    case DescriptorType::kInputAttachment:
-      return vk::DescriptorType::eInputAttachment;
-  }
+static_assert(static_cast<int>(DescriptorType::kSampledImage) ==
+              static_cast<int>(vk::DescriptorType::eCombinedImageSampler));
+static_assert(static_cast<int>(DescriptorType::kUniformBuffer) ==
+              static_cast<int>(vk::DescriptorType::eUniformBuffer));
+static_assert(static_cast<int>(DescriptorType::kStorageBuffer) ==
+              static_cast<int>(vk::DescriptorType::eStorageBuffer));
+static_assert(static_cast<int>(DescriptorType::kImage) ==
+              static_cast<int>(vk::DescriptorType::eSampledImage));
+static_assert(static_cast<int>(DescriptorType::kSampler) ==
+              static_cast<int>(vk::DescriptorType::eSampler));
+static_assert(static_cast<int>(DescriptorType::kInputAttachment) ==
+              static_cast<int>(vk::DescriptorType::eInputAttachment));
 
-  FML_UNREACHABLE();
+constexpr vk::DescriptorType ToVKDescriptorType(DescriptorType type) {
+  return static_cast<vk::DescriptorType>(type);
 }
 
 constexpr vk::DescriptorSetLayoutBinding ToVKDescriptorSetLayoutBinding(
