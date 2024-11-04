@@ -27,9 +27,8 @@ class IOSContextNoop final : public IOSContext {
   std::unique_ptr<GLContextResult> MakeCurrent() override;
 
   // |IOSContext|
-  std::unique_ptr<Texture> CreateExternalTexture(
-      int64_t texture_id,
-      fml::scoped_nsobject<NSObject<FlutterTexture>> texture) override;
+  std::unique_ptr<Texture> CreateExternalTexture(int64_t texture_id,
+                                                 NSObject<FlutterTexture>* texture) override;
 
   IOSRenderingBackend GetBackend() const override;
 

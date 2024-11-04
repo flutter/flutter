@@ -19,8 +19,7 @@ FLUTTER_ASSERT_ARC
 
 namespace flutter {
 
-IOSSurfaceSoftware::IOSSurfaceSoftware(const fml::scoped_nsobject<CALayer>& layer,
-                                       std::shared_ptr<IOSContext> context)
+IOSSurfaceSoftware::IOSSurfaceSoftware(CALayer* layer, std::shared_ptr<IOSContext> context)
     : IOSSurface(std::move(context)), layer_(layer) {}
 
 IOSSurfaceSoftware::~IOSSurfaceSoftware() = default;
@@ -120,7 +119,7 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
     return false;
   }
 
-  layer_.get().contents = (__bridge id)(static_cast<CGImageRef>(pixmap_image));
+  layer_.contents = (__bridge id) static_cast<CGImageRef>(pixmap_image);
 
   return true;
 }

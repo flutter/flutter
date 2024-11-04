@@ -7,7 +7,6 @@
 #include <Metal/Metal.h>
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/testing/test_metal_context.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColorSpace.h"

@@ -80,8 +80,8 @@ void PlatformMessageHandlerIos::HandlePlatformMessage(std::unique_ptr<PlatformMe
         });
       };
 
-      if (handler_info.task_queue.get()) {
-        [handler_info.task_queue.get() dispatch:run_handler];
+      if (handler_info.task_queue) {
+        [handler_info.task_queue dispatch:run_handler];
       } else {
         dispatch_async(dispatch_get_main_queue(), run_handler);
       }
@@ -124,8 +124,7 @@ void PlatformMessageHandlerIos::SetMessageHandler(const std::string& channel,
   message_handlers_.erase(channel);
   if (handler) {
     message_handlers_[channel] = {
-        .task_queue =
-            fml::scoped_nsprotocol(static_cast<NSObject<FlutterTaskQueueDispatch>*>(task_queue)),
+        .task_queue = (NSObject<FlutterTaskQueueDispatch>*)task_queue,
         .handler =
             fml::ScopedBlock<FlutterBinaryMessageHandler>{
                 handler, fml::scoped_policy::OwnershipPolicy::kRetain},

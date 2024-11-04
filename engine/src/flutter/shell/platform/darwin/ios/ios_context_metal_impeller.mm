@@ -15,11 +15,11 @@ namespace flutter {
 
 IOSContextMetalImpeller::IOSContextMetalImpeller(
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
-    : darwin_context_metal_impeller_(fml::scoped_nsobject<FlutterDarwinContextMetalImpeller>{
-          [[FlutterDarwinContextMetalImpeller alloc] init:is_gpu_disabled_sync_switch]}) {
-  if (darwin_context_metal_impeller_.get().context) {
+    : darwin_context_metal_impeller_(
+          [[FlutterDarwinContextMetalImpeller alloc] init:is_gpu_disabled_sync_switch]) {
+  if (darwin_context_metal_impeller_.context) {
     aiks_context_ = std::make_shared<impeller::AiksContext>(
-        darwin_context_metal_impeller_.get().context, impeller::TypographerContextSkia::Make());
+        darwin_context_metal_impeller_.context, impeller::TypographerContextSkia::Make());
   }
 }
 
@@ -44,7 +44,7 @@ sk_sp<GrDirectContext> IOSContextMetalImpeller::CreateResourceContext() {
 
 // |IOSContext|
 std::shared_ptr<impeller::Context> IOSContextMetalImpeller::GetImpellerContext() const {
-  return darwin_context_metal_impeller_.get().context;
+  return darwin_context_metal_impeller_.context;
 }
 
 // |IOSContext|
@@ -61,11 +61,10 @@ std::unique_ptr<GLContextResult> IOSContextMetalImpeller::MakeCurrent() {
 // |IOSContext|
 std::unique_ptr<Texture> IOSContextMetalImpeller::CreateExternalTexture(
     int64_t texture_id,
-    fml::scoped_nsobject<NSObject<FlutterTexture>> texture) {
-  return std::make_unique<IOSExternalTextureMetal>(
-      fml::scoped_nsobject<FlutterDarwinExternalTextureMetal>{[darwin_context_metal_impeller_
-          createExternalTextureWithIdentifier:texture_id
-                                      texture:texture]});
+    NSObject<FlutterTexture>* texture) {
+  return std::make_unique<IOSExternalTextureMetal>([darwin_context_metal_impeller_
+      createExternalTextureWithIdentifier:texture_id
+                                  texture:texture]);
 }
 
 }  // namespace flutter

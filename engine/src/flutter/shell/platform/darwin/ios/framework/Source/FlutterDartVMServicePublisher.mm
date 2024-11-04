@@ -41,7 +41,6 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/runtime/dart_service_isolate.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 

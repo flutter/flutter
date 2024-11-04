@@ -5,7 +5,6 @@
 #import "flutter/shell/platform/darwin/common/buffer_conversions.h"
 
 #include "flutter/fml/macros.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 
 static_assert(__has_feature(objc_arc), "ARC must be enabled.");
 

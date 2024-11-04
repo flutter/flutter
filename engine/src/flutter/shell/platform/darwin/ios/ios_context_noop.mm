@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/ios_context_noop.h"
+#include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "ios_context.h"
-#include "shell/platform/darwin/ios/rendering_api_selection.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -37,9 +37,8 @@ std::unique_ptr<GLContextResult> IOSContextNoop::MakeCurrent() {
 }
 
 // |IOSContext|
-std::unique_ptr<Texture> IOSContextNoop::CreateExternalTexture(
-    int64_t texture_id,
-    fml::scoped_nsobject<NSObject<FlutterTexture>> texture) {
+std::unique_ptr<Texture> IOSContextNoop::CreateExternalTexture(int64_t texture_id,
+                                                               NSObject<FlutterTexture>* texture) {
   // Don't use FML for logging as it will contain engine specific details. This is a user facing
   // message.
   NSLog(@"Flutter: Attempted to composite external texture sources using the noop backend. "

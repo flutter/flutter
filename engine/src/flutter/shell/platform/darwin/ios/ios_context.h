@@ -11,7 +11,6 @@
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/fml/synchronization/sync_switch.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
@@ -121,9 +120,8 @@ class IOSContext {
   /// @return     The texture proxy if the rendering backend supports embedder
   ///             provided external textures.
   ///
-  virtual std::unique_ptr<Texture> CreateExternalTexture(
-      int64_t texture_id,
-      fml::scoped_nsobject<NSObject<FlutterTexture>> texture) = 0;
+  virtual std::unique_ptr<Texture> CreateExternalTexture(int64_t texture_id,
+                                                         NSObject<FlutterTexture>* texture) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Accessor for the Skia context associated with IOSSurfaces and
