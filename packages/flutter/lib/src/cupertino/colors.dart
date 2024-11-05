@@ -1149,6 +1149,11 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
   @override
   int get value => _effectiveColor.value;
 
+  // TODO(matanl): Remove once https://github.com/flutter/engine/pull/56329 lands in the framework.
+  // ignore: unnecessary_override
+  @override
+  int toARGB32() => value;
+
   @override
   int get alpha => _effectiveColor.alpha;
 
