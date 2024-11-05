@@ -537,11 +537,12 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   custom_task_runners.platform_task_runner = &platform_task_runner;
   custom_task_runners.render_task_runner = &platform_task_runner;
 
-  g_autoptr(GPtrArray) command_line_args = fl_engine_get_switches(self);
-  // FlutterProjectArgs expects a full argv, so when processing it for flags
-  // the first item is treated as the executable and ignored. Add a dummy value
-  // so that all switches are used.
+  g_autoptr(GPtrArray) command_line_args =
+      g_ptr_array_new_with_free_func(g_free);
   g_ptr_array_insert(command_line_args, 0, g_strdup("flutter"));
+  for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
+    g_ptr_array_add(command_line_args, g_strdup(env_switch.c_str()));
+  }
 
   gchar** dart_entrypoint_args =
       fl_dart_project_get_dart_entrypoint_arguments(self->project);
@@ -1024,16 +1025,6 @@ void fl_engine_update_accessibility_features(FlEngine* self, int32_t flags) {
 
   self->embedder_api.UpdateAccessibilityFeatures(
       self->engine, static_cast<FlutterAccessibilityFeature>(flags));
-}
-
-GPtrArray* fl_engine_get_switches(FlEngine* self) {
-  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
-
-  GPtrArray* switches = g_ptr_array_new_with_free_func(g_free);
-  for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
-    g_ptr_array_add(switches, g_strdup(env_switch.c_str()));
-  }
-  return switches;
 }
 
 void fl_engine_request_app_exit(FlEngine* self) {

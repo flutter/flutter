@@ -537,17 +537,6 @@ TEST(FlEngineTest, EmptyLocales) {
   }
 }
 
-TEST(FlEngineTest, SwitchesEmpty) {
-  g_autoptr(FlEngine) engine = make_mock_engine();
-
-  // Clear the main environment variable, since test order is not guaranteed.
-  unsetenv("FLUTTER_ENGINE_SWITCHES");
-
-  g_autoptr(GPtrArray) switches = fl_engine_get_switches(engine);
-
-  EXPECT_EQ(switches->len, 0U);
-}
-
 static void add_view_cb(GObject* object,
                         GAsyncResult* result,
                         gpointer user_data) {
@@ -758,26 +747,5 @@ TEST(FlEngineTest, RemoveViewEngineError) {
   // Blocks here until remove_view_engine_error_cb is called.
   g_main_loop_run(loop);
 }
-
-#ifndef FLUTTER_RELEASE
-TEST(FlEngineTest, Switches) {
-  g_autoptr(FlEngine) engine = make_mock_engine();
-
-  setenv("FLUTTER_ENGINE_SWITCHES", "2", 1);
-  setenv("FLUTTER_ENGINE_SWITCH_1", "abc", 1);
-  setenv("FLUTTER_ENGINE_SWITCH_2", "foo=\"bar, baz\"", 1);
-
-  g_autoptr(GPtrArray) switches = fl_engine_get_switches(engine);
-  EXPECT_EQ(switches->len, 2U);
-  EXPECT_STREQ(static_cast<const char*>(g_ptr_array_index(switches, 0)),
-               "--abc");
-  EXPECT_STREQ(static_cast<const char*>(g_ptr_array_index(switches, 1)),
-               "--foo=\"bar, baz\"");
-
-  unsetenv("FLUTTER_ENGINE_SWITCHES");
-  unsetenv("FLUTTER_ENGINE_SWITCH_1");
-  unsetenv("FLUTTER_ENGINE_SWITCH_2");
-}
-#endif  // !FLUTTER_RELEASE
 
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
