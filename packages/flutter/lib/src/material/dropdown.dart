@@ -1364,6 +1364,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>>
   }
 
   void _removeDropdownRoute() {
+    focusNode?.unfocus();
     _dropdownRoute?._dismiss();
     _dropdownRoute = null;
     _lastOrientation = null;
@@ -1466,7 +1467,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>>
       if (!mounted || newValue == null) {
         return;
       }
-      focusNode?.unfocus();
       widget.onChanged?.call(newValue.result);
     });
 
