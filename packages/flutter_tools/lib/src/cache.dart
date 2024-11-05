@@ -156,8 +156,19 @@ class Cache {
     fileSystem ??= rootOverride?.fileSystem ?? MemoryFileSystem.test();
     platform ??= FakePlatform(environment: <String, String>{});
     logger ??= BufferLogger.test();
+    rootOverride ??= fileSystem.currentDirectory;
+
+    final File engineVersionFile = rootOverride
+        .childDirectory('bin')
+        .childDirectory('cache')
+        .childFile('engine-dart-sdk.stamp');
+    if (!engineVersionFile.existsSync()) {
+      engineVersionFile.createSync(recursive: true);
+      engineVersionFile.writeAsStringSync('testEngineSdkStamp');
+    }
+
     return Cache(
-      rootOverride: rootOverride ?? fileSystem.currentDirectory,
+      rootOverride: rootOverride,
       artifacts: artifacts ?? <ArtifactSet>[],
       logger: logger,
       fileSystem: fileSystem,

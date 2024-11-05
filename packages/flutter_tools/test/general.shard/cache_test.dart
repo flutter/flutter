@@ -345,7 +345,6 @@ void main() {
       engineVersionFile.writeAsStringSync('abcdef');
 
       final File engineRealmFile = fileSystem.currentDirectory
-          .childDirectory('cache')
           .childDirectory('bin')
           .childDirectory('internal')
           .childFile('engine.realm');
