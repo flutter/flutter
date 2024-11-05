@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -373,17 +374,27 @@ void main() {
         ])
       );
 
-        final LaunchResult launchResult = await iosDevice.startApp(
+      final FakeAsync fakeAsync = FakeAsync();
+      final Future<LaunchResult> pendingResult = fakeAsync.run((_) async {
+        return iosDevice.startApp(
           buildableIOSApp,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
           platformArgs: <String, Object>{},
         );
+      });
 
+      unawaited(pendingResult.then(expectAsync1((LaunchResult launchResult) {
         expect(logger.statusText,
           contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'),
         );
         expect(launchResult.started, true);
         expect(processManager, hasNoRemainingExpectations);
+      })));
+
+      // Wait until all asyncronous time has been elapsed.
+      do {
+        fakeAsync.elapse(const Duration(seconds: 2));
+      } while (fakeAsync.pendingTimers.isNotEmpty);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
