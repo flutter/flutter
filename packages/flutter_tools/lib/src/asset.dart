@@ -380,6 +380,7 @@ class ManifestAssetBundle implements AssetBundle {
           targetPlatform,
           packageName: package.name,
           attributedPackage: package,
+          flavor: flavor,
         );
 
         if (packageAssets == null) {
@@ -873,7 +874,7 @@ class ManifestAssetBundle implements AssetBundle {
     TargetPlatform? targetPlatform, {
     String? packageName,
     Package? attributedPackage,
-    String? flavor,
+    required String? flavor,
   }) {
     final Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
