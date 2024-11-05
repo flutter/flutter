@@ -266,8 +266,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     required Logger logger,
     required FlutterVersion flutterVersion,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-    // ignore: avoid_unused_constructor_parameters, temporarily unused to prepare G3: https://fusion2.corp.google.com/invocations/73b149c2-d86a-4869-81d3-85e74fe8ec31/targets/%2F%2Fnbu%2Fpaisa%2Fgpay%2Fmanzana%2Fapp%2Fapp_settings%2Fextension%3Aapp_settings_proto_extension_test_test_app_settings_proto_extension_test.host
-    bool useImplicitPubspecResolution = true,
+    // ignore: avoid_unused_constructor_parameters, temporarily unused to prepare G3.
   }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
         fileSystem: fileSystem,
