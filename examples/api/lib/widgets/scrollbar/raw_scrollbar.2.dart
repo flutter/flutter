@@ -33,6 +33,12 @@ class _RawScrollbarExampleState extends State<RawScrollbarExample> {
   final ScrollController _controllerOne = ScrollController();
 
   @override
+  void dispose() {
+    _controllerOne.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return RawScrollbar(
       controller: _controllerOne,
