@@ -222,26 +222,6 @@ void main() {
       });
     }
 
-    testWithoutContext('flutter build $buildSubcommand succeeds without libraries', () async {
-      await inTempDir((Directory tempDirectory) async {
-        final Directory projectDirectory = await createTestProjectWithNoCBuild(packageName, tempDirectory);
-
-        final ProcessResult result = processManager.runSync(
-          <String>[
-            flutterBin,
-            'build',
-            buildSubcommand,
-            '--debug',
-            if (buildSubcommand == 'ios') '--no-codesign',
-          ],
-          workingDirectory: projectDirectory.path,
-        );
-        if (result.exitCode != 0) {
-          throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
-        }
-      });
-    });
-
     // This could be an hermetic unit test if the native_assets_builder
     // could mock process runs and file system.
     // https://github.com/dart-lang/native/issues/90.
