@@ -13,9 +13,9 @@ Specifically:
 3. Listen. Consider and acknowledge people's points before responding.
 4. Do not discuss internal team disagreements, that require internal knowladge, on public threads.
 5. When stating that someone did something wrong, give clear objective reasons like:
-  * What was done violated a policy
-  * There may be negative consiquences that should be handled both on the level
-     of the concrete case and level of policies 
+     * What was done violated a policy
+     * There may be negative consiquences that should be handled both on the level
+        of the concrete case and level of policies 
 
 Should you experience anything that makes you feel unwelcome in Flutter's
 community, please contact [conduct@flutter.dev](mailto:conduct@flutter.dev)
