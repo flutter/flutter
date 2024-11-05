@@ -315,47 +315,27 @@ struct ContentContextOptions {
   bool wireframe = false;
   bool is_for_rrect_blur_clear = false;
 
-  struct Hash {
-    constexpr uint64_t operator()(const ContentContextOptions& o) const {
-      static_assert(sizeof(o.sample_count) == 1);
-      static_assert(sizeof(o.blend_mode) == 1);
-      static_assert(sizeof(o.sample_count) == 1);
-      static_assert(sizeof(o.depth_compare) == 1);
-      static_assert(sizeof(o.stencil_mode) == 1);
-      static_assert(sizeof(o.primitive_type) == 1);
-      static_assert(sizeof(o.color_attachment_pixel_format) == 1);
+  constexpr uint64_t ToKey() const {
+    static_assert(sizeof(sample_count) == 1);
+    static_assert(sizeof(blend_mode) == 1);
+    static_assert(sizeof(sample_count) == 1);
+    static_assert(sizeof(depth_compare) == 1);
+    static_assert(sizeof(stencil_mode) == 1);
+    static_assert(sizeof(primitive_type) == 1);
+    static_assert(sizeof(color_attachment_pixel_format) == 1);
 
-      return (o.is_for_rrect_blur_clear ? 1llu : 0llu) << 0 |
-             (o.wireframe ? 1llu : 0llu) << 1 |
-             (o.has_depth_stencil_attachments ? 1llu : 0llu) << 2 |
-             (o.depth_write_enabled ? 1llu : 0llu) << 3 |
-             // enums
-             static_cast<uint64_t>(o.color_attachment_pixel_format) << 8 |
-             static_cast<uint64_t>(o.primitive_type) << 16 |
-             static_cast<uint64_t>(o.stencil_mode) << 24 |
-             static_cast<uint64_t>(o.depth_compare) << 32 |
-             static_cast<uint64_t>(o.blend_mode) << 40 |
-             static_cast<uint64_t>(o.sample_count) << 48;
-    }
-  };
-
-  struct Equal {
-    constexpr bool operator()(const ContentContextOptions& lhs,
-                              const ContentContextOptions& rhs) const {
-      return lhs.sample_count == rhs.sample_count &&
-             lhs.blend_mode == rhs.blend_mode &&
-             lhs.depth_write_enabled == rhs.depth_write_enabled &&
-             lhs.depth_compare == rhs.depth_compare &&
-             lhs.stencil_mode == rhs.stencil_mode &&
-             lhs.primitive_type == rhs.primitive_type &&
-             lhs.color_attachment_pixel_format ==
-                 rhs.color_attachment_pixel_format &&
-             lhs.has_depth_stencil_attachments ==
-                 rhs.has_depth_stencil_attachments &&
-             lhs.wireframe == rhs.wireframe &&
-             lhs.is_for_rrect_blur_clear == rhs.is_for_rrect_blur_clear;
-    }
-  };
+    return (is_for_rrect_blur_clear ? 1llu : 0llu) << 0 |
+           (wireframe ? 1llu : 0llu) << 1 |
+           (has_depth_stencil_attachments ? 1llu : 0llu) << 2 |
+           (depth_write_enabled ? 1llu : 0llu) << 3 |
+           // enums
+           static_cast<uint64_t>(color_attachment_pixel_format) << 8 |
+           static_cast<uint64_t>(primitive_type) << 16 |
+           static_cast<uint64_t>(stencil_mode) << 24 |
+           static_cast<uint64_t>(depth_compare) << 32 |
+           static_cast<uint64_t>(blend_mode) << 40 |
+           static_cast<uint64_t>(sample_count) << 48;
+  }
 
   void ApplyToPipelineDescriptor(PipelineDescriptor& desc) const;
 };
@@ -771,7 +751,7 @@ class ContentContext {
     struct Hash {
       std::size_t operator()(const RuntimeEffectPipelineKey& key) const {
         return fml::HashCombine(key.unique_entrypoint_name,
-                                ContentContextOptions::Hash{}(key.options));
+                                key.options.ToKey());
       }
     };
 
@@ -779,7 +759,7 @@ class ContentContext {
       constexpr bool operator()(const RuntimeEffectPipelineKey& lhs,
                                 const RuntimeEffectPipelineKey& rhs) const {
         return lhs.unique_entrypoint_name == rhs.unique_entrypoint_name &&
-               ContentContextOptions::Equal{}(lhs.options, rhs.options);
+               lhs.options.ToKey() == rhs.options.ToKey();
       }
     };
   };
@@ -810,7 +790,13 @@ class ContentContext {
 
     void Set(const ContentContextOptions& options,
              std::unique_ptr<PipelineHandleT> pipeline) {
-      pipelines_[options] = std::move(pipeline);
+      uint64_t p_key = options.ToKey();
+      for (const auto& [key, pipeline] : pipelines_) {
+        if (key == p_key) {
+          return;
+        }
+      }
+      pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
     }
 
     void SetDefault(const ContentContextOptions& options,
@@ -833,8 +819,11 @@ class ContentContext {
     }
 
     PipelineHandleT* Get(const ContentContextOptions& options) const {
-      if (auto found = pipelines_.find(options); found != pipelines_.end()) {
-        return found->second.get();
+      uint64_t p_key = options.ToKey();
+      for (const auto& [key, pipeline] : pipelines_) {
+        if (key == p_key) {
+          return pipeline.get();
+        }
       }
       return nullptr;
     }
@@ -850,10 +839,7 @@ class ContentContext {
 
    private:
     std::optional<ContentContextOptions> default_options_;
-    std::unordered_map<ContentContextOptions,
-                       std::unique_ptr<PipelineHandleT>,
-                       ContentContextOptions::Hash,
-                       ContentContextOptions::Equal>
+    std::vector<std::pair<uint64_t, std::unique_ptr<PipelineHandleT>>>
         pipelines_;
 
     Variants(const Variants&) = delete;
