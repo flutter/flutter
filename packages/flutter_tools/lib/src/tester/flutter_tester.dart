@@ -267,6 +267,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     required FlutterVersion flutterVersion,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
     // ignore: avoid_unused_constructor_parameters, temporarily unused to prepare G3.
+    bool useImplicitPubspecResolution = true,
   }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
         fileSystem: fileSystem,
