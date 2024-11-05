@@ -337,14 +337,18 @@ void main() {
 
     testWithoutContext('a non-empty realm is included in the storage url', () async {
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final Directory internalDir = fileSystem.currentDirectory
-        .childDirectory('bin')
-        .childDirectory('internal');
-      final File engineVersionFile = internalDir.childFile('engine.version');
+      final File engineVersionFile = fileSystem.currentDirectory
+          .childDirectory('bin')
+          .childDirectory('cache')
+          .childFile('engine-dart-sdk.stamp');
       engineVersionFile.createSync(recursive: true);
       engineVersionFile.writeAsStringSync('abcdef');
 
-      final File engineRealmFile = internalDir.childFile('engine.realm');
+      final File engineRealmFile = fileSystem.currentDirectory
+          .childDirectory('cache')
+          .childDirectory('bin')
+          .childDirectory('internal')
+          .childFile('engine.realm');
       engineRealmFile.createSync(recursive: true);
       engineRealmFile.writeAsStringSync('flutter_archives_v2');
 
@@ -801,14 +805,17 @@ void main() {
 
   testWithoutContext('FlutterWebSdk fetches web artifacts and deletes previous directory contents', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory internalDir = fileSystem.currentDirectory
+    final File canvasKitVersionFile = fileSystem.currentDirectory
+      .childDirectory('cache')
       .childDirectory('bin')
-      .childDirectory('internal');
-    final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
+      .childDirectory('internal').childFile('canvaskit.version');
     canvasKitVersionFile.createSync(recursive: true);
     canvasKitVersionFile.writeAsStringSync('abcdefg');
 
-    final File engineVersionFile = internalDir.childFile('engine.version');
+    final File engineVersionFile = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('cache')
+        .childFile('engine-dart-sdk.stamp');
     engineVersionFile.createSync(recursive: true);
     engineVersionFile.writeAsStringSync('hijklmnop');
 
@@ -849,14 +856,17 @@ void main() {
 
   testWithoutContext('FlutterWebSdk CanvasKit URL can be overridden via FLUTTER_STORAGE_BASE_URL', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory internalDir = fileSystem.currentDirectory
-      .childDirectory('bin')
-      .childDirectory('internal');
-    final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
+    final File canvasKitVersionFile = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('canvaskit.version');
     canvasKitVersionFile.createSync(recursive: true);
     canvasKitVersionFile.writeAsStringSync('abcdefg');
 
-    final File engineVersionFile = internalDir.childFile('engine.version');
+    final File engineVersionFile = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('cache')
+        .childFile('engine-dart-sdk.stamp');
     engineVersionFile.createSync(recursive: true);
     engineVersionFile.writeAsStringSync('hijklmnop');
 
