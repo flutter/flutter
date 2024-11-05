@@ -35,6 +35,12 @@ class _DesktopExampleState extends State<DesktopExample> {
   final ScrollController controller = ScrollController();
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       return Row(
