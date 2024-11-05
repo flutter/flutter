@@ -2368,6 +2368,12 @@ class LayerLink {
   /// layout.
   Size? leaderSize;
 
+  /// The position of the content of the connected [LeaderLayer]
+  /// in global coordinates.
+  ///
+  /// This is required when adaptive positioning is desired.
+  Offset? leaderGlobalOffset;
+
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
     return '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';

@@ -4768,6 +4768,7 @@ class RenderLeaderLayer extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    link.leaderGlobalOffset = offset;
     if (layer == null) {
       layer = LeaderLayer(link: link, offset: offset);
     } else {
@@ -4812,11 +4813,13 @@ class RenderFollowerLayer extends RenderProxyBox {
     Alignment leaderAnchor = Alignment.topLeft,
     Alignment followerAnchor = Alignment.topLeft,
     RenderBox? child,
+    Rect? allowedRect,
   }) : _link = link,
        _showWhenUnlinked = showWhenUnlinked,
        _offset = offset,
        _leaderAnchor = leaderAnchor,
        _followerAnchor = followerAnchor,
+       _allowedRect = allowedRect,
        super(child);
 
   /// The link object that connects this [RenderFollowerLayer] with a
@@ -4862,8 +4865,8 @@ class RenderFollowerLayer extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// The anchor point on the linked [RenderLeaderLayer] that [followerAnchor]
-  /// will line up with.
+  /// The preferred anchor point on the linked [RenderLeaderLayer] that
+  /// [leaderAnchor] will line up with.
   ///
   /// {@template flutter.rendering.RenderFollowerLayer.leaderAnchor}
   /// For example, when [leaderAnchor] and [followerAnchor] are both
@@ -4876,6 +4879,10 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// {@endtemplate}
   ///
   /// Defaults to [Alignment.topLeft].
+  ///
+  /// if [allowedRect] is not null, the effective follower anchor value will be
+  /// adjusted in order for the follower to be inside [allowedRect]. If the
+  /// adjustment is not possible the follower anchor value will not be updated.
   Alignment get leaderAnchor => _leaderAnchor;
   Alignment _leaderAnchor;
   set leaderAnchor(Alignment value) {
@@ -4886,12 +4893,16 @@ class RenderFollowerLayer extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// The anchor point on this [RenderFollowerLayer] that will line up with
-  /// [followerAnchor] on the linked [RenderLeaderLayer].
+  /// The preferred anchor point on this [RenderFollowerLayer] that will line up
+  /// with [followerAnchor] on the linked [RenderLeaderLayer].
   ///
   /// {@macro flutter.rendering.RenderFollowerLayer.leaderAnchor}
   ///
   /// Defaults to [Alignment.topLeft].
+  ///
+  /// if [allowedRect] is not null, the effective follower anchor value will be
+  /// adjusted in order for the follower to be inside [allowedRect]. If the
+  /// adjustment is not possible the follower anchor value will not be updated.
   Alignment get followerAnchor => _followerAnchor;
   Alignment _followerAnchor;
   set followerAnchor(Alignment value) {
@@ -4899,6 +4910,18 @@ class RenderFollowerLayer extends RenderProxyBox {
       return;
     }
     _followerAnchor = value;
+    markNeedsPaint();
+  }
+
+  /// An optional rect that defines bounds into which the follower child
+  /// should be painted if possible.
+  Rect? get allowedRect => _allowedRect;
+  Rect? _allowedRect;
+  set allowedRect(Rect? value) {
+    if (_allowedRect == value) {
+      return;
+    }
+    _allowedRect = value;
     markNeedsPaint();
   }
 
@@ -4958,9 +4981,33 @@ class RenderFollowerLayer extends RenderProxyBox {
       'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',
     );
-    final Offset effectiveLinkedOffset = leaderSize == null
+    Offset effectiveLinkedOffset = leaderSize == null
       ? this.offset
       : leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + this.offset;
+
+    if (allowedRect != null && leaderSize != null && link.leaderGlobalOffset != null) {
+      // TODO(bleroux): implements all the out of bounds cases. For the moment,
+      // only bottom overflow is implemented as it suits DropdownMenu use case.
+
+      // Check if the follower will be painted outside bottom bounds.
+      final double followerHeight = size.height;
+      final Offset leaderOffset = link.leaderGlobalOffset!;
+      final double followerBottom = leaderOffset.dy + effectiveLinkedOffset.dy + followerHeight;
+      final bool bottomOverflow = followerBottom > allowedRect!.bottom;
+      if (bottomOverflow) {
+        final double adjustedTop = leaderOffset.dy - followerHeight;
+        final bool canFitAbove = adjustedTop > 0;
+        if (canFitAbove) {
+          // Adjust leader anchor to the top.
+          final Alignment adjustedLeaderAnchor = Alignment(leaderAnchor.x, -1.0);
+          // Adjust follower anchor to the bottom.
+          final Alignment adjustedFollowerAnchor = Alignment(followerAnchor.x, 1.0);
+          effectiveLinkedOffset = adjustedLeaderAnchor.alongSize(leaderSize)
+                                  - adjustedFollowerAnchor.alongSize(size)
+                                  + this.offset;
+        }
+      }
+    }
     if (layer == null) {
       layer = FollowerLayer(
         link: link,

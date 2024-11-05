@@ -1781,6 +1781,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
     this.offset = Offset.zero,
     this.targetAnchor = Alignment.topLeft,
     this.followerAnchor = Alignment.topLeft,
+    this.allowedRect,
     super.child,
   });
 
@@ -1828,6 +1829,10 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// position.
   final Offset offset;
 
+  /// An optional rect that defines bounds into which the follower child
+  /// should be painted if possible.
+  final Rect? allowedRect;
+
   @override
   RenderFollowerLayer createRenderObject(BuildContext context) {
     return RenderFollowerLayer(
@@ -1836,6 +1841,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
       offset: offset,
       leaderAnchor: targetAnchor,
       followerAnchor: followerAnchor,
+      allowedRect: allowedRect,
     );
   }
 
@@ -1846,7 +1852,8 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
       ..showWhenUnlinked = showWhenUnlinked
       ..offset = offset
       ..leaderAnchor = targetAnchor
-      ..followerAnchor = followerAnchor;
+      ..followerAnchor = followerAnchor
+      ..allowedRect = allowedRect;
   }
 }
 
