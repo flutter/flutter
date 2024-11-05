@@ -778,14 +778,6 @@ mixin WidgetInspectorService {
   static WidgetInspectorService get instance => _instance;
   static WidgetInspectorService _instance = _WidgetInspectorService();
 
-  /// Whether the inspector is in select mode.
-  ///
-  /// In select mode, pointer interactions trigger widget selection instead of
-  /// normal interactions. Otherwise the previously selected widget is
-  /// highlighted but the application can be interacted with normally.
-  // @visibleForTesting
-  // final ValueNotifier<bool> isSelectMode = ValueNotifier<bool>(true);
-
   @protected
   static set instance(WidgetInspectorService instance) {
     _instance = instance;
@@ -2958,7 +2950,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
   Widget build(BuildContext context) {
     // Be careful changing this build method. The _InspectorOverlayLayer
     // assumes the root RenderObject for the WidgetInspector will be
-    // a RenderStack with a _RenderInspectorOverlay as the last child.
+    // a RenderStack containing a _RenderInspectorOverlay as a child.
     final GlobalKey<State<StatefulWidget>> exitWidgetSelectionButtonKey =
         GlobalKey(debugLabel: 'Exit Widget Selection');
     return Stack(children: <Widget>[
@@ -2975,6 +2967,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
           child: widget.child,
         ),
       ),
+      _InspectorOverlay(selection: selection),
       if (isSelectMode && widget.exitWidgetSelectionButtonBuilder != null)
         Positioned(
           left: _kInspectButtonMargin,
@@ -2988,7 +2981,6 @@ class _WidgetInspectorState extends State<WidgetInspector>
             buttonKey: exitWidgetSelectionButtonKey,
           ),
         ),
-      _InspectorOverlay(selection: selection),
     ]);
   }
 }
@@ -3444,7 +3436,10 @@ class _InspectorOverlayLayer extends Layer {
     while (current != null) {
       // We found the widget inspector render object.
       if (current is RenderStack
-          && current.lastChild is _RenderInspectorOverlay) {
+          &&
+          current.getChildrenAsList().any(
+                (RenderBox child) => child is _RenderInspectorOverlay,
+              )) {
         return rootRenderObject == current;
       }
       current = current.parent;
@@ -3545,7 +3540,10 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
       ..maxLines = 1
       ..ellipsis = '...'
       ..text =
-          const TextSpan(text: 'Exit selection mode.', style: _messageStyle)
+          const TextSpan(
+        text: 'Exit Select Widget mode',
+        style: _messageStyle,
+      )
       ..textDirection = TextDirection.ltr
       ..layout();
 
@@ -3589,8 +3587,6 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
     return isVisible != oldDelegate.isVisible;
   }
 }
-
-
 
 /// Interface for classes that track the source code location the their
 /// constructor was called from.

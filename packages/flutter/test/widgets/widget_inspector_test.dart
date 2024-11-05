@@ -285,9 +285,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
   static void runTests() {
     final TestWidgetInspectorService service = TestWidgetInspectorService();
     WidgetInspectorService.instance = service;
-    setUp(() {
-      WidgetInspectorService.instance.isSelectMode.value = true;
-    });
     tearDown(() async {
       service.resetAllState();
 
@@ -357,7 +354,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         const Directionality(
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
-            selectButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
             child: Stack(
               children: <Widget>[
                 Text('a', textDirection: TextDirection.ltr),
@@ -374,12 +371,18 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspector interaction test', (WidgetTester tester) async {
       final List<String> log = <String>[];
-      final GlobalKey selectButtonKey = GlobalKey();
+      late GlobalKey selectButtonKey;
       final GlobalKey inspectorKey = GlobalKey();
       final GlobalKey topButtonKey = GlobalKey();
 
-      Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
+      Widget selectButtonBuilder(
+        BuildContext context,
+        VoidCallback onPressed, {
+        required GlobalKey key,
+      }) {
+        selectButtonKey = key;
+        return Material(
+            child: ElevatedButton(onPressed: onPressed, key: key, child: null));
       }
 
       String paragraphText(RenderParagraph paragraph) {
@@ -392,7 +395,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             key: inspectorKey,
-            selectButtonBuilder: selectButtonBuilder,
+            exitWidgetSelectionButtonBuilder: selectButtonBuilder,
             child: Material(
               child: ListView(
                 children: <Widget>[
@@ -469,7 +472,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         Directionality(
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
-            selectButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
             child: Transform(
               transform: Matrix4.identity()..scale(0.0),
               child: const Stack(
@@ -491,11 +494,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspector scroll test', (WidgetTester tester) async {
       final Key childKey = UniqueKey();
-      final GlobalKey selectButtonKey = GlobalKey();
       final GlobalKey inspectorKey = GlobalKey();
 
-      Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
+      Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed,
+          {required GlobalKey key}) {
+        return Material(
+            child: ElevatedButton(onPressed: onPressed, key: key, child: null));
       }
 
       await tester.pumpWidget(
@@ -503,7 +507,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             key: inspectorKey,
-            selectButtonBuilder: selectButtonBuilder,
+            exitWidgetSelectionButtonBuilder: selectButtonBuilder,
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,
               children: <Widget>[
@@ -553,7 +557,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         Directionality(
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
-            selectButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
             child: GestureDetector(
               onLongPress: () {
                 expect(didLongPress, isFalse);
@@ -601,7 +605,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             key: inspectorKey,
-            selectButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
             child: Overlay(
               initialEntries: <OverlayEntry>[
                 entry1 = OverlayEntry(
@@ -660,7 +664,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: WidgetInspector(
-                  selectButtonBuilder: null,
+                  exitWidgetSelectionButtonBuilder: null,
                   child: ColoredBox(
                     color: Colors.white,
                     child: Center(
@@ -701,8 +705,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final GlobalKey child1Key = GlobalKey();
       final GlobalKey child2Key = GlobalKey();
 
-      exitWidgetSelectionButtonBuilder selectButtonBuilder(Key key) {
-        return (BuildContext context, VoidCallback onPressed) {
+      ExitWidgetSelectionButtonBuilder selectButtonBuilder(Key key) {
+        return (
+          BuildContext context,
+          VoidCallback onPressed, {
+          required GlobalKey key,
+        }) {
           return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
         };
       }
@@ -720,7 +728,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               Flexible(
                 child: WidgetInspector(
                   key: inspector1Key,
-                  selectButtonBuilder: selectButtonBuilder(selectButton1Key),
+                  exitWidgetSelectionButtonBuilder:
+                      selectButtonBuilder(selectButton1Key),
                   child: Container(
                     key: child1Key,
                     child: const Text('Child 1'),
@@ -730,7 +739,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               Flexible(
                 child: WidgetInspector(
                   key: inspector2Key,
-                  selectButtonBuilder: selectButtonBuilder(selectButton2Key),
+                  exitWidgetSelectionButtonBuilder:
+                      selectButtonBuilder(selectButton2Key),
                   child: Container(
                     key: child2Key,
                     child: const Text('Child 2'),
@@ -751,10 +761,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         equals('Child 1'),
       );
 
-      // Re-enable select mode since it's state is shared between the
-      // WidgetInspectors
-      WidgetInspectorService.instance.isSelectMode.value = true;
-
       await tester.tap(find.text('Child 2'), warnIfMissed: false);
       await tester.pump();
       expect(
@@ -768,12 +774,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets(
       'WidgetInspector selectButton inspection for tap',
       (WidgetTester tester) async {
-        final GlobalKey selectButtonKey = GlobalKey();
         final GlobalKey inspectorKey = GlobalKey();
         setupDefaultPubRootDirectory(service);
 
-        Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-          return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
+        Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed, {required GlobalKey key}) {
+          return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
         }
 
         await tester.pumpWidget(
@@ -781,7 +786,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             textDirection: TextDirection.ltr,
             child: WidgetInspector(
               key: inspectorKey,
-              selectButtonBuilder: selectButtonBuilder,
+            exitWidgetSelectionButtonBuilder: selectButtonBuilder,
               child: const Text('Child 1'),
             ),
           ),
@@ -3727,7 +3732,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
         child: WidgetInspector(
-          selectButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
           child: _applyConstructor(_TrivialWidget.new),
         ),
       );
