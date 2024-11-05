@@ -280,37 +280,6 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
   }
 }
 
-// Used to "shake" the floating label to the left and right
-// when the errorText first appears.
-class _Shaker extends AnimatedWidget {
-  const _Shaker({
-    required Animation<double> animation,
-    this.child,
-  }) : super(listenable: animation);
-
-  final Widget? child;
-
-  Animation<double> get animation => listenable as Animation<double>;
-
-  double get translateX {
-    const double shakeDelta = 4.0;
-    final double t = animation.value;
-    return shakeDelta * switch (t) {
-      <= 0.25 => -t,
-      <  0.75 => t - 0.5,
-      _ => (1.0 - t) * 4.0,
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Transform(
-      transform: Matrix4.translationValues(translateX, 0.0, 0.0),
-      child: child,
-    );
-  }
-}
-
 // Display the helper and error text. When the error text appears
 // it fades and the helper text fades out. The error text also
 // slides upwards a little when it first appears.
@@ -2221,26 +2190,39 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       isHovering: isHovering,
     );
 
-    final Widget? label = decoration.labelText == null && decoration.label == null ? null : _Shaker(
-      animation: _shakingLabelController.view,
-      child: AnimatedOpacity(
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        opacity: _shouldShowLabel ? 1.0 : 0.0,
-        child: AnimatedDefaultTextStyle(
-          duration:_kTransitionDuration,
+    Widget? label;
+    if ((decoration.labelText ?? decoration.label) != null) {
+      label = MatrixTransition(
+        animation: _shakingLabelController,
+        onTransform: (double value) {
+          final double shakeOffset = switch (value) {
+            <= 0.25 => -value,
+            <  0.75 => value - 0.5,
+            _ => (1.0 - value) * 4.0,
+          };
+          // Shakes the floating label to the left and right
+          // when the errorText first appears.
+          return Matrix4.translationValues(shakeOffset * 4.0, 0.0, 0.0);
+        },
+        child: AnimatedOpacity(
+          duration: _kTransitionDuration,
           curve: _kTransitionCurve,
-          style: widget._labelShouldWithdraw
-            ? _getFloatingLabelStyle(themeData, defaults)
-            : labelStyle,
-          child: decoration.label ?? Text(
-            decoration.labelText!,
-            overflow: TextOverflow.ellipsis,
-            textAlign: textAlign,
+          opacity: _shouldShowLabel ? 1.0 : 0.0,
+          child: AnimatedDefaultTextStyle(
+            duration: _kTransitionDuration,
+            curve: _kTransitionCurve,
+            style: widget._labelShouldWithdraw
+              ? _getFloatingLabelStyle(themeData, defaults)
+              : labelStyle,
+            child: decoration.label ?? Text(
+              decoration.labelText!,
+              overflow: TextOverflow.ellipsis,
+              textAlign: textAlign,
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
     final bool hasPrefix = decoration.prefix != null || decoration.prefixText != null;
     final bool hasSuffix = decoration.suffix != null || decoration.suffixText != null;
