@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:logging/logging.dart';
-import 'package:native_assets_cli/native_assets_cli.dart';
+import 'package:native_assets_cli/code_assets.dart';
+import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 
-
 void main(List<String> args) async {
-  await build(args, (BuildConfig config, BuildOutput output) async {
+  await build(args, (BuildConfig config, BuildOutputBuilder output) async {
     final String assetName;
     if (config.linkingEnabled) {
       // The link hook will be run. So emit an asset with a name that is
@@ -30,7 +30,7 @@ void main(List<String> args) async {
       ],
       dartBuildFiles: <String>['hook/build.dart'],
     );
-    final BuildOutput outputCatcher = BuildOutput();
+    final BuildOutputBuilder outputCatcher = BuildOutputBuilder();
     await cbuilder.run(
       config: config,
       output: outputCatcher,
@@ -38,10 +38,11 @@ void main(List<String> args) async {
         ..level = Level.ALL
         ..onRecord.listen((LogRecord record) => print(record.message)),
     );
-    output.addDependencies(outputCatcher.dependencies);
+    final BuildOutput catchedOutput = BuildOutput(outputCatcher.json);
+    output.addDependencies(catchedOutput.dependencies);
     // Send the asset to hook/link.dart or immediately for bundling.
-    output.addAsset(
-      outputCatcher.assets.single,
+    output.codeAssets.add(
+      catchedOutput.codeAssets.single,
       linkInPackage: config.linkingEnabled ? 'link_hook' : null,
     );
   });
