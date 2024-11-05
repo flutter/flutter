@@ -12,7 +12,7 @@
 namespace flutter {
 namespace testing {
 
-class DarwinContextMetal;
+struct DarwinContextMetal;
 
 class ShellTestPlatformViewMetal final : public ShellTestPlatformView,
                                          public GPUSurfaceMetalDelegate {

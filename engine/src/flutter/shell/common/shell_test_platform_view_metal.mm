@@ -8,63 +8,49 @@
 
 #include <utility>
 
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
 #include "flutter/shell/gpu/gpu_surface_metal_skia.h"
 #include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.h"
 #include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 
+FLUTTER_ASSERT_ARC
+
 namespace flutter {
 namespace testing {
 
-static fml::scoped_nsprotocol<id<MTLTexture>> CreateOffscreenTexture(id<MTLDevice> device) {
+// This is out of the header so that shell_test_platform_view_metal.h can be included in
+// non-Objective-C TUs.
+struct DarwinContextMetal {
+  FlutterDarwinContextMetalSkia* skia_context;
+  FlutterDarwinContextMetalImpeller* impeller_context;
+  id<MTLTexture> offscreen_texture;
+};
+
+static std::unique_ptr<DarwinContextMetal> CreateDarwinContext(
+    bool impeller,
+    const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch) {
+  FlutterDarwinContextMetalSkia* skia_context = nil;
+  FlutterDarwinContextMetalImpeller* impeller_context = nil;
+  id<MTLDevice> device = nil;
+  if (impeller) {
+    impeller_context = [[FlutterDarwinContextMetalImpeller alloc] init:is_gpu_disabled_sync_switch];
+    FML_CHECK(impeller_context.context);
+    device = impeller_context.context->GetMTLDevice();
+  } else {
+    skia_context = [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
+    FML_CHECK(skia_context.mainContext);
+    device = skia_context.device;
+  }
   auto descriptor =
       [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
                                                          width:800
                                                         height:600
                                                      mipmapped:NO];
   descriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
-  return fml::scoped_nsprotocol<id<MTLTexture>>{[device newTextureWithDescriptor:descriptor]};
+  id<MTLTexture> offscreen_texture = [device newTextureWithDescriptor:descriptor];
+  return std::make_unique<DarwinContextMetal>(
+      DarwinContextMetal{skia_context, impeller_context, offscreen_texture});
 }
-
-// This is out of the header so that shell_test_platform_view_metal.h can be included in
-// non-Objective-C TUs.
-class DarwinContextMetal {
- public:
-  explicit DarwinContextMetal(
-      bool impeller,
-      const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
-      : context_(impeller ? nil : [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice]),
-        impeller_context_(
-            impeller ? [[FlutterDarwinContextMetalImpeller alloc] init:is_gpu_disabled_sync_switch]
-                     : nil),
-        offscreen_texture_(CreateOffscreenTexture(
-            impeller ? [impeller_context_ context]->GetMTLDevice() : [context_ device])) {}
-
-  ~DarwinContextMetal() = default;
-
-  fml::scoped_nsobject<FlutterDarwinContextMetalImpeller> impeller_context() const {
-    return impeller_context_;
-  }
-
-  fml::scoped_nsobject<FlutterDarwinContextMetalSkia> context() const { return context_; }
-
-  fml::scoped_nsprotocol<id<MTLTexture>> offscreen_texture() const { return offscreen_texture_; }
-
-  GPUMTLTextureInfo offscreen_texture_info() const {
-    GPUMTLTextureInfo info = {};
-    info.texture_id = 0;
-    info.texture = reinterpret_cast<GPUMTLTextureHandle>(offscreen_texture_.get());
-    return info;
-  }
-
- private:
-  const fml::scoped_nsobject<FlutterDarwinContextMetalSkia> context_;
-  const fml::scoped_nsobject<FlutterDarwinContextMetalImpeller> impeller_context_;
-  const fml::scoped_nsprotocol<id<MTLTexture>> offscreen_texture_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(DarwinContextMetal);
-};
 
 ShellTestPlatformViewMetal::ShellTestPlatformViewMetal(
     PlatformView::Delegate& delegate,
@@ -75,17 +61,11 @@ ShellTestPlatformViewMetal::ShellTestPlatformViewMetal(
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
     : ShellTestPlatformView(delegate, task_runners),
       GPUSurfaceMetalDelegate(MTLRenderTargetType::kMTLTexture),
-      metal_context_(std::make_unique<DarwinContextMetal>(GetSettings().enable_impeller,
-                                                          is_gpu_disabled_sync_switch)),
+      metal_context_(
+          CreateDarwinContext(GetSettings().enable_impeller, is_gpu_disabled_sync_switch)),
       create_vsync_waiter_(std::move(create_vsync_waiter)),
       vsync_clock_(std::move(vsync_clock)),
-      shell_test_external_view_embedder_(std::move(shell_test_external_view_embedder)) {
-  if (GetSettings().enable_impeller) {
-    FML_CHECK([metal_context_->impeller_context() context] != nil);
-  } else {
-    FML_CHECK([metal_context_->context() mainContext] != nil);
-  }
-}
+      shell_test_external_view_embedder_(std::move(shell_test_external_view_embedder)) {}
 
 ShellTestPlatformViewMetal::~ShellTestPlatformViewMetal() = default;
 
@@ -113,16 +93,16 @@ PointerDataDispatcherMaker ShellTestPlatformViewMetal::GetDispatcherMaker() {
 // |PlatformView|
 std::unique_ptr<Surface> ShellTestPlatformViewMetal::CreateRenderingSurface() {
   if (GetSettings().enable_impeller) {
-    auto context = [metal_context_->impeller_context() context];
+    auto context = metal_context_->impeller_context.context;
     return std::make_unique<GPUSurfaceMetalImpeller>(
         this, std::make_shared<impeller::AiksContext>(context, nullptr));
   }
-  return std::make_unique<GPUSurfaceMetalSkia>(this, [metal_context_->context() mainContext]);
+  return std::make_unique<GPUSurfaceMetalSkia>(this, metal_context_->skia_context.mainContext);
 }
 
 // |PlatformView|
 std::shared_ptr<impeller::Context> ShellTestPlatformViewMetal::GetImpellerContext() const {
-  return [metal_context_->impeller_context() context];
+  return metal_context_->impeller_context.context;
 }
 
 // |GPUSurfaceMetalDelegate|
@@ -141,7 +121,10 @@ bool ShellTestPlatformViewMetal::PresentDrawable(GrMTLHandle drawable) const {
 
 // |GPUSurfaceMetalDelegate|
 GPUMTLTextureInfo ShellTestPlatformViewMetal::GetMTLTexture(const SkISize& frame_info) const {
-  return metal_context_->offscreen_texture_info();
+  return {
+      .texture_id = 0,
+      .texture = (__bridge GPUMTLTextureHandle)metal_context_->offscreen_texture,
+  };
 }
 
 // |GPUSurfaceMetalDelegate|
