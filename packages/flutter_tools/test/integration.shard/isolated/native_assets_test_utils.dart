@@ -70,7 +70,7 @@ Future<void> addLinkHookDependency(String packageName, Directory packageDirector
   final File linkHookPubspecFile = linkHookDirectory.childFile('pubspec.yaml');
   final File thisPubspecFile = packageDirectory.childFile('pubspec.yaml');
 
-  final Map<String, Object?> linkHookPubspec = _pubspecAsMutableJson(linkHookPubspecFile .readAsStringSync());
+  final Map<String, Object?> linkHookPubspec = _pubspecAsMutableJson(linkHookPubspecFile.readAsStringSync());
   final Map<String, Object?> allLinkHookDeps = linkHookPubspec['dependencies']! as Map<String, Object?>;
 
   final Map<String, Object?> thisPubspec = _pubspecAsMutableJson(thisPubspecFile.readAsStringSync());
@@ -121,15 +121,10 @@ Map<String, Object?> _pubspecAsMutableJson(String pubspecContent) {
   return json.decode(json.encode(loadYaml(pubspecContent))) as Map<String, Object?>;
 }
 
-void _updateDependencies(Map<String, Object?>? to, Map<String, Object?> from) {
-  if (to == null) {
-    return;
+void _updateDependencies(Map<String, Object?> to, Map<String, Object?> from) {
+  for (final String packageName in to.keys) {
+    to[packageName] = from[packageName] ?? to[packageName];
   }
-  from.forEach((String packageName, Object? value) {
-    if (to.containsKey(packageName)) {
-      to[packageName] = value;
-    }
-  });
 }
 
 /// Adds a native library to be built by the builder and dynamically link it to
