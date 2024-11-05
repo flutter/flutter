@@ -306,12 +306,6 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 /// using the `cacheWidth` and `cacheHeight` parameters, a 100-fold reduction in
 /// memory usage.
 ///
-/// ### Web considerations
-///
-/// In the case where a network image is used on the Web platform, the
-/// `cacheWidth` and `cacheHeight` parameters are only supported when the
-/// application is running with the CanvasKit renderer.
-///
 /// ## Custom image providers
 ///
 /// {@tool dartpad}
