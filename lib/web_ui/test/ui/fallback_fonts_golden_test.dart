@@ -533,6 +533,19 @@ void testMain() {
       expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
           isNot(contains('Noto Color Emoji 9')));
     });
+
+    test('only woff2 fonts are used for fallback', () {
+      final fonts = getFallbackFontList();
+
+      for (final font in fonts) {
+        expect(
+          font.url,
+          endsWith('.woff2'),
+          reason: 'Expected all fallback fonts to be WOFF2, but found '
+              '"${font.name}" was not a WOFF2 font: ${font.url}',
+        );
+      }
+    });
   },
       // HTML renderer doesn't use the fallback font manager.
       skip: isHtml,
