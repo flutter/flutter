@@ -8,36 +8,23 @@
 #import <XCTest/XCTest.h>
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 
 FLUTTER_ASSERT_ARC
-
-/// OCMock does not allow mocking both class and protocol. Use this to mock the methods used on
-/// `UIView<UITextInput>*` in the plugin.
-@interface TextInputViewTest : NSObject
-
-@property(nonatomic, weak) id<UITextInputDelegate> inputDelegate;
-@property(nonatomic, readonly) UITextInputAssistantItem* inputAssistantItem;
-
-@end
-
-@implementation TextInputViewTest
-@end
 
 @interface FakeFlutterUndoManagerDelegate : NSObject <FlutterUndoManagerDelegate>
 
 @property(readonly) NSUInteger undoCount;
 @property(readonly) NSUInteger redoCount;
 @property(nonatomic, nullable) NSUndoManager* undoManager;
+@property(nonatomic, nullable) UIView<UITextInput>* activeTextInputView;
 
 - (instancetype)initWithUndoManager:(NSUndoManager*)undoManager
-                activeTextInputView:(TextInputViewTest*)activeTextInputView;
+                activeTextInputView:(UIView<UITextInput>*)activeTextInputView;
 
 @end
 
 @implementation FakeFlutterUndoManagerDelegate
-
-@synthesize undoManager = _undoManager;
-@synthesize activeTextInputView = _activeTextInputView;
 
 - (instancetype)initWithUndoManager:(NSUndoManager*)undoManager
                 activeTextInputView:(UIView<UITextInput>*)activeTextInputView {
@@ -62,7 +49,7 @@ FLUTTER_ASSERT_ARC
 @interface FlutterUndoManagerPluginTest : XCTestCase
 @property(nonatomic) FakeFlutterUndoManagerDelegate* undoManagerDelegate;
 @property(nonatomic) FlutterUndoManagerPlugin* undoManagerPlugin;
-@property(nonatomic) TextInputViewTest* activeTextInputView;
+@property(nonatomic) UIView<UITextInput>* activeTextInputView;
 @property(nonatomic) NSUndoManager* undoManager;
 @end
 
@@ -72,7 +59,7 @@ FLUTTER_ASSERT_ARC
   [super setUp];
 
   self.undoManager = OCMClassMock([NSUndoManager class]);
-  self.activeTextInputView = OCMClassMock([TextInputViewTest class]);
+  self.activeTextInputView = OCMClassMock([FlutterTextInputView class]);
 
   self.undoManagerDelegate =
       [[FakeFlutterUndoManagerDelegate alloc] initWithUndoManager:self.undoManager
@@ -170,7 +157,7 @@ FLUTTER_ASSERT_ARC
   // Use a real undo manager.
   NSUndoManager* undoManager = [[NSUndoManager alloc] init];
   @autoreleasepool {
-    id activeTextInputView = OCMClassMock([TextInputViewTest class]);
+    id activeTextInputView = OCMClassMock([FlutterTextInputView class]);
 
     FakeFlutterUndoManagerDelegate* undoManagerDelegate =
         [[FakeFlutterUndoManagerDelegate alloc] initWithUndoManager:undoManager

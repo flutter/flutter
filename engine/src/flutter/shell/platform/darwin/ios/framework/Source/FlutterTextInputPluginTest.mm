@@ -834,8 +834,10 @@ FLUTTER_ASSERT_ARC
 
 - (void)testFlutterTextInputViewOnlyRespondsToInsertionPointColorBelowIOS17 {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
-  BOOL respondsToInsertionPointColor =
-      [inputView respondsToSelector:@selector(insertionPointColor)];
+  // [UITextInputTraits insertionPointColor] is non-public API, so @selector(insertionPointColor)
+  // would generate a compile-time warning.
+  SEL insertionPointColor = NSSelectorFromString(@"insertionPointColor");
+  BOOL respondsToInsertionPointColor = [inputView respondsToSelector:insertionPointColor];
   if (@available(iOS 17, *)) {
     XCTAssertFalse(respondsToInsertionPointColor);
   } else {
