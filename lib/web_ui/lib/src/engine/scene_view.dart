@@ -161,11 +161,8 @@ class EngineSceneView {
       }
 
       for (final PlatformView view in slice.platformViews) {
-        // TODO(harryterkelsen): Inject the FlutterView instance from `renderScene`,
-        // instead of using `EnginePlatformDispatcher...implicitView` directly,
-        // or make the FlutterView "register" like in canvaskit.
-        // Ensure the platform view contents are injected in the DOM.
-        EnginePlatformDispatcher.instance.implicitView?.dom.injectPlatformView(view.viewId);
+        // Ensure the contents of the platform view are injected into the DOM.
+        flutterView.dom.injectPlatformView(view.viewId);
 
         // Attempt to reuse a container for the existing view
         PlatformViewContainer? container;
