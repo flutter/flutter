@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -365,37 +364,37 @@ void main() {
           '123',
           '--bundle',
           'build/ios/iphoneos/My Super Awesome App.app',
+          '--app_deltas',
+          'build/ios/app-delta',
           '--no-wifi',
           '--justlaunch',
           '--args',
-          const <String>[
-            '--enable-dart-profiling',
-            '--disable-service-auth-codes',
-          ].join(' '),
+          '--enable-dart-profiling',
         ])
       );
 
-      await FakeAsync().run((FakeAsync time) async {
         final LaunchResult launchResult = await iosDevice.startApp(
           buildableIOSApp,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
           platformArgs: <String, Object>{},
         );
-        time.elapse(const Duration(seconds: 2));
 
         expect(logger.statusText,
-          contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'));
+          contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'),
+        );
         expect(launchResult.started, true);
         expect(processManager, hasNoRemainingExpectations);
-      });
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
       Logger: () => logger,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(
+        hostPlatform: HostPlatform.darwin_arm64,
+      ),
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
       Xcode: () => xcode,
-    }, skip: true); // TODO(zanderso): clean up with https://github.com/flutter/flutter/issues/60675
+    });
   });
 
   group('IOSDevice.startApp for CoreDevice', () {
