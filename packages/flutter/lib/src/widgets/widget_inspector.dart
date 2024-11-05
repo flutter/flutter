@@ -778,6 +778,16 @@ mixin WidgetInspectorService {
   static WidgetInspectorService get instance => _instance;
   static WidgetInspectorService _instance = _WidgetInspectorService();
 
+  /// Enables select mode for the Inspector.
+  ///
+  /// In select mode, pointer interactions trigger widget selection instead of
+  /// normal interactions. Otherwise the previously selected widget is
+  /// highlighted but the application can be interacted with normally.
+  @visibleForTesting
+  set isSelectMode(bool enabled) {
+    _changeWidgetSelectionMode(enabled);
+  }
+
   @protected
   static set instance(WidgetInspectorService instance) {
     _instance = instance;

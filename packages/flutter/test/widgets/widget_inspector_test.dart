@@ -370,17 +370,21 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('WidgetInspector interaction test', (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
       final List<String> log = <String>[];
-      late GlobalKey selectButtonKey;
+      late GlobalKey exitWidgetSelectionButtonKey;
       final GlobalKey inspectorKey = GlobalKey();
       final GlobalKey topButtonKey = GlobalKey();
+      final GlobalKey bottomButtonKey = GlobalKey();
 
-      Widget selectButtonBuilder(
+      Widget exitWidgetSelectionButtonBuilder(
         BuildContext context,
         VoidCallback onPressed, {
         required GlobalKey key,
       }) {
-        selectButtonKey = key;
+        exitWidgetSelectionButtonKey = key;
         return Material(
             child: ElevatedButton(onPressed: onPressed, key: key, child: null));
       }
@@ -390,12 +394,31 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         return textSpan.text!;
       }
 
+
+      Future<void> tapAndVerifyWidgetSelection(
+        Finder widgetFinder, {
+        required bool isSelected,
+        required GlobalKey widgetKey,
+      }) async {
+        // Tap on the widget.
+        await tester.tap(widgetFinder, warnIfMissed: false);
+        await tester.pump();
+
+        // Verify the tap was intercepted by the Widget Inspector.
+        final RenderObject renderObject =
+            find.byKey(widgetKey).evaluate().first.renderObject!;
+        expect(
+          WidgetInspectorService.instance.selection.candidates,
+          contains(renderObject),
+        );
+      }
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             key: inspectorKey,
-            exitWidgetSelectionButtonBuilder: selectButtonBuilder,
+            exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
             child: Material(
               child: ListView(
                 children: <Widget>[
@@ -407,6 +430,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                     child: const Text('TOP'),
                   ),
                   ElevatedButton(
+                    key: bottomButtonKey,
                     onPressed: () {
                       log.add('bottom');
                     },
@@ -420,9 +444,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       expect(WidgetInspectorService.instance.selection.current, isNull);
-      await tester.tap(find.text('TOP'), warnIfMissed: false);
-      await tester.pump();
-      // Tap intercepted by the inspector
+
+      // Tap on the top button and verify it's selected in the Inspector.
+      await tapAndVerifyWidgetSelection(
+        find.text('TOP'),
+        isSelected: true,
+        widgetKey: topButtonKey,
+      );
       expect(log, equals(<String>[]));
       expect(
         paragraphText(
@@ -430,35 +458,30 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
         equals('TOP'),
       );
-      final RenderObject topButton = find.byKey(topButtonKey).evaluate().first.renderObject!;
-      expect(
-        WidgetInspectorService.instance.selection.candidates,
-        contains(topButton),
-      );
 
+      // Tap on the bottom button and verify it's selected in the Inspector.
+      await tapAndVerifyWidgetSelection(
+        find.text('BOTTOM'),
+        isSelected: true,
+        widgetKey: bottomButtonKey,
+      );
+      expect(
+        paragraphText(
+          WidgetInspectorService.instance.selection.current! as RenderParagraph,
+        ),
+        equals('BOTTOM'),
+      );
+      expect(log, equals(<String>[]));
+
+      // Now exit selection mode by tapping the Exit Selection Mode button.
+      await tester.tap(find.byKey(exitWidgetSelectionButtonKey));
+      await tester.pump();
+    
+      // Tap on the top button and verify it is not selected in the Inspector.
       await tester.tap(find.text('TOP'));
       expect(log, equals(<String>['top']));
-      log.clear();
 
-      await tester.tap(find.text('BOTTOM'));
-      expect(log, equals(<String>['bottom']));
-      log.clear();
-      // Ensure the inspector selection has not changed to bottom.
-      expect(
-        paragraphText(
-          WidgetInspectorService.instance.selection.current! as RenderParagraph,
-        ),
-        equals('TOP'),
-      );
-
-      await tester.tap(find.byKey(selectButtonKey));
-      await tester.pump();
-
-      // We are now back in select mode so tapping the bottom button will have
-      // not trigger a click but will cause it to be selected.
-      await tester.tap(find.text('BOTTOM'), warnIfMissed: false);
-      expect(log, equals(<String>[]));
-      log.clear();
+      // Ensure the inspector selection is still BOTTOM (not TOP).
       expect(
         paragraphText(
           WidgetInspectorService.instance.selection.current! as RenderParagraph,
@@ -493,11 +516,17 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('WidgetInspector scroll test', (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
       final Key childKey = UniqueKey();
       final GlobalKey inspectorKey = GlobalKey();
+      late GlobalKey exitWidgetSelectionButtonKey;
 
-      Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed,
+      Widget exitWidgetSelectionButtonBuilder(
+          BuildContext context, VoidCallback onPressed,
           {required GlobalKey key}) {
+        exitWidgetSelectionButtonKey = key;
         return Material(
             child: ElevatedButton(onPressed: onPressed, key: key, child: null));
       }
@@ -507,7 +536,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             key: inspectorKey,
-            exitWidgetSelectionButtonBuilder: selectButtonBuilder,
+            exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,
               children: <Widget>[
@@ -538,7 +567,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
       expect(WidgetInspectorService.instance.selection.current, isNotNull);
 
-      // Now out of inspect mode due to the click.
+      // Now exit selection mode by tapping the Exit Selection Mode button.
+      await tester.tap(find.byKey(exitWidgetSelectionButtonKey));
+      await tester.pump();
+
+      // Now out of inspect mode due to clicking the Exit Selection Mode button.
       await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 200.0);
       await tester.pump();
 
@@ -551,6 +584,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('WidgetInspector long press', (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
       bool didLongPress = false;
 
       await tester.pumpWidget(
@@ -575,6 +611,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('WidgetInspector offstage', (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
       final GlobalKey inspectorKey = GlobalKey();
       final GlobalKey clickTarget = GlobalKey();
 
@@ -646,6 +685,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('WidgetInspector with Transform above', (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
       final GlobalKey childKey = GlobalKey();
       final GlobalKey repaintBoundaryKey = GlobalKey();
 
@@ -693,6 +735,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('Multiple widget inspectors', (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
       // This test verifies that interacting with different inspectors
       // works correctly. This use case may be an app that displays multiple
       // apps inside (i.e. a storyboard).
@@ -705,7 +750,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final GlobalKey child1Key = GlobalKey();
       final GlobalKey child2Key = GlobalKey();
 
-      ExitWidgetSelectionButtonBuilder selectButtonBuilder(Key key) {
+      ExitWidgetSelectionButtonBuilder exitWidgetSelectionButtonBuilder(
+          Key key) {
         return (
           BuildContext context,
           VoidCallback onPressed, {
@@ -729,7 +775,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 child: WidgetInspector(
                   key: inspector1Key,
                   exitWidgetSelectionButtonBuilder:
-                      selectButtonBuilder(selectButton1Key),
+                      exitWidgetSelectionButtonBuilder(selectButton1Key),
                   child: Container(
                     key: child1Key,
                     child: const Text('Child 1'),
@@ -740,7 +786,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 child: WidgetInspector(
                   key: inspector2Key,
                   exitWidgetSelectionButtonBuilder:
-                      selectButtonBuilder(selectButton2Key),
+                      exitWidgetSelectionButtonBuilder(selectButton2Key),
                   child: Container(
                     key: child2Key,
                     child: const Text('Child 2'),
@@ -772,12 +818,19 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets(
-      'WidgetInspector selectButton inspection for tap',
+      'WidgetInspector Exit Selection Mode button',
       (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
         final GlobalKey inspectorKey = GlobalKey();
         setupDefaultPubRootDirectory(service);
 
-        Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed, {required GlobalKey key}) {
+      Widget exitWidgetSelectionButtonBuilder(
+        BuildContext context,
+        VoidCallback onPressed, {
+        required GlobalKey key,
+      }) {
           return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
         }
 
@@ -786,7 +839,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             textDirection: TextDirection.ltr,
             child: WidgetInspector(
               key: inspectorKey,
-            exitWidgetSelectionButtonBuilder: selectButtonBuilder,
+            exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
               child: const Text('Child 1'),
             ),
           ),
