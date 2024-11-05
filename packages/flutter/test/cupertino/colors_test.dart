@@ -430,7 +430,7 @@ void main() {
       ),
     );
 
-    expect(color.value, color.toARB32());
+    expect(color.value, color.toARGB32());
   });
 
   testWidgets('CupertinoDynamicColor used in a CupertinoTheme', (WidgetTester tester) async {
