@@ -84,6 +84,7 @@ static PoolVMA CreateBufferPool(VmaAllocator allocator) {
   VmaPoolCreateInfo pool_create_info = {};
   pool_create_info.memoryTypeIndex = memTypeIndex;
   pool_create_info.flags = VMA_POOL_CREATE_IGNORE_BUFFER_IMAGE_GRANULARITY_BIT;
+  pool_create_info.minBlockCount = 1;
 
   VmaPool pool = {};
   result = vk::Result{::vmaCreatePool(allocator, &pool_create_info, &pool)};
@@ -144,6 +145,8 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
   allocator_info.physicalDevice = physical_device;
   allocator_info.device = device_holder->GetDevice();
   allocator_info.instance = instance;
+  // 4 MB, matching the default used by Skia Vulkan.
+  allocator_info.preferredLargeHeapBlockSize = 4 * 1024 * 1024;
   allocator_info.pVulkanFunctions = &proc_table;
 
   VmaAllocator allocator = {};
