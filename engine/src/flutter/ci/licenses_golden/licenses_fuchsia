@@ -1,4 +1,4 @@
-Signature: 087ec729cd378a503dc19a0614868e48
+Signature: 3e5b5f59921716748aa122d0a19ac45a
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -12982,8 +12982,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.device.fs/names.fidl + ../../../
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.framework/driver.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.framework/driver_info.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.legacy/legacy_types.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.legacy/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.registrar/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.element/graphical_presenter.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.adcimpl/adc-impl.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -13091,8 +13089,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.device.fs/names.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.framework/driver.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.framework/driver_info.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.legacy/legacy_types.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.legacy/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.registrar/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.element/graphical_presenter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.adcimpl/adc-impl.fidl
