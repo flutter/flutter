@@ -204,12 +204,7 @@ void main() {
 
     testWithoutContext('enables Observatory on attach', () async {
       await flutterRun.run(withDebugger: true);
-      // Bail out if Observatory is still served by default in the VM.
-      // TODO(bkonyi): replace this with the following once Observatory is disabled in the VM:
-      // expect(await isObservatoryAvailable(), isFalse);
-      if (await isObservatoryAvailable()) {
-        return;
-      }
+      expect(await isObservatoryAvailable(), false);
       await flutterAttach.attach(
         flutterRun.vmServicePort!,
         serveObservatory: true,
