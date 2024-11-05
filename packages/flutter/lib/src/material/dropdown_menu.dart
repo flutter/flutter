@@ -47,6 +47,8 @@ const double _kMinimumWidth = 112.0;
 
 const double _kDefaultHorizontalPadding = 12.0;
 
+const double _kLeadingIconToInputPadding = 4.0;
+
 /// Defines a [DropdownMenu] menu button that represents one item view in the menu.
 ///
 /// See also:
@@ -610,7 +612,12 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         return;
       }
       setState(() {
-        leadingPadding = getWidth(_leadingKey);
+        final double? leadingWidgetWidth = getWidth(_leadingKey);
+        if (leadingWidgetWidth != null) {
+          leadingPadding = leadingWidgetWidth + _kLeadingIconToInputPadding;
+        } else {
+          leadingPadding = leadingWidgetWidth;
+        }
       });
     }, debugLabel: 'DropdownMenu.refreshLeadingPadding');
   }
@@ -686,7 +693,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       // menu entry have leading icons, the menu entry should remove the extra
       // paddings so its leading icon will be aligned with the leading icon of
       // the text field.
-      final double padding = entry.leadingIcon == null ? (leadingPadding ?? _kDefaultHorizontalPadding) : _kDefaultHorizontalPadding;
+      final double padding = entry.leadingIcon == null ? (leadingPadding ?? _kDefaultHorizontalPadding) : (_kDefaultHorizontalPadding + _kLeadingIconToInputPadding);
       ButtonStyle effectiveStyle = entry.style ?? switch (textDirection) {
         TextDirection.rtl => MenuItemButton.styleFrom(padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding)),
         TextDirection.ltr => MenuItemButton.styleFrom(padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding)),
