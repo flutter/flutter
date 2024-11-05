@@ -11,7 +11,7 @@ Specifically:
 1. Respect people, their identities, their culture, and their work.
 2. Be kind. Be courteous. Be welcoming.
 3. Listen. Consider and acknowledge people's points before responding.
-4. Do not discuss internal team disagreements, that require internal knowladge, on public threads.
+4. Do not discuss disagreements, that require private knowledge, on public threads.
 5. When stating that someone did something wrong, give clear objective reasons like:
      * What was done violated a policy
      * What was done will cause negative consequences, so fixes should be made to handle this case,
