@@ -160,6 +160,10 @@ void mockDeleteQueriesEXT(GLsizei size, const GLuint* queries) {
   RecordGLCall("glDeleteQueriesEXT");
 }
 
+void mockDeleteTextures(GLsizei size, const GLuint* queries) {
+  RecordGLCall("glDeleteTextures");
+}
+
 static_assert(CheckSameSignature<decltype(mockDeleteQueriesEXT),  //
                                  decltype(glDeleteQueriesEXT)>::value);
 
@@ -198,6 +202,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(&mockEndQueryEXT);
   } else if (strcmp(name, "glDeleteQueriesEXT") == 0) {
     return reinterpret_cast<void*>(&mockDeleteQueriesEXT);
+  } else if (strcmp(name, "glDeleteTextures") == 0) {
+    return reinterpret_cast<void*>(&mockDeleteTextures);
   } else if (strcmp(name, "glGetQueryObjectui64vEXT") == 0) {
     return reinterpret_cast<void*>(mockGetQueryObjectui64vEXT);
   } else if (strcmp(name, "glGetQueryObjectuivEXT") == 0) {
