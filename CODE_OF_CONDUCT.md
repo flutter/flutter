@@ -17,8 +17,8 @@ Specifically:
      * What was done will cause negative consequences, so fixes should be made to handle this case,
        and policies should be updated to handle future cases
 
-   In general, it is better to use language of suggestions for future than
-   stating that something is wrong in the past.
+   In general, it is better to use language of suggestions for future, in proper channels, than
+   stating that something was wrong in the past.
 
 Should you experience anything that makes you feel unwelcome in Flutter's
 community, please contact [conduct@flutter.dev](mailto:conduct@flutter.dev)
