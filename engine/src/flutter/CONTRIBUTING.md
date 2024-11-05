@@ -256,7 +256,6 @@ $ ./run_tests.py --variant=host_debug_unopt_arm64 --type=engine
 | felt                                     | n/a                 | The test runner for flutter web. See //lib/web_ui               |
 | flow_unittests                           | engine              |                                                                 |
 | flutter_tester                           | dart                | Launcher for engine dart tests.                                 |
-| fml_arc_unittests                        | engine              |                                                                 |
 | fml_unittests                            | engine              | Unit tests for //fml                                            |
 | framework_common_unittests               | engine(mac)         |                                                                 |
 | gpu_surface_metal_unittests              | engine(mac)         |                                                                 |

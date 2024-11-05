@@ -320,9 +320,9 @@ void main() {
               'testonly': true,
               'type': 'executable',
             },
-            '//flutter/fml:fml_arc_unittests': {
+            '//flutter/fml:fml_unittests': {
               'outputs': [
-                '//out/host_debug/fml_arc_unittests',
+                '//out/host_debug/fml_unittests',
               ],
               'testonly': true,
               'type': 'executable',
@@ -374,7 +374,7 @@ void main() {
     final expected = <String>[
       '//flutter/display_list:display_list_unittests',
       '//flutter/flow:flow_unittest',
-      '//flutter/fml:fml_arc_unittests',
+      '//flutter/fml:fml_unittests',
     ];
 
     final testLogs = stringsFromLogs(testEnvironment.testLogs);
