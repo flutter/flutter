@@ -8,9 +8,14 @@ and dignity of Flutter's social environments (such as GitHub and Discord).
 
 Specifically:
 
-* Respect people, their identities, their culture, and their work.
-* Be kind. Be courteous. Be welcoming.
-* Listen. Consider and acknowledge people's points before responding.
+1. Respect people, their identities, their culture, and their work.
+2. Be kind. Be courteous. Be welcoming.
+3. Listen. Consider and acknowledge people's points before responding.
+4. Do not discuss internal team disagreements, that require internal knowladge, on public threads.
+5. When stating that someone did something wrong, give clear objective reasons like:
+  a. There is violation of a policy
+  b. There may be negative consiquences that should be handled both on the level
+     of the concrete case and level of policies 
 
 Should you experience anything that makes you feel unwelcome in Flutter's
 community, please contact [conduct@flutter.dev](mailto:conduct@flutter.dev)
