@@ -1554,6 +1554,25 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux web_benchmarks_skwasm_st
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:35v1"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+        ]
+      tags: >
+        ["devicelab"]
+      task_name: web_benchmarks_skwasm_st
+    runIf:
+      - dev/**
+      - bin/**
+      - .ci.yaml
+
   - name: Linux web_long_running_tests_1_5
     recipe: flutter/flutter_drone
     timeout: 60

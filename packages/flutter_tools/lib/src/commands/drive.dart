@@ -28,7 +28,6 @@ import '../ios/devices.dart';
 import '../macos/macos_ipad_device.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
-import '../runner/flutter_command_runner.dart';
 import '../web/web_device.dart';
 import 'run.dart';
 
@@ -261,7 +260,6 @@ class DriveCommand extends RunCommandBase {
       processUtils: globals.processUtils,
       dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
-      useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
     );
     final File packageConfigFile = findPackageConfigFileOrDefault(_fileSystem.currentDirectory);
 
