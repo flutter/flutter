@@ -113,7 +113,7 @@ double getBorderBottom(WidgetTester tester) {
 
 Finder findLabel() {
   return find.descendant(
-    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Shaker'),
+    of: find.byType(MatrixTransition),
     matching: find.byWidgetPredicate((Widget w) => w is Text),
   );
 }
