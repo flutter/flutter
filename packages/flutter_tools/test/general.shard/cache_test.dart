@@ -872,6 +872,7 @@ void main() {
 
     final Cache cache = Cache.test(
       processManager: FakeProcessManager.any(),
+      rootOverride: fileSystem.currentDirectory,
       fileSystem: fileSystem,
       platform: FakePlatform(
         environment: <String, String>{
