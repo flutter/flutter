@@ -338,7 +338,6 @@ void main() {
     testWithoutContext('a non-empty realm is included in the storage url', () async {
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final Directory internalDir = fileSystem.currentDirectory
-        .childDirectory('cache')
         .childDirectory('bin')
         .childDirectory('internal');
       final File engineVersionFile = internalDir.childFile('engine.version');
@@ -803,7 +802,6 @@ void main() {
   testWithoutContext('FlutterWebSdk fetches web artifacts and deletes previous directory contents', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Directory internalDir = fileSystem.currentDirectory
-      .childDirectory('cache')
       .childDirectory('bin')
       .childDirectory('internal');
     final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
@@ -842,7 +840,7 @@ void main() {
     ]);
 
     expect(locations, <String>[
-      'cache/bin/cache/flutter_web_sdk',
+      '/bin/cache/flutter_web_sdk',
     ]);
 
     expect(webCacheDirectory.childFile('foo'), exists);
@@ -852,7 +850,6 @@ void main() {
   testWithoutContext('FlutterWebSdk CanvasKit URL can be overridden via FLUTTER_STORAGE_BASE_URL', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Directory internalDir = fileSystem.currentDirectory
-      .childDirectory('cache')
       .childDirectory('bin')
       .childDirectory('internal');
     final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
@@ -909,7 +906,7 @@ void main() {
     handler.addError(webCacheDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', 2)));
 
     await expectLater(() => webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils()), throwsToolExit(
-      message: RegExp('Unable to delete file or directory at "cache/bin/cache/flutter_web_sdk"'),
+      message: RegExp('Unable to delete file or directory at "/bin/cache/flutter_web_sdk"'),
     ));
   });
 
@@ -1108,11 +1105,11 @@ void main() {
       Platform: () => FakePlatform(),
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
-          '/cache/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
+          '/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
           '-b',
           'packages/flutter_tools/gradle/resolve_dependencies.gradle',
           '--project-cache-dir',
-          'cache/bin/cache/flutter_gradle_wrapper.rand0',
+          '/bin/cache/flutter_gradle_wrapper.rand0',
           'resolveDependencies',
         ]),
       ]),

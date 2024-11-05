@@ -991,6 +991,16 @@ class _MaterialAppState extends State<MaterialApp> {
         },
       );
     }
+
+    childWidget = ScaffoldMessenger(
+      key: widget.scaffoldMessengerKey,
+      child: DefaultSelectionStyle(
+        selectionColor: effectiveSelectionColor,
+        cursorColor: effectiveCursorColor,
+        child: childWidget,
+      ),
+    );
+
     if (widget.themeAnimationStyle != AnimationStyle.noAnimation) {
       childWidget = AnimatedTheme(
         data: theme,
@@ -1005,14 +1015,7 @@ class _MaterialAppState extends State<MaterialApp> {
       );
     }
 
-    return ScaffoldMessenger(
-      key: widget.scaffoldMessengerKey,
-      child: DefaultSelectionStyle(
-        selectionColor: effectiveSelectionColor,
-        cursorColor: effectiveCursorColor,
-        child: childWidget,
-      ),
-    );
+    return childWidget;
   }
 
   Widget _buildWidgetApp(BuildContext context) {

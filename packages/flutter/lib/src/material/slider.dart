@@ -196,6 +196,7 @@ class Slider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.allowedInteraction,
+    this.padding,
   }) : _sliderType = _SliderType.material,
        assert(min <= max),
        assert(value >= min && value <= max,
@@ -238,6 +239,7 @@ class Slider extends StatefulWidget {
     this.autofocus = false,
     this.allowedInteraction,
   }) : _sliderType = _SliderType.adaptive,
+       padding = null,
        assert(min <= max),
        assert(value >= min && value <= max,
          'Value $value is not between minimum $min and maximum $max'),
@@ -484,7 +486,7 @@ class Slider extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.dragged].
@@ -495,11 +497,6 @@ class Slider extends StatefulWidget {
   ///
   /// If null, then the value of [SliderThemeData.mouseCursor] is used. If that
   /// is also null, then [WidgetStateMouseCursor.clickable] is used.
-  ///
-  /// See also:
-  ///
-  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// The callback used to create a semantic value from a slider value.
@@ -549,6 +546,14 @@ class Slider extends StatefulWidget {
   ///
   /// Defaults to [SliderInteraction.tapAndSlide].
   final SliderInteraction? allowedInteraction;
+
+  /// Determines the padding around the [Slider].
+  ///
+  /// If specified, this padding overrides the default vertical padding of
+  /// the [Slider], defaults to the height of the overlay shape, and the
+  /// horizontal padding, defaults to the width of the thumb shape or
+  /// overlay shape, whichever is larger.
+  final EdgeInsetsGeometry? padding;
 
   final _SliderType _sliderType ;
 
@@ -853,6 +858,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       valueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
       valueIndicatorTextStyle: valueIndicatorTextStyle,
+      padding: widget.padding ?? sliderTheme.padding,
     );
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
       ?? sliderTheme.mouseCursor?.resolve(states)
@@ -899,6 +905,36 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       : MediaQuery.textScalerOf(context);
     final double effectiveTextScale = textScaler.scale(fontSizeToScale) / fontSizeToScale;
 
+    Widget result = CompositedTransformTarget(
+      link: _layerLink,
+      child: _SliderRenderObjectWidget(
+        key: _renderObjectKey,
+        value: _convert(widget.value),
+        secondaryTrackValue: (widget.secondaryTrackValue != null) ? _convert(widget.secondaryTrackValue!) : null,
+        divisions: widget.divisions,
+        label: widget.label,
+        sliderTheme: sliderTheme,
+        textScaleFactor: effectiveTextScale,
+        screenSize: screenSize(),
+        onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
+        onChangeStart: _handleDragStart,
+        onChangeEnd: _handleDragEnd,
+        state: this,
+        semanticFormatterCallback: widget.semanticFormatterCallback,
+        hasFocus: _focused,
+        hovering: _hovering,
+        allowedInteraction: effectiveAllowedInteraction,
+      ),
+    );
+
+    final EdgeInsetsGeometry? padding = widget.padding ?? sliderTheme.padding;
+    if (padding != null) {
+      result = Padding(
+        padding: padding,
+        child: result,
+      );
+    }
+
     return Semantics(
       container: true,
       slider: true,
@@ -912,27 +948,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         onShowFocusHighlight: _handleFocusHighlightChanged,
         onShowHoverHighlight: _handleHoverChanged,
         mouseCursor: effectiveMouseCursor,
-        child: CompositedTransformTarget(
-          link: _layerLink,
-          child: _SliderRenderObjectWidget(
-            key: _renderObjectKey,
-            value: _convert(widget.value),
-            secondaryTrackValue: (widget.secondaryTrackValue != null) ? _convert(widget.secondaryTrackValue!) : null,
-            divisions: widget.divisions,
-            label: widget.label,
-            sliderTheme: sliderTheme,
-            textScaleFactor: effectiveTextScale,
-            screenSize: screenSize(),
-            onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
-            onChangeStart: _handleDragStart,
-            onChangeEnd: _handleDragEnd,
-            state: this,
-            semanticFormatterCallback: widget.semanticFormatterCallback,
-            hasFocus: _focused,
-            hovering: _hovering,
-            allowedInteraction: effectiveAllowedInteraction,
-          ),
-        ),
+        child: result,
       ),
     );
   }
@@ -1145,8 +1161,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // centered on the track.
   double get _maxSliderPartWidth => _sliderPartSizes.map((Size size) => size.width).reduce(math.max);
   double get _maxSliderPartHeight => _sliderPartSizes.map((Size size) => size.height).reduce(math.max);
+  double get _thumbSizeHeight => _sliderTheme.thumbShape!.getPreferredSize(isInteractive, isDiscrete).height;
+  double get _overlayHeight => _sliderTheme.overlayShape!.getPreferredSize(isInteractive, isDiscrete).height;
   List<Size> get _sliderPartSizes => <Size>[
-    _sliderTheme.overlayShape!.getPreferredSize(isInteractive, isDiscrete),
+    Size(
+      _sliderTheme.overlayShape!.getPreferredSize(isInteractive, isDiscrete).width,
+      _sliderTheme.padding != null ? _thumbSizeHeight : _overlayHeight
+    ),
     _sliderTheme.thumbShape!.getPreferredSize(isInteractive, isDiscrete),
     _sliderTheme.tickMarkShape!.getPreferredSize(isEnabled: isInteractive, sliderTheme: sliderTheme),
   ];

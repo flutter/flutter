@@ -29,6 +29,7 @@ void main() {
         bindPorts.add(port);
         return socket;
       },
+      useImplicitPubspecResolution: true,
     );
     await server.run();
     expect(bindCalledTimes, 1);
@@ -56,6 +57,7 @@ void main() {
         }
         return socket;
       },
+      useImplicitPubspecResolution: true,
     );
     await server.run();
     expect(bindCalledTimes, 2);

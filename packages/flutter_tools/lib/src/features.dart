@@ -146,14 +146,12 @@ const Feature flutterCustomDevicesFeature = Feature(
   ),
 );
 
-const String kCliAnimationsFeatureName = 'cli-animations';
-
 /// The [Feature] for CLI animations.
 ///
 /// The TERM environment variable set to "dumb" turns this off.
 const Feature cliAnimation = Feature.fullyEnabled(
   name: 'animations in the command line interface',
-  configSetting: kCliAnimationsFeatureName,
+  configSetting: 'cli-animations',
 );
 
 /// Enable native assets compilation and bundling.

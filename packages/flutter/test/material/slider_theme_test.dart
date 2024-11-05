@@ -2551,6 +2551,95 @@ void main() {
     expect(const RoundedRectSliderTrackShape().isRounded, isTrue);
   });
 
+  testWidgets('SliderThemeData.padding can override the default Slider padding', (WidgetTester tester) async {
+    Widget buildSlider({ EdgeInsetsGeometry? padding }) {
+      return MaterialApp(
+        theme: ThemeData(sliderTheme: SliderThemeData(padding: padding)),
+        home: Material(
+          child: Center(
+            child: IntrinsicHeight(
+              child: Slider(
+                value: 0.5,
+                onChanged: (double value) {},
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    RenderBox sliderRenderBox() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderSlider') as RenderBox;
+    }
+
+    // Test Slider height and tracks spacing with zero padding.
+    await tester.pumpWidget(buildSlider(padding: EdgeInsets.zero));
+    await tester.pumpAndSettle();
+
+    // The height equals to the default thumb height.
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(Slider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(398.0, 8.0, 800.0, 12.0,  const Radius.circular(2.0)),
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 7.0, 402.0, 13.0,  const Radius.circular(3.0)),
+        ),
+    );
+
+    // Test Slider height and tracks spacing with directional padding.
+    const double startPadding = 100;
+    const double endPadding = 20;
+    await tester.pumpWidget(buildSlider(
+      padding: const EdgeInsetsDirectional.only(
+        start: startPadding,
+        end: endPadding,
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(sliderRenderBox().size, const Size(800 - startPadding - endPadding, 20));
+    expect(
+      find.byType(Slider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(338.0, 8.0, 680.0, 12.0,  const Radius.circular(2.0)),
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 7.0, 342.0, 13.0,  const Radius.circular(3.0)),
+        ),
+    );
+
+
+    // Test Slider height and tracks spacing with top and bottom padding.
+    const double topPadding = 100;
+    const double bottomPadding = 20;
+    const double trackHeight = 20;
+    await tester.pumpWidget(buildSlider(padding: const EdgeInsetsDirectional.only(top: topPadding, bottom: bottomPadding)));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(Slider)), const Size(800, topPadding + trackHeight + bottomPadding));
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(Slider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(398.0, 8.0, 800.0, 12.0,  const Radius.circular(2.0)),
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 7.0, 402.0, 13.0,  const Radius.circular(3.0)),
+        ),
+    );
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
