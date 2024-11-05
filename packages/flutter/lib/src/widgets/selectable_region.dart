@@ -3326,7 +3326,7 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
 }
 
 /// Notifies listeners when the selection under a [SelectionListener] has been
-/// changed or finalized.
+/// changed or is finalized.
 final class SelectionListenerNotifier extends ChangeNotifier {
   _SelectionListenerDelegate? _selectionDelegate;
 
