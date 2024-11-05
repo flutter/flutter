@@ -524,7 +524,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       result = _generatedEntrypointDirectory!.childFile('web_entrypoint.dart');
 
       // Generates the generated_plugin_registrar
-      await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: _generatedEntrypointDirectory!);
+      await injectBuildTimePluginFilesForWebPlatform(
+        flutterProject,
+        destination: _generatedEntrypointDirectory!,
+      );
       // The below works because `injectBuildTimePluginFiles` is configured to write
       // the web_plugin_registrant.dart file alongside the generated main.dart
       const String generatedImport = 'web_plugin_registrant.dart';

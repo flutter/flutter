@@ -282,6 +282,9 @@ class MenuAnchor extends StatefulWidget {
   ///
   /// If not supplied, then the [MenuAnchor] will be the size that its parent
   /// allocates for it.
+  ///
+  /// If provided, the builder will be called each time the menu is opened or
+  /// closed.
   final MenuAnchorChildBuilder? builder;
 
   /// The optional child to be passed to the [builder].
@@ -576,6 +579,11 @@ class _MenuAnchorState extends State<MenuAnchor> {
     }
 
     widget.onOpen?.call();
+    if (mounted && SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+      setState(() {
+        // Mark dirty to ensure UI updates
+      });
+    }
   }
 
   /// Close the menu.
