@@ -16,9 +16,9 @@ Specifically:
      * What was done violated a policy
      * There may be negative consiquences that should be handled both on the level
         of the concrete case and level of policies
-   
+
    In general, it is better to use language of suggestions for future than
-   stating that something is wrong in the past. 
+   stating that something is wrong in the past.
 
 Should you experience anything that makes you feel unwelcome in Flutter's
 community, please contact [conduct@flutter.dev](mailto:conduct@flutter.dev)
