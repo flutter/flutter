@@ -32,7 +32,7 @@ void main() {
     // TODO(dacoharkes): Implement Fuchsia. https://github.com/flutter/flutter/issues/129757
     return;
   }
-  
+
 
   const ProcessManager processManager = LocalProcessManager();
   final String constraint = _getPackageFfiTemplatePubspecVersion();
