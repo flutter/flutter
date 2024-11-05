@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/scrollbar/raw_scrollbar.shape.0.dart
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('The thumb of the scrollbar is drawn by the stadium border', (WidgetTester tester) async {
+  testWidgets('The thumb shape is a stadium border', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ShapeExampleApp(),
     );
