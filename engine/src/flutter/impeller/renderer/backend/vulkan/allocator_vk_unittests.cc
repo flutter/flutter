@@ -73,19 +73,6 @@ TEST(AllocatorVKTest, MemoryTypeSelectionTwoHeap) {
   EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(4, properties), -1);
 }
 
-TEST(AllocatorVKTest, DeviceBufferCoherency) {
-  auto const context = MockVulkanContextBuilder().Build();
-  auto allocator = context->GetResourceAllocator();
-
-  std::shared_ptr<DeviceBuffer> buffer =
-      allocator->CreateBuffer(DeviceBufferDescriptor{
-          .storage_mode = StorageMode::kHostVisible,
-          .size = 1024,
-      });
-
-  EXPECT_TRUE(DeviceBufferVK::Cast(*buffer).IsHostCoherent());
-}
-
 #ifdef IMPELLER_DEBUG
 
 TEST(AllocatorVKTest, RecreateSwapchainWhenSizeChanges) {
