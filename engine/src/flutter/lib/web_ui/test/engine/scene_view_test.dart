@@ -54,6 +54,10 @@ class StubPictureRenderer implements PictureRenderer {
 }
 
 class StubFlutterView implements EngineFlutterView {
+  // Overridden in some tests
+  @override
+  DomManager dom = StubDomManager();
+
   @override
   double get devicePixelRatio => throw UnimplementedError();
 
@@ -127,9 +131,6 @@ class StubFlutterView implements EngineFlutterView {
   void dispose() {
     throw UnimplementedError();
   }
-
-  @override
-  DomManager get dom => throw UnimplementedError();
 
   @override
   EmbeddingStrategy get embeddingStrategy => throw UnimplementedError();
@@ -274,4 +275,62 @@ void testMain() {
       expect(stubPictureRenderer.renderedPictures.length, 1);
       expect(stubPictureRenderer.clipRequests.containsKey(picture), true);
   });
+
+  test('SceneView places platform view contents in the DOM', () async {
+    const int expectedPlatformViewId = 1234;
+
+    int? injectedViewId;
+    final DomManager stubDomManager = StubDomManager()
+      ..injectPlatformViewOverride = (int viewId) {
+        injectedViewId = viewId;
+      };
+    sceneView = EngineSceneView(
+      stubPictureRenderer,
+      StubFlutterView()..dom = stubDomManager,
+    );
+
+    final PlatformView platformView = PlatformView(expectedPlatformViewId,
+        const ui.Rect.fromLTWH(50, 80, 100, 120), const PlatformViewStyling());
+
+    final EngineRootLayer rootLayer = EngineRootLayer();
+    rootLayer.slices.add(
+        LayerSlice(StubPicture(ui.Rect.zero), <PlatformView>[platformView]));
+    final EngineScene scene = EngineScene(rootLayer);
+    await sceneView.renderScene(scene, null);
+
+    expect(
+      injectedViewId,
+      expectedPlatformViewId,
+      reason: 'SceneView should call injectPlatformView on its flutterView.dom',
+    );
+  });
+}
+
+class StubDomManager implements DomManager {
+  void Function(int platformViewId) injectPlatformViewOverride = (int id) {};
+  @override
+  void injectPlatformView(int platformViewId) {
+    injectPlatformViewOverride(platformViewId);
+  }
+
+  @override
+  DomElement get platformViewsHost => throw UnimplementedError();
+
+  @override
+  DomShadowRoot get renderingHost => throw UnimplementedError();
+
+  @override
+  DomElement get rootElement => throw UnimplementedError();
+
+  @override
+  DomElement get sceneHost => throw UnimplementedError();
+
+  @override
+  DomElement get semanticsHost => throw UnimplementedError();
+
+  @override
+  void setScene(DomElement sceneElement) {}
+
+  @override
+  DomElement get textEditingHost => throw UnimplementedError();
 }
