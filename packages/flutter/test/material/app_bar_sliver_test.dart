@@ -50,6 +50,54 @@ Widget buildSliverAppBarApp({
   );
 }
 
+class _TestLifecycleTabBar extends StatefulWidget implements PreferredSizeWidget {
+  const _TestLifecycleTabBar({required this.tabs});
+
+  final List<Widget> tabs;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  State<_TestLifecycleTabBar> createState() => _TestLifecycleTabBarState();
+}
+
+class _TestLifecycleTabBarState extends State<_TestLifecycleTabBar> {
+  int? _tabs;
+  TabController? _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabs = widget.tabs.length;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _controller = DefaultTabController.maybeOf(context);
+  }
+
+  @override
+  void didUpdateWidget(_TestLifecycleTabBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _tabs = widget.tabs.length;
+  }
+
+  @override
+  void dispose() {
+    _controller = null;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    assert(_tabs == widget.tabs.length);
+    assert(_tabs == _controller?.length);
+    return Row(children: widget.tabs);
+  }
+}
+
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -2272,6 +2320,53 @@ void main() {
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
+  });
+
+  testWidgets('SliverAppBar should update child before child build', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/158158.
+    final List<Tab> tabs = <Tab>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                body: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverAppBar(
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('Add Tab'),
+                          onPressed: () {
+                            setState(() {
+                              tabs.add(Tab(text: 'Tab ${tabs.length + 1}'));
+                            });
+                          },
+                        ),
+                      ],
+                      bottom: _TestLifecycleTabBar(tabs: tabs),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Initializes with zero tabs.
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Tab 2'), findsNothing);
+
+    // No crash after tabs added.
+    await tester.tap(find.text('Add Tab'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   group('Material 2', () {
