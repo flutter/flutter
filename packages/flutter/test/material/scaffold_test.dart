@@ -2867,7 +2867,30 @@ void main() {
       expect(tester.takeException(), isNull);
   });
 
-   testWidgets('ScaffoldMessenger showSnackBar default animation', (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/issues/115924.
+  testWidgets('Default ScaffoldMessenger can access ambient theme', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
+    final ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple);
+    final ThemeData customTheme = ThemeData(
+      colorScheme: colorScheme,
+      visualDensity: VisualDensity.comfortable,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        scaffoldMessengerKey: scaffoldMessengerKey,
+        theme: customTheme,
+        home: const SizedBox.shrink(),
+      ),
+    );
+
+    final ThemeData messengerTheme = Theme.of(scaffoldMessengerKey.currentContext!);
+    expect(messengerTheme.colorScheme, colorScheme);
+    expect(messengerTheme.visualDensity, VisualDensity.comfortable);
+  });
+
+  testWidgets('ScaffoldMessenger showSnackBar default animation', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
