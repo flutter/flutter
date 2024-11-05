@@ -1770,6 +1770,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         projectDir: project.directory,
         packageConfigPath: packageConfigPath(),
         generateDartPluginRegistry: true,
+        useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
       );
 
       await pub.get(

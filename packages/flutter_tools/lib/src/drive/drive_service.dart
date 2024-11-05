@@ -28,17 +28,20 @@ class FlutterDriverFactory {
     required ProcessUtils processUtils,
     required String dartSdkPath,
     required DevtoolsLauncher devtoolsLauncher,
+    required bool useImplicitPubspecResolution,
   }) : _applicationPackageFactory = applicationPackageFactory,
        _logger = logger,
        _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
-       _devtoolsLauncher = devtoolsLauncher;
+       _devtoolsLauncher = devtoolsLauncher,
+       _useImplicitPubspecResolution = useImplicitPubspecResolution;
 
   final ApplicationPackageFactory _applicationPackageFactory;
   final Logger _logger;
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
+  final bool _useImplicitPubspecResolution;
 
   /// Create a driver service for running `flutter drive`.
   DriverService createDriverService(bool web) {
@@ -47,6 +50,7 @@ class FlutterDriverFactory {
         logger: _logger,
         processUtils: _processUtils,
         dartSdkPath: _dartSdkPath,
+        useImplicitPubspecResolution: _useImplicitPubspecResolution,
       );
     }
     return FlutterDriverService(
