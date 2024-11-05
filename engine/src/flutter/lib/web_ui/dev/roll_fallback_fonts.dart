@@ -312,7 +312,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     }
     final List<_FontInfo> processedFonts = <_FontInfo>[];
     final http.Response response = await client.get(Uri.parse(
-        'https://www.googleapis.com/webfonts/v1/webfonts?key=$apiKey'));
+        'https://www.googleapis.com/webfonts/v1/webfonts?capability=WOFF2&key=$apiKey'));
     if (response.statusCode != 200) {
       throw ToolExit('Failed to download Google Fonts list.');
     }
