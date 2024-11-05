@@ -21,6 +21,7 @@ void main() {
         processManager: FakeProcessManager.empty(),
       ),
       dartSdkPath: 'dart',
+      useImplicitPubspecResolution: true,
     );
     const String link = 'https://flutter.dev/to/integration-test-on-web';
     try {
