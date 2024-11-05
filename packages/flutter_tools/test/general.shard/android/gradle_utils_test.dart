@@ -24,7 +24,7 @@ void main() {
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       gradleWrapperDirectory =
-          fileSystem.directory('cache/bin/cache/artifacts/gradle_wrapper');
+          fileSystem.directory('bin/cache/artifacts/gradle_wrapper');
       gradleWrapperDirectory.createSync(recursive: true);
       gradleWrapperDirectory
           .childFile('gradlew')
