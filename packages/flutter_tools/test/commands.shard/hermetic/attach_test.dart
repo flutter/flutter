@@ -1260,6 +1260,7 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     Analytics? analytics,
     String? nativeAssetsYamlFile,
     HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
+    required bool useImplicitPubspecResolution,
   }) {
     if (_artifactTester != null) {
       for (final FlutterDevice device in devices) {
