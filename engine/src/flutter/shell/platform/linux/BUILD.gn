@@ -135,7 +135,6 @@ source_set("flutter_linux_sources") {
     "fl_renderer_gdk.cc",
     "fl_renderer_headless.cc",
     "fl_scrolling_manager.cc",
-    "fl_scrolling_view_delegate.cc",
     "fl_settings.cc",
     "fl_settings_handler.cc",
     "fl_settings_portal.cc",

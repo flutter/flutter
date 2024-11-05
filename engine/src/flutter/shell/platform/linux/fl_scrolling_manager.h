@@ -7,7 +7,8 @@
 
 #include <gdk/gdk.h>
 
-#include "flutter/shell/platform/linux/fl_scrolling_view_delegate.h"
+#include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
 G_BEGIN_DECLS
 
@@ -19,15 +20,15 @@ G_DECLARE_FINAL_TYPE(FlScrollingManager,
 
 /**
  * fl_scrolling_manager_new:
- * @view_delegate: An interface that the manager requires to communicate with
- * the platform. Usually implemented by FlView.
+ * @engine: an #FlEngine.
+ * @view_id: the view being managed.
  *
  * Create a new #FlScrollingManager.
  *
  * Returns: a new #FlScrollingManager.
  */
-FlScrollingManager* fl_scrolling_manager_new(
-    FlScrollingViewDelegate* view_delegate);
+FlScrollingManager* fl_scrolling_manager_new(FlEngine* engine,
+                                             FlutterViewId view_id);
 
 /**
  * fl_scrolling_manager_set_last_mouse_position:

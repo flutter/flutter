@@ -3,13 +3,17 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
+#include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 
 static constexpr int kMicrosecondsPerMillisecond = 1000;
 
 struct _FlScrollingManager {
   GObject parent_instance;
 
-  GWeakRef view_delegate;
+  GWeakRef engine;
+
+  FlutterViewId view_id;
 
   gdouble last_x;
   gdouble last_y;
@@ -29,7 +33,7 @@ G_DEFINE_TYPE(FlScrollingManager, fl_scrolling_manager, G_TYPE_OBJECT);
 static void fl_scrolling_manager_dispose(GObject* object) {
   FlScrollingManager* self = FL_SCROLLING_MANAGER(object);
 
-  g_weak_ref_clear(&self->view_delegate);
+  g_weak_ref_clear(&self->engine);
 
   G_OBJECT_CLASS(fl_scrolling_manager_parent_class)->dispose(object);
 }
@@ -40,14 +44,15 @@ static void fl_scrolling_manager_class_init(FlScrollingManagerClass* klass) {
 
 static void fl_scrolling_manager_init(FlScrollingManager* self) {}
 
-FlScrollingManager* fl_scrolling_manager_new(
-    FlScrollingViewDelegate* view_delegate) {
-  g_return_val_if_fail(FL_IS_SCROLLING_VIEW_DELEGATE(view_delegate), nullptr);
+FlScrollingManager* fl_scrolling_manager_new(FlEngine* engine,
+                                             FlutterViewId view_id) {
+  g_return_val_if_fail(FL_IS_ENGINE(engine), nullptr);
 
   FlScrollingManager* self = FL_SCROLLING_MANAGER(
       g_object_new(fl_scrolling_manager_get_type(), nullptr));
 
-  g_weak_ref_init(&self->view_delegate, view_delegate);
+  g_weak_ref_init(&self->engine, engine);
+  self->view_id = view_id;
   self->pan_started = FALSE;
   self->zoom_started = FALSE;
   self->rotate_started = FALSE;
@@ -68,9 +73,8 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
                                               gint scale_factor) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
-  g_autoptr(FlScrollingViewDelegate) view_delegate =
-      FL_SCROLLING_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
-  if (view_delegate == nullptr) {
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
     return;
   }
 
@@ -110,8 +114,8 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
     scroll_delta_x *= -1;
     scroll_delta_y *= -1;
     if (gdk_event_is_scroll_stop_event(event)) {
-      fl_scrolling_view_delegate_send_pointer_pan_zoom_event(
-          view_delegate, event_time * kMicrosecondsPerMillisecond,
+      fl_engine_send_pointer_pan_zoom_event(
+          engine, self->view_id, event_time * kMicrosecondsPerMillisecond,
           event_x * scale_factor, event_y * scale_factor, kPanZoomEnd,
           self->pan_x, self->pan_y, 0, 0);
       self->pan_started = FALSE;
@@ -119,24 +123,24 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
       if (!self->pan_started) {
         self->pan_x = 0;
         self->pan_y = 0;
-        fl_scrolling_view_delegate_send_pointer_pan_zoom_event(
-            view_delegate, event_time * kMicrosecondsPerMillisecond,
+        fl_engine_send_pointer_pan_zoom_event(
+            engine, self->view_id, event_time * kMicrosecondsPerMillisecond,
             event_x * scale_factor, event_y * scale_factor, kPanZoomStart, 0, 0,
             0, 0);
         self->pan_started = TRUE;
       }
       self->pan_x += scroll_delta_x;
       self->pan_y += scroll_delta_y;
-      fl_scrolling_view_delegate_send_pointer_pan_zoom_event(
-          view_delegate, event_time * kMicrosecondsPerMillisecond,
+      fl_engine_send_pointer_pan_zoom_event(
+          engine, self->view_id, event_time * kMicrosecondsPerMillisecond,
           event_x * scale_factor, event_y * scale_factor, kPanZoomUpdate,
           self->pan_x, self->pan_y, 1, 0);
     }
   } else {
     self->last_x = event_x * scale_factor;
     self->last_y = event_y * scale_factor;
-    fl_scrolling_view_delegate_send_mouse_pointer_event(
-        view_delegate,
+    fl_engine_send_mouse_pointer_event(
+        engine, self->view_id,
         FlutterPointerPhase::kMove /* arbitrary value, phase will be ignored as
                                       this is a discrete scroll event */
         ,
@@ -149,9 +153,8 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
 void fl_scrolling_manager_handle_rotation_begin(FlScrollingManager* self) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
-  g_autoptr(FlScrollingViewDelegate) view_delegate =
-      FL_SCROLLING_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
-  if (view_delegate == nullptr) {
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
     return;
   }
 
@@ -159,8 +162,8 @@ void fl_scrolling_manager_handle_rotation_begin(FlScrollingManager* self) {
   if (!self->zoom_started) {
     self->scale = 1;
     self->rotation = 0;
-    fl_scrolling_view_delegate_send_pointer_pan_zoom_event(
-        view_delegate, g_get_real_time(), self->last_x, self->last_y,
+    fl_engine_send_pointer_pan_zoom_event(
+        engine, self->view_id, g_get_real_time(), self->last_x, self->last_y,
         kPanZoomStart, 0, 0, 0, 0);
   }
 }
@@ -169,31 +172,29 @@ void fl_scrolling_manager_handle_rotation_update(FlScrollingManager* self,
                                                  gdouble rotation) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
-  g_autoptr(FlScrollingViewDelegate) view_delegate =
-      FL_SCROLLING_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
-  if (view_delegate == nullptr) {
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
     return;
   }
 
   self->rotation = rotation;
-  fl_scrolling_view_delegate_send_pointer_pan_zoom_event(
-      view_delegate, g_get_real_time(), self->last_x, self->last_y,
+  fl_engine_send_pointer_pan_zoom_event(
+      engine, self->view_id, g_get_real_time(), self->last_x, self->last_y,
       kPanZoomUpdate, 0, 0, self->scale, self->rotation);
 }
 
 void fl_scrolling_manager_handle_rotation_end(FlScrollingManager* self) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
-  g_autoptr(FlScrollingViewDelegate) view_delegate =
-      FL_SCROLLING_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
-  if (view_delegate == nullptr) {
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
     return;
   }
 
   self->rotate_started = FALSE;
   if (!self->zoom_started) {
-    fl_scrolling_view_delegate_send_pointer_pan_zoom_event(
-        view_delegate, g_get_real_time(), self->last_x, self->last_y,
+    fl_engine_send_pointer_pan_zoom_event(
+        engine, self->view_id, g_get_real_time(), self->last_x, self->last_y,
         kPanZoomEnd, 0, 0, 0, 0);
   }
 }
@@ -201,9 +202,8 @@ void fl_scrolling_manager_handle_rotation_end(FlScrollingManager* self) {
 void fl_scrolling_manager_handle_zoom_begin(FlScrollingManager* self) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
-  g_autoptr(FlScrollingViewDelegate) view_delegate =
-      FL_SCROLLING_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
-  if (view_delegate == nullptr) {
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
     return;
   }
 
@@ -211,8 +211,8 @@ void fl_scrolling_manager_handle_zoom_begin(FlScrollingManager* self) {
   if (!self->rotate_started) {
     self->scale = 1;
     self->rotation = 0;
-    fl_scrolling_view_delegate_send_pointer_pan_zoom_event(
-        view_delegate, g_get_real_time(), self->last_x, self->last_y,
+    fl_engine_send_pointer_pan_zoom_event(
+        engine, self->view_id, g_get_real_time(), self->last_x, self->last_y,
         kPanZoomStart, 0, 0, 0, 0);
   }
 }
@@ -221,31 +221,29 @@ void fl_scrolling_manager_handle_zoom_update(FlScrollingManager* self,
                                              gdouble scale) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
-  g_autoptr(FlScrollingViewDelegate) view_delegate =
-      FL_SCROLLING_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
-  if (view_delegate == nullptr) {
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
     return;
   }
 
   self->scale = scale;
-  fl_scrolling_view_delegate_send_pointer_pan_zoom_event(
-      view_delegate, g_get_real_time(), self->last_x, self->last_y,
+  fl_engine_send_pointer_pan_zoom_event(
+      engine, self->view_id, g_get_real_time(), self->last_x, self->last_y,
       kPanZoomUpdate, 0, 0, self->scale, self->rotation);
 }
 
 void fl_scrolling_manager_handle_zoom_end(FlScrollingManager* self) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
-  g_autoptr(FlScrollingViewDelegate) view_delegate =
-      FL_SCROLLING_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
-  if (view_delegate == nullptr) {
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
     return;
   }
 
   self->zoom_started = FALSE;
   if (!self->rotate_started) {
-    fl_scrolling_view_delegate_send_pointer_pan_zoom_event(
-        view_delegate, g_get_real_time(), self->last_x, self->last_y,
+    fl_engine_send_pointer_pan_zoom_event(
+        engine, self->view_id, g_get_real_time(), self->last_x, self->last_y,
         kPanZoomEnd, 0, 0, 0, 0);
   }
 }

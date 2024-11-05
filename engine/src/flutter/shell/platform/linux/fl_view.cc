@@ -20,7 +20,6 @@
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_renderer_gdk.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
-#include "flutter/shell/platform/linux/fl_scrolling_view_delegate.h"
 #include "flutter/shell/platform/linux/fl_socket_accessible.h"
 #include "flutter/shell/platform/linux/fl_text_input_handler.h"
 #include "flutter/shell/platform/linux/fl_text_input_view_delegate.h"
@@ -93,9 +92,6 @@ static void fl_view_plugin_registry_iface_init(
 static void fl_view_keyboard_delegate_iface_init(
     FlKeyboardViewDelegateInterface* iface);
 
-static void fl_view_scrolling_delegate_iface_init(
-    FlScrollingViewDelegateInterface* iface);
-
 static void fl_view_text_input_delegate_iface_init(
     FlTextInputViewDelegateInterface* iface);
 
@@ -108,11 +104,8 @@ G_DEFINE_TYPE_WITH_CODE(
                               fl_view_plugin_registry_iface_init)
             G_IMPLEMENT_INTERFACE(fl_keyboard_view_delegate_get_type(),
                                   fl_view_keyboard_delegate_iface_init)
-                G_IMPLEMENT_INTERFACE(fl_scrolling_view_delegate_get_type(),
-                                      fl_view_scrolling_delegate_iface_init)
-                    G_IMPLEMENT_INTERFACE(
-                        fl_text_input_view_delegate_get_type(),
-                        fl_view_text_input_delegate_iface_init))
+                G_IMPLEMENT_INTERFACE(fl_text_input_view_delegate_get_type(),
+                                      fl_view_text_input_delegate_iface_init))
 
 // Emit the first frame signal in the main thread.
 static gboolean first_frame_idle_cb(gpointer user_data) {
@@ -154,7 +147,7 @@ static void init_keyboard(FlView* self) {
 static void init_scrolling(FlView* self) {
   g_clear_object(&self->scrolling_manager);
   self->scrolling_manager =
-      fl_scrolling_manager_new(FL_SCROLLING_VIEW_DELEGATE(self));
+      fl_scrolling_manager_new(self->engine, self->view_id);
 }
 
 static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
@@ -367,33 +360,6 @@ static void fl_view_keyboard_delegate_iface_init(
     return fl_text_input_handler_filter_keypress(self->text_input_handler,
                                                  event);
   };
-}
-
-static void fl_view_scrolling_delegate_iface_init(
-    FlScrollingViewDelegateInterface* iface) {
-  iface->send_mouse_pointer_event =
-      [](FlScrollingViewDelegate* view_delegate, FlutterPointerPhase phase,
-         size_t timestamp, double x, double y,
-         FlutterPointerDeviceKind device_kind, double scroll_delta_x,
-         double scroll_delta_y, int64_t buttons) {
-        FlView* self = FL_VIEW(view_delegate);
-        if (self->engine != nullptr) {
-          fl_engine_send_mouse_pointer_event(
-              self->engine, self->view_id, phase, timestamp, x, y, device_kind,
-              scroll_delta_x, scroll_delta_y, buttons);
-        }
-      };
-  iface->send_pointer_pan_zoom_event =
-      [](FlScrollingViewDelegate* view_delegate, size_t timestamp, double x,
-         double y, FlutterPointerPhase phase, double pan_x, double pan_y,
-         double scale, double rotation) {
-        FlView* self = FL_VIEW(view_delegate);
-        if (self->engine != nullptr) {
-          fl_engine_send_pointer_pan_zoom_event(self->engine, self->view_id,
-                                                timestamp, x, y, phase, pan_x,
-                                                pan_y, scale, rotation);
-        };
-      };
 }
 
 static void fl_view_text_input_delegate_iface_init(
