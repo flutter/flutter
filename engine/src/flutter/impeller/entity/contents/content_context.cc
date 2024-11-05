@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "fml/trace_event.h"
-#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
