@@ -934,11 +934,16 @@ class _MaterialAppState extends State<MaterialApp> {
     ];
   }
 
-  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
+  Widget _exitWidgetSelectionButtonBuilder(
+    BuildContext context,
+    VoidCallback onPressed, {
+    required GlobalKey key,
+  }) {
     return FloatingActionButton(
+      key: key,
       onPressed: onPressed,
       mini: true,
-      child: const Icon(Icons.search),
+      child: const Icon(Icons.close),
     );
   }
 
@@ -1041,7 +1046,7 @@ class _MaterialAppState extends State<MaterialApp> {
         showPerformanceOverlay: widget.showPerformanceOverlay,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+        exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
@@ -1075,7 +1080,7 @@ class _MaterialAppState extends State<MaterialApp> {
       showPerformanceOverlay: widget.showPerformanceOverlay,
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-      inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+      exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,

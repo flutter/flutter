@@ -534,12 +534,17 @@ class _CupertinoAppState extends State<CupertinoApp> {
     ];
   }
 
-  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
+  Widget _exitWidgetSelectionButtonBuilder(
+    BuildContext context,
+    VoidCallback onPressed, {
+    required GlobalKey key,
+  }) {
     return CupertinoButton.filled(
+      key: key,
       padding: EdgeInsets.zero,
       onPressed: onPressed,
       child: const Icon(
-        CupertinoIcons.search,
+        CupertinoIcons.xmark,
         size: 28.0,
         color: CupertinoColors.white,
       ),
@@ -572,7 +577,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         showPerformanceOverlay: widget.showPerformanceOverlay,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+        exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
@@ -606,7 +611,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       showPerformanceOverlay: widget.showPerformanceOverlay,
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-      inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+      exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,

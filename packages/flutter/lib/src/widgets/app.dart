@@ -341,7 +341,7 @@ class WidgetsApp extends StatefulWidget {
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
-    this.inspectorSelectButtonBuilder,
+    this.exitWidgetSelectionButtonBuilder,
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
@@ -439,7 +439,7 @@ class WidgetsApp extends StatefulWidget {
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
-    this.inspectorSelectButtonBuilder,
+    this.exitWidgetSelectionButtonBuilder,
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
@@ -1032,7 +1032,7 @@ class WidgetsApp extends StatefulWidget {
   /// This lets [MaterialApp] to use a Material Design button to toggle the
   /// inspector select mode without requiring [WidgetInspector] to depend on the
   /// material package.
-  final InspectorSelectButtonBuilder? inspectorSelectButtonBuilder;
+  final ExitWidgetSelectionButtonBuilder? exitWidgetSelectionButtonBuilder;
 
   /// {@template flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
   /// Turns on a little "DEBUG" banner in debug mode to indicate
@@ -1755,7 +1755,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
           if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
             return WidgetInspector(
-              selectButtonBuilder: widget.inspectorSelectButtonBuilder,
+              exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder,
               child: child!,
             );
           }

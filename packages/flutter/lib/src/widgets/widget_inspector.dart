@@ -37,8 +37,12 @@ import 'service_extensions.dart';
 import 'view.dart';
 
 /// Signature for the builder callback used by
-/// [WidgetInspector.selectButtonBuilder].
-typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, VoidCallback onPressed);
+/// [WidgetInspector.exitWidgetSelectionButtonBuilder].
+typedef ExitWidgetSelectionButtonBuilder = Widget Function(
+  BuildContext context,
+  VoidCallback onPressed, {
+  required GlobalKey key,
+});
 
 /// Signature for a method that registers the service extension `callback` with
 /// the given `name`.
@@ -779,8 +783,8 @@ mixin WidgetInspectorService {
   /// In select mode, pointer interactions trigger widget selection instead of
   /// normal interactions. Otherwise the previously selected widget is
   /// highlighted but the application can be interacted with normally.
-  @visibleForTesting
-  final ValueNotifier<bool> isSelectMode = ValueNotifier<bool>(true);
+  // @visibleForTesting
+  // final ValueNotifier<bool> isSelectMode = ValueNotifier<bool>(true);
 
   @protected
   static set instance(WidgetInspectorService instance) {
@@ -1620,6 +1624,13 @@ mixin WidgetInspectorService {
         stream: 'ToolEvent',
       );
     }
+  }
+
+  /// Changes whether widget selection mode is [enabled].
+  void _changeWidgetSelectionMode(bool enabled) {
+    WidgetsBinding.instance.debugShowWidgetInspectorOverride = enabled;
+    _postExtensionStateChangedEvent(
+        WidgetInspectorServiceExtensions.show.name, enabled);
   }
 
   /// Returns a DevTools uri linking to a specific element on the inspector page.
@@ -2758,7 +2769,7 @@ class WidgetInspector extends StatefulWidget {
   const WidgetInspector({
     super.key,
     required this.child,
-    required this.selectButtonBuilder,
+    required this.exitWidgetSelectionButtonBuilder,
   });
 
   /// The widget that is being inspected.
@@ -2768,7 +2779,7 @@ class WidgetInspector extends StatefulWidget {
   ///
   /// The `onPressed` callback passed as an argument to the builder should be
   /// hooked up to the returned widget.
-  final InspectorSelectButtonBuilder? selectButtonBuilder;
+  final ExitWidgetSelectionButtonBuilder? exitWidgetSelectionButtonBuilder;
 
   @override
   State<WidgetInspector> createState() => _WidgetInspectorState();
@@ -2797,24 +2808,24 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
     WidgetInspectorService.instance.selection
         .addListener(_selectionInformationChanged);
-    WidgetInspectorService.instance.isSelectMode
+    WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier
         .addListener(_selectionInformationChanged);
     selection = WidgetInspectorService.instance.selection;
-    isSelectMode = WidgetInspectorService.instance.isSelectMode.value;
+    isSelectMode = WidgetsBinding.instance.debugShowWidgetInspectorOverride;
   }
 
   @override
   void dispose() {
     WidgetInspectorService.instance.selection
         .removeListener(_selectionInformationChanged);
-    WidgetInspectorService.instance.isSelectMode
+    WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier
         .removeListener(_selectionInformationChanged);
     super.dispose();
   }
 
   void _selectionInformationChanged() => setState((){
     selection = WidgetInspectorService.instance.selection;
-    isSelectMode = WidgetInspectorService.instance.isSelectMode.value;
+    isSelectMode = WidgetsBinding.instance.debugShowWidgetInspectorOverride;
   });
 
   bool _hitTestHelper(
@@ -2937,15 +2948,10 @@ class _WidgetInspectorState extends State<WidgetInspector>
       _inspectAt(_lastPointerLocation!);
       WidgetInspectorService.instance._sendInspectEvent(selection.current);
     }
-
-    // Only exit select mode if there is a button to return to select mode.
-    if (widget.selectButtonBuilder != null) {
-      WidgetInspectorService.instance.isSelectMode.value = false;
-    }
   }
 
-  void _handleEnableSelect() {
-      WidgetInspectorService.instance.isSelectMode.value = true;
+  void _exitSelectionMode() {
+    WidgetInspectorService.instance._changeWidgetSelectionMode(false);
   }
 
   @override
@@ -2953,6 +2959,8 @@ class _WidgetInspectorState extends State<WidgetInspector>
     // Be careful changing this build method. The _InspectorOverlayLayer
     // assumes the root RenderObject for the WidgetInspector will be
     // a RenderStack with a _RenderInspectorOverlay as the last child.
+    final GlobalKey<State<StatefulWidget>> exitWidgetSelectionButtonKey =
+        GlobalKey(debugLabel: 'Exit Widget Selection');
     return Stack(children: <Widget>[
       GestureDetector(
         onTap: _handleTap,
@@ -2967,11 +2975,18 @@ class _WidgetInspectorState extends State<WidgetInspector>
           child: widget.child,
         ),
       ),
-      if (!isSelectMode && widget.selectButtonBuilder != null)
+      if (isSelectMode && widget.exitWidgetSelectionButtonBuilder != null)
         Positioned(
           left: _kInspectButtonMargin,
           bottom: _kInspectButtonMargin,
-          child: widget.selectButtonBuilder!(context, _handleEnableSelect),
+          child: _ExitWidgetSelectionButtonWrapper(
+            button: widget.exitWidgetSelectionButtonBuilder!(
+              context,
+              _exitSelectionMode,
+              key: exitWidgetSelectionButtonKey,
+            ),
+            buttonKey: exitWidgetSelectionButtonKey,
+          ),
         ),
       _InspectorOverlay(selection: selection),
     ]);
@@ -3451,6 +3466,131 @@ const TextStyle _messageStyle = TextStyle(
   fontSize: 10.0,
   height: 1.2,
 );
+
+class _ExitWidgetSelectionButtonWrapper extends StatefulWidget {
+  const _ExitWidgetSelectionButtonWrapper({
+    required this.button,
+    required this.buttonKey,
+  });
+
+  final Widget button;
+  final GlobalKey buttonKey;
+
+  @override
+  State<_ExitWidgetSelectionButtonWrapper> createState() =>
+      _ExitWidgetSelectionButtonState();
+}
+
+class _ExitWidgetSelectionButtonState
+    extends State<_ExitWidgetSelectionButtonWrapper> {
+  bool _toolTipVisible = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: AlignmentDirectional.topCenter,
+      children: <Widget>[
+        CustomPaint(
+          painter: _ExitWidgetSelectionTooltipPainter(
+            isVisible: _toolTipVisible,
+            buttonKey: widget.buttonKey,
+          ),
+        ),
+        MouseRegion(
+          onEnter: (_) {
+            setState(() {
+              _toolTipVisible = true;
+            });
+          },
+          onExit: (_) {
+            setState(() {
+              _toolTipVisible = false;
+            });
+          },
+          child: widget.button,
+        ),
+      ],
+    );
+  }
+}
+
+class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
+  _ExitWidgetSelectionTooltipPainter({
+    required this.isVisible,
+    required this.buttonKey,
+  });
+
+  final bool isVisible;
+  final GlobalKey buttonKey;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Do not paint the tooltip if it is currently hidden.
+    if (!isVisible) {
+      return;
+    }
+
+    // Do not paint the tooltip if the selection mode button is not rendered.
+    final RenderObject? buttonRenderObject =
+        buttonKey.currentContext?.findRenderObject();
+    if (buttonRenderObject == null) {
+      return;
+    }
+
+    // Define tooltip appearance.
+    const double tooltipPadding = 4.0;
+    const double tooltipSpacing = 6.0;
+
+    final TextPainter tooltipTextPainter = TextPainter()
+      ..maxLines = 1
+      ..ellipsis = '...'
+      ..text =
+          const TextSpan(text: 'Exit selection mode.', style: _messageStyle)
+      ..textDirection = TextDirection.ltr
+      ..layout();
+
+    final Paint tooltipPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = _kTooltipBackgroundColor;
+
+    // Determine tooltip position.
+    final double buttonWidth = buttonRenderObject.paintBounds.width;
+    final Size textSize = tooltipTextPainter.size;
+    final double textWidth = textSize.width;
+    final double textHeight = textSize.height;
+    final double tooltipWidth = textWidth + (tooltipPadding * 2);
+    final double tooltipHeight = textHeight + (tooltipPadding * 2);
+
+    final double tooltipXOffset = 0 - buttonWidth / 2;
+    final double tooltipYOffset = 0 - tooltipHeight - tooltipSpacing;
+
+    // Draw tooltip background.
+    canvas.drawRect(
+      Rect.fromLTWH(
+        tooltipXOffset,
+        tooltipYOffset,
+        tooltipWidth,
+        tooltipHeight,
+      ),
+      tooltipPaint,
+    );
+
+    // Draw tooltip text.
+    tooltipTextPainter.paint(
+        canvas,
+        Offset(
+          tooltipXOffset + tooltipPadding,
+          tooltipYOffset + tooltipPadding,
+        ));
+  }
+
+  @override
+  bool shouldRepaint(covariant _ExitWidgetSelectionTooltipPainter oldDelegate) {
+    return isVisible != oldDelegate.isVisible;
+  }
+}
+
+
 
 /// Interface for classes that track the source code location the their
 /// constructor was called from.

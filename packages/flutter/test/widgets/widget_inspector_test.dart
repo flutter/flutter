@@ -701,7 +701,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final GlobalKey child1Key = GlobalKey();
       final GlobalKey child2Key = GlobalKey();
 
-      InspectorSelectButtonBuilder selectButtonBuilder(Key key) {
+      exitWidgetSelectionButtonBuilder selectButtonBuilder(Key key) {
         return (BuildContext context, VoidCallback onPressed) {
           return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
         };
