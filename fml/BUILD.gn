@@ -156,8 +156,6 @@ source_set("fml") {
       "platform/darwin/scoped_block.mm",
       "platform/darwin/scoped_nsautorelease_pool.cc",
       "platform/darwin/scoped_nsautorelease_pool.h",
-      "platform/darwin/scoped_nsobject.h",
-      "platform/darwin/scoped_nsobject.mm",
       "platform/darwin/scoped_policy.h",
       "platform/darwin/scoped_typeref.h",
       "platform/darwin/string_range_sanitization.h",
@@ -374,10 +372,6 @@ if (enable_unittests) {
       ]
     }
 
-    if (is_mac || is_ios) {
-      sources += [ "platform/darwin/scoped_nsobject_unittests.mm" ]
-    }
-
     if (is_fuchsia) {
       sources += [ "platform/fuchsia/log_interest_listener_unittests.cc" ]
     }
@@ -407,19 +401,5 @@ if (enable_unittests) {
       # symbols.
       libs = [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
     }
-  }
-
-  executable("fml_arc_unittests") {
-    testonly = true
-    if (is_mac || is_ios) {
-      cflags_objcc = flutter_cflags_objc_arc
-      sources = [ "platform/darwin/scoped_nsobject_arc_unittests.mm" ]
-    }
-
-    deps = [
-      ":fml_fixtures",
-      "//flutter/fml",
-      "//flutter/testing",
-    ]
   }
 }

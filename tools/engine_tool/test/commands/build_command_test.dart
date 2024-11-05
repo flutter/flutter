@@ -442,9 +442,9 @@ void main() {
         CannedProcess(
           (command) => command.contains('desc'),
           stdout: convert.jsonEncode({
-            '//flutter/fml:fml_arc_unittests': {
+            '//flutter/fml:fml_unittests': {
               'outputs': [
-                '//out/host_debug/fml_arc_unittests',
+                '//out/host_debug/fml_unittests',
               ],
               'testonly': true,
               'type': 'executable',
@@ -473,7 +473,7 @@ void main() {
       'build',
       '--config',
       'ci/host_debug',
-      '//flutter/fml:fml_arc_unittests',
+      '//flutter/fml:fml_unittests',
     ]);
 
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
@@ -495,7 +495,7 @@ void main() {
     expect(
       ninjaCmd.command,
       contains(
-        contains('flutter/fml:fml_arc_unittests'),
+        contains('flutter/fml:fml_unittests'),
       ),
     );
   });
@@ -521,9 +521,9 @@ void main() {
               'testonly': true,
               'type': 'executable',
             },
-            '//flutter/fml:fml_arc_unittests': {
+            '//flutter/fml:fml_unittests': {
               'outputs': [
-                '//out/host_debug/fml_arc_unittests',
+                '//out/host_debug/fml_unittests',
               ],
               'testonly': true,
               'type': 'executable',
@@ -576,7 +576,7 @@ void main() {
       containsAll([
         'flutter/display_list:display_list_unittests',
         'flutter/flow:flow_unittests',
-        'flutter/fml:fml_arc_unittests',
+        'flutter/fml:fml_unittests',
       ]),
     );
   });
