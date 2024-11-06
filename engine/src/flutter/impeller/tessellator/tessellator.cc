@@ -12,12 +12,17 @@ namespace impeller {
 
 Tessellator::Tessellator()
     : point_buffer_(std::make_unique<std::vector<Point>>()),
-      index_buffer_(std::make_unique<std::vector<uint16_t>>()) {
+      index_buffer_(std::make_unique<std::vector<uint16_t>>()),
+      stroke_points_(kPointArenaSize) {
   point_buffer_->reserve(2048);
   index_buffer_->reserve(2048);
 }
 
 Tessellator::~Tessellator() = default;
+
+std::vector<Point>& Tessellator::GetStrokePointCache() {
+  return stroke_points_;
+}
 
 Path::Polyline Tessellator::CreateTempPolyline(const Path& path,
                                                Scalar tolerance) {
