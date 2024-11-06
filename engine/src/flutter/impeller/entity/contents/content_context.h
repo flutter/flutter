@@ -70,6 +70,7 @@
 #include "impeller/entity/vertices_uber.frag.h"
 
 #ifdef IMPELLER_ENABLE_OPENGLES
+#include "impeller/entity/texture_downsample_gles.frag.h"
 #include "impeller/entity/tiled_texture_fill_external.frag.h"
 #endif  // IMPELLER_ENABLE_OPENGLES
 
@@ -239,6 +240,9 @@ using VerticesUberShader = RenderPipelineHandle<PorterDuffBlendVertexShader,
 using TiledTextureExternalPipeline =
     RenderPipelineHandle<TextureFillVertexShader,
                          TiledTextureFillExternalFragmentShader>;
+using TextureDownsampleGlesPipeline =
+    RenderPipelineHandle<TextureFillVertexShader,
+                         TextureDownsampleGlesFragmentShader>;
 #endif  // IMPELLER_ENABLE_OPENGLES
 
 /// Pipeline state configuration.
@@ -426,6 +430,11 @@ class ContentContext {
   }
 
 #ifdef IMPELLER_ENABLE_OPENGLES
+  std::shared_ptr<Pipeline<PipelineDescriptor>>
+  GetDownsampleTextureGlesPipeline(ContentContextOptions opts) const {
+    return GetPipeline(texture_downsample_gles_pipelines_, opts);
+  }
+
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetTiledTextureExternalPipeline(
       ContentContextOptions opts) const {
     FML_DCHECK(GetContext()->GetBackendType() ==
@@ -873,6 +882,8 @@ class ContentContext {
 #ifdef IMPELLER_ENABLE_OPENGLES
   mutable Variants<TiledTextureExternalPipeline>
       tiled_texture_external_pipelines_;
+  mutable Variants<TextureDownsampleGlesPipeline>
+      texture_downsample_gles_pipelines_;
 #endif  // IMPELLER_ENABLE_OPENGLES
   mutable Variants<TiledTexturePipeline> tiled_texture_pipelines_;
   mutable Variants<GaussianBlurPipeline> gaussian_blur_pipelines_;
