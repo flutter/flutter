@@ -365,37 +365,47 @@ void main() {
           '123',
           '--bundle',
           'build/ios/iphoneos/My Super Awesome App.app',
+          '--app_deltas',
+          'build/ios/app-delta',
           '--no-wifi',
           '--justlaunch',
           '--args',
-          const <String>[
-            '--enable-dart-profiling',
-            '--disable-service-auth-codes',
-          ].join(' '),
+          '--enable-dart-profiling',
         ])
       );
 
-      await FakeAsync().run((FakeAsync time) async {
-        final LaunchResult launchResult = await iosDevice.startApp(
+      final FakeAsync fakeAsync = FakeAsync();
+      final Future<LaunchResult> pendingResult = fakeAsync.run((_) async {
+        return iosDevice.startApp(
           buildableIOSApp,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
           platformArgs: <String, Object>{},
         );
-        time.elapse(const Duration(seconds: 2));
+      });
 
+      unawaited(pendingResult.then(expectAsync1((LaunchResult launchResult) {
         expect(logger.statusText,
-          contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'));
+          contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'),
+        );
         expect(launchResult.started, true);
         expect(processManager, hasNoRemainingExpectations);
-      });
+      })));
+
+      // Wait until all asyncronous time has been elapsed.
+      do {
+        fakeAsync.elapse(const Duration(seconds: 2));
+      } while (fakeAsync.pendingTimers.isNotEmpty);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
       Logger: () => logger,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(
+        hostPlatform: HostPlatform.darwin_arm64,
+      ),
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
       Xcode: () => xcode,
-    }, skip: true); // TODO(zanderso): clean up with https://github.com/flutter/flutter/issues/60675
+    });
   });
 
   group('IOSDevice.startApp for CoreDevice', () {
