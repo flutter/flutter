@@ -26,9 +26,13 @@ void main() {
     final ImageFrameBuilder frameBuilder = image.frameBuilder!;
     final BuildContext context = tester.element(find.byType(Image));
 
+    const Key key = Key('child');
+
     expect(
-      frameBuilder(context, const SizedBox(),null,  false),
-      isA<AnimatedOpacity>(),
+      frameBuilder(context, const SizedBox(key: key), null,  false),
+      isA<AnimatedOpacity>().having(
+        (AnimatedOpacity opacity) => opacity.child!.key, 'key', key,
+      ),
     );
   });
 
@@ -45,7 +49,7 @@ void main() {
     const Key key = Key('child');
 
     expect(
-      frameBuilder(context, const SizedBox(key: key),null,  true),
+      frameBuilder(context, const SizedBox(key: key), null,  true),
       isA<SizedBox>().having(
         (SizedBox widget) => widget.key, 'key', key,
       ),
