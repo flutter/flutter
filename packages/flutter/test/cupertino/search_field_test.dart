@@ -655,6 +655,81 @@ void main() {
     expect(textField.enableIMEPersonalizedLearning, false);
   });
 
+  testWidgets('cursorWidth is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            cursorWidth: 1,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.cursorWidth, 1);
+  });
+
+  testWidgets('cursorHeight is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            cursorHeight: 10,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.cursorHeight, 10);
+  });
+
+  testWidgets('cursorRadius is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            cursorRadius: Radius.circular(1.0),
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.cursorRadius, const Radius.circular(1.0));
+  });
+
+  testWidgets('cursorOpacityAnimates is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            cursorOpacityAnimates: false,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.cursorOpacityAnimates, false);
+  });
+
+  testWidgets('cursorColor is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            cursorColor: Color.fromARGB(255, 255, 0, 0),
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.cursorColor, const Color.fromARGB(255, 255, 0, 0));
+  });
+
   testWidgets('Icons and placeholder fade while resizing on scroll', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
