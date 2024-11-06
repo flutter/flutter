@@ -494,8 +494,9 @@ ImpellerTexture ImpellerTextureCreateWithContentsNew(
     auto wrapped_contents = std::make_shared<fml::NonOwnedMapping>(
         contents->data,    // data ptr
         contents->length,  // data length
-        [contents, contents_on_release_user_data](auto, auto) {
-          contents->on_release(contents_on_release_user_data);
+        [on_release = contents->on_release, contents_on_release_user_data](
+            auto, auto) {
+          on_release(contents_on_release_user_data);
         }  // release callback
     );
     if (!texture->SetContents(std::move(wrapped_contents))) {
@@ -1147,8 +1148,9 @@ bool ImpellerTypographyContextRegisterFont(ImpellerTypographyContext context,
   auto wrapped_contents = std::make_unique<fml::NonOwnedMapping>(
       contents->data,    // data ptr
       contents->length,  // data length
-      [contents, contents_on_release_user_data](auto, auto) {
-        contents->on_release(contents_on_release_user_data);
+      [on_release = contents->on_release, contents_on_release_user_data](auto,
+                                                                         auto) {
+        on_release(contents_on_release_user_data);
       }  // release callback
   );
   return GetPeer(context)->RegisterFont(std::move(wrapped_contents),
