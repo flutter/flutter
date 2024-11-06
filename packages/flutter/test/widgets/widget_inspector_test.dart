@@ -476,7 +476,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Now exit selection mode by tapping the Exit Selection Mode button.
       await tester.tap(find.byKey(exitWidgetSelectionButtonKey));
       await tester.pump();
-    
+
       // Tap on the top button and verify it is not selected in the Inspector.
       await tester.tap(find.text('TOP'));
       expect(log, equals(<String>['top']));
