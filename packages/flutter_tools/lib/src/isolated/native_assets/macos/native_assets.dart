@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/native_assets_cli.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../../base/file_system.dart';
 import '../../../build_info.dart' hide BuildMode;
@@ -24,15 +23,15 @@ Target getNativeMacOSTarget(DarwinArch darwinArch) {
   };
 }
 
-Map<KernelAssetPath, List<NativeCodeAssetImpl>> fatAssetTargetLocationsMacOS(
-  List<NativeCodeAssetImpl> nativeAssets,
+Map<KernelAssetPath, List<CodeAsset>> fatAssetTargetLocationsMacOS(
+  List<CodeAsset> nativeAssets,
   Uri? absolutePath,
 ) {
   final Set<String> alreadyTakenNames = <String>{};
-  final Map<KernelAssetPath, List<NativeCodeAssetImpl>> result =
-      <KernelAssetPath, List<NativeCodeAssetImpl>>{};
+  final Map<KernelAssetPath, List<CodeAsset>> result =
+      <KernelAssetPath, List<CodeAsset>>{};
   final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
-  for (final NativeCodeAssetImpl asset in nativeAssets) {
+  for (final CodeAsset asset in nativeAssets) {
     // Use same target path for all assets with the same id.
     final KernelAssetPath path = idToPath[asset.id] ??
         _targetLocationMacOS(
@@ -41,20 +40,20 @@ Map<KernelAssetPath, List<NativeCodeAssetImpl>> fatAssetTargetLocationsMacOS(
           alreadyTakenNames,
         ).path;
     idToPath[asset.id] = path;
-    result[path] ??= <NativeCodeAssetImpl>[];
+    result[path] ??= <CodeAsset>[];
     result[path]!.add(asset);
   }
   return result;
 }
 
-Map<NativeCodeAssetImpl, KernelAsset> assetTargetLocationsMacOS(
-  List<NativeCodeAssetImpl> nativeAssets,
+Map<CodeAsset, KernelAsset> assetTargetLocationsMacOS(
+  List<CodeAsset> nativeAssets,
   Uri? absolutePath,
 ) {
   final Set<String> alreadyTakenNames = <String>{};
   final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
-  final Map<NativeCodeAssetImpl, KernelAsset> result = <NativeCodeAssetImpl, KernelAsset>{};
-  for (final NativeCodeAssetImpl asset in nativeAssets) {
+  final Map<CodeAsset, KernelAsset> result = <CodeAsset, KernelAsset>{};
+  for (final CodeAsset asset in nativeAssets) {
     final KernelAssetPath path = idToPath[asset.id] ??
         _targetLocationMacOS(asset, absolutePath, alreadyTakenNames).path;
     idToPath[asset.id] = path;
@@ -68,7 +67,7 @@ Map<NativeCodeAssetImpl, KernelAsset> assetTargetLocationsMacOS(
 }
 
 KernelAsset _targetLocationMacOS(
-  NativeCodeAssetImpl asset,
+  CodeAsset asset,
   Uri? absolutePath,
   Set<String> alreadyTakenNames,
 ) {
@@ -123,7 +122,7 @@ KernelAsset _targetLocationMacOS(
 /// in macos_assemble.sh.
 Future<void> copyNativeCodeAssetsMacOS(
   Uri buildUri,
-  Map<KernelAssetPath, List<NativeCodeAssetImpl>> assetTargetLocations,
+  Map<KernelAssetPath, List<CodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   build_info.BuildMode buildMode,
   FileSystem fileSystem,
@@ -136,11 +135,11 @@ Future<void> copyNativeCodeAssetsMacOS(
     final Map<String, String> oldToNewInstallNames = <String, String>{};
     final List<(File, String, Directory)> dylibs = <(File, String, Directory)>[];
 
-    for (final MapEntry<KernelAssetPath, List<NativeCodeAssetImpl>> assetMapping
+    for (final MapEntry<KernelAssetPath, List<CodeAsset>> assetMapping
         in assetTargetLocations.entries) {
       final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
       final List<File> sources = <File>[
-        for (final NativeCodeAssetImpl source in assetMapping.value) fileSystem.file(source.file),
+        for (final CodeAsset source in assetMapping.value) fileSystem.file(source.file),
       ];
       final Uri targetUri = buildUri.resolveUri(target);
       final String name = targetUri.pathSegments.last;
@@ -217,7 +216,7 @@ Future<void> copyNativeCodeAssetsMacOS(
 /// Code signing is also done here.
 Future<void> copyNativeCodeAssetsMacOSFlutterTester(
   Uri buildUri,
-  Map<KernelAssetPath, List<NativeCodeAssetImpl>> assetTargetLocations,
+  Map<KernelAssetPath, List<CodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   build_info.BuildMode buildMode,
   FileSystem fileSystem,
@@ -230,11 +229,11 @@ Future<void> copyNativeCodeAssetsMacOSFlutterTester(
     final Map<String, String> oldToNewInstallNames = <String, String>{};
     final List<(File, String)> dylibs = <(File, String)>[];
 
-    for (final MapEntry<KernelAssetPath, List<NativeCodeAssetImpl>> assetMapping
+    for (final MapEntry<KernelAssetPath, List<CodeAsset>> assetMapping
         in assetTargetLocations.entries) {
       final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
       final List<File> sources = <File>[
-        for (final NativeCodeAssetImpl source in assetMapping.value) fileSystem.file(source.file),
+        for (final CodeAsset source in assetMapping.value) fileSystem.file(source.file),
       ];
       final Uri targetUri = buildUri.resolveUri(target);
       final File dylibFile = fileSystem.file(targetUri);
