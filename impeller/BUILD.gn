@@ -60,7 +60,6 @@ impeller_component("impeller_unittests") {
     "core:allocator_unittests",
     "display_list:skia_conversions_unittests",
     "geometry:geometry_unittests",
-    "renderer/backend/metal:metal_unittests",
     "runtime_stage:runtime_stage_unittests",
     "shader_archive:shader_archive_unittests",
     "tessellator:tessellator_unittests",
@@ -78,6 +77,10 @@ impeller_component("impeller_unittests") {
       "renderer:renderer_unittests",
       "typographer:typographer_unittests",
     ]
+  }
+
+  if (impeller_enable_metal) {
+    deps += [ "//flutter/impeller/renderer/backend/metal:metal_unittests" ]
   }
 
   if (impeller_enable_vulkan) {
