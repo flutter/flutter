@@ -34,6 +34,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
     await flutter('clean');
     await evalFlutter('build', options: <String>[
       'web',
+      '--no-tree-shake-icons', // local engine builds are frequently out of sync with the Dart Kernel version
       if (benchmarkOptions.useWasm) ...<String>[
         '-O4',
         '--wasm',
