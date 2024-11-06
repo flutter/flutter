@@ -7,11 +7,11 @@
 #include "display_list/dl_tile_mode.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_mask_filter.h"
-#include "flutter/impeller/display_list/aiks_unittests.h"
-
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
+#include "flutter/fml/build_config.h"
+#include "flutter/impeller/display_list/aiks_unittests.h"
 #include "flutter/testing/testing.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
@@ -479,6 +479,82 @@ TEST_P(AiksTest, TextForegroundShaderWithTransform) {
   ASSERT_NE(blob, nullptr);
   auto frame = MakeTextFrameFromTextBlobSkia(blob);
   builder.DrawTextFrame(frame, 0, 0, text_paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/157885.
+TEST_P(AiksTest, DifferenceClipsMustRenderIdenticallyAcrossBackends) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  DlColor clear_color(1.0, 0.5, 0.5, 0.5, DlColorSpace::kSRGB);
+  paint.setColor(clear_color);
+  builder.DrawPaint(paint);
+
+  DlMatrix identity = {
+      1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+  };
+  builder.Save();
+  builder.Transform(identity);
+
+  DlRect frame = DlRect::MakeLTRB(1.0, 1.0, 1278.0, 763.0);
+  DlColor white(1.0, 1.0, 1.0, 1.0, DlColorSpace::kSRGB);
+  paint.setColor(white);
+  builder.DrawRect(frame, paint);
+
+  builder.Save();
+  builder.ClipRect(frame, DlCanvas::ClipOp::kIntersect);
+
+  DlMatrix rect_xform = {
+      0.8241262, 0.56640625, 0.0, 0.0, -0.56640625, 0.8241262, 0.0, 0.0,
+      0.0,       0.0,        1.0, 0.0, 271.1137,    489.4733,  0.0, 1.0,
+  };
+  builder.Save();
+  builder.Transform(rect_xform);
+
+  DlRect rect = DlRect::MakeLTRB(0.0, 0.0, 100.0, 100.0);
+  DlColor bluish(1.0, 0.184, 0.501, 0.929, DlColorSpace::kSRGB);
+  paint.setColor(bluish);
+  DlRoundRect rrect = DlRoundRect::MakeRectRadius(rect, 18.0);
+  builder.DrawRoundRect(rrect, paint);
+
+  builder.Save();
+  builder.ClipRect(rect, DlCanvas::ClipOp::kIntersect);
+  builder.Restore();
+
+  builder.Restore();
+
+  DlMatrix path_xform = {
+      1.0, 0.0, 0.0, 0.0, 0.0,   1.0,   0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0, 675.0, 279.5, 0.0, 1.0,
+  };
+  builder.Save();
+  builder.Transform(path_xform);
+
+  SkPath path;
+  path.moveTo(87.5, 349.5);
+  path.lineTo(25.0, 29.5);
+  path.lineTo(150.0, 118.0);
+  path.lineTo(25.0, 118.0);
+  path.lineTo(150.0, 29.5);
+  path.close();
+
+  DlColor fill_color(1.0, 1.0, 0.0, 0.0, DlColorSpace::kSRGB);
+  DlColor stroke_color(1.0, 0.0, 0.0, 0.0, DlColorSpace::kSRGB);
+  paint.setColor(fill_color);
+  paint.setDrawStyle(DlDrawStyle::kFill);
+  builder.DrawPath(DlPath(path), paint);
+
+  paint.setColor(stroke_color);
+  paint.setStrokeWidth(2.0);
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  builder.DrawPath(path, paint);
+
+  builder.Restore();
+  builder.Restore();
+  builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
