@@ -113,7 +113,7 @@ double getBorderBottom(WidgetTester tester) {
 
 Finder findLabel() {
   return find.descendant(
-    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Shaker'),
+    of: find.byType(MatrixTransition),
     matching: find.byWidgetPredicate((Widget w) => w is Text),
   );
 }
@@ -4233,16 +4233,13 @@ void main() {
             ),
           );
 
-          // 12 is the left padding.
-          // TODO(bleroux): consider changing this padding because from M3 spec this should be 16.
-          expect(getLabelRect(tester).left, 12.0);
-          // TODO(bleroux): consider changing the input text position because, based on M3 spec,
-          // the expected horizontal position is 52 (12 padding, 24 icon, 16 gap between icon and input).
+          // Label left padding is 16.0 (12.0 right padding for a decoration with icons + 4.0 extra padding for the floating label)
+          expect(getLabelRect(tester).left, 16.0);
+          // Based on M3 spec, the expected horizontal position is 52 (12 padding, 24 icon, 16 gap between icon and input).
           // See https://m3.material.io/components/text-fields/specs#1ad2798c-ab41-4f0c-9a97-295ab9b37f33
           // (Note that the diagrams on the spec for outlined text field are wrong but the table for
           // outlined text fields and the diagrams for filled text field point to these values).
-          // The 48.0 value come from icon min interactive width and height.
-          expect(getInputRect(tester).left, 48.0);
+          expect(getInputRect(tester).left, 52.0);
         });
 
         testWidgets('Label for outlined decoration aligns horizontally with input when alignLabelWithHint is true', (WidgetTester tester) async {
@@ -5452,7 +5449,7 @@ void main() {
 
     group('for filled text field', () {
       group('when field is enabled', () {
-        testWidgets('prefixIcon is correctly positioned', (WidgetTester tester) async {
+        testWidgets('prefixIcon is correctly positioned - LTR', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -5472,9 +5469,33 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 16.0);
+        });
+
+        testWidgets('prefixIcon is correctly positioned - RTL', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              textDirection: TextDirection.rtl,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          // By default, the prefix icon is rendered inside a 48x48 constrained box.
+          expect(getPrefixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getPrefixIconStyle(tester).fontSize, 24.0);
+          // Prefix icon is vertically centered inside the container.
+          expect(getPrefixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Right padding is 12 per Material 3 spec.
+          expect(getDecoratorRect(tester).right - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // Check the padding between the prefix icon and the input.
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(tester.getRect(findPrefixIconInnerRichText()).left - getInputRect(tester).right, 16.0);
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -5493,7 +5514,7 @@ void main() {
           expect(getPrefixIconStyle(tester).color, expectedColor);
         });
 
-        testWidgets('suffixIcon is correctly positioned', (WidgetTester tester) async {
+        testWidgets('suffixIcon is correctly positioned - LTR', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -5513,9 +5534,33 @@ void main() {
           // Right padding is 12 per Material 3 spec.
           expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 16.0);
+        });
+
+        testWidgets('suffixIcon is correctly positioned - RTL', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              textDirection: TextDirection.rtl,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          // By default, the suffix icon is rendered inside a 48x48 constrained box.
+          expect(getSuffixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getSuffixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Left padding is 12 per Material 3 spec.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left, 12.0);
+          // Check the padding between the suffix icon and the input.
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(getInputRect(tester).left - tester.getRect(findSuffixIconInnerRichText()).right, 16.0);
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -5557,9 +5602,8 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 16.0);
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -5600,9 +5644,8 @@ void main() {
           // Right padding is 12 per Material 3 spec.
           expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 16.0);
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -5645,9 +5688,8 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 16.0);
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -5688,9 +5730,8 @@ void main() {
           // Right padding is 12 per Material 3 spec.
           expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 16.0);
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -5733,9 +5774,8 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 16.0);
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -5776,9 +5816,8 @@ void main() {
           // Right padding is 12 per Material 3 spec.
           expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 16.0);
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -5821,9 +5860,8 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 16.0);
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -5882,9 +5920,8 @@ void main() {
           // Right padding is 12 per Material 3 spec.
           expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 16.0);
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -5946,9 +5983,8 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 16.0);
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -5987,9 +6023,8 @@ void main() {
           // Right padding is 12 per Material 3 spec.
           expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 16.0);
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -6031,9 +6066,8 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 16.0);
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -6074,9 +6108,8 @@ void main() {
           // Right padding is 12 per Material 3 spec.
           expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 16.0);
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -6119,9 +6152,8 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 16.0);
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -6162,9 +6194,8 @@ void main() {
           // Right padding is 12 per Material 3 spec.
           expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 16.0);
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -6207,9 +6238,8 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 16.0);
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -6250,9 +6280,8 @@ void main() {
           // Right padding is 12 per Material 3 spec.
           expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 16.0);
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -6295,9 +6324,8 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 16.0);
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -6356,9 +6384,8 @@ void main() {
           // Right padding is 12 per Material 3 spec.
           expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 16.0);
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
