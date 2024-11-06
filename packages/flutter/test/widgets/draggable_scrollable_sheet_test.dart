@@ -1746,4 +1746,35 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  testWidgets('DraggableScrollableSheet respects shouldCloseOnMinExtent', (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    DraggableScrollableNotification? receivedNotification;
+
+    Future<void> pumpWidgetAndFling() async {
+      await tester.pumpWidget(boilerplateWidget(
+        null,
+        controller: controller,
+        shouldCloseOnMinExtent: false,
+        onDraggableScrollableNotification: (DraggableScrollableNotification notification) {
+          receivedNotification = notification;
+          return false;
+        },
+      ));
+
+      await tester.flingFrom(const Offset(0, 325), const Offset(0, -325), 200);
+      await tester.pumpAndSettle();
+    }
+
+    await pumpWidgetAndFling();
+    expect(receivedNotification!.shouldCloseOnMinExtent, isFalse);
+
+    receivedNotification = null;
+    controller.jumpTo(0.5);
+
+    // Construct the widget a second time, to ensure didUpdateWidget is called.
+    await pumpWidgetAndFling();
+    expect(receivedNotification!.shouldCloseOnMinExtent, isFalse);
+    controller.dispose();
+  });
 }
