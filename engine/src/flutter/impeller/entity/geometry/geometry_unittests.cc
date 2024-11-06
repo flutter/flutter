@@ -14,13 +14,13 @@
 #include "impeller/renderer/testing/mocks.h"
 
 inline ::testing::AssertionResult SolidVerticesNear(
-    std::vector<impeller::SolidFillVertexShader::PerVertexData> a,
-    std::vector<impeller::SolidFillVertexShader::PerVertexData> b) {
+    std::vector<impeller::Point> a,
+    std::vector<impeller::Point> b) {
   if (a.size() != b.size()) {
     return ::testing::AssertionFailure() << "Colors length does not match";
   }
   for (auto i = 0u; i < b.size(); i++) {
-    if (!PointNear(a[i].position, b[i].position)) {
+    if (!PointNear(a[i], b[i])) {
       return ::testing::AssertionFailure() << "Positions are not equal.";
     }
   }
@@ -53,13 +53,13 @@ namespace impeller {
 
 class ImpellerEntityUnitTestAccessor {
  public:
-  static std::vector<SolidFillVertexShader::PerVertexData>
-  GenerateSolidStrokeVertices(const Path::Polyline& polyline,
-                              Scalar stroke_width,
-                              Scalar miter_limit,
-                              Join stroke_join,
-                              Cap stroke_cap,
-                              Scalar scale) {
+  static std::vector<Point> GenerateSolidStrokeVertices(
+      const Path::Polyline& polyline,
+      Scalar stroke_width,
+      Scalar miter_limit,
+      Join stroke_join,
+      Cap stroke_cap,
+      Scalar scale) {
     return StrokePathGeometry::GenerateSolidStrokeVertices(
         polyline, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
   }

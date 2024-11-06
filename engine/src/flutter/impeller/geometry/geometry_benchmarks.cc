@@ -4,8 +4,6 @@
 
 #include "flutter/benchmarking/benchmarking.h"
 
-#include "flutter/impeller/entity/solid_fill.vert.h"
-
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
@@ -15,13 +13,13 @@ namespace impeller {
 
 class ImpellerBenchmarkAccessor {
  public:
-  static std::vector<SolidFillVertexShader::PerVertexData>
-  GenerateSolidStrokeVertices(const Path::Polyline& polyline,
-                              Scalar stroke_width,
-                              Scalar miter_limit,
-                              Join stroke_join,
-                              Cap stroke_cap,
-                              Scalar scale) {
+  static std::vector<Point> GenerateSolidStrokeVertices(
+      const Path::Polyline& polyline,
+      Scalar stroke_width,
+      Scalar miter_limit,
+      Join stroke_join,
+      Cap stroke_cap,
+      Scalar scale) {
     return StrokePathGeometry::GenerateSolidStrokeVertices(
         polyline, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
   }
