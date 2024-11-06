@@ -15,8 +15,7 @@ import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide Target;
+import 'package:native_assets_cli/code_assets_builder.dart' hide BuildMode;
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
@@ -112,13 +111,13 @@ void main() {
     );
     final FlutterNativeAssetsBuildRunner runner =
         FlutterNativeAssetsBuildRunnerImpl(projectUri, packageConfigFile.path, packageConfig, fileSystem, logger);
-    final CCompilerConfigImpl result = await runner.cCompilerConfig;
+    final CCompilerConfig result = await runner.cCompilerConfig;
     expect(result.compiler, Uri.file('/some/path/to/clang'));
   });
 }
 
 class _BuildRunnerWithoutClang extends FakeFlutterNativeAssetsBuildRunner {
   @override
-  Future<CCompilerConfigImpl> get cCompilerConfig async =>
+  Future<CCompilerConfig> get cCompilerConfig async =>
       throwToolExit('Failed to find clang++ on the PATH.');
 }
