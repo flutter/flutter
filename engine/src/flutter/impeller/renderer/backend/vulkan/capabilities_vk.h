@@ -297,6 +297,7 @@ class CapabilitiesVK final : public Capabilities,
   bool supports_device_transient_textures_ = false;
   bool supports_texture_fixed_rate_compression_ = false;
   ISize max_render_pass_attachment_size_ = ISize{0, 0};
+  bool has_triangle_fans_ = true;
   bool is_valid_ = false;
 
   // The embedder.h API is responsible for providing the instance and device

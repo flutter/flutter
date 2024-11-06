@@ -595,6 +595,12 @@ bool CapabilitiesVK::SetPhysicalDevice(
       ISize{device_properties_.limits.maxFramebufferWidth,
             device_properties_.limits.maxFramebufferHeight};
 
+  // Molten, Vulkan on Metal, cannot support triangle fans because Metal doesn't
+  // support triangle fans.
+  // See VUID-VkPipelineInputAssemblyStateCreateInfo-triangleFans-04452.
+  has_triangle_fans_ =
+      !HasExtension(OptionalDeviceExtensionVK::kVKKHRPortabilitySubset);
+
   return true;
 }
 
@@ -746,7 +752,7 @@ CapabilitiesVK::GetSupportedFRCRate(CompressionType compression_type,
 }
 
 bool CapabilitiesVK::SupportsTriangleFan() const {
-  return true;
+  return has_triangle_fans_;
 }
 
 ISize CapabilitiesVK::GetMaximumRenderPassAttachmentSize() const {
