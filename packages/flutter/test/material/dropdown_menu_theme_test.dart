@@ -22,11 +22,15 @@ void main() {
     ));
   }
 
+  Finder findMenuPanel() {
+    return find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MenuPanel');
+  }
+
   Material getMenuMaterial(WidgetTester tester) {
-    return tester.widget<Material>(find.ancestor(
-      of: find.widgetWithText(TextButton, 'Item 0'),
+    return tester.widget<Material>(find.descendant(
+      of: findMenuPanel(),
       matching: find.byType(Material),
-    ).at(1));
+    ).first);
   }
 
   test('DropdownMenuThemeData copyWith, ==, hashCode basics', () {
