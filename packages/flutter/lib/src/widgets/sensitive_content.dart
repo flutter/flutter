@@ -22,6 +22,24 @@ enum ContentSensitivity {
   sensitive,
 }
 
+class SensitiveContentSetting extends InheritedWidget {
+  SensitiveContentSetting(
+    super.key,
+    super.child,
+    this.sensitivityLevel = ContentSensitivity.sensitive,
+  );
+
+  ContentSensitivity sensitivityLevel;
+
+  static ContentSensitivity of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<SensitiveContentSetting>()!.sensitivityLevel;
+  }
+
+  bool updateShouldNotify(SensitiveContentSetting oldWidget) {
+    return sensitivityLevel = oldWidget.sensitivityLevel;
+  }
+}
+
 /// A widget that sets the sensitivity of the Flutter app screen.
 /// 
 /// Currently this is a no-op on non-Android platforms.
@@ -48,40 +66,53 @@ class SensitiveContent extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
+  static SensitiveContentState of(BuildContext context) {
+    return context.findAncestorStateOfType<SensitiveContentState>();
+  }
+
   @override
-  State<SensitiveContent> createState() => _SensitiveContentState();
+  State<SensitiveContent> createState() => SensitiveContentState();
 }
 
-class _SensitiveContentState extends State<SensitiveContent> {
-  @override
-  void initState() {
-    super.initState();
+class SensitiveContentState extends State<SensitiveContent> {
+  // @override
+  // void initState() {
+  //   super.initState();
 
-    // Make call to native to mark appropriate content sensitivity.
-    // CAMILLE: write a mock example though
-    // TODO(camsim99): Figure out how to make this call with jni-generated code.
+  //   // Make call to native to mark appropriate content sensitivity.
+  //   // CAMILLE: write a mock example though
+  //   // TODO(camsim99): Figure out how to make this call with jni-generated code.
+  // }
+
+  // @override
+  // void dispose() {
+  //   // Check the current content sensitivity mode. If it is different than the mode
+  //   // set by this widget, then we assume it must have been chang
+  //   ContentSensitivity currentContentSensitivity = SensitiveContentUtils.getCurrentContentSensitivity();
+
+
+  //   super.dispose();
+  // }
+
+  // /// Check if we should make a native call to set the content sensitivity.
+  // /// 
+  // /// The mode should only be set if it does not override the most severe
+  // /// [ContentSensitivity] mode set by other [SensitivecContent] widgts in the
+  // /// tree.
+  // bool _shouldSetContentSensitivity() {
+  //   // Determine if there are any other sensitive  content widgets.
+  //   // CAMILLE: I'm here!!!! think i need to take a stateful widget + inherited widget approach here!
+  // }
+
+  void setSensitivityLevel(ContentSensitivity newSensitivityLevel) {
+    ContentSensitivity _sensitivityLevel = widget.sensitivityLevel;
+    if (_sensitivityLevel != newSensitivityLevel) {
+      setState( () {
+        _sensitivityLevel = newSensitivityLevel;
+      })
+    }
   }
 
   @override
-  void dispose() {
-    // Check the current content sensitivity mode. If it is different than the mode
-    // set by this widget, then we assume it must have been chang
-    ContentSensitivity currentContentSensitivity = SensitiveContentUtils.getCurrentContentSensitivity();
-
-
-    super.dispose();
-  }
-
-  /// Check if we should make a native call to set the content sensitivity.
-  /// 
-  /// The mode should only be set if it does not override the most severe
-  /// [ContentSensitivity] mode set by other [SensitivecContent] widgts in the
-  /// tree.
-  bool _shouldSetContentSensitivity() {
-    // Determine if there are any other sensitive  content widgets.
-    // CAMILLE: I'm here!!!! think i need to take a stateful widget + inherited widget approach here!
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) => SensitiveContentSetting(child: widget.child, sensitivityLevel: sensitivityLevel);
 }
