@@ -602,7 +602,7 @@ bool RenderPassVK::BindResource(ShaderStage stage,
   if (bound_buffer_offset_ >= kMaxBindings) {
     return false;
   }
-  if (!texture->IsValid() || !sampler) {
+  if (!texture || !texture->IsValid() || !sampler) {
     return false;
   }
   const TextureVK& texture_vk = TextureVK::Cast(*texture);

@@ -408,6 +408,9 @@ bool RenderPassMTL::BindResource(
     const ShaderMetadata& metadata,
     std::shared_ptr<const Texture> texture,
     const std::unique_ptr<const Sampler>& sampler) {
+  if (!texture) {
+    return false;
+  }
   return Bind(pass_bindings_, stage, slot.texture_index, sampler, *texture);
 }
 
