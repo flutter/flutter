@@ -135,18 +135,13 @@ source_set("fml") {
   libs = []
 
   if (is_ios || is_mac) {
-    sources += [ "platform/darwin/concurrent_message_loop_factory.mm" ]
-  } else {
-    sources += [ "concurrent_message_loop_factory.cc" ]
-  }
-
-  if (is_ios || is_mac) {
-    cflags_objc = flutter_cflags_objc
-    cflags_objcc = flutter_cflags_objcc
+    cflags_objc = flutter_cflags_objc_arc
+    cflags_objcc = flutter_cflags_objcc_arc
 
     sources += [
       "platform/darwin/cf_utils.cc",
       "platform/darwin/cf_utils.h",
+      "platform/darwin/concurrent_message_loop_factory.mm",
       "platform/darwin/message_loop_darwin.h",
       "platform/darwin/message_loop_darwin.mm",
       "platform/darwin/paths_darwin.mm",
@@ -163,6 +158,8 @@ source_set("fml") {
     ]
 
     frameworks = [ "Foundation.framework" ]
+  } else {
+    sources += [ "concurrent_message_loop_factory.cc" ]
   }
 
   if (is_android) {
@@ -365,7 +362,10 @@ if (enable_unittests) {
       "time/time_unittest.cc",
     ]
 
-    if (is_mac) {
+    if (is_mac || is_ios) {
+      cflags_objc = flutter_cflags_objc_arc
+      cflags_objcc = flutter_cflags_objcc_arc
+
       sources += [
         "platform/darwin/cf_utils_unittests.mm",
         "platform/darwin/string_range_sanitization_unittests.mm",

@@ -65,7 +65,7 @@ static sk_sp<SkSurface> GetSurfaceFromTexture(const sk_sp<GrDirectContext>& skia
                                               SkISize texture_size,
                                               void* texture) {
   GrMtlTextureInfo info;
-  info.fTexture.reset([(id<MTLTexture>)texture retain]);
+  info.fTexture.retain(texture);
   GrBackendTexture backend_texture = GrBackendTextures::MakeMtl(
       texture_size.width(), texture_size.height(), skgpu::Mipmapped::kNo, info);
 
