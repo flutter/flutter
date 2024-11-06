@@ -80,6 +80,28 @@ Future<void> runFlutterDriverAndroidTests() async {
     ),
   );
 
+  // A simulated cutout overlay is necessary to test display_cutout_rotation.
+  await runCommand(
+    'adb',
+    <String>[
+      'shell',
+      'settings',
+      'put',
+      'global',
+      'development_settings_enabled',
+      '1',
+    ],
+  );
+  await runCommand(
+    'adb',
+    <String>[
+      'shell',
+      'cmd',
+      'overlay',
+      'enable',
+      'com.android.internal.display.cutout.emulation.tall',
+    ],
+  );
   await runCommand(
     'flutter',
     <String>[
