@@ -311,5 +311,4 @@ class SampleChecker {
 final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/color_scheme/dynamic_content_color.0_test.dart',
   'examples/api/test/widgets/image/image.frame_builder.0_test.dart',
-  'examples/api/test/widgets/image/image.loading_builder.0_test.dart',
 };
