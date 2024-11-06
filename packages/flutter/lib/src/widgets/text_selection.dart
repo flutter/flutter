@@ -696,7 +696,12 @@ class TextSelectionOverlay {
   // corresponds to, in global coordinates.
   late double _endHandleDragTarget;
 
+  // The edge to hold in place when the selection is inverted.
   int? _oppositeEdge;
+
+  // Whether the selection was collapsed when the handle drag began.
+  bool? _dragStartSelectionCollapsed;
+
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
       return;
@@ -723,6 +728,7 @@ class TextSelectionOverlay {
       ),
     );
     _oppositeEdge = _selection.start;
+    _dragStartSelectionCollapsed ??= _selection.isCollapsed;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -758,12 +764,10 @@ class TextSelectionOverlay {
     return handleDy + linesDragged * renderObject.preferredLineHeight;
   }
 
-  bool? _selectionDuringDragBeganCollapsed;
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
     if (!renderObject.attached) {
       return;
     }
-    _selectionDuringDragBeganCollapsed ??= _selection.isCollapsed;
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
@@ -784,7 +788,7 @@ class TextSelectionOverlay {
 
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
-    if (_selectionDuringDragBeganCollapsed!) {
+    if (_dragStartSelectionCollapsed!) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
@@ -861,6 +865,7 @@ class TextSelectionOverlay {
       ),
     );
     _oppositeEdge = _selection.end;
+    _dragStartSelectionCollapsed ??= _selection.isCollapsed;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -875,7 +880,6 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
-    _selectionDuringDragBeganCollapsed ??= _selection.isCollapsed;
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
@@ -893,7 +897,7 @@ class TextSelectionOverlay {
     );
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
-    if (_selectionDuringDragBeganCollapsed!) {
+    if (_dragStartSelectionCollapsed!) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
@@ -940,7 +944,7 @@ class TextSelectionOverlay {
     if (!context.mounted) {
       return;
     }
-    _selectionDuringDragBeganCollapsed = null;
+    _dragStartSelectionCollapsed = null;
     _oppositeEdge = null;
     if (selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay.hideMagnifier();
@@ -1249,10 +1253,6 @@ class SelectionOverlay {
 
   /// Called when the users start dragging the end selection handles.
   final ValueChanged<DragStartDetails>? onEndHandleDragStart;
-
-  void _handleEndHandleDragDown(DragDownDetails details) {
-    onEndHandleDragDown?.call(details);
-  }
 
   void _handleEndHandleDragStart(DragStartDetails details) {
     assert(!_isDraggingEndHandle);
