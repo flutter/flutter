@@ -31,7 +31,6 @@
 #include "impeller/fixtures/swizzle.frag.h"
 #include "impeller/fixtures/texture.frag.h"
 #include "impeller/fixtures/texture.vert.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/renderer/command_buffer.h"
@@ -1624,6 +1623,21 @@ TEST_P(RendererTest, CanSepiaToneThenSwizzleWithSubpasses) {
     return true;
   };
   OpenPlaygroundHere(callback);
+}
+
+TEST_P(RendererTest, BindingNullTexturesDoesNotCrash) {
+  using FS = BoxFadeFragmentShader;
+
+  auto context = GetContext();
+  const std::unique_ptr<const Sampler>& sampler =
+      context->GetSamplerLibrary()->GetSampler({});
+  auto command_buffer = context->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(context->GetResourceAllocator());
+  RenderTarget target = allocator.CreateOffscreen(*context, {1, 1}, 1);
+
+  auto pass = command_buffer->CreateRenderPass(target);
+  EXPECT_FALSE(FS::BindContents2(*pass, nullptr, sampler));
 }
 
 }  // namespace testing
