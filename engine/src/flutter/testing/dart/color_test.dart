@@ -339,6 +339,11 @@ void main() {
     // Call base class member, make sure it uses overridden value.
     expect(color.red, 0xE0);
   });
+
+  test('toARGB32 converts to a 32-bit integer', () {
+    const Color color = Color.from(alpha: 0.1, red: 0.2, green: 0.3, blue: 0.4);
+    expect(color.toARGB32(), equals(0x1a334d66));
+  });
 }
 
 class DynamicColorClass extends Color {

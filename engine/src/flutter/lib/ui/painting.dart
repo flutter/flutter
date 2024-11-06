@@ -197,8 +197,26 @@ class Color {
   /// * Bits 16-23 are the red value.
   /// * Bits 8-15 are the green value.
   /// * Bits 0-7 are the blue value.
-  @Deprecated('Use component accessors like .r or .g.')
-  int get value {
+  @Deprecated('Use component accessors like .r or .g, or toARGB32 for an explicit conversion')
+  int get value => toARGB32();
+
+  /// Returns a 32-bit value representing this color.
+  ///
+  /// Unlike accessing the floating point equivalent channels individually
+  /// ([a], [r], [g], [b]), this method is intentionally _lossy_, and scales
+  /// each channel using `(channel * 255.0).round() & 0xff`.
+  ///
+  /// While useful for storing a 32-bit integer value, prefer accessing the
+  /// individual channels (and storing the double equivalent) where higher
+  /// precision is required.
+  ///
+  /// The bits are assigned as follows:
+  ///
+  /// * Bits 24-31 represents the [a] channel as an 8-bit unsigned integer.
+  /// * Bits 16-23 represents the [r] channel as an 8-bit unsigned integer.
+  /// * Bits 8-15 represents the [g] channel as an 8-bit unsigned integer.
+  /// * Bits 0-7 represents the [b] channel as an 8-bit unsigned integer.
+  int toARGB32() {
     return _floatToInt8(a) << 24 |
         _floatToInt8(r) << 16 |
         _floatToInt8(g) << 8 |
