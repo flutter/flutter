@@ -356,7 +356,7 @@ void main() {
   testWidgets('[Panel] MenuController.isOpen is true when a descendent menu is open', (WidgetTester tester) async {
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.menuPanel(
+        RawMenuAnchor.node(
           controller: controller,
           builder: (BuildContext context, List<Widget> children) {
             return Row(children: children);
@@ -407,7 +407,7 @@ void main() {
     final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.menuPanel(
+        RawMenuAnchor.node(
           builder: (BuildContext context, List<Widget> children) {
             return Column(children: children);
           },
@@ -444,7 +444,7 @@ void main() {
     final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.menuPanel(
+        RawMenuAnchor.node(
           builder: (BuildContext context, List<Widget> children) {
             return Column(children: children);
           },
@@ -485,7 +485,7 @@ void main() {
     final MenuController controllerB = MenuController();
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.menuPanel(
+        RawMenuAnchor.node(
           builder: (BuildContext context, List<Widget> children) {
             return Column(children: children);
           },
@@ -525,7 +525,7 @@ void main() {
   testWidgets('[Panel] Should only display one open child anchor at a time', (WidgetTester tester) async {
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.menuPanel(
+        RawMenuAnchor.node(
           builder: (BuildContext context, List<Widget> children) {
             return Row(children: children);
           },
@@ -578,7 +578,7 @@ void main() {
 
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.menuPanel(
+        RawMenuAnchor.node(
           menuChildren: <Widget>[
             // Panel context.
             Builder(builder: (BuildContext context) {
@@ -665,7 +665,7 @@ void main() {
 
     Widget buildAnchor({MenuController? panel, MenuController? overlay}) {
       return App(
-        RawMenuAnchor.menuPanel(
+        RawMenuAnchor.node(
           controller: panel,
           menuChildren: <Widget>[
             // Panel context.
@@ -741,7 +741,7 @@ void main() {
       App(
         Column(
           children: <Widget>[
-            RawMenuAnchor.menuPanel(
+            RawMenuAnchor.node(
               controller: controller,
               builder: (BuildContext context, List<Widget> children) {
                 return Row(children: children);
@@ -799,7 +799,7 @@ void main() {
 
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.menuPanel(
+        RawMenuAnchor.node(
           builder: (BuildContext context, List<Widget> children) {
             return Row(children: children);
           },
@@ -851,7 +851,7 @@ void main() {
 
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.menuPanel(
+        RawMenuAnchor.node(
           builder: (BuildContext context, List<Widget> menuChildren) {
             return Row(children: menuChildren);
           },
@@ -940,7 +940,7 @@ void main() {
               },
             ),
           },
-          child: RawMenuAnchor.menuPanel(
+          child: RawMenuAnchor.node(
             menuChildren: <Widget>[
               RawMenuAnchor(
                 menuChildren: <Widget>[
@@ -1200,7 +1200,7 @@ void main() {
     await tester.pumpWidget(
       App(
         alignment: AlignmentDirectional.topStart,
-        RawMenuAnchor.menuPanel(
+        RawMenuAnchor.node(
           builder: (BuildContext context, List<Widget> children) {
             return Padding(
               key: Tag.anchor.key,
@@ -1356,7 +1356,7 @@ void main() {
                 selected.add(Tag.outside);
               },
             ),
-            RawMenuAnchor.menuPanel(
+            RawMenuAnchor.node(
               builder: (BuildContext context, List<Widget> menuChildren) {
                 return Column(children: menuChildren);
               },
@@ -1432,7 +1432,7 @@ void main() {
                 selected.add(Tag.outside);
               },
             ),
-            RawMenuAnchor.menuPanel(
+            RawMenuAnchor.node(
               menuChildren: <Widget>[
                 RawMenuAnchor(
                   onOpen: () => onOpen(Tag.anchor),
@@ -1860,7 +1860,7 @@ void main() {
     // Test that the action still works in a menu panel.
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.menuPanel(
+        RawMenuAnchor.node(
           builder: (BuildContext context, List<Widget> children) {
             return Column(children: children);
           },
@@ -1919,7 +1919,7 @@ void main() {
     // Test that the action works in a menu panel.
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.menuPanel(
+        RawMenuAnchor.node(
           builder: (BuildContext context, List<Widget> children) {
             return Column(children: children);
           },
@@ -2577,7 +2577,7 @@ void main() {
                   },
                 ),
               },
-              child: RawMenuAnchor.menuPanel(
+              child: RawMenuAnchor.node(
                 menuChildren: <Widget>[
                   Button.tag(Tag.a),
                   RawMenuAnchor(
@@ -5376,7 +5376,7 @@ class NestedTag extends Tag {
     if (level == 0 || _prefix == null) {
       return _name;
     }
-    return '${_prefix.text}.$_name';
+    return '${_prefix!.text}.$_name';
   }
 
   @override
@@ -5456,11 +5456,10 @@ class Button extends StatefulWidget {
 }
 
 class _ButtonState extends State<Button> {
-  bool _focused = false;
-  bool _hovered = false;
-  bool _active = false;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
+  final WidgetStatesController _states = WidgetStatesController();
+  ui.Brightness _brightness = ui.Brightness.light;
 
   @override
   void initState() {
@@ -5468,6 +5467,9 @@ class _ButtonState extends State<Button> {
     if (widget.focusNode == null) {
       _internalFocusNode = FocusNode(debugLabel: widget._focusNodeLabel);
     }
+    _states.addListener(() {
+      setState(() { /* Rebuild on state changes. */ });
+    });
   }
 
   @override
@@ -5484,6 +5486,12 @@ class _ButtonState extends State<Button> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _brightness = MediaQuery.maybePlatformBrightnessOf(context) ?? _brightness;
+  }
+
+  @override
   void dispose() {
     _internalFocusNode?.dispose();
     super.dispose();
@@ -5495,56 +5503,33 @@ class _ButtonState extends State<Button> {
 
   void _handlePressed() {
     widget.onPressed?.call();
+    _states.update(WidgetState.pressed, true);
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    _states.update(WidgetState.pressed, true);
   }
 
   void _handleFocusChange(bool value) {
-    if (_focused != value) {
-      setState(() {
-        _focused = value;
-      });
-    }
+    _states.update(WidgetState.focused, value);
     widget.onFocusChange?.call(value);
   }
 
   void _handleExit(PointerExitEvent event) {
-    if (_hovered || _focused) {
-      setState(() {
-        _hovered = false;
-      });
-    }
+    _states.update(WidgetState.hovered, false);
   }
 
   void _handleHover(PointerHoverEvent event) {
-    if (!_hovered) {
-      setState(() {
-        _hovered = true;
-      });
-    }
+    _states.update(WidgetState.hovered, true);
   }
 
   void _handleTapUp(TapUpDetails details) {
-    if (_active) {
-      setState(() {
-        _active = false;
-      });
-    }
+    _states.update(WidgetState.pressed, false);
     _handlePressed.call();
   }
 
   void _handleTapCancel() {
-    if (_active) {
-      setState(() {
-        _active = false;
-      });
-    }
-  }
-
-  void _handleTapDown(TapDownDetails details) {
-    if (!_active) {
-      setState(() {
-        _active = true;
-      });
-    }
+    _states.update(WidgetState.pressed, false);
   }
 
   @override
@@ -5555,14 +5540,7 @@ class _ButtonState extends State<Button> {
         child: Semantics(
           button: true,
           child: Actions(
-            actions: <Type, Action<Intent>>{
-              ActivateIntent: CallbackAction<ActivateIntent>(
-                onInvoke: _activateOnIntent,
-              ),
-              ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
-                onInvoke: _activateOnIntent,
-              ),
-            },
+            actions: _actions,
             child: Focus(
               debugLabel: widget._focusNodeLabel,
               onFocusChange: _handleFocusChange,
@@ -5593,28 +5571,35 @@ class _ButtonState extends State<Button> {
     );
   }
 
+  late final Map<Type, Action<Intent>> _actions = {
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _activateOnIntent),
+    ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _activateOnIntent),
+  };
+
   BoxDecoration? get _decoration {
-    if (_active) {
-      return const BoxDecoration(color: Color(0xFF007BFF) );
-    } else if (_focused) {
-      return switch (MediaQuery.maybePlatformBrightnessOf(context)) {
-        Brightness.dark          => const BoxDecoration(color: Color(0x95007BFF)),
-        Brightness.light || null => const BoxDecoration(color: Color(0x95007BFF))
-      };
-    } else if (_hovered) {
-      return const BoxDecoration(color: Color(0x22BBBBBB));
-    } else {
-      return null;
+    if (_states.value.contains(WidgetState.pressed)) {
+      return const BoxDecoration(color: Color(0xFF007BFF));
     }
+    if (_states.value.contains(WidgetState.focused)) {
+      return switch (_brightness) {
+        Brightness.dark  => const BoxDecoration(color: Color(0x95007BFF)),
+        Brightness.light => const BoxDecoration(color: Color(0x95007BFF))
+      };
+    }
+    if (_states.value.contains(WidgetState.hovered)) {
+      return const BoxDecoration(color: Color(0x22BBBBBB));
+    }
+    return null;
   }
 
+
   TextStyle get _textStyle {
-    if (_active) {
+    if (_states.value.contains(WidgetState.pressed)) {
       return const TextStyle(color: Color.fromARGB(255, 255, 255, 255));
     }
-    return switch (MediaQuery.maybePlatformBrightnessOf(context)) {
-      Brightness.dark          => const TextStyle(color: Color(0xFFFFFFFF)),
-      Brightness.light || null => const TextStyle(color: Color(0xFF000000))
+    return switch (_brightness) {
+      Brightness.dark  => const TextStyle(color: Color(0xFFFFFFFF)),
+      Brightness.light => const TextStyle(color: Color(0xFF000000))
     };
 
   }

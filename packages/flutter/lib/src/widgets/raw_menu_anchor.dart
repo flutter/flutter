@@ -144,14 +144,14 @@ class _RawMenuAnchorScope extends InheritedWidget {
 ///   padding: const EdgeInsets.symmetric(vertical: 4),
 ///   alignmentOffset: const Offset(0, 6),
 ///   menuChildren: <Widget>[
-///     MenuItemButton(onPressed: () {}, child: const Text('Undo')),
-///     MenuItemButton(onPressed: () {}, child: const Text('Redo')),
+///     TextButton(onPressed: () {}, child: const Text('Undo')),
+///     TextButton(onPressed: () {}, child: const Text('Redo')),
 ///     const Divider(),
-///     MenuItemButton(onPressed: () {}, child: const Text('Cut')),
-///     MenuItemButton(onPressed: () {}, child: const Text('Copy')),
-///     MenuItemButton(onPressed: () {}, child: const Text('Paste')),
-///     MenuItemButton(onPressed: () {}, child: const Text('Delete')),
-///     MenuItemButton(onPressed: () {}, child: const Text('Select All')),
+///     TextButton(onPressed: () {}, child: const Text('Cut')),
+///     TextButton(onPressed: () {}, child: const Text('Copy')),
+///     TextButton(onPressed: () {}, child: const Text('Paste')),
+///     TextButton(onPressed: () {}, child: const Text('Delete')),
+///     TextButton(onPressed: () {}, child: const Text('Select All')),
 ///   ],
 ///   builder: (
 ///     BuildContext context,
@@ -237,8 +237,8 @@ class RawMenuAnchor extends StatelessWidget {
   ///
   /// Unlike an overlay menu, a menu panel's [menuChildren] are always visible
   /// and are not displayed in an [OverlayPortal]. As a result, calling
-  /// [MenuController.open] is a no-op, and calling [MenuController.close]
-  /// will close all children of this anchor. [MenuController.isOpen] will only
+  /// [MenuController.open] is a no-op, and calling [MenuController.close] will
+  /// close all children of this anchor. [MenuController.isOpen] will only
   /// return true when a child of this anchor is open.
   ///
   /// Because building a custom menu panel entails managing layout, appearance,
@@ -249,38 +249,52 @@ class RawMenuAnchor extends StatelessWidget {
   ///
   /// The [menuChildren] and [builder] arguments are required.
   ///
-  /// {@tool snippet} This snippet renders a vertical [RawMenuAnchor.menuPanel]
-  /// with 5 fly-out submenus.
+  /// {@tool snippet}
+  ///
+  /// This snippet renders a vertical [RawMenuAnchor.node] with 5 fly-out
+  /// submenus.
   ///
   /// ```dart
-  ///   RawMenuAnchor.menuPanel(
-  ///     builder: (BuildContext context, List<Widget> menuChildren) {
-  ///       return Column(
-  ///         mainAxisSize: MainAxisSize.min,
-  ///         children: menuChildren,
-  ///       );
-  ///     },
-  ///     menuChildren: <Widget>[
-  ///        for (int i = 0; i < 5; i++)
-  ///          SubmenuButton(
-  ///            menuStyle: const MenuStyle(alignment:  Alignment.topRight),
-  ///            menuChildren: <Widget>[
-  ///              for (int j = 0; j < 5; j++)
-  ///                MenuItemButton(
-  ///                  onPressed: () {
-  ///                    print('You clicked item $i.$j!');
-  ///                  },
-  ///                  child: Text('Item $j'),
-  ///                ),
-  ///            ],
-  ///            trailingIcon: const Text('►'),
-  ///            child: Text('Submenu $i'),
-  ///          )
-  ///     ],
-  ///   )
+  /// RawMenuAnchor.menuPanel(
+  ///   builder: (BuildContext context, List<Widget> menuChildren) {
+  ///     return Row(
+  ///       mainAxisSize: MainAxisSize.min,
+  ///       children: menuChildren,
+  ///     );
+  ///   },
+  ///   menuChildren: <Widget>[
+  ///     for (int i = 0; i < 5; i++)
+  ///       RawMenuAnchor(
+  ///         builder: (BuildContext context, MenuController controller, Widget? child) {
+  ///           return TextButton(
+  ///             onPressed: () {
+  ///               if (controller.isOpen) {
+  ///                 controller.close();
+  ///               } else {
+  ///                 controller.open();
+  ///               }
+  ///             },
+  ///             child: Text('Submenu $i  ${controller.isOpen ? '▲' : '▼'}'),
+  ///           );
+  ///         },
+  ///         menuChildren: <Widget>[
+  ///           for (int j = 0; j < 5; j++)
+  ///             Builder(builder: (BuildContext context) {
+  ///               return TextButton(
+  ///                 onPressed: () {},
+  ///                 child: Align(
+  ///                   alignment: Alignment.centerLeft,
+  ///                   child: Text('Menu Item $i.$j'),
+  ///                 ),
+  ///               );
+  ///             }),
+  ///         ],
+  ///       )
+  ///   ],
+  /// );
   /// ```
   /// {@end-tool}
-  const RawMenuAnchor.menuPanel({
+  const RawMenuAnchor.node({
     super.key,
     this.controller,
     required RawMenuAnchorPanelBuilder builder,
@@ -307,7 +321,7 @@ class RawMenuAnchor extends StatelessWidget {
   /// from other widgets.
   ///
   /// If not supplied, a new [MenuController] will be created and managed by the
-  ///
+  /// [RawMenuAnchor].
   final MenuController? controller;
 
   /// The [childFocusNode] attribute is the optional [FocusNode] also associated
@@ -1122,6 +1136,47 @@ class _RawMenuAnchorPanelState extends _RawMenuAnchorState<_RawMenuAnchorPanel> 
 /// been created, with methods such as [open] and [close], and state accessors
 /// like [isOpen].
 ///
+/// [MenuController.maybeOf] can be used to retrieve a controller from the
+/// [BuildContext] of a widget that is a descendant of a [MenuAnchor],
+/// [MenuBar], [SubmenuButton], or [RawMenuAnchor]. By doing so, the widget will
+/// establish a dependency relationship that will rebuild the widget when the
+/// parent menu opens and closes.
+///
+/// {@tool snippet}
+///
+/// This example demonstrates how to use a [MenuController.maybeOf] to open and
+/// close a menu from a descendent [BuildContext] of a [RawMenuAnchor].
+///
+/// ```dart
+/// RawMenuAnchor(
+///   menuChildren: <Widget>[
+///     Builder(builder: (BuildContext context) {
+///       final MenuController controller = MenuController.maybeOf(context)!;
+///       return TextButton(
+///         onPressed: () {
+///           controller.close();
+///         },
+///         child: const Text('Close'),
+///       );
+///     })
+///   ],
+///   child: Builder(builder: (BuildContext context) {
+///     final MenuController controller = MenuController.maybeOf(context)!;
+///     return TextButton(
+///       onPressed: () {
+///         if (controller.isOpen) {
+///           controller.close();
+///         } else {
+///           controller.open();
+///         }
+///       },
+///       child: const Text('Menu'),
+///     );
+///   }),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 /// * [RawMenuAnchor], a widget that defines a region that has submenu.
@@ -1189,7 +1244,9 @@ class MenuController {
   }
 
   /// Returns the [MenuController] of the ancestor [RawMenuAnchor] nearest to
-  /// the given `context`, if one exists. Otherwise, returns null.
+  /// the given `context`, if one exists.
+  ///
+  /// Otherwise, returns null.
   static MenuController? maybeOf(BuildContext context) {
     return context
         .dependOnInheritedWidgetOfExactType<_RawMenuAnchorScope>()
@@ -1252,11 +1309,12 @@ class _MenuOverlay extends StatelessWidget {
         groupId: position.tapRegionGroupId,
         consumeOutsideTaps: consumeOutsideTaps,
         onTapOutside: (PointerDownEvent event) {
-            menuController.close();
+          menuController.close();
         },
         child: FocusScope(
           node: menuController._anchor!._menuScopeNode,
           skipTraversal: true,
+          descendantsAreFocusable: true,
           child: Actions(
             actions: _defaultOverlayActions,
             child: Shortcuts(
@@ -1304,6 +1362,8 @@ class _MenuOverlay extends StatelessWidget {
   }
 }
 
+
+// A basic panel that displays a list of menu items.
 class _MenuOverlayPanel extends StatelessWidget {
   const _MenuOverlayPanel({
     required this.decoration,
@@ -1438,6 +1498,30 @@ class _OverlayDirectionalFocusAction extends ContextAction<DirectionalFocusInten
     final FocusNode? lastFocus = overlay._lastFocus;
     final TextDirection textDirection = Directionality.of(context);
     switch ((intent.direction, textDirection)) {
+      case (TraversalDirection.up, _):
+       if (lastFocus?.context == null) {
+          break;
+        }
+
+        if (
+          primaryFocus == lastFocus!.enclosingScope ||
+          primaryFocus == firstFocus
+        ) {
+          overlay._overlayTraversalPolicy?.requestFocusCallback(lastFocus);
+          return;
+        }
+      case (TraversalDirection.down, _):
+        if (firstFocus?.context == null) {
+          break;
+        }
+
+        if (
+          primaryFocus == firstFocus!.enclosingScope ||
+          primaryFocus == lastFocus
+        ) {
+          overlay._overlayTraversalPolicy?.requestFocusCallback(firstFocus);
+          return;
+        }
       case (TraversalDirection.left, TextDirection.ltr):
       case (TraversalDirection.right, TextDirection.rtl):
         if (isSubmenuAnchor) {
@@ -1465,30 +1549,6 @@ class _OverlayDirectionalFocusAction extends ContextAction<DirectionalFocusInten
               }
             });
           }
-          return;
-        }
-      case (TraversalDirection.up, _):
-       if (lastFocus?.context == null) {
-          break;
-        }
-
-        if (
-          primaryFocus == lastFocus!.enclosingScope ||
-          primaryFocus == firstFocus
-        ) {
-          overlay._overlayTraversalPolicy?.requestFocusCallback(lastFocus);
-          return;
-        }
-      case (TraversalDirection.down, _):
-        if (firstFocus?.context == null) {
-          break;
-        }
-
-        if (
-          primaryFocus == firstFocus!.enclosingScope ||
-          primaryFocus == lastFocus
-        ) {
-          overlay._overlayTraversalPolicy?.requestFocusCallback(firstFocus);
           return;
         }
     }
