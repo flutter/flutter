@@ -357,14 +357,12 @@ class TextSelectionOverlay {
       startHandleType: TextSelectionHandleType.collapsed,
       startHandlesVisible: _effectiveStartHandleVisibility,
       lineHeightAtStart: 0.0,
-      onStartHandleDragDown: _handleSelectionStartHandleDragDown,
       onStartHandleDragStart: _handleSelectionStartHandleDragStart,
       onStartHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
       onEndHandleDragEnd: _handleAnyDragEnd,
       endHandleType: TextSelectionHandleType.collapsed,
       endHandlesVisible: _effectiveEndHandleVisibility,
       lineHeightAtEnd: 0.0,
-      onEndHandleDragDown: _handleSelectionEndHandleDragDown,
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
       onStartHandleDragEnd: _handleAnyDragEnd,
@@ -699,32 +697,6 @@ class TextSelectionOverlay {
   late double _endHandleDragTarget;
 
   int? _oppositeEdge;
-  void _handleSelectionEndHandleDragDown(DragDownDetails details) {
-    if (!renderObject.attached) {
-      return;
-    }
-    _endHandleDragPosition = details.globalPosition.dy;
-    // Use local coordinates when dealing with line height. because in case of a
-    // scale transformation, the line height will also be scaled.
-    final double centerOfLineLocal = _selectionOverlay.selectionEndpoints.last.point.dy
-        - renderObject.preferredLineHeight / 2;
-    final double centerOfLineGlobal = renderObject.localToGlobal(
-      Offset(0.0, centerOfLineLocal),
-    ).dy;
-    _endHandleDragTarget = centerOfLineGlobal  - details.globalPosition.dy;
-    // Instead of finding the TextPosition at the handle's location directly,
-    // use the vertical center of the line that it points to. This is because
-    // selection handles typically hang above or below the line that they point
-    // to.
-    final TextPosition position = renderObject.getPositionForPoint(
-      Offset(
-        details.globalPosition.dx,
-        centerOfLineGlobal,
-      ),
-    );
-    _oppositeEdge = _selection.extentOffset == position.offset ? _selection.baseOffset : _selection.extentOffset;
-  }
-
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
       return;
@@ -750,6 +722,7 @@ class TextSelectionOverlay {
         centerOfLineGlobal,
       ),
     );
+    _oppositeEdge = _selection.start;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -862,34 +835,6 @@ class TextSelectionOverlay {
   // it corresponds to, in global coordinates.
   late double _startHandleDragTarget;
 
-  void _handleSelectionStartHandleDragDown(DragDownDetails details) {
-    if (!renderObject.attached) {
-      return;
-    }
-
-    _startHandleDragPosition = details.globalPosition.dy;
-
-    // Use local coordinates when dealing with line height. because in case of a
-    // scale transformation, the line height will also be scaled.
-    final double centerOfLineLocal = _selectionOverlay.selectionEndpoints.first.point.dy
-        - renderObject.preferredLineHeight / 2;
-    final double centerOfLineGlobal = renderObject.localToGlobal(
-      Offset(0.0, centerOfLineLocal),
-    ).dy;
-    _startHandleDragTarget = centerOfLineGlobal - details.globalPosition.dy;
-    // Instead of finding the TextPosition at the handle's location directly,
-    // use the vertical center of the line that it points to. This is because
-    // selection handles typically hang above or below the line that they point
-    // to.
-    final TextPosition position = renderObject.getPositionForPoint(
-      Offset(
-        details.globalPosition.dx,
-        centerOfLineGlobal,
-      ),
-    );
-    _oppositeEdge = _selection.extentOffset == position.offset ? _selection.baseOffset : _selection.extentOffset;
-  }
-
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
       return;
@@ -915,6 +860,7 @@ class TextSelectionOverlay {
         centerOfLineGlobal,
       ),
     );
+    _oppositeEdge = _selection.end;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -1049,14 +995,12 @@ class SelectionOverlay {
     required TextSelectionHandleType startHandleType,
     required double lineHeightAtStart,
     this.startHandlesVisible,
-    this.onStartHandleDragDown,
     this.onStartHandleDragStart,
     this.onStartHandleDragUpdate,
     this.onStartHandleDragEnd,
     required TextSelectionHandleType endHandleType,
     required double lineHeightAtEnd,
     this.endHandlesVisible,
-    this.onEndHandleDragDown,
     this.onEndHandleDragStart,
     this.onEndHandleDragUpdate,
     this.onEndHandleDragEnd,
@@ -1226,10 +1170,6 @@ class SelectionOverlay {
   /// Called when the users start dragging the start selection handles.
   final ValueChanged<DragStartDetails>? onStartHandleDragStart;
 
-  void _handleStartHandleDragDown(DragDownDetails details) {
-    onStartHandleDragDown?.call(details);
-  }
-
   void _handleStartHandleDragStart(DragStartDetails details) {
     assert(!_isDraggingStartHandle);
     // Calling OverlayEntry.remove may not happen until the following frame, so
@@ -1251,8 +1191,6 @@ class SelectionOverlay {
     }
     onStartHandleDragUpdate?.call(details);
   }
-
-  final ValueChanged<DragDownDetails>? onStartHandleDragDown;
 
   /// Called when the users drag the start selection handles to new locations.
   final ValueChanged<DragUpdateDetails>? onStartHandleDragUpdate;
@@ -1308,8 +1246,6 @@ class SelectionOverlay {
   ///
   /// If this is null, the end selection handle will always be visible.
   final ValueListenable<bool>? endHandlesVisible;
-
-  final ValueChanged<DragDownDetails>? onEndHandleDragDown;
 
   /// Called when the users start dragging the end selection handles.
   final ValueChanged<DragStartDetails>? onEndHandleDragStart;
@@ -1680,7 +1616,6 @@ class SelectionOverlay {
         type: _startHandleType,
         handleLayerLink: startHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragDown: _handleStartHandleDragDown,
         onSelectionHandleDragStart: _handleStartHandleDragStart,
         onSelectionHandleDragUpdate: _handleStartHandleDragUpdate,
         onSelectionHandleDragEnd: _handleStartHandleDragEnd,
@@ -1710,7 +1645,6 @@ class SelectionOverlay {
         type: _endHandleType,
         handleLayerLink: endHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragDown: _handleEndHandleDragDown,
         onSelectionHandleDragStart: _handleEndHandleDragStart,
         onSelectionHandleDragUpdate: _handleEndHandleDragUpdate,
         onSelectionHandleDragEnd: _handleEndHandleDragEnd,
@@ -1885,7 +1819,6 @@ class _SelectionHandleOverlay extends StatefulWidget {
     required this.type,
     required this.handleLayerLink,
     this.onSelectionHandleTapped,
-    this.onSelectionHandleDragDown,
     this.onSelectionHandleDragStart,
     this.onSelectionHandleDragUpdate,
     this.onSelectionHandleDragEnd,
@@ -1897,7 +1830,6 @@ class _SelectionHandleOverlay extends StatefulWidget {
 
   final LayerLink handleLayerLink;
   final VoidCallback? onSelectionHandleTapped;
-  final ValueChanged<DragDownDetails>? onSelectionHandleDragDown;
   final ValueChanged<DragStartDetails>? onSelectionHandleDragStart;
   final ValueChanged<DragUpdateDetails>? onSelectionHandleDragUpdate;
   final ValueChanged<DragEndDetails>? onSelectionHandleDragEnd;
@@ -2023,7 +1955,6 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
                     instance
                       ..dragStartBehavior = widget.dragStartBehavior
                       ..gestureSettings = eagerlyAcceptDragWhenCollapsed ? const DeviceGestureSettings(touchSlop: 1.0) : null
-                      ..onDown = widget.onSelectionHandleDragDown
                       ..onStart = widget.onSelectionHandleDragStart
                       ..onUpdate = widget.onSelectionHandleDragUpdate
                       ..onEnd = widget.onSelectionHandleDragEnd;
