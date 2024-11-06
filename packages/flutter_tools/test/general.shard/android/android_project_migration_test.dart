@@ -181,7 +181,7 @@ task clean(type: Delete) {
         expect(bufferLogger.traceText, contains('Migrating "clean" Gradle task to lazy declaration style.'));
         expect(topLevelGradleBuildFile.readAsStringSync(), equals('''
 tasks.register("clean", Delete) {
-    delete rootProject.buildDir
+    delete rootProject.layout.buildDirectory
 }
 '''));
       });
