@@ -10,6 +10,7 @@
 
 #include "flutter/fml/status.h"
 #include "flutter/fml/time/time_delta.h"
+#include "impeller/core/host_buffer.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/core/texture.h"
 #include "impeller/geometry/point.h"
@@ -130,6 +131,7 @@ class Playground {
   std::shared_ptr<Context> context_;
   Point cursor_position_;
   ISize window_size_ = ISize{1024, 768};
+  std::shared_ptr<HostBuffer> host_buffer_;
 
   void SetCursorPosition(Point pos);
 

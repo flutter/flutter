@@ -9,6 +9,7 @@
 
 #include "fml/closure.h"
 #include "fml/time/time_point.h"
+#include "impeller/core/host_buffer.h"
 #include "impeller/playground/image/backends/skia/compressed_image_skia.h"
 #include "impeller/playground/image/decompressed_image.h"
 #include "impeller/renderer/command_buffer.h"
@@ -148,6 +149,9 @@ bool Playground::IsPlaygroundEnabled() const {
 }
 
 void Playground::TeardownWindow() {
+  if (host_buffer_) {
+    host_buffer_.reset();
+  }
   if (context_) {
     context_->Shutdown();
   }
@@ -303,8 +307,13 @@ bool Playground::OpenPlaygroundHere(
         return false;
       }
       pass->SetLabel("ImGui Render Pass");
+      if (!host_buffer_) {
+        host_buffer_ = HostBuffer::Create(context_->GetResourceAllocator(),
+                                          context_->GetIdleWaiter());
+      }
 
-      ImGui_ImplImpeller_RenderDrawData(ImGui::GetDrawData(), *pass);
+      ImGui_ImplImpeller_RenderDrawData(ImGui::GetDrawData(), *pass,
+                                        *host_buffer_);
 
       pass->EncodeCommands();
 

@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "impeller/core/host_buffer.h"
 #include "third_party/imgui/imgui.h"
 
 namespace impeller {
@@ -23,6 +24,7 @@ IMGUI_IMPL_API void ImGui_ImplImpeller_Shutdown();
 
 IMGUI_IMPL_API void ImGui_ImplImpeller_RenderDrawData(
     ImDrawData* draw_data,
-    impeller::RenderPass& renderpass);
+    impeller::RenderPass& renderpass,
+    impeller::HostBuffer& host_buffer);
 
 #endif  // FLUTTER_IMPELLER_PLAYGROUND_IMGUI_IMGUI_IMPL_IMPELLER_H_
