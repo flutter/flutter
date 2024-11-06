@@ -463,6 +463,13 @@ void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode
 void expectCCompilerIsConfigured(Directory appDirectory) {
   final Directory nativeAssetsBuilderDir = appDirectory.childDirectory('.dart_tool/native_assets_builder/');
   for (final Directory subDir in nativeAssetsBuilderDir.listSync().whereType<Directory>()) {
+    // We only want to look at build/link hook invocation directories. The
+    // `/shared/*` directory allows the individual hooks to store data that is
+    // reusable across different build/link confiurations.
+    if (subDir.path.endsWith('shared')) {
+      continue;
+    }
+
     final File config = subDir.childFile('config.json');
     expect(config, exists);
     final String contents = config.readAsStringSync();
