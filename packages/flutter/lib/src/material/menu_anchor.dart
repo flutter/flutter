@@ -435,6 +435,20 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
+    // If this menu anchor is not a menu bar, wrap the content into a Column
+    // to allow the child to use its preferred size.
+    // This is required when the menu anchor receives tight constraints.
+    // Otherwise the menu will be positioned below those constraints height
+    // and might appear detached from the menu anchor content when the content
+    // has an intrinsic height which is lower than the tight constraints height.
+    if (_orientation == Axis.vertical) {
+      child = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[child],
+      );
+    }
+
     // This `Shortcuts` is needed so that shortcuts work when the focus is on
     // MenuAnchor (specifically, the root menu, since submenus have their own
     // `Shortcuts`).
