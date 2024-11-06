@@ -342,7 +342,7 @@ During these meetings, we go through the following lists:
 * [P0](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3AP0+sort%3Aupdated-asc): all bugs should be assigned, and progress should be happening actively. There should be an update within the last week. If no progress is happening and owner cannot work on it immediately (e.g. they're on vacation, they're busy with their day job, family reasons, etc), find a new owner.
 * [Bugs flagged for additional triage](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+no%3Aassignee): figure out what should be done with the bug, then remove the `will need additional triage` label.
 * [flutter-pub-roller-bot](https://github.com/flutter/flutter/pulls/flutter-pub-roller-bot): check that the pub auto roller is chugging along. If it has gotten trivially stuck, such as having a merge conflict, close the PR so that it can open a new one. If it is non-trivially stuck, file an issue for the infra ticket queue: https://github.com/flutter/flutter/blob/main/docs/infra/Infra-Ticket-Queue.md.
-* [The stale PRs](https://github.com/pulls?q=is%3Aopen+is%3Apr+archived%3Afalse+user%3Aflutter+sort%3Aupdated-asc): examine the 25 least-recently updated PRs, if the least recently updated one was updated more than 2 months ago.
+* [The stale PRs](https://github.com/pulls?q=is%3Aopen+is%3Apr+archived%3Afalse+user%3Aflutter+-repo%3Aflutter%2Fwebsite-cms+sort%3Aupdated-asc+): examine the 25 least-recently updated PRs, if the least recently updated one was updated more than 2 months ago.
 
 ## Self test issue
 
