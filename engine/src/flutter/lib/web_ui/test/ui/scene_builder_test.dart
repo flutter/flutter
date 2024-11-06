@@ -211,9 +211,6 @@ Future<void> testMain() async {
     });
 
     test('empty backdrop filter layer with clip', () async {
-      // Note that this test does not actually render properly in skwasm due to
-      // a Skia bug. See https://g-issues.skia.org/issues/362552959 and
-      // https://github.com/flutter/flutter/issues/152026
       final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
 
       sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
