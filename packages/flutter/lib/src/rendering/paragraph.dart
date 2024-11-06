@@ -1398,7 +1398,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       startSelectionPoint: SelectionPoint(
         localPosition: startOffsetInParagraphCoordinates,
         lineHeight: paragraph._textPainter.preferredLineHeight,
-        handleType: selectionStart == selectionEnd 
+        handleType: selectionStart == selectionEnd
                     ? TextSelectionHandleType.collapsed
                     : flipHandles
                     ? TextSelectionHandleType.right

@@ -1635,7 +1635,7 @@ class SelectionOverlay {
   Widget _buildEndHandle(BuildContext context) {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
-    if (selectionControls == null 
+    if (selectionControls == null
         || (_startHandleType == TextSelectionHandleType.collapsed
         && (defaultTargetPlatform != TargetPlatform.macOS && defaultTargetPlatform != TargetPlatform.iOS))) {
       // Hide the second handle when collapsed.
