@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1473,6 +1474,79 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1));
       expect(find.byKey(containerKey), findsNothing);
     });
+
+    testWidgets('Routes can use simulation and ignore durations', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+
+      await tester.pumpWidget(MaterialApp(
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                    _SimulationPageRouteBuilder<void>(
+                      simulationBuilder: ({required double current, required bool forward}) {
+                        // A gravity simulation with a = 4.0 should traverse
+                        // a distance of 1.0 in 0.5 seconds.
+                        return GravitySimulation(
+                          forward ? 4 : -4, // Acceleration
+                          current, // Init position
+                          1.1, // End distance, slightly larger than 1.0 so that
+                               // the reverse transition isn't stopped at start
+                          0); // Init velocity; // Init velocity
+                      },
+                      // Set an extremely long duration so that the route must ignore these
+                      // durations to proceed.
+                      transitionDuration: const Duration(days: 1),
+                      reverseTransitionDuration: const Duration(days: 1),
+                      pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+                        return Container(
+                          key: containerKey,
+                          color: Colors.green,
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Open page'),
+              );
+            },
+          );
+        },
+      ));
+
+      // Open the new route.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Open page'), findsNothing);
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      await tester.pumpAndSettle();
+
+      // Pop the new route.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Container should be present halfway through the transition.
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Container should be present at the very end of the transition.
+      await tester.pump(const Duration(milliseconds: 490));
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Container have transitioned out after 500ms.
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.byKey(containerKey), findsNothing);
+    });
   });
 
   group('ModalRoute', () {
@@ -2628,5 +2702,33 @@ class _RestorableDialogTestWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+typedef _SimulationBuilder = Simulation Function({ required double current, required bool forward });
+
+class _SimulationPageRouteBuilder<T> extends PageRouteBuilder<T> {
+  _SimulationPageRouteBuilder({
+    required this.simulationBuilder,
+    // Inherited
+    super.settings,
+    super.requestFocus,
+    required super.pageBuilder,
+    super.transitionDuration = const Duration(milliseconds: 300),
+    super.reverseTransitionDuration = const Duration(milliseconds: 300),
+    super.opaque = true,
+    super.barrierDismissible = false,
+    super.barrierColor,
+    super.barrierLabel,
+    super.maintainState = true,
+    super.fullscreenDialog,
+    super.allowSnapshotting = true,
+  });
+
+  final _SimulationBuilder simulationBuilder;
+
+  @override
+  Simulation createSimulation({ required bool forward }) {
+    return simulationBuilder(current: controller!.value, forward: forward);
   }
 }

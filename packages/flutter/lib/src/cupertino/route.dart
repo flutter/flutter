@@ -1124,9 +1124,6 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   }) : _barrierDismissible = barrierDismissible,
        _semanticsDismissible = semanticsDismissible;
 
-  @override
-  bool get useSimulation => true;
-
   /// A builder that builds the widget tree for the [CupertinoModalPopupRoute].
   ///
   /// The [builder] argument typically builds a [CupertinoActionSheet] widget.
@@ -1191,11 +1188,6 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
         child: child,
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }
 
