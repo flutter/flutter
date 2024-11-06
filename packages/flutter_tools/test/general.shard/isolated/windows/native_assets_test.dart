@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/code_assets_builder.dart' hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli_internal.dart' as native_assets_cli;
 import 'package:package_config/package_config_types.dart';
 
@@ -81,13 +81,14 @@ void main() {
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
-          buildResult: FakeFlutterNativeAssetsBuilderResult(
-            assets: <AssetImpl>[
-              NativeCodeAssetImpl(
-                id: 'package:bar/bar.dart',
-                linkMode: DynamicLoadingBundledImpl(),
-                os: OSImpl.windows,
-                architecture: ArchitectureImpl.x64,
+          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+            codeAssets: <CodeAsset>[
+              CodeAsset(
+                package: 'bar',
+                name: 'bar.dart',
+                linkMode: DynamicLoadingBundled(),
+                os: OS.windows,
+                architecture: Architecture.x64,
                 file: dylibAfterCompiling.uri,
               ),
             ],
@@ -116,7 +117,7 @@ void main() {
           ]),
         );
         final String expectedDirectory = flutterTester
-            ? native_assets_cli.OSImpl.current.toString()
+            ? native_assets_cli.OS.current.toString()
             : 'windows';
         expect(nativeAssetsYaml,
                flutterTester
@@ -246,7 +247,7 @@ void main() {
       fileSystem,
       logger,
     );
-    final CCompilerConfigImpl result = await runner.cCompilerConfig;
+    final CCompilerConfig result = await runner.cCompilerConfig;
     expect(
       result.compiler?.toFilePath(),
       msvcBinDir.childFile('cl.exe').uri.toFilePath(),

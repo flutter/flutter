@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/code_assets_builder.dart' hide BuildMode;
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
@@ -71,13 +71,14 @@ void main() {
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
-        buildResult: FakeFlutterNativeAssetsBuilderResult(
-          assets: <AssetImpl>[
-            NativeCodeAssetImpl(
-              id: 'package:bar/bar.dart',
-              linkMode: DynamicLoadingBundledImpl(),
-              os: OSImpl.android,
-              architecture: ArchitectureImpl.arm64,
+        buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          codeAssets: <CodeAsset>[
+            CodeAsset(
+              package: 'bar',
+              name: 'bar.dart',
+              linkMode: DynamicLoadingBundled(),
+              os: OS.android,
+              architecture: Architecture.arm64,
               file: Uri.file('libbar.so'),
             ),
           ],
@@ -182,6 +183,6 @@ class _BuildRunnerWithoutNdk extends FakeFlutterNativeAssetsBuildRunner {
   });
 
   @override
-  Future<CCompilerConfigImpl> get ndkCCompilerConfigImpl async =>
+  Future<CCompilerConfig> get ndkCCompilerConfig async =>
       throwToolExit('Android NDK Clang could not be found.');
 }

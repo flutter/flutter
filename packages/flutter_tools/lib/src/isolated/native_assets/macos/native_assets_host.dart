@@ -4,8 +4,7 @@
 
 // Shared logic between iOS and macOS implementations of native assets.
 
-import 'package:native_assets_cli/native_assets_cli.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
@@ -178,7 +177,7 @@ Future<void> codesignDylib(
 /// Flutter expects `xcrun` to be on the path on macOS hosts.
 ///
 /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
-Future<CCompilerConfigImpl> cCompilerConfigMacOS() async {
+Future<CCompilerConfig> cCompilerConfigMacOS() async {
   final ProcessResult xcrunResult = await globals.processManager.run(
     <String>['xcrun', 'clang', '--version'],
   );
@@ -189,7 +188,7 @@ Future<CCompilerConfigImpl> cCompilerConfigMacOS() async {
       .firstWhere((String s) => s.startsWith('InstalledDir: '))
       .split(' ')
       .last;
-  return CCompilerConfigImpl(
+  return CCompilerConfig(
     compiler: Uri.file('$installPath/clang'),
     archiver: Uri.file('$installPath/ar'),
     linker: Uri.file('$installPath/ld'),
