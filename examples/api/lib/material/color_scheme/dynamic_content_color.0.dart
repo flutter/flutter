@@ -9,23 +9,23 @@ import 'package:flutter/material.dart';
 const Widget divider = SizedBox(height: 10);
 const double narrowScreenWidthThreshold = 400;
 
-void main() => runApp(DynamicColorExample());
+void main() => runApp(const DynamicColorExample());
 
 class DynamicColorExample extends StatefulWidget {
-  DynamicColorExample({super.key});
+  const DynamicColorExample({super.key});
 
-  final List<ImageProvider> images = <NetworkImage>[
-    const NetworkImage(
+  static const List<ImageProvider> images = <NetworkImage>[
+    NetworkImage(
         'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_1.png'),
-    const NetworkImage(
+    NetworkImage(
         'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_2.png'),
-    const NetworkImage(
+    NetworkImage(
         'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_3.png'),
-    const NetworkImage(
+    NetworkImage(
         'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_4.png'),
-    const NetworkImage(
+    NetworkImage(
         'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_5.png'),
-    const NetworkImage(
+    NetworkImage(
         'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_6.png'),
   ];
 
@@ -48,7 +48,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     isLoading = true;
     currentColorScheme = const ColorScheme.light();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateImage(widget.images[selectedImage]);
+      _updateImage(DynamicColorExample.images[selectedImage]);
       isLoading = false;
     });
   }
@@ -105,7 +105,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                   onChanged: (bool value) {
                     setState(() {
                       isLight = value;
-                      _updateImage(widget.images[selectedImage]);
+                      _updateImage(DynamicColorExample.images[selectedImage]);
                     });
                   })
             ],
@@ -120,7 +120,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                         divider,
                         _imagesRow(
                           context,
-                          widget.images,
+                          DynamicColorExample.images,
                           colorScheme,
                         ),
                         divider,
@@ -192,7 +192,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
       return;
     }
     setState(() {
-      selectedImage = widget.images.indexOf(provider);
+      selectedImage = DynamicColorExample.images.indexOf(provider);
       currentColorScheme = newColorScheme;
     });
   }
@@ -227,7 +227,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
               child: GestureDetector(
                 onTap: () => _updateImage(image),
                 child: Card(
-                  color: widget.images.indexOf(image) == selectedImage
+                  color: DynamicColorExample.images.indexOf(image) == selectedImage
                       ? colorScheme.primaryContainer
                       : colorScheme.surface,
                   child: Padding(
