@@ -51,6 +51,9 @@ class _${blockName}DefaultsM3 extends ${blockName}ThemeData {
   EdgeInsetsGeometry? get barPadding => const EdgeInsets.symmetric(horizontal: 8.0);
 
   @override
+  bool get shrinkWrap => false;
+
+  @override
   Color? get dividerColor => ${componentColor('md.comp.search-view.divider')};
 }
 ''';
