@@ -9,8 +9,7 @@
 #import <objc/message.h>
 
 #include "flutter/common/constants.h"
-#include "flutter/shell/platform/embedder/embedder.h"
-
+#include "flutter/fml/platform/darwin/cf_utils.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
@@ -20,6 +19,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 #pragma mark - Static types and data.
 
@@ -902,17 +902,16 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
  * It's returned in NSData* to enable auto reference count.
  */
 static NSData* CurrentKeyboardLayoutData() {
-  TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
+  fml::CFRef<TISInputSourceRef> source(TISCopyCurrentKeyboardInputSource());
   CFTypeRef layout_data = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData);
   if (layout_data == nil) {
-    CFRelease(source);
     // TISGetInputSourceProperty returns null with Japanese keyboard layout.
     // Using TISCopyCurrentKeyboardLayoutInputSource to fix NULL return.
     // https://github.com/microsoft/node-native-keymap/blob/5f0699ded00179410a14c0e1b0e089fe4df8e130/src/keyboard_mac.mm#L91
-    source = TISCopyCurrentKeyboardLayoutInputSource();
+    source.Reset(TISCopyCurrentKeyboardLayoutInputSource());
     layout_data = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData);
   }
-  return (__bridge_transfer NSData*)CFRetain(layout_data);
+  return (__bridge NSData*)layout_data;
 }
 
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
