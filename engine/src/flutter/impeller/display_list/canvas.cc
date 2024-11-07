@@ -692,12 +692,7 @@ void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
     Scalar sy = dest.GetHeight() / source.GetHeight();
     Scalar tx = dest.GetLeft() - source.GetLeft() * sx;
     Scalar ty = dest.GetTop() - source.GetTop() * sy;
-    // clang-format off
-    Matrix src_to_dest(  sx, 0.0f, 0.0f, 0.0f,
-                       0.0f,   sy, 0.0f, 0.0f,
-                       0.0f, 0.0f, 1.0f, 0.0f,
-                         tx,   ty, 0.0f, 1.0f);
-    // clang-format on
+    Matrix src_to_dest = Matrix::MakeTranslateScale({sx, sy, 1}, {tx, ty, 0});
     dest = clipped_source->TransformBounds(src_to_dest);
   }
 
