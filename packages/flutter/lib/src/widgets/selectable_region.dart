@@ -351,7 +351,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
   final LayerLink _toolbarLayerLink = LayerLink();
-  final _SelectableRegionContainerDelegate _selectionDelegate = _SelectableRegionContainerDelegate();
+  final StaticSelectionContainerDelegate _selectionDelegate = StaticSelectionContainerDelegate();
   // there should only ever be one selectable, which is the SelectionContainer.
   Selectable? _selectable;
 
@@ -1823,101 +1823,197 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
   }
 }
 
-class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+/// A delegate that manages updating multiple [Selectable] children where the
+/// [Selectable]s do not change or move around frequently.
+///
+/// This delegate keeps track of the [Selectable]s that received start or end
+/// [SelectionEvent]s and the global locations of those events to accurately
+/// synthesize [SelectionEvent]s for children [Selectable]s when needed.
+///
+/// When a new [SelectionEdgeUpdateEvent] is dispatched to a [Selectable], this
+/// delegate checks whether the [Selectable] has already received a selection
+/// update for each edge that currently exists, and synthesizes an event for the
+/// edges that have not yet received an update. This synthesized event is dispatched
+/// before dispatching the new event.
+///
+/// For example, if we have an existing start edge for this delegate and a [Selectable]
+/// child receives an end [SelectionEdgeUpdateEvent] and the child hasn't received a start
+/// [SelectionEdgeUpdateEvent], we synthesize a start [SelectionEdgeUpdateEvent] for the
+/// child [Selectable] and dispatch it before dispatching the original end [SelectionEdgeUpdateEvent].
+///
+/// See also:
+///
+///  * [MultiSelectableSelectionContainerDelegate], for the class that provides
+///  the main implementation details of this [SelectionContainerDelegate].
+class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+  /// The set of [Selectable]s that have received start events.
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
+
+  /// The set of [Selectable]s that have received end events.
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
 
+  /// The global position of the last selection start edge update.
   Offset? _lastStartEdgeUpdateGlobalPosition;
+
+  /// The global position of the last selection end edge update.
   Offset? _lastEndEdgeUpdateGlobalPosition;
 
-  @override
-  void remove(Selectable selectable) {
-    _hasReceivedStartEvent.remove(selectable);
-    _hasReceivedEndEvent.remove(selectable);
-    super.remove(selectable);
+  /// Tracks whether a selection edge update event for a given [Selectable] was received.
+  ///
+  /// When `forEnd` is true, the [Selectable] will be registered as having received
+  /// an end event. When false, the [Selectable] is registered as having received
+  /// a start event.
+  ///
+  /// When `forEnd` is null, the [Selectable] will be registered as having received both
+  /// start and end events.
+  ///
+  /// Call this method when a [SelectionEvent] is dispatched to a child selectable managed
+  /// by this delegate.
+  ///
+  /// Subclasses should call [clearInternalSelectionStateForSelectable] to clean up any state
+  /// added by this method, for example when removing a [Selectable] from this delegate.
+  @protected
+  void didReceiveSelectionEventFor({required Selectable selectable, bool? forEnd}) {
+    switch (forEnd) {
+      case true:
+        _hasReceivedEndEvent.add(selectable);
+      case false:
+        _hasReceivedStartEvent.add(selectable);
+      case null:
+        _hasReceivedStartEvent.add(selectable);
+        _hasReceivedEndEvent.add(selectable);
+    }
   }
 
-  void _updateLastEdgeEventsFromGeometries() {
+  /// Updates the internal selection state after a [SelectionEvent] that
+  /// selects a boundary such as: [SelectWordSelectionEvent],
+  /// [SelectParagraphSelectionEvent], and [SelectAllSelectionEvent].
+  ///
+  /// Call this method after determining the new selection as a result of
+  /// a [SelectionEvent] that selects a boundary. The [currentSelectionStartIndex]
+  /// and [currentSelectionEndIndex] should be set to valid values at the time
+  /// this method is called.
+  ///
+  /// Subclasses should call [clearInternalSelectionStateForSelectable] to clean up any state
+  /// added by this method, for example when removing a [Selectable] from this delegate.
+  @protected
+  void didReceiveSelectionBoundaryEvents() {
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      return;
+    }
+    final int start = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int end = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    for (int index = start; index <= end; index += 1) {
+      didReceiveSelectionEventFor(selectable: selectables[index]);
+    }
+    _updateLastSelectionEdgeLocationsFromGeometries();
+  }
+
+  /// Updates the last selection edge location of the edge specified by `forEnd`
+  /// to the provided `globalSelectionEdgeLocation`.
+  @protected
+  void updateLastSelectionEdgeLocation({required Offset globalSelectionEdgeLocation, required bool forEnd}) {
+    if (forEnd) {
+      _lastEndEdgeUpdateGlobalPosition = globalSelectionEdgeLocation;
+    } else {
+      _lastStartEdgeUpdateGlobalPosition = globalSelectionEdgeLocation;
+    }
+  }
+
+  /// Updates the last selection edge locations of both start and end selection
+  /// edges based on their [SelectionGeometry].
+  void _updateLastSelectionEdgeLocationsFromGeometries() {
     if (currentSelectionStartIndex != -1 && selectables[currentSelectionStartIndex].value.hasSelection) {
       final Selectable start = selectables[currentSelectionStartIndex];
       final Offset localStartEdge = start.value.startSelectionPoint!.localPosition +
           Offset(0, - start.value.startSelectionPoint!.lineHeight / 2);
-      _lastStartEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(start.getTransformTo(null), localStartEdge);
+      updateLastSelectionEdgeLocation(
+        globalSelectionEdgeLocation: MatrixUtils.transformPoint(start.getTransformTo(null), localStartEdge),
+        forEnd: false,
+      );
     }
     if (currentSelectionEndIndex != -1 && selectables[currentSelectionEndIndex].value.hasSelection) {
       final Selectable end = selectables[currentSelectionEndIndex];
       final Offset localEndEdge = end.value.endSelectionPoint!.localPosition +
           Offset(0, -end.value.endSelectionPoint!.lineHeight / 2);
-      _lastEndEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(end.getTransformTo(null), localEndEdge);
+      updateLastSelectionEdgeLocation(
+        globalSelectionEdgeLocation: MatrixUtils.transformPoint(end.getTransformTo(null), localEndEdge),
+        forEnd: true,
+      );
     }
+  }
+
+  /// Clears the internal selection state.
+  ///
+  /// This indicates that no [Selectable] child under this delegate
+  /// has received start or end events, and resets any tracked global
+  /// locations for start and end [SelectionEdgeUpdateEvent]s.
+  @protected
+  void clearInternalSelectionState() {
+    selectables.forEach(clearInternalSelectionStateForSelectable);
+    _lastStartEdgeUpdateGlobalPosition = null;
+    _lastEndEdgeUpdateGlobalPosition = null;
+  }
+
+  /// Clears the internal selection state for a given [Selectable].
+  ///
+  /// This indicates that the given `selectable` has neither received a
+  /// start or end [SelectionEdgeUpdateEvent]s.
+  ///
+  /// Subclasses should call this method to clean up state added in
+  /// [didReceiveSelectionEventFor] and [didReceiveSelectionBoundaryEvents].
+  @protected
+  void clearInternalSelectionStateForSelectable(Selectable selectable) {
+    _hasReceivedStartEvent.remove(selectable);
+    _hasReceivedEndEvent.remove(selectable);
+  }
+
+  @override
+  void remove(Selectable selectable) {
+    clearInternalSelectionStateForSelectable(selectable);
+    super.remove(selectable);
   }
 
   @override
   SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
     final SelectionResult result = super.handleSelectAll(event);
-    for (final Selectable selectable in selectables) {
-      _hasReceivedStartEvent.add(selectable);
-      _hasReceivedEndEvent.add(selectable);
-    }
-    // Synthesize last update event so the edge updates continue to work.
-    _updateLastEdgeEventsFromGeometries();
+    didReceiveSelectionBoundaryEvents();
     return result;
   }
 
-  /// Selects a word in a [Selectable] at the location
-  /// [SelectWordSelectionEvent.globalPosition].
   @override
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     final SelectionResult result = super.handleSelectWord(event);
-    if (currentSelectionStartIndex != -1) {
-      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
-    }
-    if (currentSelectionEndIndex != -1) {
-      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
-    }
-    _updateLastEdgeEventsFromGeometries();
+    didReceiveSelectionBoundaryEvents();
     return result;
   }
 
-  /// Selects a paragraph in a [Selectable] at the location
-  /// [SelectParagraphSelectionEvent.globalPosition].
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
     final SelectionResult result = super.handleSelectParagraph(event);
-    if (currentSelectionStartIndex != -1) {
-      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
-    }
-    if (currentSelectionEndIndex != -1) {
-      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
-    }
-    _updateLastEdgeEventsFromGeometries();
+    didReceiveSelectionBoundaryEvents();
     return result;
   }
 
   @override
   SelectionResult handleClearSelection(ClearSelectionEvent event) {
     final SelectionResult result = super.handleClearSelection(event);
-    _hasReceivedStartEvent.clear();
-    _hasReceivedEndEvent.clear();
-    _lastStartEdgeUpdateGlobalPosition = null;
-    _lastEndEdgeUpdateGlobalPosition = null;
+    clearInternalSelectionState();
     return result;
   }
 
   @override
   SelectionResult handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
-    if (event.type == SelectionEventType.endEdgeUpdate) {
-      _lastEndEdgeUpdateGlobalPosition = event.globalPosition;
-    } else {
-      _lastStartEdgeUpdateGlobalPosition = event.globalPosition;
-    }
+    updateLastSelectionEdgeLocation(
+      globalSelectionEdgeLocation: event.globalPosition,
+      forEnd: event.type == SelectionEventType.endEdgeUpdate,
+    );
     return super.handleSelectionEdgeUpdate(event);
   }
 
   @override
   void dispose() {
-    _hasReceivedStartEvent.clear();
-    _hasReceivedEndEvent.clear();
+    clearInternalSelectionState();
     super.dispose();
   }
 
@@ -1925,27 +2021,35 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
-        _hasReceivedStartEvent.add(selectable);
+        didReceiveSelectionEventFor(selectable: selectable, forEnd: false);
         ensureChildUpdated(selectable);
       case SelectionEventType.endEdgeUpdate:
-        _hasReceivedEndEvent.add(selectable);
+        didReceiveSelectionEventFor(selectable: selectable, forEnd: true);
         ensureChildUpdated(selectable);
       case SelectionEventType.clear:
-        _hasReceivedStartEvent.remove(selectable);
-        _hasReceivedEndEvent.remove(selectable);
+        clearInternalSelectionStateForSelectable(selectable);
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
       case SelectionEventType.selectParagraph:
         break;
       case SelectionEventType.granularlyExtendSelection:
       case SelectionEventType.directionallyExtendSelection:
-        _hasReceivedStartEvent.add(selectable);
-        _hasReceivedEndEvent.add(selectable);
+        didReceiveSelectionEventFor(selectable: selectable);
         ensureChildUpdated(selectable);
     }
     return super.dispatchSelectionEventToChild(selectable, event);
   }
 
+  /// Ensures the `selectable` child has received the most up to date selection events.
+  ///
+  /// This method is called when:
+  ///   1. A new [Selectable] is added to the delegate, and its screen location
+  ///   falls into the previous selection.
+  ///   2. Before a [SelectionEvent] of type
+  ///   [SelectionEventType.startEdgeUpdate], [SelectionEventType.endEdgeUpdate],
+  ///   [SelectionEventType.granularlyExtendSelection], or
+  ///   [SelectionEventType.directionallyExtendSelection] is dispatched
+  ///   to a [Selectable] child.
   @override
   void ensureChildUpdated(Selectable selectable) {
     if (_lastEndEdgeUpdateGlobalPosition != null && _hasReceivedEndEvent.add(selectable)) {
