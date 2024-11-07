@@ -180,6 +180,8 @@ void main() {
           .childDirectory('flutter_build')
           .childFile('dart_plugin_registrant.dart');
       expect(generatedMain.existsSync(), isFalse);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('regenerates dart_plugin_registrant.dart', () async {
@@ -257,6 +259,8 @@ void main() {
           '}\n'
         ),
       );
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('removes dart_plugin_registrant.dart if plugins are removed from pubspec.yaml', () async {
@@ -301,6 +305,8 @@ void main() {
 
       await DartPluginRegistrantTarget.test(testProject).build(environment);
       expect(generatedMain.existsSync(), isFalse);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('target file is outside the current project package', () async {
@@ -379,6 +385,8 @@ void main() {
           '}\n'
         ),
       );
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }
