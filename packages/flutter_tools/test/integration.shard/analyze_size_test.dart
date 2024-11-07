@@ -47,8 +47,7 @@ void main() {
         .split('\n')
         .firstWhere((String line) => line.contains(runDevToolsMessage));
     final String commandArguments = devToolsCommand.split(runDevToolsMessage).last.trim();
-    final String relativeAppSizePath = outputFilePath.split('.flutter-devtools/').last.trim();
-    expect(commandArguments.contains('--appSizeBase=$relativeAppSizePath'), isTrue);
+    expect(commandArguments.contains('--appSizeBase=$outputFilePath'), isTrue);
   });
 
   testWithoutContext('--analyze-size flag produces expected output on hello_world for iOS', () async {
@@ -82,9 +81,8 @@ void main() {
         .split('\n')
         .firstWhere((String line) => line.contains(runDevToolsMessage));
     final String commandArguments = devToolsCommand.split(runDevToolsMessage).last.trim();
-    final String relativeAppSizePath = outputFilePath.split('.flutter-devtools/').last.trim();
 
-    expect(commandArguments.contains('--appSizeBase=$relativeAppSizePath'), isTrue);
+    expect(commandArguments.contains('--appSizeBase=$outputFilePath'), isTrue);
     expect(codeSizeDir.existsSync(), true);
     tempDir.deleteSync(recursive: true);
   }, skip: !platform.isMacOS); // [intended] iOS can only be built on macos.
@@ -135,9 +133,8 @@ void main() {
         .split('\n')
         .firstWhere((String line) => line.contains(runDevToolsMessage));
     final String commandArguments = devToolsCommand.split(runDevToolsMessage).last.trim();
-    final String relativeAppSizePath = outputFilePath.split('.flutter-devtools/').last.trim();
 
-    expect(commandArguments.contains('--appSizeBase=$relativeAppSizePath'), isTrue);
+    expect(commandArguments.contains('--appSizeBase=$outputFilePath'), isTrue);
     expect(codeSizeDir.existsSync(), true);
     tempDir.deleteSync(recursive: true);
   }, skip: !platform.isMacOS); // [intended] this is a macos only test.
