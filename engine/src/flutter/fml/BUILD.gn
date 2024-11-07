@@ -147,12 +147,9 @@ source_set("fml") {
       "platform/darwin/paths_darwin.mm",
       "platform/darwin/platform_version.h",
       "platform/darwin/platform_version.mm",
-      "platform/darwin/scoped_block.h",
-      "platform/darwin/scoped_block.mm",
       "platform/darwin/scoped_nsautorelease_pool.cc",
       "platform/darwin/scoped_nsautorelease_pool.h",
       "platform/darwin/scoped_policy.h",
-      "platform/darwin/scoped_typeref.h",
       "platform/darwin/string_range_sanitization.h",
       "platform/darwin/string_range_sanitization.mm",
     ]
