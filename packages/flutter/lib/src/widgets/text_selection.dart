@@ -1609,7 +1609,10 @@ class SelectionOverlay {
   Widget _buildStartHandle(BuildContext context) {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
-    if (selectionControls == null) {
+    if (selectionControls == null
+        || (_startHandleType == TextSelectionHandleType.collapsed && _isDraggingEndHandle)) {
+      // Hide the start handle when dragging the end handle and collapsing
+      // the selection.
       handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
@@ -1636,9 +1639,10 @@ class SelectionOverlay {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null
-        || (_startHandleType == TextSelectionHandleType.collapsed
-        && (defaultTargetPlatform != TargetPlatform.macOS && defaultTargetPlatform != TargetPlatform.iOS))) {
-      // Hide the second handle when collapsed.
+        || (_endHandleType == TextSelectionHandleType.collapsed && _isDraggingStartHandle)
+        || (_endHandleType == TextSelectionHandleType.collapsed && !_isDraggingStartHandle && !_isDraggingEndHandle)) {
+      // Hide the end handle when dragging the start handle and collapsing the selection
+      // or when the selection is collapsed and no handle is being dragged.
       handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
