@@ -9,7 +9,6 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/make_copyable.h"
-#include "flutter/fml/platform/darwin/scoped_block.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/window/platform_message_response.h"
 #import "flutter/shell/platform/darwin/common/buffer_conversions.h"
@@ -30,7 +29,7 @@ class PlatformMessageResponseDarwin : public flutter::PlatformMessageResponse {
 
   ~PlatformMessageResponseDarwin() override;
 
-  fml::ScopedBlock<PlatformMessageResponseCallback> callback_;
+  PlatformMessageResponseCallback callback_;
   fml::RefPtr<fml::TaskRunner> platform_task_runner_;
 
   FML_FRIEND_MAKE_REF_COUNTED(PlatformMessageResponseDarwin);

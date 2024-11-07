@@ -13,22 +13,20 @@ namespace flutter {
 PlatformMessageResponseDarwin::PlatformMessageResponseDarwin(
     PlatformMessageResponseCallback callback,
     fml::RefPtr<fml::TaskRunner> platform_task_runner)
-    : callback_(callback, fml::scoped_policy::OwnershipPolicy::kRetain),
-      platform_task_runner_(std::move(platform_task_runner)) {}
+    : callback_(callback), platform_task_runner_(std::move(platform_task_runner)) {}
 
 PlatformMessageResponseDarwin::~PlatformMessageResponseDarwin() = default;
 
 void PlatformMessageResponseDarwin::Complete(std::unique_ptr<fml::Mapping> data) {
   fml::RefPtr<PlatformMessageResponseDarwin> self(this);
   platform_task_runner_->PostTask(fml::MakeCopyable([self, data = std::move(data)]() mutable {
-    self->callback_.get()(CopyMappingPtrToNSData(std::move(data)));
+    self->callback_(CopyMappingPtrToNSData(std::move(data)));
   }));
 }
 
 void PlatformMessageResponseDarwin::CompleteEmpty() {
   fml::RefPtr<PlatformMessageResponseDarwin> self(this);
-  platform_task_runner_->PostTask(
-      fml::MakeCopyable([self]() mutable { self->callback_.get()(nil); }));
+  platform_task_runner_->PostTask(fml::MakeCopyable([self]() mutable { self->callback_(nil); }));
 }
 
 }  // namespace flutter
