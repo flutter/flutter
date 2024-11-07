@@ -3488,7 +3488,14 @@ class _ExitWidgetSelectionButtonWrapper extends StatefulWidget {
 
 class _ExitWidgetSelectionButtonState
     extends State<_ExitWidgetSelectionButtonWrapper> {
-  bool _toolTipVisible = false;
+  bool _tooltipVisible = false;
+
+  static const Duration _tooltipShownOnLongPressDuration = Duration(
+    milliseconds: 1500,
+  );
+  static const Duration _tooltipDelayDuration = Duration(
+    milliseconds: 100,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -3497,25 +3504,52 @@ class _ExitWidgetSelectionButtonState
       children: <Widget>[
         CustomPaint(
           painter: _ExitWidgetSelectionTooltipPainter(
-            isVisible: _toolTipVisible,
+            isVisible: _tooltipVisible,
             buttonKey: widget.buttonKey,
           ),
         ),
         MouseRegion(
           onEnter: (_) {
             setState(() {
-              _toolTipVisible = true;
+              _tooltipVisibleAfter(_tooltipDelayDuration);
             });
           },
           onExit: (_) {
             setState(() {
-              _toolTipVisible = false;
+              _tooltipHiddenAfter(_tooltipDelayDuration);
             });
           },
-          child: widget.button,
+          child: Listener(
+            onPointerDown: (_) {
+              _tooltipVisibleAfter(_tooltipDelayDuration);
+              _tooltipHiddenAfter(
+                _tooltipShownOnLongPressDuration + _tooltipDelayDuration,
+              );
+            },
+            child: widget.button,
+          ),
         ),
       ],
     );
+  }
+
+  void _tooltipVisibleAfter(Duration duration) {
+    _tooltipVisibilityChangedAfter(duration, isVisible: true);
+  }
+
+  void _tooltipHiddenAfter(Duration duration) {
+    _tooltipVisibilityChangedAfter(duration, isVisible: false);
+  }
+
+  void _tooltipVisibilityChangedAfter(
+    Duration duration, {
+    required bool isVisible,
+  }) {
+    Timer(duration, () {
+      setState(() {
+        _tooltipVisible = isVisible;
+      });
+    });
   }
 }
 

@@ -839,7 +839,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             textDirection: TextDirection.ltr,
             child: WidgetInspector(
               key: inspectorKey,
-            exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+              exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
               child: const Text('Child 1'),
             ),
           ),
@@ -3785,7 +3785,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
         child: WidgetInspector(
-            exitWidgetSelectionButtonBuilder: null,
+          exitWidgetSelectionButtonBuilder: null,
           child: _applyConstructor(_TrivialWidget.new),
         ),
       );
