@@ -8,6 +8,7 @@
 
 #import <OCMock/OCMock.h>
 
+#include "flutter/fml/platform/darwin/cf_utils.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
@@ -1022,29 +1023,27 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
 
   // Test for pan events.
   // Start gesture.
-  CGEventRef cgEventStart = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 1, 0);
+  fml::CFRef<CGEventRef> cgEventStart =
+      CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 1, 0);
   CGEventSetType(cgEventStart, kCGEventScrollWheel);
   CGEventSetIntegerValueField(cgEventStart, kCGScrollWheelEventScrollPhase, kCGScrollPhaseBegan);
   CGEventSetIntegerValueField(cgEventStart, kCGScrollWheelEventIsContinuous, 1);
   [viewController scrollWheel:[NSEvent eventWithCGEvent:cgEventStart]];
-  CFRelease(cgEventStart);
 
-  CGEventRef cgEventUpdate = CGEventCreateCopy(cgEventStart);
+  fml::CFRef<CGEventRef> cgEventUpdate = CGEventCreateCopy(cgEventStart);
   CGEventSetIntegerValueField(cgEventUpdate, kCGScrollWheelEventScrollPhase, kCGScrollPhaseChanged);
   CGEventSetIntegerValueField(cgEventUpdate, kCGScrollWheelEventDeltaAxis2, 1);  // pan_x
   CGEventSetIntegerValueField(cgEventUpdate, kCGScrollWheelEventDeltaAxis1, 2);  // pan_y
   [viewController scrollWheel:[NSEvent eventWithCGEvent:cgEventUpdate]];
-  CFRelease(cgEventUpdate);
 
   NSEvent* mouseEvent = flutter::testing::CreateMouseEvent(0x00);
   [viewController mouseEntered:mouseEvent];
   [viewController mouseExited:mouseEvent];
 
   // End gesture.
-  CGEventRef cgEventEnd = CGEventCreateCopy(cgEventStart);
+  fml::CFRef<CGEventRef> cgEventEnd = CGEventCreateCopy(cgEventStart);
   CGEventSetIntegerValueField(cgEventEnd, kCGScrollWheelEventScrollPhase, kCGScrollPhaseEnded);
   [viewController scrollWheel:[NSEvent eventWithCGEvent:cgEventEnd]];
-  CFRelease(cgEventEnd);
 
   return true;
 }
