@@ -626,7 +626,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       ));
     });
 
-    testUsingContext('parses missing module error', () async{
+    testUsingContext('parses missing module error', () async {
       const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
@@ -663,6 +663,8 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         'Your project uses CocoaPods as a dependency manager, but the following plugin(s) '
         'only support Swift Package Manager: plugin_1_name, plugin_2_name.'
       ));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
