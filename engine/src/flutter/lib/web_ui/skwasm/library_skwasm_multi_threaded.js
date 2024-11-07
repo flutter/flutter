@@ -43,7 +43,7 @@ mergeInto(LibraryManager.library, {
       if (threadId) {
         PThread.pthreads[threadId].postMessage(message, transfers);
       } else {
-        postMessage(message);
+        postMessage(message, transfers);
       }
     };
   },
