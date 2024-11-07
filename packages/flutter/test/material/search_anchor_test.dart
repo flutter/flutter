@@ -1188,9 +1188,9 @@ void main() {
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      final ConstrainedBox constrainedBox = tester.widget<ConstrainedBox>(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-      expect(constrainedBox.constraints.maxWidth, 800.0);
-      expect(constrainedBox.constraints.maxHeight, 600.0);
+      final Size size = tester.getSize(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
+      expect(size.width, 800.0);
+      expect(size.height, 600.0);
     }
 
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.linux, TargetPlatform.windows ]) {
@@ -1198,9 +1198,9 @@ void main() {
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      final ConstrainedBox constrainedBox = tester.widget<ConstrainedBox>(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-      expect(constrainedBox.constraints.maxWidth, 360.0);
-      expect(constrainedBox.constraints.maxHeight, 400.0);
+      final Size size = tester.getSize(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
+      expect(size.width, 360.0);
+      expect(size.height, 400.0);
     }
   });
 
@@ -1234,9 +1234,9 @@ void main() {
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      final ConstrainedBox constrainedBox = tester.widget<ConstrainedBox>(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-      expect(constrainedBox.constraints.maxWidth, 800.0);
-      expect(constrainedBox.constraints.maxHeight, 600.0);
+      final Size size = tester.getSize(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
+      expect(size.width, 800.0);
+      expect(size.height, 600.0);
     }
   });
 
@@ -1771,9 +1771,9 @@ void main() {
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
 
-    final ConstrainedBox constrainedBox = tester.widget<ConstrainedBox>(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-    expect(constrainedBox.constraints.maxWidth, 280.0);
-    expect(constrainedBox.constraints.maxHeight, 390.0);
+    final Size size = tester.getSize(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
+    expect(size.width, 280.0);
+    expect(size.height, 390.0);
   });
 
   testWidgets('SearchAnchor respects viewBarPadding property', (WidgetTester tester) async {
