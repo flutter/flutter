@@ -3531,6 +3531,9 @@
 ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/dist/lib/hwasan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/dist/lib/hwasan/ld.so.1
+../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/dist/lib/hwasan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/dist/lib/ld.so.1
@@ -3544,6 +3547,8 @@
 ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/dist/lib/asan/ld.so.1
@@ -3556,6 +3561,8 @@
 ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/packages/blobs
@@ -3585,6 +3592,10 @@
 ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_devfs_cpp/meta.json
+../../../fuchsia/sdk/linux/pkg/driver_fake_bti_cpp/meta.json
+../../../fuchsia/sdk/linux/pkg/driver_fake_object_cpp/meta.json
+../../../fuchsia/sdk/linux/pkg/driver_fake_platform_device_cpp/meta.json
+../../../fuchsia/sdk/linux/pkg/driver_fake_resource_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_incoming_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_logging_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/meta.json
