@@ -81,6 +81,9 @@ Future<void> runFlutterDriverAndroidTests() async {
   );
 
   // A simulated cutout overlay is necessary to test display_cutout_rotation.
+  // Using adb to enable a cutout overlay once the test app is running breaks
+  // the connection with FlutterDriver; therefore, this setting must be set
+  // before `flutter drive` is executed.
   await runCommand(
     'adb',
     <String>[

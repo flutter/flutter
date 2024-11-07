@@ -6,6 +6,11 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:native_driver/native_driver.dart';
 import 'package:test/test.dart';
 
+// These tests require that the device running them have a single cutout at the
+// top of the display. A simulated cutout setting suffices; however, enabling
+// one via adb must take place before `flutter drive` starts. Therefore, this
+// setup is executed in run_flutter_driver_android_tests.dart, rather than in
+// the below setupAll block.
 void main() async {
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
