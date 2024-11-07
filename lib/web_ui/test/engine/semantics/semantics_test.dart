@@ -742,7 +742,7 @@ class MockSemanticsEnabler implements SemanticsEnabler {
 }
 
 void _testHeader() {
-  test('renders heading role for headers', () {
+  test('renders an empty labeled header as a heading with a label and uses a sized span for label', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -757,20 +757,32 @@ void _testHeader() {
     );
 
     owner().updateSemantics(builder.build());
-    expectSemanticsTree(owner(), '''
-<sem role="heading">Header of the page</sem>
-''');
+    expectSemanticsTree(owner(), '<h2>Header of the page</span></h2>');
 
     semantics().semanticsEnabled = false;
   });
 
-  // When a header has child elements, role="heading" prevents AT from reaching
-  // child elements. To fix that role="group" is used, even though that causes
-  // the heading to not be announced as a heading. If the app really needs the
-  // heading to be announced as a heading, the developer can restructure the UI
-  // such that the heading is not a parent node, but a side-note, e.g. preceding
-  // the child list.
-  test('uses group role for headers when children are present', () {
+  // This is a useless case, but we should at least not crash if it happens.
+  test('renders an empty unlabeled header', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      flags: 0 | ui.SemanticsFlag.isHeader.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    owner().updateSemantics(builder.build());
+    expectSemanticsTree(owner(), '<header></header>');
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('renders a header with children and uses aria-label', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -794,7 +806,7 @@ void _testHeader() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-<sem role="group" aria-label="Header of the page"><sem-c><sem></sem></sem-c></sem>
+<header aria-label="Header of the page"><sem-c><sem></sem></sem-c></header>
 ''');
 
     semantics().semanticsEnabled = false;
