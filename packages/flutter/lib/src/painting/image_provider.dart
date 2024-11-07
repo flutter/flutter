@@ -1194,18 +1194,15 @@ enum ResizeImagePolicy {
 /// Instructs Flutter to decode the image at the specified dimensions
 /// instead of at its native size.
 ///
-/// The [width] and [height] parameters refer to logical pixels.
-///
-/// Logical pixels have roughly the same visual size across devices, whereas
-/// physical pixels correspond to actual device hardware.
-/// The number of physical pixels per logical pixel is described by the
-/// [ui.FlutterView.devicePixelRatio].
-///
 /// This allows finer control of the size of the image in [ImageCache] and is
 /// generally used to reduce the memory footprint of [ImageCache].
 ///
 /// The decoded image may still be displayed at sizes other than the
 /// cached size provided here.
+///
+/// The [width] and [height] parameters determine the image resolution.
+/// These values also set the image's width & height in logical pixels
+/// if it is unconstrained.
 ///
 /// {@tool snippet}
 /// This example shows how to size the image to half of the screen's width.
@@ -1219,6 +1216,11 @@ enum ResizeImagePolicy {
 ///    );
 /// ```
 /// {@end-tool}
+///
+/// See also:
+///
+///  * [ui.FlutterView.devicePixelRatio], used to convert between physical and
+///    logical pixels.
 class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// Creates an ImageProvider that decodes the image to the specified size.
   ///
@@ -1408,12 +1410,6 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
 /// The image will be cached regardless of cache headers from the server.
-///
-/// When a network image is used on the Web platform, the `getTargetSize`
-/// parameter of the [ImageDecoderCallback] is only supported when the
-/// application is running with the CanvasKit renderer. When the application is
-/// using the HTML renderer, the web engine delegates image decoding of network
-/// images to the Web, which does not support custom decode sizes.
 ///
 /// See also:
 ///

@@ -144,11 +144,20 @@ class Cache {
     Platform? platform,
     required ProcessManager processManager,
   }) {
+    if (rootOverride?.fileSystem != null &&
+        fileSystem != null &&
+        rootOverride!.fileSystem != fileSystem) {
+      throw ArgumentError(
+        'If rootOverride and fileSystem are both non-null, '
+        'rootOverride.fileSystem must be the same as fileSystem.',
+        'fileSystem'
+      );
+    }
     fileSystem ??= rootOverride?.fileSystem ?? MemoryFileSystem.test();
     platform ??= FakePlatform(environment: <String, String>{});
     logger ??= BufferLogger.test();
     return Cache(
-      rootOverride: rootOverride ?? fileSystem.directory('cache'),
+      rootOverride: rootOverride ?? fileSystem.currentDirectory,
       artifacts: artifacts ?? <ArtifactSet>[],
       logger: logger,
       fileSystem: fileSystem,

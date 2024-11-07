@@ -30,15 +30,21 @@ class RawScrollbarExample extends StatefulWidget {
 }
 
 class _RawScrollbarExampleState extends State<RawScrollbarExample> {
-  final ScrollController _controllerOne = ScrollController();
+  final ScrollController _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return RawScrollbar(
-      controller: _controllerOne,
+      controller: _controller,
       thumbVisibility: true,
       child: GridView.builder(
-        controller: _controllerOne,
+        controller: _controller,
         itemCount: 120,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
         itemBuilder: (BuildContext context, int index) {
