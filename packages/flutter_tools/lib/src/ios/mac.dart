@@ -938,7 +938,7 @@ Future<bool> _isPluginSwiftPackageOnly({
   required String pluginName,
   required FileSystem fileSystem,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project, useImplicitPubspecResolution: true);
   final Plugin? matched = plugins
       .where((Plugin plugin) =>
           plugin.name.toLowerCase() == pluginName.toLowerCase() &&
