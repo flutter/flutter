@@ -211,7 +211,7 @@ Most plugins in flutter/packages use [`pigeon`](https://pub.dev/packages/pigeon)
 
 If the package's tests have mocks, they likely include mocks of Pigeon-generated classes; see below for instructions to update the mocks to reflect the changes in the Pigeon-generated code.
 
-### Mocks
+### Mockito
 
 Many packages use [`mockito`](https://pub.dev/packages/mockito) for unit tests. To regenerate mocks run:
    ```sh
