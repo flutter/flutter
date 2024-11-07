@@ -98,7 +98,7 @@ void main() {
     expect(description[8], 'constraints: BoxConstraints(350.0<=w<=Infinity, 240.0<=h<=Infinity)');
     expect(description[9], 'padding: EdgeInsets(0.0, 0.0, 0.0, 32.0)');
     expect(description[10], 'barPadding: EdgeInsets.zero');
-    expect(description[10], 'shrinkWrap: true');
+    expect(description[11], 'shrinkWrap: true');
   });
 
   group('[Theme, SearchViewTheme, SearchView properties overrides]', () {
