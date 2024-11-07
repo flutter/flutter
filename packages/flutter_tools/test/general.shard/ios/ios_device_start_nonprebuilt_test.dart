@@ -364,6 +364,7 @@ void main() {
       final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App');
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       // The first xcrun call should fail with a
       // concurrent build exception.
       processManager.addCommand(
