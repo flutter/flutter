@@ -1,6 +1,6 @@
 <!--
-Thanks for filing a pull request! 
-Reviewers are typically assigned within a week of filing a request. 
+Thanks for filing a pull request!
+Reviewers are typically assigned within a week of filing a request.
 To learn more about code review, see our documentation on Tree Hygiene: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md
 -->
 
