@@ -145,7 +145,7 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   /// See also:
   ///
   ///  * [RenderViewportBase.cacheExtent] for a definition of the cache extent.
-  static const double defaultCacheExtent = 250.0;
+  static const double defaultCacheExtent = 1000.0;
 }
 
 /// Return value for [RenderAbstractViewport.getOffsetToReveal].
