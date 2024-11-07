@@ -931,20 +931,6 @@ class _ViewContentState extends State<_ViewContent> {
     viewListFadeOnIntervalCurve.dispose();
   }
 
-  Widget viewBuilder(Iterable<Widget> suggestions) {
-    if (widget.viewBuilder == null) {
-      return MediaQuery.removePadding(
-        context: context,
-        removeTop: true,
-        child: ListView(
-          shrinkWrap: widget.viewShrinkWrap ?? false,
-          children: suggestions.toList(),
-        ),
-      );
-    }
-    return widget.viewBuilder!(suggestions);
-  }
-
   Future<void> updateSuggestions() async {
     if (searchValue != _controller.text) {
       searchValue = _controller.text;
@@ -1102,7 +1088,16 @@ class _ViewContentState extends State<_ViewContent> {
                           fit: (effectiveShrinkWrap && !widget.showFullScreenView) ? FlexFit.loose : FlexFit.tight,
                           child: FadeTransition(
                             opacity: viewListFadeOnIntervalCurve,
-                            child: viewBuilder(result),
+                            child: widget.viewBuilder == null
+                                ? MediaQuery.removePadding(
+                                    context: context,
+                                    removeTop: true,
+                                    child: ListView(
+                                      shrinkWrap: effectiveShrinkWrap,
+                                      children: result.toList(),
+                                    ),
+                                  )
+                                : widget.viewBuilder!(result),
                           ),
                         ),
                       ],
