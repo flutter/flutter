@@ -39,6 +39,53 @@ void main() {
   });
 
   group('CupertinoTextEditingMagnifier', () {
+    testWidgets('Magnifier border color inherits from parent CupertinoTheme', (WidgetTester tester) async {
+      final Key fakeTextFieldKey = UniqueKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Container(
+            key: fakeTextFieldKey,
+            width: 10,
+            height: 10,
+            child: CupertinoTheme(
+              data: CupertinoThemeData(primaryColor: Colors.green),
+              child: Builder(
+                builder: (BuildContext context) {
+                  return Placeholder();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      final BuildContext context = tester.element(find.byType(Placeholder));
+
+      // Magnifier should be positioned directly over the red square.
+      final RenderBox tapPointRenderBox =
+          tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
+      final Rect fakeTextFieldRect =
+          tapPointRenderBox.localToGlobal(Offset.zero) & tapPointRenderBox.size;
+
+      final ValueNotifier<MagnifierInfo> magnifier =
+          ValueNotifier<MagnifierInfo>(
+        MagnifierInfo(
+          currentLineBoundaries: fakeTextFieldRect,
+          fieldBounds: fakeTextFieldRect,
+          caretRect: fakeTextFieldRect,
+          // The tap position is dragBelow units below the text field.
+          globalGesturePosition: fakeTextFieldRect.center,
+        ),
+      );
+      addTearDown(magnifier.dispose);
+
+      await showCupertinoMagnifier(context, tester, magnifier);
+
+      // Magnifier border color should inherit from CupertinoTheme.of(context).primaryColor.
+      final Color magnifierBorderColor = tester.widget<CupertinoMagnifier>(find.byType(CupertinoMagnifier)).borderSide.color;
+      expect(magnifierBorderColor, equals(Colors.green));
+    });
+
     group('position', () {
       Offset getMagnifierPosition(WidgetTester tester) {
         final AnimatedPositioned animatedPositioned =
