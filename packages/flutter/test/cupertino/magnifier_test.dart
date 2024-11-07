@@ -44,15 +44,14 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Container(
+          home: SizedBox.square(
             key: fakeTextFieldKey,
-            width: 10,
-            height: 10,
+            dimension: 10,
             child: CupertinoTheme(
-              data: CupertinoThemeData(primaryColor: Colors.green),
+              data: const CupertinoThemeData(primaryColor: Colors.green),
               child: Builder(
                 builder: (BuildContext context) {
-                  return Placeholder();
+                  return const Placeholder();
                 },
               ),
             ),
