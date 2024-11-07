@@ -232,8 +232,10 @@ class ColorSourceContents : public Contents {
     // If overdraw prevention is enabled (like when drawing stroke paths), we
     // increment the stencil buffer as we draw, preventing overlapping fragments
     // from drawing. Afterwards, we need to append another draw call to clean up
-    // the stencil buffer (happens below in this method).
-    if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw) {
+    // the stencil buffer (happens below in this method). This can be skipped
+    // for draws that are fully opaque or use src blend mode.
+    if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw &&
+        options.blend_mode != BlendMode::kSource) {
       options.stencil_mode =
           ContentContextOptions::StencilMode::kOverdrawPreventionIncrement;
     }
@@ -259,7 +261,8 @@ class ColorSourceContents : public Contents {
     // If we performed overdraw prevention, a subsection of the clip heightmap
     // was incremented by 1 in order to self-clip. So simply append a clip
     // restore to clean it up.
-    if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw) {
+    if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw &&
+        options.blend_mode != BlendMode::kSource) {
       return RenderClipRestore(renderer, pass, entity.GetClipDepth(),
                                GetCoverage(entity));
     }
