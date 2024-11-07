@@ -494,7 +494,7 @@ class TestRenderObject extends RenderObject with ContainerRenderObjectMixin<Test
 class TestRenderObjectWithoutSetupParentData extends TestRenderObject {
   @override
   void setupParentData(RenderObject child) {
-    // The default behavior for RenderObject.
+    // Use a mismatched parent data type.
     if (child.parentData is! ParentData) {
       child.parentData = ParentData();
     }
