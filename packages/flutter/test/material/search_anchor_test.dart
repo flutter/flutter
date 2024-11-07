@@ -1743,6 +1743,7 @@ void main() {
         ),
       ),
     ));
+  });
 
   testWidgets('SearchAnchor respects dividerColor property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -1825,12 +1826,13 @@ void main() {
     expect(padding.padding, const EdgeInsets.symmetric(horizontal: 16.0));
   });
 
-  testWidgets('SearchAnchor respects viewConstraints min width and height', (WidgetTester tester) async {
+  testWidgets('SearchAnchor respects viewConstraints min width and height when viewShrinkWrap is true', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor(
           isFullScreen: false,
           viewConstraints: const BoxConstraints(),
+          viewShrinkWrap: true,
           builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();

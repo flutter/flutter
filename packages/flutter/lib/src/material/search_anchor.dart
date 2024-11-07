@@ -937,7 +937,7 @@ class _ViewContentState extends State<_ViewContent> {
         context: context,
         removeTop: true,
         child: ListView(
-          shrinkWrap: true,
+          shrinkWrap: widget.viewShrinkWrap ?? false,
           children: suggestions.toList(),
         ),
       );
