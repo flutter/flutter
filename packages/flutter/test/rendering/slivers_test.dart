@@ -58,6 +58,7 @@ void main() {
     final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
+      cacheExtent: 250.0,
       children: <RenderSliver>[
         RenderSliverToBoxAdapter(child: a = RenderSizedBox(const Size(100.0, 400.0))),
         RenderSliverToBoxAdapter(child: b = RenderSizedBox(const Size(100.0, 400.0))),
