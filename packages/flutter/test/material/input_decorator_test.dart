@@ -5343,6 +5343,38 @@ void main() {
           throwsAssertionError,
         );
       });
+
+      testWidgets('InputDecorator throws when error and errorBuilder are provided', (WidgetTester tester) async {
+        expect(
+              () {
+            buildInputDecorator(
+              decoration: InputDecoration(
+                errorBuilder: (String s) => Text(s),
+                error: const Text('error', style: TextStyle(fontSize: 20.0)),
+              ),
+            );
+          },
+          throwsAssertionError,
+        );
+      });
+
+      testWidgets('InputDecorator uses Widget returned by errorBuilder', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: InputDecoration(
+              errorText: 'errorText',
+              errorBuilder: (String errorText) {
+                return const Text(
+                  'errorBuilder',
+                  style: TextStyle(fontSize: 20.0),
+                );
+              },
+            ),
+          ),
+        );
+
+        expect(find.text('errorBuilder'), findsOneWidget);
+      });
     });
 
     testWidgets('InputDecorator with counter does not crash when given a 0 size', (WidgetTester tester) async {
