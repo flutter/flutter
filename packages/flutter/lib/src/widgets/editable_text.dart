@@ -1833,6 +1833,10 @@ class EditableText extends StatefulWidget {
   ///   Autofill service. Enable the autofill service of your choice, and make
   ///   sure there are available credentials associated with your app.
   ///
+  /// Specifying [InputDecoration.hintText] may also help autofill services
+  /// (like Samsung Pass) determine the expected content type of an input field,
+  /// although this is typically not required when autofillHints are present.
+  ///
   /// #### I called `TextInput.finishAutofillContext` but the autofill save
   /// prompt isn't showing
   ///
