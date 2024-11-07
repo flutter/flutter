@@ -33,6 +33,7 @@ void main() {
     expect(themeData.headerHintStyle, null);
     expect(themeData.padding, null);
     expect(themeData.barPadding, null);
+    expect(themeData.shrinkWrap, null);
     expect(themeData.dividerColor, null);
 
     const SearchViewTheme theme = SearchViewTheme(data: SearchViewThemeData(), child: SizedBox());
@@ -47,6 +48,7 @@ void main() {
     expect(theme.data.headerHintStyle, null);
     expect(themeData.padding, null);
     expect(themeData.barPadding, null);
+    expect(themeData.shrinkWrap, null);
     expect(theme.data.dividerColor, null);
   });
 
@@ -77,6 +79,7 @@ void main() {
       constraints: BoxConstraints(minWidth: 350, minHeight: 240),
       padding: EdgeInsets.only(bottom: 32.0),
       barPadding: EdgeInsets.zero,
+      shrinkWrap: true,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties

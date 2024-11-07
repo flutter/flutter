@@ -1722,6 +1722,28 @@ void main() {
     expect(padding.padding, EdgeInsets.zero);
   });
 
+  testWidgets('SearchAnchor respects viewShrinkWrap property', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: false,
+          viewShrinkWrap: true,
+          viewConstraints: const BoxConstraints(),
+          builder: (BuildContext context, SearchController controller) {
+            return IconButton(icon: const Icon(Icons.search), onPressed: () {
+              controller.openView();
+            },);
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return List<Widget>.generate(
+              controller.text.length,
+              (int index) => ListTile(title: Text('Item $index')),
+            );
+          }
+        ),
+      ),
+    ));
+
   testWidgets('SearchAnchor respects dividerColor property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
