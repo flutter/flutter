@@ -52,7 +52,7 @@ dependencies:
   http_multi_server: 3.2.1
   convert: 3.1.2
   async: 2.12.0
-  unified_analytics: 6.1.4
+  unified_analytics: 6.1.5
 
   graphs: 2.3.2
   native_assets_builder: 0.9.0
@@ -121,4 +121,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: bb02
+# PUBSPEC CHECKSUM: ac03
