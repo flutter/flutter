@@ -654,6 +654,54 @@ void main() {
     });
   });
 
+  testWidgets('Can extend StaticSelectionContainerDelegate', (WidgetTester tester) async {
+    SelectedContent? content;
+    final FocusNode focusNode = FocusNode();
+
+    // Inserts a new line between selected content of children selectables.
+    final ColumnSelectionContainerDelegate selectionDelegate = ColumnSelectionContainerDelegate();
+
+    addTearDown(focusNode.dispose);
+    addTearDown(selectionDelegate.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionControls,
+          child: SelectionContainer(
+            delegate: selectionDelegate,
+            child: const Center(
+              child: Column(
+                children: <Widget>[
+                  Text('Hello World!'),
+                  Text('How are you!'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Hello World!'), matching: find.byType(RichText)));
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you!'), matching: find.byType(RichText)));
+    final TestGesture mouseGesture = await tester.startGesture(textOffsetToPosition(paragraph, 4), kind: PointerDeviceKind.mouse);
+
+    expect(content, isNull);
+    addTearDown(mouseGesture.removePointer);
+    await tester.pump();
+
+    // Move selection to second paragraph.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph2, 10));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'o World!\nHow are yo');
+    await mouseGesture.up();
+    await tester.pump();
+  });
+
   testWidgets('dragging handle or selecting word triggers haptic feedback on Android', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -5300,6 +5348,24 @@ void main() {
     final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
     expect(clipboardData['text'], 'Hello my name is Dash.');
   });
+}
+
+class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {
+  /// Copies the selected contents of all [Selectable]s, separating their
+  /// contents with a new line.
+  @override
+  SelectedContent? getSelectedContent() {
+    final List<SelectedContent> selections = <SelectedContent>[
+      for (final Selectable selectable in selectables)
+        if (selectable.getSelectedContent() case final SelectedContent data) data,
+    ];
+    if (selections.isEmpty) {
+      return null;
+    }
+    return SelectedContent(
+      plainText: selections.map((SelectedContent selectedContent) => selectedContent.plainText).join('\n'),
+    );
+  }
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
