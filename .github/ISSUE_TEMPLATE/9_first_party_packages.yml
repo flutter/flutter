@@ -41,6 +41,7 @@ body:
         - flutter_markdown
         - flutter_migrate
         - flutter_plugin_android_lifecycle
+        - flutter_svg
         - flutter_template_images
         - go_router
         - go_router_builder
@@ -55,6 +56,7 @@ body:
         - metrics_center
         - multicast_dns
         - palette_generator
+        - path_parsing
         - path_provider
         - pigeon
         - plugin_platform_interface
@@ -66,6 +68,7 @@ body:
         - standard_message_codec
         - two_dimensional_scrollables
         - url_launcher
+        - vector_graphics
         - video_player
         - web_benchmarks
         - webview_flutter
