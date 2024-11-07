@@ -1,12 +1,18 @@
-# Leak tracking in Flutter framework
+# Leak tracking in Flutter Framework
 
-Flutter Framework widget tests use [leak_tracker](https://github.com/dart-lang/leak_tracker/blob/main/doc/leak_tracking/
-OVERVIEW.md) to detect leaks from objects that have not been disposed.
+## TL;DR;
 
-This page contains Flutter Framework related information.
+To enable leak tracking locally pass `--dart-define LEAK_TRACKING=true` to `flutter test`.
 
 See leak_tracker documentation for
 [general leak troubleshooting](https://github.com/dart-lang/leak_tracker/blob/main/doc/leak_tracking/TROUBLESHOOT.md).
+
+This page contains Flutter Framework specific information.
+
+## Overview
+
+Flutter Framework widget tests use [leak_tracker](https://github.com/dart-lang/leak_tracker/blob/main/doc/leak_tracking/
+OVERVIEW.md) to detect leaks from objects that have not been disposed.
 
 Test failures cause by leaks look like this:
 
@@ -32,8 +38,8 @@ disposables are disposed.
 If a tests is opted out, the reasons should be clearly explained
 in the comments.
 
-It is ok to opt out a test when a test
-throws an exception and the code did not finalize properly.
+It is ok to opt out a test when the test
+throws an exception and thus the code did not finalize properly.
 
 While some exceptions should be finalized properly
 and should not result in leaking objects,
@@ -59,5 +65,3 @@ For local testing, or for test shards configuration, to enable leak tracking for
 `--dart-define LEAK_TRACKING=true` to `flutter test`.
 
 You can see the bot's status on the [Flutter build dashboard](https://flutter-dashboard.appspot.com/#/build).
-The bots are not blocking yet.
-See [a proposal to convert them to be blocking](http://flutter.dev/go/leak-tracker-make-bots-blocking).
