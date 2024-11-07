@@ -20,7 +20,7 @@ class SemanticHeading extends SemanticRole {
 
   @override
   DomElement createElement() {
-    final element = createDomElement('h${semanticsObject.headingLevel}');
+    final element = createDomElement('h${semanticsObject.effectiveHeadingLevel}');
     element.style
       // Browser adds default non-zero margins/paddings to <h*> tags, which
       // affects the size of the element. As the element size is fully defined
