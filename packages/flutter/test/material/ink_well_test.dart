@@ -1137,6 +1137,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
               child: ListView(
                 addAutomaticKeepAlives: keepAlive,
                 dragStartBehavior: DragStartBehavior.down,
+                cacheExtent:250.0,
                 children: <Widget>[
                   SizedBox(height: 500.0, child: InkWell(onTap: () {}, child: const Placeholder())),
                   const SizedBox(height: 500.0),
