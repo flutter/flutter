@@ -1733,7 +1733,7 @@ void main() {
             },);
           },
           suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return const <Widget>[ListTile(title: Text('test'))];
+            return <Widget>[];
           },
         ),
       ),
