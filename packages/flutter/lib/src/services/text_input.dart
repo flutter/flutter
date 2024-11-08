@@ -194,14 +194,24 @@ class TextInputType {
   /// Prevent the OS from showing the on-screen virtual keyboard.
   static const TextInputType none = TextInputType._(10);
 
+  /// Optimized for web searches.
+  ///
+  /// Requests a keyboard that includes keys useful for web searches as well as URLs.
+  ///
+  /// On iOS, requests a default keyboard with ready access to the "." key. In contrast to
+  /// [url], a space bar is available.
+  ///
+  /// On Android this is remapped to the [url] keyboard type as it always shows a space bar.
+  static const TextInputType webSearch = TextInputType._(11);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
-    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress, none,
+    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress, none, webSearch,
   ];
 
   // Corresponding string name for each of the [values].
   static const List<String> _names = <String>[
-    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address', 'none',
+    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address', 'none', 'webSearch',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
