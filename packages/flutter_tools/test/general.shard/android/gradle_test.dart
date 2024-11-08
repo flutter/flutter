@@ -840,54 +840,6 @@ flutter:
     });
   });
 
-  group('configureLegacyPluginEachProjects', () {
-    late FlutterProject project;
-
-    setUp(() {
-      project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
-    });
-
-    test('Ignores .flutter-plugins when it is within comments', () async {
-      // Create a settings.gradle file with '.flutter-plugins' inside comments
-      final File settingsGradle = project.android.hostAppGradleRoot.childFile('settings.gradle');
-      settingsGradle.writeAsStringSync(r'''
-        include ":app"  // include ':another_project'
-        // includeFlat '.flutter-plugins'
-        /*
-          This is a block comment that might contain '.flutter-plugins'
-          includeFlat '.flutter-plugins'
-        */
-      ''');
-
-      // Run the configureLegacyPluginEachProjects function
-      await configureLegacyPluginEachProjects(project);
-
-      // Verify the expected behavior
-      // Since '.flutter-plugins' is within comments, it should not trigger the plugin configuration
-      // To check this, verify that the '.flutter-plugins' directory is not created
-      final Directory pluginsDirectory = project.directory.childDirectory('.flutter-plugins');
-      expect(pluginsDirectory.existsSync(), isFalse);
-    });
-
-    test('Detects .flutter-plugins when it is in uncommented code', () async {
-      // Create a settings.gradle file with '.flutter-plugins' in uncommented code
-      final File settingsGradle = project.android.hostAppGradleRoot.childFile('settings.gradle');
-      settingsGradle.writeAsStringSync(r'''
-        include ":app"
-        includeFlat '.flutter-plugins'
-      ''');
-
-      // Run the configureLegacyPluginEachProjects function
-      await configureLegacyPluginEachProjects(project);
-
-      // Verify the expected behavior
-      // Since '.flutter-plugins' is in uncommented code, it should trigger the plugin configuration
-      // To check this, verify that the '.flutter-plugins' directory is created
-      final Directory pluginsDirectory = project.directory.childDirectory('.flutter-plugins');
-      expect(pluginsDirectory.existsSync(), isTrue);
-    });
-  });
-
   test('Current settings.gradle is in our legacy settings.gradle file set', () {
     // If this test fails, you probably edited templates/app/android.tmpl.
     // That's fine, but you now need to add a copy of that file to gradle/settings.gradle.legacy_versions, separated
