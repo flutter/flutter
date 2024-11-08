@@ -409,7 +409,26 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 
   Widget _buildError() {
-    assert(widget.error != null || widget.errorText != null);
+    assert(
+      widget.error != null || widget.errorText != null,
+      'errorText or error must be provided'
+    );
+
+    assert(
+      !(widget.error != null && (widget.errorBuilder != null || widget.errorText != null)),
+      'errorBuilder and errorText can not used together with error'
+    );
+
+    assert(
+      widget.errorBuilder == null || (widget.errorText != null && widget.error == null),
+      'errorText must be provided when using errorBuilder (and error must be null)'
+    );
+
+    assert(
+      widget.errorText == null || widget.error == null,
+      'errorText and error can not be used together'
+    );
+
     return Semantics(
       container: true,
       child: FadeTransition(
