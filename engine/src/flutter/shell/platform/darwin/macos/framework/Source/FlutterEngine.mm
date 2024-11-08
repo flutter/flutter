@@ -645,16 +645,23 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   static size_t sTaskRunnerIdentifiers = 0;
   const FlutterTaskRunnerDescription cocoa_task_runner_description = {
       .struct_size = sizeof(FlutterTaskRunnerDescription),
-      .user_data = (void*)CFBridgingRetain(self),
+      // Retain for use in post_task_callback. Released in destruction_callback.
+      .user_data = (__bridge_retained void*)self,
       .runs_task_on_current_thread_callback = [](void* user_data) -> bool {
         return [[NSThread currentThread] isMainThread];
       },
       .post_task_callback = [](FlutterTask task, uint64_t target_time_nanos,
                                void* user_data) -> void {
-        [((__bridge FlutterEngine*)(user_data)) postMainThreadTask:task
-                                           targetTimeInNanoseconds:target_time_nanos];
+        FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
+        [engine postMainThreadTask:task targetTimeInNanoseconds:target_time_nanos];
       },
       .identifier = ++sTaskRunnerIdentifiers,
+      .destruction_callback =
+          [](void* user_data) {
+            // Balancing release for the retain when setting user_data above.
+            FlutterEngine* engine = (__bridge_transfer FlutterEngine*)user_data;
+            engine = nil;
+          },
   };
   const FlutterCustomTaskRunners custom_task_runners = {
       .struct_size = sizeof(FlutterCustomTaskRunners),
@@ -1143,9 +1150,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   if (result != kSuccess) {
     NSLog(@"Could not de-initialize the Flutter engine: error %d", result);
   }
-
-  // Balancing release for the retain in the task runner dispatch table.
-  CFRelease((CFTypeRef)self);
 
   result = _embedderAPI.Shutdown(_engine);
   if (result != kSuccess) {

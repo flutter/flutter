@@ -55,11 +55,16 @@ CreateEmbedderTaskRunner(const FlutterTaskRunnerDescription* description) {
   auto runs_task_on_current_thread_callback_c =
       description->runs_task_on_current_thread_callback;
 
+  VoidCallback destruction_callback_c = [](void* user_data) {};
+  if (SAFE_ACCESS(description, destruction_callback, nullptr) != nullptr) {
+    destruction_callback_c = description->destruction_callback;
+  }
+
   EmbedderTaskRunner::DispatchTable task_runner_dispatch_table = {
-      // .post_task_callback
-      [post_task_callback_c, user_data](EmbedderTaskRunner* task_runner,
-                                        uint64_t task_baton,
-                                        fml::TimePoint target_time) -> void {
+      .post_task_callback = [post_task_callback_c, user_data](
+                                EmbedderTaskRunner* task_runner,
+                                uint64_t task_baton,
+                                fml::TimePoint target_time) -> void {
         FlutterTask task = {
             // runner
             reinterpret_cast<FlutterTaskRunner>(task_runner),
@@ -69,10 +74,15 @@ CreateEmbedderTaskRunner(const FlutterTaskRunnerDescription* description) {
         post_task_callback_c(task, target_time.ToEpochDelta().ToNanoseconds(),
                              user_data);
       },
-      // runs_task_on_current_thread_callback
-      [runs_task_on_current_thread_callback_c, user_data]() -> bool {
+      .runs_task_on_current_thread_callback =
+          [runs_task_on_current_thread_callback_c, user_data]() -> bool {
         return runs_task_on_current_thread_callback_c(user_data);
-      }};
+      },
+      .destruction_callback =
+          [destruction_callback_c, user_data]() {
+            destruction_callback_c(user_data);
+          },
+  };
 
   return {true, fml::MakeRefCounted<EmbedderTaskRunner>(
                     task_runner_dispatch_table,

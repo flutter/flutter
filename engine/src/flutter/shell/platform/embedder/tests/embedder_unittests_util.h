@@ -130,7 +130,12 @@ class EmbedderTestTaskRunner {
 
       real_task_runner->PostTaskForTime(invoke_task, target_time);
     };
+    task_runner_description_.destruction_callback = [](void* user_data) {};
     task_runner_description_.identifier = identifier_;
+  }
+
+  void SetDestructionCallback(VoidCallback callback) {
+    task_runner_description_.destruction_callback = callback;
   }
 
   const FlutterTaskRunnerDescription& GetFlutterTaskRunnerDescription() {

@@ -210,6 +210,7 @@ TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
   auto platform_task_runner = CreateNewThread("test_platform_thread");
   static std::mutex engine_mutex;
   static bool signaled_once = false;
+  static std::atomic<bool> destruction_callback_called = false;
   UniqueEngine engine;
 
   EmbedderTestTaskRunner test_task_runner(
@@ -230,6 +231,8 @@ TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
         ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
         latch.Signal();
       });
+  test_task_runner.SetDestructionCallback(
+      [](void* user_data) { destruction_callback_called = true; });
 
   platform_task_runner->PostTask([&]() {
     EmbedderConfigBuilder builder(context);
@@ -263,6 +266,9 @@ TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
 
   ASSERT_TRUE(signaled_once);
   signaled_once = false;
+
+  ASSERT_TRUE(destruction_callback_called);
+  destruction_callback_called = false;
 }
 
 TEST(EmbedderTestNoFixture, CanGetCurrentTimeInNanoseconds) {
