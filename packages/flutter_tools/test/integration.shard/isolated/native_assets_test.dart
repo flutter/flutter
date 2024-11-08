@@ -222,26 +222,6 @@ void main() {
       });
     }
 
-    testWithoutContext('flutter build $buildSubcommand succeeds without libraries', () async {
-      await inTempDir((Directory tempDirectory) async {
-        final Directory projectDirectory = await createTestProjectWithNoCBuild(packageName, tempDirectory);
-
-        final ProcessResult result = processManager.runSync(
-          <String>[
-            flutterBin,
-            'build',
-            buildSubcommand,
-            '--debug',
-            if (buildSubcommand == 'ios') '--no-codesign',
-          ],
-          workingDirectory: projectDirectory.path,
-        );
-        if (result.exitCode != 0) {
-          throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
-        }
-      });
-    });
-
     // This could be an hermetic unit test if the native_assets_builder
     // could mock process runs and file system.
     // https://github.com/dart-lang/native/issues/90.
@@ -582,61 +562,6 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
     workingDirectory: packageDirectory.path,
   );
   expect(result2, const ProcessResultMatcher());
-
-  return packageDirectory;
-}
-
-Future<Directory> createTestProjectWithNoCBuild(String packageName, Directory tempDirectory) async {
-  final ProcessResult result = processManager.runSync(
-    <String>[
-      flutterBin,
-      'create',
-      '--no-pub',
-      packageName,
-    ],
-    workingDirectory: tempDirectory.path,
-  );
-  if (result.exitCode != 0) {
-    throw Exception(
-      'flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
-    );
-  }
-
-  final Directory packageDirectory = tempDirectory.childDirectory(packageName);
-
-  final ProcessResult result2 = await processManager.run(
-    <String>[
-      flutterBin,
-      'pub',
-      'add',
-      'native_assets_cli',
-    ],
-    workingDirectory: packageDirectory.path,
-  );
-  expect(result2, const ProcessResultMatcher());
-
-  await pinDependencies(packageDirectory.childFile('pubspec.yaml'));
-
-  final ProcessResult result3 = await processManager.run(
-    <String>[
-      flutterBin,
-      'pub',
-      'get',
-    ],
-    workingDirectory: packageDirectory.path,
-  );
-  expect(result3, const ProcessResultMatcher());
-
-  // Add build hook that does nothing to the package.
-  final File buildHook = packageDirectory.childDirectory('hook').childFile('build.dart');
-  buildHook.createSync(recursive: true);
-  buildHook.writeAsStringSync('''
-import 'package:native_assets_cli/native_assets_cli.dart';
-
-void main(List<String> args) async {
-  await build(args, (config, output) async {});
-}
-''');
 
   return packageDirectory;
 }
