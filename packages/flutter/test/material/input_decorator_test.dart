@@ -5375,6 +5375,23 @@ void main() {
 
         expect(find.text('errorBuilder'), findsOneWidget);
       });
+
+      testWidgets('InputDecorator errorBuilder is never called if errorText is null', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: InputDecoration(
+              errorBuilder: (String errorText) {
+                return const Text(
+                  'errorBuilder',
+                  style: TextStyle(fontSize: 20.0),
+                );
+              },
+            ),
+          ),
+        );
+
+        expect(find.text('errorBuilder'), findsNothing);
+      });
     });
 
     testWidgets('InputDecorator with counter does not crash when given a 0 size', (WidgetTester tester) async {
