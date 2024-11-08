@@ -566,61 +566,6 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   return packageDirectory;
 }
 
-Future<Directory> createTestProjectWithNoCBuild(String packageName, Directory tempDirectory) async {
-  final ProcessResult result = processManager.runSync(
-    <String>[
-      flutterBin,
-      'create',
-      '--no-pub',
-      packageName,
-    ],
-    workingDirectory: tempDirectory.path,
-  );
-  if (result.exitCode != 0) {
-    throw Exception(
-      'flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
-    );
-  }
-
-  final Directory packageDirectory = tempDirectory.childDirectory(packageName);
-
-  final ProcessResult result2 = await processManager.run(
-    <String>[
-      flutterBin,
-      'pub',
-      'add',
-      'native_assets_cli',
-    ],
-    workingDirectory: packageDirectory.path,
-  );
-  expect(result2, const ProcessResultMatcher());
-
-  await pinDependencies(packageDirectory.childFile('pubspec.yaml'));
-
-  final ProcessResult result3 = await processManager.run(
-    <String>[
-      flutterBin,
-      'pub',
-      'get',
-    ],
-    workingDirectory: packageDirectory.path,
-  );
-  expect(result3, const ProcessResultMatcher());
-
-  // Add build hook that does nothing to the package.
-  final File buildHook = packageDirectory.childDirectory('hook').childFile('build.dart');
-  buildHook.createSync(recursive: true);
-  buildHook.writeAsStringSync('''
-import 'package:native_assets_cli/native_assets_cli.dart';
-
-void main(List<String> args) async {
-  await build(args, (config, output) async {});
-}
-''');
-
-  return packageDirectory;
-}
-
 Future<void> addLinkHookDependency(Directory packageDirectory) async {
   final Directory flutterDirectory = fileSystem.currentDirectory.parent.parent;
   final Directory linkHookDirectory = flutterDirectory
