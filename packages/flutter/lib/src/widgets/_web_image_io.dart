@@ -14,22 +14,41 @@ Future<bool> checkIfImageBytesCanBeFetched(String url) {
   return SynchronousFuture<bool>(true);
 }
 
-/// Returns a widget which displays the [src] in an <img> tag.
-Widget createImgElementWidget(ImgElementProvider provider,
-        {Key? key,
-        ImageLoadingBuilder? loadingBuilder,
-        ImageFrameBuilder? frameBuilder,
-        ImageErrorWidgetBuilder? errorBuilder}) =>
-    throw UnsupportedError('Creating an Image widget using an <img> tag is '
-        'only supported on Web.');
+class WebImageState extends State<WebImage> {
+  @override
+  Widget build(BuildContext context) {
+    return Image.network(
+      widget.provider.src,
+      frameBuilder: widget.frameBuilder,
+      loadingBuilder: widget.loadingBuilder,
+      errorBuilder: widget.errorBuilder,
+      semanticLabel: widget.semanticLabel,
+      excludeFromSemantics: widget.excludeFromSemantics,
+      width: widget.width,
+      height: widget.height,
+      fit: widget.fit,
+      alignment: widget.alignment,
+      matchTextDirection: widget.matchTextDirection,
+      gaplessPlayback: widget.gaplessPlayback,
+    );
+  }
+}
 
-ImgElementProvider createImgElementProvider(String src) =>
-    throw UnsupportedError('Creating an Image widget using an <img> tag is '
-        'only supported on Web.');
+class WebImageProviderImpl implements WebImageProvider {
+  WebImageProviderImpl(this.src);
 
-Future<void> precacheImgElement(
-  ImgElementProvider provider, {
+  String src;
+}
+
+Future<void> precacheWebImage(
+  WebImageProvider provider,
+  BuildContext context, {
+  Size? size,
   ImageErrorListener? onError,
 }) =>
-    throw UnsupportedError('Creating an Image widget using an <img> tag is '
-        'only supported on Web.');
+    precacheImage(
+      NetworkImage(provider.src),
+      context,
+      size: size,
+      onError: onError,
+    );

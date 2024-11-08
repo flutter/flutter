@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../foundation.dart';
 import '../../widgets.dart';
 import '_web_image_io.dart' if (dart.library.js_interop) '_web_image_web.dart'
     as impl;
@@ -42,28 +41,39 @@ import '_web_image_io.dart' if (dart.library.js_interop) '_web_image_web.dart'
 ///
 /// [same origin policy]: https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
 class WebImage extends StatefulWidget {
-  /// Creates a web image.
+  /// Creates a web image with the given [provider].
   const WebImage(
     this.provider, {
     super.key,
-    this.loadingBuilder,
     this.frameBuilder,
+    this.loadingBuilder,
     this.errorBuilder,
+    this.semanticLabel,
+    this.excludeFromSemantics = false,
+    this.width,
+    this.height,
+    this.fit,
+    this.alignment = Alignment.center,
+    this.matchTextDirection = false,
+    this.gaplessPlayback = false,
   });
 
+  /// Creates a web image showing the image at the URL [src].
   WebImage.network(
     String src, {
-    Key? key,
-    ImageLoadingBuilder? loadingBuilder,
-    ImageFrameBuilder? frameBuilder,
-    ImageErrorWidgetBuilder? errorBuilder,
-  }) : this(
-          WebImageProvider(src),
-          key: key,
-          loadingBuilder: loadingBuilder,
-          frameBuilder: frameBuilder,
-          errorBuilder: errorBuilder,
-        );
+    super.key,
+    this.frameBuilder,
+    this.loadingBuilder,
+    this.errorBuilder,
+    this.semanticLabel,
+    this.excludeFromSemantics = false,
+    this.width,
+    this.height,
+    this.fit,
+    this.alignment = Alignment.center,
+    this.matchTextDirection = false,
+    this.gaplessPlayback = false,
+  }) : provider = WebImageProvider(src);
 
   /// The resource which provides the image.
   final WebImageProvider provider;
@@ -77,54 +87,24 @@ class WebImage extends StatefulWidget {
   /// {@macro flutter.widgets.Image.errorBuilder}
   final ImageErrorWidgetBuilder? errorBuilder;
 
-  @override
-  State<WebImage> createState() => _WebImageState();
-}
+  final String? semanticLabel;
 
-class _WebImageState extends State<WebImage> {
-  bool checkedIfBytesCanBeFetched = false;
-  bool imageBytesCanBeFetched = true;
-  @override
-  void initState() {
-    super.initState();
-    widget.provider.checkIfImageBytesCanBeFetched().then((bool canBeFetched) {
-      // We may have become unmounted in the time it took to check if the bytes
-      // could be fetched.
-      if (mounted) {
-        setState(() {
-          checkedIfBytesCanBeFetched = true;
-          imageBytesCanBeFetched = canBeFetched;
-        });
-      }
-    });
-  }
+  final bool excludeFromSemantics;
+
+  final double? width;
+
+  final double? height;
+
+  final BoxFit? fit;
+
+  final AlignmentGeometry alignment;
+
+  final bool matchTextDirection;
+
+  final bool gaplessPlayback;
 
   @override
-  Widget build(BuildContext context) {
-    if (!checkedIfBytesCanBeFetched) {
-      return widget.loadingBuilder
-              ?.call(context, const SizedBox.shrink(), null) ??
-          const SizedBox.shrink();
-    }
-
-    if (imageBytesCanBeFetched) {
-      return Image(
-        image: widget.provider._networkImage!,
-        key: widget.key,
-        loadingBuilder: widget.loadingBuilder,
-        frameBuilder: widget.frameBuilder,
-        errorBuilder: widget.errorBuilder,
-      );
-    } else {
-      return impl.createImgElementWidget(
-        widget.provider._imgElementProvider!,
-        key: widget.key,
-        loadingBuilder: widget.loadingBuilder,
-        frameBuilder: widget.frameBuilder,
-        errorBuilder: widget.errorBuilder,
-      );
-    }
-  }
+  State<WebImage> createState() => impl.WebImageState();
 }
 
 Future<void> precacheWebImage(
@@ -132,53 +112,10 @@ Future<void> precacheWebImage(
   BuildContext context, {
   Size? size,
   ImageErrorListener? onError,
-}) {
-  return provider.checkIfImageBytesCanBeFetched().then((bool canBeFetched) {
-    if (canBeFetched) {
-      if (context.mounted) {
-        return precacheImage(
-          provider._networkImage!,
-          context,
-          size: size,
-          onError: onError,
-        );
-      }
-    }
+}) => impl.precacheWebImage(provider, context, size: size, onError: onError);
 
-    if (context.mounted) {
-      return impl.precacheImgElement(
-        provider._imgElementProvider!,
-        onError: onError,
-      );
-    }
-  });
+abstract class WebImageProvider {
+  factory WebImageProvider(String src) => impl.WebImageProviderImpl(src);
+
+  String get src;
 }
-
-class WebImageProvider {
-  WebImageProvider(this.src);
-
-  final String src;
-
-  bool? _imageBytesCanBeFetched;
-
-  NetworkImage? _networkImage;
-
-  ImgElementProvider? _imgElementProvider;
-
-  Future<bool> checkIfImageBytesCanBeFetched() {
-    if (_imageBytesCanBeFetched != null) {
-      return SynchronousFuture<bool>(_imageBytesCanBeFetched!);
-    }
-    return impl.checkIfImageBytesCanBeFetched(src).then((bool result) {
-      _imageBytesCanBeFetched = result;
-      if (_imageBytesCanBeFetched!) {
-        _networkImage = NetworkImage(src);
-      } else {
-        _imgElementProvider = impl.createImgElementProvider(src);
-      }
-      return result;
-    });
-  }
-}
-
-abstract class ImgElementProvider {}
