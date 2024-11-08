@@ -137,8 +137,8 @@ runner("dart_aot_runner_bin") {
     extra_defines += [ "FLUTTER_PROFILE" ]
   }
   extra_deps = [
-    "$dart_src/runtime:libdart_precompiled_runtime",
-    "$dart_src/runtime/platform:libdart_platform_precompiled_runtime",
+    "$dart_src/runtime:libdart_aotruntime",
+    "$dart_src/runtime/platform:libdart_platform_aotruntime",
     "embedder:dart_aot_snapshot_cc",
   ]
 }
@@ -151,8 +151,8 @@ runner("dart_aot_product_runner_bin") {
     "DART_PRODUCT",
   ]
   extra_deps = [
-    "$dart_src/runtime:libdart_precompiled_runtime",
-    "$dart_src/runtime/platform:libdart_platform_precompiled_runtime",
+    "$dart_src/runtime:libdart_aotruntime",
+    "$dart_src/runtime/platform:libdart_platform_aotruntime",
     "embedder:dart_aot_product_snapshot_cc",
   ]
 }
@@ -170,8 +170,8 @@ template("aot_runner_package") {
         "vmservice:vmservice_snapshot",
         "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_aot_runner",
 
-        # TODO(kaushikiska): Figure out how to get the profiler symbols for `libdart_precompiled_runtime`
-        # "$dart_src/runtime:libdart_precompiled_runtime",
+        # TODO(kaushikiska): Figure out how to get the profiler symbols for `libdart_aotruntime`
+        # "$dart_src/runtime:libdart_aotruntime",
         observatory_target,
       ]
     }

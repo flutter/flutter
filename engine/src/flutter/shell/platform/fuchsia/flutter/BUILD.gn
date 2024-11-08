@@ -278,8 +278,8 @@ flutter_runner("aot") {
   product = false
 
   extra_deps = [
-    "$dart_src/runtime:libdart_precompiled_runtime",
-    "$dart_src/runtime/platform:libdart_platform_precompiled_runtime",
+    "$dart_src/runtime:libdart_aotruntime",
+    "$dart_src/runtime/platform:libdart_platform_aotruntime",
   ]
 }
 
@@ -288,8 +288,8 @@ flutter_runner("aot_product") {
   product = true
 
   extra_deps = [
-    "$dart_src/runtime:libdart_precompiled_runtime",
-    "$dart_src/runtime/platform:libdart_platform_precompiled_runtime",
+    "$dart_src/runtime:libdart_aotruntime",
+    "$dart_src/runtime/platform:libdart_platform_aotruntime",
   ]
 }
 

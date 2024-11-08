@@ -1,4 +1,4 @@
-Signature: 059b4219d4c5ab12d09772f435c139e9
+Signature: ad943b3dce1d3415bb8663e604f48d55
 
 ====================================================================================================
 LIBRARY: dart
@@ -3842,8 +3842,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dart_precompiled_runtime_test_component.cml + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dart_test_component.cml + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dartaotruntime_test_component.cml + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/main_impl.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/run_vm_tests_test_component.cml + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/lib/ffi_dynamic_library.h + ../../../flutter/third_party/dart/LICENSE
@@ -3904,8 +3904,8 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/async/future_extensions.dart +
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/js_interop/js_interop.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/js_interop_unsafe/js_interop_unsafe.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/dart/runtime/bin/dart_precompiled_runtime_test_component.cml
 FILE: ../../../flutter/third_party/dart/runtime/bin/dart_test_component.cml
+FILE: ../../../flutter/third_party/dart/runtime/bin/dartaotruntime_test_component.cml
 FILE: ../../../flutter/third_party/dart/runtime/bin/main_impl.h
 FILE: ../../../flutter/third_party/dart/runtime/bin/run_vm_tests_test_component.cml
 FILE: ../../../flutter/third_party/dart/runtime/lib/ffi_dynamic_library.h
@@ -4380,8 +4380,8 @@ FILE: ../../../flutter/third_party/dart/runtime/observatory/web/index.html
 FILE: ../../../flutter/third_party/dart/runtime/observatory/web/third_party/trace_viewer_full.html
 FILE: ../../../flutter/third_party/dart/runtime/observatory/web/timeline.html
 FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/dart.plist
-FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/dart_precompiled_runtime.plist
-FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/dart_precompiled_runtime_product.plist
+FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/dartaotruntime.plist
+FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/dartaotruntime_product.plist
 FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/gen_snapshot.plist
 FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/gen_snapshot_product.plist
 FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/run_vm_tests.plist
@@ -4805,7 +4805,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/6a3684b961213427ba63c28ba3c438dc5a356eef
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/307869c696e8003257ca3666f3c89e22f2a379a9
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
