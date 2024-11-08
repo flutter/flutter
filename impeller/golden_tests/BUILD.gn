@@ -67,6 +67,7 @@ if (is_mac) {
     deps = [
       ":screenshot",
       "//flutter/display_list",
+      "//flutter/fml",
       "//flutter/impeller/display_list",
       "//flutter/impeller/playground",
       "//flutter/impeller/renderer/backend/metal:metal",
