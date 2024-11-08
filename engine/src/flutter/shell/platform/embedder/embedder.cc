@@ -1183,15 +1183,16 @@ MakeRenderTargetFromBackingStoreImpeller(
   }
 
   impeller::TextureDescriptor depth_stencil_texture_desc;
-  depth_stencil_texture_desc.type =
-      impeller::TextureType::kTexture2DMultisample;
   depth_stencil_texture_desc.format = impeller::PixelFormat::kD24UnormS8Uint;
   depth_stencil_texture_desc.size = size;
   depth_stencil_texture_desc.usage = static_cast<impeller::TextureUsageMask>(
       impeller::TextureUsage::kRenderTarget);
   if (implicit_msaa) {
+    depth_stencil_texture_desc.type =
+        impeller::TextureType::kTexture2DMultisample;
     depth_stencil_texture_desc.sample_count = impeller::SampleCount::kCount4;
   } else {
+    depth_stencil_texture_desc.type = impeller::TextureType::kTexture2D;
     depth_stencil_texture_desc.sample_count = impeller::SampleCount::kCount1;
   }
 
