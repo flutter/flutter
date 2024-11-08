@@ -1566,7 +1566,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           child: widget.child,
         ),
       );
-      final MaterialTapTargetSize tapTargetSize = widget.style?.tapTargetSize ?? Theme.of(context).materialTapTargetSize;
+      final MaterialTapTargetSize tapTargetSize = widget.style?.tapTargetSize ?? MaterialTapTargetSize.shrinkWrap;
       if (tapTargetSize == MaterialTapTargetSize.padded) {
         return ConstrainedBox(
           constraints: const BoxConstraints(
