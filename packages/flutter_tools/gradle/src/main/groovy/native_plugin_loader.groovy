@@ -41,7 +41,7 @@ class NativePluginLoader {
             assert(androidPlugin.name instanceof String)
             assert(androidPlugin.path instanceof String)
             assert(androidPlugin.dependencies instanceof List<String>)
-            assert(androidPlugin.dev_dependency instanceof boolean)
+            assert(androidPlugin.dev_dependency instanceof Boolean)
             // Skip plugins that have no native build (such as a Dart-only implementation
             // of a federated plugin).
             def needsBuild = androidPlugin.containsKey(nativeBuildKey) ? androidPlugin[nativeBuildKey] : true
