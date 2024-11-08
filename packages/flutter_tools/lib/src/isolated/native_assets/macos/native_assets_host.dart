@@ -4,13 +4,12 @@
 
 // Shared logic between iOS and macOS implementations of native assets.
 
-import 'package:native_assets_cli/native_assets_cli.dart' show Architecture;
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../base/io.dart';
-import '../../../build_info.dart';
+import '../../../build_info.dart' as build_info;
 import '../../../convert.dart';
 import '../../../globals.dart' as globals;
 
@@ -99,13 +98,13 @@ Future<void> setInstallNamesDylib(
   String newInstallName,
   Map<String, String> oldToNewInstallNames,
 ) async {
-   final ProcessResult setInstallNamesResult = await globals.processManager.run(
+  final ProcessResult setInstallNamesResult = await globals.processManager.run(
     <String>[
       'install_name_tool',
       '-id',
       newInstallName,
-      for (final MapEntry<String, String> entry in oldToNewInstallNames.entries)
-        ...<String>['-change', entry.key, entry.value],
+      for (final MapEntry<String, String> entry in oldToNewInstallNames
+          .entries) ...<String>['-change', entry.key, entry.value],
       dylibFile.path,
     ],
   );
@@ -135,18 +134,16 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
 
   return <String>{
     for (final List<String> architectureSection
-         in parseOtoolArchitectureSections(installNameResult.stdout as String).values)
+        in parseOtoolArchitectureSections(installNameResult.stdout as String).values)
       // For each architecture, a separate install name is reported, which are
       // not necessarily the same.
       architectureSection.single,
   };
 }
 
-
-
 Future<void> codesignDylib(
   String? codesignIdentity,
-  BuildMode buildMode,
+  build_info.BuildMode buildMode,
   FileSystemEntity target,
 ) async {
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
@@ -157,7 +154,7 @@ Future<void> codesignDylib(
     '--force',
     '--sign',
     codesignIdentity,
-    if (buildMode != BuildMode.release) ...<String>[
+    if (buildMode != build_info.BuildMode.release) ...<String>[
       // Mimic Xcode's timestamp codesigning behavior on non-release binaries.
       '--timestamp=none',
     ],
@@ -180,7 +177,7 @@ Future<void> codesignDylib(
 /// Flutter expects `xcrun` to be on the path on macOS hosts.
 ///
 /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
-Future<CCompilerConfigImpl> cCompilerConfigMacOS() async {
+Future<CCompilerConfig> cCompilerConfigMacOS() async {
   final ProcessResult xcrunResult = await globals.processManager.run(
     <String>['xcrun', 'clang', '--version'],
   );
@@ -191,7 +188,7 @@ Future<CCompilerConfigImpl> cCompilerConfigMacOS() async {
       .firstWhere((String s) => s.startsWith('InstalledDir: '))
       .split(' ')
       .last;
-  return CCompilerConfigImpl(
+  return CCompilerConfig(
     compiler: Uri.file('$installPath/clang'),
     archiver: Uri.file('$installPath/ar'),
     linker: Uri.file('$installPath/ld'),

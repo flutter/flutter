@@ -54,7 +54,7 @@ const double _inputFormPortraitHeight = 98.0;
 const double _inputFormLandscapeHeight = 108.0;
 
 // 3.0 is the maximum scale factor on mobile phones. As of 07/30/24, iOS goes up
-// to a max of 3.0 text sxale factor, and Android goes up to 2.0. This is the
+// to a max of 3.0 text scale factor, and Android goes up to 2.0. This is the
 // default used for non-range date pickers. This default is changed to a lower
 // value at different parts of the date pickers depending on content, and device
 // orientation.
@@ -155,6 +155,13 @@ const double _fontSizeToScale = 14.0;
 /// [DatePickerMode.day] mode. It defaults to [DatePickerMode.day].
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to create a basic date picker.
+/// Tapping the button displays a date picker which returns the selected date.
+///
+/// ** See code in examples/api/lib/material/date_picker/show_date_picker.1.dart **
+/// {@end-tool}
 ///
 /// ### State Restoration
 ///
@@ -327,6 +334,7 @@ class DatePickerDialog extends StatefulWidget {
     this.onDatePickerModeChange,
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
+    this.insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
   }) : initialDate = initialDate == null ? null : DateUtils.dateOnly(initialDate),
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate),
@@ -429,7 +437,6 @@ class DatePickerDialog extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
-
   /// Called when the [DatePickerDialog] is toggled between
   /// [DatePickerEntryMode.calendar],[DatePickerEntryMode.input].
   ///
@@ -443,6 +450,13 @@ class DatePickerDialog extends StatefulWidget {
 
   /// {@macro flutter.material.date_picker.switchToCalendarEntryModeIcon}
   final Icon? switchToCalendarEntryModeIcon;
+
+  /// The amount of padding added to [MediaQueryData.viewInsets] on the outside
+  /// of the dialog. This defines the minimum space between the screen's edges
+  /// and the dialog.
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0)`.
+  final EdgeInsets insetPadding;
 
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
@@ -513,9 +527,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   }
 
   void _handleDateChanged(DateTime date) {
-    setState(() {
-      _selectedDate.value = date;
-    });
+    setState(() => _selectedDate.value = date);
   }
 
   Size _dialogSize(BuildContext context) {
@@ -707,7 +719,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     // layout issues.
     final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(_fontSizeToScale) / _fontSizeToScale;
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
-    final DialogTheme dialogTheme = theme.dialogTheme;
+    final DialogThemeData dialogTheme = theme.dialogTheme;
     return Dialog(
       backgroundColor: datePickerTheme.backgroundColor ?? defaults.backgroundColor,
       elevation: useMaterial3
@@ -718,7 +730,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       shape: useMaterial3
         ? datePickerTheme.shape ?? defaults.shape
         : datePickerTheme.shape ?? dialogTheme.shape ?? defaults.shape,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      insetPadding: widget.insetPadding,
       clipBehavior: Clip.antiAlias,
       child: AnimatedContainer(
         width: dialogSize.width,
@@ -1660,7 +1672,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
               : localizations.dateRangePickerHelpText.toUpperCase()
           ),
         );
-        final DialogTheme dialogTheme = theme.dialogTheme;
+        final DialogThemeData dialogTheme = theme.dialogTheme;
         size = orientation == Orientation.portrait
           ? (useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2)
           : _inputRangeLandscapeDialogSize;

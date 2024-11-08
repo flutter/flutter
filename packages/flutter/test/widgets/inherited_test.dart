@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
@@ -52,6 +53,35 @@ class ExpectFailState extends State<ExpectFail> {
 
 class ChangeNotifierInherited extends InheritedNotifier<ChangeNotifier> {
   const ChangeNotifierInherited({ super.key, required super.child, super.notifier });
+}
+
+class ThemedCard extends SingleChildRenderObjectWidget {
+  const ThemedCard({super.key}) : super(child: const SizedBox.expand());
+
+  @override
+  RenderPhysicalShape createRenderObject(BuildContext context) {
+    final CardThemeData cardTheme = CardTheme.of(context);
+
+    return RenderPhysicalShape(
+      clipper: ShapeBorderClipper(shape: cardTheme.shape ?? const RoundedRectangleBorder()),
+      clipBehavior: cardTheme.clipBehavior ?? Clip.antiAlias,
+      color: cardTheme.color ?? Colors.white,
+      elevation: cardTheme.elevation ?? 0.0,
+      shadowColor: cardTheme.shadowColor ?? Colors.black,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
+    final CardThemeData cardTheme = CardTheme.of(context);
+
+    renderObject
+      ..clipper = ShapeBorderClipper(shape: cardTheme.shape ?? const RoundedRectangleBorder())
+      ..clipBehavior = cardTheme.clipBehavior ?? Clip.antiAlias
+      ..color = cardTheme.color ?? Colors.white
+      ..elevation = cardTheme.elevation ?? 0.0
+      ..shadowColor = cardTheme.shadowColor ?? Colors.black;
+  }
 }
 
 void main() {
@@ -499,5 +529,80 @@ void main() {
       child: builder,
     ));
     expect(buildCount, equals(3));
+  });
+
+  testWidgets('InheritedWidgets can trigger RenderObject updates', (WidgetTester tester) async {
+    CardThemeData cardThemeData = const CardThemeData(color: Colors.white);
+    late StateSetter setState;
+
+    // Verifies that the "themed card" is rendered
+    // with the appropriate inherited theme data.
+    void expectCardToMatchTheme() {
+      final RenderPhysicalShape renderShape = tester.renderObject(
+        find.byType(ThemedCard),
+      );
+
+      if (cardThemeData.color != null) {
+        expect(renderShape.color, cardThemeData.color);
+      }
+      if (cardThemeData.elevation != null) {
+        expect(renderShape.elevation, cardThemeData.elevation);
+      }
+      if (cardThemeData.shadowColor != null) {
+        expect(renderShape.shadowColor, cardThemeData.shadowColor);
+      }
+      if (cardThemeData.shape != null) {
+        final CustomClipper<Path>? clipper = renderShape.clipper;
+        expect(clipper, isA<ShapeBorderClipper>());
+        expect((clipper! as ShapeBorderClipper).shape, cardThemeData.shape);
+      }
+      if (cardThemeData.clipBehavior != null) {
+        expect(renderShape.clipBehavior, cardThemeData.clipBehavior);
+      }
+    }
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          return Theme(
+            data: ThemeData(cardTheme: CardTheme(data: cardThemeData)),
+            child: const ThemedCard(),
+          );
+        },
+      ),
+    );
+    expectCardToMatchTheme();
+
+    setState(() {
+      cardThemeData = const CardThemeData(
+        shape: BeveledRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+        ),
+      );
+    });
+    await tester.pump();
+    expectCardToMatchTheme();
+
+    setState(() {
+      cardThemeData = const CardThemeData(
+        clipBehavior: Clip.hardEdge,
+      );
+    });
+    await tester.pump();
+    expectCardToMatchTheme();
+
+    setState(() {
+      cardThemeData = const CardThemeData(
+        elevation: 5.0,
+        shadowColor: Colors.blueGrey,
+        shape: ContinuousRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        ),
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+      );
+    });
+    await tester.pump();
+    expectCardToMatchTheme();
   });
 }

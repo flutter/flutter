@@ -145,7 +145,7 @@ linter:
     # - one_member_abstracts # too many false positives
     - only_throw_errors # this does get disabled in a few places where we have legacy code that uses strings et al
     - overridden_fields
-    - package_api_docs
+    # - package_api_docs # Deprecated (https://github.com/dart-lang/linter/issues/5107)
     - package_names
     - package_prefixed_library_names
     # - parameter_assignments # we do this commonly
@@ -236,7 +236,6 @@ linter:
     - unnecessary_to_list_in_spreads
     - unreachable_from_main
     - unrelated_type_equality_checks
-    - unsafe_html
     - use_build_context_synchronously
     - use_colored_box
     # - use_decorated_box # leads to bugs: DecoratedBox and Container are not equivalent (Container inserts extra padding)

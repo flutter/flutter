@@ -226,6 +226,19 @@ void main() {
       expect(outputFlutterFramework.childLink('Modules'), isNot(exists));
       expect(outputFlutterFramework.childDirectory('Modules'), isNot(exists));
 
+      // PrivacyInfo.xcprivacy was first added to the top-level path, but
+      // the correct location is Versions/A/Resources/PrivacyInfo.xcprivacy.
+      // TODO(jmagman): Switch expectation to only check Resources/ once the new path rolls.
+      // https://github.com/flutter/flutter/issues/157016#issuecomment-2420786225
+      final File topLevelPrivacy =  outputFlutterFramework.childFile('PrivacyInfo.xcprivacy');
+      final File resourcesLevelPrivacy = fileSystem.file(fileSystem.path.join(
+        outputFlutterFramework.path,
+        'Resources',
+        'PrivacyInfo.xcprivacy',
+      ));
+
+      expect(topLevelPrivacy.existsSync() || resourcesLevelPrivacy.existsSync(), isTrue);
+
       // Build again without cleaning.
       final ProcessResult secondBuild = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
 

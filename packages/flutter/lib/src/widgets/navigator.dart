@@ -225,7 +225,9 @@ abstract class Route<T> extends _RoutePlaceholder {
   void _updateSettings(RouteSettings newSettings) {
     if (_settings != newSettings) {
       _settings = newSettings;
-      changedInternalState();
+      if (_navigator != null) {
+        changedInternalState();
+      }
     }
   }
 
@@ -2808,16 +2810,14 @@ class Navigator extends StatefulWidget {
     BuildContext context, {
     bool rootNavigator = false,
   }) {
-    // Handles the case where the input context is a navigator element.
     NavigatorState? navigator;
-    if (context is StatefulElement && context.state is NavigatorState) {
-      navigator = context.state as NavigatorState;
+    if (context case StatefulElement(:final NavigatorState state)) {
+      navigator = state;
     }
-    if (rootNavigator) {
-      navigator = context.findRootAncestorStateOfType<NavigatorState>() ?? navigator;
-    } else {
-      navigator = navigator ?? context.findAncestorStateOfType<NavigatorState>();
-    }
+
+    navigator = rootNavigator
+        ? context.findRootAncestorStateOfType<NavigatorState>() ?? navigator
+        : navigator ?? context.findAncestorStateOfType<NavigatorState>();
 
     assert(() {
       if (navigator == null) {
@@ -2858,17 +2858,14 @@ class Navigator extends StatefulWidget {
     BuildContext context, {
     bool rootNavigator = false,
   }) {
-    // Handles the case where the input context is a navigator element.
     NavigatorState? navigator;
-    if (context is StatefulElement && context.state is NavigatorState) {
-      navigator = context.state as NavigatorState;
+    if (context case StatefulElement(:final NavigatorState state)) {
+      navigator = state;
     }
-    if (rootNavigator) {
-      navigator = context.findRootAncestorStateOfType<NavigatorState>() ?? navigator;
-    } else {
-      navigator = navigator ?? context.findAncestorStateOfType<NavigatorState>();
-    }
-    return navigator;
+
+    return rootNavigator
+        ? context.findRootAncestorStateOfType<NavigatorState>() ?? navigator
+        : navigator ?? context.findAncestorStateOfType<NavigatorState>();
   }
 
   /// Turn a route name into a set of [Route] objects.
@@ -3106,10 +3103,6 @@ class _RouteEntry extends RouteTransitionRecord {
   void handleAdd({ required NavigatorState navigator, required Route<dynamic>? previousPresent }) {
     assert(currentState == _RouteLifecycle.add);
     assert(navigator._debugLocked);
-    assert(route._navigator == null);
-    route._navigator = navigator;
-    route.install();
-    assert(route.overlayEntries.isNotEmpty);
     currentState = _RouteLifecycle.adding;
     navigator._observedRouteAdditions.add(
       _NavigatorPushObservation(route, previousPresent),
@@ -3234,6 +3227,10 @@ class _RouteEntry extends RouteTransitionRecord {
   }
 
   void didAdd({ required NavigatorState navigator, required bool isNewFirst}) {
+    assert(route._navigator == null);
+    route._navigator = navigator;
+    route.install();
+    assert(route.overlayEntries.isNotEmpty);
     route.didAdd();
     currentState = _RouteLifecycle.idle;
     if (isNewFirst) {
@@ -3830,7 +3827,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     super.didChangeDependencies();
     _updateHeroController(HeroControllerScope.maybeOf(context));
     for (final _RouteEntry entry in _history) {
-      entry.route.changedExternalState();
+      if (entry.route.navigator == this) {
+        entry.route.changedExternalState();
+      }
     }
   }
 
@@ -3950,7 +3949,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
 
     for (final _RouteEntry entry in _history) {
-      entry.route.changedExternalState();
+      if (entry.route.navigator == this) {
+        entry.route.changedExternalState();
+      }
     }
   }
 

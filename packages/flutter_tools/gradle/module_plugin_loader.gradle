@@ -30,7 +30,7 @@ gradle.getGradle().projectsLoaded { g ->
                 if (!androidPluginBuildOutputDir.exists()) {
                     androidPluginBuildOutputDir.mkdirs()
                 }
-                subproject.buildDir = androidPluginBuildOutputDir
+                subproject.layout.buildDirectory.fileValue(androidPluginBuildOutputDir)
             }
         }
         def _mainModuleName = binding.variables['mainModuleName']

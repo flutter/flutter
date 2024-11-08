@@ -40,11 +40,10 @@ class SynchronousFuture<T> implements Future<T> {
 
   @override
   Future<R> then<R>(FutureOr<R> Function(T value) onValue, { Function? onError }) {
-    final FutureOr<R> result = onValue(_value);
-    if (result is Future<R>) {
-      return result;
-    }
-    return SynchronousFuture<R>(result);
+    return switch (onValue(_value)) {
+      final Future<R> result => result,
+      final R result => SynchronousFuture<R>(result),
+    };
   }
 
   @override

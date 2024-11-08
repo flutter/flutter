@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'android/android_device.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
@@ -421,16 +422,17 @@ class FlutterDevice {
   /// This can fail if the device if no longer connected.
   Future<void> tryInitLogReader() async {
     final vm_service.VM? vm = await vmService!.getVmGuarded();
-    if (vm == null) {
-      globals.printError(
-        'Unable to initiate log reader for device'
-        '${device?.name}, because the Flutter VM service connection '
-        'is closed.',
-      );
-      return;
-    }
     final DeviceLogReader logReader = await device!.getLogReader(app: package);
-    logReader.appPid = vm.pid;
+    if (vm == null && logReader is AdbLogReader) {
+      // TODO(andrewkolos): This is a temporary, hacky fix for
+      //  https://github.com/flutter/flutter/issues/155795 that emphasizes
+      //  simplicity for the sake of being suitable for cherry-picking.
+      globals.printError(
+        'Unable to initiate adb log filtering for device'
+        '${device?.name}. Logs from the device may be more verbose than usual.',
+      );
+    }
+    logReader.appPid = vm?.pid;
   }
 
   Future<int> runHot({
@@ -1051,6 +1053,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.flutterDevices, {
     required this.target,
     required this.debuggingOptions,
+    required bool useImplicitPubspecResolution,
     String? projectRootPath,
     this.stayResident = true,
     this.hotMode = true,
@@ -1061,6 +1064,7 @@ abstract class ResidentRunner extends ResidentHandlers {
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
+       _useImplicitPubspecResolution = useImplicitPubspecResolution,
        artifactDirectory = dillOutputPath == null
           ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
           : globals.fs.file(dillOutputPath).parent,
@@ -1093,6 +1097,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   final bool stayResident;
   final String? _dillOutputPath;
+  final bool _useImplicitPubspecResolution;
   /// The parent location of the incremental artifacts.
   final Directory artifactDirectory;
   final String packagesFilePath;
@@ -1219,6 +1224,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         // Needed for Dart plugin registry generation.
         kTargetFile: mainPath,
       },
+      useImplicitPubspecResolution: _useImplicitPubspecResolution,
     );
 
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[

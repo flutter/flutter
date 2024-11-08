@@ -10,6 +10,7 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
+import '../runner/flutter_command_runner.dart';
 import '../web/compile.dart';
 import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/web_constants.dart';
@@ -28,7 +29,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();
-    addBuildModeFlags(verboseHelp: verboseHelp, excludeDebug: true);
+    addBuildModeFlags(verboseHelp: verboseHelp);
     usesDartDefineOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
@@ -62,7 +63,6 @@ class BuildWebCommand extends BuildSubCommand {
       abbr: 'O',
       help:
           'Sets the optimization level used for Dart compilation to JavaScript/Wasm.',
-      defaultsTo: '${WebCompilerConfig.kDefaultOptimizationLevel}',
       allowed: const <String>['0', '1', '2', '3', '4'],
     );
     argParser.addFlag(
@@ -134,10 +134,11 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
 
-    final int optimizationLevel = int.parse(stringArg('optimization-level')!);
+    final String? optimizationLevelArg = stringArg('optimization-level');
+    final int? optimizationLevel = optimizationLevelArg != null ? int.parse(optimizationLevelArg) : null;
 
     final String? dart2jsOptimizationLevelValue = stringArg('dart2js-optimization');
-    final int jsOptimizationLevel =  dart2jsOptimizationLevelValue != null
+    final int? jsOptimizationLevel =  dart2jsOptimizationLevelValue != null
         ? int.parse(dart2jsOptimizationLevelValue.substring(1))
         : optimizationLevel;
 
@@ -149,6 +150,9 @@ class BuildWebCommand extends BuildSubCommand {
     final bool sourceMaps = boolArg('source-maps');
 
     final List<WebCompilerConfig> compilerConfigs;
+    if (webRenderer != null && webRenderer.isDeprecated) {
+      globals.logger.printWarning(webRenderer.deprecationWarning);
+    }
     if (boolArg(FlutterOptions.kWebWasmFlag)) {
       if (webRenderer != null) {
         throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');
@@ -188,9 +192,6 @@ class BuildWebCommand extends BuildSubCommand {
 
     final String target = stringArg('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
-    if (buildInfo.isDebug) {
-      throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
-    }
     final String? baseHref = stringArg('base-href');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
       throwToolExit(
@@ -226,6 +227,7 @@ class BuildWebCommand extends BuildSubCommand {
       flutterVersion: globals.flutterVersion,
       usage: globals.flutterUsage,
       analytics: globals.analytics,
+      useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
     );
     await webBuilder.buildWeb(
       project,

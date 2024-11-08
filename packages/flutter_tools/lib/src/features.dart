@@ -146,14 +146,12 @@ const Feature flutterCustomDevicesFeature = Feature(
   ),
 );
 
-const String kCliAnimationsFeatureName = 'cli-animations';
-
 /// The [Feature] for CLI animations.
 ///
 /// The TERM environment variable set to "dumb" turns this off.
 const Feature cliAnimation = Feature.fullyEnabled(
   name: 'animations in the command line interface',
-  configSetting: kCliAnimationsFeatureName,
+  configSetting: 'cli-animations',
 );
 
 /// Enable native assets compilation and bundling.
@@ -179,12 +177,18 @@ const Feature previewDevice = Feature(
   ),
 );
 
-/// Enable Swift Package Mangaer as a darwin dependency manager.
+/// Enable Swift Package Manager as a darwin dependency manager.
 const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'SWIFT_PACKAGE_MANAGER',
   master: FeatureChannelSetting(
+    available: true,
+  ),
+  beta: FeatureChannelSetting(
+    available: true,
+  ),
+  stable: FeatureChannelSetting(
     available: true,
   ),
 );

@@ -227,17 +227,17 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
-                  flags: SemanticsFlag.isSelected.index,
+                  flags: <SemanticsFlag>[SemanticsFlag.hasSelectedState, SemanticsFlag.isSelected],
                   label: 'node 1',
                 ),
                 TestSemantics(
                   id: 3,
-                  flags: SemanticsFlag.isSelected.index,
+                  flags: <SemanticsFlag>[SemanticsFlag.hasSelectedState, SemanticsFlag.isSelected],
                   label: 'node 2',
                 ),
                 TestSemantics(
                   id: 4,
-                  flags: SemanticsFlag.isSelected.index,
+                  flags: <SemanticsFlag>[SemanticsFlag.hasSelectedState, SemanticsFlag.isSelected],
                   label: 'node 3',
                 ),
               ],

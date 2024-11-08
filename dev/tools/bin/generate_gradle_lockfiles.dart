@@ -83,6 +83,7 @@ void main(List<String> arguments) {
         (loadYaml(exclusionFile.readAsStringSync()) as YamlList)
             .toList()
             .cast<String>()
+            .map((String s) => '${repoRoot.path}/$s')
     );
     print('Loaded exclusion file from ${exclusionFile.path}.');
   } else {
@@ -179,14 +180,18 @@ void main(List<String> arguments) {
     final String appDirectory = androidDirectory.parent.absolute.path;
 
     // Fetch pub dependencies.
-    exec('flutter', <String>['pub', 'get'], workingDirectory: appDirectory);
+    final String flutterPath = repoRoot
+        .childDirectory('bin')
+        .childFile('flutter')
+        .path;
+    exec(flutterPath, <String>['pub', 'get'], workingDirectory: appDirectory);
 
     // Verify that the Gradlew wrapper exists.
     final File gradleWrapper = androidDirectory.childFile('gradlew');
     // Generate Gradle wrapper if it doesn't exist.
     if (!gradleWrapper.existsSync()) {
       exec(
-        'flutter',
+        flutterPath,
         <String>['build', 'apk', '--config-only'],
         workingDirectory: appDirectory,
       );
@@ -232,10 +237,10 @@ allprojects {
     }
 }
 
-rootProject.buildDir = '../build'
+rootProject.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir("../../build").get())
 
 subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
+    project.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir(project.name).get())
 }
 subprojects {
     project.evaluationDependsOn(':app')
@@ -249,7 +254,7 @@ subprojects {
 }
 
 tasks.register("clean", Delete) {
-    delete rootProject.buildDir
+    delete rootProject.layout.buildDirectory
 }
 ''';
 
@@ -290,8 +295,8 @@ buildscript {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "8.1.0" apply false
-    id "org.jetbrains.kotlin.android" version "1.7.10" apply false
+    id "com.android.application" version "8.7.0" apply false
+    id "org.jetbrains.kotlin.android" version "1.8.10" apply false
 }
 
 include ":app"
@@ -302,7 +307,7 @@ distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.3-all.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-all.zip
 ''';
 
 Iterable<Directory> discoverAndroidDirectories(Directory repoRoot) {

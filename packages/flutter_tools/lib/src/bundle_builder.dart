@@ -37,6 +37,7 @@ class BundleBuilder {
   Future<void> build({
     required TargetPlatform platform,
     required BuildInfo buildInfo,
+    required bool useImplicitPubspecResolution,
     FlutterProject? project,
     String? mainPath,
     String manifestPath = defaultManifestPath,
@@ -60,7 +61,7 @@ class BundleBuilder {
       buildDir: project.dartTool.childDirectory('flutter_build'),
       cacheDir: globals.cache.getRoot(),
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      engineVersion: globals.artifacts!.isLocalEngine
+      engineVersion: globals.artifacts!.usesLocalArtifacts
           ? null
           : globals.flutterVersion.engineRevision,
       defines: <String, String>{
@@ -79,6 +80,7 @@ class BundleBuilder {
       analytics: globals.analytics,
       platform: globals.platform,
       generateDartPluginRegistry: true,
+      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
     final Target target = buildInfo.mode == BuildMode.debug
         ? globals.buildTargets.copyFlutterBundle

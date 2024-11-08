@@ -46,13 +46,15 @@ class WebBuilder {
     required Analytics analytics,
     required FlutterVersion flutterVersion,
     required FileSystem fileSystem,
+    required bool useImplicitPubspecResolution,
   })  : _logger = logger,
         _processManager = processManager,
         _buildSystem = buildSystem,
         _flutterUsage = usage,
         _analytics = analytics,
         _flutterVersion = flutterVersion,
-        _fileSystem = fileSystem;
+        _fileSystem = fileSystem,
+        _useImplicitPubspecResolution = useImplicitPubspecResolution;
 
   final Logger _logger;
   final ProcessManager _processManager;
@@ -61,6 +63,7 @@ class WebBuilder {
   final Analytics _analytics;
   final FlutterVersion _flutterVersion;
   final FileSystem _fileSystem;
+  final bool _useImplicitPubspecResolution;
 
   Future<void> buildWeb(
     FlutterProject flutterProject,
@@ -72,7 +75,7 @@ class WebBuilder {
     String? outputDirectoryPath,
   }) async {
     final bool hasWebPlugins =
-        (await findPlugins(flutterProject)).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+        (await findPlugins(flutterProject, useImplicitPubspecResolution: true)).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
         ? _fileSystem.directory(getWebBuildDirectory())
         : _fileSystem.directory(outputDirectoryPath);
@@ -111,11 +114,12 @@ class WebBuilder {
             usage: _flutterUsage,
             analytics: _analytics,
             cacheDir: globals.cache.getRoot(),
-            engineVersion: globals.artifacts!.isLocalEngine ? null : _flutterVersion.engineRevision,
+            engineVersion: globals.artifacts!.usesLocalArtifacts ? null : _flutterVersion.engineRevision,
             flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
             // Web uses a different Dart plugin registry.
             // https://github.com/flutter/flutter/issues/80406
             generateDartPluginRegistry: false,
+            useImplicitPubspecResolution: _useImplicitPubspecResolution,
           ));
       if (!result.success) {
         for (final ExceptionMeasurement measurement in result.exceptions.values) {
@@ -198,6 +202,21 @@ enum WebRendererMode implements CliEnum {
 
   static const WebRendererMode defaultForJs = WebRendererMode.canvaskit;
   static const WebRendererMode defaultForWasm = WebRendererMode.skwasm;
+
+  /// Returns whether the WebRendererMode is considered deprecated or not.
+  ///
+  /// Deprecated modes: auto, html.
+  bool get isDeprecated => switch (this) {
+        auto => true,
+        canvaskit => false,
+        html => true,
+        skwasm => false
+      };
+
+  /// Returns a consistent deprecation warning for the WebRendererMode.
+  String get deprecationWarning =>
+    'The HTML Renderer is deprecated. Do not use "--web-renderer=$name".'
+    '\nSee: https://docs.flutter.dev/to/web-html-renderer-deprecation';
 
   @override
   String get cliName => kebabCase(name);

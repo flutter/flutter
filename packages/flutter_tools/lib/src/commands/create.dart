@@ -26,6 +26,7 @@ import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 import 'create_base.dart';
 
 const String kPlatformHelp =
@@ -258,6 +259,13 @@ class CreateCommand extends CreateBase {
         'template: the language will always be C or C++.',
         exitCode: 2,
       );
+    } else if (argResults!.wasParsed('ios-language')) {
+      globals.printWarning(
+          'The "ios-language" option is deprecated and will be removed in a future Flutter release.');
+      if (stringArg('ios-language') == 'objc') {
+        globals.printWarning(
+            'Please comment in https://github.com/flutter/flutter/issues/148586 describing your use-case for using Objective-C instead of Swift.');
+      }
     }
 
     final String organization = await getOrganization();
@@ -451,6 +459,7 @@ class CreateCommand extends CreateBase {
           macOSPlatform: includeMacos,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,
+          useImplicitPubspecResolution: boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true),
         );
       }
     }
