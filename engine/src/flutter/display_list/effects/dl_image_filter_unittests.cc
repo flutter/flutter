@@ -12,6 +12,8 @@
 #include "flutter/display_list/utils/dl_comparable.h"
 #include "gtest/gtest.h"
 
+#include "include/core/SkMatrix.h"
+#include "include/core/SkRect.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"
@@ -821,6 +823,88 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
       }
     }
   }
+}
+
+TEST(DisplayListImageFilter, RuntimeEffectEquality) {
+  DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>());
+  DlRuntimeEffectImageFilter filter_b(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>());
+
+  EXPECT_EQ(filter_a, filter_b);
+
+  DlRuntimeEffectImageFilter filter_c(
+      nullptr, {nullptr}, std::make_shared<std::vector<uint8_t>>(1));
+
+  EXPECT_NE(filter_a, filter_c);
+}
+
+TEST(DisplayListImageFilter, RuntimeEffectEqualityWithSamplers) {
+  auto image_a = std::make_shared<DlImageColorSource>(
+      nullptr, DlTileMode::kClamp, DlTileMode::kDecal);
+  auto image_b = std::make_shared<DlImageColorSource>(
+      nullptr, DlTileMode::kClamp, DlTileMode::kClamp);
+
+  DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr, image_a},
+                                      std::make_shared<std::vector<uint8_t>>());
+  DlRuntimeEffectImageFilter filter_b(nullptr, {nullptr, image_a},
+                                      std::make_shared<std::vector<uint8_t>>());
+
+  EXPECT_EQ(filter_a, filter_b);
+
+  DlRuntimeEffectImageFilter filter_c(nullptr, {nullptr, image_b},
+                                      std::make_shared<std::vector<uint8_t>>());
+
+  EXPECT_NE(filter_a, filter_c);
+}
+
+TEST(DisplayListImageFilter, RuntimeEffectMapDeviceBounds) {
+  DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>());
+
+  auto input_bounds = SkIRect::MakeLTRB(0, 0, 100, 100);
+  SkMatrix identity;
+  SkIRect output_bounds;
+  SkIRect* result =
+      filter_a.map_device_bounds(input_bounds, identity, output_bounds);
+
+  EXPECT_NE(result, nullptr);
+  EXPECT_EQ(output_bounds, input_bounds);
+}
+
+TEST(DisplayListImageFilter, RuntimeEffectMapInputBounds) {
+  DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>());
+
+  auto input_bounds = SkRect::MakeLTRB(0, 0, 100, 100);
+
+  SkRect output_bounds;
+  SkRect* result = filter_a.map_local_bounds(input_bounds, output_bounds);
+
+  EXPECT_NE(result, nullptr);
+  EXPECT_EQ(output_bounds, input_bounds);
+}
+
+TEST(DisplayListImageFilter, RuntimeEffectGetInputDeviceBounds) {
+  DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>());
+
+  auto output_bounds = SkIRect::MakeLTRB(0, 0, 100, 100);
+
+  SkMatrix identity;
+  SkIRect input_bounds;
+  SkIRect* result =
+      filter_a.get_input_device_bounds(output_bounds, identity, input_bounds);
+
+  EXPECT_NE(result, nullptr);
+  EXPECT_EQ(output_bounds, input_bounds);
+}
+
+TEST(DisplayListImageFilter, RuntimeEffectModifiesTransparentBlack) {
+  DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>());
+
+  EXPECT_FALSE(filter_a.modifies_transparent_black());
 }
 
 }  // namespace testing

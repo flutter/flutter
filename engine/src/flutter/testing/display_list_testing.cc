@@ -8,6 +8,7 @@
 #include <iomanip>
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
 
 namespace flutter {
 namespace testing {
@@ -660,6 +661,12 @@ void DisplayListStreamDispatcher::out(const DlImageFilter& filter) {
       os_ << std::endl;
       outdent(25);
       startl() << ")";
+      break;
+    }
+    case flutter::DlImageFilterType::kRuntimeEffect: {
+      [[maybe_unused]] const DlRuntimeEffectImageFilter* runtime_effect = filter.asRuntimeEffectFilter();
+      FML_DCHECK(runtime_effect);
+      os_ << "DlRuntimeEffectImageFilter()";
       break;
     }
   }

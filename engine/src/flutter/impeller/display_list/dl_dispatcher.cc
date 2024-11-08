@@ -10,7 +10,7 @@
 #include <optional>
 #include <vector>
 
-#include "display_list/effects/dl_color_source.h"
+#include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "flutter/fml/logging.h"
 #include "impeller/core/formats.h"

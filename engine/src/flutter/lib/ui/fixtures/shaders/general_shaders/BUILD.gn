@@ -17,6 +17,9 @@ if (enable_unittests) {
     "uniforms.frag",
     "uniforms_sorted.frag",
     "uniform_arrays.frag",
+    "filter_shader.frag",
+    "missing_size.frag",
+    "missing_texture.frag",
   ]
 
   group("general_shaders") {

@@ -4,11 +4,12 @@
 
 #include <memory>
 
-#include "display_list/effects/dl_color_source.h"
-#include "flutter/impeller/display_list/aiks_unittests.h"
-
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/dl_runtime_effect.h"
+#include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "include/core/SkPath.h"
 #include "include/core/SkRRect.h"
@@ -79,6 +80,33 @@ TEST_P(AiksTest, DrawPaintTransformsBounds) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.DrawPaint(paint);
   builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
+  auto runtime_stages =
+      OpenAssetAsRuntimeStage("runtime_stage_filter_example.frag.iplr");
+
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  std::vector<std::shared_ptr<DlColorSource>> sampler_inputs = {
+      nullptr,
+  };
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  uniform_data->resize(sizeof(Vector2));
+
+  DlPaint paint;
+  paint.setColor(DlColor::kAqua());
+  paint.setImageFilter(std::make_shared<DlRuntimeEffectImageFilter>(
+      DlRuntimeEffect::MakeImpeller(runtime_stage), sampler_inputs,
+      uniform_data));
+
+  DisplayListBuilder builder;
+  builder.DrawRect(SkRect::MakeXYWH(0, 0, 400, 400), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

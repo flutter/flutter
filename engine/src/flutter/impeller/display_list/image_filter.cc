@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/display_list/image_filter.h"
+#include "display_list/effects/dl_image_filter.h"
 #include "fml/logging.h"
 #include "impeller/display_list/color_filter.h"
 #include "impeller/display_list/skia_conversions.h"
@@ -101,6 +102,43 @@ std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
       return WrapInput(
           outer_dl_filter.get(),
           FilterInput::Make(WrapInput(inner_dl_filter.get(), input)));
+    }
+    case flutter::DlImageFilterType::kRuntimeEffect: {
+      const flutter::DlRuntimeEffectImageFilter* runtime_filter =
+          filter->asRuntimeEffectFilter();
+      FML_DCHECK(runtime_filter);
+      std::shared_ptr<impeller::RuntimeStage> runtime_stage =
+          runtime_filter->runtime_effect()->runtime_stage();
+
+      std::vector<RuntimeEffectContents::TextureInput> texture_inputs;
+      size_t index = 0;
+      for (const std::shared_ptr<flutter::DlColorSource>& sampler :
+           runtime_filter->samplers()) {
+        if (index == 0 && sampler == nullptr) {
+          // Insert placeholder for filter.
+          texture_inputs.push_back(
+              {.sampler_descriptor = skia_conversions::ToSamplerDescriptor({}),
+               .texture = nullptr});
+          continue;
+        }
+        if (sampler == nullptr) {
+          return nullptr;
+        }
+        auto* image = sampler->asImage();
+        if (!image) {
+          return nullptr;
+        }
+        FML_DCHECK(image->image()->impeller_texture());
+        index++;
+        texture_inputs.push_back({
+            .sampler_descriptor =
+                skia_conversions::ToSamplerDescriptor(image->sampling()),
+            .texture = image->image()->impeller_texture(),
+        });
+      }
+      return FilterContents::MakeRuntimeEffect(input, std::move(runtime_stage),
+                                               runtime_filter->uniform_data(),
+                                               std::move(texture_inputs));
     }
   }
   FML_UNREACHABLE();

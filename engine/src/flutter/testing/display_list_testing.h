@@ -7,6 +7,7 @@
 
 #include <ostream>
 
+#include "display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_op_receiver.h"
 
@@ -285,6 +286,7 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
         case DlImageFilterType::kCompose:
         case DlImageFilterType::kLocalMatrix:
         case DlImageFilterType::kColorFilter:
+        case DlImageFilterType::kRuntimeEffect:
           RecordByType(DisplayListOpType::kSetSharedImageFilter);
           break;
       }

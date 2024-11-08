@@ -9,6 +9,7 @@
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/color_filter.h"
+#include "lib/ui/painting/fragment_shader.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
 namespace tonic {
@@ -34,6 +35,7 @@ class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
   void initMatrix(const tonic::Float64List& matrix4, int filter_quality_index);
   void initColorFilter(ColorFilter* colorFilter);
   void initComposeFilter(ImageFilter* outer, ImageFilter* inner);
+  void initShader(ReusableFragmentShader* shader);
 
   const std::shared_ptr<const DlImageFilter> filter(DlTileMode mode) const;
 

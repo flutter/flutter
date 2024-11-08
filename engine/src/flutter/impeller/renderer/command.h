@@ -38,9 +38,9 @@ struct Resource {
   Resource(const ShaderMetadata* metadata, ResourceType p_resource)
       : resource(p_resource), metadata_(metadata) {}
 
-  Resource(std::shared_ptr<const ShaderMetadata>& metadata,
-           ResourceType p_resource)
-      : resource(p_resource), dynamic_metadata_(metadata) {}
+  Resource(const ShaderMetadata& metadata, ResourceType p_resource)
+      : resource(p_resource),
+        dynamic_metadata_(std::make_shared<ShaderMetadata>(metadata)) {}
 
   const ShaderMetadata* GetMetadata() const {
     return dynamic_metadata_ ? dynamic_metadata_.get() : metadata_;
@@ -51,7 +51,7 @@ struct Resource {
   const ShaderMetadata* metadata_ = nullptr;
 
   // Dynamically generated shader metadata.
-  std::shared_ptr<const ShaderMetadata> dynamic_metadata_;
+  std::shared_ptr<const ShaderMetadata> dynamic_metadata_ = nullptr;
 };
 
 using BufferResource = Resource<BufferView>;
