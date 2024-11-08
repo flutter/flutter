@@ -29,7 +29,7 @@ group("libdart") {
   public_deps = []
 
   if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
-    public_deps += [ "$dart_src/runtime:libdart_precompiled_runtime" ]
+    public_deps += [ "$dart_src/runtime:libdart_aotruntime" ]
   } else {
     public_deps += [
       "$dart_src/runtime:libdart_jit",
