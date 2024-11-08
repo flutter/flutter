@@ -1180,6 +1180,38 @@ void main() {
     );
   });
 
+  testWidgets('NavigationBar.labelPadding overrides NavigationDestination.label padding', (WidgetTester tester) async {
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.all(8);
+    Widget buildNavigationBar({ EdgeInsetsGeometry? labelPadding }) {
+      return MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: NavigationBar(
+            labelPadding: labelPadding,
+            destinations: const <Widget>[
+              NavigationDestination(
+                icon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.settings),
+                label: 'Settings',
+              ),
+            ],
+            onDestinationSelected: (int i) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationBar());
+    expect(_getLabelPadding(tester, 'Home'), const EdgeInsets.only(top: 4));
+    expect(_getLabelPadding(tester, 'Settings'), const EdgeInsets.only(top: 4));
+
+    await tester.pumpWidget(buildNavigationBar(labelPadding: labelPadding));
+    expect(_getLabelPadding(tester, 'Home'), labelPadding);
+    expect(_getLabelPadding(tester, 'Settings'), labelPadding);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
@@ -1533,6 +1565,39 @@ void main() {
       expect(icon.color, initialColor);
     });
   });
+
+  testWidgets('NavigationBar.labelPadding overrides NavigationDestination.label padding', (WidgetTester tester) async {
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.all(8);
+    Widget buildNavigationBar({ EdgeInsetsGeometry? labelPadding }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          bottomNavigationBar: NavigationBar(
+            labelPadding: labelPadding,
+            destinations: const <Widget>[
+              NavigationDestination(
+                icon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.settings),
+                label: 'Settings',
+              ),
+            ],
+            onDestinationSelected: (int i) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationBar());
+    expect(_getLabelPadding(tester, 'Home'), const EdgeInsets.only(top: 4));
+    expect(_getLabelPadding(tester, 'Settings'), const EdgeInsets.only(top: 4));
+
+    await tester.pumpWidget(buildNavigationBar(labelPadding: labelPadding));
+    expect(_getLabelPadding(tester, 'Home'), labelPadding);
+    expect(_getLabelPadding(tester, 'Settings'), labelPadding);
+  });
 }
 
 Widget _buildWidget(Widget child, { bool? useMaterial3 }) {
@@ -1576,4 +1641,13 @@ class IconWithRandomColor extends StatelessWidget {
 
 bool _sizeAlmostEqual(Size a, Size b, {double maxDiff=0.05}) {
   return (a.width - b.width).abs() <= maxDiff && (a.height - b.height).abs() <= maxDiff;
+}
+
+EdgeInsetsGeometry _getLabelPadding(WidgetTester tester, String text) {
+  return tester.widget<Padding>(
+    find.ancestor(
+      of: find.text(text),
+      matching: find.byType(Padding),
+    ).first,
+  ).padding;
 }
