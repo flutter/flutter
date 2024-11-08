@@ -771,9 +771,9 @@ class FlutterPlugin implements Plugin<Project> {
         pluginProject.extensions.create("flutter", FlutterExtension)
 
         // Add plugin dependency to the app project.
-        project.android.buildTypes.all { buildType ->
+        project.android.buildTypes.each { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
-            if (flutterBuildMode != "release" || pluginProject.dev_dependency) {
+            if (flutterBuildMode != "release" || !pluginProject.dev_dependency) {
                 flutterProject.dependencies {
                     api(pluginProject)
                 }
@@ -956,9 +956,9 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         // TODO(camsim99): Determine if I need to pass flutterProject or if I can just reference project.
-        project.android.buildTypes.all { buildType ->
+        project.android.buildTypes.each { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
-            if (flutterBuildMode == "release" && ) {
+            if (flutterBuildMode == "release" && pluginProject.dev_dependency) {
                 return
             }
             def dependencies = pluginObject.dependencies
