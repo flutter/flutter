@@ -1023,14 +1023,14 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
 
   // Test for pan events.
   // Start gesture.
-  fml::CFRef<CGEventRef> cgEventStart =
-      CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 1, 0);
+  fml::CFRef<CGEventRef> cgEventStart(
+      CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 1, 0));
   CGEventSetType(cgEventStart, kCGEventScrollWheel);
   CGEventSetIntegerValueField(cgEventStart, kCGScrollWheelEventScrollPhase, kCGScrollPhaseBegan);
   CGEventSetIntegerValueField(cgEventStart, kCGScrollWheelEventIsContinuous, 1);
   [viewController scrollWheel:[NSEvent eventWithCGEvent:cgEventStart]];
 
-  fml::CFRef<CGEventRef> cgEventUpdate = CGEventCreateCopy(cgEventStart);
+  fml::CFRef<CGEventRef> cgEventUpdate(CGEventCreateCopy(cgEventStart));
   CGEventSetIntegerValueField(cgEventUpdate, kCGScrollWheelEventScrollPhase, kCGScrollPhaseChanged);
   CGEventSetIntegerValueField(cgEventUpdate, kCGScrollWheelEventDeltaAxis2, 1);  // pan_x
   CGEventSetIntegerValueField(cgEventUpdate, kCGScrollWheelEventDeltaAxis1, 2);  // pan_y
@@ -1041,7 +1041,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   [viewController mouseExited:mouseEvent];
 
   // End gesture.
-  fml::CFRef<CGEventRef> cgEventEnd = CGEventCreateCopy(cgEventStart);
+  fml::CFRef<CGEventRef> cgEventEnd(CGEventCreateCopy(cgEventStart));
   CGEventSetIntegerValueField(cgEventEnd, kCGScrollWheelEventScrollPhase, kCGScrollPhaseEnded);
   [viewController scrollWheel:[NSEvent eventWithCGEvent:cgEventEnd]];
 

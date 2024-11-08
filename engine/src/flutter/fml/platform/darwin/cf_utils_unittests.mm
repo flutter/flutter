@@ -60,5 +60,28 @@ TEST(CFTest, CanCreateRefs) {
   }
 }
 
+TEST(CFTest, GetReturnsUnderlyingObject) {
+  CFMutableStringRef cf_string = CFStringCreateMutable(kCFAllocatorDefault, 100u);
+  const CFIndex ref_count_before = CFGetRetainCount(cf_string);
+  CFRef<CFMutableStringRef> string_ref(cf_string);
+
+  CFMutableStringRef returned_string = string_ref.Get();
+  const CFIndex ref_count_after = CFGetRetainCount(cf_string);
+  EXPECT_EQ(cf_string, returned_string);
+  EXPECT_EQ(ref_count_before, ref_count_after);
+}
+
+TEST(CFTest, RetainSharesOwnership) {
+  CFMutableStringRef cf_string = CFStringCreateMutable(kCFAllocatorDefault, 100u);
+  const CFIndex ref_count_before = CFGetRetainCount(cf_string);
+
+  CFRef<CFMutableStringRef> string_ref;
+  string_ref.Retain(cf_string);
+  const CFIndex ref_count_after = CFGetRetainCount(cf_string);
+
+  EXPECT_EQ(cf_string, string_ref);
+  EXPECT_EQ(ref_count_before + 1u, ref_count_after);
+}
+
 }  // namespace testing
 }  // namespace fml

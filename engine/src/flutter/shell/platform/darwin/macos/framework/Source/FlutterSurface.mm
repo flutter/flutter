@@ -6,9 +6,11 @@
 
 #import <Metal/Metal.h>
 
+#import "flutter/fml/platform/darwin/cf_utils.h"
+
 @interface FlutterSurface () {
   CGSize _size;
-  IOSurfaceRef _ioSurface;
+  fml::CFRef<IOSurfaceRef> _ioSurface;
   id<MTLTexture> _texture;
   // Used for testing.
   BOOL _isInUseOverride;
@@ -44,7 +46,7 @@
 - (instancetype)initWithSize:(CGSize)size device:(id<MTLDevice>)device {
   if (self = [super init]) {
     self->_size = size;
-    self->_ioSurface = [FlutterSurface createIOSurfaceWithSize:size];
+    self->_ioSurface.Reset([FlutterSurface createIOSurfaceWithSize:size]);
     self->_texture = [FlutterSurface createTextureForIOSurface:_ioSurface size:size device:device];
   }
   return self;
@@ -69,10 +71,6 @@ static void ReleaseSurface(void* surface) {
 
 + (FlutterSurface*)fromFlutterMetalTexture:(const FlutterMetalTexture*)texture {
   return (__bridge FlutterSurface*)texture->user_data;
-}
-
-- (void)dealloc {
-  CFRelease(_ioSurface);
 }
 
 + (IOSurfaceRef)createIOSurfaceWithSize:(CGSize)size {
