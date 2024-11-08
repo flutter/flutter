@@ -4063,6 +4063,61 @@ abstract class ImageFilter {
     return _ComposeImageFilter(innerFilter: inner, outerFilter: outer);
   }
 
+  /// Creates an image filter from a [FragmentShader].
+  ///
+  /// The fragment shader provided here has additional requirements to be used
+  /// by the engine for filtering. The first uniform value must be a vec2, this
+  /// will be set by the engine to the size of the bound texture. There must
+  /// also be at least one sampler2D uniform, the first of which will be set by
+  /// the engine to contain the filter input.
+  ///
+  /// For example, the following is a valid fragment shader that can be used
+  /// with this API. Note that the uniform names are not required to have any
+  /// particular value.
+  ///
+  /// ```glsl
+  /// #include <flutter/runtime_effect.glsl>
+  ///
+  /// uniform vec2 u_size;
+  /// uniform float u_time;
+  ///
+  /// uniform sampler2D u_texture_input;
+  ///
+  /// out vec4 frag_color;
+  ///
+  /// void main() {
+  ///   frag_color = texture(u_texture_input, FlutterFragCoord().xy / u_size) * u_time;
+  ///
+  /// }
+  ///
+  /// ```
+  ///
+  /// This API is only supported when using the Impeller rendering engine. On
+  /// other backends a [UnsupportedError] will be thrown. To check at runtime
+  /// whether this API is suppored use [isShaderFilterSupported].
+  factory ImageFilter.shader(FragmentShader shader) {
+    if (!_impellerEnabled) {
+      throw UnsupportedError('ImageFilter.shader only supported with Impeller rendering engine.');
+    }
+    final bool invalidFloats = shader._floats.length < 2;
+    final bool invalidSampler = !shader._validateImageFilter();
+    if (invalidFloats || invalidSampler) {
+      final StringBuffer buffer = StringBuffer(
+        'ImageFilter.shader requires that the first uniform is a vec2 and at '
+        'least one sampler uniform is present.\n');
+      if (invalidFloats) {
+        buffer.write('The shader has fewer than two float uniforms.\n');
+      }
+      if (invalidSampler) {
+        buffer.write('The shader is missing a sampler uniform.\n');
+      }
+    }
+    return _FragmentShaderImageFilter(shader);
+  }
+
+  /// Whether [ImageFilter.shader] is supported on the current backend.
+  static bool get isShaderFilterSupported => _impellerEnabled;
+
   // Converts this to a native DlImageFilter. See the comments of this method in
   // subclasses for the exact type of DlImageFilter this method converts to.
   _ImageFilter _toNativeImageFilter();
@@ -4237,6 +4292,35 @@ class _ComposeImageFilter implements ImageFilter {
   int get hashCode => Object.hash(innerFilter, outerFilter);
 }
 
+class _FragmentShaderImageFilter implements ImageFilter {
+  _FragmentShaderImageFilter(this.shader);
+
+  final FragmentShader shader;
+
+  late final _ImageFilter nativeFilter = _ImageFilter.shader(this);
+
+  @override
+  _ImageFilter _toNativeImageFilter() => nativeFilter;
+
+  @override
+  String get _shortDescription => 'shader';
+
+  @override
+  String toString() => 'ImageFilter.shader(Shader#${shader.hashCode})';
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is _FragmentShaderImageFilter
+        && other.shader == shader;
+  }
+
+  @override
+  int get hashCode => shader.hashCode;
+}
+
 /// An [ImageFilter] that is backed by a native DlImageFilter.
 ///
 /// This is a private class, rather than being the implementation of the public
@@ -4296,6 +4380,12 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
     _initComposed(nativeFilterOuter, nativeFilterInner);
   }
 
+  _ImageFilter.shader(_FragmentShaderImageFilter filter)
+    : creator = filter {
+      _constructor();
+      _initShader(filter.shader);
+    }
+
   @Native<Void Function(Handle)>(symbol: 'ImageFilter::Create')
   external void _constructor();
 
@@ -4316,6 +4406,9 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Pointer<Void>)>(symbol: 'ImageFilter::initComposeFilter')
   external void _initComposed(_ImageFilter outerFilter, _ImageFilter innerFilter);
+
+  @Native<Void Function(Pointer<Void>, Pointer<Void>)>(symbol: 'ImageFilter::initShader')
+  external void _initShader(FragmentShader shader);
 
   /// The original Dart object that created the native wrapper, which retains
   /// the values used for the filter.
@@ -4968,6 +5061,9 @@ base class FragmentShader extends Shader {
 
   @Native<Bool Function(Pointer<Void>)>(symbol: 'ReusableFragmentShader::ValidateSamplers')
   external bool _validateSamplers();
+
+  @Native<Bool Function(Pointer<Void>)>(symbol: 'ReusableFragmentShader::ValidateImageFilter')
+  external bool _validateImageFilter();
 
   @Native<Void Function(Pointer<Void>)>(symbol: 'ReusableFragmentShader::Dispose')
   external void _dispose();

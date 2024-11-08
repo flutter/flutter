@@ -7,6 +7,7 @@
 
 #include <utility>
 
+#include "display_list/effects/dl_color_source.h"
 #include "flutter/display_list/dl_attributes.h"
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/dl_tile_mode.h"
@@ -34,6 +35,7 @@ enum class DlImageFilterType {
   kCompose,
   kColorFilter,
   kLocalMatrix,
+  kRuntimeEffect,
 };
 
 class DlBlurImageFilter;
@@ -43,6 +45,7 @@ class DlMatrixImageFilter;
 class DlLocalMatrixImageFilter;
 class DlComposeImageFilter;
 class DlColorFilterImageFilter;
+class DlRuntimeEffectImageFilter;
 
 class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
  public:
@@ -82,6 +85,12 @@ class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
   // Return a DlColorFilterImageFilter pointer to this object iff it is a
   // ColorFilter type of ImageFilter, otherwise return nullptr.
   virtual const DlColorFilterImageFilter* asColorFilter() const {
+    return nullptr;
+  }
+
+  // Return a DlRuntimeEffectImageFilter pointer to this object iff it is a
+  // DlRuntimeEffectImageFilter type of ImageFilter, otherwise return nullptr.
+  virtual const DlRuntimeEffectImageFilter* asRuntimeEffectFilter() const {
     return nullptr;
   }
 
@@ -740,6 +749,101 @@ class DlLocalMatrixImageFilter final : public DlImageFilter {
  private:
   SkMatrix matrix_;
   std::shared_ptr<const DlImageFilter> image_filter_;
+};
+
+class DlRuntimeEffectImageFilter final : public DlImageFilter {
+ public:
+  explicit DlRuntimeEffectImageFilter(
+      sk_sp<DlRuntimeEffect> runtime_effect,
+      std::vector<std::shared_ptr<DlColorSource>> samplers,
+      std::shared_ptr<std::vector<uint8_t>> uniform_data)
+      : runtime_effect_(std::move(runtime_effect)),
+        samplers_(std::move(samplers)),
+        uniform_data_(std::move(uniform_data)) {}
+
+  std::shared_ptr<DlImageFilter> shared() const override {
+    return std::make_shared<DlRuntimeEffectImageFilter>(
+        this->runtime_effect_, this->samplers_, this->uniform_data_);
+  }
+
+  static std::shared_ptr<DlImageFilter> Make(
+      sk_sp<DlRuntimeEffect> runtime_effect,
+      std::vector<std::shared_ptr<DlColorSource>> samplers,
+      std::shared_ptr<std::vector<uint8_t>> uniform_data) {
+    return std::make_shared<DlRuntimeEffectImageFilter>(
+        std::move(runtime_effect), std::move(samplers),
+        std::move(uniform_data));
+  }
+
+  DlImageFilterType type() const override {
+    return DlImageFilterType::kRuntimeEffect;
+  }
+  size_t size() const override { return sizeof(*this); }
+
+  bool modifies_transparent_black() const override { return false; }
+
+  SkRect* map_local_bounds(const SkRect& input_bounds,
+                           SkRect& output_bounds) const override {
+    output_bounds = input_bounds;
+    return &output_bounds;
+  }
+
+  SkIRect* map_device_bounds(const SkIRect& input_bounds,
+                             const SkMatrix& ctm,
+                             SkIRect& output_bounds) const override {
+    output_bounds = input_bounds;
+    return &output_bounds;
+  }
+
+  SkIRect* get_input_device_bounds(const SkIRect& output_bounds,
+                                   const SkMatrix& ctm,
+                                   SkIRect& input_bounds) const override {
+    input_bounds = output_bounds;
+    return &input_bounds;
+  }
+
+  const DlRuntimeEffectImageFilter* asRuntimeEffectFilter() const override {
+    return this;
+  }
+
+  const sk_sp<DlRuntimeEffect> runtime_effect() const {
+    return runtime_effect_;
+  }
+
+  const std::vector<std::shared_ptr<DlColorSource>>& samplers() const {
+    return samplers_;
+  }
+
+  const std::shared_ptr<std::vector<uint8_t>>& uniform_data() const {
+    return uniform_data_;
+  }
+
+ protected:
+  bool equals_(const DlImageFilter& other) const override {
+    FML_DCHECK(other.type() == DlImageFilterType::kRuntimeEffect);
+    auto that = static_cast<const DlRuntimeEffectImageFilter*>(&other);
+    if (runtime_effect_ != that->runtime_effect_ ||
+        samplers_.size() != that->samplers().size() ||
+        uniform_data_->size() != that->uniform_data()->size()) {
+      return false;
+    }
+    for (auto i = 0u; i < samplers_.size(); i++) {
+      if (samplers_[i] != that->samplers()[i]) {
+        return false;
+      }
+    }
+    for (auto i = 0u; i < uniform_data_->size(); i++) {
+      if (uniform_data_->at(i) != that->uniform_data()->at(i)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+ private:
+  sk_sp<DlRuntimeEffect> runtime_effect_;
+  std::vector<std::shared_ptr<DlColorSource>> samplers_;
+  std::shared_ptr<std::vector<uint8_t>> uniform_data_;
 };
 
 }  // namespace flutter

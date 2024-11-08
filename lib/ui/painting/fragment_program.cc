@@ -5,6 +5,7 @@
 #include <memory>
 #include <sstream>
 
+#include "display_list/effects/dl_image_filter.h"
 #include "display_list/effects/dl_runtime_effect.h"
 #include "flutter/lib/ui/painting/fragment_program.h"
 
@@ -141,6 +142,13 @@ std::shared_ptr<DlColorSource> FragmentProgram::MakeDlColorSource(
     std::shared_ptr<std::vector<uint8_t>> float_uniforms,
     const std::vector<std::shared_ptr<DlColorSource>>& children) {
   return DlColorSource::MakeRuntimeEffect(runtime_effect_, children,
+                                          std::move(float_uniforms));
+}
+
+std::shared_ptr<DlImageFilter> FragmentProgram::MakeDlImageFilter(
+    std::shared_ptr<std::vector<uint8_t>> float_uniforms,
+    const std::vector<std::shared_ptr<DlColorSource>>& children) {
+  return DlRuntimeEffectImageFilter::Make(runtime_effect_, children,
                                           std::move(float_uniforms));
 }
 

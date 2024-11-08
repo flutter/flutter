@@ -12,10 +12,12 @@
 
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
+#include "impeller/entity/contents/runtime_effect_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/sigma.h"
+#include "impeller/runtime_stage/runtime_stage.h"
 
 namespace impeller {
 
@@ -76,6 +78,12 @@ class FilterContents : public Contents {
       std::shared_ptr<Texture> y_texture,
       std::shared_ptr<Texture> uv_texture,
       YUVColorSpace yuv_color_space);
+
+  static std::shared_ptr<FilterContents> MakeRuntimeEffect(
+      FilterInput::Ref input,
+      std::shared_ptr<RuntimeStage> runtime_stage,
+      std::shared_ptr<std::vector<uint8_t>> uniforms,
+      std::vector<RuntimeEffectContents::TextureInput> texture_inputs);
 
   FilterContents();
 

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_FRAGMENT_PROGRAM_H_
 #define FLUTTER_LIB_UI_PAINTING_FRAGMENT_PROGRAM_H_
 
+#include "display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_runtime_effect.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/shader.h"
@@ -35,6 +36,10 @@ class FragmentProgram : public RefCountedDartWrappable<FragmentProgram> {
                                      Dart_Handle samplers);
 
   std::shared_ptr<DlColorSource> MakeDlColorSource(
+      std::shared_ptr<std::vector<uint8_t>> float_uniforms,
+      const std::vector<std::shared_ptr<DlColorSource>>& children);
+
+  std::shared_ptr<DlImageFilter> MakeDlImageFilter(
       std::shared_ptr<std::vector<uint8_t>> float_uniforms,
       const std::vector<std::shared_ptr<DlColorSource>>& children);
 
