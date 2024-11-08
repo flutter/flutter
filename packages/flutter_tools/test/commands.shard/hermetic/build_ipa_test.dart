@@ -84,12 +84,7 @@ void main() {
   late BufferLogger logger;
   late Artifacts artifacts;
   late FakeAnalytics fakeAnalytics;
-  late final FakeCommand dartPubDepsCommand = FakeCommand(command: <String>[
-    artifacts.getArtifactPath(Artifact.engineDartBinary),
-    'pub',
-    'deps',
-    '--json',
-  ]);
+  late FakeCommand dartPubDepsCommand;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -98,6 +93,12 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
+    dartPubDepsCommand = FakeCommand(command: <String>[
+      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      'pub',
+      'deps',
+      '--json',
+    ]);
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     processUtils = ProcessUtils(
@@ -416,6 +417,7 @@ void main() {
     expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
     expect(logger.statusText, contains('Building ad-hoc IPA'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -463,6 +465,7 @@ void main() {
     expect(actualIpaPlistContents, expectedIpaPlistContents);
     expect(logger.statusText, contains('Building debugging IPA'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -510,6 +513,7 @@ void main() {
     expect(actualIpaPlistContents, expectedIpaPlistContents);
     expect(logger.statusText, contains('Building release-testing IPA'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -557,6 +561,7 @@ void main() {
     expect(actualIpaPlistContents, expectedIpaPlistContents);
     expect(logger.statusText, contains('Building App Store IPA'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -586,6 +591,7 @@ void main() {
     );
     expect(logger.statusText, contains('Building enterprise IPA'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -633,6 +639,7 @@ void main() {
     expect(actualIpaPlistContents, expectedIpaPlistContents);
     expect(logger.statusText, contains('Building enterprise IPA'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -662,6 +669,7 @@ void main() {
     );
     expect(logger.statusText, contains('Building App Store IPA'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -701,6 +709,7 @@ void main() {
     expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
     expect(logger.statusText, contains('Building enterprise IPA'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -757,6 +766,7 @@ void main() {
     expect(logger.errorText, contains('open /build/ios/archive/Runner.xcarchive'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -792,6 +802,7 @@ void main() {
     );
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -845,6 +856,7 @@ void main() {
     expect(logger.statusText, contains('Apple Transporter macOS app'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -898,6 +910,7 @@ void main() {
     expect(logger.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -951,6 +964,7 @@ void main() {
     expect(logger.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -981,6 +995,7 @@ void main() {
     );
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1011,6 +1026,7 @@ void main() {
     );
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
@@ -1063,6 +1079,7 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
     expect(logger.statusText, contains('Codesigning disabled with --no-codesign, skipping IPA'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1091,6 +1108,7 @@ void main() {
       contains('Could not find app to analyze code size'),
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
@@ -1145,6 +1163,7 @@ void main() {
       Event.codeSizeAnalysis(platform: 'ios')
     ));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1189,6 +1208,7 @@ void main() {
     expect(logger.statusText, contains(RegExp('Built IPA to $outputPath ' r'\(\d+\.\d+MB\)')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1224,6 +1244,7 @@ void main() {
     expect(logger.traceText, contains('xcresult parser: Unrecognized top level json format.'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1260,6 +1281,7 @@ void main() {
     expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1298,6 +1320,7 @@ void main() {
     expect(logger.warningText, isNot(contains('but the range of supported deployment target versions')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1330,6 +1353,7 @@ void main() {
     expect(logger.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1370,6 +1394,7 @@ void main() {
     expect(logger.errorText, contains("Also try selecting 'Product > Build' to fix the problem."));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1424,6 +1449,7 @@ void main() {
       contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy')
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1484,6 +1510,7 @@ void main() {
       contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy')
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1543,6 +1570,7 @@ void main() {
       contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy'),
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1588,6 +1616,7 @@ void main() {
       contains('    ! Your application still contains the default "com.example" bundle identifier.'),
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1631,6 +1660,7 @@ void main() {
       isNot(contains('    ! Your application still contains the default "com.example" bundle identifier.'))
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1716,6 +1746,7 @@ void main() {
       contains('    ! App icon is set to the default placeholder icon. Replace with unique icons.'),
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1799,6 +1830,7 @@ void main() {
       isNot(contains('! App icon is set to the default placeholder icon. Replace with unique icons.')),
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1862,6 +1894,7 @@ void main() {
       contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1926,6 +1959,7 @@ void main() {
       contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).'),
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -1989,6 +2023,7 @@ void main() {
       isNot(contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')),
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -2055,6 +2090,7 @@ void main() {
       isNot(contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')),
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -2166,6 +2202,7 @@ void main() {
       );
     }
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -2247,6 +2284,7 @@ void main() {
       contains('    ! Launch image is set to the default placeholder icon. Replace with unique launch image.'),
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
@@ -2329,6 +2367,7 @@ void main() {
       isNot(contains('    ! Launch image is set to the default placeholder icon. Replace with unique launch image.')),
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,

@@ -87,20 +87,22 @@ final FakeOperatingSystemUtils os = FakeOperatingSystemUtils(
 void main() {
   late Artifacts artifacts;
   late String iosDeployPath;
+
   // TODO(matanlurey): XCode builds call processPodsIfNeeded -> refreshPluginsList
   // ... which in turn requires that `dart pub deps --json` is called in order to
   // label which plugins are dependency plugins.
   //
   // Ideally processPodsIfNeeded should rely on the command (removing this call).
-  late final List<String> kCheckDartPubDeps = <String> [
-    artifacts.getArtifactPath(Artifact.engineDartBinary),
-    'pub',
-    'deps',
-    '--json',
-  ];
+  late List<String> kCheckDartPubDeps;
 
   setUp(() {
     artifacts = Artifacts.test();
+    kCheckDartPubDeps = <String> [
+      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      'pub',
+      'deps',
+      '--json',
+    ];
     iosDeployPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
   });
 
@@ -164,6 +166,7 @@ void main() {
         true,
       );
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
       Logger: () => logger,
@@ -256,6 +259,7 @@ void main() {
       expect(launchResult.started, true);
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
       Logger: () => logger,
@@ -340,6 +344,7 @@ void main() {
       expect(launchResult.started, true);
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
       Logger: () => logger,
@@ -411,6 +416,7 @@ void main() {
         fakeAsync.elapse(const Duration(seconds: 2));
       } while (fakeAsync.pendingTimers.isNotEmpty);
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
       Logger: () => logger,

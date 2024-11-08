@@ -75,12 +75,7 @@ void main() {
   late FakeProcessManager processManager;
   late ProcessUtils processUtils;
   late Artifacts artifacts;
-  late final FakeCommand dartPubDepsCommand = FakeCommand(command: <String>[
-    artifacts.getArtifactPath(Artifact.engineDartBinary),
-    'pub',
-    'deps',
-    '--json',
-  ]);
+  late FakeCommand dartPubDepsCommand;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -89,6 +84,12 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
+    dartPubDepsCommand = FakeCommand(command: <String>[
+      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      'pub',
+      'deps',
+      '--json',
+    ]);
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -303,6 +304,7 @@ void main() {
     );
     expect(testLogger.statusText, contains(RegExp(r'✓ Built build/ios/iphoneos/Runner\.app \(\d+\.\d+MB\)')));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
@@ -342,6 +344,7 @@ void main() {
     );
     expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
@@ -365,6 +368,7 @@ void main() {
     );
     expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
@@ -398,6 +402,7 @@ void main() {
     );
     expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
@@ -443,6 +448,7 @@ void main() {
     );
     expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
@@ -474,6 +480,7 @@ void main() {
     );
     expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
@@ -504,6 +511,7 @@ void main() {
       const <String>['build', 'ios', '--simulator', '--no-pub'],
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
@@ -534,6 +542,7 @@ void main() {
       const <String>['build', 'ios', '--no-pub', '-v'],
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
@@ -586,6 +595,7 @@ void main() {
       Event.codeSizeAnalysis(platform: 'ios')
     ));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => processManager,
@@ -636,6 +646,7 @@ void main() {
         ),
       ));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
@@ -691,6 +702,7 @@ void main() {
         ),
       ));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
@@ -755,6 +767,7 @@ void main() {
 
       expect(logger.traceText, contains('xcresult parser: Unrecognized top level json format.'));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -795,6 +808,7 @@ void main() {
       expect(logger.statusText, isNot(contains("Xcode's output")));
       expect(logger.statusText, isNot(contains('Lots of spew from Xcode')));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -834,6 +848,7 @@ void main() {
       expect(logger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
       expect(logger.warningText, isNot(contains('but the range of supported deployment target versions is')));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -868,6 +883,7 @@ void main() {
 
       expect(testLogger.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
@@ -907,6 +923,7 @@ void main() {
       expect(logger.errorText, contains('open ios/Runner.xcworkspace'));
       expect(logger.errorText, contains("Also try selecting 'Product > Build' to fix the problem."));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -947,6 +964,7 @@ void main() {
       expect(logger.errorText, contains('Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor'));
       expect(logger.errorText, contains(noProvisioningProfileInstruction));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -983,6 +1001,7 @@ void main() {
 
       expect(logger.errorText, contains(missingPlatformInstructions('iOS 17.0')));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -1031,6 +1050,7 @@ void main() {
 
       expect(logger.statusText, contains('Xcode build done.'));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -1073,6 +1093,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
 
       expect(logger.errorText, contains(noProvisioningProfileInstruction));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -1112,6 +1133,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
 
       expect(logger.errorText, contains(noDevelopmentTeamInstruction));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -1139,6 +1161,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
 
       expect(testLogger.errorText, contains(noProvisioningProfileInstruction));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
@@ -1192,6 +1215,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
 
       expect(testLogger.errorText, contains(noDevelopmentTeamInstruction));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
@@ -1231,6 +1255,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       expect(logger.errorText, contains(noProvisioningProfileInstruction));
       expect(logger.errorText, isNot(contains(noDevelopmentTeamInstruction)));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -1271,6 +1296,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       expect(logger.errorText, contains(noDevelopmentTeamInstruction));
       expect(logger.errorText, isNot(contains('It appears that there was a problem signing your application prior to installation on the device.')));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -1313,6 +1339,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
 
       expect(logger.traceText, contains('xcresult parser: Unrecognized top level json format.'));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -1354,6 +1381,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
       expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -1398,6 +1426,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       expect(logger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
       expect(logger.warningText, isNot(contains('but the range of supported deployment target versions is')));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
@@ -1435,6 +1464,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
 
       expect(logger.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
     }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,

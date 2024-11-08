@@ -71,12 +71,7 @@ void main() {
   late XcodeProjectInterpreter xcodeProjectInterpreter;
   late Artifacts artifacts;
   late FakeAnalytics fakeAnalytics;
-  late final FakeCommand dartPubDepsCommand = FakeCommand(command: <String>[
-    artifacts.getArtifactPath(Artifact.engineDartBinary),
-    'pub',
-    'deps',
-    '--json',
-  ]);
+  late FakeCommand dartPubDepsCommand;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -85,6 +80,12 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
+    dartPubDepsCommand = FakeCommand(command: <String>[
+      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      'pub',
+      'deps',
+      '--json',
+    ]);
     logger = BufferLogger.test();
     fakeProcessManager = FakeProcessManager.empty();
     processUtils = ProcessUtils(
@@ -304,6 +305,7 @@ STDERR STUFF
     expect(testLogger.errorText, isNot(contains('_NSMainThread:')));
     expect(testLogger.errorText, isNot(contains('Please file a bug at https://feedbackassistant')));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       dartPubDepsCommand,
@@ -330,6 +332,7 @@ STDERR STUFF
     );
     expect(testLogger.statusText, contains(RegExp(r'✓ Built build/macos/Build/Products/Release/example.app \(\d+\.\d+MB\)')));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       dartPubDepsCommand,
@@ -355,6 +358,7 @@ STDERR STUFF
       const <String>['build', 'macos', '--debug', '--no-pub']
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       dartPubDepsCommand,
@@ -380,6 +384,7 @@ STDERR STUFF
       const <String>['build', 'macos', '--debug', '--no-pub', '-v']
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       dartPubDepsCommand,
@@ -406,6 +411,7 @@ STDERR STUFF
       const <String>['build', 'macos', '--profile', '--no-pub']
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       dartPubDepsCommand,
@@ -432,6 +438,7 @@ STDERR STUFF
       const <String>['build', 'macos', '--release', '--no-pub']
     );
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       dartPubDepsCommand,
@@ -503,7 +510,7 @@ STDERR STUFF
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-    Artifacts: () => Artifacts.test(),
+    Artifacts: () => artifacts,
   });
 
   testUsingContext('build settings contains Flutter Xcode environment variables', () async {
@@ -553,6 +560,7 @@ STDERR STUFF
 
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatformCustomEnv,
@@ -589,6 +597,7 @@ STDERR STUFF
     expect(contents, contains('FLUTTER_BUILD_NAME=1.2.3'));
     expect(contents, contains('FLUTTER_BUILD_NUMBER=42'));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       dartPubDepsCommand,
@@ -661,6 +670,7 @@ STDERR STUFF
 
     expect(testLogger.statusText, isEmpty);
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       dartPubDepsCommand,
@@ -696,6 +706,7 @@ STDERR STUFF
     expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
     expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'macos')));
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       dartPubDepsCommand,
@@ -768,6 +779,7 @@ STDERR STUFF
 
 ''');
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       dartPubDepsCommand,
@@ -837,6 +849,7 @@ STDERR STUFF
 
 ''');
   }, overrides: <Type, Generator>{
+    Artifacts: () => artifacts,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       dartPubDepsCommand,
