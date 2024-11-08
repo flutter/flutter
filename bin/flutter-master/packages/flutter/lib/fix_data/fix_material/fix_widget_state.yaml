@@ -1,0 +1,157 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/to/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are for the MaterialState enum and classes from the Material library. *
+#   For fixes to
+#     * AppBar: fix_app_bar.yaml
+#     * AppBarTheme: fix_app_bar_theme.yaml
+#     * ColorScheme: fix_color_scheme.yaml
+#     * Material (general): fix_material.yaml
+#     * SliverAppBar: fix_sliver_app_bar.yaml
+#     * TextTheme: fix_text_theme.yaml
+#     * ThemeDate: fix_theme_data.yaml
+version: 1
+transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/154972
+  - title: "Replace with 'WidgetStateInputBorder'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'resolveWith'
+      inClass: 'MaterialStateOutlineInputBorder'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'material.dart' ]
+          constructor: 'resolveWith'
+          inClass: 'WidgetStateInputBorder'
+
+  # Changes made in https://github.com/flutter/flutter/pull/154972
+  - title: "Replace with 'WidgetStateInputBorder'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'resolveWith'
+      inClass: 'MaterialStateUnderlineInputBorder'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'material.dart' ]
+          constructor: 'resolveWith'
+          inClass: 'WidgetStateInputBorder'
+
+  # Changes made in https://github.com/flutter/flutter/pull/142151
+  - title: "Replace with 'WidgetState'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      enum: 'MaterialState'
+    changes:
+      - kind: 'rename'
+        newName: 'WidgetState'
+
+  # Changes made in https://github.com/flutter/flutter/pull/142151
+  - title: "Replace with 'WidgetPropertyResolver'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      typedef: 'MaterialPropertyResolver'
+    changes:
+      - kind: 'rename'
+        newName: 'WidgetPropertyResolver'
+
+  # Changes made in https://github.com/flutter/flutter/pull/142151
+  - title: "Replace with 'WidgetStateColor'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      class: 'MaterialStateColor'
+    changes:
+      - kind: 'rename'
+        newName: 'WidgetStateColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/142151
+  - title: "Replace with 'WidgetStateMouseCursor'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      class: 'MaterialStateMouseCursor'
+    changes:
+      - kind: 'rename'
+        newName: 'WidgetStateMouseCursor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/142151
+  - title: "Replace with 'WidgetStateBorderSide'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      class: 'MaterialStateBorderSide'
+    changes:
+      - kind: 'rename'
+        newName: 'WidgetStateBorderSide'
+
+  # Changes made in https://github.com/flutter/flutter/pull/142151
+  - title: "Replace with 'WidgetStateOutlinedBorder'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      class: 'MaterialStateOutlinedBorder'
+    changes:
+      - kind: 'rename'
+        newName: 'WidgetStateOutlinedBorder'
+
+  # Changes made in https://github.com/flutter/flutter/pull/142151
+  - title: "Replace with 'WidgetStateTextStyle'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      class: 'MaterialStateTextStyle'
+    changes:
+      - kind: 'rename'
+        newName: 'WidgetStateTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/142151
+  - title: "Replace with 'WidgetStateProperty'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      class: 'MaterialStateProperty'
+    changes:
+      - kind: 'rename'
+        newName: 'WidgetStateProperty'
+
+  # Changes made in https://github.com/flutter/flutter/pull/142151
+  - title: "Replace with 'WidgetStatePropertyAll'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      class: 'MaterialStatePropertyAll'
+    changes:
+      - kind: 'rename'
+        newName: 'WidgetStatePropertyAll'
+
+  # Changes made in https://github.com/flutter/flutter/pull/142151
+  - title: "Replace with 'WidgetStatesController'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart', 'widgets.dart' ]
+      class: 'MaterialStatesController'
+    changes:
+      - kind: 'rename'
+        newName: 'WidgetStatesController'
+
+# Before adding a new fix: read instructions at the top of this file.

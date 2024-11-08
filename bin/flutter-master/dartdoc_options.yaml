@@ -1,0 +1,42 @@
+# This file is used by dartdoc when generating API documentation for Flutter.
+dartdoc:
+  # Before you can run dartdoc, the snippets tool needs to be
+  # activated with "pub global activate snippets <version>"
+  # The dev/bots/docs.sh script does this automatically.
+  tools:
+    snippet:
+      command: ["bin/cache/artifacts/snippets/snippets", "--output-directory=doc/snippets", "--type=snippet"]
+      description: "Creates sample code documentation output from embedded documentation samples."
+    sample:
+      command: ["bin/cache/artifacts/snippets/snippets", "--output-directory=doc/snippets", "--type=sample"]
+      description: "Creates full application sample code documentation output from embedded documentation samples."
+    dartpad:
+      command: ["bin/cache/artifacts/snippets/snippets", "--output-directory=doc/snippets", "--type=dartpad"]
+      description: "Creates full application sample code documentation output from embedded documentation samples and displays it in an embedded DartPad."
+  errors:
+    ## Default errors of dartdoc:
+    - duplicate-file
+    - invalid-parameter
+    - tool-error
+    - unresolved-export
+    ## Warnings that are elevated to errors:
+    - ambiguous-doc-reference
+    - ambiguous-reexport
+    - broken-link
+    - category-order-gives-missing-package-name
+    - deprecated
+    - ignored-canonical-for
+    - missing-example-file
+    - missing-from-search-index
+    - no-canonical-found
+    - no-documentable-libraries
+    - no-library-level-docs
+    - orphaned-file
+    - reexported-private-api-across-packages
+    - unknown-file
+    - unknown-html-fragment
+    - unknown-macro
+    - unresolved-doc-reference
+    ## Ignores that are elevated to errors:
+    # - type-as-html # broken, https://github.com/dart-lang/dartdoc/issues/3545
+    - missing-constant-constructor

@@ -1,0 +1,207 @@
+{
+  "@datePickerHourSemanticsLabelZero": {
+    "optional": true
+  },
+  "datePickerHourSemanticsLabelOne": "$hour o'clock",
+  "@datePickerHourSemanticsLabelOne": {
+    "optional": true
+  },
+  "@datePickerHourSemanticsLabelTwo": {
+    "optional": true
+  },
+  "@datePickerHourSemanticsLabelFew": {
+    "optional": true
+  },
+  "@datePickerHourSemanticsLabelMany": {
+    "optional": true
+  },
+  "datePickerHourSemanticsLabelOther": "$hour o'clock",
+  "@datePickerHourSemanticsLabel": {
+    "description": "Accessibility announcement for the selected hour on a time picker such as '5 o'clock' or '5点'",
+    "plural": "hour"
+  },
+
+  "@datePickerMinuteSemanticsLabelZero": {
+    "optional": true
+  },
+  "datePickerMinuteSemanticsLabelOne": "1 minute",
+  "@datePickerMinuteSemanticsLabelOne": {
+    "optional": true
+  },
+  "@datePickerMinuteSemanticsLabelTwo": {
+    "optional": true
+  },
+  "@datePickerMinuteSemanticsLabelFew": {
+    "optional": true
+  },
+  "@datePickerMinuteSemanticsLabelMany": {
+    "optional": true
+  },
+  "datePickerMinuteSemanticsLabelOther": "$minute minutes",
+  "@datePickerMinuteSemanticsLabel": {
+    "description": "Accessibility announcement for the selected minute on a time picker such as '15 minutes' or '15分'",
+    "plural": "minute"
+  },
+
+  "datePickerDateOrder": "mdy",
+  "@datePickerDateOrder": {
+    "description": "Choose a standard order for the locale to arrange day, month and year in a date. Do not transliterate the abbreviations themselves. The only options are dmy, mdy, ymd and ydm. For instance, in French, use dmy (for day month year) but do not translate into jma (for jour mois année). "
+  },
+
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "@datePickerDateTimeOrder": {
+    "description": "Choose a standard order for the locale to arrange date, time and am/pm in a datetime. Do not transliterate the choices themselves. The only options are date_time_dayPeriod, date_dayPeriod_time, time_dayPeriod_date and dayPeriod_time_date where 'dayPeriod' is am/pm. You can ignore the position of dayPeriod if the locale uses 24h time only. For instance, in French, use date_time_dayPeriod, but do not translate into date_heure_périodeDuJour or some such."
+  },
+
+  "anteMeridiemAbbreviation": "AM",
+  "@anteMeridiemAbbreviation": {
+    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker when it's not using the 24h format. Reference the text iOS uses such as in the iOS clock app."
+  },
+
+  "postMeridiemAbbreviation": "PM",
+  "@postMeridiemAbbreviation": {
+    "description": "The abbreviation for post meridiem (after noon) shown in the time picker when it's not using the 24h format. Reference the text iOS uses such as in the iOS clock app."
+  },
+
+  "todayLabel": "Today",
+  "@todayLabel": {
+    "description": "A label shown in the date picker when the date is today."
+  },
+
+  "alertDialogLabel": "Alert",
+  "@alertDialogLabel": {
+    "description": "The accessibility audio announcement made when an iOS style alert dialog is opened."
+  },
+
+  "tabSemanticsLabel": "Tab $tabIndex of $tabCount",
+  "@tabSemanticsLabel": {
+    "description": "The accessibility label used on a tab. This message describes the index of the selected tab and how many tabs there are, e.g. 'tab, 1 of 2'. All values are greater than or equal to one.",
+    "parameters": "tabIndex, tabCount"
+  },
+
+  "@timerPickerHourLabelZero": {
+    "optional": true
+  },
+  "timerPickerHourLabelOne": "hour",
+  "@timerPickerHourLabelOne": {
+    "optional": true
+  },
+  "@timerPickerHourLabelTwo": {
+    "optional": true
+  },
+  "@timerPickerHourLabelFew": {
+    "optional": true
+  },
+  "@timerPickerHourLabelMany": {
+    "optional": true
+  },
+  "timerPickerHourLabelOther": "hours",
+  "@timerPickerHourLabel": {
+    "description": "The label adjacent to an hour integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
+    "plural": "hour"
+  },
+
+  "@timerPickerMinuteLabelZero": {
+    "optional": true
+  },
+  "timerPickerMinuteLabelOne": "min.",
+  "@timerPickerMinuteLabelOne": {
+    "optional": true
+  },
+  "@timerPickerMinuteLabelTwo": {
+    "optional": true
+  },
+  "@timerPickerMinuteLabelFew": {
+    "optional": true
+  },
+  "@timerPickerMinuteLabelMany": {
+    "optional": true
+  },
+  "timerPickerMinuteLabelOther": "min.",
+  "@timerPickerMinuteLabel": {
+    "description": "The label adjacent to a minute integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
+    "plural": "minute"
+  },
+
+  "@timerPickerSecondLabelZero": {
+    "optional": true
+  },
+  "timerPickerSecondLabelOne": "sec.",
+  "@timerPickerSecondLabelOne": {
+    "optional": true
+  },
+  "@timerPickerSecondLabelTwo": {
+    "optional": true
+  },
+  "@timerPickerSecondLabelFew": {
+    "optional": true
+  },
+  "@timerPickerSecondLabelMany": {
+    "optional": true
+  },
+  "timerPickerSecondLabelOther": "sec.",
+  "@timerPickerSecondLabel": {
+    "description": "The label adjacent to a second integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
+    "plural": "second"
+  },
+
+  "cutButtonLabel": "Cut",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
+  },
+
+  "copyButtonLabel": "Copy",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
+  },
+
+  "pasteButtonLabel": "Paste",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
+  },
+
+  "clearButtonLabel": "Clear",
+  "@clearButtonLabel": {
+    "description": "The label for clear buttons and menu items."
+  },
+
+  "selectAllButtonLabel": "Select All",
+  "@selectAllButtonLabel": {
+    "description": "The label for select-all buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
+  },
+
+  "lookUpButtonLabel": "Look Up",
+  "@lookUpButtonLabel": {
+    "description": "The label for the Look Up button and menu items on iOS."
+  },
+
+  "searchWebButtonLabel": "Search Web",
+  "@searchWebButtonLabel": {
+    "description": "The label for the Search Web button and menu items on iOS."
+  },
+
+  "shareButtonLabel": "Share...",
+  "@shareButtonLabel": {
+    "description": "The label for the Share button and menu items on iOS."
+  },
+
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "@noSpellCheckReplacementsLabel": {
+    "description": "The label shown in the text selection context menu on iOS when a misspelled word is tapped but the spell checker found no reasonable fixes for it."
+  },
+
+  "searchTextFieldPlaceholderLabel": "Search",
+  "@searchTextFieldPlaceholderLabel": {
+    "description": "The default placeholder label used in an iOS styled search bar."
+  },
+
+  "modalBarrierDismissLabel": "Dismiss",
+  "@modalBarrierDismissLabel": {
+    "description": "Label read out by accessibility tools (VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can, for example, be found behind an alert or popup to block user interaction with elements behind it."
+  },
+
+  "menuDismissLabel": "Dismiss menu",
+  "@menuDismissLabel": {
+    "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for the area around a menu to indicate that a tap dismisses the menu."
+  }
+}

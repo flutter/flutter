@@ -1,0 +1,71 @@
+{
+  "name": "flutter",
+  "package": "flutter",
+  "author": {
+    "name": "The Flutter Team",
+    "link": "https://flutter.dev"
+  },
+  "index": "index.html",
+  "icon32x32": "flutter/static-assets/favicon.png",
+  "allowJS": true,
+  "ExternalURL": "https://api.flutter.dev",
+  "selectors": {
+    "#exceptions span.name a": {
+      "type": "Exception"
+    },
+
+    "h1 > span.kind-library": {
+      "type": "Library"
+    },
+
+    "h1 > span.kind-class": {
+      "type": "Class"
+    },
+
+    "h1 > span.kind-function": {
+      "type": "Function"
+    },
+
+    "h1 > span.kind-typedef": {
+      "type": "Type"
+    },
+
+    "h1 > span.kind-enum": {
+      "type": "Enum"
+    },
+
+    "h1 > span.kind-top-level-constant": {
+      "type": "Constant"
+    },
+
+    "h1 > span.kind-constant": {
+      "type": "Constant"
+    },
+
+    "h1 > span.kind-method": {
+      "type": "Method"
+    },
+
+    "h1 > span.kind-property": {
+      "type": "Property"
+    },
+
+    "h1 > span.kind-top-level-property": {
+      "type": "Property"
+    },
+
+    "h1 > span.kind-constructor": {
+      "type": "Constructor"
+    },
+
+    ".callables .callable": {
+      "requiretext": "operator ",
+      "type": "Operator",
+      "regexp": "operator ",
+      "replacement": ""
+    }
+  },
+  "ignore": [
+    "ABOUT"
+  ]
+}

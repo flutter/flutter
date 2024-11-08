@@ -1,0 +1,9 @@
+# Take our settings from the repo's main analysis_options.yaml file, and include
+# additional rules that are specific to production code.
+
+include: ../analysis_options.yaml
+
+linter:
+  rules:
+    - public_member_api_docs # see https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#documentation-dartdocs-javadocs-etc
+    - no_runtimeType_toString # use objectRuntimeType from package:foundation

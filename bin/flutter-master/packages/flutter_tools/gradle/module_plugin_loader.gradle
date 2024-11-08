@@ -1,0 +1,48 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// This file is included from `<module>/.android/include_flutter.groovy`,
+// so it can be versioned with the Flutter SDK.
+
+import java.nio.file.Paths
+
+File pathToThisDirectory = buildscript.sourceFile.parentFile
+apply from: Paths.get(pathToThisDirectory.absolutePath, "src", "main", "groovy", "native_plugin_loader.groovy")
+
+def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
+
+List<Map<String, Object>> nativePlugins = nativePluginLoader.getPlugins(moduleProjectRoot)
+nativePlugins.each { androidPlugin ->
+    def pluginDirectory = new File(androidPlugin.path as String, 'android')
+    assert pluginDirectory.exists()
+    include ":${androidPlugin.name}"
+    project(":${androidPlugin.name}").projectDir = pluginDirectory
+}
+
+String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolutePath()
+gradle.getGradle().projectsLoaded { g ->
+    g.rootProject.beforeEvaluate { p ->
+        p.subprojects { subproject ->
+            if (nativePlugins.name.contains(subproject.name)) {
+                File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator
+                        + "plugins_build_output" + File.separator + subproject.name);
+                if (!androidPluginBuildOutputDir.exists()) {
+                    androidPluginBuildOutputDir.mkdirs()
+                }
+                subproject.buildDir = androidPluginBuildOutputDir
+            }
+        }
+        def _mainModuleName = binding.variables['mainModuleName']
+        if (_mainModuleName != null && !_mainModuleName.empty) {
+            p.ext.mainModuleName = _mainModuleName
+        }
+    }
+    g.rootProject.afterEvaluate { p ->
+        p.subprojects { sp ->
+            if (sp.name != 'flutter') {
+                sp.evaluationDependsOn(':flutter')
+            }
+        }
+    }
+}

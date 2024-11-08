@@ -1,0 +1,31 @@
+# Configuration for Lock Threads - https://github.com/dessant/lock-threads
+
+name: 'Lock Threads'
+
+# By specifying the access of one of the scopes, all of those that are not
+# specified are set to 'none'.
+permissions:
+  issues: write
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+
+jobs:
+  lock:
+    permissions:
+      issues: write
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'flutter/flutter' }}
+    steps:
+      - uses: dessant/lock-threads@1bf7ec25051fe7c00bdd17e6a7cf3d7bfb7dc771
+        with:
+          process-only: 'issues'
+          github-token: ${{ github.token }}
+          # Number of days of inactivity before a closed issue is locked.
+          issue-inactive-days: '14'
+          issue-comment: >
+            This thread has been automatically locked since there has not been
+            any recent activity after it was closed. If you are still experiencing a
+            similar issue, please open a new bug, including the output of
+            `flutter doctor -v` and a minimal reproduction of the issue.
