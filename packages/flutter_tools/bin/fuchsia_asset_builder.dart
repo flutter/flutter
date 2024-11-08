@@ -34,7 +34,7 @@ const List<String> _kRequiredOptions = <String>[
 Future<void> main(List<String> args) {
   return runInContext<void>(() => run(args), overrides: <Type, Generator>{
     Usage: () => DisabledUsage(),
-  }, useImplicitPubspecResolution: true);
+  });
 }
 
 Future<void> writeAssetFile(libfs.File outputFile, AssetBundleEntry asset) async {
