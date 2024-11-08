@@ -18,9 +18,12 @@ EmbedderTaskRunner::EmbedderTaskRunner(DispatchTable table,
           fml::MessageLoopTaskQueues::GetInstance()->CreateTaskQueue()) {
   FML_DCHECK(dispatch_table_.post_task_callback);
   FML_DCHECK(dispatch_table_.runs_task_on_current_thread_callback);
+  FML_DCHECK(dispatch_table_.destruction_callback);
 }
 
-EmbedderTaskRunner::~EmbedderTaskRunner() = default;
+EmbedderTaskRunner::~EmbedderTaskRunner() {
+  dispatch_table_.destruction_callback();
+}
 
 size_t EmbedderTaskRunner::GetEmbedderIdentifier() const {
   return embedder_identifier_;

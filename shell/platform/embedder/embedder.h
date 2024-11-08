@@ -1651,6 +1651,8 @@ typedef struct {
   /// A unique identifier for the task runner. If multiple task runners service
   /// tasks on the same thread, their identifiers must match.
   size_t identifier;
+  /// The callback invoked when the task runner is destroyed.
+  VoidCallback destruction_callback;
 } FlutterTaskRunnerDescription;
 
 typedef struct {
