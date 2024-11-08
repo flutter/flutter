@@ -590,7 +590,8 @@ dev_dependencies:
   plugin-a: 1.3.0
   plugin-c: 1.4.0
 ''';
-        File flutterProjectPubspecFile = flutterProject.directory.childFile('pubspec,yaml').createSync();
+        flutterProject.directory.childFile('pubspec.yaml').createSync();
+        File flutterProjectPubspecFile = flutterProject.directory.childFile('pubspec.yaml');
         flutterProjectPubspecFile.writeAsStringSync(flutterProjectPubspecFileAsString);
 
         await refreshPluginsList(flutterProject, useImplicitPubspecResolution: false);
@@ -609,8 +610,8 @@ dev_dependencies:
             'dependencies': <String>[
               'plugin-b',
               'plugin-c',
-            'dev_dependency': false,
             ],
+            'dev_dependency': false,
           },
           <String, dynamic> {
             'name': 'plugin-b',
