@@ -1184,7 +1184,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     return Align(
       alignment: Alignment.bottomCenter,
       child: FractionalTranslation(
-        translation: _offsetTween.evaluate(animation!),
+        translation: _offsetTween.evaluate(animation),
         child: child,
       ),
     );

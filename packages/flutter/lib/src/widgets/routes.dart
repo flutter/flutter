@@ -269,15 +269,16 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
 
   /// Creates the simulation that drives the transition animation for this route.
   ///
-  /// By default, this method returns null, indicating that the route initiates
-  /// the transition by calling either [AnimationController.forward] or
-  /// [AnimationController.reverse] with [transitionDuration] and the controller's
-  /// curve.
+  /// By default, this method returns null, indicating that the route doesn't
+  /// use simulations, but initiates the transition by calling either
+  /// [AnimationController.forward] or [AnimationController.reverse] with
+  /// [transitionDuration] and the controller's curve.
   ///
   /// Subclasses can override this method to return a non-null [Simulation]. In
   /// this case, the [controller] will instead use the provided simulation to
   /// animate the transition using [AnimationController.animateWith] or
-  /// [AnimationController.animateBackWith], and the [controller]'s curve and
+  /// [AnimationController.animateBackWith], and the [Simulation.x] is forwarded
+  /// to the value of [animation]. The [controller]'s curve and
   /// [transitionDuration] are ignored.
   ///
   /// This method is invoked each time the navigator pushes or pops this route.
@@ -286,7 +287,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   ///
   /// See also:
   ///
-  ///  * [simulation], which returns the simulation for the most recent
+  ///  * [simulation], a getter that returns the simulation for the most recent
   ///    transition.
   Simulation? createSimulation({ required bool forward }) {
     assert(transitionDuration >= Duration.zero,
