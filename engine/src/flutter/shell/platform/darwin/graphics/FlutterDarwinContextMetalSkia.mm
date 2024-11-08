@@ -8,6 +8,7 @@
 
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/platform/darwin/cf_utils.h"
 #include "flutter/shell/common/context_options.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
@@ -16,7 +17,9 @@
 
 FLUTTER_ASSERT_ARC
 
-@implementation FlutterDarwinContextMetalSkia
+@implementation FlutterDarwinContextMetalSkia {
+  fml::CFRef<CVMetalTextureCacheRef> _textureCache;
+}
 
 - (instancetype)initWithDefaultMTLDevice {
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
@@ -43,15 +46,19 @@ FLUTTER_ASSERT_ARC
 
     [_commandQueue setLabel:@"Flutter Main Queue"];
 
-    CVReturn cvReturn = CVMetalTextureCacheCreate(kCFAllocatorDefault,  // allocator
-                                                  nil,      // cache attributes (nil default)
-                                                  _device,  // metal device
-                                                  nil,      // texture attributes (nil default)
-                                                  &_textureCache  // [out] cache
-    );
-    if (cvReturn != kCVReturnSuccess) {
-      FML_DLOG(ERROR) << "Could not create Metal texture cache.";
-      return nil;
+    {
+      CVMetalTextureCacheRef cache = nullptr;
+      CVReturn cvReturn = CVMetalTextureCacheCreate(kCFAllocatorDefault,  // allocator
+                                                    nil,      // cache attributes (nil default)
+                                                    _device,  // metal device
+                                                    nil,      // texture attributes (nil default)
+                                                    &cache    // [out] cache
+      );
+      _textureCache.Reset(cache);
+      if (cvReturn != kCVReturnSuccess) {
+        FML_DLOG(ERROR) << "Could not create Metal texture cache.";
+        return nil;
+      }
     }
 
     // The devices are in the same "sharegroup" because they share the same device and command
@@ -96,12 +103,6 @@ FLUTTER_ASSERT_ARC
   return GrDirectContexts::MakeMetal(backendContext, contextOptions);
 }
 
-- (void)dealloc {
-  if (_textureCache) {
-    CFRelease(_textureCache);
-  }
-}
-
 - (FlutterDarwinExternalTextureMetal*)
     createExternalTextureWithIdentifier:(int64_t)textureID
                                 texture:(NSObject<FlutterTexture>*)texture {
@@ -109,6 +110,10 @@ FLUTTER_ASSERT_ARC
                                                                textureID:textureID
                                                                  texture:texture
                                                           enableImpeller:NO];
+}
+
+- (CVMetalTextureCacheRef)textureCache {
+  return _textureCache;
 }
 
 @end

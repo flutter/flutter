@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
+
 #include "flutter/display_list/image/dl_image.h"
+#include "flutter/fml/platform/darwin/cf_utils.h"
 #include "impeller/base/validation.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_image_impeller.h"
@@ -23,7 +25,7 @@
 FLUTTER_ASSERT_ARC
 
 @implementation FlutterDarwinExternalTextureMetal {
-  CVMetalTextureCacheRef _textureCache;
+  fml::CFRef<CVMetalTextureCacheRef> _textureCache;
   NSObject<FlutterTexture>* _externalTexture;
   BOOL _textureFrameAvailable;
   sk_sp<flutter::DlImage> _externalImage;
@@ -37,8 +39,7 @@ FLUTTER_ASSERT_ARC
                              texture:(NSObject<FlutterTexture>*)texture
                       enableImpeller:(BOOL)enableImpeller {
   if (self = [super init]) {
-    _textureCache = textureCache;
-    CFRetain(_textureCache);
+    _textureCache.Retain(textureCache);
     _textureID = textureID;
     _externalTexture = texture;
     _enableImpeller = enableImpeller;
@@ -50,10 +51,7 @@ FLUTTER_ASSERT_ARC
 - (void)dealloc {
   CVPixelBufferRelease(_lastPixelBuffer);
   if (_textureCache) {
-    CVMetalTextureCacheFlush(_textureCache,  // cache
-                             0               // options (must be zero)
-    );
-    CFRelease(_textureCache);
+    CVMetalTextureCacheFlush(_textureCache, /* options (must be zero) */ 0);
   }
 }
 
@@ -107,9 +105,9 @@ FLUTTER_ASSERT_ARC
   // buffer will be used to materialize the image in case the application fails to provide a new
   // one.
   _externalImage.reset();
-  CVMetalTextureCacheFlush(_textureCache,  // cache
-                           0               // options (must be zero)
-  );
+  if (_textureCache) {
+    CVMetalTextureCacheFlush(_textureCache, /* options (must be zero) */ 0);
+  }
 }
 
 - (void)markNewFrameAvailable {
