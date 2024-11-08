@@ -69,6 +69,18 @@ const List<String> kRunReleaseArgs = <String>[
   'COMPILER_INDEX_STORE_ENABLE=NO',
 ];
 
+// TODO(matanlurey): XCode builds call processPodsIfNeeded -> refreshPluginsList
+// ... which in turn requires that `dart pub deps --json` is called in order to
+// label which plugins are dependency plugins.
+//
+// Ideally processPodsIfNeeded should rely on the command (removing this call).
+const List<String> kCheckDartPubDeps = <String> [
+  'dart',
+  'pub',
+  'deps',
+  '--json',
+];
+
 const String kConcurrentBuildErrorMessage = '''
 "/Developer/Xcode/DerivedData/foo/XCBuildData/build.db":
 database is locked
@@ -132,6 +144,7 @@ void main() {
       final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App');
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
 
       final LaunchResult launchResult = await iosDevice.startApp(
@@ -206,6 +219,7 @@ void main() {
       fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
       processManager.addCommand(const FakeCommand(command: <String>[
         'rsync',
@@ -266,6 +280,7 @@ void main() {
       fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       processManager.addCommand(const FakeCommand(command: <String>[
         'xcrun',
         'xcodebuild',
@@ -349,6 +364,7 @@ void main() {
       final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App');
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       // The first xcrun call should fail with a
       // concurrent build exception.
       processManager.addCommand(
@@ -365,37 +381,47 @@ void main() {
           '123',
           '--bundle',
           'build/ios/iphoneos/My Super Awesome App.app',
+          '--app_deltas',
+          'build/ios/app-delta',
           '--no-wifi',
           '--justlaunch',
           '--args',
-          const <String>[
-            '--enable-dart-profiling',
-            '--disable-service-auth-codes',
-          ].join(' '),
+          '--enable-dart-profiling',
         ])
       );
 
-      await FakeAsync().run((FakeAsync time) async {
-        final LaunchResult launchResult = await iosDevice.startApp(
+      final FakeAsync fakeAsync = FakeAsync();
+      final Future<LaunchResult> pendingResult = fakeAsync.run((_) async {
+        return iosDevice.startApp(
           buildableIOSApp,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
           platformArgs: <String, Object>{},
         );
-        time.elapse(const Duration(seconds: 2));
+      });
 
+      unawaited(pendingResult.then(expectAsync1((LaunchResult launchResult) {
         expect(logger.statusText,
-          contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'));
+          contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'),
+        );
         expect(launchResult.started, true);
         expect(processManager, hasNoRemainingExpectations);
-      });
+      })));
+
+      // Wait until all asyncronous time has been elapsed.
+      do {
+        fakeAsync.elapse(const Duration(seconds: 2));
+      } while (fakeAsync.pendingTimers.isNotEmpty);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
       Logger: () => logger,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(
+        hostPlatform: HostPlatform.darwin_arm64,
+      ),
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
       Xcode: () => xcode,
-    }, skip: true); // TODO(zanderso): clean up with https://github.com/flutter/flutter/issues/60675
+    });
   });
 
   group('IOSDevice.startApp for CoreDevice', () {
