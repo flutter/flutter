@@ -69,18 +69,6 @@ const List<String> kRunReleaseArgs = <String>[
   'COMPILER_INDEX_STORE_ENABLE=NO',
 ];
 
-// TODO(matanlurey): XCode builds call processPodsIfNeeded -> refreshPluginsList
-// ... which in turn requires that `dart pub deps --json` is called in order to
-// label which plugins are dependency plugins.
-//
-// Ideally processPodsIfNeeded should rely on the command (removing this call).
-const List<String> kCheckDartPubDeps = <String> [
-  'dart',
-  'pub',
-  'deps',
-  '--json',
-];
-
 const String kConcurrentBuildErrorMessage = '''
 "/Developer/Xcode/DerivedData/foo/XCBuildData/build.db":
 database is locked
@@ -99,6 +87,17 @@ final FakeOperatingSystemUtils os = FakeOperatingSystemUtils(
 void main() {
   late Artifacts artifacts;
   late String iosDeployPath;
+  // TODO(matanlurey): XCode builds call processPodsIfNeeded -> refreshPluginsList
+  // ... which in turn requires that `dart pub deps --json` is called in order to
+  // label which plugins are dependency plugins.
+  //
+  // Ideally processPodsIfNeeded should rely on the command (removing this call).
+  late final List<String> kCheckDartPubDeps = <String> [
+    artifacts.getArtifactPath(Artifact.engineDartBinary),
+    'pub',
+    'deps',
+    '--json',
+  ];
 
   setUp(() {
     artifacts = Artifacts.test();
@@ -144,7 +143,7 @@ void main() {
       final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App');
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
+      processManager.addCommand(FakeCommand(command: kCheckDartPubDeps));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
 
       final LaunchResult launchResult = await iosDevice.startApp(
@@ -219,7 +218,7 @@ void main() {
       fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
+      processManager.addCommand(FakeCommand(command: kCheckDartPubDeps));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
       processManager.addCommand(const FakeCommand(command: <String>[
         'rsync',
@@ -280,7 +279,7 @@ void main() {
       fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
+      processManager.addCommand(FakeCommand(command: kCheckDartPubDeps));
       processManager.addCommand(const FakeCommand(command: <String>[
         'xcrun',
         'xcodebuild',
@@ -364,7 +363,7 @@ void main() {
       final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App');
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
+      processManager.addCommand(FakeCommand(command: kCheckDartPubDeps));
       // The first xcrun call should fail with a
       // concurrent build exception.
       processManager.addCommand(
