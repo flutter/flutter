@@ -403,8 +403,6 @@ class _DefaultPub implements Pub {
       workingDirectory: project.directory.path,
     );
 
-
-
     Never fail([String? reason]) {
       final String stdout = runResult.stdout;
       if (stdout.isNotEmpty) {
