@@ -51,6 +51,11 @@ class ConicalGradientContents final : public ColorSourceContents {
   bool RenderSSBO(const ContentContext& renderer,
                   const Entity& entity,
                   RenderPass& pass) const;
+
+  bool RenderUniform(const ContentContext& renderer,
+                     const Entity& entity,
+                     RenderPass& pass) const;
+
   Point center_;
   Scalar radius_ = 0.0f;
   std::vector<Color> colors_;

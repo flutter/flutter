@@ -54,6 +54,10 @@ class SweepGradientContents final : public ColorSourceContents {
                   const Entity& entity,
                   RenderPass& pass) const;
 
+  bool RenderUniform(const ContentContext& renderer,
+                     const Entity& entity,
+                     RenderPass& pass) const;
+
   Point center_;
   Scalar bias_;
   Scalar scale_;

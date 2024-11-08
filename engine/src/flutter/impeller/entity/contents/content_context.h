@@ -56,6 +56,11 @@
 #include "impeller/entity/tiled_texture_fill.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
 
+#include "impeller/entity/conical_gradient_uniform_fill.frag.h"
+#include "impeller/entity/linear_gradient_uniform_fill.frag.h"
+#include "impeller/entity/radial_gradient_uniform_fill.frag.h"
+#include "impeller/entity/sweep_gradient_uniform_fill.frag.h"
+
 #include "impeller/entity/conical_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/linear_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/radial_gradient_ssbo_fill.frag.h"
@@ -92,6 +97,18 @@ using ConicalGradientFillPipeline =
 using SweepGradientFillPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
                          SweepGradientFillFragmentShader>;
+using LinearGradientUniformFillPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         LinearGradientUniformFillFragmentShader>;
+using ConicalGradientUniformFillPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientUniformFillFragmentShader>;
+using RadialGradientUniformFillPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         RadialGradientUniformFillFragmentShader>;
+using SweepGradientUniformFillPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         SweepGradientUniformFillFragmentShader>;
 using LinearGradientSSBOFillPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
                          LinearGradientSsboFillFragmentShader>;
@@ -368,6 +385,26 @@ class ContentContext {
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetLinearGradientFillPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(linear_gradient_fill_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>>
+  GetLinearGradientUniformFillPipeline(ContentContextOptions opts) const {
+    return GetPipeline(linear_gradient_uniform_fill_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>>
+  GetRadialGradientUniformFillPipeline(ContentContextOptions opts) const {
+    return GetPipeline(radial_gradient_uniform_fill_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>>
+  GetConicalGradientUniformFillPipeline(ContentContextOptions opts) const {
+    return GetPipeline(conical_gradient_uniform_fill_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>>
+  GetSweepGradientUniformFillPipeline(ContentContextOptions opts) const {
+    return GetPipeline(sweep_gradient_uniform_fill_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
@@ -867,6 +904,14 @@ class ContentContext {
   mutable Variants<ConicalGradientFillPipeline>
       conical_gradient_fill_pipelines_;
   mutable Variants<SweepGradientFillPipeline> sweep_gradient_fill_pipelines_;
+  mutable Variants<LinearGradientUniformFillPipeline>
+      linear_gradient_uniform_fill_pipelines_;
+  mutable Variants<RadialGradientUniformFillPipeline>
+      radial_gradient_uniform_fill_pipelines_;
+  mutable Variants<ConicalGradientUniformFillPipeline>
+      conical_gradient_uniform_fill_pipelines_;
+  mutable Variants<SweepGradientUniformFillPipeline>
+      sweep_gradient_uniform_fill_pipelines_;
   mutable Variants<LinearGradientSSBOFillPipeline>
       linear_gradient_ssbo_fill_pipelines_;
   mutable Variants<RadialGradientSSBOFillPipeline>

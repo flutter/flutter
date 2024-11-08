@@ -67,4 +67,31 @@ std::vector<StopData> CreateGradientColors(const std::vector<Color>& colors,
   return result;
 }
 
+int PopulateUniformGradientColors(
+    const std::vector<Color>& colors,
+    const std::vector<Scalar>& stops,
+    Vector4 frag_info_colors[kMaxUniformGradientStops],
+    Vector4 frag_info_stop_pairs[kMaxUniformGradientStops / 2]) {
+  FML_DCHECK(stops.size() == colors.size());
+
+  Scalar last_stop = 0;
+  int index = 0;
+  for (auto i = 0u; i < stops.size() && i < kMaxUniformGradientStops; i++) {
+    Scalar cur_stop = stops[i];
+    Scalar delta = cur_stop - last_stop;
+    Scalar inverse_delta = delta == 0.0f ? 0.0 : 1.0 / delta;
+    frag_info_colors[index] = colors[i];
+    if ((i & 1) == 0) {
+      frag_info_stop_pairs[index / 2].x = cur_stop;
+      frag_info_stop_pairs[index / 2].y = inverse_delta;
+    } else {
+      frag_info_stop_pairs[index / 2].z = cur_stop;
+      frag_info_stop_pairs[index / 2].w = inverse_delta;
+    }
+    last_stop = cur_stop;
+    index++;
+  }
+  return index;
+}
+
 }  // namespace impeller

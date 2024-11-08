@@ -186,6 +186,14 @@ bool LinearGradientContents::FastLinearGradient(const ContentContext& renderer,
       /*force_stencil=*/force_stencil, geom_callback);
 }
 
+#define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
+#define UNIFORM_FRAG_INFO(t) \
+  t##GradientUniformFillPipeline::FragmentShader::FragInfo
+#define UNIFORM_COLOR_SIZE ARRAY_LEN(UNIFORM_FRAG_INFO(Linear)::colors)
+#define UNIFORM_STOP_SIZE ARRAY_LEN(UNIFORM_FRAG_INFO(Linear)::stop_pairs)
+static_assert(UNIFORM_COLOR_SIZE == kMaxUniformGradientStops);
+static_assert(UNIFORM_STOP_SIZE == kMaxUniformGradientStops / 2);
+
 bool LinearGradientContents::Render(const ContentContext& renderer,
                                     const Entity& entity,
                                     RenderPass& pass) const {
@@ -197,6 +205,10 @@ bool LinearGradientContents::Render(const ContentContext& renderer,
   }
   if (renderer.GetDeviceCapabilities().SupportsSSBO()) {
     return RenderSSBO(renderer, entity, pass);
+  }
+  if (colors_.size() <= kMaxUniformGradientStops &&
+      stops_.size() <= kMaxUniformGradientStops) {
+    return RenderUniform(renderer, entity, pass);
   }
   return RenderTexture(renderer, entity, pass);
 }
@@ -305,6 +317,44 @@ bool LinearGradientContents::RenderSSBO(const ContentContext& renderer,
         FS::BindFragInfo(
             pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
         FS::BindColorData(pass, color_buffer);
+
+        return true;
+      });
+}
+
+bool LinearGradientContents::RenderUniform(const ContentContext& renderer,
+                                           const Entity& entity,
+                                           RenderPass& pass) const {
+  using VS = LinearGradientUniformFillPipeline::VertexShader;
+  using FS = LinearGradientUniformFillPipeline::FragmentShader;
+
+  VS::FrameInfo frame_info;
+  frame_info.matrix = GetInverseEffectTransform();
+
+  PipelineBuilderCallback pipeline_callback =
+      [&renderer](ContentContextOptions options) {
+        return renderer.GetLinearGradientUniformFillPipeline(options);
+      };
+  return ColorSourceContents::DrawGeometry<VS>(
+      renderer, entity, pass, pipeline_callback, frame_info,
+      [this, &renderer, &entity](RenderPass& pass) {
+        FS::FragInfo frag_info;
+        frag_info.start_point = start_point_;
+        frag_info.start_to_end = end_point_ - start_point_;
+        frag_info.alpha =
+            GetOpacityFactor() *
+            GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
+        frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
+        frag_info.colors_length = PopulateUniformGradientColors(
+            colors_, stops_, frag_info.colors, frag_info.stop_pairs);
+        frag_info.inverse_dot_start_to_end =
+            CalculateInverseDotStartToEnd(start_point_, end_point_);
+        frag_info.decal_border_color = decal_border_color_;
+
+        pass.SetCommandLabel("LinearGradientUniformFill");
+
+        FS::BindFragInfo(
+            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
 
         return true;
       });

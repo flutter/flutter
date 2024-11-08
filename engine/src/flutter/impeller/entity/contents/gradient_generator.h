@@ -44,6 +44,28 @@ static_assert(sizeof(StopData) == 32);
 std::vector<StopData> CreateGradientColors(const std::vector<Color>& colors,
                                            const std::vector<Scalar>& stops);
 
+static constexpr uint32_t kMaxUniformGradientStops = 256u;
+
+/**
+ * @brief Populate 2 arrays with the colors and stop data for a gradient
+ *
+ * The color data is simply converted to a vec4 format, but the stop data
+ * is both turned into pairs of {t, inverse_delta} information and also
+ * stops are themselves paired up into a vec4 format for efficient packing
+ * in the uniform data.
+ *
+ * @param colors colors from gradient
+ * @param stops  stops from gradient
+ * @param frag_info_colors colors for fragment shader in vec4 format
+ * @param frag_info_stop_pairs pairs of stop data for shader in vec4 format
+ * @return count of colors stored
+ */
+int PopulateUniformGradientColors(
+    const std::vector<Color>& colors,
+    const std::vector<Scalar>& stops,
+    Vector4 frag_info_colors[kMaxUniformGradientStops],
+    Vector4 frag_info_stop_pairs[kMaxUniformGradientStops / 2]);
+
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_ENTITY_CONTENTS_GRADIENT_GENERATOR_H_
