@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 
 abstract class FallbackFontRegistry {
@@ -12,17 +13,18 @@ abstract class FallbackFontRegistry {
   void updateFallbackFontFamilies(List<String> families);
 }
 
+bool _isNotoSansSC(NotoFont font) => font.name.startsWith('Noto Sans SC');
+bool _isNotoSansTC(NotoFont font) => font.name.startsWith('Noto Sans TC');
+bool _isNotoSansHK(NotoFont font) => font.name.startsWith('Noto Sans HK');
+bool _isNotoSansJP(NotoFont font) => font.name.startsWith('Noto Sans JP');
+bool _isNotoSansKR(NotoFont font) => font.name.startsWith('Noto Sans KR');
+
 /// Global static font fallback data.
 class FontFallbackManager {
   factory FontFallbackManager(FallbackFontRegistry registry) =>
       FontFallbackManager._(registry, getFallbackFontList());
 
   FontFallbackManager._(this.registry, this.fallbackFonts) :
-    _notoSansSC = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans SC'),
-    _notoSansTC = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans TC'),
-    _notoSansHK = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans HK'),
-    _notoSansJP = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans JP'),
-    _notoSansKR = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans KR'),
     _notoSymbols = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans Symbols') {
       downloadQueue = FallbackFontDownloadQueue(this);
   }
@@ -39,11 +41,17 @@ class FontFallbackManager {
 
   final List<NotoFont> fallbackFonts;
 
-  final NotoFont _notoSansSC;
-  final NotoFont _notoSansTC;
-  final NotoFont _notoSansHK;
-  final NotoFont _notoSansJP;
-  final NotoFont _notoSansKR;
+  // By default, we use the system language to determine the user's preferred
+  // language. This can be overridden through [debugUserPreferredLanguage] for testing.
+  String _language = domWindow.navigator.language;
+
+  @visibleForTesting
+  String get debugUserPreferredLanguage => _language;
+
+  @visibleForTesting
+  set debugUserPreferredLanguage(String value) {
+    _language = value;
+  }
 
   final NotoFont _notoSymbols;
 
@@ -257,56 +265,49 @@ class FontFallbackManager {
       }
     }
 
-    // If the list of best fonts are all CJK fonts, choose the best one based
-    // on locale. Otherwise just choose the first font.
+    NotoFont? bestFontForLanguage;
     if (bestFonts.length > 1) {
+      // If the list of best fonts are all CJK fonts, choose the best one based
+      // on user preferred language. Otherwise just choose the first font.
       if (bestFonts.every((NotoFont font) =>
-          font == _notoSansSC ||
-          font == _notoSansTC ||
-          font == _notoSansHK ||
-          font == _notoSansJP ||
-          font == _notoSansKR)) {
-        final String language = domWindow.navigator.language;
-
-        if (language == 'zh-Hans' ||
-            language == 'zh-CN' ||
-            language == 'zh-SG' ||
-            language == 'zh-MY') {
-          if (bestFonts.contains(_notoSansSC)) {
-            bestFont = _notoSansSC;
-          }
-        } else if (language == 'zh-Hant' ||
-            language == 'zh-TW' ||
-            language == 'zh-MO') {
-          if (bestFonts.contains(_notoSansTC)) {
-            bestFont = _notoSansTC;
-          }
-        } else if (language == 'zh-HK') {
-          if (bestFonts.contains(_notoSansHK)) {
-            bestFont = _notoSansHK;
-          }
-        } else if (language == 'ja') {
-          if (bestFonts.contains(_notoSansJP)) {
-            bestFont = _notoSansJP;
-          }
-        } else if (language == 'ko') {
-          if (bestFonts.contains(_notoSansKR)) {
-            bestFont = _notoSansKR;
-          }
-        } else if (bestFonts.contains(_notoSansSC)) {
-          bestFont = _notoSansSC;
+          _isNotoSansSC(font) ||
+          _isNotoSansTC(font) ||
+          _isNotoSansHK(font) ||
+          _isNotoSansJP(font) ||
+          _isNotoSansKR(font))) {
+        if (_language == 'zh-Hans' ||
+            _language == 'zh-CN' ||
+            _language == 'zh-SG' ||
+            _language == 'zh-MY') {
+          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansSC);
+        } else if (_language == 'zh-Hant' ||
+            _language == 'zh-TW' ||
+            _language == 'zh-MO') {
+          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansTC);
+        } else if (_language == 'zh-HK') {
+          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansHK);
+        } else if (_language == 'ja') {
+          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansJP);
+        } else if (_language == 'ko') {
+          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansKR);
+        } else {
+          // Default to `Noto Sans SC` when the user preferred language is not CJK.
+          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansSC);
         }
       } else {
         // To be predictable, if there is a tie for best font, choose a font
         // from this list first, then just choose the first font.
         if (bestFonts.contains(_notoSymbols)) {
           bestFont = _notoSymbols;
-        } else if (bestFonts.contains(_notoSansSC)) {
-          bestFont = _notoSansSC;
+        } else {
+          final notoSansSC = bestFonts.firstWhereOrNull(_isNotoSansSC);
+          if (notoSansSC != null) {
+            bestFont = notoSansSC;
+          }
         }
       }
     }
-    return bestFont!;
+    return bestFontForLanguage ?? bestFont!;
   }
 
   late final List<FallbackFontComponent> fontComponents =

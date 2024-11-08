@@ -65,6 +65,12 @@ class RollFallbackFontsCommand extends Command<bool>
       ...await _processSplitFallbackFonts(client, splitFallbackFonts),
       ...await _processFallbackFonts(client, apiFallbackFonts),
     ];
+
+    final List<String> failedUrls = await _checkForLicenseAttributions(client, fallbackFontInfo);
+    if (failedUrls.isNotEmpty) {
+      throw ToolExit('Could not find license attribution at:\n - ${failedUrls.join('\n - ')}');
+    }
+
     final List<_Font> fallbackFontData = <_Font>[];
 
     final Map<String, String> charsetForFamily = <String, String>{};
@@ -79,19 +85,11 @@ class RollFallbackFontsCommand extends Command<bool>
       if (fontResponse.statusCode != 200) {
         throw ToolExit('Failed to download font for $family');
       }
-      final String urlString = uri.toString();
-      if (!urlString.startsWith(expectedUrlPrefix)) {
-        throw ToolExit('Unexpected url format received from Google Fonts API: $urlString.');
-      }
-      final String urlSuffix = urlString.substring(expectedUrlPrefix.length);
+      final String urlSuffix = getUrlSuffix(uri);
       final io.File fontFile =
           io.File(path.join(fontDir.path, urlSuffix));
 
       final Uint8List bodyBytes = fontResponse.bodyBytes;
-      if (!await _checkForLicenseAttribution(client, urlSuffix, bodyBytes)) {
-        throw ToolExit(
-            'Expected license attribution not found in file: $urlString');
-      }
       hasher.add(utf8.encode(urlSuffix));
       hasher.add(bodyBytes);
 
@@ -144,12 +142,7 @@ class RollFallbackFontsCommand extends Command<bool>
 
     for (final _Font font in fallbackFontData) {
       final String family = font.info.family;
-      final String urlString = font.info.uri.toString();
-      if (!urlString.startsWith(expectedUrlPrefix)) {
-        throw ToolExit(
-            'Unexpected url format received from Google Fonts API: $urlString.');
-      }
-      final String urlSuffix = urlString.substring(expectedUrlPrefix.length);
+      final String urlSuffix = getUrlSuffix(font.info.uri);
       sb.writeln(" NotoFont('$family', '$urlSuffix'),");
     }
     sb.writeln('];');
@@ -385,7 +378,6 @@ const List<String> apiFallbackFonts = <String>[
   'Noto Sans',
   'Noto Music',
   'Noto Sans Symbols',
-  'Noto Sans Symbols 2',
   'Noto Sans Adlam',
   'Noto Sans Anatolian Hieroglyphs',
   'Noto Sans Arabic',
@@ -407,12 +399,9 @@ const List<String> apiFallbackFonts = <String>[
   'Noto Sans Cham',
   'Noto Sans Cherokee',
   'Noto Sans Coptic',
-  'Noto Sans Cuneiform',
   'Noto Sans Cypriot',
   'Noto Sans Deseret',
   'Noto Sans Devanagari',
-  'Noto Sans Duployan',
-  'Noto Sans Egyptian Hieroglyphs',
   'Noto Sans Elbasan',
   'Noto Sans Elymaic',
   'Noto Sans Ethiopic',
@@ -423,7 +412,6 @@ const List<String> apiFallbackFonts = <String>[
   'Noto Sans Gujarati',
   'Noto Sans Gunjala Gondi',
   'Noto Sans Gurmukhi',
-  'Noto Sans HK',
   'Noto Sans Hanunoo',
   'Noto Sans Hatran',
   'Noto Sans Hebrew',
@@ -431,9 +419,7 @@ const List<String> apiFallbackFonts = <String>[
   'Noto Sans Indic Siyaq Numbers',
   'Noto Sans Inscriptional Pahlavi',
   'Noto Sans Inscriptional Parthian',
-  'Noto Sans JP',
   'Noto Sans Javanese',
-  'Noto Sans KR',
   'Noto Sans Kaithi',
   'Noto Sans Kannada',
   'Noto Sans Kayah Li',
@@ -492,7 +478,6 @@ const List<String> apiFallbackFonts = <String>[
   'Noto Sans Psalter Pahlavi',
   'Noto Sans Rejang',
   'Noto Sans Runic',
-  'Noto Sans SC',
   'Noto Sans Saurashtra',
   'Noto Sans Sharada',
   'Noto Sans Shavian',
@@ -504,7 +489,6 @@ const List<String> apiFallbackFonts = <String>[
   'Noto Sans Sundanese',
   'Noto Sans Syloti Nagri',
   'Noto Sans Syriac',
-  'Noto Sans TC',
   'Noto Sans Tagalog',
   'Noto Sans Tagbanwa',
   'Noto Sans Tai Le',
@@ -531,27 +515,61 @@ const List<String> apiFallbackFonts = <String>[
 /// handling.
 const List<String> splitFallbackFonts = <String>[
   'Noto Color Emoji',
+  'Noto Sans Symbols 2',
+  'Noto Sans Cuneiform',
+  'Noto Sans Duployan',
+  'Noto Sans Egyptian Hieroglyphs',
+  'Noto Sans HK',
+  'Noto Sans JP',
+  'Noto Sans KR',
+  'Noto Sans SC',
+  'Noto Sans TC',
 ];
 
-Future<bool> _checkForLicenseAttribution(
+String getUrlSuffix(Uri fontUri) {
+  final String urlString = fontUri.toString();
+  if (!urlString.startsWith(expectedUrlPrefix)) {
+    throw ToolExit('Unexpected url format received from Google Fonts API: $urlString.');
+  }
+  return urlString.substring(expectedUrlPrefix.length);
+}
+
+/// Checks the license attribution for unique fonts in the [fallbackFontInfo]
+/// list.
+///
+/// Returns a list of URLs that failed to contain the license attribution.
+Future<List<String>> _checkForLicenseAttributions(
   http.Client client,
-  String urlSuffix,
-  Uint8List fontBytes,
+  List<_FontInfo> fallbackFontInfo,
 ) async {
   const String googleFontsUpstream =
       'https://github.com/google/fonts/tree/main/ofl';
   const String attributionString =
       'This Font Software is licensed under the SIL Open Font License, Version 1.1.';
 
-  final String fontPackageName = urlSuffix.split('/').first;
-  final String fontLicenseUrl = '$googleFontsUpstream/$fontPackageName/OFL.txt';
-  final http.Response response = await client.get(Uri.parse(fontLicenseUrl));
-  if (response.statusCode != 200) {
-    throw ToolExit('Failed to download `$fontPackageName` license at $fontLicenseUrl');
-  }
-  final String licenseString = response.body;
+  final failedUrls = <String>[];
 
-  return licenseString.contains(attributionString);
+  final uniqueFontPackageNames = <String>{};
+  for (final (family: _, :uri) in fallbackFontInfo) {
+    final String urlSuffix = getUrlSuffix(uri);
+    final String fontPackageName = urlSuffix.split('/').first;
+    uniqueFontPackageNames.add(fontPackageName);
+  }
+
+  for (final String fontPackageName in uniqueFontPackageNames) {
+    final String fontLicenseUrl = '$googleFontsUpstream/$fontPackageName/OFL.txt';
+    final http.Response response = await client.get(Uri.parse(fontLicenseUrl));
+    if (response.statusCode != 200) {
+      failedUrls.add(fontLicenseUrl);
+      continue;
+    }
+    final String licenseString = response.body;
+    if (!licenseString.contains(attributionString)) {
+      failedUrls.add(fontLicenseUrl);
+    }
+  }
+
+  return failedUrls;
 }
 
 // The basic information of a font: its [family] (name) and [uri].
