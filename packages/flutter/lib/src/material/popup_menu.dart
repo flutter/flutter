@@ -28,6 +28,7 @@ import 'material_state.dart';
 import 'popup_menu_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
 // Examples can assume:
@@ -1554,7 +1555,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     assert(debugCheckHasMaterialLocalizations(context));
 
     if (widget.child != null) {
-      return Tooltip(
+      final Widget child = Tooltip(
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
           borderRadius: widget.borderRadius,
@@ -1565,6 +1566,17 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           child: widget.child,
         ),
       );
+      final MaterialTapTargetSize tapTargetSize = widget.style?.tapTargetSize ?? Theme.of(context).materialTapTargetSize;
+      if (tapTargetSize == MaterialTapTargetSize.padded) {
+        return ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: kMinInteractiveDimension,
+            minHeight: kMinInteractiveDimension,
+          ),
+          child: child,
+        );
+      }
+      return child;
     }
 
     return IconButton(
