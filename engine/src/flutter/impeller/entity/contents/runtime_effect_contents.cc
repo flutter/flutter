@@ -207,7 +207,6 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
 
     for (const auto& uniform : runtime_stage_->GetUniforms()) {
       std::shared_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
-
       switch (uniform.type) {
         case kSampledImage: {
           // Sampler uniforms are ordered in the IPLR according to their
@@ -249,8 +248,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           FML_DCHECK(renderer.GetContext()->GetBackendType() ==
                      Context::BackendType::kVulkan);
           ShaderUniformSlot uniform_slot;
-          uniform_slot.name = uniform.name.c_str();
           uniform_slot.binding = uniform.location;
+          uniform_slot.name = uniform.name.c_str();
 
           // TODO(jonahwilliams): rewrite this to emplace directly into
           // HostBuffer.

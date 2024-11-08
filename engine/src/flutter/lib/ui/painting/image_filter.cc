@@ -4,9 +4,13 @@
 
 #include "flutter/lib/ui/painting/image_filter.h"
 
+#include "display_list/dl_sampling_options.h"
+#include "display_list/effects/dl_image_filter.h"
 #include "flutter/lib/ui/floating_point.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "lib/ui/painting/fragment_program.h"
+#include "lib/ui/painting/fragment_shader.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
@@ -114,6 +118,11 @@ void ImageFilter::initComposeFilter(ImageFilter* outer, ImageFilter* inner) {
   is_dynamic_tile_mode_ = false;
   filter_ = DlComposeImageFilter::Make(outer->filter(DlTileMode::kClamp),
                                        inner->filter(DlTileMode::kClamp));
+}
+
+void ImageFilter::initShader(ReusableFragmentShader* shader) {
+  FML_DCHECK(shader);
+  filter_ = shader->as_image_filter();
 }
 
 }  // namespace flutter
