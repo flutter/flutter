@@ -43,7 +43,7 @@ const String _kOptionCoveragePath = 'coverage-path';
 void main(List<String> args) {
   runInContext<void>(() => run(args), overrides: <Type, Generator>{
     Usage: () => DisabledUsage(),
-  }, useImplicitPubspecResolution: true);
+  });
 }
 
 Future<void> run(List<String> args) async {
