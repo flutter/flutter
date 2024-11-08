@@ -45,7 +45,7 @@ void main() {
     // Create settings.gradle with commented .flutter-plugins
     final File settingsGradle = androidDir.childFile('settings.gradle');
     settingsGradle.writeAsStringSync(r'''
-// The following block uses '.flutter-plugins' but is commented out
+// The following block uses '.flutter-plugins' but is commented out.
 /*
 def plugins = new Properties()
 def pluginsFile = new File(flutterProjectRoot.toFile(), '.flutter-plugins')
