@@ -75,6 +75,12 @@ void main() {
   late FakeProcessManager processManager;
   late ProcessUtils processUtils;
   late Artifacts artifacts;
+  late final FakeCommand dartPubDepsCommand = FakeCommand(command: <String>[
+    artifacts.getArtifactPath(Artifact.engineDartBinary),
+    'pub',
+    'deps',
+    '--json',
+  ]);
 
   setUpAll(() {
     Cache.disableLocking();
@@ -112,13 +118,6 @@ void main() {
 
   const FakeCommand xattrCommand = FakeCommand(command: <String>[
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
-  ]);
-
-  const FakeCommand dartPubDepsCommand = FakeCommand(command: <String>[
-    'dart',
-    'pub',
-    'deps',
-    '--json',
   ]);
 
   FakeCommand setUpRsyncCommand({void Function(List<String> command)? onRun}) {

@@ -4,9 +4,11 @@
 
 import 'package:process/process.dart';
 
+import 'artifacts.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'convert.dart';
+import 'globals.dart' as globals;
 
 /// Returns dependencies of [project] that are _only_ used as `dev_dependency`.
 ///
@@ -19,8 +21,9 @@ Future<Set<String>> computeExclusiveDevDependencies(
   required Logger logger,
   required String projectPath,
 }) async {
+  final String dartBinaryPath = globals.artifacts!.getArtifactPath(Artifact.engineDartBinary);
   final ProcessResult processResult = await processes.run(
-    <String>['dart', 'pub', 'deps', '--json'],
+    <String>[dartBinaryPath, 'pub', 'deps', '--json'],
     workingDirectory: projectPath,
   );
 

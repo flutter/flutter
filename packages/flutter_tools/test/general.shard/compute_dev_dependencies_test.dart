@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/compute_dev_dependencies.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
-import '../src/fake_process_manager.dart';
+import '../src/context.dart';
 
 // For all of these examples, imagine the following package structure:
 //
@@ -26,7 +28,8 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  test('no dev dependencies at all', () async {
+
+  testUsingContext('no dev dependencies at all', () async {
     // Simulates the following:
     //
     // # /my_app/pubspec.yaml
@@ -86,7 +89,7 @@ void main() {
     );
   });
 
-  test('dev dependency', () async {
+  testUsingContext('dev dependency', () async {
     // Simulates the following:
     //
     // # /my_app/pubspec.yaml
@@ -145,7 +148,7 @@ void main() {
     );
   });
 
-  test('dev used as a non-dev dependency transitively', () async {
+  testUsingContext('dev used as a non-dev dependency transitively', () async {
     // Simulates the following:
     //
     // # /my_app/pubspec.yaml
@@ -210,7 +213,7 @@ void main() {
     );
   });
 
-  test('combination of an included and excluded dev_dependency', () async {
+  testUsingContext('combination of an included and excluded dev_dependency', () async {
     // Simulates the following:
     //
     // # /my_app/pubspec.yaml
@@ -293,7 +296,7 @@ void main() {
     );
   });
 
-  test('throws and logs on non-zero exit code', () async {
+  testUsingContext('throws and logs on non-zero exit code', () async {
     final ProcessManager processes = _dartPubDepsFails(
       'Bad thing',
       exitCode: 1,
@@ -317,7 +320,7 @@ void main() {
     expect(logger.traceText, isEmpty);
   });
 
-  test('throws and logs on unexpected output type', () async {
+  testUsingContext('throws and logs on unexpected output type', () async {
     final ProcessManager processes = _dartPubDepsReturns(
       'Not JSON haha!',
     );
@@ -340,7 +343,7 @@ void main() {
     expect(logger.traceText, contains('Not JSON haha'));
   });
 
-  test('throws and logs on invalid JSON', () async {
+  testUsingContext('throws and logs on invalid JSON', () async {
     final ProcessManager processes = _dartPubDepsReturns('''
     {
       "root": "my_app",
@@ -402,9 +405,10 @@ void main() {
 const String _fakeProjectPath = '/path/to/project';
 
 ProcessManager _dartPubDepsReturns(String dartPubDepsOutput) {
+  final String dartBinaryPath = globals.artifacts!.getArtifactPath(Artifact.engineDartBinary);
   return FakeProcessManager.list(<FakeCommand>[
     FakeCommand(
-      command: const <String>['dart', 'pub', 'deps', '--json'],
+      command: <String>[dartBinaryPath, 'pub', 'deps', '--json'],
       stdout: dartPubDepsOutput,
       workingDirectory: _fakeProjectPath,
     ),
@@ -415,9 +419,10 @@ ProcessManager _dartPubDepsFails(
   String dartPubDepsError, {
   required int exitCode,
 }) {
+  final String dartBinaryPath = globals.artifacts!.getArtifactPath(Artifact.engineDartBinary);
   return FakeProcessManager.list(<FakeCommand>[
     FakeCommand(
-      command: const <String>['dart', 'pub', 'deps', '--json'],
+      command: <String>[dartBinaryPath, 'pub', 'deps', '--json'],
       exitCode: exitCode,
       stderr: dartPubDepsError,
       workingDirectory: _fakeProjectPath,

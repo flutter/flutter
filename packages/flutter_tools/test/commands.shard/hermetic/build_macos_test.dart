@@ -71,6 +71,12 @@ void main() {
   late XcodeProjectInterpreter xcodeProjectInterpreter;
   late Artifacts artifacts;
   late FakeAnalytics fakeAnalytics;
+  late final FakeCommand dartPubDepsCommand = FakeCommand(command: <String>[
+    artifacts.getArtifactPath(Artifact.engineDartBinary),
+    'pub',
+    'deps',
+    '--json',
+  ]);
 
   setUpAll(() {
     Cache.disableLocking();
@@ -104,13 +110,6 @@ void main() {
     fileSystem.directory(fileSystem.path.join('macos', 'Runner.xcworkspace')).createSync(recursive: true);
     createCoreMockProjectFiles();
   }
-
-  const FakeCommand dartPubDepsCommand = FakeCommand(command: <String>[
-    'dart',
-    'pub',
-    'deps',
-    '--json',
-  ]);
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
