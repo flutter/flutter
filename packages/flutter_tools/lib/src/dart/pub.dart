@@ -69,6 +69,7 @@ class PubContext {
   static final PubContext createPackage = PubContext._(<String>['create_pkg']);
   static final PubContext createPlugin = PubContext._(<String>['create_plugin']);
   static final PubContext interactive = PubContext._(<String>['interactive']);
+  static final PubContext pubDeps = PubContext._(<String>['deps']);
   static final PubContext pubGet = PubContext._(<String>['get']);
   static final PubContext pubUpgrade = PubContext._(<String>['upgrade']);
   static final PubContext pubAdd = PubContext._(<String>['add']);
@@ -155,6 +156,15 @@ abstract class Pub {
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     PubOutputMode outputMode = PubOutputMode.all,
+  });
+
+  /// Runs, parses, and returns `pub deps --json` for [project].
+  ///
+  /// [context] provides extra information to package server requests to
+  /// understand usage.
+  Future<Map<String, Object?>> deps({
+    required PubContext context,
+    required FlutterProject project,
   });
 
   /// Runs pub in 'batch' mode.
@@ -371,6 +381,53 @@ class _DefaultPub implements Pub {
       outputMode: outputMode,
     );
     await _updateVersionAndPackageConfig(project);
+  }
+
+  @override
+  Future<Map<String, Object?>> deps({
+    required PubContext context,
+    required FlutterProject project,
+  }) async {
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(
+      context: context,
+    );
+    final List<String> pubCommand = <String>[
+      ..._pubCommand,
+      'deps',
+      '--json',
+    ];
+
+    final RunResult runResult = await _processUtils.run(
+      pubCommand,
+      environment: pubEnvironment,
+      workingDirectory: project.directory.path,
+    );
+
+
+
+    Never fail([String? reason]) {
+      final String stdout = runResult.stdout;
+      if (stdout.isNotEmpty) {
+        _logger.printTrace(stdout);
+      }
+      final String stderr = runResult.stderr;
+      throw StateError(
+        'dart pub deps --json ${reason != null ? 'had unexpected output: $reason' : 'failed'}'
+        '${stderr.isNotEmpty ? '\n$stderr' : ''}',
+      );
+    }
+
+    // Guard against dart pub deps crashing.
+    if (runResult.exitCode != 0) {
+      fail();
+    }
+
+    // Guard against dart pub deps having explicitly invalid output.
+    try {
+      return json.decode(runResult.stdout) as Map<String, Object?>;
+    } on FormatException catch (e) {
+      fail('$e');
+    }
   }
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
