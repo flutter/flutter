@@ -342,6 +342,7 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
     this.exitWidgetSelectionButtonBuilder,
+    this.moveExitWidgetSelectionButtonBuilder,
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
@@ -440,6 +441,7 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
     this.exitWidgetSelectionButtonBuilder,
+    this.moveExitWidgetSelectionButtonBuilder,
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
@@ -1033,6 +1035,8 @@ class WidgetsApp extends StatefulWidget {
   /// inspector select mode without requiring [WidgetInspector] to depend on the
   /// material package.
   final ExitWidgetSelectionButtonBuilder? exitWidgetSelectionButtonBuilder;
+
+  final MoveExitWidgetSelectionButtonBuilder? moveExitWidgetSelectionButtonBuilder;
 
   /// {@template flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
   /// Turns on a little "DEBUG" banner in debug mode to indicate
@@ -1756,6 +1760,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
             return WidgetInspector(
               exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder,
+              moveExitWidgetSelectionButtonBuilder: widget.moveExitWidgetSelectionButtonBuilder,
               child: child!,
             );
           }

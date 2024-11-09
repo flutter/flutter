@@ -44,6 +44,12 @@ typedef ExitWidgetSelectionButtonBuilder = Widget Function(
   required GlobalKey key,
 });
 
+typedef MoveExitWidgetSelectionButtonBuilder = Widget Function(
+  BuildContext context,
+  VoidCallback onPressed, {
+  bool isLeftAligned,
+});
+
 /// Signature for a method that registers the service extension `callback` with
 /// the given `name`.
 ///
@@ -2772,6 +2778,7 @@ class WidgetInspector extends StatefulWidget {
     super.key,
     required this.child,
     required this.exitWidgetSelectionButtonBuilder,
+    required this.moveExitWidgetSelectionButtonBuilder,
   });
 
   /// The widget that is being inspected.
@@ -2782,6 +2789,9 @@ class WidgetInspector extends StatefulWidget {
   /// The `onPressed` callback passed as an argument to the builder should be
   /// hooked up to the returned widget.
   final ExitWidgetSelectionButtonBuilder? exitWidgetSelectionButtonBuilder;
+
+  final MoveExitWidgetSelectionButtonBuilder?
+      moveExitWidgetSelectionButtonBuilder;
 
   @override
   State<WidgetInspector> createState() => _WidgetInspectorState();
@@ -2979,17 +2989,11 @@ class _WidgetInspectorState extends State<WidgetInspector>
       ),
       _InspectorOverlay(selection: selection),
       if (isSelectMode && widget.exitWidgetSelectionButtonBuilder != null)
-        Positioned(
-          left: _kInspectButtonMargin,
-          bottom: _kInspectButtonMargin,
-          child: _ExitWidgetSelectionButtonWrapper(
-            button: widget.exitWidgetSelectionButtonBuilder!(
-              context,
-              _exitSelectionMode,
-              key: exitWidgetSelectionButtonKey,
-            ),
-            buttonKey: exitWidgetSelectionButtonKey,
-          ),
+        _ExitWidgetSelectionButtonGroup(
+          exitWidgetSelectionButtonBuilder:
+              widget.exitWidgetSelectionButtonBuilder!,
+          moveExitWidgetSelectionButtonBuilder:
+              widget.moveExitWidgetSelectionButtonBuilder,
         ),
     ]);
   }
@@ -3460,7 +3464,6 @@ class _InspectorOverlayLayer extends Layer {
 
 const double _kScreenEdgeMargin = 10.0;
 const double _kTooltipPadding = 5.0;
-const double _kInspectButtonMargin = 10.0;
 
 /// Interpret pointer up events within with this margin as indicating the
 /// pointer is moving off the device.
@@ -3472,23 +3475,145 @@ const TextStyle _messageStyle = TextStyle(
   height: 1.2,
 );
 
-class _ExitWidgetSelectionButtonWrapper extends StatefulWidget {
-  const _ExitWidgetSelectionButtonWrapper({
+class _ExitWidgetSelectionButtonGroup extends StatefulWidget {
+  const _ExitWidgetSelectionButtonGroup({
+    required this.exitWidgetSelectionButtonBuilder,
+    required this.moveExitWidgetSelectionButtonBuilder,
+  });
+
+  final ExitWidgetSelectionButtonBuilder exitWidgetSelectionButtonBuilder;
+  final MoveExitWidgetSelectionButtonBuilder?
+      moveExitWidgetSelectionButtonBuilder;
+
+  @override
+  State<_ExitWidgetSelectionButtonGroup> createState() =>
+      _ExitWidgetSelectionButtonGroupState();
+}
+
+class _ExitWidgetSelectionButtonGroupState
+    extends State<_ExitWidgetSelectionButtonGroup> {
+  static const double _kExitWidgetSelectionButtonPadding = 4.0;
+  static const double _kExitWidgetSelectionButtonMargin = 10.0;
+
+  final GlobalKey _exitWidgetSelectionButtonKey = GlobalKey(
+    debugLabel: 'Exit Widget Selection button',
+  );
+
+  String? _tooltipMessage;
+
+  bool _leftAligned = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget? moveExitWidgetSelectionButton =
+        widget.moveExitWidgetSelectionButtonBuilder != null
+            ? Padding(
+                padding: _leftAligned
+                    ? const EdgeInsets.only(
+                        left: _kExitWidgetSelectionButtonPadding,
+                      )
+                    : const EdgeInsets.only(
+                        right: _kExitWidgetSelectionButtonPadding,
+                      ),
+                child: _TooltipGestureDetector(
+                  button: widget.moveExitWidgetSelectionButtonBuilder!(
+                    context,
+                    () {
+                      _changeButtonGroupAlignment();
+                      _onTooltipHidden();
+                    },
+                    isLeftAligned: _leftAligned,
+                  ),
+                  onTooltipVisible: () {
+                    _changeTooltipMessage(
+                      'Move to the ${_leftAligned ? 'right' : 'left'}',
+                    );
+                  },
+                  onTooltipHidden: _onTooltipHidden,
+                ),
+              )
+            : null;
+
+    final Widget buttonGroup = Stack(
+      alignment: AlignmentDirectional.topCenter,
+      children: <Widget>[
+        CustomPaint(
+          painter: _ExitWidgetSelectionTooltipPainter(
+            tooltipMessage: _tooltipMessage,
+            buttonKey: _exitWidgetSelectionButtonKey,
+            isLeftAligned: _leftAligned,
+          ),
+        ),
+        Row(
+          children: <Widget>[
+            if (!_leftAligned && moveExitWidgetSelectionButton != null)
+              moveExitWidgetSelectionButton,
+            _TooltipGestureDetector(
+              button: widget.exitWidgetSelectionButtonBuilder(
+                context,
+                _exitWidgetSelectionMode,
+                key: _exitWidgetSelectionButtonKey,
+              ),
+              onTooltipVisible: () {
+                _changeTooltipMessage('Exit Select Widget mode');
+              },
+              onTooltipHidden: _onTooltipHidden,
+            ),
+            if (_leftAligned && moveExitWidgetSelectionButton != null)
+              moveExitWidgetSelectionButton,
+          ],
+        ),
+      ],
+    );
+
+    return _leftAligned
+        ? Positioned(
+            left: _kExitWidgetSelectionButtonMargin,
+            bottom: _kExitWidgetSelectionButtonMargin,
+            child: buttonGroup,
+          )
+        : Positioned(
+            right: _kExitWidgetSelectionButtonMargin,
+            bottom: _kExitWidgetSelectionButtonMargin,
+            child: buttonGroup,
+          );
+  }
+
+  void _exitWidgetSelectionMode() {
+    WidgetInspectorService.instance._changeWidgetSelectionMode(false);
+  }
+
+  void _changeButtonGroupAlignment() {
+    if (mounted) {
+      setState(() {
+        _leftAligned = !_leftAligned;
+      });
+    }
+  }
+
+  void _onTooltipHidden() {
+    _changeTooltipMessage(null);
+  }
+
+  void _changeTooltipMessage(String? message) {
+    if (mounted) {
+      setState(() {
+        _tooltipMessage = message;
+      });
+    }
+  }
+}
+
+class _TooltipGestureDetector extends StatelessWidget {
+  const _TooltipGestureDetector({
     required this.button,
-    required this.buttonKey,
+    required this.onTooltipVisible,
+    required this.onTooltipHidden,
   });
 
   final Widget button;
-  final GlobalKey buttonKey;
-
-  @override
-  State<_ExitWidgetSelectionButtonWrapper> createState() =>
-      _ExitWidgetSelectionButtonState();
-}
-
-class _ExitWidgetSelectionButtonState
-    extends State<_ExitWidgetSelectionButtonWrapper> {
-  bool _tooltipVisible = false;
+  final void Function() onTooltipVisible;
+  final void Function() onTooltipHidden;
 
   static const Duration _tooltipShownOnLongPressDuration = Duration(
     milliseconds: 1500,
@@ -3502,31 +3627,21 @@ class _ExitWidgetSelectionButtonState
     return Stack(
       alignment: AlignmentDirectional.topCenter,
       children: <Widget>[
-        CustomPaint(
-          painter: _ExitWidgetSelectionTooltipPainter(
-            isVisible: _tooltipVisible,
-            buttonKey: widget.buttonKey,
-          ),
-        ),
-        MouseRegion(
-          onEnter: (_) {
-            setState(() {
-              _tooltipVisibleAfter(_tooltipDelayDuration);
-            });
+        GestureDetector(
+          onLongPress: () {
+            _tooltipVisibleAfter(_tooltipDelayDuration);
+            _tooltipHiddenAfter(
+              _tooltipShownOnLongPressDuration + _tooltipDelayDuration,
+            );
           },
-          onExit: (_) {
-            setState(() {
-              _tooltipHiddenAfter(_tooltipDelayDuration);
-            });
-          },
-          child: Listener(
-            onPointerDown: (_) {
+          child: MouseRegion(
+            onEnter: (_) {
               _tooltipVisibleAfter(_tooltipDelayDuration);
-              _tooltipHiddenAfter(
-                _tooltipShownOnLongPressDuration + _tooltipDelayDuration,
-              );
             },
-            child: widget.button,
+            onExit: (_) {
+              _tooltipHiddenAfter(_tooltipDelayDuration);
+            },
+            child: button,
           ),
         ),
       ],
@@ -3546,30 +3661,31 @@ class _ExitWidgetSelectionButtonState
     required bool isVisible,
   }) {
     Timer(duration, () {
-      setState(() {
-        _tooltipVisible = isVisible;
-      });
+      isVisible ? onTooltipVisible() : onTooltipHidden();
     });
   }
 }
 
 class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
   _ExitWidgetSelectionTooltipPainter({
-    required this.isVisible,
+    required this.tooltipMessage,
     required this.buttonKey,
+    required this.isLeftAligned,
   });
 
-  final bool isVisible;
+  final String? tooltipMessage;
   final GlobalKey buttonKey;
+  final bool isLeftAligned;
 
   @override
   void paint(Canvas canvas, Size size) {
     // Do not paint the tooltip if it is currently hidden.
+    final bool isVisible = tooltipMessage != null;
     if (!isVisible) {
       return;
     }
 
-    // Do not paint the tooltip if the selection mode button is not rendered.
+    // Do not paint the tooltip if the exit select mode button is not rendered.
     final RenderObject? buttonRenderObject =
         buttonKey.currentContext?.findRenderObject();
     if (buttonRenderObject == null) {
@@ -3583,9 +3699,8 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
     final TextPainter tooltipTextPainter = TextPainter()
       ..maxLines = 1
       ..ellipsis = '...'
-      ..text =
-          const TextSpan(
-        text: 'Exit Select Widget mode',
+      ..text = TextSpan(
+        text: tooltipMessage,
         style: _messageStyle,
       )
       ..textDirection = TextDirection.ltr
@@ -3603,7 +3718,8 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
     final double tooltipWidth = textWidth + (tooltipPadding * 2);
     final double tooltipHeight = textHeight + (tooltipPadding * 2);
 
-    final double tooltipXOffset = 0 - buttonWidth / 2;
+    final double tooltipXOffset =
+        isLeftAligned ? 0 - buttonWidth : 0 - (tooltipWidth - buttonWidth);
     final double tooltipYOffset = 0 - tooltipHeight - tooltipSpacing;
 
     // Draw tooltip background.
@@ -3628,7 +3744,7 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ExitWidgetSelectionTooltipPainter oldDelegate) {
-    return isVisible != oldDelegate.isVisible;
+    return tooltipMessage != oldDelegate.tooltipMessage;
   }
 }
 

@@ -22,6 +22,7 @@ import 'package:flutter/services.dart';
 import 'arc.dart';
 import 'colors.dart';
 import 'floating_action_button.dart';
+import 'icon_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
 import 'page.dart';
@@ -947,6 +948,24 @@ class _MaterialAppState extends State<MaterialApp> {
     );
   }
 
+  Widget _moveExitWidgetSelectionButtonBuilder(
+    BuildContext context,
+    VoidCallback onPressed, {
+    bool isLeftAligned = true,
+  }) {
+    return IconButton(
+        padding: EdgeInsets.all(-8.0),
+        iconSize: 32,
+        onPressed: onPressed,
+        constraints: const BoxConstraints(
+          minWidth: 40,
+          minHeight: 40,
+        ),
+        icon: Icon(
+          isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
+        ));
+  }
+
   ThemeData _themeBuilder(BuildContext context) {
     ThemeData? theme;
     // Resolve which theme to use based on brightness and high contrast.
@@ -1050,6 +1069,8 @@ class _MaterialAppState extends State<MaterialApp> {
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
         exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+        moveExitWidgetSelectionButtonBuilder:
+            _moveExitWidgetSelectionButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
@@ -1084,6 +1105,8 @@ class _MaterialAppState extends State<MaterialApp> {
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
       exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+      moveExitWidgetSelectionButtonBuilder:
+          _moveExitWidgetSelectionButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,
