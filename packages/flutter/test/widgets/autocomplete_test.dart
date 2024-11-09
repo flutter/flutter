@@ -1558,9 +1558,9 @@ void main() {
     expect(lastOptions, altEleOptions);
     expect(find.byKey(optionsKey), findsOneWidget);
   });
-  
+
   testWidgets('optionsLayerLink: open upward', (WidgetTester tester) async {
-      final LayerLink optionsLayerLink=LayerLink();
+      final LayerLink optionsLayerLink = LayerLink();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
