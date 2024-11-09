@@ -18,6 +18,7 @@ import 'inherited_notifier.dart';
 import 'overlay.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
+import 'visibility.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -159,16 +160,17 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.onSelected,
     this.textEditingController,
     this.initialValue,
-  }) : assert(
+    this.optionsLayerLink,
+    }) : assert(
          fieldViewBuilder != null
             || (key != null && focusNode != null && textEditingController != null),
-         'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
+          'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
         ),
-       assert((focusNode == null) == (textEditingController == null)),
-       assert(
-         !(textEditingController != null && initialValue != null),
-         'textEditingController and initialValue cannot be simultaneously defined.',
-       );
+        assert((focusNode == null) == (textEditingController == null)),
+        assert(
+          !(textEditingController != null && initialValue != null),
+          'textEditingController and initialValue cannot be simultaneously defined.',
+        );
 
   /// {@template flutter.widgets.RawAutocomplete.fieldViewBuilder}
   /// Builds the field whose input is used to get the options.
@@ -271,6 +273,17 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// This parameter is ignored if [textEditingController] is defined.
   final TextEditingValue? initialValue;
 
+  /// {@template flutter.widgets.RawAutocomplete.optionsLayerLink}
+  /// This parameter is used to link the [optionsBuilder] to a custom [CompositedTransformTarget],
+  /// allowing you to control the positioning and size of the options overlay. 
+  /// By providing a [LayerLink], you can change the location or size of the [optionsBuilder]
+  /// 
+  /// If you need to set the value of [optionsLayerLink], you must provide the [RawAutocomplete] 
+  /// with a [CompositedTransformTarget] as a parent widget, which will link the options overlay 
+  /// to the correct position in the widget tree.
+  /// {@endtemplate}
+  final LayerLink? optionsLayerLink;
+
   /// Calls [AutocompleteFieldViewBuilder]'s onFieldSubmitted callback for the
   /// RawAutocomplete widget indicated by the given [GlobalKey].
   ///
@@ -303,7 +316,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {
   final GlobalKey _fieldKey = GlobalKey();
-  final LayerLink _optionsLayerLink = LayerLink();
+  late LayerLink _optionsLayerLink;
   final OverlayPortalController _optionsViewController = OverlayPortalController(debugLabel: '_RawAutocompleteState');
 
   TextEditingController? _internalTextEditingController;
@@ -467,6 +480,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
                                                  ?? (_internalTextEditingController = TextEditingController.fromValue(widget.initialValue));
     initialController.addListener(_onChangedField);
     widget.focusNode?.addListener(_updateOptionsViewVisibility);
+    _optionsLayerLink = widget.optionsLayerLink ?? LayerLink();
   }
 
   @override
@@ -514,9 +528,13 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             shortcuts: _shortcuts,
             child: Actions(
               actions: _actionMap,
-              child: CompositedTransformTarget(
-                link: _optionsLayerLink,
-                child: fieldView,
+              child: Visibility(
+                visible: widget.optionsLayerLink==null,
+                replacement: fieldView,
+                child: CompositedTransformTarget(
+                  link: _optionsLayerLink,
+                  child: fieldView,
+                ),
               ),
             ),
           ),

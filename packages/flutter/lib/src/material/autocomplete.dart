@@ -9,7 +9,7 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'text_form_field.dart';
 import 'theme.dart';
-
+ 
 /// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=-Nny8kzW380}
@@ -67,7 +67,8 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
-    this.initialValue,
+    this.initialValue,    
+    this.optionsLayerLink,
   });
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
@@ -105,6 +106,9 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
+  /// {@macro flutter.widgets.RawAutocomplete.optionsLayerLink}
+  final LayerLink? optionsLayerLink;
+
   static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
     return _AutocompleteField(
       focusNode: focusNode,
@@ -121,6 +125,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
       initialValue: initialValue,
       optionsBuilder: optionsBuilder,
       optionsViewOpenDirection: optionsViewOpenDirection,
+      optionsLayerLink: optionsLayerLink,
       optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
         return _AutocompleteOptions<T>(
           displayStringForOption: displayStringForOption,
