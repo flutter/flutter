@@ -70,6 +70,7 @@ void main() {
       flutterVersion: flutterVersion,
       fileSystem: fileSystem,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     await webBuilder.buildWeb(
       flutterProject,
@@ -138,6 +139,8 @@ void main() {
       ),
       true,
     );
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('WebBuilder throws tool exit on failure', () async {
@@ -160,6 +163,7 @@ void main() {
       flutterVersion: flutterVersion,
       fileSystem: fileSystem,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     await expectLater(
         () async => webBuilder.buildWeb(
@@ -176,5 +180,7 @@ void main() {
     expect(logger.errorText, contains('Target hello failed: FormatException: illegal character in input string'));
     expect(testUsage.timings, isEmpty);
     expect(fakeAnalytics.sentEvents, isEmpty);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }

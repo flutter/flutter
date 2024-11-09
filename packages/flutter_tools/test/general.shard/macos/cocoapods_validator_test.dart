@@ -54,7 +54,7 @@ void main() {
       final ValidationMessage message = result.messages.first;
       expect(message.type, ValidationMessageType.hint);
       expect(message.message, contains('CocoaPods $currentVersion out of date'));
-      expect(message.message, contains('(1.13.0 is recommended)'));
+      expect(message.message, contains('(1.16.2 is recommended)'));
       expect(message.message, contains('getting-started.html#updating-cocoapods'));
     });
   });

@@ -38,6 +38,18 @@ class _Linear${blockName}DefaultsM3 extends ProgressIndicatorThemeData {
 
   @override
   double get linearMinHeight => ${getToken('md.comp.progress-indicator.track.thickness')};
+
+  @override
+  BorderRadius get borderRadius => BorderRadius.circular(${getToken('md.comp.progress-indicator.track.thickness')} / 2);
+
+  @override
+  Color get stopIndicatorColor => ${componentColor('md.comp.progress-indicator.stop-indicator')};
+
+  @override
+  double? get stopIndicatorRadius => ${getToken('md.comp.progress-indicator.stop-indicator.size')} / 2;
+
+  @override
+  double? get trackGap => ${getToken('md.comp.progress-indicator.active-indicator-track-space')};
 }
 ''';
 }
