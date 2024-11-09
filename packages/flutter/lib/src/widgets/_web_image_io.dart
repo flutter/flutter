@@ -8,12 +8,13 @@ import '../../widgets.dart';
 /// Returns [true] if the bytes at [url] can be fetched.
 ///
 /// The bytes may be unable to be fetched if they aren't from the same origin
-/// and the sever hosting them does not allow cross-origin requests.
+/// and the server hosting them does not allow cross-origin requests.
 Future<bool> checkIfImageBytesCanBeFetched(String url) {
   // On mobile and desktop there are no cross-origin restrictions.
   return SynchronousFuture<bool>(true);
 }
 
+/// The underlying State widget for [WebImage].
 class WebImageState extends State<WebImage> {
   @override
   Widget build(BuildContext context) {
@@ -34,12 +35,20 @@ class WebImageState extends State<WebImage> {
   }
 }
 
+/// A key for loading the web image resource located at the URL [src].
 class WebImageProviderImpl implements WebImageProvider {
+  /// Creates a new web image resource located at [src].
   WebImageProviderImpl(this.src);
 
-  String src;
+  /// The URL of the web image resource.
+  @override
+  final String src;
 }
 
+/// If the [provider] points to a web image resource that can be directly
+/// fetched, then this calls [precacheImage] with the resource URL as the
+/// provider. Otherwise, this completes when the underlying image resource
+/// has been decoded and is ready to display in an <img> element.
 Future<void> precacheWebImage(
   WebImageProvider provider,
   BuildContext context, {

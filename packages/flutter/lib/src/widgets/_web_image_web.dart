@@ -61,6 +61,7 @@ Future<bool> checkIfImageBytesCanBeFetched(String url) {
   });
 }
 
+/// The underlying State widget for [WebImage].
 class WebImageState extends State<WebImage> with WidgetsBindingObserver {
   WebImageStream? _imageStream;
   WebImageInfo? _imageInfo;
@@ -117,7 +118,6 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
   }
 
   void _resolveImage() {
-    print('calling resolveImage for src: ${widget.provider.src}');
     final WebImageStream newStream =
         (widget.provider as WebImageProviderImpl).resolve();
     _updateSourceStream(newStream);
@@ -172,7 +172,6 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
   }
 
   void _handleImageFrame(WebImageInfo imageInfo, bool synchronousCall) {
-    print('LOADED IMAGE: ${imageInfo.image.src}, sync: $synchronousCall');
     setState(() {
       _replaceImage(info: imageInfo);
       _lastException = null;
@@ -184,8 +183,6 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
   }
 
   void _handleImageCanBeLoaded(bool synchronousCall) {
-    print(
-        'ABLE TO FETCH IMAGE: ${widget.provider.src}, sync: $synchronousCall');
     setState(() {
       _replaceImage(info: null);
       _lastException = null;
@@ -197,10 +194,6 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
   }
 
   void _replaceImage({required WebImageInfo? info}) {
-    final WebImageInfo? oldImageInfo = _imageInfo;
-    SchedulerBinding.instance.addPostFrameCallback(
-        (_) => oldImageInfo?.dispose(),
-        debugLabel: 'WebImage.disposeOldInfo');
     _imageInfo = info;
   }
 
@@ -321,8 +314,10 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
   }
 }
 
+/// Displays an `<img>` element with `src` set to [src].
 class ImgElementPlatformView extends StatelessWidget {
-  ImgElementPlatformView(this.src) {
+  /// Creates a platform view backed with an `<img>` element.
+  ImgElementPlatformView(this.src, {super.key}) {
     if (!_registered) {
       _register();
     }
@@ -338,13 +333,12 @@ class ImgElementPlatformView extends StatelessWidget {
         {Object? params}) {
       final Map<Object?, Object?> paramsMap = params! as Map<Object?, Object?>;
       final web.HTMLImageElement img =
-          webImageCache.getLoadedImage(paramsMap['key']!)!.image;
-      print('LOADING IMAGE FROM SRC: ${paramsMap['key']}');
-      print('IMAGE ELEMENT: $img');
+          webImageCache.getLoadedImage(paramsMap['key']! as String)!.image;
       return img;
     });
   }
 
+  /// The `src` url for the `<img>` tag.
   final String? src;
 
   @override
@@ -359,7 +353,9 @@ class ImgElementPlatformView extends StatelessWidget {
   }
 }
 
+/// A widget which displays and lays out an underlying `<img>` platform view.
 class RawWebImage extends SingleChildRenderObjectWidget {
+  /// Creates a [RawWebImage].
   RawWebImage({
     super.key,
     required this.image,
@@ -371,12 +367,25 @@ class RawWebImage extends SingleChildRenderObjectWidget {
     this.matchTextDirection = false,
   }) : super(child: ImgElementPlatformView(image?.src));
 
+  /// The underlying `<img>` tag to be displayed.
   final web.HTMLImageElement? image;
+
+  /// A debug label explaining the image.
   final String? debugImageLabel;
+
+  /// The requested width for this widget.
   final double? width;
+
+  /// The requested height for this widget.
   final double? height;
+
+  /// How the `<img>` should be inscribed in the box constraining it.
   final BoxFit? fit;
+
+  /// How the image should be aligned in the box constraining it.
   final AlignmentGeometry alignment;
+
+  /// Whether or not the alignment of the image should match the text direction.
   final bool matchTextDirection;
 
   @override
@@ -395,7 +404,9 @@ class RawWebImage extends SingleChildRenderObjectWidget {
   }
 }
 
-class RenderWebImage extends RenderProxyBox {
+/// Lays out and positions the child `<img>` element similarly to [RenderImage].
+class RenderWebImage extends RenderShiftedBox {
+  /// Creates a new [RenderWebImage].
   RenderWebImage({
     RenderBox? child,
     required web.HTMLImageElement? image,
@@ -567,9 +578,6 @@ class RenderWebImage extends RenderProxyBox {
       return constraints.smallest;
     }
 
-    print('CONSTRAINTS: $constraints');
-    print('IMAGE NATURAL SIZE: ${image!.naturalWidth} x ${image!.naturalHeight}');
-
     return constraints.constrainSizeAndAttemptToPreserveAspectRatio(Size(
       _image!.naturalWidth.toDouble(),
       _image!.naturalHeight.toDouble(),
@@ -621,9 +629,23 @@ class RenderWebImage extends RenderProxyBox {
 
   @override
   void performLayout() {
+    _resolve();
+    assert(_resolvedAlignment != null);
+    assert(_flipHorizontally != null);
     size = _sizeForConstraints(constraints);
-    print('CONSTRAINING SIZE TO $size');
-    child?.layout(BoxConstraints.tight(size));
+    if (child != null && image != null) {
+      final Size inputSize = Size(image!.naturalWidth.toDouble(), image!.naturalHeight.toDouble());
+      fit ??= BoxFit.scaleDown;
+      final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize, size);
+      final Size childSize = fittedSizes.destination;
+      child!.layout(BoxConstraints.tight(childSize));
+      final double halfWidthDelta = (size.width - childSize.width) / 2.0;
+      final double halfHeightDelta = (size.height - childSize.height) / 2.0;
+      final double dx = halfWidthDelta + (_flipHorizontally! ? -_resolvedAlignment!.x : _resolvedAlignment!.x) * halfWidthDelta;
+      final double dy = halfHeightDelta + _resolvedAlignment!.y * halfHeightDelta;
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = Offset(dx, dy);
+    }
   }
 
   @override
@@ -647,14 +669,19 @@ typedef _KeyAndErrorHandlerCallback = void Function(
 typedef _AsyncKeyErrorHandler = Future<void> Function(
     String key, Object exception, StackTrace? stack);
 
+/// A key for loading the web image resource located at the URL [src].
 class WebImageProviderImpl implements WebImageProvider {
+  /// Creates a new web image resource located at [src].
   WebImageProviderImpl(this.src);
 
+  /// The URL of the web image resource.
+  @override
   final String src;
 
+  /// Creates a [WebImageStream], and begins to load the image resource.
+  ///
+  /// The stream is automatically cached with the [WebImageCache].
   WebImageStream resolve() {
-    print('calling resolve for $src');
-    print('current cache status: ${webImageCache.statusForKey(src)}');
     final WebImageStream stream = WebImageStream();
     // Set up an error handling zone and call resolveStreamForKey.
     _createErrorHandler(
@@ -712,23 +739,11 @@ class WebImageProviderImpl implements WebImageProvider {
     }
   }
 
-  /// Called by [resolve] with the key returned by [obtainKey].
+  /// Called by [resolve] with the key as [src].
   ///
-  /// Subclasses should override this method rather than calling [obtainKey] if
-  /// they need to use a key directly. The [resolve] method installs appropriate
-  /// error handling guards so that errors will bubble up to the right places in
-  /// the framework, and passes those guards along to this method via the
-  /// [handleError] parameter.
-  ///
-  /// It is safe for the implementation of this method to call [handleError]
-  /// multiple times if multiple errors occur, or if an error is thrown both
-  /// synchronously into the current part of the stack and thrown into the
-  /// enclosing [Zone].
-  ///
-  /// The default implementation uses the key to interact with the [ImageCache],
-  /// calling [ImageCache.putIfAbsent] and notifying listeners of the [stream].
-  /// Implementers that do not call super are expected to correctly use the
-  /// [ImageCache].
+  /// The implementation uses the key to interact with the [WebImageCache],
+  /// calling [WebImageCache.putIfAbsent] and notifying listeners of the
+  /// [stream].
   @protected
   void resolveStreamForKey(
       WebImageStream stream, String key, ImageErrorListener handleError) {
@@ -754,6 +769,8 @@ class WebImageProviderImpl implements WebImageProvider {
     }
   }
 
+  /// Creates a completer which completes if either (1) the image bytes can be
+  /// fetched normally or (2) an <img> tag has decoded the image.
   WebImageStreamCompleter loadImage(String key) {
     return OneFrameWebImageStreamCompleter(
       checkIfImageBytesCanBeFetched(key),
@@ -773,6 +790,9 @@ class WebImageProviderImpl implements WebImageProvider {
   }
 }
 
+/// A stream which can be listened to to determine if the underlying web image
+/// resource can (1) be fetched directly, (2) has been decoded in an <img> tag,
+/// or (3) there has been an error decoding the image.
 class WebImageStream with Diagnosticable {
   /// Create an initially unbound image stream.
   ///
@@ -787,12 +807,12 @@ class WebImageStream with Diagnosticable {
 
   List<WebImageStreamListener>? _listeners;
 
-  /// Assigns a particular [ImageStreamCompleter] to this [ImageStream].
+  /// Assigns a particular [WebImageStreamCompleter] to this [WebImageStream].
   ///
-  /// This is usually done automatically by the [ImageProvider] that created the
-  /// [ImageStream].
+  /// This is usually done automatically by the [WebImageProvider] that created
+  /// the [WebImageStream].
   ///
-  /// This method can only be called once per stream. To have an [ImageStream]
+  /// This method can only be called once per stream. To have a [WebImageStream]
   /// represent multiple images over time, assign it a completer that
   /// completes several images in succession.
   void setCompleter(WebImageStreamCompleter value) {
@@ -807,27 +827,14 @@ class WebImageStream with Diagnosticable {
     }
   }
 
-  /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
-  /// object is available. If a concrete image is already available, this object
-  /// will call the listener synchronously.
+  /// Adds a listener callback that is called whenever either it is determined
+  /// that the image bytes can be fetched directly or a new concrete
+  /// [WebImageInfo] object is available. If it has already been determined that
+  /// the bytes can be fetched or a concrete image is already available, this
+  /// object will call the listener synchronously.
   ///
   /// If the assigned [completer] completes multiple images over its lifetime,
   /// this listener will fire multiple times.
-  ///
-  /// {@template flutter.painting.imageStream.addListener}
-  /// The listener will be passed a flag indicating whether a synchronous call
-  /// occurred. If the listener is added within a render object paint function,
-  /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
-  /// a paint.
-  ///
-  /// If a duplicate `listener` is registered N times, then it will be called N
-  /// times when the image stream completes (whether because a new image is
-  /// available or because an error occurs). Likewise, to remove all instances
-  /// of the listener, [removeListener] would need to called N times as well.
-  ///
-  /// When a `listener` receives an [ImageInfo] object, the `listener` is
-  /// responsible for disposing of the [ImageInfo.image].
-  /// {@endtemplate}
   void addListener(WebImageStreamListener listener) {
     if (_completer != null) {
       return _completer!.addListener(listener);
@@ -836,7 +843,7 @@ class WebImageStream with Diagnosticable {
     _listeners!.add(listener);
   }
 
-  /// Stops listening for events from this stream's [ImageStreamCompleter].
+  /// Stops listening for events from this stream's [WebImageStreamCompleter].
   ///
   /// If [listener] has been added multiple times, this removes the _first_
   /// instance of the listener.
@@ -854,14 +861,15 @@ class WebImageStream with Diagnosticable {
   }
 
   /// Returns an object which can be used with `==` to determine if this
-  /// [ImageStream] shares the same listeners list as another [ImageStream].
+  /// [WebImageStream] shares the same listeners list as another
+  /// [WebImageStream].
   ///
   /// This can be used to avoid un-registering and re-registering listeners
-  /// after calling [ImageProvider.resolve] on a new, but possibly equivalent,
-  /// [ImageProvider].
+  /// after calling [WebImageProvider.resolve] on a new, but possibly
+  /// equivalent, [WebImageProvider].
   ///
   /// The key may change once in the lifetime of the object. When it changes, it
-  /// will go from being different than other [ImageStream]'s keys to
+  /// will go from being different than other [WebImageStream]'s keys to
   /// potentially being the same as others'. No notification is sent when this
   /// happens.
   Object get key => _completer ?? this;
@@ -887,6 +895,8 @@ class WebImageStream with Diagnosticable {
   }
 }
 
+/// A completer which completes when either the web image resource has been
+/// determined to be fetchable, or an <img> tag has finished decoding the image.
 class WebImageStreamCompleter with Diagnosticable {
   final List<WebImageStreamListener> _listeners = <WebImageStreamListener>[];
   final List<ImageErrorListener> _ephemeralErrorListeners =
@@ -1098,7 +1108,6 @@ class WebImageStreamCompleter with Diagnosticable {
     }
 
     _ephemeralErrorListeners.clear();
-    _currentImage?.dispose();
     _currentImage = null;
     _disposed = true;
   }
@@ -1139,7 +1148,6 @@ class WebImageStreamCompleter with Diagnosticable {
   @protected
   void setImage(WebImageInfo image) {
     _checkDisposed();
-    _currentImage?.dispose();
     _currentImage = image;
 
     _ephemeralErrorListeners.clear();
@@ -1244,7 +1252,9 @@ class WebImageStreamCompleter with Diagnosticable {
     }
   }
 
-  @protected
+  /// Called when it has been determined that the image can be fetched directly.
+  ///
+  /// In this case, an [Image.network] will be used to show the image.
   void reportImageCanBeLoaded() {
     _checkDisposed();
     _bytesAreFetchable = true;
@@ -1338,6 +1348,8 @@ class _ErrorImageCompleter extends WebImageStreamCompleter {}
 
 const String _flutterWebImageLibrary = 'package:flutter/widgets/web_image.dart';
 
+/// A handle which signifies that the associated completer should be kept alive
+/// even if there are currently no listeners on it.
 class WebImageStreamCompleterHandle {
   WebImageStreamCompleterHandle._(WebImageStreamCompleter this._completer) {
     _completer!._keepAliveHandles += 1;
@@ -1374,35 +1386,51 @@ class WebImageStreamCompleterHandle {
   }
 }
 
+/// A listener which is notified when a web image resource can either be
+/// fetched directly, or if it has been decoded by an <img> tag.
 class WebImageStreamListener {
+  /// Creates a new [WebImageListener].
   WebImageStreamListener(this.onImage, this.onImageCanBeFetched,
       {this.onError});
 
+  /// A callback which is called when the web image resource has been decoded
+  /// by an `<img>` tag.
   final WebImageListener onImage;
+
+  /// A callback which is called when it has been determined that the web image
+  /// can be fetched directly.
   final WebImageCanBeFetchedListener onImageCanBeFetched;
+
+  /// A callback which is called if an error has been thrown while trying to
+  /// determine if the web image can be fetched or while decoding it.
   final ImageErrorListener? onError;
 }
 
+/// The type of the callback for [WebImageStreamListener.onImage].
 typedef WebImageListener = void Function(
     WebImageInfo info, bool synchronousCall);
+/// The type of the callback for [WebImageStreamListener.onImageCanBeFetched].
 typedef WebImageCanBeFetchedListener = void Function(bool synchronousCall);
 
+/// Contains the `<img>` tag to show a web image. The underlying image is
+/// guaranteed to have been decoded and is ready to display immediately.
 class WebImageInfo {
+  /// Creates a new [WebImageInfo].
   WebImageInfo(
     this.image, {
     this.debugLabel,
   });
 
+  /// The decoded <img> element.
   final web.HTMLImageElement image;
+
+  /// A debug label explaining the source of the image.
   final String? debugLabel;
 
   /// An estimate of the image size in bytes.
   int get sizeBytes => (image.naturalWidth * image.naturalHeight * 4).toInt();
 
-  // XXX DO NOT SUBMIT
-  // TODO(harryterkelsen): Decide if we need to dispose.
-  void dispose() {}
-
+  /// Creates a clone of this [WebImageInfo].
   WebImageInfo clone() {
     return WebImageInfo(
       image.cloneNode(true) as web.HTMLImageElement,
@@ -1414,82 +1442,33 @@ class WebImageInfo {
 const int _kDefaultSize = 1000;
 const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 
-/// Class for caching images.
+/// Class for caching web images.
 ///
 /// Implements a least-recently-used cache of up to 1000 images, and up to 100
 /// MB. The maximum size can be adjusted using [maximumSize] and
 /// [maximumSizeBytes].
 ///
 /// The cache also holds a list of 'live' references. An image is considered
-/// live if its [ImageStreamCompleter]'s listener count has never dropped to
+/// live if its [WebImageStreamCompleter]'s listener count has never dropped to
 /// zero after adding at least one listener. The cache uses
-/// [ImageStreamCompleter.addOnLastListenerRemovedCallback] to determine when
+/// [WebImageStreamCompleter.addOnLastListenerRemovedCallback] to determine when
 /// this has happened.
 ///
 /// The [putIfAbsent] method is the main entry-point to the cache API. It
-/// returns the previously cached [ImageStreamCompleter] for the given key, if
-/// available; if not, it calls the given callback to obtain it first. In either
-/// case, the key is moved to the 'most recently used' position.
-///
-/// A caller can determine whether an image is already in the cache by using
-/// [containsKey], which will return true if the image is tracked by the cache
-/// in a pending or completed state. More fine grained information is available
-/// by using the [statusForKey] method.
-///
-/// Generally this class is not used directly. The [ImageProvider] class and its
-/// subclasses automatically handle the caching of images.
-///
-/// A shared instance of this cache is retained by [PaintingBinding] and can be
-/// obtained via the [imageCache] top-level property in the [painting] library.
-///
-/// {@tool snippet}
-///
-/// This sample shows how to supply your own caching logic and replace the
-/// global [imageCache] variable.
-///
-/// ```dart
-/// /// This is the custom implementation of [ImageCache] where we can override
-/// /// the logic.
-/// class MyImageCache extends ImageCache {
-///   @override
-///   void clear() {
-///     print('Clearing cache!');
-///     super.clear();
-///   }
-/// }
-///
-/// class MyWidgetsBinding extends WidgetsFlutterBinding {
-///   @override
-///   ImageCache createImageCache() => MyImageCache();
-/// }
-///
-/// void main() {
-///   // The constructor sets global variables.
-///   MyWidgetsBinding();
-///   runApp(const MyApp());
-/// }
-///
-/// class MyApp extends StatelessWidget {
-///   const MyApp({super.key});
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Container();
-///   }
-/// }
-/// ```
-/// {@end-tool}
+/// returns the previously cached [WebImageStreamCompleter] for the given key,
+/// if available; if not, it calls the given callback to obtain it first. In
+/// either case, the key is moved to the 'most recently used' position.
 class WebImageCache {
-  final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
-  final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};
+  final Map<String, _PendingImage> _pendingImages = <String, _PendingImage>{};
+  final Map<String, _CachedImage> _cache = <String, _CachedImage>{};
 
-  /// ImageStreamCompleters with at least one listener. These images may or may
+  /// WebImageStreamCompleters with at least one listener. These images may or may
   /// not fit into the _pendingImages or _cache objects.
   ///
   /// Unlike _cache, the [_CachedImage] for this may have a null byte size.
-  final Map<Object, _LiveImage> _liveImages = <Object, _LiveImage>{};
-  final Map<Object, _FetchableImage> _fetchableImages =
-      <Object, _FetchableImage>{};
+  final Map<String, _LiveImage> _liveImages = <String, _LiveImage>{};
+  final Map<String, _FetchableImage> _fetchableImages =
+      <String, _FetchableImage>{};
 
   /// Maximum number of entries to store in the cache.
   ///
@@ -1632,11 +1611,8 @@ class WebImageCache {
   /// count on the completer drops to zero. To clear live image references,
   /// whether completed or not, use [clearLiveImages].
   ///
-  /// The `key` must be equal to an object used to cache an image in
-  /// [ImageCache.putIfAbsent].
-  ///
-  /// If the key is not immediately available, as is common, consider using
-  /// [ImageProvider.evict] to call this method indirectly instead.
+  /// The `key` must be equal to the string used to cache an image in
+  /// [WebImageCache.putIfAbsent].
   ///
   /// The `includeLive` argument determines whether images that still have
   /// listeners in the tree should be evicted as well. This parameter should be
@@ -1648,8 +1624,8 @@ class WebImageCache {
   ///
   /// See also:
   ///
-  ///  * [ImageProvider], for providing images to the [Image] widget.
-  bool evict(Object key, {bool includeLive = true}) {
+  ///  * [WebImageProvider], for providing images to the [WebImage] widget.
+  bool evict(String key, {bool includeLive = true}) {
     if (includeLive) {
       // Remove from live images - the cache will not be able to mark
       // it as complete, and it might be getting evicted because it
@@ -1694,7 +1670,7 @@ class WebImageCache {
   ///
   /// Resizes the cache as appropriate to maintain the constraints of
   /// [maximumSize] and [maximumSizeBytes].
-  void _touch(Object key, _CachedImage image, TimelineTask? timelineTask) {
+  void _touch(String key, _CachedImage image, TimelineTask? timelineTask) {
     if (image.sizeBytes != null &&
         image.sizeBytes! <= maximumSizeBytes &&
         maximumSize > 0) {
@@ -1707,7 +1683,7 @@ class WebImageCache {
   }
 
   void _trackLiveImage(
-      Object key, WebImageStreamCompleter completer, int? sizeBytes) {
+      String key, WebImageStreamCompleter completer, int? sizeBytes) {
     // Avoid adding unnecessary callbacks to the completer.
     _liveImages.putIfAbsent(key, () {
       // Even if no callers to ImageProvider.resolve have listened to the stream,
@@ -1724,9 +1700,9 @@ class WebImageCache {
     }).sizeBytes ??= sizeBytes;
   }
 
-  /// Returns the previously cached [ImageStream] for the given key, if available;
-  /// if not, calls the given callback to obtain it first. In either case, the
-  /// key is moved to the 'most recently used' position.
+  /// Returns the previously cached [WebImageStream] for the given key, if
+  /// available; if not, calls the given callback to obtain it first. In either
+  /// case, the key is moved to the 'most recently used' position.
   ///
   /// In the event that the loader throws an exception, it will be caught only if
   /// `onError` is also provided. When an exception is caught resolving an image,
@@ -1736,7 +1712,7 @@ class WebImageCache {
   /// Images that are larger than [maximumSizeBytes] are not cached, and do not
   /// cause other images in the cache to be evicted.
   WebImageStreamCompleter? putIfAbsent(
-      Object key, WebImageStreamCompleter Function() loader,
+      String key, WebImageStreamCompleter Function() loader,
       {ImageErrorListener? onError}) {
     TimelineTask? debugTimelineTask;
     if (!kReleaseMode) {
@@ -1744,7 +1720,7 @@ class WebImageCache {
         ..start(
           'ImageCache.putIfAbsent',
           arguments: <String, dynamic>{
-            'key': key.toString(),
+            'key': key,
           },
         );
     }
@@ -1841,7 +1817,6 @@ class WebImageCache {
       int? sizeBytes;
       if (info != null) {
         sizeBytes = info.sizeBytes;
-        info.dispose();
       }
       final _CachedImage image = _CachedImage(
         result!,
@@ -1908,8 +1883,10 @@ class WebImageCache {
     return result;
   }
 
-  WebImageInfo? getLoadedImage(Object key) {
-    _CachedImage? image = _cache[key];
+  /// Returns the already decoded `<img>` element with the given [key], if one
+  /// exists.
+  WebImageInfo? getLoadedImage(String key) {
+    final _CachedImage? image = _cache[key];
     if (image != null) {
       return image.completer._currentImage;
     }
@@ -1917,9 +1894,9 @@ class WebImageCache {
     return null;
   }
 
-  /// The [ImageCacheStatus] information for the given `key`.
-  ImageCacheStatus statusForKey(Object key) {
-    return ImageCacheStatus._(
+  /// The [WebImageCacheStatus] information for the given `key`.
+  WebImageCacheStatus statusForKey(String key) {
+    return WebImageCacheStatus._(
       pending: _pendingImages.containsKey(key),
       keepAlive: _cache.containsKey(key),
       live: _liveImages.containsKey(key),
@@ -1928,27 +1905,27 @@ class WebImageCache {
   }
 
   /// Returns whether this `key` has been previously added by [putIfAbsent].
-  bool containsKey(Object key) {
+  bool containsKey(String key) {
     return _pendingImages[key] != null ||
         _cache[key] != null ||
         _fetchableImages[key] != null;
   }
 
-  /// The number of live images being held by the [ImageCache].
+  /// The number of live images being held by the [WebImageCache].
   ///
-  /// Compare with [ImageCache.currentSize] for keepAlive images.
+  /// Compare with [WebImageCache.currentSize] for keepAlive images.
   int get liveImageCount => _liveImages.length;
 
-  /// The number of images being tracked as pending in the [ImageCache].
+  /// The number of images being tracked as pending in the [WebImageCache].
   ///
-  /// Compare with [ImageCache.currentSize] for keepAlive images.
+  /// Compare with [WebImageCache.currentSize] for keepAlive images.
   int get pendingImageCount => _pendingImages.length;
 
   /// Clears any live references to images in this cache.
   ///
-  /// An image is considered live if its [ImageStreamCompleter] has never hit
+  /// An image is considered live if its [WebImageStreamCompleter] has never hit
   /// zero listeners after adding at least one listener. The
-  /// [ImageStreamCompleter.addOnLastListenerRemovedCallback] is used to
+  /// [WebImageStreamCompleter.addOnLastListenerRemovedCallback] is used to
   /// determine when this has happened.
   ///
   /// This is called after a hot reload to evict any stale references to image
@@ -1974,13 +1951,13 @@ class WebImageCache {
     }
     while (
         _currentSizeBytes > _maximumSizeBytes || _cache.length > _maximumSize) {
-      final Object key = _cache.keys.first;
+      final String key = _cache.keys.first;
       final _CachedImage image = _cache[key]!;
       _currentSizeBytes -= image.sizeBytes!;
       image.dispose();
       _cache.remove(key);
       if (!kReleaseMode) {
-        (finishArgs['evictedKeys'] as List<String>).add(key.toString());
+        (finishArgs['evictedKeys'] as List<String>).add(key);
       }
     }
     if (!kReleaseMode) {
@@ -1994,39 +1971,42 @@ class WebImageCache {
   }
 }
 
-WebImageCache webImageCache = WebImageCache();
+/// The singleton instance of [WebImageCache].
+final WebImageCache webImageCache = WebImageCache();
 
-/// Information about how the [ImageCache] is tracking an image.
+/// Information about how the [WebImageCache] is tracking an image.
 ///
 /// A [pending] image is one that has not completed yet. It may also be tracked
 /// as [live] because something is listening to it.
 ///
 /// A [keepAlive] image is being held in the cache, which uses Least Recently
 /// Used semantics to determine when to evict an image. These images are subject
-/// to eviction based on [ImageCache.maximumSizeBytes] and
-/// [ImageCache.maximumSize]. It may be [live], but not [pending].
+/// to eviction based on [WebImageCache.maximumSizeBytes] and
+/// [WebImageCache.maximumSize]. It may be [live], but not [pending].
 ///
 /// A [live] image is being held until its [ImageStreamCompleter] has no more
 /// listeners. It may also be [pending] or [keepAlive].
 ///
+/// A [fetchable] image is one that can be directly fetched.
+///
 /// An [untracked] image is not being cached.
 ///
-/// To obtain an [ImageCacheStatus], use [ImageCache.statusForKey] or
+/// To obtain an [WebImageCacheStatus], use [WebImageCache.statusForKey] or
 /// [ImageProvider.obtainCacheStatus].
 @immutable
-class ImageCacheStatus {
-  const ImageCacheStatus._({
+class WebImageCacheStatus {
+  const WebImageCacheStatus._({
     this.pending = false,
     this.keepAlive = false,
     this.live = false,
     this.fetchable = false,
   }) : assert(!pending || !keepAlive);
 
-  /// An image that has been submitted to [ImageCache.putIfAbsent], but
+  /// An image that has been submitted to [WebImageCache.putIfAbsent], but
   /// not yet completed.
   final bool pending;
 
-  /// An image that has been submitted to [ImageCache.putIfAbsent], has
+  /// An image that has been submitted to [WebImageCache.putIfAbsent], has
   /// completed, fits based on the sizing rules of the cache, and has not been
   /// evicted.
   ///
@@ -2034,21 +2014,23 @@ class ImageCacheStatus {
   /// as they have not been evicted from the cache based on its sizing rules.
   final bool keepAlive;
 
-  /// An image that has been submitted to [ImageCache.putIfAbsent] and has at
-  /// least one listener on its [ImageStreamCompleter].
+  /// An image that has been submitted to [WebImageCache.putIfAbsent] and has at
+  /// least one listener on its [WebImageStreamCompleter].
   ///
   /// Such images may also be [keepAlive] if they fit in the cache based on its
   /// sizing rules. They may also be [pending] if they have not yet resolved.
   final bool live;
 
+  /// An image that has been submitted to [WebImageCache.putIfAbsent] and has
+  /// been determined to be directly fetchable.
   final bool fetchable;
 
-  /// An image that is tracked in some way by the [ImageCache], whether
-  /// [pending], [keepAlive], or [live].
+  /// An image that is tracked in some way by the [WebImageCache], whether
+  /// [pending], [keepAlive], [live], or [fetchable].
   bool get tracked => pending || keepAlive || live || fetchable;
 
   /// An image that either has not been submitted to
-  /// [ImageCache.putIfAbsent] or has otherwise been evicted from the
+  /// [WebImageCache.putIfAbsent] or has otherwise been evicted from the
   /// [keepAlive] and [live] caches.
   bool get untracked => !pending && !keepAlive && !live && !fetchable;
 
@@ -2057,7 +2039,7 @@ class ImageCacheStatus {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ImageCacheStatus &&
+    return other is WebImageCacheStatus &&
         other.pending == pending &&
         other.keepAlive == keepAlive &&
         other.live == live &&
@@ -2154,6 +2136,10 @@ class _FetchableImage extends _CachedImageBase {
   _FetchableImage(super.completer) : super(sizeBytes: 0);
 }
 
+/// If the [provider] points to a web image resource that can be directly
+/// fetched, then this calls [precacheImage] with the resource URL as the
+/// provider. Otherwise, this completes when the underlying image resource
+/// has been decoded and is ready to display in an <img> element.
 Future<void> precacheWebImage(
   WebImageProvider provider,
   BuildContext context, {
@@ -2173,7 +2159,6 @@ Future<void> precacheWebImage(
       // image stream.
       // See ImageCache._liveImages
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-        image?.dispose();
         stream.removeListener(listener!);
       }, debugLabel: 'precacheImage.removeListener');
     },
