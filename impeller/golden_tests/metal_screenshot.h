@@ -15,9 +15,10 @@
 
 namespace fml {
 
-/// Default retain and release implementations for CGImageRef.
+/// fml::CFRef retain and release implementations for CGImageRef.
 template <>
 struct CFRefTraits<CGImageRef> {
+  static constexpr CGImageRef kNullValue = nullptr;
   static void Retain(CGImageRef instance) { CGImageRetain(instance); }
   static void Release(CGImageRef instance) { CGImageRelease(instance); }
 };
