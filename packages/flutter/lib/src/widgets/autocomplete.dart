@@ -18,7 +18,6 @@ import 'inherited_notifier.dart';
 import 'overlay.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
-import 'visibility.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -528,14 +527,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             shortcuts: _shortcuts,
             child: Actions(
               actions: _actionMap,
-              child: Visibility(
-                visible: widget.optionsLayerLink==null,
-                replacement: fieldView,
-                child: CompositedTransformTarget(
-                  link: _optionsLayerLink,
-                  child: fieldView,
-                ),
-              ),
+              child: widget.optionsLayerLink != null
+                  ? fieldView
+                  : CompositedTransformTarget(
+                      link: _optionsLayerLink,
+                      child: fieldView,
+                    ),
             ),
           ),
         ),
