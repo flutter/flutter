@@ -90,11 +90,7 @@ class DarwinDependencyManagement {
 
     final bool useCocoapods;
     if (_project.usesSwiftPackageManager) {
-      useCocoapods = _usingCocoaPodsPlugin(
-        pluginCount: totalCount,
-        swiftPackageCount: swiftPackageCount,
-        cocoapodCount: podCount,
-      );
+      useCocoapods = swiftPackageCount < totalCount;
     } else {
       // When Swift Package Manager is not enabled, set up Podfile if plugins
       // is not empty, regardless of if plugins are CocoaPod compatible. This
@@ -110,19 +106,6 @@ class DarwinDependencyManagement {
     else if (xcodeProject.podfile.existsSync() && xcodeProject.podfileLock.existsSync()) {
       _cocoapods.addPodsDependencyToFlutterXcconfig(xcodeProject);
     }
-  }
-
-  bool _usingCocoaPodsPlugin({
-    required int pluginCount,
-    required int swiftPackageCount,
-    required int cocoapodCount,
-  }) {
-    if (_project.usesSwiftPackageManager) {
-      if (pluginCount == swiftPackageCount) {
-        return false;
-      }
-    }
-    return cocoapodCount > 0;
   }
 
   /// Returns count of total number of plugins, number of Swift Package Manager
