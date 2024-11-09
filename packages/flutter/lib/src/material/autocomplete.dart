@@ -67,7 +67,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
-    this.initialValue,    
+    this.initialValue,
     this.optionsLayerLink,
   });
 

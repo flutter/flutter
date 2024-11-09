@@ -274,10 +274,10 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 
   /// {@template flutter.widgets.RawAutocomplete.optionsLayerLink}
   /// This parameter is used to link the [optionsBuilder] to a custom [CompositedTransformTarget],
-  /// allowing you to control the positioning and size of the options overlay. 
+  /// allowing you to control the positioning and size of the options overlay.
   /// By providing a [LayerLink], you can change the location or size of the [optionsBuilder]
-  /// 
-  /// If you need to set the value of [optionsLayerLink], you must provide the [RawAutocomplete] 
+  ///
+  /// If you need to set the value of [optionsLayerLink], you must provide the [RawAutocomplete]
   /// with a [CompositedTransformTarget] as a parent widget, which will link the options overlay 
   /// to the correct position in the widget tree.
   /// {@endtemplate}
