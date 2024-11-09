@@ -278,7 +278,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// By providing a [LayerLink], you can change the location or size of the [optionsBuilder]
   ///
   /// If you need to set the value of [optionsLayerLink], you must provide the [RawAutocomplete]
-  /// with a [CompositedTransformTarget] as a parent widget, which will link the options overlay 
+  /// with a [CompositedTransformTarget] as a parent widget, which will link the options overlay
   /// to the correct position in the widget tree.
   /// {@endtemplate}
   final LayerLink? optionsLayerLink;
