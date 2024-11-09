@@ -14,6 +14,7 @@ namespace fml {
 /// Default retain and release implementations for CFRef.
 template <typename T>
 struct CFRefTraits {
+  static constexpr T kNullValue = nullptr;
   static void Retain(T instance) { CFRetain(instance); }
   static void Release(T instance) { CFRelease(instance); }
 };
@@ -26,7 +27,7 @@ template <class T>
 class CFRef {
  public:
   /// Creates a new null CFRef.
-  CFRef() : instance_(nullptr) {}
+  CFRef() : instance_(CFRefTraits<T>::kNullValue) {}
 
   /// Takes over ownership of `instance`, which is expected to be already
   /// retained.
@@ -43,7 +44,7 @@ class CFRef {
   /// Move ctor: Takes over ownership of the CoreFoundation object owned
   /// by `other`. The object owned by `other` is set to null.
   CFRef(CFRef&& other) : instance_(other.instance_) {
-    other.instance_ = nullptr;
+    other.instance_ = CFRefTraits<T>::kNullValue;
   }
 
   /// Takes over ownership of the CoreFoundation object owned by `other`.
@@ -57,14 +58,14 @@ class CFRef {
     if (instance_) {
       CFRefTraits<T>::Release(instance_);
     }
-    instance_ = nullptr;
+    instance_ = CFRefTraits<T>::kNullValue;
   }
 
   /// Takes over ownership of `instance`, null by default. The object is
   /// expected to be already retained if non-null.
   ///
   /// Releases the previous object, if non-null.
-  void Reset(T instance = nullptr) {
+  void Reset(T instance = CFRefTraits<T>::kNullValue) {
     if (instance_) {
       CFRefTraits<T>::Release(instance_);
     }
@@ -73,7 +74,7 @@ class CFRef {
 
   /// Retains a shared copy of `instance`. The previous object is released if
   /// non-null. Has no effect if `instance` is the currently-held object.
-  void Retain(T instance = nullptr) {
+  void Retain(T instance = CFRefTraits<T>::kNullValue) {
     if (instance_ == instance) {
       return;
     }
@@ -88,7 +89,7 @@ class CFRef {
   /// with the object.
   [[nodiscard]] T Release() {
     auto instance = instance_;
-    instance_ = nullptr;
+    instance_ = CFRefTraits<T>::kNullValue;
     return instance;
   }
 
@@ -108,7 +109,9 @@ class CFRef {
   operator T() const { return instance_; }
 
   /// Returns true if the underlying CoreFoundation object is non-null.
-  explicit operator bool() const { return instance_ != nullptr; }
+  explicit operator bool() const {
+    return instance_ != CFRefTraits<T>::kNullValue;
+  }
 
  private:
   T instance_;
