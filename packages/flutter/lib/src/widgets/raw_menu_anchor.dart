@@ -24,8 +24,9 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
   SingleActivator(LogicalKeyboardKey.end):         _FocusLastMenuItemIntent(),
 };
 
-/// Describes the position of the menu overlay for the
-/// [RawMenuAnchor.overlayBuilder] constructor.
+/// Anchor and menu positioning information passed to
+/// [RawMenuAnchor.overlayBuilder].
+@immutable
 class RawMenuAnchorOverlayPosition {
   /// Creates a [RawMenuAnchorOverlayPosition].
   const RawMenuAnchorOverlayPosition({
@@ -53,6 +54,27 @@ class RawMenuAnchorOverlayPosition {
   // This used to be a separate parameter, but was moved into the position class
   // to keep the constructor API cleaner.
   final Object tapRegionGroupId;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    };
+
+    return other is RawMenuAnchorOverlayPosition &&
+           other.anchorRect       == anchorRect  &&
+           other.overlaySize      == overlaySize &&
+           other.position         == position    &&
+           other.tapRegionGroupId == tapRegionGroupId;
+  }
+
+  @override
+  int get hashCode {
+    return anchorRect.hashCode  ^
+           overlaySize.hashCode ^
+           position.hashCode    ^
+           tapRegionGroupId.hashCode;
+  }
 }
 
 /// The type of builder function used by [RawMenuAnchor.overlayBuilder] to build
@@ -193,7 +215,7 @@ class RawMenuAnchor extends StatelessWidget {
     required this.menuChildren,
     this.builder,
     this.child,
-    this.panelDecoration,
+    this.surfaceDecoration,
     this.padding = EdgeInsets.zero,
     this.constrainCrossAxis = false,
     String? semanticLabel,
@@ -222,7 +244,7 @@ class RawMenuAnchor extends StatelessWidget {
     this.child,
   }) : alignment = null,
        menuAlignment = null,
-       panelDecoration = null,
+       surfaceDecoration = null,
        alignmentOffset = Offset.zero,
        clipBehavior = Clip.hardEdge,
        constraints = null,
@@ -303,7 +325,7 @@ class RawMenuAnchor extends StatelessWidget {
        _panelBuilder = builder,
        alignment = null,
        menuAlignment = null,
-       panelDecoration = null,
+       surfaceDecoration = null,
        alignmentOffset = Offset.zero,
        clipBehavior = Clip.hardEdge,
        onOpen = null,
@@ -341,7 +363,7 @@ class RawMenuAnchor extends StatelessWidget {
   /// [MediaQuery.platformBrightness] returns [Brightness.light] or null and
   /// [defaultDarkOverlayDecoration] when [MediaQuery.platformBrightness]
   /// returns [Brightness.dark].
-  final Decoration? panelDecoration;
+  final Decoration? surfaceDecoration;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -466,10 +488,10 @@ class RawMenuAnchor extends StatelessWidget {
 
   static const Decoration defaultLightOverlayDecoration = BoxDecoration(
     borderRadius: BorderRadius.all(Radius.circular(6.0)),
-    color: ui.Color.fromARGB(255, 232, 234, 237),
+    color: ui.Color.fromARGB(255, 253, 253, 253),
     border: Border.fromBorderSide(
         BorderSide(
-          color: ui.Color.fromARGB(255, 175, 175, 175),
+          color: ui.Color.fromARGB(255, 255, 255, 255),
           width: 0.5,
         ),
     ),
@@ -511,6 +533,7 @@ class RawMenuAnchor extends StatelessWidget {
     ]
   );
 
+
   Widget defaultOverlayBuilder(
     BuildContext context,
     List<Widget> menuChildren,
@@ -528,7 +551,7 @@ class RawMenuAnchor extends StatelessWidget {
       constraints: constraints,
       padding: padding,
       semanticLabel: _semanticLabel,
-      decoration: panelDecoration
+      decoration: surfaceDecoration
           ?? switch (MediaQuery.maybePlatformBrightnessOf(context)) {
                 ui.Brightness.dark          => defaultDarkOverlayDecoration,
                 ui.Brightness.light || null => defaultLightOverlayDecoration,
@@ -544,7 +567,7 @@ class RawMenuAnchor extends StatelessWidget {
         controller: controller,
         consumeOutsideTaps: consumeOutsideTaps,
         menuChildren: menuChildren,
-        panelBuilder: _panelBuilder!,
+        panelBuilder: _panelBuilder,
       );
     }
 
@@ -588,8 +611,8 @@ class RawMenuAnchor extends StatelessWidget {
     if (menuAlignment != null) {
       properties.add(DiagnosticsProperty<AlignmentGeometry>('menuAlignment', menuAlignment));
     }
-    if (panelDecoration != null) {
-      properties.add(DiagnosticsProperty<Decoration>('panelDecoration', panelDecoration));
+    if (surfaceDecoration != null) {
+      properties.add(DiagnosticsProperty<Decoration>('panelDecoration', surfaceDecoration));
     }
   }
 }
@@ -954,7 +977,7 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
     final BuildContext anchorContext = _anchorKey.currentContext!;
     final RenderBox overlay = Overlay.of(anchorContext).context.findRenderObject()! as RenderBox;
     final RenderBox anchor = anchorContext.findRenderObject()! as RenderBox;
-    final Rect anchorRect = anchor.localToGlobal(Offset.zero, ancestor: overlay)
+    final Rect anchorRect = anchor.localToGlobal(Offset.zero)
                             & anchor.size;
     return widget.overlayBuilder(
       context,
