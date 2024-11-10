@@ -8,18 +8,19 @@
 
 namespace fml {
 
+// Test state used in CFTest.SupportsCustomRetainRelease.
+struct CFRefTestState {
+  bool retain_called;
+  bool release_called;
+};
+
 // Template specialization used in CFTest.SupportsCustomRetainRelease.
 template <>
-struct CFRefTraits<int64_t> {
-  static bool retain_called;
-  static bool release_called;
-
-  static constexpr int64_t kNullValue = 0;
-  static void Retain(int64_t instance) { retain_called = true; }
-  static void Release(int64_t instance) { release_called = true; }
+struct CFRefTraits<CFRefTestState*> {
+  static constexpr CFRefTestState* kNullValue = nullptr;
+  static void Retain(CFRefTestState* instance) { instance->retain_called = true; }
+  static void Release(CFRefTestState* instance) { instance->release_called = true; }
 };
-bool CFRefTraits<int64_t>::retain_called = false;
-bool CFRefTraits<int64_t>::release_called = false;
 
 namespace testing {
 
@@ -98,18 +99,21 @@ TEST(CFTest, RetainSharesOwnership) {
 }
 
 TEST(CFTest, SupportsCustomRetainRelease) {
-  CFRef<int64_t> ref(1);
-  ASSERT_EQ(ref.Get(), 1);
-  ASSERT_FALSE(CFRefTraits<int64_t>::retain_called);
-  ASSERT_FALSE(CFRefTraits<int64_t>::release_called);
+  CFRefTestState instance{};
+  CFRef<CFRefTestState*> ref(&instance);
+  ASSERT_EQ(ref.Get(), &instance);
+  ASSERT_FALSE(instance.retain_called);
+  ASSERT_FALSE(instance.release_called);
   ref.Reset();
-  ASSERT_EQ(ref.Get(), 0);
-  ASSERT_TRUE(CFRefTraits<int64_t>::release_called);
-  ref.Retain(2);
-  ASSERT_EQ(ref.Get(), 2);
-  ASSERT_TRUE(CFRefTraits<int64_t>::retain_called);
-  CFRefTraits<int64_t>::retain_called = false;
-  CFRefTraits<int64_t>::release_called = false;
+  ASSERT_EQ(ref.Get(), nullptr);
+  ASSERT_FALSE(instance.retain_called);
+  ASSERT_TRUE(instance.release_called);
+
+  CFRefTestState other_instance{};
+  ref.Retain(&other_instance);
+  ASSERT_EQ(ref.Get(), &other_instance);
+  ASSERT_TRUE(other_instance.retain_called);
+  ASSERT_FALSE(other_instance.release_called);
 }
 
 }  // namespace testing
