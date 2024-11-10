@@ -308,6 +308,4 @@ class SampleChecker {
 //
 // TODO(gspencergoog): implement the missing tests.
 // See https://github.com/flutter/flutter/issues/130459
-final Set<String> _knownMissingTests = <String>{
-  'examples/api/test/material/color_scheme/dynamic_content_color.0_test.dart',
-};
+final Set<String> _knownMissingTests = <String>{};
