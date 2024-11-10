@@ -112,9 +112,9 @@ void main() {
 
     double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
     DecoratedBox getDecoratedBox(Key key) => tester.firstWidget(find.descendant(
-          of: find.byKey(key),
-          matching: find.byType(DecoratedBox),
-        ));
+      of: find.byKey(key),
+      matching: find.byType(DecoratedBox),
+    ));
 
     expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
     expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
@@ -269,12 +269,12 @@ void main() {
       ),
     );
 
-    // This text should be offstage while ExpansionTile collapsed
-    expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
-    expect(find.text('Maintaining State'), findsNothing);
-    // This text shouldn't be there while ExpansionTile collapsed
-    expect(find.text('Discarding State'), findsNothing);
-  });
+     // This text should be offstage while ExpansionTile collapsed
+     expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
+     expect(find.text('Maintaining State'), findsNothing);
+     // This text shouldn't be there while ExpansionTile collapsed
+     expect(find.text('Discarding State'), findsNothing);
+   });
 
   testWidgets('ExpansionTile padding test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
@@ -390,9 +390,9 @@ void main() {
         );
       },
       throwsA(isA<AssertionError>().having((AssertionError error) => error.toString(), '.toString()', contains(
-            'CrossAxisAlignment.baseline is not supported since the expanded'
-            ' children are aligned in a column, not a row. Try to use another constant.',
-          ))),
+        'CrossAxisAlignment.baseline is not supported since the expanded'
+        ' children are aligned in a column, not a row. Try to use another constant.',
+      ))),
     );
   });
 
@@ -512,8 +512,8 @@ void main() {
     ));
 
     ShapeDecoration shapeDecoration =  tester.firstWidget<DecoratedBox>(find.descendant(
-          of: find.byKey(expansionTileKey),
-          matching: find.byType(DecoratedBox),
+      of: find.byKey(expansionTileKey),
+      matching: find.byType(DecoratedBox),
     )).decoration as ShapeDecoration;
 
     expect(shapeDecoration.color, collapsedBackgroundColor);
@@ -522,8 +522,8 @@ void main() {
     await tester.pumpAndSettle();
 
     shapeDecoration =  tester.firstWidget<DecoratedBox>(find.descendant(
-          of: find.byKey(expansionTileKey),
-          matching: find.byType(DecoratedBox),
+      of: find.byKey(expansionTileKey),
+      matching: find.byType(DecoratedBox),
     )).decoration as ShapeDecoration;
 
     expect(shapeDecoration.color, backgroundColor);
@@ -599,7 +599,7 @@ void main() {
     const Key expansionTileKey = PageStorageKey<String>('expansionTile');
 
     const Border collapsedShape = Border(
-        top: BorderSide(color: Colors.blue),
+      top: BorderSide(color: Colors.blue),
       bottom: BorderSide(color: Colors.green)
     );
     final Border shape = Border.all(color: Colors.red);
@@ -854,8 +854,8 @@ void main() {
 
     SemanticsNode semantics = tester.getSemantics(
       find.ancestor(
-            of: find.byType(ListTile).first,
-            matching: find.byType(Semantics),
+        of: find.byType(ListTile).first,
+        matching: find.byType(Semantics),
       ).first,
     );
     expect(semantics, isNotNull);
@@ -868,8 +868,8 @@ void main() {
 
     semantics = tester.getSemantics(
       find.ancestor(
-            of: find.byType(ListTile).last,
-            matching: find.byType(Semantics),
+        of: find.byType(ListTile).last,
+        matching: find.byType(Semantics),
       ).first,
     );
 
@@ -905,8 +905,8 @@ void main() {
 
     SemanticsNode semantics = tester.getSemantics(
       find.ancestor(
-            of: find.byType(ListTile).first,
-            matching: find.byType(Semantics),
+        of: find.byType(ListTile).first,
+        matching: find.byType(Semantics),
       ).first,
     );
 
@@ -918,8 +918,8 @@ void main() {
 
     semantics = tester.getSemantics(
       find.ancestor(
-            of: find.byType(ListTile).last,
-            matching: find.byType(Semantics),
+        of: find.byType(ListTile).last,
+        matching: find.byType(Semantics),
       ).first,
     );
 
@@ -943,37 +943,37 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-          return Column(
-            children: <Widget>[
-              ExpansionTile(
-                key: expansionTileKey,
-                collapsedShape: collapsedShape,
-                collapsedTextColor: collapsedTextColor,
-                collapsedBackgroundColor: collapsedBackgroundColor,
-                collapsedIconColor: collapsedIconColor,
-                title: const TestText('title'),
-                trailing: const TestIcon(),
-                children: const <Widget>[
-                  SizedBox(height: 100, width: 100),
-                ],
-              ),
-              // This button is used to update the ExpansionTile properties.
-              FilledButton(
-                onPressed: () {
-                  setState(() {
-                    collapsedShape = const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(16)),
-                    );
-                    collapsedTextColor = const Color(0xff000000);
-                    collapsedBackgroundColor = const Color(0xffffff00);
-                    collapsedIconColor = const Color(0xff000000);
-                  });
-                },
-                child: const Text('Update collapsed properties'),
-              ),
-            ],
-          );
+          builder: (BuildContext context, StateSetter setState) {
+            return Column(
+              children: <Widget>[
+                ExpansionTile(
+                  key: expansionTileKey,
+                  collapsedShape: collapsedShape,
+                  collapsedTextColor: collapsedTextColor,
+                  collapsedBackgroundColor: collapsedBackgroundColor,
+                  collapsedIconColor: collapsedIconColor,
+                  title: const TestText('title'),
+                  trailing: const TestIcon(),
+                  children: const <Widget>[
+                    SizedBox(height: 100, width: 100),
+                  ],
+                ),
+                // This button is used to update the ExpansionTile properties.
+                FilledButton(
+                  onPressed: () {
+                    setState(() {
+                      collapsedShape = const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                      );
+                      collapsedTextColor = const Color(0xff000000);
+                      collapsedBackgroundColor = const Color(0xffffff00);
+                      collapsedIconColor = const Color(0xff000000);
+                    });
+                  },
+                  child: const Text('Update collapsed properties'),
+                ),
+              ],
+            );
           }
         ),
       ),
@@ -1017,37 +1017,37 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-          return Column(
-            children: <Widget>[
-              ExpansionTile(
-                key: expansionTileKey,
-                shape: shape,
-                textColor: textColor,
-                backgroundColor: backgroundColor,
-                iconColor: iconColor,
-                title: const TestText('title'),
-                trailing: const TestIcon(),
-                children: const <Widget>[
-                  SizedBox(height: 100, width: 100),
-                ],
-              ),
-              // This button is used to update the ExpansionTile properties.
-              FilledButton(
-                onPressed: () {
-                  setState(() {
-                    shape = const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(6)),
-                    );
-                    textColor = const Color(0xffffffff);
-                    backgroundColor = const Color(0xff123456);
-                    iconColor = const Color(0xffffffff);
-                  });
-                },
-                child: const Text('Update collapsed properties'),
-              ),
-            ],
-          );
+          builder: (BuildContext context, StateSetter setState) {
+            return Column(
+              children: <Widget>[
+                ExpansionTile(
+                  key: expansionTileKey,
+                  shape: shape,
+                  textColor: textColor,
+                  backgroundColor: backgroundColor,
+                  iconColor: iconColor,
+                  title: const TestText('title'),
+                  trailing: const TestIcon(),
+                  children: const <Widget>[
+                    SizedBox(height: 100, width: 100),
+                  ],
+                ),
+                // This button is used to update the ExpansionTile properties.
+                FilledButton(
+                  onPressed: () {
+                    setState(() {
+                      shape = const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                      );
+                      textColor = const Color(0xffffffff);
+                      backgroundColor = const Color(0xff123456);
+                      iconColor = const Color(0xffffffff);
+                    });
+                  },
+                  child: const Text('Update collapsed properties'),
+                ),
+              ],
+            );
           }
         ),
       ),
