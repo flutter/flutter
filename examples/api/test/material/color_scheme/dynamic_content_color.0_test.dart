@@ -11,9 +11,24 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   // The app being tested loads images via HTTP which the test
   // framework defeats by default.
-  setUpAll(() {
+  setUp(() {
     HttpOverrides.global = null;
   });
+
+  final List<ImageProvider> images = <NetworkImage>[
+    const NetworkImage(
+        'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_1.png'),
+    const NetworkImage(
+        'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_2.png'),
+    const NetworkImage(
+        'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_3.png'),
+    const NetworkImage(
+        'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_4.png'),
+    const NetworkImage(
+        'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_5.png'),
+    const NetworkImage(
+        'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_6.png'),
+  ];
 
   testWidgets('DynamicColor smoke test', (WidgetTester tester) async {
     await tester.runAsync(() async {
@@ -27,6 +42,14 @@ void main() {
 
       expect(find.text('Light ColorScheme'), findsOne);
       expect(find.text('Dark ColorScheme'), findsOne);
+
+      for (final ImageProvider<Object> networkImage in images) {
+        expect(
+            find.descendant(
+              of: find.byType(GestureDetector),
+              matching: find.image(networkImage),
+            ), findsOne);
+      }
 
       Finder chipFinder(String label) =>
           find.byWidgetPredicate((Widget widget) => widget is example.ColorChip && widget.label == label);
