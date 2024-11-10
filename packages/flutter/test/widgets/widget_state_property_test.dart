@@ -260,6 +260,32 @@ void main() {
     expect(style1 == style2, isTrue);
     expect(style1 == style3, isFalse);
   });
+
+  test('WidgetStateDouble works!', () {
+    final WidgetStateDouble widgetStateDouble = WidgetStateDouble.fromMap(
+      <WidgetStatesConstraint, double>{
+        WidgetState.focused: 5,
+        WidgetState.error: -1,
+        WidgetState.any: 0,
+      },
+    );
+    const Set<WidgetState> focused = <WidgetState>{WidgetState.focused};
+    const Set<WidgetState> error = <WidgetState>{WidgetState.error};
+
+    expect(WidgetStateProperty.resolveAs<double>(widgetStateDouble, focused), 5);
+    expect(WidgetStateProperty.resolveAs<double>(widgetStateDouble, error),  -1);
+    expect(WidgetStateProperty.resolveAs<double>(widgetStateDouble, enabled), 0);
+
+
+    const double normalDouble = 0.5;
+
+    expect(WidgetStateProperty.resolveAs<double>(normalDouble, focused), 0.5);
+    expect(WidgetStateProperty.resolveAs<double>(normalDouble, error),   0.5);
+    expect(WidgetStateProperty.resolveAs<double>(normalDouble, enabled), 0.5);
+
+    // Of course this is what we'd expect!
+    expect(normalDouble, isA<WidgetStateDouble>());
+  });
 }
 
 const Set<WidgetState> enabled = <WidgetState>{};

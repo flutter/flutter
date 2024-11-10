@@ -6,6 +6,8 @@
 /// @docImport 'package:flutter/scheduler.dart';
 library;
 
+import 'dart:collection';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -761,6 +763,42 @@ class _WidgetTextStyleMapper extends WidgetStateMapper<TextStyle> implements Wid
   const _WidgetTextStyleMapper(super.map);
 }
 
+typedef _DoubleMapper = WidgetStateMapper<double>;
+
+/// A type that implements [double].
+extension type WidgetStateDouble._(double _value) implements double {
+  /// Not a `const` constructor, but it works!
+  factory WidgetStateDouble.fromMap(WidgetStateMap<double> map) {
+    final _DoubleMapper mapper = _DoubleMapper(map);
+
+    return WidgetStateDouble._(_cache[mapper] ??= _next);
+  }
+
+  static const double _negativeOneMillion = -1000000;
+  static final Map<_DoubleMapper, double> _cache = HashMap<_DoubleMapper, double>();
+  static double _current = _negativeOneMillion;
+  static double get _next => ++_current;
+
+  /// If the [value] is a [double] that's been stored in the `_cache`,
+  /// this method will output the result of the [WidgetStateMapper]
+  /// assigned to it.
+  ///
+  /// Let's hope the developer doesn't want to use big negative numbers
+  /// for anything else!
+  static T? resolveAs<T>(T value, Set<WidgetState> states) {
+    if (value case final WidgetStateDouble widgetStateDouble) {
+      for (final MapEntry<_DoubleMapper, double> entry in _cache.entries) {
+        if (entry.value == widgetStateDouble) {
+          if (entry.key.resolve(states) case final T resolved) {
+            return resolved;
+          }
+        }
+      }
+    }
+    return null;
+  }
+}
+
 /// Interface for classes that [resolve] to a value of type `T` based
 /// on a widget's interactive "state", which is defined as a set
 /// of [WidgetState]s.
@@ -834,6 +872,12 @@ abstract class WidgetStateProperty<T> {
   /// [WidgetStateProperty]. For example, [InkWell.mouseCursor] can be a
   /// [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
   static T resolveAs<T>(T value, Set<WidgetState> states) {
+    if (value is WidgetStateDouble) {
+      final T? resolved = WidgetStateDouble.resolveAs<T>(value, states);
+      if (resolved != null) {
+        return resolved;
+      }
+    }
     if (value is WidgetStateProperty<T>) {
       final WidgetStateProperty<T> property = value;
       return property.resolve(states);
