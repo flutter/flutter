@@ -408,12 +408,10 @@ class ExpansionTile extends StatefulWidget {
   ///   [ExpansionTileThemeData].
   final EdgeInsetsGeometry? childrenPadding;
 
-  /// The color to display behind the sublist when expanded.
+  /// The color to display behind the expanded children section of the tile.
   ///
-  /// If this property is null then [ExpansionTileThemeData.backgroundColor] is used. If that
-  /// is also null then Colors.transparent is used.
-  ///
-  /// See also:
+  /// If this property is null, the value from [ExpansionTileThemeData.childrenBackgroundColor] is
+  /// used if specified. If both are null, then [backgroundColor] will be used.
   ///
   /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
   ///   [ExpansionTileThemeData].
