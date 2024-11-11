@@ -252,7 +252,6 @@ executable("flutter_linux_unittests") {
     "testing/mock_renderer.cc",
     "testing/mock_settings.cc",
     "testing/mock_signal_handler.cc",
-    "testing/mock_text_input_handler.cc",
     "testing/mock_text_input_view_delegate.cc",
     "testing/mock_texture_registrar.cc",
     "testing/mock_window.cc",

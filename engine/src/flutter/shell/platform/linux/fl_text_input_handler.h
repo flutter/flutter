@@ -13,11 +13,11 @@
 
 G_BEGIN_DECLS
 
-G_DECLARE_DERIVABLE_TYPE(FlTextInputHandler,
-                         fl_text_input_handler,
-                         FL,
-                         TEXT_INPUT_HANDLER,
-                         GObject);
+G_DECLARE_FINAL_TYPE(FlTextInputHandler,
+                     fl_text_input_handler,
+                     FL,
+                     TEXT_INPUT_HANDLER,
+                     GObject);
 
 /**
  * FlTextInputHandler:
@@ -25,15 +25,6 @@ G_DECLARE_DERIVABLE_TYPE(FlTextInputHandler,
  * #FlTextInputHandler is a handler that implements the shell side
  * of SystemChannels.textInput from the Flutter services library.
  */
-
-struct _FlTextInputHandlerClass {
-  GObjectClass parent_class;
-
-  /**
-   * Virtual method called to filter a keypress.
-   */
-  gboolean (*filter_keypress)(FlTextInputHandler* self, FlKeyEvent* event);
-};
 
 /**
  * fl_text_input_handler_new:
