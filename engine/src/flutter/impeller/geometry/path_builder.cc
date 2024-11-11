@@ -18,13 +18,22 @@ PathBuilder::~PathBuilder() = default;
 
 Path PathBuilder::CopyPath(FillType fill) {
   prototype_.fill = fill;
+  prototype_.single_countour =
+      current_contour_location_ == 0u ||
+      (contour_count_ == 2 &&
+       prototype_.components.back() == Path::ComponentType::kContour);
   return Path(prototype_);
 }
 
 Path PathBuilder::TakePath(FillType fill) {
   prototype_.fill = fill;
   UpdateBounds();
+  prototype_.single_countour =
+      current_contour_location_ == 0u ||
+      (contour_count_ == 2 &&
+       prototype_.components.back() == Path::ComponentType::kContour);
   current_contour_location_ = 0u;
+  contour_count_ = 1;
   return Path(std::move(prototype_));
 }
 
@@ -276,6 +285,7 @@ void PathBuilder::AddContourComponent(const Point& destination,
     points.push_back(destination);
     points.push_back(closed);
     components.push_back(Path::ComponentType::kContour);
+    contour_count_ += 1;
   }
   prototype_.bounds.reset();
 }
@@ -450,6 +460,7 @@ PathBuilder& PathBuilder::AddPath(const Path& path) {
   for (auto component : path.data_->components) {
     if (component == Path::ComponentType::kContour) {
       current_contour_location_ = source_offset;
+      contour_count_ += 1;
     }
     source_offset += Path::VerbToOffset(component);
   }

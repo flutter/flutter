@@ -178,21 +178,40 @@ class Tessellator {
   /// @brief      Given a convex path, create a triangle fan structure.
   ///
   /// @param[in]  path  The path to tessellate.
-  /// @param[in]  tolerance  The tolerance value for conversion of the path to
-  ///                        a polyline. This value is often derived from the
-  ///                        Matrix::GetMaxBasisLength of the CTM applied to the
-  ///                        path for rendering.
-  ///
-  /// @return A point vector containing the vertices in triangle strip format.
-  ///
   /// @param[in]  host_buffer  The host buffer for allocation of vertices/index
   ///                          data.
+  /// @param[in]  tolerance  The tolerance value for conversion of the path to
+  ///                        a polyline. This value is often derived from the
+  ///                        Matrix::GetMaxBasisLengthXY of the CTM applied to
+  ///                        the path for rendering.
+  ///
   /// @return A vertex buffer containing all data from the provided curve.
   VertexBuffer TessellateConvex(const Path& path,
                                 HostBuffer& host_buffer,
                                 Scalar tolerance,
                                 bool supports_primitive_restart = false,
                                 bool supports_triangle_fan = false);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Given a path, create a line strip primitive structure.
+  ///
+  ///             A line strip is a series of vertices that draws a line
+  ///             rendered at a specified width (in our case, always 1.0
+  ///             physical pixel) that is tessellated by the rasterizer. See
+  ///             also PrimitiveType::kLineStrip.
+  ///
+  /// @param[in]  path  The path to tessellate.
+  /// @param[in]  host_buffer  The host buffer for allocation of vertices/index
+  ///                          data.
+  /// @param[in]  tolerance  The tolerance value for conversion of the path to
+  ///                        a polyline. This value is often derived from the
+  ///                        Matrix::GetMaxBasisLengthXY of the CTM applied to
+  ///                        the path for rendering.
+  ///
+  /// @return A vertex buffer containing all data from the provided curve.
+  VertexBuffer GenerateLineStrip(const Path& path,
+                                 HostBuffer& host_buffer,
+                                 Scalar tolerance);
 
   /// Visible for testing.
   ///

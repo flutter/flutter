@@ -41,7 +41,7 @@ class PositionWriter {
 
   bool HasOversizedBuffer() const { return !oversized_.empty(); }
 
-  const std::vector<Point>& GetOveriszedBuffer() const { return oversized_; }
+  const std::vector<Point>& GetOversizedBuffer() const { return oversized_; }
 
  private:
   std::vector<Point>& points_;
@@ -618,7 +618,7 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
                           .mode = GeometryResult::Mode::kPreventOverdraw};
   }
   const std::vector<Point>& oversized_data =
-      position_writer.GetOveriszedBuffer();
+      position_writer.GetOversizedBuffer();
   BufferView buffer_view = host_buffer.Emplace(
       /*buffer=*/nullptr,                                 //
       (arena_length + oversized_length) * sizeof(Point),  //

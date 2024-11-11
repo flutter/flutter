@@ -59,6 +59,10 @@ bool Path::IsEmpty() const {
           data_->components[0] == ComponentType::kContour);
 }
 
+bool Path::IsSingleContour() const {
+  return data_->single_countour;
+}
+
 /// Determine required storage for points and indices.
 std::pair<size_t, size_t> Path::CountStorage(Scalar scale) const {
   size_t points = 0;
