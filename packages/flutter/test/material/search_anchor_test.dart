@@ -1743,6 +1743,26 @@ void main() {
         ),
       ),
     ));
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Finder findDivider = find.descendant(of: findViewContent(), matching: find.byType(Divider));
+
+    // Divider should not be shown if there are no suggestions
+    expect(findDivider, findsNothing);
+
+    final Finder findMaterial = find.descendant(of: findViewContent(), matching: find.byType(Material)).first;
+    final Rect materialRectWithoutSuggestions = tester.getRect(findMaterial);
+    expect(materialRectWithoutSuggestions, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0)));
+
+    await tester.enterText(find.byType(SearchBar), 'a');
+    await tester.pumpAndSettle();
+
+    expect(findDivider, findsOneWidget);
+
+    final Rect materialRectWithSuggestions = tester.getRect(findMaterial);
+    expect(materialRectWithSuggestions, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 113.0)));
   });
 
   testWidgets('SearchAnchor respects dividerColor property', (WidgetTester tester) async {
