@@ -17,6 +17,12 @@ static_assert(__has_feature(objc_arc), "ARC must be enabled.");
 
 namespace flutter {
 
+// TOOD(cbracken): https://github.com/flutter/flutter/issues/157942
+struct MetalObjCFields {
+  id<MTLDevice> device;
+  id<MTLCommandQueue> command_queue;
+};
+
 TestMetalContext::TestMetalContext() {
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
   if (!device) {
@@ -43,37 +49,21 @@ TestMetalContext::TestMetalContext() {
                       "and command queue.";
   }
 
-  // Retain and transfer to non-ARC-managed pointers.
-  // TODO(cbracken): https://github.com/flutter/flutter/issues/157942
-  device_ = (__bridge_retained void*)device;
-  command_queue_ = (__bridge_retained void*)command_queue;
+  metal_ = std::make_unique<MetalObjCFields>(MetalObjCFields{device, command_queue});
 }
 
 TestMetalContext::~TestMetalContext() {
   std::scoped_lock lock(textures_mutex_);
   textures_.clear();
-  if (device_) {
-    // Release and transfer to ARC-managed pointer.
-    // TODO(cbracken): https://github.com/flutter/flutter/issues/157942
-    id<MTLDevice> device =  // NOLINT(clang-analyzer-deadcode.DeadStores)
-        (__bridge_transfer id<MTLDevice>)device_;
-    device = nil;
-  }
-  if (command_queue_) {
-    // Release and transfer to ARC-managed pointer.
-    // TODO(cbracken): https://github.com/flutter/flutter/issues/157942
-    id<MTLCommandQueue> command_queue =  // NOLINT(clang-analyzer-deadcode.DeadStores)
-        (__bridge_transfer id<MTLCommandQueue>)command_queue_;
-    command_queue = nil;
-  }
+  metal_.reset();
 }
 
 void* TestMetalContext::GetMetalDevice() const {
-  return device_;
+  return metal_ ? (__bridge void*)metal_->device : nil;
 }
 
 void* TestMetalContext::GetMetalCommandQueue() const {
-  return command_queue_;
+  return metal_ ? (__bridge void*)metal_->command_queue : nil;
 }
 
 sk_sp<GrDirectContext> TestMetalContext::GetSkiaContext() const {
@@ -98,8 +88,12 @@ TestMetalContext::TextureInfo TestMetalContext::CreateMetalTexture(const SkISize
     return {.texture_id = -1, .texture = nullptr};
   }
 
-  id<MTLDevice> device = (__bridge id<MTLDevice>)GetMetalDevice();
-  id<MTLTexture> texture = [device newTextureWithDescriptor:texture_descriptor];
+  if (!metal_) {
+    FML_CHECK(false) << "Invalid Metal device.";
+    return {.texture_id = -1, .texture = nullptr};
+  }
+
+  id<MTLTexture> texture = [metal_->device newTextureWithDescriptor:texture_descriptor];
   if (!texture) {
     FML_CHECK(false) << "Could not create texture from texture descriptor.";
     return {.texture_id = -1, .texture = nullptr};

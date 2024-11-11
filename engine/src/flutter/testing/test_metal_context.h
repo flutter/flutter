@@ -6,12 +6,15 @@
 #define FLUTTER_TESTING_TEST_METAL_CONTEXT_H_
 
 #include <map>
+#include <memory>
 #include <mutex>
 
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/ports/SkCFObject.h"
 
 namespace flutter {
+
+struct MetalObjCFields;
 
 class TestMetalContext {
  public:
@@ -38,9 +41,7 @@ class TestMetalContext {
   TextureInfo GetTextureInfo(int64_t texture_id);
 
  private:
-  // TODO(cbracken): https://github.com/flutter/flutter/issues/157942
-  void* device_;         // id<MTLDevice>
-  void* command_queue_;  // id<MTLCommandQueue>
+  std::unique_ptr<MetalObjCFields> metal_;
   sk_sp<GrDirectContext> skia_context_;
   std::mutex textures_mutex_;
   int64_t texture_id_ctr_ = 1;                 // guarded by textures_mutex
