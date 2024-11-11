@@ -1956,6 +1956,41 @@ void main() {
     );
   });
 
+  testWidgets('Hovering over Cupertino action sheet action updates to the passed cursor on desktop', (WidgetTester tester) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.precise;
+
+    await tester.pumpWidget(
+        createAppWithButtonThatLaunchesActionSheet(
+            CupertinoActionSheet(
+              title: const Text('The Title'),
+              message: const Text('Message'),
+              actions: <Widget>[
+                CupertinoActionSheetAction(
+                  onPressed: () { },
+                  cursor: customCursor,
+                  child: const Text('One'),
+                ),
+              ],
+            )
+        )
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+
+    final Offset actionSheetAction = tester.getCenter(find.text('One'));
+    await gesture.moveTo(actionSheetAction);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : customCursor,
+    );
+  });
+
   testWidgets('Action sheets emits haptic vibration on sliding into a button', (WidgetTester tester) async {
     int vibrationCount = 0;
 

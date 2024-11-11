@@ -1215,6 +1215,7 @@ class CupertinoActionSheetAction extends StatefulWidget {
     required this.onPressed,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
+    this.cursor = MouseCursor.defer,
     required this.child,
   });
 
@@ -1233,6 +1234,11 @@ class CupertinoActionSheetAction extends StatefulWidget {
   ///
   /// Destructive buttons have red text.
   final bool isDestructiveAction;
+
+  /// The cursor that will be shown when hovering over the button.
+  ///
+  /// If not passed will default to [MouseCursor.defer] and on web will default to [SystemMouseCursors.click].
+  final MouseCursor cursor;
 
   /// The widget below this widget in the tree.
   ///
@@ -1312,7 +1318,7 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
         + fontSize * _kActionSheetButtonVerticalPaddingFactor;
 
     return MouseRegion(
-      cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor: kIsWeb ? SystemMouseCursors.click : widget.cursor,
       child: MetaData(
         metaData: this,
         behavior: HitTestBehavior.opaque,
