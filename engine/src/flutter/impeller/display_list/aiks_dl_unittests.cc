@@ -3,12 +3,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <vector>
 #include "display_list/dl_sampling_options.h"
 #include "display_list/dl_tile_mode.h"
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "display_list/geometry/dl_geometry_types.h"
+#include "display_list/geometry/dl_path.h"
 #include "display_list/image/dl_image.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
@@ -21,7 +23,9 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/geometry/scalar.h"
+#include "include/core/SkCanvas.h"
 #include "include/core/SkMatrix.h"
+#include "include/core/SkPath.h"
 #include "include/core/SkRSXform.h"
 #include "include/core/SkRefCnt.h"
 
@@ -980,6 +984,64 @@ TEST_P(AiksTest, CanEmptyPictureConvertToImage) {
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(recorder_builder.Build()));
+}
+
+TEST_P(AiksTest, DepthValuesForLineMode) {
+  // Ensures that the additional draws created by line/polygon mode all
+  // have the same depth values.
+  DisplayListBuilder builder;
+
+  SkPath path = SkPath::Circle(100, 100, 100);
+
+  builder.DrawPath(path, DlPaint()
+                             .setColor(DlColor::kRed())
+                             .setDrawStyle(DlDrawStyle::kStroke)
+                             .setStrokeWidth(5));
+  builder.Save();
+  builder.ClipPath(path);
+
+  std::vector<DlPoint> points = {
+      DlPoint::MakeXY(0, -200), DlPoint::MakeXY(400, 200),
+      DlPoint::MakeXY(0, -100), DlPoint::MakeXY(400, 300),
+      DlPoint::MakeXY(0, 0),    DlPoint::MakeXY(400, 400),
+      DlPoint::MakeXY(0, 100),  DlPoint::MakeXY(400, 500),
+      DlPoint::MakeXY(0, 150),  DlPoint::MakeXY(400, 600)};
+
+  builder.DrawPoints(DisplayListBuilder::PointMode::kLines, points.size(),
+                     points.data(),
+                     DlPaint().setColor(DlColor::kBlue()).setStrokeWidth(10));
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, DepthValuesForPolygonMode) {
+  // Ensures that the additional draws created by line/polygon mode all
+  // have the same depth values.
+  DisplayListBuilder builder;
+
+  SkPath path = SkPath::Circle(100, 100, 100);
+
+  builder.DrawPath(path, DlPaint()
+                             .setColor(DlColor::kRed())
+                             .setDrawStyle(DlDrawStyle::kStroke)
+                             .setStrokeWidth(5));
+  builder.Save();
+  builder.ClipPath(path);
+
+  std::vector<DlPoint> points = {
+      DlPoint::MakeXY(0, -200), DlPoint::MakeXY(400, 200),
+      DlPoint::MakeXY(0, -100), DlPoint::MakeXY(400, 300),
+      DlPoint::MakeXY(0, 0),    DlPoint::MakeXY(400, 400),
+      DlPoint::MakeXY(0, 100),  DlPoint::MakeXY(400, 500),
+      DlPoint::MakeXY(0, 150),  DlPoint::MakeXY(400, 600)};
+
+  builder.DrawPoints(DisplayListBuilder::PointMode::kPolygon, points.size(),
+                     points.data(),
+                     DlPaint().setColor(DlColor::kBlue()).setStrokeWidth(10));
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 }  // namespace testing
