@@ -111,6 +111,7 @@ class NavigationBar extends StatelessWidget {
     this.height,
     this.labelBehavior,
     this.overlayColor,
+    this.labelPadding,
   }) :  assert(destinations.length >= 2),
         assert(0 <= selectedIndex && selectedIndex < destinations.length);
 
@@ -223,6 +224,13 @@ class NavigationBar extends StatelessWidget {
   /// the [NavigationDestination] is focused, hovered, or pressed.
   final MaterialStateProperty<Color?>? overlayColor;
 
+  /// The padding around the [NavigationDestination.label] widget.
+  ///
+  /// When [labelPadding] is null, [NavigationBarThemeData.labelPadding]
+  /// is used. If that is also null, the default padding is 4 pixels on
+  /// the top.
+  final EdgeInsetsGeometry? labelPadding;
+
   VoidCallback _handleTap(int index) {
     return onDestinationSelected != null
       ? () => onDestinationSelected!(index)
@@ -267,6 +275,7 @@ class NavigationBar extends StatelessWidget {
                         indicatorShape: indicatorShape,
                         overlayColor: overlayColor,
                         onTap: _handleTap(i),
+                        labelPadding: labelPadding,
                         child: destinations[i],
                       );
                     },
@@ -423,6 +432,9 @@ class NavigationDestination extends StatelessWidget {
           ?? defaults.labelTextStyle!.resolve(unselectedState);
         final TextStyle? effectiveDisabledLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(disabledState)
           ?? defaults.labelTextStyle!.resolve(disabledState);
+        final EdgeInsetsGeometry labelPadding = info.labelPadding
+          ?? navigationBarTheme.labelPadding
+          ?? defaults.labelPadding!;
 
         final TextStyle? textStyle = enabled
           ? animation.isForwardOrCompleted
@@ -431,7 +443,7 @@ class NavigationDestination extends StatelessWidget {
           : effectiveDisabledLabelTextStyle;
 
         return Padding(
-          padding: const EdgeInsets.only(top: 4),
+          padding: labelPadding,
           child: MediaQuery.withClampedTextScaling(
             // Set maximum text scale factor to _kMaxLabelTextScaleFactor for the
             // label to keep the visual hierarchy the same even with larger font
@@ -592,6 +604,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
     required this.indicatorShape,
     required this.overlayColor,
     required this.onTap,
+    this.labelPadding,
     required super.child,
   });
 
@@ -668,6 +681,11 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// This is computed by calling [NavigationBar.onDestinationSelected]
   /// with [index] passed in.
   final VoidCallback onTap;
+
+  /// The padding around the [label] widget.
+  ///
+  /// Defaults to a padding of 4 pixels on the top.
+  final EdgeInsetsGeometry? labelPadding;
 
   /// Returns a non null [_NavigationDestinationInfo].
   ///
@@ -1313,32 +1331,39 @@ NavigationBarThemeData _defaultsFor(BuildContext context) {
 // Hand coded defaults based on Material Design 2.
 class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
   _NavigationBarDefaultsM2(BuildContext context)
-      : _theme = Theme.of(context),
-        _colors = Theme.of(context).colorScheme,
-        super(
-          height: 80.0,
-          elevation: 0.0,
-          indicatorShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        );
+    : _theme = Theme.of(context),
+      _colors = Theme.of(context).colorScheme,
+      super(
+        height: 80.0,
+        elevation: 0.0,
+        indicatorShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      );
 
   final ThemeData _theme;
   final ColorScheme _colors;
 
   // With Material 2, the NavigationBar uses an overlay blend for the
   // default color regardless of light/dark mode.
-  @override Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.onSurface, 3.0);
+  @override
+  Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.onSurface, 3.0);
 
-  @override MaterialStateProperty<IconThemeData?>? get iconTheme {
+  @override
+  MaterialStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStatePropertyAll<IconThemeData>(IconThemeData(
       size: 24,
       color: _colors.onSurface,
     ));
   }
 
-  @override Color? get indicatorColor => _colors.secondary.withOpacity(0.24);
+  @override
+  Color? get indicatorColor => _colors.secondary.withOpacity(0.24);
 
-  @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStatePropertyAll<TextStyle?>(_theme.textTheme.labelSmall!.copyWith(color: _colors.onSurface));
+  @override
+  MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStatePropertyAll<TextStyle?>(_theme.textTheme.labelSmall!.copyWith(color: _colors.onSurface));
+
+  @override
+  EdgeInsetsGeometry? get labelPadding => const EdgeInsets.only(top: 4);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - NavigationBar
@@ -1350,23 +1375,27 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
 
 class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(this.context)
-      : super(
-          height: 80.0,
-          elevation: 3.0,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        );
+    : super(
+        height: 80.0,
+        elevation: 3.0,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      );
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
-  @override Color? get backgroundColor => _colors.surfaceContainer;
+  @override
+  Color? get backgroundColor => _colors.surfaceContainer;
 
-  @override Color? get shadowColor => Colors.transparent;
+  @override
+  Color? get shadowColor => Colors.transparent;
 
-  @override Color? get surfaceTintColor => Colors.transparent;
+  @override
+  Color? get surfaceTintColor => Colors.transparent;
 
-  @override MaterialStateProperty<IconThemeData?>? get iconTheme {
+  @override
+  MaterialStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
         size: 24.0,
@@ -1379,10 +1408,14 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
     });
   }
 
-  @override Color? get indicatorColor => _colors.secondaryContainer;
-  @override ShapeBorder? get indicatorShape => const StadiumBorder();
+  @override
+  Color? get indicatorColor => _colors.secondaryContainer;
 
-  @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
+  @override
+  ShapeBorder? get indicatorShape => const StadiumBorder();
+
+  @override
+  MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = _textTheme.labelMedium!;
       return style.apply(
@@ -1394,6 +1427,9 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
       );
     });
   }
+
+  @override
+  EdgeInsetsGeometry? get labelPadding => const EdgeInsets.only(top: 4);
 }
 
 // END GENERATED TOKEN PROPERTIES - NavigationBar
