@@ -5,7 +5,7 @@
 Optimize for readability. Write detailed documentation.
 Make error messages useful.
 Never use timeouts or timers.
-Avoid `is`, `print`, `part of`, `extension` and `_`.
+Avoid hidden dependencies: powerful systems are composed of simple, reusable parts.
 
 ## Introduction
 
@@ -831,21 +831,60 @@ really is, and tends to encourage "spaghetti" code (where distant components ref
 than "lasagna" code (where each section of the code is cleanly layered and separable).
 
 
-### Avoid using `extension`.
+### Avoid using `extension` methods.
 
 Extension methods are confusing to document and discover. To an end developer,
 they appear no different than the built-in API of the class, and discovering
 the documentation and implementation of an extension is more challenging than
-for class members.
+for class members. Prefer instead adding methods directly to relevant classes.
 
-Prefer instead adding methods directly to relevant classes. If that is not
-possible, create a method that clearly identifies what object(s) it works with
-and is part of.
+Only use `extension` methods when discoverability is not a concern:
 
-(A rare exception can be made for extensions that provide temporary workarounds
+- Extension methods might be implemented as temporary workarounds
 when deprecating features. In those cases, however, the extensions and all their
 members must be deprecated in the PR that adds them, and they must be removed
 in accordance with our deprecation policy.)
+- Additionally, private class fields
+[cannot be safely accessed](https://github.com/dart-lang/sdk/issues/51641)
+if the receiver is a subtype that implements the interface.\
+In these cases, it's better to house these fields in an `extension`
+or to restructure them into private top-level functions if possible.
+
+
+### Use extension types to improve an API surface
+
+"Extension types" in Dart are distinct from "extension methods":
+
+```dart
+extension A on B {
+  void c() {}
+}
+```
+
+ * `A` is an _extension_.
+ * `B` is the _type_ (to be specific, it's the "`on` type").
+ * `c()` is an _extension method_.
+
+```dart
+extension type A(B b) implements C {
+  void d() {}
+}
+```
+
+ * `A` is an _extension type_.
+ * `B` is the _representation type_ (and `b` is the "representation field").
+ * `C` is the _supertype_ (optionally added using an "`implements` clause").
+ * `d()` is a member of `A`'s interface.\
+   (to prevent confusion, avoid referring to it as an "extension method").
+
+Rather than adding fields to an existing class, an `extension type` creates
+a separate interface. This can prevent [API oceans](#avoid-exposing-api-oceans)
+without any risk of name overlap, and while avoiding the performance cost of
+a wrapper class.
+
+Prefer specifying a non-nullable supertype (e.g. `implements Object`) when
+the representation type is non-nullable: this improves static analysis for
+null-checks.
 
 
 ### Avoid using `FutureOr<T>`
