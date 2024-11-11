@@ -500,7 +500,7 @@ Uptime: 441088659 Realtime: 521464097
 
 class _MyFakeVmService extends Fake implements VmService {
   @override Future<VM> getVM() async {
-    throw RPCError(null, RPCErrorCodes.kServerError, 'Service connection disposed');
+    throw RPCError(null, RPCErrorKind.kServerError.code, 'Service connection disposed');
   }
 }
 
