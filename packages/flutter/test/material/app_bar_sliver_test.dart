@@ -50,54 +50,6 @@ Widget buildSliverAppBarApp({
   );
 }
 
-class _TestLifecycleTabBar extends StatefulWidget implements PreferredSizeWidget {
-  const _TestLifecycleTabBar({required this.tabs});
-
-  final List<Widget> tabs;
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-
-  @override
-  State<_TestLifecycleTabBar> createState() => _TestLifecycleTabBarState();
-}
-
-class _TestLifecycleTabBarState extends State<_TestLifecycleTabBar> {
-  int? _tabs;
-  TabController? _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabs = widget.tabs.length;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _controller = DefaultTabController.maybeOf(context);
-  }
-
-  @override
-  void didUpdateWidget(_TestLifecycleTabBar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _tabs = widget.tabs.length;
-  }
-
-  @override
-  void dispose() {
-    _controller = null;
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    assert(_tabs == widget.tabs.length);
-    assert(_tabs == _controller?.length);
-    return Row(children: widget.tabs);
-  }
-}
-
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -2322,8 +2274,8 @@ void main() {
     expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
   });
 
-  testWidgets('SliverAppBar should update child before child build', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/158158.
+  // Regression test for https://github.com/flutter/flutter/issues/158158.
+  testWidgets('SliverAppBar should update TabBar before TabBar build', (WidgetTester tester) async {
     final List<Tab> tabs = <Tab>[];
 
     await tester.pumpWidget(
@@ -2346,7 +2298,7 @@ void main() {
                           },
                         ),
                       ],
-                      bottom: _TestLifecycleTabBar(tabs: tabs),
+                      bottom: TabBar(tabs: tabs),
                     ),
                   ],
                 ),
