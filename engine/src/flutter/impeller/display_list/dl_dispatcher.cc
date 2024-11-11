@@ -27,7 +27,6 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/geometry/ellipse_geometry.h"
 #include "impeller/entity/geometry/fill_path_geometry.h"
-#include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/round_rect_geometry.h"
 #include "impeller/geometry/color.h"
@@ -663,14 +662,14 @@ void DlDispatcherBase::drawPoints(PointMode mode,
   switch (mode) {
     case flutter::DlCanvas::PointMode::kPoints: {
       // Cap::kButt is also treated as a square.
-      auto point_style = paint.stroke_cap == Cap::kRound ? PointStyle::kRound
-                                                         : PointStyle::kSquare;
-      auto radius = paint.stroke_width;
+      PointStyle point_style = paint.stroke_cap == Cap::kRound
+                                   ? PointStyle::kRound
+                                   : PointStyle::kSquare;
+      Scalar radius = paint.stroke_width;
       if (radius > 0) {
         radius /= 2.0;
       }
-      GetCanvas().DrawPoints(skia_conversions::ToPoints(points, count), radius,
-                             paint, point_style);
+      GetCanvas().DrawPoints(points, count, radius, paint, point_style);
     } break;
     case flutter::DlCanvas::PointMode::kLines:
       for (uint32_t i = 1; i < count; i += 2) {
