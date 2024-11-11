@@ -682,6 +682,15 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   bool UIIsolateHasLivePorts();
 
+  /// @brief      Another signal of liveness is the presence of microtasks that
+  ///             have been queued by the application but have not yet been
+  ///             executed.  Embedders may want to check for pending microtasks
+  ///             and ensure that the microtask queue has been drained before
+  ///             the embedder terminates.
+  ///
+  /// @return     Check if the root isolate has any pending microtasks.
+  bool UIIsolateHasPendingMicrotasks();
+
   //----------------------------------------------------------------------------
   /// @brief      Errors that are unhandled on the Dart message loop are kept
   ///             for further inspection till the next unhandled error comes

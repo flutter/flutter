@@ -524,6 +524,15 @@ class RuntimeController : public PlatformConfigurationClient,
   bool HasLivePorts();
 
   //----------------------------------------------------------------------------
+  /// @brief      Returns if the root isolate has any pending microtasks.
+  ///
+  /// @return     True if there are microtasks that have been queued but not
+  ///             run, False otherwise. Return False if the root isolate is not
+  ///             running as well.
+  ///
+  bool HasPendingMicrotasks();
+
+  //----------------------------------------------------------------------------
   /// @brief      Get the last error encountered by the microtask queue.
   ///
   /// @return     The last error encountered by the microtask queue.
