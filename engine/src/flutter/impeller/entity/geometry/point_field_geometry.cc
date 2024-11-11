@@ -12,10 +12,14 @@
 
 namespace impeller {
 
-PointFieldGeometry::PointFieldGeometry(std::vector<Point> points,
+PointFieldGeometry::PointFieldGeometry(const Point* points,
+                                       size_t point_count,
                                        Scalar radius,
                                        bool round)
-    : points_(std::move(points)), radius_(radius), round_(round) {}
+    : point_count_(point_count),
+      radius_(radius),
+      round_(round),
+      points_(points) {}
 
 PointFieldGeometry::~PointFieldGeometry() = default;
 
@@ -23,7 +27,7 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  if (radius_ < 0.0 || points_.empty()) {
+  if (radius_ < 0.0 || point_count_ == 0) {
     return {};
   }
   const Matrix& transform = entity.GetTransform();
@@ -52,7 +56,7 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
     });
     FML_DCHECK(circle_vertices.size() == generator.GetVertexCount());
 
-    vertex_count = (circle_vertices.size() + 2) * points_.size() - 2;
+    vertex_count = (circle_vertices.size() + 2) * point_count_ - 2;
     buffer_view = host_buffer.Emplace(
         vertex_count * sizeof(Point), alignof(Point), [&](uint8_t* data) {
           Point* output = reinterpret_cast<Point*>(data);
@@ -66,7 +70,7 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
           // the strip. This could be optimized out if we switched to using
           // primitive restart.
           Point last_point = circle_vertices.back() + center;
-          for (size_t i = 1; i < points_.size(); i++) {
+          for (size_t i = 1; i < point_count_; i++) {
             Point center = points_[i];
             output[offset++] = last_point;
             output[offset++] = Point(center + circle_vertices[0]);
@@ -77,7 +81,7 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
           }
         });
   } else {
-    vertex_count = 6 * points_.size() - 2;
+    vertex_count = 6 * point_count_ - 2;
     buffer_view = host_buffer.Emplace(
         vertex_count * sizeof(Point), alignof(Point), [&](uint8_t* data) {
           Point* output = reinterpret_cast<Point*>(data);
@@ -97,7 +101,7 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
           // For all subequent points, insert a degenerate triangle to break
           // the strip. This could be optimized out if we switched to using
           // primitive restart.
-          for (size_t i = 1; i < points_.size(); i++) {
+          for (size_t i = 1; i < point_count_; i++) {
             Point point = points_[i];
             Point first = Point(point.x - radius, point.y - radius);
 
@@ -129,22 +133,21 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
 // |Geometry|
 std::optional<Rect> PointFieldGeometry::GetCoverage(
     const Matrix& transform) const {
-  if (points_.size() > 0) {
+  if (point_count_ > 0) {
     // Doesn't use MakePointBounds as this isn't resilient to points that
     // all lie along the same axis.
-    auto first = points_.begin();
-    auto last = points_.end();
-    auto left = first->x;
-    auto top = first->y;
-    auto right = first->x;
-    auto bottom = first->y;
-    for (auto it = first + 1; it < last; ++it) {
-      left = std::min(left, it->x);
-      top = std::min(top, it->y);
-      right = std::max(right, it->x);
-      bottom = std::max(bottom, it->y);
+    Scalar left = points_[0].x;
+    Scalar top = points_[0].y;
+    Scalar right = points_[0].x;
+    Scalar bottom = points_[0].y;
+    for (auto i = 1u; i < point_count_; i++) {
+      const Point point = points_[i];
+      left = std::min(left, point.x);
+      top = std::min(top, point.y);
+      right = std::max(right, point.x);
+      bottom = std::max(bottom, point.y);
     }
-    auto coverage = Rect::MakeLTRB(left - radius_, top - radius_,
+    Rect coverage = Rect::MakeLTRB(left - radius_, top - radius_,
                                    right + radius_, bottom + radius_);
     return coverage.TransformBounds(transform);
   }

@@ -10,11 +10,20 @@
 namespace impeller {
 
 /// @brief A geometry class specialized for Canvas::DrawPoints.
+///
+/// Does not hold ownership of the allocated point data, which is expected to be
+/// maintained via the display list structure.
 class PointFieldGeometry final : public Geometry {
  public:
-  PointFieldGeometry(std::vector<Point> points, Scalar radius, bool round);
+  PointFieldGeometry(const Point* points,
+                     size_t point_count,
+                     Scalar radius,
+                     bool round);
 
   ~PointFieldGeometry() override;
+
+  // |Geometry|
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
  private:
   // |Geometry|
@@ -22,12 +31,10 @@ class PointFieldGeometry final : public Geometry {
                                    const Entity& entity,
                                    RenderPass& pass) const override;
 
-  // |Geometry|
-  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
-
-  std::vector<Point> points_;
+  size_t point_count_;
   Scalar radius_;
   bool round_;
+  const Point* points_;
 
   PointFieldGeometry(const PointFieldGeometry&) = delete;
 

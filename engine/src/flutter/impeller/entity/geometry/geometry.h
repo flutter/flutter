@@ -83,10 +83,6 @@ class Geometry {
   static std::unique_ptr<Geometry> MakeRoundRect(const Rect& rect,
                                                  const Size& radii);
 
-  static std::unique_ptr<Geometry> MakePointField(std::vector<Point> points,
-                                                  Scalar radius,
-                                                  bool round);
-
   virtual GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                            const Entity& entity,
                                            RenderPass& pass) const = 0;
