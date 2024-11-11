@@ -995,7 +995,10 @@ void main() {
     final OperationResult result = await residentWebRunner.restart();
 
     expect(result.code, 1);
-    expect(result.message, contains(vm_service.RPCErrorKind.kInternalError.toString()));
+    expect(
+      result.message,
+      contains(vm_service.RPCErrorKind.kInternalError.code.toString()),
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
