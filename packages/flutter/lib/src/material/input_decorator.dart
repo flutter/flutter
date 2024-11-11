@@ -1417,9 +1417,12 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           if (prefixIcon != null && !decoration.alignLabelWithHint) {
             offsetToPrefixIcon = material3 ? _boxSize(prefixIcon).width - contentPadding.end : 0;
           }
-          decoration.borderGap.start = lerpDouble(labelX + _boxSize(label).width + offsetToPrefixIcon,
+          // -1.0 offset starts drawing from outside the edge of the label.
+          decoration.borderGap.start = lerpDouble(
+            labelX + _boxSize(label).width + offsetToPrefixIcon,
             _boxSize(container).width / 2.0 + floatWidth / 2.0,
-            floatAlign);
+            floatAlign
+          )! - 1.0;
 
         case TextDirection.ltr:
           // The value of _InputBorderGap.start is relative to the origin of the
@@ -1429,9 +1432,11 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           if (prefixIcon != null && !decoration.alignLabelWithHint) {
             offsetToPrefixIcon = material3 ? (-_boxSize(prefixIcon).width + contentPadding.start) : 0;
           }
-          decoration.borderGap.start = lerpDouble(labelX - _boxSize(icon).width + offsetToPrefixIcon,
+          decoration.borderGap.start = lerpDouble(
+            labelX - _boxSize(icon).width + offsetToPrefixIcon,
             _boxSize(container).width / 2.0 - floatWidth / 2.0,
-            floatAlign);
+            floatAlign
+          )! - 1.0;
       }
       decoration.borderGap.extent = label!.size.width * _kFinalLabelScale;
     } else {
