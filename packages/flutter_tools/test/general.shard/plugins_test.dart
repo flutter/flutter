@@ -478,8 +478,9 @@ dependencies:
 
         await refreshPluginsList(flutterProject, useImplicitPubspecResolution: true);
 
-        // Verify .flutter-plugins is configured correctly.
+        // Verify .flutter-plugins-dependencies is configured correctly.
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         expect(flutterProject.flutterPluginsFile.readAsStringSync(),
           '# This is a generated file; do not edit or check into version control.\n'
           'plugin-a=${pluginA.path}/\n'
@@ -487,8 +488,6 @@ dependencies:
           'plugin-c=${pluginC.path}/\n'
         );
 
-        // Verify .flutter-plugins-dependencies is configured correctly.
-        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
         final Map<String, dynamic> jsonContent = json.decode(pluginsString) as  Map<String, dynamic>;
         expect(jsonContent['info'], 'This is a generated file; do not edit or check into version control.');
@@ -561,101 +560,6 @@ dependencies:
           'swift_package_manager_enabled',
         ];
         expect(jsonContent.keys, expectedKeys);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        SystemClock: () => systemClock,
-        FlutterVersion: () => flutterVersion,
-      });
-
-      testUsingContext(
-        '.flutter-plugins-dependencies contains whether or not the plugins are dev dependencies', () async {
-        final Directory pluginA = createLegacyPluginWithDependencies(name: 'plugin-a', dependencies: const <String>[]);
-        final Directory pluginB = createLegacyPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
-        final Directory pluginC = createLegacyPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
-        iosProject.testExists = true;
-
-        final DateTime dateCreated = DateTime(1970);
-        systemClock.currentTime = dateCreated;
-
-        // Modify the flutterProject's pubspec.yaml to contain some plugins as dev dependencies.
-        String flutterProjectPubspecFileAsString = '''
-name: flutterProject
-dependencies:
-  flutter:
-    sdk: flutter
-dependencies:
-  plugin-b: 1.0.0
-dev_dependencies:
-  plugin-a: 1.3.0
-  plugin-c: 1.4.0
-''';
-        flutterProject.directory.childFile('pubspec.yaml').createSync();
-        File flutterProjectPubspecFile = flutterProject.directory.childFile('pubspec.yaml');
-        flutterProjectPubspecFile.writeAsStringSync(flutterProjectPubspecFileAsString);
-
-        await refreshPluginsList(flutterProject, useImplicitPubspecResolution: false);
-
-        // Verify .flutter-plugins-dependencies contains plugins with the 'dev_dependency' attribute.
-        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
-        final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
-        final Map<String, dynamic> jsonContent = json.decode(pluginsString) as  Map<String, dynamic>;
-
-        final Map<String, dynamic> plugins = jsonContent['plugins'] as Map<String, dynamic>;
-        final List<dynamic> expectedPlugins = <dynamic>[
-          <String, dynamic> {
-            'name': 'plugin-a',
-            'path': '${pluginA.path}/',
-            'native_build': true,
-            'dependencies': <String>[
-              'plugin-b',
-              'plugin-c',
-            ],
-            'dev_dependency': false,
-          },
-          <String, dynamic> {
-            'name': 'plugin-b',
-            'path': '${pluginB.path}/',
-            'native_build': true,
-            'dependencies': <String>[
-              'plugin-c',
-            ],
-            'dev_dependency': true,
-          },
-          <String, dynamic> {
-            'name': 'plugin-c',
-            'path': '${pluginC.path}/',
-            'native_build': true,
-            'dependencies': <String>[],
-            'dev_dependency': true,
-          },
-        ];
-        expect(plugins['ios'], expectedPlugins);
-        expect(plugins['android'], expectedPlugins);
-        expect(plugins['macos'], <dynamic>[]);
-        expect(plugins['windows'], <dynamic>[]);
-        expect(plugins['linux'], <dynamic>[]);
-        expect(plugins['web'], <dynamic>[]);
-
-        final List<dynamic> expectedDependencyGraph = <dynamic>[
-          <String, dynamic> {
-            'name': 'plugin-a',
-            'dependencies': <String>[
-              'plugin-b',
-              'plugin-c',
-            ],
-          },
-          <String, dynamic> {
-            'name': 'plugin-b',
-            'dependencies': <String>[
-              'plugin-c',
-            ],
-          },
-          <String, dynamic> {
-            'name': 'plugin-c',
-            'dependencies': <String>[],
-          },
-        ];
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

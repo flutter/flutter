@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:file/file.dart';
 
 import '../src/common.dart';
@@ -20,9 +21,10 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext(
+  test(
       '.flutter-plugins-dependencies correctly denotes project dev dependencies on iOS, Android',
       () async {
+    // Create Flutter project.
     final String flutterBin =
         fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
@@ -33,22 +35,45 @@ void main() {
       '--project-name=testapp',
     ], workingDirectory: tempDir.path);
 
+    final File pubspecFile = tempDir.childFile('pubspec.yaml');
+    expect(pubspecFile.existsSync(), true);
+    String pubspecFileAsString = pubspecFile.readAsStringSync();
+
+    // Add dependency on two plugin: one dependency, one dev dependency.
+    final RegExp pubspecDependenciesRegExp = RegExp('\ndependencies:\n');
+    final RegExp pubspecDevDependenciesRegExp = RegExp('dev_dependencies:\n');
+    expect(pubspecDependenciesRegExp.hasMatch(pubspecFileAsString), isTrue);
+    expect(pubspecDevDependenciesRegExp.hasMatch(pubspecFileAsString), isTrue);
+
+    const String pubspecDependenciesWithCameraAdded = '''
+\ndependencies:
+  camera: 0.11.0
+''';
+    const String pubspecDevDependenciesWithVideoPlayerAdded = '''
+dev_dependencies:
+  video_player: 2.9.2
+''';
+
+    pubspecFileAsString = pubspecFileAsString.replaceFirst(
+        pubspecDependenciesRegExp, pubspecDependenciesWithCameraAdded);
+    pubspecFileAsString = pubspecFileAsString.replaceFirst(
+        pubspecDevDependenciesRegExp,
+        pubspecDevDependenciesWithVideoPlayerAdded);
+    pubspecFile.writeAsStringSync(pubspecFileAsString);
+
+    // Run `flutter pub get` to generate .flutter-plugins-dependencies.
     await processManager.run(<String>[
       flutterBin,
-      'packages',
+      'pub',
       'get',
-    ], workingDirectory: tempDir.path);
-    await processManager.run(<String>[
-      flutterBin,
-      'build',
-      'apk',
     ], workingDirectory: tempDir.path);
 
     final File flutterPluginsDependenciesFile =
         tempDir.childFile('.flutter-plugins-dependencies');
     expect(flutterPluginsDependenciesFile.existsSync(), true);
 
-    // TODO(camsim99): Figure out the rest later:
+    // Check that .flutter-plugin-dependencies denotes dependencies and
+    // dev dependencies as expected.
     final String pluginsString =
         flutterPluginsDependenciesFile.readAsStringSync();
     final Map<String, dynamic> jsonContent =
@@ -56,42 +81,47 @@ void main() {
     final Map<String, dynamic> plugins =
         jsonContent['plugins'] as Map<String, dynamic>;
 
-    final List<dynamic> expectedPlugins = <dynamic>[
-      <String, dynamic>{
-        'name': 'flutter',
-        // 'path': '${pluginA.path}/',
-        'native_build': true,
-        // 'dependencies': <String>[
-        //   'plugin-b',
-        //   'plugin-c',
-        // ],
-        'dev_dependency': false,
-      },
-      <String, dynamic>{
-        'name': 'flutter_test',
-        // 'path': '${pluginB.path}/',
-        'native_build': true,
-        // 'dependencies': <String>[
-        //   'plugin-c',
-        // ],
-        'dev_dependency': true,
-      },
-      <String, dynamic>{
-        'name': 'flutter_lints',
-        // 'path': '${pluginC.path}/',
-        'native_build': true,
-        // 'dependencies': <String>[],
-        'dev_dependency': true,
-      },
-    ];
-
-    print(plugins['ios']);
-
-    expect(plugins['ios'], expectedPlugins);
-    expect(plugins['android'], expectedPlugins);
-    expect(plugins['macos'], <dynamic>[]);
+    // No project plugins run on Windows, Linux.
     expect(plugins['windows'], <dynamic>[]);
     expect(plugins['linux'], <dynamic>[]);
-    expect(plugins['web'], <dynamic>[]);
+
+    // camera, video_player, and transitive dependencies run on Android, iOS,
+    // macOS, and web, so we verify on these platforms only.
+    final List<String> platformsToVerify = <String>[
+      'android',
+      'ios',
+      'macos',
+      'web'
+    ];
+
+    for (final String platform in platformsToVerify) {
+      final List<dynamic> pluginsForPlatform =
+          plugins[platform] as List<dynamic>;
+
+      for (final dynamic plugin in pluginsForPlatform) {
+        final Map<String, dynamic> pluginProperties =
+            plugin as Map<String, dynamic>;
+        final String pluginName = pluginProperties['name'] as String;
+        final bool pluginIsDevDependency =
+            pluginProperties['dev_dependency'] as bool;
+
+        // Check camera dependencies are not marked as dev dependencies.
+        if (pluginName.startsWith('camera_')) {
+          expect(pluginIsDevDependency, isFalse);
+        }
+
+        // Check video_player dependencies are marked as dev dependencies.
+        if (pluginName.startsWith('video_player')) {
+          expect(pluginIsDevDependency, isTrue);
+        }
+
+        // video_player brings in transitive dependncy
+        // flutter_plugin_android_lifecycle, so ensure it is marked as a
+        // dev dependency.
+        if (pluginName == 'flutter_plugin_android_lifecycle') {
+          expect(pluginIsDevDependency, isTrue);
+        }
+      }
+    }
   });
 }
