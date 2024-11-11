@@ -18,6 +18,8 @@ import 'package:flutter/material.dart'
         VisualDensity;
 import 'package:flutter/widgets.dart';
 
+/// Flutter code sample for a [RawMenuAnchor.node] that demonstrates
+/// how to create a menu bar for a document editor.
 void main() => runApp(const MenuNodeApp());
 
 class MenuItem {

@@ -59,7 +59,7 @@ class RawMenuAnchorOverlayPosition {
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
-    };
+    }
 
     return other is RawMenuAnchorOverlayPosition &&
            other.anchorRect       == anchorRect  &&
@@ -199,6 +199,22 @@ class _RawMenuAnchorScope extends InheritedWidget {
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example uses a [RawMenuAnchor] to build a simple menu with three items.
+/// The "Edit" button opens and closes the menu when pressed. Selecting a menu
+/// item will close the menu and update the selected item text.
+///
+/// ** See code in examples/api/lib/widgets/raw_menu_anchor/raw_menu_anchor.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example uses a [RawMenuAnchor] to build a context menu with a nested
+/// submenu. Right-clicking the background opens and positions the context menu
+/// at the cursor. Selecting a menu item will close the menu and update the
+/// selected item text.
+///
+/// ** See code in examples/api/lib/widgets/raw_menu_anchor/raw_menu_anchor.1.dart **
+/// {@end-tool}
 ///
 class RawMenuAnchor extends StatelessWidget {
   /// Creates a [RawMenuAnchor].
@@ -235,6 +251,14 @@ class RawMenuAnchor extends StatelessWidget {
   /// the default overlay provided by [RawMenuAnchor] is sufficient. However, in
   /// cases where a custom overlay is needed (e.g. an animated menu), this
   /// constructor can be used to provide one.
+  ///
+  /// {@tool dartpad}
+  /// This example uses a [RawMenuAnchor.overlayBuilder] to build an animated
+  /// select menu with four items. The menu opens with the last selected item
+  /// positioned above the anchor.
+  ///
+  /// ** See code in examples/api/lib/widgets/raw_menu_anchor/raw_menu_anchor.2.dart **
+  /// {@end-tool}
   const RawMenuAnchor.overlayBuilder({
     super.key,
     this.controller,
@@ -319,6 +343,15 @@ class RawMenuAnchor extends StatelessWidget {
   ///   ],
   /// );
   /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// This example uses [RawMenuAnchor.node] to build a menu bar with four
+  /// submenus. Hovering over menu items opens their respective submenus.
+  /// Selecting a menu item will close the menu and update the selected item
+  /// text.
+  ///
+  /// ** See code in examples/api/lib/widgets/raw_menu_anchor/raw_menu_anchor.3.dart **
   /// {@end-tool}
   const RawMenuAnchor.node({
     super.key,
@@ -590,7 +623,7 @@ class RawMenuAnchor extends StatelessWidget {
         controller: controller,
         consumeOutsideTaps: consumeOutsideTaps,
         menuChildren: menuChildren,
-        builder: _nodeBuilder!,
+        builder: _nodeBuilder,
       );
     }
 
@@ -611,6 +644,7 @@ class RawMenuAnchor extends StatelessWidget {
     );
   }
 
+  /// The type of the menu overlay used for testing.
   @visibleForTesting
   static Type get debugMenuOverlayPanelType => _MenuOverlayPanel;
 
@@ -1178,10 +1212,9 @@ class _RawMenuAnchorPanelState extends _RawMenuAnchorState<_RawMenuAnchorPanel> 
 /// RawMenuAnchor(
 ///   menuChildren: <Widget>[
 ///     Builder(builder: (BuildContext context) {
-///       final MenuController controller = MenuController.maybeOf(context)!;
-///       return TextButton(
+///       return MenuItemButton(
 ///         onPressed: () {
-///           controller.close();
+///           MenuController.maybeOf(context)?.close();
 ///         },
 ///         child: const Text('Close'),
 ///       );
@@ -1455,6 +1488,9 @@ class _MenuOverlayPanel extends StatelessWidget {
 class DismissMenuAction extends DismissAction {
   /// Creates a [DismissMenuAction].
   DismissMenuAction({required this.controller});
+
+  /// The [MenuController] that manages the menu which should be dismissed upon
+  /// invocation.
   final MenuController controller;
 
   @override

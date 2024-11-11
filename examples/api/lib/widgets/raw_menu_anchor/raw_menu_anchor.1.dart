@@ -21,8 +21,9 @@ import 'package:flutter/material.dart'
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for a [CupertinoMenuAnchor] that shows a basic menu.
-// void main() => runApp(const CupertinoSimpleMenuApp());
+/// Flutter code sample for a [RawMenuAnchor] that shows a context menu.
+/// The menu can be opened by right-clicking.
+void main() => runApp(const ContextMenuApp());
 
 class ContextMenuExample extends StatefulWidget {
   const ContextMenuExample({super.key});

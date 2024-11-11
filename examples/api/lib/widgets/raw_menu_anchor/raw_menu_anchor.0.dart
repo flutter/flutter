@@ -18,8 +18,9 @@ import 'package:flutter/material.dart'
 import 'package:flutter/widgets.dart';
 
 
-/// Flutter code sample for a [CupertinoMenuAnchor] that shows a basic menu.
-// void main() => runApp(const CupertinoSimpleMenuApp());
+/// Flutter code sample for a [RawMenuAnchor] that shows a simple menu with
+/// three items.
+void main() => runApp(const SimpleMenuApp());
 
 class SimpleMenuExample extends StatefulWidget {
   const SimpleMenuExample({super.key});

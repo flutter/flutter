@@ -25,14 +25,14 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for a [CupertinoMenuAnchor] that shows a basic menu.
-// void main() => runApp(const CupertinoSimpleMenuApp());
+/// Flutter code sample for a [RawMenuAnchor.overlayBuilder] that demonstrates
+/// how to create a custom, animated menu overlay.
+void main() => runApp(const MenuOverlayBuilderApp());
 
 class MenuItem {
-  const MenuItem(this.label, {this.leading, this.children = const <MenuItem>[]});
+  const MenuItem(this.label, {this.leading});
   final String label;
   final Widget? leading;
-  final List<MenuItem> children;
 }
 
 const List<MenuItem> menuItems = <MenuItem>[
@@ -42,16 +42,17 @@ const List<MenuItem> menuItems = <MenuItem>[
   MenuItem('Dog'        , leading: Text('🐕')),
 ];
 
-class MenuExample extends StatefulWidget {
-  const MenuExample({super.key});
+class MenuOverlayBuilderExample extends StatefulWidget {
+  const MenuOverlayBuilderExample({super.key});
 
   static const double menuItemExtent = 44.0;
 
   @override
-  State<MenuExample> createState() => _MenuExampleState();
+  State<MenuOverlayBuilderExample> createState() => _MenuOverlayBuilderExampleState();
 }
 
-class _MenuExampleState extends State<MenuExample> {
+class _MenuOverlayBuilderExampleState extends State<MenuOverlayBuilderExample> {
+
   final MenuController controller = MenuController();
   int? _selected;
 
@@ -83,7 +84,7 @@ class _MenuExampleState extends State<MenuExample> {
               return ItemAwareMenuSurface(
                 selectedIndex: _selected ?? 0,
                 position: position,
-                itemExtent: MenuExample.menuItemExtent,
+                itemExtent: MenuOverlayBuilderExample.menuItemExtent,
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 constraints: const BoxConstraints(minWidth: 172),
                 children: menuChildren,
@@ -179,11 +180,7 @@ class ItemAwareMenuSurface extends StatelessWidget {
       height: height,
       child: Semantics.fromProperties(
         explicitChildNodes: true,
-        properties: const SemanticsProperties(
-          namesRoute: true,
-          scopesRoute: true,
-          label: 'Menu',
-        ),
+        properties: const SemanticsProperties(scopesRoute: true),
         child: TapRegion(
           groupId: position.tapRegionGroupId,
           consumeOutsideTaps: true,
@@ -267,7 +264,7 @@ class MenuOverlayBuilderApp extends StatelessWidget {
         filledButtonTheme: const FilledButtonThemeData(style: buttonStyle),
         menuButtonTheme: const MenuButtonThemeData(style: buttonStyle),
       ),
-      home: const MenuExample(),
+      home: const MenuOverlayBuilderExample(),
     );
   }
 }
