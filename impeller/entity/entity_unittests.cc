@@ -35,6 +35,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_playground.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/point_field_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/geometry/superellipse_geometry.h"
 #include "impeller/geometry/color.h"
@@ -2095,9 +2096,9 @@ TEST_P(EntityTest, TiledTextureContentsIsOpaque) {
 
 TEST_P(EntityTest, PointFieldGeometryCoverage) {
   std::vector<Point> points = {{10, 20}, {100, 200}};
-  auto geometry = Geometry::MakePointField(points, 5.0, false);
-  ASSERT_EQ(*geometry->GetCoverage(Matrix()), Rect::MakeLTRB(5, 15, 105, 205));
-  ASSERT_EQ(*geometry->GetCoverage(Matrix::MakeTranslation({30, 0, 0})),
+  PointFieldGeometry geometry(points.data(), 2, 5.0, false);
+  ASSERT_EQ(geometry.GetCoverage(Matrix()), Rect::MakeLTRB(5, 15, 105, 205));
+  ASSERT_EQ(geometry.GetCoverage(Matrix::MakeTranslation({30, 0, 0})),
             Rect::MakeLTRB(35, 15, 135, 205));
 }
 
