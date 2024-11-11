@@ -111,6 +111,7 @@ class PathBuilder {
   Point subpath_start_;
   Point current_;
   size_t current_contour_location_ = 0u;
+  size_t contour_count_ = 0u;
   Path::Data prototype_;
 
   PathBuilder& AddRoundedRectTopLeft(Rect rect, RoundingRadii radii);

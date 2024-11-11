@@ -50,6 +50,142 @@ TEST(PathTest, PathCreatePolyLineDoesNotDuplicatePoints) {
   ASSERT_EQ(polyline.GetPoint(4).x, 50);
 }
 
+TEST(PathTest, PathSingleContour) {
+  // Closed shapes.
+  {
+    Path path = PathBuilder{}.AddCircle({100, 100}, 50).TakePath();
+    EXPECT_TRUE(path.IsSingleContour());
+  }
+
+  {
+    Path path =
+        PathBuilder{}.AddOval(Rect::MakeXYWH(100, 100, 100, 100)).TakePath();
+
+    EXPECT_TRUE(path.IsSingleContour());
+  }
+
+  {
+    Path path =
+        PathBuilder{}.AddRect(Rect::MakeXYWH(100, 100, 100, 100)).TakePath();
+
+    EXPECT_TRUE(path.IsSingleContour());
+  }
+
+  {
+    Path path = PathBuilder{}
+                    .AddRoundRect(RoundRect::MakeRectRadius(
+                        Rect::MakeXYWH(100, 100, 100, 100), 10))
+                    .TakePath();
+
+    EXPECT_TRUE(path.IsSingleContour());
+  }
+
+  // Open shapes.
+  {
+    Point p(100, 100);
+    Path path = PathBuilder{}.AddLine(p, {200, 100}).TakePath();
+
+    EXPECT_TRUE(path.IsSingleContour());
+  }
+
+  {
+    Path path =
+        PathBuilder{}
+            .AddCubicCurve({100, 100}, {100, 50}, {100, 150}, {200, 100})
+            .TakePath();
+
+    EXPECT_TRUE(path.IsSingleContour());
+  }
+
+  {
+    Path path = PathBuilder{}
+                    .AddQuadraticCurve({100, 100}, {100, 50}, {200, 100})
+                    .TakePath();
+
+    EXPECT_TRUE(path.IsSingleContour());
+  }
+}
+
+TEST(PathTest, PathSingleContourDoubleShapes) {
+  // Closed shapes.
+  {
+    Path path = PathBuilder{}
+                    .AddCircle({100, 100}, 50)
+                    .AddCircle({100, 100}, 50)
+                    .TakePath();
+    EXPECT_FALSE(path.IsSingleContour());
+  }
+
+  {
+    Path path = PathBuilder{}
+                    .AddOval(Rect::MakeXYWH(100, 100, 100, 100))
+                    .AddOval(Rect::MakeXYWH(100, 100, 100, 100))
+                    .TakePath();
+
+    EXPECT_FALSE(path.IsSingleContour());
+  }
+
+  {
+    Path path = PathBuilder{}
+                    .AddRect(Rect::MakeXYWH(100, 100, 100, 100))
+                    .AddRect(Rect::MakeXYWH(100, 100, 100, 100))
+                    .TakePath();
+
+    EXPECT_FALSE(path.IsSingleContour());
+  }
+
+  {
+    Path path = PathBuilder{}
+                    .AddRoundRect(RoundRect::MakeRectRadius(
+                        Rect::MakeXYWH(100, 100, 100, 100), 10))
+                    .AddRoundRect(RoundRect::MakeRectRadius(
+                        Rect::MakeXYWH(100, 100, 100, 100), 10))
+                    .TakePath();
+
+    EXPECT_FALSE(path.IsSingleContour());
+  }
+
+  {
+    Path path = PathBuilder{}
+                    .AddRoundRect(RoundRect::MakeRectXY(
+                        Rect::MakeXYWH(100, 100, 100, 100), Size(10, 20)))
+                    .AddRoundRect(RoundRect::MakeRectXY(
+                        Rect::MakeXYWH(100, 100, 100, 100), Size(10, 20)))
+                    .TakePath();
+
+    EXPECT_FALSE(path.IsSingleContour());
+  }
+
+  // Open shapes.
+  {
+    Point p(100, 100);
+    Path path =
+        PathBuilder{}.AddLine(p, {200, 100}).AddLine(p, {200, 100}).TakePath();
+
+    EXPECT_FALSE(path.IsSingleContour());
+  }
+
+  {
+    Path path =
+        PathBuilder{}
+            .AddCubicCurve({100, 100}, {100, 50}, {100, 150}, {200, 100})
+            .AddCubicCurve({100, 100}, {100, 50}, {100, 150}, {200, 100})
+            .TakePath();
+
+    EXPECT_FALSE(path.IsSingleContour());
+  }
+
+  {
+    Path path = PathBuilder{}
+                    .AddQuadraticCurve({100, 100}, {100, 50}, {200, 100})
+                    .Close()
+                    .AddQuadraticCurve({100, 100}, {100, 50}, {200, 100})
+                    .TakePath();
+
+    EXPECT_FALSE(path.IsSingleContour());
+  }
+}
+
 TEST(PathTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
   // Closed shapes.
   {
