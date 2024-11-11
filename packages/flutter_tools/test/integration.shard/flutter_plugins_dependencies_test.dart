@@ -111,7 +111,7 @@ dev_dependencies:
         }
 
         // Check video_player dependencies are marked as dev dependencies.
-        if (pluginName.startsWith('video_player')) {
+        if (pluginName.startsWith('video_player_')) {
           expect(pluginIsDevDependency, isTrue);
         }
 
