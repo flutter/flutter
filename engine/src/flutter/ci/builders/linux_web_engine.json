@@ -426,7 +426,7 @@
         },
         {
           "dependency": "firefox",
-          "version": "version:106.0"
+          "version": "version:132.0"
         }
       ],
       "tasks": [
