@@ -3287,7 +3287,7 @@ class _SelectionListenerState extends State<SelectionListener> {
   }
 }
 
-class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
+class _SelectionListenerDelegate extends StaticSelectionContainerDelegate {
   _SelectionListenerDelegate({
     required SelectionListenerNotifier selectionNotifier,
   }) : _selectionNotifier = selectionNotifier {
