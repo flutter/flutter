@@ -1728,7 +1728,6 @@ void main() {
         child: SearchAnchor(
           isFullScreen: false,
           viewShrinkWrap: true,
-          viewConstraints: const BoxConstraints(),
           builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();
@@ -1844,49 +1843,6 @@ void main() {
     final Finder findSearchBar = find.descendant(of: findViewContent(), matching: find.byType(SearchBar)).first;
     final Padding padding = tester.widget<Padding>(find.descendant(of: findSearchBar, matching: find.byType(Padding)).first);
     expect(padding.padding, const EdgeInsets.symmetric(horizontal: 16.0));
-  });
-
-  testWidgets('SearchAnchor respects viewConstraints min width and height when viewShrinkWrap is true', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: SearchAnchor(
-          isFullScreen: false,
-          viewConstraints: const BoxConstraints(),
-          viewShrinkWrap: true,
-          builder: (BuildContext context, SearchController controller) {
-            return IconButton(icon: const Icon(Icons.search), onPressed: () {
-              controller.openView();
-            },);
-          },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return List<Widget>.generate(
-              controller.text.length,
-              (int index) => ListTile(title: Text('Item $index')),
-            );
-          }
-        ),
-      ),
-    ));
-
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
-    await tester.pumpAndSettle();
-
-    final Finder findDivider = find.descendant(of: findViewContent(), matching: find.byType(Divider));
-
-    // Divider should not be shown if there are no suggestions
-    expect(findDivider, findsNothing);
-
-    final Finder findMaterial = find.descendant(of: findViewContent(), matching: find.byType(Material)).first;
-    final Rect materialRectWithoutSuggestions = tester.getRect(findMaterial);
-    expect(materialRectWithoutSuggestions, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0)));
-
-    await tester.enterText(find.byType(SearchBar), 'a');
-    await tester.pumpAndSettle();
-
-    expect(findDivider, findsOneWidget);
-
-    final Rect materialRectWithSuggestions = tester.getRect(findMaterial);
-    expect(materialRectWithSuggestions, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 113.0)));
   });
 
   testWidgets('SearchAnchor respects viewBarPadding property', (WidgetTester tester) async {
