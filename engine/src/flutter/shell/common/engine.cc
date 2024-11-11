@@ -293,6 +293,10 @@ bool Engine::UIIsolateHasLivePorts() {
   return runtime_controller_->HasLivePorts();
 }
 
+bool Engine::UIIsolateHasPendingMicrotasks() {
+  return runtime_controller_->HasPendingMicrotasks();
+}
+
 tonic::DartErrorHandleType Engine::GetUIIsolateLastError() {
   return runtime_controller_->GetLastError();
 }

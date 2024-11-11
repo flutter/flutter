@@ -169,6 +169,10 @@ void UIDartState::FlushMicrotasksNow() {
   microtask_queue_.RunMicrotasks();
 }
 
+bool UIDartState::HasPendingMicrotasks() {
+  return microtask_queue_.HasMicrotasks();
+}
+
 void UIDartState::AddOrRemoveTaskObserver(bool add) {
   auto task_runner = context_.task_runners.GetUITaskRunner();
   if (!task_runner) {

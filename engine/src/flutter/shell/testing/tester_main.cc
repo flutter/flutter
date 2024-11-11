@@ -267,9 +267,11 @@ class ScriptCompletionTaskObserver {
  public:
   ScriptCompletionTaskObserver(Shell& shell,
                                fml::RefPtr<fml::TaskRunner> main_task_runner,
+                               fml::RefPtr<fml::TaskRunner> ui_task_runner,
                                bool run_forever)
       : shell_(shell),
         main_task_runner_(std::move(main_task_runner)),
+        ui_task_runner_(std::move(ui_task_runner)),
         run_forever_(run_forever) {}
 
   int GetExitCodeForLastError() const {
@@ -281,6 +283,12 @@ class ScriptCompletionTaskObserver {
     if (shell_.EngineHasLivePorts()) {
       // The UI isolate still has live ports and is running. Nothing to do
       // just yet.
+      return;
+    }
+    if (shell_.EngineHasPendingMicrotasks()) {
+      // Post an empty task to force a run of the engine task observer that
+      // drains the microtask queue.
+      ui_task_runner_->PostTask([] {});
       return;
     }
 
@@ -302,6 +310,7 @@ class ScriptCompletionTaskObserver {
  private:
   Shell& shell_;
   fml::RefPtr<fml::TaskRunner> main_task_runner_;
+  fml::RefPtr<fml::TaskRunner> ui_task_runner_;
   bool run_forever_ = false;
   std::optional<DartErrorCode> last_error_;
   bool has_terminated_ = false;
@@ -456,6 +465,7 @@ int RunTester(const flutter::Settings& settings,
       *shell,  // a valid shell
       fml::MessageLoop::GetCurrent()
           .GetTaskRunner(),  // the message loop to terminate
+      ui_task_runner,        // runner for Dart microtasks
       run_forever            // should the exit be ignored
   );
 

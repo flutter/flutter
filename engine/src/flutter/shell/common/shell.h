@@ -359,6 +359,17 @@ class Shell final : public PlatformView::Delegate,
   bool EngineHasLivePorts() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Used by embedders to check if the Engine is running and has
+  ///             any microtasks that have been queued but have not yet run.
+  ///             The Flutter tester uses this as a signal that a test is still
+  ///             running.
+  ///
+  /// @return     Returns if the shell has an engine and the engine has pending
+  ///             microtasks.
+  ///
+  bool EngineHasPendingMicrotasks() const;
+
+  //----------------------------------------------------------------------------
   /// @brief     Accessor for the disable GPU SyncSwitch.
   // |Rasterizer::Delegate|
   std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch()

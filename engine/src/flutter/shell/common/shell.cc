@@ -710,6 +710,17 @@ bool Shell::EngineHasLivePorts() const {
   return weak_engine_->UIIsolateHasLivePorts();
 }
 
+bool Shell::EngineHasPendingMicrotasks() const {
+  FML_DCHECK(is_set_up_);
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+
+  if (!weak_engine_) {
+    return false;
+  }
+
+  return weak_engine_->UIIsolateHasPendingMicrotasks();
+}
+
 bool Shell::IsSetup() const {
   return is_set_up_;
 }

@@ -130,6 +130,8 @@ class UIDartState : public tonic::DartState {
 
   void FlushMicrotasksNow();
 
+  bool HasPendingMicrotasks();
+
   fml::WeakPtr<IOManager> GetIOManager() const;
 
   fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const;

@@ -511,6 +511,14 @@ bool RuntimeController::HasLivePorts() {
   return Dart_HasLivePorts();
 }
 
+bool RuntimeController::HasPendingMicrotasks() {
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  if (!root_isolate) {
+    return false;
+  }
+  return root_isolate->HasPendingMicrotasks();
+}
+
 tonic::DartErrorHandleType RuntimeController::GetLastError() {
   std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   return root_isolate ? root_isolate->GetLastError() : tonic::kNoError;
