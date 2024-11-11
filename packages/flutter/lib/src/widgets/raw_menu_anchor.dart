@@ -93,7 +93,7 @@ typedef RawMenuAnchorOverlayBuilder = Widget Function(
   RawMenuAnchorOverlayPosition position,
 );
 
-/// The type of builder function used by [RawMenuAnchor.panelBuilder] to
+/// The type of builder function used by [RawMenuAnchor.node] to
 /// build the panel displayed by a [RawMenuAnchor].
 typedef RawMenuAnchorPanelBuilder = Widget Function(
   BuildContext context,
@@ -117,6 +117,10 @@ typedef RawMenuAnchorChildBuilder = Widget Function(
   Widget? child,
 );
 
+// An inherited widget that provides the [RawMenuAnchor] to its descendants.
+//
+// Used to notify anchor descendents when the menu opens and closes, and to
+// access the anchor's controller.
 class _RawMenuAnchorScope extends InheritedWidget {
   const _RawMenuAnchorScope( {
     required super.child,
@@ -148,11 +152,11 @@ class _RawMenuAnchorScope extends InheritedWidget {
 /// has minimal styling, layout, and behavior.
 ///
 /// To completely customize the overlay, [RawMenuAnchor.overlayBuilder] can be
-/// used to completely manage the positioning, appearance, semantics, and
-/// interaction of the menu overlay. No default overlay is provided when using
-/// this constructor.
+/// used to manage the positioning, appearance, semantics, and interaction of
+/// the menu overlay. No default overlay is provided when using this
+/// constructor.
 ///
-/// The [RawMenuAnchor.panelBuilder] constructor can be used to create menus
+/// The [RawMenuAnchor.node] constructor can be used to create menus
 /// that are always visible and are not displayed in an [OverlayPortal]. This is
 /// useful for creating a menu bars or other custom menu layouts.
 ///
@@ -221,7 +225,7 @@ class RawMenuAnchor extends StatelessWidget {
     String? semanticLabel,
   }) : _semanticLabel = semanticLabel,
        _overlayBuilder = null,
-       _panelBuilder = null;
+       _nodeBuilder = null;
 
   /// Creates a [RawMenuAnchor] that lays out it's [menuChildren] in a custom
   /// overlay built by `overlayBuilder`.
@@ -249,7 +253,7 @@ class RawMenuAnchor extends StatelessWidget {
        clipBehavior = Clip.hardEdge,
        constraints = null,
        _overlayBuilder = overlayBuilder,
-       _panelBuilder = null,
+       _nodeBuilder = null,
        padding = EdgeInsets.zero,
        constrainCrossAxis = false,
        _semanticLabel = null;
@@ -322,7 +326,7 @@ class RawMenuAnchor extends StatelessWidget {
     required RawMenuAnchorPanelBuilder builder,
     required this.menuChildren,
   }) : _overlayBuilder = null,
-       _panelBuilder = builder,
+       _nodeBuilder = builder,
        alignment = null,
        menuAlignment = null,
        surfaceDecoration = null,
@@ -350,17 +354,15 @@ class RawMenuAnchor extends StatelessWidget {
   /// the [child] or [builder] widget that opens the menu.
   ///
   /// The focus node should be attached to the widget that should take focus
-  /// when the menu is opened or closed. On the default [RawMenuAnchor] constructor,
-  /// invoking NextFocus or PreviousFocus will close the menu and move focus to
-  /// the next and previous siblings of [childFocusNode].
+  /// when the menu is opened or closed.
   ///
-  /// If not supplied,
+  /// If not supplied, the anchor will not be focused when the menu is opened.
   final FocusNode? childFocusNode;
 
   /// The [Decoration] that defines the visual attributes of the menu surface.
   ///
   /// Defaults to [defaultLightOverlayDecoration] when
-  /// [MediaQuery.platformBrightness] returns [Brightness.light] or null and
+  /// [MediaQuery.platformBrightness] returns [Brightness.light] or null, and
   /// [defaultDarkOverlayDecoration] when [MediaQuery.platformBrightness]
   /// returns [Brightness.dark].
   final Decoration? surfaceDecoration;
@@ -483,9 +485,12 @@ class RawMenuAnchor extends StatelessWidget {
   /// children.
   final BoxConstraints? constraints;
 
-  final RawMenuAnchorPanelBuilder? _panelBuilder;
+  final RawMenuAnchorPanelBuilder? _nodeBuilder;
   final RawMenuAnchorOverlayBuilder? _overlayBuilder;
 
+  /// The default decoration applied by the default [RawMenuAnchor] constructor
+  /// when [MediaQuery.maybePlatformBrightnessOf] returns null or
+  /// [Brightness.light].
   static const Decoration defaultLightOverlayDecoration = BoxDecoration(
     borderRadius: BorderRadius.all(Radius.circular(6.0)),
     color: ui.Color.fromARGB(255, 253, 253, 253),
@@ -510,6 +515,8 @@ class RawMenuAnchor extends StatelessWidget {
     ]
   );
 
+  /// The default decoration applied by the default [RawMenuAnchor] constructor
+  /// when [MediaQuery.maybePlatformBrightnessOf] returns [Brightness.dark].
   static const Decoration defaultDarkOverlayDecoration = BoxDecoration(
     borderRadius: BorderRadius.all(Radius.circular(6.0)),
     color: ui.Color.fromARGB(255, 32, 33, 36),
@@ -534,6 +541,22 @@ class RawMenuAnchor extends StatelessWidget {
   );
 
 
+  /// The overlay builder used by the default [RawMenuAnchor] constructor.
+  ///
+  /// The [defaultOverlayBuilder] constructor builds a simple menu overlay. An
+  /// internal [FocusScope] is created to manage focus. Default keyboard
+  /// shortcuts include:
+  ///
+  /// - `ArrowUp` moves focus to the previous menu item.
+  /// - `ArrowDown` moves focus to the next menu item.
+  /// - `ArrowLeft` moves focus out of a submenu, thereby closing that submenu.
+  /// - `ArrowRight` opens and moves focus into a submenu.
+  /// - `Home` moves focus to the first menu item.
+  /// - `End` moves focus to the last menu item.
+  /// - `Escape` closes all menu layers.
+  ///
+  /// To customize the overlay, use the [RawMenuAnchor.overlayBuilder]
+  /// constructor.
   Widget defaultOverlayBuilder(
     BuildContext context,
     List<Widget> menuChildren,
@@ -561,13 +584,13 @@ class RawMenuAnchor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (_panelBuilder != null) {
+    if (_nodeBuilder != null) {
       return _RawMenuAnchorPanel(
         key: key,
         controller: controller,
         consumeOutsideTaps: consumeOutsideTaps,
         menuChildren: menuChildren,
-        panelBuilder: _panelBuilder,
+        builder: _nodeBuilder!,
       );
     }
 
@@ -620,10 +643,8 @@ class RawMenuAnchor extends StatelessWidget {
 // Base class that provides the common interface and state for the different
 // types of RawMenuAnchors, [_RawMenuAnchorOverlay] and [_RawMenuAnchorPanel].
 //
-// Unlike MenuAnchor, this class does not manage the overlay controller nor
-// the focus scope node -- it is only responsible for
-
-abstract class _RawMenuAnchor extends StatefulWidget {
+// This class does not assume that the anchor is an overlay or a panel.
+sealed class _RawMenuAnchor extends StatefulWidget {
   const _RawMenuAnchor({super.key});
   MenuController? get controller;
   bool get consumeOutsideTaps;
@@ -634,7 +655,7 @@ abstract class _RawMenuAnchor extends StatefulWidget {
 }
 
 @optionalTypeArgs
-abstract class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
+sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
   final List<_RawMenuAnchorState> _anchorChildren = <_RawMenuAnchorState>[];
   _RawMenuAnchorState? _parent;
   ScrollPosition? _scrollPosition;
@@ -642,12 +663,7 @@ abstract class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   MenuController? _internalMenuController;
   bool get _isRoot => _parent == null;
-  bool get _isRootOverlay => _parent?._hasOverlay != true;
-  bool get _hasOverlay;
   bool get _isOpen;
-  FocusScopeNode? get _menuScopeNode;
-  FocusNode? get _firstFocus => null;
-  FocusNode? get _lastFocus => null;
   _RawMenuAnchorState get _root {
     _RawMenuAnchorState anchor = this;
     while (anchor._parent != null) {
@@ -740,25 +756,16 @@ abstract class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
     assert(mounted);
     if (SchedulerBinding.instance.schedulerPhase !=
         SchedulerPhase.persistentCallbacks) {
-      setState(() {
-        // Mark dirty now, but only if not in a build.
-      });
+      setState(() { /* Mark dirty now, but only if not in a build. */ });
     } else {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         setState(() {
-          // Mark dirty after this frame, but only if in a build.
+          /* Mark dirty after this frame, but only if in a build. */
         });
       });
     }
   }
 
-  FocusTraversalPolicy? get _overlayTraversalPolicy {
-    if (_menuScopeNode?.context?.mounted != true) {
-      return null;
-    }
-    return FocusTraversalGroup.maybeOf(_menuScopeNode!.context!)
-            ?? ReadingOrderTraversalPolicy();
-  }
   /// Open the menu, optionally at a position relative to the [RawMenuAnchor].
   ///
   /// Call this when the menu should be shown to the user.
@@ -778,11 +785,13 @@ abstract class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
     }
   }
 
-  Widget _buildAnchor(BuildContext context);
 
   void _handleOutsideTap(PointerDownEvent pointerDownEvent) {
     _closeChildren();
   }
+
+  // Used to build the anchor widget in subclasses.
+  Widget _buildAnchor(BuildContext context);
 
   @override
   @nonVirtual
@@ -874,17 +883,17 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
 
   Offset? _menuPosition;
   FocusNode? _menuFocusNode;
-
-  @override
   FocusScopeNode? _menuScopeNode;
 
-  @override
-  bool get _hasOverlay => true;
+  bool get _isRootOverlay => _parent is! _RawMenuAnchorOverlayState;
+  FocusTraversalPolicy? get _overlayTraversalPolicy {
+    if (_menuScopeNode?.context?.mounted != true) {
+      return null;
+    }
+    return FocusTraversalGroup.maybeOf(_menuScopeNode!.context!)
+            ?? ReadingOrderTraversalPolicy();
+  }
 
-  @override
-  bool get _isOpen => _overlayController.isShowing;
-
-  @override
   FocusNode? get _firstFocus {
     assert(_menuScopeNode != null, '_firstFocus requires a menu scope node.');
     return _overlayTraversalPolicy?.findFirstFocus(
@@ -893,7 +902,6 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
     );
   }
 
-  @override
   FocusNode? get _lastFocus {
     assert(_menuScopeNode != null, '_lastFocus requires a menu scope node.');
     return _overlayTraversalPolicy?.findLastFocus(
@@ -901,6 +909,9 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
       ignoreCurrentFocus: true
     );
   }
+
+  @override
+  bool get _isOpen => _overlayController.isShowing;
 
   @override
   void initState() {
@@ -977,8 +988,7 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
     final BuildContext anchorContext = _anchorKey.currentContext!;
     final RenderBox overlay = Overlay.of(anchorContext).context.findRenderObject()! as RenderBox;
     final RenderBox anchor = anchorContext.findRenderObject()! as RenderBox;
-    final Rect anchorRect = anchor.localToGlobal(Offset.zero)
-                            & anchor.size;
+    final Rect anchorRect = anchor.localToGlobal(Offset.zero) & anchor.size;
     return widget.overlayBuilder(
       context,
       widget.menuChildren,
@@ -1092,11 +1102,11 @@ class _RawMenuAnchorPanel extends _RawMenuAnchor {
     this.consumeOutsideTaps = false,
     this.controller,
     required this.menuChildren,
-    required this.panelBuilder,
+    required this.builder,
   });
 
   final List<Widget> menuChildren;
-  final RawMenuAnchorPanelBuilder panelBuilder;
+  final RawMenuAnchorPanelBuilder builder;
 
   @override
   final bool consumeOutsideTaps;
@@ -1109,12 +1119,6 @@ class _RawMenuAnchorPanel extends _RawMenuAnchor {
 }
 
 class _RawMenuAnchorPanelState extends _RawMenuAnchorState<_RawMenuAnchorPanel> {
-  @override
-  bool get _hasOverlay => false;
-
-  @override
-  late final FocusScopeNode? _menuScopeNode = null;
-
   @override
   bool get _isOpen => _anchorChildren.any((_RawMenuAnchorState child) => child._isOpen);
 
@@ -1147,7 +1151,7 @@ class _RawMenuAnchorPanelState extends _RawMenuAnchorState<_RawMenuAnchorPanel> 
       groupId: _root._menuController,
       consumeOutsideTaps: _root._isOpen && widget.consumeOutsideTaps,
       onTapOutside: _handleOutsideTap,
-      child: widget.panelBuilder(context, widget.menuChildren),
+      child: widget.builder(context, widget.menuChildren),
     );
   }
 }
@@ -1321,12 +1325,11 @@ class _MenuOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MenuController menuController = MenuController.maybeOf(context)!;
+    final _RawMenuAnchorOverlayState state = menuController._anchor! as _RawMenuAnchorOverlayState;
     final Widget child = Semantics.fromProperties(
       explicitChildNodes: true,
-      properties: SemanticsProperties(
-        namesRoute: true,
+      properties: const SemanticsProperties(
         scopesRoute: true,
-        label: semanticLabel,
       ),
       child: TapRegion(
         groupId: position.tapRegionGroupId,
@@ -1335,7 +1338,7 @@ class _MenuOverlay extends StatelessWidget {
           menuController.close();
         },
         child: FocusScope(
-          node: menuController._anchor!._menuScopeNode,
+          node: state._menuScopeNode,
           skipTraversal: true,
           descendantsAreFocusable: true,
           child: Actions(
@@ -1363,9 +1366,11 @@ class _MenuOverlay extends StatelessWidget {
         // Resolve fallback alignment here so that alignmentOffset defaults to
         // being directionally-agnostic.
         final AlignmentGeometry anchorAttachment = alignment ??
-            (menuController._anchor!._isRootOverlay
+            (state._isRootOverlay
                     ? AlignmentDirectional.bottomStart
                     : AlignmentDirectional.topEnd).resolve(textDirection);
+
+
         return CustomSingleChildLayout(
           delegate: _MenuLayout(
             screenPadding: mediaQuery.padding,
@@ -1468,9 +1473,12 @@ class _AnchorDirectionalFocusAction extends ContextAction<DirectionalFocusIntent
 
    @override
   void invoke(DirectionalFocusIntent intent, [BuildContext? context]) {
-    final _RawMenuAnchorOverlayState? state =
-        _RawMenuAnchorState._maybeOf(context!) as _RawMenuAnchorOverlayState?;
-    if (state == null) {
+    final _RawMenuAnchorState? state = _RawMenuAnchorState._maybeOf(context!);
+    if (state is! _RawMenuAnchorOverlayState) {
+      assert(
+        state is! _RawMenuAnchorPanelState,
+        'Menu panels should not invoke $_OverlayDirectionalFocusAction : $state',
+      );
       primaryFocus?.focusInDirection(intent.direction);
       return;
     }
@@ -1500,20 +1508,24 @@ class _OverlayDirectionalFocusAction extends ContextAction<DirectionalFocusInten
 
   @override
   void invoke(DirectionalFocusIntent intent, [BuildContext? context]) {
-    assert(context != null);
-    final _RawMenuAnchorOverlayState? anchor =
-        _RawMenuAnchorState._maybeOf(context!) as _RawMenuAnchorOverlayState?;
-    if (anchor == null) {
+    final _RawMenuAnchorState? anchor = _RawMenuAnchorState._maybeOf(context!);
+    if (anchor is! _RawMenuAnchorOverlayState) {
+      assert(
+        anchor is! _RawMenuAnchorPanelState,
+        'Menu panels should not invoke $_OverlayDirectionalFocusAction : $anchor',
+      );
+      primaryFocus?.focusInDirection(intent.direction);
       return;
     }
 
     final bool isAnchorFocused = !(anchor._menuScopeNode?.hasFocus ?? false);
-    _RawMenuAnchorState overlay = anchor;
+    _RawMenuAnchorOverlayState overlay = anchor;
     bool isSubmenuAnchor = false;
+
     // If we are an anchor in an overlay, switch to our parent anchor to move
     // between our siblings rather than the children in our overlay.
     if (isAnchorFocused && !anchor._isRootOverlay) {
-      overlay = anchor._parent!;
+      overlay = anchor._parent! as _RawMenuAnchorOverlayState;
       isSubmenuAnchor = true;
     }
 
@@ -1555,6 +1567,7 @@ class _OverlayDirectionalFocusAction extends ContextAction<DirectionalFocusInten
           }
           return;
         } else if (!anchor._isRootOverlay) {
+          // When the anchor closes, focus will move to the parent anchor.
           anchor._close();
           return;
         }
@@ -1590,7 +1603,11 @@ class _FocusFirstMenuItemAction extends ContextAction<_FocusFirstMenuItemIntent>
   @override
   void invoke(_FocusFirstMenuItemIntent intent, [BuildContext? context]) {
     _RawMenuAnchorState? anchor = _RawMenuAnchorState._maybeOf(context!);
-    if (anchor == null) {
+    if (anchor is! _RawMenuAnchorOverlayState) {
+      assert(
+        anchor is! _RawMenuAnchorPanelState,
+        'Menu panels should not invoke $_FocusFirstMenuItemAction : $anchor',
+      );
       return;
     }
 
@@ -1599,10 +1616,10 @@ class _FocusFirstMenuItemAction extends ContextAction<_FocusFirstMenuItemIntent>
     // If we are an anchor in an overlay, switch to our parent anchor to move
     // between our siblings rather than the children in our overlay.
     if (isAnchorFocused && !anchor._isRootOverlay) {
-      anchor = anchor._parent;
+      anchor = anchor._parent! as _RawMenuAnchorOverlayState;
     }
 
-    final FocusNode? firstFocus = anchor!._firstFocus;
+    final FocusNode? firstFocus = anchor._firstFocus;
     if (firstFocus == null) {
       return;
     }
@@ -1619,20 +1636,24 @@ class _FocusLastMenuItemAction extends ContextAction<_FocusLastMenuItemIntent> {
   @override
   void invoke(_FocusLastMenuItemIntent intent, [BuildContext? context]) {
     _RawMenuAnchorState? anchor = _RawMenuAnchorState._maybeOf(context!);
-    if (anchor == null) {
+    if (anchor is! _RawMenuAnchorOverlayState) {
+      assert(
+        anchor is! _RawMenuAnchorPanelState,
+        'Menu panels should not invoke $_FocusFirstMenuItemAction : $anchor',
+      );
       return;
     }
 
     final bool isAnchorFocused = !(anchor._menuScopeNode?.hasFocus ?? false);
-    final bool inOverlay = anchor._parent?._hasOverlay ?? false;
+    final bool inOverlay = !anchor._isRootOverlay;
 
     // If we are an anchor in an overlay, switch to our parent anchor to move
     // between our siblings rather than the children in our overlay.
     if (isAnchorFocused && inOverlay) {
-      anchor = anchor._parent;
+      anchor = anchor._parent! as _RawMenuAnchorOverlayState;
     }
 
-    final FocusNode? lastFocus = anchor!._lastFocus;
+    final FocusNode? lastFocus = anchor._lastFocus;
     if (lastFocus == null) {
       return;
     }

@@ -315,44 +315,6 @@ void main() {
     expect(find.text(Tag.b.a.text), findsOneWidget);
   });
 
-  testWidgets('[OverlayBuilder] Context menus can be nested', (WidgetTester tester) async {
-    await tester.pumpWidget(App(
-      RawMenuAnchor(
-        menuAlignment: AlignmentDirectional.bottomStart,
-        alignment: AlignmentDirectional.topStart,
-        menuChildren: <Widget>[ Button.tag(Tag.a.a) ],
-        builder: (
-          BuildContext context,
-          MenuController controller,
-          Widget? child,
-        ) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const AnchorButton(Tag.a),
-              RawMenuAnchor(
-                alignment: AlignmentDirectional.bottomStart,
-                menuAlignment: AlignmentDirectional.topStart,
-                menuChildren: <Widget>[ Button.tag(Tag.b.a) ],
-                child: const AnchorButton(Tag.b),
-              ),
-            ],
-          );
-        },
-      ),
-    ));
-
-    await tester.tap(find.text(Tag.a.text));
-    await tester.pump();
-
-    expect(find.text(Tag.a.a.text), findsOneWidget);
-
-    await tester.tap(find.text(Tag.b.text));
-    await tester.pump();
-
-    expect(find.text(Tag.b.a.text), findsOneWidget);
-  });
-
   testWidgets('[Panel] MenuController.isOpen is true when a descendent menu is open', (WidgetTester tester) async {
     await tester.pumpWidget(
       App(
@@ -729,6 +691,19 @@ void main() {
     expect(panelBuilds, equals(4));
     expect(anchorBuilds, equals(4));
     expect(overlayBuilds, equals(2));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/156572.
+  testWidgets('Unattached MenuController does not throw when calling close', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    controller.close();
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Unattached MenuController returns false when calling isOpen', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    expect(controller.isOpen, false);
   });
 
   testWidgets('[Default] Previous focus is restored on menu close', (WidgetTester tester) async {
@@ -2842,7 +2817,7 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
-          panelDecoration: decoration,
+          surfaceDecoration: decoration,
           controller: controller,
           menuAlignment: Alignment.center,
           menuChildren: const <Widget>[
@@ -3045,6 +3020,137 @@ void main() {
     expect(closed, equals(<Tag>[Tag.a]));
   });
 
+  // Copied from [MenuAnchor] tests.
+  //
+  // Regression test for https://github.com/flutter/flutter/issues/157606.
+  testWidgets('RawMenuAnchor builder rebuilds when isOpen state changes', (WidgetTester tester) async {
+    bool isOpen = false;
+    int openCount = 0;
+    int closeCount = 0;
+
+    await tester.pumpWidget(
+      App(
+         RawMenuAnchor(
+              menuChildren: <Widget>[
+                Button.text('Menu Item'),
+              ],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                isOpen = controller.isOpen;
+                return Button(
+                  Text(isOpen ? 'close' : 'open'),
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                );
+              },
+              onOpen: () => openCount++,
+              onClose: () => closeCount++,
+            ),
+          ),
+    );
+
+    expect(find.text('open'), findsOneWidget);
+    expect(isOpen, false);
+    expect(openCount, 0);
+    expect(closeCount, 0);
+
+    await tester.tap(find.text('open'));
+    await tester.pump();
+
+    expect(find.text('close'), findsOneWidget);
+    expect(isOpen, true);
+    expect(openCount, 1);
+    expect(closeCount, 0);
+
+    await tester.tap(find.text('close'));
+    await tester.pump();
+
+    expect(find.text('open'), findsOneWidget);
+    expect(isOpen, false);
+    expect(openCount, 1);
+    expect(closeCount, 1);
+  });
+
+  // Copied from [MenuAnchor] tests. Also tested by "Menu is positioned within
+  // the root overlay.", so this test (or the other) may be redundant.
+  //
+  // Regression test for https://github.com/flutter/flutter/issues/155034.
+  testWidgets('Content is shown in the root overlay', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    final UniqueKey overlayKey = UniqueKey();
+    final UniqueKey menuItemKey = UniqueKey();
+
+    List<RenderObject> ancestorRenderTheaters(RenderObject child) {
+      final List<RenderObject> results = <RenderObject>[];
+      RenderObject? node = child;
+      while (node != null) {
+        if (node.runtimeType.toString() == '_RenderTheater') {
+          results.add(node);
+        }
+        final RenderObject? parent = node.parent;
+        node = parent is RenderObject? parent : null;
+      }
+      return results;
+    }
+
+    late final OverlayEntry overlayEntry;
+    addTearDown((){
+      overlayEntry.remove();
+      overlayEntry.dispose();
+    });
+
+    Widget boilerplate() {
+      return App(
+        Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(builder: (BuildContext context) {
+              return Center(
+                child: RawMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    Button(
+                      const Text('Item 1'),
+                      key: menuItemKey,
+                      onPressed: () {},
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(boilerplate());
+    expect(find.byKey(menuItemKey), findsNothing);
+
+    // Open the menu.
+    controller.open();
+    await tester.pump();
+    expect(find.byKey(menuItemKey), findsOne);
+
+    // Expect two overlays: the root overlay created by WidgetsApp and the
+    // overlay created by the boilerplate code.
+    expect(find.byType(Overlay), findsNWidgets(2));
+
+    final Iterable<Overlay> overlays = tester.widgetList<Overlay>(find.byType(Overlay));
+    final Overlay nonRootOverlay = tester.widget(find.byKey(overlayKey));
+    final Overlay rootOverlay = overlays.firstWhere((Overlay overlay) => overlay != nonRootOverlay);
+
+    // Check that the ancestor _RenderTheater for the menu item is the one
+    // from the root overlay.
+    expect(
+      ancestorRenderTheaters(tester.renderObject(find.byKey(menuItemKey))).single,
+      tester.renderObject(find.byWidget(rootOverlay)),
+    );
+  });
+
   testWidgets('[Default] Overlay semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     tester.ensureSemantics();
@@ -3155,7 +3261,7 @@ void main() {
           RawMenuAnchor(
             alignment: alignment,
             menuAlignment: Alignment.center,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               Container(
                 width: 100,
@@ -3199,7 +3305,7 @@ void main() {
           RawMenuAnchor(
             alignment: alignment,
             menuAlignment: Alignment.center,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               Container(
                 width: 100,
@@ -3245,7 +3351,7 @@ void main() {
           RawMenuAnchor(
             alignment: Alignment.center,
             menuAlignment: alignment,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               Container(
                 width: 100,
@@ -3290,7 +3396,7 @@ void main() {
           RawMenuAnchor(
             alignment: Alignment.center,
             menuAlignment: alignment,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               Container(
                 width: 100,
@@ -3326,7 +3432,7 @@ void main() {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
-            panelDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
+            surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
             menuChildren: <Widget>[
               Container(
                 width: 100,
@@ -3354,7 +3460,7 @@ void main() {
         App(
           textDirection: TextDirection.rtl,
           RawMenuAnchor(
-            panelDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
+            surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
             menuChildren: <Widget>[
               Container(
                 width: 100,
@@ -3381,10 +3487,10 @@ void main() {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
-            panelDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
+            surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
             menuChildren: <Widget>[
               RawMenuAnchor(
-                panelDecoration: const BoxDecoration(),
+                surfaceDecoration: const BoxDecoration(),
                 menuChildren: <Widget>[
                   Container(
                     width: 100,
@@ -3415,10 +3521,10 @@ void main() {
         App(
           textDirection: TextDirection.rtl,
           RawMenuAnchor(
-            panelDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
+            surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
             menuChildren: <Widget>[
               RawMenuAnchor(
-                panelDecoration: const BoxDecoration(color: Color(0xFFFF00FF)),
+                surfaceDecoration: const BoxDecoration(color: Color(0xFFFF00FF)),
                 menuChildren: const <Widget>[
                   SizedBox.square(dimension: 100),
                 ],
@@ -3451,7 +3557,7 @@ void main() {
           textDirection: textDirection,
           RawMenuAnchor(
             alignmentOffset: alignmentOffset,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               Container(
                 width: 250,
@@ -3504,7 +3610,7 @@ void main() {
             alignment: anchorAlignment,
             menuAlignment: Alignment.center,
             alignmentOffset: alignmentOffset,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               Container(
                 width: 125,
@@ -3549,7 +3655,7 @@ void main() {
             alignment: anchorAlignment,
             menuAlignment: Alignment.center,
             alignmentOffset: alignmentOffset,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               Container(
                 width: 125,
@@ -3591,7 +3697,7 @@ void main() {
           RawMenuAnchor(
             alignmentOffset: alignmentOffset,
             alignment: alignment,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuAlignment: Alignment.center,
             menuChildren: <Widget>[
               Container(
@@ -3649,7 +3755,7 @@ void main() {
             controller: controller,
             alignmentOffset: alignmentOffset,
             alignment: alignment,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuAlignment: Alignment.center,
             menuChildren: <Widget>[
               Container(
@@ -3705,7 +3811,7 @@ void main() {
             menuAlignment: alignment,
             alignmentOffset: alignmentOffset,
             alignment: Alignment.center,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               Container(
                 width: 50,
@@ -3759,12 +3865,12 @@ void main() {
           RawMenuAnchor(
             constraints: constraints,
             alignmentOffset: const Offset(-100, 100),
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               RawMenuAnchor(
                 constraints: constraints,
                 alignmentOffset: const Offset(100, -100),
-                panelDecoration: const BoxDecoration(),
+                surfaceDecoration: const BoxDecoration(),
                 menuChildren: <Widget>[
                   Container(
                     color: const Color(0xFF0000FF),
@@ -3802,12 +3908,12 @@ void main() {
         RawMenuAnchor(
           constraints: constraints,
           alignmentOffset: const Offset(-100, 100),
-          panelDecoration: const BoxDecoration(),
+          surfaceDecoration: const BoxDecoration(),
           menuChildren: <Widget>[
             RawMenuAnchor(
               constraints: constraints,
               alignmentOffset: const Offset(100, -100),
-              panelDecoration: const BoxDecoration(),
+              surfaceDecoration: const BoxDecoration(),
               menuChildren: <Widget>[
                 Container(
                   color: const Color(0xFF0000FF),
@@ -3842,10 +3948,10 @@ void main() {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               RawMenuAnchor(
-                panelDecoration: const BoxDecoration(),
+                surfaceDecoration: const BoxDecoration(),
                 menuChildren: <Widget>[
                   Button.tag(Tag.a.a, constraints: constraints)
                 ],
@@ -3885,10 +3991,10 @@ void main() {
         App(
           textDirection: TextDirection.rtl,
           RawMenuAnchor(
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               RawMenuAnchor(
-                panelDecoration: const BoxDecoration(),
+                surfaceDecoration: const BoxDecoration(),
                 menuChildren: <Widget>[
                   Button.tag(Tag.a.a, constraints: constraints)
                 ],
@@ -3925,11 +4031,11 @@ void main() {
         App(
           RawMenuAnchor(
             constrainCrossAxis: true,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               RawMenuAnchor(
                 constrainCrossAxis: true,
-                panelDecoration: const BoxDecoration(),
+                surfaceDecoration: const BoxDecoration(),
                 menuChildren: <Widget>[
                   Button.tag(Tag.a.a, constraints: constraints)
                 ],
@@ -3965,11 +4071,11 @@ void main() {
           textDirection: TextDirection.rtl,
           RawMenuAnchor(
             constrainCrossAxis: true,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               RawMenuAnchor(
                 constrainCrossAxis: true,
-                panelDecoration: const BoxDecoration(),
+                surfaceDecoration: const BoxDecoration(),
                 menuChildren: <Widget>[
                   Button.tag(Tag.a.a, constraints: constraints)
                 ],
@@ -3999,7 +4105,7 @@ void main() {
           ConstrainedBox(
             constraints: const BoxConstraints.tightFor(width: 40, height: 40),
             child: RawMenuAnchor(
-              panelDecoration: const BoxDecoration(),
+              surfaceDecoration: const BoxDecoration(),
               menuChildren: <Widget>[
                 Container(
                   color: const Color(0xFFFF0000),
@@ -4026,7 +4132,7 @@ void main() {
       await tester.pumpWidget(App(
         alignment: const Alignment(0.5, 0),
         RawMenuAnchor(
-          panelDecoration: const BoxDecoration(),
+          surfaceDecoration: const BoxDecoration(),
           alignment: Alignment.topLeft,
           menuAlignment: const Alignment(-0.75, -0.75),
           menuChildren: <Widget>[
@@ -4056,7 +4162,7 @@ void main() {
           textDirection: TextDirection.rtl,
           alignment: const Alignment(0.5, 0),
           RawMenuAnchor(
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             alignment: Alignment.topLeft,
             menuAlignment: const Alignment(-0.75, -0.75),
             menuChildren: <Widget>[
@@ -4087,7 +4193,7 @@ void main() {
       await tester.pumpWidget(App(
         alignment: const Alignment(-0.5, 0),
         RawMenuAnchor(
-          panelDecoration: const BoxDecoration(),
+          surfaceDecoration: const BoxDecoration(),
           alignment: Alignment.topLeft,
           menuAlignment: const Alignment(0.75, -0.75),
           menuChildren: <Widget>[
@@ -4117,7 +4223,7 @@ void main() {
         textDirection: TextDirection.rtl,
         alignment: const Alignment(-0.5, 0),
         RawMenuAnchor(
-          panelDecoration: const BoxDecoration(),
+          surfaceDecoration: const BoxDecoration(),
           alignment: Alignment.topLeft,
           menuAlignment: const Alignment(0.75, -0.75),
           menuChildren: <Widget>[
@@ -4147,7 +4253,7 @@ void main() {
         App(
           RawMenuAnchor(
             controller: controller,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuAlignment: Alignment.center,
             menuChildren: <Widget>[
               Container(
@@ -4189,14 +4295,14 @@ void main() {
         App(
           // Overlaps the bottom of the anchor by 4px
           RawMenuAnchor(
-            panelDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
+            surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
             alignmentOffset: const Offset(0, -4),
             alignment: AlignmentDirectional.bottomEnd,
             menuAlignment: AlignmentDirectional.topStart,
             menuChildren: <Widget>[
               // Overlaps the top of the anchor by 4px
               RawMenuAnchor(
-                panelDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
+                surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
                 alignmentOffset: const Offset(0, 4),
                 alignment: AlignmentDirectional.topStart,
                 menuAlignment: AlignmentDirectional.bottomEnd,
@@ -4242,7 +4348,7 @@ void main() {
       await tester.pumpWidget(App(
         alignment: const Alignment(0, 0.5),
         RawMenuAnchor(
-          panelDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
+          surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
           alignmentOffset: const Offset(0, -8),
           menuChildren: <Widget>[
             Container(
@@ -4269,7 +4375,7 @@ void main() {
       await tester.pumpWidget(App(
         alignment: const Alignment(0, -0.5),
         RawMenuAnchor(
-          panelDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
+          surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
           alignment: AlignmentDirectional.topStart,
           menuAlignment: AlignmentDirectional.bottomStart,
           alignmentOffset: const Offset(0, -8),
@@ -4302,7 +4408,7 @@ void main() {
             alignment: Alignment.center,
             menuAlignment: Alignment.center,
             alignmentOffset: const Offset(200, 200),
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               Container(
                 width: 50,
@@ -4332,7 +4438,7 @@ void main() {
           RawMenuAnchor(
             alignment: AlignmentDirectional.bottomEnd,
             menuAlignment: Alignment.center,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               Container(
                 width: 50,
@@ -4362,7 +4468,7 @@ void main() {
           RawMenuAnchor(
             alignment: Alignment.center,
             menuAlignment: AlignmentDirectional.topStart,
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               Container(
                 width: 50,
@@ -4558,7 +4664,7 @@ void main() {
       await tester.pumpWidget(App(
         RawMenuAnchor(
           constraints: const BoxConstraints(),
-          panelDecoration: const BoxDecoration(),
+          surfaceDecoration: const BoxDecoration(),
           controller: controller,
           menuAlignment: Alignment.topLeft,
           menuChildren: <Widget>[
@@ -4607,14 +4713,14 @@ void main() {
       final RawMenuAnchor child = RawMenuAnchor(
         controller: controller,
         padding: const EdgeInsets.fromLTRB(0, 5, 0, 3),
-        panelDecoration: const BoxDecoration(color: paddingColor),
+        surfaceDecoration: const BoxDecoration(color: paddingColor),
         alignment: AlignmentDirectional.bottomStart,
         menuAlignment: AlignmentDirectional.topStart,
         menuChildren: <Widget>[
           ColoredBox(
             color: childColor,
             child: RawMenuAnchor(
-              panelDecoration: const BoxDecoration(color: paddingColor),
+              surfaceDecoration: const BoxDecoration(color: paddingColor),
               alignment: AlignmentDirectional.topEnd,
               menuAlignment: AlignmentDirectional.topStart,
               padding: const EdgeInsets.fromLTRB(0, 11, 0, 17),
@@ -4701,14 +4807,14 @@ void main() {
       final RawMenuAnchor child = RawMenuAnchor(
         controller: controller,
         padding: const EdgeInsetsDirectional.fromSTEB(5, 0, 3, 0),
-        panelDecoration: const BoxDecoration(color: paddingColor),
+        surfaceDecoration: const BoxDecoration(color: paddingColor),
         alignment: AlignmentDirectional.bottomStart,
         menuAlignment: AlignmentDirectional.topStart,
         menuChildren: <Widget>[
           ColoredBox(
             color: childColor,
             child: RawMenuAnchor(
-              panelDecoration: const BoxDecoration(color: paddingColor),
+              surfaceDecoration: const BoxDecoration(color: paddingColor),
               alignment: AlignmentDirectional.topEnd,
               menuAlignment: AlignmentDirectional.topStart,
               padding: const EdgeInsetsDirectional.fromSTEB(11, 0, 17, 0),
@@ -4792,14 +4898,14 @@ void main() {
       final RawMenuAnchor child = RawMenuAnchor(
         controller: controller,
         padding: const EdgeInsetsDirectional.fromSTEB(5, 0, 3, 0),
-        panelDecoration: const BoxDecoration(color: paddingColor),
+        surfaceDecoration: const BoxDecoration(color: paddingColor),
         alignment: AlignmentDirectional.bottomStart,
         menuAlignment: AlignmentDirectional.topStart,
         menuChildren: <Widget>[
           ColoredBox(
             color: childColor,
             child: RawMenuAnchor(
-              panelDecoration: const BoxDecoration(color: paddingColor),
+              surfaceDecoration: const BoxDecoration(color: paddingColor),
               alignment: AlignmentDirectional.topEnd,
               menuAlignment: AlignmentDirectional.topStart,
               padding: const EdgeInsetsDirectional.fromSTEB(11, 0, 17, 0),
@@ -4877,7 +4983,7 @@ void main() {
       final Widget menu = RawMenuAnchor(
         controller: controller,
         padding: const EdgeInsets.only(right: 50, top: 30),
-        panelDecoration: const BoxDecoration(color: Color(0x62000DFF)),
+        surfaceDecoration: const BoxDecoration(color: Color(0x62000DFF)),
         alignment: AlignmentDirectional.topEnd,
         menuAlignment: AlignmentDirectional.topStart,
         menuChildren: <Widget>[
@@ -5102,51 +5208,42 @@ void main() {
       expect(subPadded, equals(second.shift(const Offset(43, 7))));
     });
 
-    List<Widget> layer(int depth, List<Widget> children) {
-      return <Widget>[
+
+    testWidgets('LTR nested menu placement', (WidgetTester tester) async {
+      List<Widget> children = <Widget>[
+        Container(
+          height: 600,
+          width: 50,
+          color: const Color(0xFF0000FF),
+        )
+      ];
+      int layers = 5;
+      while (layers-- > 0) {
+        children = <Widget>[
         for (int index = 0; index < 4; index++)
           Button.text(
-            "${'Sub' * depth}menu $index",
+            "${'Sub' * layers}menu $index",
             constraints: const BoxConstraints(maxHeight: 30),
           ),
         RawMenuAnchor(
-          constraints: BoxConstraints(minWidth: 125 + 75.0 * depth),
+          constraints: BoxConstraints(minWidth: 125 + 75.0 * layers),
           padding: const EdgeInsetsDirectional.fromSTEB(0.5, 4, 1, 6),
           alignmentOffset: const Offset(-1, 0),
           alignment: AlignmentDirectional.topEnd,
           menuChildren: children,
           child: AnchorButton(
-            Tag.values[depth],
+            Tag.values[layers % Tag.values.length],
             constraints: const BoxConstraints(maxHeight: 30),
           ),
         ),
       ];
-    }
-
-    testWidgets('LTR nested menu placement', (WidgetTester tester) async {
+      }
       await tester.pumpWidget(
         App(
           alignment: AlignmentDirectional.topStart,
           RawMenuAnchor(
             constraints: const BoxConstraints(maxWidth: 150),
-            menuChildren:
-              layer(0,
-                  layer(1,
-                      layer(2,
-                          layer(3,
-                              layer(4,
-                                  <Widget>[
-                                    Container(
-                                      height: 600,
-                                      width: 50,
-                                      color: const Color(0xFF0000FF),
-                                    )
-                                  ]
-                              )
-                          )
-                      )
-                  )
-              ),
+            menuChildren: children,
             child: AnchorButton.small(Tag.anchor),
           ),
         ),
@@ -5175,30 +5272,41 @@ void main() {
       ]);
     });
     testWidgets('RTL nested menu placement', (WidgetTester tester) async {
+      List<Widget> children = <Widget>[
+        Container(
+          height: 600,
+          width: 50,
+          color: const Color(0xFF0000FF),
+        )
+      ];
+      int layers = 5;
+      while (layers-- > 0) {
+        children = <Widget>[
+          for (int index = 0; index < 4; index++)
+            Button.text(
+              "${'Sub' * layers}menu $index",
+              constraints: const BoxConstraints(maxHeight: 30),
+            ),
+          RawMenuAnchor(
+            constraints: BoxConstraints(minWidth: 125 + 75.0 * layers),
+            padding: const EdgeInsetsDirectional.fromSTEB(0.5, 4, 1, 6),
+            alignmentOffset: const Offset(-1, 0),
+            alignment: AlignmentDirectional.topEnd,
+            menuChildren: children,
+            child: AnchorButton(
+              Tag.values[layers % Tag.values.length],
+              constraints: const BoxConstraints(maxHeight: 30),
+            ),
+          ),
+        ];
+      }
       await tester.pumpWidget(
         App(
-          alignment: AlignmentDirectional.topStart,
           textDirection: TextDirection.rtl,
+          alignment: AlignmentDirectional.topStart,
           RawMenuAnchor(
             constraints: const BoxConstraints(maxWidth: 150),
-            menuChildren:
-             layer(0,
-                  layer(1,
-                      layer(2,
-                          layer(3,
-                              layer(4,
-                                  <Widget>[
-                                    Container(
-                                      height: 600,
-                                      width: 50,
-                                      color: const Color(0xFF0000FF),
-                                    )
-                                  ]
-                              )
-                          )
-                      )
-                  )
-              ),
+            menuChildren: children,
             child: AnchorButton.small(Tag.anchor),
           ),
         ),
@@ -5292,7 +5400,7 @@ void main() {
         App(
           RawMenuAnchor(
             constraints: const BoxConstraints(minWidth: 75, maxHeight: 100),
-            panelDecoration: const BoxDecoration(),
+            surfaceDecoration: const BoxDecoration(),
             menuChildren: <Widget>[
               Container(
                 key: Tag.a.key,
@@ -5315,6 +5423,42 @@ void main() {
       // located inside a scrollable.
       expect( tester.getSize(find.byKey(Tag.a.key)), equals(const Size(75, 150)));
     });
+    testWidgets('Menu is positioned within the root overlay.', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        App(
+          Stack(
+            children: <Widget>[
+              Positioned(
+                left: 200,
+                top: 200,
+                height: 200,
+                width: 200,
+                child: Overlay(
+                  initialEntries: <OverlayEntry>[
+                    OverlayEntry(
+                      builder: (BuildContext context) {
+                        return RawMenuAnchor(
+                          menuChildren: <Widget>[ Button.tag(Tag.a) ],
+                          child: const AnchorButton(Tag.anchor),
+                        );
+                      },
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text(Tag.anchor.text));
+      await tester.pump();
+
+      final Rect menu = collectOverlays().first;
+      final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+
+      expect(menu.topLeft, equals(anchor.bottomLeft));
+    });
   });
 }
 
@@ -5322,9 +5466,6 @@ void main() {
 // ********* UTILITIES *********  //
 
 /// Allows the creation of arbitrarily-nested tags in tests.
-///
-/// Calling a tag (e.g. `Tag.a()`) will return a string representation of the
-/// tag.
 abstract class Tag {
   const Tag();
 
@@ -5376,7 +5517,7 @@ class NestedTag extends Tag {
     if (level == 0 || _prefix == null) {
       return _name;
     }
-    return '${_prefix!.text}.$_name';
+    return '${_prefix.text}.$_name';
   }
 
   @override
@@ -5387,7 +5528,7 @@ class NestedTag extends Tag {
   Key get key => ValueKey<String>('${text}_Key');
 }
 
-// A simple button that calls onPressed when tapped.
+// A simple, focusable button that calls onPressed when tapped.
 class Button extends StatefulWidget {
   const Button(
     this.child, {
@@ -5571,7 +5712,7 @@ class _ButtonState extends State<Button> {
     );
   }
 
-  late final Map<Type, Action<Intent>> _actions = {
+  late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _activateOnIntent),
     ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _activateOnIntent),
   };
@@ -5634,6 +5775,7 @@ class AnchorButton extends StatelessWidget {
     return Button.tag(
       tag,
       onPressed: () {
+        onPressed?.call(tag);
         if (controller != null) {
           if (controller.isOpen) {
             controller.close();
@@ -5641,7 +5783,6 @@ class AnchorButton extends StatelessWidget {
             controller.open();
           }
         }
-        onPressed?.call(tag);
       },
       focusNode: focusNode,
       constraints: constraints,
