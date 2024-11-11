@@ -14,6 +14,7 @@ void main() {
   const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
   final List<DropdownMenuEntry<TestMenu>> menuChildrenWithIcons = <DropdownMenuEntry<TestMenu>>[];
+  const double leadingIconToInputPadding = 4.0;
 
   for (final TestMenu value in TestMenu.values) {
     final DropdownMenuEntry<TestMenu> entry = DropdownMenuEntry<TestMenu>(value: value, label: value.label);
@@ -69,11 +70,15 @@ void main() {
     return color == themeData.colorScheme.onSurface.withOpacity(0.12);
   }
 
+  Finder findMenuPanel() {
+    return find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MenuPanel');
+  }
+
   Finder findMenuMaterial() {
-    return find.ancestor(
-      of: find.widgetWithText(TextButton, TestMenu.mainMenu0.label),
+    return find.descendant(
+      of: findMenuPanel(),
       matching: find.byType(Material),
-    ).at(1);
+    ).first;
   }
 
   testWidgets('DropdownMenu defaults', (WidgetTester tester) async {
@@ -921,7 +926,7 @@ void main() {
     final Offset updatedItemTextTopLeft = tester.getTopLeft(updatedItemText);
 
     expect(updatedLabelTopLeft.dx, equals(updatedItemTextTopLeft.dx));
-    expect(updatedLabelTopLeft.dx, equals(iconWidth));
+    expect(updatedLabelTopLeft.dx, equals(iconWidth + leadingIconToInputPadding));
 
     // Test when then leading icon is a widget with a bigger size.
     await tester.pumpWidget(Container());
@@ -943,7 +948,7 @@ void main() {
     final Offset updatedItemTextTopLeft1 = tester.getTopLeft(updatedItemText1);
 
     expect(updatedLabelTopLeft1.dx, equals(updatedItemTextTopLeft1.dx));
-    expect(updatedLabelTopLeft1.dx, equals(largeIconWidth));
+    expect(updatedLabelTopLeft1.dx, equals(largeIconWidth + leadingIconToInputPadding));
   });
 
   testWidgets('The text in the menu button should be aligned with the text of '
@@ -1002,7 +1007,7 @@ void main() {
     final Offset updatedItemTextTopRight = tester.getTopRight(updatedItemText);
 
     expect(updatedLabelTopRight.dx, equals(updatedItemTextTopRight.dx));
-    expect(updatedLabelTopRight.dx, equals(dropdownMenuTopRight.dx - iconWidth));
+    expect(updatedLabelTopRight.dx, equals(dropdownMenuTopRight.dx - iconWidth - leadingIconToInputPadding));
 
     // Test when then leading icon is a widget with a bigger size.
     await tester.pumpWidget(Container());
@@ -1033,7 +1038,7 @@ void main() {
     final Offset updatedItemTextTopRight1 = tester.getTopRight(updatedItemText1);
 
     expect(updatedLabelTopRight1.dx, equals(updatedItemTextTopRight1.dx));
-    expect(updatedLabelTopRight1.dx, equals(updatedDropdownMenuTopRight.dx - largeIconWidth));
+    expect(updatedLabelTopRight1.dx, equals(updatedDropdownMenuTopRight.dx - largeIconWidth - leadingIconToInputPadding));
   });
 
   testWidgets('DropdownMenu has default trailing icon button', (WidgetTester tester) async {
@@ -2712,14 +2717,14 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check text location in text field.
-    expect(tester.getTopLeft(find.text('Hint')).dx, 48.0);
+    expect(tester.getTopLeft(find.text('Hint')).dx, 52.0);
 
     // By default, the text of item 0 should be aligned with the text of the text field.
-    expect(tester.getTopLeft(find.text('Item 0').last).dx, 48.0);
+    expect(tester.getTopLeft(find.text('Item 0').last).dx, 52.0);
 
     // By default, the text of item 1 should be aligned with the text of the text field,
     // so there are some extra padding before "Item 1".
-    expect(tester.getTopLeft(find.text('Item 1').last).dx, 48.0);
+    expect(tester.getTopLeft(find.text('Item 1').last).dx, 52.0);
   });
 
   testWidgets('DropdownMenu can have customized search algorithm', (WidgetTester tester) async {

@@ -386,14 +386,14 @@ class PackagesGetCommand extends FlutterCommand {
     if (rootProject != null) {
       // We need to regenerate the platform specific tooling for both the project
       // itself and example(if present).
-      final bool writeLegacyPluginsList = boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true);
+      final bool useImplicitPubspecResolution = boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true);
       await rootProject.regeneratePlatformSpecificTooling(
-        writeLegacyPluginsList: writeLegacyPluginsList,
+        useImplicitPubspecResolution: useImplicitPubspecResolution,
       );
       if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
         final FlutterProject exampleProject = rootProject.example;
         await exampleProject.regeneratePlatformSpecificTooling(
-          writeLegacyPluginsList: writeLegacyPluginsList,
+          useImplicitPubspecResolution: useImplicitPubspecResolution,
         );
       }
     }
@@ -407,7 +407,7 @@ class PackagesGetCommand extends FlutterCommand {
       return <Plugin>[];
     }
 
-    return findPlugins(rootProject, throwOnError: false);
+    return findPlugins(rootProject, throwOnError: false, useImplicitPubspecResolution: boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true));
   })();
 
   late final String? _androidEmbeddingVersion = _rootProject?.android.getEmbeddingVersion().toString().split('.').last;

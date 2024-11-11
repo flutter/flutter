@@ -126,16 +126,16 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
       }
   }
 
-  rootProject.buildDir = '../build'
+  rootProject.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir("../../build").get())
   subprojects {
-      project.buildDir = "${rootProject.buildDir}/${project.name}"
+      project.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir(project.name).get())
   }
   subprojects {
       project.evaluationDependsOn(':app')
   }
 
   tasks.register("clean", Delete) {
-      delete rootProject.buildDir
+      delete rootProject.layout.buildDirectory
   }
   ''';
 
@@ -242,7 +242,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
 
   @override
   String get androidGradleProperties => '''
-  org.gradle.jvmargs=-Xmx4G -XX:MaxMetaspaceSize=2G -XX:+HeapDumpOnOutOfMemoryError
+  org.gradle.jvmargs=-Xmx8G -XX:MaxMetaspaceSize=2G -XX:+HeapDumpOnOutOfMemoryError
   android.useAndroidX=true
   android.enableJetifier=true
   android.enableR8=true
