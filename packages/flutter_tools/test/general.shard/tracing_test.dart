@@ -138,9 +138,9 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
       ...vmServiceSetup,
-      const FakeVmServiceRequest(
+      FakeVmServiceRequest(
         method: 'getVMTimeline',
-        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
+        error: FakeRPCError(code: vm_service.RPCErrorKind.kServiceDisappeared.code),
       ),
       const FakeVmServiceRequest(
         method: 'setVMTimelineFlags',
