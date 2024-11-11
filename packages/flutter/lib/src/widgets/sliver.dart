@@ -879,7 +879,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         }
 
         bool hasBeenFound = false;
-        for (final Element child in _childElements.values.whereType<Element>()) {
+        for (final Element child in _childElements.values.nonNulls) {
           if (child.widget.key == key) {
             if (hasBeenFound) {
               return true;
