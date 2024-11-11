@@ -4,7 +4,7 @@ chrome:
   version: '125.0.6422.141'
 
 firefox:
-  version: '106.0'
+  version: '132.0'
 
 edge:
   launcher_version: '1.2.0.0'

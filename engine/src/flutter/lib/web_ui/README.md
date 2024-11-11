@@ -180,7 +180,7 @@ The available versions of Chrome for Testing available can be found [here](https
 - Edit `dev/package_lock.yaml` and update the following values under `chrome`:
   - Set `version` to the full four part version number of the build of Chrome 
     for Testing you want to roll (for example, `118.0.5993.70`)
-- Run `dart dev/browser_roller.dart` and make sure it completes successfully.
+- Run `dart dev/package_roller.dart` and make sure it completes successfully.
   The script uploads the specified versions of Chromium (and Chromedriver) to the
   right locations in CIPD: [Chrome](https://chrome-infra-packages.appspot.com/p/flutter_internal/browsers/chrome),
   [Chromedriver](https://chrome-infra-packages.appspot.com/p/flutter_internal/browser-drivers/chrome).
@@ -194,7 +194,7 @@ If you have questions, contact the Flutter Web team on Flutter Discord on the
 
 We test with Firefox on LUCI in the Linux Web Engine builder. The process for
 rolling Firefox is even easier than Chromium. Simply update `package_lock.yaml`
-with the latest version of Firefox, and run `browser_roller.dart`.
+with the latest version of Firefox, and run `package_roller.dart`.
 
 #### .ci.yaml
 
@@ -210,7 +210,7 @@ After rolling Chrome and/or Firefox, also update the CI dependencies in
         ]
 ```
 
-##### **browser_roller.dart**
+##### **package_roller.dart**
 
 The script has the following command-line options:
 
@@ -220,7 +220,7 @@ The script has the following command-line options:
 > Try the following!
 >
 > ```bash
-> dart ./dev/browser_roller.dart --dry-run --verbose
+> dart dev/package_roller.dart --dry-run --verbose
 > ```
 
 #### **Other browsers / manual upload**
