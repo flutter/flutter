@@ -11,10 +11,14 @@ updates:
       timezone: "America/Los_Angeles"
     labels:
       - "autosubmit"
+    groups:
+      all-github-actions:
+        patterns: [ "*" ]
     ignore:
       # ignore patch versions, just rely on minor in order to update fewer times
       - dependency-name: "github/codeql-action"
         update-types: ["version-update:semver-minor"]
+
   - package-ecosystem: "pub"
     directory: "/lib/web_ui"
     schedule:
