@@ -289,11 +289,11 @@ library funstuff;
   });
 
   testWithoutContext('Returns null safe error if reading the file throws a FileSystemException', () {
-    final MutableFileSystemOpHandle fileSystemOpHandle = MutableFileSystemOpHandle();
+    final FileExceptionHandler fileSystemOpHandle = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
     setUpLanguageVersion(fileSystem);
     final File errorFile = fileSystem.file('foo');
-    fileSystemOpHandle.setHandler(
+    fileSystemOpHandle.addError(
       errorFile,
       FileSystemOp.read,
       () => throw const FileSystemException(),

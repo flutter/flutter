@@ -60,14 +60,14 @@ void main() {
   });
 
   testWithoutContext('deleteIfExists throws tool exit if file exists on read-only volume', () {
-    final MutableFileSystemOpHandle exceptionHandler = MutableFileSystemOpHandle();
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
     final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
       delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
       platform: linuxPlatform,
     );
     final File file = fileSystem.file('file')..createSync();
 
-    exceptionHandler.setHandler(
+    exceptionHandler.addError(
       file,
       FileSystemOp.delete,
       () => throw FileSystemException('', file.path, const OSError('', 2)),
@@ -78,14 +78,14 @@ void main() {
 
   testWithoutContext('deleteIfExists does not tool exit if file exists on read-only '
     'volume and it is run under noExitOnFailure', () {
-    final MutableFileSystemOpHandle exceptionHandler = MutableFileSystemOpHandle();
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
     final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
       delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
       platform: linuxPlatform,
     );
     final File file = fileSystem.file('file')..createSync();
 
-    exceptionHandler.setHandler(
+    exceptionHandler.addError(
       file,
       FileSystemOp.delete,
       () => throw FileSystemException('', file.path, const OSError('', 2)),
@@ -99,7 +99,7 @@ void main() {
   });
 
   testWithoutContext('deleteIfExists throws tool exit if the path is not found on Windows', () {
-    final MutableFileSystemOpHandle exceptionHandler = MutableFileSystemOpHandle();
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
     final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
       delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
       platform: windowsPlatform,
@@ -107,7 +107,7 @@ void main() {
     final File file = fileSystem.file(fileSystem.path.join('directory', 'file'))
       ..createSync(recursive: true);
 
-    exceptionHandler.setHandler(
+    exceptionHandler.addError(
       file,
       FileSystemOp.delete,
       () => throw FileSystemException('', file.path, const OSError('', 2)),
@@ -123,10 +123,10 @@ void main() {
     const int kFatalDeviceHardwareError =  483;
     const int kDeviceDoesNotExist = 433;
 
-    late MutableFileSystemOpHandle opHandle;
+    late FileExceptionHandler opHandle;
 
     setUp(() {
-      opHandle = MutableFileSystemOpHandle();
+      opHandle = FileExceptionHandler();
     });
 
     testWithoutContext('bypasses error handling when noExitOnFailure is used', () {
@@ -136,7 +136,7 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.write,
         () => throw FileSystemException(
@@ -165,19 +165,19 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.write,
         () => throw FileSystemException(
             '', file.path, const OSError('', kUserPermissionDenied)),
       );
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.open,
         () => throw FileSystemException(
             '', file.path, const OSError('', kUserPermissionDenied)),
       );
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.create,
         () => throw FileSystemException(
@@ -206,7 +206,7 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.write,
         () => throw FileSystemException('', file.path, const OSError('', kDeviceFull)),
@@ -230,7 +230,7 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.write,
         () => throw FileSystemException(
@@ -255,19 +255,19 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.write,
         () => throw FileSystemException(
             '', file.path, const OSError('', kFatalDeviceHardwareError)),
       );
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.open,
         () => throw FileSystemException(
             '', file.path, const OSError('', kFatalDeviceHardwareError)),
       );
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.create,
         () => throw FileSystemException(
@@ -297,17 +297,17 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.write,
         () => throw FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
       );
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.open,
         () => throw FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
       );
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.create,
         () => throw FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
@@ -336,7 +336,7 @@ void main() {
       final Directory directory = fileSystem.directory('directory')
         ..createSync();
 
-      opHandle.setTempHandler(
+      opHandle.addTempError(
         FileSystemOp.create,
         (String path) => throw FileSystemException(
             '', directory.path, const OSError('', kDeviceFull)),
@@ -356,7 +356,7 @@ void main() {
       );
       final Directory directory = fileSystem.directory('directory');
 
-      opHandle.setHandler(
+      opHandle.addError(
         directory,
         FileSystemOp.create,
         () => throw FileSystemException(
@@ -377,7 +377,7 @@ void main() {
       final Directory directory = fileSystem.directory('directory')
         ..createSync();
 
-      opHandle.setHandler(
+      opHandle.addError(
         directory,
         FileSystemOp.exists,
         () => throw FileSystemException(
@@ -396,7 +396,7 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.read,
         () => throw FileSystemException(
@@ -432,7 +432,7 @@ void main() {
       final File file = parentDirectory.childFile('file');
 
       // Simulates the parent directory being deleted/moved as soon it was created.
-      opHandle.setHandler(file, FileSystemOp.create, () {
+      opHandle.addError(file, FileSystemOp.create, () {
         parentDirectory.deleteSync();
       });
 
@@ -449,10 +449,10 @@ void main() {
     const int enospc = 28;
     const int eacces = 13;
 
-    late MutableFileSystemOpHandle opHandle;
+    late FileExceptionHandler opHandle;
 
     setUp(() {
-      opHandle = MutableFileSystemOpHandle();
+      opHandle = FileExceptionHandler();
     });
 
     testWithoutContext('when access is denied', () async {
@@ -463,22 +463,22 @@ void main() {
       final Directory directory = fileSystem.directory('dir')..createSync();
       final File file = directory.childFile('file');
 
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.create,
         () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.write,
         () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.read,
         () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.delete,
         () => throw FileSystemException('', file.path, const OSError('', eacces)),
@@ -520,13 +520,13 @@ void main() {
       final Directory parent = fileSystem.directory('parent')..createSync();
       final Directory directory = parent.childDirectory('childDir');
 
-      opHandle.setHandler(
+      opHandle.addError(
         directory,
         FileSystemOp.create,
         () => throw FileSystemException(
             '', directory.path, const OSError('', eperm)),
       );
-      opHandle.setHandler(
+      opHandle.addError(
         directory,
         FileSystemOp.delete,
         () => throw FileSystemException(
@@ -569,7 +569,7 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.write,
         () => throw FileSystemException('', file.path, const OSError('', enospc)),
@@ -595,7 +595,7 @@ void main() {
       final Directory directory = fileSystem.directory('directory')
         ..createSync();
 
-      opHandle.setTempHandler(
+      opHandle.addTempError(
         FileSystemOp.create,
         (String path) => throw FileSystemException('', path, const OSError('', enospc)),
       );
@@ -616,7 +616,7 @@ void main() {
       final Directory directory = fileSystem.directory('directory')
         ..createSync();
 
-      opHandle.setHandler(
+      opHandle.addError(
         directory,
         FileSystemOp.exists,
         () => throw FileSystemException('', directory.path, const OSError('', eacces)),
@@ -643,7 +643,7 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      opHandle.setHandler(
+      opHandle.addError(
         file,
         FileSystemOp.read,
         () => throw FileSystemException(
@@ -659,10 +659,10 @@ void main() {
     const int eperm = 1;
     const int enospc = 28;
     const int eacces = 13;
-    late MutableFileSystemOpHandle exceptionHandler;
+    late FileExceptionHandler exceptionHandler;
 
     setUp(() {
-      exceptionHandler = MutableFileSystemOpHandle();
+      exceptionHandler = FileExceptionHandler();
     });
 
     testWithoutContext('when access is denied', () async {
@@ -673,22 +673,22 @@ void main() {
       final Directory directory = fileSystem.directory('dir')..createSync();
       final File file = directory.childFile('file');
 
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         file,
         FileSystemOp.create,
         () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         file,
         FileSystemOp.write,
         () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         file,
         FileSystemOp.read,
         () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         file,
         FileSystemOp.delete,
         () => throw FileSystemException('', file.path, const OSError('', eacces)),
@@ -730,12 +730,12 @@ void main() {
       final Directory parent = fileSystem.directory('parent')..createSync();
       final Directory directory = parent.childDirectory('childDir');
 
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         directory,
         FileSystemOp.create,
         () => throw FileSystemException('', directory.path, const OSError('', eperm)),
       );
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         directory,
         FileSystemOp.delete,
         () => throw FileSystemException('', directory.path, const OSError('', eperm)),
@@ -776,7 +776,7 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         file,
         FileSystemOp.write,
         () => throw FileSystemException('', file.path, const OSError('', enospc)),
@@ -802,7 +802,7 @@ void main() {
       final Directory directory = fileSystem.directory('directory')
         ..createSync();
 
-      exceptionHandler.setTempHandler(
+      exceptionHandler.addTempError(
         FileSystemOp.create,
         (String path) => throw FileSystemException('', path, const OSError('', enospc)),
       );
@@ -822,7 +822,7 @@ void main() {
 
       final Directory directory = fileSystem.directory('directory');
 
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         directory,
         FileSystemOp.exists,
         () => throw FileSystemException(
@@ -841,7 +841,7 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         file,
         FileSystemOp.read,
         () => throw FileSystemException('', file.path, const OSError('', eacces)),
@@ -927,7 +927,7 @@ void main() {
   });
 
   testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory wraps delegates filesystem's systemTempDirectory", () {
-    final MutableFileSystemOpHandle exceptionHandler = MutableFileSystemOpHandle();
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
 
     final MemoryFileSystem delegate = MemoryFileSystem.test(
       style: FileSystemStyle.windows,
@@ -945,7 +945,7 @@ void main() {
     final File tempFile = delegate.systemTempDirectory.childFile('hello')
       ..createSync(recursive: true);
 
-    exceptionHandler.setHandler(
+    exceptionHandler.addError(
       tempFile,
       FileSystemOp.write,
       () => throw FileSystemException(
@@ -1270,11 +1270,11 @@ Please ensure that the SDK and/or project is installed in a location that has re
 
   group('CopySync' , () {
     const int eaccess = 13;
-    late MutableFileSystemOpHandle exceptionHandler;
+    late FileExceptionHandler exceptionHandler;
     late ErrorHandlingFileSystem fileSystem;
 
     setUp(() {
-      exceptionHandler = MutableFileSystemOpHandle();
+      exceptionHandler = FileExceptionHandler();
       fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -1284,7 +1284,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
     testWithoutContext('copySync handles error if openSync on source file fails', () {
       final File source = fileSystem.file('source');
 
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         source,
         FileSystemOp.open,
         () => throw FileSystemException('', source.path, const OSError('', eaccess)),
@@ -1302,7 +1302,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       fileSystem.file('source').createSync();
       final File dest = fileSystem.file('dest');
 
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         dest,
         FileSystemOp.create,
         () => throw FileSystemException('', dest.path, const OSError('', eaccess)),
@@ -1319,7 +1319,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       fileSystem.file('source').createSync();
       final File dest = fileSystem.file('dest');
 
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         dest,
         FileSystemOp.open,
         () => throw FileSystemException('', dest.path, const OSError('', eaccess)),
@@ -1344,7 +1344,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       fileSystem.file('source').writeAsBytesSync(expectedBytes);
       final File dest = fileSystem.file('dest');
 
-      exceptionHandler.setHandler(
+      exceptionHandler.addError(
         dest,
         FileSystemOp.copy,
         () => throw FileSystemException('', dest.path, const OSError('', eaccess)),

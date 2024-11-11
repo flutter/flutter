@@ -41,7 +41,7 @@ const List<String> kCodeCache = <String>[
 const String kDevtoolsStderr = '\n\nDevTools listening\n\n';
 
 void main() {
-  late MutableFileSystemOpHandle fileSystemOpHandle;
+  late FileExceptionHandler fileSystemOpHandle;
   late ChromiumLauncher chromeLauncher;
   late FileSystem fileSystem;
   late Platform platform;
@@ -50,7 +50,7 @@ void main() {
   late BufferLogger testLogger;
 
   setUp(() {
-    fileSystemOpHandle = MutableFileSystemOpHandle();
+    fileSystemOpHandle = FileExceptionHandler();
     operatingSystemUtils = FakeOperatingSystemUtils();
     platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{
       kChromeEnvironment: 'example_chrome',
@@ -312,7 +312,7 @@ void main() {
       .createSync(recursive: true);
     final File file = fileSystem.file('$directoryPrefix/Local Storage/foo')
       ..createSync(recursive: true);
-    fileSystemOpHandle.setHandler(
+    fileSystemOpHandle.addError(
       file,
       FileSystemOp.read,
       () => throw const FileSystemException(),
@@ -326,7 +326,7 @@ void main() {
     final BufferLogger logger = BufferLogger.test();
     final File file = fileSystem.file('/Default/foo')
       ..createSync(recursive: true);
-    fileSystemOpHandle.setHandler(
+    fileSystemOpHandle.addError(
       file,
       FileSystemOp.read,
       () => throw const FileSystemException(),

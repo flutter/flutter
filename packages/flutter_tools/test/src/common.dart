@@ -275,7 +275,7 @@ class _NoContext implements AppContext {
 ///   expect(() => file.writeAsStringSync('A'), throwsA(isA<FileSystemException>()));
 /// }
 /// ```
-class MutableFileSystemOpHandle {
+class FileExceptionHandler {
   final Map<FileSystemOp, void Function(String path)> _tempHandlers = <FileSystemOp, void Function(String)>{};
 
   final Map<String, Map<FileSystemOp, void Function()>> _handlers = <String, Map<FileSystemOp, void Function()>>{};
@@ -284,7 +284,7 @@ class MutableFileSystemOpHandle {
 
   /// Sets the handler that will be called when file system performs the
   /// [operation] on the [entity].
-  void setHandler(
+  void addError(
     FileSystemEntity entity,
     FileSystemOp operation,
     Null Function() handler,
@@ -294,7 +294,7 @@ class MutableFileSystemOpHandle {
     _handlers[path]![operation] = handler;
   }
 
-  void removeHandler(
+  void removeError(
     FileSystemEntity entity,
     FileSystemOp operation,
   ) {
@@ -303,7 +303,7 @@ class MutableFileSystemOpHandle {
     _handlers[path]!.remove(operation);
   }
 
-  void setTempHandler(FileSystemOp operation, void Function(String path) handler) {
+  void addTempError(FileSystemOp operation, void Function(String path) handler) {
     _tempHandlers[operation] = handler;
   }
 

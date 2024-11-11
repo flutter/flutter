@@ -435,11 +435,11 @@ void main() {
   });
 
   testWithoutContext('Local DevFSWriter turns FileSystemException into DevFSException', () async {
-    final MutableFileSystemOpHandle fileSystemOpHandle = MutableFileSystemOpHandle();
+    final FileExceptionHandler fileSystemOpHandle = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
     final LocalDevFSWriter writer = LocalDevFSWriter(fileSystem: fileSystem);
     final File file = fileSystem.file('foo');
-    fileSystemOpHandle.setHandler(
+    fileSystemOpHandle.addError(
       file,
       FileSystemOp.read,
       () => throw const FileSystemException('foo'),

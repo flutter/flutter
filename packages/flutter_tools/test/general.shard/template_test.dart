@@ -17,7 +17,7 @@ import '../src/context.dart';
 
 void main() {
   testWithoutContext('Template constructor throws ToolExit when source directory is missing', () {
-    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
+    final FileExceptionHandler handler = FileExceptionHandler();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
     expect(() => Template(
@@ -30,7 +30,7 @@ void main() {
   });
 
   testWithoutContext('Template.render throws ToolExit when FileSystem exception is raised', () {
-    final MutableFileSystemOpHandle fileSystemOpHandle = MutableFileSystemOpHandle();
+    final FileExceptionHandler fileSystemOpHandle = FileExceptionHandler();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
     final Template template = Template(
       fileSystem.directory('examples')..createSync(recursive: true),
@@ -40,7 +40,7 @@ void main() {
       templateRenderer: FakeTemplateRenderer(),
     );
     final Directory directory = fileSystem.directory('foo');
-    fileSystemOpHandle.setHandler(
+    fileSystemOpHandle.addError(
       directory,
       FileSystemOp.create,
       () => throw const FileSystemException(),

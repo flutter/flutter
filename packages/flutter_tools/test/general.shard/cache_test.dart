@@ -891,7 +891,7 @@ void main() {
   });
 
   testWithoutContext('FlutterWebSdk uses tryToDelete to handle directory edge cases', () async {
-    final MutableFileSystemOpHandle fileSystemOpHandle = MutableFileSystemOpHandle();
+    final FileExceptionHandler fileSystemOpHandle = FileExceptionHandler();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
@@ -903,7 +903,7 @@ void main() {
       location.childFile('foo').createSync();
     };
     webCacheDirectory.childFile('bar').createSync(recursive: true);
-    fileSystemOpHandle.setHandler(
+    fileSystemOpHandle.addError(
       webCacheDirectory,
       FileSystemOp.delete,
       () => throw const FileSystemException('', '', OSError('', 2)),
@@ -915,7 +915,7 @@ void main() {
   });
 
   testWithoutContext('LegacyCanvasKitRemover removes old canvaskit artifacts if they exist', () async {
-    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
+    final FileExceptionHandler handler = FileExceptionHandler();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final File canvasKitWasm = fileSystem.file(fileSystem.path.join(
@@ -940,7 +940,7 @@ void main() {
   });
 
   testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
-    final MutableFileSystemOpHandle fileSystemOpHandle = MutableFileSystemOpHandle();
+    final FileExceptionHandler fileSystemOpHandle = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
     final Logger logger = BufferLogger.test();
     final FakeCache cache = FakeCache(
@@ -955,7 +955,7 @@ void main() {
     expect(cache.getStampFor('foo'), null);
 
     file.createSync();
-    fileSystemOpHandle.setHandler(
+    fileSystemOpHandle.addError(
       file,
       FileSystemOp.read,
       () => throw const FileSystemException(),

@@ -618,12 +618,12 @@ flutter:
   });
 
   testUsingContext('Failed directory delete shows message', () async {
-    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
+    final FileExceptionHandler handler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
     final Directory directory = fileSystem.directory('foo')
       ..createSync();
-    handler.setHandler(
+    handler.addError(
       directory,
       FileSystemOp.delete,
       () => throw const FileSystemException('Expected Error Text'),

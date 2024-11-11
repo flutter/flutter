@@ -179,11 +179,11 @@ void main() {
     group('Windows', () {
       late FakePlatform windowsPlatform;
       late MemoryFileSystem fileSystem;
-      late MutableFileSystemOpHandle exceptionHandler;
+      late FileExceptionHandler exceptionHandler;
 
       setUp(() {
         windowsPlatform = FakePlatform(operatingSystem: 'windows');
-        exceptionHandler = MutableFileSystemOpHandle();
+        exceptionHandler = FileExceptionHandler();
         fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
       });
 
@@ -191,7 +191,7 @@ void main() {
         xcodeProjectInterpreter.isInstalled = false;
 
         final File file = fileSystem.file('file')..createSync();
-        exceptionHandler.setHandler(
+        exceptionHandler.addError(
           file,
           FileSystemOp.delete,
           () => throw const FileSystemException('Deletion failed'),
@@ -208,11 +208,11 @@ void main() {
       });
 
       testUsingContext('$CleanCommand handles missing delete permissions', () async {
-        final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
+        final FileExceptionHandler handler = FileExceptionHandler();
         final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
         final File throwingFile = fileSystem.file('bad')
           ..createSync();
-        handler.setHandler(
+        handler.addError(
           throwingFile,
           FileSystemOp.delete,
           () => throw const FileSystemException('OS error: Access Denied'),
