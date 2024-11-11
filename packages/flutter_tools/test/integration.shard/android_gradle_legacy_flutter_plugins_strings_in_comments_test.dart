@@ -23,7 +23,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('should build Android app with commented .flutter-plugins in settings.gradle', () async {
+  test('should build Android app with commented-out ".flutter-plugins" in settings.gradle', () async {
     final String flutterBin = fileSystem.path.join(
       getFlutterRoot(),
       'bin',
