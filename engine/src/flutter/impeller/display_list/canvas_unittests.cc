@@ -34,20 +34,23 @@ std::unique_ptr<Canvas> CreateTestCanvas(
       context.GetContext()->GetResourceAllocator()->CreateTexture(
           onscreen_desc);
 
-  TextureDescriptor onscreen_msaa_desc = onscreen_desc;
-  onscreen_msaa_desc.sample_count = SampleCount::kCount4;
-  onscreen_msaa_desc.storage_mode = StorageMode::kDeviceTransient;
-  onscreen_msaa_desc.type = TextureType::kTexture2DMultisample;
-
-  std::shared_ptr<Texture> onscreen_msaa =
-      context.GetContext()->GetResourceAllocator()->CreateTexture(
-          onscreen_msaa_desc);
-
   ColorAttachment color0;
-  color0.resolve_texture = onscreen;
-  color0.texture = onscreen_msaa;
-  color0.store_action = StoreAction::kMultisampleResolve;
   color0.load_action = LoadAction::kClear;
+  if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA()) {
+    TextureDescriptor onscreen_msaa_desc = onscreen_desc;
+    onscreen_msaa_desc.sample_count = SampleCount::kCount4;
+    onscreen_msaa_desc.storage_mode = StorageMode::kDeviceTransient;
+    onscreen_msaa_desc.type = TextureType::kTexture2DMultisample;
+
+    std::shared_ptr<Texture> onscreen_msaa =
+        context.GetContext()->GetResourceAllocator()->CreateTexture(
+            onscreen_msaa_desc);
+    color0.resolve_texture = onscreen;
+    color0.texture = onscreen_msaa;
+    color0.store_action = StoreAction::kMultisampleResolve;
+  } else {
+    color0.texture = onscreen;
+  }
 
   RenderTarget render_target;
   render_target.SetColorAttachment(color0, 0);
