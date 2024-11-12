@@ -519,6 +519,13 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
        result,
        supports_wide_gamut = supports_wide_gamut_,  //
        gpu_disabled_switch = gpu_disabled_switch_]() {
+#if FML_OS_IOS_SIMULATOR
+        // No-op backend.
+        if (!context) {
+          return;
+        }
+#endif  // FML_OS_IOS_SIMULATOR
+
         if (!context) {
           result(nullptr, "No Impeller context is available");
           return;
