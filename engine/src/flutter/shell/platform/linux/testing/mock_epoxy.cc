@@ -4,6 +4,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
+#include "flutter/fml/logging.h"
 
 using namespace flutter::testing;
 
@@ -352,9 +353,13 @@ EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
 
 static GLuint bound_texture_2d;
 
+static std::map<GLenum, GLuint> framebuffer_renderbuffers;
+
 void _glAttachShader(GLuint program, GLuint shader) {}
 
 static void _glBindFramebuffer(GLenum target, GLuint framebuffer) {}
+
+static void _glBindRenderbuffer(GLenum target, GLuint framebuffer) {}
 
 static void _glBindTexture(GLenum target, GLuint texture) {
   if (target == GL_TEXTURE_2D) {
@@ -396,6 +401,13 @@ void _glDeleteShader(GLuint shader) {}
 
 void _glDeleteTextures(GLsizei n, const GLuint* textures) {}
 
+static void _glFramebufferRenderbuffer(GLenum target,
+                                       GLenum attachment,
+                                       GLenum renderbuffertarget,
+                                       GLuint renderbuffer) {
+  framebuffer_renderbuffers[attachment] = renderbuffer;
+}
+
 static void _glFramebufferTexture2D(GLenum target,
                                     GLenum attachment,
                                     GLenum textarget,
@@ -411,6 +423,26 @@ static void _glGenTextures(GLsizei n, GLuint* textures) {
 static void _glGenFramebuffers(GLsizei n, GLuint* framebuffers) {
   for (GLsizei i = 0; i < n; i++) {
     framebuffers[i] = 0;
+  }
+}
+
+static void _glGenRenderbuffers(GLsizei n, GLuint* renderbuffers) {
+  for (GLsizei i = 0; i < n; i++) {
+    renderbuffers[i] = 0;
+  }
+}
+
+static void _glGetFramebufferAttachmentParameteriv(GLenum target,
+                                                   GLenum attachment,
+                                                   GLenum pname,
+                                                   GLint* params) {
+  if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE) {
+    auto it = framebuffer_renderbuffers.find(attachment);
+    *params =
+        (it != framebuffer_renderbuffers.end()) ? GL_RENDERBUFFER : GL_NONE;
+  } else if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME) {
+    auto it = framebuffer_renderbuffers.find(attachment);
+    *params = (it != framebuffer_renderbuffers.end()) ? it->second : 0;
   }
 }
 
@@ -465,6 +497,11 @@ static GLenum _glGetError() {
 }
 
 void _glLinkProgram(GLuint program) {}
+
+void _glRenderbufferStorage(GLenum target,
+                            GLenum internalformat,
+                            GLsizei width,
+                            GLsizei height) {}
 
 void _glShaderSource(GLuint shader,
                      GLsizei count,
@@ -536,6 +573,7 @@ EGLBoolean (*epoxy_eglSwapBuffers)(EGLDisplay dpy, EGLSurface surface);
 
 void (*epoxy_glAttachShader)(GLuint program, GLuint shader);
 void (*epoxy_glBindFramebuffer)(GLenum target, GLuint framebuffer);
+void (*epoxy_glBindRenderbuffer)(GLenum target, GLuint renderbuffer);
 void (*epoxy_glBindTexture)(GLenum target, GLuint texture);
 void (*epoxy_glBlitFramebuffer)(GLint srcX0,
                                 GLint srcY0,
@@ -553,14 +591,26 @@ GLuint (*epoxy_glCreateShader)(GLenum shaderType);
 void (*epoxy_glDeleteFramebuffers)(GLsizei n, const GLuint* framebuffers);
 void (*expoxy_glDeleteShader)(GLuint shader);
 void (*epoxy_glDeleteTextures)(GLsizei n, const GLuint* textures);
+void (*epoxy_glFramebufferRenderbuffer)(GLenum target,
+                                        GLenum attachment,
+                                        GLenum renderbuffertarget,
+                                        GLuint renderbuffer);
 void (*epoxy_glFramebufferTexture2D)(GLenum target,
                                      GLenum attachment,
                                      GLenum textarget,
                                      GLuint texture,
                                      GLint level);
+void (*epoxy_glGetFramebufferAttachmentParameteriv)(GLenum target,
+                                                    GLenum attachment,
+                                                    GLenum pname,
+                                                    GLint* params);
 void (*epoxy_glGenFramebuffers)(GLsizei n, GLuint* framebuffers);
 void (*epoxy_glGenTextures)(GLsizei n, GLuint* textures);
 void (*epoxy_glLinkProgram)(GLuint program);
+void (*epoxy_glRenderbufferStorage)(GLenum target,
+                                    GLenum internalformat,
+                                    GLsizei width,
+                                    GLsizei height);
 void (*epoxy_glShaderSource)(GLuint shader,
                              GLsizei count,
                              const GLchar* const* string,
@@ -595,6 +645,7 @@ static void library_init() {
 
   epoxy_glAttachShader = _glAttachShader;
   epoxy_glBindFramebuffer = _glBindFramebuffer;
+  epoxy_glBindRenderbuffer = _glBindRenderbuffer;
   epoxy_glBindTexture = _glBindTexture;
   epoxy_glBlitFramebuffer = _glBlitFramebuffer;
   epoxy_glCompileShader = _glCompileShader;
@@ -604,9 +655,13 @@ static void library_init() {
   epoxy_glDeleteFramebuffers = _glDeleteFramebuffers;
   epoxy_glDeleteShader = _glDeleteShader;
   epoxy_glDeleteTextures = _glDeleteTextures;
+  epoxy_glFramebufferRenderbuffer = _glFramebufferRenderbuffer;
   epoxy_glFramebufferTexture2D = _glFramebufferTexture2D;
   epoxy_glGenFramebuffers = _glGenFramebuffers;
+  epoxy_glGenRenderbuffers = _glGenRenderbuffers;
   epoxy_glGenTextures = _glGenTextures;
+  epoxy_glGetFramebufferAttachmentParameteriv =
+      _glGetFramebufferAttachmentParameteriv;
   epoxy_glGetIntegerv = _glGetIntegerv;
   epoxy_glGetProgramiv = _glGetProgramiv;
   epoxy_glGetProgramInfoLog = _glGetProgramInfoLog;
@@ -614,6 +669,7 @@ static void library_init() {
   epoxy_glGetShaderInfoLog = _glGetShaderInfoLog;
   epoxy_glGetString = _glGetString;
   epoxy_glLinkProgram = _glLinkProgram;
+  epoxy_glRenderbufferStorage = _glRenderbufferStorage;
   epoxy_glShaderSource = _glShaderSource;
   epoxy_glTexParameterf = _glTexParameterf;
   epoxy_glTexParameteri = _glTexParameteri;
