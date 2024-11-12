@@ -67,6 +67,34 @@ void main() {
     controller.dispose();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/158233.
+  test('Setting value updates AnimationStatus accordingly', () {
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    controller.value = 0.0;
+    expect(controller.status, AnimationStatus.dismissed);
+
+    controller.value = 0.5;
+    expect(controller.status, AnimationStatus.forward);
+
+    controller.value = 0.4;
+    expect(controller.status, AnimationStatus.reverse);
+
+    controller.value = 0.75;
+    expect(controller.status, AnimationStatus.forward);
+
+    controller.value = 1.0;
+    expect(controller.status, AnimationStatus.completed);
+
+    controller.value = 0.9;
+    expect(controller.status, AnimationStatus.reverse);
+
+    controller.value = 0.0;
+    expect(controller.status, AnimationStatus.dismissed);
+  });
+
   test('Receives status callbacks for forward and reverse', () {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
