@@ -92,8 +92,8 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 
   /// Gets the [SelectedContentRange] representing the selected range in this object.
   ///
-  /// When nothing is selected, subclasses should return a [SelectedContentRange.empty].
-  SelectedContentRange getSelection();
+  /// When nothing is selected, subclasses should return `null`.
+  SelectedContentRange? getSelection();
 
   /// Handles the [SelectionEvent] sent to this object.
   ///
@@ -108,7 +108,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   ///  * [SelectionEventType], which contains all of the possible types.
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
 
-  /// The length of the content in this [SelectionHandler].
+  /// The length of the content in this object.
   int get contentLength;
 }
 
@@ -123,15 +123,7 @@ class SelectedContentRange with Diagnosticable {
   const SelectedContentRange({
     required this.startOffset,
     required this.endOffset,
-  }) : assert((startOffset >= 0 && endOffset >= 0)
-              || (startOffset == -1 && endOffset == -1));
-
-  /// A selected content range that represents an empty selection, i.e. nothing
-  /// is selected.
-  const SelectedContentRange.empty() : this(
-        startOffset: -1,
-        endOffset: -1,
-      );
+  }) : assert((startOffset >= 0 && endOffset >= 0));
 
   /// The start of the selection relative to the start of the content.
   ///
@@ -175,9 +167,6 @@ class SelectedContentRange with Diagnosticable {
   ///
   /// {@macro flutter.rendering.selection.SelectedContentRange.selectionOffsets}
   final int endOffset;
-
-  /// Whether this range represents a valid selection.
-  bool get isValid => startOffset >= 0 && endOffset >= 0;
 
   @override
   bool operator ==(Object other) {
