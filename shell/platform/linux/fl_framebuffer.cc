@@ -63,6 +63,19 @@ FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                          provider->texture_id, 0);
 
+  GLuint depth_stencil;
+  glGenRenderbuffers(1, &depth_stencil);
+  glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil);
+  glRenderbufferStorage(GL_RENDERBUFFER,      // target
+                        GL_DEPTH24_STENCIL8,  // internal format
+                        width,                // width
+                        height                // height
+  );
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                            GL_RENDERBUFFER, depth_stencil);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                            GL_RENDERBUFFER, depth_stencil);
+
   return provider;
 }
 

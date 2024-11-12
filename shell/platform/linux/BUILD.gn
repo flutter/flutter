@@ -211,6 +211,7 @@ executable("flutter_linux_unittests") {
     "fl_dart_project_test.cc",
     "fl_engine_test.cc",
     "fl_event_channel_test.cc",
+    "fl_framebuffer_test.cc",
     "fl_gnome_settings_test.cc",
     "fl_json_message_codec_test.cc",
     "fl_json_method_codec_test.cc",
