@@ -4745,7 +4745,7 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 0);
+    expect(selectedRange!.startOffset, 0);
     expect(selectedRange.endOffset, 1);
 
     // Selection on paragraph1.
@@ -4754,7 +4754,7 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 0);
+    expect(selectedRange!.startOffset, 0);
     expect(selectedRange.endOffset, 10);
 
     // Selection on paragraph1 and paragraph2.
@@ -4763,14 +4763,14 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 0);
+    expect(selectedRange!.startOffset, 0);
     expect(selectedRange.endOffset, 23);
     await mouseGesture.up();
     await tester.pump();
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 0);
+    expect(selectedRange!.startOffset, 0);
     expect(selectedRange.endOffset, 23);
 
     // Collapsed selection.
@@ -4781,7 +4781,7 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.collapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 16);
+    expect(selectedRange!.startOffset, 16);
     expect(selectedRange.endOffset, 16);
 
     // Backwards selection.
@@ -4792,14 +4792,14 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 17);
+    expect(selectedRange!.startOffset, 17);
     expect(selectedRange.endOffset, 0);
     await mouseGesture.up();
     await tester.pump();
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 17);
+    expect(selectedRange!.startOffset, 17);
     expect(selectedRange.endOffset, 0);
 
     // Collapsed selection.
@@ -4810,7 +4810,7 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.collapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 0);
+    expect(selectedRange!.startOffset, 0);
     expect(selectedRange.endOffset, 0);
   });
 
@@ -4865,7 +4865,7 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 4);
+    expect(selectedRange!.startOffset, 4);
     expect(selectedRange.endOffset, 7);
 
     // Selection on paragraph1.
@@ -4874,7 +4874,7 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 4);
+    expect(selectedRange!.startOffset, 4);
     expect(selectedRange.endOffset, 10);
 
     // Selection on paragraph1 and paragraph2.
@@ -4883,7 +4883,7 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 4);
+    expect(selectedRange!.startOffset, 4);
     expect(selectedRange.endOffset, 22);
 
     // Selection on paragraph1, paragraph2, and paragraph3.
@@ -4892,14 +4892,14 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 4);
+    expect(selectedRange!.startOffset, 4);
     expect(selectedRange.endOffset, 36);
     await mouseGesture.up();
     await tester.pump();
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 4);
+    expect(selectedRange!.startOffset, 4);
     expect(selectedRange.endOffset, 36);
 
     // Collapsed selection.
@@ -4910,7 +4910,7 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.collapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 3);
+    expect(selectedRange!.startOffset, 3);
     expect(selectedRange.endOffset, 3);
 
     // Backwards selection.
@@ -4921,14 +4921,14 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 30);
+    expect(selectedRange!.startOffset, 30);
     expect(selectedRange.endOffset, 0);
     await mouseGesture.up();
     await tester.pump();
     expect(selectionNotifier.status, SelectionStatus.uncollapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 30);
+    expect(selectedRange!.startOffset, 30);
     expect(selectedRange.endOffset, 0);
 
     // Collapsed selection.
@@ -4939,7 +4939,7 @@ void main() {
     expect(selectionNotifier.status, SelectionStatus.collapsed);
     selectedRange = selectionNotifier.range;
     expect(selectedRange, isNotNull);
-    expect(selectedRange.startOffset, 0);
+    expect(selectedRange!.startOffset, 0);
     expect(selectedRange.endOffset, 0);
   });
 
@@ -5391,9 +5391,12 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  SelectedContentRange getSelection() {
-    return const SelectedContentRange.empty();
+  SelectedContentRange? getSelection() {
+    return null;
   }
+
+  @override
+  int get contentLength => 1;
 
   @override
   final SelectionGeometry value = const SelectionGeometry(
@@ -5478,9 +5481,12 @@ class RenderSelectAll extends RenderProxyBox
   }
 
   @override
-  SelectedContentRange getSelection() {
-    return const SelectedContentRange.empty();
+  SelectedContentRange? getSelection() {
+    return null;
   }
+
+  @override
+  int get contentLength => 1;
 
   @override
   SelectionGeometry get value => _value;

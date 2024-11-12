@@ -162,9 +162,12 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  SelectedContentRange getSelection() {
-    return const SelectedContentRange.empty();
+  SelectedContentRange? getSelection() {
+    return null;
   }
+
+  @override
+  int get contentLength => 1;
 
   @override
   final SelectionGeometry value = const SelectionGeometry(

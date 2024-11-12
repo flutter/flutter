@@ -137,7 +137,10 @@ class _MyHomePageState extends State<MyHomePage> {
         || selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor == null) {
       return;
     }
-    final SelectedContentRange selectedContentRange = _selectionNotifier.range;
+    final SelectedContentRange? selectedContentRange = _selectionNotifier.range;
+    if (selectedContentRange == null) {
+      return;
+    }
     _menuController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
