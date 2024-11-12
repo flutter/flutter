@@ -1956,38 +1956,38 @@ void main() {
     );
   });
 
-  testWidgets('Hovering over Cupertino action sheet action updates to the passed cursor on desktop', (WidgetTester tester) async {
+  testWidgets('Hovering over Cupertino action sheet action updates cursor to passed cursor on any platform', (WidgetTester tester) async {
     const SystemMouseCursor customCursor = SystemMouseCursors.click;
 
     await tester.pumpWidget(
-        createAppWithButtonThatLaunchesActionSheet(
-            CupertinoActionSheet(
-              title: const Text('The Title'),
-              message: const Text('Message'),
-              actions: <Widget>[
-                CupertinoActionSheetAction(
-                  onPressed: () { },
-                  mouseCursor: customCursor,
-                  child: const Text('One'),
-                ),
-              ],
-            )
-        )
+      createAppWithButtonThatLaunchesActionSheet(
+          CupertinoActionSheet(
+            title: const Text('The title'),
+            message: const Text('Message'),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                mouseCursor: customCursor,
+                onPressed: () { },
+                child: const Text('One'),
+              ),
+            ],
+          )
+      ),
     );
-
     await tester.tap(find.text('Go'));
     await tester.pump();
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: const Offset(10, 10));
     await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     final Offset actionSheetAction = tester.getCenter(find.text('One'));
     await gesture.moveTo(actionSheetAction);
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      kIsWeb ? SystemMouseCursors.click : customCursor,
+      customCursor
     );
   });
 
