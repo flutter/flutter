@@ -438,14 +438,12 @@ class _MenuAnchorState extends State<MenuAnchor> {
     // This `Shortcuts` is needed so that shortcuts work when the focus is on
     // MenuAnchor (specifically, the root menu, since submenus have their own
     // `Shortcuts`).
-    return
-    Shortcuts(
+    return Shortcuts(
       shortcuts: _kMenuTraversalShortcuts,
       // Ignore semantics here and since the same information is typically
       // also provided by the children.
       includeSemantics: false,
-      child:
-      _MenuAnchorScope(
+      child: _MenuAnchorScope(
         anchorKey: _anchorKey,
         anchor: this,
         isOpen: _isOpen,
@@ -459,7 +457,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       actions: <Type, Action<Intent>>{
         DismissIntent: DismissMenuAction(controller: _menuController),
       },
-      child:  Builder(
+      child: Builder(
         key: _anchorKey,
         builder: (BuildContext context) {
           return widget.builder?.call(context, _menuController, widget.child)
@@ -3391,7 +3389,7 @@ class _MenuPanel extends StatefulWidget {
   /// The layout orientation of this panel.
   final Axis orientation;
 
-  /// The list of widgets to use as children of this menu bar.
+  /// The list of widgets to use as children of this menu panel.
   ///
   /// These are the top level [SubmenuButton]s.
   final List<Widget> children;
@@ -3746,7 +3744,6 @@ bool get _isCupertino {
 bool get _usesSymbolicModifiers {
   return _isCupertino;
 }
-
 
 bool get _platformSupportsAccelerators {
   // On iOS and macOS, pressing the Option key (a.k.a. the Alt key) causes a

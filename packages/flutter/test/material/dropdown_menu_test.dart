@@ -70,11 +70,15 @@ void main() {
     return color == themeData.colorScheme.onSurface.withOpacity(0.12);
   }
 
+  Finder findMenuPanel() {
+    return find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MenuPanel');
+  }
+
   Finder findMenuMaterial() {
-    return find.ancestor(
-      of: find.widgetWithText(TextButton, TestMenu.mainMenu0.label),
+    return find.descendant(
+      of: findMenuPanel(),
       matching: find.byType(Material),
-    ).at(1);
+    ).first;
   }
 
   testWidgets('DropdownMenu defaults', (WidgetTester tester) async {

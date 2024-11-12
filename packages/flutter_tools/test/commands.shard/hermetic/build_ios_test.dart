@@ -114,6 +114,13 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
+  const FakeCommand dartPubDepsCommand = FakeCommand(command: <String>[
+    'dart',
+    'pub',
+    'deps',
+    '--json',
+  ]);
+
   FakeCommand setUpRsyncCommand({void Function(List<String> command)? onRun}) {
     return FakeCommand(
       command: const <String>[
@@ -300,6 +307,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
@@ -323,6 +331,7 @@ void main() {
 
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
@@ -360,6 +369,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(
         disablePortPublication: true,
         onRun: (_) {
@@ -392,6 +402,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(
         onRun: (_) {
           fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
@@ -416,6 +427,7 @@ void main() {
 
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(customNaming: true, onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
@@ -450,6 +462,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(deviceId: '1234', onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
@@ -480,6 +493,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(simulator: true, onRun: (_) {
         fileSystem.directory('build/ios/Debug-iphonesimulator/Runner.app').createSync(recursive: true);
       }),
@@ -510,6 +524,7 @@ void main() {
     createMinimalMockProjectFiles();
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(verbose: true, onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
@@ -538,6 +553,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
@@ -624,6 +640,7 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(onRun: (_) {
           fileSystem.directory('build/ios/Release-iphoneos/Runner.app')
             .createSync(recursive: true);
@@ -678,6 +695,7 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(onRun: (_) {
           fileSystem.directory('build/ios/Release-iphoneos/Runner.app')
             .createSync(recursive: true);
@@ -721,6 +739,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
@@ -756,6 +775,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }, stdout: 'Lots of spew from Xcode',
@@ -795,6 +815,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
@@ -833,6 +854,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
         setUpRsyncCommand(),
@@ -865,6 +887,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
@@ -904,6 +927,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -943,6 +967,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
@@ -978,6 +1003,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         // Intentionally fail the first xcodebuild command with concurrent run failure message.
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
@@ -1025,6 +1051,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           stdout: '''
@@ -1066,6 +1093,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -1115,6 +1143,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           stdout: '''
@@ -1144,6 +1173,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -1181,6 +1211,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -1220,6 +1251,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -1261,6 +1293,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(
           simulator: true,
           exitCode: 1,
@@ -1300,6 +1333,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(
           simulator: true,
           exitCode: 1,
@@ -1341,6 +1375,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
 
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(
           simulator: true,
           exitCode: 1,
@@ -1383,6 +1418,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
+        dartPubDepsCommand,
         setUpFakeXcodeBuildHandler(
           simulator: true,
           exitCode: 1,
