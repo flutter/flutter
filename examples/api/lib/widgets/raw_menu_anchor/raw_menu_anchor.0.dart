@@ -2,22 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart'
-    show
-        ButtonStyle,
-        ColorScheme,
-        Colors,
-        InkSparkle,
-        MaterialApp,
-        MenuButtonThemeData,
-        MenuItemButton,
-        TextButton,
-        Theme,
-        ThemeData,
-        VisualDensity;
-import 'package:flutter/widgets.dart';
-
-
+import 'package:flutter/material.dart';
 /// Flutter code sample for a [RawMenuAnchor] that shows a simple menu with
 /// three items.
 void main() => runApp(const SimpleMenuApp());
@@ -39,8 +24,8 @@ class _SimpleMenuExampleState extends State<SimpleMenuExample> {
       _selected = value;
     });
     controller.close();
-
   }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -49,7 +34,7 @@ class _SimpleMenuExampleState extends State<SimpleMenuExample> {
         children: <Widget>[
           Text(
             'Selected: $_selected',
-            style: Theme.of(context).textTheme.bodyMedium
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
           RawMenuAnchor(
             controller: controller,
@@ -62,19 +47,19 @@ class _SimpleMenuExampleState extends State<SimpleMenuExample> {
                 onPressed: (){
                   _handlePressed('Cut');
                 },
-                child: const Text('Cut')
+                child: const Text('Cut'),
               ),
               MenuItemButton(
                 onPressed: (){
                   _handlePressed('Copy');
                 },
-                child: const Text('Copy')
+                child: const Text('Copy'),
               ),
               MenuItemButton(
                 onPressed: (){
                   _handlePressed('Paste');
                 },
-                child: const Text('Paste')
+                child: const Text('Paste'),
               ),
             ],
             builder: (
@@ -99,8 +84,6 @@ class _SimpleMenuExampleState extends State<SimpleMenuExample> {
     );
   }
 }
-
-
 class SimpleMenuApp extends StatelessWidget {
   const SimpleMenuApp({super.key});
 
@@ -120,7 +103,6 @@ class SimpleMenuApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.from(
-        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ).copyWith(
         menuButtonTheme: const MenuButtonThemeData(style: menuButtonStyle),

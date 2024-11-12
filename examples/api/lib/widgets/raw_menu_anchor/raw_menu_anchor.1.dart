@@ -3,23 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart'
-    show
-        ButtonStyle,
-        ColorScheme,
-        Colors,
-        Divider,
-        Icons,
-        InkSparkle,
-        MaterialApp,
-        MenuButtonThemeData,
-        MenuItemButton,
-        Scaffold,
-        Theme,
-        ThemeData,
-        VisualDensity;
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 /// Flutter code sample for a [RawMenuAnchor] that shows a context menu.
 /// The menu can be opened by right-clicking.
@@ -219,7 +204,6 @@ class ContextMenuApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.from(
-        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ).copyWith(
         menuButtonTheme: const MenuButtonThemeData(style: menuButtonStyle),

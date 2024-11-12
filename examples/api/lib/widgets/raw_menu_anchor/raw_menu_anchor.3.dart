@@ -3,20 +3,7 @@
 // found in the LICENSE file.
 
 
-import 'package:flutter/material.dart'
-    show
-        ButtonStyle,
-        ColorScheme,
-        Colors,
-        Icons,
-        InkSparkle,
-        MaterialApp,
-        MenuButtonThemeData,
-        MenuItemButton,
-        Theme,
-        ThemeData,
-        VisualDensity;
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 /// Flutter code sample for a [RawMenuAnchor.node] that demonstrates
 /// how to create a menu bar for a document editor.
@@ -136,10 +123,10 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (_selected.isNotEmpty)
-          Text(
-            'Selected: $_selected',
-            style: Theme.of(context).textTheme.titleMedium
-          ),
+            Text(
+              'Selected: $_selected',
+              style: Theme.of(context).textTheme.titleMedium
+            ),
           RawMenuAnchor.node(
             controller: controller,
             menuChildren: <Widget>[
@@ -149,7 +136,7 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
             builder: (BuildContext context, List<Widget> menuChildren) {
               return Row(
                 mainAxisSize: MainAxisSize.min,
-                children: menuChildren
+                children: menuChildren,
               );
             },
           ),
@@ -178,7 +165,6 @@ class MenuNodeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.from(
-        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ).copyWith(
         menuButtonTheme: const MenuButtonThemeData(style: menuButtonStyle),

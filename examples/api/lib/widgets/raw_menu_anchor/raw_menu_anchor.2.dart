@@ -5,25 +5,9 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart'
-    show
-        ButtonStyle,
-        ColorScheme,
-        Colors,
-        FilledButton,
-        FilledButtonThemeData,
-        Icons,
-        InkSparkle,
-        Material,
-        MaterialApp,
-        MenuButtonThemeData,
-        MenuItemButton,
-        Theme,
-        ThemeData,
-        VisualDensity;
+import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 /// Flutter code sample for a [RawMenuAnchor.overlayBuilder] that demonstrates
 /// how to create a custom, animated menu overlay.
@@ -156,7 +140,7 @@ class ItemAwareMenuSurface extends StatelessWidget {
   final EdgeInsets padding;
   final BoxConstraints constraints;
 
-  static const Cubic curve = Cubic(0.36,1.1,0,1);
+  static const Cubic curve = Cubic(0.36, 1.1, 0, 1);
 
   static const Map<SingleActivator, Intent> shortcuts =
   <SingleActivator, Intent>{
@@ -258,7 +242,6 @@ class MenuOverlayBuilderApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.from(
-        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ).copyWith(
         filledButtonTheme: const FilledButtonThemeData(style: buttonStyle),

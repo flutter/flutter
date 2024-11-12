@@ -21,14 +21,14 @@ Finder findMenuPanel() {
 }
 
 List<Rect> collectOverlays({bool clipped = true}) {
-    final List<Rect> menuRects = <Rect>[];
-    final Finder finder = findMenuPanel();
-    for (final Element candidate in finder.evaluate().toList()) {
-      final RenderBox box = candidate.renderObject! as RenderBox;
-      final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
-      menuRects.add(topLeft & box.size);
-    }
-    return menuRects;
+  final List<Rect> menuRects = <Rect>[];
+  final Finder finder = findMenuPanel();
+  for (final Element candidate in finder.evaluate().toList()) {
+    final RenderBox box = candidate.renderObject! as RenderBox;
+    final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
+    menuRects.add(topLeft & box.size);
+  }
+  return menuRects;
 }
 
 void main() {
