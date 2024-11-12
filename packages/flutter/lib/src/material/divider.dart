@@ -326,7 +326,7 @@ class _DividerDefaultsM2 extends DividerThemeData {
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
-//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+// dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 class _DividerDefaultsM3 extends DividerThemeData {
   const _DividerDefaultsM3(this.context) : super(
