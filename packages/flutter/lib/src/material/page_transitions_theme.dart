@@ -307,6 +307,7 @@ class _ZoomPageTransition extends StatelessWidget {
       },
       child: ZoomPageTransitionsBuilder._snapshotAwareDelegatedTransition(
         context,
+        animation,
         secondaryAnimation,
         child,
         allowSnapshotting,
