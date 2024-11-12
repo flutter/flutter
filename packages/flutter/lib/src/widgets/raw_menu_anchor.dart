@@ -411,7 +411,7 @@ class RawMenuAnchor extends StatelessWidget {
   ///
   /// Defaults to [defaultLightOverlayDecoration] when
   /// [MediaQuery.platformBrightness] returns [Brightness.light] or null, and
-  /// [defaultDarkOverlayDecoration] when [MediaQuery.platformBrightness]
+  /// [defaultDarkOverlayDecoration] when [MediaQuery.platformBrightnessOf]
   /// returns [Brightness.dark].
   final Decoration? surfaceDecoration;
 
