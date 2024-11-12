@@ -884,7 +884,7 @@ void main() {
     });
   });
 
-  testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory wraps delegates filesystem's systemTempDirectory", () {
+  testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory wraps delegate filesystem's systemTempDirectory", () {
     final FileExceptionHandler exceptionHandler = FileExceptionHandler();
 
     final MemoryFileSystem delegate = MemoryFileSystem.test(
@@ -918,6 +918,35 @@ void main() {
       throwsToolExit(message: r'''
 Flutter failed to write to a file at "C:\.tmp_rand0\hello". The flutter tool cannot access the file or directory.
 Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.'''),
+    );
+  });
+
+  testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory handles any exception thrown by the delegate's systemTempDirectory implementation", () {
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+    exceptionHandler.addTempError(
+      FileSystemOp.create,
+      const FileSystemException(
+        'Creation of temporary directory failed',
+        'some/temp/path',
+        OSError(
+          'No space left on device',
+          28,
+        ),
+      ),
+    );
+
+    final MemoryFileSystem delegate = MemoryFileSystem.test(
+      opHandle: exceptionHandler.opHandle,
+    );
+
+    final FileSystem fs = ErrorHandlingFileSystem(
+      delegate: delegate,
+      platform: FakePlatform(),
+    );
+
+    expect(
+      () => fs.systemTempDirectory,
+      throwsToolExit(message: 'Free up space and try again.'),
     );
   });
 

@@ -124,7 +124,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
 
   @override
   Directory get systemTempDirectory {
-    return directory(delegate.systemTempDirectory);
+    return _runSync(() => directory(delegate.systemTempDirectory), platform: _platform);
   }
 
   @override
