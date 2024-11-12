@@ -136,14 +136,15 @@ void main() {
   });
 
   testWidgets('Browser context menu is disabled', (WidgetTester tester) async {
-      await tester.pumpWidget(const example.ContextMenuApp());
+    await tester.pumpWidget(const example.ContextMenuApp());
 
-      await tester.tapAt(const Offset(100, 200), buttons: kSecondaryButton);
-      await tester.pump();
+    await tester.tapAt(const Offset(100, 200), buttons: kSecondaryButton);
+    await tester.pump();
 
-      if (kIsWeb) {
-        assert(BrowserContextMenu.enabled, isFalse);
-      }
-    }, skip: !kIsWeb // Browser context menu is only enabled on the web
+    if (kIsWeb) {
+      assert(BrowserContextMenu.enabled, isFalse);
+    }
+  },
+  skip: !kIsWeb // Browser context menu is only enabled on the web
   );
 }

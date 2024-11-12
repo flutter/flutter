@@ -77,7 +77,6 @@ void main() {
     await tester.pump();
 
     expect(find.text('Selected: Grammar'), findsOneWidget);
-
   });
 
   testWidgets('Menu can be traversed', (WidgetTester tester) async {

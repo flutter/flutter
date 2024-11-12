@@ -573,7 +573,6 @@ class RawMenuAnchor extends StatelessWidget {
     ]
   );
 
-
   /// The overlay builder used by the default [RawMenuAnchor] constructor.
   ///
   /// The [defaultOverlayBuilder] constructor builds a simple menu overlay. An
