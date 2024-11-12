@@ -45,8 +45,8 @@ class RawMenuAnchorOverlayPosition {
 
   /// The `position` argument passed to [MenuController.open].
   ///
-  /// When defined, the `position` will override [RawMenuAnchor.alignmentOffset]
-  /// and [RawMenuAnchor.alignment].
+  /// The position describes the distance from the top-left corner
+  /// of the anchor that the menu should be positioned at.
   final Offset? position;
 
   /// The group ID of the tap region that should be used to consume taps outside
@@ -250,7 +250,7 @@ class RawMenuAnchor extends StatelessWidget {
   /// appearance, semantics, and interaction of the menu overlay, in most cases
   /// the default overlay provided by [RawMenuAnchor] is sufficient. However, in
   /// cases where a custom overlay is needed (e.g. an animated menu), this
-  /// constructor can be used to provide one.
+  /// constructor can be used.
   ///
   /// {@tool dartpad}
   /// This example uses a [RawMenuAnchor.overlayBuilder] to build an animated
@@ -305,7 +305,7 @@ class RawMenuAnchor extends StatelessWidget {
   /// submenus.
   ///
   /// ```dart
-  /// RawMenuAnchor.menuPanel(
+  /// RawMenuAnchor.node(
   ///   builder: (BuildContext context, List<Widget> menuChildren) {
   ///     return Row(
   ///       mainAxisSize: MainAxisSize.min,
@@ -459,7 +459,7 @@ class RawMenuAnchor extends StatelessWidget {
   /// Defaults to [AlignmentDirectional.bottomStart].
   final AlignmentGeometry? alignment;
 
-  /// The amount to offset the menu relative to the anchor attachment point.
+  /// The offset applied to the menu relative to the anchor attachment point.
   ///
   /// By default, increasing the [Offset.dx] and [Offset.dy] value of
   /// [alignmentOffset] will shift the menu position rightward and downward,
@@ -467,8 +467,8 @@ class RawMenuAnchor extends StatelessWidget {
   ///
   /// However, when the [alignment] is an [AlignmentDirectional], increasing the
   /// [Offset.dx] value of [alignmentOffset] will shift the menu in the reading
-  /// direction of the ambient [Directionality] -- leftward in
-  /// [TextDirection.ltr] and rightward in [TextDirection.rtl].
+  /// direction of the ambient [Directionality] -- rightward in
+  /// [TextDirection.ltr] and leftward in [TextDirection.rtl].
   ///
   /// The [alignment] and [alignmentOffset] are ignored if a `position` argument
   /// is provided to [MenuController.open].
@@ -819,7 +819,6 @@ sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
     }
   }
 
-
   void _handleOutsideTap(PointerDownEvent pointerDownEvent) {
     _closeChildren();
   }
@@ -918,7 +917,6 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
   Offset? _menuPosition;
   FocusNode? _menuFocusNode;
   FocusScopeNode? _menuScopeNode;
-
   bool get _isRootOverlay => _parent is! _RawMenuAnchorOverlayState;
   FocusTraversalPolicy? get _overlayTraversalPolicy {
     if (_menuScopeNode?.context?.mounted != true) {
@@ -1359,6 +1357,7 @@ class _MenuOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final MenuController menuController = MenuController.maybeOf(context)!;
     final _RawMenuAnchorOverlayState state = menuController._anchor! as _RawMenuAnchorOverlayState;
+
     final Widget child = Semantics.fromProperties(
       explicitChildNodes: true,
       properties: const SemanticsProperties(
@@ -1391,6 +1390,7 @@ class _MenuOverlay extends StatelessWidget {
         ),
       ),
     );
+
     return ConstrainedBox(
       constraints: BoxConstraints.loose(position.overlaySize),
       child: Builder(builder: (BuildContext context) {
@@ -1402,7 +1402,6 @@ class _MenuOverlay extends StatelessWidget {
             (state._isRootOverlay
                     ? AlignmentDirectional.bottomStart
                     : AlignmentDirectional.topEnd).resolve(textDirection);
-
 
         return CustomSingleChildLayout(
           delegate: _MenuLayout(
@@ -1422,7 +1421,6 @@ class _MenuOverlay extends StatelessWidget {
     );
   }
 }
-
 
 // A basic panel that displays a list of menu items.
 class _MenuOverlayPanel extends StatelessWidget {
@@ -1475,7 +1473,6 @@ class _MenuOverlayPanel extends StatelessWidget {
   }
 }
 
-
 /// An action that closes all the menus associated with the given
 /// [MenuController].
 ///
@@ -1507,7 +1504,7 @@ class DismissMenuAction extends DismissAction {
 class _AnchorDirectionalFocusAction extends ContextAction<DirectionalFocusIntent> {
   _AnchorDirectionalFocusAction();
 
-   @override
+  @override
   void invoke(DirectionalFocusIntent intent, [BuildContext? context]) {
     final _RawMenuAnchorState? state = _RawMenuAnchorState._maybeOf(context!);
     if (state is! _RawMenuAnchorOverlayState) {
@@ -1663,9 +1660,11 @@ class _FocusFirstMenuItemAction extends ContextAction<_FocusFirstMenuItemIntent>
     anchor._overlayTraversalPolicy?.requestFocusCallback(firstFocus);
   }
 }
+
 class _FocusLastMenuItemIntent extends Intent {
   const _FocusLastMenuItemIntent();
 }
+
 class _FocusLastMenuItemAction extends ContextAction<_FocusLastMenuItemIntent> {
   _FocusLastMenuItemAction();
 

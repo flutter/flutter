@@ -400,6 +400,7 @@ void main() {
     expect(find.text(Tag.b.text), findsOneWidget);
     expect(find.text(Tag.b.a.text), findsNothing);
   });
+
   testWidgets('[Panel] MenuController.close closes children', (WidgetTester tester) async {
     final MenuController nestedController = MenuController();
     await tester.pumpWidget(
@@ -931,6 +932,7 @@ void main() {
         ),
       ),
     );
+
     aFocusNode.requestFocus();
     await tester.pump();
     Actions.invoke(aFocusNode.context!, const DirectionalFocusIntent(TraversalDirection.up));
@@ -938,6 +940,7 @@ void main() {
     Actions.invoke(aFocusNode.context!, const PreviousFocusIntent());
     Actions.invoke(aFocusNode.context!, const DismissIntent());
     await tester.pump();
+
     expect(
         invokedIntents,
         equals(const <Intent>[
@@ -3149,86 +3152,6 @@ void main() {
     );
   });
 
-  // Enable when resolved
-  // testWidgets('[Default] Overlay semantics', (WidgetTester tester) async {
-  //   final SemanticsTester semantics = SemanticsTester(tester);
-  //   tester.ensureSemantics();
-  //   await tester.pumpWidget(
-  //     App(
-  //       RawMenuAnchor(
-  //         semanticLabel: 'abc',
-  //         controller: controller,
-  //         menuChildren: const <Widget>[SizedBox(width: 50, height: 1000)],
-  //       ),
-  //     ),
-  //   );
-
-  //   controller.open();
-  //   await tester.pump();
-
-  //   // The flags should not have SemanticsFlag.isButton
-  //   expect(
-  //       semantics,
-  //       hasSemantics(TestSemantics.root(
-  //         children: <TestSemantics>[
-  //           TestSemantics(
-  //             id: 1,
-  //             textDirection: TextDirection.ltr,
-  //             children: <TestSemantics>[
-  //               TestSemantics(
-  //                 id: 2,
-  //                 children: <TestSemantics>[
-  //                   TestSemantics(
-  //                     id: 4,
-  //                     flags: <SemanticsFlag>[
-  //                       SemanticsFlag.scopesRoute,
-  //                       SemanticsFlag.namesRoute
-  //                     ],
-  //                     label: 'Menu',
-  //                     textDirection: TextDirection.ltr,
-  //                     children: <TestSemantics>[
-  //                       TestSemantics(
-  //                         id: 5,
-  //                         children: <TestSemantics>[
-  //                           TestSemantics(
-  //                             id: 6,
-  //                             flags: <SemanticsFlag>[
-  //                               SemanticsFlag.hasImplicitScrolling
-  //                             ],
-  //                             children: <TestSemantics>[
-  //                               TestSemantics(
-  //                                 id: 7,
-  //                                 flags: <SemanticsFlag>[
-  //                                   SemanticsFlag.isFocusable
-  //                                 ],
-  //                                 actions: <SemanticsAction>[
-  //                                   SemanticsAction.tap
-  //                                 ],
-  //                                 label: 'a',
-  //                                 textDirection: TextDirection.ltr,
-  //                               ),
-  //                             ],
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ],
-  //                   ),
-  //                   TestSemantics(
-  //                     id: 3,
-  //                     flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-  //                     actions: <SemanticsAction>[SemanticsAction.tap],
-  //                     label: 'anchor',
-  //                     textDirection: TextDirection.ltr,
-  //                   ),
-  //                 ],
-  //               ),
-  //             ],
-  //           ),
-  //         ],
-  //       )));
-  //   semantics.dispose();
-  // });
-
   group('[Default] Layout', () {
     final List<AlignmentGeometry> alignments = <AlignmentGeometry>[
       for (double x = -2; x <= 2; x += 1)
@@ -3238,8 +3161,6 @@ void main() {
         for (double y = -2; y <= 2; y += 1)
           AlignmentDirectional(x, y),
     ];
-
-
 
     /// Returns the rects of the menu's contents. If [clipped] is true, the
     /// rect is taken after UnconstrainedBox clips its contents.
@@ -3745,9 +3666,10 @@ void main() {
     testWidgets('RTL alignmentOffset.dx is negated when alignment is an AlignmentDirectional', (WidgetTester tester) async {
       const ui.Offset offset = Offset(24, 33);
 
-      Widget buildApp(
-          {AlignmentGeometry alignment = Alignment.center,
-          Offset alignmentOffset = Offset.zero}) {
+      Widget buildApp({
+        AlignmentGeometry alignment = Alignment.center,
+        Offset alignmentOffset = Offset.zero,
+      }) {
         return App(
           textDirection: ui.TextDirection.rtl,
           RawMenuAnchor(
@@ -5207,7 +5129,6 @@ void main() {
       expect(subPadded, equals(second.shift(const Offset(43, 7))));
     });
 
-
     testWidgets('LTR nested menu placement', (WidgetTester tester) async {
       List<Widget> children = <Widget>[
         Container(
@@ -5270,6 +5191,7 @@ void main() {
         Rect.fromLTRB(375.0, 0.0, 800.0, 600.0)
       ]);
     });
+
     testWidgets('RTL nested menu placement', (WidgetTester tester) async {
       List<Widget> children = <Widget>[
         Container(
@@ -5422,6 +5344,7 @@ void main() {
       // located inside a scrollable.
       expect( tester.getSize(find.byKey(Tag.a.key)), equals(const Size(75, 150)));
     });
+
     testWidgets('Menu is positioned within the root overlay.', (WidgetTester tester) async {
       await tester.pumpWidget(
         App(
@@ -5461,9 +5384,7 @@ void main() {
   });
 }
 
-
 // ********* UTILITIES *********  //
-
 /// Allows the creation of arbitrarily-nested tags in tests.
 abstract class Tag {
   const Tag();
@@ -5731,7 +5652,6 @@ class _ButtonState extends State<Button> {
     }
     return null;
   }
-
 
   TextStyle get _textStyle {
     if (_states.value.contains(WidgetState.pressed)) {

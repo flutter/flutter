@@ -3401,7 +3401,6 @@ class _Submenu extends StatelessWidget {
   }
 }
 
-
 /// Wraps the [WidgetStateMouseCursor] so that it can default to
 /// [MouseCursor.uncontrolled] if none is set.
 class _MouseCursor extends MaterialStateMouseCursor {
