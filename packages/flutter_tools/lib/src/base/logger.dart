@@ -1155,10 +1155,8 @@ abstract class Status {
   final VoidCallback? _onFinish;
   final Duration? _timeout;
 
-  @protected
   final Stopwatch _stopwatch;
 
-  @protected
   String get _elapsedTime {
     if (_stopwatch.elapsed.inSeconds > 2) {
       return getElapsedAsSeconds(_stopwatch.elapsed);
@@ -1339,8 +1337,11 @@ class AnonymousSpinnerStatus extends Status {
   final List<String> _animation;
 
   Timer? _timer;
+
+  int _ticks = 0;
   @visibleForTesting
-  int ticks = 0;
+  int get ticks => _ticks;
+
   int _lastAnimationFrameLength = 0;
   bool _timedOut = false;
 
@@ -1373,7 +1374,7 @@ class AnonymousSpinnerStatus extends Status {
     assert(_timer == timer);
     assert(timer.isActive);
     _writeToStdOut(_backspaceChar * _lastAnimationFrameLength);
-    ticks += 1;
+    _ticks += 1;
     if (seemsSlow) {
       if (!_timedOut) {
         _timedOut = true;
