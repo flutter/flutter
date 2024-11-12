@@ -27,6 +27,8 @@ void main() {
         expect(find.byIcon(Icons.light_mode), findsOne);
 
         // Loads the images.
+        // Using runAsync forces the streams to complete. This is needed because
+        // loading the fake image is a real async task.
         await tester.pump();
         await tester.runAsync(() => Future<void>.delayed(Duration.zero));
         await tester.runAsync(() => Future<void>.delayed(Duration.zero));
@@ -76,6 +78,8 @@ void main() {
         await tester.pump();
 
         // Loads the images.
+        // Using runAsync forces the streams to complete. This is needed because
+        // loading the fake image is a real async task.
         await tester.runAsync(() => Future<void>.delayed(Duration.zero));
         await tester.runAsync(() => Future<void>.delayed(Duration.zero));
         await tester.pump();
@@ -129,15 +133,18 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
   }
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData,
-      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
-          return Stream<List<int>>.value(_blueSquarePng).listen(
-            onData,
-            onDone: onDone,
-            onError: onError,
-            cancelOnError: cancelOnError,
-          );
-
+  StreamSubscription<List<int>> listen(
+    void Function(List<int> event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
+    return Stream<List<int>>.value(_blueSquarePng).listen(
+      onData,
+      onDone: onDone,
+      onError: onError,
+      cancelOnError: cancelOnError,
+    );
   }
 }
 
