@@ -387,6 +387,9 @@ class AnimationController extends Animation<double>
   ///    which start the animation controller.
   set value(double newValue) {
     stop();
+    if (newValue != _value) {
+      _direction = newValue > _value ? _AnimationDirection.forward : _AnimationDirection.reverse;
+    }
     _internalSetValue(newValue);
     notifyListeners();
     _checkStatusChanged();
