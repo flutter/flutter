@@ -214,7 +214,8 @@ const String _kFlutterPluginsSharedDarwinSource = 'shared_darwin_source';
 bool _writeFlutterPluginsList(
   FlutterProject project,
   List<Plugin> plugins, {
-  bool forceCocoaPodsOnly = false,
+  required bool swiftPackageManagerEnabledIos,
+  required bool swiftPackageManagerEnabledMacos,
 }) {
   final File pluginsFile = project.flutterPluginsDependenciesFile;
   if (plugins.isEmpty) {
@@ -250,7 +251,11 @@ bool _writeFlutterPluginsList(
   result['dependencyGraph'] = _createPluginLegacyDependencyGraph(plugins);
   result['date_created'] = globals.systemClock.now().toString();
   result['version'] = globals.flutterVersion.frameworkVersion;
-  result['swift_package_manager_enabled'] = !forceCocoaPodsOnly && project.usesSwiftPackageManager;
+
+  result['swift_package_manager_enabled'] = <String, bool>{
+    'ios': swiftPackageManagerEnabledIos,
+    'macos': swiftPackageManagerEnabledMacos,
+  };
 
   // Only notify if the plugins list has changed. [date_created] will always be different,
   // [version] is not relevant for this check.
@@ -1065,10 +1070,12 @@ Future<void> refreshPluginsList(
   // Write the legacy plugin files to avoid breaking existing apps.
   final bool legacyChanged = useImplicitPubspecResolution && _writeFlutterPluginsListLegacy(project, plugins);
 
+  final bool swiftPackageManagerEnabled = !forceCocoaPodsOnly && project.usesSwiftPackageManager;
   final bool changed = _writeFlutterPluginsList(
     project,
     plugins,
-    forceCocoaPodsOnly: forceCocoaPodsOnly,
+    swiftPackageManagerEnabledIos: swiftPackageManagerEnabled,
+    swiftPackageManagerEnabledMacos: swiftPackageManagerEnabled,
   );
   if (changed || legacyChanged || forceCocoaPodsOnly) {
     createPluginSymlinks(project, force: true);
