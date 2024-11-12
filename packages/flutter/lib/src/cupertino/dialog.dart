@@ -1317,10 +1317,6 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     final double verticalPadding = _kActionSheetButtonVerticalPaddingBase
         + fontSize * _kActionSheetButtonVerticalPaddingFactor;
 
-    final Set<WidgetState> states = <WidgetState>{
-      WidgetState.hovered
-    };
-
     return MouseRegion(
       cursor: kIsWeb ? SystemMouseCursors.click : widget.mouseCursor,
       child: MetaData(
