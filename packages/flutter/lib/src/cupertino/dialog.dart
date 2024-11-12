@@ -1215,7 +1215,7 @@ class CupertinoActionSheetAction extends StatefulWidget {
     required this.onPressed,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
-    this.cursor = MouseCursor.defer,
+    this.mouseCursor,
     required this.child,
   });
 
@@ -1235,10 +1235,25 @@ class CupertinoActionSheetAction extends StatefulWidget {
   /// Destructive buttons have red text.
   final bool isDestructiveAction;
 
-  /// The cursor that will be shown when hovering over the button.
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
   ///
-  /// If not passed will default to [MouseCursor.defer] and on web will default to [SystemMouseCursors.click].
-  final MouseCursor cursor;
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  ///
+  ///  * [WidgetState.hovered].
+  ///
+  /// If null, then [MouseCursor.defer] is used as the default cursor.
+  /// When the widget is enabled, [SystemMouseCursors.click] is used on Web,
+  /// and [SystemMouseCursors.basic] is used on other platforms.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetStateProperty], which can be used to resolve mouse cursors
+  ///    based on a widget's state.
+  ///  * [SystemMouseCursors], which defines cursors that are supported by
+  ///    the underlying platform.
+  final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
   ///
@@ -1317,8 +1332,19 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     final double verticalPadding = _kActionSheetButtonVerticalPaddingBase
         + fontSize * _kActionSheetButtonVerticalPaddingFactor;
 
+    final Set<WidgetState> states = <WidgetState>{
+      WidgetState.hovered
+    };
+
+    final MouseCursor effectiveMouseCursor =
+        WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+            ?? (kIsWeb && states.contains(WidgetState.hovered)
+            ? SystemMouseCursors.click
+            : MouseCursor.defer
+        );
+
     return MouseRegion(
-      cursor: kIsWeb ? SystemMouseCursors.click : widget.cursor,
+      cursor: effectiveMouseCursor,
       child: MetaData(
         metaData: this,
         behavior: HitTestBehavior.opaque,
