@@ -1237,10 +1237,7 @@ class CupertinoActionSheetAction extends StatefulWidget {
 
   /// The cursor that will be shown when hovering over the button.
   ///
-  /// if `null`, cursor will default to:
-  /// - `MouseCursor.click` on web platforms
-  /// - `MouseCursor.defer` on other platforms
-  /// else will use value provided
+  /// if null defaults to [SystemMouseCursors.click] on web else [MouseCursor.defer].
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
