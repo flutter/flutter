@@ -293,6 +293,52 @@ void main() {
     );
   });
 
+  test('omitted devDependencies in app package', () async {
+    // Simulates the following:
+    //
+    // # /my_app/pubspec.yaml
+    // name: my_app
+    // dependencies:
+    //   package_a:
+    //
+    // # /package_a/pubspec.yaml
+    // name: package_a
+    final ProcessManager processes = _dartPubDepsReturns('''
+    {
+      "root": "my_app",
+      "packages": [
+        {
+          "name": "my_app",
+          "kind": "root",
+          "dependencies": [
+            "package_a"
+          ],
+          "directDependencies": [
+            "package_a"
+          ]
+        },
+        {
+          "name": "package_a",
+          "kind": "direct",
+          "dependencies": [],
+          "directDependencies": []
+        }
+      ]
+    }''');
+
+    final Set<String> dependencies = await computeExclusiveDevDependencies(
+      processes,
+      projectPath: _fakeProjectPath,
+      logger: logger,
+    );
+
+    expect(
+      dependencies,
+      isEmpty,
+      reason: 'package_b is excluded but package_c should not',
+    );
+  });
+
   test('throws and logs on non-zero exit code', () async {
     final ProcessManager processes = _dartPubDepsFails(
       'Bad thing',
