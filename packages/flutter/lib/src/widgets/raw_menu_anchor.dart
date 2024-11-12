@@ -11,7 +11,22 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+
+import 'actions.dart';
+import 'basic.dart';
+import 'container.dart';
+import 'display_feature_sub_screen.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
+import 'focus_traversal.dart';
+import 'framework.dart';
+import 'media_query.dart';
+import 'overlay.dart';
+import 'scroll_position.dart';
+import 'scrollable.dart';
+import 'shortcuts.dart';
+import 'single_child_scroll_view.dart';
+import 'tap_region.dart';
 
 const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
   SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
