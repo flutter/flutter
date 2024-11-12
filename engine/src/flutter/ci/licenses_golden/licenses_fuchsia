@@ -1,4 +1,4 @@
-Signature: 9740f32fa78b97178620d40cb7de45f3
+Signature: 9797451b5eb9741675e9c6bcb9c6163c
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -12805,6 +12805,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl + ../..
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/constraints.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/results.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/usages.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.system.state/system-state-transition.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/events.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/keyboard.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/modifiers.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -13110,6 +13111,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/constraints.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/results.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/usages.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.system.state/system-state-transition.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/modifiers.fidl
