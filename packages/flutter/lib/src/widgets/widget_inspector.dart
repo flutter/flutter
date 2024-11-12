@@ -39,14 +39,16 @@ import 'view.dart';
 /// Signature for the builder callback used by
 /// [WidgetInspector.exitWidgetSelectionButtonBuilder].
 typedef ExitWidgetSelectionButtonBuilder = Widget Function(
-  BuildContext context,
-  VoidCallback onPressed, {
+  BuildContext context, {
+  required VoidCallback onPressed,
   required GlobalKey key,
 });
 
+/// Signature for the builder callback used by
+/// [WidgetInspector.moveExitWidgetSelectionButtonBuilder].
 typedef MoveExitWidgetSelectionButtonBuilder = Widget Function(
-  BuildContext context,
-  VoidCallback onPressed, {
+  BuildContext context, {
+  required VoidCallback onPressed,
   bool isLeftAligned,
 });
 
@@ -2784,12 +2786,19 @@ class WidgetInspector extends StatefulWidget {
   /// The widget that is being inspected.
   final Widget child;
 
-  /// A builder that is called to create the select button.
+  /// A builder that is called to create the exit select-mode button.
+  ///
+  /// The `onPressed` callback and key passed as arguments to the builder should
+  /// be hooked up to the returned widget.
+  final ExitWidgetSelectionButtonBuilder? exitWidgetSelectionButtonBuilder;
+
+  /// A builder that is called to create the button that moves the exit select-
+  /// mode button to the right or left.
   ///
   /// The `onPressed` callback passed as an argument to the builder should be
   /// hooked up to the returned widget.
-  final ExitWidgetSelectionButtonBuilder? exitWidgetSelectionButtonBuilder;
-
+  /// 
+  /// The button UI should respond to the `leftAligned` argument.
   final MoveExitWidgetSelectionButtonBuilder?
       moveExitWidgetSelectionButtonBuilder;
 
@@ -2962,17 +2971,11 @@ class _WidgetInspectorState extends State<WidgetInspector>
     }
   }
 
-  void _exitSelectionMode() {
-    WidgetInspectorService.instance._changeWidgetSelectionMode(false);
-  }
-
   @override
   Widget build(BuildContext context) {
     // Be careful changing this build method. The _InspectorOverlayLayer
     // assumes the root RenderObject for the WidgetInspector will be
     // a RenderStack containing a _RenderInspectorOverlay as a child.
-    final GlobalKey<State<StatefulWidget>> exitWidgetSelectionButtonKey =
-        GlobalKey(debugLabel: 'Exit Widget Selection');
     return Stack(children: <Widget>[
       GestureDetector(
         onTap: _handleTap,
@@ -3518,7 +3521,7 @@ class _ExitWidgetSelectionButtonGroupState
                 child: _TooltipGestureDetector(
                   button: widget.moveExitWidgetSelectionButtonBuilder!(
                     context,
-                    () {
+                    onPressed: () {
                       _changeButtonGroupAlignment();
                       _onTooltipHidden();
                     },
@@ -3551,7 +3554,7 @@ class _ExitWidgetSelectionButtonGroupState
             _TooltipGestureDetector(
               button: widget.exitWidgetSelectionButtonBuilder(
                 context,
-                _exitWidgetSelectionMode,
+                onPressed: _exitWidgetSelectionMode,
                 key: _exitWidgetSelectionButtonKey,
               ),
               onTooltipVisible: () {
@@ -3604,7 +3607,7 @@ class _ExitWidgetSelectionButtonGroupState
   }
 }
 
-class _TooltipGestureDetector extends StatelessWidget {
+class _TooltipGestureDetector extends StatefulWidget {
   const _TooltipGestureDetector({
     required this.button,
     required this.onTooltipVisible,
@@ -3623,25 +3626,37 @@ class _TooltipGestureDetector extends StatelessWidget {
   );
 
   @override
+  State<_TooltipGestureDetector> createState() =>
+      _TooltipGestureDetectorState();
+}
+
+class _TooltipGestureDetectorState extends State<_TooltipGestureDetector> {
+  Timer? _tooltipVisibleTimer;
+  Timer? _tooltipHiddenTimer;
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       alignment: AlignmentDirectional.topCenter,
       children: <Widget>[
         GestureDetector(
           onLongPress: () {
-            _tooltipVisibleAfter(_tooltipDelayDuration);
+            _tooltipVisibleAfter(_TooltipGestureDetector._tooltipDelayDuration);
             _tooltipHiddenAfter(
-              _tooltipShownOnLongPressDuration + _tooltipDelayDuration,
+              _TooltipGestureDetector._tooltipShownOnLongPressDuration +
+                  _TooltipGestureDetector._tooltipDelayDuration,
             );
           },
           child: MouseRegion(
             onEnter: (_) {
-              _tooltipVisibleAfter(_tooltipDelayDuration);
+              _tooltipVisibleAfter(
+                  _TooltipGestureDetector._tooltipDelayDuration);
             },
             onExit: (_) {
-              _tooltipHiddenAfter(_tooltipDelayDuration);
+              _tooltipHiddenAfter(
+                  _TooltipGestureDetector._tooltipDelayDuration);
             },
-            child: button,
+            child: widget.button,
           ),
         ),
       ],
@@ -3660,9 +3675,20 @@ class _TooltipGestureDetector extends StatelessWidget {
     Duration duration, {
     required bool isVisible,
   }) {
-    Timer(duration, () {
-      isVisible ? onTooltipVisible() : onTooltipHidden();
-    });
+    final Timer? timer = isVisible ? _tooltipVisibleTimer : _tooltipHiddenTimer;
+    if (timer?.isActive ?? false) {
+      timer!.cancel();
+    }
+
+    if (isVisible) {
+      _tooltipVisibleTimer = Timer(duration, () {
+        widget.onTooltipVisible();
+      });
+    } else {
+      _tooltipHiddenTimer = Timer(duration, () {
+        widget.onTooltipHidden();
+      });
+    }
   }
 }
 

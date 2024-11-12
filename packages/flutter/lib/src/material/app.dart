@@ -936,8 +936,8 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 
   Widget _exitWidgetSelectionButtonBuilder(
-    BuildContext context,
-    VoidCallback onPressed, {
+    BuildContext context, {
+    required VoidCallback onPressed,
     required GlobalKey key,
   }) {
     return FloatingActionButton(
@@ -949,12 +949,12 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 
   Widget _moveExitWidgetSelectionButtonBuilder(
-    BuildContext context,
-    VoidCallback onPressed, {
+    BuildContext context, {
+    required VoidCallback onPressed,
     bool isLeftAligned = true,
   }) {
     return IconButton(
-        padding: EdgeInsets.all(-8.0),
+        padding: const EdgeInsets.all(-8.0),
         iconSize: 32,
         onPressed: onPressed,
         constraints: const BoxConstraints(

@@ -355,6 +355,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
             child: Stack(
               children: <Widget>[
                 Text('a', textDirection: TextDirection.ltr),
@@ -380,8 +381,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final GlobalKey bottomButtonKey = GlobalKey();
 
       Widget exitWidgetSelectionButtonBuilder(
-        BuildContext context,
-        VoidCallback onPressed, {
+        BuildContext context, {
+        required VoidCallback onPressed,
         required GlobalKey key,
       }) {
         exitWidgetSelectionButtonKey = key;
@@ -419,6 +420,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           child: WidgetInspector(
             key: inspectorKey,
             exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+            moveExitWidgetSelectionButtonBuilder: null,
             child: Material(
               child: ListView(
                 children: <Widget>[
@@ -496,6 +498,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
             child: Transform(
               transform: Matrix4.identity()..scale(0.0),
               child: const Stack(
@@ -524,8 +527,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       late GlobalKey exitWidgetSelectionButtonKey;
 
       Widget exitWidgetSelectionButtonBuilder(
-          BuildContext context, VoidCallback onPressed,
-          {required GlobalKey key}) {
+        BuildContext context, {
+        required VoidCallback onPressed,
+        required GlobalKey key,
+      }) {
         exitWidgetSelectionButtonKey = key;
         return Material(
             child: ElevatedButton(onPressed: onPressed, key: key, child: null));
@@ -537,6 +542,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           child: WidgetInspector(
             key: inspectorKey,
             exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+            moveExitWidgetSelectionButtonBuilder: null,
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,
               children: <Widget>[
@@ -594,6 +600,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
             child: GestureDetector(
               onLongPress: () {
                 expect(didLongPress, isFalse);
@@ -645,6 +652,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           child: WidgetInspector(
             key: inspectorKey,
             exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
             child: Overlay(
               initialEntries: <OverlayEntry>[
                 entry1 = OverlayEntry(
@@ -707,6 +715,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 textDirection: TextDirection.ltr,
                 child: WidgetInspector(
                   exitWidgetSelectionButtonBuilder: null,
+                  moveExitWidgetSelectionButtonBuilder: null,
                   child: ColoredBox(
                     color: Colors.white,
                     child: Center(
@@ -753,8 +762,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       ExitWidgetSelectionButtonBuilder exitWidgetSelectionButtonBuilder(
           Key key) {
         return (
-          BuildContext context,
-          VoidCallback onPressed, {
+          BuildContext context, {
+          required VoidCallback onPressed,
           required GlobalKey key,
         }) {
           return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
@@ -776,6 +785,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                   key: inspector1Key,
                   exitWidgetSelectionButtonBuilder:
                       exitWidgetSelectionButtonBuilder(selectButton1Key),
+                  moveExitWidgetSelectionButtonBuilder: null,
                   child: Container(
                     key: child1Key,
                     child: const Text('Child 1'),
@@ -787,6 +797,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                   key: inspector2Key,
                   exitWidgetSelectionButtonBuilder:
                       exitWidgetSelectionButtonBuilder(selectButton2Key),
+                  moveExitWidgetSelectionButtonBuilder: null,
                   child: Container(
                     key: child2Key,
                     child: const Text('Child 2'),
@@ -827,8 +838,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         setupDefaultPubRootDirectory(service);
 
       Widget exitWidgetSelectionButtonBuilder(
-        BuildContext context,
-        VoidCallback onPressed, {
+        BuildContext context, {
+        required VoidCallback onPressed,
         required GlobalKey key,
       }) {
           return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
@@ -840,6 +851,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             child: WidgetInspector(
               key: inspectorKey,
               exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+              moveExitWidgetSelectionButtonBuilder: null,
               child: const Text('Child 1'),
             ),
           ),
@@ -3786,6 +3798,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         textDirection: TextDirection.ltr,
         child: WidgetInspector(
           exitWidgetSelectionButtonBuilder: null,
+          moveExitWidgetSelectionButtonBuilder: null,
           child: _applyConstructor(_TrivialWidget.new),
         ),
       );

@@ -535,8 +535,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
   }
 
   Widget _exitWidgetSelectionButtonBuilder(
-    BuildContext context,
-    VoidCallback onPressed, {
+    BuildContext context, {
+    required VoidCallback onPressed,
     required GlobalKey key,
   }) {
     return CupertinoButton.filled(

@@ -1028,14 +1028,19 @@ class WidgetsApp extends StatefulWidget {
   /// debug mode.
   final bool debugShowWidgetInspector;
 
-  /// Builds the widget the [WidgetInspector] uses to switch between view and
-  /// inspect modes.
+  /// Builds the widget the [WidgetInspector] uses to exit selection mode.
   ///
-  /// This lets [MaterialApp] to use a Material Design button to toggle the
+  /// This lets [MaterialApp] to use a Material Design button to exit the
   /// inspector select mode without requiring [WidgetInspector] to depend on the
-  /// material package.
+  /// Material package.
   final ExitWidgetSelectionButtonBuilder? exitWidgetSelectionButtonBuilder;
 
+  /// Builds the widget the [WidgetInspector] uses to move the exit selection
+  /// mode button.
+  ///
+  /// This lets [MaterialApp] to use a Material Design button to change the
+  /// alignment without requiring [WidgetInspector] to depend on the Material
+  /// package.
   final MoveExitWidgetSelectionButtonBuilder? moveExitWidgetSelectionButtonBuilder;
 
   /// {@template flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
