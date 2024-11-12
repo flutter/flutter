@@ -335,7 +335,7 @@ void main() {
     expect(
       dependencies,
       isEmpty,
-      reason: 'package_b is excluded but package_c should not',
+      reason: 'No devDependencies: [] specified but still parsed successfully',
     );
   });
 
