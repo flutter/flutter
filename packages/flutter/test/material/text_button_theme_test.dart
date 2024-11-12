@@ -379,4 +379,40 @@ void main() {
     material = tester.widget<Material>(buttonMaterialFinder);
     expect(material.shadowColor, shadowColor);
   });
+
+  testWidgets('TextButton icon respects TextButtonTheme ButtonStyle.iconAlignment', (WidgetTester tester) async {
+    Widget buildButton({ IconAlignment? iconAlignment }) {
+      return MaterialApp(
+        theme: ThemeData(
+          textButtonTheme: TextButtonThemeData(
+            style: ButtonStyle(iconAlignment: iconAlignment),
+          ),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: TextButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.add),
+              label: const Text('button'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildButton());
+
+    final Offset buttonTopLeft = tester.getTopLeft(find.byType(Material).last);
+    final Offset iconTopLeft = tester.getTopLeft(find.byIcon(Icons.add));
+
+    expect(buttonTopLeft.dx, iconTopLeft.dx - 12.0);
+
+    await tester.pumpWidget(buildButton(iconAlignment: IconAlignment.end));
+    await tester.pumpAndSettle();
+
+    final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+
+    expect(buttonTopRight.dx, iconTopRight.dx + 16.0);
+  });
 }

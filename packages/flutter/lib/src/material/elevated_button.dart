@@ -80,7 +80,6 @@ class ElevatedButton extends ButtonStyleButton {
     super.clipBehavior,
     super.statesController,
     required super.child,
-    super.iconAlignment,
   });
 
   /// Create an elevated button from a pair of widgets that serve as the button's
@@ -106,7 +105,7 @@ class ElevatedButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
-    IconAlignment iconAlignment = IconAlignment.start,
+    IconAlignment? iconAlignment,
   }) {
     if (icon == null) {
       return ElevatedButton(
@@ -210,6 +209,7 @@ class ElevatedButton extends ButtonStyleButton {
     Color? surfaceTintColor,
     Color? iconColor,
     double? iconSize,
+    IconAlignment? iconAlignment,
     Color? disabledIconColor,
     Color? overlayColor,
     double? elevation,
@@ -265,6 +265,7 @@ class ElevatedButton extends ButtonStyleButton {
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
       iconColor: ButtonStyleButton.defaultColor(iconColor, disabledIconColor),
       iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
+      iconAlignment: iconAlignment,
       elevation: elevationValue,
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -478,7 +479,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-    super.iconAlignment,
+    IconAlignment? iconAlignment,
   }) : super(
          autofocus: autofocus ?? false,
          child: _ElevatedButtonWithIconChild(
@@ -525,16 +526,21 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
   final Widget label;
   final Widget icon;
   final ButtonStyle? buttonStyle;
-  final IconAlignment iconAlignment;
+  final IconAlignment? iconAlignment;
 
   @override
   Widget build(BuildContext context) {
     final double defaultFontSize = buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
     final double scale = clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
     final double gap = lerpDouble(8, 4, scale)!;
+    final ElevatedButtonThemeData textButtonTheme = ElevatedButtonTheme.of(context);
+    final IconAlignment effectiveIconAlignment = iconAlignment
+      ?? textButtonTheme.style?.iconAlignment
+      ?? buttonStyle?.iconAlignment
+      ?? IconAlignment.start;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: iconAlignment == IconAlignment.start
+      children: effectiveIconAlignment == IconAlignment.start
         ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
         : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
     );
