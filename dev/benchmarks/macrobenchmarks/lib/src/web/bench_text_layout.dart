@@ -45,27 +45,13 @@ class ParagraphGenerator {
   }
 }
 
-/// Which mode to run [BenchBuildColorsGrid] in.
-enum _TestMode {
-  /// Uses the HTML rendering backend with the canvas 2D text layout.
-  useCanvasTextLayout,
-
-  /// Uses CanvasKit for everything.
-  useCanvasKit,
-}
-
 /// Repeatedly lays out a paragraph.
 ///
 /// Creates a different paragraph each time in order to avoid hitting the cache.
 class BenchTextLayout extends RawRecorder {
-  BenchTextLayout.canvas()
-      : super(name: canvasBenchmarkName);
+  BenchTextLayout() : super(name: benchmarkName);
 
-  BenchTextLayout.canvasKit()
-      : super(name: canvasKitBenchmarkName);
-
-  static const String canvasBenchmarkName = 'text_canvas_layout';
-  static const String canvasKitBenchmarkName = 'text_canvaskit_layout';
+  static const String benchmarkName = 'text_canvaskit_layout';
 
   final ParagraphGenerator generator = ParagraphGenerator();
 
@@ -143,14 +129,9 @@ class BenchTextLayout extends RawRecorder {
 /// use the same paragraph instance because the layout method will shortcircuit
 /// in that case.
 class BenchTextCachedLayout extends RawRecorder {
-  BenchTextCachedLayout.canvas()
-      : super(name: canvasBenchmarkName);
+  BenchTextCachedLayout() : super(name: benchmarkName);
 
-  BenchTextCachedLayout.canvasKit()
-      : super(name: canvasKitBenchmarkName);
-
-  static const String canvasBenchmarkName = 'text_canvas_cached_layout';
-  static const String canvasKitBenchmarkName = 'text_canvas_kit_cached_layout';
+  static const String benchmarkName = 'text_canvas_kit_cached_layout';
 
   @override
   void body(Profile profile) {
@@ -179,11 +160,7 @@ int _counter = 0;
 /// The benchmark constructs a tabbed view, where each tab displays a list of
 /// colors. Each color's description is made of several [Text] nodes.
 class BenchBuildColorsGrid extends WidgetBuildRecorder {
-  BenchBuildColorsGrid.canvas()
-      : _mode = _TestMode.useCanvasTextLayout, super(name: canvasBenchmarkName);
-
-  BenchBuildColorsGrid.canvasKit()
-      : _mode = _TestMode.useCanvasKit, super(name: canvasKitBenchmarkName);
+  BenchBuildColorsGrid() : super(name: benchmarkName);
 
   /// Disables tracing for this benchmark.
   ///
@@ -193,11 +170,7 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
   @override
   bool get isTracingEnabled => false;
 
-  static const String canvasBenchmarkName = 'text_canvas_color_grid';
-  static const String canvasKitBenchmarkName = 'text_canvas_kit_color_grid';
-
-  /// Whether to use the new canvas-based text measurement implementation.
-  final _TestMode _mode;
+  static const String benchmarkName = 'text_canvas_kit_color_grid';
 
   num _textLayoutMicros = 0;
 
@@ -225,13 +198,16 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
     // We need to do this before calling [super.frameDidDraw] because the latter
     // updates the value of [showWidget] in preparation for the next frame.
     // TODO(yjbanov): https://github.com/flutter/flutter/issues/53877
-    if (showWidget && _mode != _TestMode.useCanvasKit) {
-      profile!.addDataPoint(
-        'text_layout',
-        Duration(microseconds: _textLayoutMicros.toInt()),
-        reported: true,
-      );
-    }
+    // if (showWidget) {
+    //   profile!.addDataPoint(
+    //     'text_layout',
+    //     Duration(microseconds: _textLayoutMicros.toInt()),
+    //     reported: true,
+    //   );
+    // }
+
+    // Use it so the analyzer doesn't complain about the unused variable.
+    _textLayoutMicros.toInt();
     super.frameDidDraw();
   }
 

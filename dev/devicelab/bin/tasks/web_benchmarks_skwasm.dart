@@ -9,7 +9,7 @@ import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
 Future<void> main() async {
   await task(() async {
     return runWebBenchmark((
-      webRenderer: 'skwasm',
+      webRenderer: WebRenderer.skwasm,
       useWasm: true,
       forceSingleThreadedSkwasm: false,
     ));
