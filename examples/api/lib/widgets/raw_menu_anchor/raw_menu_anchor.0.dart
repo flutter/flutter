@@ -85,6 +85,7 @@ class _SimpleMenuExampleState extends State<SimpleMenuExample> {
     );
   }
 }
+
 class SimpleMenuApp extends StatelessWidget {
   const SimpleMenuApp({super.key});
 
