@@ -77,13 +77,8 @@ const List<String> kRunReleaseArgs = <String>[
 // ... which in turn requires that `dart pub deps --json` is called in order to
 // label which plugins are dependency plugins.
 //
-// Ideally processPodsIfNeeded should rely on the command (removing this call).
-const List<String> kCheckDartPubDeps = <String>[
-  'dart',
-  'pub',
-  'deps',
-  '--json',
-];
+// Ideally processPodsIfNeeded should rely on the command (removing this fake).
+final Pub fakePubForRefreshPluginsList = FakePubWithPrimedDeps();
 
 const String kConcurrentBuildErrorMessage = '''
 "/Developer/Xcode/DerivedData/foo/XCBuildData/build.db":
@@ -154,7 +149,6 @@ void main() {
 
       processManager
           .addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
 
       final LaunchResult launchResult = await iosDevice.startApp(
@@ -183,6 +177,7 @@ void main() {
       Logger: () => logger,
       OperatingSystemUtils: () => os,
       Platform: () => macPlatform,
+      Pub: () => fakePubForRefreshPluginsList,
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreter(buildSettings: const <String, String>{
             'WRAPPER_NAME': 'My Super Awesome App.app',
@@ -240,7 +235,6 @@ void main() {
 
       processManager
           .addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
       processManager.addCommand(const FakeCommand(command: <String>[
         'rsync',
@@ -277,6 +271,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
+      Pub: () => fakePubForRefreshPluginsList,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       OperatingSystemUtils: () => os,
@@ -306,7 +301,6 @@ void main() {
 
       processManager
           .addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       processManager.addCommand(const FakeCommand(command: <String>[
         'xcrun',
         'xcodebuild',
@@ -350,9 +344,7 @@ void main() {
         '--no-wifi',
         '--justlaunch',
         '--args',
-        const <String>[
-          '--enable-dart-profiling',
-        ].join(' '),
+        '--enable-dart-profiling',
       ]));
 
       final LaunchResult launchResult = await iosDevice.startApp(
@@ -366,6 +358,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
+      Pub: () => fakePubForRefreshPluginsList,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       OperatingSystemUtils: () => FakeOperatingSystemUtils(
@@ -391,7 +384,6 @@ void main() {
 
       processManager
           .addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       // The first xcrun call should fail with a
       // concurrent build exception.
       processManager.addCommand(const FakeCommand(
@@ -506,6 +498,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubForRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -545,6 +538,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubForRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -584,6 +578,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubForRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -626,6 +621,7 @@ void main() {
             contains('--enable-dart-profiling'));
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubForRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -696,6 +692,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubForRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -781,6 +778,7 @@ void main() {
           expect(processManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => fakePubForRefreshPluginsList,
           FileSystem: () => fileSystem,
           Logger: () => logger,
           OperatingSystemUtils: () => os,
@@ -870,6 +868,7 @@ void main() {
         expect(contents.contains('CONFIGURATION_BUILD_DIR'), isFalse);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubForRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -955,6 +954,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubForRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
