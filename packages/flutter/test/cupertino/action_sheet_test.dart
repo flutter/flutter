@@ -1961,17 +1961,17 @@ void main() {
 
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-          CupertinoActionSheet(
-            title: const Text('The title'),
-            message: const Text('Message'),
-            actions: <Widget>[
-              CupertinoActionSheetAction(
-                mouseCursor: customCursor,
-                onPressed: () { },
-                child: const Text('One'),
-              ),
-            ],
-          )
+        CupertinoActionSheet(
+          title: const Text('The title'),
+          message: const Text('Message'),
+          actions: <Widget>[
+            CupertinoActionSheetAction(
+              mouseCursor: customCursor,
+              onPressed: () { },
+              child: const Text('One'),
+            ),
+          ],
+        ),
       ),
     );
     await tester.tap(find.text('Go'));
@@ -1987,7 +1987,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      customCursor
+      customCursor,
     );
   });
 
