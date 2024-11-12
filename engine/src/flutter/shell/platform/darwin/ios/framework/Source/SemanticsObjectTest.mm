@@ -1206,4 +1206,18 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertTrue([itemsInRect containsObject:child1]);
   XCTAssertTrue([itemsInRect containsObject:child2]);
 }
+
+- (void)testSliderSemanticsObject {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kIsSlider);
+  SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  [object accessibilityBridgeDidFinishUpdate];
+  XCTAssertEqual([object accessibilityActivate], YES);
+}
+
 @end
