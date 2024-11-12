@@ -37,7 +37,7 @@ class ChannelCommand extends FlutterCommand {
       'Common commands:\n'
       '\n'
       ' flutter channel\n'
-      '   List Flutter channels\n'
+      '   List Flutter channels.\n'
       '\n'
       ' flutter channel main\n'
       "   Switch to Flutter's main channel.";
