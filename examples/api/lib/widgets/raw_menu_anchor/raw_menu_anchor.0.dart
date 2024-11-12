@@ -45,19 +45,19 @@ class _SimpleMenuExampleState extends State<SimpleMenuExample> {
             surfaceDecoration: RawMenuAnchor.defaultLightOverlayDecoration,
             menuChildren: <Widget>[
               MenuItemButton(
-                onPressed: (){
+                onPressed: () {
                   _handlePressed('Cut');
                 },
                 child: const Text('Cut'),
               ),
               MenuItemButton(
-                onPressed: (){
+                onPressed: () {
                   _handlePressed('Copy');
                 },
                 child: const Text('Copy'),
               ),
               MenuItemButton(
-                onPressed: (){
+                onPressed: () {
                   _handlePressed('Paste');
                 },
                 child: const Text('Paste'),

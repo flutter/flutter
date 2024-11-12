@@ -144,7 +144,5 @@ void main() {
     if (kIsWeb) {
       assert(BrowserContextMenu.enabled, isFalse);
     }
-  },
-  skip: !kIsWeb // Browser context menu is only enabled on the web
-  );
+  }, skip: !kIsWeb); // [intended] Browser context menu is only enabled on the web
 }
