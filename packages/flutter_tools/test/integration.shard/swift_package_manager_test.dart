@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -553,14 +555,14 @@ void main() {
       .childFile('.flutter-plugins-dependencies');
 
     expect(flutterPluginsDependenciesFile, exists);
-    expect(
-      flutterPluginsDependenciesFile.readAsStringSync(),
-      isNot(contains('"swift_package_manager_enabled":true')),
-    );
-    expect(
-      flutterPluginsDependenciesFile.readAsStringSync(),
-      contains('"swift_package_manager_enabled":false'),
-    );
+
+    final String dependenciesString = flutterPluginsDependenciesFile.readAsStringSync();
+    final Map<String, dynamic>? dependenciesJson = json.decode(dependenciesString) as Map<String, dynamic>?;
+    final Map<String, dynamic>? swiftPackageManagerEnabled =
+      dependenciesJson?['swift_package_manager_enabled'] as Map<String, dynamic>?;
+    final bool? swiftPackageManagerEnabledIos = swiftPackageManagerEnabled?['ios'] as bool?;
+
+    expect(swiftPackageManagerEnabledIos, isFalse);
   }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
 
   test("Generated Swift package uses iOS's project minimum deployment", () async {

@@ -210,7 +210,7 @@ public class DummyPluginAClass {
       final String flutterPluginsDependenciesFileContent = flutterPluginsDependenciesFile.readAsStringSync();
 
       final Map<String, dynamic> jsonContent = json.decode(flutterPluginsDependenciesFileContent) as Map<String, dynamic>;
-      final bool swiftPackageManagerEnabled = jsonContent['swift_package_manager_enabled'] as bool? ?? false;
+      final Map<String, dynamic>? swiftPackageManagerJson = jsonContent['swift_package_manager_enabled'] as Map<String, dynamic>?;
 
       // Verify the dependencyGraph object is valid. The rest of the contents of this file are not relevant to the
       // dependency graph and are tested by unit tests.
@@ -302,6 +302,18 @@ public class DummyPluginAClass {
 
         if (!exists(appBundle)) {
           return TaskResult.failure('Failed to build plugin A example iOS app');
+        }
+
+        final bool? swiftPackageManagerEnabled = swiftPackageManagerJson?['ios'] as bool?;
+        if (swiftPackageManagerEnabled == null) {
+          return TaskResult.failure(
+            '${flutterPluginsDependenciesFile.path} is missing the '
+            '"swift_package_manager_enabled" > "ios" property.\n'
+            '\n'
+            '.flutter_plugin_dependencies content:\n'
+            '\n'
+            '$flutterPluginsDependenciesFileContent',
+          );
         }
 
         if (swiftPackageManagerEnabled) {

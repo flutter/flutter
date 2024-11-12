@@ -548,7 +548,15 @@ dependencies:
         expect(jsonContent['dependencyGraph'], expectedDependencyGraph);
         expect(jsonContent['date_created'], dateCreated.toString());
         expect(jsonContent['version'], '1.0.0');
-        expect(jsonContent['swift_package_manager_enabled'], false);
+
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, bool>{
+          'ios': false,
+          'macos': false,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
 
         // Make sure tests are updated if a new object is added/removed.
         final List<String> expectedKeys = <String>[
@@ -665,7 +673,14 @@ dependencies:
             .readAsStringSync();
         final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-        expect(jsonContent['swift_package_manager_enabled'], true);
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
+          'ios': true,
+          'macos': true,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -702,7 +717,14 @@ dependencies:
             .readAsStringSync();
         final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-        expect(jsonContent['swift_package_manager_enabled'], false);
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
+          'ios': false,
+          'macos': false,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
