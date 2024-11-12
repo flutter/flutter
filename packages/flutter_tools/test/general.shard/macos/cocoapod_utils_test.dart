@@ -109,7 +109,7 @@ void main() {
           expect(cocoaPods.processedPods, isTrue);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
@@ -128,7 +128,7 @@ void main() {
           expect(cocoaPods.processedPods, isTrue);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
@@ -146,7 +146,7 @@ void main() {
           expect(cocoaPods.processedPods, isFalse);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
@@ -163,7 +163,7 @@ void main() {
           expect(cocoaPods.processedPods, isFalse);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
@@ -188,7 +188,7 @@ void main() {
           expect(cocoaPods.processedPods, isTrue);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
@@ -210,7 +210,7 @@ void main() {
           expect(cocoaPods.processedPods, isFalse);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
@@ -243,7 +243,7 @@ void main() {
           );
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
           Logger: () => logger,
@@ -269,7 +269,7 @@ void main() {
           expect(cocoaPods.processedPods, isTrue);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
@@ -288,7 +288,7 @@ void main() {
           expect(cocoaPods.processedPods, isTrue);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
@@ -306,7 +306,7 @@ void main() {
           expect(cocoaPods.processedPods, isFalse);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
@@ -323,7 +323,7 @@ void main() {
           expect(cocoaPods.processedPods, isFalse);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
@@ -348,7 +348,7 @@ void main() {
           expect(cocoaPods.processedPods, isTrue);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
@@ -370,7 +370,7 @@ void main() {
           expect(cocoaPods.processedPods, isFalse);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
@@ -403,7 +403,7 @@ void main() {
           );
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: FakeProcessManager.empty,
           Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
           Logger: () => logger,
