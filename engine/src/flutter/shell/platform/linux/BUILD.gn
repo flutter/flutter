@@ -92,6 +92,7 @@ source_set("flutter_linux_sources") {
              "fl_method_channel_private.h",
              "fl_method_codec_private.h",
              "fl_plugin_registrar_private.h",
+             "fl_pointer_manager.h",
              "fl_window_state_monitor.h",
              "key_mapping.h",
            ]
@@ -130,6 +131,7 @@ source_set("flutter_linux_sources") {
     "fl_platform_handler.cc",
     "fl_plugin_registrar.cc",
     "fl_plugin_registry.cc",
+    "fl_pointer_manager.cc",
     "fl_renderable.cc",
     "fl_renderer.cc",
     "fl_renderer_gdk.cc",
@@ -224,6 +226,7 @@ executable("flutter_linux_unittests") {
     "fl_pixel_buffer_texture_test.cc",
     "fl_platform_handler_test.cc",
     "fl_plugin_registrar_test.cc",
+    "fl_pointer_manager_test.cc",
     "fl_renderer_test.cc",
     "fl_scrolling_manager_test.cc",
     "fl_settings_handler_test.cc",
