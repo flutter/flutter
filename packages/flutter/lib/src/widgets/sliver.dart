@@ -925,6 +925,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           indexToLayoutOffset[index] = childParentData.layoutOffset!;
         }
 
+        // Initialize availableIndex to the current index to track the next free position if needed.
+        int availableIndex = index;
+
         if (newIndex != null && newIndex != index) {
           // The layout offset of the child being moved is no longer accurate.
           if (childParentData != null) {
@@ -937,9 +940,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
             newChildren[newIndex] = _childElements[index];
           } else {
             // Handle duplicates: skip direct reordering, and add to the next available slot later.
-            int availableIndex = newIndex;
+            // This finds the next free index if there's a duplicate key, preventing index conflicts.
             while (newChildren.containsKey(availableIndex)) {
-              availableIndex++; // Finds the next free spot.
+              availableIndex++;
             }
             newChildren[availableIndex] = _childElements[index];
           }
@@ -947,8 +950,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
             // We need to make sure the original index gets processed.
             newChildren.putIfAbsent(index, () => null);
           }
-          // We do not want the remapped child to get deactivated during processElement.
-          _childElements.remove(index);
+          // Prevents the remapped child from being deactivated during processElement by using availableIndex.
+          _childElements.remove(availableIndex);
         } else {
           newChildren.putIfAbsent(index, () => _childElements[index]);
         }
