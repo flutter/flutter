@@ -898,11 +898,11 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   DelegatedTransitionBuilder? get delegatedTransition => (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child)
-      => _snapshotAwareDelegatedTransition(context, secondaryAnimation, child, allowSnapshotting && this.allowSnapshotting, allowEnterRouteSnapshotting, backgroundColor);
+      => _snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting && this.allowSnapshotting, allowEnterRouteSnapshotting, backgroundColor);
 
   // A transition builder that takes into account the snapshotting properties of
   // ZoomPageTransitionsBuilder.
-  static Widget _snapshotAwareDelegatedTransition(BuildContext context, Animation<double> secondaryAnimation, Widget? child, bool allowSnapshotting, bool allowEnterRouteSnapshotting, Color? backgroundColor) {
+  static Widget _snapshotAwareDelegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child, bool allowSnapshotting, bool allowEnterRouteSnapshotting, Color? backgroundColor) {
     final Color enterTransitionBackgroundColor = backgroundColor ?? Theme.of(context).colorScheme.surface;
     return DualTransitionBuilder(
       animation: ReverseAnimation(secondaryAnimation),
