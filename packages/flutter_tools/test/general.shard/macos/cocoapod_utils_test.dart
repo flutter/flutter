@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/macos/cocoapod_utils.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
@@ -16,6 +17,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_pub_deps.dart';
 
 void main() {
   group('processPodsIfNeeded', () {
@@ -108,6 +110,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
 
@@ -126,6 +129,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
 
@@ -143,6 +147,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
 
@@ -159,6 +164,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
       });
@@ -183,6 +189,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
 
@@ -204,6 +211,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
 
@@ -236,6 +244,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
           Logger: () => logger,
         });
@@ -261,6 +270,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
 
@@ -279,6 +289,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
 
@@ -296,6 +307,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
 
@@ -312,6 +324,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
       });
@@ -336,6 +349,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
 
@@ -357,6 +371,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
         });
 
@@ -389,6 +404,7 @@ void main() {
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => FakePubWithPrimedDeps(rootPackageName: 'app_name'),
           CocoaPods: () => cocoaPods,
           Logger: () => logger,
         });

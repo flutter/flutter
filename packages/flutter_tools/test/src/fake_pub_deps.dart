@@ -16,29 +16,69 @@ final class FakePubWithPrimedDeps implements Pub {
   /// dev-dependencies ([dependencies]) of any package to a set of any other
   /// packages. A resulting valid `dart pub deps --json` response is implicitly
   /// created.
-  const FakePubWithPrimedDeps({
+  factory FakePubWithPrimedDeps({
     required String rootPackageName,
     Set<String> devDependencies = const <String>{},
     Map<String, Set<String>> dependencies = const <String, Set<String>>{},
-  })  : _rootPackage = rootPackageName,
-        _devDependencies = devDependencies,
-        _dependencies = dependencies;
+  }) {
+    // Start the packages: [ ... ] list with the root package.
+    final List<Object?> packages = <Object?>[
+      <String, Object?>{
+        'name': rootPackageName,
+        'kind': 'root',
+        'dependencies': <String>[
+          ...dependencies.keys,
+          ...devDependencies,
+        ]..sort(),
+        'directDependencies': <String>[
+          ...?dependencies[rootPackageName],
+          ...devDependencies,
+        ]..sort(),
+        'devDependencies': <String>[
+          ...devDependencies,
+        ],
+      },
+    ];
 
-  final String _rootPackage;
-  final Set<String> _devDependencies;
-  final Map<String, Set<String>> _dependencies;
+    // Add all non-dev dependencies.
+    for (final String packageName in dependencies.keys) {
+      final bool direct = dependencies[rootPackageName]!.contains(packageName);
+      packages.add(<String, Object?>{
+        'name': packageName,
+        'kind': direct ? 'direct' : 'transitive',
+        'dependencies': <String>[
+          ...?dependencies[packageName],
+        ],
+        'directDependencies': <String>[
+          ...?dependencies[packageName],
+        ],
+      });
+    }
 
-  List<String> _getDeps(String name) {
-    return _dependencies[_rootPackage]?.toList() ?? const <String>[];
+    // Add all dev-dependencies.
+    for (final String packageName in devDependencies) {
+      packages.add(<String, Object?>{
+        'name': packageName,
+        'kind': 'dev',
+        'dependencies': <String>[],
+        'directDependencies': <String>[],
+      });
+    }
+
+    return FakePubWithPrimedDeps._(<String, Object?>{
+      'root': rootPackageName,
+      'packages': packages,
+    });
   }
+
+  const FakePubWithPrimedDeps._(this._deps);
+  final Map<String, Object?> _deps;
 
   @override
-  Future<Map<String, Object?>> deps(FlutterProject project) async {
-    throw UnimplementedError();
-  }
+  Future<Map<String, Object?>> deps(FlutterProject project) async => _deps;
 
   @override
   Never noSuchMethod(Invocation invocation) {
-    throw UnsupportedError('Only Pub.deps is expected to be called');
+    throw UnsupportedError('Only <Pub>.deps is expected to be called');
   }
 }
