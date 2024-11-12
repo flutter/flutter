@@ -1771,6 +1771,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectable?.removeListener(_updateSelectionStatus);
     _selectable?.pushHandleLayers(null, null);
     _selectionDelegate.dispose();
+    _selectionStatusNotifier.dispose();
     // In case dispose was triggered before gesture end, remove the magnifier
     // so it doesn't remain stuck in the overlay forever.
     _selectionOverlay?.hideMagnifier();
@@ -3268,6 +3269,8 @@ class _SelectionListenerState extends State<SelectionListener> {
 
   @override
   void dispose() {
+    _selectableRegionScope?.removeListener(_handleOnSelectableRegionChanged);
+    _selectableRegionScope = null;
     _selectionDelegate.dispose();
     super.dispose();
   }
