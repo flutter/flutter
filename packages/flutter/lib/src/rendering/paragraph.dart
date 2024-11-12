@@ -1488,14 +1488,11 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
 
   @override
   SelectedContentRange getSelection() {
-    assert(range.isNormalized);
-    final int contentLength = range.end - range.start;
     assert(!contentLength.isNegative);
     if (_textSelectionStart == null || _textSelectionEnd == null) {
-      return SelectedContentRange.empty(contentLength: contentLength);
+      return SelectedContentRange.empty();
     }
     return SelectedContentRange(
-      contentLength: contentLength,
       startOffset: _textSelectionStart!.offset,
       endOffset: _textSelectionEnd!.offset,
     );
@@ -3061,6 +3058,9 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     _cachedRect = null;
     _cachedBoundingBoxes = null;
   }
+
+  @override
+  int get contentLength => range.end - range.start;
 
   @override
   Size get size {

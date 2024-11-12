@@ -92,9 +92,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 
   /// Gets the [SelectedContentRange] representing the selected range in this object.
   ///
-  /// When nothing is selected, subclasses should return a [SelectedContentRange.empty],
-  /// with a [SelectedContentRange.contentLength] that represents the length
-  /// of the content under this [SelectionHandler].
+  /// When nothing is selected, subclasses should return a [SelectedContentRange.empty].
   SelectedContentRange getSelection();
 
   /// Handles the [SelectionEvent] sent to this object.
@@ -109,6 +107,9 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// See also:
   ///  * [SelectionEventType], which contains all of the possible types.
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
+
+  /// The length of the content in this [SelectionHandler].
+  int get contentLength;
 }
 
 /// This class stores the information of the selection under a [Selectable]
@@ -120,7 +121,6 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 class SelectedContentRange with Diagnosticable {
   /// Creates a [SelectedContentRange] with the given values.
   const SelectedContentRange({
-    required this.contentLength,
     required this.startOffset,
     required this.endOffset,
   }) : assert((startOffset >= 0 && endOffset >= 0)
@@ -128,20 +128,10 @@ class SelectedContentRange with Diagnosticable {
 
   /// A selected content range that represents an empty selection, i.e. nothing
   /// is selected.
-  const SelectedContentRange.empty({
-    int contentLength = 0,
-  }) : this(
-        contentLength: contentLength,
+  const SelectedContentRange.empty() : this(
         startOffset: -1,
         endOffset: -1,
       );
-
-  /// The length of the content in the [Selectable] or [SelectionHandler] that
-  /// created this object.
-  ///
-  /// The absolute value of the difference between the [startOffset] and [endOffset]
-  /// contained by this [SelectedContentRange] must not exceed the content length.
-  final int contentLength;
 
   /// The start of the selection relative to the start of the content.
   ///
@@ -173,8 +163,8 @@ class SelectedContentRange with Diagnosticable {
   /// [SelectionHandler.getSelection] will be relative to the text of the
   /// [TextSpan] tree, with [WidgetSpan] content being flattened. The [startOffset]
   /// will be 6, and [endOffset] will be 56. This takes into account the
-  /// length of the content in the [WidgetSpan], which is 19, so the overall
-  /// [contentLength] will be 56.
+  /// length of the content in the [WidgetSpan], which is 19, making the overall
+  /// length of the content 56.
   ///
   /// If [startOffset] and [endOffset] are both -1, the selected content range is
   /// empty, i.e. nothing is selected.
@@ -186,8 +176,8 @@ class SelectedContentRange with Diagnosticable {
   /// {@macro flutter.rendering.selection.SelectedContentRange.selectionOffsets}
   final int endOffset;
 
-  /// Whether this range represents an empty selection.
-  bool get isEmpty => startOffset == -1 && endOffset == -1;
+  /// Whether this range represents a valid selection.
+  bool get isValid => startOffset >= 0 && endOffset >= 0;
 
   @override
   bool operator ==(Object other) {
@@ -198,7 +188,6 @@ class SelectedContentRange with Diagnosticable {
       return false;
     }
     return other is SelectedContentRange
-        && other.contentLength == contentLength
         && other.startOffset == startOffset
         && other.endOffset == endOffset;
   }
@@ -206,7 +195,6 @@ class SelectedContentRange with Diagnosticable {
   @override
   int get hashCode {
     return Object.hash(
-      contentLength,
       startOffset,
       endOffset,
     );
@@ -215,7 +203,6 @@ class SelectedContentRange with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IntProperty('contentLength', contentLength));
     properties.add(IntProperty('startOffset', startOffset));
     properties.add(IntProperty('endOffset', endOffset));
   }

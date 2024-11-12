@@ -209,6 +209,9 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
   }
 
   @override
+  int get contentLength => widget.delegate!.contentLength;
+
+  @override
   Size get size => (context.findRenderObject()! as RenderBox).size;
 
   @override

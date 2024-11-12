@@ -2639,16 +2639,21 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     );
   }
 
+  /// The total length of the content under this [SelectionContainerDelegate].
+  ///
+  /// This value is derived from the [Selectable.contentLength] of each [Selectable]
+  /// managed by this delegate.
+  @override
+  int get contentLength => selectables.fold<int>(0, (int sum, Selectable selectable) => sum + selectable.contentLength);
+
   /// This method calculates a local [SelectedContentRange] based on the list
   /// of [ranges] that are accumulated from the [Selectable] children under this
   /// delegate. This calculation takes into account the accumulated content
   /// length before the active selection, and returns a [SelectedContentRange.empty]
   /// when either selection edge has not been set.
-  SelectedContentRange _calculateLocalRange(List<SelectedContentRange> ranges) {
-    // Calculate content length.
-    final int totalContentLength = ranges.fold<int>(0, (int sum, SelectedContentRange range) => sum + range.contentLength);
+  SelectedContentRange _calculateLocalRange(List<(int, SelectedContentRange)> ranges) {
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
-      return SelectedContentRange.empty(contentLength: totalContentLength);
+      return SelectedContentRange.empty();
     }
     int startOffset = 0;
     int endOffset = 0;
@@ -2661,21 +2666,20 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       forwardSelection = rangeAtSelectableInSelection.endOffset >= rangeAtSelectableInSelection.startOffset;
     }
     for (int index = 0; index < ranges.length; index++) {
-      final SelectedContentRange range = ranges[index];
-      if (range.isEmpty) {
+      final (int, SelectedContentRange) range = ranges[index];
+      if (!range.$2.isValid) {
         if (foundStart) {
           return SelectedContentRange(
-            contentLength: totalContentLength,
             startOffset: forwardSelection ? startOffset : endOffset,
             endOffset: forwardSelection ? endOffset : startOffset,
           );
         }
-        startOffset += range.contentLength;
+        startOffset += range.$1;
         endOffset = startOffset;
         continue;
       }
-      final int selectionStartNormalized = min(range.startOffset, range.endOffset);
-      final int selectionEndNormalized = max(range.startOffset, range.endOffset);
+      final int selectionStartNormalized = min(range.$2.startOffset, range.$2.endOffset);
+      final int selectionEndNormalized = max(range.$2.startOffset, range.$2.endOffset);
       if (!foundStart) {
         startOffset += selectionStartNormalized;
         endOffset = startOffset + (selectionEndNormalized - selectionStartNormalized).abs();
@@ -2686,7 +2690,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
     assert(foundStart, 'The start of the selection has not been found despite this selection delegate having an existing currentSelectionStartIndex and currentSelectionEndIndex.');
     return SelectedContentRange(
-      contentLength: totalContentLength,
       startOffset: forwardSelection ? startOffset : endOffset,
       endOffset: forwardSelection ? endOffset : startOffset,
     );
@@ -2700,9 +2703,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// length accumulated from each [Selectable] child managed under this delegate.
   @override
   SelectedContentRange getSelection() {
-    final List<SelectedContentRange> selections = <SelectedContentRange>[
+    final List<(int, SelectedContentRange)> selections = <(int, SelectedContentRange)>[
       for (final Selectable selectable in selectables)
-        selectable.getSelection(),
+        (selectable.contentLength, selectable.getSelection()),
     ];
     return _calculateLocalRange(selections);
   }
