@@ -157,9 +157,6 @@ class SelectedContentRange with Diagnosticable {
   /// will be 6, and [endOffset] will be 56. This takes into account the
   /// length of the content in the [WidgetSpan], which is 19, making the overall
   /// length of the content 56.
-  ///
-  /// If [startOffset] and [endOffset] are both -1, the selected content range is
-  /// empty, i.e. nothing is selected.
   /// {@endtemplate}
   final int startOffset;
 
