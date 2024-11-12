@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:test/fake.dart';
@@ -25,6 +26,7 @@ import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -138,13 +140,6 @@ void main() {
 
   const FakeCommand xattrCommand = FakeCommand(command: <String>[
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
-  ]);
-
-  const FakeCommand dartPubDepsCommand = FakeCommand(command: <String>[
-    'dart',
-    'pub',
-    'deps',
-    '--json',
   ]);
 
   FakeCommand setUpXCResultCommand({String stdout = '', void Function(List<String> command)? onRun}) {
@@ -405,7 +400,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
     ]);
@@ -420,6 +414,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -437,7 +432,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -467,6 +461,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
   });
@@ -484,7 +479,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -514,6 +508,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
   });
@@ -531,7 +526,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -561,6 +555,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
   });
@@ -577,7 +572,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
     ]);
@@ -590,6 +584,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
   });
@@ -607,7 +602,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -637,6 +631,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
   });
@@ -653,7 +648,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
     ]);
@@ -666,6 +660,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
   });
@@ -682,7 +677,6 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: exportOptions.path),
     ]);
@@ -705,6 +699,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
@@ -722,7 +717,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       const FakeCommand(
         command: <String>[
@@ -761,6 +755,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -778,7 +773,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(
         exportOptionsPlist: _exportOptionsPlist,
@@ -796,6 +790,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -813,7 +808,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -849,6 +843,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -866,7 +861,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -902,6 +896,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -919,7 +914,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -955,6 +949,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -971,7 +966,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(verbose: true),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
     ]);
@@ -985,6 +979,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1001,7 +996,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
     ]);
@@ -1014,6 +1008,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1030,7 +1025,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       const FakeCommand(
         command: <String>[
           'xcrun',
@@ -1067,6 +1061,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1083,7 +1078,6 @@ void main() {
     );
     createMinimalMockProjectFiles();
 
-    fakeProcessManager.addCommand(dartPubDepsCommand);
     fakeProcessManager.addCommand(setUpFakeXcodeBuildHandler());
     await expectToolExitLater(
       createTestCommandRunner(command).run(
@@ -1094,6 +1088,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1115,7 +1110,6 @@ void main() {
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
@@ -1149,6 +1143,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Analytics: () => fakeAnalytics,
@@ -1171,7 +1166,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(),
     ]);
@@ -1193,6 +1187,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1209,7 +1204,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
@@ -1228,6 +1222,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1244,7 +1239,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
@@ -1264,6 +1258,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1280,7 +1275,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
@@ -1302,6 +1296,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1318,7 +1313,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1),
     ]);
     createMinimalMockProjectFiles();
@@ -1334,6 +1328,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1351,7 +1346,6 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
@@ -1374,6 +1368,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1384,7 +1379,6 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
@@ -1428,6 +1422,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
@@ -1438,7 +1433,6 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
@@ -1488,6 +1482,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
@@ -1498,7 +1493,6 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
@@ -1547,6 +1541,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
@@ -1558,7 +1553,6 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
@@ -1592,6 +1586,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
@@ -1602,7 +1597,6 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
@@ -1636,6 +1630,7 @@ void main() {
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
+    Pub: FakePubWithPrimedDeps.new,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
   });
@@ -1649,7 +1644,6 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateIconContentsJsonPath)
         ..createSync(recursive: true)
@@ -1720,6 +1714,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1732,7 +1727,6 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateIconContentsJsonPath)
           ..createSync(recursive: true)
@@ -1803,6 +1797,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1813,7 +1808,6 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
@@ -1866,6 +1860,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1876,7 +1871,6 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
@@ -1930,6 +1924,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1940,7 +1935,6 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
@@ -1993,6 +1987,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -2003,7 +1998,6 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         // Uses unknown format version 123.
         fileSystem.file(projectIconContentsJsonPath)
@@ -2059,6 +2053,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -2076,7 +2071,6 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         // The following json contains examples of:
         // - invalid size
@@ -2170,6 +2164,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -2182,7 +2177,6 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateLaunchImageContentsJsonPath)
           ..createSync(recursive: true)
@@ -2251,6 +2245,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -2264,7 +2259,6 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateLaunchImageContentsJsonPath)
           ..createSync(recursive: true)
@@ -2333,6 +2327,7 @@ void main() {
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
