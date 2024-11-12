@@ -111,6 +111,7 @@ class NavigationBar extends StatelessWidget {
     this.height,
     this.labelBehavior,
     this.overlayColor,
+    this.labelTextStyle,
     this.labelPadding,
   }) :  assert(destinations.length >= 2),
         assert(0 <= selectedIndex && selectedIndex < destinations.length);
@@ -224,6 +225,19 @@ class NavigationBar extends StatelessWidget {
   /// the [NavigationDestination] is focused, hovered, or pressed.
   final MaterialStateProperty<Color?>? overlayColor;
 
+  //// The text style of the label.
+  ///
+  /// If null, [NavigationBarThemeData.labelTextStyle] is used. If that
+  /// is also null, the default text style is [TextTheme.labelMedium] with
+  /// [ColorScheme.onSurface] when the destination is selected, and
+  /// [ColorScheme.onSurfaceVariant] when the destination is unselected, and
+  /// [ColorScheme.onSurfaceVariant] with an opacity of 0.38 when the
+  /// destination is disabled.
+  ///
+  /// If [ThemeData.useMaterial3] is false, then the default text style is
+  /// [TextTheme.labelSmall] with [ColorScheme.onSurface].
+  final MaterialStateProperty<TextStyle?>? labelTextStyle;
+
   /// The padding around the [NavigationDestination.label] widget.
   ///
   /// When [labelPadding] is null, [NavigationBarThemeData.labelPadding]
@@ -275,6 +289,7 @@ class NavigationBar extends StatelessWidget {
                         indicatorShape: indicatorShape,
                         overlayColor: overlayColor,
                         onTap: _handleTap(i),
+                        labelTextStyle: labelTextStyle,
                         labelPadding: labelPadding,
                         child: destinations[i],
                       );
@@ -426,11 +441,14 @@ class NavigationDestination extends StatelessWidget {
         );
       },
       buildLabel: (BuildContext context) {
-        final TextStyle? effectiveSelectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(selectedState)
+        final TextStyle? effectiveSelectedLabelTextStyle = info.labelTextStyle?.resolve(selectedState)
+          ?? navigationBarTheme.labelTextStyle?.resolve(selectedState)
           ?? defaults.labelTextStyle!.resolve(selectedState);
-        final TextStyle? effectiveUnselectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(unselectedState)
+        final TextStyle? effectiveUnselectedLabelTextStyle = info.labelTextStyle?.resolve(unselectedState)
+          ??  navigationBarTheme.labelTextStyle?.resolve(unselectedState)
           ?? defaults.labelTextStyle!.resolve(unselectedState);
-        final TextStyle? effectiveDisabledLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(disabledState)
+        final TextStyle? effectiveDisabledLabelTextStyle = info.labelTextStyle?.resolve(disabledState)
+          ?? navigationBarTheme.labelTextStyle?.resolve(disabledState)
           ?? defaults.labelTextStyle!.resolve(disabledState);
         final EdgeInsetsGeometry labelPadding = info.labelPadding
           ?? navigationBarTheme.labelPadding
@@ -604,6 +622,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
     required this.indicatorShape,
     required this.overlayColor,
     required this.onTap,
+    this.labelTextStyle,
     this.labelPadding,
     required super.child,
   });
@@ -681,6 +700,9 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// This is computed by calling [NavigationBar.onDestinationSelected]
   /// with [index] passed in.
   final VoidCallback onTap;
+
+  /// The text style of the label.
+  final MaterialStateProperty<TextStyle?>? labelTextStyle;
 
   /// The padding around the [label] widget.
   ///
