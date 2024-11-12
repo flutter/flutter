@@ -1145,7 +1145,7 @@ typedef SlowWarningCallback = String Function();
 /// a [Status] or one of its subclasses.
 abstract class Status {
   Status({
-    void Function()? onFinish,
+    VoidCallback? onFinish,
     required Stopwatch stopwatch,
     Duration? timeout,
   })  : _timeout = timeout,
@@ -1213,8 +1213,8 @@ class SilentStatus extends Status {
 
 const int _kTimePadding = 8; // should fit "99,999ms"
 
-/// Constructor writes [_message] to [stdout]. On [cancel] or [stop], will call
-/// [_onFinish]. On [stop], will additionally print out summary information.
+/// Constructor writes [message] to [stdout]. On [cancel] or [stop], will call
+/// [onFinish]. On [stop], will additionally print out summary information.
 class SummaryStatus extends Status {
   SummaryStatus({
     String message = '',
@@ -1284,7 +1284,7 @@ class AnonymousSpinnerStatus extends Status {
     required super.stopwatch,
     required Stdio stdio,
     required Terminal terminal,
-    String Function()? slowWarningCallback,
+    SlowWarningCallback? slowWarningCallback,
     TerminalColor? warningColor,
     super.timeout,
   })  : _warningColor = warningColor,
@@ -1433,10 +1433,10 @@ class AnonymousSpinnerStatus extends Status {
 
 /// An animated version of [Status].
 ///
-/// The constructor writes [_message] to [stdout] with padding, then starts an
+/// The constructor writes [message] to [stdout] with padding, then starts an
 /// indeterminate progress indicator animation.
 ///
-/// On [cancel] or [stop], will call [_onFinish]. On [stop], will
+/// On [cancel] or [stop], will call [onFinish]. On [stop], will
 /// additionally print out summary information.
 ///
 /// Call [pause] before outputting any text while this is running.
