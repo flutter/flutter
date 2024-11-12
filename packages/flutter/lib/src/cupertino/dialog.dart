@@ -115,7 +115,7 @@ const double _kActionSheetButtonVerticalPaddingBase = 1.8;
 // Extracted from https://developer.apple.com/design/resources/.
 const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xCCF2F2F2),
-  darkColor: Color(0xBF1E1E1E),
+  darkColor: Color(0xCC2D2D2D),
 );
 
 // Translucent light gray that is painted on top of the blurred backdrop as the
@@ -123,7 +123,7 @@ const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
 // Eyeballed from iOS 13 beta simulator.
 const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFE1E1E1),
-  darkColor: Color(0xFF2E2E2E),
+  darkColor: Color(0xFF404040),
 );
 
 // Translucent light gray that is painted on top of the blurred backdrop as the
