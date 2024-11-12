@@ -1957,7 +1957,7 @@ void main() {
   });
 
   testWidgets('Hovering over Cupertino action sheet action updates to the passed cursor on desktop', (WidgetTester tester) async {
-    const SystemMouseCursor customCursor = SystemMouseCursors.precise;
+    const SystemMouseCursor customCursor = SystemMouseCursors.click;
 
     await tester.pumpWidget(
         createAppWithButtonThatLaunchesActionSheet(
@@ -1967,7 +1967,7 @@ void main() {
               actions: <Widget>[
                 CupertinoActionSheetAction(
                   onPressed: () { },
-                  cursor: customCursor,
+                  mouseCursor: customCursor,
                   child: const Text('One'),
                 ),
               ],
