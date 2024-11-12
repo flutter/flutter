@@ -39,7 +39,7 @@ class HomePage extends StatelessWidget {
             CupertinoButton.filled(
               onPressed: () {
                 Navigator.of(context).push(CupertinoSheetRoute<void>(
-                  pageBuilder: (BuildContext context) => const SheetScaffold()
+                  builder: (BuildContext context) => const SheetScaffold()
                 ));
               },
               child: const Text('Open Bottom Sheet'),
@@ -72,7 +72,7 @@ class SheetScaffold extends StatelessWidget {
             CupertinoButton.filled(
               onPressed: () {
                 Navigator.of(context).push(CupertinoSheetRoute<void>(
-                  pageBuilder: (BuildContext context) => const SheetScaffold()
+                  builder: (BuildContext context) => const SheetScaffold()
                 ));
               },
               child: const Text('Push Sheet'),

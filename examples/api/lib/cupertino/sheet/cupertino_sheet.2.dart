@@ -115,7 +115,7 @@ class SheetNextPage extends StatelessWidget {
             ),
             CupertinoButton.filled(
               onPressed: () {
-                CupertinoSheetRoute.of(context).popSheet();
+                CupertinoSheetRoute.popSheet(context);
               },
               child: const Text('Pop whole sheet'),
             ),

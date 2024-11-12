@@ -39,7 +39,7 @@ class HomePage extends StatelessWidget {
             CupertinoButton.filled(
               onPressed: () {
                 Navigator.of(context).push(CupertinoSheetRoute<void>(
-                  pageBuilder: (BuildContext context) => const SheetContentWithNavigator()
+                  builder: (BuildContext context) => const SheetContentWithNavigator()
                 ));
               },
               child: const Text('Open Bottom Sheet'),
@@ -88,7 +88,6 @@ class SheetScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BuildContext? topLevelContext = CupertinoSheetController.maybeOf(context)?.topLevelContext;
     return CupertinoPageScaffold(
       child: Center(
         child: Column(
@@ -111,8 +110,8 @@ class SheetScaffold extends StatelessWidget {
             ),
             CupertinoButton.filled(
               onPressed: () {
-                Navigator.of(topLevelContext ?? context).push(CupertinoSheetRoute<void>(
-                  pageBuilder: (BuildContext context) => const SheetContentWithNavigator()
+                Navigator.of(context, rootNavigator: true).push(CupertinoSheetRoute<void>(
+                  builder: (BuildContext context) => const SheetContentWithNavigator()
                 ));
               },
               child: const Text('Push Sheet'),
@@ -129,7 +128,6 @@ class SheetNextPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BuildContext? topLevelContext = CupertinoSheetController.maybeOf(context)?.topLevelContext;
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.activeOrange,
       child: Center(
@@ -145,7 +143,7 @@ class SheetNextPage extends StatelessWidget {
             ),
             CupertinoButton.filled(
               onPressed: () {
-                CupertinoSheetRoute.of(context).popSheet();
+                CupertinoSheetRoute.popSheet(context);
               },
               child: const Text('Pop whole sheet'),
             ),
@@ -159,8 +157,8 @@ class SheetNextPage extends StatelessWidget {
             ),
             CupertinoButton.filled(
               onPressed: () {
-                Navigator.of(topLevelContext ?? context).push(CupertinoSheetRoute<void>(
-                  pageBuilder: (BuildContext context) => const SheetContentWithNavigator()
+                Navigator.of(context, rootNavigator: true).push(CupertinoSheetRoute<void>(
+                  builder: (BuildContext context) => const SheetContentWithNavigator()
                 ));
               },
               child: const Text('Push Sheet'),

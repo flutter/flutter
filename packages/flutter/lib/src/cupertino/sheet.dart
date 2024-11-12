@@ -42,42 +42,42 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 Future<T?> showCupertinoSheet<T>({
   required BuildContext context,
   required WidgetBuilder pageBuilder,
-  bool useRootNavigator = true,
   bool useNestedNavigation = false,
 }) {
-  final BuildContext topLevelSheetContext = CupertinoSheetController.maybeOf(context)?.topLevelContext ?? context;
-
-  final WidgetBuilder builder = switch (useNestedNavigation) {
-    false => pageBuilder,
-    true => (BuildContext context) {
-      return Navigator(
-        initialRoute: '/',
-        onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
-            builder: (BuildContext context) {
-              return PopScope(
-                canPop: settings.name != '/',
-                onPopInvokedWithResult: (bool didPop, Object? result) {
-                  if (didPop) {
-                    return;
-                  }
-                  Navigator.of(topLevelSheetContext).pop();
-                },
-                child: Semantics(
-                  scopesRoute: true,
-                  explicitChildNodes: true,
-                  child: pageBuilder(context),
-                ),
-              );
-            }
-          );
+  final WidgetBuilder builder;
+  if (!useNestedNavigation) {
+    builder = pageBuilder;
+  } else {
+    builder = (BuildContext context) {
+      return NavigatorPopHandler(
+        onPopWithResult: (T? result) {
+          Navigator.of(context, rootNavigator: true).maybePop();
         },
+        child: Navigator(
+          initialRoute: '/',
+          onGenerateRoute: (RouteSettings settings) {
+            return CupertinoPageRoute<void>(
+              builder: (BuildContext context) {
+                return PopScope(
+                  canPop: settings.name != '/',
+                  onPopInvokedWithResult: (bool didPop, Object? result) {
+                    if (didPop) {
+                      return;
+                    }
+                    Navigator.of(context, rootNavigator: true).pop();
+                  },
+                  child: pageBuilder(context),
+                );
+              }
+            );
+          },
+        ),
       );
-    }
-  };
+    };
+  }
 
-  return Navigator.of(topLevelSheetContext, rootNavigator: useRootNavigator).push<T>(CupertinoSheetRoute<T>(
-    pageBuilder: builder,
+  return Navigator.of(context, rootNavigator: true).push<T>(CupertinoSheetRoute<T>(
+    builder: builder,
   ));
 }
 
@@ -105,7 +105,7 @@ class CupertinoSheetTransition extends StatelessWidget {
   /// If a [CupertinoSheetController] already exists in the stack, then it will
   /// slide the previous sheet upwards instead.
   static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {
-    if (CupertinoSheetController.maybeOf(context) != null) {
+    if (CupertinoSheetRoute.hasParentSheet(context)) {
       return _coverSheetSecondaryTransition(secondaryAnimation, child);
     }
 
@@ -149,9 +149,9 @@ class CupertinoSheetTransition extends StatelessWidget {
 
   static Widget _coverSheetPrimaryTransition(BuildContext context, Animation<double> animation, Widget? child) {
     final Animatable<Offset> offsetTween =
-      CupertinoSheetController.maybeOf(context) == null ?
-      _kBottomUpTween :
-      _kFullBottomUpTween;
+      CupertinoSheetRoute.hasParentSheet(context) ?
+      _kFullBottomUpTween :
+      _kBottomUpTween;
 
     final Animation<Offset> positionAnimation =
       CurvedAnimation(
@@ -213,33 +213,30 @@ class CupertinoSheetTransition extends StatelessWidget {
 class CupertinoSheetRoute<T> extends PageRoute<T> with CupertinoSheetRouteTransitionMixin<T> {
   /// Creates a page route for use in an iOS designed app.
   CupertinoSheetRoute({
-    required this.pageBuilder,
+    required this.builder,
   });
 
   /// Docs placeholder
-  final WidgetBuilder pageBuilder;
+  final WidgetBuilder builder;
 
   @override
   DelegatedTransitionBuilder? get delegatedTransition => CupertinoSheetTransition.delegateTransition;
 
   @override
   Widget buildContent(BuildContext context) {
-    final BuildContext? topLevelContext = CupertinoSheetController.maybeOf(context)?.topLevelContext;
-    return CupertinoSheetController(
-      context: context,
-      topLevelContext: topLevelContext ?? context,
-      child: pageBuilder(context),
+    return _CupertinoSheetScope(
+      child: builder(context),
     );
   }
 
   /// Docs placeholder
-  static CupertinoSheetController? maybeOf(BuildContext context) {
-    return CupertinoSheetController.maybeOf(context);
+  static bool hasParentSheet(BuildContext context) {
+    return _CupertinoSheetScope.maybeOf(context) != null;
   }
 
   /// Docs placeholder
-  static CupertinoSheetController of(BuildContext context) {
-    return CupertinoSheetController.of(context);
+  static void popSheet(BuildContext context) {
+    Navigator.of(context, rootNavigator: true).pop();
   }
 
   @override
@@ -259,52 +256,21 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with CupertinoSheetRouteTransi
 }
 
 /// Docs placeholder
-class CupertinoSheetController extends InheritedWidget {
+class _CupertinoSheetScope extends InheritedWidget {
   /// Docs placeholder
-  const CupertinoSheetController({
-    super.key,
-    required this.context,
-    required this.topLevelContext,
+  const _CupertinoSheetScope({
     required super.child,
   });
 
-  /// Context for the location of the [CupertinoSheetController].
-  ///
-  /// Used to pop the whole sheet route at once from any location below the sheet
-  /// on the tree.
-  final BuildContext context;
-
-  /// Context for the location of the top level [CupertinoSheetController].
-  ///
-  /// If there is a [Navigator] within a [CupertinoSheetRoute], then this
-  /// `topLevelContext` is useful for pushing routes to the [Navigator] that
-  /// wraps all of the sheets in the stack. Usefull for adding a new
-  /// [CupertinoSheetRoute], or any page route that needs to animate outside the
-  /// bounds of the sheet.
-  final BuildContext topLevelContext;
-
-  /// Docs placeholder
-  static CupertinoSheetController? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<CupertinoSheetController>();
-  }
-
-  /// Docs placeholder
-  static CupertinoSheetController of(BuildContext context) {
-    final CupertinoSheetController? result = maybeOf(context);
-    assert(result != null, 'No CupertinoSheetController found in context');
-    return result!;
-  }
-
-  /// Docs placeholder
-  void popSheet() {
-    Navigator.of(context).pop();
+  static _CupertinoSheetScope? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_CupertinoSheetScope>();
   }
 
   // FOR REVIEW: Not sure what the smartest way to do this is. My intinct is to
   // always have this return false. But if so, should this widget not be an
   // InheritedWidget?
   @override
-  bool updateShouldNotify(CupertinoSheetController oldWidget) => oldWidget.key != null && key != null && oldWidget.key != key;
+  bool updateShouldNotify(_CupertinoSheetScope oldWidget) => oldWidget.key != null && key != null && oldWidget.key != key;
 }
 
 /// Docs placeholder
