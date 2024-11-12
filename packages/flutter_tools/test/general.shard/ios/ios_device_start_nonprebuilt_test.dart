@@ -469,6 +469,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -504,6 +505,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -539,6 +541,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -575,6 +578,7 @@ void main() {
         expect(coreDeviceControl.argumentsUsedForLaunch, contains('--enable-dart-profiling'));
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -642,6 +646,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -718,6 +723,7 @@ void main() {
           expect(processManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => fakePubBecauseRefreshPluginsList,
           FileSystem: () => fileSystem,
           Logger: () => logger,
           OperatingSystemUtils: () => os,
@@ -799,6 +805,7 @@ void main() {
         expect(contents.contains('CONFIGURATION_BUILD_DIR'), isFalse);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -839,6 +846,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         Platform: () => macPlatform,
@@ -878,6 +886,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
