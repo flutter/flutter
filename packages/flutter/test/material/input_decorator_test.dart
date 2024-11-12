@@ -1676,8 +1676,9 @@ void main() {
           excludes: <Offset>[
             labelBottomLeftLocalToBorder,
           ],
-          // The point just before the label bottom left corner should be part of the border.
+          // The points just before the label bottom left corner should be part of the border.
           includes: <Offset>[
+            labelBottomLeftLocalToBorder + const Offset(-1, 0),
             labelBottomLeftLocalToBorder + const Offset(-1, -1),
           ],
         )
@@ -1696,8 +1697,9 @@ void main() {
           excludes: <Offset>[
             labelBottomRightLocalToBorder,
           ],
-          // The point just after the label bottom right corner should be part of the border.
+          // The points just after the label bottom right corner should be part of the border.
           includes: <Offset>[
+            labelBottomRightLocalToBorder + const Offset(1, 0),
             labelBottomRightLocalToBorder + const Offset(1, -1),
           ],
         )
