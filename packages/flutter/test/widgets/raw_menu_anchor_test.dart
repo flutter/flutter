@@ -951,7 +951,7 @@ void main() {
         ]));
   });
 
-  testWidgets('[OverlayBuilder] Focus traversal shortcuts are defined and are not bound to actions', (WidgetTester tester) async {
+  testWidgets('[OverlayBuilder] Focus traversal shortcuts are not bound to actions', (WidgetTester tester) async {
       final FocusNode anchorFocusNode = FocusNode(
         debugLabel: Tag.anchor.focusNode,
       );
@@ -960,6 +960,12 @@ void main() {
       );
       addTearDown(anchorFocusNode.dispose);
       addTearDown(bFocusNode.dispose);
+
+      final Map<ShortcutActivator, Intent> traversalShortcuts = <ShortcutActivator, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
+        LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
+        LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+      };
 
       final List<Intent> invokedIntents = <Intent>[];
       await tester.pumpWidget(
@@ -992,7 +998,12 @@ void main() {
                   controller: controller,
                   menuChildren: <Widget>[
                     Button.tag(Tag.a),
-                    Button.tag(Tag.b, focusNode: bFocusNode),
+                    Shortcuts(
+                      // Web doesn't automatically apply directional traversal
+                      // shortcuts.
+                      shortcuts: traversalShortcuts,
+                      child: Button.tag(Tag.b, focusNode: bFocusNode),
+                    ),
                     Button.tag(Tag.d),
                   ],
                   overlayBuilder: (
