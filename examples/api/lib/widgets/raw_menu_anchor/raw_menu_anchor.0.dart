@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 /// Flutter code sample for a [RawMenuAnchor] that shows a simple menu with
 /// three items.
 void main() => runApp(const SimpleMenuApp());
