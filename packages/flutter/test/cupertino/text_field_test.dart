@@ -5289,7 +5289,7 @@ void main() {
     // The selection doesn't move beyond the left handle. There's always at
     // least 1 char selected.
     expect(controller.selection.extentOffset, 5);
-  });
+  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('Can drag one handle past the other on Apple platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -5356,7 +5356,7 @@ void main() {
     // The selection inverts moving beyond the left handle.
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 2);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('Dragging between multiple lines keeps the contact point at the same place on the handle on Android', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
