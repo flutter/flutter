@@ -1,4 +1,4 @@
-Signature: 19fb60ada73bdf11460fabd08da46196
+Signature: 692977a873c4e9b0d189b53beaf4780d
 
 ====================================================================================================
 LIBRARY: etc1
@@ -399,6 +399,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
+FILE: ../../../flutter/third_party/skia/relnotes/SkCodecHasHighBitDepthEncodedData.md
 FILE: ../../../flutter/third_party/skia/relnotes/TimerQuery.md
 FILE: ../../../flutter/third_party/skia/relnotes/WGLWaitSync.md
 FILE: ../../../flutter/third_party/skia/relnotes/patheffect_dash.md
