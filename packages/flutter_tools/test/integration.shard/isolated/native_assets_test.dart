@@ -550,7 +550,7 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   await pinDependencies(
       packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
 
-  await addLinkHookDepedendency(packageDirectory);
+  await addLinkHookDependency(packageDirectory);
 
   final ProcessResult result2 = await processManager.run(
     <String>[
