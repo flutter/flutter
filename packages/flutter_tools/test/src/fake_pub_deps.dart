@@ -17,7 +17,7 @@ final class FakePubWithPrimedDeps implements Pub {
   /// packages. A resulting valid `dart pub deps --json` response is implicitly
   /// created.
   factory FakePubWithPrimedDeps({
-    required String rootPackageName,
+    String rootPackageName = 'app_name',
     Set<String> devDependencies = const <String>{},
     Map<String, Set<String>> dependencies = const <String, Set<String>>{},
   }) {
