@@ -340,6 +340,7 @@ class FlutterProject {
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,
+    required bool useImplicitPubspecResolution,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
@@ -352,6 +353,7 @@ class FlutterProject {
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
       allowedPlugins: allowedPlugins,
+      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
   }
 
@@ -366,11 +368,17 @@ class FlutterProject {
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,
+    required bool useImplicitPubspecResolution,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;
     }
-    await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
+    await refreshPluginsList(
+      this,
+      iosPlatform: iosPlatform,
+      macOSPlatform: macOSPlatform,
+      useImplicitPubspecResolution: useImplicitPubspecResolution,
+    );
     if (androidPlatform) {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
@@ -397,6 +405,7 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       allowedPlugins: allowedPlugins,
+      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
   }
 
@@ -996,10 +1005,9 @@ class WebProject extends FlutterProjectPlatform {
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
     /// See: https://github.com/dart-lang/dart-services/pull/874
-    await injectBuildTimePluginFiles(
+    await injectBuildTimePluginFilesForWebPlatform(
       parent,
       destination: dartpadToolDirectory,
-      webPlatform: true,
     );
   }
 }

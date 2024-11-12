@@ -347,6 +347,7 @@ class Environment {
     required Analytics analytics,
     String? engineVersion,
     required bool generateDartPluginRegistry,
+    required bool useImplicitPubspecResolution,
     Directory? buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
@@ -391,6 +392,7 @@ class Environment {
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
+      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
   }
 
@@ -412,6 +414,7 @@ class Environment {
     Usage? usage,
     Analytics? analytics,
     bool generateDartPluginRegistry = false,
+    bool useImplicitPubspecResolution = true,
     required FileSystem fileSystem,
     required Logger logger,
     required Artifacts artifacts,
@@ -435,6 +438,7 @@ class Environment {
       analytics: analytics ?? const NoOpAnalytics(),
       engineVersion: engineVersion,
       generateDartPluginRegistry: generateDartPluginRegistry,
+      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
   }
 
@@ -457,6 +461,7 @@ class Environment {
     this.engineVersion,
     required this.inputs,
     required this.generateDartPluginRegistry,
+    required this.useImplicitPubspecResolution,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -556,6 +561,10 @@ class Environment {
   /// When [true], the main entrypoint is wrapped and the wrapper becomes
   /// the new entrypoint.
   final bool generateDartPluginRegistry;
+
+  /// Whether to generate a `.flutter-plugins` file and for Flutter i10n source
+  /// generation to default to `synthetic-package: true`.
+  final bool useImplicitPubspecResolution;
 
   late final DepfileService depFileService = DepfileService(
     logger: logger,

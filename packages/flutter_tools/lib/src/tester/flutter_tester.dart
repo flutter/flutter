@@ -51,6 +51,7 @@ class FlutterTesterDevice extends Device {
     required super.logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
+    required bool useImplicitPubspecResolution,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : _processManager = processManager,
        _flutterVersion = flutterVersion,
@@ -58,6 +59,7 @@ class FlutterTesterDevice extends Device {
        _fileSystem = fileSystem,
       _artifacts = artifacts,
       _nativeAssetsBuilder = nativeAssetsBuilder,
+      _useImplicitPubspecResolution = useImplicitPubspecResolution,
        super(
         platformType: null,
         category: null,
@@ -70,6 +72,7 @@ class FlutterTesterDevice extends Device {
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
   final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
+  final bool _useImplicitPubspecResolution;
 
   Process? _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -164,6 +167,7 @@ class FlutterTesterDevice extends Device {
       applicationKernelFilePath: applicationKernelFilePath,
       platform: TargetPlatform.tester,
       assetDirPath: assetDirectory.path,
+      useImplicitPubspecResolution: _useImplicitPubspecResolution,
     );
 
     final List<String> command = <String>[
@@ -265,6 +269,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     required ProcessManager processManager,
     required Logger logger,
     required FlutterVersion flutterVersion,
+    required bool useImplicitPubspecResolution,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
@@ -274,6 +279,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
         logger: logger,
         flutterVersion: flutterVersion,
         nativeAssetsBuilder: nativeAssetsBuilder,
+        useImplicitPubspecResolution: useImplicitPubspecResolution,
       ),
        super('Flutter tester');
 

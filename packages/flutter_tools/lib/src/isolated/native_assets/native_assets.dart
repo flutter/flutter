@@ -6,7 +6,7 @@
 
 import 'package:logging/logging.dart' as logging;
 import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/native_assets_cli.dart';
+import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:native_assets_cli/native_assets_cli_internal.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -34,12 +34,12 @@ import 'windows/native_assets.dart';
 /// If any of the dependencies change, then the Dart build should be performed
 /// again.
 final class DartBuildResult {
-  const DartBuildResult({required this.codeAssets, required this.dependencies});
+  const DartBuildResult(this.codeAssets, this.dependencies);
   const DartBuildResult.empty()
-      : codeAssets = const <NativeCodeAssetImpl>[],
+      : codeAssets = const <CodeAsset>[],
         dependencies = const <Uri>[];
 
-  final List<NativeCodeAssetImpl> codeAssets;
+  final List<CodeAsset> codeAssets;
   final List<Uri> dependencies;
 }
 
@@ -109,7 +109,7 @@ Future<(DartBuildResult, Uri)> runFlutterSpecificDartBuild({
   final String? codesignIdentity =
       environmentDefines[build_info.kCodesignIdentity];
 
-  final Map<NativeCodeAssetImpl, KernelAsset> assetTargetLocations =
+  final Map<CodeAsset, KernelAsset> assetTargetLocations =
       _assetTargetLocationsForOS(
           targetOS, result.codeAssets, flutterTester, buildUri);
   await _copyNativeCodeAssetsForOS(targetOS, buildUri, buildMode, fileSystem,
@@ -130,8 +130,8 @@ Future<Uri?> runFlutterSpecificDartDryRunOnPlatforms({
     return null;
   }
 
-  final Map<NativeCodeAssetImpl, KernelAsset> assetTargetLocations =
-      <NativeCodeAssetImpl, KernelAsset>{};
+  final Map<CodeAsset, KernelAsset> assetTargetLocations =
+      <CodeAsset, KernelAsset>{};
   for (final build_info.TargetPlatform targetPlatform in targetPlatforms) {
     // This dry-run functionality is only used in the `flutter run`
     // implementation (not in `flutter build` or `flutter test`).
@@ -142,7 +142,7 @@ Future<Uri?> runFlutterSpecificDartDryRunOnPlatforms({
     final bool flutterTester =
         targetPlatform == build_info.TargetPlatform.tester;
 
-    final OSImpl targetOS = _getNativeOSFromTargetPlatfrorm(targetPlatform);
+    final OS targetOS = _getNativeOSFromTargetPlatfrorm(targetPlatform);
     if (targetOS != OS.macOS &&
         targetOS != OS.windows &&
         targetOS != OS.linux &&
@@ -194,48 +194,48 @@ abstract interface class FlutterNativeAssetsBuildRunner {
   Future<List<Package>> packagesWithNativeAssets();
 
   /// Runs all [packagesWithNativeAssets] `build.dart` in dry run.
-  Future<BuildDryRunResult> buildDryRun({
+  Future<BuildDryRunResult?> buildDryRun({
+    required List<String> supportedAssetTypes,
+    required BuildConfigCreator configCreator,
+    required BuildValidator buildValidator,
     required bool includeParentEnvironment,
-    required LinkModePreferenceImpl linkModePreference,
-    required OSImpl targetOS,
+    required OS targetOS,
     required Uri workingDirectory,
   });
 
   /// Runs all [packagesWithNativeAssets] `build.dart`.
-  Future<BuildResult> build({
+  Future<BuildResult?> build({
+    required List<String> supportedAssetTypes,
+    required BuildConfigValidator configValidator,
+    required BuildConfigCreator configCreator,
+    required BuildValidator buildValidator,
+    required ApplicationAssetValidator applicationAssetValidator,
     required bool includeParentEnvironment,
-    required BuildModeImpl buildMode,
-    required LinkModePreferenceImpl linkModePreference,
-    required Target target,
+    required BuildMode buildMode,
+    required OS targetOS,
     required Uri workingDirectory,
-    CCompilerConfigImpl? cCompilerConfig,
-    int? targetAndroidNdkApi,
-    int? targetIOSVersion,
-    int? targetMacOSVersion,
-    IOSSdkImpl? targetIOSSdkImpl,
     required bool linkingEnabled,
   });
 
   /// Runs all [packagesWithNativeAssets] `link.dart`.
-  Future<LinkResult> link({
+  Future<LinkResult?> link({
+    required List<String> supportedAssetTypes,
+    required LinkConfigValidator configValidator,
+    required LinkConfigCreator configCreator,
+    required LinkValidator linkValidator,
+    required ApplicationAssetValidator applicationAssetValidator,
     required bool includeParentEnvironment,
-    required BuildModeImpl buildMode,
-    required LinkModePreferenceImpl linkModePreference,
-    required Target target,
+    required BuildMode buildMode,
+    required OS targetOS,
     required Uri workingDirectory,
     required BuildResult buildResult,
-    CCompilerConfigImpl? cCompilerConfig,
-    int? targetAndroidNdkApi,
-    int? targetIOSVersion,
-    int? targetMacOSVersion,
-    IOSSdkImpl? targetIOSSdkImpl,
   });
 
   /// The C compiler config to use for compilation.
-  Future<CCompilerConfigImpl> get cCompilerConfig;
+  Future<CCompilerConfig> get cCompilerConfig;
 
   /// The NDK compiler to use to use for compilation for Android.
-  Future<CCompilerConfigImpl> get ndkCCompilerConfigImpl;
+  Future<CCompilerConfig> get ndkCCompilerConfig;
 }
 
 /// Uses `package:native_assets_builder` for its implementation.
@@ -294,10 +294,12 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   }
 
   @override
-  Future<BuildDryRunResult> buildDryRun({
+  Future<BuildDryRunResult?> buildDryRun({
+    required List<String> supportedAssetTypes,
+    required BuildConfigCreator configCreator,
+    required BuildValidator buildValidator,
     required bool includeParentEnvironment,
-    required LinkModePreferenceImpl linkModePreference,
-    required OSImpl targetOS,
+    required OS targetOS,
     required Uri workingDirectory,
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
@@ -305,8 +307,10 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
       Uri.file(packageConfigPath),
     );
     return _buildRunner.buildDryRun(
+      supportedAssetTypes: supportedAssetTypes,
+      configCreator: configCreator,
+      buildValidator: buildValidator,
       includeParentEnvironment: includeParentEnvironment,
-      linkModePreference: linkModePreference,
       targetOS: targetOS,
       workingDirectory: workingDirectory,
       packageLayout: packageLayout,
@@ -315,17 +319,16 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   }
 
   @override
-  Future<BuildResult> build({
+  Future<BuildResult?> build({
+    required List<String> supportedAssetTypes,
+    required BuildConfigValidator configValidator,
+    required BuildConfigCreator configCreator,
+    required BuildValidator buildValidator,
+    required ApplicationAssetValidator applicationAssetValidator,
     required bool includeParentEnvironment,
-    required BuildModeImpl buildMode,
-    required LinkModePreferenceImpl linkModePreference,
-    required Target target,
+    required BuildMode buildMode,
+    required OS targetOS,
     required Uri workingDirectory,
-    CCompilerConfigImpl? cCompilerConfig,
-    int? targetIOSVersion,
-    int? targetMacOSVersion,
-    int? targetAndroidNdkApi,
-    IOSSdkImpl? targetIOSSdkImpl,
     required bool linkingEnabled,
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
@@ -333,57 +336,54 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
       Uri.file(packageConfigPath),
     );
     return _buildRunner.build(
+      supportedAssetTypes: supportedAssetTypes,
+      configCreator: configCreator,
+      configValidator: configValidator,
+      buildValidator: buildValidator,
+      applicationAssetValidator: applicationAssetValidator,
       buildMode: buildMode,
-      cCompilerConfig: cCompilerConfig,
       includeParentEnvironment: includeParentEnvironment,
-      linkModePreference: linkModePreference,
-      target: target,
-      targetAndroidNdkApi: targetAndroidNdkApi,
-      targetIOSSdk: targetIOSSdkImpl,
+      targetOS: targetOS,
       workingDirectory: workingDirectory,
       packageLayout: packageLayout,
-      targetIOSVersion: targetIOSVersion,
-      targetMacOSVersion: targetMacOSVersion,
       linkingEnabled: linkingEnabled,
     );
   }
 
   @override
-  Future<LinkResult> link({
+  Future<LinkResult?> link({
+    required List<String> supportedAssetTypes,
+    required LinkConfigValidator configValidator,
+    required LinkConfigCreator configCreator,
+    required LinkValidator linkValidator,
+    required ApplicationAssetValidator applicationAssetValidator,
     required bool includeParentEnvironment,
-    required BuildModeImpl buildMode,
-    required LinkModePreferenceImpl linkModePreference,
-    required Target target,
+    required BuildMode buildMode,
+    required OS targetOS,
     required Uri workingDirectory,
     required BuildResult buildResult,
-    CCompilerConfigImpl? cCompilerConfig,
-    int? targetAndroidNdkApi,
-    int? targetIOSVersion,
-    int? targetMacOSVersion,
-    IOSSdkImpl? targetIOSSdkImpl,
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
       Uri.file(packageConfigPath),
     );
     return _buildRunner.link(
+      supportedAssetTypes: supportedAssetTypes,
+      configCreator: configCreator,
+      configValidator: configValidator,
+      linkValidator: linkValidator,
+      applicationAssetValidator: applicationAssetValidator,
       buildMode: buildMode,
-      cCompilerConfig: cCompilerConfig,
       includeParentEnvironment: includeParentEnvironment,
-      linkModePreference: linkModePreference,
-      target: target,
-      targetAndroidNdkApi: targetAndroidNdkApi,
-      targetIOSSdk: targetIOSSdkImpl,
+      targetOS: targetOS,
       workingDirectory: workingDirectory,
       packageLayout: packageLayout,
       buildResult: buildResult,
-      targetIOSVersion: targetIOSVersion,
-      targetMacOSVersion: targetMacOSVersion,
     );
   }
 
   @override
-  late final Future<CCompilerConfigImpl> cCompilerConfig = () {
+  late final Future<CCompilerConfig> cCompilerConfig = () {
     if (globals.platform.isMacOS || globals.platform.isIOS) {
       return cCompilerConfigMacOS();
     }
@@ -400,7 +400,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   }();
 
   @override
-  late final Future<CCompilerConfigImpl> ndkCCompilerConfigImpl = () {
+  late final Future<CCompilerConfig> ndkCCompilerConfig = () {
     return cCompilerConfigAndroid();
   }();
 }
@@ -423,14 +423,14 @@ Future<Uri> writeNativeAssetsYaml(
 }
 
 /// Select the native asset build mode for a given Flutter build mode.
-BuildModeImpl _nativeAssetsBuildMode(build_info.BuildMode buildMode) {
+BuildMode _nativeAssetsBuildMode(build_info.BuildMode buildMode) {
   switch (buildMode) {
     case build_info.BuildMode.debug:
-      return BuildModeImpl.debug;
+      return BuildMode.debug;
     case build_info.BuildMode.jitRelease:
     case build_info.BuildMode.profile:
     case build_info.BuildMode.release:
-      return BuildModeImpl.release;
+      return BuildMode.release;
   }
 }
 
@@ -447,7 +447,6 @@ Future<bool> _hasNoPackageConfig(FlutterNativeAssetsBuildRunner buildRunner) asy
   }
   return !packageConfigExists;
 }
-
 
 Future<bool> _nativeBuildRequired(FlutterNativeAssetsBuildRunner buildRunner) async {
   if (await _hasNoPackageConfig(buildRunner)) {
@@ -547,7 +546,6 @@ class HotRunnerNativeAssetsBuilderImpl implements HotRunnerNativeAssetsBuilder {
   }
 }
 
-
 /// With `flutter run -d all` we need a place to store the native assets
 /// mapping for multiple OSes combined.
 Uri _buildUriMultiple(Uri projectUri) {
@@ -555,12 +553,12 @@ Uri _buildUriMultiple(Uri projectUri) {
   return projectUri.resolve('$buildDir/native_assets/multiple/');
 }
 
-Map<NativeCodeAssetImpl, KernelAsset> _assetTargetLocationsWindowsLinux(
-  List<NativeCodeAssetImpl> assets,
+Map<CodeAsset, KernelAsset> _assetTargetLocationsWindowsLinux(
+  List<CodeAsset> assets,
   Uri? absolutePath,
 ) {
-  return <NativeCodeAssetImpl, KernelAsset>{
-    for (final NativeCodeAssetImpl asset in assets)
+  return <CodeAsset, KernelAsset>{
+    for (final CodeAsset asset in assets)
       asset: _targetLocationSingleArchitecture(
         asset,
         absolutePath,
@@ -569,7 +567,7 @@ Map<NativeCodeAssetImpl, KernelAsset> _assetTargetLocationsWindowsLinux(
 }
 
 KernelAsset _targetLocationSingleArchitecture(
-    NativeCodeAssetImpl asset, Uri? absolutePath) {
+    CodeAsset asset, Uri? absolutePath) {
   final LinkMode linkMode = asset.linkMode;
   final KernelAssetPath kernelAssetPath;
   switch (linkMode) {
@@ -604,8 +602,8 @@ KernelAsset _targetLocationSingleArchitecture(
   );
 }
 
-Map<NativeCodeAssetImpl, KernelAsset> _assetTargetLocationsForOS(OS targetOS,
-    List<NativeCodeAssetImpl> codeAssets, bool flutterTester, Uri buildUri) {
+Map<CodeAsset, KernelAsset> _assetTargetLocationsForOS(
+    OS targetOS, List<CodeAsset> codeAssets, bool flutterTester, Uri buildUri) {
   switch (targetOS) {
     case OS.windows:
     case OS.linux:
@@ -628,11 +626,10 @@ Future<void> _copyNativeCodeAssetsForOS(
     Uri buildUri,
     build_info.BuildMode buildMode,
     FileSystem fileSystem,
-    Map<NativeCodeAssetImpl, KernelAsset> assetTargetLocations,
+    Map<CodeAsset, KernelAsset> assetTargetLocations,
     String? codesignIdentity,
     bool flutterTester) async {
-  final List<NativeCodeAssetImpl> codeAssets =
-      assetTargetLocations.keys.toList();
+  final List<CodeAsset> codeAssets = assetTargetLocations.keys.toList();
   switch (targetOS) {
     case OS.windows:
     case OS.linux:
@@ -687,7 +684,7 @@ Future<DartBuildResult> _runDartBuild({
   required FlutterNativeAssetsBuildRunner buildRunner,
   required List<Target> targets,
   required Uri projectUri,
-  required BuildModeImpl buildMode,
+  required BuildMode buildMode,
   required FileSystem fileSystem,
   required OS targetOS,
 }) async {
@@ -697,7 +694,7 @@ Future<DartBuildResult> _runDartBuild({
       : targets.toList().toString();
   globals.logger
       .printTrace('Building native assets for $targetString $buildMode.');
-  final List<Asset> assets = <Asset>[];
+  final List<EncodedAsset> assets = <EncodedAsset>[];
   final Set<Uri> dependencies = <Uri>{};
   final build_info.EnvironmentType? environmentType;
   if (targetOS == OS.iOS) {
@@ -710,8 +707,8 @@ Future<DartBuildResult> _runDartBuild({
     environmentType = null;
   }
 
-  final CCompilerConfigImpl cCompilerConfig = targetOS == OS.android
-      ? await buildRunner.ndkCCompilerConfigImpl
+  final CCompilerConfig cCompilerConfig = targetOS == OS.android
+      ? await buildRunner.ndkCCompilerConfig
       : await buildRunner.cCompilerConfig;
 
   final String? codesignIdentity = environmentDefines[build_info.kCodesignIdentity];
@@ -720,81 +717,122 @@ Future<DartBuildResult> _runDartBuild({
   final int? androidNdkApi = targetOS == OS.android ? targetAndroidNdkApi(environmentDefines) : null;
   final int? iOSVersion = targetOS == OS.iOS ? targetIOSVersion : null;
   final int? macOSVersion = targetOS == OS.macOS ? targetMacOSVersion : null;
-  final IOSSdkImpl? iOSSdkImpl =  targetOS == OS.iOS ? getIOSSdk(environmentType!) : null;
+  final IOSSdk? iOSSdk = targetOS == OS.iOS ? getIOSSdk(environmentType!) : null;
 
   for (final Target target in targets) {
-    final BuildResult buildResult = await buildRunner.build(
-      linkModePreference: LinkModePreferenceImpl.dynamic,
-      target: target,
+    final BuildResult? buildResult = await buildRunner.build(
+      supportedAssetTypes: <String>[CodeAsset.type],
+      configCreator: () => BuildConfigBuilder()
+          ..setupCodeConfig(
+            targetArchitecture: target.architecture,
+            linkModePreference: LinkModePreference.dynamic,
+            cCompilerConfig: cCompilerConfig,
+            targetAndroidNdkApi: androidNdkApi,
+            targetIOSVersion: iOSVersion,
+            targetMacOSVersion: macOSVersion,
+            targetIOSSdk: iOSSdk,
+          ),
+      configValidator: (BuildConfig config) async => <String>[
+        ...await validateCodeAssetBuildConfig(config),
+      ],
+      buildValidator: (BuildConfig config, BuildOutput output) async => <String>[
+        ...await validateCodeAssetBuildOutput(config, output),
+      ],
+      applicationAssetValidator: (List<EncodedAsset> assets) async => <String>[
+        ...await validateCodeAssetInApplication(assets),
+      ],
+      targetOS: target.os,
       buildMode: buildMode,
       workingDirectory: projectUri,
       includeParentEnvironment: true,
       linkingEnabled: linkingEnabled,
-      cCompilerConfig: cCompilerConfig,
-      targetAndroidNdkApi: androidNdkApi,
-      targetIOSVersion: iOSVersion,
-      targetMacOSVersion: macOSVersion,
-      targetIOSSdkImpl: iOSSdkImpl,
     );
-    if (!buildResult.success) {
+    if (buildResult == null) {
       _throwNativeAssetsBuildFailed();
     }
-    assets.addAll(buildResult.assets);
+    assets.addAll(buildResult.encodedAssets);
     dependencies.addAll(buildResult.dependencies);
     if (linkingEnabled) {
-      final LinkResult linkResult = await buildRunner.link(
-        linkModePreference: LinkModePreferenceImpl.dynamic,
-        target: target,
-        buildMode: buildMode,
+      final LinkResult? linkResult = await buildRunner.link(
+        supportedAssetTypes: <String>[CodeAsset.type],
+        configCreator: () => LinkConfigBuilder()
+            ..setupCodeConfig(
+              targetArchitecture: target.architecture,
+              linkModePreference: LinkModePreference.dynamic,
+              cCompilerConfig: cCompilerConfig,
+              targetAndroidNdkApi: androidNdkApi,
+              targetIOSVersion: iOSVersion,
+              targetMacOSVersion: macOSVersion,
+              targetIOSSdk: iOSSdk,
+            ),
+        configValidator: (LinkConfig config) async => <String>[
+          ...await validateCodeAssetLinkConfig(config),
+        ],
+        linkValidator: (LinkConfig config, LinkOutput output) async => <String>[
+          ...await validateCodeAssetLinkOutput(config, output),
+        ],
+        applicationAssetValidator: (List<EncodedAsset> assets) async => <String>[
+          ...await validateCodeAssetInApplication(assets),
+        ],
         workingDirectory: projectUri,
         includeParentEnvironment: true,
         buildResult: buildResult,
-        cCompilerConfig: cCompilerConfig,
-        targetAndroidNdkApi: androidNdkApi,
-        targetIOSVersion: iOSVersion,
-        targetMacOSVersion: macOSVersion,
-        targetIOSSdkImpl: iOSSdkImpl,
+        targetOS: targetOS,
+        buildMode: buildMode,
       );
-      if (!linkResult.success) {
+      if (linkResult == null) {
         _throwNativeAssetsLinkFailed();
       }
-      assets.addAll(linkResult.assets);
+      assets.addAll(linkResult.encodedAssets);
       dependencies.addAll(linkResult.dependencies);
     }
   }
 
-  final List<NativeCodeAssetImpl> codeAssets =
-      assets.whereType<NativeCodeAssetImpl>().toList();
+  final List<CodeAsset> codeAssets = assets
+      .where((EncodedAsset asset) => asset.type == CodeAsset.type)
+      .map<CodeAsset>(CodeAsset.fromEncoded)
+      .toList();
   globals.logger
       .printTrace('Building native assets for $targetString $buildMode done.');
-  return DartBuildResult(codeAssets: codeAssets, dependencies: dependencies.toList());
+  return DartBuildResult(codeAssets, dependencies.toList());
 }
 
 Future<DartBuildResult> _runDartDryRunBuild({
   required FlutterNativeAssetsBuildRunner buildRunner,
   required Uri projectUri,
   required FileSystem fileSystem,
-  required OSImpl targetOS,
+  required OS targetOS,
 }) async {
   globals.logger.printTrace('Dry running native assets for $targetOS.');
-  final List<Asset> assets = <Asset>[];
+  final List<EncodedAsset> assets = <EncodedAsset>[];
   final Set<Uri> dependencies = <Uri>{};
-
-  final BuildDryRunResult buildResult = await buildRunner.buildDryRun(
-    linkModePreference: LinkModePreferenceImpl.dynamic,
-    targetOS: targetOS,
+  final BuildDryRunResult? buildResult = await buildRunner.buildDryRun(
+    supportedAssetTypes: <String>[CodeAsset.type],
+    configCreator: () => BuildConfigBuilder()
+        ..setupCodeConfig(
+          targetArchitecture: null,
+          linkModePreference: LinkModePreference.dynamic,
+        ),
+    buildValidator: (BuildConfig config, BuildOutput output) async => <String>[
+      ...await validateCodeAssetBuildOutput(config, output),
+    ],
     workingDirectory: projectUri,
+    targetOS: targetOS,
     includeParentEnvironment: true,
   );
-  if (!buildResult.success) {
+  if (buildResult == null) {
     _throwNativeAssetsBuildDryRunFailed();
   }
-  assets.addAll(buildResult.assets);
+  assets.addAll(buildResult.encodedAssets);
 
-  final List<NativeCodeAssetImpl> codeAssets =
-      assets.whereType<NativeCodeAssetImpl>().toList();
+  final List<CodeAsset> codeAssets = assets
+      .where((EncodedAsset asset) => asset.type == CodeAsset.type)
+      .map<CodeAsset>(CodeAsset.fromEncoded)
+      .toList();
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
-  return DartBuildResult(codeAssets: codeAssets, dependencies: dependencies.toList());
+  return DartBuildResult(
+    _expandCodeAssetsToAllArchitectures(codeAssets),
+    dependencies.toList());
 }
 
 List<Target> _targetsForOS(build_info.TargetPlatform targetPlatform,
@@ -865,7 +903,7 @@ Target _getNativeTarget(build_info.TargetPlatform targetPlatform) {
 
 Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
   Uri buildUri,
-  Map<NativeCodeAssetImpl, KernelAsset> assetTargetLocations,
+  Map<CodeAsset, KernelAsset> assetTargetLocations,
   build_info.BuildMode buildMode,
   FileSystem fileSystem,
 ) async {
@@ -876,7 +914,7 @@ Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
     if (!buildDir.existsSync()) {
       buildDir.createSync(recursive: true);
     }
-    for (final MapEntry<NativeCodeAssetImpl, KernelAsset> assetMapping in assetTargetLocations.entries) {
+    for (final MapEntry<CodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
       final Uri source = assetMapping.key.file!;
       final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
       final Uri targetUri = buildUri.resolveUri(target);
@@ -906,35 +944,34 @@ Never _throwNativeAssetsLinkFailed() {
   );
 }
 
-
-OSImpl _getNativeOSFromTargetPlatfrorm(build_info.TargetPlatform platform) {
+OS _getNativeOSFromTargetPlatfrorm(build_info.TargetPlatform platform) {
   switch (platform) {
     case build_info.TargetPlatform.ios:
-      return OSImpl.iOS;
+      return OS.iOS;
     case build_info.TargetPlatform.darwin:
-      return OSImpl.macOS;
+      return OS.macOS;
     case build_info.TargetPlatform.linux_x64:
     case build_info.TargetPlatform.linux_arm64:
-      return OSImpl.linux;
+      return OS.linux;
     case build_info.TargetPlatform.windows_x64:
     case build_info.TargetPlatform.windows_arm64:
-      return OSImpl.windows;
+      return OS.windows;
     case build_info.TargetPlatform.fuchsia_arm64:
     case build_info.TargetPlatform.fuchsia_x64:
-      return OSImpl.fuchsia;
+      return OS.fuchsia;
     case build_info.TargetPlatform.android:
     case build_info.TargetPlatform.android_arm:
     case build_info.TargetPlatform.android_arm64:
     case build_info.TargetPlatform.android_x64:
     case build_info.TargetPlatform.android_x86:
-      return OSImpl.android;
+      return OS.android;
     case build_info.TargetPlatform.tester:
       if (const LocalPlatform().isMacOS) {
-        return OSImpl.macOS;
+        return OS.macOS;
       } else if (const LocalPlatform().isLinux) {
-        return OSImpl.linux;
+        return OS.linux;
       } else if (const LocalPlatform().isWindows) {
-        return OSImpl.windows;
+        return OS.windows;
       } else {
         throw StateError('Unknown operating system');
       }
@@ -984,3 +1021,52 @@ String? _emptyToNull(String? input) {
   }
   return input;
 }
+
+List<CodeAsset> _expandCodeAssetsToAllArchitectures(List<CodeAsset> codeAssets) {
+  assert(codeAssets.every((CodeAsset asset) => asset.architecture == null));
+  return <CodeAsset>[
+    for (final CodeAsset codeAsset in codeAssets)
+      for (final Architecture architecture in codeAsset.os.architectures)
+        codeAsset.copyWith(architecture: architecture),
+  ];
+}
+
+extension OSArchitectures on OS {
+  Set<Architecture> get architectures => _osTargets[this]!;
+}
+
+const Map<OS, Set<Architecture>> _osTargets = <OS, Set<Architecture>>{
+  OS.android: <Architecture>{
+    Architecture.arm,
+    Architecture.arm64,
+    Architecture.ia32,
+    Architecture.x64,
+    Architecture.riscv64,
+  },
+  OS.fuchsia: <Architecture>{
+    Architecture.arm64,
+    Architecture.x64,
+  },
+  OS.iOS: <Architecture>{
+    Architecture.arm,
+    Architecture.arm64,
+    Architecture.x64,
+  },
+  OS.linux: <Architecture>{
+    Architecture.arm,
+    Architecture.arm64,
+    Architecture.ia32,
+    Architecture.riscv32,
+    Architecture.riscv64,
+    Architecture.x64,
+  },
+  OS.macOS: <Architecture>{
+    Architecture.arm64,
+    Architecture.x64,
+  },
+  OS.windows: <Architecture>{
+    Architecture.arm64,
+    Architecture.ia32,
+    Architecture.x64,
+  },
+};
