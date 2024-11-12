@@ -2797,7 +2797,7 @@ class WidgetInspector extends StatefulWidget {
   ///
   /// The `onPressed` callback passed as an argument to the builder should be
   /// hooked up to the returned widget.
-  /// 
+  ///
   /// The button UI should respond to the `leftAligned` argument.
   final MoveExitWidgetSelectionButtonBuilder?
       moveExitWidgetSelectionButtonBuilder;
