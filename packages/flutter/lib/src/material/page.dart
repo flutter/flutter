@@ -87,7 +87,14 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   Widget buildContent(BuildContext context);
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
+  Duration get transitionDuration {
+    final TargetPlatform platform = Theme.of(navigator!.context).platform;
+    final PageTransitionsTheme pageTransitionsTheme = Theme.of(navigator!.context).pageTransitionsTheme;
+    final PageTransitionsBuilder? pageTransitionBuilder = pageTransitionsTheme.builders[platform];
+    return pageTransitionBuilder is FadeForwardsPageTransitionsBuilder
+      ? const Duration(milliseconds: 800)
+      : const Duration(milliseconds: 300);
+  }
 
   @override
   Color? get barrierColor => null;
