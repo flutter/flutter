@@ -1215,7 +1215,7 @@ class CupertinoActionSheetAction extends StatefulWidget {
     required this.onPressed,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
-    this.mouseCursor = MouseCursor.defer,
+    this.mouseCursor,
     required this.child,
   });
 
@@ -1237,8 +1237,11 @@ class CupertinoActionSheetAction extends StatefulWidget {
 
   /// The cursor that will be shown when hovering over the button.
   ///
-  /// Defaults to [MouseCursor.defer], except on web, where this defaults to [SystemMouseCursors.click].
-  final MouseCursor mouseCursor;
+  /// if `null`, cursor will default to:
+  /// - `MouseCursor.click` on web platforms
+  /// - `MouseCursor.defer` on other platforms
+  /// else will use value provided
+  final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
   ///
@@ -1317,12 +1320,8 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     final double verticalPadding = _kActionSheetButtonVerticalPaddingBase
         + fontSize * _kActionSheetButtonVerticalPaddingFactor;
 
-    final Set<WidgetState> states = <WidgetState>{
-      WidgetState.hovered
-    };
-
     return MouseRegion(
-      cursor: kIsWeb ? SystemMouseCursors.click : widget.mouseCursor,
+      cursor: widget.mouseCursor ?? (kIsWeb ? SystemMouseCursors.click : MouseCursor.defer),
       child: MetaData(
         metaData: this,
         behavior: HitTestBehavior.opaque,
