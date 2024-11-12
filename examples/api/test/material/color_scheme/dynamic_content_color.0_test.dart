@@ -4,42 +4,87 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_api_samples/material/color_scheme/dynamic_content_color.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  // // The app being tested loads images via HTTP which the test
-  // // framework defeats by default.
-  // setUpAll(() {
-  //   HttpOverrides.global = null;
-  // });
 
   testWidgets('The theme colors are created dynamically from the first image', (WidgetTester tester) async {
     await HttpOverrides.runZoned(
       () async {
-        await tester.runAsync(() async {
-          await tester.pumpWidget(
-            const example.DynamicColorExample(),
-          );
+        await tester.pumpWidget(
+          const example.DynamicColorExample(),
+        );
 
-          await tester.idle();
-        });
+        expect(
+          find.widgetWithText(AppBar, 'Content Based Dynamic Color'),
+          findsOne,
+        );
+        expect(find.byType(Switch), findsOne);
+        expect(find.byIcon(Icons.light_mode), findsOne);
 
-        expect(find.widgetWithText(AppBar, 'Content Based Dynamic Color'), findsOne);
-
+        // Loads the images.
+        await tester.pump();
         await tester.runAsync(() => Future<void>.delayed(Duration.zero));
         await tester.runAsync(() => Future<void>.delayed(Duration.zero));
         await tester.runAsync(() => Future<void>.delayed(Duration.zero));
-        await tester.pumpAndSettle();
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pump();
+        await tester.pump(kThemeChangeDuration);
+
         expect(find.byType(Image), findsExactly(6));
 
-        final ThemeData themeData = Theme.of(tester.element(find.byType(Scaffold)));
+        expect(find.text('Light ColorScheme'), findsOne);
+        expect(find.text('Dark ColorScheme'), findsOne);
+        expect(find.text('primary'), findsExactly(2));
+        expect(find.text('onPrimary'), findsExactly(2));
+        expect(find.text('primaryContainer'), findsExactly(2));
+        expect(find.text('onPrimaryContainer'), findsExactly(2));
+        expect(find.text('secondary'), findsExactly(2));
+        expect(find.text('onSecondary'), findsExactly(2));
+        expect(find.text('secondaryContainer'), findsExactly(2));
+        expect(find.text('onSecondaryContainer'), findsExactly(2));
+        expect(find.text('tertiary'), findsExactly(2));
+        expect(find.text('onTertiary'), findsExactly(2));
+        expect(find.text('tertiaryContainer'), findsExactly(2));
+        expect(find.text('onTertiaryContainer'), findsExactly(2));
+        expect(find.text('error'), findsExactly(2));
+        expect(find.text('onError'), findsExactly(2));
+        expect(find.text('errorContainer'), findsExactly(2));
+        expect(find.text('onErrorContainer'), findsExactly(2));
+        expect(find.text('surface'), findsExactly(2));
+        expect(find.text('onSurface'), findsExactly(2));
+        expect(find.text('onSurfaceVariant'), findsExactly(2));
+        expect(find.text('outline'), findsExactly(2));
+        expect(find.text('shadow'), findsExactly(2));
+        expect(find.text('inverseSurface'), findsExactly(2));
+        expect(find.text('onInverseSurface'), findsExactly(2));
+        expect(find.text('inversePrimary'), findsExactly(2));
 
-        print(themeData.primaryColor.value.toRadixString(16));
-        expect(themeData.primaryColor, const Color(0xff575992));
+        ThemeData themeData = Theme.of(
+          tester.element(find.byType(Scaffold)),
+        );
+
+        expect(themeData.colorScheme.primary, const Color(0xff575992));
+        expect(themeData.colorScheme.secondary, const Color(0xff5d5c72));
+
+        await tester.tap(find.byType(Switch));
+        await tester.pump();
+
+        // Loads the images.
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pump();
+        await tester.pump(kThemeChangeDuration);
+
+        themeData = Theme.of(tester.element(find.byType(Scaffold)));
+
+        expect(themeData.primaryColor, const Color(0xff131318));
+        expect(themeData.colorScheme.secondary, const Color(0xffc6c4dd));
       },
       createHttpClient: (SecurityContext? securityContext) => _FakeClient(),
     );
@@ -96,9 +141,8 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
   }
 }
 
-
 /// A 50x50 blue square png.
-final Uint8List _blueSquarePng =    Uint8List.fromList(const <int>[
+final Uint8List _blueSquarePng = Uint8List.fromList(const <int>[
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49,
   0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x32, 0x00, 0x00, 0x00, 0x32, 0x08, 0x06,
   0x00, 0x00, 0x00, 0x1e, 0x3f, 0x88, 0xb1, 0x00, 0x00, 0x00, 0x48, 0x49, 0x44,
