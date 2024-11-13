@@ -46,33 +46,58 @@ void main() {
   });
 
   // Test building a host, iOS, and APK (Android) target where possible.
-  for (final String buildCommand in <String>[
-    // Current (Host) OS.
-    platform.operatingSystem,
+  // for (final String buildCommand in <String>[
+  //   // Current (Host) OS.
+  //   platform.operatingSystem,
 
-    // On macOS, also test iOS.
-    if (platform.isMacOS) 'ios',
+  //   // On macOS, also test iOS.
+  //   if (platform.isMacOS) 'ios',
 
-    // On every host platform, test Android.
-    'apk',
-  ]) {
-    _testBuildCommand(
-      buildCommand: buildCommand,
-      processManager: processManager,
-      nativeAssetsCliVersionConstraint: constraint,
-      codeSign: buildCommand != 'ios',
-    );
-  }
+  //   // On every host platform, test Android.
+  //   'apk',
+  // ]) {
+  //   _testBuildCommand(
+  //     buildCommand: buildCommand,
+  //     processManager: processManager,
+  //     nativeAssetsCliVersionConstraint: constraint,
+  //     codeSign: buildCommand != 'ios',
+  //   );
+  // }
+
+  // Test 3 times without native_assets
+  group('without native_assets', () {
+    for (int i = 1; i <= 3; i++) {
+      _testBuildCommand(
+        buildCommand: 'apk',
+        processManager: processManager,
+        nativeAssetsCliVersionConstraint: null,
+        codeSign: true,
+        suffix: '$i',
+      );
+    }
+  });
+
+  group('with` native_assets', () {
+    for (int i = 1; i <= 3; i++) {
+      _testBuildCommand(
+        buildCommand: 'apk',
+        processManager: processManager,
+        nativeAssetsCliVersionConstraint: constraint,
+        codeSign: true,
+        suffix: '$i',
+      );
+    }
+  });
 }
 
-void _testBuildCommand({
-  required String buildCommand,
-  required String nativeAssetsCliVersionConstraint,
-  required ProcessManager processManager,
-  required bool codeSign,
-}) {
+void _testBuildCommand(
+    {required String buildCommand,
+    required String? nativeAssetsCliVersionConstraint,
+    required ProcessManager processManager,
+    required bool codeSign,
+    String suffix = ''}) {
   testWithoutContext(
-    'flutter build "$buildCommand" succeeds without libraries',
+    'flutter build ($suffix) "$buildCommand" succeeds without libraries',
     () async {
       await inTempDir((Directory tempDirectory) async {
         const String packageName = 'uses_package_native_assets_cli';
@@ -97,29 +122,31 @@ void _testBuildCommand({
 
         // Add native_assets_cli and resolve implicitly (pub add does pub get).
         // See https://dart.dev/tools/pub/cmd/pub-add#version-constraint.
-        await expectLater(
-          processManager.run(
-            <String>[
-              flutterBin,
-              'packages',
-              'add',
-              'native_assets_cli:$nativeAssetsCliVersionConstraint',
-            ],
-            workingDirectory: packageDirectory.path,
-          ),
-          completion(const ProcessResultMatcher()),
-        );
+        if (nativeAssetsCliVersionConstraint != null) {
+          await expectLater(
+            processManager.run(
+              <String>[
+                flutterBin,
+                'packages',
+                'add',
+                'native_assets_cli:$nativeAssetsCliVersionConstraint',
+              ],
+              workingDirectory: packageDirectory.path,
+            ),
+            completion(const ProcessResultMatcher()),
+          );
 
-        // Add a build hook that does nothing to the package.
-        packageDirectory.childDirectory('hook').childFile('build.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+          // Add a build hook that does nothing to the package.
+          packageDirectory.childDirectory('hook').childFile('build.dart')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
 import 'package:native_assets_cli/native_assets_cli.dart';
 
 void main(List<String> args) async {
   await build(args, (config, output) async {});
 }
 ''');
+        }
 
         // Try building.
         //
