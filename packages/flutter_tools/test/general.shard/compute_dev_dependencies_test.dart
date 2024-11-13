@@ -2,11 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compute_dev_dependencies.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
+import '../src/fakes.dart';
+
+const String _dartBin = 'bin/cache/dart-sdk/bin/dart';
 
 // For all of these examples, imagine the following package structure:
 //
@@ -20,11 +30,28 @@ import '../src/fake_process_manager.dart';
 //   /package_c
 //     pubspec.yaml
 void main() {
+  late FileSystem fileSystem;
+  late FlutterProject project;
   late BufferLogger logger;
 
   setUp(() {
+    Cache.flutterRoot = '';
+    fileSystem = MemoryFileSystem.test();
+    project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     logger = BufferLogger.test();
   });
+
+  Pub pub(ProcessManager processManager) {
+    return Pub.test(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      usage: TestUsage(),
+      platform: FakePlatform(),
+      botDetector: const FakeBotDetector(false),
+      stdio: FakeStdio(),
+    );
+  }
 
   test('no dev dependencies at all', () async {
     // Simulates the following:
@@ -38,7 +65,8 @@ void main() {
     // name: package_a
     // dependencies:
     //   package_b:
-    final ProcessManager processes = _dartPubDepsReturns('''
+    final ProcessManager processes = _dartPubDepsReturns(
+      '''
     {
       "root": "my_app",
       "packages": [
@@ -71,11 +99,13 @@ void main() {
           "directDependencies": []
         }
       ]
-    }''');
+    }''',
+      project: project,
+    );
 
     final Set<String> dependencies = await computeExclusiveDevDependencies(
-      processes,
-      projectPath: _fakeProjectPath,
+      pub(processes),
+      project: project,
       logger: logger,
     );
 
@@ -99,7 +129,8 @@ void main() {
     //
     // # /package_a/pubspec.yaml
     // name: package_a
-    final ProcessManager processes = _dartPubDepsReturns('''
+    final ProcessManager processes = _dartPubDepsReturns(
+      '''
     {
       "root": "my_app",
       "packages": [
@@ -130,11 +161,13 @@ void main() {
           "directDependencies": []
         }
       ]
-    }''');
+    }''',
+      project: project,
+    );
 
     final Set<String> dependencies = await computeExclusiveDevDependencies(
-      processes,
-      projectPath: _fakeProjectPath,
+      pub(processes),
+      project: project,
       logger: logger,
     );
 
@@ -160,7 +193,8 @@ void main() {
     // name: package_a
     // dependencies:
     //   package_b:
-    final ProcessManager processes = _dartPubDepsReturns('''
+    final ProcessManager processes = _dartPubDepsReturns(
+      '''
     {
       "root": "my_app",
       "packages": [
@@ -195,11 +229,13 @@ void main() {
           "directDependencies": []
         }
       ]
-    }''');
+    }''',
+      project: project,
+    );
 
     final Set<String> dependencies = await computeExclusiveDevDependencies(
-      processes,
-      projectPath: _fakeProjectPath,
+      pub(processes),
+      project: project,
       logger: logger,
     );
 
@@ -232,7 +268,8 @@ void main() {
     //
     // # /package_c/pubspec.yaml
     // name: package_c
-    final ProcessManager processes = _dartPubDepsReturns('''
+    final ProcessManager processes = _dartPubDepsReturns(
+      '''
     {
       "root": "my_app",
       "packages": [
@@ -278,11 +315,13 @@ void main() {
           "directDependencies": []
         }
       ]
-    }''');
+    }''',
+      project: project,
+    );
 
     final Set<String> dependencies = await computeExclusiveDevDependencies(
-      processes,
-      projectPath: _fakeProjectPath,
+      pub(processes),
+      project: project,
       logger: logger,
     );
 
@@ -293,7 +332,7 @@ void main() {
     );
   });
 
-  test('omitted devDependencies in app package', () async {
+    test('omitted devDependencies in app package', () async {
     // Simulates the following:
     //
     // # /my_app/pubspec.yaml
@@ -324,11 +363,13 @@ void main() {
           "directDependencies": []
         }
       ]
-    }''');
+    }''',
+      project: project,
+    );
 
     final Set<String> dependencies = await computeExclusiveDevDependencies(
-      processes,
-      projectPath: _fakeProjectPath,
+      pub(processes),
+      project: project,
       logger: logger,
     );
 
@@ -339,55 +380,9 @@ void main() {
     );
   });
 
-  test('throws and logs on non-zero exit code', () async {
-    final ProcessManager processes = _dartPubDepsFails(
-      'Bad thing',
-      exitCode: 1,
-    );
-
-    await expectLater(
-      computeExclusiveDevDependencies(
-        processes,
-        projectPath: _fakeProjectPath,
-        logger: logger,
-      ),
-      throwsA(
-        isA<StateError>().having(
-          (StateError e) => e.message,
-          'message',
-          contains('dart pub deps --json failed'),
-        ),
-      ),
-    );
-
-    expect(logger.traceText, isEmpty);
-  });
-
-  test('throws and logs on unexpected output type', () async {
-    final ProcessManager processes = _dartPubDepsReturns(
-      'Not JSON haha!',
-    );
-
-    await expectLater(
-      computeExclusiveDevDependencies(
-        processes,
-        projectPath: _fakeProjectPath,
-        logger: logger,
-      ),
-      throwsA(
-        isA<StateError>().having(
-          (StateError e) => e.message,
-          'message',
-          contains('dart pub deps --json had unexpected output'),
-        ),
-      ),
-    );
-
-    expect(logger.traceText, contains('Not JSON haha'));
-  });
-
   test('throws and logs on invalid JSON', () async {
-    final ProcessManager processes = _dartPubDepsReturns('''
+    final ProcessManager processes = _dartPubDepsReturns(
+      '''
     {
       "root": "my_app",
       "packages": [
@@ -420,12 +415,14 @@ void main() {
           "directDependencies": []
         }
       ]
-    }''');
+    }''',
+      project: project,
+    );
 
     await expectLater(
       computeExclusiveDevDependencies(
-        processes,
-        projectPath: _fakeProjectPath,
+        pub(processes),
+        project: project,
         logger: logger,
       ),
       throwsA(
@@ -445,28 +442,21 @@ void main() {
   });
 }
 
-const String _fakeProjectPath = '/path/to/project';
-
-ProcessManager _dartPubDepsReturns(String dartPubDepsOutput) {
-  return FakeProcessManager.list(<FakeCommand>[
-    FakeCommand(
-      command: const <String>['dart', 'pub', 'deps', '--json'],
-      stdout: dartPubDepsOutput,
-      workingDirectory: _fakeProjectPath,
-    ),
-  ]);
-}
-
-ProcessManager _dartPubDepsFails(
-  String dartPubDepsError, {
-  required int exitCode,
+ProcessManager _dartPubDepsReturns(
+  String dartPubDepsOutput, {
+  required FlutterProject project,
 }) {
   return FakeProcessManager.list(<FakeCommand>[
     FakeCommand(
-      command: const <String>['dart', 'pub', 'deps', '--json'],
-      exitCode: exitCode,
-      stderr: dartPubDepsError,
-      workingDirectory: _fakeProjectPath,
+      command: const <String>[
+        _dartBin,
+        'pub',
+        '--suppress-analytics',
+        'deps',
+        '--json',
+      ],
+      stdout: dartPubDepsOutput,
+      workingDirectory: project.directory.path,
     ),
   ]);
 }

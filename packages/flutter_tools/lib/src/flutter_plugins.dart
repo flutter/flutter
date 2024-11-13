@@ -21,6 +21,7 @@ import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
+import 'dart/pub.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'macos/darwin_dependency_management.dart';
@@ -128,9 +129,9 @@ Future<List<Plugin>> findPlugins(
     devDependencies = <String>{};
   } else {
     devDependencies = await computeExclusiveDevDependencies(
-      globals.processManager,
+      pub,
       logger: globals.logger,
-      projectPath: project.directory.path,
+      project: project,
     );
   }
   for (final Package package in packageConfig.packages) {
