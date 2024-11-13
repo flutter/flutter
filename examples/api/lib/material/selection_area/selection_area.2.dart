@@ -55,18 +55,6 @@ class _MyHomePageState extends State<MyHomePage> {
   late final Map<LocalSpanRange, TextSpan> originSourceData;
   late final Map<LocalSpanRange, TextSpan> originBulletSourceData;
 
-  @override
-  void initState() {
-    super.initState();
-    _initData();
-  }
-
-  @override
-  void dispose() {
-    _selectionNotifier.dispose();
-    super.dispose();
-  }
-
   void _initData() {
     const String bulletListTitle = 'This is some bulleted list:\n';
     final List<String> bullets = <String>[
@@ -314,6 +302,18 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _initData();
+  }
+
+  @override
+  void dispose() {
+    _selectionNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -365,6 +365,13 @@ class MySelectableTextColumn extends StatefulWidget {
 class _MySelectableTextColumnState extends State<MySelectableTextColumn> {
   ValueListenable<SelectableRegionSelectionStatus>? _selectableRegionScope;
 
+  void _handleOnSelectableRegionChanged() {
+    if (_selectableRegionScope == null) {
+      return;
+    }
+    widget.onChanged.call(_selectableRegionScope!.value);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -378,13 +385,6 @@ class _MySelectableTextColumnState extends State<MySelectableTextColumn> {
     _selectableRegionScope?.removeListener(_handleOnSelectableRegionChanged);
     _selectableRegionScope = null;
     super.dispose();
-  }
-
-  void _handleOnSelectableRegionChanged() {
-    if (_selectableRegionScope == null) {
-      return;
-    }
-    widget.onChanged.call(_selectableRegionScope!.value);
   }
 
   @override

@@ -38,17 +38,17 @@ class _MyHomePageState extends State<MyHomePage> {
   final SelectionListenerNotifier _selectionNotifier = SelectionListenerNotifier();
   SelectableRegionSelectionStatus? _selectableRegionStatus;
 
+  void _handleOnSelectionStateChanged(SelectableRegionSelectionStatus status) {
+    setState(() {
+      _selectableRegionStatus = status;
+    });
+  }
+
   @override
   void dispose() {
     _selectionNotifier.dispose();
     _selectableRegionStatus = null;
     super.dispose();
-  }
-
-  void _handleOnSelectionStateChanged(SelectableRegionSelectionStatus status) {
-    setState(() {
-      _selectableRegionStatus = status;
-    });
   }
 
   @override
@@ -104,6 +104,13 @@ class MySelectableText extends StatefulWidget {
 class _MySelectableTextState extends State<MySelectableText> {
   ValueListenable<SelectableRegionSelectionStatus>? _selectableRegionScope;
 
+  void _handleOnSelectableRegionChanged() {
+    if (_selectableRegionScope == null) {
+      return;
+    }
+    widget.onChanged.call(_selectableRegionScope!.value);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -117,13 +124,6 @@ class _MySelectableTextState extends State<MySelectableText> {
     _selectableRegionScope?.removeListener(_handleOnSelectableRegionChanged);
     _selectableRegionScope = null;
     super.dispose();
-  }
-
-  void _handleOnSelectableRegionChanged() {
-    if (_selectableRegionScope == null) {
-      return;
-    }
-    widget.onChanged.call(_selectableRegionScope!.value);
   }
 
   @override
