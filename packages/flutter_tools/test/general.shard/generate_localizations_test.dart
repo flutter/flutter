@@ -1718,7 +1718,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, contains(r'DateFormat.yMMMMEEEEd(localeName).add_QQQQ().add_Hm()'));
       });
 
-      testWithoutContext('throws an exception when invalid formats', (){
+      testWithoutContext('throws an exception when adding invalid formats', (){
         expect(
           () {
             setupLocalizations(<String, String>{
