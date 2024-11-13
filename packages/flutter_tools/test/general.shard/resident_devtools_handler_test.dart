@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
@@ -254,9 +255,9 @@ void main() {
           'streamId': 'Isolate',
         },
       ),
-      const FakeVmServiceRequest(
+      FakeVmServiceRequest(
         method: kListViewsMethod,
-        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
+        error: FakeRPCError(code: RPCErrorKind.kServiceDisappeared.code),
       ),
     ], httpAddress: Uri.parse('http://localhost:1234'));
 
@@ -317,9 +318,9 @@ void main() {
           'streamId': 'Isolate',
         },
       ),
-      const FakeVmServiceRequest(
+      FakeVmServiceRequest(
         method: kListViewsMethod,
-        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
+        error: FakeRPCError(code: RPCErrorKind.kServiceDisappeared.code),
       ),
     ], httpAddress: Uri.parse('http://localhost:5678'));
 

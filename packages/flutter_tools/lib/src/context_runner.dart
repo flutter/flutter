@@ -376,6 +376,7 @@ Future<T> runInContext<T>(
         ),
         fileSystem: globals.fs,
         analytics: globals.analytics,
+        shutdownHooks: globals.shutdownHooks,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,
