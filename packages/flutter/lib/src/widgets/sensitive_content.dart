@@ -84,7 +84,7 @@ class SensitiveContentSetting {
      _contentSensitivityCounts[widgetSensitivityLevel] = _contentSensitivityCounts[widgetSensitivityLevel]! - 1;
 
     if (_getTotalSensitiveContentWidgets() == 0) {
-      // There is no more content to mark sensitive. Reset to the defualt mode.
+      // There is no more content to mark sensitive. Reset to the default mode.
       // TODO(camsim99): Determine if we should set `autoSensitive`
       // since this is technically the default, though it will not work for Flutter.
       SensitiveContentUtils.setContentSensitivity(ContentSensitivity.autoSensitive);
@@ -104,18 +104,22 @@ class SensitiveContentSetting {
       case ContentSensitivity.sensitive:
         if (_contentSensitivityCounts[ContentSensitivity.autoSensitive]! > 0) {
           sensitivityLevelToSet = ContentSensitivity.autoSensitive;
-          return;
+          break;
         }
+        continue auto;
+      auto:
       case ContentSensitivity.autoSensitive:
         if (_contentSensitivityCounts[ContentSensitivity.notSensitive]! > 0) {
           sensitivityLevelToSet = ContentSensitivity.notSensitive;
-          return;
+          break;
         }
+        continue not;
+      not:
       case ContentSensitivity.notSensitive:
         throw StateError('The SensitiveContentSetting has gone out of sync with the SensitiveContent widgets in the tree.');
     }
 
-    SensitiveContentUtils.setContentSensitivity(sensitivityLevelToSet!);
+    SensitiveContentUtils.setContentSensitivity(sensitivityLevelToSet);
   }
 
   /// A desired [ContentSensitivity] level should be set only if it is less
