@@ -7,7 +7,6 @@ When triaging web issues follow the following process:
   - [ditman](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP2%2CP3+assignee%3Aditman)
   - [eyebrowsoffire](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP2%2CP3+assignee%3Aeyebrowsoffire)
   - [harryterkelsen](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP2%2CP3+assignee%3Aharryterkelsen)
-  - [tugorez](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP2%2CP3+assignee%3Atugorez)
   - [kevmoo](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP2%2CP3+assignee%3Akevmoo)
   - [mdebbar](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP2%2CP3+assignee%3Amdebbar)
   - [yjbanov](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP2%2CP3+assignee%3Ayjbanov)
