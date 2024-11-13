@@ -280,37 +280,6 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
   }
 }
 
-// Used to "shake" the floating label to the left and right
-// when the errorText first appears.
-class _Shaker extends AnimatedWidget {
-  const _Shaker({
-    required Animation<double> animation,
-    this.child,
-  }) : super(listenable: animation);
-
-  final Widget? child;
-
-  Animation<double> get animation => listenable as Animation<double>;
-
-  double get translateX {
-    const double shakeDelta = 4.0;
-    final double t = animation.value;
-    return shakeDelta * switch (t) {
-      <= 0.25 => -t,
-      <  0.75 => t - 0.5,
-      _ => (1.0 - t) * 4.0,
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Transform(
-      transform: Matrix4.translationValues(translateX, 0.0, 0.0),
-      child: child,
-    );
-  }
-}
-
 // Display the helper and error text. When the error text appears
 // it fades and the helper text fades out. The error text also
 // slides upwards a little when it first appears.
@@ -740,6 +709,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   // TODO(bleroux): consider defining this value as a Material token and making it
   // configurable by InputDecorationTheme.
   double get subtextGap => material3 ? 4.0 : 8.0;
+  double get prefixToInputGap => material3 ? 4.0 : 0.0;
+  double get inputToSuffixGap => material3 ? 4.0 : 0.0;
 
   RenderBox? get icon => childForSlot(_DecorationSlot.icon);
   RenderBox? get input => childForSlot(_DecorationSlot.input);
@@ -997,8 +968,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final Size suffixSize = suffix == null ? Size.zero : layoutChild(suffix, contentConstraints);
 
     final EdgeInsetsDirectional accessoryHorizontalInsets = EdgeInsetsDirectional.only(
-      start: iconWidth + prefixSize.width + (prefixIcon == null ? contentPadding.start : prefixIconSize.width),
-      end: suffixSize.width + (suffixIcon == null ? contentPadding.end : suffixIconSize.width),
+      start: iconWidth + prefixSize.width + (prefixIcon == null ? contentPadding.start : prefixIconSize.width + prefixToInputGap),
+      end: suffixSize.width + (suffixIcon == null ? contentPadding.end : suffixIconSize.width + inputToSuffixGap),
     );
 
     final double inputWidth = math.max(0.0, constraints.maxWidth - accessoryHorizontalInsets.horizontal);
@@ -1165,25 +1136,25 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   @override
   double computeMinIntrinsicWidth(double height) {
     return _minWidth(icon, height)
-      + (prefixIcon != null ? 0.0 : contentPadding.start)
+      + (prefixIcon != null ? prefixToInputGap : contentPadding.start)
       + _minWidth(prefixIcon, height)
       + _minWidth(prefix, height)
       + math.max(_minWidth(input, height), _minWidth(hint, height))
       + _minWidth(suffix, height)
       + _minWidth(suffixIcon, height)
-      + (suffixIcon != null ? 0.0 : contentPadding.end);
+      + (suffixIcon != null ? inputToSuffixGap : contentPadding.end);
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     return _maxWidth(icon, height)
-      + (prefixIcon != null ? 0.0 : contentPadding.start)
+      + (prefixIcon != null ? prefixToInputGap : contentPadding.start)
       + _maxWidth(prefixIcon, height)
       + _maxWidth(prefix, height)
       + math.max(_maxWidth(input, height), _maxWidth(hint, height))
       + _maxWidth(suffix, height)
       + _maxWidth(suffixIcon, height)
-      + (suffixIcon != null ? 0.0 : contentPadding.end);
+      + (suffixIcon != null ? inputToSuffixGap : contentPadding.end);
   }
 
   double _lineHeight(double width, List<RenderBox?> boxes) {
@@ -1371,6 +1342,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         if (prefixIcon != null) {
           start += contentPadding.start;
           start -= centerLayout(prefixIcon!, start - prefixIcon!.size.width);
+          start -= prefixToInputGap;
         }
         if (label != null) {
           if (decoration.alignLabelWithHint) {
@@ -1391,6 +1363,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         if (suffixIcon != null) {
           end -= contentPadding.end;
           end += centerLayout(suffixIcon!, end);
+          end += inputToSuffixGap;
         }
         if (suffix != null) {
           end += baselineLayout(suffix!, end);
@@ -1401,6 +1374,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         if (prefixIcon != null) {
           start -= contentPadding.start;
           start += centerLayout(prefixIcon!, start);
+          start += prefixToInputGap;
         }
         if (label != null) {
           if (decoration.alignLabelWithHint) {
@@ -1421,6 +1395,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         if (suffixIcon != null) {
           end += contentPadding.end;
           end -= centerLayout(suffixIcon!, end - suffixIcon!.size.width);
+          end -= inputToSuffixGap;
         }
         if (suffix != null) {
           end -= baselineLayout(suffix!, end - suffix!.size.width);
@@ -2097,14 +2072,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       .merge(decoration.errorStyle);
   }
 
-  Set<MaterialState> get materialState {
-    return <MaterialState>{
-      if (!decoration.enabled) MaterialState.disabled,
-      if (isFocused) MaterialState.focused,
-      if (isHovering) MaterialState.hovered,
-      if (_hasError) MaterialState.error,
-    };
-  }
+  Set<MaterialState> get materialState => <MaterialState>{
+    if (!decoration.enabled) MaterialState.disabled,
+    if (isFocused) MaterialState.focused,
+    if (isHovering) MaterialState.hovered,
+    if (_hasError) MaterialState.error,
+  };
 
 
   InputBorder _getDefaultBorder(ThemeData themeData, InputDecorationTheme defaults) {
@@ -2217,26 +2190,39 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       isHovering: isHovering,
     );
 
-    final Widget? label = decoration.labelText == null && decoration.label == null ? null : _Shaker(
-      animation: _shakingLabelController.view,
-      child: AnimatedOpacity(
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        opacity: _shouldShowLabel ? 1.0 : 0.0,
-        child: AnimatedDefaultTextStyle(
-          duration:_kTransitionDuration,
+    Widget? label;
+    if ((decoration.labelText ?? decoration.label) != null) {
+      label = MatrixTransition(
+        animation: _shakingLabelController,
+        onTransform: (double value) {
+          final double shakeOffset = switch (value) {
+            <= 0.25 => -value,
+            <  0.75 => value - 0.5,
+            _ => (1.0 - value) * 4.0,
+          };
+          // Shakes the floating label to the left and right
+          // when the errorText first appears.
+          return Matrix4.translationValues(shakeOffset * 4.0, 0.0, 0.0);
+        },
+        child: AnimatedOpacity(
+          duration: _kTransitionDuration,
           curve: _kTransitionCurve,
-          style: widget._labelShouldWithdraw
-            ? _getFloatingLabelStyle(themeData, defaults)
-            : labelStyle,
-          child: decoration.label ?? Text(
-            decoration.labelText!,
-            overflow: TextOverflow.ellipsis,
-            textAlign: textAlign,
+          opacity: _shouldShowLabel ? 1.0 : 0.0,
+          child: AnimatedDefaultTextStyle(
+            duration: _kTransitionDuration,
+            curve: _kTransitionCurve,
+            style: widget._labelShouldWithdraw
+              ? _getFloatingLabelStyle(themeData, defaults)
+              : labelStyle,
+            child: decoration.label ?? Text(
+              decoration.labelText!,
+              overflow: TextOverflow.ellipsis,
+              textAlign: textAlign,
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
     final bool hasPrefix = decoration.prefix != null || decoration.prefixText != null;
     final bool hasSuffix = decoration.suffix != null || decoration.suffixText != null;
@@ -2874,7 +2860,15 @@ class InputDecoration {
 
   /// The maximum number of lines the [helperText] can occupy.
   ///
-  /// Defaults to null, which means that the [helperText] is not limited.
+  /// Defaults to null, which means that soft line breaks in [helperText] are
+  /// truncated with an ellipse while hard line breaks are respected.
+  /// For example, a [helperText] that overflows the width of the field will be
+  /// truncated with an ellipse. However, a [helperText] with explicit linebreak
+  /// characters (\n) will display on multiple lines.
+  ///
+  /// To cause a long [helperText] to wrap, either set [helperMaxLines] or use
+  /// [helper] which offers more flexibility. For instance, it can be set to a
+  /// [Text] widget with a specific overflow value.
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the helper.
@@ -2972,7 +2966,15 @@ class InputDecoration {
 
   /// The maximum number of lines the [errorText] can occupy.
   ///
-  /// Defaults to null, which means that the [errorText] is not limited.
+  /// Defaults to null, which means that soft line breaks in [errorText] are
+  /// truncated with an ellipse while hard line breaks are respected.
+  /// For example, an [errorText] that overflows the width of the field will be
+  /// truncated with an ellipse. However, an [errorText] with explicit linebreak
+  /// characters (\n) will display on multiple lines.
+  ///
+  /// To cause a long [errorText] to wrap, either set [errorMaxLines] or use
+  /// [error] which offers more flexibility. For instance, it can be set to a
+  /// [Text] widget with a specific overflow value.
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.

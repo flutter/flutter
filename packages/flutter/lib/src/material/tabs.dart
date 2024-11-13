@@ -159,6 +159,31 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   /// If null, the height will be calculated based on the content of the [Tab]. When `icon` is not
   /// null along with `child` or `text`, the default height is 72.0 pixels. Without an `icon`, the
   /// height is 46.0 pixels.
+  ///
+  /// {@tool snippet}
+  ///
+  /// The provided tab height cannot be lower than the default height. Use
+  /// [PreferredSize] widget to adjust the overall [TabBar] height and match
+  /// the provided tab [height]:
+  ///
+  /// ```dart
+  /// bottom: const PreferredSize(
+  ///   preferredSize: Size.fromHeight(20.0),
+  ///   child: TabBar(
+  ///     tabs: <Widget>[
+  ///       Tab(
+  ///         text: 'Tab 1',
+  ///         height: 20.0,
+  ///       ),
+  ///       Tab(
+  ///         text: 'Tab 2',
+  ///         height: 20.0,
+  ///       ),
+  ///     ],
+  ///   ),
+  /// ),
+  /// ```
+  /// {@end-tool}
   final double? height;
 
   Widget _buildLabelText() {
@@ -244,9 +269,12 @@ class _TabStyle extends AnimatedWidget {
   final TabBarThemeData defaults;
   final Widget child;
 
-  MaterialStateColor _resolveWithLabelColor(BuildContext context) {
+  MaterialStateColor _resolveWithLabelColor(
+    BuildContext context, {
+    IconThemeData? iconTheme,
+  }) {
     final ThemeData themeData = Theme.of(context);
-    final TabBarThemeData tabBarTheme = TabBarTheme.of(context).data;
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
 
     // labelStyle.color (and tabBarTheme.labelStyle.color) is not considered
@@ -270,6 +298,7 @@ class _TabStyle extends AnimatedWidget {
           ?? tabBarTheme.unselectedLabelColor
           ?? unselectedLabelStyle?.color
           ?? tabBarTheme.unselectedLabelStyle?.color
+          ?? iconTheme?.color
           ?? (themeData.useMaterial3
                ? defaults.unselectedLabelColor!
                : selectedColor.withAlpha(0xB2)); // 70% alpha
@@ -285,7 +314,8 @@ class _TabStyle extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TabBarThemeData tabBarTheme = TabBarTheme.of(context).data;
+    final ThemeData theme = Theme.of(context);
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
 
     final Set<MaterialState> states = isSelected
@@ -306,14 +336,23 @@ class _TabStyle extends AnimatedWidget {
     final TextStyle textStyle = isSelected
       ? TextStyle.lerp(selectedStyle, unselectedStyle, animation.value)!
       : TextStyle.lerp(unselectedStyle, selectedStyle, animation.value)!;
-    final Color color = _resolveWithLabelColor(context).resolve(states);
+    final Color defaultIconColor = switch (theme.colorScheme.brightness) {
+      Brightness.light => kDefaultIconDarkColor,
+      Brightness.dark  => kDefaultIconLightColor,
+    };
+    final IconThemeData? customIconTheme = switch (IconTheme.of(context)) {
+      final IconThemeData iconTheme when iconTheme.color != defaultIconColor => iconTheme,
+      _ => null,
+    };
+    final Color iconColor = _resolveWithLabelColor(context, iconTheme: customIconTheme).resolve(states);
+    final Color labelColor = _resolveWithLabelColor(context).resolve(states);
 
     return DefaultTextStyle(
-      style: textStyle.copyWith(color: color),
+      style: textStyle.copyWith(color: labelColor),
       child: IconTheme.merge(
         data: IconThemeData(
-          size: 24.0,
-          color: color,
+          size: customIconTheme?.size ?? 24.0,
+          color: iconColor,
         ),
         child: child,
       ),
@@ -1153,7 +1192,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// individual tab widgets.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.selected].
@@ -1161,11 +1200,6 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If null, then the value of [TabBarThemeData.mouseCursor] is used. If
   /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
-  ///
-  /// See also:
-  ///
-  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -1355,7 +1389,7 @@ class _TabBarState extends State<TabBar> {
 
   Decoration _getIndicator(TabBarIndicatorSize indicatorSize) {
     final ThemeData theme = Theme.of(context);
-    final TabBarThemeData tabBarTheme = TabBarTheme.of(context).data;
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
 
     if (widget.indicator != null) {
       return widget.indicator!;
@@ -1455,7 +1489,7 @@ class _TabBarState extends State<TabBar> {
 
   void _initIndicatorPainter() {
     final ThemeData theme = Theme.of(context);
-    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final TabBarIndicatorSize indicatorSize = widget.indicatorSize
       ?? tabBarTheme.indicatorSize
       ?? _defaults.indicatorSize!;
@@ -1687,7 +1721,7 @@ class _TabBarState extends State<TabBar> {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(_debugScheduleCheckHasValidTabsCount());
     final ThemeData theme = Theme.of(context);
-    final TabBarThemeData tabBarTheme = TabBarTheme.of(context).data;
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final TabAlignment effectiveTabAlignment = widget.tabAlignment ?? tabBarTheme.tabAlignment ?? _defaults.tabAlignment!;
     assert(_debugTabAlignmentIsValid(effectiveTabAlignment));
 

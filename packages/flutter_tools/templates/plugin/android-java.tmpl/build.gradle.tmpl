@@ -22,15 +22,13 @@ rootProject.allprojects {
 apply plugin: "com.android.library"
 
 android {
-    if (project.android.hasProperty("namespace")) {
-        namespace = "{{androidIdentifier}}"
-    }
+    namespace = "{{androidIdentifier}}"
 
     compileSdk = {{compileSdkVersion}}
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     defaultConfig {

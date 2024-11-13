@@ -44,7 +44,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   Analytics: () => const NoOpAnalytics(),
   FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
   Signals: () => FakeSignals(),  // prevent registering actual signal handlers.
-  Pub: () => ThrowingPub(), // prevent accidental invocations of pub.
+  Pub: () => const ThrowingPub(), // prevent accidental invocations of pub.
 };
 
 /// Manages interaction with the tool injection and runner system.
@@ -92,7 +92,7 @@ class Testbed {
   ///
   /// `overrides` may be used to provide new context values for the single test
   /// case or override any context values from the setup.
-  Future<T?> run<T>(FutureOr<T> Function() test, {Map<Type, Generator>? overrides}) {
+  Future<T?> run<T>(FutureOr<T> Function() test, {Map<Type, Generator>? overrides, bool useImplicitPubspecResolution = true}) {
     final Map<Type, Generator> testOverrides = <Type, Generator>{
       ..._testbedDefaults,
       // Add the initial setUp overrides
@@ -139,7 +139,7 @@ class Testbed {
             }
             return null;
           });
-      });
+      }, useImplicitPubspecResolution: useImplicitPubspecResolution);
     }, createHttpClient: (SecurityContext? c) => FakeHttpClient.any());
   }
 }

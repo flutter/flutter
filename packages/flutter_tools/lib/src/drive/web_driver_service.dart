@@ -30,13 +30,16 @@ class WebDriverService extends DriverService {
     required ProcessUtils processUtils,
     required String dartSdkPath,
     required Logger logger,
+    required bool useImplicitPubspecResolution,
   }) : _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
-       _logger = logger;
+       _logger = logger,
+       _useImplicitPubspecResolution = useImplicitPubspecResolution;
 
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
   final Logger _logger;
+  final bool _useImplicitPubspecResolution;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -94,6 +97,7 @@ class WebDriverService extends DriverService {
       analytics: globals.analytics,
       logger: _logger,
       systemClock: globals.systemClock,
+      useImplicitPubspecResolution: _useImplicitPubspecResolution,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(
@@ -114,18 +118,18 @@ class WebDriverService extends DriverService {
     ]);
 
     if (_runResult != null) {
-      throw ToolExit(
+      throwToolExit(
         'Application exited before the test started. Check web driver logs '
         'for possible application-side errors.'
       );
     }
 
     if (!isAppStarted) {
-      throw ToolExit('Failed to start application');
+      throwToolExit('Failed to start application');
     }
 
     if (_residentRunner.uri == null) {
-      throw ToolExit('Unable to connect to the app. URL not available.');
+      throwToolExit('Unable to connect to the app. URL not available.');
     }
 
     if (debuggingOptions.webLaunchUrl != null) {
@@ -209,7 +213,7 @@ class WebDriverService extends DriverService {
     await _residentRunner.cleanupAtFinish();
 
     if (appDidFinishPrematurely) {
-      throw ToolExit(
+      throwToolExit(
         'Application exited before the test finished. Check web driver logs '
         'for possible application-side errors.'
       );

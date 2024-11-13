@@ -3126,9 +3126,9 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    expect(globals.fs.isFileSync('${projectDir.path}/android/app/build.gradle'), true);
+    expect(globals.fs.isFileSync('${projectDir.path}/android/app/build.gradle.kts'), true);
 
-    final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle').readAsString();
+    final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle.kts').readAsString();
 
     expect(buildContent.contains('compileSdk = flutter.compileSdkVersion'), true);
     expect(buildContent.contains('ndkVersion = flutter.ndkVersion'), true);
@@ -3202,6 +3202,9 @@ void main() {
     expect(cmakeLists.existsSync(), true);
 
     final String cmakeListsContent = await cmakeLists.readAsString();
+    // If we ever change the flags, this should be accounted for in the
+    // migration as well:
+    // lib/src/android/migrations/cmake_android_16k_pages_migration.dart
     const String expected16KbFlags = 'PRIVATE "-Wl,-z,max-page-size=16384")';
     expect(cmakeListsContent, contains(expected16KbFlags));
   });
@@ -3226,6 +3229,54 @@ void main() {
     final String buildGradleContent = await buildGradleFile.readAsString();
 
     expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
+  });
+
+  testUsingContext('Android Java plugin sets explicit compatibility version', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub',
+      '-t', 'plugin',
+      '--org', 'com.bar.foo',
+      '-a', 'java',
+      '--platforms=android',
+      projectDir.path]);
+
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+
+    expect(buildGradleFile.existsSync(), true);
+
+    final String buildGradleContent = await buildGradleFile.readAsString();
+
+    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_11'), true);
+    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_11'), true);
+  });
+
+  testUsingContext('Android Kotlin plugin sets explicit compatibility version', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub',
+      '-t', 'plugin',
+      '--org', 'com.bar.foo',
+      '-a', 'kotlin',
+      '--platforms=android',
+      projectDir.path]);
+
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+
+    expect(buildGradleFile.existsSync(), true);
+
+    final String buildGradleContent = await buildGradleFile.readAsString();
+
+    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_11'), true);
+    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_11'), true);
+    // jvmTarget should be set to the same value.
+    expect(buildGradleContent.contains('jvmTarget = JavaVersion.VERSION_11'), true);
   });
 
   testUsingContext('Flutter module Android project contains namespace', () async {

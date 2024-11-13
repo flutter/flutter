@@ -710,7 +710,7 @@ void main() {
         ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
         ..paragraph() // alpha icon animating
-        ..paragraph(offset: const Offset(56.0, -20.0)) // alpha naimating
+        ..paragraph(offset: const Offset(56.0, -20.0)) // alpha animating
         ..paragraph(offset: const Offset(56.0, 20.0))  // beta
         ..paragraph(offset: const Offset(56.0, 60.0))  // kappa
         ..paragraph() // Icon

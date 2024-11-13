@@ -56,7 +56,7 @@ const String kConcurrentRunFailureMessage2 = 'there are two concurrent builds ru
 String missingPlatformInstructions(String simulatorVersion) => '''
 ════════════════════════════════════════════════════════════════════════════════
 $simulatorVersion is not installed. To download and install the platform, open
-Xcode, select Xcode > Settings > Platforms, and click the GET button for the
+Xcode, select Xcode > Settings > Components, and click the GET button for the
 required platform.
 
 For more information, please visit:
@@ -938,7 +938,7 @@ Future<bool> _isPluginSwiftPackageOnly({
   required String pluginName,
   required FileSystem fileSystem,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project, useImplicitPubspecResolution: true);
   final Plugin? matched = plugins
       .where((Plugin plugin) =>
           plugin.name.toLowerCase() == pluginName.toLowerCase() &&

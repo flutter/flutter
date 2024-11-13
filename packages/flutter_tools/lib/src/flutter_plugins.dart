@@ -17,9 +17,11 @@ import 'base/platform.dart';
 import 'base/template.dart';
 import 'base/version.dart';
 import 'cache.dart';
+import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
+import 'dart/pub.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'macos/darwin_dependency_management.dart';
@@ -40,8 +42,13 @@ Future<void> _renderTemplateToFile(
   await file.writeAsString(renderedTemplate);
 }
 
-Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies,
-    {FileSystem? fileSystem}) async {
+Future<Plugin?> _pluginFromPackage(
+  String name,
+  Uri packageRoot,
+  Set<String> appDependencies, {
+  required Set<String> devDependencies,
+  FileSystem? fileSystem,
+}) async {
   final FileSystem fs = fileSystem ?? globals.fs;
   final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
   if (!pubspecFile.existsSync()) {
@@ -76,10 +83,36 @@ Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> app
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
     fileSystem: fs,
     appDependencies: appDependencies,
+    isDevDependency: devDependencies.contains(name),
   );
 }
 
-Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = true}) async {
+/// Returns a list of all plugins to be registered with the provided [project].
+///
+/// [useImplicitPubspecResolution] defines if legacy rules for traversing the
+/// pub dependencies of a package implies, namely, that if `true`, all plugins
+/// are assumed to be non-dev dependencies. Code that calls [findPlugins] in
+/// order to obtain _other_ information about the plugins, such as whether a
+/// plugin uses a specific language or platform can safely pass either `true`
+/// or `false`; however a value of `false` _will_ cause `dart pub deps --json`
+/// to trigger, which in turn could have other side-effects.
+///
+/// Please reach out to matanlurey@ if you find you need:
+/// ```dart
+/// useImplicitPubspecResolution: true
+/// ```
+///
+/// ... in order for your code to function, as that path is being deprecated:
+/// <https://flutter.dev/to/flutter-gen-deprecation>.
+///
+/// ---
+///
+/// If [throwOnError] is `true`, an empty package configuration is an error.
+Future<List<Plugin>> findPlugins(
+  FlutterProject project, {
+  required bool useImplicitPubspecResolution,
+  bool throwOnError = true,
+}) async {
   final List<Plugin> plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
   final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
@@ -88,12 +121,26 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     logger: globals.logger,
     throwOnError: throwOnError,
   );
+  final Set<String> devDependencies;
+  if (useImplicitPubspecResolution) {
+    // With --implicit-pubspec-resolution, we do not want to check for what
+    // plugins are dev dependencies and instead continue to assume the previous
+    // behavior (all plugins are non-dev dependencies).
+    devDependencies = <String>{};
+  } else {
+    devDependencies = await computeExclusiveDevDependencies(
+      pub,
+      logger: globals.logger,
+      project: project,
+    );
+  }
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');
     final Plugin? plugin = await _pluginFromPackage(
       package.name,
       packageRoot,
       project.manifest.dependencies,
+      devDependencies: devDependencies,
       fileSystem: fs,
     );
     if (plugin != null) {
@@ -168,7 +215,8 @@ const String _kFlutterPluginsSharedDarwinSource = 'shared_darwin_source';
 bool _writeFlutterPluginsList(
   FlutterProject project,
   List<Plugin> plugins, {
-  bool forceCocoaPodsOnly = false,
+  required bool swiftPackageManagerEnabledIos,
+  required bool swiftPackageManagerEnabledMacos,
 }) {
   final File pluginsFile = project.flutterPluginsDependenciesFile;
   if (plugins.isEmpty) {
@@ -204,7 +252,11 @@ bool _writeFlutterPluginsList(
   result['dependencyGraph'] = _createPluginLegacyDependencyGraph(plugins);
   result['date_created'] = globals.systemClock.now().toString();
   result['version'] = globals.flutterVersion.frameworkVersion;
-  result['swift_package_manager_enabled'] = !forceCocoaPodsOnly && project.usesSwiftPackageManager;
+
+  result['swift_package_manager_enabled'] = <String, bool>{
+    'ios': swiftPackageManagerEnabledIos,
+    'macos': swiftPackageManagerEnabledMacos,
+  };
 
   // Only notify if the plugins list has changed. [date_created] will always be different,
   // [version] is not relevant for this check.
@@ -1010,18 +1062,21 @@ Future<void> refreshPluginsList(
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
+  required bool useImplicitPubspecResolution,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project, useImplicitPubspecResolution: useImplicitPubspecResolution);
   // Sort the plugins by name to keep ordering stable in generated files.
   plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
-  // TODO(franciscojma): Remove once migration is complete.
+  // TODO(matanlurey): Remove once migration is complete.
   // Write the legacy plugin files to avoid breaking existing apps.
-  final bool legacyChanged = _writeFlutterPluginsListLegacy(project, plugins);
+  final bool legacyChanged = useImplicitPubspecResolution && _writeFlutterPluginsListLegacy(project, plugins);
 
+  final bool swiftPackageManagerEnabled = !forceCocoaPodsOnly && project.usesSwiftPackageManager;
   final bool changed = _writeFlutterPluginsList(
     project,
     plugins,
-    forceCocoaPodsOnly: forceCocoaPodsOnly,
+    swiftPackageManagerEnabledIos: swiftPackageManagerEnabled,
+    swiftPackageManagerEnabledMacos: swiftPackageManagerEnabled,
   );
   if (changed || legacyChanged || forceCocoaPodsOnly) {
     createPluginSymlinks(project, force: true);
@@ -1050,16 +1105,13 @@ Future<void> refreshPluginsList(
 /// to inject a copy of the plugin registrant for web into .dart_tool/dartpad so
 /// dartpad can get the plugin registrant without needing to build the complete
 /// project. See: https://github.com/dart-lang/dart-services/pull/874
-Future<void> injectBuildTimePluginFiles(
+Future<void> injectBuildTimePluginFilesForWebPlatform(
   FlutterProject project, {
   required Directory destination,
-  bool webPlatform = false,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project, useImplicitPubspecResolution: true);
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(plugins, pluginResolutionType: _PluginResolutionType.nativeOrDart);
-  if (webPlatform) {
-    await _writeWebPluginRegistrant(project, pluginsByPlatform[WebPlugin.kConfigKey]!, destination);
-  }
+  await _writeWebPluginRegistrant(project, pluginsByPlatform[WebPlugin.kConfigKey]!, destination);
 }
 
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
@@ -1070,12 +1122,13 @@ Future<void> injectBuildTimePluginFiles(
 /// Files written by this method end up in platform-specific locations that are
 /// configured by each [FlutterProject] subclass (except for the Web).
 ///
-/// Web tooling uses [injectBuildTimePluginFiles] instead, which places files in the
+/// Web tooling uses [injectBuildTimePluginFilesForWebPlatform] instead, which places files in the
 /// current build (temp) directory, and doesn't modify the users' working copy.
 ///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 Future<void> injectPlugins(
   FlutterProject project, {
+  required bool useImplicitPubspecResolution,
   bool androidPlatform = false,
   bool iosPlatform = false,
   bool linuxPlatform = false,
@@ -1084,7 +1137,7 @@ Future<void> injectPlugins(
   Iterable<String>? allowedPlugins,
   DarwinDependencyManagement? darwinDependencyManagement,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project, useImplicitPubspecResolution: useImplicitPubspecResolution);
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(plugins, pluginResolutionType: _PluginResolutionType.nativeOrDart);
 
   if (androidPlatform) {
@@ -1131,7 +1184,7 @@ Future<void> injectPlugins(
 ///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 bool hasPlugins(FlutterProject project) {
-  return _readFileContent(project.flutterPluginsFile) != null;
+  return _readFileContent(project.flutterPluginsDependenciesFile) != null;
 }
 
 /// Resolves the plugin implementations for all platforms.
@@ -1512,7 +1565,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   String currentMainUri,
   File mainFile,
 ) async {
-  final List<Plugin> plugins = await findPlugins(rootProject);
+  final List<Plugin> plugins = await findPlugins(rootProject, useImplicitPubspecResolution: true);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
     selectDartPluginsOnly: true,

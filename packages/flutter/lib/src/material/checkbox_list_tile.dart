@@ -291,7 +291,7 @@ class CheckboxListTile extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.selected].
@@ -499,57 +499,57 @@ class CheckboxListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control;
+    Widget control;
 
     switch (_checkboxType) {
       case _CheckboxType.material:
         control = ExcludeFocus(
-          child: Transform.scale(
-            scale: checkboxScaleFactor,
-            child: Checkbox(
-              value: value,
-              onChanged: enabled ?? true ? onChanged : null,
-              mouseCursor: mouseCursor,
-              activeColor: activeColor,
-              fillColor: fillColor,
-              checkColor: checkColor,
-              hoverColor: hoverColor,
-              overlayColor: overlayColor,
-              splashRadius: splashRadius,
-              materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-              autofocus: autofocus,
-              tristate: tristate,
-              shape: checkboxShape,
-              side: side,
-              isError: isError,
-              semanticLabel: checkboxSemanticLabel,
-            ),
+          child: Checkbox(
+            value: value,
+            onChanged: enabled ?? true ? onChanged : null,
+            mouseCursor: mouseCursor,
+            activeColor: activeColor,
+            fillColor: fillColor,
+            checkColor: checkColor,
+            hoverColor: hoverColor,
+            overlayColor: overlayColor,
+            splashRadius: splashRadius,
+            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+            autofocus: autofocus,
+            tristate: tristate,
+            shape: checkboxShape,
+            side: side,
+            isError: isError,
+            semanticLabel: checkboxSemanticLabel,
           ),
         );
       case _CheckboxType.adaptive:
         control = ExcludeFocus(
-          child: Transform.scale(
-            scale: checkboxScaleFactor,
-            child: Checkbox.adaptive(
-              value: value,
-              onChanged: enabled ?? true ? onChanged : null,
-              mouseCursor: mouseCursor,
-              activeColor: activeColor,
-              fillColor: fillColor,
-              checkColor: checkColor,
-              hoverColor: hoverColor,
-              overlayColor: overlayColor,
-              splashRadius: splashRadius,
-              materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-              autofocus: autofocus,
-              tristate: tristate,
-              shape: checkboxShape,
-              side: side,
-              isError: isError,
-              semanticLabel: checkboxSemanticLabel,
-            ),
+          child: Checkbox.adaptive(
+            value: value,
+            onChanged: enabled ?? true ? onChanged : null,
+            mouseCursor: mouseCursor,
+            activeColor: activeColor,
+            fillColor: fillColor,
+            checkColor: checkColor,
+            hoverColor: hoverColor,
+            overlayColor: overlayColor,
+            splashRadius: splashRadius,
+            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+            autofocus: autofocus,
+            tristate: tristate,
+            shape: checkboxShape,
+            side: side,
+            isError: isError,
+            semanticLabel: checkboxSemanticLabel,
           ),
         );
+    }
+    if (checkboxScaleFactor != 1.0) {
+      control = Transform.scale(
+        scale: checkboxScaleFactor,
+        child: control,
+      );
     }
 
     final ListTileThemeData listTileTheme = ListTileTheme.of(context);

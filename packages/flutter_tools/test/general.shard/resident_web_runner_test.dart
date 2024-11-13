@@ -170,6 +170,7 @@ void main() {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      useImplicitPubspecResolution: true,
     );
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
@@ -202,6 +203,7 @@ void main() {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      useImplicitPubspecResolution: true,
     );
 
     expect(profileResidentWebRunner.uri, webDevFS.baseUri);
@@ -221,6 +223,7 @@ void main() {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      useImplicitPubspecResolution: true,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     flutterDevice.device = chromeDevice;
@@ -234,6 +237,7 @@ void main() {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      useImplicitPubspecResolution: true,
     );
 
     expect(profileResidentWebRunner.supportsServiceProtocol, false);
@@ -368,6 +372,7 @@ void main() {
       analytics: globals.analytics,
       systemClock: globals.systemClock,
       devtoolsHandler: createNoOpHandler,
+      useImplicitPubspecResolution: true,
     );
 
     expect(await residentWebRunner.run(), 0);
@@ -395,6 +400,7 @@ void main() {
       analytics: globals.analytics,
       systemClock: globals.systemClock,
       devtoolsHandler: createNoOpHandler,
+      useImplicitPubspecResolution: true,
     );
 
     expect(await residentWebRunner.run(), 0);
@@ -596,6 +602,7 @@ void main() {
       analytics: globals.analytics,
       systemClock: globals.systemClock,
       devtoolsHandler: createNoOpHandler,
+      useImplicitPubspecResolution: true,
     );
     fakeVmServiceHost =
         FakeVmServiceHost(requests: kAttachExpectations.toList());
@@ -972,10 +979,10 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
-      const FakeVmServiceRequest(
+      FakeVmServiceRequest(
         method: kHotRestartServiceName,
         // Failed response,
-        error: FakeRPCError(code: RPCErrorCodes.kInternalError),
+        error: FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
       ),
     ]);
     setupMocks();
@@ -988,7 +995,10 @@ void main() {
     final OperationResult result = await residentWebRunner.restart();
 
     expect(result.code, 1);
-    expect(result.message, contains(RPCErrorCodes.kInternalError.toString()));
+    expect(
+      result.message,
+      contains(vm_service.RPCErrorKind.kInternalError.code.toString()),
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1120,6 +1130,7 @@ void main() {
       analytics: globals.analytics,
       systemClock: globals.systemClock,
       devtoolsHandler: createNoOpHandler,
+      useImplicitPubspecResolution: true,
     );
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter =
@@ -1169,6 +1180,7 @@ void main() {
       analytics: globals.analytics,
       systemClock: globals.systemClock,
       devtoolsHandler: createNoOpHandler,
+      useImplicitPubspecResolution: true,
     );
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter =
@@ -1212,6 +1224,7 @@ void main() {
       analytics: globals.analytics,
       systemClock: globals.systemClock,
       devtoolsHandler: createNoOpHandler,
+      useImplicitPubspecResolution: true,
     );
 
     // Create necessary files.
@@ -1468,6 +1481,7 @@ ResidentRunner setUpResidentRunner(
     fileSystem: globals.fs,
     logger: logger ?? BufferLogger.test(),
     devtoolsHandler: createNoOpHandler,
+    useImplicitPubspecResolution: true,
   );
 }
 

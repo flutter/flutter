@@ -70,6 +70,7 @@ void main() {
       flutterVersion: flutterVersion,
       fileSystem: fileSystem,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     await webBuilder.buildWeb(
       flutterProject,
@@ -107,7 +108,7 @@ void main() {
         label: 'web-compile',
             parameters: CustomDimensions(
               buildEventSettings:
-                  'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+                  'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
 
       ),
           ),
@@ -121,7 +122,7 @@ void main() {
         Event.flutterBuildInfo(
           label: 'web-compile',
           buildType: 'web',
-          settings: 'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+          settings: 'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
         ),
       ]),
     );
@@ -138,6 +139,8 @@ void main() {
       ),
       true,
     );
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('WebBuilder throws tool exit on failure', () async {
@@ -160,6 +163,7 @@ void main() {
       flutterVersion: flutterVersion,
       fileSystem: fileSystem,
       analytics: fakeAnalytics,
+      useImplicitPubspecResolution: true,
     );
     await expectLater(
         () async => webBuilder.buildWeb(
@@ -176,5 +180,7 @@ void main() {
     expect(logger.errorText, contains('Target hello failed: FormatException: illegal character in input string'));
     expect(testUsage.timings, isEmpty);
     expect(fakeAnalytics.sentEvents, isEmpty);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }

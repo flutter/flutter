@@ -31,7 +31,6 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
-import '../vmservice.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -280,6 +279,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             ? _logger
             : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
           logToStdout: true,
+          useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
         )
       : null;
 
@@ -414,7 +414,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         _logger.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
     } on RPCError catch (err) {
-      if (err.code == RPCErrorCodes.kServiceDisappeared ||
+      if (err.code == RPCErrorKind.kServiceDisappeared.code ||
           err.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }
@@ -466,6 +466,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
     );
 
+    final bool useImplicitPubspecResolution = globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution);
     return buildInfo.isDebug
       ? _hotRunnerFactory.build(
           flutterDevices,
@@ -478,11 +479,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
           nativeAssetsBuilder: _nativeAssetsBuilder,
           analytics: analytics,
+          useImplicitPubspecResolution: useImplicitPubspecResolution,
         )
       : ColdRunner(
           flutterDevices,
           target: targetFile,
           debuggingOptions: debuggingOptions,
+          useImplicitPubspecResolution: useImplicitPubspecResolution,
         );
   }
 
@@ -509,6 +512,7 @@ class HotRunnerFactory {
     FlutterProject? flutterProject,
     String? nativeAssetsYamlFile,
     required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
+    required bool useImplicitPubspecResolution,
     required Analytics analytics,
   }) => HotRunner(
     devices,
@@ -523,5 +527,6 @@ class HotRunnerFactory {
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     nativeAssetsBuilder: nativeAssetsBuilder,
     analytics: analytics,
+    useImplicitPubspecResolution: useImplicitPubspecResolution,
   );
 }

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart';
-import 'package:native_assets_cli/native_assets_cli.dart';
+import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../../src/common.dart';
 

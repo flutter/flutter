@@ -123,14 +123,12 @@ class Java {
   ///
   /// This map should be used as the environment when invoking any Java-dependent
   /// processes, such as Gradle or Android SDK tools (avdmanager, sdkmanager, etc.)
-  Map<String, String> get environment {
-    return <String, String>{
-      if (javaHome != null) javaHomeEnvironmentVariable: javaHome!,
-      'PATH': _fileSystem.path.dirname(binaryPath) +
-                        _os.pathVarSeparator +
-                        _platform.environment['PATH']!,
-    };
-  }
+  Map<String, String> get environment => <String, String>{
+    if (javaHome != null) javaHomeEnvironmentVariable: javaHome!,
+    'PATH': _fileSystem.path.dirname(binaryPath) +
+            _os.pathVarSeparator +
+            _platform.environment['PATH']!,
+  };
 
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version could not be determined.

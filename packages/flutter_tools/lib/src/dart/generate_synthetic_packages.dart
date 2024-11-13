@@ -15,10 +15,10 @@ Future<void> generateLocalizationsSyntheticPackage({
   required BuildSystem buildSystem,
   required BuildTargets buildTargets,
 }) async {
-
   final FileSystem fileSystem = environment.fileSystem;
   final File l10nYamlFile = fileSystem.file(
-    fileSystem.path.join(environment.projectDir.path, 'l10n.yaml'));
+    fileSystem.path.join(environment.projectDir.path, 'l10n.yaml'),
+  );
 
   // If pubspec.yaml has generate:true and if l10n.yaml exists in the
   // root project directory, check to see if a synthetic package should
@@ -30,7 +30,7 @@ Future<void> generateLocalizationsSyntheticPackage({
   final YamlNode yamlNode = loadYamlNode(l10nYamlFile.readAsStringSync());
   if (yamlNode.value != null && yamlNode is! YamlMap) {
     throwToolExit(
-      'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode'
+      'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode',
     );
   }
 
@@ -41,8 +41,7 @@ Future<void> generateLocalizationsSyntheticPackage({
     final Object? value = yamlMap['synthetic-package'];
     if (value is! bool && value != null) {
       throwToolExit(
-        'Expected "synthetic-package" to have a bool value, '
-        'instead was "$value"'
+        'Expected "synthetic-package" to have a bool value, instead was "$value"',
       );
     }
 
@@ -52,7 +51,29 @@ Future<void> generateLocalizationsSyntheticPackage({
     if (isSyntheticL10nPackage == false) {
       return;
     }
+  } else if (!environment.useImplicitPubspecResolution) {
+    // --no-implicit-pubspec-resolution was passed, and synthetic-packages: true was not.
+    return;
   }
+
+  if (!environment.useImplicitPubspecResolution) {
+    throwToolExit(
+      'Cannot generate a synthetic package when --no-implicit-pubspec-resolution is passed.\n'
+      '\n'
+      'Synthetic package output (package:flutter_gen) is deprecated: '
+      'https://flutter.dev/to/flutter-gen-deprecation. If you are seeing this '
+      'message either you have provided --no-implicit-pubspec-resolution, or '
+      'it is the default value (see flutter --verbose --help).',
+    );
+  }
+
+  // Log a warning: synthetic-package: true (or implicit true) is deprecated.
+  environment.logger.printWarning(
+    'Synthetic package output (package:flutter_gen) is deprecated: '
+    'https://flutter.dev/to/flutter-gen-deprecation. In a future release, '
+    'synthetic-package will default to `false` and will later be removed '
+    'entirely.',
+  );
 
   final BuildResult result = await buildSystem.build(
     buildTargets.generateLocalizationsTarget,

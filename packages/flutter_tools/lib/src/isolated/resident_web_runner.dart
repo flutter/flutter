@@ -57,6 +57,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required SystemClock systemClock,
     required Usage usage,
     required Analytics analytics,
+    required bool useImplicitPubspecResolution,
     bool machine = false,
   }) {
     return ResidentWebRunner(
@@ -72,6 +73,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       systemClock: systemClock,
       fileSystem: fileSystem,
       logger: logger,
+      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
   }
 }
@@ -87,6 +89,7 @@ class ResidentWebRunner extends ResidentRunner {
     bool stayResident = true,
     bool machine = false,
     required this.flutterProject,
+    required bool useImplicitPubspecResolution,
     required DebuggingOptions debuggingOptions,
     required FileSystem fileSystem,
     required Logger logger,
@@ -102,6 +105,7 @@ class ResidentWebRunner extends ResidentRunner {
        _usage = usage,
        _analytics = analytics,
        _urlTunneller = urlTunneller,
+       _useImplicitPubspecResolution = useImplicitPubspecResolution,
        super(
           <FlutterDevice>[device],
           target: target ?? fileSystem.path.join('lib', 'main.dart'),
@@ -109,6 +113,7 @@ class ResidentWebRunner extends ResidentRunner {
           stayResident: stayResident,
           machine: machine,
           devtoolsHandler: devtoolsHandler,
+          useImplicitPubspecResolution: useImplicitPubspecResolution,
         );
 
   final FileSystem _fileSystem;
@@ -117,6 +122,7 @@ class ResidentWebRunner extends ResidentRunner {
   final Usage _usage;
   final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
+  final bool _useImplicitPubspecResolution;
 
   @override
   Logger get logger => _logger;
@@ -345,6 +351,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             flutterVersion: globals.flutterVersion,
             usage: globals.flutterUsage,
             analytics: globals.analytics,
+            useImplicitPubspecResolution: _useImplicitPubspecResolution,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -393,16 +400,19 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     }
   }
 
-  WebCompilerConfig get _compilerConfig => (debuggingOptions.webUseWasm)
-    ? WasmCompilerConfig(
+  WebCompilerConfig get _compilerConfig {
+    if (debuggingOptions.webUseWasm) {
+      return WasmCompilerConfig(
         optimizationLevel: 0,
         stripWasm: false,
         renderer: debuggingOptions.webRenderer
-      )
-    : JsCompilerConfig.run(
-        nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-        renderer: debuggingOptions.webRenderer,
       );
+    }
+    return JsCompilerConfig.run(
+      nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+      renderer: debuggingOptions.webRenderer,
+    );
+  }
 
   @override
   Future<OperationResult> restart({
@@ -438,6 +448,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           flutterVersion: globals.flutterVersion,
           usage: globals.flutterUsage,
           analytics: globals.analytics,
+          useImplicitPubspecResolution: _useImplicitPubspecResolution,
         );
         await webBuilder.buildWeb(
           flutterProject,
@@ -521,7 +532,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       result = _generatedEntrypointDirectory!.childFile('web_entrypoint.dart');
 
       // Generates the generated_plugin_registrar
-      await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: _generatedEntrypointDirectory!);
+      await injectBuildTimePluginFilesForWebPlatform(
+        flutterProject,
+        destination: _generatedEntrypointDirectory!,
+      );
       // The below works because `injectBuildTimePluginFiles` is configured to write
       // the web_plugin_registrant.dart file alongside the generated main.dart
       const String generatedImport = 'web_plugin_registrant.dart';

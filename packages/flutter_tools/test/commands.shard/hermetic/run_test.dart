@@ -29,7 +29,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
@@ -1023,6 +1022,35 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
+      // Tests whether using a deprecated webRenderer toggles a warningText.
+      Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
+        testUsingContext('Using --web-renderer=${webRenderer.name} triggers a warningText.', () async {
+          // Run the command so it parses --web-renderer, but ignore all errors.
+          // We only care about the logger.
+          try {
+            await createTestCommandRunner(RunCommand()).run(<String>[
+              'run',
+              '--no-pub',
+              '--web-renderer=${webRenderer.name}',
+            ]);
+          } on ToolExit catch (error) {
+            expect(error, isA<ToolExit>());
+          }
+          expect(logger.warningText, contains(
+            'See: https://docs.flutter.dev/to/web-html-renderer-deprecation'
+          ));
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+        });
+      }
+      /// Do test all the deprecated WebRendererModes
+      WebRendererMode.values
+        .where((WebRendererMode mode) => mode.isDeprecated)
+        .forEach(testWebRendererDeprecationMessage);
+
       testUsingContext('accepts headers with commas in them', () async {
         final RunCommand command = RunCommand();
         await expectLater(
@@ -1100,7 +1128,7 @@ void main() {
     final FakeResidentRunner residentRunner = FakeResidentRunner();
     residentRunner.rpcError = RPCError(
       'flutter._listViews',
-      RPCErrorCodes.kServiceDisappeared,
+      RPCErrorKind.kServiceDisappeared.code,
       '',
     );
     final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
@@ -1113,7 +1141,7 @@ void main() {
 
     residentRunner.rpcError = RPCError(
       'flutter._listViews',
-      RPCErrorCodes.kServerError,
+      RPCErrorKind.kServerError.code,
       'Service connection disposed.',
     );
 
@@ -1129,7 +1157,7 @@ void main() {
 
   testUsingContext('Flutter run does not catch other RPC errors', () async {
     final FakeResidentRunner residentRunner = FakeResidentRunner();
-    residentRunner.rpcError = RPCError('flutter._listViews', RPCErrorCodes.kInvalidParams, '');
+    residentRunner.rpcError = RPCError('flutter._listViews', RPCErrorKind.kInvalidParams.code, '');
     final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
     command.fakeResidentRunner = residentRunner;
 
@@ -1555,14 +1583,14 @@ class DaemonCapturingRunCommand extends RunCommand {
   @override
   Daemon createMachineDaemon() {
     daemon = super.createMachineDaemon();
-    appDomain = daemon.appDomain = CapturingAppDomain(daemon);
+    appDomain = daemon.appDomain = CapturingAppDomain(daemon, useImplicitPubspecResolution: true);
     daemon.registerDomain(appDomain);
     return daemon;
   }
 }
 
 class CapturingAppDomain extends AppDomain {
-  CapturingAppDomain(super.daemon);
+  CapturingAppDomain(super.daemon, {required super.useImplicitPubspecResolution});
 
   String? userIdentifier;
   bool? enableDevTools;

@@ -21,6 +21,7 @@ import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
+import '../runner/flutter_command_runner.dart';
 import '../version.dart';
 import 'build.dart';
 
@@ -150,7 +151,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         ...framework.parent
             .listSync()
             .where((FileSystemEntity entity) =>
-        entity.basename.endsWith('dSYM'))
+        entity.basename.endsWith('dSYM') && !entity.basename.startsWith('Flutter'))
             .map((FileSystemEntity entity) => <String>['-debug-symbols', entity.path])
             .expand<String>((List<String> parameter) => parameter),
       ],
@@ -456,10 +457,11 @@ end
           platform: globals.platform,
           usage: globals.flutterUsage,
           analytics: globals.analytics,
-          engineVersion: globals.artifacts!.isLocalEngine
+          engineVersion: globals.artifacts!.usesLocalArtifacts
               ? null
               : globals.flutterVersion.engineRevision,
           generateDartPluginRegistry: true,
+          useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
         );
         Target target;
         // Always build debug for simulator.
