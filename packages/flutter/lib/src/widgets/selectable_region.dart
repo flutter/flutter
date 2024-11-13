@@ -3204,6 +3204,11 @@ final class _SelectableRegionSelectionStatusNotifier extends ChangeNotifier impl
 
 /// Notifies its listeners when the selection under a [SelectableRegion] or
 /// [SelectionArea] is being changed or finalized.
+///
+/// Use [SelectableRegionScope.maybeOf], to access the [ValueListenable] of type
+/// [SelectableRegionSelectionStatus] under a [SelectableRegion]. Its listeners
+/// will be called even when the value of the [SelectableRegionSelectionStatus]
+/// does not change.
 final class SelectableRegionScope extends InheritedNotifier<ValueListenable<SelectableRegionSelectionStatus>> {
   const SelectableRegionScope._({
     required ValueListenable<SelectableRegionSelectionStatus> selectionStatusNotifier,
