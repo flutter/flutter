@@ -409,7 +409,7 @@ void main() {
         buildSystem: buildSystem,
         buildTargets: const NoOpBuildTargets(),
       ),
-      throwsToolExit(message: 'Cannot generate a synthetic package when --config explicit-package-dependencies is enabled'),
+      throwsToolExit(message: 'Cannot generate a synthetic package when explicit-package-dependencies is enabled'),
     );
   }, overrides: <Type, Generator> {
     FeatureFlags: () => TestFeatureFlags(
