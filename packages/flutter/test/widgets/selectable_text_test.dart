@@ -24,7 +24,6 @@ import '../impeller_test_helpers.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 import '../widgets/semantics_tester.dart';
-import 'slivers_evil_test.dart';
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
