@@ -377,7 +377,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   FocusNode get _focusNode => widget.focusNode ?? (_localFocusNode ??= FocusNode(debugLabel: 'SelectableRegion'));
 
   /// Notifies its listeners when the selection state in this [SelectableRegion] changes.
-  final _SelectableRegionSelectionStatusNotifier _selectionStatusNotifier = _SelectableRegionSelectionStatusNotifier();
+  final SelectableRegionSelectionStatusNotifier _selectionStatusNotifier = SelectableRegionSelectionStatusNotifier._();
 
   @protected
   @override
@@ -467,8 +467,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         // case we want to retain the selection so it remains when we return to
         // the Flutter application.
         clearSelection();
-        _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-        _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+        _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+        _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
       }
     }
     if (kIsWeb) {
@@ -664,14 +664,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             final bool isShiftPressedValid = _isShiftPressed && _selectionDelegate.value.startSelectionPoint != null;
             if (isShiftPressedValid) {
               _selectEndTo(offset: details.globalPosition);
-              _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-              _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
               return;
             }
             clearSelection();
             _collapseSelectionAt(offset: details.globalPosition);
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
         }
       case 2:
         switch (defaultTargetPlatform) {
@@ -682,8 +682,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               break;
             }
             _selectWordAt(offset: details.globalPosition);
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
             if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
               _showHandles();
             }
@@ -693,8 +693,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             _selectWordAt(offset: details.globalPosition);
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
         }
       case 3:
         switch (defaultTargetPlatform) {
@@ -705,15 +705,15 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               // Triple tap on static text is only supported on mobile
               // platforms using a precise pointer device.
               _selectParagraphAt(offset: details.globalPosition);
-              _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-              _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
             }
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             _selectParagraphAt(offset: details.globalPosition);
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
         }
     }
     _updateSelectedContentIfNeeded();
@@ -727,7 +727,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           return;
         }
         _selectStartTo(offset: details.globalPosition);
-        _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
+        _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
     }
     _updateSelectedContentIfNeeded();
   }
@@ -740,7 +740,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           return;
         }
         _selectEndTo(offset: details.globalPosition, continuous: true);
-        _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
+        _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
       case 2:
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
@@ -749,7 +749,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             // pointer device or when not on the web.
             if (!kIsWeb || details.kind != null && _isPrecisePointerDevice(details.kind!)) {
               _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
-              _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
+              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
             }
           case TargetPlatform.iOS:
             if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind!) && _doubleTapOffset != null) {
@@ -757,11 +757,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               // until the drag has begun.
               _selectWordAt(offset: _doubleTapOffset!);
               _doubleTapOffset = null;
-              _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-              _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
             }
             _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
             if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
               _showHandles();
             }
@@ -769,7 +769,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         }
       case 3:
         switch (defaultTargetPlatform) {
@@ -815,8 +815,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
   }
 
   void _handleMouseTapUp(TapDragUpDetails details) {
@@ -839,8 +839,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.iOS:
             hideToolbar();
             _collapseSelectionAt(offset: details.globalPosition);
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
@@ -890,7 +890,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     HapticFeedback.selectionClick();
     _focusNode.requestFocus();
     _selectWordAt(offset: details.globalPosition);
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
     // Platforms besides Android will show the text selection handles when
     // the long press is initiated. Android shows the text selection handles when
     // the long press has ended, usually after a pointer up event is received.
@@ -902,14 +902,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     _selectEndTo(offset: details.globalPosition, textGranularity: TextGranularity.word);
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
     _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressEnd(LongPressEndDetails details) {
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
     _showToolbar();
     if (defaultTargetPlatform == TargetPlatform.android) {
       _showHandles();
@@ -969,8 +969,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
         }
     }
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
     // Restore _lastSecondaryTapDownPosition since it may be cleared if a user
     // accesses contextMenuAnchors.
     _lastSecondaryTapDownPosition = details.globalPosition;
@@ -1027,7 +1027,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
    }
   _finalizeSelection();
   _updateSelectedContentIfNeeded();
-  _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+  _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
  }
 
   void _stopSelectionEndEdgeUpdate() {
@@ -1505,8 +1505,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       ),
     );
     _updateSelectedContentIfNeeded();
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
   }
 
   double? _directionalHorizontalBaseline;
@@ -1529,8 +1529,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       ),
     );
     _updateSelectedContentIfNeeded();
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
   }
 
   // [TextSelectionDelegate] overrides.
@@ -1562,8 +1562,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
             clearSelection();
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
           case TargetPlatform.iOS:
             hideToolbar(false);
           case TargetPlatform.linux:
@@ -1593,8 +1593,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
             clearSelection();
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-            _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
           case TargetPlatform.iOS:
             hideToolbar(false);
           case TargetPlatform.linux:
@@ -1695,8 +1695,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       _showHandles();
     }
     _updateSelectedContentIfNeeded();
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
   }
 
   @Deprecated(
@@ -1707,8 +1707,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void copySelection(SelectionChangedCause cause) {
     _copy();
     clearSelection();
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.changed;
-    _selectionStatusNotifier.selectionListenerStatus = SelectionListenerStatus.finalized;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
   }
 
   @Deprecated(
@@ -1790,7 +1790,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
-    Widget result = _SelectableRegionScope(
+    Widget result = SelectableRegionScope._(
       selectionStatusNotifier: _selectionStatusNotifier,
       child: SelectionContainer(
         registrar: this,
@@ -2702,8 +2702,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// from each [Selectable] child managed under this delegate.
   ///
   /// When nothing is selected or either selection edge has not been set,
-  /// this method will return a [SelectedContentRange.empty] with a content
-  /// length accumulated from each [Selectable] child managed under this delegate.
+  /// this method will return `null`.
   @override
   SelectedContentRange? getSelection() {
     final List<_SelectionInfo> selections = <_SelectionInfo>[
@@ -3157,33 +3156,56 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
   SelectableRegionState selectableRegionState,
 );
 
-/// The status of the [SelectionListener].
-enum SelectionListenerStatus {
-  /// Indicates the selection under a [SelectionListener] is changing.
-  changed,
+/// The status of the selection under a [SelectableRegion].
+enum SelectableRegionSelectionStatus {
+  /// Indicates the selection under a [SelectableRegion] is changing.
+  ///
+  /// A [SelectableRegion]s selection is changing when it is being
+  /// updated by user through selection gestures and keyboard shortcuts.
+  changing,
 
-  /// Indicates the selection under a [SelectionListener] is finalized.
+  /// Indicates the selection under a [SelectableRegion] is finalized.
+  ///
+  /// A [SelectableRegion]s selection is finalized when it is no longer
+  /// being updated by the user through selection gestures or keyboard
+  /// shortcuts. For example, the selection will be finalized on a mouse
+  /// drag end, touch long press drag end, a single click to collapse the
+  /// selection, a double click/tap to select a word, ctrl + A / cmd + A to
+  /// select all, or a triple click/tap to select a paragraph.
   finalized,
 }
 
-/// Signature for listeners attached using [SelectionListenerNotifier.addStatusListener].
-typedef SelectionListenerStatusCallback = void Function(SelectionListenerStatus status);
+/// Notifies its listeners when the [SelectableRegion] that created this object
+/// is changing or finalizes its selection.
+///
+/// To access the [SelectableRegionSelectionStatusNotifier] from the nearest [SelectableRegion]
+/// ancestor, use [SelectableRegionScope.maybeOf].
+final class SelectableRegionSelectionStatusNotifier extends ChangeNotifier {
+  SelectableRegionSelectionStatusNotifier._();
 
-/// Notifies its listeners of changes in selection.
-class _SelectableRegionSelectionStatusNotifier extends ChangeNotifier {
-  SelectionListenerStatus _selectionListenerStatus = SelectionListenerStatus.finalized;
-  SelectionListenerStatus get selectionListenerStatus => _selectionListenerStatus;
-  set selectionListenerStatus(SelectionListenerStatus newStatus) {
-    _selectionListenerStatus = newStatus;
+  SelectableRegionSelectionStatus _selectableRegionSelectionStatus = SelectableRegionSelectionStatus.finalized;
+  /// The current value of the [SelectableRegionSelectionStatus] of the [SelectableRegion]
+  /// that owns this object.
+  ///
+  /// Defaults to [SelectableRegionSelectionStatus.finalized].
+  SelectableRegionSelectionStatus get value => _selectableRegionSelectionStatus;
+
+  /// Sets the [SelectableRegionSelectionStatus] for the [SelectableRegion] that
+  /// owns this object.
+  ///
+  /// Listeners are notified even if the value did not change.
+  @protected
+  set value(SelectableRegionSelectionStatus newStatus) {
+    _selectableRegionSelectionStatus = newStatus;
     notifyListeners();
   }
 }
 
 /// Notifies its listeners when the selection under a [SelectableRegion] or
-/// [SelectionArea] is finalized or has changed.
-class _SelectableRegionScope extends InheritedNotifier<_SelectableRegionSelectionStatusNotifier> {
-  const _SelectableRegionScope({
-    required _SelectableRegionSelectionStatusNotifier selectionStatusNotifier,
+/// [SelectionArea] is being changed or finalized.
+final class SelectableRegionScope extends InheritedNotifier<SelectableRegionSelectionStatusNotifier> {
+  const SelectableRegionScope._({
+    required SelectableRegionSelectionStatusNotifier selectionStatusNotifier,
     required super.child,
   }) : super(notifier: selectionStatusNotifier);
 
@@ -3193,23 +3215,23 @@ class _SelectableRegionScope extends InheritedNotifier<_SelectableRegionSelectio
   /// returned.
   ///
   /// Calling this method will create a dependency on the closest
-  /// [_SelectableRegionScope] in the [context], if there is one.
-  static _SelectableRegionSelectionStatusNotifier? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_SelectableRegionScope>()?.notifier;
+  /// [SelectableRegionScope] in the [context], if there is one.
+  static SelectableRegionSelectionStatusNotifier? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<SelectableRegionScope>()?.notifier;
   }
 
   @override
-  bool updateShouldNotify(_SelectableRegionScope oldScope) {
-    return notifier != oldScope.notifier;
+  bool updateShouldNotify(SelectableRegionScope oldWidget) {
+    return notifier != oldWidget.notifier;
   }
 }
 
-/// A [SelectionContainer] that allows the user to listen to selection changes
-/// for the child subtree it wraps under a [SelectionArea] or [SelectableRegion].
+/// A [SelectionContainer] that allows the user to access the selection and listen
+/// to selection changes for the child subtree it wraps under a [SelectionArea]
+/// or [SelectableRegion].
 ///
 /// The selection updates are provided through the [selectionNotifier], to listen
-/// to these updates attach a listener through [SelectionListenerNotifier.addListener]
-/// or [SelectionListenerNotifier.addStatusListener].
+/// to these updates attach a listener through [SelectionListenerNotifier.addListener].
 ///
 /// This widget should have an ancestor [SelectionArea] or [SelectableRegion]
 /// to be able to listen to selection changes in this widgets subtree.
@@ -3259,15 +3281,6 @@ class SelectionListener extends StatefulWidget {
 
 class _SelectionListenerState extends State<SelectionListener> {
   late final _SelectionListenerDelegate _selectionDelegate = _SelectionListenerDelegate(selectionNotifier: widget.selectionNotifier);
-  _SelectableRegionSelectionStatusNotifier? _selectableRegionScope;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _selectableRegionScope?.removeListener(_handleOnSelectableRegionChanged);
-    _selectableRegionScope = _SelectableRegionScope.maybeOf(context);
-    _selectableRegionScope?.addListener(_handleOnSelectableRegionChanged);
-  }
 
   @override
   void didUpdateWidget(SelectionListener oldWidget) {
@@ -3279,16 +3292,8 @@ class _SelectionListenerState extends State<SelectionListener> {
 
   @override
   void dispose() {
-    _selectableRegionScope?.removeListener(_handleOnSelectableRegionChanged);
-    _selectableRegionScope = null;
     _selectionDelegate.dispose();
     super.dispose();
-  }
-
-  void _handleOnSelectableRegionChanged() {
-    if (_selectableRegionScope != null) {
-      _selectionDelegate._dispatchStatusEvent(_selectableRegionScope!.selectionListenerStatus);
-    }
   }
 
   @override
@@ -3306,7 +3311,7 @@ class _SelectionListenerDelegate extends StaticSelectionContainerDelegate {
   }) : _selectionNotifier = selectionNotifier {
     assert(
       _selectionNotifier._selectionDelegate == null,
-      'The SelectionListenerNotifier provided is already attached to another [SelectionListener]. Try providing a new SelectionListenerNotifier.',
+      'The SelectionListenerNotifier provided is already attached to another SelectionListener. Try providing a new SelectionListenerNotifier.',
     );
     _selectionNotifier._selectionDelegate = this;
   }
@@ -3317,18 +3322,16 @@ class _SelectionListenerDelegate extends StaticSelectionContainerDelegate {
     _selectionNotifier._selectionDelegate = this;
   }
 
-  SelectionGeometry? _lastFinalizedSelectionGeometry;
   SelectionGeometry? _previousSelectionGeometry;
 
-  void _dispatchStatusEvent(SelectionListenerStatus status) {
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+    final SelectionResult result = super.dispatchSelectionEvent(event);
     if (_previousSelectionGeometry != value) {
       _selectionNotifier.notifyListeners();
-      _selectionNotifier.notifyStatusListeners(status);
-    } else if (status == SelectionListenerStatus.finalized && _lastFinalizedSelectionGeometry != value) {
-      _selectionNotifier.notifyStatusListeners(status);
-      _lastFinalizedSelectionGeometry = value;
+      _previousSelectionGeometry = value;
     }
-    _previousSelectionGeometry = value;
+    return result;
   }
 
   @override
@@ -3339,7 +3342,9 @@ class _SelectionListenerDelegate extends StaticSelectionContainerDelegate {
 }
 
 /// Notifies listeners when the selection under a [SelectionListener] has been
-/// changed or is finalized.
+/// changed.
+///
+/// This is typically provided to a [SelectionListener].
 final class SelectionListenerNotifier extends ChangeNotifier {
   _SelectionListenerDelegate? _selectionDelegate;
 
@@ -3358,66 +3363,10 @@ final class SelectionListenerNotifier extends ChangeNotifier {
     _selectionDelegate = null;
   }
 
-  final ObserverList<SelectionListenerStatusCallback> _statusListeners = ObserverList<SelectionListenerStatusCallback>();
-
-  /// Calls the listener every time the [SelectionListenerStatus] of a [SelectableRegion]
-  /// is updated.
-  ///
-  /// Listeners can be removed with [removeStatusListener].
-  void addStatusListener(SelectionListenerStatusCallback listener) => _statusListeners.add(listener);
-
-  /// Stops calling the listener every time the [SelectionListenerStatus] of a
-  /// [SelectableRegion] is updated.
-  ///
-  /// Listeners can be added with [addStatusListener].
-  void removeStatusListener(SelectionListenerStatusCallback listener) => _statusListeners.remove(listener);
-
-  /// Call all the registered status listeners.
-  ///
-  /// Call this method whenever the selection status changes, to notify any clients the
-  /// [SelectionListenerStatus] may have changed. Status listeners that are added during this
-  /// iteration will not be visited. Status listeners that are removed during this iteration
-  /// will not be visited after they are removed.
-  @protected
-  @pragma('vm:notify-debugger-on-exception')
-  void notifyStatusListeners(SelectionListenerStatus status) {
-    if (_statusListeners.isEmpty) {
-      return;
-    }
-    final List<SelectionListenerStatusCallback> localListeners = List<SelectionListenerStatusCallback>.of(_statusListeners, growable: false);
-    for (final SelectionListenerStatusCallback listener in localListeners) {
-      try {
-        if (_statusListeners.contains(listener)) {
-          listener(status);
-        }
-      } catch (exception, stack) {
-        InformationCollector? collector;
-        assert(() {
-          collector = () => <DiagnosticsNode>[
-            DiagnosticsProperty<SelectionListenerNotifier>(
-              'The $runtimeType notifying status listeners was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ];
-          return true;
-        }());
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets library',
-          context: ErrorDescription('while notifying status listeners for $runtimeType'),
-          informationCollector: collector,
-        ));
-      }
-    }
-  }
-
   // From ChangeNotifier.
   @override
   void dispose() {
     _unregisterSelectionListenerDelegate();
-    _statusListeners.clear();
     super.dispose();
   }
 

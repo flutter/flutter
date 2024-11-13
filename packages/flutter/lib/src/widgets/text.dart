@@ -1277,8 +1277,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
   /// from each [Selectable] child managed under this delegate.
   ///
   /// When nothing is selected or either selection edge has not been set,
-  /// this method will return a [SelectedContentRange.empty] with a content
-  /// length accumulated from each [Selectable] child managed under this delegate.
+  /// this method will return `null`.
   @override
   SelectedContentRange? getSelection() {
     final List<_SelectionInfo> selections = <_SelectionInfo>[

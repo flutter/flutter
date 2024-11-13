@@ -35,35 +35,33 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-typedef _LocalSpanRange = ({int startOffset, int endOffset});
+typedef LocalSpanRange = ({int startOffset, int endOffset});
 
 class _MyHomePageState extends State<MyHomePage> {
   final SelectionListenerNotifier _selectionNotifier = SelectionListenerNotifier();
   final ContextMenuController _menuController = ContextMenuController();
   final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
 
-  // The data of the top level TextSpans. Each TextSpan is mapped to a _LocalSpanRange,
+  // The data of the top level TextSpans. Each TextSpan is mapped to a LocalSpanRange,
   // which is the range the textspan covers relative to the SelectionListener it is under.
-  Map<_LocalSpanRange, TextSpan> dataSourceMap = <_LocalSpanRange, TextSpan>{};
+  Map<LocalSpanRange, TextSpan> dataSourceMap = <LocalSpanRange, TextSpan>{};
   // The data of the bulleted list contained within a WidgetSpan. Each bullet is mapped
-  // to a _LocalSpanRange, being the range the bullet covers relative to the SelectionListener
+  // to a LocalSpanRange, being the range the bullet covers relative to the SelectionListener
   // it is under.
-  Map<_LocalSpanRange, TextSpan> bulletSourceMap = <_LocalSpanRange, TextSpan>{};
-  Map<int, Map<_LocalSpanRange, TextSpan>> widgetSpanMaps = <int, Map<_LocalSpanRange, TextSpan>>{};
+  Map<LocalSpanRange, TextSpan> bulletSourceMap = <LocalSpanRange, TextSpan>{};
+  Map<int, Map<LocalSpanRange, TextSpan>> widgetSpanMaps = <int, Map<LocalSpanRange, TextSpan>>{};
   // The origin data used to restore the demo to its initial state.
-  late final Map<_LocalSpanRange, TextSpan> originSourceData;
-  late final Map<_LocalSpanRange, TextSpan> originBulletSourceData;
+  late final Map<LocalSpanRange, TextSpan> originSourceData;
+  late final Map<LocalSpanRange, TextSpan> originBulletSourceData;
 
   @override
   void initState() {
     super.initState();
     _initData();
-    _selectionNotifier.addStatusListener(_handleSelectionStatusChanged);
   }
 
   @override
   void dispose() {
-    _selectionNotifier.removeStatusListener(_handleSelectionStatusChanged);
     _selectionNotifier.dispose();
     super.dispose();
   }
@@ -114,22 +112,22 @@ class _MyHomePageState extends State<MyHomePage> {
     dataSourceMap[(startOffset: currentOffset, endOffset: currentOffset + thirdTextParagraph.toPlainText(includeSemanticsLabels: false).length)] = thirdTextParagraph;
 
     // Save the origin data so we can revert our changes.
-    originSourceData = <_LocalSpanRange, TextSpan>{};
-    for (final MapEntry<_LocalSpanRange, TextSpan> entry in dataSourceMap.entries) {
+    originSourceData = <LocalSpanRange, TextSpan>{};
+    for (final MapEntry<LocalSpanRange, TextSpan> entry in dataSourceMap.entries) {
       originSourceData[entry.key] = entry.value;
     }
-    originBulletSourceData = <_LocalSpanRange, TextSpan>{};
-    for (final MapEntry<_LocalSpanRange, TextSpan> entry in bulletSourceMap.entries) {
+    originBulletSourceData = <LocalSpanRange, TextSpan>{};
+    for (final MapEntry<LocalSpanRange, TextSpan> entry in bulletSourceMap.entries) {
       originBulletSourceData[entry.key] = entry.value;
     }
   }
 
-  void _handleSelectionStatusChanged(SelectionListenerStatus status) {
+  void _handleSelectableRegionStatusChanged(SelectableRegionSelectionStatus status) {
     if (_menuController.isShown) {
       ContextMenuController.removeAny();
     }
     if (_selectionNotifier.status != SelectionStatus.uncollapsed
-        || status != SelectionListenerStatus.finalized) {
+        || status != SelectableRegionSelectionStatus.finalized) {
       return;
     }
     if (selectionAreaKey.currentState == null
@@ -174,11 +172,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _colorSelectionRed(
     SelectedContentRange selectedContentRange, {
-    required Map<_LocalSpanRange, TextSpan> dataMap,
+    required Map<LocalSpanRange, TextSpan> dataMap,
     required bool coloringChildSpan,
   }) {
-    for (final MapEntry<_LocalSpanRange, TextSpan> entry in dataMap.entries) {
-      final _LocalSpanRange entryLocalRange = entry.key;
+    for (final MapEntry<LocalSpanRange, TextSpan> entry in dataMap.entries) {
+      final LocalSpanRange entryLocalRange = entry.key;
       final int normalizedStartOffset = min(selectedContentRange.startOffset, selectedContentRange.endOffset);
       final int normalizedEndOffset = max(selectedContentRange.startOffset, selectedContentRange.endOffset);
       if (normalizedStartOffset > entryLocalRange.endOffset) {
@@ -252,7 +250,7 @@ class _MyHomePageState extends State<MyHomePage> {
             // We have arrived at a WidgetSpan but it is unaccounted for.
             return true;
           }
-          final Map<_LocalSpanRange, TextSpan> widgetSpanSourceMap = widgetSpanMaps[count]!;
+          final Map<LocalSpanRange, TextSpan> widgetSpanSourceMap = widgetSpanMaps[count]!;
           if (count < startOffset && count + (widgetSpanSourceMap.keys.last.endOffset - widgetSpanSourceMap.keys.first.startOffset).abs() < startOffset) {
             // When the count is less than the startOffset and we are at a widgetspan
             // it is still possible that the startOffset is somewhere within the widgetspan,
@@ -281,7 +279,7 @@ class _MyHomePageState extends State<MyHomePage> {
               WidgetSpan(
                 child: Column(
                   children: <Widget>[
-                    for (final MapEntry<_LocalSpanRange, TextSpan> entry in widgetSpanSourceMap.entries)
+                    for (final MapEntry<LocalSpanRange, TextSpan> entry in widgetSpanSourceMap.entries)
                       Padding(
                         padding: const EdgeInsets.only(left: 20.0),
                         child: Text.rich(
@@ -323,34 +321,85 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: SelectionArea(
         key: selectionAreaKey,
-        child: SelectionListener(
+        child: MySelectableTextColumn(
           selectionNotifier: _selectionNotifier,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                for (final MapEntry<_LocalSpanRange, TextSpan> entry in dataSourceMap.entries)
-                  Text.rich(
-                    entry.value,
-                  ),
-              ],
-            ),
-          ),
+          dataSourceMap: dataSourceMap,
+          onChanged: _handleSelectableRegionStatusChanged,
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {
             // Resets the state to the origin data.
-            for (final MapEntry<_LocalSpanRange, TextSpan> entry in originSourceData.entries) {
+            for (final MapEntry<LocalSpanRange, TextSpan> entry in originSourceData.entries) {
               dataSourceMap[entry.key] = entry.value;
             }
-            for (final MapEntry<_LocalSpanRange, TextSpan> entry in originBulletSourceData.entries) {
+            for (final MapEntry<LocalSpanRange, TextSpan> entry in originBulletSourceData.entries) {
               bulletSourceMap[entry.key] = entry.value;
             }
           });
         },
         child: const Icon(Icons.undo),
+      ),
+    );
+  }
+}
+
+class MySelectableTextColumn extends StatefulWidget {
+  const MySelectableTextColumn({
+    super.key,
+    required this.selectionNotifier,
+    required this.dataSourceMap,
+    required this.onChanged,
+  });
+
+  final SelectionListenerNotifier selectionNotifier;
+  final Map<LocalSpanRange, TextSpan> dataSourceMap;
+  final ValueChanged<SelectableRegionSelectionStatus> onChanged;
+
+  @override
+  State<MySelectableTextColumn> createState() => _MySelectableTextColumnState();
+}
+
+class _MySelectableTextColumnState extends State<MySelectableTextColumn> {
+  SelectableRegionSelectionStatusNotifier? _selectableRegionScope;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _selectableRegionScope?.removeListener(_handleOnSelectableRegionChanged);
+    _selectableRegionScope = SelectableRegionScope.maybeOf(context);
+    _selectableRegionScope?.addListener(_handleOnSelectableRegionChanged);
+  }
+
+  @override
+  void dispose() {
+    _selectableRegionScope?.removeListener(_handleOnSelectableRegionChanged);
+    _selectableRegionScope = null;
+    super.dispose();
+  }
+
+  void _handleOnSelectableRegionChanged() {
+    if (_selectableRegionScope == null) {
+      return;
+    }
+    widget.onChanged.call(_selectableRegionScope!.value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectionListener(
+      selectionNotifier: widget.selectionNotifier,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            for (final MapEntry<LocalSpanRange, TextSpan> entry in widget.dataSourceMap.entries)
+              Text.rich(
+                entry.value,
+              ),
+          ],
+        ),
       ),
     );
   }
