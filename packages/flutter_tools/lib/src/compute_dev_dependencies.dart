@@ -64,6 +64,10 @@ Future<Set<String>> computeExclusiveDevDependencies(
   }
 
   List<T> asListOrFail<T>(Object? value, String name) {
+    // Allow omitting a list as empty to default to an empty list
+    if (value == null) {
+      return <T>[];
+    }
     if (value is! List<Object?>) {
       fail('Expected field "$name" to be a list, got "$value"');
     }
@@ -115,7 +119,7 @@ Future<Set<String>> computeExclusiveDevDependencies(
 
   // Start initially with every `devDependency` listed.
   final Set<String> devDependencies = asListOrFail<String>(
-    rootPackage['devDependencies'],
+    rootPackage['devDependencies'] ?? <String>[],
     'devDependencies',
   ).toSet();
 
