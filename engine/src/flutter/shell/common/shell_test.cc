@@ -65,6 +65,14 @@ void ShellTest::SendPlatformMessage(Shell* shell,
   shell->OnPlatformViewDispatchPlatformMessage(std::move(message));
 }
 
+void ShellTest::SendSemanticsAction(Shell* shell,
+                                    int32_t node_id,
+                                    SemanticsAction action,
+                                    fml::MallocMapping args) {
+  shell->OnPlatformViewDispatchSemanticsAction(node_id, action,
+                                               std::move(args));
+}
+
 void ShellTest::SendEnginePlatformMessage(
     Shell* shell,
     std::unique_ptr<PlatformMessage> message) {

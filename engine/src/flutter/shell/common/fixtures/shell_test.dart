@@ -4,6 +4,7 @@
 
 // ignore_for_file: avoid_print
 
+import 'dart:async';
 import 'dart:convert' show json, utf8;
 import 'dart:isolate';
 import 'dart:typed_data';
@@ -628,4 +629,14 @@ void renderWarmUpView1and2() {
       renderDummyToView(PlatformDispatcher.instance.view(id: viewId)!);
     }
   });
+}
+
+@pragma('vm:entry-point')
+void testSemanticsActions() {
+  PlatformDispatcher.instance.onSemanticsActionEvent = (SemanticsActionEvent action) async {
+    await null;
+    Future<void>.value().then((_) {
+      notifyNative();
+    });
+  };
 }
