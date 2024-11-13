@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 /// Flutter code sample for [SelectionArea].
 
@@ -37,23 +36,17 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final SelectionListenerNotifier _selectionNotifier = SelectionListenerNotifier();
-  SelectedContentRange? _currentRange;
-  SelectionStatus? _currentSelectionStatus;
   SelectableRegionSelectionStatus? _selectableRegionStatus;
 
   @override
   void dispose() {
     _selectionNotifier.dispose();
-    _currentRange = null;
-    _currentSelectionStatus = null;
     _selectableRegionStatus = null;
     super.dispose();
   }
 
   void _handleOnSelectionStateChanged(SelectableRegionSelectionStatus status) {
     setState(() {
-      _currentRange = _selectionNotifier.range;
-      _currentSelectionStatus = _selectionNotifier.status;
       _selectableRegionStatus = status;
     });
   }
@@ -71,9 +64,12 @@ class _MyHomePageState extends State<MyHomePage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('Selection StartOffset: ${_currentRange?.startOffset}'),
-                Text('Selection EndOffset: ${_currentRange?.endOffset}'),
-                Text('Selection Status: $_currentSelectionStatus'),
+                for (final (int? offset, String label) in <(int? offset, String label)>[
+                  (_selectionNotifier.registered ? _selectionNotifier.range?.startOffset : null, 'StartOffset'),
+                  (_selectionNotifier.registered ? _selectionNotifier.range?.endOffset : null, 'EndOffset'),
+                ])
+                  Text('Selection $label: $offset'),
+                Text('Selection Status: ${_selectionNotifier.registered ? _selectionNotifier.status : 'SelectionListenerNotifier not registered.'}'),
                 Text('Selectable Region Status: $_selectableRegionStatus'),
               ],
             ),

@@ -3326,7 +3326,7 @@ class _SelectionListenerDelegate extends StaticSelectionContainerDelegate {
     required SelectionListenerNotifier selectionNotifier,
   }) : _selectionNotifier = selectionNotifier {
     assert(
-      _selectionNotifier._selectionDelegate == null,
+      !_selectionNotifier.registered,
       'The SelectionListenerNotifier provided is already attached to another SelectionListener. Try providing a new SelectionListenerNotifier.',
     );
     _selectionNotifier._selectionDelegate = this;
@@ -3376,6 +3376,9 @@ final class SelectionListenerNotifier extends ChangeNotifier {
 
   /// The status that indicates whether there is a selection and whether the selection is collapsed.
   SelectionStatus get status => _selectionDelegate?.value.status ?? (throw Exception('Selection client has not been registered to this notifier.'));
+
+  /// Whether this [SelectionListenerNotifier] has been registered to a [SelectionListener].
+  bool get registered => _selectionDelegate != null;
 
   void _unregisterSelectionListenerDelegate() {
     _selectionDelegate = null;
