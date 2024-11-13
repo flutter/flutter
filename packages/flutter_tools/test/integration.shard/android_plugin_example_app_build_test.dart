@@ -32,8 +32,7 @@ void main() {
     );
 
     final String testName = '${template}_test';
-
-    final ProcessResult result = processManager.runSync(<String>[
+    ProcessResult result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'create',
@@ -41,6 +40,17 @@ void main() {
       '--platforms=android',
       testName,
     ], workingDirectory: tempDir.path);
+    expect(result, const ProcessResultMatcher());
+
+    final Directory exampleAppDir =
+        tempDir.childDirectory(testName).childDirectory('example');
+    result = processManager.runSync(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'build',
+      'apk',
+      '--target-platform=android-arm',
+    ], workingDirectory: exampleAppDir.path);
     expect(result, const ProcessResultMatcher());
   }
 
