@@ -15,7 +15,7 @@ void main() {
     expect(find.textContaining('Selection StartOffset:'), findsOneWidget);
     expect(find.textContaining('Selection EndOffset:'), findsOneWidget);
     expect(find.textContaining('Selection Status:'), findsOneWidget);
-    expect(find.textContaining('Selection Listener Status:'), findsOneWidget);
+    expect(find.textContaining('Selectable Region Status:'), findsOneWidget);
     expect(find.textContaining('This is some text under a SelectionArea that can be selected.'), findsOneWidget);
   });
 }
