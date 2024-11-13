@@ -63,9 +63,9 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 /// A mixin that provides platform-adaptive transitions for a [PageRoute].
 ///
 /// {@template flutter.material.materialRouteTransitionMixin}
-/// For Android, the entrance transition for the page zooms in and fades in
-/// while the exiting page zooms out and fades out. The exit transition is similar,
-/// but in reverse.
+/// For Android, the entrance transition for the page slides in from right to
+/// left and fades in while the exiting page slides out in the same direction
+/// and fades out. The exit transition is similar, but in reverse.
 ///
 /// For iOS, the page slides in from the right and exits in reverse. The page
 /// also shifts to the left in parallax when another page enters to cover it.
@@ -77,8 +77,8 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 ///
 ///  * [PageTransitionsTheme], which defines the default page transitions used
 ///    by the [MaterialRouteTransitionMixin.buildTransitions].
-///  * [ZoomPageTransitionsBuilder], which is the default page transition used
-///    by the [PageTransitionsTheme].
+///  * [FadeForwardsPageTransitionsBuilder], which is the default page transition
+///    used by the [PageTransitionsTheme].
 ///  * [CupertinoPageTransitionsBuilder], which is the default page transition
 ///    for iOS and macOS.
 mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {

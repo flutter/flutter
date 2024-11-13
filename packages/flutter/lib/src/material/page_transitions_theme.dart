@@ -617,6 +617,8 @@ class _FadeForwardsPageTransition extends StatelessWidget {
 ///    that's similar to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
+///  * [FadeForwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android U.
 abstract class PageTransitionsBuilder {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -691,6 +693,8 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    transition that matches native iOS page transitions.
 ///  * [PredictiveBackPageTransitionsBuilder], which defines a page
 ///    transition that allows peeking behind the current route on Android.
+///  * [FadeForwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android U.
 class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android P.
@@ -728,6 +732,8 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    transition that matches native iOS page transitions.
 ///  * [PredictiveBackPageTransitionsBuilder], which defines a page
 ///    transition that allows peeking behind the current route on Android.
+///  * [FadeForwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android U.
 class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android U.
@@ -735,35 +741,37 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     this.backgroundColor,
   });
 
+  /// The background color during transition between two routes.
+  ///
+  /// Defaults to [ColorScheme.surface]
   final Color? backgroundColor;
 
   @override
   DelegatedTransitionBuilder? get delegatedTransition => (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child)
       => _delegatedTransition(context, animation, backgroundColor, child);
 
-
-  // Used by all of the transition animations.
+  // Used by all of the sliding transition animations.
   static const Curve _transitionCurve = Curves.easeInOutCubicEmphasized;
 
-  // The old page slides frowards from left to right as the new page disappears.
-  static final Animatable<Offset> _secondaryForwardTranslationTween = Tween<Offset>(
-    begin: const Offset(-0.25, 0.0),
-    end: Offset.zero,
-  ).chain(CurveTween(curve: _transitionCurve));
-
-  // The old page slides frowards from right to left as the new page appears.
+  // The previous page slides from right to left as the current page appears.
   static final Animatable<Offset> _secondaryBackwardTranslationTween = Tween<Offset>(
     begin: Offset.zero,
     end: const Offset(-0.25, 0.0),
   ).chain(CurveTween(curve: _transitionCurve));
 
-  // The new page fades in.
+  // The previous page slides from left to right as the current page disappears.
+  static final Animatable<Offset> _secondaryForwardTranslationTween = Tween<Offset>(
+    begin: const Offset(-0.25, 0.0),
+    end: Offset.zero,
+  ).chain(CurveTween(curve: _transitionCurve));
+
+  // The fade in transition when the new page appears.
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
     end: 1.0,
   ).chain(CurveTween(curve: const Interval(0.0, 0.75)));
 
-  // The old page fades out.
+  // The fade out trnasition of the old page when the new page appears.
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
     end: 0.0,
@@ -843,6 +851,8 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    transition that matches native iOS page transitions.
 ///  * [PredictiveBackPageTransitionsBuilder], which defines a page
 ///    transition that allows peeking behind the current route on Android.
+///  * [FadeForwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android U.
 class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android Q.
