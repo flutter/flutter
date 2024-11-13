@@ -3162,6 +3162,9 @@ enum SelectableRegionSelectionStatus {
   ///
   /// A [SelectableRegion]s selection is changing when it is being
   /// updated by user through selection gestures and keyboard shortcuts.
+  /// For example, during a text selection drag with a click + drag,
+  /// a [SelectableRegion]s selection is considered changing until
+  /// the user releases the click, then it will be considered finalized.
   changing,
 
   /// Indicates the selection under a [SelectableRegion] is finalized.
