@@ -60,7 +60,7 @@ class DarwinDependencyManagement {
     final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios
         ? _project.ios
         : _project.macos;
-    if (_project.usesSwiftPackageManager) {
+    if (xcodeProject.usesSwiftPackageManager) {
       await _swiftPackageManager.generatePluginsSwiftPackage(
         _plugins,
         platform,
@@ -89,7 +89,7 @@ class DarwinDependencyManagement {
     );
 
     final bool useCocoapods;
-    if (_project.usesSwiftPackageManager) {
+    if (xcodeProject.usesSwiftPackageManager) {
       useCocoapods = swiftPackageCount < totalCount;
     } else {
       // When Swift Package Manager is not enabled, set up Podfile if plugins
@@ -161,7 +161,7 @@ class DarwinDependencyManagement {
       // If not using Swift Package Manager and plugin does not have podspec
       // but does have a Package.swift, throw an error. Otherwise, it'll error
       // when it builds.
-      if (!_project.usesSwiftPackageManager &&
+      if (!xcodeProject.usesSwiftPackageManager &&
           !cocoaPodsCompatible &&
           swiftPackageManagerCompatible) {
         throwToolExit(
@@ -175,7 +175,7 @@ class DarwinDependencyManagement {
     // Only show warnings to remove CocoaPods if the project is using Swift
     // Package Manager, has already been migrated to have SPM integration, and
     // all plugins are Swift Packages.
-    if (_project.usesSwiftPackageManager &&
+    if (xcodeProject.usesSwiftPackageManager &&
         xcodeProject.flutterPluginSwiftPackageInProjectSettings &&
         pluginCount == swiftPackageCount &&
         swiftPackageCount != 0) {

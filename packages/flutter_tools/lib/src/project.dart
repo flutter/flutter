@@ -21,7 +21,6 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
-import 'macos/xcode.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
 import 'template.dart';
@@ -261,24 +260,6 @@ class FlutterProject {
 
   /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
-
-  /// True if this project doesn't have Swift Package Manager disabled in the
-  /// pubspec, has either an iOS or macOS platform implementation, is not a
-  /// module project, Xcode is 15 or greater, and the Swift Package Manager
-  /// feature is enabled.
-  bool get usesSwiftPackageManager {
-    if (!manifest.disabledSwiftPackageManager &&
-        (ios.existsSync() || macos.existsSync()) &&
-        !isModule) {
-      final Xcode? xcode = globals.xcode;
-      final Version? xcodeVersion = xcode?.currentVersion;
-      if (xcodeVersion == null || xcodeVersion.major < 15) {
-        return false;
-      }
-      return featureFlags.isSwiftPackageManagerEnabled;
-    }
-    return false;
-  }
 
   /// Returns a list of platform names that are supported by the project.
   List<SupportedPlatform> getSupportedPlatforms({bool includeRoot = false}) {

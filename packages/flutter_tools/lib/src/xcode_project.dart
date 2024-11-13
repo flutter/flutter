@@ -5,15 +5,18 @@
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
+import 'base/version.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'convert.dart';
+import 'features.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'ios/code_signing.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcode_build_settings.dart' as xcode;
 import 'ios/xcodeproj.dart';
+import 'macos/xcode.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
 import 'template.dart';
@@ -145,6 +148,40 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
         xcodeProjectInfoFile
             .readAsStringSync()
             .contains('FlutterGeneratedPluginSwiftPackage');
+  }
+
+  /// True if this project doesn't have Swift Package Manager disabled in the
+  /// pubspec, has either an iOS or macOS platform implementation, is not a
+  /// module project, Xcode is 15 or greater, and the Swift Package Manager
+  /// feature is enabled.
+  bool get usesSwiftPackageManager {
+    if (!featureFlags.isSwiftPackageManagerEnabled) {
+      return false;
+    }
+
+    // The project can disable Swift Package Manager in its pubspec.yaml.
+    if (parent.manifest.disabledSwiftPackageManager) {
+      return false;
+    }
+
+    // TODO(loic-sharma): Support Swift Package Manager in add-to-app modules.
+    // https://github.com/flutter/flutter/issues/146957
+    if (parent.isModule) {
+      return false;
+    }
+
+    if (!existsSync()) {
+      return false;
+    }
+
+    // Swift Package Manager requires Xcode 15 or greater.
+    final Xcode? xcode = globals.xcode;
+    final Version? xcodeVersion = xcode?.currentVersion;
+    if (xcodeVersion == null || xcodeVersion.major < 15) {
+      return false;
+    }
+
+    return true;
   }
 
   Future<XcodeProjectInfo?> projectInfo() async {

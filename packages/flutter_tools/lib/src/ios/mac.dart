@@ -166,7 +166,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     RemoveBitcodeMigration(app.project, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, globals.logger),
     UIApplicationMainDeprecationMigration(app.project, globals.logger),
-    if (project.usesSwiftPackageManager && app.project.flutterPluginSwiftPackageManifest.existsSync())
+    if (app.project.usesSwiftPackageManager && app.project.flutterPluginSwiftPackageManifest.existsSync())
       SwiftPackageManagerIntegrationMigration(
         app.project,
         SupportedPlatform.ios,
@@ -267,7 +267,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-  if (project.usesSwiftPackageManager) {
+  if (app.project.usesSwiftPackageManager) {
     final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
     if (iosDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
@@ -888,7 +888,7 @@ Future<bool> _handleIssues(
     logger.printError(missingPlatformInstructions(missingPlatform), emphasis: true);
   } else if (duplicateModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
-    final bool usesSwiftPackageManager = project.usesSwiftPackageManager;
+    final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     if (usesCocoapods && usesSwiftPackageManager) {
       logger.printError(
         'Your project uses both CocoaPods and Swift Package Manager, which can '
@@ -906,7 +906,7 @@ Future<bool> _handleIssues(
     }
   } else if (missingModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
-    final bool usesSwiftPackageManager = project.usesSwiftPackageManager;
+    final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     if (usesCocoapods && !usesSwiftPackageManager) {
       final List<String> swiftPackageOnlyPlugins = <String>[];
       for (final String module in missingModules) {

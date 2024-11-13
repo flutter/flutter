@@ -91,7 +91,7 @@ Future<void> buildMacOS({
     FlutterApplicationMigration(flutterProject.macos, globals.logger),
     NSApplicationMainDeprecationMigration(flutterProject.macos, globals.logger),
     SecureRestorableStateMigration(flutterProject.macos, globals.logger),
-    if (flutterProject.usesSwiftPackageManager && flutterProject.macos.flutterPluginSwiftPackageManifest.existsSync())
+    if (flutterProject.macos.usesSwiftPackageManager && flutterProject.macos.flutterPluginSwiftPackageManifest.existsSync())
       SwiftPackageManagerIntegrationMigration(
         flutterProject.macos,
         SupportedPlatform.macos,
@@ -145,7 +145,7 @@ Future<void> buildMacOS({
     useMacOSConfig: true,
   );
 
-  if (flutterProject.usesSwiftPackageManager) {
+  if (flutterProject.macos.usesSwiftPackageManager) {
     final String? macOSDeploymentTarget = buildSettings['MACOSX_DEPLOYMENT_TARGET'];
     if (macOSDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
