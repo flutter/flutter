@@ -134,7 +134,7 @@ class SearchAnchor extends StatefulWidget {
     this.dividerColor,
     this.viewConstraints,
     this.viewPadding,
-    this.viewShrinkWrap,
+    this.shrinkWrap,
     this.textCapitalization,
     this.viewOnChanged,
     this.viewOnSubmitted,
@@ -187,7 +187,7 @@ class SearchAnchor extends StatefulWidget {
     BoxConstraints? constraints,
     BoxConstraints? viewConstraints,
     EdgeInsetsGeometry? viewPadding,
-    bool? viewShrinkWrap,
+    bool? shrinkWrap,
     bool? isFullScreen,
     SearchController searchController,
     TextCapitalization textCapitalization,
@@ -338,7 +338,7 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// If null, the value of [SearchViewThemeData.shrinkWrap] will be used. If
   /// this is also null, then the default value is `false`.
-  final bool? viewShrinkWrap;
+  final bool? shrinkWrap;
 
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
@@ -466,7 +466,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       dividerColor: widget.dividerColor,
       viewConstraints: widget.viewConstraints,
       viewPadding: widget.viewPadding,
-      viewShrinkWrap: widget.viewShrinkWrap,
+      shrinkWrap: widget.shrinkWrap,
       showFullScreenView: getShowFullScreenView(),
       toggleVisibility: toggleVisibility,
       textDirection: Directionality.of(context),
@@ -549,7 +549,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.dividerColor,
     this.viewConstraints,
     this.viewPadding,
-    this.viewShrinkWrap,
+    this.shrinkWrap,
     this.textCapitalization,
     required this.showFullScreenView,
     required this.anchorKey,
@@ -580,7 +580,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final Color? dividerColor;
   final BoxConstraints? viewConstraints;
   final EdgeInsetsGeometry? viewPadding;
-  final bool? viewShrinkWrap;
+  final bool? shrinkWrap;
   final TextCapitalization? textCapitalization;
   final bool showFullScreenView;
   final GlobalKey anchorKey;
@@ -748,7 +748,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 dividerColor: dividerColor,
                 viewConstraints: viewConstraints,
                 viewPadding: viewPadding,
-                viewShrinkWrap: viewShrinkWrap,
+                shrinkWrap: shrinkWrap,
                 showFullScreenView: showFullScreenView,
                 animation: curvedAnimation!,
                 topPadding: topPadding,
@@ -792,7 +792,7 @@ class _ViewContent extends StatefulWidget {
     this.dividerColor,
     this.viewConstraints,
     this.viewPadding,
-    this.viewShrinkWrap,
+    this.shrinkWrap,
     this.textCapitalization,
     required this.showFullScreenView,
     required this.topPadding,
@@ -823,7 +823,7 @@ class _ViewContent extends StatefulWidget {
   final Color? dividerColor;
   final BoxConstraints? viewConstraints;
   final EdgeInsetsGeometry? viewPadding;
-  final bool? viewShrinkWrap;
+  final bool? shrinkWrap;
   final TextCapitalization? textCapitalization;
   final bool showFullScreenView;
   final double topPadding;
@@ -1011,7 +1011,7 @@ class _ViewContentState extends State<_ViewContent> {
     final double minWidth = math.min(effectiveConstraints.minWidth, _viewRect.width);
     final double minHeight = math.min(effectiveConstraints.minHeight, _viewRect.height);
 
-    final bool effectiveShrinkWrap = widget.viewShrinkWrap
+    final bool effectiveShrinkWrap = widget.shrinkWrap
       ?? viewTheme.shrinkWrap
       ?? viewDefaults.shrinkWrap!;
 
@@ -1143,7 +1143,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     BoxConstraints? constraints,
     super.viewConstraints,
     super.viewPadding,
-    super.viewShrinkWrap,
+    super.shrinkWrap,
     super.isFullScreen,
     super.searchController,
     super.textCapitalization,

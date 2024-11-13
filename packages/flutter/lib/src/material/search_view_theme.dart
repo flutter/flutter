@@ -88,7 +88,7 @@ class SearchViewThemeData with Diagnosticable {
   /// Overrides the value of the padding for [SearchAnchor.viewBarPadding]
   final EdgeInsetsGeometry? barPadding;
 
-  /// Overrides the value of the shrink wrap for [SearchAnchor.viewShrinkWrap].
+  /// Overrides the value of the shrink wrap for [SearchAnchor.shrinkWrap].
   final bool? shrinkWrap;
 
   /// Overrides the value of the divider color for [SearchAnchor.dividerColor].

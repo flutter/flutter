@@ -1722,12 +1722,12 @@ void main() {
     expect(padding.padding, EdgeInsets.zero);
   });
 
-  testWidgets('SearchAnchor respects viewShrinkWrap property', (WidgetTester tester) async {
+  testWidgets('SearchAnchor respects shrinkWrap property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor(
           isFullScreen: false,
-          viewShrinkWrap: true,
+          shrinkWrap: true,
           viewConstraints: const BoxConstraints(),
           builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
