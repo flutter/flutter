@@ -1378,7 +1378,7 @@ void main() {
 
     await tester.pumpWidget(Container());
     await tester.pumpWidget(buildAnchor(viewBuilder: (Iterable<Widget> suggestions)
-      => GridView.count(crossAxisCount: 5, children: suggestions.toList(),)
+      => GridView.count(crossAxisCount: 5, children: suggestions.toList())
     ));
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
@@ -1408,7 +1408,7 @@ void main() {
 
     await tester.pumpWidget(Container());
     await tester.pumpWidget(buildAnchor(viewBuilder: (Iterable<Widget> suggestions)
-      => GridView.count(crossAxisCount: 5, children: suggestions.toList(),)
+      => GridView.count(crossAxisCount: 5, children: suggestions.toList())
     ));
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
@@ -1817,33 +1817,6 @@ void main() {
     final Size size = tester.getSize(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
     expect(size.width, 280.0);
     expect(size.height, 390.0);
-  });
-
-  testWidgets('SearchAnchor respects viewBarPadding property', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
-          child: SearchAnchor(
-            viewBarPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-            builder: (BuildContext context, SearchController controller) {
-              return IconButton(icon: const Icon(Icons.search), onPressed: () {
-                controller.openView();
-              },);
-            },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
-            },
-          ),
-        ),
-      ),
-    ));
-
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
-    await tester.pumpAndSettle();
-
-    final Finder findSearchBar = find.descendant(of: findViewContent(), matching: find.byType(SearchBar)).first;
-    final Padding padding = tester.widget<Padding>(find.descendant(of: findSearchBar, matching: find.byType(Padding)).first);
-    expect(padding.padding, const EdgeInsets.symmetric(horizontal: 16.0));
   });
 
   testWidgets('SearchAnchor respects viewBarPadding property', (WidgetTester tester) async {
