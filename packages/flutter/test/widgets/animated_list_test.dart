@@ -587,7 +587,7 @@ void main() {
         ),
       );
 
-      // get all list entries in order
+      // Get all list entries in order.
       final List<Text> listEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
       expect(listEntries[0].data, equals('0'));
 
@@ -609,7 +609,7 @@ void main() {
       expect(updatedListEntries[2].data, equals('1'));
       expect(updatedListEntries[3].data, equals('0'));
 
-      // Remove the first item
+      // Remove the first item.
       items.removeAt(0);
       listKey.currentState?.removeItem(0, (BuildContext context, Animation<double> animation) {
         return const SizedBox.shrink();

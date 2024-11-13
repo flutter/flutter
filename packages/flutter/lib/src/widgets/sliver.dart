@@ -873,11 +873,11 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       final SplayTreeMap<int, Element?> newChildren = SplayTreeMap<int, Element?>();
       final Map<int, double> indexToLayoutOffset = HashMap<int, double>();
       final SliverMultiBoxAdaptorWidget adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
-      bool hasDuplicateKey(Key? key) {
+      bool hasDuplicate(Key? key) {
+        // Checks if the provided key has a duplicate.
         if (key == null || _childElements.isEmpty) {
           return false;
         }
-
         bool hasBeenFound = false;
         for (final Element child in _childElements.values.nonNulls) {
           if (child.widget.key == key) {
@@ -889,7 +889,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         }
         return false;
       }
-
       void processElement(int index) {
         _currentlyUpdatingChildIndex = index;
         if (_childElements[index] != null && _childElements[index] != newChildren[index]) {
@@ -933,24 +932,24 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           if (childParentData != null) {
             childParentData.layoutOffset = null;
           }
-          if (!hasDuplicateKey(key)) {
-            // The child is being moved to a new index.
-            childParentData?.layoutOffset = null;
-
-            newChildren[newIndex] = _childElements[index];
-          } else {
-            // Handle duplicates: skip direct reordering, and add to the next available slot later.
-            // This finds the next free index if there's a duplicate key, preventing index conflicts.
+          if (hasDuplicate(key)) {
+            // If a duplicate key is detected, skip reordering the item directly.
+            // Instead, assign it to the next available slot to avoid index conflicts.
             while (newChildren.containsKey(availableIndex)) {
               availableIndex++;
             }
             newChildren[availableIndex] = _childElements[index];
+          } else {
+            // The child is being moved to a new index.
+            childParentData?.layoutOffset = null;
+
+            newChildren[newIndex] = _childElements[index];
           }
           if (_replaceMovedChildren) {
             // We need to make sure the original index gets processed.
             newChildren.putIfAbsent(index, () => null);
           }
-          // Prevents the remapped child from being deactivated during processElement by using availableIndex.
+          // We do not want the remapped child to get deactivated during processElement.
           _childElements.remove(availableIndex);
         } else {
           newChildren.putIfAbsent(index, () => _childElements[index]);
