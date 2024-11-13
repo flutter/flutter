@@ -1071,12 +1071,22 @@ Future<void> refreshPluginsList(
   // Write the legacy plugin files to avoid breaking existing apps.
   final bool legacyChanged = useImplicitPubspecResolution && _writeFlutterPluginsListLegacy(project, plugins);
 
-  final bool swiftPackageManagerEnabled = !forceCocoaPodsOnly && project.usesSwiftPackageManager;
+  bool swiftPackageManagerEnabledIos = false;
+  bool swiftPackageManagerEnabledMacos = false;
+  if (!forceCocoaPodsOnly) {
+    if (iosPlatform) {
+      swiftPackageManagerEnabledIos = project.ios.usesSwiftPackageManager;
+    }
+    if (macOSPlatform) {
+      swiftPackageManagerEnabledMacos = project.macos.usesSwiftPackageManager;
+    }
+  }
+
   final bool changed = _writeFlutterPluginsList(
     project,
     plugins,
-    swiftPackageManagerEnabledIos: swiftPackageManagerEnabled,
-    swiftPackageManagerEnabledMacos: swiftPackageManagerEnabled,
+    swiftPackageManagerEnabledIos: swiftPackageManagerEnabledIos,
+    swiftPackageManagerEnabledMacos: swiftPackageManagerEnabledMacos,
   );
   if (changed || legacyChanged || forceCocoaPodsOnly) {
     createPluginSymlinks(project, force: true);
