@@ -24,23 +24,55 @@ class TextureGLES final : public Texture,
     kRenderBufferMultisampled,
   };
 
-  enum class IsWrapped {
-    kWrapped,
-  };
-
-  TextureGLES(ReactorGLES::Ref reactor, TextureDescriptor desc);
-
-  TextureGLES(ReactorGLES::Ref reactor,
-              TextureDescriptor desc,
-              IsWrapped wrapped);
-
-  TextureGLES(ReactorGLES::Ref reactor,
-              TextureDescriptor desc,
-              HandleGLES external_handle);
-
+  //----------------------------------------------------------------------------
+  /// @brief      Create a texture by wrapping an external framebuffer object
+  ///             whose lifecycle is owned by the caller.
+  ///
+  ///             This is useful for creating a render target for the default
+  ///             window managed framebuffer.
+  ///
+  /// @param[in]  reactor  The reactor
+  /// @param[in]  desc     The description
+  /// @param[in]  fbo      The fbo
+  ///
+  /// @return     If a texture representation of the framebuffer could be
+  ///             created.
+  ///
   static std::shared_ptr<TextureGLES> WrapFBO(ReactorGLES::Ref reactor,
                                               TextureDescriptor desc,
                                               GLuint fbo);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Create a texture by wrapping an external OpenGL texture
+  ///             handle. Ownership of the texture handle is assumed by the
+  ///             reactor.
+  ///
+  /// @param[in]  reactor          The reactor
+  /// @param[in]  desc             The description
+  /// @param[in]  external_handle  The external handle
+  ///
+  /// @return     If a texture representation of the framebuffer could be
+  ///             created.
+  ///
+  static std::shared_ptr<TextureGLES> WrapTexture(ReactorGLES::Ref reactor,
+                                                  TextureDescriptor desc,
+                                                  HandleGLES external_handle);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Create a "texture" that is never expected to be bound/unbound
+  ///             explicitly or initialized in any way. It only exists to setup
+  ///             a render pass description.
+  ///
+  /// @param[in]  reactor  The reactor
+  /// @param[in]  desc     The description
+  ///
+  /// @return     If a texture placeholder could be created.
+  ///
+  static std::shared_ptr<TextureGLES> CreatePlaceholder(
+      ReactorGLES::Ref reactor,
+      TextureDescriptor desc);
+
+  TextureGLES(ReactorGLES::Ref reactor, TextureDescriptor desc);
 
   // |Texture|
   ~TextureGLES() override;
@@ -69,9 +101,22 @@ class TextureGLES final : public Texture,
 
   std::optional<GLuint> GetFBO() const;
 
-  // For non cubemap textures, 0 indicates uninitialized and 1 indicates
-  // initialized. For cubemap textures, each face is initialized separately with
-  // each bit tracking the initialization of the corresponding slice.
+  //----------------------------------------------------------------------------
+  /// @brief      Indicates that all texture storage has already been allocated
+  ///             and contents initialized.
+  ///
+  ///             This is similar to calling `MarkSliceInitialized` with all
+  ///             slices.
+  ///
+  /// @see        MarkSliceInitialized.
+  ///
+  void MarkContentsInitialized();
+
+  //----------------------------------------------------------------------------
+  /// @brief      Indicates that a specific texture slice has been initialized.
+  ///
+  /// @param[in]  slice  The slice to mark as being initialized.
+  ///
   void MarkSliceInitialized(size_t slice) const;
 
   bool IsSliceInitialized(size_t slice) const;
@@ -87,7 +132,6 @@ class TextureGLES final : public Texture,
 
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,
               TextureDescriptor desc,
-              bool is_wrapped,
               std::optional<GLuint> fbo,
               std::optional<HandleGLES> external_handle);
 
