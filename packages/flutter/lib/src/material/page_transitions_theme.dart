@@ -1033,7 +1033,7 @@ class PageTransitionsTheme with Diagnosticable {
   }) : _builders = builders;
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
-    TargetPlatform.android: ZoomPageTransitionsBuilder(),
+    TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
     TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
     TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
   };
@@ -1068,7 +1068,7 @@ class PageTransitionsTheme with Diagnosticable {
   /// {@macro flutter.widgets.delegatedTransition}
   DelegatedTransitionBuilder? delegatedTransition(TargetPlatform platform) {
     final PageTransitionsBuilder matchingBuilder =
-      builders[platform] ?? const ZoomPageTransitionsBuilder();
+      builders[platform] ?? const FadeForwardsPageTransitionsBuilder();
 
     return matchingBuilder.delegatedTransition;
   }
@@ -1147,7 +1147,7 @@ class _PageTransitionsThemeTransitionsState<T> extends State<_PageTransitionsThe
 
     final PageTransitionsBuilder matchingBuilder = widget.builders[platform] ?? switch (platform) {
       TargetPlatform.iOS => const CupertinoPageTransitionsBuilder(),
-      TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.windows || TargetPlatform.macOS || TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
+      TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.windows || TargetPlatform.macOS || TargetPlatform.linux => const FadeForwardsPageTransitionsBuilder(),
     };
     return matchingBuilder.buildTransitions<T>(
       widget.route,

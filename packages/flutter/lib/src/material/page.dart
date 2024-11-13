@@ -87,9 +87,11 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   Widget buildContent(BuildContext context);
 
   @override
-  Duration get transitionDuration {
-    final TargetPlatform platform = Theme.of(navigator!.context).platform;
-    final PageTransitionsTheme pageTransitionsTheme = Theme.of(navigator!.context).pageTransitionsTheme;
+  Duration get transitionDuration => _getTransitionDuration(navigator!.context);
+
+  Duration _getTransitionDuration(BuildContext context) {
+    final TargetPlatform platform = Theme.of(context).platform;
+    final PageTransitionsTheme pageTransitionsTheme = Theme.of(context).pageTransitionsTheme;
     final PageTransitionsBuilder? pageTransitionBuilder = pageTransitionsTheme.builders[platform];
     return pageTransitionBuilder is FadeForwardsPageTransitionsBuilder
       ? const Duration(milliseconds: 800)
@@ -154,6 +156,10 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
+    final Duration duration = _getTransitionDuration(context);
+    controller?.duration = duration;
+    controller?.reverseDuration = duration;
+
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
