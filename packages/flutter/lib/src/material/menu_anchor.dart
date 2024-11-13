@@ -965,7 +965,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   void _handleFocusChange() {
     if (!_focusNode.hasPrimaryFocus) {
       // Close any child menus of this button's menu.
-      MenuController.maybeOf(context)?.closeChildren();
+      _anchor?._menuController.closeChildren();
     }
   }
 
@@ -998,7 +998,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   void _handleSelect() {
     assert(_debugMenuInfo('Selected ${widget.child} menu'));
     if (widget.closeOnActivate) {
-      Actions.invoke(context, const DismissIntent());
+      _anchor?._root._menuController.closeChildren();
     }
     // Delay the call to onPressed until post-frame so that the focus is
     // restored to what it was before the menu was opened before the action is
