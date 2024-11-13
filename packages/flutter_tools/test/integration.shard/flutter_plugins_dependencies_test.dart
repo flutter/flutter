@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:file/file.dart';
 
 import '../src/common.dart';
@@ -48,7 +49,7 @@ void main() {
     await processManager.run(<String>[
       flutterBin,
       'create',
-      tempPluginADir.path,
+      '${tempPluginADir.path}/plugin_a_real_dependency',
       '--template=plugin',
       '--platforms=android', //TODO(camsim99): Consider looping through platforms to verify behavior across.
       '--project-name=plugin_a_real_dependency',
@@ -57,7 +58,7 @@ void main() {
     await processManager.run(<String>[
       flutterBin,
       'create',
-      tempPluginBDir.path,
+      '${tempPluginBDir.path}/plugin_b_dev_dependency',
       '--template=plugin',
       '--platforms=android', //TODO(camsim99): Consider looping through platforms to verify behavior across.
       '--project-name=plugin_b_dev_dependency',
@@ -68,16 +69,18 @@ void main() {
       flutterBin,
       'pub',
       'add',
-      'plugin_a_real_dependency', //TODO(camsim99): Figure out how this should work.
-      tempProjectDir.path,
+      'plugin_a_real_dependency',
+      '--path',
+      '${tempPluginADir.path}/plugin_a_real_dependency',
     ], workingDirectory: tempProjectDir.path);
+
     await processManager.run(<String>[
       flutterBin,
       'pub',
       'add',
-      'plugin_b_dev_dependency',
-      '--dev-dependency', //TODO(camsim99): Figure out how this should work.
-      tempProjectDir.path,
+      'dev:plugin_b_dev_dependency',
+      '--path',
+      '${tempPluginBDir.path}/plugin_b_dev_dependency',
     ], workingDirectory: tempProjectDir.path);
 
     // Run `flutter pub get` to generate .flutter-plugins-dependencies.
