@@ -288,6 +288,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
         (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate))) {
       final _RenderSliverPersistentHeaderForWidgetsMixin renderObject = this.renderObject;
       _updateChild(newDelegate, renderObject.lastShrinkOffset, renderObject.lastOverlapsContent);
+      renderObject.triggerRebuild();
     }
   }
 
