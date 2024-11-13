@@ -397,7 +397,6 @@ void main() {
       logger: mockBufferLogger,
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
-      useImplicitPubspecResolution: false,
     );
     // Will throw if build is called.
     final TestBuildSystem buildSystem = TestBuildSystem.all(null);
@@ -434,7 +433,6 @@ void main() {
       logger: mockBufferLogger,
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
-      useImplicitPubspecResolution: false,
     );
     // Will throw if build is called.
     final TestBuildSystem buildSystem = TestBuildSystem.all(null);

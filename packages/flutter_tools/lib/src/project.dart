@@ -340,7 +340,6 @@ class FlutterProject {
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,
-    required bool useImplicitPubspecResolution,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
@@ -353,7 +352,6 @@ class FlutterProject {
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
       allowedPlugins: allowedPlugins,
-      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
   }
 
@@ -368,7 +366,6 @@ class FlutterProject {
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,
-    required bool useImplicitPubspecResolution,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;
@@ -377,7 +374,6 @@ class FlutterProject {
       this,
       iosPlatform: iosPlatform,
       macOSPlatform: macOSPlatform,
-      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
     if (androidPlatform) {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
@@ -405,7 +401,6 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       allowedPlugins: allowedPlugins,
-      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
   }
 
