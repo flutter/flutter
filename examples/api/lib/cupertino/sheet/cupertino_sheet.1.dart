@@ -56,7 +56,6 @@ class SheetContentWithNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BuildContext parentContext = context;
     return Navigator(
       initialRoute: '/',
       onGenerateRoute: (RouteSettings settings) {
@@ -68,13 +67,9 @@ class SheetContentWithNavigator extends StatelessWidget {
                 if (didPop) {
                   return;
                 }
-                Navigator.of(parentContext).pop();
+                Navigator.of(context).pop();
               },
-              child: Semantics(
-                scopesRoute: true,
-                explicitChildNodes: true,
-                child: const SheetScaffold(),
-              ),
+              child: const SheetScaffold(),
             );
           }
         );
