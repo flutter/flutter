@@ -317,7 +317,6 @@
 
 ## Firebase tests
 /dev/integration_tests/abstract_method_smoke_test @reidbaker @flutter/android
-/dev/integration_tests/android_embedding_v2_smoke_test @reidbaker @flutter/android
 /dev/integration_tests/release_smoke_test @reidbaker @flutter/android
 
 ## Shards tests

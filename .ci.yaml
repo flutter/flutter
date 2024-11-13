@@ -362,6 +362,7 @@ targets:
   # are intentionally running it in the devicelab to ensure that it does not
   # run on a VM in order to avoid noisy results from the benchmark.
   - name: Linux analyzer_benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/158243
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -654,38 +655,6 @@ targets:
           "--device", "model=shiba,version=34",
           "--device", "model=panther,version=33",
           "--device", "model=redfin,version=30"
-        ]
-      # TODO(flutter/flutter#123331): This device is flaking.
-      # "--device", "model=Nexus6P,version=25"
-      virtual_devices: >-
-        [
-          "--device", "model=Nexus5.gce_x86,version=21",
-          "--device", "model=Nexus5.gce_x86,version=22",
-          "--device", "model=Nexus5.gce_x86,version=23",
-          "--device", "model=Nexus6P,version=25",
-          "--device", "model=Nexus6P,version=26",
-          "--device", "model=Nexus6P,version=27",
-          "--device", "model=NexusLowRes,version=29"
-        ]
-
-  - name: Linux firebase_android_embedding_v2_smoke_test
-    recipe: firebaselab/firebaselab
-    bringup: true # https://github.com/flutter/flutter/issues/147335
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "open_jdk", "version": "version:17"}
-        ]
-      tags: >
-        ["firebaselab"]
-      task_name: android_embedding_v2_smoke_test
-      physical_devices: >-
-        [
-          "--device", "model=shiba,version=34",
-          "--device", "model=redfin,version=30",
-          "--device", "model=griffin,version=24"
         ]
       # TODO(flutter/flutter#123331): This device is flaking.
       # "--device", "model=Nexus6P,version=25"
@@ -1071,6 +1040,10 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
+      # TODO(fujino): delete once propagation from
+      # https://github.com/flutter/flutter/issues/158521 completes.
+      drone_dimensions: >
+        ["os=Linux", "os=Ubuntu-20"]
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: plugin_test
@@ -1202,7 +1175,6 @@ targets:
       - .ci.yaml
 
   - name: Linux tool_integration_tests_1_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1229,7 +1201,6 @@ targets:
       - .ci.yaml
 
   - name: Linux tool_integration_tests_2_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1256,7 +1227,6 @@ targets:
       - .ci.yaml
 
   - name: Linux tool_integration_tests_3_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1283,7 +1253,6 @@ targets:
       - .ci.yaml
 
   - name: Linux tool_integration_tests_4_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1310,7 +1279,6 @@ targets:
       - .ci.yaml
 
   - name: Linux tool_integration_tests_5_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1337,7 +1305,6 @@ targets:
       - .ci.yaml
 
   - name: Linux tool_integration_tests_6_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3860,6 +3827,7 @@ targets:
       task_name: complex_layout_macos__start_up
 
   - name: Mac_benchmark complex_layout_scroll_perf_macos__timeline_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/158251
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -5450,7 +5418,6 @@ targets:
       task_name: run_release_test_macos
 
   - name: Windows build_tests_1_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5469,7 +5436,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_2_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5488,7 +5454,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_3_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5507,7 +5472,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_4_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5526,7 +5490,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_5_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5545,7 +5508,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_6_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5564,7 +5526,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_7_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5583,7 +5544,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_8_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5602,7 +5562,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_9_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5658,10 +5617,8 @@ targets:
 
   - name: Windows framework_tests_libraries_leak_tracking
     recipe: flutter/flutter_drone
-    bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 120
     properties:
-      ignore_flakiness: "true"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
@@ -5745,10 +5702,8 @@ targets:
 
   - name: Windows framework_tests_widgets_leak_tracking
     recipe: flutter/flutter_drone
-    bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 120
     properties:
-      ignore_flakiness: "true"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [

@@ -677,7 +677,12 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private void configureLegacyPluginEachProjects(Project project) {
         try {
-            if (!settingsGradleFile(project).text.contains("'.flutter-plugins'")) {
+            // Read the contents of the settings.gradle file.
+            // Remove block/line comments
+            String settingsText = settingsGradleFile(project).text
+            settingsText = settingsText.replaceAll(/(?s)\/\*.*?\*\//, '').replaceAll(/(?m)\/\/.*$/, '')
+
+            if (!settingsText.contains("'.flutter-plugins'")) {
                 return
             }
         } catch (FileNotFoundException ignored) {
@@ -1289,7 +1294,7 @@ class FlutterPlugin implements Plugin<Project> {
                         }
                     }
                     // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
-                    // The `$project.buildDir` is '.android/Flutter/build/' instead of 'build/'.
+                    // The `$project.layout.buildDirectory` is '.android/Flutter/build/' instead of 'build/'.
                     String buildDir = "${getFlutterSourceDirectory()}/build"
                     String nativeAssetsDir = "${buildDir}/native_assets/android/jniLibs/lib"
                     from("${nativeAssetsDir}/${abi}") {
@@ -1416,7 +1421,7 @@ class FlutterPlugin implements Plugin<Project> {
             // This path is not flavor specific and must only be added once.
             // If support for flavors is added to native assets, then they must only be added
             // once per flavor; see https://github.com/dart-lang/native/issues/1359.
-            String nativeAssetsDir = "${project.buildDir}/../native_assets/android/jniLibs/lib/"
+            String nativeAssetsDir = "${project.layout.buildDirectory.get()}/../native_assets/android/jniLibs/lib/"
             project.android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             configurePlugins(project)
             detectLowCompileSdkVersionOrNdkVersion()
