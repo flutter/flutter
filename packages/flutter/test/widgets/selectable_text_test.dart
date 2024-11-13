@@ -24,6 +24,7 @@ import '../impeller_test_helpers.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 import '../widgets/semantics_tester.dart';
+import 'slivers_evil_test.dart';
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
@@ -1389,6 +1390,36 @@ void main() {
     expect(newFirstPos.dy, firstPos.dy);
     expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
+  });
+
+  testWidgets('ScrollBehavior can be overridden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText(
+          kMoreThanFourLines,
+          dragStartBehavior: DragStartBehavior.down,
+          style: TextStyle(color: Colors.black, fontSize: 34.0),
+          maxLines: 2,
+        ),
+      ),
+    );
+    expect(tester.widget<EditableText>(find.byType(EditableText)).scrollBehavior, isNull);
+    expect(tester.widget<Scrollable>(find.byType(Scrollable)).scrollBehavior, isNotNull);
+
+    final ScrollBehavior behavior = const ScrollBehavior()..copyWith(scrollbars: false);
+    await tester.pumpWidget(
+      boilerplate(
+        child: SelectableText(
+          kMoreThanFourLines,
+          dragStartBehavior: DragStartBehavior.down,
+          style: const TextStyle(color: Colors.black, fontSize: 34.0),
+          maxLines: 2,
+          scrollBehavior: behavior,
+        ),
+      ),
+    );
+    expect(tester.widget<EditableText>(find.byType(EditableText)).scrollBehavior, equals(behavior));
+    expect(tester.widget<Scrollable>(find.byType(Scrollable)).scrollBehavior, equals(behavior));
   });
 
   testWidgets('minLines cannot be greater than maxLines', (WidgetTester tester) async {
@@ -4578,6 +4609,7 @@ void main() {
       cursorRadius: Radius.zero,
       cursorColor: Color(0xff00ff00),
       scrollPhysics: ClampingScrollPhysics(),
+      scrollBehavior: ScrollBehavior(),
       semanticsLabel: 'something else',
       enableInteractiveSelection: false,
     ).debugFillProperties(builder);
@@ -4603,6 +4635,7 @@ void main() {
       'cursorColor: ${const Color(0xff00ff00)}',
       'selection disabled',
       'scrollPhysics: ClampingScrollPhysics',
+      'scrollBehavior: ScrollBehavior',
     ]);
   });
 
