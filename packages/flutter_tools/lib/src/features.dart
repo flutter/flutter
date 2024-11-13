@@ -201,7 +201,7 @@ const Feature swiftPackageManager = Feature(
 const Feature explicitPackageDependencies = Feature(
   name: 'support for dev_dependency plugins',
   configSetting: 'explicit-package-dependencies',
-  extraHelpText: 
+  extraHelpText:
     'Plugins that are resolved as result of being in "dev_dependencies" of a '
     'package are not included in release builds of an app. By enabling this '
     'feature, the synthetic "package:flutter_gen" can no longer be generated '
