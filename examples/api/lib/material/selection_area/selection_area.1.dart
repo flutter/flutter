@@ -65,11 +65,11 @@ class _MyHomePageState extends State<MyHomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 for (final (int? offset, String label) in <(int? offset, String label)>[
-                  (_selectionNotifier.registered ? _selectionNotifier.range?.startOffset : null, 'StartOffset'),
-                  (_selectionNotifier.registered ? _selectionNotifier.range?.endOffset : null, 'EndOffset'),
+                  (_selectionNotifier.registered ? _selectionNotifier.selection.range?.startOffset : null, 'StartOffset'),
+                  (_selectionNotifier.registered ? _selectionNotifier.selection.range?.endOffset : null, 'EndOffset'),
                 ])
                   Text('Selection $label: $offset'),
-                Text('Selection Status: ${_selectionNotifier.registered ? _selectionNotifier.status : 'SelectionListenerNotifier not registered.'}'),
+                Text('Selection Status: ${_selectionNotifier.registered ? _selectionNotifier.selection.status : 'SelectionListenerNotifier not registered.'}'),
                 Text('Selectable Region Status: $_selectableRegionStatus'),
               ],
             ),

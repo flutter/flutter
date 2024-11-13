@@ -3321,7 +3321,7 @@ class _SelectionListenerState extends State<SelectionListener> {
   }
 }
 
-class _SelectionListenerDelegate extends StaticSelectionContainerDelegate {
+final class _SelectionListenerDelegate extends StaticSelectionContainerDelegate implements SelectionDetails {
   _SelectionListenerDelegate({
     required SelectionListenerNotifier selectionNotifier,
   }) : _selectionNotifier = selectionNotifier {
@@ -3355,6 +3355,31 @@ class _SelectionListenerDelegate extends StaticSelectionContainerDelegate {
     _selectionNotifier._unregisterSelectionListenerDelegate();
     super.dispose();
   }
+
+  @override
+  SelectedContentRange? get range => getSelection();
+
+  @override
+  SelectionStatus get status => value.status;
+}
+
+/// A read-only interface for accessing the details of a selection under a [SelectionListener].
+///
+/// This includes information such as the status of the selection indicating
+/// if it is collapsed or uncollapsed, the [SelectedContentRange] that includes
+/// the start and end offsets of the selection local to the [SelectionListener]
+/// that reports this object.
+///
+/// This object is typically accessed by providing a [SelectionListenerNotifier]
+/// to a [SelectionListener] and retrieving the value from [SelectionListenerNotifier.selection].
+abstract final class SelectionDetails {
+  /// The computed selection range of the owning [SelectionListener]s subtree.
+  ///
+  /// Returns `null` if there is nothing selected.
+  SelectedContentRange? get range;
+
+  /// The status that indicates whether there is a selection and whether the selection is collapsed.
+  SelectionStatus get status;
 }
 
 /// Notifies listeners when the selection under a [SelectionListener] has been
@@ -3364,18 +3389,8 @@ class _SelectionListenerDelegate extends StaticSelectionContainerDelegate {
 final class SelectionListenerNotifier extends ChangeNotifier {
   _SelectionListenerDelegate? _selectionDelegate;
 
-  /// The computed selection range of the owning [SelectionListener]s subtree.
-  ///
-  /// Returns `null` if there is nothing selected.
-  SelectedContentRange? get range {
-    if (_selectionDelegate == null) {
-      throw Exception('Selection client has not been registered to this notifier.');
-    }
-    return _selectionDelegate!.getSelection();
-  }
-
-  /// The status that indicates whether there is a selection and whether the selection is collapsed.
-  SelectionStatus get status => _selectionDelegate?.value.status ?? (throw Exception('Selection client has not been registered to this notifier.'));
+  /// The details of the selection under the [SelectionListener] that owns this notifier.
+  SelectionDetails get selection => _selectionDelegate ?? (throw Exception('Selection client has not been registered to this notifier.'));
 
   /// Whether this [SelectionListenerNotifier] has been registered to a [SelectionListener].
   bool get registered => _selectionDelegate != null;

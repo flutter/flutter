@@ -115,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (_menuController.isShown) {
       ContextMenuController.removeAny();
     }
-    if (_selectionNotifier.status != SelectionStatus.uncollapsed
+    if (_selectionNotifier.selection.status != SelectionStatus.uncollapsed
         || status != SelectableRegionSelectionStatus.finalized) {
       return;
     }
@@ -124,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
         || selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor == null) {
       return;
     }
-    final SelectedContentRange? selectedContentRange = _selectionNotifier.range;
+    final SelectedContentRange? selectedContentRange = _selectionNotifier.selection.range;
     if (selectedContentRange == null) {
       return;
     }
