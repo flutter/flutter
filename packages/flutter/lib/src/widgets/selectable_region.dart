@@ -377,7 +377,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   FocusNode get _focusNode => widget.focusNode ?? (_localFocusNode ??= FocusNode(debugLabel: 'SelectableRegion'));
 
   /// Notifies its listeners when the selection state in this [SelectableRegion] changes.
-  final SelectableRegionSelectionStatusNotifier _selectionStatusNotifier = SelectableRegionSelectionStatusNotifier._();
+  final _SelectableRegionSelectionStatusNotifier _selectionStatusNotifier = _SelectableRegionSelectionStatusNotifier._();
 
   @protected
   @override
@@ -3178,16 +3178,17 @@ enum SelectableRegionSelectionStatus {
 /// Notifies its listeners when the [SelectableRegion] that created this object
 /// is changing or finalizes its selection.
 ///
-/// To access the [SelectableRegionSelectionStatusNotifier] from the nearest [SelectableRegion]
+/// To access the [_SelectableRegionSelectionStatusNotifier] from the nearest [SelectableRegion]
 /// ancestor, use [SelectableRegionScope.maybeOf].
-final class SelectableRegionSelectionStatusNotifier extends ChangeNotifier {
-  SelectableRegionSelectionStatusNotifier._();
+final class _SelectableRegionSelectionStatusNotifier extends ChangeNotifier implements ValueListenable<SelectableRegionSelectionStatus> {
+  _SelectableRegionSelectionStatusNotifier._();
 
   SelectableRegionSelectionStatus _selectableRegionSelectionStatus = SelectableRegionSelectionStatus.finalized;
   /// The current value of the [SelectableRegionSelectionStatus] of the [SelectableRegion]
   /// that owns this object.
   ///
   /// Defaults to [SelectableRegionSelectionStatus.finalized].
+  @override
   SelectableRegionSelectionStatus get value => _selectableRegionSelectionStatus;
 
   /// Sets the [SelectableRegionSelectionStatus] for the [SelectableRegion] that
@@ -3203,9 +3204,9 @@ final class SelectableRegionSelectionStatusNotifier extends ChangeNotifier {
 
 /// Notifies its listeners when the selection under a [SelectableRegion] or
 /// [SelectionArea] is being changed or finalized.
-final class SelectableRegionScope extends InheritedNotifier<SelectableRegionSelectionStatusNotifier> {
+final class SelectableRegionScope extends InheritedNotifier<ValueListenable<SelectableRegionSelectionStatus>> {
   const SelectableRegionScope._({
-    required SelectableRegionSelectionStatusNotifier selectionStatusNotifier,
+    required ValueListenable<SelectableRegionSelectionStatus> selectionStatusNotifier,
     required super.child,
   }) : super(notifier: selectionStatusNotifier);
 
@@ -3216,7 +3217,7 @@ final class SelectableRegionScope extends InheritedNotifier<SelectableRegionSele
   ///
   /// Calling this method will create a dependency on the closest
   /// [SelectableRegionScope] in the [context], if there is one.
-  static SelectableRegionSelectionStatusNotifier? maybeOf(BuildContext context) {
+  static ValueListenable<SelectableRegionSelectionStatus>? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<SelectableRegionScope>()?.notifier;
   }
 

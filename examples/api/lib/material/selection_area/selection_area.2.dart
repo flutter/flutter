@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -362,7 +363,7 @@ class MySelectableTextColumn extends StatefulWidget {
 }
 
 class _MySelectableTextColumnState extends State<MySelectableTextColumn> {
-  SelectableRegionSelectionStatusNotifier? _selectableRegionScope;
+  ValueListenable<SelectableRegionSelectionStatus>? _selectableRegionScope;
 
   @override
   void didChangeDependencies() {
