@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
-
-import 'base/io.dart';
 import 'base/logger.dart';
 import 'convert.dart';
+import 'dart/pub.dart';
+import 'project.dart';
 
 /// Returns dependencies of [project] that are _only_ used as `dev_dependency`.
 ///
@@ -15,55 +14,24 @@ import 'convert.dart';
 /// `pubspec.yaml` file, and removing packages from that set that appear as
 /// dependencies (implicitly non-dev) in any non-dev package depended on.
 Future<Set<String>> computeExclusiveDevDependencies(
-  ProcessManager processes, {
+  Pub pub, {
   required Logger logger,
-  required String projectPath,
+  required FlutterProject project,
 }) async {
-  final ProcessResult processResult = await processes.run(
-    <String>['dart', 'pub', 'deps', '--json'],
-    workingDirectory: projectPath,
-  );
+  final Map<String, Object?> jsonResult = await pub.deps(project);
 
   Never fail([String? reason]) {
-    final Object? stdout = processResult.stdout;
-    if (stdout is String && stdout.isNotEmpty) {
-      logger.printTrace(stdout);
-    }
-    final String stderr = processResult.stderr.toString();
+    logger.printTrace(const JsonEncoder.withIndent('  ').convert(jsonResult));
     throw StateError(
       'dart pub deps --json ${reason != null ? 'had unexpected output: $reason' : 'failed'}'
-      '${stderr.isNotEmpty ? '\n$stderr' : ''}',
     );
   }
 
-  // Guard against dart pub deps crashing.
-  final Map<String, Object?> jsonResult;
-  if (processResult.exitCode != 0 || processResult.stdout is! String) {
-    fail();
-  }
-
-  // Guard against dart pub deps having explicitly invalid output.
-  final String stdout;
-  try {
-    stdout = processResult.stdout as String;
-
-    // This is an indication that `FakeProcessManager.any` was used, which by
-    // contract emits exit code 0 and no output on either stdout or stderr. To
-    // avoid this code, we'd have to go and make this function injectable into
-    // every callsite and mock-it out manually, which at the time of this
-    // writing was 130+ unit test cases alone.
-    //
-    // So, this is the lesser of two evils.
-    if (stdout.isEmpty && processResult.stderr == '') {
-      return <String>{};
-    }
-
-    jsonResult = json.decode(stdout) as Map<String, Object?>;
-  } on FormatException catch (e) {
-    fail('$e');
-  }
-
   List<T> asListOrFail<T>(Object? value, String name) {
+    // Allow omitting a list as empty to default to an empty list
+    if (value == null) {
+      return <T>[];
+    }
     if (value is! List<Object?>) {
       fail('Expected field "$name" to be a list, got "$value"');
     }
@@ -115,7 +83,7 @@ Future<Set<String>> computeExclusiveDevDependencies(
 
   // Start initially with every `devDependency` listed.
   final Set<String> devDependencies = asListOrFail<String>(
-    rootPackage['devDependencies'],
+    rootPackage['devDependencies'] ?? <String>[],
     'devDependencies',
   ).toSet();
 

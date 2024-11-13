@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
@@ -30,6 +31,7 @@ import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart' hide FakeOperatingSystemUtils;
 import '../src/pubspec_schema.dart';
 
@@ -462,7 +464,8 @@ dependencies:
         expect(flutterProject.flutterPluginsDependenciesFile, exists);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: FakeProcessManager.empty,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext(
@@ -548,7 +551,15 @@ dependencies:
         expect(jsonContent['dependencyGraph'], expectedDependencyGraph);
         expect(jsonContent['date_created'], dateCreated.toString());
         expect(jsonContent['version'], '1.0.0');
-        expect(jsonContent['swift_package_manager_enabled'], false);
+
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, bool>{
+          'ios': false,
+          'macos': false,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
 
         // Make sure tests are updated if a new object is added/removed.
         final List<String> expectedKeys = <String>[
@@ -665,7 +676,14 @@ dependencies:
             .readAsStringSync();
         final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-        expect(jsonContent['swift_package_manager_enabled'], true);
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
+          'ios': true,
+          'macos': true,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -702,7 +720,14 @@ dependencies:
             .readAsStringSync();
         final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-        expect(jsonContent['swift_package_manager_enabled'], false);
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
+          'ios': false,
+          'macos': false,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
