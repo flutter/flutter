@@ -8,6 +8,7 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
@@ -94,6 +95,24 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 ///  * [SelectionArea], which selects appropriate text selection controls
 ///    based on the current platform.
 abstract class TextSelectionControls {
+  /// Returns the bounding [Rect] of the text selection handle in local
+  /// coordinates.
+  ///
+  /// When interacting with a text seletion handle through a touch event, the
+  /// interactive area should be at least [kMinInteractiveDimension] square,
+  /// which this method does not consider.
+  Rect getHandleRect(TextSelectionHandleType type, double preferredLineHeight) {
+    final Size handleSize = getHandleSize(
+      preferredLineHeight,
+    );
+    return Rect.fromLTWH(
+      0.0,
+      0.0,
+      handleSize.width,
+      handleSize.height,
+    );
+  }
+
   /// Builds a selection handle of the given `type`.
   ///
   /// The top left corner of this widget is positioned at the bottom of the
@@ -1874,19 +1893,9 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
 
   @override
   Widget build(BuildContext context) {
-    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
+    final Rect handleRect = widget.selectionControls.getHandleRect(
       widget.type,
       widget.preferredLineHeight,
-    );
-    final Size handleSize = widget.selectionControls.getHandleSize(
-      widget.preferredLineHeight,
-    );
-
-    final Rect handleRect = Rect.fromLTWH(
-      -handleAnchor.dx,
-      -handleAnchor.dy,
-      handleSize.width,
-      handleSize.height,
     );
 
     // Make sure the GestureDetector is big enough to be easily interactive.
@@ -1900,6 +1909,11 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
       math.max((interactiveRect.height - handleRect.height) / 2, 0),
     );
 
+    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
+      widget.type,
+      widget.preferredLineHeight,
+    );
+
     // Make sure a drag is eagerly accepted. This is used on iOS to match the
     // behavior where a drag directly on a collapse handle will always win against
     // other drag gestures.
@@ -1907,7 +1921,8 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
 
     return CompositedTransformFollower(
       link: widget.handleLayerLink,
-      offset: interactiveRect.topLeft,
+      // Put the handle's anchor point on the leader's anchor point.
+      offset: -handleAnchor - Offset(padding.left, padding.top),
       showWhenUnlinked: false,
       child: FadeTransition(
         opacity: _opacity,
@@ -2242,10 +2257,11 @@ class TextSelectionGestureDetectorBuilder {
   ///
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
   @protected
-  void onTapDown(TapDragDownDetails details) {
+  void onTapDown(TapDragDownDetails details) async {
     if (!delegate.selectionEnabled) {
       return;
     }
+
     // TODO(Renzo-Olivares): Migrate text selection gestures away from saving state
     // in renderEditable. The gesture callbacks can use the details objects directly
     // in callbacks variants that provide them [TapGestureRecognizer.onSecondaryTap]
@@ -2270,6 +2286,14 @@ class TextSelectionGestureDetectorBuilder {
     final bool isShiftPressedValid = _isShiftPressed && renderEditable.selection?.baseOffset != null;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
+        if (editableText.widget.stylusHandwritingEnabled) {
+          final bool isStylus = details.kind == PointerDeviceKind.stylus
+              || details.kind == PointerDeviceKind.invertedStylus;
+          if (isStylus && await Scribe.isFeatureAvailable()) {
+            renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+            Scribe.startStylusHandwriting();
+          }
+        }
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         // On mobile platforms the selection is set on tap up.
@@ -2868,6 +2892,10 @@ class TextSelectionGestureDetectorBuilder {
                   from: details.globalPosition,
                   cause: SelectionChangedCause.drag,
                 );
+                // TODO(justinmc): This shouldn't show the magnifier unless the
+                // drag is moving the cursor. If it's horizontally outside of
+                // the field, no magnifier. The magnifier will show and hide as
+                // a drag moves into and out of the text.
                 _showMagnifierIfSupportedByPlatform(details.globalPosition);
               }
             case null:

@@ -182,7 +182,12 @@ class TextFormField extends FormField<String> {
     ContentInsertionConfiguration? contentInsertionConfiguration,
     MaterialStatesController? statesController,
     Clip clipBehavior = Clip.hardEdge,
+    @Deprecated(
+      'Use `stylusHandwritingEnabled` instead. '
+      'This feature was deprecated after v3.27.0-0.1.pre.',
+    )
     bool scribbleEnabled = true,
+    bool stylusHandwritingEnabled = EditableText.defaultStylusHandwritingEnabled,
     bool canRequestFocus = true,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
@@ -279,6 +284,7 @@ class TextFormField extends FormField<String> {
                contentInsertionConfiguration: contentInsertionConfiguration,
                clipBehavior: clipBehavior,
                scribbleEnabled: scribbleEnabled,
+               stylusHandwritingEnabled: stylusHandwritingEnabled,
                canRequestFocus: canRequestFocus,
              ),
            );
