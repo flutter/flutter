@@ -450,7 +450,7 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Opting out of useImplicitPubspecResolution omits .flutter-plugins', () async {
+      testUsingContext('Opting in to explicit-package-dependencies omits .flutter-plugins', () async {
         createFakePlugins(fs, <String>[
           'plugin_d',
           'plugin_a',
@@ -463,6 +463,9 @@ dependencies:
         expect(flutterProject.flutterPluginsFile, isNot(exists));
         expect(flutterProject.flutterPluginsDependenciesFile, exists);
       }, overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(
+          isExplicitPackageDependenciesEnabled: true,
+        ),
         FileSystem: () => fs,
         ProcessManager: FakeProcessManager.empty,
         Pub: FakePubWithPrimedDeps.new,
