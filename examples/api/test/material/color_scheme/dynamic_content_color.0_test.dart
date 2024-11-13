@@ -9,20 +9,29 @@ import 'package:flutter_api_samples/material/color_scheme/dynamic_content_color.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  final List<(ImageProvider<Object>, Brightness)> loadColorSchemeCalls = <(ImageProvider<Object>, Brightness)>[];
+
+  Future<ColorScheme> fakeColorSchemeLoader(ImageProvider<Object> provider, Brightness brightness) async {
+    loadColorSchemeCalls.add((provider, brightness));
+    return provider == example.DynamicColorExample.images[1]
+      ? ColorScheme.fromSeed(seedColor: Colors.lightBlue)
+      : const ColorScheme.light();
+  }
+
+  setUp(() {
+    loadColorSchemeCalls.clear();
+  });
+
   // The app being tested loads images via HTTP which the test
   // framework defeats by default.
   setUpAll(() {
     HttpOverrides.global = null;
   });
 
-  testWidgets('The theme colors are created dynamically from the first image', (WidgetTester tester) async {
-    final List<(ImageProvider<Object>, Brightness)> loadColorSchemeCalls = <(ImageProvider<Object>, Brightness)>[];
+  testWidgets('The content is visible', (WidgetTester tester) async {
     await tester.pumpWidget(
       example.DynamicColorExample(
-        loadColorScheme: (ImageProvider<Object> provider, Brightness brightness) async {
-          loadColorSchemeCalls.add((provider, brightness));
-          return const ColorScheme.light();
-        },
+        loadColorScheme: fakeColorSchemeLoader,
       ),
     );
     await tester.pump();
@@ -76,6 +85,32 @@ void main() {
       Brightness.light,
     );
 
+    await tester.pumpAndSettle(); // Clears the timers from image loading.
+  });
+
+  testWidgets('The brightness can be changed', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      example.DynamicColorExample(
+        loadColorScheme: fakeColorSchemeLoader,
+      ),
+    );
+    await tester.pump();
+
+    expect(loadColorSchemeCalls, hasLength(1));
+    expect(
+      loadColorSchemeCalls.single.$1,
+      isA<NetworkImage>()
+        .having(
+          (NetworkImage provider) => provider.url,
+          'url',
+          'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_1.png',
+        ),
+    );
+    expect(
+      loadColorSchemeCalls.single.$2,
+      Brightness.light,
+    );
+
     await tester.tap(find.byType(Switch));
     await tester.pump();
 
@@ -92,6 +127,50 @@ void main() {
     expect(
       loadColorSchemeCalls.last.$2,
       Brightness.dark,
+    );
+
+    await tester.pumpAndSettle(); // Clears the timers from image loading.
+  });
+
+  testWidgets('Tapping an image loads a new color scheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      example.DynamicColorExample(
+        loadColorScheme: fakeColorSchemeLoader,
+      ),
+    );
+    await tester.pump();
+
+    expect(loadColorSchemeCalls, hasLength(1));
+    expect(
+      loadColorSchemeCalls.single.$1,
+      isA<NetworkImage>()
+        .having(
+          (NetworkImage provider) => provider.url,
+          'url',
+          'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_1.png',
+        ),
+    );
+    expect(
+      loadColorSchemeCalls.single.$2,
+      Brightness.light,
+    );
+
+    await tester.tapAt(tester.getCenter(find.byType(Image).at(1)));
+    await tester.pump();
+
+    expect(loadColorSchemeCalls, hasLength(2));
+    expect(
+      loadColorSchemeCalls.last.$1,
+      isA<NetworkImage>()
+        .having(
+          (NetworkImage provider) => provider.url,
+          'url',
+          'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_2.png',
+        ),
+    );
+    expect(
+      loadColorSchemeCalls.last.$2,
+      Brightness.light,
     );
 
     await tester.pumpAndSettle(); // Clears the timers from image loading.
