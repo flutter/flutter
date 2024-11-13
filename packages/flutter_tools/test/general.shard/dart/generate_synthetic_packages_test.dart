@@ -12,14 +12,16 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 import 'package:flutter_tools/src/dart/generate_synthetic_packages.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
 void main() {
-  testWithoutContext('calls buildSystem.build with blank l10n.yaml file', () async {
+  testUsingContext('calls buildSystem.build with blank l10n.yaml file', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -68,7 +70,7 @@ void main() {
     await completer.future;
   });
 
-  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: true', () async {
+  testUsingContext('calls buildSystem.build with l10n.yaml synthetic-package: true', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -118,7 +120,7 @@ void main() {
     await completer.future;
   });
 
-  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: null', () async {
+  testUsingContext('calls buildSystem.build with l10n.yaml synthetic-package: null', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -166,7 +168,7 @@ void main() {
     await completer.future;
   });
 
-  testWithoutContext('does not call buildSystem.build when l10n.yaml is not present', () async {
+  testUsingContext('does not call buildSystem.build when l10n.yaml is not present', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -196,7 +198,7 @@ void main() {
     );
   });
 
-  testWithoutContext('does not call buildSystem.build with incorrect l10n.yaml format', () async {
+  testUsingContext('does not call buildSystem.build with incorrect l10n.yaml format', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -232,7 +234,7 @@ void main() {
     );
   });
 
-  testWithoutContext('does not call buildSystem.build with non-bool "synthetic-package" value', () async {
+  testUsingContext('does not call buildSystem.build with non-bool "synthetic-package" value', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -268,7 +270,7 @@ void main() {
     );
   });
 
-  testWithoutContext('synthetic-package: true (implicit) logs a deprecation warning', () async {
+  testUsingContext('synthetic-package: true (implicit) logs a deprecation warning', () async {
     // Project directory setup for gen_l10n logic.
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -305,7 +307,7 @@ void main() {
     );
   });
 
-  testWithoutContext('synthetic-package: true (explicit) logs a deprecation warning', () async {
+  testUsingContext('synthetic-package: true (explicit) logs a deprecation warning', () async {
     // Project directory setup for gen_l10n logic.
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -340,7 +342,7 @@ void main() {
     );
   });
 
-  testWithoutContext('synthetic-package: false has no deprecation warning', () async {
+  testUsingContext('synthetic-package: false has no deprecation warning', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -375,7 +377,7 @@ void main() {
     );
   });
 
-  testWithoutContext('synthetic-package: true with --no-implicit-pubspec-resolution is an error', () async {
+  testUsingContext('synthetic-package: true with explicit-packages-resolution is an error', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -407,11 +409,15 @@ void main() {
         buildSystem: buildSystem,
         buildTargets: const NoOpBuildTargets(),
       ),
-      throwsToolExit(message: 'Cannot generate a synthetic package when --no-implicit-pubspec-resolution is passed'),
+      throwsToolExit(message: 'Cannot generate a synthetic package when --config explicit-package-dependencies is enabled'),
     );
+  }, overrides: <Type, Generator> {
+    FeatureFlags: () => TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    ),
   });
 
-  testWithoutContext('synthetic-package defaults to false if --no-implicit-pubspec-resolution is passed', () async {
+  testUsingContext('synthetic-package defaults to false if explicit-package-dependencies is enabled', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -445,5 +451,9 @@ void main() {
       ),
       returnsNormally,
     );
+  }, overrides: <Type, Generator> {
+    FeatureFlags: () => TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    ),
   });
 }

@@ -52,12 +52,12 @@ Future<void> generateLocalizationsSyntheticPackage({
     if (isSyntheticL10nPackage == false) {
       return;
     }
-  } else if (!featureFlags.isExplicitPackageDependenciesEnabled) {
-    // --no-implicit-pubspec-resolution was passed, and synthetic-packages: true was not.
+  } else if (featureFlags.isExplicitPackageDependenciesEnabled) {
+    // synthetic-packages: true was not set and it is no longer the defualt.
     return;
   }
 
-  if (!featureFlags.isExplicitPackageDependenciesEnabled) {
+  if (featureFlags.isExplicitPackageDependenciesEnabled) {
     throwToolExit(
       'Cannot generate a synthetic package when --config explicit-package-dependencies is enabled.\n'
       '\n'

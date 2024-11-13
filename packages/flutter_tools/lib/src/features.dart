@@ -207,9 +207,18 @@ const Feature explicitPackageDependencies = Feature(
     'feature, the synthetic "package:flutter_gen" can no longer be generated '
     'and the legacy ".flutter-plugins" tool artifact is no longer generated.\n'
     '\n'
-    'See also: \n'
-    '- https://flutter.dev/to/flutter-plugins-configuration\n'
-    '- https://flutter.dev/to/flutter-gen-deprecation',
+    'See also:\n'
+    '* https://flutter.dev/to/flutter-plugins-configuration.\n'
+    '* https://flutter.dev/to/flutter-gen-deprecation.',
+  master: FeatureChannelSetting(
+    available: true,
+  ),
+  beta: FeatureChannelSetting(
+    available: true,
+  ),
+  stable: FeatureChannelSetting(
+    available: true,
+  ),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
