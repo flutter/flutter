@@ -3360,11 +3360,13 @@ class _SelectionListenerDelegate extends StaticSelectionContainerDelegate {
 /// Notifies listeners when the selection under a [SelectionListener] has been
 /// changed.
 ///
-/// This is typically provided to a [SelectionListener].
+/// This object is typically provided to a [SelectionListener].
 final class SelectionListenerNotifier extends ChangeNotifier {
   _SelectionListenerDelegate? _selectionDelegate;
 
   /// The computed selection range of the owning [SelectionListener]s subtree.
+  ///
+  /// Returns `null` if there is nothing selected.
   SelectedContentRange? get range {
     if (_selectionDelegate == null) {
       throw Exception('Selection client has not been registered to this notifier.');
