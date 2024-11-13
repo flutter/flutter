@@ -550,12 +550,13 @@ class _FadeForwardsPageTransition extends StatelessWidget {
 
   final Widget? child;
 
-  // The new page slides forwards from right to left.
+  // The new page slides in from right to left.
   static final Animatable<Offset> _forwardTranslationTween = Tween<Offset>(
     begin: const Offset(0.25, 0.0),
     end: Offset.zero,
   ).chain(CurveTween(curve: FadeForwardsPageTransitionsBuilder._transitionCurve));
 
+  // The old page slides back from left to right.
   static final Animatable<Offset> _backwardTranslationTween = Tween<Offset>(
     begin: Offset.zero,
     end: const Offset(0.25, 0.0),
