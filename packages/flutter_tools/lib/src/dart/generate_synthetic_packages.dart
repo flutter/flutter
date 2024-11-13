@@ -59,7 +59,7 @@ Future<void> generateLocalizationsSyntheticPackage({
 
   if (featureFlags.isExplicitPackageDependenciesEnabled) {
     throwToolExit(
-      'Cannot generate a synthetic package when --config explicit-package-dependencies is enabled.\n'
+      'Cannot generate a synthetic package when explicit-package-dependencies is enabled.\n'
       '\n'
       'Synthetic package output (package:flutter_gen) is deprecated: '
       'https://flutter.dev/to/flutter-gen-deprecation. If you are seeing this '
