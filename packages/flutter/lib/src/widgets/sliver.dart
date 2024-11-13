@@ -873,8 +873,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       final SplayTreeMap<int, Element?> newChildren = SplayTreeMap<int, Element?>();
       final Map<int, double> indexToLayoutOffset = HashMap<int, double>();
       final SliverMultiBoxAdaptorWidget adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
+      // Checks if the provided key has a duplicate.
       bool hasDuplicate(Key? key) {
-        // Checks if the provided key has a duplicate.
         if (key == null || _childElements.isEmpty) {
           return false;
         }
