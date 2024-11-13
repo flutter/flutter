@@ -1956,7 +1956,7 @@ void main() {
     );
   });
 
-  testWidgets('Hovering over Cupertino action sheet action updates cursor to passed cursor on any platform', (WidgetTester tester) async {
+  testWidgets('CupertinoActionSheet action cursor behavior', (WidgetTester tester) async {
     const SystemMouseCursor customCursor = SystemMouseCursors.grab;
 
     await tester.pumpWidget(
