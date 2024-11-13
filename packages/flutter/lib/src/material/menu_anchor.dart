@@ -998,7 +998,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   void _handleSelect() {
     assert(_debugMenuInfo('Selected ${widget.child} menu'));
     if (widget.closeOnActivate) {
-      _anchor?._root._menuController.closeChildren();
+      _anchor?._root._menuController.close();
     }
     // Delay the call to onPressed until post-frame so that the focus is
     // restored to what it was before the menu was opened before the action is
