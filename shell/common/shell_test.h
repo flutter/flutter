@@ -90,6 +90,11 @@ class ShellTest : public FixtureTest {
   void SendPlatformMessage(Shell* shell,
                            std::unique_ptr<PlatformMessage> message);
 
+  void SendSemanticsAction(Shell* shell,
+                           int32_t node_id,
+                           SemanticsAction action,
+                           fml::MallocMapping args);
+
   void SendEnginePlatformMessage(Shell* shell,
                                  std::unique_ptr<PlatformMessage> message);
 
