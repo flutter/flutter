@@ -33,8 +33,10 @@ void SurfaceTextureExternalTextureGLImpeller::ProcessFrame(
                  static_cast<int>(bounds.height())};
     desc.mip_count = 1;
     texture_ = std::make_shared<impeller::TextureGLES>(
-        impeller_context_->GetReactor(), desc,
-        impeller::TextureGLES::IsWrapped::kWrapped);
+        impeller_context_->GetReactor(), desc);
+    // The contents will be initialized later in the call to `Attach` instead of
+    // by Impeller.
+    texture_->MarkContentsInitialized();
     texture_->SetCoordinateSystem(
         impeller::TextureCoordinateSystem::kUploadFromHost);
     auto maybe_handle = texture_->GetGLHandle();

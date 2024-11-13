@@ -147,8 +147,7 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
   impeller::HandleGLES handle = context.GetReactor()->CreateHandle(
       impeller::HandleType::kTexture, texture->target);
   std::shared_ptr<impeller::TextureGLES> image =
-      std::make_shared<impeller::TextureGLES>(context.GetReactor(), desc,
-                                              handle);
+      impeller::TextureGLES::WrapTexture(context.GetReactor(), desc, handle);
 
   if (!image) {
     // In case Skia rejects the image, call the release proc so that

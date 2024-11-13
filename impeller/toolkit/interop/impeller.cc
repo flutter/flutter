@@ -528,13 +528,6 @@ ImpellerTexture ImpellerTextureCreateWithOpenGLTextureHandleNew(
   const auto& impeller_context_gl = ContextGLES::Cast(*impeller_context);
   const auto& reactor = impeller_context_gl.GetReactor();
 
-  auto wrapped_external_gl_handle =
-      reactor->CreateHandle(HandleType::kTexture, external_gl_handle);
-  if (wrapped_external_gl_handle.IsDead()) {
-    VALIDATION_LOG << "Could not wrap external handle.";
-    return nullptr;
-  }
-
   TextureDescriptor desc;
   desc.storage_mode = StorageMode::kDevicePrivate;
   desc.type = TextureType::kTexture2D;
@@ -543,9 +536,11 @@ ImpellerTexture ImpellerTextureCreateWithOpenGLTextureHandleNew(
   desc.mip_count = std::min(descriptor->mip_count, 1u);
   desc.usage = TextureUsage::kShaderRead;
   desc.compression_type = CompressionType::kLossless;
-  auto texture = std::make_shared<TextureGLES>(reactor,                    //
-                                               desc,                       //
-                                               wrapped_external_gl_handle  //
+
+  auto texture = TextureGLES::WrapTexture(
+      reactor,                                                         //
+      desc,                                                            //
+      reactor->CreateHandle(HandleType::kTexture, external_gl_handle)  //
   );
   if (!texture || !texture->IsValid()) {
     VALIDATION_LOG << "Could not wrap external texture.";
