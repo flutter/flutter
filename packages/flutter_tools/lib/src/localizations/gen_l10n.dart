@@ -165,7 +165,7 @@ String generateDateFormattingLogic(Message message) {
         );
       }
       if (placeholder.hasValidDateFormat) {
-        // 'format' can contain a number of date time formats separated by `dateFormatPartsDelimeter`.
+        // 'format' can contain a number of date time formats separated by `dateFormatPartsDelimiter`.
         // The first format is the main format, and the rest are added formats.
         final List<String> formatParts = placeholderFormat.split(dateFormatPartsDelimiter);
         final String mainFormat = formatParts.first;
