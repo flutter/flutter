@@ -670,9 +670,14 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        flutterProject.usesSwiftPackageManager = true;
+        iosProject.usesSwiftPackageManager = true;
+        macosProject.usesSwiftPackageManager = true;
 
-        await refreshPluginsList(flutterProject);
+        await refreshPluginsList(
+          flutterProject,
+          iosPlatform: true,
+          macOSPlatform: true,
+        );
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile
@@ -714,7 +719,8 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        flutterProject.usesSwiftPackageManager = true;
+        iosProject.usesSwiftPackageManager = true;
+        macosProject.usesSwiftPackageManager = true;
 
         await refreshPluginsList(flutterProject, forceCocoaPodsOnly: true);
 
@@ -725,6 +731,54 @@ dependencies:
 
         final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
           'ios': false,
+          'macos': false,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        SystemClock: () => systemClock,
+        FlutterVersion: () => flutterVersion,
+      });
+
+      testUsingContext(
+        '.flutter-plugins-dependencies can have different swift_package_manager_enabled values for iOS and macoS', () async {
+        createPlugin(
+          name: 'plugin-a',
+          platforms: const <String, _PluginPlatformInfo>{
+            // Native-only; should include native build.
+            'android': _PluginPlatformInfo(pluginClass: 'Foo', androidPackage: 'bar.foo'),
+            // Hybrid native and Dart; should include native build.
+            'ios': _PluginPlatformInfo(pluginClass: 'Foo', dartPluginClass: 'Bar', sharedDarwinSource: true),
+            // Web; should not have the native build key at all since it doesn't apply.
+            'web': _PluginPlatformInfo(pluginClass: 'Foo', fileName: 'lib/foo.dart'),
+            // Dart-only; should not include native build.
+            'windows': _PluginPlatformInfo(dartPluginClass: 'Foo'),
+          });
+        iosProject.testExists = true;
+
+        final DateTime dateCreated = DateTime(1970);
+        systemClock.currentTime = dateCreated;
+
+        iosProject.usesSwiftPackageManager = true;
+        macosProject.usesSwiftPackageManager = false;
+
+        await refreshPluginsList(
+          flutterProject,
+          iosPlatform: true,
+          macOSPlatform: true,
+        );
+
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
+        final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+            .readAsStringSync();
+        final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
+
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
+          'ios': true,
           'macos': false,
         };
         expect(
@@ -2105,9 +2159,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   bool isModule = false;
 
   @override
-  bool usesSwiftPackageManager = false;
-
-  @override
   late FlutterManifest manifest;
 
   @override
@@ -2151,6 +2202,9 @@ class FakeMacOSProject extends Fake implements MacOSProject {
   late File podManifestLock;
 
   @override
+  bool usesSwiftPackageManager = false;
+
+  @override
   late Directory managedDirectory;
 
   @override
@@ -2183,6 +2237,9 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   late File podManifestLock;
+
+  @override
+  bool usesSwiftPackageManager = false;
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {
