@@ -34,7 +34,7 @@ class DecoratedSliverClipExample extends StatefulWidget {
 
 class _DecoratedSliverClipExampleState extends State<DecoratedSliverClipExample> {
   double _height = 225.0;
-  bool isClipped = false;
+  bool _isClipped = false;
 
   @override
   Widget build(BuildContext context) {
