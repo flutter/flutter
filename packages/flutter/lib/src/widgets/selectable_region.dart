@@ -3157,6 +3157,13 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
 );
 
 /// The status of the selection under a [SelectableRegion].
+///
+/// This value can be accessed for a [SelectableRegion] by using
+/// [SelectableRegionScope.maybeOf].
+///
+/// This value under a [SelectableRegion] is updated frequently
+/// during selection gestures such as clicks and taps to select
+/// and keyboard shortcuts.
 enum SelectableRegionSelectionStatus {
   /// Indicates the selection under a [SelectableRegion] is changing.
   ///
