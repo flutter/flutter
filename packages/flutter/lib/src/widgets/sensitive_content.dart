@@ -6,10 +6,6 @@ import 'framework.dart';
 
 /// Specifies the sensitivity level that a [SensitiveContent] widget could
 /// set for the Flutter app screen on Android.
-// TODO(camsim99): Implement `autoSensitive` mode that will attempt to match
-// the behavior of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented
-// based on autofill hints.
-// TODO(camsim99): File issue for implementing `autoSensitive` mode.
 enum ContentSensitivity {
   /// The screen does not display sensitive content.
   /// 
@@ -21,91 +17,107 @@ enum ContentSensitivity {
   /// 
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
   sensitive,
+
+  // TODO(camsim99): docs.
+  // TODO(camsim99): Implement `autoSensitive` mode that will attempt to match
+  // the behavior of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented
+  // based on autofill hints.
+  autoSensitive,
 }
 
 /// Host of the current content sensitivity level.
-class SensitiveContentSetting extends InheritedWidget {
-  /// Creates a [SensitiveContentSetting].
-  const SensitiveContentSetting({
-    super.key,
-    required this.sensitivityLevel,
-    required super.child,
-});
+class SensitiveContentSetting {
+  late ContentSensitivity _currentSensitivityLevel;
 
-  /// The content sensitivity setting for the relevant Flutter view.
-  final ContentSensitivity sensitivityLevel;
-
-  /// Return content sensitivity setting of this [SensitiveContentSetting].
-  static ContentSensitivity of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<SensitiveContentSetting>()!.sensitivityLevel;
+  Map<ContentSensitivity, int> contentSensitivityCounts = <ContentSensitivity, int> {
+    ContentSensitivity.sensitive: 0,
+    ContentSensitivity.autoSensitive: 0,
+    ContentSensitivity.notSensitive, 0,
   }
 
-  @override
-  bool updateShouldNotify(SensitiveContentSetting oldWidget) {
-    return sensitivityLevel == oldWidget.sensitivityLevel;
-  }
-}
-
-/// A widget that sets the sensitivity of the Flutter app screen.
-/// 
-/// Currently this is a no-op on non-Android platforms.
-// NOTE(camsim99): This has to be inserted in the widget tree somewhere high up
-// for this to work as expected.
-class SensitiveContentZone extends StatefulWidget {
-  /// Creates a widget that sets the sensitivity of the Flutter app
-  /// screen.
-  ///
-  /// This widget does nothing on non-Android platforms.
-  const SensitiveContentZone({
-    super.key,
-    required this.child,
-  });
-
-  /// The child widget of this [SensitiveContentZone].
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
-
-  /// Finds ancestor [SensitiveContentZoneState] widget.
-  static SensitiveContentZoneState of(BuildContext context) {
-    return context.findAncestorStateOfType<SensitiveContentZoneState>()!;
+  int _getTotalSensitiveContentWidgets() {
+    int total = 0;
+    for (ContentSensitivity key in contentSensitivityCounts.keys) {
+      total += contentSensitivityCounts[key];
+    }
+    return total;
   }
 
-  @override
-  State<SensitiveContentZone> createState() => SensitiveContentZoneState();
-}
+  static void _register(ContentSensitivity desiredSensitivityLevel) {
+    _numSensitiveContentWidgets++;
+    contentSensitivityCounts[desiredSensitivityLevel]++;
 
-/// State of [SensitiveContentZone] widget.
-class SensitiveContentZoneState extends State<SensitiveContentZone> {
-  // TODO(camsim99): Figure out what to do here since *technically*
-  // autoSensitive is the default mode on Android.
-  ContentSensitivity _sensitivityLevel = ContentSensitivity.notSensitive;
+    if (_getTotalSensitiveContentWidgets() == 1) {
+      // There are no other attempts to alter ContentSensitivity, so
+      // set the desired level.
+      SensitiveContentUtils.setContentSensitivity(desiredSensitivityLevel);
+      return;
+    }
+    if (!shouldSetContentSensitivity(desiredSensitivityLevel)) {
+      return;
+    }
 
-  /// Makes call to native side to set content sensitivity.
-  void setSensitivityLevel(ContentSensitivity newSensitivityLevel) {
-    if (_sensitivityLevel != newSensitivityLevel) {
-      setState( () {
-        // Update state.
-        _sensitivityLevel = newSensitivityLevel;
+    // Update stored data.
+    SensitiveContentUtils.setContentSensitivity(desiredSensitivityLevel);
+    _currentSensitivityLevel = desiredSensitivityLevel;
+  }
 
-        // Make native call to update content sensitivity:
-        final ContentSensitivity currentNativeSensitivityLevel = SensitiveContentUtils.getCurrentSensitivityLevel();
-        if (currentNativeSensitivityLevel == newSensitivityLevel) {
+  static void _unregister(ContentSensitivity widgetSensitivityLevel) {
+    contentSensitivityCounts[widgetSensitivityLevel]--;
+
+    if (_getTotalSensitiveContentWidgets() == 0) {
+      // There is no more content to mark sensitive. Reset to the defualt mode.
+      // TODO(camsim99): Determine if we should set `autoSensitive`
+      // since this is technically the default, though it will not work for Flutter.
+      SensitiveContentUtils.setContentSensitivity(autoSensitive);
+      return;
+    }
+
+    if (widgetSensitivityLevel != _currentSensitivityLevel
+      || contentSensitivityCounts[widgetSensitivityLevel] > 0) {
+      // Either another SensitiveContent widget has set a more severe ContentSensitivity
+      // level or there are other widgets that have requested the same level.
+      return;
+    }
+
+    // TODO(camsim99): Ensure this switch works as expected.
+    ContentSensitivity sensitivityLevelToSet;
+    switch (widgetSensitivityLevel) {
+      case ContentSensitivity.sensitive:
+        if (contentSensitivityCounts[autoSensitive] > 0) {
+          sensitivityLevelToSet = autoSensitive;
           return;
         }
-
-        SensitiveContentUtils.setSensitivityLevel(newSensitivityLevel);
-      });
+      case ContentSensitivity.autoSensitive:
+        if (contentSensitivityCounts[notSensitive] > 0) {
+          sensitivityLevelToSet = notSensitive;
+          return;
+        }
     }
+
+    SensitiveContentUtils.setContentSensitivity(sensitivityLevelToSet!);
   }
 
-  @override
-  Widget build(BuildContext context) => SensitiveContentSetting(sensitivityLevel: _sensitivityLevel, child: widget.child);
+  /// A desired [ContentSensitivity] level should be set only if it is less
+  /// severe than any of the other registered [SensitiveContent] widgets.
+  // TODO(camsim99): Gather feedback on not caring if a widget is visible or not.
+  bool shouldSetContentSensitivity(ContentSensitivity desiredSensitivityLevel) {
+    if (desiredSensitivityLevel == _currentSensitivityLevel) return false;
+
+    switch(desiredSensitivityLevel) {
+      case ContentSensitivity.sensitive:
+        return true;
+      case ContentSensitivity.autoSensitive:
+        return _currentSensitivityLevel != ContentSensitivity.sensitive;
+      case ContentSensitivity.notSensitive:
+        return _currentSensitivityLevel == ContentSensitivity.notSensitive;
+    }
+  }
 }
 
 /// Widget to set content sensitivity level.
 // TODO(camsim99): Make compatible with multiview.
-class SensitiveContent extends StatelessWidget {
+class SensitiveContent extends StatefulWidget {
   /// Builds a [SensitiveContent].
   const SensitiveContent({
     super.key,
@@ -125,21 +137,25 @@ class SensitiveContent extends StatelessWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  void _setContentSensitvity(BuildContext context) {
-    final ContentSensitivity currentContentSensitivityLevel = SensitiveContentSetting.of(context);
-    if (currentContentSensitivityLevel == ContentSensitivity.sensitive) {
-      // At least one other widget requires that content still be obscured.
-      return;
-    }
+  @override
+  State<SensitiveContent> createState() => _SensitiveContentState();
+}
 
-    SensitiveContentZone.of(context).setSensitivityLevel(sensitivityLevel);
+class _SensitiveContentState extends State<SensitiveContent> {
+  @override
+  void initState() {
+    super.initState();
+    SensitiveContentSetting.register(sensitivityLevel);
+  }
+
+  @override
+  void dispose() {
+    SensitiveContentSetting.unregister(sensitivityLevel);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Make call to native to mark appropriate content sensitivity.
-    _setContentSensitvity(context);
-
     return child;
   }
 }
