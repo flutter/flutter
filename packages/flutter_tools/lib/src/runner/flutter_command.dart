@@ -1770,6 +1770,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         projectDir: project.directory,
         packageConfigPath: packageConfigPath(),
         generateDartPluginRegistry: true,
+        useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
       );
 
       await pub.get(
@@ -1790,7 +1791,10 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         // The preview device does not currently support any plugins.
         allowedPlugins = PreviewDevice.supportedPubPlugins;
       }
-      await project.regeneratePlatformSpecificTooling(allowedPlugins: allowedPlugins);
+      await project.regeneratePlatformSpecificTooling(
+        allowedPlugins: allowedPlugins,
+        useImplicitPubspecResolution: boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true),
+      );
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }

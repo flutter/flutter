@@ -29,7 +29,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
@@ -1129,7 +1128,7 @@ void main() {
     final FakeResidentRunner residentRunner = FakeResidentRunner();
     residentRunner.rpcError = RPCError(
       'flutter._listViews',
-      RPCErrorCodes.kServiceDisappeared,
+      RPCErrorKind.kServiceDisappeared.code,
       '',
     );
     final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
@@ -1142,7 +1141,7 @@ void main() {
 
     residentRunner.rpcError = RPCError(
       'flutter._listViews',
-      RPCErrorCodes.kServerError,
+      RPCErrorKind.kServerError.code,
       'Service connection disposed.',
     );
 
@@ -1158,7 +1157,7 @@ void main() {
 
   testUsingContext('Flutter run does not catch other RPC errors', () async {
     final FakeResidentRunner residentRunner = FakeResidentRunner();
-    residentRunner.rpcError = RPCError('flutter._listViews', RPCErrorCodes.kInvalidParams, '');
+    residentRunner.rpcError = RPCError('flutter._listViews', RPCErrorKind.kInvalidParams.code, '');
     final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
     command.fakeResidentRunner = residentRunner;
 
@@ -1584,14 +1583,14 @@ class DaemonCapturingRunCommand extends RunCommand {
   @override
   Daemon createMachineDaemon() {
     daemon = super.createMachineDaemon();
-    appDomain = daemon.appDomain = CapturingAppDomain(daemon);
+    appDomain = daemon.appDomain = CapturingAppDomain(daemon, useImplicitPubspecResolution: true);
     daemon.registerDomain(appDomain);
     return daemon;
   }
 }
 
 class CapturingAppDomain extends AppDomain {
-  CapturingAppDomain(super.daemon);
+  CapturingAppDomain(super.daemon, {required super.useImplicitPubspecResolution});
 
   String? userIdentifier;
   bool? enableDevTools;

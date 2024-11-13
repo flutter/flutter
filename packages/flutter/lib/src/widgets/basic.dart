@@ -302,7 +302,6 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///   colorBlendMode: BlendMode.modulate
 /// )
 /// ```
-///
 /// {@end-tool}
 ///
 /// Directly drawing an [Image] or [Color] with opacity is faster than using
@@ -509,9 +508,7 @@ class BackdropGroup extends InheritedWidget {
 /// [BlendMode.srcOver] which works well for most scenes. But that value may
 /// produce surprising results when a parent of the [BackdropFilter] uses a
 /// temporary buffer, or save layer, as does an [Opacity] widget. In that
-/// situation, a value of [BlendMode.src] can produce more pleasing results,
-/// but at the cost of incompatibility with some platforms, most notably the
-/// html renderer for web applications.
+/// situation, a value of [BlendMode.src] can produce more pleasing results.
 /// {@endtemplate}
 ///
 /// Multiple backdrop filters can be combined into a single rendering operation
@@ -559,6 +556,7 @@ class BackdropGroup extends InheritedWidget {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=dYRs7Q1vfYI}
 ///
 /// {@tool snippet}
+///
 /// If the [BackdropFilter] needs to be applied to an area that exactly matches
 /// its child, wraps the [BackdropFilter] with a clip widget that clips exactly
 /// to that child.
@@ -622,6 +620,7 @@ class BackdropGroup extends InheritedWidget {
 /// ```
 /// {@end-tool}
 /// {@tool snippet}
+///
 /// Instead consider the following approach which directly applies a blur
 /// to the child widget.
 ///
@@ -633,7 +632,6 @@ class BackdropGroup extends InheritedWidget {
 ///    );
 ///  }
 /// ```
-///
 /// {@end-tool}
 ///
 /// See also:
@@ -2132,6 +2130,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// the width of this widget will always be twice its child's width.
 ///
 /// {@tool snippet}
+///
 /// The [Align] widget in this example uses one of the defined constants from
 /// [Alignment], [Alignment.topRight]. This places the [FlutterLogo] in the top
 /// right corner of the parent blue [Container].
@@ -2163,6 +2162,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// each other.
 ///
 /// {@tool snippet}
+///
 /// The [Alignment] used in the following example defines two points:
 ///
 ///   * (0.2 * width of [FlutterLogo]/2 + width of [FlutterLogo]/2, 0.6 * height
@@ -2199,6 +2199,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// {@end-tool}
 ///
 /// {@tool snippet}
+///
 /// The [FractionalOffset] used in the following example defines two points:
 ///
 ///   * (0.2 * width of [FlutterLogo], 0.6 * height of [FlutterLogo]) = (12.0, 36.0)
@@ -2691,6 +2692,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// vertically:
 ///
 /// {@tool snippet}
+///
 /// In the following snippet, the [Card] is guaranteed to be at least as tall as
 /// its "natural" height. Unlike [UnconstrainedBox], it will become taller if
 /// its "natural" height is smaller than 40 px. If the [Container] isn't high
@@ -5355,10 +5357,10 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 
   /// The flex factor to use for this child.
   ///
-  /// If null or zero, the child is inflexible and determines its own size. If
-  /// non-zero, the amount of space the child can occupy in the main axis is
-  /// determined by dividing the free space (after placing the inflexible
-  /// children) according to the flex factors of the flexible children.
+  /// If zero, the child is inflexible and determines its own size. If non-zero,
+  /// the amount of space the child can occupy in the main axis is determined by
+  /// dividing the free space (after placing the inflexible children) according
+  /// to the flex factors of the flexible children.
   final int flex;
 
   /// How a flexible child is inscribed into the available space.
@@ -7540,6 +7542,7 @@ class Semantics extends SingleChildRenderObjectWidget {
 /// the user would not be able to be sure that they were related.
 ///
 /// {@tool snippet}
+///
 /// This snippet shows how to use [MergeSemantics] to merge the semantics of
 /// a [Checkbox] and [Text] widget.
 ///

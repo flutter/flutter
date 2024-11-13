@@ -10,6 +10,7 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
+import '../runner/flutter_command_runner.dart';
 import '../web/compile.dart';
 import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/web_constants.dart';
@@ -226,6 +227,7 @@ class BuildWebCommand extends BuildSubCommand {
       flutterVersion: globals.flutterVersion,
       usage: globals.flutterUsage,
       analytics: globals.analytics,
+      useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
     );
     await webBuilder.buildWeb(
       project,

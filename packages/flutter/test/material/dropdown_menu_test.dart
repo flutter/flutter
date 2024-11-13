@@ -14,6 +14,7 @@ void main() {
   const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
   final List<DropdownMenuEntry<TestMenu>> menuChildrenWithIcons = <DropdownMenuEntry<TestMenu>>[];
+  const double leadingIconToInputPadding = 4.0;
 
   for (final TestMenu value in TestMenu.values) {
     final DropdownMenuEntry<TestMenu> entry = DropdownMenuEntry<TestMenu>(value: value, label: value.label);
@@ -49,20 +50,35 @@ void main() {
     );
   }
 
+  Finder findMenuItemButton(String label) {
+    // For each menu items there are two MenuItemButton widgets.
+    // The last one is the real button item in the menu.
+    // The first one is not visible, it is part of _DropdownMenuBody
+    // which is used to compute the dropdown width.
+    return find.widgetWithText(MenuItemButton, label).last;
+  }
+
   Material getButtonMaterial(WidgetTester tester, String itemLabel) {
     return tester.widget<Material>(find.descendant(
-      of: find.widgetWithText(MenuItemButton, itemLabel).last,
+      of: findMenuItemButton(itemLabel),
       matching: find.byType(Material),
     ));
   }
 
   bool isItemHighlighted(WidgetTester tester, ThemeData themeData, String itemLabel) {
-    final Finder buttonMaterial = find.descendant(
-      of: find.widgetWithText(MenuItemButton, itemLabel).last,
-      matching: find.byType(Material),
-    );
-    final Color? color = tester.widget<Material>(buttonMaterial).color;
+    final Color? color = getButtonMaterial(tester, itemLabel).color;
     return color == themeData.colorScheme.onSurface.withOpacity(0.12);
+  }
+
+  Finder findMenuPanel() {
+    return find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MenuPanel');
+  }
+
+  Finder findMenuMaterial() {
+    return find.descendant(
+      of: findMenuPanel(),
+      matching: find.byType(Material),
+    ).first;
   }
 
   testWidgets('DropdownMenu defaults', (WidgetTester tester) async {
@@ -88,23 +104,14 @@ void main() {
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    final Finder menuMaterial = find.ancestor(
-      of: find.widgetWithText(TextButton, TestMenu.mainMenu0.label),
-      matching: find.byType(Material),
-    ).at(1);
-    Material material = tester.widget<Material>(menuMaterial);
+    Material material = tester.widget<Material>(findMenuMaterial());
     expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
     expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
-    final Finder buttonMaterial = find.descendant(
-      of: find.byType(TextButton),
-      matching: find.byType(Material),
-    ).last;
-
-    material = tester.widget<Material>(buttonMaterial);
+    material = getButtonMaterial(tester, TestMenu.mainMenu0.label);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
@@ -170,7 +177,7 @@ void main() {
 
     RenderObject overlayPainter(WidgetTester tester, TestMenu menuItem) {
       return tester.renderObject(find.descendant(
-        of: find.widgetWithText(MenuItemButton, menuItem.label).last,
+        of: findMenuItemButton(menuItem.label),
         matching: find.byElementPredicate(
           (Element element) => element.renderObject.runtimeType.toString() == '_RenderInkFeatures',
         ),
@@ -212,7 +219,7 @@ void main() {
         return gesture.removePointer();
       });
       await gesture.addPointer();
-      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, selectedItem.label).last));
+      await gesture.moveTo(tester.getCenter(findMenuItemButton(selectedItem.label)));
       await tester.pump();
 
       expect(
@@ -221,7 +228,7 @@ void main() {
       );
 
       // Hover a non-selected item.
-      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, nonSelectedItem.label).last));
+      await gesture.moveTo(tester.getCenter(findMenuItemButton(nonSelectedItem.label)));
       await tester.pump();
 
       expect(
@@ -264,7 +271,7 @@ void main() {
         return gesture.removePointer();
       });
       await gesture.addPointer();
-      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, selectedItem.label).last));
+      await gesture.moveTo(tester.getCenter(findMenuItemButton(selectedItem.label)));
       await tester.pump();
 
       expect(
@@ -273,7 +280,7 @@ void main() {
       );
 
       // Hover a non-selected item.
-      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, nonSelectedItem.label).last));
+      await gesture.moveTo(tester.getCenter(findMenuItemButton(nonSelectedItem.label)));
       await tester.pump();
 
       expect(
@@ -315,7 +322,7 @@ void main() {
         return gesture.removePointer();
       });
       await gesture.addPointer();
-      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, selectedItem.label).last));
+      await gesture.moveTo(tester.getCenter(findMenuItemButton(selectedItem.label)));
       await tester.pump();
 
       expect(
@@ -324,7 +331,7 @@ void main() {
       );
 
       // Hover a non-selected item.
-      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, nonSelectedItem.label).last));
+      await gesture.moveTo(tester.getCenter(findMenuItemButton(nonSelectedItem.label)));
       await tester.pump();
 
       expect(
@@ -375,7 +382,7 @@ void main() {
         return gesture.removePointer();
       });
       await gesture.addPointer();
-      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, selectedItem.label).last));
+      await gesture.moveTo(tester.getCenter(findMenuItemButton(selectedItem.label)));
       await tester.pump();
 
       expect(
@@ -384,7 +391,7 @@ void main() {
       );
 
       // Hover a non-selected item.
-      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, nonSelectedItem.label).last));
+      await gesture.moveTo(tester.getCenter(findMenuItemButton(nonSelectedItem.label)));
       await tester.pump();
 
       expect(
@@ -444,7 +451,7 @@ void main() {
         return gesture.removePointer();
       });
       await gesture.addPointer();
-      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, selectedItem.label).last));
+      await gesture.moveTo(tester.getCenter(findMenuItemButton(selectedItem.label)));
       await tester.pump();
 
       expect(
@@ -453,7 +460,7 @@ void main() {
       );
 
       // Hover a non-selected item.
-      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, nonSelectedItem.label).last));
+      await gesture.moveTo(tester.getCenter(findMenuItemButton(nonSelectedItem.label)));
       await tester.pump();
 
       expect(
@@ -565,7 +572,7 @@ void main() {
 
   testWidgets('Material3 - The width of the text field should always be the same as the menu view',
     (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(useMaterial3: true);
+    final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -629,7 +636,7 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<ShortMenu>));
     await tester.pump();
     expect(find.byType(MenuItemButton), findsNWidgets(6));
-    Size buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').last);
+    Size buttonSize = tester.getSize(findMenuItemButton('I0'));
     expect(buttonSize.width, customBigWidth);
 
     // reset test
@@ -642,7 +649,7 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<ShortMenu>));
     await tester.pump();
     expect(find.byType(MenuItemButton), findsNWidgets(6));
-    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').last);
+    buttonSize = tester.getSize(findMenuItemButton('I0'));
     expect(buttonSize.width, customSmallWidth);
   });
 
@@ -698,7 +705,7 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
-    Size buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').hitTestable());
+    Size buttonSize = tester.getSize(findMenuItemButton('I0'));
     expect(buttonSize.width, 136.0);
 
     // If expandedInsets is EdgeInsets.zero, the width should be the same as its parent.
@@ -710,7 +717,7 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
-    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+    buttonSize = tester.getSize(findMenuItemButton('I0'));
     expect(buttonSize.width, parentWidth);
 
     // If expandedInsets is not zero, the width of the text field should be adjusted
@@ -727,7 +734,7 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
-    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+    buttonSize = tester.getSize(findMenuItemButton('I0'));
     expect(buttonSize.width, parentWidth - 35.0 - 20.0);
   });
 
@@ -762,7 +769,7 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
-    Size buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').hitTestable());
+    Size buttonSize = tester.getSize(findMenuItemButton('I0'));
     expect(buttonSize.width, 136.0);
 
     // If expandedInsets is not zero, the width of the text field should be adjusted
@@ -779,7 +786,7 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
-    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+    buttonSize = tester.getSize(findMenuItemButton('I0'));
     expect(buttonSize.width, parentWidth - 35.0 - 20.0);
 
     // Regression test for https://github.com/flutter/flutter/issues/151769.
@@ -797,7 +804,7 @@ void main() {
 
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
-    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+    buttonSize = tester.getSize(findMenuItemButton('I0'));
     expect(buttonSize.width, parentWidth - 35.0 - 20.0);
   });
 
@@ -809,10 +816,10 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
 
-    final Element firstItem = tester.element(find.widgetWithText(MenuItemButton, 'Item 0').last);
+    final Element firstItem = tester.element(findMenuItemButton('Item 0'));
     final RenderBox firstBox = firstItem.renderObject! as RenderBox;
     final Offset topLeft = firstBox.localToGlobal(firstBox.size.topLeft(Offset.zero));
-    final Element lastItem = tester.element(find.widgetWithText(MenuItemButton, 'Item 5').last);
+    final Element lastItem = tester.element(findMenuItemButton('Item 5'));
     final RenderBox lastBox = lastItem.renderObject! as RenderBox;
     final Offset bottomRight = lastBox.localToGlobal(lastBox.size.bottomRight(Offset.zero));
     // height = height of MenuItemButton * 6 = 48 * 6
@@ -844,16 +851,16 @@ void main() {
 
   testWidgets('Material3 - The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {
-  final ThemeData themeData = ThemeData(useMaterial3: true);
+  final ThemeData themeData = ThemeData();
   await tester.pumpWidget(buildTest(themeData, menuChildren));
 
   await tester.tap(find.byType(DropdownMenu<TestMenu>));
   await tester.pumpAndSettle();
 
-  final Element firstItem = tester.element(find.widgetWithText(MenuItemButton, 'Item 0').last);
+  final Element firstItem = tester.element(findMenuItemButton('Item 0'));
   final RenderBox firstBox = firstItem.renderObject! as RenderBox;
   final Offset topLeft = firstBox.localToGlobal(firstBox.size.topLeft(Offset.zero));
-  final Element lastItem = tester.element(find.widgetWithText(MenuItemButton, 'Item 5').last);
+  final Element lastItem = tester.element(findMenuItemButton('Item 5'));
   final RenderBox lastBox = lastItem.renderObject! as RenderBox;
   final Offset bottomRight = lastBox.localToGlobal(lastBox.size.bottomRight(Offset.zero));
   // height = height of MenuItemButton * 6 = 48 * 6
@@ -919,7 +926,7 @@ void main() {
     final Offset updatedItemTextTopLeft = tester.getTopLeft(updatedItemText);
 
     expect(updatedLabelTopLeft.dx, equals(updatedItemTextTopLeft.dx));
-    expect(updatedLabelTopLeft.dx, equals(iconWidth));
+    expect(updatedLabelTopLeft.dx, equals(iconWidth + leadingIconToInputPadding));
 
     // Test when then leading icon is a widget with a bigger size.
     await tester.pumpWidget(Container());
@@ -941,7 +948,7 @@ void main() {
     final Offset updatedItemTextTopLeft1 = tester.getTopLeft(updatedItemText1);
 
     expect(updatedLabelTopLeft1.dx, equals(updatedItemTextTopLeft1.dx));
-    expect(updatedLabelTopLeft1.dx, equals(largeIconWidth));
+    expect(updatedLabelTopLeft1.dx, equals(largeIconWidth + leadingIconToInputPadding));
   });
 
   testWidgets('The text in the menu button should be aligned with the text of '
@@ -1000,7 +1007,7 @@ void main() {
     final Offset updatedItemTextTopRight = tester.getTopRight(updatedItemText);
 
     expect(updatedLabelTopRight.dx, equals(updatedItemTextTopRight.dx));
-    expect(updatedLabelTopRight.dx, equals(dropdownMenuTopRight.dx - iconWidth));
+    expect(updatedLabelTopRight.dx, equals(dropdownMenuTopRight.dx - iconWidth - leadingIconToInputPadding));
 
     // Test when then leading icon is a widget with a bigger size.
     await tester.pumpWidget(Container());
@@ -1031,7 +1038,7 @@ void main() {
     final Offset updatedItemTextTopRight1 = tester.getTopRight(updatedItemText1);
 
     expect(updatedLabelTopRight1.dx, equals(updatedItemTextTopRight1.dx));
-    expect(updatedLabelTopRight1.dx, equals(updatedDropdownMenuTopRight.dx - largeIconWidth));
+    expect(updatedLabelTopRight1.dx, equals(updatedDropdownMenuTopRight.dx - largeIconWidth - leadingIconToInputPadding));
   });
 
   testWidgets('DropdownMenu has default trailing icon button', (WidgetTester tester) async {
@@ -1046,14 +1053,14 @@ void main() {
     await tester.pump();
 
     final Finder menuMaterial = find.ancestor(
-      of: find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label),
+      of: findMenuItemButton(TestMenu.mainMenu0.label),
       matching: find.byType(Material),
     ).last;
     expect(menuMaterial, findsOneWidget);
   });
 
-  testWidgets('Leading IconButton status test', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(useMaterial3: true);
+  testWidgets('Trailing IconButton status test', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
     await tester.pumpWidget(buildTest(themeData, menuChildren, width: 100.0, menuHeight: 100.0));
     await tester.pump();
 
@@ -1103,11 +1110,7 @@ void main() {
     await tester.tap(iconButton);
     await tester.pump();
 
-    final Finder menuMaterial = find.ancestor(
-      of: find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label),
-      matching: find.byType(Material),
-    );
-    expect(menuMaterial, findsNWidgets(3));
+    expect(findMenuItemButton(TestMenu.mainMenu0.label), findsOne);
 
     // didChangeMetrics
     tester.view.physicalSize = const Size(700.0, 700.0);
@@ -1136,7 +1139,7 @@ void main() {
     await tester.pump();
 
     final Finder menuMaterial = find.ancestor(
-      of: find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label),
+      of: findMenuItemButton(TestMenu.mainMenu0.label),
       matching: find.byType(Material),
     ).last;
     expect(menuMaterial, findsOneWidget);
@@ -1777,18 +1780,18 @@ void main() {
     expect(controller.text, 'item');
     await tester.pumpAndSettle();
     for (final TestMenu menu in TestMenu.values) {
-      expect(find.widgetWithText(MenuItemButton, menu.label).hitTestable(), findsNothing);
+      expect(findMenuItemButton(menu.label).hitTestable(), findsNothing);
     }
 
     await tester.enterText(find.byType(TextField).first, 'Item');
     expect(controller.text, 'Item');
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(MenuItemButton, 'Item 0').hitTestable(), findsOneWidget);
-    expect(find.widgetWithText(MenuItemButton, 'Menu 1').hitTestable(), findsNothing);
-    expect(find.widgetWithText(MenuItemButton, 'Item 2').hitTestable(), findsOneWidget);
-    expect(find.widgetWithText(MenuItemButton, 'Item 3').hitTestable(), findsOneWidget);
-    expect(find.widgetWithText(MenuItemButton, 'Item 4').hitTestable(), findsOneWidget);
-    expect(find.widgetWithText(MenuItemButton, 'Item 5').hitTestable(), findsOneWidget);
+    expect(findMenuItemButton('Item 0').hitTestable(), findsOneWidget);
+    expect(findMenuItemButton('Menu 1').hitTestable(), findsNothing);
+    expect(findMenuItemButton('Item 2').hitTestable(), findsOneWidget);
+    expect(findMenuItemButton('Item 3').hitTestable(), findsOneWidget);
+    expect(findMenuItemButton('Item 4').hitTestable(), findsOneWidget);
+    expect(findMenuItemButton('Item 5').hitTestable(), findsOneWidget);
   });
 
   testWidgets('Throw assertion error when enable filtering with custom filter callback and enableFilter set on False', (WidgetTester tester) async {
@@ -1837,7 +1840,7 @@ void main() {
     // Open the menu
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
-    final Finder item3 = find.widgetWithText(MenuItemButton, 'Item 3').last;
+    final Finder item3 = findMenuItemButton('Item 3');
     await tester.tap(item3);
     await tester.pumpAndSettle();
 
@@ -1932,14 +1935,14 @@ void main() {
     }
 
     // Disabled item doesn't trigger onSelected callback.
-    final Finder item1 = find.widgetWithText(MenuItemButton, 'Item 1').last;
+    final Finder item1 = findMenuItemButton('Item 1');
     await tester.tap(item1);
     await tester.pumpAndSettle();
 
     expect(controller.text, isMobile ? '' : 'Item 0');
     expect(selectionCount, expectedCount);
 
-    final Finder item2 = find.widgetWithText(MenuItemButton, 'Item 2').last;
+    final Finder item2 = findMenuItemButton('Item 2');
     await tester.tap(item2);
     await tester.pumpAndSettle();
 
@@ -1948,7 +1951,7 @@ void main() {
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
-    final Finder item3 = find.widgetWithText(MenuItemButton, 'Item 3').last;
+    final Finder item3 = findMenuItemButton('Item 3');
     await tester.tap(item3);
     await tester.pumpAndSettle();
 
@@ -2113,7 +2116,7 @@ void main() {
       await tester.pump();
 
       // Select another item.
-      final Finder item2 = find.widgetWithText(MenuItemButton, 'Item 2').last;
+      final Finder item2 = findMenuItemButton('Item 2');
       await tester.tap(item2);
       await tester.pumpAndSettle();
       expect(controller.text, TestMenu.mainMenu2.label);
@@ -2207,9 +2210,9 @@ void main() {
     await tester.tap(textFieldFinder);
     await tester.pump();
     // Make a selection.
-    await tester.tap(find.widgetWithText(MenuItemButton, 'Item 0').last);
+    await tester.tap(findMenuItemButton('Item 0'));
     await tester.pump();
-    expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
+    expect(findMenuItemButton('Item 0'), findsOneWidget);
 
     // Set requestFocusOnTap to false.
     await tester.pumpWidget(Container());
@@ -2223,7 +2226,7 @@ void main() {
     await tester.tap(textFieldFinder1);
     await tester.pump();
     // Make a selection.
-    await tester.tap(find.widgetWithText(MenuItemButton, 'Item 0').last);
+    await tester.tap(findMenuItemButton('Item 0'));
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
   }, variant: TargetPlatformVariant.all());
@@ -2403,7 +2406,7 @@ void main() {
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(MenuItemButton, 'Item 3').last);
+    await tester.tap(findMenuItemButton('Item 3'));
     await tester.pumpAndSettle();
     expect(selectedValue?.label, 'Item 3');
     expect(node.label, '');
@@ -2554,7 +2557,6 @@ void main() {
       decoration: TextDecoration.underline,
     );
     final ThemeData themeData = ThemeData(
-      useMaterial3: true,
       textTheme: const TextTheme(
         bodyLarge: inputTextThemeStyle,
         labelLarge: menuItemTextThemeStyle,
@@ -2573,13 +2575,8 @@ void main() {
     await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
     await tester.pump();
 
-    final Finder buttonMaterial = find.descendant(
-      of: find.byType(TextButton),
-      matching: find.byType(Material),
-    ).last;
-
     // Test menu item text style uses the TextTheme.labelLarge.
-    final Material material = tester.widget<Material>(buttonMaterial);
+    final Material material = getButtonMaterial(tester, TestMenu.mainMenu0.label);
     expect(material.textStyle?.fontSize, menuItemTextThemeStyle.fontSize);
     expect(material.textStyle?.fontStyle, menuItemTextThemeStyle.fontStyle);
     expect(material.textStyle?.wordSpacing, menuItemTextThemeStyle.wordSpacing);
@@ -2616,7 +2613,7 @@ void main() {
     Finder findMenuItemText(String label) {
       final String labelText = '$label $longText';
       return find.descendant(
-        of: find.widgetWithText(MenuItemButton, labelText),
+        of: findMenuItemButton(labelText),
         matching: find.byType(Text),
       ).last;
     }
@@ -2660,7 +2657,7 @@ void main() {
     Finder findMenuItemText(String label) {
       final String labelText = '$label $longText';
       return find.descendant(
-        of: find.widgetWithText(MenuItemButton, labelText),
+        of: findMenuItemButton(labelText),
         matching: find.byType(Text),
       ).last;
     }
@@ -2720,14 +2717,14 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check text location in text field.
-    expect(tester.getTopLeft(find.text('Hint')).dx, 48.0);
+    expect(tester.getTopLeft(find.text('Hint')).dx, 52.0);
 
     // By default, the text of item 0 should be aligned with the text of the text field.
-    expect(tester.getTopLeft(find.text('Item 0').last).dx, 48.0);
+    expect(tester.getTopLeft(find.text('Item 0').last).dx, 52.0);
 
     // By default, the text of item 1 should be aligned with the text of the text field,
     // so there are some extra padding before "Item 1".
-    expect(tester.getTopLeft(find.text('Item 1').last).dx, 48.0);
+    expect(tester.getTopLeft(find.text('Item 1').last).dx, 52.0);
   });
 
   testWidgets('DropdownMenu can have customized search algorithm', (WidgetTester tester) async {
@@ -2752,7 +2749,7 @@ void main() {
     void checkExpectedHighlight({String? searchResult, required List<String> otherItems}) {
       if (searchResult != null) {
         final Finder material = find.descendant(
-          of: find.widgetWithText(MenuItemButton, searchResult).last,
+          of: findMenuItemButton(searchResult),
           matching: find.byType(Material),
         );
         final Material itemMaterial = tester.widget<Material>(material);
@@ -2761,7 +2758,7 @@ void main() {
 
       for (final String nonHighlight in otherItems) {
         final Finder material = find.descendant(
-          of: find.widgetWithText(MenuItemButton, nonHighlight).last,
+          of: findMenuItemButton(nonHighlight),
           matching: find.byType(Material),
         );
         final Material itemMaterial = tester.widget<Material>(material);
@@ -2852,7 +2849,7 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
 
-    final Finder item1 = find.widgetWithText(MenuItemButton, 'Item 0').last;
+    final Finder item1 = findMenuItemButton('Item 0');
     await tester.tap(item1);
     await tester.pumpAndSettle();
 
@@ -2903,7 +2900,7 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
 
-    final Finder item1 = find.widgetWithText(MenuItemButton, 'Item 0').last;
+    final Finder item1 = findMenuItemButton('Item 0');
     await tester.tap(item1);
     await tester.pumpAndSettle();
 
@@ -3283,7 +3280,7 @@ void main() {
     }
 
     // Selecting an item would disable filter again.
-    await tester.tap(find.widgetWithText(MenuItemButton, 'Menu 1').last);
+    await tester.tap(findMenuItemButton('Menu 1'));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
@@ -3486,7 +3483,7 @@ void main() {
     expect(dropdownMenuAnchor.controller!.isOpen, true);
 
     // Tap the dropdown menu item.
-    await tester.tap(find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label).last);
+    await tester.tap(findMenuItemButton(TestMenu.mainMenu0.label));
     await tester.pumpAndSettle();
     // All menus should be closed.
     expect(find.byType(DropdownMenu<TestMenu>), findsNothing);
@@ -3507,7 +3504,7 @@ void main() {
     expect(dropdownMenuAnchor.controller!.isOpen, true);
 
     // Tap the menu item to open the dropdown menu.
-    await tester.tap(find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label).last);
+    await tester.tap(findMenuItemButton(TestMenu.mainMenu0.label));
     await tester.pumpAndSettle();
     // Only the dropdown menu should be closed.
     expect(dropdownMenuAnchor.controller!.isOpen, false);
@@ -3527,7 +3524,7 @@ void main() {
     expect(dropdownMenuAnchor.controller!.isOpen, true);
 
     // Tap the dropdown menu item.
-    await tester.tap(find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label).last);
+    await tester.tap(findMenuItemButton(TestMenu.mainMenu0.label));
     await tester.pumpAndSettle();
     // None of the menus should be closed.
     expect(dropdownMenuAnchor.controller!.isOpen, true);

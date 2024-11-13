@@ -310,19 +310,4 @@ class SampleChecker {
 // See https://github.com/flutter/flutter/issues/130459
 final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/color_scheme/dynamic_content_color.0_test.dart',
-  'examples/api/test/widgets/scroll_position/scroll_metrics_notification.0_test.dart',
-  'examples/api/test/widgets/media_query/media_query_data.system_gesture_insets.0_test.dart',
-  'examples/api/test/widgets/image/image.frame_builder.0_test.dart',
-  'examples/api/test/widgets/image/image.loading_builder.0_test.dart',
-  'examples/api/test/widgets/scrollbar/raw_scrollbar.1_test.dart',
-  'examples/api/test/widgets/scrollbar/raw_scrollbar.2_test.dart',
-  'examples/api/test/widgets/scrollbar/raw_scrollbar.desktop.0_test.dart',
-  'examples/api/test/widgets/scrollbar/raw_scrollbar.shape.0_test.dart',
-  'examples/api/test/widgets/scrollbar/raw_scrollbar.0_test.dart',
-  'examples/api/test/widgets/interactive_viewer/interactive_viewer.constrained.0_test.dart',
-  'examples/api/test/widgets/interactive_viewer/interactive_viewer.transformation_controller.0_test.dart',
-  'examples/api/test/widgets/interactive_viewer/interactive_viewer.0_test.dart',
-  'examples/api/test/widgets/notification_listener/notification.0_test.dart',
-  'examples/api/test/widgets/overscroll_indicator/glowing_overscroll_indicator.1_test.dart',
-  'examples/api/test/widgets/overscroll_indicator/glowing_overscroll_indicator.0_test.dart',
 };

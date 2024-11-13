@@ -140,6 +140,13 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
+  const FakeCommand dartPubDepsCommand = FakeCommand(command: <String>[
+    'dart',
+    'pub',
+    'deps',
+    '--json',
+  ]);
+
   FakeCommand setUpXCResultCommand({String stdout = '', void Function(List<String> command)? onRun}) {
     return FakeCommand(
       command: const <String>[
@@ -398,6 +405,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
     ]);
@@ -429,6 +437,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -475,6 +484,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -521,6 +531,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -566,6 +577,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
     ]);
@@ -595,6 +607,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -640,6 +653,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
     ]);
@@ -668,6 +682,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: exportOptions.path),
     ]);
@@ -707,6 +722,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       const FakeCommand(
         command: <String>[
@@ -762,6 +778,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(
         exportOptionsPlist: _exportOptionsPlist,
@@ -796,6 +813,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -848,6 +866,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -900,6 +919,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
@@ -951,6 +971,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(verbose: true),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
     ]);
@@ -980,6 +1001,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
     ]);
@@ -1008,6 +1030,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       const FakeCommand(
         command: <String>[
           'xcrun',
@@ -1060,6 +1083,7 @@ void main() {
     );
     createMinimalMockProjectFiles();
 
+    fakeProcessManager.addCommand(dartPubDepsCommand);
     fakeProcessManager.addCommand(setUpFakeXcodeBuildHandler());
     await expectToolExitLater(
       createTestCommandRunner(command).run(
@@ -1091,6 +1115,7 @@ void main() {
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
@@ -1146,6 +1171,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(),
     ]);
@@ -1183,6 +1209,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
@@ -1217,6 +1244,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
@@ -1252,6 +1280,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
@@ -1289,6 +1318,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1),
     ]);
     createMinimalMockProjectFiles();
@@ -1321,6 +1351,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
@@ -1353,6 +1384,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
@@ -1406,6 +1438,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
@@ -1465,6 +1498,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
@@ -1524,6 +1558,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
@@ -1567,6 +1602,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
@@ -1613,6 +1649,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateIconContentsJsonPath)
         ..createSync(recursive: true)
@@ -1695,6 +1732,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateIconContentsJsonPath)
           ..createSync(recursive: true)
@@ -1775,6 +1813,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
@@ -1837,6 +1876,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
@@ -1900,6 +1940,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
@@ -1962,6 +2003,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         // Uses unknown format version 123.
         fileSystem.file(projectIconContentsJsonPath)
@@ -2034,6 +2076,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         // The following json contains examples of:
         // - invalid size
@@ -2139,6 +2182,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateLaunchImageContentsJsonPath)
           ..createSync(recursive: true)
@@ -2220,6 +2264,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
+      dartPubDepsCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateLaunchImageContentsJsonPath)
           ..createSync(recursive: true)
