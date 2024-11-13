@@ -26,7 +26,7 @@ void main() {
   // Normally these tests should take about a minute, but sometimes for
   // unknown reasons they can take 30m+ and timeout. The intent behind this loop
   // is to get more information on what exactly is happening.
-  for (int i = 0; i < 10; i++) {
+  for (int i = 1; i <= 10; i++) {
     test('flutter build apk | attempt $i of 10', () async {
       final String package = 'flutter_build_apk_test_$i';
 
@@ -60,7 +60,7 @@ void main() {
         workingDirectory: tmpDir.childDirectory(package).path,
         mode: io.ProcessStartMode.inheritStdio,
       );
-      await expectLater(process.exitCode, completion(1));
+      await expectLater(process.exitCode, completion(0));
     });
   }
 }
