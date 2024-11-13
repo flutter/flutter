@@ -18,7 +18,9 @@ enum ContentSensitivity {
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
   sensitive,
 
-  // TODO(camsim99): docs.
+  /// 
+  /// 
+  /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO.
   // TODO(camsim99): Implement `autoSensitive` mode that will attempt to match
   // the behavior of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented
   // based on autofill hints.
@@ -27,25 +29,35 @@ enum ContentSensitivity {
 
 /// Host of the current content sensitivity level.
 class SensitiveContentSetting {
+  SensitiveContentSetting._();
+
   late ContentSensitivity _currentSensitivityLevel;
 
-  Map<ContentSensitivity, int> contentSensitivityCounts = <ContentSensitivity, int> {
+  final Map<ContentSensitivity, int> _contentSensitivityCounts = <ContentSensitivity, int> {
     ContentSensitivity.sensitive: 0,
     ContentSensitivity.autoSensitive: 0,
-    ContentSensitivity.notSensitive, 0,
-  }
+    ContentSensitivity.notSensitive: 0,
+  };
+
+  static final SensitiveContentSetting _instance = SensitiveContentSetting._();
 
   int _getTotalSensitiveContentWidgets() {
     int total = 0;
-    for (ContentSensitivity key in contentSensitivityCounts.keys) {
-      total += contentSensitivityCounts[key];
+    for (final ContentSensitivity key in _contentSensitivityCounts.keys) {
+      total += _contentSensitivityCounts[key]!;
     }
     return total;
   }
 
-  static void _register(ContentSensitivity desiredSensitivityLevel) {
-    _numSensitiveContentWidgets++;
-    contentSensitivityCounts[desiredSensitivityLevel]++;
+
+  /// Registers [SensitiveContent] widget who calls it to the overarching
+  /// [ContentSensitivity] setting.
+  static void register(ContentSensitivity desiredSensitivityLevel) {
+     _instance._register(desiredSensitivityLevel);
+  }
+
+  void _register(ContentSensitivity desiredSensitivityLevel) {
+    _contentSensitivityCounts[desiredSensitivityLevel] = _contentSensitivityCounts[desiredSensitivityLevel]! + 1;
 
     if (_getTotalSensitiveContentWidgets() == 1) {
       // There are no other attempts to alter ContentSensitivity, so
@@ -62,37 +74,45 @@ class SensitiveContentSetting {
     _currentSensitivityLevel = desiredSensitivityLevel;
   }
 
-  static void _unregister(ContentSensitivity widgetSensitivityLevel) {
-    contentSensitivityCounts[widgetSensitivityLevel]--;
+  /// Unregisters [SensitiveContent] widget who calls it from the overarching
+  /// [ContentSensitivity] setting.
+  static void unregister(ContentSensitivity widgetSensitivityLevel) {
+     _instance._unregister(widgetSensitivityLevel);
+  }
+
+  void _unregister(ContentSensitivity widgetSensitivityLevel) {
+     _contentSensitivityCounts[widgetSensitivityLevel] = _contentSensitivityCounts[widgetSensitivityLevel]! - 1;
 
     if (_getTotalSensitiveContentWidgets() == 0) {
       // There is no more content to mark sensitive. Reset to the defualt mode.
       // TODO(camsim99): Determine if we should set `autoSensitive`
       // since this is technically the default, though it will not work for Flutter.
-      SensitiveContentUtils.setContentSensitivity(autoSensitive);
+      SensitiveContentUtils.setContentSensitivity(ContentSensitivity.autoSensitive);
       return;
     }
 
     if (widgetSensitivityLevel != _currentSensitivityLevel
-      || contentSensitivityCounts[widgetSensitivityLevel] > 0) {
+      || _contentSensitivityCounts[widgetSensitivityLevel]! > 0) {
       // Either another SensitiveContent widget has set a more severe ContentSensitivity
       // level or there are other widgets that have requested the same level.
       return;
     }
 
     // TODO(camsim99): Ensure this switch works as expected.
-    ContentSensitivity sensitivityLevelToSet;
+    ContentSensitivity? sensitivityLevelToSet;
     switch (widgetSensitivityLevel) {
       case ContentSensitivity.sensitive:
-        if (contentSensitivityCounts[autoSensitive] > 0) {
-          sensitivityLevelToSet = autoSensitive;
+        if (_contentSensitivityCounts[ContentSensitivity.autoSensitive]! > 0) {
+          sensitivityLevelToSet = ContentSensitivity.autoSensitive;
           return;
         }
       case ContentSensitivity.autoSensitive:
-        if (contentSensitivityCounts[notSensitive] > 0) {
-          sensitivityLevelToSet = notSensitive;
+        if (_contentSensitivityCounts[ContentSensitivity.notSensitive]! > 0) {
+          sensitivityLevelToSet = ContentSensitivity.notSensitive;
           return;
         }
+      case ContentSensitivity.notSensitive:
+        throw StateError('The SensitiveContentSetting has gone out of sync with the SensitiveContent widgets in the tree.');
     }
 
     SensitiveContentUtils.setContentSensitivity(sensitivityLevelToSet!);
@@ -102,7 +122,9 @@ class SensitiveContentSetting {
   /// severe than any of the other registered [SensitiveContent] widgets.
   // TODO(camsim99): Gather feedback on not caring if a widget is visible or not.
   bool shouldSetContentSensitivity(ContentSensitivity desiredSensitivityLevel) {
-    if (desiredSensitivityLevel == _currentSensitivityLevel) return false;
+    if (desiredSensitivityLevel == _currentSensitivityLevel) {
+      return false;
+    }
 
     switch(desiredSensitivityLevel) {
       case ContentSensitivity.sensitive:
@@ -145,17 +167,17 @@ class _SensitiveContentState extends State<SensitiveContent> {
   @override
   void initState() {
     super.initState();
-    SensitiveContentSetting.register(sensitivityLevel);
+    SensitiveContentSetting.register(widget.sensitivityLevel);
   }
 
   @override
   void dispose() {
-    SensitiveContentSetting.unregister(sensitivityLevel);
+    SensitiveContentSetting.unregister(widget.sensitivityLevel);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return child;
+    return widget.child;
   }
 }
