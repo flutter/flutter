@@ -34,8 +34,8 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(
   color0_tex.storage_mode = StorageMode::kDevicePrivate;
 
   ColorAttachment color0;
-  color0.texture = std::make_shared<TextureGLES>(
-      gl_context.GetReactor(), color0_tex, TextureGLES::IsWrapped::kWrapped);
+  color0.texture =
+      TextureGLES::WrapFBO(gl_context.GetReactor(), color0_tex, fbo);
   color0.clear_color = Color::DarkSlateGray();
   color0.load_action = LoadAction::kClear;
   color0.store_action = StoreAction::kStore;
@@ -47,9 +47,10 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(
   depth_stencil_texture_desc.usage = TextureUsage::kRenderTarget;
   depth_stencil_texture_desc.sample_count = SampleCount::kCount1;
 
-  auto depth_stencil_tex = std::make_shared<TextureGLES>(
-      gl_context.GetReactor(), depth_stencil_texture_desc,
-      TextureGLES::IsWrapped::kWrapped);
+  auto depth_stencil_tex =
+      TextureGLES::CreatePlaceholder(gl_context.GetReactor(),    //
+                                     depth_stencil_texture_desc  //
+      );
 
   DepthAttachment depth0;
   depth0.clear_depth = 0;

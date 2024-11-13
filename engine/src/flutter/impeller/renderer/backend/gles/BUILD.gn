@@ -24,6 +24,7 @@ impeller_component("gles_unittests") {
     "test/proc_table_gles_unittests.cc",
     "test/reactor_unittests.cc",
     "test/specialization_constants_unittests.cc",
+    "test/surface_gles_unittests.cc",
   ]
   deps = [
     ":gles",

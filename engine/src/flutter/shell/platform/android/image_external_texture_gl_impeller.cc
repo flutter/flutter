@@ -38,8 +38,10 @@ sk_sp<flutter::DlImage> ImageExternalTextureGLImpeller::CreateDlImage(
                static_cast<int>(bounds.height())};
   desc.mip_count = 1;
   auto texture = std::make_shared<impeller::TextureGLES>(
-      impeller_context_->GetReactor(), desc,
-      impeller::TextureGLES::IsWrapped::kWrapped);
+      impeller_context_->GetReactor(), desc);
+  // The contents will be initialized later in the call to
+  // `glEGLImageTargetTexture2DOES` instead of by Impeller.
+  texture->MarkContentsInitialized();
   texture->SetCoordinateSystem(
       impeller::TextureCoordinateSystem::kUploadFromHost);
   if (!texture->Bind()) {
