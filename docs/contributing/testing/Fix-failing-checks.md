@@ -63,7 +63,7 @@ This includes [package tests](../../ecosystem/testing/Understanding-Packages-tes
 along with other tests from open-source Flutter projects.\
 If a pull request requires an update to those external tests, it qualifies as a
 [**breaking change**](../Tree-hygiene.md#handling-breaking-changes);
-it's great to avoid those when possible.
+please avoid those when possible.
 
 If **Linux Analyze** fails, it's likely that one or more changes in the PR
 violated a [linter rule](https://dart.dev/lints/).\
