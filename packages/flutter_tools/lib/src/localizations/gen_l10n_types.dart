@@ -72,7 +72,7 @@ const Set<String> validDateFormats = <String>{
   's',
 };
 
-const String dateFormatPartsDelimiter = '+';
+const String _dateFormatPartsDelimiter = '+';
 
 // The set of number formats that can be automatically localized.
 //
@@ -254,7 +254,9 @@ class Placeholder {
   bool get requiresNumFormatting => <String>['int', 'num', 'double'].contains(type) && format != null;
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
-  bool get hasValidDateFormat => format?.split(dateFormatPartsDelimiter).every(validDateFormats.contains) ?? false;
+  // 'format' can contain a number of date time formats separated by `dateFormatPartsDelimiter`.
+  List<String> get dateFormatParts => format?.split(_dateFormatPartsDelimiter) ?? <String>[];
+  bool get hasValidDateFormat => dateFormatParts.every(validDateFormats.contains) ?? false;
 
   static String? _stringAttribute(
     String resourceId,

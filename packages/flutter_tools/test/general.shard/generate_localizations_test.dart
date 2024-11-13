@@ -1680,6 +1680,104 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, contains(r"DateFormat('asdf o\'clock', localeName)"));
       });
 
+      testWithoutContext('handles adding two valid formats', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "loggedIn": "Last logged in on {lastLoginDate}",
+  "@loggedIn": {
+    "placeholders": {
+      "lastLoginDate": {
+        "type": "DateTime",
+        "format": "yMd+jms"
+      }
+    }
+  }
+}'''
+        });
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains(r'DateFormat.yMd(localeName).add_jms()'));
+      });
+
+      testWithoutContext('handles adding three valid formats', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "loggedIn": "Last logged in on {lastLoginDate}",
+  "@loggedIn": {
+    "placeholders": {
+      "lastLoginDate": {
+        "type": "DateTime",
+        "format": "yMMMMEEEEd+QQQQ+Hm"
+      }
+    }
+  }
+}'''
+        });
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains(r'DateFormat.yMMMMEEEEd(localeName).add_QQQQ().add_Hm()'));
+      });
+
+      testWithoutContext('throws an exception when invalid formats', (){
+        expect(
+          () {
+            setupLocalizations(<String, String>{
+              'en': '''
+{
+  "loggedIn": "Last logged in on {lastLoginDate}",
+  "@loggedIn": {
+    "placeholders": {
+      "lastLoginDate": {
+        "type": "DateTime",
+        "format": "foo+bar+baz"
+      }
+    }
+  }
+}'''
+            });
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            allOf(
+              contains('"foo+bar+baz"'),
+              contains('lastLoginDate'),
+              contains('contains at least one invalid date format.'),
+            ),
+          )),
+        );
+      });
+
+      testWithoutContext('throws an exception when adding formats and trailing plus sign', () {
+        expect(
+          () {
+            setupLocalizations(<String, String>{
+              'en': '''
+{
+  "loggedIn": "Last logged in on {lastLoginDate}",
+  "@loggedIn": {
+    "placeholders": {
+      "lastLoginDate": {
+        "type": "DateTime",
+        "format": "yMd+Hm+"
+      }
+    }
+  }
+}'''
+            });
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            allOf(
+              contains('"yMd+Hm+"'),
+              contains('lastLoginDate'),
+              contains('contains at least one invalid date format.'),
+            ),
+          )),
+        );
+      });
+
       testWithoutContext('throws an exception when no format attribute is passed in', () {
         expect(
           () {

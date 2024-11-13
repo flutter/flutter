@@ -156,6 +156,16 @@ String generateDateFormattingLogic(Message message) {
       final bool? isCustomDateFormat = placeholder.isCustomDateFormat;
       if (!placeholder.hasValidDateFormat
           && (isCustomDateFormat == null || !isCustomDateFormat)) {
+        if (placeholder.dateFormatParts.length > 1) {
+          throw L10nException(
+            'Date format "$placeholderFormat" for placeholder '
+            '${placeholder.name} contains at least one invalid date format. '
+            'Ensure all date formats joined with plus character have '
+            'a corresponding DateFormat constructor.\n Check the intl '
+            "library's DateFormat class constructors for allowed date formats."
+          );
+        }
+
         throw L10nException(
           'Date format "$placeholderFormat" for placeholder '
           '${placeholder.name} does not have a corresponding DateFormat '
@@ -165,9 +175,8 @@ String generateDateFormattingLogic(Message message) {
         );
       }
       if (placeholder.hasValidDateFormat) {
-        // 'format' can contain a number of date time formats separated by `dateFormatPartsDelimiter`.
         // The first format is the main format, and the rest are added formats.
-        final List<String> formatParts = placeholderFormat.split(dateFormatPartsDelimiter);
+        final List<String> formatParts = placeholder.dateFormatParts;
         final String mainFormat = formatParts.first;
         final List<String> addedFormats = formatParts.skip(1).toList();
 
