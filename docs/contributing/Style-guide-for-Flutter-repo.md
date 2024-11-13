@@ -5,7 +5,6 @@
 Optimize for readability. Write detailed documentation.
 Make error messages useful.
 Never use timeouts or timers.
-Avoid hidden dependencies: powerful systems are composed of simple, reusable parts.
 
 ## Introduction
 
@@ -829,62 +828,6 @@ documentation section).
 We avoid using `part of` because that feature makes it very hard to reason about how private a private
 really is, and tends to encourage "spaghetti" code (where distant components refer to each other) rather
 than "lasagna" code (where each section of the code is cleanly layered and separable).
-
-
-### Avoid using `extension` methods.
-
-Extension methods are confusing to document and discover. To an end developer,
-they appear no different than the built-in API of the class, and discovering
-the documentation and implementation of an extension is more challenging than
-for class members. Prefer instead adding methods directly to relevant classes.
-
-Only use `extension` methods when discoverability is not a concern:
-
-- Extension methods might be implemented as temporary workarounds
-when deprecating features. In those cases, however, the extensions and all their
-members must be deprecated in the PR that adds them, and they must be removed
-in accordance with our deprecation policy.)
-- Additionally, private class fields
-[cannot be safely accessed](https://github.com/dart-lang/sdk/issues/51641)
-if the receiver is a subtype that implements the interface.\
-In these cases, it's better to house these fields in an `extension`
-or to restructure them into private top-level functions if possible.
-
-
-### Use extension types to improve an API surface
-
-"Extension types" in Dart are distinct from "extension methods":
-
-```dart
-extension A on B {
-  void c() {}
-}
-```
-
- * `A` is an _extension_.
- * `B` is the _type_ (to be specific, it's the "`on` type").
- * `c()` is an _extension method_.
-
-```dart
-extension type A(B b) implements C {
-  void d() {}
-}
-```
-
- * `A` is an _extension type_.
- * `B` is the _representation type_ (and `b` is the "representation field").
- * `C` is the _supertype_ (optionally added using an "`implements` clause").
- * `d()` is a member of `A`'s interface.\
-   (to prevent confusion, avoid referring to it as an "extension method").
-
-Rather than adding fields to an existing class, an `extension type` creates
-a separate interface. This can prevent [API oceans](#avoid-exposing-api-oceans)
-without any risk of name overlap, and while avoiding the performance cost of
-a wrapper class.
-
-Prefer specifying a non-nullable supertype (e.g. `implements Object`) when
-the representation type is non-nullable: this improves static analysis for
-null-checks.
 
 
 ### Avoid using `FutureOr<T>`
@@ -1851,6 +1794,72 @@ Now that the Flutter framework is mature, we expect every new widget to implemen
 It's the job of the programmer to provide these before submitting a PR.
 
 It's the job of the reviewer to check that all these are present when reviewing a PR.
+
+
+### Effect of `extension` on API usability.
+
+#### Extension types
+
+An [extension type](https://dart.dev/language/extension-types) wraps
+an existing API with a different static interface.
+
+```dart
+extension type SimpleAPI._(SomeAPI _someAPI) implements Object {
+  void run() {
+    _someAPI.method1();
+    _someAPI.method2();
+  }
+}
+```
+
+ * `SimpleAPI` is an _extension type_.
+ * `SomeAPI` is the _representation type_ (and `_someAPI` is the "representation field").
+ * `Object` is the _supertype_.
+ * `run()` is "a `SimpleAPI` method".
+
+Oftentimes a class can be modified directly to improve its API surface,
+but in some cases the simplest solution is to expose the ideal interface
+with an extension type.
+
+The supertype defaults to `Object?` if no `implements` clause is included.\
+Prefer specifying a non-nullable supertype (e.g. `implements Object`) when
+the representation type is non-nullable: this improves static analysis for
+null-checks.
+
+#### Extension methods
+
+[Extension methods](https://dart.dev/language/extension-methods) are
+additional fields applied to an existing API.
+
+```dart
+extension RunMethod on SomeAPI {
+  void run() {
+    method1();
+    method2();
+  }
+}
+```
+
+ * `RunMethod` is an _extension_.
+ * `SomeAPI` is the _"on" type_.
+ * `run()` is an _extension method_.
+
+Extension methods are confusing to document and discover. To an end developer,
+they appear no different than the built-in API of the class, and discovering
+the documentation and implementation of an extension is more challenging than
+for class members. Prefer instead adding methods directly to relevant classes.
+
+Only use `extension` methods when discoverability is not a concern:
+
+- Extension methods might be implemented as temporary workarounds
+when deprecating features. In those cases, however, the extensions and all their
+members must be deprecated in the PR that adds them, and they must be removed
+in accordance with our deprecation policy.)
+- An unnamed extension might be created to house private class fields,
+since otherwise they cannot always be safely accessed
+(e.g. if the receiver is a subtype that implements the interface.\
+But in many cases, an extension method can be restructured as a private
+top-level function without a loss in readability.
 
 
 ### Use of streams in Flutter framework code
