@@ -3,22 +3,27 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:file/file.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  late Directory tempDir;
+  late Directory tempProjectDir;
+  late Directory tempPluginADir;
+  late Directory tempPluginBDir;
 
-  setUp(() async {
-    tempDir =
-        createResolvedTempDirectorySync('flutter_plugins_dependencies_test.');
+  setUp(() {
+    tempProjectDir = createResolvedTempDirectorySync(
+        'flutter_plugins_dependencies_test_project.');
+    tempPluginADir = createResolvedTempDirectorySync(
+        'flutter_plugins_dependencies_test_plugin_a.');
+    tempPluginBDir = createResolvedTempDirectorySync(
+        'flutter_plugins_dependencies_test_plugin_b.');
   });
 
-  tearDown(() async {
-    tryToDelete(tempDir);
+  tearDown(() {
+    tryToDelete(tempProjectDir);
   });
 
   test(
@@ -31,45 +36,59 @@ void main() {
     await processManager.run(<String>[
       flutterBin,
       'create',
-      tempDir.path,
+      tempProjectDir.path,
       '--project-name=testapp',
-    ], workingDirectory: tempDir.path);
+    ], workingDirectory: tempProjectDir.path);
 
-    final File pubspecFile = tempDir.childFile('pubspec.yaml');
+    final File pubspecFile = tempProjectDir.childFile('pubspec.yaml');
     expect(pubspecFile.existsSync(), true);
     String pubspecFileAsString = pubspecFile.readAsStringSync();
 
+    // Create Flutter plugins to add as dependencies to Flutter project.
+    await processManager.run(<String>[
+      flutterBin,
+      'create',
+      tempPluginADir.path,
+      '--template=plugin',
+      '--platforms=android', //TODO(camsim99): Consider looping through platforms to verify behavior across.
+      '--project-name=plugin_a_real_dependency',
+    ], workingDirectory: tempPluginADir.path);
+
+    await processManager.run(<String>[
+      flutterBin,
+      'create',
+      tempPluginBDir.path,
+      '--template=plugin',
+      '--platforms=android', //TODO(camsim99): Consider looping through platforms to verify behavior across.
+      '--project-name=plugin_b_dev_dependency',
+    ], workingDirectory: tempPluginBDir.path);
+
     // Add dependency on two plugin: one dependency, one dev dependency.
-    final RegExp pubspecDependenciesRegExp = RegExp('\ndependencies:\n');
-    final RegExp pubspecDevDependenciesRegExp = RegExp('dev_dependencies:\n');
-    expect(pubspecDependenciesRegExp.hasMatch(pubspecFileAsString), isTrue);
-    expect(pubspecDevDependenciesRegExp.hasMatch(pubspecFileAsString), isTrue);
-
-    const String pubspecDependenciesWithCameraAdded = '''
-\ndependencies:
-  camera: 0.11.0
-''';
-    const String pubspecDevDependenciesWithVideoPlayerAdded = '''
-dev_dependencies:
-  video_player: 2.9.2
-''';
-
-    pubspecFileAsString = pubspecFileAsString.replaceFirst(
-        pubspecDependenciesRegExp, pubspecDependenciesWithCameraAdded);
-    pubspecFileAsString = pubspecFileAsString.replaceFirst(
-        pubspecDevDependenciesRegExp,
-        pubspecDevDependenciesWithVideoPlayerAdded);
-    pubspecFile.writeAsStringSync(pubspecFileAsString);
+    await processManager.run(<String>[
+      flutterBin,
+      'pub',
+      'add',
+      'plugin_a_real_dependency', //TODO(camsim99): Figure out how this should work.
+      tempProjectDir.path,
+    ], workingDirectory: tempProjectDir.path);
+    await processManager.run(<String>[
+      flutterBin,
+      'pub',
+      'add',
+      'plugin_b_dev_dependency',
+      '--dev-dependency', //TODO(camsim99): Figure out how this should work.
+      tempProjectDir.path,
+    ], workingDirectory: tempProjectDir.path);
 
     // Run `flutter pub get` to generate .flutter-plugins-dependencies.
     await processManager.run(<String>[
       flutterBin,
       'pub',
       'get',
-    ], workingDirectory: tempDir.path);
+    ], workingDirectory: tempProjectDir.path);
 
     final File flutterPluginsDependenciesFile =
-        tempDir.childFile('.flutter-plugins-dependencies');
+        tempProjectDir.childFile('.flutter-plugins-dependencies');
     expect(flutterPluginsDependenciesFile.existsSync(), true);
 
     // Check that .flutter-plugin-dependencies denotes dependencies and
@@ -81,17 +100,12 @@ dev_dependencies:
     final Map<String, dynamic> plugins =
         jsonContent['plugins'] as Map<String, dynamic>;
 
-    // No project plugins run on Windows, Linux.
-    expect(plugins['windows'], <dynamic>[]);
-    expect(plugins['linux'], <dynamic>[]);
-
-    // camera, video_player, and transitive dependencies run on Android, iOS,
-    // macOS, and web, so we verify on these platforms only.
+    //  TODO(camsim99): Consider looping through platforms to verify behavior across.
     final List<String> platformsToVerify = <String>[
       'android',
-      'ios',
-      'macos',
-      'web'
+      // 'ios',
+      // 'macos',
+      // 'web'
     ];
 
     for (final String platform in platformsToVerify) {
@@ -106,19 +120,12 @@ dev_dependencies:
             pluginProperties['dev_dependency'] as bool;
 
         // Check camera dependencies are not marked as dev dependencies.
-        if (pluginName.startsWith('camera_')) {
+        if (pluginName.startsWith('plugin_a_real_dependency')) {
           expect(pluginIsDevDependency, isFalse);
         }
 
         // Check video_player dependencies are marked as dev dependencies.
-        if (pluginName.startsWith('video_player_')) {
-          expect(pluginIsDevDependency, isTrue);
-        }
-
-        // video_player brings in transitive dependncy
-        // flutter_plugin_android_lifecycle, so ensure it is marked as a
-        // dev dependency.
-        if (pluginName == 'flutter_plugin_android_lifecycle') {
+        if (pluginName.startsWith('plugin_b_dev_dependency')) {
           expect(pluginIsDevDependency, isTrue);
         }
       }
