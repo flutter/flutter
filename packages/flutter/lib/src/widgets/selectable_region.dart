@@ -3390,6 +3390,9 @@ final class SelectionListenerNotifier extends ChangeNotifier {
   _SelectionListenerDelegate? _selectionDelegate;
 
   /// The details of the selection under the [SelectionListener] that owns this notifier.
+  ///
+  /// Throws an exception if this notifier has not been registered to a [SelectionListener].
+  /// To check if a notifier has been registered to a [SelectionListener] use [registered].
   SelectionDetails get selection => _selectionDelegate ?? (throw Exception('Selection client has not been registered to this notifier.'));
 
   /// Whether this [SelectionListenerNotifier] has been registered to a [SelectionListener].
