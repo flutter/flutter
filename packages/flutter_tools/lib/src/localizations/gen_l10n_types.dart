@@ -256,7 +256,7 @@ class Placeholder {
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
   // 'format' can contain a number of date time formats separated by `dateFormatPartsDelimiter`.
   List<String> get dateFormatParts => format?.split(_dateFormatPartsDelimiter) ?? <String>[];
-  bool get hasValidDateFormat => dateFormatParts.every(validDateFormats.contains) ?? false;
+  bool get hasValidDateFormat => dateFormatParts.every(validDateFormats.contains);
 
   static String? _stringAttribute(
     String resourceId,
