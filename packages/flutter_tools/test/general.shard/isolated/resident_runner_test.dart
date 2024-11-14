@@ -74,7 +74,6 @@ void main() {
           nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
           analytics: FakeAnalytics(),
           nativeAssetsYamlFile: 'foo.yaml',
-          useImplicitPubspecResolution: true,
         );
 
         final int result = await residentRunner.run();
