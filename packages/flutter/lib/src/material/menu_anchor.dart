@@ -3327,38 +3327,52 @@ class _Submenu extends StatelessWidget {
     final EdgeInsetsGeometry resolvedPadding = padding
         .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
-    final Rect anchorRect = Rect.fromLTRB(
-      menuPosition.anchorRect.left + dx,
-      menuPosition.anchorRect.top - dy,
-      menuPosition.anchorRect.right,
-      menuPosition.anchorRect.bottom,
-    );
 
-    final Widget child = TapRegion(
-      consumeOutsideTaps: consumeOutsideTaps,
-      groupId: menuPosition.tapRegionGroupId,
-      onTapOutside: (PointerDownEvent event) {
-        MenuController.maybeOf(context)?.close();
-      },
-      child: FocusScope(
-        node: menuScopeNode,
-        skipTraversal: true,
-        child: MouseRegion(
-          cursor: mouseCursor,
-          hitTestBehavior: HitTestBehavior.deferToChild,
-          child: Actions(
-            actions: <Type, Action<Intent>>{
-              DismissIntent:
-                  DismissMenuAction(controller: anchor._menuController),
+    final Widget child = Theme(
+      data: Theme.of(context).copyWith(
+        visualDensity: visualDensity,
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints.loose(menuPosition.overlaySize),
+        child: CustomSingleChildLayout(
+          delegate: _MenuLayout(
+            anchorRect: layerLink == null ? menuPosition.anchorRect : Rect.zero,
+            textDirection: textDirection,
+            avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
+            menuPadding: resolvedPadding,
+            alignment: alignment,
+            alignmentOffset: alignmentOffset,
+            menuPosition: menuPosition.position,
+            orientation: anchor._orientation,
+            parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
+          ),
+          child: TapRegion(
+            groupId: anchor._root,
+            consumeOutsideTaps: anchor._root._menuController.isOpen && anchor.widget.consumeOutsideTap,
+            onTapOutside: (PointerDownEvent event) {
+              anchor._menuController.close();
             },
-            child: Shortcuts(
-              shortcuts: _kMenuTraversalShortcuts,
-              child: _MenuPanel(
-                menuStyle: menuStyle,
-                clipBehavior: clipBehavior,
-                orientation: anchor._orientation,
-                crossAxisUnconstrained: crossAxisUnconstrained,
-                children: menuChildren,
+            child: MouseRegion(
+              cursor: mouseCursor,
+              hitTestBehavior: HitTestBehavior.deferToChild,
+              child: FocusScope(
+                node: anchor._menuScopeNode,
+                skipTraversal: true,
+                child: Actions(
+                  actions: <Type, Action<Intent>>{
+                    DismissIntent: DismissMenuAction(controller: anchor._menuController),
+                  },
+                  child: Shortcuts(
+                    shortcuts: _kMenuTraversalShortcuts,
+                    child: _MenuPanel(
+                      menuStyle: menuStyle,
+                      clipBehavior: clipBehavior,
+                      orientation: anchor._orientation,
+                      crossAxisUnconstrained: crossAxisUnconstrained,
+                      children: menuChildren,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -3366,33 +3380,8 @@ class _Submenu extends StatelessWidget {
       ),
     );
 
-    final Widget layout = Theme(
-      data: Theme.of(context).copyWith(visualDensity: visualDensity),
-      child: ConstrainedBox(
-        constraints: BoxConstraints.loose(menuPosition.overlaySize),
-        child: Builder(
-          builder: (BuildContext context) {
-            return CustomSingleChildLayout(
-              delegate: _MenuLayout(
-                anchorRect: anchorRect,
-                textDirection: textDirection,
-                avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
-                menuPadding: resolvedPadding,
-                alignment: alignment,
-                alignmentOffset: alignmentOffset,
-                menuPosition: menuPosition.position,
-                orientation: anchor._orientation,
-                parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
-              ),
-              child: child
-            );
-          }
-        ),
-      ),
-    );
-
     if (layerLink == null) {
-      return layout;
+      return child;
     }
 
     return CompositedTransformFollower(
