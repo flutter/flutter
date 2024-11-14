@@ -780,9 +780,9 @@ exit code: 66
         '--example',
       ], onRun: (_) {
         fileSystem.currentDirectory
-            .childDirectory('.dart_tool')
-            .childFile('package_config.json')
-            .createSync(recursive: true);
+          .childDirectory('.dart_tool')
+          .childFile('package_config.json')
+          .createSync(recursive: true);
       }),
     ]);
 
