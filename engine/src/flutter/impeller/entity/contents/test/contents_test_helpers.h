@@ -7,7 +7,7 @@
 
 #include "impeller/renderer/command.h"
 
-namespace impeller {
+namespace impeller::testing {
 
 /// @brief Retrieve the [VertInfo] struct data from the provided [command].
 template <typename T>
@@ -44,6 +44,6 @@ typename T::FragInfo* GetFragInfo(const Command& command) {
   return reinterpret_cast<typename T::FragInfo*>(data);
 }
 
-}  // namespace impeller
+}  // namespace impeller::testing
 
 #endif  // FLUTTER_IMPELLER_ENTITY_CONTENTS_TEST_CONTENTS_TEST_HELPERS_H_

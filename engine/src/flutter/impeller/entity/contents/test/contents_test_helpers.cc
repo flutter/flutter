@@ -4,8 +4,8 @@
 
 #include "impeller/entity/contents/test/contents_test_helpers.h"
 
-namespace impeller {
+namespace impeller::testing {
 
 //
 
-}
+}  // namespace impeller::testing
