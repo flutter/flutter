@@ -181,7 +181,7 @@ bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
   if (a.length != b.length) {
     return false;
   }
-  for (final dynamic key in a.keys) {
+  for (final Object? key in a.keys) {
     if (!b.containsKey(key) || !_deepEquals(a[key], b[key])) {
       return false;
     }

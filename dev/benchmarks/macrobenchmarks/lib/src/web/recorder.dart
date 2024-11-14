@@ -1056,7 +1056,7 @@ class Profile {
       final dynamic value = extraData[key];
       if (value is List) {
         buffer.writeln('$key:');
-        for (final dynamic item in value) {
+        for (final Object? item in value) {
           buffer.writeln(' - $item');
         }
       } else {

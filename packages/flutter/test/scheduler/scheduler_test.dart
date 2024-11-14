@@ -297,7 +297,7 @@ void main() {
 
     // `Future` is disallowed in this file due to the import of
     // scheduler_tester.dart so annotations cannot be specified.
-    // ignore: always_specify_types
+    // ignore: specify_nonobvious_local_variable_types
     final result = scheduler.scheduleTask(
       () async {
         // Yield, so if awaiting `result` did not wait for completion of this

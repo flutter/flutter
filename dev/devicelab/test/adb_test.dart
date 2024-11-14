@@ -360,7 +360,7 @@ class _MemoryIOSink implements IOSink {
   @override
   void writeAll(Iterable<dynamic> objects, [String separator = '']) {
     bool addSeparator = false;
-    for (final dynamic object in objects) {
+    for (final Object? object in objects) {
       if (addSeparator) {
         write(separator);
       }

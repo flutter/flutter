@@ -166,13 +166,14 @@ class _BufferedStreamController<T> {
   late final StreamController<T> _streamController = () {
     final StreamController<T> streamControllerInstance = StreamController<T>.broadcast();
       streamControllerInstance.onListen = () {
-      for (final dynamic event in _events) {
+      for (final Object? event in _events) {
         if (event is T) {
           streamControllerInstance.add(event);
         } else {
+          final iterable = event! as Iterable<Object?>;
           streamControllerInstance.addError(
-            (event as Iterable<dynamic>).first as Object,
-            event.last as StackTrace,
+            iterable.first!,
+            iterable.last! as StackTrace,
           );
         }
       }

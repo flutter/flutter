@@ -563,7 +563,7 @@ bool _mapsEqual(Map<dynamic, dynamic>? a, Map<dynamic, dynamic>? b) {
     return false;
   }
 
-  for (final dynamic k in a.keys) {
+  for (final Object? k in a.keys) {
     final dynamic bValue = b[k];
     if (bValue == null && !b.containsKey(k)) {
       return false;
