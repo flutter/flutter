@@ -195,6 +195,7 @@ group("unittests") {
       "//flutter/shell/platform/embedder:embedder_a11y_unittests",
       "//flutter/shell/platform/embedder:embedder_proctable_unittests",
       "//flutter/shell/platform/embedder:embedder_unittests",
+      "//flutter/testing:testing_unittests",
       "//flutter/testing/dart",
       "//flutter/testing/smoke_test_failure",
       "//flutter/third_party/tonic/tests:tonic_unittests",
