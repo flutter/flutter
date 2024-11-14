@@ -35,6 +35,7 @@ enum class StencilBits {
 enum class DepthBits {
   kZero = 0,
   kEight = 8,
+  kTwentyFour = 24,
 };
 
 enum class SurfaceType {
