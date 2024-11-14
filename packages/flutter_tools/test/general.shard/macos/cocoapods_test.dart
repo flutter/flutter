@@ -345,7 +345,7 @@ void main() {
         ..writeAsStringSync('Existing release config');
 
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('project'));
-      await injectPlugins(project, iosPlatform: true, useImplicitPubspecResolution: true);
+      await injectPlugins(project, iosPlatform: true);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
       expect(debugContents, contains(
