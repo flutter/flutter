@@ -329,6 +329,7 @@
 # coverage @goderbauer @flutter/infra
 # customer_testing @Piinks @flutter/framework
 # docs @Piinks @flutter/framework
+# flutter_build_apk_health_tests @matanlurey @gmackall
 # flutter_driver_android_test @matanlurey @johnmccutchan
 # flutter_packaging @christopherfujino @flutter/infra
 # flutter_plugins @stuartmorgan @flutter/plugin
