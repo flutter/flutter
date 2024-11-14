@@ -172,45 +172,6 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
 
   static const String benchmarkName = 'text_canvas_kit_color_grid';
 
-  num _textLayoutMicros = 0;
-
-  @override
-  Future<void> setUpAll() async {
-    super.setUpAll();
-    registerEngineBenchmarkValueListener('text_layout', (num value) {
-      _textLayoutMicros += value;
-    });
-  }
-
-  @override
-  Future<void> tearDownAll() async {
-    stopListeningToEngineBenchmarkValues('text_layout');
-  }
-
-  @override
-  void frameWillDraw() {
-    super.frameWillDraw();
-    _textLayoutMicros = 0;
-  }
-
-  @override
-  void frameDidDraw() {
-    // We need to do this before calling [super.frameDidDraw] because the latter
-    // updates the value of [showWidget] in preparation for the next frame.
-    // TODO(yjbanov): https://github.com/flutter/flutter/issues/53877
-    // if (showWidget) {
-    //   profile!.addDataPoint(
-    //     'text_layout',
-    //     Duration(microseconds: _textLayoutMicros.toInt()),
-    //     reported: true,
-    //   );
-    // }
-
-    // Use it so the analyzer doesn't complain about the unused variable.
-    _textLayoutMicros.toInt();
-    super.frameDidDraw();
-  }
-
   @override
   Widget createWidget() {
     _counter++;
