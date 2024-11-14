@@ -2165,6 +2165,21 @@ public class AccessibilityBridgeTest {
     verify(mockEvent).setSource(eq(mockRootView), eq(123));
   }
 
+  @Test
+  public void itAddsClickActionToSliderNodeInfo() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.addFlag(AccessibilityBridge.Flag.IS_SLIDER);
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+
+    assertEquals(nodeInfo.isClickable(), true);
+    List<AccessibilityNodeInfo.AccessibilityAction> actions = nodeInfo.getActionList();
+    assertTrue(actions.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK));
+  }
+
   AccessibilityBridge setUpBridge() {
     return setUpBridge(null, null, null, null, null, null);
   }
