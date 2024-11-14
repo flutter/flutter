@@ -3402,7 +3402,7 @@ void main() {
                     closeOnActivate: false,
                     child: const Text('Set focus to null'),
                     onPressed: () {
-                      setState((){
+                      setState(() {
                         buttonFocusNode?.dispose();
                         buttonFocusNode = null;
                       });
@@ -3921,7 +3921,7 @@ void main() {
       );
     });
 
-    testWidgets('Menu is correctly offsetted when a LayerLink is provided and alignmentOffset is set', (WidgetTester tester) async {
+    testWidgets('Menu is correctly offset when a LayerLink is provided and alignmentOffset is set', (WidgetTester tester) async {
       final MenuController controller = MenuController();
       final UniqueKey contentKey = UniqueKey();
       const double horizontalOffset = 16.0;
@@ -4708,7 +4708,7 @@ void main() {
     }
 
     late final OverlayEntry overlayEntry;
-    addTearDown((){
+    addTearDown(() {
       overlayEntry.remove();
       overlayEntry.dispose();
     });
