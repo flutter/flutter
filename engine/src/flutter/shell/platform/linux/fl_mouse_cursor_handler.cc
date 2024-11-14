@@ -4,7 +4,6 @@
 
 #include "flutter/shell/platform/linux/fl_mouse_cursor_handler.h"
 
-#include <gtk/gtk.h>
 #include <cstring>
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
@@ -22,10 +21,15 @@ struct _FlMouseCursorHandler {
 
   FlMethodChannel* channel;
 
-  GWeakRef view;
-
   GHashTable* system_cursor_table;
+
+  // The current cursor.
+  gchar* cursor_name;
 };
+
+enum { kSignalCursorChanged, kSignalLastSignal };
+
+static guint fl_mouse_cursor_handler_signals[kSignalLastSignal];
 
 G_DEFINE_TYPE(FlMouseCursorHandler, fl_mouse_cursor_handler, G_TYPE_OBJECT)
 
@@ -109,14 +113,10 @@ FlMethodResponse* activate_system_cursor(FlMouseCursorHandler* self,
     cursor_name = kFallbackCursor;
   }
 
-  g_autoptr(FlView) view = FL_VIEW(g_weak_ref_get(&self->view));
-  if (view != nullptr) {
-    GdkWindow* window =
-        gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(view)));
-    g_autoptr(GdkCursor) cursor =
-        gdk_cursor_new_from_name(gdk_window_get_display(window), cursor_name);
-    gdk_window_set_cursor(window, cursor);
-  }
+  g_free(self->cursor_name);
+  self->cursor_name = g_strdup(cursor_name);
+
+  g_signal_emit(self, fl_mouse_cursor_handler_signals[kSignalCursorChanged], 0);
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
@@ -147,8 +147,8 @@ static void fl_mouse_cursor_handler_dispose(GObject* object) {
   FlMouseCursorHandler* self = FL_MOUSE_CURSOR_HANDLER(object);
 
   g_clear_object(&self->channel);
-  g_weak_ref_clear(&self->view);
   g_clear_pointer(&self->system_cursor_table, g_hash_table_unref);
+  g_clear_pointer(&self->cursor_name, g_free);
 
   G_OBJECT_CLASS(fl_mouse_cursor_handler_parent_class)->dispose(object);
 }
@@ -156,12 +156,18 @@ static void fl_mouse_cursor_handler_dispose(GObject* object) {
 static void fl_mouse_cursor_handler_class_init(
     FlMouseCursorHandlerClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_mouse_cursor_handler_dispose;
+
+  fl_mouse_cursor_handler_signals[kSignalCursorChanged] =
+      g_signal_new("cursor-changed", fl_mouse_cursor_handler_get_type(),
+                   G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
-static void fl_mouse_cursor_handler_init(FlMouseCursorHandler* self) {}
+static void fl_mouse_cursor_handler_init(FlMouseCursorHandler* self) {
+  self->cursor_name = g_strdup("");
+}
 
-FlMouseCursorHandler* fl_mouse_cursor_handler_new(FlBinaryMessenger* messenger,
-                                                  FlView* view) {
+FlMouseCursorHandler* fl_mouse_cursor_handler_new(
+    FlBinaryMessenger* messenger) {
   g_return_val_if_fail(FL_IS_BINARY_MESSENGER(messenger), nullptr);
 
   FlMouseCursorHandler* self = FL_MOUSE_CURSOR_HANDLER(
@@ -172,7 +178,12 @@ FlMouseCursorHandler* fl_mouse_cursor_handler_new(FlBinaryMessenger* messenger,
       fl_method_channel_new(messenger, kChannelName, FL_METHOD_CODEC(codec));
   fl_method_channel_set_method_call_handler(self->channel, method_call_cb, self,
                                             nullptr);
-  g_weak_ref_init(&self->view, view);
 
   return self;
+}
+
+const gchar* fl_mouse_cursor_handler_get_cursor_name(
+    FlMouseCursorHandler* self) {
+  g_return_val_if_fail(FL_IS_MOUSE_CURSOR_HANDLER(self), nullptr);
+  return self->cursor_name;
 }
