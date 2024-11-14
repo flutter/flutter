@@ -381,7 +381,20 @@ void main() {
   test('ContainerParentDataMixin asserts parentData type', () {
     final TestRenderObject renderObject = TestRenderObjectWithoutSetupParentData();
     final TestRenderObject child = TestRenderObject();
-    expect(()=>renderObject.add(child),throwsAssertionError);
+    expect(
+      () => renderObject.add(child),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'description',
+          contains(
+            'A child of TestRenderObjectWithoutSetupParentData has parentData of type ParentData, '
+            'which does not conform to TestRenderObjectParentData. Class using ContainerRenderObjectMixin '
+            'should override setupParentData() to set parentData to type TestRenderObjectParentData.'
+          ),
+        ),
+      ),
+    );
   });
 }
 
