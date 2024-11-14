@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/ui/painting/image_decoder_no_gl_unittests.h"
+#include <memory>
 
 #include "flutter/fml/endianness.h"
+#include "impeller/renderer/capabilities.h"
 #include "include/core/SkColorType.h"
 
 namespace flutter {
@@ -80,6 +82,10 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
 #endif
   auto data = flutter::testing::OpenFixtureAsSkData("DisplayP3Logo.png");
   auto image = SkImages::DeferredFromEncodedData(data);
+  std::shared_ptr<impeller::Capabilities> capabilities =
+      impeller::CapabilitiesBuilder()
+          .SetSupportsTextureToTextureBlits(true)
+          .Build();
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(100, 100), image->dimensions());
 
@@ -100,7 +106,7 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
   std::optional<DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), SkISize::Make(100, 100), {100, 100},
-          /*supports_wide_gamut=*/true, allocator);
+          /*supports_wide_gamut=*/true, capabilities, allocator);
   ASSERT_TRUE(wide_result.has_value());
   ASSERT_EQ(wide_result->image_info.colorType(), kRGBA_F16_SkColorType);
   ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
@@ -124,7 +130,7 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
   std::optional<DecompressResult> narrow_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), SkISize::Make(100, 100), {100, 100},
-          /*supports_wide_gamut=*/false, allocator);
+          /*supports_wide_gamut=*/false, capabilities, allocator);
 
   ASSERT_TRUE(narrow_result.has_value());
   ASSERT_EQ(narrow_result->image_info.colorType(), kRGBA_8888_SkColorType);
@@ -137,6 +143,10 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
 #endif
   auto data = flutter::testing::OpenFixtureAsSkData("WideGamutIndexed.png");
   auto image = SkImages::DeferredFromEncodedData(data);
+  std::shared_ptr<impeller::Capabilities> capabilities =
+      impeller::CapabilitiesBuilder()
+          .SetSupportsTextureToTextureBlits(true)
+          .Build();
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(100, 100), image->dimensions());
 
@@ -157,7 +167,7 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
   std::optional<DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), SkISize::Make(100, 100), {100, 100},
-          /*supports_wide_gamut=*/true, allocator);
+          /*supports_wide_gamut=*/true, capabilities, allocator);
   ASSERT_EQ(wide_result->image_info.colorType(), kBGR_101010x_XR_SkColorType);
   ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
 
@@ -180,7 +190,7 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
   std::optional<DecompressResult> narrow_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), SkISize::Make(100, 100), {100, 100},
-          /*supports_wide_gamut=*/false, allocator);
+          /*supports_wide_gamut=*/false, capabilities, allocator);
 
   ASSERT_TRUE(narrow_result.has_value());
   ASSERT_EQ(narrow_result->image_info.colorType(), kRGBA_8888_SkColorType);
@@ -193,6 +203,10 @@ TEST(ImageDecoderNoGLTest, ImepllerUnmultipliedAlphaPng) {
 #endif
   auto data = flutter::testing::OpenFixtureAsSkData("unmultiplied_alpha.png");
   auto image = SkImages::DeferredFromEncodedData(data);
+  std::shared_ptr<impeller::Capabilities> capabilities =
+      impeller::CapabilitiesBuilder()
+          .SetSupportsTextureToTextureBlits(true)
+          .Build();
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(11, 11), image->dimensions());
 
@@ -210,7 +224,7 @@ TEST(ImageDecoderNoGLTest, ImepllerUnmultipliedAlphaPng) {
   std::optional<DecompressResult> result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), SkISize::Make(11, 11), {11, 11},
-          /*supports_wide_gamut=*/true, allocator);
+          /*supports_wide_gamut=*/true, capabilities, allocator);
   ASSERT_EQ(result->image_info.colorType(), kRGBA_8888_SkColorType);
 
   const SkPixmap& pixmap = result->sk_bitmap->pixmap();

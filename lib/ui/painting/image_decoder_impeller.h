@@ -11,6 +11,7 @@
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "impeller/core/formats.h"
 #include "impeller/geometry/size.h"
+#include "impeller/renderer/capabilities.h"
 #include "include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 
@@ -68,6 +69,7 @@ class ImageDecoderImpeller final : public ImageDecoder {
       SkISize target_size,
       impeller::ISize max_texture_size,
       bool supports_wide_gamut,
+      const std::shared_ptr<const impeller::Capabilities>& capabilities,
       const std::shared_ptr<impeller::Allocator>& allocator);
 
   /// @brief Create a device private texture from the provided host buffer.
