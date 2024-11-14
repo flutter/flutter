@@ -281,52 +281,6 @@
             },
             "gn": [
                 "--target-dir",
-                "ci/android_jit_release_x86_test",
-                "--android",
-                "--android-cpu=x86",
-                "--runtime-mode=jit_release",
-                "--rbe",
-                "--no-goma"
-            ],
-            "name": "ci/android_jit_release_x86_test",
-            "description": "Produces jit-release mode artifacts to target x86 Android from a Linux host.",
-            "ninja": {
-                "config": "ci/android_jit_release_x86_test",
-                "targets": [
-                    "flutter",
-                    "flutter/shell/platform/android:embedding_jars",
-                    "flutter/shell/platform/android:abi_jars",
-                    "flutter/shell/platform/android:robolectric_tests"
-                ]
-            },
-            "tests": [
-                {
-                    "language": "python3",
-                    "name": "Host Tests for android_jit_release_x86_test",
-                    "script": "flutter/testing/run_tests.py",
-                    "parameters": [
-                        "--variant",
-                        "ci/android_jit_release_x86_test",
-                        "--type",
-                        "java",
-                        "--engine-capture-core-dump",
-                        "--android-variant",
-                        "ci/android_jit_release_x86_test"
-                    ]
-                }
-            ]
-        },
-        {
-            "cas_archive": false,
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Linux"
-            ],
-            "gclient_variables": {
-                "use_rbe": true
-            },
-            "gn": [
-                "--target-dir",
                 "ci/android_debug_test",
                 "--android",
                 "--android-cpu=arm",
