@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
@@ -30,6 +31,7 @@ import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart' hide FakeOperatingSystemUtils;
 import '../src/pubspec_schema.dart';
 
@@ -402,7 +404,7 @@ dependencies:
 
     group('refreshPlugins', () {
       testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () async {
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject);
 
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
@@ -415,7 +417,7 @@ dependencies:
         flutterProject.flutterPluginsFile.createSync();
         flutterProject.flutterPluginsDependenciesFile.createSync();
 
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject);
 
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
@@ -434,7 +436,7 @@ dependencies:
 
         iosProject.testExists = true;
 
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject);
 
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
@@ -448,7 +450,7 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Opting out of writeLegacyPluginsList omits .flutter-plugins', () async {
+      testUsingContext('Opting in to explicit-package-dependencies omits .flutter-plugins', () async {
         createFakePlugins(fs, <String>[
           'plugin_d',
           'plugin_a',
@@ -456,10 +458,17 @@ dependencies:
           '/local_plugins/plugin_b',
         ]);
 
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: false);
+        await refreshPluginsList(flutterProject);
 
         expect(flutterProject.flutterPluginsFile, isNot(exists));
         expect(flutterProject.flutterPluginsDependenciesFile, exists);
+      }, overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(
+          isExplicitPackageDependenciesEnabled: true,
+        ),
+        FileSystem: () => fs,
+        ProcessManager: FakeProcessManager.empty,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext(
@@ -473,7 +482,7 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject);
 
         // Verify .flutter-plugins-dependencies is configured correctly.
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
@@ -545,7 +554,15 @@ dependencies:
         expect(jsonContent['dependencyGraph'], expectedDependencyGraph);
         expect(jsonContent['date_created'], dateCreated.toString());
         expect(jsonContent['version'], '1.0.0');
-        expect(jsonContent['swift_package_manager_enabled'], false);
+
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, bool>{
+          'ios': false,
+          'macos': false,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
 
         // Make sure tests are updated if a new object is added/removed.
         final List<String> expectedKeys = <String>[
@@ -583,7 +600,7 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject);
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
@@ -653,16 +670,28 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        flutterProject.usesSwiftPackageManager = true;
+        iosProject.usesSwiftPackageManager = true;
+        macosProject.usesSwiftPackageManager = true;
 
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
+        await refreshPluginsList(
+          flutterProject,
+          iosPlatform: true,
+          macOSPlatform: true,
+        );
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile
             .readAsStringSync();
         final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-        expect(jsonContent['swift_package_manager_enabled'], true);
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
+          'ios': true,
+          'macos': true,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -690,16 +719,72 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        flutterProject.usesSwiftPackageManager = true;
+        iosProject.usesSwiftPackageManager = true;
+        macosProject.usesSwiftPackageManager = true;
 
-        await refreshPluginsList(flutterProject, forceCocoaPodsOnly: true, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject, forceCocoaPodsOnly: true);
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile
             .readAsStringSync();
         final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-        expect(jsonContent['swift_package_manager_enabled'], false);
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
+          'ios': false,
+          'macos': false,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        SystemClock: () => systemClock,
+        FlutterVersion: () => flutterVersion,
+      });
+
+      testUsingContext(
+        '.flutter-plugins-dependencies can have different swift_package_manager_enabled values for iOS and macoS', () async {
+        createPlugin(
+          name: 'plugin-a',
+          platforms: const <String, _PluginPlatformInfo>{
+            // Native-only; should include native build.
+            'android': _PluginPlatformInfo(pluginClass: 'Foo', androidPackage: 'bar.foo'),
+            // Hybrid native and Dart; should include native build.
+            'ios': _PluginPlatformInfo(pluginClass: 'Foo', dartPluginClass: 'Bar', sharedDarwinSource: true),
+            // Web; should not have the native build key at all since it doesn't apply.
+            'web': _PluginPlatformInfo(pluginClass: 'Foo', fileName: 'lib/foo.dart'),
+            // Dart-only; should not include native build.
+            'windows': _PluginPlatformInfo(dartPluginClass: 'Foo'),
+          });
+        iosProject.testExists = true;
+
+        final DateTime dateCreated = DateTime(1970);
+        systemClock.currentTime = dateCreated;
+
+        iosProject.usesSwiftPackageManager = true;
+        macosProject.usesSwiftPackageManager = false;
+
+        await refreshPluginsList(
+          flutterProject,
+          iosPlatform: true,
+          macOSPlatform: true,
+        );
+
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
+        final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+            .readAsStringSync();
+        final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
+
+        final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
+          'ios': true,
+          'macos': false,
+        };
+        expect(
+          jsonContent['swift_package_manager_enabled'],
+          expectedSwiftPackageManagerEnabled,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -714,7 +799,7 @@ dependencies:
         iosProject.testExists = true;
         macosProject.exists = true;
 
-        await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
         expect(iosProject.podManifestLock.existsSync(), false);
         expect(macosProject.podManifestLock.existsSync(), false);
       }, overrides: <Type, Generator>{
@@ -733,11 +818,11 @@ dependencies:
         // Since there was no plugins list, the lock files will be invalidated.
         // The second call is where the plugins list is compared to the existing one, and if there is no change,
         // the podfiles shouldn't be invalidated.
-        await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
         simulatePodInstallRun(iosProject);
         simulatePodInstallRun(macosProject);
 
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject);
         expect(iosProject.podManifestLock.existsSync(), true);
         expect(macosProject.podManifestLock.existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -1511,7 +1596,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         linuxProject.exists = true;
         createFakePlugin(fs);
         // refreshPluginsList should call createPluginSymlinks.
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject);
 
         expect(linuxProject.pluginSymlinkDirectory.childLink('some_plugin').existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -1524,7 +1609,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         windowsProject.exists = true;
         createFakePlugin(fs);
         // refreshPluginsList should call createPluginSymlinks.
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject);
 
         expect(windowsProject.pluginSymlinkDirectory.childLink('some_plugin').existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -1570,7 +1655,7 @@ The Flutter Preview device does not support the following plugins from your pubs
 
         // refreshPluginsList should remove existing links and recreate on changes.
         createFakePlugin(fs);
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject);
 
         for (final File file in dummyFiles) {
           expect(file.existsSync(), false);
@@ -1609,7 +1694,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         linuxProject.exists = true;
         windowsProject.exists = true;
         createFakePlugin(fs);
-        await refreshPluginsList(flutterProject, writeLegacyPluginsList: true);
+        await refreshPluginsList(flutterProject);
 
         final List<Link> links = <Link>[
           linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
@@ -1708,6 +1793,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           },
           dependencies: <String>[],
           isDirectDependency: true,
+          isDevDependency: false,
         );
 
         expect(
@@ -1733,6 +1819,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           },
           dependencies: <String>[],
           isDirectDependency: true,
+          isDevDependency: false,
         );
 
         expect(
@@ -1757,6 +1844,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           },
           dependencies: <String>[],
           isDirectDependency: true,
+          isDevDependency: false,
         );
 
         expect(
@@ -1786,6 +1874,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           },
           dependencies: <String>[],
           isDirectDependency: true,
+          isDevDependency: false,
         );
 
         expect(
@@ -1811,6 +1900,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           },
           dependencies: <String>[],
           isDirectDependency: true,
+          isDevDependency: false,
         );
 
         expect(
@@ -1835,6 +1925,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           },
           dependencies: <String>[],
           isDirectDependency: true,
+          isDevDependency: false,
         );
 
         expect(plugin.pluginPodspecPath(fs, IOSPlugin.kConfigKey), isNull);
@@ -2068,9 +2159,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   bool isModule = false;
 
   @override
-  bool usesSwiftPackageManager = false;
-
-  @override
   late FlutterManifest manifest;
 
   @override
@@ -2114,6 +2202,9 @@ class FakeMacOSProject extends Fake implements MacOSProject {
   late File podManifestLock;
 
   @override
+  bool usesSwiftPackageManager = false;
+
+  @override
   late Directory managedDirectory;
 
   @override
@@ -2146,6 +2237,9 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   late File podManifestLock;
+
+  @override
+  bool usesSwiftPackageManager = false;
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {

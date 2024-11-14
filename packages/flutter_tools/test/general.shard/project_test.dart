@@ -141,12 +141,12 @@ void main() {
           FlutterManifest.empty(logger: logger),
           FlutterManifest.empty(logger: logger),
         );
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectNotExists(project.directory);
       });
       _testInMemory('does nothing in plugin or package root project', () async {
         final FlutterProject project = await aPluginProject();
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectNotExists(project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
         expectNotExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
         expectNotExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
@@ -158,7 +158,7 @@ void main() {
         // that a project was a plugin, but shouldn't be as this creates false
         // positives.
         project.directory.childDirectory('example').createSync();
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectExists(project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
         expectExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
         expectExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
@@ -166,22 +166,22 @@ void main() {
       });
       _testInMemory('injects plugins for iOS', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectExists(project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
       });
       _testInMemory('generates Xcode configuration for iOS', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
       });
       _testInMemory('injects plugins for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       _testInMemory('checkForDeprecation fails on invalid android app manifest file', () async {
@@ -224,18 +224,18 @@ void main() {
         final FlutterProject project = await aPluginProject();
         project.example.directory.deleteSync();
 
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expect(testLogger.statusText, isNot(contains('https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-pre-1.12-Android-projects.md')));
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       testUsingContext('injects plugins for macOS', () async {
         final FlutterProject project = await someProject();
         project.macos.managedDirectory.createSync(recursive: true);
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectExists(project.macos.pluginRegistrantImplementation);
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
@@ -249,7 +249,7 @@ void main() {
       testUsingContext('generates Xcode configuration for macOS', () async {
         final FlutterProject project = await someProject();
         project.macos.managedDirectory.createSync(recursive: true);
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectExists(project.macos.generatedXcodePropertiesFile);
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
@@ -263,7 +263,7 @@ void main() {
       testUsingContext('injects plugins for Linux', () async {
         final FlutterProject project = await someProject();
         project.linux.cmakeFile.createSync(recursive: true);
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
       }, overrides: <Type, Generator>{
@@ -278,7 +278,7 @@ void main() {
       testUsingContext('injects plugins for Windows', () async {
         final FlutterProject project = await someProject();
         project.windows.cmakeFile.createSync(recursive: true);
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'));
       }, overrides: <Type, Generator>{
@@ -292,14 +292,14 @@ void main() {
       });
       _testInMemory('creates Android library in module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         expectExists(project.android.hostAppGradleRoot.childFile('settings.gradle'));
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
         expectExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('Flutter')));
       });
       _testInMemory('creates iOS pod in module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.regeneratePlatformSpecificTooling(writeLegacyPluginsList: true);
+        await project.regeneratePlatformSpecificTooling();
         final Directory flutter = project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));
         expectExists(flutter.childFile('flutter_export_environment.sh'));
@@ -372,91 +372,6 @@ void main() {
         final FlutterProject project = await someProject();
         expect(project.isPlugin, isFalse);
         expect(project.hasExampleApp, isFalse);
-      });
-    });
-
-    group('usesSwiftPackageManager', () {
-      testUsingContext('is true when iOS project exists', () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Directory projectDirectory = fs.directory('path');
-        projectDirectory.childDirectory('ios').createSync(recursive: true);
-        final FlutterManifest manifest = FakeFlutterManifest();
-        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
-        expect(project.usesSwiftPackageManager, isTrue);
-      }, overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-      });
-
-      testUsingContext('is true when macOS project exists', () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Directory projectDirectory = fs.directory('path');
-        projectDirectory.childDirectory('macos').createSync(recursive: true);
-        final FlutterManifest manifest = FakeFlutterManifest();
-        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
-        expect(project.usesSwiftPackageManager, isTrue);
-      }, overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-      });
-
-      testUsingContext('is false when disabled via manifest', () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Directory projectDirectory = fs.directory('path');
-        projectDirectory.childDirectory('ios').createSync(recursive: true);
-        final FlutterManifest manifest = FakeFlutterManifest(disabledSwiftPackageManager: true);
-        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
-        expect(project.usesSwiftPackageManager, isFalse);
-      }, overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-      });
-
-      testUsingContext("is false when iOS and macOS project don't exist", () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Directory projectDirectory = fs.directory('path');
-        final FlutterManifest manifest = FakeFlutterManifest();
-        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
-        expect(project.usesSwiftPackageManager, isFalse);
-      }, overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-      });
-
-      testUsingContext('is false when Xcode is less than 15', () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Directory projectDirectory = fs.directory('path');
-        projectDirectory.childDirectory('ios').createSync(recursive: true);
-        final FlutterManifest manifest = FakeFlutterManifest();
-        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
-        expect(project.usesSwiftPackageManager, isFalse);
-      }, overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(14, 0, 0)),
-      });
-
-      testUsingContext('is false when Swift Package Manager feature is not enabled', () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Directory projectDirectory = fs.directory('path');
-        projectDirectory.childDirectory('ios').createSync(recursive: true);
-        final FlutterManifest manifest = FakeFlutterManifest();
-        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
-        expect(project.usesSwiftPackageManager, isFalse);
-      }, overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(),
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-      });
-
-      testUsingContext('is false when project is a module', () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Directory projectDirectory = fs.directory('path');
-        projectDirectory.childDirectory('ios').createSync(recursive: true);
-        final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
-        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
-        expect(project.usesSwiftPackageManager, isFalse);
-      }, overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
       });
     });
 
@@ -1895,17 +1810,4 @@ class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
 
   @override
   Directory get directory => _directory;
-}
-
-class FakeFlutterManifest extends Fake implements FlutterManifest {
-  FakeFlutterManifest({
-    this.disabledSwiftPackageManager = false,
-    this.isModule = false,
-  });
-
-  @override
-  bool disabledSwiftPackageManager;
-
-  @override
-  bool isModule;
 }

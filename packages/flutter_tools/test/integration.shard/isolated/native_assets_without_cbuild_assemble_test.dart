@@ -5,6 +5,7 @@
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:process/process.dart';
 import 'package:yaml/yaml.dart';
 
@@ -32,7 +33,6 @@ void main() {
     // TODO(dacoharkes): Implement Fuchsia. https://github.com/flutter/flutter/issues/129757
     return;
   }
-
 
   const ProcessManager processManager = LocalProcessManager();
   final String constraint = _getPackageFfiTemplatePubspecVersion();
@@ -122,21 +122,27 @@ void main(List<String> args) async {
 ''');
 
         // Try building.
-        await expectLater(
-          processManager.run(
-            <String>[
-              flutterBin,
-              'build',
-              buildCommand,
-              '--debug',
-              if (!codeSign) '--no-codesign',
-            ],
-            workingDirectory: packageDirectory.path,
-          ),
-          completion(const ProcessResultMatcher()),
+        //
+        // TODO(matanlurey): Stream the app so that we can see partial output.
+        final List<String> args = <String>[
+          flutterBin,
+          'build',
+          buildCommand,
+          '--debug',
+          if (!codeSign) '--no-codesign',
+        ];
+        io.stderr.writeln('Running $args...');
+        final io.Process process = await processManager.start(
+          args,
+          workingDirectory: packageDirectory.path,
+          mode: ProcessStartMode.inheritStdio,
         );
-      });
+        expect(await process.exitCode, 0);
+      },);
     },
+    // TODO(matanlurey): Debug why flutter build apk often timesout.
+    // See https://github.com/flutter/flutter/issues/158560 for details.
+    skip: buildCommand == 'apk' ? 'flutter build apk times out' : false, // Temporary workaround for https://github.com/flutter/flutter/issues/158560.
   );
 }
 

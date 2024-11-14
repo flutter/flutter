@@ -17,9 +17,11 @@ import 'base/platform.dart';
 import 'base/template.dart';
 import 'base/version.dart';
 import 'cache.dart';
+import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
+import 'dart/pub.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'macos/darwin_dependency_management.dart';
@@ -40,8 +42,13 @@ Future<void> _renderTemplateToFile(
   await file.writeAsString(renderedTemplate);
 }
 
-Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies,
-    {FileSystem? fileSystem}) async {
+Future<Plugin?> _pluginFromPackage(
+  String name,
+  Uri packageRoot,
+  Set<String> appDependencies, {
+  required Set<String> devDependencies,
+  FileSystem? fileSystem,
+}) async {
   final FileSystem fs = fileSystem ?? globals.fs;
   final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
   if (!pubspecFile.existsSync()) {
@@ -76,10 +83,19 @@ Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> app
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
     fileSystem: fs,
     appDependencies: appDependencies,
+    isDevDependency: devDependencies.contains(name),
   );
 }
 
-Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = true}) async {
+/// Returns a list of all plugins to be registered with the provided [project].
+///
+/// If [throwOnError] is `true`, an empty package configuration is an error.
+Future<List<Plugin>> findPlugins(
+  FlutterProject project, {
+  bool throwOnError = true,
+  bool? determineDevDependencies,
+}) async {
+  determineDevDependencies ??= featureFlags.isExplicitPackageDependenciesEnabled;
   final List<Plugin> plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
   final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
@@ -88,12 +104,23 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     logger: globals.logger,
     throwOnError: throwOnError,
   );
+  final Set<String> devDependencies;
+  if (!determineDevDependencies) {
+    devDependencies = <String>{};
+  } else {
+    devDependencies = await computeExclusiveDevDependencies(
+      pub,
+      logger: globals.logger,
+      project: project,
+    );
+  }
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');
     final Plugin? plugin = await _pluginFromPackage(
       package.name,
       packageRoot,
       project.manifest.dependencies,
+      devDependencies: devDependencies,
       fileSystem: fs,
     );
     if (plugin != null) {
@@ -168,7 +195,8 @@ const String _kFlutterPluginsSharedDarwinSource = 'shared_darwin_source';
 bool _writeFlutterPluginsList(
   FlutterProject project,
   List<Plugin> plugins, {
-  bool forceCocoaPodsOnly = false,
+  required bool swiftPackageManagerEnabledIos,
+  required bool swiftPackageManagerEnabledMacos,
 }) {
   final File pluginsFile = project.flutterPluginsDependenciesFile;
   if (plugins.isEmpty) {
@@ -204,7 +232,11 @@ bool _writeFlutterPluginsList(
   result['dependencyGraph'] = _createPluginLegacyDependencyGraph(plugins);
   result['date_created'] = globals.systemClock.now().toString();
   result['version'] = globals.flutterVersion.frameworkVersion;
-  result['swift_package_manager_enabled'] = !forceCocoaPodsOnly && project.usesSwiftPackageManager;
+
+  result['swift_package_manager_enabled'] = <String, bool>{
+    'ios': swiftPackageManagerEnabledIos,
+    'macos': swiftPackageManagerEnabledMacos,
+  };
 
   // Only notify if the plugins list has changed. [date_created] will always be different,
   // [version] is not relevant for this check.
@@ -1010,19 +1042,33 @@ Future<void> refreshPluginsList(
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
-  required bool writeLegacyPluginsList,
+  bool? determineDevDependencies,
+  bool? generateLegacyPlugins,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project, determineDevDependencies: determineDevDependencies);
   // Sort the plugins by name to keep ordering stable in generated files.
   plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
   // TODO(matanlurey): Remove once migration is complete.
   // Write the legacy plugin files to avoid breaking existing apps.
-  final bool legacyChanged = writeLegacyPluginsList && _writeFlutterPluginsListLegacy(project, plugins);
+  generateLegacyPlugins ??= !featureFlags.isExplicitPackageDependenciesEnabled;
+  final bool legacyChanged = generateLegacyPlugins && _writeFlutterPluginsListLegacy(project, plugins);
+
+  bool swiftPackageManagerEnabledIos = false;
+  bool swiftPackageManagerEnabledMacos = false;
+  if (!forceCocoaPodsOnly) {
+    if (iosPlatform) {
+      swiftPackageManagerEnabledIos = project.ios.usesSwiftPackageManager;
+    }
+    if (macOSPlatform) {
+      swiftPackageManagerEnabledMacos = project.macos.usesSwiftPackageManager;
+    }
+  }
 
   final bool changed = _writeFlutterPluginsList(
     project,
     plugins,
-    forceCocoaPodsOnly: forceCocoaPodsOnly,
+    swiftPackageManagerEnabledIos: swiftPackageManagerEnabledIos,
+    swiftPackageManagerEnabledMacos: swiftPackageManagerEnabledMacos,
   );
   if (changed || legacyChanged || forceCocoaPodsOnly) {
     createPluginSymlinks(project, force: true);
