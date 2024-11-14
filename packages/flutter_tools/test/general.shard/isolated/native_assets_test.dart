@@ -180,6 +180,54 @@ void main() {
     expect(buildRunner.buildDryRunInvocations, 1);
   });
 
+  testUsingContext('Native assets: non-bundled libraries require no copying', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
+    await packageConfig.parent.create();
+    await packageConfig.create();
+
+    final File directSoFile = environment.projectDir.childFile('direct.so');
+    directSoFile.writeAsBytesSync(<int>[]);
+
+    CodeAsset makeCodeAsset(String name, LinkMode linkMode, [Uri? file])
+        => CodeAsset(
+             package: 'bar',
+             name: name,
+             linkMode: linkMode,
+             os: OS.linux,
+             architecture: Architecture.x64,
+             file: file,
+           );
+
+
+    await runFlutterSpecificDartBuild(
+      environmentDefines: <String, String>{
+        kBuildMode: BuildMode.release.cliName,
+      },
+      targetPlatform: TargetPlatform.linux_x64,
+      projectUri: projectUri,
+      nativeAssetsYamlUri: nonFlutterTesterAssetUri,
+      fileSystem: fileSystem,
+      buildRunner: FakeFlutterNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+        buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          codeAssets: <CodeAsset>[
+            makeCodeAsset('malloc', LookupInProcess()),
+            makeCodeAsset('free', LookupInExecutable()),
+            makeCodeAsset('draw', DynamicLoadingSystem(Uri.file('/usr/lib/skia.so'))),
+          ],
+        ),
+      ),
+    );
+    expect(testLogger.traceText.toLowerCase(), isNot(contains('copy')));
+  });
+
   testUsingContext('build with assets but not enabled', overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
