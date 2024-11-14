@@ -199,8 +199,8 @@ if (is_mac || is_ios) {
       sources = [
         "test_metal_context.h",
         "test_metal_context.mm",
-        "test_metal_surface.cc",
         "test_metal_surface.h",
+        "test_metal_surface.mm",
         "test_metal_surface_impl.h",
         "test_metal_surface_impl.mm",
       ]
@@ -260,7 +260,7 @@ if (enable_unittests) {
       cflags_objc = flutter_cflags_objc_arc
       cflags_objcc = flutter_cflags_objcc_arc
 
-      sources += [ "test_metal_surface_unittests.cc" ]
+      sources += [ "test_metal_surface_unittests.mm" ]
       deps += [ ":metal" ]
     }
   }
