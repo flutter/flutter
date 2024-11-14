@@ -17,6 +17,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'common.dart';
 
+/// Runs the dart build of the app.
 abstract class DartBuild extends Target {
   const DartBuild({
     @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,

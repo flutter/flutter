@@ -100,13 +100,14 @@ void main() {
           ),
         );
         final Map<String, String> environmentDefines = <String, String>{
-              kBuildMode: buildMode.cliName,
+          kBuildMode: buildMode.cliName,
         };
+        final TargetPlatform targetPlatform = flutterTester
+            ? TargetPlatform.tester
+            : TargetPlatform.windows_x64;
         final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
           environmentDefines: environmentDefines,
-          targetPlatform: flutterTester
-              ? TargetPlatform.tester
-              : TargetPlatform.windows_x64,
+          targetPlatform: targetPlatform,
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
@@ -120,7 +121,7 @@ void main() {
         await installCodeAssets(
           dartBuildResult: dartBuildResult,
           environmentDefines: environmentDefines,
-          targetPlatform: TargetPlatform.android_arm64,
+          targetPlatform: targetPlatform,
           projectUri: projectUri,
           fileSystem: fileSystem,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
@@ -136,7 +137,7 @@ void main() {
           ]),
         );
         expect(
-          await fileSystem.file(nativeAssetsFileUri ).readAsString(),
+          await fileSystem.file(nativeAssetsFileUri).readAsString(),
           stringContainsInOrder(<String>[
             'package:bar/bar.dart',
             if (flutterTester)

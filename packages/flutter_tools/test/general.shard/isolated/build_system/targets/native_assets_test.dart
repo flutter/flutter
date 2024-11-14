@@ -215,18 +215,31 @@ void main() {
       await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
       await const InstallCodeAssets().build(iosEnvironment);
 
-      final File nativeAssetsYaml = iosEnvironment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename);
-      final File depsFile = iosEnvironment.buildDir.childFile(InstallCodeAssets.depFilename);
-      expect(depsFile, exists);
-      // We don't care about the specific format, but it should contain the
-      // yaml as the file depending on the source files that went in to the
-      // build.
+      // We don't care about the specific format, but
+      //  * dart build output should depend on C source
+      //  * installation output should depend on shared library from dart build
+
+      final File dartBuildResult = iosEnvironment.buildDir.childFile(DartBuild.dartBuildResultFilename);
+      final File buildDepsFile = iosEnvironment.buildDir.childFile(DartBuild.depFilename);
+      expect(buildDepsFile, exists);
       expect(
-        depsFile.readAsStringSync(),
+        buildDepsFile.readAsStringSync(),
+        stringContainsInOrder(<String>[
+          dartBuildResult.path,
+          ':',
+          'src/foo.c',
+        ]),
+      );
+
+      final File nativeAssetsYaml = iosEnvironment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename);
+      final File installDepsFile = iosEnvironment.buildDir.childFile(InstallCodeAssets.depFilename);
+      expect(installDepsFile, exists);
+      expect(
+        installDepsFile.readAsStringSync(),
         stringContainsInOrder(<String>[
           nativeAssetsYaml.path,
           ':',
-          'src/foo.c',
+          'foo.framework/foo',
         ]),
       );
       expect(nativeAssetsYaml, exists);

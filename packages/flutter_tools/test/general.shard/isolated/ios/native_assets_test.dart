@@ -208,7 +208,7 @@ void main() {
       await installCodeAssets(
         dartBuildResult: dartBuildResult,
         environmentDefines: environmentDefines,
-        targetPlatform: TargetPlatform.android_arm64,
+        targetPlatform: TargetPlatform.ios,
         projectUri: projectUri,
         fileSystem: fileSystem,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,

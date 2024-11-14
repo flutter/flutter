@@ -60,8 +60,7 @@ void main() {
           FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
           ProcessManager: () => FakeProcessManager.empty(),
         }, () async {
-      final File packageConfig =
-          environment.projectDir.childFile('.dart_tool/package_config.json');
+      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
       await packageConfig.parent.create();
       await packageConfig.create();
@@ -91,9 +90,9 @@ void main() {
         ),
       );
       final Map<String, String> environmentDefines = <String, String>{
-          kBuildMode: buildMode.cliName,
-          kMinSdkVersion: minSdkVersion,
-        };
+        kBuildMode: buildMode.cliName,
+        kMinSdkVersion: minSdkVersion,
+      };
       final DartBuildResult result = await runFlutterSpecificDartBuild(
         environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.android_arm64,
@@ -117,7 +116,7 @@ void main() {
         ]),
       );
 
-      expect(nonFlutterTesterAssetUri , exists);
+      expect(environment.buildDir.childFile('native_assets.yaml'), exists);
       expect(buildRunner.buildInvocations, 1);
       expect(
         buildRunner.linkInvocations,
