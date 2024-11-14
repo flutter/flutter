@@ -74,7 +74,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   await installCodeAssets(dartBuildResult: dartBuildResult, environmentDefines: environmentDefines,
     targetPlatform: TargetPlatform.tester, projectUri: projectUri, fileSystem: globals.fs,
     nativeAssetsFileUri: nativeAssetsFileUri);
-  assert(!await globals.fs.file(nativeAssetsFileUri).exists());
+  assert(await globals.fs.file(nativeAssetsFileUri).exists());
 
   return nativeAssetsFileUri;
 }
