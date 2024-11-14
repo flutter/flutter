@@ -300,4 +300,67 @@ void main() {
       ),
     );
   });
+
+  testUsingContext('Native assets: no duplicate assets with linking', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
+    await packageConfig.parent.create();
+    await packageConfig.create();
+
+    final File directSoFile = environment.projectDir.childFile('direct.so');
+    directSoFile.writeAsBytesSync(<int>[]);
+    final File linkableAFile = environment.projectDir.childFile('linkable.a');
+    linkableAFile.writeAsBytesSync(<int>[]);
+    final File linkedSoFile = environment.projectDir.childFile('linked.so');
+    linkedSoFile.writeAsBytesSync(<int>[]);
+
+    CodeAsset makeCodeAsset(String name, Uri file, LinkMode linkMode)
+        => CodeAsset(
+             package: 'bar',
+             name: name,
+             linkMode: linkMode,
+             os: OS.linux,
+             architecture: Architecture.x64,
+             file: file,
+           );
+
+    final (DartBuildResult result, _) = await runFlutterSpecificDartBuild(
+      environmentDefines: <String, String>{
+        // Release mode means the dart build has linking enabled.
+        kBuildMode: BuildMode.release.cliName,
+      },
+      targetPlatform: TargetPlatform.linux_x64,
+      projectUri: projectUri,
+      nativeAssetsYamlUri: nonFlutterTesterAssetUri,
+      fileSystem: fileSystem,
+      buildRunner: FakeFlutterNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+        buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          codeAssets: <CodeAsset>[
+            makeCodeAsset('direct', directSoFile.uri, DynamicLoadingBundled()),
+          ],
+          codeAssetsForLinking: <String, List<CodeAsset>>{
+            'package:bar' : <CodeAsset>[
+              makeCodeAsset('linkable', linkableAFile.uri, StaticLinking()),
+            ],
+          },
+        ),
+        linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          codeAssets: <CodeAsset>[
+            makeCodeAsset('direct', directSoFile.uri, DynamicLoadingBundled()),
+            makeCodeAsset('linked', linkedSoFile.uri, DynamicLoadingBundled()),
+          ],
+        ),
+      ),
+    );
+    expect(
+      result.codeAssets.map((CodeAsset c) => c.file!.toString()).toList()..sort(),
+      <String>[directSoFile.uri.toString(), linkedSoFile.uri.toString()]);
+  });
 }

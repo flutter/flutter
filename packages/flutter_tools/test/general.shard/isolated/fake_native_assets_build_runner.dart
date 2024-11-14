@@ -12,6 +12,8 @@ import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
 
+export 'package:native_assets_cli/code_assets_builder.dart' show CodeAsset, DynamicLoadingBundled;
+
 /// Mocks all logic instead of using `package:native_assets_builder`, which
 /// relies on doing process calls to `pub` and the local file system.
 class FakeFlutterNativeAssetsBuildRunner
@@ -148,12 +150,22 @@ final class FakeFlutterNativeAssetsBuilderResult
 
   factory FakeFlutterNativeAssetsBuilderResult.fromAssets({
     List<CodeAsset> codeAssets = const <CodeAsset>[],
+    Map<String, List<CodeAsset>> codeAssetsForLinking = const <String, List<CodeAsset>>{},
     List<Uri> dependencies = const <Uri>[],
   }) {
     return FakeFlutterNativeAssetsBuilderResult(
       encodedAssets: <EncodedAsset>[
         for (final CodeAsset codeAsset in codeAssets) codeAsset.encode(),
-    ], dependencies: dependencies);
+      ],
+      encodedAssetsForLinking: <String, List<EncodedAsset>>{
+        for (final String linkerName in codeAssetsForLinking.keys)
+          linkerName: <EncodedAsset>[
+            for (final CodeAsset codeAsset in codeAssetsForLinking[linkerName]!)
+              codeAsset.encode(),
+          ],
+      },
+      dependencies: dependencies,
+    );
   }
 
   @override
