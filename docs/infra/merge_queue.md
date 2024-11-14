@@ -8,11 +8,11 @@ On Friday November 14, 2024, GitHub merge queue feature will be enabled in the f
 What should I expect?
 The only visible change will be the merge button. Currently, the button looks like this:
 
-<!-- TODO(Piinks) Image -->
+![Squash and merge button](https://github.com/flutter/assets-for-api-docs/blob/main/assets/wiki/squash_merge.png)
 
 With the merge queue, the button will now look like this:
 
-<!-- TODO(Piinks) Image -->
+![Merge when ready button](https://github.com/flutter/assets-for-api-docs/blob/main/assets/wiki/merge_ready.png)
 
 
 Unlike "Squash and merge", the new button does not immediately land the PR on the target branch, but instead enqueues your PR for extra checks in the merge queue. If you do not do anything, eventually your PR will land.
@@ -21,7 +21,7 @@ Yes! Feel free to continue using the autosubmit label as normal. The bots will r
 What's "Remove from queue"? Can I click it?
 While your PR is enqueued, Github will show the following button:
 
-<!-- TODO(Piinks) Image -->
+![Remove from queue button](https://github.com/flutter/assets-for-api-docs/blob/main/assets/wiki/remove_queue.png)
 
 When you press this button, GitHub will remove your PR from the queue, and the PR will no longer be landed by any automated machinery.
 
