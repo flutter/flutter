@@ -6,7 +6,7 @@
 
 #include <utility>
 
-namespace impeller {
+namespace impeller::testing {
 
 RecordingRenderPass::RecordingRenderPass(
     std::shared_ptr<RenderPass> delegate,
@@ -147,4 +147,4 @@ bool RecordingRenderPass::BindResource(
   return true;
 }
 
-}  // namespace impeller
+}  // namespace impeller::testing
