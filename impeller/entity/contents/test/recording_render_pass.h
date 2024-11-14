@@ -7,7 +7,7 @@
 
 #include "impeller/renderer/render_pass.h"
 
-namespace impeller {
+namespace impeller::testing {
 
 class RecordingRenderPass : public RenderPass {
  public:
@@ -82,6 +82,6 @@ class RecordingRenderPass : public RenderPass {
   std::vector<Command> commands_;
 };
 
-}  // namespace impeller
+}  // namespace impeller::testing
 
 #endif  // FLUTTER_IMPELLER_ENTITY_CONTENTS_TEST_RECORDING_RENDER_PASS_H_
