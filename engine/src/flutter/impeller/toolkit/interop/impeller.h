@@ -689,6 +689,14 @@ void ImpellerSurfaceRelease(ImpellerSurface IMPELLER_NULLABLE surface);
 /// @brief      Draw a display list onto the surface. The same display list can
 ///             be drawn multiple times to different surfaces.
 ///
+/// @warning    In the OpenGL backend, Impeller will not make an effort to
+///             preserve the OpenGL state that is current in the context.
+///             Embedders that perform additional OpenGL operations in the
+///             context should expect the reset state after control transitions
+///             back to them. Key state to watch out for would be the viewports,
+///             stencil rects, test toggles, resource (texture, framebuffer,
+///             buffer) bindings, etc...
+///
 /// @param[in]  surface       The surface to draw the display list to.
 /// @param[in]  display_list  The display list to draw onto the surface.
 ///
