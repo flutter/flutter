@@ -157,7 +157,7 @@ extension WebHTMLElementExtension on web.HTMLElement {
   void appendHtml(String html) {
     final web.HTMLDivElement div = web.document.createElement('div') as
         web.HTMLDivElement;
-    div.innerHTML = html;
+    div.innerHTML = html.toJS;
     final web.DocumentFragment fragment = web.document.createDocumentFragment();
     fragment.append(div as JSAny);
     web.document.adoptNode(fragment);
