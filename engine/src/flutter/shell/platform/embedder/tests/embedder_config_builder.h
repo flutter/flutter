@@ -11,8 +11,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_software.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 struct UniqueEngineTraits {
   static FlutterEngine InvalidValue() { return nullptr; }
@@ -126,6 +125,10 @@ class EmbedderConfigBuilder {
   void SetupVsyncCallback();
 
  private:
+  void InitializeGLRendererConfig();
+  void InitializeVulkanRendererConfig();
+  void InitializeMetalRendererConfig();
+
   EmbedderTestContext& context_;
   FlutterProjectArgs project_args_ = {};
   FlutterRendererConfig renderer_config_ = {};
@@ -133,13 +136,11 @@ class EmbedderConfigBuilder {
 #ifdef SHELL_ENABLE_GL
   FlutterOpenGLRendererConfig opengl_renderer_config_ = {};
 #endif
-#ifdef SHELL_ENABLE_VULKAN
-  void InitializeVulkanRendererConfig();
-  FlutterVulkanRendererConfig vulkan_renderer_config_ = {};
-#endif
 #ifdef SHELL_ENABLE_METAL
-  void InitializeMetalRendererConfig();
   FlutterMetalRendererConfig metal_renderer_config_ = {};
+#endif
+#ifdef SHELL_ENABLE_VULKAN
+  FlutterVulkanRendererConfig vulkan_renderer_config_ = {};
 #endif
   std::string dart_entrypoint_;
   FlutterCustomTaskRunners custom_task_runners_ = {};
@@ -153,7 +154,6 @@ class EmbedderConfigBuilder {
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderConfigBuilder);
 };
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_CONFIG_BUILDER_H_

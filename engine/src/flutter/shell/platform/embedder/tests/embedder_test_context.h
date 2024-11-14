@@ -72,6 +72,10 @@ class EmbedderTestContext {
 
   void SetRootSurfaceTransformation(SkMatrix matrix);
 
+  void SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType type,
+      FlutterSoftwarePixelFormat software_pixfmt);
+
   void AddIsolateCreateCallback(const fml::closure& closure);
 
   void SetSemanticsUpdateCallback2(SemanticsUpdateCallback2 update_semantics);

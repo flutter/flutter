@@ -11,23 +11,7 @@
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
 
-#ifdef SHELL_ENABLE_GL
-#include "flutter/shell/platform/embedder/tests/embedder_test_compositor_gl.h"
-#include "flutter/shell/platform/embedder/tests/embedder_test_context_gl.h"
-#endif
-
-#ifdef SHELL_ENABLE_VULKAN
-#include "flutter/shell/platform/embedder/tests/embedder_test_context_vulkan.h"
-#include "flutter/vulkan/vulkan_device.h"  // nogncheck
-#include "vulkan/vulkan_core.h"            // nogncheck
-#endif
-
-#ifdef SHELL_ENABLE_METAL
-#include "flutter/shell/platform/embedder/tests/embedder_test_context_metal.h"
-#endif
-
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 EmbedderConfigBuilder::EmbedderConfigBuilder(
     EmbedderTestContext& context,
@@ -43,49 +27,9 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
 
   custom_task_runners_.struct_size = sizeof(FlutterCustomTaskRunners);
 
-#ifdef SHELL_ENABLE_GL
-  opengl_renderer_config_.struct_size = sizeof(FlutterOpenGLRendererConfig);
-  opengl_renderer_config_.make_current = [](void* context) -> bool {
-    return reinterpret_cast<EmbedderTestContextGL*>(context)->GLMakeCurrent();
-  };
-  opengl_renderer_config_.clear_current = [](void* context) -> bool {
-    return reinterpret_cast<EmbedderTestContextGL*>(context)->GLClearCurrent();
-  };
-  opengl_renderer_config_.present_with_info =
-      [](void* context, const FlutterPresentInfo* present_info) -> bool {
-    return reinterpret_cast<EmbedderTestContextGL*>(context)->GLPresent(
-        *present_info);
-  };
-  opengl_renderer_config_.fbo_with_frame_info_callback =
-      [](void* context, const FlutterFrameInfo* frame_info) -> uint32_t {
-    return reinterpret_cast<EmbedderTestContextGL*>(context)->GLGetFramebuffer(
-        *frame_info);
-  };
-  opengl_renderer_config_.populate_existing_damage = nullptr;
-  opengl_renderer_config_.make_resource_current = [](void* context) -> bool {
-    return reinterpret_cast<EmbedderTestContextGL*>(context)
-        ->GLMakeResourceCurrent();
-  };
-  opengl_renderer_config_.gl_proc_resolver = [](void* context,
-                                                const char* name) -> void* {
-    return reinterpret_cast<EmbedderTestContextGL*>(context)->GLGetProcAddress(
-        name);
-  };
-  opengl_renderer_config_.fbo_reset_after_present = true;
-  opengl_renderer_config_.surface_transformation =
-      [](void* context) -> FlutterTransformation {
-    return reinterpret_cast<EmbedderTestContext*>(context)
-        ->GetRootSurfaceTransformation();
-  };
-#endif
-
-#ifdef SHELL_ENABLE_METAL
+  InitializeGLRendererConfig();
   InitializeMetalRendererConfig();
-#endif
-
-#ifdef SHELL_ENABLE_VULKAN
   InitializeVulkanRendererConfig();
-#endif
 
   software_renderer_config_.struct_size = sizeof(FlutterSoftwareRendererConfig);
   software_renderer_config_.surface_present_callback =
@@ -141,37 +85,6 @@ void EmbedderConfigBuilder::SetSoftwareRendererConfig(SkISize surface_size) {
   context_.SetupSurface(surface_size);
 }
 
-void EmbedderConfigBuilder::SetOpenGLFBOCallBack() {
-#ifdef SHELL_ENABLE_GL
-  // SetOpenGLRendererConfig must be called before this.
-  FML_CHECK(renderer_config_.type == FlutterRendererType::kOpenGL);
-  renderer_config_.open_gl.fbo_callback = [](void* context) -> uint32_t {
-    FlutterFrameInfo frame_info = {};
-    // fbo_callback doesn't use the frame size information, only
-    // fbo_callback_with_frame_info does.
-    frame_info.struct_size = sizeof(FlutterFrameInfo);
-    frame_info.size.width = 0;
-    frame_info.size.height = 0;
-    return reinterpret_cast<EmbedderTestContextGL*>(context)->GLGetFramebuffer(
-        frame_info);
-  };
-#endif
-}
-
-void EmbedderConfigBuilder::SetOpenGLPresentCallBack() {
-#ifdef SHELL_ENABLE_GL
-  // SetOpenGLRendererConfig must be called before this.
-  FML_CHECK(renderer_config_.type == FlutterRendererType::kOpenGL);
-  renderer_config_.open_gl.present = [](void* context) -> bool {
-    // passing a placeholder fbo_id.
-    return reinterpret_cast<EmbedderTestContextGL*>(context)->GLPresent(
-        FlutterPresentInfo{
-            .fbo_id = 0,
-        });
-  };
-#endif
-}
-
 void EmbedderConfigBuilder::SetRendererConfig(EmbedderTestContextType type,
                                               SkISize surface_size) {
   switch (type) {
@@ -188,38 +101,6 @@ void EmbedderConfigBuilder::SetRendererConfig(EmbedderTestContextType type,
       SetSoftwareRendererConfig(surface_size);
       break;
   }
-}
-
-void EmbedderConfigBuilder::SetOpenGLRendererConfig(SkISize surface_size) {
-#ifdef SHELL_ENABLE_GL
-  renderer_config_.type = FlutterRendererType::kOpenGL;
-  renderer_config_.open_gl = opengl_renderer_config_;
-  context_.SetupSurface(surface_size);
-#endif
-}
-
-void EmbedderConfigBuilder::SetMetalRendererConfig(SkISize surface_size) {
-#ifdef SHELL_ENABLE_METAL
-  renderer_config_.type = FlutterRendererType::kMetal;
-  renderer_config_.metal = metal_renderer_config_;
-  context_.SetupSurface(surface_size);
-#endif
-}
-
-void EmbedderConfigBuilder::SetVulkanRendererConfig(
-    SkISize surface_size,
-    std::optional<FlutterVulkanInstanceProcAddressCallback>
-        instance_proc_address_callback) {
-#ifdef SHELL_ENABLE_VULKAN
-  renderer_config_.type = FlutterRendererType::kVulkan;
-  FlutterVulkanRendererConfig vulkan_renderer_config = vulkan_renderer_config_;
-  if (instance_proc_address_callback.has_value()) {
-    vulkan_renderer_config.get_instance_proc_address_callback =
-        instance_proc_address_callback.value();
-  }
-  renderer_config_.vulkan = vulkan_renderer_config;
-  context_.SetupSurface(surface_size);
-#endif
 }
 
 void EmbedderConfigBuilder::SetAssetsPath() {
@@ -406,18 +287,7 @@ FlutterCompositor& EmbedderConfigBuilder::GetCompositor() {
 void EmbedderConfigBuilder::SetRenderTargetType(
     EmbedderTestBackingStoreProducer::RenderTargetType type,
     FlutterSoftwarePixelFormat software_pixfmt) {
-  auto& compositor = context_.GetCompositor();
-
-  auto producer = std::make_unique<EmbedderTestBackingStoreProducer>(
-      compositor.GetGrContext(), type, software_pixfmt);
-
-#ifdef SHELL_ENABLE_GL
-  producer->SetEGLContext(context_.egl_context_);
-#endif
-
-  // TODO(wrightgeorge): figure out a better way of plumbing through the
-  // GrDirectContext
-  compositor.SetBackingStoreProducer(std::move(producer));
+  context_.SetRenderTargetType(type, software_pixfmt);
 }
 
 UniqueEngine EmbedderConfigBuilder::LaunchEngine() const {
@@ -479,93 +349,52 @@ UniqueEngine EmbedderConfigBuilder::SetupEngine(bool run) const {
   return UniqueEngine{engine};
 }
 
-#ifdef SHELL_ENABLE_METAL
+#ifndef SHELL_ENABLE_GL
+// OpenGL fallback implementations.
+// See: flutter/shell/platform/embedder/tests/embedder_config_builder_gl.cc.
+
+void EmbedderConfigBuilder::InitializeGLRendererConfig() {
+  // no-op.
+}
+
+void EmbedderConfigBuilder::SetOpenGLFBOCallBack() {
+  FML_LOG(FATAL) << "OpenGL is not enabled in this build.";
+}
+
+void EmbedderConfigBuilder::SetOpenGLPresentCallBack() {
+  FML_LOG(FATAL) << "OpenGL is not enabled in this build.";
+}
+
+void EmbedderConfigBuilder::SetOpenGLRendererConfig(SkISize surface_size) {
+  FML_LOG(FATAL) << "OpenGL is not enabled in this build.";
+}
+#endif
+#ifndef SHELL_ENABLE_METAL
+// Metal fallback implementations.
+// See: flutter/shell/platform/embedder/tests/embedder_config_builder_metal.mm.
 
 void EmbedderConfigBuilder::InitializeMetalRendererConfig() {
-  if (context_.GetContextType() != EmbedderTestContextType::kMetalContext) {
-    return;
-  }
-
-  metal_renderer_config_.struct_size = sizeof(metal_renderer_config_);
-  EmbedderTestContextMetal& metal_context =
-      reinterpret_cast<EmbedderTestContextMetal&>(context_);
-
-  metal_renderer_config_.device =
-      metal_context.GetTestMetalContext()->GetMetalDevice();
-  metal_renderer_config_.present_command_queue =
-      metal_context.GetTestMetalContext()->GetMetalCommandQueue();
-  metal_renderer_config_.get_next_drawable_callback =
-      [](void* user_data, const FlutterFrameInfo* frame_info) {
-        return reinterpret_cast<EmbedderTestContextMetal*>(user_data)
-            ->GetNextDrawable(frame_info);
-      };
-  metal_renderer_config_.present_drawable_callback =
-      [](void* user_data, const FlutterMetalTexture* texture) -> bool {
-    EmbedderTestContextMetal* metal_context =
-        reinterpret_cast<EmbedderTestContextMetal*>(user_data);
-    return metal_context->Present(texture->texture_id);
-  };
-  metal_renderer_config_.external_texture_frame_callback =
-      [](void* user_data, int64_t texture_id, size_t width, size_t height,
-         FlutterMetalExternalTexture* texture_out) -> bool {
-    EmbedderTestContextMetal* metal_context =
-        reinterpret_cast<EmbedderTestContextMetal*>(user_data);
-    return metal_context->PopulateExternalTexture(texture_id, width, height,
-                                                  texture_out);
-  };
+  // no-op.
 }
 
-#endif  // SHELL_ENABLE_METAL
-
-#ifdef SHELL_ENABLE_VULKAN
+void EmbedderConfigBuilder::SetMetalRendererConfig(SkISize surface_size) {
+  FML_LOG(FATAL) << "Metal is not enabled in this build.";
+}
+#endif
+#ifndef SHELL_ENABLE_VULKAN
+// Vulkan fallback implementations.
+// See: flutter/shell/platform/embedder/tests/embedder_config_builder_vulkan.cc.
 
 void EmbedderConfigBuilder::InitializeVulkanRendererConfig() {
-  if (context_.GetContextType() != EmbedderTestContextType::kVulkanContext) {
-    return;
-  }
-
-  vulkan_renderer_config_.struct_size = sizeof(FlutterVulkanRendererConfig);
-  vulkan_renderer_config_.version =
-      static_cast<EmbedderTestContextVulkan&>(context_)
-          .vulkan_context_->application_->GetAPIVersion();
-  vulkan_renderer_config_.instance =
-      static_cast<EmbedderTestContextVulkan&>(context_)
-          .vulkan_context_->application_->GetInstance();
-  vulkan_renderer_config_.physical_device =
-      static_cast<EmbedderTestContextVulkan&>(context_)
-          .vulkan_context_->device_->GetPhysicalDeviceHandle();
-  vulkan_renderer_config_.device =
-      static_cast<EmbedderTestContextVulkan&>(context_)
-          .vulkan_context_->device_->GetHandle();
-  vulkan_renderer_config_.queue_family_index =
-      static_cast<EmbedderTestContextVulkan&>(context_)
-          .vulkan_context_->device_->GetGraphicsQueueIndex();
-  vulkan_renderer_config_.queue =
-      static_cast<EmbedderTestContextVulkan&>(context_)
-          .vulkan_context_->device_->GetQueueHandle();
-  vulkan_renderer_config_.get_instance_proc_address_callback =
-      EmbedderTestContextVulkan::InstanceProcAddr;
-  vulkan_renderer_config_.get_next_image_callback =
-      [](void* context,
-         const FlutterFrameInfo* frame_info) -> FlutterVulkanImage {
-    VkImage image =
-        reinterpret_cast<EmbedderTestContextVulkan*>(context)->GetNextImage(
-            {static_cast<int>(frame_info->size.width),
-             static_cast<int>(frame_info->size.height)});
-    return {
-        .struct_size = sizeof(FlutterVulkanImage),
-        .image = reinterpret_cast<uint64_t>(image),
-        .format = VK_FORMAT_R8G8B8A8_UNORM,
-    };
-  };
-  vulkan_renderer_config_.present_image_callback =
-      [](void* context, const FlutterVulkanImage* image) -> bool {
-    return reinterpret_cast<EmbedderTestContextVulkan*>(context)->PresentImage(
-        reinterpret_cast<VkImage>(image->image));
-  };
+  // no-op.
 }
 
+void EmbedderConfigBuilder::SetVulkanRendererConfig(
+    SkISize surface_size,
+    std::optional<FlutterVulkanInstanceProcAddressCallback>
+        instance_proc_address_callback) {
+  FML_LOG(FATAL) << "Vulkan is not enabled in this build.";
+}
 #endif
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
