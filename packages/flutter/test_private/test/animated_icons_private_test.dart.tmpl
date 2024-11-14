@@ -396,7 +396,7 @@ class Mock {
               '${expected[count].memberName} instead.');
       if (call.positionalArguments != null && !expected[count].acceptAny) {
         int countArg = 0;
-        for (final dynamic arg in call.positionalArguments!) {
+        for (final Object? arg in call.positionalArguments!) {
           expect(arg, equals(expected[count].positionalArguments![countArg]),
               reason: 'Failed at call $count. Positional argument $countArg to ${call.memberName} '
                   'not as expected. Expected ${expected[count].positionalArguments![countArg]} '
