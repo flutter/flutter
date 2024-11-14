@@ -508,6 +508,7 @@ dependencies:
               'plugin-b',
               'plugin-c',
             ],
+            'dev_dependency': false,
           },
           <String, dynamic> {
             'name': 'plugin-b',
@@ -516,12 +517,14 @@ dependencies:
             'dependencies': <String>[
               'plugin-c',
             ],
+            'dev_dependency': false,
           },
           <String, dynamic> {
             'name': 'plugin-c',
             'path': '${pluginC.path}/',
             'native_build': true,
             'dependencies': <String>[],
+            'dev_dependency': false,
           },
         ];
         expect(plugins['ios'], expectedPlugins);
@@ -614,7 +617,8 @@ dependencies:
               'path': '/.tmp_rand0/flutter_plugin.rand0/',
               'shared_darwin_source': true,
               'native_build': true,
-              'dependencies': <String>[]
+              'dependencies': <String>[],
+              'dev_dependency': false,
             }
           ],
           'android': <Map<String, Object>>[
@@ -622,7 +626,8 @@ dependencies:
               'name': 'plugin-a',
               'path': '/.tmp_rand0/flutter_plugin.rand0/',
               'native_build': true,
-              'dependencies': <String>[]
+              'dependencies': <String>[],
+              'dev_dependency': false,
             }
           ],
           'macos': <Map<String, Object>>[],
@@ -632,14 +637,16 @@ dependencies:
               'name': 'plugin-a',
               'path': '/.tmp_rand0/flutter_plugin.rand0/',
               'native_build': false,
-              'dependencies': <String>[]
+              'dependencies': <String>[],
+              'dev_dependency': false,
             }
           ],
           'web': <Map<String, Object>>[
             <String, Object>{
               'name': 'plugin-a',
               'path': '/.tmp_rand0/flutter_plugin.rand0/',
-              'dependencies': <String>[]
+              'dependencies': <String>[],
+              'dev_dependency': false,
             }
           ]
         };
