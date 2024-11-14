@@ -181,7 +181,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
       );
-      logReader.connectedVMService = vmService;
+      await logReader.provideVmService(vmService);
 
       // Wait for stream listeners to fire.
       await expectLater(logReader.logLines, emitsInAnyOrder(<Matcher>[
@@ -223,7 +223,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
       );
-      logReader.connectedVMService = vmService;
+      await logReader.provideVmService(vmService);
 
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       iosDeployDebugger.debuggerAttached = true;
@@ -425,7 +425,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
 
-    testWithoutContext('for iOS 13 or greater non-CoreDevice, _iosDeployDebugger not attached, and VM is connected', () {
+    testWithoutContext('for iOS 13 or greater non-CoreDevice, _iosDeployDebugger not attached, and VM is connected', () async {
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -448,7 +448,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         }),
       ]).vmService;
 
-      logReader.connectedVMService = vmService;
+      await logReader.provideVmService(vmService);
 
       expect(logReader.useSyslogLogging, isFalse);
       expect(logReader.useUnifiedLogging, isTrue);
@@ -457,7 +457,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.iosDeploy);
     });
 
-    testWithoutContext('for iOS 13 or greater non-CoreDevice and _iosDeployDebugger is attached', () {
+    testWithoutContext('for iOS 13 or greater non-CoreDevice and _iosDeployDebugger is attached', () async {
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -484,7 +484,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         }),
       ]).vmService;
 
-      logReader.connectedVMService = vmService;
+      await logReader.provideVmService(vmService);
 
       expect(logReader.useSyslogLogging, isFalse);
       expect(logReader.useUnifiedLogging, isTrue);
@@ -685,7 +685,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             logger: logger,
           ),
         );
-        logReader.connectedVMService = vmService;
+        await logReader.provideVmService(vmService);
 
         // Wait for stream listeners to fire.
         expect(logReader.useUnifiedLogging, isTrue);
@@ -729,7 +729,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           ),
           majorSdkVersion: 12,
         );
-        logReader.connectedVMService = vmService;
+        await logReader.provideVmService(vmService);
 
         final List<String> lines = await logReader.logLines.toList();
 

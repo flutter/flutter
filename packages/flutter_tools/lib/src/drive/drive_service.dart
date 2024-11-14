@@ -231,9 +231,7 @@ class FlutterDriverService extends DriverService {
     _vmService = await _vmServiceConnector(uri, device: _device, logger: _logger);
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
     logReader.logLines.listen(_logger.printStatus);
-
-    final vm_service.VM vm = await _vmService.service.getVM();
-    logReader.appPid = vm.pid;
+    await logReader.provideVmService(_vmService);
   }
 
   @override

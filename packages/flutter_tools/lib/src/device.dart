@@ -1440,13 +1440,10 @@ abstract class DeviceLogReader {
 
   /// Some logs can be obtained from a VM service stream.
   /// Set this after the VM services are connected.
-  FlutterVmService? connectedVMService;
+  Future<void> provideVmService(FlutterVmService connectedVmService);
 
   @override
   String toString() => name;
-
-  /// Process ID of the app on the device.
-  int? appPid;
 
   // Clean up resources allocated by log reader e.g. subprocesses
   void dispose();
@@ -1467,16 +1464,13 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   final String name;
 
   @override
-  int? appPid;
-
-  @override
-  FlutterVmService? connectedVMService;
-
-  @override
   Stream<String> get logLines => const Stream<String>.empty();
 
   @override
   void dispose() { }
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {}
 }
 
 /// Append --null_assertions to any existing Dart VM flags if

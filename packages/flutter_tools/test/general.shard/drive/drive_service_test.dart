@@ -273,7 +273,6 @@ void main() {
   testUsingContext('Writes SkSL to file when provided with out file', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
-      getVM,
       listViews,
       const FakeVmServiceRequest(
         method: '_flutter.getSkSLs',
@@ -311,7 +310,6 @@ void main() {
   testWithoutContext('Can connect to existing application and stop it during cleanup', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
       getVM,
-      getVM,
       const FakeVmServiceRequest(
         method: 'ext.flutter.exit',
         args: <String, Object>{
@@ -333,7 +331,6 @@ void main() {
 
   testWithoutContext('Can connect to existing application using ws URI', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
-      getVM,
       getVM,
       const FakeVmServiceRequest(
         method: 'ext.flutter.exit',
@@ -357,7 +354,6 @@ void main() {
   testWithoutContext('Can connect to existing application using ws URI (no trailing slash)', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
       getVM,
-      getVM,
       const FakeVmServiceRequest(
         method: 'ext.flutter.exit',
         args: <String, Object>{
@@ -379,7 +375,6 @@ void main() {
 
   testWithoutContext('Can connect to existing application using ws URI (no trailing slash, ws in auth code)', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
-      getVM,
       getVM,
       const FakeVmServiceRequest(
         method: 'ext.flutter.exit',
