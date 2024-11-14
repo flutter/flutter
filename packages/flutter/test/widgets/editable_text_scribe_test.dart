@@ -6,6 +6,7 @@ import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -44,9 +45,44 @@ void main() {
     focusNode.dispose();
   });
 
+  Future<void> pumpTextSelectionGestureDetectorBuilder(
+    WidgetTester tester, {
+    bool forcePressEnabled = true,
+    bool selectionEnabled = true,
+  }) async {
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: forcePressEnabled,
+      selectionEnabled: selectionEnabled,
+    );
+
+    final TextSelectionGestureDetectorBuilder provider =
+      TextSelectionGestureDetectorBuilder(delegate: delegate);
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: provider.buildGestureDetector(
+          behavior: HitTestBehavior.translucent,
+          child: FakeEditableText(
+            key: editableTextKey,
+            controller: controller,
+            focusNode: focusNode,
+          ),
+        ),
+      ),
+    );
+  }
+
   testWidgets('when Scribe is available, starts handwriting on tap down', (WidgetTester tester) async {
     isFeatureAvailableReturnValue = true;
 
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+    /*
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -59,6 +95,7 @@ void main() {
         ),
       ),
     );
+    */
 
     expect(focusNode.hasFocus, isFalse);
 
@@ -347,4 +384,176 @@ void main() {
       await gesture.up();
     }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
   });
+}
+
+class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {
+  FakeTextSelectionGestureDetectorBuilderDelegate({
+    required this.editableTextKey,
+    required this.forcePressEnabled,
+    required this.selectionEnabled,
+  });
+
+  @override
+  final GlobalKey<EditableTextState> editableTextKey;
+
+  @override
+  final bool forcePressEnabled;
+
+  @override
+  final bool selectionEnabled;
+}
+
+class FakeEditableText extends EditableText {
+  FakeEditableText({
+    required super.controller,
+    required super.focusNode,
+    super.key,
+  }): super(
+    backgroundCursorColor: Colors.white,
+    cursorColor: Colors.white,
+    style: const TextStyle(),
+  );
+
+  @override
+  FakeEditableTextState createState() => FakeEditableTextState();
+}
+
+class FakeEditableTextState extends EditableTextState {
+  final GlobalKey _editableKey = GlobalKey();
+  bool showToolbarCalled = false;
+  bool toggleToolbarCalled = false;
+  bool showSpellCheckSuggestionsToolbarCalled = false;
+  bool markCurrentSelectionAsMisspelled = false;
+
+  @override
+  RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
+
+  @override
+  bool showToolbar() {
+    showToolbarCalled = true;
+    return true;
+  }
+
+  @override
+  void toggleToolbar([bool hideHandles = true]) {
+    toggleToolbarCalled = true;
+    return;
+  }
+
+  @override
+  bool showSpellCheckSuggestionsToolbar() {
+    showSpellCheckSuggestionsToolbarCalled = true;
+    return true;
+  }
+
+  @override
+  SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
+    return markCurrentSelectionAsMisspelled
+      ? const SuggestionSpan(
+        TextRange(start: 7, end: 12),
+        <String>['word', 'world', 'old'],
+      ) : null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return FakeEditable(this, key: _editableKey);
+  }
+}
+
+class FakeEditable extends LeafRenderObjectWidget {
+  const FakeEditable(
+    this.delegate, {
+    super.key,
+  });
+  final EditableTextState delegate;
+
+  @override
+  RenderEditable createRenderObject(BuildContext context) {
+    return FakeRenderEditable(delegate);
+  }
+}
+
+class FakeRenderEditable extends RenderEditable {
+  FakeRenderEditable(EditableTextState delegate)
+      : this._(delegate, ViewportOffset.fixed(10.0));
+
+  FakeRenderEditable._(
+    EditableTextState delegate,
+    this._offset,
+  ) : super(
+    text: const TextSpan(
+      style: TextStyle(height: 1.0, fontSize: 10.0),
+      text: 'placeholder',
+    ),
+    startHandleLayerLink: LayerLink(),
+    endHandleLayerLink: LayerLink(),
+    ignorePointer: true,
+    textAlign: TextAlign.start,
+    textDirection: TextDirection.ltr,
+    locale: const Locale('en', 'US'),
+    offset: _offset,
+    textSelectionDelegate: delegate,
+    selection: const TextSelection.collapsed(
+      offset: 0,
+    ),
+  );
+
+  SelectionChangedCause? lastCause;
+
+  ViewportOffset _offset;
+
+  bool selectWordsInRangeCalled = false;
+  @override
+  void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
+    selectWordsInRangeCalled = true;
+    hasFocus = true;
+    lastCause = cause;
+  }
+
+  bool selectWordEdgeCalled = false;
+  @override
+  void selectWordEdge({ required SelectionChangedCause cause }) {
+    selectWordEdgeCalled = true;
+    hasFocus = true;
+    lastCause = cause;
+  }
+
+  bool selectPositionAtCalled = false;
+  Offset? selectPositionAtFrom;
+  Offset? selectPositionAtTo;
+  @override
+  void selectPositionAt({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
+    selectPositionAtCalled = true;
+    selectPositionAtFrom = from;
+    selectPositionAtTo = to;
+    hasFocus = true;
+    lastCause = cause;
+  }
+
+  bool selectPositionCalled = false;
+  @override
+  void selectPosition({ required SelectionChangedCause cause }) {
+    selectPositionCalled = true;
+    lastCause = cause;
+    return super.selectPosition(cause: cause);
+  }
+
+  bool selectWordCalled = false;
+  @override
+  void selectWord({ required SelectionChangedCause cause }) {
+    selectWordCalled = true;
+    hasFocus = true;
+    lastCause = cause;
+  }
+
+  @override
+  bool hasFocus = false;
+
+  @override
+  void dispose() {
+    _offset.dispose();
+    super.dispose();
+  }
 }
