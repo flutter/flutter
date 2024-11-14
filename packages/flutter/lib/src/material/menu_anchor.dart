@@ -3334,7 +3334,7 @@ class _Submenu extends StatelessWidget {
       menuPosition.anchorRect.bottom,
     );
 
-    Widget body = TapRegion(
+    final Widget child = TapRegion(
       consumeOutsideTaps: consumeOutsideTaps,
       groupId: menuPosition.tapRegionGroupId,
       onTapOutside: (PointerDownEvent event) {
@@ -3366,15 +3366,7 @@ class _Submenu extends StatelessWidget {
       ),
     );
 
-    if (layerLink != null) {
-      body = CompositedTransformFollower(
-        link: layerLink!,
-        targetAnchor: Alignment.bottomLeft,
-        child: body,
-      );
-    }
-
-    return Theme(
+    final Widget layout = Theme(
       data: Theme.of(context).copyWith(visualDensity: visualDensity),
       child: ConstrainedBox(
         constraints: BoxConstraints.loose(menuPosition.overlaySize),
@@ -3392,11 +3384,21 @@ class _Submenu extends StatelessWidget {
                 orientation: anchor._orientation,
                 parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
               ),
-              child: body
+              child: child
             );
           }
         ),
       ),
+    );
+
+    if (layerLink == null) {
+      return layout;
+    }
+
+    return CompositedTransformFollower(
+      link: layerLink!,
+      targetAnchor: Alignment.bottomLeft,
+      child: child,
     );
   }
 }
