@@ -328,10 +328,10 @@ if (enable_unittests) {
 
     if (test_enable_metal) {
       sources += [
-        "tests/embedder_test_compositor_metal.cc",
         "tests/embedder_test_compositor_metal.h",
-        "tests/embedder_test_context_metal.cc",
+        "tests/embedder_test_compositor_metal.mm",
         "tests/embedder_test_context_metal.h",
+        "tests/embedder_test_context_metal.mm",
         "tests/embedder_test_metal.mm",
       ]
 

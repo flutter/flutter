@@ -14,29 +14,26 @@
 namespace flutter {
 namespace testing {
 
-EmbedderTestCompositorMetal::EmbedderTestCompositorMetal(
-    SkISize surface_size,
-    sk_sp<GrDirectContext> context)
+EmbedderTestCompositorMetal::EmbedderTestCompositorMetal(SkISize surface_size,
+                                                         sk_sp<GrDirectContext> context)
     : EmbedderTestCompositor(surface_size, std::move(context)) {}
 
 EmbedderTestCompositorMetal::~EmbedderTestCompositorMetal() = default;
 
-bool EmbedderTestCompositorMetal::UpdateOffscrenComposition(
-    const FlutterLayer** layers,
-    size_t layers_count) {
+bool EmbedderTestCompositorMetal::UpdateOffscrenComposition(const FlutterLayer** layers,
+                                                            size_t layers_count) {
   last_composition_ = nullptr;
 
   const auto image_info = SkImageInfo::MakeN32Premul(surface_size_);
 
-  auto surface =
-      SkSurfaces::RenderTarget(context_.get(),            // context
-                               skgpu::Budgeted::kNo,      // budgeted
-                               image_info,                // image info
-                               1,                         // sample count
-                               kTopLeft_GrSurfaceOrigin,  // surface origin
-                               nullptr,                   // surface properties
-                               false                      // create mipmaps
-      );
+  auto surface = SkSurfaces::RenderTarget(context_.get(),            // context
+                                          skgpu::Budgeted::kNo,      // budgeted
+                                          image_info,                // image info
+                                          1,                         // sample count
+                                          kTopLeft_GrSurfaceOrigin,  // surface origin
+                                          nullptr,                   // surface properties
+                                          false                      // create mipmaps
+  );
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not update the off-screen composition.";
@@ -60,14 +57,12 @@ bool EmbedderTestCompositorMetal::UpdateOffscrenComposition(
     switch (layer->type) {
       case kFlutterLayerContentTypeBackingStore:
         layer_image =
-            reinterpret_cast<SkSurface*>(layer->backing_store->user_data)
-                ->makeImageSnapshot();
+            reinterpret_cast<SkSurface*>(layer->backing_store->user_data)->makeImageSnapshot();
         break;
       case kFlutterLayerContentTypePlatformView:
-        layer_image =
-            platform_view_renderer_callback_
-                ? platform_view_renderer_callback_(*layer, context_.get())
-                : nullptr;
+        layer_image = platform_view_renderer_callback_
+                          ? platform_view_renderer_callback_(*layer, context_.get())
+                          : nullptr;
         canvas_offset = SkIPoint::Make(layer->offset.x, layer->offset.y);
         break;
     };
@@ -75,8 +70,7 @@ bool EmbedderTestCompositorMetal::UpdateOffscrenComposition(
     // If the layer is not a platform view but the engine did not specify an
     // image for the backing store, it is an error.
     if (!layer_image && layer->type != kFlutterLayerContentTypePlatformView) {
-      FML_LOG(ERROR) << "Could not snapshot layer in test compositor: "
-                     << *layer;
+      FML_LOG(ERROR) << "Could not snapshot layer in test compositor: " << *layer;
       return false;
     }
 
@@ -85,8 +79,7 @@ bool EmbedderTestCompositorMetal::UpdateOffscrenComposition(
     if (layer_image) {
       // The image rendered by Flutter already has the correct offset and
       // transformation applied. The layers offset is meant for the platform.
-      canvas->drawImage(layer_image.get(), canvas_offset.x(),
-                        canvas_offset.y());
+      canvas->drawImage(layer_image.get(), canvas_offset.x(), canvas_offset.y());
     }
   }
 

@@ -101,8 +101,8 @@ source_set("display_list_surface_provider") {
 
   if (surface_provider_include_metal) {
     sources += [
-      "dl_test_surface_metal.cc",
       "dl_test_surface_metal.h",
+      "dl_test_surface_metal.mm",
     ]
     deps += [
       "//flutter/impeller/display_list",

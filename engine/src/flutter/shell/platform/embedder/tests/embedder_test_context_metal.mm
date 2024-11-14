@@ -37,10 +37,9 @@ EmbedderTestContextType EmbedderTestContextMetal::GetContextType() const {
 
 void EmbedderTestContextMetal::SetupCompositor() {
   FML_CHECK(!compositor_) << "Already set up a compositor in this context.";
-  FML_CHECK(metal_surface_)
-      << "Set up the Metal surface before setting up a compositor.";
-  compositor_ = std::make_unique<EmbedderTestCompositorMetal>(
-      surface_size_, metal_surface_->GetGrContext());
+  FML_CHECK(metal_surface_) << "Set up the Metal surface before setting up a compositor.";
+  compositor_ =
+      std::make_unique<EmbedderTestCompositorMetal>(surface_size_, metal_surface_->GetGrContext());
 }
 
 TestMetalContext* EmbedderTestContextMetal::GetTestMetalContext() {
@@ -51,8 +50,7 @@ TestMetalSurface* EmbedderTestContextMetal::GetTestMetalSurface() {
   return metal_surface_.get();
 }
 
-void EmbedderTestContextMetal::SetPresentCallback(
-    PresentCallback present_callback) {
+void EmbedderTestContextMetal::SetPresentCallback(PresentCallback present_callback) {
   present_callback_ = std::move(present_callback);
 }
 
@@ -71,11 +69,10 @@ void EmbedderTestContextMetal::SetExternalTextureCallback(
   external_texture_frame_callback_ = std::move(external_texture_frame_callback);
 }
 
-bool EmbedderTestContextMetal::PopulateExternalTexture(
-    int64_t texture_id,
-    size_t w,
-    size_t h,
-    FlutterMetalExternalTexture* output) {
+bool EmbedderTestContextMetal::PopulateExternalTexture(int64_t texture_id,
+                                                       size_t w,
+                                                       size_t h,
+                                                       FlutterMetalExternalTexture* output) {
   if (external_texture_frame_callback_ != nullptr) {
     return external_texture_frame_callback_(texture_id, w, h, output);
   } else {
@@ -88,8 +85,7 @@ void EmbedderTestContextMetal::SetNextDrawableCallback(
   next_drawable_callback_ = std::move(next_drawable_callback);
 }
 
-FlutterMetalTexture EmbedderTestContextMetal::GetNextDrawable(
-    const FlutterFrameInfo* frame_info) {
+FlutterMetalTexture EmbedderTestContextMetal::GetNextDrawable(const FlutterFrameInfo* frame_info) {
   if (next_drawable_callback_ != nullptr) {
     return next_drawable_callback_(frame_info);
   }
@@ -98,8 +94,7 @@ FlutterMetalTexture EmbedderTestContextMetal::GetNextDrawable(
   FlutterMetalTexture texture = {};
   texture.struct_size = sizeof(FlutterMetalTexture);
   texture.texture_id = texture_info.texture_id;
-  texture.texture =
-      reinterpret_cast<FlutterMetalTextureHandle>(texture_info.texture);
+  texture.texture = reinterpret_cast<FlutterMetalTextureHandle>(texture_info.texture);
   return texture;
 }
 

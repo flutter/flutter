@@ -28,8 +28,7 @@ TEST(TestMetalSurface, CanCreateValidTestMetalSurface) {
   }
 
   TestMetalContext metal_context = TestMetalContext();
-  auto surface =
-      TestMetalSurface::Create(metal_context, SkISize::Make(100, 100));
+  auto surface = TestMetalSurface::Create(metal_context, SkISize::Make(100, 100));
   ASSERT_NE(surface, nullptr);
   ASSERT_TRUE(surface->IsValid());
   ASSERT_NE(surface->GetSurface(), nullptr);
