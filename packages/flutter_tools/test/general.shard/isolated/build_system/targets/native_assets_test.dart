@@ -68,7 +68,7 @@ void main() {
 
   testWithoutContext('NativeAssets throws error if missing target platform', () async {
     iosEnvironment.defines.remove(kTargetPlatform);
-    expect(const DartBuild(dependency: null).build(iosEnvironment), throwsA(isA<MissingDefineException>()));
+    expect(const DartBuildForNative().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
 
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
@@ -77,8 +77,8 @@ void main() {
     iosEnvironment.defines.remove(kIosArchs);
 
     final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
-    await DartBuild(dependency: null, buildRunner: buildRunner).build(iosEnvironment);
-    await const InstallCodeAssets(dependency: null).build(iosEnvironment);
+    await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
+    await const InstallCodeAssets().build(iosEnvironment);
 
     expect(iosEnvironment.buildDir.childFile(DartBuild.depFilename), exists);
     expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.depFilename), exists);
@@ -96,7 +96,7 @@ void main() {
       ]);
 
     iosEnvironment.defines.remove(kSdkRoot);
-    expect(DartBuild(dependency: null, buildRunner: buildRunner).build(iosEnvironment), throwsA(isA<MissingDefineException>()));
+    expect(DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
 
   // The NativeAssets Target should _always_ be creating a yaml an d file.
@@ -116,8 +116,8 @@ void main() {
         await createPackageConfig(iosEnvironment);
 
         final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
-        await DartBuild(dependency: null, buildRunner: buildRunner).build(iosEnvironment);
-        await const InstallCodeAssets(dependency: null).build(iosEnvironment);
+        await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
+        await const InstallCodeAssets().build(iosEnvironment);
 
         expect(iosEnvironment.buildDir.childFile(DartBuild.depFilename), exists);
         expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.depFilename), exists);
@@ -212,8 +212,8 @@ void main() {
           codeAssets: codeAssets,
         ),
       );
-      await DartBuild(dependency: null, buildRunner: buildRunner).build(iosEnvironment);
-      await const InstallCodeAssets(dependency: null).build(iosEnvironment);
+      await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
+      await const InstallCodeAssets().build(iosEnvironment);
 
       final File nativeAssetsYaml = iosEnvironment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename);
       final File depsFile = iosEnvironment.buildDir.childFile(InstallCodeAssets.depFilename);
@@ -282,7 +282,7 @@ void main() {
             codeAssets: codeAssets,
           ),
         );
-        await DartBuild(dependency: null, buildRunner: buildRunner).build(androidEnvironment);
+        await DartBuildForNative(buildRunner: buildRunner).build(androidEnvironment);
         expect(
           buildRunner.lastBuildMode,
           native_assets_cli.BuildMode.release,
