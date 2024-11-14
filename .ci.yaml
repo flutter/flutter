@@ -1332,6 +1332,8 @@ targets:
 
   - name: Linux flutter_build_apk_health_tests
     recipe: flutter/flutter_drone
+    # WARNING: Do *NOT* enable. This intended for testing on CI only.
+    # Ask matanlurey@ or @gmackall if you have any questions.
     bringup: true
     timeout: 60
     properties:

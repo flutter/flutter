@@ -23,6 +23,24 @@ void main() {
     tryToDelete(tmpDir);
   });
 
+  Future<void> setGradleLoggingLevel(
+    String level, {
+    required Directory projectDir,
+  }) async {
+    // Open gradle.properties and append to it.
+    final Directory androidDir = projectDir.childDirectory('android');
+    final File gradleDotProperties = androidDir.childFile('gradle.properties');
+    final io.IOSink sink = gradleDotProperties.openWrite(mode: FileMode.append);
+
+    sink.writeln('org.gradle.logging.level=$level');
+    await sink.flush();
+    await sink.close();
+
+    // For debugging, print the current output.
+    io.stderr.writeln('${gradleDotProperties.path}:');
+    io.stderr.writeln(gradleDotProperties.readAsStringSync());
+  }
+
   // Normally these tests should take about a minute, but sometimes for
   // unknown reasons they can take 30m+ and timeout. The intent behind this loop
   // is to get more information on what exactly is happening.
@@ -36,7 +54,6 @@ void main() {
           <String>[
             flutterBin,
             'create',
-            '--no-pub',
             package,
           ],
           workingDirectory: tmpDir.path,
@@ -44,6 +61,10 @@ void main() {
         completion(const ProcessResultMatcher()),
         reason: 'Should create a new blank Flutter project',
       );
+
+      // Tweak verbosity of just gradle.
+      final Directory projectDir = tmpDir.childDirectory(package);
+      await setGradleLoggingLevel('debug', projectDir: projectDir);
 
       // Build the APK.
       final List<String> args = <String>[
@@ -57,7 +78,7 @@ void main() {
 
       final io.Process process = await processManager.start(
         args,
-        workingDirectory: tmpDir.childDirectory(package).path,
+        workingDirectory: projectDir.path,
         mode: io.ProcessStartMode.inheritStdio,
       );
       await expectLater(process.exitCode, completion(0));
