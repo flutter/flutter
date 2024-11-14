@@ -82,6 +82,9 @@ TEST(FlViewTest, SecondaryView) {
         return kSuccess;
       }));
 
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+
   FlView* secondary_view = fl_view_new_for_engine(engine);
   EXPECT_EQ(view_id, fl_view_get_id(secondary_view));
 }
@@ -102,6 +105,9 @@ TEST(FlViewTest, SecondaryViewError) {
         view_id = info->view_id;
         return kInvalidArguments;
       }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
   EXPECT_EQ(view_id, fl_view_get_id(secondary_view));
@@ -124,6 +130,9 @@ TEST(FlViewTest, ViewDestroy) {
         g_ptr_array_add(removed_views, GINT_TO_POINTER(info->view_id));
         return kSuccess;
       }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
 
@@ -154,6 +163,9 @@ TEST(FlViewTest, ViewDestroyError) {
       RemoveView, ([](auto engine, const FlutterRemoveViewInfo* info) {
         return kInvalidArguments;
       }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
 

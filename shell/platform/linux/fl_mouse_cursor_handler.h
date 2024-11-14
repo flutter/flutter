@@ -8,7 +8,6 @@
 #include <gdk/gdk.h>
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 G_BEGIN_DECLS
 
@@ -28,15 +27,24 @@ G_DECLARE_FINAL_TYPE(FlMouseCursorHandler,
 /**
  * fl_mouse_cursor_handler_new:
  * @messenger: an #FlBinaryMessenger.
- * @view: an #FlView to control.
  *
  * Creates a new handler that implements SystemChannels.mouseCursor from the
  * Flutter services library.
  *
  * Returns: a new #FlMouseCursorHandler.
  */
-FlMouseCursorHandler* fl_mouse_cursor_handler_new(FlBinaryMessenger* messenger,
-                                                  FlView* view);
+FlMouseCursorHandler* fl_mouse_cursor_handler_new(FlBinaryMessenger* messenger);
+
+/**
+ * fl_mouse_cursor_handler_get_cursor_name:
+ * @handler: an #FlMouseCursorHandler.
+ *
+ * Get the name of the current mouse cursor.
+ *
+ * Returns: a mouse cursor name.
+ */
+const gchar* fl_mouse_cursor_handler_get_cursor_name(
+    FlMouseCursorHandler* handler);
 
 G_END_DECLS
 
