@@ -57,7 +57,7 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
   final MenuController controller = MenuController();
   String _selected = '';
 
-  RawMenuAnchor _buildMenuItem(MenuItem option, {bool isSubmenu = false}) {
+  RawMenuAnchor _buildSubmenu(MenuItem option, {bool isSubmenu = false}) {
     return RawMenuAnchor(
       padding: const EdgeInsets.symmetric(vertical: 5),
       alignmentOffset: const Offset(-4, 0),
@@ -66,7 +66,7 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
       menuChildren: <Widget>[
         for (final MenuItem child in option.children)
           if (child.children.isNotEmpty)
-            _buildMenuItem(child, isSubmenu: true)
+            _buildSubmenu(child, isSubmenu: true)
           else
             MenuItemButton(
               onPressed: () {
@@ -91,11 +91,6 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
               color: controller.isOpen ? const Color(0x0D1A1A1A)
                                        : Colors.transparent,
               child: MenuItemButton(
-                onHover: (bool value) {
-                  if (value) {
-                    controller.open();
-                  }
-                },
                 onPressed: () {
                   if (controller.isOpen) {
                     controller.close();
@@ -130,7 +125,7 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
             controller: controller,
             menuChildren: <Widget>[
               for (final MenuItem option in menuItems)
-                _buildMenuItem(option),
+                _buildSubmenu(option),
             ],
             builder: (BuildContext context, List<Widget> menuChildren) {
               return Row(

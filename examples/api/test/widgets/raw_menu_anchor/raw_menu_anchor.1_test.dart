@@ -58,7 +58,30 @@ void main() {
     await tester.pump();
 
     expect(find.text('Cut'), findsNothing);
-  });
+  }, variant: TargetPlatformVariant.desktop());
+
+   testWidgets('Can open and close menu', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.ContextMenuApp());
+
+    await tester.longPressAt(const Offset(100, 200));
+    await tester.pump();
+
+    expect(collectOverlays().first, equals(const Rect.fromLTRB(100.0, 195.0, 280.0, 430.0)));
+    expect(find.text('Cut'), findsOneWidget);
+
+    // Make sure tapping in a different place causes the menu to move.
+    await tester.longPressAt(const Offset(200, 100));
+    await tester.pump();
+
+    expect(collectOverlays().first, equals(const Rect.fromLTRB(200.0, 95.0, 380.0, 330.0)));
+    expect(find.text('Cut'), findsOneWidget);
+
+    // Tap outside the menu to close.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    expect(find.text('Cut'), findsNothing);
+  }, variant: TargetPlatformVariant.mobile());
 
   testWidgets('Can traverse menu', (WidgetTester tester) async {
     await tester.pumpWidget(const example.ContextMenuApp());
@@ -116,7 +139,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Selected: Undo'), findsOneWidget);
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Platform Brightness does not affect menu appearance', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -133,7 +156,7 @@ void main() {
       findMenuPanelDescendent<Container>(tester).decoration,
       RawMenuAnchor.defaultLightOverlayDecoration,
     );
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Browser context menu is disabled', (WidgetTester tester) async {
     await tester.pumpWidget(const example.ContextMenuApp());
@@ -142,7 +165,7 @@ void main() {
     await tester.pump();
 
     if (kIsWeb) {
-      assert(BrowserContextMenu.enabled, isFalse);
+      expect(BrowserContextMenu.enabled, isFalse);
     }
   }, skip: !kIsWeb); // [intended] Browser context menu is only enabled on the web
 }

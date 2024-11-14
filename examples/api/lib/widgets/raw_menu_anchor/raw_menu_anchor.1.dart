@@ -170,10 +170,27 @@ class NestedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     // Long-press on mobile, secondary-click (right click) on desktop.
+    GestureLongPressStartCallback? onLongPressStart;
+    GestureTapDownCallback? onSecondaryTapDown;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        onLongPressStart = (LongPressStartDetails details) {
+          MenuController.maybeOf(context)?.open(position: details.localPosition);
+          HapticFeedback.heavyImpact();
+        };
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        onSecondaryTapDown = (TapDownDetails details) {
+          MenuController.maybeOf(context)?.open(position: details.localPosition);
+        };
+    }
     return GestureDetector(
-      onSecondaryTapDown: (TapDownDetails details) {
-        MenuController.maybeOf(context)?.open(position: details.localPosition);
-      },
+      onSecondaryTapDown: onSecondaryTapDown,
+      onLongPressStart: onLongPressStart,
       onTapDown: (TapDownDetails details) {
         MenuController.maybeOf(context)?.close();
       },

@@ -1004,8 +1004,7 @@ void main() {
                   menuChildren: <Widget>[
                     Button.tag(Tag.a),
                     Shortcuts(
-                      // Web doesn't automatically apply directional traversal
-                      // shortcuts.
+                      // Web doesn't automatically handle directional traversal.
                       shortcuts: traversalShortcuts,
                       child: Button.tag(Tag.b, focusNode: bFocusNode),
                     ),
@@ -1739,6 +1738,7 @@ void main() {
     );
 
     addTearDown(anchorFocusNode.dispose);
+    addTearDown(bFocusNode.dispose);
     addTearDown(baFocusNode.dispose);
 
     await tester.pumpWidget(
@@ -5362,6 +5362,21 @@ void main() {
     });
 
     testWidgets('Menu is positioned within the root overlay.', (WidgetTester tester) async {
+      // Overlay entries leak if they are not disposed.
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext context) {
+          return RawMenuAnchor(
+            menuChildren: <Widget>[Button.tag(Tag.a)],
+            child: const AnchorButton(Tag.anchor),
+          );
+        },
+      );
+
+      addTearDown(() {
+        entry.remove();
+        entry.dispose();
+      });
+
       await tester.pumpWidget(
         App(
           Stack(
@@ -5372,16 +5387,7 @@ void main() {
                 height: 200,
                 width: 200,
                 child: Overlay(
-                  initialEntries: <OverlayEntry>[
-                    OverlayEntry(
-                      builder: (BuildContext context) {
-                        return RawMenuAnchor(
-                          menuChildren: <Widget>[ Button.tag(Tag.a) ],
-                          child: const AnchorButton(Tag.anchor),
-                        );
-                      },
-                    )
-                  ],
+                  initialEntries: <OverlayEntry>[ entry ],
                 ),
               ),
             ],
@@ -5533,6 +5539,10 @@ class Button extends StatefulWidget {
 }
 
 class _ButtonState extends State<Button> {
+  late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _activateOnIntent),
+    ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _activateOnIntent),
+  };
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
   final WidgetStatesController _states = WidgetStatesController();
@@ -5647,11 +5657,6 @@ class _ButtonState extends State<Button> {
       ),
     );
   }
-
-  late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
-    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _activateOnIntent),
-    ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _activateOnIntent),
-  };
 
   BoxDecoration? get _decoration {
     if (_states.value.contains(WidgetState.pressed)) {

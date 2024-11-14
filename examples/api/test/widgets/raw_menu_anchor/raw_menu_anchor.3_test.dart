@@ -2,18 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.3.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
-
-Future<TestGesture> hoverOver(WidgetTester tester, Finder finder) async {
-  final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-  await gesture.moveTo(tester.getCenter(finder));
-  await tester.pumpAndSettle();
-  return gesture;
-}
 
 T findMenuPanelDescendent<T extends Widget>(WidgetTester tester) {
   return tester.firstWidget<T>(
@@ -37,46 +29,6 @@ void main() {
       tester.getRect(find.byType(RawMenuAnchor).first),
       const Rect.fromLTRB(233.0, 284.0, 567.0, 316.0),
     );
-  });
-
-  testWidgets('Menu items with children open when hovered', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.MenuNodeApp());
-    final List<String> labels = <String>[];
-    for (final example.MenuItem item in example.menuItems) {
-      await hoverOver(tester, find.text(item.label));
-      expect(
-        primaryFocus?.debugLabel,
-        equals('MenuItemButton(Text("${item.label}"))'),
-      );
-      labels.add(item.label);
-      for (final example.MenuItem child in item.children) {
-        expect(find.text(child.label), findsOneWidget);
-        labels.add(child.label);
-        if (child.children.isNotEmpty) {
-          await hoverOver(tester, find.text(child.label));
-          expect(
-            primaryFocus?.debugLabel,
-            equals('MenuItemButton(Text("${child.label}"))'),
-          );
-          for (final example.MenuItem grandchild in child.children) {
-            expect(find.text(grandchild.label), findsOneWidget);
-            labels.add(grandchild.label);
-          }
-        }
-      }
-    }
-
-    expect(labels.length, 23);
-    expect(labels.toSet().length, 23);
-
-    expect(find.text('Fit'), findsNothing);
-    expect(find.text('Grammar'), findsOneWidget);
-
-    await tester.tap(find.text('Grammar'));
-    await tester.pump();
-    await tester.pump();
-
-    expect(find.text('Selected: Grammar'), findsOneWidget);
   });
 
   testWidgets('Menu can be traversed', (WidgetTester tester) async {
@@ -163,11 +115,11 @@ void main() {
       ),
     );
 
-    await hoverOver(tester, find.text('File'));
+    await tester.tap(find.text('File'));
+    await tester.pump();
     await tester.pump();
 
     expect(find.text('New'), findsOneWidget);
-
     expect(
       findMenuPanelDescendent<Container>(tester).decoration,
       RawMenuAnchor.defaultLightOverlayDecoration,
