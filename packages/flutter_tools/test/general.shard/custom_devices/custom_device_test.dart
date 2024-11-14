@@ -123,7 +123,6 @@ void main() {
         config: testConfig,
         processManager: FakeProcessManager.any(),
         logger: BufferLogger.test(),
-        useImplicitPubspecResolution: true,
       );
 
       final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
@@ -167,7 +166,6 @@ void main() {
         directory: dir,
         logger: BufferLogger.test()
       ),
-      useImplicitPubspecResolution: true,
     ).devices(), <Device>[]);
   });
 
@@ -186,7 +184,6 @@ void main() {
         directory: dir,
         logger: BufferLogger.test()
       ),
-      useImplicitPubspecResolution: true,
     ).devices(), <Device>[]);
   });
 
@@ -211,7 +208,6 @@ void main() {
           directory: dir,
           logger: BufferLogger.test()
         ),
-        useImplicitPubspecResolution: true,
       ).devices(),
       hasLength(1)
     );
@@ -240,7 +236,6 @@ void main() {
         directory: dir,
         logger: BufferLogger.test(),
       ),
-      useImplicitPubspecResolution: true,
     );
 
     final List<Device> discoveredDevices = await discovery.discoverDevices();
@@ -270,7 +265,6 @@ void main() {
         directory: dir,
         logger: BufferLogger.test(),
       ),
-      useImplicitPubspecResolution: true,
     );
 
     expect(await discovery.discoverDevices(), hasLength(0));
@@ -295,7 +289,6 @@ void main() {
         directory: dir,
         logger: BufferLogger.test(),
       ),
-      useImplicitPubspecResolution: true,
     );
 
     expect(await discovery.discoverDevices(), hasLength(0));
@@ -315,7 +308,6 @@ void main() {
       config: testConfig,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
-      useImplicitPubspecResolution: true,
     ).isSupportedForProject(flutterProject), true);
   });
 
@@ -331,7 +323,6 @@ void main() {
           FakeCommand(command: testConfig.uninstallCommand),
           FakeCommand(command: testConfig.installCommand, onRun: (_) => bothCommandsWereExecuted = true),
         ]),
-        useImplicitPubspecResolution: true,
       );
 
       expect(await device.installApp(PrebuiltLinuxApp(executable: 'exe')), true);
@@ -394,7 +385,6 @@ void main() {
         config: testConfig,
         logger: BufferLogger.test(),
         processManager: processManager,
-        useImplicitPubspecResolution: true,
       ),
       appPackage: PrebuiltLinuxApp(executable: 'testexecutable'),
       logger: BufferLogger.test(),
@@ -432,7 +422,6 @@ void main() {
         config: testConfigNonForwarding,
         logger: BufferLogger.test(),
         processManager: processManager,
-        useImplicitPubspecResolution: true,
       ),
       appPackage: PrebuiltLinuxApp(executable: 'testexecutable'),
       logger: BufferLogger.test(),
@@ -498,7 +487,6 @@ void main() {
           directory: configFileDir,
           logger: BufferLogger.test()
         ),
-        useImplicitPubspecResolution: true,
       );
 
       final List<Device> devices = await customDevices.discoverDevices();
@@ -548,7 +536,6 @@ void main() {
       config: testConfig,
       logger: BufferLogger.test(),
       processManager: processManager,
-      useImplicitPubspecResolution: true,
     );
 
     expect(device.supportsScreenshot, true);
@@ -577,7 +564,6 @@ void main() {
         ),
         logger: BufferLogger.test(),
         processManager: processManager,
-      useImplicitPubspecResolution: true,
     );
 
     expect(device.supportsScreenshot, false);
@@ -596,7 +582,6 @@ void main() {
       ),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.empty(),
-      useImplicitPubspecResolution: true,
     );
 
     expect(await device.targetPlatform, TargetPlatform.linux_x64);
@@ -664,7 +649,6 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? assetDirPath,
     Uri? nativeAssets,
     bool buildNativeAssets = true,
-    required bool useImplicitPubspecResolution,
     @visibleForTesting BuildSystem? buildSystem
   }) async {}
 }
