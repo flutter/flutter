@@ -1664,7 +1664,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
             ? IconButton(
                 icon: widget.switchToCalendarEntryModeIcon ??
                       Icon(Icons.calendar_today,
-                          semanticLabel: Platform.isIOS ? null : localizations.calendarModeButtonLabel,
+                          semanticLabel: (defaultTargetPlatform == TargetPlatform.iOS) ? null : localizations.calendarModeButtonLabel,
                       ),
                 padding: EdgeInsets.zero,
                 tooltip: localizations.calendarModeButtonLabel,
