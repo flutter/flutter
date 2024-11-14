@@ -18612,7 +18612,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get tabLabelRaw => r'$tabCount का टैब $tabIndex';
 
   @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
   String get timePickerDialHelpText => 'समय चुनें';
