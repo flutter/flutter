@@ -35,12 +35,6 @@ void main() {
 
     await processManager.run(<String>[
       flutterBin,
-      'config',
-      '--no-implicit-pubspec-resolution',
-    ], workingDirectory: tempProjectDir.path);
-
-    await processManager.run(<String>[
-      flutterBin,
       'create',
       tempProjectDir.path,
       '--project-name=testapp',
@@ -50,10 +44,13 @@ void main() {
     expect(pubspecFile.existsSync(), true);
 
     // Create Flutter plugins to add as dependencies to Flutter project.
+    final String pluginAPath = '${tempPluginADir.path}/plugin_a_real_dependency';
+    final String pluginBPath = '${tempPluginBDir.path}/plugin_b_dev_dependency';
+
     await processManager.run(<String>[
       flutterBin,
       'create',
-      '${tempPluginADir.path}/plugin_a_real_dependency',
+      pluginAPath,
       '--template=plugin',
       '--project-name=plugin_a_real_dependency',
     ], workingDirectory: tempPluginADir.path);
@@ -61,7 +58,7 @@ void main() {
     await processManager.run(<String>[
       flutterBin,
       'create',
-      '${tempPluginBDir.path}/plugin_b_dev_dependency',
+      pluginBPath,
       '--template=plugin',
       '--project-name=plugin_b_dev_dependency',
     ], workingDirectory: tempPluginBDir.path);
@@ -73,7 +70,7 @@ void main() {
       'add',
       'plugin_a_real_dependency',
       '--path',
-      '${tempPluginADir.path}/plugin_a_real_dependency',
+      pluginAPath,
     ], workingDirectory: tempProjectDir.path);
 
     await processManager.run(<String>[
@@ -82,7 +79,7 @@ void main() {
       'add',
       'dev:plugin_b_dev_dependency',
       '--path',
-      '${tempPluginBDir.path}/plugin_b_dev_dependency',
+      pluginBPath,
     ], workingDirectory: tempProjectDir.path);
 
     // Run `flutter pub get` to generate .flutter-plugins-dependencies.
@@ -97,7 +94,7 @@ void main() {
         tempProjectDir.childFile('.flutter-plugins-dependencies');
     expect(flutterPluginsDependenciesFile.existsSync(), true);
 
-    // Check that .flutter-plugin-dependencies denotes dependency and
+    // Check that .flutter-plugin-dependencies denotes the dependency and
     // dev dependency as expected.
     final String pluginsString =
         flutterPluginsDependenciesFile.readAsStringSync();
@@ -106,8 +103,8 @@ void main() {
     final Map<String, dynamic> plugins =
         jsonContent['plugins'] as Map<String, dynamic>;
 
-    // Loop through all platforms supported by default to verify that dependency
-    // and dev dependency is handled appropriately.
+    // Loop through all platforms supported by default to verify that the
+    // dependency and dev dependency are handled appropriately.
     final List<String> platformsToVerify = <String>[
       'ios',
       'android',
