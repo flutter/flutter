@@ -27,7 +27,7 @@ When you press this button, GitHub will remove your PR from the queue, and the P
 
 WARNING: please only use this button in case of emergency. Adding and removing your PR from the queue costs in CI resources. Any CI work being done for your PR and all PRs that follow yours will be stopped and restarted.
 What if I have questions?
-If you have any questions or concerns, or If you suspect you are unable to land your PRs for reasons other than the familiar test failures and flakes, please contact any of: yjbanov@google.com, codefu@google.com, fujino@google.com, katelovett@google.com.
+If you have any questions or concerns, or If you suspect you are unable to land your PRs for reasons other than the familiar test failures and flakes, please contact any of: @yjbanov, @jtmcdole, @christopherfujino, @Piinks.
 Why do we need the merge queue?
 The main reason for this change is that flutter/engine and flutter/flutter repos will be combined into one "monorepo". In order to preserve the current lightweight dev cycle for the framework code, we need to provide pre-built engine artifacts. This way you don't need to compile any C++ code, or install extra tooling (e.g. depot_tools), when hacking on the framework alone. The merge queue is what will be building those engine binaries.
 
