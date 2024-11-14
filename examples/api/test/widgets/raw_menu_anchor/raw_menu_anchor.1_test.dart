@@ -164,8 +164,6 @@ void main() {
     await tester.tapAt(const Offset(100, 200), buttons: kSecondaryButton);
     await tester.pump();
 
-    if (kIsWeb) {
-      expect(BrowserContextMenu.enabled, isFalse);
-    }
+    expect(BrowserContextMenu.enabled, isFalse);
   }, skip: !kIsWeb); // [intended] Browser context menu is only enabled on the web
 }
