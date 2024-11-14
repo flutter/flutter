@@ -1040,6 +1040,10 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
+      # TODO(fujino): delete once propagation from
+      # https://github.com/flutter/flutter/issues/158521 completes.
+      drone_dimensions: >
+        ["os=Linux", "os=Ubuntu-20"]
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: plugin_test
@@ -1325,6 +1329,29 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+
+  - name: Linux flutter_build_apk_health_tests
+    recipe: flutter/flutter_drone
+    # WARNING: Do *NOT* enable. This intended for testing on CI only.
+    # Ask matanlurey@ or @gmackall if you have any questions.
+    bringup: true
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:35v1"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      shard: flutter_build_apk_health_tests
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700"
 
   - name: Linux android_preview_tool_integration_tests
     recipe: flutter/flutter_drone
