@@ -465,6 +465,7 @@ abstract class IosAssetBundle extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
+    DartBuildForNative(),
     KernelSnapshot(),
     InstallCodeAssets(),
   ];
@@ -545,9 +546,11 @@ abstract class IosAssetBundle extends Target {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
 
     // Copy the assets.
+    final DartBuildResult dartBuildResult = await DartBuild.loadBuildResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
+      dartBuildResult: dartBuildResult,
       targetPlatform: TargetPlatform.ios,
       buildMode: buildMode,
       additionalInputs: <File>[

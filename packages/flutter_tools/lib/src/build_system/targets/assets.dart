@@ -36,6 +36,7 @@ import 'native_assets.dart';
 Future<Depfile> copyAssets(
   Environment environment,
   Directory outputDirectory, {
+  required DartBuildResult dartBuildResult,
   Map<String, DevFSContent> additionalContent = const <String, DevFSContent>{},
   required TargetPlatform targetPlatform,
   required BuildMode buildMode,
@@ -61,6 +62,7 @@ Future<Depfile> copyAssets(
     splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
   ).createBundle();
   final int resultCode = await assetBundle.build(
+    dartBuildResult: dartBuildResult,
     manifestPath: pubspecFile.path,
     packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
@@ -329,6 +331,7 @@ class CopyAssets extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
+    DartBuildForNative(),
     KernelSnapshot(),
     InstallCodeAssets(),
   ];
@@ -359,9 +362,11 @@ class CopyAssets extends Target {
       .buildDir
       .childDirectory('flutter_assets');
     output.createSync(recursive: true);
+    final DartBuildResult dartBuildResult = await DartBuild.loadBuildResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       output,
+      dartBuildResult: dartBuildResult,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],

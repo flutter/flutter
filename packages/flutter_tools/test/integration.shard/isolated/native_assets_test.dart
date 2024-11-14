@@ -133,7 +133,7 @@ void main() {
                   return 'q';
                 }),
               ],
-              const Barrier('Application finished.'),
+              Barrier('Application finished.'),
             ],
             logging: false,
           );

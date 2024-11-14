@@ -13,8 +13,10 @@ import '../../dart/package_map.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
-import '../exceptions.dart';
 import 'common.dart';
+import 'web.dart';
+
+export '../../isolated/native_assets/native_assets.dart' show CodeAsset, DartBuildResult, DataAsset, DynamicLoadingBundled;
 
 /// Runs the dart build of the app.
 abstract class DartBuild extends Target {
@@ -31,7 +33,7 @@ abstract class DartBuild extends Target {
 
     final DartBuildResult result;
     if (nativeAssetsEnvironment == 'false') {
-      result = const DartBuildResult.empty();
+      result = DartBuildResult.empty();
     } else {
       final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
@@ -104,6 +106,9 @@ abstract class DartBuild extends Target {
   /// [DartBuild] target.
   static Future<DartBuildResult> loadBuildResult(Environment environment) async {
     final File dartBuildResultJsonFile = environment.buildDir.childFile(DartBuild.dartBuildResultFilename);
+    if (!dartBuildResultJsonFile.existsSync()) {
+      return DartBuildResult.empty();
+    }
     return DartBuildResult.fromJson(json.decode(dartBuildResultJsonFile.readAsStringSync()) as Map<String, Object?>);
   }
 
@@ -117,6 +122,17 @@ class DartBuildForNative extends DartBuild {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
+  ];
+}
+
+class DartBuildForWeb extends DartBuild {
+  const DartBuildForWeb(this.compileTargets, {@visibleForTesting super.buildRunner});
+
+  final List<Dart2WebTarget> compileTargets;
+
+  @override
+  List<Target> get dependencies => <Target>[
+    ...compileTargets,
   ];
 }
 
@@ -189,8 +205,15 @@ class InstallCodeAssets extends Target {
 
 TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String name) {
   final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
-  if (targetPlatformEnvironment == null) {
-    throw MissingDefineException(kTargetPlatform, name);
+  if (targetPlatformEnvironment != null) {
+    return getTargetPlatformForName(targetPlatformEnvironment);
   }
-  return getTargetPlatformForName(targetPlatformEnvironment);
+
+  // HACK: Currently the web builds don't actually specify `kTargetPlatform`
+  // in environment defines. Even if they would, they wouldn't specify it
+  // precisely because web can compile to JavaScript and to Wasm (so
+  // `TargetPlatform.web_javascript` isn't actually always the case).
+  //
+  // For now we just use this as the JS target platform.
+  return TargetPlatform.web_javascript;
 }

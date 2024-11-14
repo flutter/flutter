@@ -74,9 +74,11 @@ class CopyFlutterBundle extends Target {
       environment.fileSystem.file(isolateSnapshotData)
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
+    final DartBuildResult dartBuildResult = await DartBuild.loadBuildResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       environment.outputDir,
+      dartBuildResult: dartBuildResult,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: flavor,
@@ -93,6 +95,7 @@ class CopyFlutterBundle extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
+    DartBuildForNative(),
     KernelSnapshot(),
     InstallCodeAssets(),
   ];

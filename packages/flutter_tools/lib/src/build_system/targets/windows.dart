@@ -106,6 +106,7 @@ abstract class BundleWindowsAssets extends Target {
 
   @override
   List<Target> get dependencies => <Target>[
+    const DartBuildForNative(),
     const KernelSnapshot(),
     const InstallCodeAssets(),
     UnpackWindows(targetPlatform),
@@ -141,9 +142,11 @@ abstract class BundleWindowsAssets extends Target {
       environment.buildDir.childFile('app.dill')
         .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
+    final DartBuildResult dartBuildResult = await DartBuild.loadBuildResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       outputDirectory,
+      dartBuildResult: dartBuildResult,
       targetPlatform: targetPlatform,
       buildMode: buildMode,
       additionalContent: <String, DevFSContent>{

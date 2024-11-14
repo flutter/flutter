@@ -56,6 +56,9 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isNativeAssetsEnabled => isEnabled(nativeAssets);
 
   @override
+  bool get isDartDataAssetsEnabled => isEnabled(dartDataAssets);
+
+  @override
   bool get isPreviewDeviceEnabled => isEnabled(previewDevice);
 
   @override

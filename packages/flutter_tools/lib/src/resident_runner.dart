@@ -24,6 +24,8 @@ import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
+import 'build_system/targets/native_assets.dart';
+import 'build_system/targets/web.dart';
 import 'build_system/tools/scene_importer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
@@ -32,6 +34,7 @@ import 'compile.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart';
 import 'globals.dart' as globals;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
@@ -1097,6 +1100,13 @@ abstract class ResidentRunner extends ResidentHandlers {
   BuildResult? _lastBuild;
   Environment? _environment;
 
+  /// The result of the last dart build. Will be populated in
+  /// [runDartBuild].
+  DartBuildResult? _dartBuildResult;
+
+  /// The last dart build's result.
+  DartBuildResult? get dartBuildResult => _dartBuildResult;
+
   @override
   bool hotMode;
 
@@ -1212,6 +1222,8 @@ abstract class ResidentRunner extends ResidentHandlers {
       defines: <String, String>{
         // Needed for Dart plugin registry generation.
         kTargetFile: mainPath,
+        kNativeAssets: (featureFlags.isNativeAssetsEnabled || featureFlags.isDartDataAssetsEnabled)  ? 'true' : 'false',
+        kBuildMode: debuggingOptions.buildInfo.mode.cliName,
       },
     );
 
@@ -1236,6 +1248,32 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
     }
     globals.printTrace('complete');
+  }
+
+  Future<DartBuildResult> runDartBuild() async {
+    globals.printTrace('runDartBuild()');
+    if (_dartBuildResult != null && _dartBuildResult!.isBuildUpToDate(globals.fs)) {
+      globals.printTrace('runDartBuild() - up-to-date already');
+      return _dartBuildResult!;
+    }
+    globals.printTrace('runDartBuild() - will perform dart build');
+
+    final BuildResult lastBuild = await globals.buildSystem.build(
+        const DartBuildForWeb(<Dart2WebTarget>[]), _environment!);
+    if (!lastBuild.success) {
+      for (final ExceptionMeasurement exceptionMeasurement in _lastBuild!.exceptions.values) {
+        globals.printError(
+          exceptionMeasurement.exception.toString(),
+          stackTrace: globals.logger.isVerbose
+            ? exceptionMeasurement.stackTrace
+            : null,
+        );
+      }
+    }
+
+    _dartBuildResult = await DartBuild.loadBuildResult(_environment!);
+    globals.printTrace('runDartBuild() - done');
+    return _dartBuildResult!;
   }
 
   @protected
