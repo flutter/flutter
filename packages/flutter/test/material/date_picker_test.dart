@@ -7,7 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
