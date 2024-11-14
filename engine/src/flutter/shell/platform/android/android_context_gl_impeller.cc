@@ -94,7 +94,7 @@ AndroidContextGLImpeller::AndroidContextGLImpeller(
   impeller::egl::ConfigDescriptor desc;
   desc.api = impeller::egl::API::kOpenGLES2;
   desc.color_format = impeller::egl::ColorFormat::kRGBA8888;
-  desc.depth_bits = impeller::egl::DepthBits::kZero;
+  desc.depth_bits = impeller::egl::DepthBits::kTwentyFour;
   desc.stencil_bits = impeller::egl::StencilBits::kEight;
   desc.samples = impeller::egl::Samples::kFour;
 
