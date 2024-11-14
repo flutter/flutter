@@ -25,6 +25,12 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 INTERNAL NOTE
 -->
 ## Flutter 3.24 Changes
+### [3.24.5](https://github.com/flutter/flutter/releases/tag/3.24.5)
+- [flutter/157359](https://github.com/flutter/flutter/issues/157359) - [iOS] Fixed an issue where dSYM files were being incorrectly bundled with applications
+- [flutter/158120](https://github.com/flutter/flutter/issues/158120) - Fixes a test which was causing Flutter's internal CI to fail.
+- [flutter/155018](https://github.com/flutter/flutter/issues/155018) - [Android] Fixes a crash on Android when a surface becomes unavailable
+- [flutter/158243](https://github.com/flutter/flutter/issues/158423) - [iOS] Fixes an issue where the use of some private symbols causes apps to be rejected from the app store.
+
 ### [3.24.4](https://github.com/flutter/flutter/releases/tag/3.24.4)
 - [dart 3.5.4 changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#354---2024-10-17)
 - [flutter/154915](https://github.com/flutter/engine/pull/55366) - [macOS] Comply with the new Apple privacy manifest policy for the macOS Flutter engine framework and prevent the "Missing privacy manifest" warning when submitting a macOS app to the App Store.
