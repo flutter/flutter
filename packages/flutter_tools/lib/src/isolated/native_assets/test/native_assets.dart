@@ -50,13 +50,31 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     );
     return null;
   }
-  final (_, Uri nativeAssetsYaml) = await runFlutterSpecificDartBuild(
-      environmentDefines: <String, String>{
-        kBuildMode: buildInfo.mode.cliName,
-      },
+
+  // Only `flutter test` uses the
+  // `build/native_assets/<os>/native_assets.yaml` file which uses absolute
+  // paths to the shared libraries.
+  final OS targetOS = getNativeOSFromTargetPlatfrorm(TargetPlatform.tester);
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
+  final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.yaml');
+
+  final Map<String, String> environmentDefines = <String, String>{
+    kBuildMode: buildInfo.mode.cliName,
+  };
+
+  // First perform the dart build.
+  final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+      environmentDefines: environmentDefines,
       buildRunner: buildRunner,
       targetPlatform: TargetPlatform.tester,
       projectUri: projectUri,
       fileSystem: globals.fs);
-  return nativeAssetsYaml;
+
+  // Then "install" the code assets so they can be used at runtime.
+  await installCodeAssets(dartBuildResult: dartBuildResult, environmentDefines: environmentDefines,
+    targetPlatform: TargetPlatform.tester, projectUri: projectUri, fileSystem: globals.fs,
+    nativeAssetsFileUri: nativeAssetsFileUri);
+  assert(!await globals.fs.file(nativeAssetsFileUri).exists());
+
+  return nativeAssetsFileUri;
 }
