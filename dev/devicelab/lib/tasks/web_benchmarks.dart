@@ -20,13 +20,7 @@ import '../framework/utils.dart';
 const int benchmarkServerPort = 9999;
 const int chromeDebugPort = 10000;
 
-enum WebRenderer {
-  canvaskit,
-  skwasm,
-}
-
 typedef WebBenchmarkOptions = ({
-  WebRenderer webRenderer,
   bool useWasm,
   bool forceSingleThreadedSkwasm,
 });
@@ -46,7 +40,6 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         '--no-strip-wasm',
       ],
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-      if (!benchmarkOptions.useWasm) '--web-renderer=${benchmarkOptions.webRenderer.name}',
       '--profile',
       '--no-web-resources-cdn',
       '-t',
@@ -180,10 +173,10 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         }
 
         final String webRendererName;
-        if (benchmarkOptions.useWasm && benchmarkOptions.forceSingleThreadedSkwasm) {
-          webRendererName = 'skwasm_st';
+        if (benchmarkOptions.useWasm) {
+          webRendererName = benchmarkOptions.forceSingleThreadedSkwasm ? 'skwasm_st' : 'skwasm';
         } else {
-          webRendererName = benchmarkOptions.webRenderer.name;
+          webRendererName = 'canvaskit';
         }
         final String namespace = '$benchmarkName.$webRendererName';
         final List<String> scoreKeys = List<String>.from(profile['scoreKeys'] as List<dynamic>);
