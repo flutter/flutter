@@ -463,19 +463,19 @@ class AndroidLicenseValidator extends DoctorValidator {
 String _androidJdkLocationMessage(String location, JavaSource source) {
   final String setWithConfigBreadcrumb = switch (source) {
     JavaSource.androidStudio || JavaSource.path || JavaSource.javaHome =>
-      'To manually set a custom JDK path, use: `flutter config --jdk-dir="path/to/jdk"`',
+      'To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.',
     JavaSource.flutterConfig =>
-      'To change current JDK, run: `flutter config --jdk-dir="path/to/jdk"`'
+      'To change the current JDK, run: `flutter config --jdk-dir="path/to/jdk"`.'
   };
   final String sourceMessagePart = switch (source) {
     JavaSource.androidStudio =>
-      'This is the JDK bundled with latest Android Studio installation',
+      'This is the JDK bundled with the latest Android Studio installation on this machine.',
     JavaSource.javaHome =>
-      'This JDK is specified by JAVA_HOME environment variable',
+      'This JDK is specified by the JAVA_HOME environment variable.',
     JavaSource.path =>
-      'This JDK was found in system PATH',
+      'This JDK was found in the system PATH.',
     JavaSource.flutterConfig =>
-      'This JDK is specified in Flutter configuration',
+      'This JDK is specified in your Flutter configuration.',
   };
 
   return 'Java binary at: $location\n'

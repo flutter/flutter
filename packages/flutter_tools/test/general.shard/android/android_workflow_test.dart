@@ -658,7 +658,7 @@ Android sdkmanager tool was found, but failed to run
     expect(
       validationResult.messages.any(
         (ValidationMessage message) => message.message.contains(
-          'This is the JDK bundled with latest Android Studio installation'
+          'This is the JDK bundled with the latest Android Studio installation on this machine.'
         )
       ),
       true,
@@ -666,7 +666,7 @@ Android sdkmanager tool was found, but failed to run
     expect(
       validationResult.messages.any(
         (ValidationMessage message) => message.message.contains(
-          'To manually set a custom JDK path, use: `flutter config --jdk-dir="path/to/jdk"`'
+          'To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.'
         )
       ),
       true,
