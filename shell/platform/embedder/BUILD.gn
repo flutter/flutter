@@ -317,6 +317,7 @@ if (enable_unittests) {
         "tests/embedder_test_compositor_gl.h",
         "tests/embedder_test_context_gl.cc",
         "tests/embedder_test_context_gl.h",
+        "tests/embedder_test_gl.cc",
       ]
 
       public_deps += [
@@ -331,6 +332,7 @@ if (enable_unittests) {
         "tests/embedder_test_compositor_metal.h",
         "tests/embedder_test_context_metal.cc",
         "tests/embedder_test_context_metal.h",
+        "tests/embedder_test_metal.mm",
       ]
 
       public_deps += [ "//flutter/testing:metal" ]
@@ -342,6 +344,7 @@ if (enable_unittests) {
         "tests/embedder_test_compositor_vulkan.h",
         "tests/embedder_test_context_vulkan.cc",
         "tests/embedder_test_context_vulkan.h",
+        "tests/embedder_test_vulkan.cc",
       ]
 
       public_deps += [
