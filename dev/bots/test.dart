@@ -247,6 +247,7 @@ Future<void> _runFlutterBuildApkHealthTests() async {
     forceSingleCore: true,
     testPaths: selectIndexOfTotalSubshard<String>(toolIntegrationTests, subshardKey: '6_6'),
     collectMetrics: true,
+    runSkipped: true,
   );
 
   // Then run the health tests after.
