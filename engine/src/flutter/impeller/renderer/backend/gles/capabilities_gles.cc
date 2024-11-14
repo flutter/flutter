@@ -158,6 +158,9 @@ bool CapabilitiesGLES::SupportsSSBO() const {
 }
 
 bool CapabilitiesGLES::SupportsTextureToTextureBlits() const {
+  // TODO(158523): Switch this to true for improved performance
+  // on GLES 3.0+ devices. Note that this wasn't enabled because
+  // there were some rendering issues on some devices.
   return false;
 }
 
