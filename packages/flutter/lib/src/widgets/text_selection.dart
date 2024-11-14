@@ -8,7 +8,6 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
@@ -2257,7 +2256,7 @@ class TextSelectionGestureDetectorBuilder {
   ///
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
   @protected
-  void onTapDown(TapDragDownDetails details) async {
+  void onTapDown(TapDragDownDetails details) {
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -2287,11 +2286,19 @@ class TextSelectionGestureDetectorBuilder {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         if (editableText.widget.stylusHandwritingEnabled) {
-          final bool isStylus = details.kind == PointerDeviceKind.stylus
-              || details.kind == PointerDeviceKind.invertedStylus;
-          if (isStylus && await Scribe.isFeatureAvailable()) {
-            renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-            Scribe.startStylusHandwriting();
+          final bool stylusEnabled = switch (kind) {
+            PointerDeviceKind.stylus
+            || PointerDeviceKind.invertedStylus =>
+              editableText.widget.stylusHandwritingEnabled,
+            _ => false,
+          };
+          if (stylusEnabled) {
+            Scribe.isFeatureAvailable().then((bool isAvailable) {
+              if (isAvailable) {
+                renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+                Scribe.startStylusHandwriting();
+              }
+            });
           }
         }
       case TargetPlatform.fuchsia:
