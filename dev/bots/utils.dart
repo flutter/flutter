@@ -77,7 +77,7 @@ final List<String> flutterTestArgs = <String>[];
 /// the process. This is useful for determing what an invocation of `test.dart`
 /// _might_ due if not invoked with `--dry-mode`, or otherwise determine what
 /// the different test shards and sub-shards are configured as.
-late final bool dryRun;
+bool dryRun = false;
 
 const int kESC = 0x1B;
 const int kOpenSquareBracket = 0x5B;
