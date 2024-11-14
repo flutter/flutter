@@ -97,6 +97,7 @@ void main() {
       'build',
       'apk',
       '--debug',
+      // TODO(bkonyi): remove once https://github.com/flutter/flutter/pull/158933 is resolved
       '--verbose',
     ], workingDirectory: pluginExampleAppDir.path);
   }
