@@ -154,6 +154,15 @@ void main() {
       expectExitCode(result, 255);
       expect(result.stdout, contains('Invalid subshard name'));
     });
+
+    test('--dry-run prints every test that would run', () async {
+      final ProcessResult result = await runScript(
+        <String, String> {},
+        <String>['--dry-run'],
+      );
+      expectExitCode(result, 0);
+      expect(result.stdout, contains('|> bin/flutter'));
+    });
   });
 
   test('selectTestsForSubShard distributes tests amongst subshards correctly', () async {

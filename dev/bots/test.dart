@@ -4,13 +4,11 @@
 
 // Runs the tests for the flutter/flutter repository.
 //
-//
 // By default, test output is filtered and only errors are shown. (If a
 // particular test takes longer than _quietTimeout in utils.dart, the output is
 // shown then also, in case something has hung.)
 //
 //  --verbose stops the output cleanup and just outputs everything verbatim.
-//
 //
 // By default, errors are non-fatal; all tests are executed and the output
 // ends with a summary of the errors that were detected.
@@ -19,10 +17,10 @@
 //
 //  --abort-on-error causes the script to exit immediately when hitting an error.
 //
-//
 // By default, all tests are run. However, the tests support being split by
-// shard and subshard. (Inspect the code to see what shards and subshards are
-// supported.)
+// shard and subshard. Inspect the code to see what shards and subshards are
+// supported, or run with `--dry-run` to get a list of tests that _would_ have
+// been executed.
 //
 // If the CIRRUS_TASK_NAME environment variable exists, it is used to determine
 // the shard and sub-shard, by parsing it in the form shard-subshard-platform,
@@ -42,7 +40,6 @@
 // order to (eventually) catch inter-test dependencies.
 //
 //  --test-randomize-ordering-seed=<n> sets the shuffle seed for reproducing runs.
-//
 //
 // All other arguments are treated as arguments to pass to the flutter tool when
 // running tests.
@@ -96,6 +93,7 @@ const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
 Future<void> main(List<String> args) async {
   try {
     printProgress('STARTING ANALYSIS');
+    bool dryRunArgSet = false;
     for (final String arg in args) {
       if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
@@ -116,10 +114,14 @@ Future<void> main(List<String> args) async {
         onError = () {
           system.exit(1);
         };
+      } else if (arg.startsWith('--dry-run')) {
+        dryRunArgSet = true;
+        printProgress('--dry-run enabled. Tests will not actually be executed.');
       } else {
         flutterTestArgs.add(arg);
       }
     }
+    dryRun = dryRunArgSet;
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
       printProgress('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     }
@@ -527,6 +529,9 @@ Future<void> _flutterBuild(
 }
 
 bool _allTargetsCached(File performanceFile) {
+  if (dryRun) {
+    return true;
+  }
   final Map<String, Object?> data = json.decode(performanceFile.readAsStringSync())
     as Map<String, Object?>;
   final List<Map<String, Object?>> targets = (data['targets']! as List<Object?>)
