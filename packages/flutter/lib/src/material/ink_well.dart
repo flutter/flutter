@@ -1458,7 +1458,7 @@ class InkWell extends InkResponse {
     super.radius,
     super.borderRadius,
     super.customBorder,
-    bool? enableFeedback = true,
+    super.enableFeedback,
     super.excludeFromSemantics,
     super.focusNode,
     super.canRequestFocus,
@@ -1469,6 +1469,5 @@ class InkWell extends InkResponse {
   }) : super(
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
-    enableFeedback: enableFeedback ?? true,
   );
 }
