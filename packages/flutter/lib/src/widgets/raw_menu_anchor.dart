@@ -733,7 +733,7 @@ sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final _RawMenuAnchorState? newParent = _RawMenuAnchorState._maybeOf(context);
+    final _RawMenuAnchorState? newParent = MenuController.maybeOf(context)?._anchor;
     if (newParent != _parent) {
       _parent?._removeChild(this);
       _parent = newParent;
@@ -858,15 +858,6 @@ sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
     );
   }
 
-  // Returns the active anchor in the given context, if any, and creates a
-  // dependency relationship that will rebuild the context when the node
-  // changes.
-  static _RawMenuAnchorState? _maybeOf(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_RawMenuAnchorScope>()
-        ?.anchor;
-  }
-
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
     return describeIdentity(this);
@@ -895,7 +886,8 @@ class _RawMenuAnchorOverlay extends _RawMenuAnchor {
   final Widget? child;
   final RawMenuAnchorOverlayBuilder overlayBuilder;
 
-  // Whether focus should be handled by this class or externally.
+  // Whether focus is handled by this class (default overlay) or externally
+  // (overlayBuilder)
   final bool hasExternalFocusScope;
 
   @override
@@ -936,6 +928,7 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
     if (_menuScopeNode?.context?.mounted != true) {
       return null;
     }
+
     return FocusTraversalGroup.maybeOf(_menuScopeNode!.context!)
             ?? ReadingOrderTraversalPolicy();
   }
@@ -1053,14 +1046,14 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
     widget.childFocusNode?.requestFocus();
   }
 
-  /// Open the menu, optionally at a position relative to the [RawMenuAnchor].
-  ///
-  /// Call this when the menu should be shown to the user.
-  ///
-  /// The optional `position` argument will specify the location of the menu in
-  /// the local coordinates of the [RawMenuAnchor], ignoring any
-  /// [MenuStyle.alignment] and/or [RawMenuAnchor.alignmentOffset] that were
-  /// specified.
+  // Open the menu, optionally at a position relative to the [RawMenuAnchor].
+  //
+  // Call this when the menu should be shown to the user.
+  //
+  // The optional `position` argument will specify the location of the menu in
+  // the local coordinates of the [RawMenuAnchor], ignoring any
+  // [MenuStyle.alignment] and/or [RawMenuAnchor.alignmentOffset] that were
+  // specified.
   @override
   void _open({Offset? position}) {
     assert(_menuController._anchor == this);
@@ -1096,10 +1089,10 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
     }
   }
 
-  /// Close the menu.
-  ///
-  /// Call this when the menu should be closed. Has no effect if the menu is
-  /// already closed.
+  // Close the menu.
+  //
+  // Call this when the menu should be closed. Has no effect if the menu is
+  // already closed.
   @override
   void _close({bool inDispose = false}) {
     if (!_isOpen) {
@@ -1253,11 +1246,11 @@ class _RawMenuAnchorPanelState extends _RawMenuAnchorState<_RawMenuAnchorPanel> 
 ///
 /// See also:
 ///
-/// * [RawMenuAnchor], a widget that defines a region that has submenu.
 /// * [MenuAnchor], a RawMenuAnchor that follows the Material Design guidelines.
 /// * [MenuBar], a widget that creates a menu bar, that can take an optional
 ///   [MenuController].
 /// * [SubmenuButton], a widget that has a button that manages a submenu.
+/// * [RawMenuAnchor], a widget that defines a region that has submenu.
 class MenuController {
   /// The anchor that this controller controls.
   ///
@@ -1273,14 +1266,14 @@ class MenuController {
   /// Opens the menu that this [MenuController] is associated with.
   ///
   /// If `position` is given, then the menu will open at the position given, in
-  /// the coordinate space of the [RawMenuAnchor] this controller is attached to.
+  /// the coordinate space of the root overlay.
   ///
   /// If given, the `position` will override the [RawMenuAnchor.alignmentOffset]
   /// given to the [RawMenuAnchor].
   ///
-  /// If the menu's anchor point (either a [MenuBar] or a [RawMenuAnchor]) is
-  /// scrolled by an ancestor, or the view changes size, then any open menu will
-  /// automatically close.
+  /// If the menu's anchor point (either a [MenuBar], [MenuAnchor], or a
+  /// [RawMenuAnchor]) is scrolled by an ancestor, or the view changes size,
+  /// then any open menu will automatically close.
   void open({Offset? position}) {
     assert(_anchor != null);
     _anchor!._open(position: position);
@@ -1292,9 +1285,9 @@ class MenuController {
   /// [RawMenuAnchor]. A [MenuController] is also be received by the
   /// [RawMenuAnchor.builder] when invoked.
   ///
-  /// If the menu's anchor point (either a [MenuBar] or a [RawMenuAnchor]) is
-  /// scrolled by an ancestor, or the view changes size, then any open menu will
-  /// automatically close.
+  /// If the menu's anchor point (either a [MenuBar], [MenuAnchor], or a
+  /// [RawMenuAnchor]) is scrolled by an ancestor, or the view changes size,
+  /// then any open menu will automatically close.
   void close() {
     _anchor?._close();
   }
@@ -1414,11 +1407,10 @@ class _MenuOverlay extends StatelessWidget {
         final TextDirection textDirection = Directionality.of(context);
         // Resolve fallback alignment here so that alignmentOffset defaults to
         // being directionally-agnostic.
-        final AlignmentGeometry anchorAttachment = alignment ??
-            (state._isRootOverlay
-                    ? AlignmentDirectional.bottomStart
-                    : AlignmentDirectional.topEnd).resolve(textDirection);
-
+        final AlignmentGeometry anchorAlignment = alignment
+                    ?? (state._isRootOverlay
+                          ? AlignmentDirectional.bottomStart
+                          : AlignmentDirectional.topEnd).resolve(textDirection);
         return CustomSingleChildLayout(
           delegate: _MenuLayout(
             screenPadding: mediaQuery.padding,
@@ -1429,7 +1421,7 @@ class _MenuOverlay extends StatelessWidget {
             alignmentOffset: alignmentOffset,
             menuPosition: position.position,
             menuAlignment: menuAlignment ?? AlignmentDirectional.topStart,
-            alignment: anchorAttachment,
+            alignment: anchorAlignment,
           ),
           child: child,
         );
@@ -1476,10 +1468,14 @@ class _MenuOverlayPanel extends StatelessWidget {
       );
     }
 
+    // The menu's items will be constrained to the size of the overlay,
+    // potentially causing the items to overflow or wrap.
     if (constrainCrossAxis) {
       return child;
     }
 
+    // The menu's items can grow beyond the size of the overlay, but will be
+    // clipped by the overlay's bounds.
     return UnconstrainedBox(
       clipBehavior: Clip.hardEdge,
       alignment: AlignmentDirectional.centerStart,
@@ -1522,29 +1518,29 @@ class _AnchorDirectionalFocusAction extends ContextAction<DirectionalFocusIntent
 
   @override
   void invoke(DirectionalFocusIntent intent, [BuildContext? context]) {
-    final _RawMenuAnchorState? state = _RawMenuAnchorState._maybeOf(context!);
-    if (state is! _RawMenuAnchorOverlayState) {
+    final _RawMenuAnchorState? anchor = MenuController.maybeOf(context!)?._anchor;
+    if (anchor is! _RawMenuAnchorOverlayState) {
       assert(
-        state is! _RawMenuAnchorPanelState,
-        'Menu panels should not invoke $_OverlayDirectionalFocusAction : $state',
+        anchor is! _RawMenuAnchorPanelState,
+        'Menu panels should not invoke $_OverlayDirectionalFocusAction : $anchor',
       );
       primaryFocus?.focusInDirection(intent.direction);
       return;
     }
 
-    final FocusNode? firstFocus = state._firstFocus;
-    final FocusNode? lastFocus = state._lastFocus;
+    final FocusNode? firstFocus = anchor._firstFocus;
+    final FocusNode? lastFocus = anchor._lastFocus;
     switch (intent.direction) {
       case TraversalDirection.left:
       case TraversalDirection.right:
         break;
       case TraversalDirection.up:
         if (lastFocus != null) {
-          return state._overlayTraversalPolicy?.requestFocusCallback(lastFocus);
+          return anchor._overlayTraversalPolicy?.requestFocusCallback(lastFocus);
         }
       case TraversalDirection.down:
         if (firstFocus != null) {
-          return state._overlayTraversalPolicy?.requestFocusCallback(firstFocus);
+          return anchor._overlayTraversalPolicy?.requestFocusCallback(firstFocus);
         }
     }
 
@@ -1557,7 +1553,7 @@ class _OverlayDirectionalFocusAction extends ContextAction<DirectionalFocusInten
 
   @override
   void invoke(DirectionalFocusIntent intent, [BuildContext? context]) {
-    final _RawMenuAnchorState? anchor = _RawMenuAnchorState._maybeOf(context!);
+    final _RawMenuAnchorState? anchor = MenuController.maybeOf(context!)?._anchor;
     if (anchor is! _RawMenuAnchorOverlayState) {
       assert(
         anchor is! _RawMenuAnchorPanelState,
@@ -1651,7 +1647,7 @@ class _FocusFirstMenuItemAction extends ContextAction<_FocusFirstMenuItemIntent>
 
   @override
   void invoke(_FocusFirstMenuItemIntent intent, [BuildContext? context]) {
-    _RawMenuAnchorState? anchor = _RawMenuAnchorState._maybeOf(context!);
+    _RawMenuAnchorState? anchor = MenuController.maybeOf(context!)?._anchor;
     if (anchor is! _RawMenuAnchorOverlayState) {
       assert(
         anchor is! _RawMenuAnchorPanelState,
@@ -1686,7 +1682,7 @@ class _FocusLastMenuItemAction extends ContextAction<_FocusLastMenuItemIntent> {
 
   @override
   void invoke(_FocusLastMenuItemIntent intent, [BuildContext? context]) {
-    _RawMenuAnchorState? anchor = _RawMenuAnchorState._maybeOf(context!);
+    _RawMenuAnchorState? anchor = MenuController.maybeOf(context!)?._anchor;
     if (anchor is! _RawMenuAnchorOverlayState) {
       assert(
         anchor is! _RawMenuAnchorPanelState,
