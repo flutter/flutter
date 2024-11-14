@@ -33,7 +33,6 @@ abstract class WebRunnerFactory {
     required SystemClock systemClock,
     required Usage usage,
     required Analytics analytics,
-    required bool useImplicitPubspecResolution,
     bool machine = false,
   });
 }

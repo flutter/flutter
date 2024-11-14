@@ -62,6 +62,9 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isSwiftPackageManagerEnabled => isEnabled(swiftPackageManager);
 
   @override
+  bool get isExplicitPackageDependenciesEnabled => isEnabled(explicitPackageDependencies);
+
+  @override
   bool isEnabled(Feature feature) {
     final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);

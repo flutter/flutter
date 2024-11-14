@@ -1053,7 +1053,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.flutterDevices, {
     required this.target,
     required this.debuggingOptions,
-    required bool useImplicitPubspecResolution,
     String? projectRootPath,
     this.stayResident = true,
     this.hotMode = true,
@@ -1064,7 +1063,6 @@ abstract class ResidentRunner extends ResidentHandlers {
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
-       _useImplicitPubspecResolution = useImplicitPubspecResolution,
        artifactDirectory = dillOutputPath == null
           ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
           : globals.fs.file(dillOutputPath).parent,
@@ -1097,7 +1095,6 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   final bool stayResident;
   final String? _dillOutputPath;
-  final bool _useImplicitPubspecResolution;
   /// The parent location of the incremental artifacts.
   final Directory artifactDirectory;
   final String packagesFilePath;
@@ -1224,7 +1221,6 @@ abstract class ResidentRunner extends ResidentHandlers {
         // Needed for Dart plugin registry generation.
         kTargetFile: mainPath,
       },
-      useImplicitPubspecResolution: _useImplicitPubspecResolution,
     );
 
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[

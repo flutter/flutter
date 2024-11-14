@@ -98,7 +98,6 @@ void main() {
         artifacts: Artifacts.test(),
         logger: BufferLogger.test(),
         flutterVersion: FakeFlutterVersion(),
-        useImplicitPubspecResolution: true,
       );
       logLines = <String>[];
       device.getLogReader().logLines.listen(logLines.add);
@@ -218,7 +217,6 @@ FlutterTesterDevices setUpFlutterTesterDevices() {
     processManager: FakeProcessManager.any(),
     fileSystem: MemoryFileSystem.test(),
     flutterVersion: FakeFlutterVersion(),
-    useImplicitPubspecResolution: true,
   );
 }
 

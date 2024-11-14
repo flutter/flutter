@@ -92,7 +92,7 @@ class Testbed {
   ///
   /// `overrides` may be used to provide new context values for the single test
   /// case or override any context values from the setup.
-  Future<T?> run<T>(FutureOr<T> Function() test, {Map<Type, Generator>? overrides, bool useImplicitPubspecResolution = true}) {
+  Future<T?> run<T>(FutureOr<T> Function() test, {Map<Type, Generator>? overrides}) {
     final Map<Type, Generator> testOverrides = <Type, Generator>{
       ..._testbedDefaults,
       // Add the initial setUp overrides
@@ -139,7 +139,7 @@ class Testbed {
             }
             return null;
           });
-      }, useImplicitPubspecResolution: useImplicitPubspecResolution);
+      });
     }, createHttpClient: (SecurityContext? c) => FakeHttpClient.any());
   }
 }

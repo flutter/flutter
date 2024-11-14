@@ -377,7 +377,7 @@ untranslated-messages-file: lib/l10n/untranslated.json
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/120530.
-  testWithoutContext('dart format is run when generateLocalizations is called through build target', () async {
+  testUsingContext('dart format is run when generateLocalizations is called through build target', () async {
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''

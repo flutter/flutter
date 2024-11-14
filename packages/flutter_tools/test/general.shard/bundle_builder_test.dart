@@ -48,7 +48,6 @@ void main() {
       assetDirPath: 'example',
       depfilePath: 'example.d',
       buildSystem: buildSystem,
-      useImplicitPubspecResolution: true,
     );
     expect(globals.fs.file(globals.fs.path.join('example', 'kernel_blob.bin')).existsSync(), true);
     expect(globals.fs.file(globals.fs.path.join('example', 'LICENSE')).existsSync(), true);
@@ -138,7 +137,6 @@ void main() {
         assetDirPath: 'example',
         depfilePath: 'example.d',
         buildSystem: TestBuildSystem.all(BuildResult(success: false)),
-        useImplicitPubspecResolution: true,
       ),
       throwsToolExit()
     );
@@ -184,7 +182,6 @@ void main() {
       assetDirPath: assetDirPath,
       depfilePath: depfilePath,
       buildSystem: buildSystem,
-      useImplicitPubspecResolution: true,
     );
 
     expect(env, isNotNull);

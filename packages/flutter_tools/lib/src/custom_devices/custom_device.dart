@@ -440,10 +440,8 @@ class CustomDevice extends Device {
     required CustomDeviceConfig config,
     required super.logger,
     required ProcessManager processManager,
-    required bool useImplicitPubspecResolution,
   }) : _config = config,
        _logger = logger,
-       _useImplicitPubspecResolution = useImplicitPubspecResolution,
        _processManager = processManager,
        _processUtils = ProcessUtils(
          processManager: processManager,
@@ -471,7 +469,6 @@ class CustomDevice extends Device {
   final ProcessUtils _processUtils;
   final Map<ApplicationPackage, CustomDeviceAppSession> _sessions = <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
-  final bool _useImplicitPubspecResolution;
 
   @override
   final DevicePortForwarder portForwarder;
@@ -765,7 +762,6 @@ class CustomDevice extends Device {
         mainPath: mainPath,
         depfilePath: defaultDepfilePath,
         assetDirPath: assetBundleDir,
-        useImplicitPubspecResolution: _useImplicitPubspecResolution,
       );
 
       // if we have a post build step (needed for some embedders), execute it
@@ -827,17 +823,14 @@ class CustomDevices extends PollingDeviceDiscovery {
     required ProcessManager processManager,
     required Logger logger,
     required CustomDevicesConfig config,
-    required bool useImplicitPubspecResolution,
   }) : _customDeviceWorkflow = CustomDeviceWorkflow(
          featureFlags: featureFlags,
        ),
-       _useImplicitPubspecResolution = useImplicitPubspecResolution,
        _logger = logger,
        _processManager = processManager,
        _config = config,
        super('custom devices');
 
-  final bool _useImplicitPubspecResolution;
   final CustomDeviceWorkflow  _customDeviceWorkflow;
   final ProcessManager _processManager;
   final Logger _logger;
@@ -859,7 +852,6 @@ class CustomDevices extends PollingDeviceDiscovery {
           config: config,
           logger: _logger,
           processManager: _processManager,
-          useImplicitPubspecResolution: _useImplicitPubspecResolution,
         )
       ).toList();
   }

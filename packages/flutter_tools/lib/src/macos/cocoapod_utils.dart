@@ -38,7 +38,8 @@ Future<void> processPodsIfNeeded(
     //  file being generated. A better long-term fix would be not to have a call to refreshPluginsList
     //  at all, and instead have it implicitly run by the FlutterCommand instead. See
     //  https://github.com/flutter/flutter/issues/157391 for details.
-    useImplicitPubspecResolution: false,
+    determineDevDependencies: false,
+    generateLegacyPlugins: false,
   );
 
   // If there are no plugins and if the project is a not module with an existing

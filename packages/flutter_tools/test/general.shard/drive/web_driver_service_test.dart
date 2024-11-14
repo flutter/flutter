@@ -318,7 +318,6 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     Usage? usage,
     Analytics? analytics,
     bool machine = false,
-    required bool useImplicitPubspecResolution,
   }) {
     expect(stayResident, isTrue);
     return FakeResidentRunner(
@@ -382,7 +381,6 @@ WebDriverService setUpDriverService() {
       processManager: FakeProcessManager.any(),
     ),
     dartSdkPath: 'dart',
-    useImplicitPubspecResolution: true,
   );
 }
 
