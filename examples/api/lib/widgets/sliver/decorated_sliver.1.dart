@@ -50,10 +50,10 @@ class _DecoratedSliverClipExampleState extends State<DecoratedSliverClipExample>
                 activeColor: Colors.pink,
                 onChanged: (bool value) {
                   setState(() {
-                    isClipped = value;
+                    _isClipped = value;
                   });
                 },
-                value: isClipped,
+                value: _isClipped,
               ),
               Slider(
                 activeColor: Colors.pink,
@@ -79,7 +79,7 @@ class _DecoratedSliverClipExampleState extends State<DecoratedSliverClipExample>
                 child: SizedBox(
                   width: 400,
                   height: _height,
-                  child: ResizableCustomScrollView(isClipped: isClipped),
+                  child: ResizableCustomScrollView(isClipped: _isClipped),
                 ),
               ),
               Positioned(
