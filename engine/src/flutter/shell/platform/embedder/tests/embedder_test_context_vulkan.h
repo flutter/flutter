@@ -38,6 +38,10 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
                                 const char* name);
 
  private:
+  // The TestVulkanContext destructor must be called _after_ the compositor is
+  // freed.
+  fml::RefPtr<TestVulkanContext> vulkan_context_ = nullptr;
+
   std::unique_ptr<TestVulkanSurface> surface_;
 
   SkISize surface_size_ = SkISize::MakeEmpty();
