@@ -2184,6 +2184,22 @@ void main() {
     });
   });
 
+  testWidgets('DatePickerDialog with updated insetPadding', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: DatePickerDialog(
+          initialDate: initialDate,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          insetPadding: const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
+        ),
+      ),
+    ));
+
+    final Dialog dialog = tester.widget<Dialog>(find.byType(Dialog));
+    expect(dialog.insetPadding, const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0));
+  });
+
   group('Landscape input-only date picker headers use headlineSmall', () {
     // Regression test for https://github.com/flutter/flutter/issues/122056
 
