@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:file/file.dart';
 
 import '../src/common.dart';
@@ -28,11 +27,17 @@ void main() {
   });
 
   test(
-      '.flutter-plugins-dependencies correctly denotes project dev dependencies on iOS, Android',
+      '.flutter-plugins-dependencies correctly denotes project dev dependencies on all default platforms',
       () async {
     // Create Flutter project.
     final String flutterBin =
         fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+
+    await processManager.run(<String>[
+      flutterBin,
+      'config',
+      '--no-implicit-pubspec-resolution',
+    ], workingDirectory: tempProjectDir.path);
 
     await processManager.run(<String>[
       flutterBin,
@@ -43,7 +48,6 @@ void main() {
 
     final File pubspecFile = tempProjectDir.childFile('pubspec.yaml');
     expect(pubspecFile.existsSync(), true);
-    String pubspecFileAsString = pubspecFile.readAsStringSync();
 
     // Create Flutter plugins to add as dependencies to Flutter project.
     await processManager.run(<String>[
@@ -51,7 +55,6 @@ void main() {
       'create',
       '${tempPluginADir.path}/plugin_a_real_dependency',
       '--template=plugin',
-      '--platforms=android', //TODO(camsim99): Consider looping through platforms to verify behavior across.
       '--project-name=plugin_a_real_dependency',
     ], workingDirectory: tempPluginADir.path);
 
@@ -60,7 +63,6 @@ void main() {
       'create',
       '${tempPluginBDir.path}/plugin_b_dev_dependency',
       '--template=plugin',
-      '--platforms=android', //TODO(camsim99): Consider looping through platforms to verify behavior across.
       '--project-name=plugin_b_dev_dependency',
     ], workingDirectory: tempPluginBDir.path);
 
@@ -86,6 +88,7 @@ void main() {
     // Run `flutter pub get` to generate .flutter-plugins-dependencies.
     await processManager.run(<String>[
       flutterBin,
+      '--no-implicit-pubspec-resolution',
       'pub',
       'get',
     ], workingDirectory: tempProjectDir.path);
@@ -94,8 +97,8 @@ void main() {
         tempProjectDir.childFile('.flutter-plugins-dependencies');
     expect(flutterPluginsDependenciesFile.existsSync(), true);
 
-    // Check that .flutter-plugin-dependencies denotes dependencies and
-    // dev dependencies as expected.
+    // Check that .flutter-plugin-dependencies denotes dependency and
+    // dev dependency as expected.
     final String pluginsString =
         flutterPluginsDependenciesFile.readAsStringSync();
     final Map<String, dynamic> jsonContent =
@@ -103,12 +106,15 @@ void main() {
     final Map<String, dynamic> plugins =
         jsonContent['plugins'] as Map<String, dynamic>;
 
-    //  TODO(camsim99): Consider looping through platforms to verify behavior across.
+    // Loop through all platforms supported by default to verify that dependency
+    // and dev dependency is handled appropriately.
     final List<String> platformsToVerify = <String>[
+      'ios',
       'android',
-      // 'ios',
-      // 'macos',
-      // 'web'
+      'windows',
+      'linux',
+      'macos',
+      'web',
     ];
 
     for (final String platform in platformsToVerify) {
