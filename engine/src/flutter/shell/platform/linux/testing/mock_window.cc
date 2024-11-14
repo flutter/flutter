@@ -15,3 +15,18 @@ MockWindow::MockWindow() {
 GdkWindowState gdk_window_get_state(GdkWindow* window) {
   return mock->gdk_window_get_state(window);
 }
+
+GdkDisplay* gdk_window_get_display(GdkWindow* window) {
+  return nullptr;
+}
+
+GdkMonitor* gdk_display_get_monitor_at_window(GdkDisplay* display,
+                                              GdkWindow* window) {
+  return nullptr;
+}
+
+GdkCursor* gdk_cursor_new_from_name(GdkDisplay* display, const gchar* name) {
+  return nullptr;
+}
+
+void gdk_window_set_cursor(GdkWindow* window, GdkCursor* cursor) {}

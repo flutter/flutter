@@ -16,7 +16,6 @@
 #include "flutter/shell/platform/linux/fl_keyboard_handler.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 #include "flutter/shell/platform/linux/fl_keyboard_view_delegate.h"
-#include "flutter/shell/platform/linux/fl_mouse_cursor_handler.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_renderer_gdk.h"
@@ -68,10 +67,12 @@ struct _FlView {
   // Flutter system channel handlers.
   FlKeyboardHandler* keyboard_handler;
   FlTextInputHandler* text_input_handler;
-  FlMouseCursorHandler* mouse_cursor_handler;
 
   // Accessible tree from Flutter, exposed as an AtkPlug.
   FlViewAccessible* view_accessible;
+
+  // Signal subscripton for cursor changes.
+  guint cursor_changed_cb_id;
 
   GCancellable* cancellable;
 };
@@ -182,6 +183,28 @@ static gboolean get_mouse_button(GdkEvent* event, int64_t* button) {
     default:
       return FALSE;
   }
+}
+
+// Called when the mouse cursor changes.
+static void cursor_changed_cb(FlView* self) {
+  FlMouseCursorHandler* handler =
+      fl_engine_get_mouse_cursor_handler(self->engine);
+  const gchar* cursor_name = fl_mouse_cursor_handler_get_cursor_name(handler);
+  GdkWindow* window =
+      gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(self)));
+  g_autoptr(GdkCursor) cursor =
+      gdk_cursor_new_from_name(gdk_window_get_display(window), cursor_name);
+  gdk_window_set_cursor(window, cursor);
+}
+
+// Set the mouse cursor.
+static void setup_cursor(FlView* self) {
+  FlMouseCursorHandler* handler =
+      fl_engine_get_mouse_cursor_handler(self->engine);
+
+  self->cursor_changed_cb_id = g_signal_connect_swapped(
+      handler, "cursor-changed", G_CALLBACK(cursor_changed_cb), self);
+  cursor_changed_cb(self);
 }
 
 // Updates the engine with the current window metrics.
@@ -457,10 +480,7 @@ static GdkGLContext* create_context_cb(FlView* self) {
   fl_renderer_gdk_set_window(self->renderer,
                              gtk_widget_get_parent_window(GTK_WIDGET(self)));
 
-  // Create system channel handlers.
-  FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
   init_scrolling(self);
-  self->mouse_cursor_handler = fl_mouse_cursor_handler_new(messenger, self);
 
   g_autoptr(GError) error = nullptr;
   if (!fl_renderer_gdk_create_contexts(self->renderer, &error)) {
@@ -504,6 +524,8 @@ static void realize_cb(FlView* self) {
     g_warning("Failed to start Flutter engine: %s", error->message);
     return;
   }
+
+  setup_cursor(self);
 
   handle_geometry_changed(self);
 
@@ -567,6 +589,13 @@ static void fl_view_dispose(GObject* object) {
     fl_engine_set_update_semantics_handler(self->engine, nullptr, nullptr,
                                            nullptr);
 
+    FlMouseCursorHandler* handler =
+        fl_engine_get_mouse_cursor_handler(self->engine);
+    if (self->cursor_changed_cb_id != 0) {
+      g_signal_handler_disconnect(handler, self->cursor_changed_cb_id);
+      self->cursor_changed_cb_id = 0;
+    }
+
     // Stop rendering.
     fl_renderer_remove_view(FL_RENDERER(self->renderer), self->view_id);
 
@@ -589,7 +618,6 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->pointer_manager);
   g_clear_object(&self->keyboard_manager);
   g_clear_object(&self->keyboard_handler);
-  g_clear_object(&self->mouse_cursor_handler);
   g_clear_object(&self->view_accessible);
   g_clear_object(&self->cancellable);
 
@@ -749,6 +777,8 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
                              FL_RENDERABLE(self));
 
   self->pointer_manager = fl_pointer_manager_new(self->view_id, engine);
+
+  setup_cursor(self);
 
   return self;
 }
