@@ -1096,7 +1096,7 @@ Future<T?> showMenu<T>({
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
-  assert(position != null || positionBuilder != null,
+  assert((position != null) != (positionBuilder != null),
   'Either position or positionBuilder must be provided.');
 
   switch (Theme.of(context).platform) {
