@@ -115,7 +115,7 @@ const double _kActionSheetButtonVerticalPaddingBase = 1.8;
 // Extracted from https://developer.apple.com/design/resources/.
 const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xCCF2F2F2),
-  darkColor: Color(0xBF1E1E1E),
+  darkColor: Color(0xCC2D2D2D),
 );
 
 // Translucent light gray that is painted on top of the blurred backdrop as the
@@ -123,7 +123,7 @@ const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
 // Eyeballed from iOS 13 beta simulator.
 const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFE1E1E1),
-  darkColor: Color(0xFF2E2E2E),
+  darkColor: Color(0xFF404040),
 );
 
 // Translucent light gray that is painted on top of the blurred backdrop as the
@@ -1215,6 +1215,7 @@ class CupertinoActionSheetAction extends StatefulWidget {
     required this.onPressed,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
+    this.mouseCursor,
     required this.child,
   });
 
@@ -1233,6 +1234,12 @@ class CupertinoActionSheetAction extends StatefulWidget {
   ///
   /// Destructive buttons have red text.
   final bool isDestructiveAction;
+
+  /// The cursor that will be shown when hovering over the button.
+  ///
+  /// If null, defaults to [SystemMouseCursors.click] on web and
+  /// [MouseCursor.defer] on other platforms.
+  final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
   ///
@@ -1312,7 +1319,7 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
         + fontSize * _kActionSheetButtonVerticalPaddingFactor;
 
     return MouseRegion(
-      cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor: widget.mouseCursor ?? (kIsWeb ? SystemMouseCursors.click : MouseCursor.defer),
       child: MetaData(
         metaData: this,
         behavior: HitTestBehavior.opaque,
