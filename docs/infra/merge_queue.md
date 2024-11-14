@@ -4,7 +4,7 @@ If you are not hacking on flutter/flutter, you can stop reading now.
 
 tl;dr GitHub merge queue will be enabled in the flutter/flutter repo, which slightly changes the PR merge process, but you should not notice a change in your workflow.
 
-On Friday November 14, 2024, GitHub merge queue feature will be enabled in the flutter/flutter repo. After this change, pull requests will first need to pass merge queue tests before landing on the target branch (e.g. main or master). At this time, no additional tests will run in the merge queue. A PR that passes presubmit checks will be allowed to land on the target branch immediately.
+On Friday November 15, 2024, GitHub merge queue feature will be enabled in the flutter/flutter repo. After this change, pull requests will first need to pass merge queue tests before landing on the target branch (e.g. main or master). At this time, no additional tests will run in the merge queue. A PR that passes presubmit checks will be allowed to land on the target branch immediately.
 What should I expect?
 The only visible change will be the merge button. Currently, the button looks like this:
 
