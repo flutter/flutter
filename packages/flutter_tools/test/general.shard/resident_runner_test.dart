@@ -682,10 +682,6 @@ void main() {
   testUsingContext('ResidentRunner reports hot reload time details', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
-      FakeVmServiceRequest(
-        method: 'getVM',
-        jsonResponse: fakeVM.toJson(),
-      ),
       listViews,
       listViews,
       FakeVmServiceRequest(
@@ -1924,43 +1920,6 @@ flutter:
 
     expect(residentCompiler!.frontendServerStarterPath, '/foo/bar/frontend_server_starter.dart');
   }, overrides: <Type, Generator>{
-    Artifacts: () => Artifacts.test(),
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
-  testUsingContext('FlutterDevice does not throw when unable to initiate log reader due to VM service disconnection', () async {
-    fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        FakeVmServiceRequest(
-          method: 'getVM',
-          error: FakeRPCError(
-            code: vm_service.RPCErrorKind.kServerError.code,
-            error: 'Service connection disposed',
-          ),
-        ),
-      ],
-    );
-    final TestFlutterDevice flutterDevice = TestFlutterDevice(device);
-    flutterDevice.vmService = fakeVmServiceHost!.vmService;
-    await flutterDevice.tryInitLogReader();
-
-    final BufferLogger logger = globals.logger as BufferLogger;
-    expect(
-      logger.traceText,
-      contains(
-        'VmService.getVm call failed: getVM: (-32000) '
-        'Service connection disposed\n',
-      ),
-    );
-    // We should not print a warning since the device does not have a connected
-    // adb log reader.
-    // TODO(andrewkolos): This test is a bit fragile, and is something that
-    //  should be corrected in a follow-up PR (see
-    //  https://github.com/flutter/flutter/issues/155795).
-    expect(logger.errorText, isEmpty);
-  }, overrides: <Type, Generator>{
-    Logger: () => BufferLogger.test(),
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
