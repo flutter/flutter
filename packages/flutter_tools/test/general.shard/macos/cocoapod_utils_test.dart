@@ -177,7 +177,7 @@ void main() {
             'plugin_one',
             'plugin_two'
           ]);
-          flutterProject.usesSwiftPackageManager = true;
+          flutterProject.ios.usesSwiftPackageManager = true;
           flutterProject.ios.podfile.createSync(recursive: true);
 
           await processPodsIfNeeded(
@@ -200,7 +200,7 @@ void main() {
             'plugin_one',
             'plugin_two'
           ]);
-          flutterProject.usesSwiftPackageManager = true;
+          flutterProject.ios.usesSwiftPackageManager = true;
 
           await processPodsIfNeeded(
             flutterProject.ios,
@@ -221,7 +221,7 @@ void main() {
             'plugin_one',
             'plugin_two'
           ]);
-          flutterProject.usesSwiftPackageManager = true;
+          flutterProject.ios.usesSwiftPackageManager = true;
           flutterProject.ios.flutterPluginSwiftPackageManifest.createSync(recursive: true);
 
           await processPodsIfNeeded(
@@ -336,7 +336,7 @@ void main() {
             'plugin_one',
             'plugin_two'
           ]);
-          flutterProject.usesSwiftPackageManager = true;
+          flutterProject.macos.usesSwiftPackageManager = true;
           flutterProject.macos.podfile.createSync(recursive: true);
 
           await processPodsIfNeeded(
@@ -359,7 +359,7 @@ void main() {
             'plugin_one',
             'plugin_two'
           ]);
-          flutterProject.usesSwiftPackageManager = true;
+          flutterProject.macos.usesSwiftPackageManager = true;
 
           await processPodsIfNeeded(
             flutterProject.macos,
@@ -380,7 +380,7 @@ void main() {
             'plugin_one',
             'plugin_two'
           ]);
-          flutterProject.usesSwiftPackageManager = true;
+          flutterProject.macos.usesSwiftPackageManager = true;
           flutterProject.macos.flutterPluginSwiftPackageManifest.createSync(recursive: true);
 
           await processPodsIfNeeded(
@@ -421,9 +421,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   bool isModule = false;
 
   @override
-  bool usesSwiftPackageManager = false;
-
-  @override
   late FlutterManifest manifest;
 
   @override
@@ -436,10 +433,10 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   late File flutterPluginsDependenciesFile;
 
   @override
-  late IosProject ios;
+  late FakeIosProject ios;
 
   @override
-  late MacOSProject macos;
+  late FakeMacOSProject macos;
 
   @override
   late AndroidProject android;
@@ -489,6 +486,9 @@ class FakeMacOSProject extends Fake implements MacOSProject {
       .childDirectory('Packages')
       .childDirectory('FlutterGeneratedPluginSwiftPackage')
       .childFile('Package.swift');
+
+  @override
+  bool usesSwiftPackageManager = false;
 }
 
 class FakeIosProject extends Fake implements IosProject {
@@ -527,6 +527,9 @@ class FakeIosProject extends Fake implements IosProject {
       .childDirectory('Packages')
       .childDirectory('FlutterGeneratedPluginSwiftPackage')
       .childFile('Package.swift');
+
+  @override
+  bool usesSwiftPackageManager = false;
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {

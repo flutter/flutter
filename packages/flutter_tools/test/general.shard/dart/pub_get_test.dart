@@ -763,6 +763,49 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('pub get does not inherit logger.verbose', () async {
+    final BufferLogger logger = BufferLogger.test(verbose: true);
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.currentDirectory.childFile('version').createSync();
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: const <String>[
+        'bin/cache/dart-sdk/bin/dart',
+        // Note: Omitted --verbose.
+        'pub',
+        '--suppress-analytics',
+        '--directory',
+        '.',
+        'get',
+        '--example',
+      ], onRun: (_) {
+        fileSystem.currentDirectory
+          .childDirectory('.dart_tool')
+          .childFile('package_config.json')
+          .createSync(recursive: true);
+      }),
+    ]);
+
+    final Pub pub = Pub.test(
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      logger: logger,
+      usage: TestUsage(),
+      botDetector: const FakeBotDetector(false),
+      stdio: FakeStdio(),
+      processManager: processManager,
+    );
+
+    await expectLater(
+      pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        context: PubContext.flutterTests,
+        outputMode: PubOutputMode.failuresOnly,
+      ),
+      completes,
+    );
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/116627
   testWithoutContext('pub get suppresses progress output', () async {
     final BufferLogger logger = BufferLogger.test();
