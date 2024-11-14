@@ -19,7 +19,7 @@ class WebImageState extends State<WebImage> {
   @override
   Widget build(BuildContext context) {
     return Image.network(
-      widget.provider.src,
+      widget.image.src,
       frameBuilder: widget.frameBuilder,
       loadingBuilder: widget.loadingBuilder,
       errorBuilder: widget.errorBuilder,

@@ -100,6 +100,14 @@ extension type HTMLImageElement._(JSObject _) implements HTMLElement, JSObject {
   external JSPromise<JSAny?> decode();
 }
 
+extension type HTMLCanvasElement._(JSObject _) implements HTMLElement, JSObject {
+  external int get width;
+  external set width(int value);
+  external int get height;
+  external set height(int value);
+  external String toDataURL();
+}
+
 extension type MediaQueryList._(JSObject _) implements EventTarget, JSObject {
   external bool get matches;
 }

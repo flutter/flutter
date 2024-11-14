@@ -41,9 +41,9 @@ import '_web_image_io.dart' if (dart.library.js_interop) '_web_image_web.dart'
 ///
 /// [same origin policy]: https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
 class WebImage extends StatefulWidget {
-  /// Creates a web image with the given [provider].
-  const WebImage(
-    this.provider, {
+  /// Creates a web image with the given [image].
+  const WebImage({
+    required this.image,
     super.key,
     this.frameBuilder,
     this.loadingBuilder,
@@ -73,10 +73,10 @@ class WebImage extends StatefulWidget {
     this.alignment = Alignment.center,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
-  }) : provider = WebImageProvider(src);
+  }) : image = WebImageProvider(src);
 
   /// The resource which provides the image.
-  final WebImageProvider provider;
+  final WebImageProvider image;
 
   /// {@macro flutter.widgets.Image.loadingBuilder}
   final ImageLoadingBuilder? loadingBuilder;
@@ -87,35 +87,51 @@ class WebImage extends StatefulWidget {
   /// {@macro flutter.widgets.Image.errorBuilder}
   final ImageErrorWidgetBuilder? errorBuilder;
 
+  /// {@macro flutter.widgets.Image.semanticLabel}
   final String? semanticLabel;
 
+  /// {@macro flutter.widgets.Image.excludeFromSemantics}
   final bool excludeFromSemantics;
 
+  /// {@macro flutter.widgets.Image.width}
   final double? width;
 
+  /// {@macro flutter.widgets.Image.height}
   final double? height;
 
+  /// {@macro flutter.widgets.Image.fit}
   final BoxFit? fit;
 
+  /// {@macro flutter.widgets.Image.alignment}
   final AlignmentGeometry alignment;
 
+  /// {@macro flutter.widgets.Image.matchTextDirection}
   final bool matchTextDirection;
 
+  /// {@macro flutter.widgets.Image.gapplessPlayback}
   final bool gaplessPlayback;
 
   @override
   State<WebImage> createState() => impl.WebImageState();
 }
 
+/// If the [provider] points to a web image resource that can be directly
+/// fetched, then this calls [precacheImage] with the resource URL as the
+/// provider. Otherwise, this completes when the underlying image resource
+/// has been decoded and is ready to display in an <img> element.
 Future<void> precacheWebImage(
   WebImageProvider provider,
   BuildContext context, {
   Size? size,
   ImageErrorListener? onError,
-}) => impl.precacheWebImage(provider, context, size: size, onError: onError);
+}) =>
+    impl.precacheWebImage(provider, context, size: size, onError: onError);
 
+/// A key for loading the web image resource located at the URL [src].
 abstract class WebImageProvider {
+  /// Creates a new [WebImageProvider].
   factory WebImageProvider(String src) => impl.WebImageProviderImpl(src);
 
+  /// The URL the web image resource is located at.
   String get src;
 }

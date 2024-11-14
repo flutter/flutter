@@ -112,14 +112,14 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
       _imageStream!.addListener(_getListener(recreateListener: true));
       _imageStream!.removeListener(oldListener);
     }
-    if (widget.provider != oldWidget.provider) {
+    if (widget.image != oldWidget.image) {
       _resolveImage();
     }
   }
 
   void _resolveImage() {
     final WebImageStream newStream =
-        (widget.provider as WebImageProviderImpl).resolve();
+        (widget.image as WebImageProviderImpl).resolve();
     _updateSourceStream(newStream);
   }
 
@@ -130,6 +130,10 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
 
     if (_isListeningToStream) {
       _imageStream!.removeListener(_getListener());
+    }
+
+    if (!widget.gaplessPlayback) {
+      setState(() { _replaceImage(info: null); });
     }
 
     setState(() {
@@ -272,7 +276,7 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
 
     if (_imageCanBeFetched) {
       return Image.network(
-        widget.provider.src,
+        widget.image.src,
         frameBuilder: widget.frameBuilder,
         loadingBuilder: widget.loadingBuilder,
         errorBuilder: widget.errorBuilder,
@@ -283,14 +287,12 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
       );
     }
 
-    Widget result = _imageInfo == null
-        ? const SizedBox.expand()
-        : RawWebImage(
-            image: _imageInfo!.image,
-            debugImageLabel: _imageInfo?.debugLabel,
-            width: widget.width,
-            height: widget.height,
-          );
+    Widget result = RawWebImage(
+      image: _imageInfo?.image,
+      debugImageLabel: _imageInfo?.debugLabel,
+      width: widget.width,
+      height: widget.height,
+    );
 
     if (!widget.excludeFromSemantics) {
       result = Semantics(
@@ -311,6 +313,14 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
     }
 
     return result;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(DiagnosticsProperty<WebImageStream>('stream', _imageStream));
+    description.add(DiagnosticsProperty<WebImageInfo>('<img>', _imageInfo));
+    description.add(DiagnosticsProperty<bool>('wasSynchronouslyLoaded', _wasSynchronouslyLoaded));
   }
 }
 
@@ -401,6 +411,20 @@ class RawWebImage extends SingleChildRenderObjectWidget {
           ? Directionality.of(context)
           : null,
     );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderWebImage renderObject) {
+    renderObject
+      ..image = image
+      ..width = width
+      ..height = height
+      ..fit = fit
+      ..alignment = alignment
+      ..matchTextDirection = matchTextDirection
+      ..textDirection = matchTextDirection || alignment is! Alignment
+          ? Directionality.of(context)
+          : null;
   }
 }
 
@@ -633,18 +657,28 @@ class RenderWebImage extends RenderShiftedBox {
     assert(_resolvedAlignment != null);
     assert(_flipHorizontally != null);
     size = _sizeForConstraints(constraints);
-    if (child != null && image != null) {
-      final Size inputSize = Size(image!.naturalWidth.toDouble(), image!.naturalHeight.toDouble());
-      fit ??= BoxFit.scaleDown;
-      final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize, size);
-      final Size childSize = fittedSizes.destination;
-      child!.layout(BoxConstraints.tight(childSize));
-      final double halfWidthDelta = (size.width - childSize.width) / 2.0;
-      final double halfHeightDelta = (size.height - childSize.height) / 2.0;
-      final double dx = halfWidthDelta + (_flipHorizontally! ? -_resolvedAlignment!.x : _resolvedAlignment!.x) * halfWidthDelta;
-      final double dy = halfHeightDelta + _resolvedAlignment!.y * halfHeightDelta;
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      childParentData.offset = Offset(dx, dy);
+    if (child != null) {
+      if (image != null) {
+        final Size inputSize =
+            Size(image!.naturalWidth.toDouble(), image!.naturalHeight.toDouble());
+        fit ??= BoxFit.scaleDown;
+        final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize, size);
+        final Size childSize = fittedSizes.destination;
+        child!.layout(BoxConstraints.tight(childSize));
+        final double halfWidthDelta = (size.width - childSize.width) / 2.0;
+        final double halfHeightDelta = (size.height - childSize.height) / 2.0;
+        final double dx = halfWidthDelta +
+            (_flipHorizontally!
+                    ? -_resolvedAlignment!.x
+                    : _resolvedAlignment!.x) *
+                halfWidthDelta;
+        final double dy =
+            halfHeightDelta + _resolvedAlignment!.y * halfHeightDelta;
+        final BoxParentData childParentData = child!.parentData! as BoxParentData;
+        childParentData.offset = Offset(dx, dy);
+      } else {
+        child!.layout(BoxConstraints.tight(size));
+      }
     }
   }
 
@@ -712,6 +746,48 @@ class WebImageProviderImpl implements WebImageProvider {
       },
     );
     return stream;
+  }
+
+  /// Returns the cache location for the key that this [ImageProvider] creates.
+  ///
+  /// The location may be [ImageCacheStatus.untracked], indicating that this
+  /// image provider's key is not available in the [ImageCache].
+  ///
+  /// If the `handleError` parameter is null, errors will be reported to
+  /// [FlutterError.onError], and the method will return null.
+  ///
+  /// A completed return value of null indicates that an error has occurred.
+  Future<WebImageCacheStatus?> obtainCacheStatus({
+    ImageErrorListener? handleError,
+  }) {
+    final Completer<WebImageCacheStatus?> completer = Completer<WebImageCacheStatus?>();
+    _createErrorHandler(
+      (String key, ImageErrorListener innerHandleError) {
+        completer.complete(webImageCache.statusForKey(key));
+      },
+      (String? key, Object exception, StackTrace? stack) async {
+        if (handleError != null) {
+          handleError(exception, stack);
+        } else {
+          InformationCollector? collector;
+          assert(() {
+            collector = () => <DiagnosticsNode>[
+              DiagnosticsProperty<WebImageProvider>('Image provider', this),
+              DiagnosticsProperty<String>('Image src', key, defaultValue: null),
+            ];
+            return true;
+          }());
+          FlutterError.reportError(FlutterErrorDetails(
+            context: ErrorDescription('while checking the cache location of an image'),
+            informationCollector: collector,
+            exception: exception,
+            stack: stack,
+          ));
+          completer.complete();
+        }
+      },
+    );
+    return completer.future;
   }
 
   /// This method is used by both [resolve] and [obtainCacheStatus] to ensure
@@ -1388,9 +1464,10 @@ class WebImageStreamCompleterHandle {
 
 /// A listener which is notified when a web image resource can either be
 /// fetched directly, or if it has been decoded by an <img> tag.
+@immutable
 class WebImageStreamListener {
   /// Creates a new [WebImageListener].
-  WebImageStreamListener(this.onImage, this.onImageCanBeFetched,
+  const WebImageStreamListener(this.onImage, this.onImageCanBeFetched,
       {this.onError});
 
   /// A callback which is called when the web image resource has been decoded
@@ -1404,19 +1481,35 @@ class WebImageStreamListener {
   /// A callback which is called if an error has been thrown while trying to
   /// determine if the web image can be fetched or while decoding it.
   final ImageErrorListener? onError;
+
+  @override
+  int get hashCode => Object.hash(onImage, onImageCanBeFetched, onError);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is WebImageStreamListener
+        && other.onImage == onImage
+        && other.onImageCanBeFetched == onImageCanBeFetched
+        && other.onError == onError;
+  }
 }
 
 /// The type of the callback for [WebImageStreamListener.onImage].
 typedef WebImageListener = void Function(
     WebImageInfo info, bool synchronousCall);
+
 /// The type of the callback for [WebImageStreamListener.onImageCanBeFetched].
 typedef WebImageCanBeFetchedListener = void Function(bool synchronousCall);
 
 /// Contains the `<img>` tag to show a web image. The underlying image is
 /// guaranteed to have been decoded and is ready to display immediately.
+@immutable
 class WebImageInfo {
   /// Creates a new [WebImageInfo].
-  WebImageInfo(
+  const WebImageInfo(
     this.image, {
     this.debugLabel,
   });
@@ -1436,6 +1529,22 @@ class WebImageInfo {
       image.cloneNode(true) as web.HTMLImageElement,
       debugLabel: debugLabel,
     );
+  }
+
+  @override
+  String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image';
+
+  @override
+  int get hashCode => Object.hash(image, debugLabel);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is WebImageInfo
+        && other.image == image
+        && other.debugLabel == debugLabel;
   }
 }
 
@@ -2167,7 +2276,9 @@ Future<void> precacheWebImage(
       precacheImage(NetworkImage(provider.src), context,
               size: size, onError: onError)
           .then<void>((_) {
-        completer.complete();
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
       });
     },
     onError: (Object exception, StackTrace? stackTrace) {
