@@ -138,7 +138,7 @@ abstract class Pub {
   /// skipped if the package config file has a "generator" other than "pub".
   /// Defaults to true.
   ///
-  /// [outputMode] determines how verbose the output from `pub get` will be.
+  /// [outputMode] determines how detailed the output from `pub get` will be.
   /// If [PubOutputMode.all] is used, `pub get` will print its typical output
   /// which includes information about all changed dependencies. If
   /// [PubOutputMode.summaryOnly] is used, only summary information will be printed.
@@ -353,12 +353,9 @@ class _DefaultPub implements Pub {
     }
 
     final String command = upgrade ? 'upgrade' : 'get';
-    final bool verbose = _logger.isVerbose;
     final List<String> args = <String>[
       if (_logger.supportsColor)
         '--color',
-      if (verbose)
-        '--verbose',
       '--directory',
       _fileSystem.path.relative(directory),
       ...<String>[
