@@ -14,8 +14,7 @@
 #include "flutter/testing/thread_test.h"
 #include "gtest/gtest.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 class EmbedderTest : public ThreadTest {
  public:
@@ -29,6 +28,11 @@ class EmbedderTest : public ThreadTest {
   std::map<EmbedderTestContextType, std::unique_ptr<EmbedderTestContext>>
       embedder_contexts_;
 
+  std::unique_ptr<EmbedderTestContext> CreateSoftwareContext();
+  std::unique_ptr<EmbedderTestContext> CreateGLContext();
+  std::unique_ptr<EmbedderTestContext> CreateMetalContext();
+  std::unique_ptr<EmbedderTestContext> CreateVulkanContext();
+
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTest);
 };
 
@@ -36,7 +40,6 @@ class EmbedderTestMultiBackend
     : public EmbedderTest,
       public ::testing::WithParamInterface<EmbedderTestContextType> {};
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_TEST_H_
