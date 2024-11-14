@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
@@ -133,6 +134,7 @@ class SearchAnchor extends StatefulWidget {
     this.dividerColor,
     this.viewConstraints,
     this.viewPadding,
+    this.shrinkWrap,
     this.textCapitalization,
     this.viewOnChanged,
     this.viewOnSubmitted,
@@ -170,6 +172,7 @@ class SearchAnchor extends StatefulWidget {
     EdgeInsetsGeometry? viewBarPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
+    ViewBuilder? viewBuilder,
     Widget? viewLeading,
     Iterable<Widget>? viewTrailing,
     String? viewHintText,
@@ -184,6 +187,7 @@ class SearchAnchor extends StatefulWidget {
     BoxConstraints? constraints,
     BoxConstraints? viewConstraints,
     EdgeInsetsGeometry? viewPadding,
+    bool? shrinkWrap,
     bool? isFullScreen,
     SearchController searchController,
     TextCapitalization textCapitalization,
@@ -328,6 +332,14 @@ class SearchAnchor extends StatefulWidget {
   /// If null, the value of [SearchViewThemeData.padding] will be used.
   final EdgeInsetsGeometry? viewPadding;
 
+  /// Whether the search view should shrink-wrap its contents.
+  ///
+  /// Has no effect if the search view is full-screen.
+  ///
+  /// If null, the value of [SearchViewThemeData.shrinkWrap] will be used. If
+  /// this is also null, then the default value is `false`.
+  final bool? shrinkWrap;
+
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
@@ -454,6 +466,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       dividerColor: widget.dividerColor,
       viewConstraints: widget.viewConstraints,
       viewPadding: widget.viewPadding,
+      shrinkWrap: widget.shrinkWrap,
       showFullScreenView: getShowFullScreenView(),
       toggleVisibility: toggleVisibility,
       textDirection: Directionality.of(context),
@@ -536,6 +549,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.dividerColor,
     this.viewConstraints,
     this.viewPadding,
+    this.shrinkWrap,
     this.textCapitalization,
     required this.showFullScreenView,
     required this.anchorKey,
@@ -566,6 +580,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final Color? dividerColor;
   final BoxConstraints? viewConstraints;
   final EdgeInsetsGeometry? viewPadding;
+  final bool? shrinkWrap;
   final TextCapitalization? textCapitalization;
   final bool showFullScreenView;
   final GlobalKey anchorKey;
@@ -690,7 +705,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-
     return Directionality(
       textDirection: textDirection ?? TextDirection.ltr,
       child: AnimatedBuilder(
@@ -732,7 +746,9 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 viewHeaderTextStyle: viewHeaderTextStyle,
                 viewHeaderHintStyle: viewHeaderHintStyle,
                 dividerColor: dividerColor,
+                viewConstraints: viewConstraints,
                 viewPadding: viewPadding,
+                shrinkWrap: shrinkWrap,
                 showFullScreenView: showFullScreenView,
                 animation: curvedAnimation!,
                 topPadding: topPadding,
@@ -774,7 +790,9 @@ class _ViewContent extends StatefulWidget {
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
+    this.viewConstraints,
     this.viewPadding,
+    this.shrinkWrap,
     this.textCapitalization,
     required this.showFullScreenView,
     required this.topPadding,
@@ -803,7 +821,9 @@ class _ViewContent extends StatefulWidget {
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
+  final BoxConstraints? viewConstraints;
   final EdgeInsetsGeometry? viewPadding;
+  final bool? shrinkWrap;
   final TextCapitalization? textCapitalization;
   final bool showFullScreenView;
   final double topPadding;
@@ -911,19 +931,6 @@ class _ViewContentState extends State<_ViewContent> {
     viewListFadeOnIntervalCurve.dispose();
   }
 
-  Widget viewBuilder(Iterable<Widget> suggestions) {
-    if (widget.viewBuilder == null) {
-      return MediaQuery.removePadding(
-        context: context,
-        removeTop: true,
-        child: ListView(
-          children: suggestions.toList()
-        ),
-      );
-    }
-    return widget.viewBuilder!(suggestions);
-  }
-
   Future<void> updateSuggestions() async {
     if (searchValue != _controller.text) {
       searchValue = _controller.text;
@@ -998,6 +1005,16 @@ class _ViewContentState extends State<_ViewContent> {
       ?? viewTheme.barPadding
       ?? viewDefaults.barPadding;
 
+    final BoxConstraints effectiveConstraints = widget.viewConstraints
+      ?? viewTheme.constraints
+      ?? viewDefaults.constraints!;
+    final double minWidth = math.min(effectiveConstraints.minWidth, _viewRect.width);
+    final double minHeight = math.min(effectiveConstraints.minHeight, _viewRect.height);
+
+    final bool effectiveShrinkWrap = widget.shrinkWrap
+      ?? viewTheme.shrinkWrap
+      ?? viewDefaults.shrinkWrap!;
+
     final Widget viewDivider = DividerTheme(
       data: dividerTheme.copyWith(color: effectiveDividerColor),
       child: const Divider(height: 1),
@@ -1007,9 +1024,13 @@ class _ViewContentState extends State<_ViewContent> {
       alignment: Alignment.topLeft,
       child: Transform.translate(
         offset: _viewRect.topLeft,
-        child: SizedBox(
-          width: _viewRect.width,
-          height: _viewRect.height,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: minWidth,
+            maxWidth: _viewRect.width,
+            minHeight: minHeight,
+            maxHeight: _viewRect.height,
+          ),
           child: Padding(
             padding: widget.showFullScreenView ? EdgeInsets.zero : (effectivePadding ?? EdgeInsets.zero),
             child: Material(
@@ -1018,57 +1039,69 @@ class _ViewContentState extends State<_ViewContent> {
               color: effectiveBackgroundColor,
               surfaceTintColor: effectiveSurfaceTint,
               elevation: effectiveElevation,
-              child: ClipRect(
-                clipBehavior: Clip.antiAlias,
-                child: OverflowBox(
-                  alignment: Alignment.topLeft,
-                  maxWidth: math.min(widget.viewMaxWidth, _screenSize!.width),
-                  minWidth: 0,
-                  child: FadeTransition(
-                    opacity: viewIconsFadeCurve,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(top: widget.topPadding),
-                          child: SafeArea(
-                            top: false,
-                            bottom: false,
-                            child: SearchBar(
-                              autoFocus: true,
-                              constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
-                              padding: WidgetStatePropertyAll<EdgeInsetsGeometry?>(effectiveBarPadding),
-                              leading: widget.viewLeading ?? defaultLeading,
-                              trailing: widget.viewTrailing ?? defaultTrailing,
-                              hintText: widget.viewHintText,
-                              backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                              overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                              elevation: const MaterialStatePropertyAll<double>(0.0),
-                              textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
-                              hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
-                              controller: _controller,
-                              onChanged: (String value) {
-                                widget.viewOnChanged?.call(value);
-                                updateSuggestions();
-                              },
-                              onSubmitted: widget.viewOnSubmitted,
-                              textCapitalization: widget.textCapitalization,
-                              textInputAction: widget.textInputAction,
-                              keyboardType: widget.keyboardType,
-                            ),
+              child: OverflowBox(
+                alignment: Alignment.topLeft,
+                maxWidth: math.min(widget.viewMaxWidth, _screenSize!.width),
+                minWidth: 0,
+                fit: OverflowBoxFit.deferToChild,
+                child: FadeTransition(
+                  opacity: viewIconsFadeCurve,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(top: widget.topPadding),
+                        child: SafeArea(
+                          top: false,
+                          bottom: false,
+                          child: SearchBar(
+                            autoFocus: true,
+                            constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
+                            padding: WidgetStatePropertyAll<EdgeInsetsGeometry?>(effectiveBarPadding),
+                            leading: widget.viewLeading ?? defaultLeading,
+                            trailing: widget.viewTrailing ?? defaultTrailing,
+                            hintText: widget.viewHintText,
+                            backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                            overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                            elevation: const MaterialStatePropertyAll<double>(0.0),
+                            textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
+                            hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
+                            controller: _controller,
+                            onChanged: (String value) {
+                              widget.viewOnChanged?.call(value);
+                              updateSuggestions();
+                            },
+                            onSubmitted: widget.viewOnSubmitted,
+                            textCapitalization: widget.textCapitalization,
+                            textInputAction: widget.textInputAction,
+                            keyboardType: widget.keyboardType,
                           ),
                         ),
+                      ),
+                      if (!effectiveShrinkWrap || minHeight > 0 || widget.showFullScreenView || result.isNotEmpty) ...<Widget>[
                         FadeTransition(
                           opacity: viewDividerFadeCurve,
-                          child: viewDivider),
-                        Expanded(
+                          child: viewDivider,
+                        ),
+                        Flexible(
+                          fit: (effectiveShrinkWrap && !widget.showFullScreenView) ? FlexFit.loose : FlexFit.tight,
                           child: FadeTransition(
                             opacity: viewListFadeOnIntervalCurve,
-                            child: viewBuilder(result),
+                            child: widget.viewBuilder == null
+                                ? MediaQuery.removePadding(
+                                    context: context,
+                                    removeTop: true,
+                                    child: ListView(
+                                      shrinkWrap: effectiveShrinkWrap,
+                                      children: result.toList(),
+                                    ),
+                                  )
+                                : widget.viewBuilder!(result),
                           ),
                         ),
                       ],
-                    ),
+                    ],
                   ),
                 ),
               ),
@@ -1095,6 +1128,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.viewBarPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
+    super.viewBuilder,
     super.viewLeading,
     super.viewTrailing,
     String? viewHintText,
@@ -1109,6 +1143,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     BoxConstraints? constraints,
     super.viewConstraints,
     super.viewPadding,
+    super.shrinkWrap,
     super.isFullScreen,
     super.searchController,
     super.textCapitalization,
@@ -1715,6 +1750,9 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
 
   @override
   EdgeInsetsGeometry? get barPadding => const EdgeInsets.symmetric(horizontal: 8.0);
+
+  @override
+  bool get shrinkWrap => false;
 
   @override
   Color? get dividerColor => _colors.outline;

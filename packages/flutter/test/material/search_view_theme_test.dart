@@ -33,6 +33,7 @@ void main() {
     expect(themeData.headerHintStyle, null);
     expect(themeData.padding, null);
     expect(themeData.barPadding, null);
+    expect(themeData.shrinkWrap, null);
     expect(themeData.dividerColor, null);
 
     const SearchViewTheme theme = SearchViewTheme(data: SearchViewThemeData(), child: SizedBox());
@@ -47,6 +48,7 @@ void main() {
     expect(theme.data.headerHintStyle, null);
     expect(themeData.padding, null);
     expect(themeData.barPadding, null);
+    expect(themeData.shrinkWrap, null);
     expect(theme.data.dividerColor, null);
   });
 
@@ -77,6 +79,7 @@ void main() {
       constraints: BoxConstraints(minWidth: 350, minHeight: 240),
       padding: EdgeInsets.only(bottom: 32.0),
       barPadding: EdgeInsets.zero,
+      shrinkWrap: true,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -95,6 +98,7 @@ void main() {
     expect(description[8], 'constraints: BoxConstraints(350.0<=w<=Infinity, 240.0<=h<=Infinity)');
     expect(description[9], 'padding: EdgeInsets(0.0, 0.0, 0.0, 32.0)');
     expect(description[10], 'barPadding: EdgeInsets.zero');
+    expect(description[11], 'shrinkWrap: true');
   });
 
   group('[Theme, SearchViewTheme, SearchView properties overrides]', () {
@@ -196,9 +200,9 @@ void main() {
       expect(material.surfaceTintColor, surfaceTintColor);
       expect(material.shape, shape);
 
-      final SizedBox sizedBox = tester.widget<SizedBox>(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
-      expect(sizedBox.width, 250.0);
-      expect(sizedBox.height, 450.0);
+      final Size size = tester.getSize(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
+      expect(size.width, 250.0);
+      expect(size.height, 450.0);
 
       final Text hintText = tester.widget(find.text('hint text'));
       expect(hintText.style?.color, headerHintStyle.color);
