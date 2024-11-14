@@ -11,33 +11,55 @@ import 'debug.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
-/// A widget that insets its child by sufficient padding to avoid intrusions by
-/// the operating system.
+/// A widget that insets its child with sufficient padding to avoid intrusions
+/// by the operating system.
 ///
-/// For example, this will indent the child by enough to avoid the status bar at
-/// the top of the screen.
-///
-/// It will also indent the child by the amount necessary to avoid The Notch on
-/// the iPhone X, or other similar creative physical features of the display.
+/// {@youtube 560 315 https://www.youtube.com/watch?v=lkF0TQJO0bA}
 ///
 /// When a [minimum] padding is specified, the greater of the minimum padding
 /// or the safe area padding will be applied.
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=lkF0TQJO0bA}
+/// {@tool dartpad}
+/// This example shows how `SafeArea` can apply padding within a mobile device's
+/// screen to make the relevant content completely visible.
+///
+/// ** See code in examples/api/lib/widgets/safe_area/safe_area.0.dart **
+/// {@end-tool}
+///
+/// {@tool snippet}
+///
+/// This example creates a blue box containing text that is sufficiently padded
+/// to avoid instrusions by the operating system.
+///
+/// ```dart
+/// SafeArea(
+///   child: Container(
+///     constraints: const BoxConstraints.expand(),
+///     alignment: Alignment.center,
+///     color: Colors.blue,
+///     child: const Text('Hello, World!'),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// ### [MediaQuery] impact
+///
+/// The padding on the [MediaQuery] for the [child] will be suitably adjusted
+/// to zero out any sides that were avoided by this widget.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
 ///
 /// See also:
 ///
 ///  * [SliverSafeArea], for insetting slivers to avoid operating system
 ///    intrusions.
 ///  * [Padding], for insetting widgets in general.
-///  * [MediaQuery], from which the window padding is obtained.
+///  * [MediaQuery], from which the view padding is obtained.
 ///  * [dart:ui.FlutterView.padding], which reports the padding from the operating
 ///    system.
 class SafeArea extends StatelessWidget {
   /// Creates a widget that avoids operating system interfaces.
-  ///
-  /// The [left], [top], [right], [bottom], and [minimum] arguments must not be
-  /// null.
   const SafeArea({
     super.key,
     this.left = true,

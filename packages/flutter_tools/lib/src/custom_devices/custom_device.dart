@@ -218,7 +218,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
       }
     }
 
-    throw ToolExit('Forwarding port for custom device $_deviceName failed after $tries tries.');
+    throwToolExit('Forwarding port for custom device $_deviceName failed after $tries tries.');
   }
 
   @override
@@ -357,7 +357,7 @@ class CustomDeviceAppSession {
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
     final String? packageName = _appPackage.name;
     if (packageName == null) {
-      throw ToolExit('Could not start app, name for $_appPackage is unknown.');
+      throwToolExit('Could not start app, name for $_appPackage is unknown.');
     }
     final List<String> interpolated = interpolateCommand(
       _device._config.runDebugCommand,
@@ -768,7 +768,7 @@ class CustomDevice extends Device {
       if (_config.postBuildCommand != null) {
         final String? packageName = package.name;
         if (packageName == null) {
-          throw ToolExit('Could not start app, name for $package is unknown.');
+          throwToolExit('Could not start app, name for $package is unknown.');
         }
         await _tryPostBuild(
           appName: packageName,
@@ -822,7 +822,7 @@ class CustomDevices extends PollingDeviceDiscovery {
     required FeatureFlags featureFlags,
     required ProcessManager processManager,
     required Logger logger,
-    required CustomDevicesConfig config
+    required CustomDevicesConfig config,
   }) : _customDeviceWorkflow = CustomDeviceWorkflow(
          featureFlags: featureFlags,
        ),
@@ -851,7 +851,7 @@ class CustomDevices extends PollingDeviceDiscovery {
         (CustomDeviceConfig config) => CustomDevice(
           config: config,
           logger: _logger,
-          processManager: _processManager
+          processManager: _processManager,
         )
       ).toList();
   }

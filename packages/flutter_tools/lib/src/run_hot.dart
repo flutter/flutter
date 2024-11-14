@@ -175,7 +175,7 @@ class HotRunner extends ResidentRunner {
     if (!result.isOk) {
       throw vm_service.RPCError(
         'Unable to reload sources',
-        RPCErrorCodes.kInternalError,
+        vm_service.RPCErrorKind.kInternalError.code,
         '',
       );
     }
@@ -187,7 +187,7 @@ class HotRunner extends ResidentRunner {
     if (!result.isOk) {
       throw vm_service.RPCError(
         'Unable to restart',
-        RPCErrorCodes.kInternalError,
+        vm_service.RPCErrorKind.kInternalError.code,
         '',
       );
     }

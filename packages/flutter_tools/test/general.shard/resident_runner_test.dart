@@ -1932,10 +1932,10 @@ flutter:
   testUsingContext('FlutterDevice does not throw when unable to initiate log reader due to VM service disconnection', () async {
     fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
+        FakeVmServiceRequest(
           method: 'getVM',
           error: FakeRPCError(
-            code: RPCErrorCodes.kServerError,
+            code: vm_service.RPCErrorKind.kServerError.code,
             error: 'Service connection disposed',
           ),
         ),

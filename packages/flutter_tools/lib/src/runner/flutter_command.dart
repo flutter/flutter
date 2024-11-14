@@ -1790,7 +1790,9 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         // The preview device does not currently support any plugins.
         allowedPlugins = PreviewDevice.supportedPubPlugins;
       }
-      await project.regeneratePlatformSpecificTooling(allowedPlugins: allowedPlugins);
+      await project.regeneratePlatformSpecificTooling(
+        allowedPlugins: allowedPlugins,
+      );
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }
@@ -1896,7 +1898,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     if (_usesTargetOption) {
       final String targetPath = targetFile;
       if (!globals.fs.isFileSync(targetPath)) {
-        throw ToolExit(globals.userMessages.flutterTargetFileMissing(targetPath));
+        throwToolExit(globals.userMessages.flutterTargetFileMissing(targetPath));
       }
     }
   }

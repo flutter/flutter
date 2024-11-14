@@ -1058,7 +1058,7 @@ void main() {
     expect(groupValue, 1);
   });
 
-  testWidgets('Non-centered taps work on propotional segments', (WidgetTester tester) async {
+  testWidgets('Non-centered taps work on proportional segments', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const SizedBox(width: 50, height: 30);
     children[1] = const SizedBox();

@@ -53,7 +53,7 @@ void main() {
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     artifacts = Artifacts.test(fileSystem: fileSystem);
     logger = BufferLogger.test();
-    processManager = FakeProcessManager.empty();
+    processManager = FakeProcessManager.any();
     processUtils = ProcessUtils(
       logger: logger,
       processManager: processManager,
@@ -79,25 +79,6 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('Refuses to build a debug build for web', () async {
-    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
-      artifacts: artifacts,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: fileSystem,
-      logger: logger,
-      processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
-    ));
-
-    expect(() => runner.run(<String>['build', 'web', '--debug', '--no-pub']),
-      throwsA(isA<UsageException>()));
-  }, overrides: <Type, Generator>{
-    Platform: () => fakePlatform,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     ProcessManager: () => processManager,
   });
@@ -189,7 +170,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       expect(environment.defines, <String, String>{
         'TargetFile': 'lib/main.dart',

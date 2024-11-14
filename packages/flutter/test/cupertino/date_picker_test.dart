@@ -261,6 +261,55 @@ void main() {
     });
   });
 
+  testWidgets('showDayOfWeek is only supported in date mode', (WidgetTester tester) async {
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.date,
+        onDateTimeChanged: (DateTime _) {},
+        showDayOfWeek: true,
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.time,
+        onDateTimeChanged: (DateTime _) {},
+        showDayOfWeek: true,
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError e) => e.message ?? 'Unknown error',
+        'message',
+        contains('showDayOfWeek is only supported in date mode'),
+      )),
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.monthYear,
+        onDateTimeChanged: (DateTime _) {},
+        showDayOfWeek: true,
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError e) => e.message ?? 'Unknown error',
+        'message',
+        contains('showDayOfWeek is only supported in date mode'),
+      )),
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        onDateTimeChanged: (DateTime _) {},
+        showDayOfWeek: true,
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError e) => e.message ?? 'Unknown error',
+        'message',
+        contains('showDayOfWeek is only supported in date mode'),
+      )),
+    );
+  });
+
   testWidgets('picker honors minuteInterval and secondInterval', (WidgetTester tester) async {
     late Duration duration;
     await tester.pumpWidget(

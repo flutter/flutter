@@ -28,7 +28,7 @@ import 'slotted_render_object_widget.dart';
 ///
 /// If the [minExtentPrototype] is null, then the default minimum extent is 0. If
 /// [maxExtentPrototype] is null then the default maximum extent is based on the child's
-/// intrisic size.
+/// intrinsic size.
 ///
 /// This sliver is preferable to the general purpose [SliverPersistentHeader]
 /// for its relatively narrow use case because there's no need to create a

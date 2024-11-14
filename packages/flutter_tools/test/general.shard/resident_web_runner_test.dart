@@ -972,10 +972,10 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
-      const FakeVmServiceRequest(
+      FakeVmServiceRequest(
         method: kHotRestartServiceName,
         // Failed response,
-        error: FakeRPCError(code: RPCErrorCodes.kInternalError),
+        error: FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
       ),
     ]);
     setupMocks();
@@ -988,7 +988,10 @@ void main() {
     final OperationResult result = await residentWebRunner.restart();
 
     expect(result.code, 1);
-    expect(result.message, contains(RPCErrorCodes.kInternalError.toString()));
+    expect(
+      result.message,
+      contains(vm_service.RPCErrorKind.kInternalError.code.toString()),
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

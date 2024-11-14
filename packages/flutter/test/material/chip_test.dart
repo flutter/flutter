@@ -5924,7 +5924,7 @@ void main() {
       ),
     );
 
-    // Test the chechmark is not visible yet.
+    // Test the checkmark is not visible yet.
     expect(materialBox, isNot(paints..path(color:checkmarkColor)));
     expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
 
@@ -6038,6 +6038,49 @@ void main() {
     ));
 
     expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/157622.
+  testWidgets('Chip does not glitch on hover when providing ThemeData.hoverColor', (WidgetTester tester) async {
+    const Color themeDataHoverColor = Color(0xffff0000);
+    const Color hoverColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    await tester.pumpWidget(wrapForChip(
+      theme: ThemeData(hoverColor: themeDataHoverColor),
+      child: Center(
+        child: RawChip(
+          color: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+            if (states.contains(WidgetState.hovered)) {
+              return hoverColor;
+            }
+            return backgroundColor;
+          }),
+          label: const Text('Chip'),
+          onPressed: () {},
+        ),
+      ),
+    ));
+
+    expect(getMaterialBox(tester), paints..rrect(color: backgroundColor));
+
+    // Hover over the chip.
+    final Offset center = tester.getCenter(find.byType(RawChip));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    addTearDown(gesture.removePointer);
+    await tester.pumpAndSettle();
+
+    expect(
+      getMaterialBox(tester),
+      paints..rrect(color: hoverColor)..rect(color: Colors.transparent),
+    );
+    expect(
+      getMaterialBox(tester),
+      isNot(paints..rrect(color: hoverColor)..rect(color: themeDataHoverColor)),
+    );
   });
 }
 

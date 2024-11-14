@@ -6,6 +6,7 @@
 library;
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -27,6 +28,7 @@ import 'layer_tree.dart';
 import 'message.dart';
 import 'render_tree.dart';
 import 'request_data.dart';
+import 'screenshot.dart';
 import 'semantics.dart';
 import 'text.dart';
 import 'text_input_action.dart' show SendTextInputAction;
@@ -164,6 +166,7 @@ mixin CommandHandlerFactory {
       'get_semantics_id'              => _getSemanticsId(command, finderFactory),
       'get_offset'                    => _getOffset(command, finderFactory),
       'get_diagnostics_tree'          => _getDiagnosticsTree(command, finderFactory),
+      'screenshot'                    => _takeScreenshot(command),
       final String kind => throw DriverError('Unsupported command kind $kind'),
     };
 
@@ -350,6 +353,18 @@ mixin CommandHandlerFactory {
       subtreeDepth: diagnosticsCommand.subtreeDepth,
       includeProperties: diagnosticsCommand.includeProperties,
     )));
+  }
+
+  Future<ScreenshotResult> _takeScreenshot(Command command) async {
+    final ScreenshotCommand screenshotCommand = command as ScreenshotCommand;
+    final RenderView renderView = RendererBinding.instance.renderViews.first;
+    // ignore: invalid_use_of_protected_member
+    final ContainerLayer? layer = renderView.layer;
+    final OffsetLayer offsetLayer = layer! as OffsetLayer;
+    final ui.Image image = await offsetLayer.toImage(renderView.paintBounds);
+    final ui.ImageByteFormat format = ui.ImageByteFormat.values[screenshotCommand.format.index];
+    final ByteData buffer = (await image.toByteData(format: format))!;
+    return ScreenshotResult(buffer.buffer.asUint8List());
   }
 
   Future<Result> _scroll(Command command, WidgetController prober, CreateFinderFactory finderFactory) async {

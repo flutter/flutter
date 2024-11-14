@@ -1751,7 +1751,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Ease in sine (accelerating).
-    double accelerateIntepolation(double fraction) {
+    double accelerateInterpolation(double fraction) {
       return 1.0 - math.cos((fraction * math.pi) / 2.0);
     }
 
@@ -1762,8 +1762,8 @@ void main() {
     }) {
       const double indicatorWeight = 3.0;
       final double tabChangeProgress =  (controller.index - controller.animation!.value).abs();
-      final double leftFraction = accelerateIntepolation(tabChangeProgress);
-      final double rightFraction = accelerateIntepolation(tabChangeProgress);
+      final double leftFraction = accelerateInterpolation(tabChangeProgress);
+      final double rightFraction = accelerateInterpolation(tabChangeProgress);
 
       final RRect rrect = RRect.fromLTRBAndCorners(
         lerpDouble(rect.left, targetRect.left, leftFraction)!,

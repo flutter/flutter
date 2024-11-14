@@ -114,7 +114,7 @@ Because we prefer to minimize breaking changes to packages after 1.0, breaking c
 
 ## Dependencies
 
-We try to minimize external package dependencies as much as possible, where "external" means packages that are not generally within the control of the Flutter or Dart teams (Examples non-external packages include `sdk:` dependencies, packages in flutter/packages, and packages published by dart.dev), or by an organization with a track record of strong support for both engineering best practices and Flutter. This is for several reasons:
+We try to minimize external package dependencies as much as possible, where "external" means packages that are not generally within the control of the Flutter or Dart teams (Examples of non-external packages include `sdk:` dependencies, packages in flutter/packages, and packages published by dart.dev), or by an organization with a track record of strong support for both engineering best practices and Flutter. This is for several reasons:
 - Maintainability:
     - We have a policy of always supporting Flutter `master`; if we can't guarantee that fixes for breaking changes can be landed immediately in dependencies, it can block our roller.
     - If a package is abandoned by its authors, we will have to fork or migrate in order to unblock the entire repository.
@@ -125,11 +125,20 @@ If you are considering adding an external dependency:
 - Consider other options, and discuss with #hackers-ecosystem in Discord.
 - If you add a `dev_dependency` on an external package, pin it to a specific version if at all possible.
 - If you add a `dependency` on an external package in an `example/`, pin it to a specific version if at all possible.
-- Some dependencies should only be linked as dev_dependencies like integration_test
+- If you add a non-dev, non-example dependency on an external package, a formal approval is required, and all of the following must be true:
+  - The dependency is necessary for a high-priority product/feature.
+  - The code has an OSS license, and the original source repository is available.
+  - The dependency has an exact upper bound set to a version that has been reviewed by the Flutter team
+  - The ecosystem TL and PM are confident that the code could be forked and maintained by the Flutter team if it were to become necessary (e.g., if the package were later abandoned).
 
 ### Native dependencies
 
 The same general principles apply to native dependencies for plugins (e.g., dependencies specified in an Android Gradle file or iOS podspec file): minimize dependencies—and especially non-test dependencies—on libraries that are not created by either the platform vendor or another organization with a track record of strong support for engineering best practices in whom we can have a very high degree of confidence in ongoing support and prompt updates.
+
+### Dev dependencies
+
+Some dependencies should only be linked as dev_dependencies, such as `integration_test`. Known dev-only dependencies are checked by CI, and if you are adding a new dev-only dependency, consider adding it to
+[the repository tooling checks](https://github.com/flutter/packages/blob/main/script/tool/lib/src/pubspec_check_command.dart).
 
 ## Platform Support
 
@@ -190,6 +199,24 @@ On some platforms, there are multiple native languages that can be used to write
 - Web: Dart.
 
 For all platforms, use of Dart for platform-specific features is both allowed and encouraged. While there are no specific rules about this in most plugins, in general we are moving toward having more logic written in Dart rather than a host language, as having more code in the project's primary language eases maintenance.
+
+## Generated code
+
+### Pigeon
+
+Most plugins in flutter/packages use [`pigeon`](https://pub.dev/packages/pigeon) for communication between Dart and host-language code. Unless a package lists specific instructions in its CONTRIBUTING.md file, after changing a Pigeon interface definition file in the `pigeons/` directory run:
+   ```sh
+   $ dart run pigeon --input pigeons/[changed file]
+   ```
+
+If the package's tests have mocks, they likely include mocks of Pigeon-generated classes; see below for instructions to update the mocks to reflect the changes in the Pigeon-generated code.
+
+### Mockito
+
+Many packages use [`mockito`](https://pub.dev/packages/mockito) for unit tests. To regenerate mocks run:
+   ```sh
+   $ dart run build_runner build --delete-conflicting-outputs
+   ```
 
 ## Changing federated plugins
 
