@@ -160,16 +160,16 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.textEditingController,
     this.initialValue,
     this.optionsLayerLink,
-    }) : assert(
+  }) : assert(
          fieldViewBuilder != null
             || (key != null && focusNode != null && textEditingController != null),
-        'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
+         'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
         ),
-      assert((focusNode == null) == (textEditingController == null)),
-      assert(
-        !(textEditingController != null && initialValue != null),
-        'textEditingController and initialValue cannot be simultaneously defined.',
-      );
+       assert((focusNode == null) == (textEditingController == null)),
+       assert(
+         !(textEditingController != null && initialValue != null),
+         'textEditingController and initialValue cannot be simultaneously defined.',
+       );
 
   /// {@template flutter.widgets.RawAutocomplete.fieldViewBuilder}
   /// Builds the field whose input is used to get the options.
