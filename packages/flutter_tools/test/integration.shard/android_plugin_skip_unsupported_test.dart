@@ -97,6 +97,7 @@ void main() {
       'build',
       'apk',
       '--debug',
+      '--verbose',
     ], workingDirectory: pluginExampleAppDir.path);
   }
 
