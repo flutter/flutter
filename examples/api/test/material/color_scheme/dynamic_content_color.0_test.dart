@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/material/color_scheme/dynamic_content_color.0.dart' as example;
@@ -13,9 +14,9 @@ void main() {
 
   Future<ColorScheme> fakeColorSchemeLoader(ImageProvider<Object> provider, Brightness brightness) async {
     loadColorSchemeCalls.add((provider, brightness));
-    return provider == example.DynamicColorExample.images[1]
-      ? ColorScheme.fromSeed(seedColor: Colors.lightBlue)
-      : const ColorScheme.light();
+    final int index = example.DynamicColorExample.images.indexOf(provider);
+    final int seedColor = 0xf * pow(0x10, index).toInt();
+    return ColorScheme.fromSeed(seedColor: Color(seedColor), brightness: brightness);
   }
 
   setUp(() {
@@ -110,6 +111,13 @@ void main() {
       loadColorSchemeCalls.single.$2,
       Brightness.light,
     );
+    await tester.pump();
+    await tester.pump(kThemeChangeDuration);
+
+    ThemeData themeData = Theme.of(tester.element(find.byType(Scaffold)));
+
+    expect(themeData.colorScheme.primary, const Color(0xff565992));
+    expect(themeData.colorScheme.secondary, const Color(0xff5c5d72));
 
     await tester.tap(find.byType(Switch));
     await tester.pump();
@@ -129,7 +137,12 @@ void main() {
       Brightness.dark,
     );
 
-    await tester.pumpAndSettle(); // Clears the timers from image loading.
+    await tester.pump(kThemeChangeDuration);
+
+    themeData = Theme.of(tester.element(find.byType(Scaffold)));
+
+    expect(themeData.colorScheme.primary, const Color(0xffbfc2ff));
+    expect(themeData.colorScheme.secondary, const Color(0xffc5c4dd));
   });
 
   testWidgets('Tapping an image loads a new color scheme', (WidgetTester tester) async {
@@ -140,22 +153,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(loadColorSchemeCalls, hasLength(1));
-    expect(
-      loadColorSchemeCalls.single.$1,
-      isA<NetworkImage>()
-        .having(
-          (NetworkImage provider) => provider.url,
-          'url',
-          'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_1.png',
-        ),
-    );
-    expect(
-      loadColorSchemeCalls.single.$2,
-      Brightness.light,
-    );
-
-    await tester.tapAt(tester.getCenter(find.byType(Image).at(1)));
+    await tester.tapAt(tester.getCenter(find.byType(Image).at(3)));
     await tester.pump();
 
     expect(loadColorSchemeCalls, hasLength(2));
@@ -165,7 +163,7 @@ void main() {
         .having(
           (NetworkImage provider) => provider.url,
           'url',
-          'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_2.png',
+          'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_4.png',
         ),
     );
     expect(
@@ -173,6 +171,11 @@ void main() {
       Brightness.light,
     );
 
-    await tester.pumpAndSettle(); // Clears the timers from image loading.
+    await tester.pump(kThemeChangeDuration);
+
+    final ThemeData themeData = Theme.of(tester.element(find.byType(Scaffold)));
+
+    expect(themeData.colorScheme.primary, const Color(0xff406836));
+    expect(themeData.colorScheme.secondary, const Color(0xff54634d));
   });
 }
