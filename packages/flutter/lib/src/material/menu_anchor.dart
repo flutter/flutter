@@ -3328,6 +3328,13 @@ class _Submenu extends StatelessWidget {
         .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
+     final Rect anchorRect = Rect.fromLTRB(
+      menuPosition.anchorRect.left + dx,
+      menuPosition.anchorRect.top - dy,
+      menuPosition.anchorRect.right,
+      menuPosition.anchorRect.bottom,
+    );
+
     final Widget child = Theme(
       data: Theme.of(context).copyWith(
         visualDensity: visualDensity,
@@ -3336,7 +3343,7 @@ class _Submenu extends StatelessWidget {
         constraints: BoxConstraints.loose(menuPosition.overlaySize),
         child: CustomSingleChildLayout(
           delegate: _MenuLayout(
-            anchorRect: layerLink == null ? menuPosition.anchorRect : Rect.zero,
+            anchorRect: layerLink == null ? anchorRect : Rect.zero,
             textDirection: textDirection,
             avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
             menuPadding: resolvedPadding,
@@ -3347,7 +3354,7 @@ class _Submenu extends StatelessWidget {
             parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
           ),
           child: TapRegion(
-            groupId: anchor._root,
+            groupId: menuPosition.tapRegionGroupId,
             consumeOutsideTaps: anchor._root._menuController.isOpen && anchor.widget.consumeOutsideTap,
             onTapOutside: (PointerDownEvent event) {
               anchor._menuController.close();
