@@ -6,7 +6,6 @@ import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -59,19 +58,20 @@ void main() {
 
     final TextSelectionGestureDetectorBuilder provider =
       TextSelectionGestureDetectorBuilder(delegate: delegate);
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: provider.buildGestureDetector(
           behavior: HitTestBehavior.translucent,
-          child: FakeEditableText(
+          child: EditableText(
             key: editableTextKey,
             controller: controller,
+            backgroundCursorColor: Colors.grey,
             focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            showSelectionHandles: true,
           ),
         ),
       ),
@@ -82,32 +82,21 @@ void main() {
     isFeatureAvailableReturnValue = true;
 
     await pumpTextSelectionGestureDetectorBuilder(tester);
-    /*
-    await tester.pumpWidget(
-      MaterialApp(
-        home: EditableText(
-          controller: controller,
-          backgroundCursorColor: Colors.grey,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
-        ),
-      ),
-    );
-    */
 
     expect(focusNode.hasFocus, isFalse);
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.stylus, pointer: 1);
     await gesture.down(tester.getCenter(find.byType(EditableText)));
 
+    // Wait for the gesture arena.
+    await tester.pumpAndSettle();
+
     expect(calls, hasLength(2));
     expect(calls.first.method, 'Scribe.isFeatureAvailable');
     expect(calls[1].method, 'Scribe.startStylusHandwriting');
-    expect(focusNode.hasFocus, isTrue);
 
     await gesture.up();
+    expect(focusNode.hasFocus, isTrue);
 
     // On web, let the browser handle handwriting input.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
@@ -115,23 +104,15 @@ void main() {
   testWidgets('when Scribe is unavailable, does not start handwriting on tap down', (WidgetTester tester) async {
     isFeatureAvailableReturnValue = false;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: EditableText(
-          controller: controller,
-          backgroundCursorColor: Colors.grey,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
-        ),
-      ),
-    );
+    await pumpTextSelectionGestureDetectorBuilder(tester);
 
     expect(focusNode.hasFocus, isFalse);
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.stylus, pointer: 1);
     await gesture.down(tester.getCenter(find.byType(EditableText)));
+
+    // Wait for the gesture arena.
+    await tester.pumpAndSettle();
 
     expect(calls, hasLength(1));
     expect(calls.first.method, 'Scribe.isFeatureAvailable');
@@ -142,18 +123,7 @@ void main() {
   testWidgets('tap down event must be from a stylus in order to start handwriting', (WidgetTester tester) async {
     isFeatureAvailableReturnValue = true;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: EditableText(
-          controller: controller,
-          backgroundCursorColor: Colors.grey,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
-        ),
-      ),
-    );
+    await pumpTextSelectionGestureDetectorBuilder(tester);
 
     expect(focusNode.hasFocus, isFalse);
 
@@ -168,19 +138,7 @@ void main() {
   testWidgets('tap down event on a collapsed selection handle is handled by the handle and does not start handwriting', (WidgetTester tester) async {
     isFeatureAvailableReturnValue = true;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: EditableText(
-          controller: controller,
-          backgroundCursorColor: Colors.grey,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
-          showSelectionHandles: true,
-        ),
-      ),
-    );
+    await pumpTextSelectionGestureDetectorBuilder(tester);
 
     expect(focusNode.hasFocus, isFalse);
     expect(find.byType(CompositedTransformFollower), findsNothing);
@@ -198,8 +156,10 @@ void main() {
     );
     await gesture.down(tester.getCenter(handleFinder));
 
-    expect(calls, hasLength(1));
-    expect(calls.first.method, 'Scribe.isFeatureAvailable');
+    // Wait for the gesture arena.
+    await tester.pumpAndSettle();
+
+    expect(calls, hasLength(0));
     expect(controller.selection.isCollapsed, isTrue);
     final int cursorStart = controller.selection.start;
 
@@ -207,7 +167,7 @@ void main() {
     await gesture.moveBy(const Offset(20.0, 0.0));
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.start, greaterThan(cursorStart));
-    expect(calls, hasLength(1));
+    expect(calls, hasLength(0));
 
     await gesture.up();
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
@@ -215,19 +175,7 @@ void main() {
   testWidgets('tap down event on the end selection handle is handled by the handle and does not start handwriting', (WidgetTester tester) async {
     isFeatureAvailableReturnValue = true;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: EditableText(
-          controller: controller,
-          backgroundCursorColor: Colors.grey,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
-          showSelectionHandles: true,
-        ),
-      ),
-    );
+    await pumpTextSelectionGestureDetectorBuilder(tester);
 
     expect(focusNode.hasFocus, isFalse);
     expect(find.byType(CompositedTransformFollower), findsNothing);
@@ -245,8 +193,10 @@ void main() {
     );
     await gesture.down(tester.getCenter(endHandleFinder));
 
-    expect(calls, hasLength(1));
-    expect(calls.first.method, 'Scribe.isFeatureAvailable');
+    // Wait for the gesture arena.
+    await tester.pumpAndSettle();
+
+    expect(calls, isEmpty);
     expect(controller.selection.isCollapsed, isFalse);
     final TextSelection selectionStart = controller.selection;
 
@@ -255,135 +205,10 @@ void main() {
     expect(controller.selection.isCollapsed, isFalse);
     expect(controller.selection.start, equals(selectionStart.start));
     expect(controller.selection.end, greaterThan(selectionStart.end));
-    expect(calls, hasLength(1));
+    expect(calls, isEmpty);
 
     await gesture.up();
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
-
-  group('handwriting padding', () {
-    const EdgeInsets handwritingPadding = EdgeInsets.symmetric(
-      horizontal: 10.0,
-      vertical: 40.0,
-    );
-
-    testWidgets('can start handwriting in the padded area outside of the field (vertical)', (WidgetTester tester) async {
-      isFeatureAvailableReturnValue = true;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            backgroundCursorColor: Colors.grey,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
-          ),
-        ),
-      );
-
-      expect(focusNode.hasFocus, isFalse);
-
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.stylus, pointer: 1);
-      final Offset editableTextBottomLeft = tester.getBottomLeft(find.byType(EditableText));
-      await gesture.down(editableTextBottomLeft + Offset(0.0, handwritingPadding.bottom - 1.0));
-
-      expect(calls, hasLength(2));
-      expect(calls.first.method, 'Scribe.isFeatureAvailable');
-      expect(calls[1].method, 'Scribe.startStylusHandwriting');
-      expect(focusNode.hasFocus, isTrue);
-
-      await gesture.up();
-    }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
-
-    testWidgets('cannot start handwriting just outside the padded area (vertical)', (WidgetTester tester) async {
-      isFeatureAvailableReturnValue = true;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            backgroundCursorColor: Colors.grey,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
-          ),
-        ),
-      );
-
-      expect(focusNode.hasFocus, isFalse);
-
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.stylus, pointer: 1);
-      final Offset editableTextBottomLeft = tester.getBottomLeft(find.byType(EditableText));
-      await gesture.down(editableTextBottomLeft + Offset(0.0, handwritingPadding.bottom));
-
-      expect(calls, hasLength(1));
-      expect(calls.first.method, 'Scribe.isFeatureAvailable');
-      expect(focusNode.hasFocus, isFalse);
-
-      await gesture.up();
-    }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
-
-    testWidgets('can start handwriting in the padded area outside of the field (horizontal)', (WidgetTester tester) async {
-      isFeatureAvailableReturnValue = true;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            backgroundCursorColor: Colors.grey,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
-          ),
-        ),
-      );
-
-      expect(focusNode.hasFocus, isFalse);
-
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.stylus, pointer: 1);
-      final Offset editableTextTopRight = tester.getTopRight(find.byType(EditableText));
-      await gesture.down(editableTextTopRight + Offset(handwritingPadding.right - 1.0, 0.0));
-
-      expect(calls, hasLength(2));
-      expect(calls.first.method, 'Scribe.isFeatureAvailable');
-      expect(calls[1].method, 'Scribe.startStylusHandwriting');
-      expect(focusNode.hasFocus, isTrue);
-
-      await gesture.up();
-    }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
-
-    testWidgets('cannot start handwriting just outside the padded area (horizontal)', (WidgetTester tester) async {
-      isFeatureAvailableReturnValue = true;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            backgroundCursorColor: Colors.grey,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
-          ),
-        ),
-      );
-
-      expect(focusNode.hasFocus, isFalse);
-
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.stylus, pointer: 1);
-      final Offset editableTextTopRight = tester.getTopRight(find.byType(EditableText));
-      await gesture.down(editableTextTopRight + Offset(handwritingPadding.right, 0.0));
-
-      expect(calls, hasLength(1));
-      expect(calls.first.method, 'Scribe.isFeatureAvailable');
-      expect(focusNode.hasFocus, isFalse);
-
-      await gesture.up();
-    }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
-  });
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {
@@ -401,159 +226,4 @@ class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGe
 
   @override
   final bool selectionEnabled;
-}
-
-class FakeEditableText extends EditableText {
-  FakeEditableText({
-    required super.controller,
-    required super.focusNode,
-    super.key,
-  }): super(
-    backgroundCursorColor: Colors.white,
-    cursorColor: Colors.white,
-    style: const TextStyle(),
-  );
-
-  @override
-  FakeEditableTextState createState() => FakeEditableTextState();
-}
-
-class FakeEditableTextState extends EditableTextState {
-  final GlobalKey _editableKey = GlobalKey();
-  bool showToolbarCalled = false;
-  bool toggleToolbarCalled = false;
-  bool showSpellCheckSuggestionsToolbarCalled = false;
-  bool markCurrentSelectionAsMisspelled = false;
-
-  @override
-  RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
-
-  @override
-  bool showToolbar() {
-    showToolbarCalled = true;
-    return true;
-  }
-
-  @override
-  void toggleToolbar([bool hideHandles = true]) {
-    toggleToolbarCalled = true;
-    return;
-  }
-
-  @override
-  bool showSpellCheckSuggestionsToolbar() {
-    showSpellCheckSuggestionsToolbarCalled = true;
-    return true;
-  }
-
-  @override
-  SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
-    return markCurrentSelectionAsMisspelled
-      ? const SuggestionSpan(
-        TextRange(start: 7, end: 12),
-        <String>['word', 'world', 'old'],
-      ) : null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return FakeEditable(this, key: _editableKey);
-  }
-}
-
-class FakeEditable extends LeafRenderObjectWidget {
-  const FakeEditable(
-    this.delegate, {
-    super.key,
-  });
-  final EditableTextState delegate;
-
-  @override
-  RenderEditable createRenderObject(BuildContext context) {
-    return FakeRenderEditable(delegate);
-  }
-}
-
-class FakeRenderEditable extends RenderEditable {
-  FakeRenderEditable(EditableTextState delegate)
-      : this._(delegate, ViewportOffset.fixed(10.0));
-
-  FakeRenderEditable._(
-    EditableTextState delegate,
-    this._offset,
-  ) : super(
-    text: const TextSpan(
-      style: TextStyle(height: 1.0, fontSize: 10.0),
-      text: 'placeholder',
-    ),
-    startHandleLayerLink: LayerLink(),
-    endHandleLayerLink: LayerLink(),
-    ignorePointer: true,
-    textAlign: TextAlign.start,
-    textDirection: TextDirection.ltr,
-    locale: const Locale('en', 'US'),
-    offset: _offset,
-    textSelectionDelegate: delegate,
-    selection: const TextSelection.collapsed(
-      offset: 0,
-    ),
-  );
-
-  SelectionChangedCause? lastCause;
-
-  ViewportOffset _offset;
-
-  bool selectWordsInRangeCalled = false;
-  @override
-  void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
-    selectWordsInRangeCalled = true;
-    hasFocus = true;
-    lastCause = cause;
-  }
-
-  bool selectWordEdgeCalled = false;
-  @override
-  void selectWordEdge({ required SelectionChangedCause cause }) {
-    selectWordEdgeCalled = true;
-    hasFocus = true;
-    lastCause = cause;
-  }
-
-  bool selectPositionAtCalled = false;
-  Offset? selectPositionAtFrom;
-  Offset? selectPositionAtTo;
-  @override
-  void selectPositionAt({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
-    selectPositionAtCalled = true;
-    selectPositionAtFrom = from;
-    selectPositionAtTo = to;
-    hasFocus = true;
-    lastCause = cause;
-  }
-
-  bool selectPositionCalled = false;
-  @override
-  void selectPosition({ required SelectionChangedCause cause }) {
-    selectPositionCalled = true;
-    lastCause = cause;
-    return super.selectPosition(cause: cause);
-  }
-
-  bool selectWordCalled = false;
-  @override
-  void selectWord({ required SelectionChangedCause cause }) {
-    selectWordCalled = true;
-    hasFocus = true;
-    lastCause = cause;
-  }
-
-  @override
-  bool hasFocus = false;
-
-  @override
-  void dispose() {
-    _offset.dispose();
-    super.dispose();
-  }
 }

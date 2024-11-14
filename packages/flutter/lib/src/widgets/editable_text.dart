@@ -40,7 +40,6 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
-import 'gesture_detector.dart';
 import 'localizations.dart';
 import 'magnifier.dart';
 import 'media_query.dart';
