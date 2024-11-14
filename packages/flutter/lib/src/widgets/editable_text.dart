@@ -1756,6 +1756,10 @@ class EditableText extends StatefulWidget {
   ///  * Android devices running API 34 and above and using an active stylus.
   /// {@endtemplate}
   ///
+  /// On Android, Scribe gestures are detected outside of [EditableText],
+  /// typically by [TextSelectionGestureDetectorBuilder]. This is handled
+  /// automatically in [TextField].
+  ///
   /// See also:
   ///
   ///   * [ScribbleClient], which can be mixed into an arbirtrary widget to
