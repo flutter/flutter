@@ -96,6 +96,32 @@ void EmbedderTestContext::SetRootSurfaceTransformation(SkMatrix matrix) {
   root_surface_transformation_ = matrix;
 }
 
+void EmbedderTestContext::SetRenderTargetType(
+    EmbedderTestBackingStoreProducer::RenderTargetType type,
+    FlutterSoftwarePixelFormat software_pixfmt) {
+  // TODO(wrightgeorge): figure out a better way of plumbing through the
+  // GrDirectContext
+  auto& compositor = GetCompositor();
+  auto producer = std::make_unique<EmbedderTestBackingStoreProducer>(
+      compositor.GetGrContext(), type, software_pixfmt);
+#ifdef SHELL_ENABLE_GL
+  switch (type) {
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLTexture:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLSurface:
+      producer->SetEGLContext(egl_context_);
+      break;
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer2:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage:
+      // no-op.
+      break;
+  }
+#endif  // SHELL_ENABLE_GL
+  compositor.SetBackingStoreProducer(std::move(producer));
+}
+
 void EmbedderTestContext::AddIsolateCreateCallback(
     const fml::closure& closure) {
   if (closure) {
