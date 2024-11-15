@@ -9,6 +9,7 @@ import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
+import '../features.dart';
 
 Future<void> generateLocalizationsSyntheticPackage({
   required Environment environment,
@@ -51,19 +52,19 @@ Future<void> generateLocalizationsSyntheticPackage({
     if (isSyntheticL10nPackage == false) {
       return;
     }
-  } else if (!environment.useImplicitPubspecResolution) {
-    // --no-implicit-pubspec-resolution was passed, and synthetic-packages: true was not.
+  } else if (featureFlags.isExplicitPackageDependenciesEnabled) {
+    // synthetic-packages: true was not set and it is no longer the defualt.
     return;
   }
 
-  if (!environment.useImplicitPubspecResolution) {
+  if (featureFlags.isExplicitPackageDependenciesEnabled) {
     throwToolExit(
-      'Cannot generate a synthetic package when --no-implicit-pubspec-resolution is passed.\n'
+      'Cannot generate a synthetic package when explicit-package-dependencies is enabled.\n'
       '\n'
       'Synthetic package output (package:flutter_gen) is deprecated: '
       'https://flutter.dev/to/flutter-gen-deprecation. If you are seeing this '
-      'message either you have provided --no-implicit-pubspec-resolution, or '
-      'it is the default value (see flutter --verbose --help).',
+      'message either you have provided explicit-package-dependencies, or it '
+      'is the default value (see flutter config --help).',
     );
   }
 

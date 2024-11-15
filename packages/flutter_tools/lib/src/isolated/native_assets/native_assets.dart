@@ -629,6 +629,21 @@ Future<void> _copyNativeCodeAssetsForOS(
     Map<CodeAsset, KernelAsset> assetTargetLocations,
     String? codesignIdentity,
     bool flutterTester) async {
+  // We only have to copy code assets that are bundled within the app.
+  // If a code asset that use a linking mode of [LookupInProcess],
+  // [LookupInExecutable] or [DynamicLoadingSystem] do not have anything to
+  // bundle as part of the app.
+  assetTargetLocations = <CodeAsset, KernelAsset>{
+    for (final CodeAsset codeAsset in assetTargetLocations.keys)
+      if (codeAsset.linkMode is DynamicLoadingBundled)
+        codeAsset: assetTargetLocations[codeAsset]!,
+  };
+
+  if (assetTargetLocations.isEmpty) {
+    return;
+  }
+
+  globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
   final List<CodeAsset> codeAssets = assetTargetLocations.keys.toList();
   switch (targetOS) {
     case OS.windows:
@@ -673,6 +688,7 @@ Future<void> _copyNativeCodeAssetsForOS(
     default:
       throw StateError('This should be unreachable.');
   }
+  globals.logger.printTrace('Copying native assets done.');
 }
 
 /// Invokes the build of all transitive Dart packages.
@@ -750,9 +766,10 @@ Future<DartBuildResult> _runDartBuild({
     if (buildResult == null) {
       _throwNativeAssetsBuildFailed();
     }
-    assets.addAll(buildResult.encodedAssets);
     dependencies.addAll(buildResult.dependencies);
-    if (linkingEnabled) {
+    if (!linkingEnabled) {
+      assets.addAll(buildResult.encodedAssets);
+    } else {
       final LinkResult? linkResult = await buildRunner.link(
         supportedAssetTypes: <String>[CodeAsset.type],
         configCreator: () => LinkConfigBuilder()
@@ -907,22 +924,18 @@ Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
   build_info.BuildMode buildMode,
   FileSystem fileSystem,
 ) async {
-  globals.logger.printTrace('copyNativeCodeAssetsToBundleOnWindowsLinux()');
-  if (assetTargetLocations.isNotEmpty) {
-    globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-    final Directory buildDir = fileSystem.directory(buildUri.toFilePath());
-    if (!buildDir.existsSync()) {
-      buildDir.createSync(recursive: true);
-    }
-    for (final MapEntry<CodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
-      final Uri source = assetMapping.key.file!;
-      final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
-      final Uri targetUri = buildUri.resolveUri(target);
-      final String targetFullPath = targetUri.toFilePath();
-      await fileSystem.file(source).copy(targetFullPath);
-      globals.logger.printTrace('copyNativeCodeAssetsToBundleOnWindowsLinux(): copied $source to $targetFullPath');
-    }
-    globals.logger.printTrace('Copying native assets done.');
+  assert(assetTargetLocations.isNotEmpty);
+
+  final Directory buildDir = fileSystem.directory(buildUri.toFilePath());
+  if (!buildDir.existsSync()) {
+    buildDir.createSync(recursive: true);
+  }
+  for (final MapEntry<CodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
+    final Uri source = assetMapping.key.file!;
+    final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
+    final Uri targetUri = buildUri.resolveUri(target);
+    final String targetFullPath = targetUri.toFilePath();
+    await fileSystem.file(source).copy(targetFullPath);
   }
 }
 
