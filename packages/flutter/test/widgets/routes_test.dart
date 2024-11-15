@@ -1590,10 +1590,11 @@ void main() {
 
       // Open the new route.
       await tester.tap(find.byType(ElevatedButton));
+      await tester.pump(const Duration(milliseconds: 1));
 
       await tester.pump(const Duration(milliseconds: 500));
       expect(find.byKey(containerKey), findsOneWidget);
-      expect(tester.getTopLeft(find.byKey(containerKey)), const Offset(0, 600));
+      expect(tester.getTopLeft(find.byKey(containerKey)), const Offset(0, 300));
 
       await tester.pump(const Duration(milliseconds: 500));
       expect(find.byKey(containerKey), findsOneWidget);
