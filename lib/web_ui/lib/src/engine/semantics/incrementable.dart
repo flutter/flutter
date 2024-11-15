@@ -43,11 +43,11 @@ class SemanticIncrementable extends SemanticRole {
       if (newInputValue > _currentSurrogateValue) {
         _currentSurrogateValue += 1;
         EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-            semanticsObject.id, ui.SemanticsAction.increase, null);
+            viewId, semanticsObject.id, ui.SemanticsAction.increase, null);
       } else if (newInputValue < _currentSurrogateValue) {
         _currentSurrogateValue -= 1;
         EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-            semanticsObject.id, ui.SemanticsAction.decrease, null);
+            viewId, semanticsObject.id, ui.SemanticsAction.decrease, null);
       }
     }));
 

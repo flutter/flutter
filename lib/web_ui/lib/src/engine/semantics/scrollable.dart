@@ -76,20 +76,20 @@ class SemanticScrollable extends SemanticRole {
       if (doScrollForward) {
         if (semanticsObject.isVerticalScrollContainer) {
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-              semanticsId, ui.SemanticsAction.scrollUp, null);
+              viewId, semanticsId, ui.SemanticsAction.scrollUp, null);
         } else {
           assert(semanticsObject.isHorizontalScrollContainer);
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-              semanticsId, ui.SemanticsAction.scrollLeft, null);
+              viewId, semanticsId, ui.SemanticsAction.scrollLeft, null);
         }
       } else {
         if (semanticsObject.isVerticalScrollContainer) {
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-              semanticsId, ui.SemanticsAction.scrollDown, null);
+              viewId, semanticsId, ui.SemanticsAction.scrollDown, null);
         } else {
           assert(semanticsObject.isHorizontalScrollContainer);
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-              semanticsId, ui.SemanticsAction.scrollRight, null);
+              viewId, semanticsId, ui.SemanticsAction.scrollRight, null);
         }
       }
     }

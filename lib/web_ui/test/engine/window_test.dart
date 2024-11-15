@@ -239,7 +239,8 @@ Future<void> testMain() async {
       expect(ui.PlatformDispatcher.instance.onSemanticsActionEvent, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnSemanticsAction(0, ui.SemanticsAction.tap, null);
+    EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+        myWindow.viewId, 0, ui.SemanticsAction.tap, null);
   });
 
   test('onAccessibilityFeaturesChanged preserves the zone', () {
