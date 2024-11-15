@@ -416,7 +416,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
     assert(
       !(widget.error != null && (widget.errorBuilder != null || widget.errorText != null)),
-      'errorBuilder and errorText can not used together with error'
+      'errorBuilder and errorText can not be used together with error'
     );
 
     assert(
