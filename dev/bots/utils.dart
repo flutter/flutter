@@ -80,7 +80,7 @@ final List<String> flutterTestArgs = <String>[];
 bool get dryRun => _dryRun ?? false;
 
 /// Switches [dryRun] to `true`.
-/// 
+///
 /// Expected to be called at most once during execution of a process.
 void enableDryRun() {
   if (_dryRun != null) {
