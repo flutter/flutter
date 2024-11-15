@@ -28,7 +28,6 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
-import '../vmservice.dart';
 import '../web/compile.dart';
 import '../web/web_constants.dart';
 import '../web/web_runner.dart';
@@ -860,7 +859,7 @@ class RunCommand extends RunCommandBase {
         throwToolExit(null, exitCode: result);
       }
     } on RPCError catch (error) {
-      if (error.code == RPCErrorCodes.kServiceDisappeared ||
+      if (error.code == RPCErrorKind.kServiceDisappeared.code ||
           error.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }

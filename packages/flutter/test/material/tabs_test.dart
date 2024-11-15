@@ -7464,4 +7464,56 @@ void main() {
     targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
     expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/155518.
+  testWidgets('Tabs icon respects ambient icon theme', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      iconTheme: const IconThemeData(
+        color: Color(0xffff0000),
+        size: 38.0,
+      ),
+    );
+    const IconData selectedIcon = Icons.ac_unit;
+    const IconData unselectedIcon = Icons.access_alarm;
+    await tester.pumpWidget(boilerplate(
+      theme: theme,
+      child: const DefaultTabController(
+        length: 2,
+        child: TabBar(
+          tabs: <Widget>[
+            Tab(
+              icon: Icon(selectedIcon),
+              text: 'Tab 1',
+            ),
+            Tab(
+              icon: Icon(unselectedIcon),
+              text: 'Tab 2',
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    TextStyle iconStyle(WidgetTester tester, IconData icon) {
+      final RichText iconRichText = tester.widget<RichText>(
+        find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+      );
+      return iconRichText.text.style!;
+    }
+
+    // The iconTheme color isn't applied to the selected icon.
+    expect(iconStyle(tester, selectedIcon).color, equals(theme.colorScheme.primary));
+    // The iconTheme color is applied to the unselected icon.
+    expect(iconStyle(tester, unselectedIcon).color, equals(theme.iconTheme.color));
+
+    // Both selected and unselected icons should have the iconTheme size.
+    expect(
+      tester.getSize(find.byIcon(selectedIcon)),
+      Size(theme.iconTheme.size!, theme.iconTheme.size!),
+    );
+    expect(
+      tester.getSize(find.byIcon(unselectedIcon)),
+      Size(theme.iconTheme.size!, theme.iconTheme.size!),
+    );
+  });
 }

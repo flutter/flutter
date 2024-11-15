@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_cli/native_assets_cli.dart';
+import 'package:native_assets_cli/code_assets.dart';
 
 void main(List<String> args) async {
-  await link(args, (LinkConfig config, LinkOutput output) async {
-    final NativeCodeAsset asset = config.assets.single as NativeCodeAsset;
+  await link(args, (LinkConfig config, LinkOutputBuilder output) async {
+    final CodeAsset asset = config.codeAssets.single;
     final String packageName = config.packageName;
-    output.addAsset(NativeCodeAsset(
+    output.codeAssets.add(CodeAsset(
       package: packageName,
       // Change the asset id to something that is used.
       name: '${packageName}_bindings_generated.dart',

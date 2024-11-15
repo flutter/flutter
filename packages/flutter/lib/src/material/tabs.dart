@@ -269,7 +269,10 @@ class _TabStyle extends AnimatedWidget {
   final TabBarThemeData defaults;
   final Widget child;
 
-  MaterialStateColor _resolveWithLabelColor(BuildContext context) {
+  MaterialStateColor _resolveWithLabelColor(
+    BuildContext context, {
+    IconThemeData? iconTheme,
+  }) {
     final ThemeData themeData = Theme.of(context);
     final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
@@ -295,6 +298,7 @@ class _TabStyle extends AnimatedWidget {
           ?? tabBarTheme.unselectedLabelColor
           ?? unselectedLabelStyle?.color
           ?? tabBarTheme.unselectedLabelStyle?.color
+          ?? iconTheme?.color
           ?? (themeData.useMaterial3
                ? defaults.unselectedLabelColor!
                : selectedColor.withAlpha(0xB2)); // 70% alpha
@@ -310,6 +314,7 @@ class _TabStyle extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
 
@@ -331,14 +336,23 @@ class _TabStyle extends AnimatedWidget {
     final TextStyle textStyle = isSelected
       ? TextStyle.lerp(selectedStyle, unselectedStyle, animation.value)!
       : TextStyle.lerp(unselectedStyle, selectedStyle, animation.value)!;
-    final Color color = _resolveWithLabelColor(context).resolve(states);
+    final Color defaultIconColor = switch (theme.colorScheme.brightness) {
+      Brightness.light => kDefaultIconDarkColor,
+      Brightness.dark  => kDefaultIconLightColor,
+    };
+    final IconThemeData? customIconTheme = switch (IconTheme.of(context)) {
+      final IconThemeData iconTheme when iconTheme.color != defaultIconColor => iconTheme,
+      _ => null,
+    };
+    final Color iconColor = _resolveWithLabelColor(context, iconTheme: customIconTheme).resolve(states);
+    final Color labelColor = _resolveWithLabelColor(context).resolve(states);
 
     return DefaultTextStyle(
-      style: textStyle.copyWith(color: color),
+      style: textStyle.copyWith(color: labelColor),
       child: IconTheme.merge(
         data: IconThemeData(
-          size: 24.0,
-          color: color,
+          size: customIconTheme?.size ?? 24.0,
+          color: iconColor,
         ),
         child: child,
       ),
@@ -1178,7 +1192,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// individual tab widgets.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.selected].
@@ -1186,11 +1200,6 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If null, then the value of [TabBarThemeData.mouseCursor] is used. If
   /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
-  ///
-  /// See also:
-  ///
-  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -1763,11 +1772,9 @@ class _TabBarState extends State<TabBar> {
         wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation, _defaults);
       } else {
         // The user is dragging the TabBarView's PageView left or right.
-        if (_currentIndex! < widget.tabs.length) {
-          final int tabIndex = _currentIndex!;
-          final Animation<double> centerAnimation = _DragAnimation(_controller!, tabIndex);
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, _defaults);
-        }
+        final int tabIndex = _currentIndex!;
+        final Animation<double> centerAnimation = _DragAnimation(_controller!, tabIndex);
+        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, _defaults);
         if (_currentIndex! > 0) {
           final int tabIndex = _currentIndex! - 1;
           final Animation<double> previousAnimation = ReverseAnimation(_DragAnimation(_controller!, tabIndex));

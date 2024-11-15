@@ -26,6 +26,7 @@ import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
+import '../vmservice.dart';
 import 'application_package.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
@@ -1022,6 +1023,9 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   void dispose() {
     _stop();
   }
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async { }
 }
 
 class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {

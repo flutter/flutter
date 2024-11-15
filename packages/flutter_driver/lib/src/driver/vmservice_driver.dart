@@ -6,7 +6,6 @@
 library;
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart' as f;
@@ -357,14 +356,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
       file.createSync(recursive: true); // no-op if file exists
       file.writeAsStringSync('${DateTime.now()} $message\n', mode: f.FileMode.append, flush: true);
     }
-  }
-
-  @override
-  Future<List<int>> screenshot() async {
-    await Future<void>.delayed(const Duration(seconds: 2));
-
-    final vms.Response result = await _serviceClient.callMethod('_flutter.screenshot');
-    return base64.decode(result.json!['screenshot'] as String);
   }
 
   @override

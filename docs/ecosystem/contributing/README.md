@@ -200,6 +200,24 @@ On some platforms, there are multiple native languages that can be used to write
 
 For all platforms, use of Dart for platform-specific features is both allowed and encouraged. While there are no specific rules about this in most plugins, in general we are moving toward having more logic written in Dart rather than a host language, as having more code in the project's primary language eases maintenance.
 
+## Generated code
+
+### Pigeon
+
+Most plugins in flutter/packages use [`pigeon`](https://pub.dev/packages/pigeon) for communication between Dart and host-language code. Unless a package lists specific instructions in its CONTRIBUTING.md file, after changing a Pigeon interface definition file in the `pigeons/` directory run:
+   ```sh
+   $ dart run pigeon --input pigeons/[changed file]
+   ```
+
+If the package's tests have mocks, they likely include mocks of Pigeon-generated classes; see below for instructions to update the mocks to reflect the changes in the Pigeon-generated code.
+
+### Mockito
+
+Many packages use [`mockito`](https://pub.dev/packages/mockito) for unit tests. To regenerate mocks run:
+   ```sh
+   $ dart run build_runner build --delete-conflicting-outputs
+   ```
+
 ## Changing federated plugins
 
 Most of the plugins in flutter/packages are [federated](https://flutter.dev/docs/development/packages-and-plugins/developing-packages#federated-plugins). Because a logical plugin consists of multiple packages, and our CI tests using published package dependencies—in order to ensure that every PR can be published without breaking the ecosystem—changes that span multiple packages will need to be done in multiple PRs. This is common when adding new features.

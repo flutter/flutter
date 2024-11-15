@@ -79,7 +79,10 @@ class WebEntrypointTarget extends Target {
     final String importedEntrypoint = packageConfig.toPackageUri(importUri)?.toString()
       ?? importUri.toString();
 
-    await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: environment.buildDir);
+    await injectBuildTimePluginFilesForWebPlatform(
+      flutterProject,
+      destination: environment.buildDir,
+    );
     // The below works because `injectBuildTimePluginFiles` is configured to write
     // the web_plugin_registrant.dart file alongside the generated main.dart
     const String generatedImport = 'web_plugin_registrant.dart';
