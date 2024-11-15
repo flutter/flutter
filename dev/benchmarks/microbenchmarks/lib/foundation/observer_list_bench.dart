@@ -8,9 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../common.dart';
 
-const int _kNumIterationsList = 2 << 14;
-const int _kNumIterationsHashed = 2 << 19;
-const List<int> callbackCounts = <int>[1, 10, 50, 250];
+const int _kNumIterationsList = 2 << 10;
+const int _kNumIterationsHashed = 2 << 15;
+const List<int> callbackCounts = <int>[1, 10, 100, 500];
 
 class TestAnimationController extends AnimationController {
   TestAnimationController() : super(vsync: const TestVSync());
