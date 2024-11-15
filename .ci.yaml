@@ -1541,23 +1541,6 @@ targets:
         ["devicelab","hostonly", "linux"]
       task_name: web_benchmarks_canvaskit
 
-  - name: Linux web_benchmarks_html
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
-        ]
-      tags: >
-        ["devicelab"]
-      task_name: web_benchmarks_html
-    runIf:
-      - dev/**
-      - bin/**
-      - .ci.yaml
-
   - name: Linux web_benchmarks_skwasm
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4896,6 +4879,7 @@ targets:
       task_name: hello_world_ios__compile
 
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/158568
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -5428,7 +5412,6 @@ targets:
   - name: Mac_arm64 mac_desktop_impeller
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
