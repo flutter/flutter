@@ -333,7 +333,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
   @override
   void initState() {
     super.initState();
-    _internalMenuController ??= MenuController();
+    if (widget.controller == null) {
+      _internalMenuController = MenuController();
+    }
   }
 
   @override
