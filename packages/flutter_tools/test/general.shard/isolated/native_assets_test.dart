@@ -202,19 +202,18 @@ void main() {
              file: file,
            );
 
+    final Map<String, String> environmentDefines = <String, String>{
+      kBuildMode: BuildMode.release.cliName,
+    };
     final List<CodeAsset> codeAssets = <CodeAsset>[
       makeCodeAsset('malloc', LookupInProcess()),
       makeCodeAsset('free', LookupInExecutable()),
       makeCodeAsset('draw', DynamicLoadingSystem(Uri.file('/usr/lib/skia.so'))),
     ];
-
-    await runFlutterSpecificDartBuild(
-      environmentDefines: <String, String>{
-        kBuildMode: BuildMode.release.cliName,
-      },
+    final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+      environmentDefines: environmentDefines,
       targetPlatform: TargetPlatform.linux_x64,
       projectUri: projectUri,
-      nativeAssetsYamlUri: nonFlutterTesterAssetUri,
       fileSystem: fileSystem,
       buildRunner: FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
@@ -223,6 +222,14 @@ void main() {
         buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
         linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
       ),
+    );
+    await installCodeAssets(
+      dartBuildResult: dartBuildResult,
+      environmentDefines: environmentDefines,
+      targetPlatform: TargetPlatform.windows_x64,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      nativeAssetsFileUri: nonFlutterTesterAssetUri,
     );
     expect(testLogger.traceText, isNot(contains('Copying native assets to')));
   });
@@ -358,7 +365,6 @@ void main() {
   }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await packageConfig.parent.create();
     await packageConfig.create();
 
@@ -379,14 +385,13 @@ void main() {
              file: file,
            );
 
-    final (DartBuildResult result, _) = await runFlutterSpecificDartBuild(
+    final DartBuildResult result = await runFlutterSpecificDartBuild(
       environmentDefines: <String, String>{
         // Release mode means the dart build has linking enabled.
         kBuildMode: BuildMode.release.cliName,
       },
       targetPlatform: TargetPlatform.linux_x64,
       projectUri: projectUri,
-      nativeAssetsYamlUri: nonFlutterTesterAssetUri,
       fileSystem: fileSystem,
       buildRunner: FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
