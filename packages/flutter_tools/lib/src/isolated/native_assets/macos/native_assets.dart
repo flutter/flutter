@@ -8,7 +8,6 @@ import 'package:native_assets_cli/code_assets_builder.dart';
 import '../../../base/file_system.dart';
 import '../../../build_info.dart' hide BuildMode;
 import '../../../build_info.dart' as build_info;
-import '../../../globals.dart' as globals;
 import 'native_assets_host.dart';
 
 // TODO(dcharkes): Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
@@ -127,79 +126,73 @@ Future<void> copyNativeCodeAssetsMacOS(
   build_info.BuildMode buildMode,
   FileSystem fileSystem,
 ) async {
-  if (assetTargetLocations.isNotEmpty) {
-    globals.logger.printTrace(
-      'Copying native assets to ${buildUri.toFilePath()}.',
-    );
+  assert(assetTargetLocations.isNotEmpty);
 
-    final Map<String, String> oldToNewInstallNames = <String, String>{};
-    final List<(File, String, Directory)> dylibs = <(File, String, Directory)>[];
+  final Map<String, String> oldToNewInstallNames = <String, String>{};
+  final List<(File, String, Directory)> dylibs = <(File, String, Directory)>[];
 
-    for (final MapEntry<KernelAssetPath, List<CodeAsset>> assetMapping
-        in assetTargetLocations.entries) {
-      final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
-      final List<File> sources = <File>[
-        for (final CodeAsset source in assetMapping.value) fileSystem.file(source.file),
-      ];
-      final Uri targetUri = buildUri.resolveUri(target);
-      final String name = targetUri.pathSegments.last;
-      final Directory frameworkDir = fileSystem.file(targetUri).parent;
-      if (await frameworkDir.exists()) {
-        await frameworkDir.delete(recursive: true);
-      }
-      // MyFramework.framework/                           frameworkDir
-      //   MyFramework  -> Versions/Current/MyFramework   dylibLink
-      //   Resources    -> Versions/Current/Resources     resourcesLink
-      //   Versions/                                      versionsDir
-      //     A/                                           versionADir
-      //       MyFramework                                dylibFile
-      //       Resources/                                 resourcesDir
-      //         Info.plist
-      //     Current  -> A                                currentLink
-      final Directory versionsDir = frameworkDir.childDirectory('Versions');
-      final Directory versionADir = versionsDir.childDirectory('A');
-      final Directory resourcesDir = versionADir.childDirectory('Resources');
-      await resourcesDir.create(recursive: true);
-      final File dylibFile = versionADir.childFile(name);
-      final Link currentLink = versionsDir.childLink('Current');
-      await currentLink.create(fileSystem.path.relative(
-        versionADir.path,
-        from: currentLink.parent.path,
-      ));
-      final Link resourcesLink = frameworkDir.childLink('Resources');
-      await resourcesLink.create(fileSystem.path.relative(
-        resourcesDir.path,
-        from: resourcesLink.parent.path,
-      ));
-      await lipoDylibs(dylibFile, sources);
-      final Link dylibLink = frameworkDir.childLink(name);
-      await dylibLink.create(fileSystem.path.relative(
-        versionsDir.childDirectory('Current').childFile(name).path,
-        from: dylibLink.parent.path,
-      ));
-
-      final String dylibFileName = dylibFile.basename;
-      final String newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
-      final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
-      for (final String oldInstallName in oldInstallNames) {
-        oldToNewInstallNames[oldInstallName] = newInstallName;
-      }
-      dylibs.add((dylibFile, newInstallName, frameworkDir));
-
-      await createInfoPlist(name, resourcesDir);
+  for (final MapEntry<KernelAssetPath, List<CodeAsset>> assetMapping
+      in assetTargetLocations.entries) {
+    final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
+    final List<File> sources = <File>[
+      for (final CodeAsset source in assetMapping.value) fileSystem.file(source.file),
+    ];
+    final Uri targetUri = buildUri.resolveUri(target);
+    final String name = targetUri.pathSegments.last;
+    final Directory frameworkDir = fileSystem.file(targetUri).parent;
+    if (await frameworkDir.exists()) {
+      await frameworkDir.delete(recursive: true);
     }
+    // MyFramework.framework/                           frameworkDir
+    //   MyFramework  -> Versions/Current/MyFramework   dylibLink
+    //   Resources    -> Versions/Current/Resources     resourcesLink
+    //   Versions/                                      versionsDir
+    //     A/                                           versionADir
+    //       MyFramework                                dylibFile
+    //       Resources/                                 resourcesDir
+    //         Info.plist
+    //     Current  -> A                                currentLink
+    final Directory versionsDir = frameworkDir.childDirectory('Versions');
+    final Directory versionADir = versionsDir.childDirectory('A');
+    final Directory resourcesDir = versionADir.childDirectory('Resources');
+    await resourcesDir.create(recursive: true);
+    final File dylibFile = versionADir.childFile(name);
+    final Link currentLink = versionsDir.childLink('Current');
+    await currentLink.create(fileSystem.path.relative(
+      versionADir.path,
+      from: currentLink.parent.path,
+    ));
+    final Link resourcesLink = frameworkDir.childLink('Resources');
+    await resourcesLink.create(fileSystem.path.relative(
+      resourcesDir.path,
+      from: resourcesLink.parent.path,
+    ));
+    await lipoDylibs(dylibFile, sources);
+    final Link dylibLink = frameworkDir.childLink(name);
+    await dylibLink.create(fileSystem.path.relative(
+      versionsDir.childDirectory('Current').childFile(name).path,
+      from: dylibLink.parent.path,
+    ));
 
-    for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
-      await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
-      // Do not code-sign the libraries here with identity. Code-signing
-      // for bundled dylibs is done in `macos_assemble.sh embed` because the
-      // "Flutter Assemble" target does not have access to the signing identity.
-      if (codesignIdentity != null) {
-        await codesignDylib(codesignIdentity, buildMode, frameworkDir);
-      }
+    final String dylibFileName = dylibFile.basename;
+    final String newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
+    final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+    for (final String oldInstallName in oldInstallNames) {
+      oldToNewInstallNames[oldInstallName] = newInstallName;
     }
+    dylibs.add((dylibFile, newInstallName, frameworkDir));
 
-    globals.logger.printTrace('Copying native assets done.');
+    await createInfoPlist(name, resourcesDir);
+  }
+
+  for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
+    await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
+    // Do not code-sign the libraries here with identity. Code-signing
+    // for bundled dylibs is done in `macos_assemble.sh embed` because the
+    // "Flutter Assemble" target does not have access to the signing identity.
+    if (codesignIdentity != null) {
+      await codesignDylib(codesignIdentity, buildMode, frameworkDir);
+    }
   }
 }
 
@@ -221,40 +214,34 @@ Future<void> copyNativeCodeAssetsMacOSFlutterTester(
   build_info.BuildMode buildMode,
   FileSystem fileSystem,
 ) async {
-  if (assetTargetLocations.isNotEmpty) {
-    globals.logger.printTrace(
-      'Copying native assets to ${buildUri.toFilePath()}.',
-    );
+  assert(assetTargetLocations.isNotEmpty);
 
-    final Map<String, String> oldToNewInstallNames = <String, String>{};
-    final List<(File, String)> dylibs = <(File, String)>[];
+  final Map<String, String> oldToNewInstallNames = <String, String>{};
+  final List<(File, String)> dylibs = <(File, String)>[];
 
-    for (final MapEntry<KernelAssetPath, List<CodeAsset>> assetMapping
-        in assetTargetLocations.entries) {
-      final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
-      final List<File> sources = <File>[
-        for (final CodeAsset source in assetMapping.value) fileSystem.file(source.file),
-      ];
-      final Uri targetUri = buildUri.resolveUri(target);
-      final File dylibFile = fileSystem.file(targetUri);
-      final Directory targetParent = dylibFile.parent;
-      if (!await targetParent.exists()) {
-        await targetParent.create(recursive: true);
-      }
-      await lipoDylibs(dylibFile, sources);
-      final String newInstallName = dylibFile.path;
-      final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
-      for (final String oldInstallName in oldInstallNames) {
-        oldToNewInstallNames[oldInstallName] = newInstallName;
-      }
-      dylibs.add((dylibFile, newInstallName));
+  for (final MapEntry<KernelAssetPath, List<CodeAsset>> assetMapping
+      in assetTargetLocations.entries) {
+    final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
+    final List<File> sources = <File>[
+      for (final CodeAsset source in assetMapping.value) fileSystem.file(source.file),
+    ];
+    final Uri targetUri = buildUri.resolveUri(target);
+    final File dylibFile = fileSystem.file(targetUri);
+    final Directory targetParent = dylibFile.parent;
+    if (!await targetParent.exists()) {
+      await targetParent.create(recursive: true);
     }
-
-    for (final (File dylibFile, String newInstallName) in dylibs) {
-      await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
-      await codesignDylib(codesignIdentity, buildMode, dylibFile);
+    await lipoDylibs(dylibFile, sources);
+    final String newInstallName = dylibFile.path;
+    final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+    for (final String oldInstallName in oldInstallNames) {
+      oldToNewInstallNames[oldInstallName] = newInstallName;
     }
+    dylibs.add((dylibFile, newInstallName));
+  }
 
-    globals.logger.printTrace('Copying native assets done.');
+  for (final (File dylibFile, String newInstallName) in dylibs) {
+    await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
+    await codesignDylib(codesignIdentity, buildMode, dylibFile);
   }
 }

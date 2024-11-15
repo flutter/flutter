@@ -10,7 +10,6 @@ import '../../../android/gradle_utils.dart';
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../build_info.dart' hide BuildMode;
-import '../../../globals.dart' as globals;
 
 int targetAndroidNdkApi(Map<String, String> environmentDefines) {
   return int.parse(environmentDefines[kMinSdkVersion] ?? minSdkVersion);
@@ -21,30 +20,26 @@ Future<void> copyNativeCodeAssetsAndroid(
   Map<CodeAsset, KernelAsset> assetTargetLocations,
   FileSystem fileSystem,
 ) async {
-  if (assetTargetLocations.isNotEmpty) {
-    globals.logger
-        .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-    final List<String> jniArchDirs = <String>[
-      for (final AndroidArch androidArch in AndroidArch.values)
-        androidArch.archName,
-    ];
-    for (final String jniArchDir in jniArchDirs) {
-      final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
-      await fileSystem.directory(archUri).create(recursive: true);
-    }
-    for (final MapEntry<CodeAsset, KernelAsset> assetMapping
-        in assetTargetLocations.entries) {
-      final Uri source = assetMapping.key.file!;
-      final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
-      final AndroidArch androidArch =
-          _getAndroidArch(assetMapping.value.target);
-      final String jniArchDir = androidArch.archName;
-      final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
-      final Uri targetUri = archUri.resolveUri(target);
-      final String targetFullPath = targetUri.toFilePath();
-      await fileSystem.file(source).copy(targetFullPath);
-    }
-    globals.logger.printTrace('Copying native assets done.');
+  assert(assetTargetLocations.isNotEmpty);
+  final List<String> jniArchDirs = <String>[
+    for (final AndroidArch androidArch in AndroidArch.values)
+      androidArch.archName,
+  ];
+  for (final String jniArchDir in jniArchDirs) {
+    final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
+    await fileSystem.directory(archUri).create(recursive: true);
+  }
+  for (final MapEntry<CodeAsset, KernelAsset> assetMapping
+      in assetTargetLocations.entries) {
+    final Uri source = assetMapping.key.file!;
+    final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
+    final AndroidArch androidArch =
+        _getAndroidArch(assetMapping.value.target);
+    final String jniArchDir = androidArch.archName;
+    final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
+    final Uri targetUri = archUri.resolveUri(target);
+    final String targetFullPath = targetUri.toFilePath();
+    await fileSystem.file(source).copy(targetFullPath);
   }
 }
 
