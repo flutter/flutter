@@ -372,14 +372,13 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   final List<ProcessTextAction> _processTextActions = <ProcessTextAction>[];
 
   // The focus node to use if the widget didn't supply one.
-  final FocusNode _localFocusNode = FocusNode(debugLabel: 'SelectableRegion');
-  FocusNode get _focusNode => widget.focusNode ?? _localFocusNode;
+  FocusNode? _localFocusNode;
+  FocusNode get _focusNode => widget.focusNode ?? (_localFocusNode ??= FocusNode(debugLabel: 'SelectableRegion'));
 
   @override
   void initState() {
     super.initState();
-    _localFocusNode.addListener(_handleFocusChanged);
-    widget.focusNode?.addListener(_handleFocusChanged);
+    _focusNode.addListener(_handleFocusChanged);
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
     // Right clicks.
@@ -429,8 +428,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void didUpdateWidget(SelectableRegion oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.focusNode != oldWidget.focusNode) {
-      oldWidget.focusNode?.removeListener(_handleFocusChanged);
-      widget.focusNode?.addListener(_handleFocusChanged);
+      if (oldWidget.focusNode == null && widget.focusNode != null) {
+        _localFocusNode?.removeListener(_handleFocusChanged);
+        _localFocusNode?.dispose();
+        _localFocusNode = null;
+      } else if (widget.focusNode == null && oldWidget.focusNode != null) {
+        oldWidget.focusNode!.removeListener(_handleFocusChanged);
+      }
+      _focusNode.addListener(_handleFocusChanged);
       if (_focusNode.hasFocus != oldWidget.focusNode?.hasFocus) {
         _handleFocusChanged();
       }
@@ -1710,8 +1715,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     widget.focusNode?.removeListener(_handleFocusChanged);
-    _localFocusNode.removeListener(_handleFocusChanged);
-    _localFocusNode.dispose();
+    _localFocusNode?.removeListener(_handleFocusChanged);
+    _localFocusNode?.dispose();
     super.dispose();
   }
 
@@ -1736,7 +1741,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         excludeFromSemantics: true,
         child: Actions(
           actions: _actions,
-          child: Focus(
+          child: Focus.withExternalFocusNode(
             includeSemantics: false,
             focusNode: _focusNode,
             child: result,
