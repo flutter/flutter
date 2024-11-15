@@ -259,7 +259,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// The simulation used by the most recent pushing or popping transition, if
   /// any.
   ///
-  /// The value is null before the first transition.
+  /// The value is null before the first transition, or if the route does not
+  /// use simulation for transition.
   ///
   /// See also:
   ///

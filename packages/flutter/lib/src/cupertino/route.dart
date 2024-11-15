@@ -1063,9 +1063,9 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 // The stiffness used by dialogs and action sheets.
 //
 // The stiffness value is obtained by examining the properties of
-// [CASpringAnimation] in Xcode.  The damping value is derived similarly, with
+// `CASpringAnimation` in Xcode. The damping value is derived similarly, with
 // additional precision calculated based on `_kStandardStiffness` to ensure a
-// critical damping ratio of 1 (critically damped).
+// damping ratio of 1 (critically damped): damping = 2 * sqrt(stiffness)
 const double _kStandardStiffness = 522.35;
 const double _kStandardDamping = 45.7099552;
 const SpringDescription _kStandardSpring = SpringDescription(
