@@ -32,7 +32,7 @@
       "name": "clangd",
       "script": "flutter/tools/clangd_check/bin/main.dart",
       "parameters": [
-        "--clangd=buildtools/mac-x64/clang/bin/clangd",
+        "--clangd=buildtools/mac-arm64/clang/bin/clangd",
         "--compile-commands-dir=../out/ci/mac_unopt_debug_no_rbe"
       ]
     }
