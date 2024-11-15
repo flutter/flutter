@@ -63,6 +63,10 @@ The `$PLATFORM_ARCH` can be determined from the table below.
 
 For example, the SDK for `Linux x64` at engine SHA `31aaaaad868743b38ac3b7165f0d58eca94e521b` would be https://storage.googleapis.com/flutter_infra_release/flutter/31aaaaad868743b38ac3b7165f0d58eca94e521b/linux-x64/impeller_sdk.zip
 
+# Example
+
+A fully functional example of using Impeller to draw using GLFW is available in [`example.c`](example.c). This example is also present in the `impeller_sdk.zip` prebuilts along with necessary artifacts.
+
 # API Fundamentals
 
 ## Versioning

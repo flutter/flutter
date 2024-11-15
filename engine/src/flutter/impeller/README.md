@@ -229,6 +229,17 @@ To your `Info.plist` file, add under the top-level `<dict>` tag:
   <true/>
 ```
 
+## Embedding Standalone Impeller
+
+Impeller is designed to work best when used by Flutter. Most of the teams
+efforts go into being great at that use-case. But, standalone Impeller can be
+used to perform accelerated rendering in most environments without any Flutter
+dependencies.
+
+Impeller provides a standalone SDK. The SDK exposes a single-header C API with
+no platform dependencies. [Prebuilts for major platforms, documentation,
+examples, are available](toolkit/interop/README.md).
+
 ## Documentation, References, and Additional Reading
 
 * [Frequently Asked Questions](docs/faq.md)
