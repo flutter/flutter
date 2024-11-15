@@ -40,13 +40,9 @@ void main() {
   group('SelectableRegion', () {
     testWidgets('mouse selection single click sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: SelectionSpy(key: spy),
           ),
@@ -81,13 +77,10 @@ void main() {
 
     testWidgets('mouse double click sends select-word event', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionControls,
               child: SelectionSpy(key: spy),
             ),
@@ -112,13 +105,10 @@ void main() {
 
     testWidgets('touch double click sends select-word event', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionControls,
               child: SelectionSpy(key: spy),
             ),
@@ -143,9 +133,6 @@ void main() {
 
     testWidgets('Does not crash when using Navigator pages', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/119776
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: Navigator(
@@ -155,7 +142,6 @@ void main() {
                   children: <Widget>[
                     const Text('How are you?'),
                     SelectableRegion(
-                      focusNode: focusNode,
                       selectionControls: materialTextSelectionControls,
                       child: const SelectAllWidget(child: SizedBox(width: 100, height: 100)),
                     ),
@@ -177,8 +163,6 @@ void main() {
 
     testWidgets('can draw handles when they are at rect boundaries', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -186,7 +170,6 @@ void main() {
             children: <Widget>[
               const Text('How are you?'),
               SelectableRegion(
-                focusNode: focusNode,
                 selectionControls: materialTextSelectionControls,
                 child: SelectAllWidget(key: spy, child: const SizedBox(width: 100, height: 100)),
               ),
@@ -210,13 +193,10 @@ void main() {
 
     testWidgets('touch does not accept drag', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionControls,
               child: SelectionSpy(key: spy),
             ),
@@ -236,13 +216,10 @@ void main() {
 
     testWidgets('does not merge semantics node of the children', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Scaffold(
               body: Center(
@@ -315,8 +292,6 @@ void main() {
     testWidgets('Horizontal PageView beats SelectionArea child touch drag gestures on iOS', (WidgetTester tester) async {
       final PageController pageController = PageController();
       const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
       addTearDown(pageController.dispose);
 
       await tester.pumpWidget(
@@ -326,7 +301,6 @@ void main() {
             children: <Widget>[
               Center(
                 child: SelectableRegion(
-                  focusNode: focusNode,
                   selectionControls: materialTextSelectionControls,
                   child: const Text(testValue),
                 ),
@@ -379,8 +353,6 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/150897.
       final PageController pageController = PageController();
       const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
       addTearDown(pageController.dispose);
 
       await tester.pumpWidget(
@@ -391,7 +363,6 @@ void main() {
             children: <Widget>[
               Center(
                 child: SelectableRegion(
-                  focusNode: focusNode,
                   selectionControls: materialTextSelectionControls,
                   child: const Text(testValue),
                 ),
@@ -452,13 +423,10 @@ void main() {
 
     testWidgets('mouse single-click selection collapses the selection', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionControls,
               child: SelectionSpy(key: spy),
             ),
@@ -481,13 +449,10 @@ void main() {
 
     testWidgets('touch long press sends select-word event', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionControls,
               child: SelectionSpy(key: spy),
             ),
@@ -509,13 +474,10 @@ void main() {
 
     testWidgets('touch long press and drag sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionControls,
               child: SelectionSpy(key: spy),
             ),
@@ -547,13 +509,10 @@ void main() {
       'touch long press cancel does not send ClearSelectionEvent',
       (WidgetTester tester) async {
         final UniqueKey spy = UniqueKey();
-        final FocusNode focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
             MaterialApp(
               home: SelectableRegion(
-                focusNode: focusNode,
                 selectionControls: materialTextSelectionControls,
                 child: SelectionSpy(key: spy),
               ),
@@ -583,8 +542,6 @@ void main() {
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/128765
         final UniqueKey spy = UniqueKey();
-        final FocusNode focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
@@ -594,7 +551,6 @@ void main() {
                 child: SizedBox(
                   height: 2000,
                   child: SelectableRegion(
-                    focusNode: focusNode,
                     selectionControls: materialTextSelectionControls,
                     child: SelectionSpy(key: spy),
                   ),
@@ -627,13 +583,10 @@ void main() {
 
     testWidgets('mouse long press does not send select-word event', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: SelectionSpy(key: spy),
           ),
@@ -711,13 +664,10 @@ void main() {
     addTearDown(() {
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     });
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
           child: const Text('How are you?'),
         ),
@@ -814,13 +764,9 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('touch can select word-by-word on double tap drag on mobile platforms', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text('How are you'),
@@ -890,13 +836,9 @@ void main() {
     );
 
     testWidgets('touch can select multiple widgets on double tap drag on mobile platforms', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -942,13 +884,9 @@ void main() {
     );
 
     testWidgets('touch can select multiple widgets on double tap drag and return to origin word on mobile platforms', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -1006,13 +944,9 @@ void main() {
     );
 
     testWidgets('touch can reverse selection across multiple widgets on double tap drag on mobile platforms', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -1063,13 +997,9 @@ void main() {
           'This will be the start of a new line. When triple clicking this block '
           'of text all of it should be selected.';
 
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text(longText),
@@ -1166,13 +1096,9 @@ void main() {
     );
 
     testWidgets('touch cannot select word-by-word on double tap drag when on Android web', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text('How are you'),
@@ -1219,13 +1145,9 @@ void main() {
     );
 
     testWidgets('touch can double tap + drag on iOS web', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text('How are you'),
@@ -1275,13 +1197,9 @@ void main() {
     );
 
     testWidgets('touch cannot double tap on iOS web', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text('How are you'),
@@ -1311,15 +1229,12 @@ void main() {
 
     testWidgets('RenderParagraph should invalidate cachedRect on window size change', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/155143.
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
       addTearDown(tester.view.reset);
       const String testString = 'How are you doing today? Good, and you?';
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text(testString),
@@ -1366,14 +1281,11 @@ void main() {
 
     testWidgets('RenderParagraph should invalidate cached bounding boxes', (WidgetTester tester) async {
       final UniqueKey outerText = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Scaffold(
               body: Center(
@@ -1427,13 +1339,9 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text('How are you'),
@@ -1478,13 +1386,9 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('mouse can select single text on mobile platforms', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text('How are you'),
@@ -1531,13 +1435,9 @@ void main() {
     }, variant: TargetPlatformVariant.mobile());
 
     testWidgets('mouse can select word-by-word on double click drag', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text('How are you'),
@@ -1604,13 +1504,9 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select multiple widgets on double click drag', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -1653,13 +1549,9 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select multiple widgets on double click drag and return to origin word', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -1714,13 +1606,9 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can reverse selection across multiple widgets on double click drag', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -1768,13 +1656,9 @@ void main() {
           'This will be the start of a new line. When triple clicking this block '
           'of text all of it should be selected.';
 
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text(longText),
@@ -1843,13 +1727,9 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select multiple widgets on triple click drag when selecting inside a WidgetSpan', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Text.rich(
               WidgetSpan(
@@ -1899,13 +1779,9 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select multiple widgets on triple click drag', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -1965,13 +1841,9 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select multiple widgets on triple click drag and return to origin paragraph', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -2041,13 +1913,9 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can reverse selection across multiple widgets on triple click drag', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -2094,13 +1962,9 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -2137,13 +2001,9 @@ void main() {
     });
 
     testWidgets('mouse shift + click holds the selection start in place and moves the end', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -2200,13 +2060,9 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('mouse shift + click collapses the selection when it has not been initialized', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -2234,13 +2090,9 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('collapsing selection should clear selection of all other selectables', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -2280,13 +2132,9 @@ void main() {
     });
 
     testWidgets('mouse can work with disabled container', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -2324,13 +2172,9 @@ void main() {
     });
 
     testWidgets('mouse can reverse selection', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -2374,12 +2218,9 @@ void main() {
         final bool isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();
-        final FocusNode focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionHandleControls,
               contextMenuBuilder: (
                 BuildContext context,
@@ -2466,13 +2307,10 @@ void main() {
       (WidgetTester tester) async {
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();
-        final FocusNode focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionHandleControls,
               contextMenuBuilder: (
                 BuildContext context,
@@ -2542,13 +2380,10 @@ void main() {
       (WidgetTester tester) async {
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();
-        final FocusNode focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionHandleControls,
               contextMenuBuilder: (
                 BuildContext context,
@@ -2626,13 +2461,10 @@ void main() {
         // Regression test for https://github.com/flutter/flutter/issues/150268.
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();
-        final FocusNode focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionHandleControls,
               contextMenuBuilder: (
                 BuildContext context,
@@ -2701,13 +2533,10 @@ void main() {
       (WidgetTester tester) async {
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();
-        final FocusNode focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionHandleControls,
               contextMenuBuilder: (
                 BuildContext context,
@@ -2808,13 +2637,10 @@ void main() {
       (WidgetTester tester) async {
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();
-        final FocusNode focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionHandleControls,
               contextMenuBuilder: (
                 BuildContext context,
@@ -2931,13 +2757,10 @@ void main() {
       (WidgetTester tester) async {
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();
-        final FocusNode focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionHandleControls,
               contextMenuBuilder: (
                 BuildContext context,
@@ -3058,13 +2881,10 @@ void main() {
     );
 
     testWidgets('can copy a selection made with the mouse', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -3243,13 +3063,10 @@ void main() {
     testWidgets(
       'mouse selection can handle widget span', (WidgetTester tester) async {
       final UniqueKey outerText = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Center(
               child: Text.rich(
@@ -3285,13 +3102,10 @@ void main() {
     testWidgets(
       'double click + drag mouse selection can handle widget span', (WidgetTester tester) async {
       final UniqueKey outerText = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Center(
               child: Text.rich(
@@ -3333,13 +3147,10 @@ void main() {
       'double click + drag mouse selection can handle widget span - multiline', (WidgetTester tester) async {
       final UniqueKey outerText = UniqueKey();
       final UniqueKey innerText = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Center(
               child: Text.rich(
@@ -3384,13 +3195,10 @@ void main() {
       'select word event can select inline widget', (WidgetTester tester) async {
       final UniqueKey outerText = UniqueKey();
       final UniqueKey innerText = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Center(
               child: Text.rich(
@@ -3437,7 +3245,6 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Scaffold(
               body: Center(
@@ -3478,13 +3285,10 @@ void main() {
       'can select word when a selectables rect is completely inside of another selectables rect', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/127076.
       final UniqueKey outerText = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Scaffold(
               body: Center(
@@ -3524,13 +3328,10 @@ void main() {
     testWidgets(
       'can select word when selectable is broken up by an unselectable WidgetSpan', (WidgetTester tester) async {
       final UniqueKey outerText = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Scaffold(
               body: Center(
@@ -3571,13 +3372,10 @@ void main() {
       'widget span is ignored if it does not contain text - non Apple',
       (WidgetTester tester) async {
         final UniqueKey outerText = UniqueKey();
-        final FocusNode focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionControls,
               child: Center(
                 child: Text.rich(
@@ -3614,13 +3412,10 @@ void main() {
       'widget span is ignored if it does not contain text - Apple',
           (WidgetTester tester) async {
         final UniqueKey outerText = UniqueKey();
-        final FocusNode focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: focusNode,
               selectionControls: materialTextSelectionControls,
               child: Center(
                 child: Text.rich(
@@ -3654,13 +3449,10 @@ void main() {
     );
 
     testWidgets('mouse can select across bidi text', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -3698,13 +3490,10 @@ void main() {
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
     testWidgets('long press and drag touch moves selection word by word', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -3733,8 +3522,6 @@ void main() {
 
     testWidgets('can drag end handle when not covering entire screen', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/104620.
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -3742,7 +3529,6 @@ void main() {
             children: <Widget>[
               const Text('How are you?'),
               SelectableRegion(
-                focusNode: focusNode,
                 selectionControls: materialTextSelectionControls,
                 child: const Text('Good, and you?'),
               ),
@@ -3773,8 +3559,6 @@ void main() {
 
     testWidgets('can drag start handle when not covering entire screen', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/104620.
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -3782,7 +3566,6 @@ void main() {
             children: <Widget>[
               const Text('How are you?'),
               SelectableRegion(
-                focusNode: focusNode,
                 selectionControls: materialTextSelectionControls,
                 child: const Text('Good, and you?'),
               ),
@@ -3811,13 +3594,10 @@ void main() {
     });
 
     testWidgets('can drag start selection handle', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -3856,13 +3636,10 @@ void main() {
     });
 
     testWidgets('can drag start selection handle across end selection handle', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -3896,13 +3673,10 @@ void main() {
     });
 
     testWidgets('can drag end selection handle across start selection handle', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -3936,13 +3710,10 @@ void main() {
     });
 
     testWidgets('can select all from toolbar', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -3975,13 +3746,10 @@ void main() {
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
 
     testWidgets('can copy from toolbar', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -4018,13 +3786,10 @@ void main() {
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
 
     testWidgets('can use keyboard to granularly extend selection - character', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -4081,13 +3846,10 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('can use keyboard to granularly extend selection - word', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -4196,13 +3958,10 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('can use keyboard to granularly extend selection - line', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -4290,13 +4049,10 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('can use keyboard to granularly extend selection - document', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -4373,13 +4129,10 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('can use keyboard to directionally extend selection', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -4477,8 +4230,6 @@ void main() {
       testWidgets('Can drag handles to show, unshow, and update magnifier',
           (WidgetTester tester) async {
         const String text = 'Monkeys and rabbits in my soup';
-        final FocusNode focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
@@ -4492,7 +4243,6 @@ void main() {
                   return fakeMagnifier;
                 },
               ),
-              focusNode: focusNode,
               selectionControls: materialTextSelectionControls,
               child: const Text(text),
             ),
@@ -4544,13 +4294,10 @@ void main() {
 
   testWidgets('toolbar is hidden on Android and iOS when orientation changes', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
           child: const Text('How are you?'),
         ),
@@ -4612,13 +4359,10 @@ void main() {
 
   testWidgets('the selection behavior when clicking `Copy` item in mobile platforms', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          focusNode: focusNode,
           selectionControls: materialTextSelectionHandleControls,
           contextMenuBuilder: (
             BuildContext context,
@@ -4668,13 +4412,10 @@ void main() {
 
   testWidgets('the handles do not disappear when clicking `Select all` item in mobile platforms', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          focusNode: focusNode,
           selectionControls: materialTextSelectionHandleControls,
           contextMenuBuilder: (
             BuildContext context,
@@ -4735,13 +4476,10 @@ void main() {
 
   testWidgets('Selection behavior when clicking the `Share` button on Android', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          focusNode: focusNode,
           selectionControls: materialTextSelectionHandleControls,
           contextMenuBuilder: (
             BuildContext context,
@@ -4795,13 +4533,10 @@ void main() {
 
   testWidgets('builds the correct button items', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          focusNode: focusNode,
           selectionControls: materialTextSelectionHandleControls,
           contextMenuBuilder: (
             BuildContext context,
@@ -4855,13 +4590,10 @@ void main() {
   );
 
   testWidgets('can clear selection through SelectableRegionState', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
           child: const Column(
             children: <Widget>[
@@ -4919,13 +4651,10 @@ void main() {
     addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, null));
 
     Set<String?> buttonLabels = <String?>{};
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          focusNode: focusNode,
           selectionControls: materialTextSelectionHandleControls,
           contextMenuBuilder: (
             BuildContext context,
@@ -4968,14 +4697,11 @@ void main() {
 
   testWidgets('onSelectionChange is called when the selection changes through gestures', (WidgetTester tester) async {
     SelectedContent? content;
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
           onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
-          focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
           child: const Center(
             child: Text('How are you'),
@@ -5109,14 +4835,11 @@ void main() {
 
   testWidgets('onSelectionChange is called when the selection changes through keyboard actions', (WidgetTester tester) async {
     SelectedContent? content;
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
           onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
-          focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
           child: const Column(
             children: <Widget>[
@@ -5268,14 +4991,11 @@ void main() {
     });
 
     testWidgets('web can show flutter context menu when the browser context menu is disabled', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
             onSelectionChanged: (SelectedContent? selectedContent) {},
-            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text('How are you'),
@@ -5305,13 +5025,10 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/127942.
     final UniqueKey outerText = UniqueKey();
     const TextStyle textStyle = TextStyle(fontSize: 10);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
           child: Scaffold(
             body: Center(
