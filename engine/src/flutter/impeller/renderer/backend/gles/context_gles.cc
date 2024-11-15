@@ -9,6 +9,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/gles/command_buffer_gles.h"
 #include "impeller/renderer/backend/gles/gpu_tracer_gles.h"
+#include "impeller/renderer/backend/gles/render_pass_gles.h"
 #include "impeller/renderer/command_queue.h"
 
 namespace impeller {
@@ -143,6 +144,17 @@ const std::shared_ptr<const Capabilities>& ContextGLES::GetCapabilities()
 // |Context|
 std::shared_ptr<CommandQueue> ContextGLES::GetCommandQueue() const {
   return command_queue_;
+}
+
+// |Context|
+void ContextGLES::ResetThreadLocalState() const {
+  if (!IsValid()) {
+    return;
+  }
+  [[maybe_unused]] auto result =
+      reactor_->AddOperation([](const ReactorGLES& reactor) {
+        RenderPassGLES::ResetGLState(reactor.GetProcTable());
+      });
 }
 
 }  // namespace impeller

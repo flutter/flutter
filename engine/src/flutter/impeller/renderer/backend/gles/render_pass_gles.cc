@@ -172,6 +172,19 @@ static bool BindVertexBuffer(const ProcTableGLES& gl,
   return true;
 }
 
+void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
+  gl.Disable(GL_SCISSOR_TEST);
+  gl.Disable(GL_DEPTH_TEST);
+  gl.Disable(GL_STENCIL_TEST);
+  gl.Disable(GL_CULL_FACE);
+  gl.Disable(GL_BLEND);
+  gl.Disable(GL_DITHER);
+  gl.ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+  gl.DepthMask(GL_TRUE);
+  gl.StencilMaskSeparate(GL_FRONT, 0xFFFFFFFF);
+  gl.StencilMaskSeparate(GL_BACK, 0xFFFFFFFF);
+}
+
 [[nodiscard]] bool EncodeCommandsInReactor(
     const RenderPassData& pass_data,
     const std::shared_ptr<Allocator>& transients_allocator,
@@ -267,16 +280,7 @@ static bool BindVertexBuffer(const ProcTableGLES& gl,
     clear_bits |= GL_STENCIL_BUFFER_BIT;
   }
 
-  gl.Disable(GL_SCISSOR_TEST);
-  gl.Disable(GL_DEPTH_TEST);
-  gl.Disable(GL_STENCIL_TEST);
-  gl.Disable(GL_CULL_FACE);
-  gl.Disable(GL_BLEND);
-  gl.Disable(GL_DITHER);
-  gl.ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-  gl.DepthMask(GL_TRUE);
-  gl.StencilMaskSeparate(GL_FRONT, 0xFFFFFFFF);
-  gl.StencilMaskSeparate(GL_BACK, 0xFFFFFFFF);
+  RenderPassGLES::ResetGLState(gl);
 
   gl.Clear(clear_bits);
 
