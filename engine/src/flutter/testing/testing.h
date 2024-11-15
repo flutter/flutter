@@ -14,8 +14,7 @@
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkData.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 const char* GetSourcePath();
 
@@ -115,7 +114,6 @@ bool MemsetPatternSetOrCheck(uint8_t* buffer, size_t size, MemsetPatternOp op);
 
 bool MemsetPatternSetOrCheck(std::vector<uint8_t>& buffer, MemsetPatternOp op);
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_TESTING_H_

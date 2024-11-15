@@ -7,8 +7,7 @@
 
 #include "flutter/fml/macros.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 enum class DebuggerStatus {
   kDontKnow,
@@ -17,7 +16,6 @@ enum class DebuggerStatus {
 
 DebuggerStatus GetDebuggerStatus();
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_DEBUGGER_DETECTION_H_

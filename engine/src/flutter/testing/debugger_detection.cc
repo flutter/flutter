@@ -19,8 +19,7 @@
 #include <windows.h>
 #endif  // FML_OS_WIN
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 DebuggerStatus GetDebuggerStatus() {
 #if FML_OS_MACOSX
@@ -61,7 +60,6 @@ DebuggerStatus GetDebuggerStatus() {
 #else
   return DebuggerStatus::kDontKnow;
 #endif
-}  // namespace testing
+}
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

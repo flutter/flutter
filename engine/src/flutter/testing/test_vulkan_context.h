@@ -15,8 +15,7 @@
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 class TestVulkanContext : public fml::RefCountedThreadSafe<TestVulkanContext> {
  public:
@@ -42,7 +41,6 @@ class TestVulkanContext : public fml::RefCountedThreadSafe<TestVulkanContext> {
   FML_DISALLOW_COPY_AND_ASSIGN(TestVulkanContext);
 };
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_TEST_VULKAN_CONTEXT_H_

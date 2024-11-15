@@ -12,8 +12,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 struct TestEGLContext {
   explicit TestEGLContext();
@@ -96,7 +95,6 @@ class TestGLSurface : public TestGLOnscreenOnlySurface {
   FML_DISALLOW_COPY_AND_ASSIGN(TestGLSurface);
 };
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_TEST_GL_SURFACE_H_

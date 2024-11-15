@@ -12,8 +12,7 @@
 #include "flutter/fml/thread.h"
 #include "flutter/testing/testing.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 class PendingTests;
 
@@ -38,7 +37,6 @@ class TestTimeoutListener : public ::testing::EmptyTestEventListener {
   FML_DISALLOW_COPY_AND_ASSIGN(TestTimeoutListener);
 };
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_TEST_TIMEOUT_LISTENER_H_

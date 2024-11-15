@@ -9,8 +9,7 @@
 #include <sstream>
 #include <string>
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 // Temporarily replaces the specified stream's output buffer to capture output.
 //
@@ -41,7 +40,6 @@ class StreamCapture {
   std::streambuf* old_buffer_;
 };
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_STREAM_CAPTURE_H_

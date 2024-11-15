@@ -9,8 +9,7 @@
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 // This fixture allows creating tests that make use of a mock |SkCanvas|.
 template <typename BaseT>
@@ -27,7 +26,6 @@ class CanvasTestBase : public BaseT {
 };
 using CanvasTest = CanvasTestBase<::testing::Test>;
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_CANVAS_TEST_H_

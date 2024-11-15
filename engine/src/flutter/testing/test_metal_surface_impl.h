@@ -11,7 +11,7 @@
 
 #include "third_party/skia/include/core/SkSurface.h"
 
-namespace flutter {
+namespace flutter::testing {
 
 class TestMetalSurfaceImpl : public TestMetalSurface {
  public:
@@ -52,6 +52,6 @@ class TestMetalSurfaceImpl : public TestMetalSurface {
   FML_DISALLOW_COPY_AND_ASSIGN(TestMetalSurfaceImpl);
 };
 
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_TEST_METAL_SURFACE_IMPL_H_

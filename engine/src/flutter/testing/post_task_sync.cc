@@ -6,8 +6,7 @@
 
 #include "flutter/fml/synchronization/waitable_event.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 void PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
                   const std::function<void()>& function) {
@@ -19,5 +18,4 @@ void PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
   latch.Wait();
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

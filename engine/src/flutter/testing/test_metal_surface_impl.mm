@@ -22,7 +22,7 @@
 
 static_assert(__has_feature(objc_arc), "ARC must be enabled.");
 
-namespace flutter {
+namespace flutter::testing {
 
 void TestMetalSurfaceImpl::Init(const TestMetalContext::TextureInfo& texture_info,
                                 const SkISize& surface_size) {
@@ -121,4 +121,4 @@ TestMetalContext::TextureInfo TestMetalSurfaceImpl::GetTextureInfo() {
   return IsValid() ? texture_info_ : TestMetalContext::TextureInfo();
 }
 
-}  // namespace flutter
+}  // namespace flutter::testing

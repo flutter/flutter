@@ -23,8 +23,7 @@
     return entrypoint;                                                      \
   })()
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 using NativeEntry = std::function<void(Dart_NativeArguments)>;
 
@@ -56,7 +55,6 @@ class TestDartNativeResolver
   FML_DISALLOW_COPY_AND_ASSIGN(TestDartNativeResolver);
 };
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_TEST_DART_NATIVE_RESOLVER_H_

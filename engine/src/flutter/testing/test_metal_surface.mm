@@ -9,7 +9,7 @@
 
 #include "third_party/skia/include/core/SkSurface.h"
 
-namespace flutter {
+namespace flutter::testing {
 
 bool TestMetalSurface::PlatformSupportsMetal() {
   return true;
@@ -52,4 +52,4 @@ TestMetalContext::TextureInfo TestMetalSurface::GetTextureInfo() {
   return impl_ ? impl_->GetTextureInfo() : TestMetalContext::TextureInfo();
 }
 
-}  // namespace flutter
+}  // namespace flutter::testing

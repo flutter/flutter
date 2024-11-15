@@ -7,15 +7,13 @@
 
 #include <type_traits>
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 inline bool NumberNear(double a, double b) {
   static const double epsilon = 1e-3;
   return (a > (b - epsilon)) && (a < (b + epsilon));
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_ASSERTIONS_H_

@@ -4,8 +4,7 @@
 
 #include "flutter/testing/stream_capture.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 StreamCapture::StreamCapture(std::ostream* ostream)
     : ostream_(ostream), old_buffer_(ostream_->rdbuf()) {
@@ -27,5 +26,4 @@ std::string StreamCapture::GetOutput() const {
   return buffer_.str();
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

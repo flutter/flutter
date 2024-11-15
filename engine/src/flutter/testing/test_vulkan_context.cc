@@ -22,8 +22,7 @@
 #include "third_party/skia/include/gpu/vk/VulkanExtensions.h"
 #include "vulkan/vulkan_core.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 TestVulkanContext::TestVulkanContext() {
   // ---------------------------------------------------------------------------
@@ -185,5 +184,4 @@ sk_sp<GrDirectContext> TestVulkanContext::GetGrDirectContext() const {
   return context_;
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
