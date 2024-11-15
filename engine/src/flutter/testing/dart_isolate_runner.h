@@ -14,8 +14,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 class AutoIsolateShutdown {
  public:
@@ -66,7 +65,6 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
     fml::WeakPtr<IOManager> io_manager = {},
     std::unique_ptr<PlatformConfiguration> platform_configuration = nullptr);
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_DART_ISOLATE_RUNNER_H_

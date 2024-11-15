@@ -9,8 +9,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/paths.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 std::string GetCurrentTestName() {
   return ::testing::UnitTest::GetInstance()->current_test_info()->name();
@@ -121,5 +120,4 @@ bool MemsetPatternSetOrCheck(std::vector<uint8_t>& buffer, MemsetPatternOp op) {
   return MemsetPatternSetOrCheck(buffer.data(), buffer.size(), op);
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

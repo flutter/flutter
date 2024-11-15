@@ -8,8 +8,8 @@
 
 #include "flutter/runtime/isolate_configuration.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
+
 AutoIsolateShutdown::AutoIsolateShutdown(std::shared_ptr<DartIsolate> isolate,
                                          fml::RefPtr<fml::TaskRunner> runner)
     : isolate_(std::move(isolate)), runner_(std::move(runner)) {}
@@ -173,5 +173,4 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
   return result;
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

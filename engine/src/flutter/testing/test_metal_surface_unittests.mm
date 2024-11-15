@@ -6,8 +6,7 @@
 #include "flutter/testing/test_metal_surface.h"
 #include "flutter/testing/testing.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 #ifdef SHELL_ENABLE_METAL
 
@@ -37,5 +36,4 @@ TEST(TestMetalSurface, CanCreateValidTestMetalSurface) {
 
 #endif
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

@@ -11,8 +11,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/testing/testing.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary(std::string elf_filename) {
   if (!DartVM::IsRunningPrecompiledCode()) {
@@ -135,5 +134,4 @@ bool PrepareSettingsForAOTWithSymbols(Settings& settings,
   return true;
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

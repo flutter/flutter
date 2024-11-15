@@ -8,8 +8,7 @@
 
 #include "flutter/testing/dart_fixture.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 FixtureTest::FixtureTest() : DartFixture() {}
 
@@ -20,5 +19,4 @@ FixtureTest::FixtureTest(std::string kernel_filename,
                   std::move(elf_filename),
                   std::move(elf_split_filename)) {}
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

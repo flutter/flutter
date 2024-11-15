@@ -6,8 +6,8 @@
 
 #include "flutter/testing/thread_test.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
+
 namespace {
 
 fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
@@ -31,5 +31,4 @@ fml::RefPtr<fml::TaskRunner> ThreadTest::CreateNewThread(
   return runner;
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

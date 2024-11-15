@@ -11,8 +11,7 @@
 #include "flutter/vulkan/procs/vulkan_handle.h"
 #include "third_party/skia/include/core/SkSize.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 class TestVulkanContext;
 
@@ -40,7 +39,6 @@ class TestVulkanImage {
   friend TestVulkanContext;
 };
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_TEST_VULKAN_IMAGE_H_

@@ -4,8 +4,7 @@
 
 #include "flutter/testing/test_args.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 static fml::CommandLine gProcessArgs;
 
@@ -17,5 +16,4 @@ void SetArgsForProcess(int argc, char** argv) {
   gProcessArgs = fml::CommandLineFromArgcArgv(argc, argv);
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

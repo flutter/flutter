@@ -13,9 +13,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
-namespace flutter {
-
-namespace testing {
+namespace flutter::testing {
 
 class TestVulkanSurface {
  public:
@@ -36,7 +34,6 @@ class TestVulkanSurface {
   sk_sp<SkSurface> surface_;
 };
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_TEST_VULKAN_SURFACE_H_

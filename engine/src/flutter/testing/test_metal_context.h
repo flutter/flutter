@@ -12,7 +12,7 @@
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/ports/SkCFObject.h"
 
-namespace flutter {
+namespace flutter::testing {
 
 struct MetalObjCFields;
 
@@ -48,6 +48,6 @@ class TestMetalContext {
   std::map<int64_t, sk_cfp<void*>> textures_;  // guarded by textures_mutex
 };
 
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_TEST_METAL_CONTEXT_H_

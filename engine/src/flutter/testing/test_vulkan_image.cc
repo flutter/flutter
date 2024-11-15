@@ -6,8 +6,7 @@
 
 #include "flutter/testing/test_vulkan_context.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 TestVulkanImage::TestVulkanImage() = default;
 
@@ -20,5 +19,4 @@ VkImage TestVulkanImage::GetImage() {
   return image_;
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

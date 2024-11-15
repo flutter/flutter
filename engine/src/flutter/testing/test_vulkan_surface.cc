@@ -16,8 +16,7 @@
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 TestVulkanSurface::TestVulkanSurface(TestVulkanImage&& image)
     : image_(std::move(image)){};
@@ -110,5 +109,4 @@ VkImage TestVulkanSurface::GetImage() {
   return image_.GetImage();
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
