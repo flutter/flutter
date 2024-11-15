@@ -124,7 +124,7 @@ void main() {
           targetPlatform: targetPlatform,
           projectUri: projectUri,
           fileSystem: fileSystem,
-          nativeAssetsFileUri: nonFlutterTesterAssetUri,
+          nativeAssetsFileUri: nativeAssetsFileUri,
         );
         final String expectedOS = flutterTester
             ? native_assets_cli.Target.current.toString()
