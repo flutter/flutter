@@ -509,7 +509,7 @@ targets:
     recipe: engine_v2/builder
     properties:
       config_name: mac_clangd
-      cpu: x86
+      cpu: arm64
 
   - name: Mac mac_unopt
     recipe: engine_v2/engine_v2
