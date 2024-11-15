@@ -25,4 +25,12 @@ bool Context::FlushCommandBuffers() {
   return true;
 }
 
+std::shared_ptr<const IdleWaiter> Context::GetIdleWaiter() const {
+  return nullptr;
+}
+
+void Context::ResetThreadLocalState() const {
+  // Nothing to do.
+}
+
 }  // namespace impeller

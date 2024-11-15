@@ -192,6 +192,44 @@ TEST_P(InteropPlaygroundTest, CanCreateOpenGLImage) {
       }));
 }
 
+TEST_P(InteropPlaygroundTest, ClearsOpenGLStancilStateAfterTransition) {
+  auto context = GetInteropContext();
+  auto impeller_context = context->GetContext();
+  if (impeller_context->GetBackendType() !=
+      impeller::Context::BackendType::kOpenGLES) {
+    GTEST_SKIP() << "This test works with OpenGL handles is only suitable for "
+                    "that backend.";
+    return;
+  }
+  const auto& gl_context = ContextGLES::Cast(*impeller_context);
+  const auto& gl = gl_context.GetReactor()->GetProcTable();
+  auto builder =
+      Adopt<DisplayListBuilder>(ImpellerDisplayListBuilderNew(nullptr));
+  auto paint = Adopt<Paint>(ImpellerPaintNew());
+  ImpellerColor color = {0.0, 0.0, 1.0, 1.0};
+  ImpellerPaintSetColor(paint.GetC(), &color);
+  ImpellerRect rect = {10, 20, 100, 200};
+  ImpellerDisplayListBuilderDrawRect(builder.GetC(), &rect, paint.GetC());
+  color = {1.0, 0.0, 0.0, 1.0};
+  ImpellerPaintSetColor(paint.GetC(), &color);
+  ImpellerDisplayListBuilderTranslate(builder.GetC(), 110, 210);
+  ImpellerDisplayListBuilderClipRect(builder.GetC(), &rect,
+                                     kImpellerClipOperationDifference);
+  ImpellerDisplayListBuilderDrawRect(builder.GetC(), &rect, paint.GetC());
+  auto dl = Adopt<DisplayList>(
+      ImpellerDisplayListBuilderCreateDisplayListNew(builder.GetC()));
+  ASSERT_TRUE(dl);
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        ImpellerSurfaceDrawDisplayList(surface.GetC(), dl.GetC());
+        // OpenGL state is reset even though the operations above enable a
+        // stencil check.
+        GLboolean stencil_enabled = true;
+        gl.GetBooleanv(GL_STENCIL_TEST, &stencil_enabled);
+        return stencil_enabled == GL_FALSE;
+      }));
+}
+
 TEST_P(InteropPlaygroundTest, CanCreateParagraphs) {
   // Create a typography context.
   auto type_context = Adopt<TypographyContext>(ImpellerTypographyContextNew());
