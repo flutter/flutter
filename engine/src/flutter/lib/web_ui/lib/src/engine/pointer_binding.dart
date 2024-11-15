@@ -271,7 +271,7 @@ class ClickDebouncer {
   /// Forwards the event to the framework, unless it is deduplicated because
   /// the corresponding pointer down/up events were recently flushed to the
   /// framework already.
-  void onClick(DomEvent click, int semanticsNodeId, bool isListening) {
+  void onClick(DomEvent click, int viewId, int semanticsNodeId, bool isListening) {
     assert(click.type == 'click');
 
     if (!isDebouncing) {
@@ -280,7 +280,7 @@ class ClickDebouncer {
       // recently and if the node is currently listening to event, forward to
       // the framework.
       if (isListening && _shouldSendClickEventToFramework(click)) {
-        _sendSemanticsTapToFramework(click, semanticsNodeId);
+        _sendSemanticsTapToFramework(click, viewId, semanticsNodeId);
       }
       return;
     }
@@ -292,7 +292,7 @@ class ClickDebouncer {
       final DebounceState state = _state!;
       _state = null;
       state.timer.cancel();
-      _sendSemanticsTapToFramework(click, semanticsNodeId);
+      _sendSemanticsTapToFramework(click, viewId, semanticsNodeId);
     } else {
       // The semantic node is not listening to taps. Flush the pointer events
       // for the framework to figure out what to do with them. It's possible
@@ -301,7 +301,11 @@ class ClickDebouncer {
     }
   }
 
-  void _sendSemanticsTapToFramework(DomEvent click, int semanticsNodeId) {
+  void _sendSemanticsTapToFramework(
+    DomEvent click,
+    int viewId,
+    int semanticsNodeId,
+  ) {
     // Tappable nodes can be nested inside other tappable nodes. If a click
     // lands on an inner element and is allowed to propagate, it will also
     // land on the ancestor tappable, leading to both the descendant and the
@@ -312,7 +316,11 @@ class ClickDebouncer {
     click.stopPropagation();
 
     EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-        semanticsNodeId, ui.SemanticsAction.tap, null);
+      viewId,
+      semanticsNodeId,
+      ui.SemanticsAction.tap,
+      null,
+    );
     reset();
   }
 

@@ -157,7 +157,7 @@ class EngineFlutterView implements ui.FlutterView {
 
   final JsViewConstraints? _jsViewConstraints;
 
-  late final EngineSemanticsOwner semantics = EngineSemanticsOwner(dom.semanticsHost);
+  late final EngineSemanticsOwner semantics = EngineSemanticsOwner(viewId, dom.semanticsHost);
 
   @override
   ui.Size get physicalSize {

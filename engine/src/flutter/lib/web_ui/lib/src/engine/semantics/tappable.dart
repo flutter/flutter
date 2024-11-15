@@ -46,6 +46,7 @@ class Tappable extends SemanticBehavior {
     _clickListener = createDomEventListener((DomEvent click) {
       PointerBinding.clickDebouncer.onClick(
         click,
+        viewId,
         semanticsObject.id,
         _isListening,
       );

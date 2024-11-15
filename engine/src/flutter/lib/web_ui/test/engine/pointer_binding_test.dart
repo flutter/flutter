@@ -3021,7 +3021,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
       }
     );
 
-    PointerBinding.clickDebouncer.onClick(click, 42, true);
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
     expect(PointerBinding.clickDebouncer.isDebouncing, false);
     expect(pointerPackets, isEmpty);
     expect(semanticsActions, <CapturedSemanticsEvent>[
@@ -3046,7 +3046,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
       }
     );
 
-    PointerBinding.clickDebouncer.onClick(click, 42, true);
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
     expect(pointerPackets, isEmpty);
     expect(semanticsActions, <CapturedSemanticsEvent>[
       (type: ui.SemanticsAction.tap, nodeId: 42)
@@ -3070,7 +3070,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
       }
     );
 
-    PointerBinding.clickDebouncer.onClick(click, 42, false);
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, false);
     expect(
       reason: 'When tappable declares that it is not listening to click events '
               'the debouncer flushes the pointer events to the framework and '
@@ -3129,7 +3129,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
         'clientY': testElement.getBoundingClientRect().y,
       }
     );
-    PointerBinding.clickDebouncer.onClick(click, 42, true);
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
 
     expect(
       reason: 'Because the DOM click event was deduped.',
@@ -3190,7 +3190,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
         'clientY': testElement.getBoundingClientRect().y,
       }
     );
-    PointerBinding.clickDebouncer.onClick(click, 42, true);
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
 
     expect(
       reason: 'Because the DOM click event was deduped.',
@@ -3245,7 +3245,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
         'clientY': testElement.getBoundingClientRect().y,
       }
     );
-    PointerBinding.clickDebouncer.onClick(click, 42, true);
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
 
     expect(
       reason: 'The DOM click should still be sent to the framework because it '

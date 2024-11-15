@@ -1298,14 +1298,18 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnSemanticsAction(
-      int nodeId, ui.SemanticsAction action, ByteData? args) {
+    int viewId,
+    int nodeId,
+    ui.SemanticsAction action,
+    ByteData? args,
+  ) {
     invoke1<ui.SemanticsActionEvent>(
       _onSemanticsActionEvent,
       _onSemanticsActionEventZone,
       ui.SemanticsActionEvent(
         type: action,
         nodeId: nodeId,
-        viewId: 0, // TODO(goderbauer): Wire up the real view ID.
+        viewId: viewId,
         arguments: args,
       ),
     );
