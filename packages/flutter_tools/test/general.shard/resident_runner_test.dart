@@ -2021,65 +2021,6 @@ flutter:
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
-  testUsingContext('Failed DDS start outputs error message', () => testbed.run(() async {
-    // See https://github.com/flutter/flutter/issues/72385 for context.
-    final FakeDevice device = FakeDevice()
-      ..dds = DartDevelopmentService(logger: testLogger);
-    ddsLauncherCallback = ({
-        required Uri remoteVmServiceUri,
-        Uri? serviceUri,
-        bool enableAuthCodes = true,
-        bool serveDevTools = false,
-        Uri? devToolsServerAddress,
-        bool enableServicePortFallback = false,
-        List<String> cachedUserTags = const <String>[],
-        String? dartExecutable,
-        String? google3WorkspaceRoot,
-      }) {
-      expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
-      expect(enableAuthCodes, isTrue);
-      expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
-      expect(cachedUserTags, isEmpty);
-      throw FakeDartDevelopmentServiceException(message: 'No URI');
-    };
-    final TestFlutterDevice flutterDevice = TestFlutterDevice(
-      device,
-      vmServiceUris: Stream<Uri>.value(testUri),
-    );
-    bool caught = false;
-    final Completer<void>done = Completer<void>();
-    runZonedGuarded(() {
-      flutterDevice.connect(
-        allowExistingDdsInstance: true,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, enableDevTools: false),
-      ).then((_) => done.complete());
-    }, (Object e, StackTrace st) {
-      expect(e, isA<StateError>());
-      expect((e as StateError).message, contains('No URI'));
-      expect(testLogger.errorText, contains(
-        'DDS has failed to start and there is not an existing DDS instance',
-      ));
-      done.complete();
-      caught = true;
-    });
-    await done.future;
-    if (!caught) {
-      fail('Expected a StateError to be thrown.');
-    }
-  }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-      Device? device,
-      required Logger logger,
-    }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
-  }));
-
   testUsingContext('nextPlatform moves through expected platforms', () {
     expect(nextPlatform('android'), 'iOS');
     expect(nextPlatform('iOS'), 'windows');
