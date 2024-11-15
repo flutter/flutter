@@ -115,7 +115,7 @@ void main() {
   test(
       'skip plugin with android folder if it does not support the Android platform',
       () async {
-    final Project project = PluginWithPathAndroidProject();
+    final Project project = PluginWithPathAndroidProjectWithoutDeferred();
     final ProcessResult buildApkResult = await testUnsupportedPlugin(
         project: project, createAndroidPluginFolder: true);
     expect(buildApkResult.stderr.toString(),
@@ -210,7 +210,7 @@ dependencies:
 ''';
 
 /// Project that load's a plugin from the specified path.
-class PluginWithPathAndroidProject extends PluginProject {
+class PluginWithPathAndroidProjectWithoutDeferred extends PluginProject {
   // Intentionally omit; this test case has nothing to do with deferred
   // components and a DefererdComponentsConfig will cause duplicates of files
   // such as build.gradle{.kts}, settings.gradle{kts} and related to be
@@ -221,6 +221,12 @@ class PluginWithPathAndroidProject extends PluginProject {
   @override
   DeferredComponentsConfig? get deferredComponents => null;
 
+  @override
+  String get pubspec => pubspecWithPluginPath;
+}
+
+/// Project that load's a plugin from the specified path.
+class PluginWithPathAndroidProject extends PluginProject {
   @override
   String get pubspec => pubspecWithPluginPath;
 }
