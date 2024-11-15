@@ -776,7 +776,6 @@ class Image extends StatefulWidget {
   /// {@end-tool}
   final ImageFrameBuilder? frameBuilder;
 
-  /// {@template flutter.widgets.Image.loadingBuilder}
   /// A builder that specifies the widget to display to the user while an image
   /// is still loading.
   ///
@@ -818,7 +817,6 @@ class Image extends StatefulWidget {
   /// before rendering the completed image.
   ///
   /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/loading_progress_image.mp4}
-  /// {@endtemplate}
   final ImageLoadingBuilder? loadingBuilder;
 
   /// {@template flutter.widgets.Image.errorBuilder}

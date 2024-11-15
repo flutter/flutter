@@ -78,7 +78,10 @@ class WebImage extends StatefulWidget {
   /// The resource which provides the image.
   final WebImageProvider image;
 
-  /// {@macro flutter.widgets.Image.loadingBuilder}
+  /// A builder that specifies the widget to display to the user while an image
+  /// is still loading.
+  ///
+  /// See [Image.loadingBuilder].
   final ImageLoadingBuilder? loadingBuilder;
 
   /// A builder function responsible for creating the widget that represents
