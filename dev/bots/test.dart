@@ -236,8 +236,7 @@ Future<void> _runIntegrationToolTests() async {
 }
 
 Future<void> _runFlutterBuildApkHealthTests() async {
-  // Try "priming" the test environment by running historically problematic tests first.
-  final List<String> toolIntegrationTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))
+  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'flutter_build_apk.shard'))
       .listSync(recursive: true).whereType<File>()
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
@@ -245,21 +244,7 @@ Future<void> _runFlutterBuildApkHealthTests() async {
   await runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: selectIndexOfTotalSubshard<String>(toolIntegrationTests, subshardKey: '6_6'),
-    collectMetrics: true,
-    runSkipped: true,
-  );
-
-  // Then run the health tests after.
-  final List<String> flutterBuildApkTests = Directory(path.join(_toolsPath, 'test', 'flutter_build_apk.shard'))
-      .listSync(recursive: true).whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-      .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
-
-  await runDartTest(
-    _toolsPath,
-    forceSingleCore: true,
-    testPaths: selectIndexOfTotalSubshard<String>(flutterBuildApkTests),
+    testPaths: selectIndexOfTotalSubshard<String>(allTests),
     collectMetrics: true,
   );
 }
