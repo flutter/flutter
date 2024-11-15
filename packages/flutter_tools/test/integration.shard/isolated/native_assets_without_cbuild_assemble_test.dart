@@ -11,7 +11,6 @@ import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../test_utils.dart';
-import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
 /// Regression test as part of https://github.com/flutter/flutter/pull/150742.
