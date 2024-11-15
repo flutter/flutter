@@ -49,7 +49,6 @@ void main() {
       processManager: FakeProcessManager.any(),
       previewBinary: previewBinary,
       logger: BufferLogger.test(),
-      useImplicitPubspecResolution: true,
     );
 
     expect(await device.isLocalEmulator, false);
@@ -85,7 +84,6 @@ void main() {
       ]),
       logger: logger,
       builderFactory: () => FakeBundleBuilder(fs),
-      useImplicitPubspecResolution: true,
     );
     final Directory previewDeviceCacheDir = fs
       .directory('Artifact.windowsDesktopPath.TargetPlatform.windows_x64.debug')
@@ -123,7 +121,6 @@ void main() {
         processManager: processManager,
         platform: linuxPlatform,
         featureFlags: featureFlags,
-        useImplicitPubspecResolution: true,
       );
 
       final List<Device> devices = await discovery.devices();
@@ -139,7 +136,6 @@ void main() {
         processManager: processManager,
         platform: macPlatform,
         featureFlags: featureFlags,
-        useImplicitPubspecResolution: true,
       );
 
       final List<Device> devices = await discovery.devices();
@@ -157,7 +153,6 @@ void main() {
         processManager: processManager,
         platform: windowsPlatform,
         featureFlags: featureFlags,
-        useImplicitPubspecResolution: true,
       );
 
       final List<Device> devices = await discovery.devices();
@@ -175,7 +170,6 @@ void main() {
         processManager: processManager,
         platform: windowsPlatform,
         featureFlags: featureFlags,
-        useImplicitPubspecResolution: true,
       );
 
       final List<Device> devices = await discovery.devices();
@@ -204,7 +198,6 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? assetDirPath,
     bool buildNativeAssets = true,
     @visibleForTesting BuildSystem? buildSystem,
-    required bool useImplicitPubspecResolution,
   }) async {
     final Directory assetDirectory = fileSystem
       .directory(assetDirPath)

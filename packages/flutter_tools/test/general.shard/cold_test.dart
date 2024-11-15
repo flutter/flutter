@@ -42,7 +42,6 @@ void main() {
     final int exitCode = await ColdRunner(devices,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
-      useImplicitPubspecResolution: true,
     ).attach();
     expect(exitCode, 2);
   });
@@ -59,7 +58,6 @@ void main() {
       await ColdRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        useImplicitPubspecResolution: true,
       ).cleanupAtFinish();
 
       expect(flutterDevice1.stopEchoingDeviceLogCount, 1);
@@ -89,7 +87,6 @@ void main() {
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        useImplicitPubspecResolution: true,
       ).run();
 
       expect(result, 1);
@@ -106,7 +103,6 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
         target: 'main.dart',
         traceStartup: true,
-        useImplicitPubspecResolution: true,
       ).run();
 
       expect(result, 0);
@@ -130,7 +126,6 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
         target: 'main.dart',
         traceStartup: true,
-        useImplicitPubspecResolution: true,
       ).run();
 
       expect(result, 0);
@@ -168,9 +163,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Future<int> runCold({ColdRunner? coldRunner, String? route}) async {
     return runColdCode;
   }
-
-  @override
-  Future<void> tryInitLogReader() async { }
 }
 
 class FakeDevice extends Fake implements Device {

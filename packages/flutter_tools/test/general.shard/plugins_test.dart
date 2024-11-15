@@ -404,7 +404,7 @@ dependencies:
 
     group('refreshPlugins', () {
       testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () async {
-        await refreshPluginsList(flutterProject, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject);
 
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
@@ -417,7 +417,7 @@ dependencies:
         flutterProject.flutterPluginsFile.createSync();
         flutterProject.flutterPluginsDependenciesFile.createSync();
 
-        await refreshPluginsList(flutterProject, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject);
 
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
@@ -436,7 +436,7 @@ dependencies:
 
         iosProject.testExists = true;
 
-        await refreshPluginsList(flutterProject, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject);
 
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
@@ -450,7 +450,7 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Opting out of useImplicitPubspecResolution omits .flutter-plugins', () async {
+      testUsingContext('Opting in to explicit-package-dependencies omits .flutter-plugins', () async {
         createFakePlugins(fs, <String>[
           'plugin_d',
           'plugin_a',
@@ -458,11 +458,14 @@ dependencies:
           '/local_plugins/plugin_b',
         ]);
 
-        await refreshPluginsList(flutterProject, useImplicitPubspecResolution: false);
+        await refreshPluginsList(flutterProject);
 
         expect(flutterProject.flutterPluginsFile, isNot(exists));
         expect(flutterProject.flutterPluginsDependenciesFile, exists);
       }, overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(
+          isExplicitPackageDependenciesEnabled: true,
+        ),
         FileSystem: () => fs,
         ProcessManager: FakeProcessManager.empty,
         Pub: FakePubWithPrimedDeps.new,
@@ -479,7 +482,7 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        await refreshPluginsList(flutterProject, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject);
 
         // Verify .flutter-plugins-dependencies is configured correctly.
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
@@ -505,6 +508,7 @@ dependencies:
               'plugin-b',
               'plugin-c',
             ],
+            'dev_dependency': false,
           },
           <String, dynamic> {
             'name': 'plugin-b',
@@ -513,12 +517,14 @@ dependencies:
             'dependencies': <String>[
               'plugin-c',
             ],
+            'dev_dependency': false,
           },
           <String, dynamic> {
             'name': 'plugin-c',
             'path': '${pluginC.path}/',
             'native_build': true,
             'dependencies': <String>[],
+            'dev_dependency': false,
           },
         ];
         expect(plugins['ios'], expectedPlugins);
@@ -597,7 +603,7 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        await refreshPluginsList(flutterProject, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject);
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
@@ -611,7 +617,8 @@ dependencies:
               'path': '/.tmp_rand0/flutter_plugin.rand0/',
               'shared_darwin_source': true,
               'native_build': true,
-              'dependencies': <String>[]
+              'dependencies': <String>[],
+              'dev_dependency': false,
             }
           ],
           'android': <Map<String, Object>>[
@@ -619,7 +626,8 @@ dependencies:
               'name': 'plugin-a',
               'path': '/.tmp_rand0/flutter_plugin.rand0/',
               'native_build': true,
-              'dependencies': <String>[]
+              'dependencies': <String>[],
+              'dev_dependency': false,
             }
           ],
           'macos': <Map<String, Object>>[],
@@ -629,14 +637,16 @@ dependencies:
               'name': 'plugin-a',
               'path': '/.tmp_rand0/flutter_plugin.rand0/',
               'native_build': false,
-              'dependencies': <String>[]
+              'dependencies': <String>[],
+              'dev_dependency': false,
             }
           ],
           'web': <Map<String, Object>>[
             <String, Object>{
               'name': 'plugin-a',
               'path': '/.tmp_rand0/flutter_plugin.rand0/',
-              'dependencies': <String>[]
+              'dependencies': <String>[],
+              'dev_dependency': false,
             }
           ]
         };
@@ -674,7 +684,6 @@ dependencies:
           flutterProject,
           iosPlatform: true,
           macOSPlatform: true,
-          useImplicitPubspecResolution: true,
         );
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
@@ -720,7 +729,7 @@ dependencies:
         iosProject.usesSwiftPackageManager = true;
         macosProject.usesSwiftPackageManager = true;
 
-        await refreshPluginsList(flutterProject, forceCocoaPodsOnly: true, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject, forceCocoaPodsOnly: true);
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile
@@ -768,7 +777,6 @@ dependencies:
           flutterProject,
           iosPlatform: true,
           macOSPlatform: true,
-          useImplicitPubspecResolution: true,
         );
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
@@ -798,7 +806,7 @@ dependencies:
         iosProject.testExists = true;
         macosProject.exists = true;
 
-        await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
         expect(iosProject.podManifestLock.existsSync(), false);
         expect(macosProject.podManifestLock.existsSync(), false);
       }, overrides: <Type, Generator>{
@@ -817,11 +825,11 @@ dependencies:
         // Since there was no plugins list, the lock files will be invalidated.
         // The second call is where the plugins list is compared to the existing one, and if there is no change,
         // the podfiles shouldn't be invalidated.
-        await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
         simulatePodInstallRun(iosProject);
         simulatePodInstallRun(macosProject);
 
-        await refreshPluginsList(flutterProject, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject);
         expect(iosProject.podManifestLock.existsSync(), true);
         expect(macosProject.podManifestLock.existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -842,7 +850,7 @@ dependencies:
       testUsingContext('Registrant uses new embedding if app uses new embedding', () async {
         androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
-        await injectPlugins(flutterProject, androidPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
           .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
@@ -865,7 +873,7 @@ dependencies:
 
         await expectLater(
           () async {
-            await injectPlugins(flutterProject, androidPlatform: true, useImplicitPubspecResolution: true);
+            await injectPlugins(flutterProject, androidPlatform: true);
           },
           throwsToolExit(
             message: "The plugin `plugin1` doesn't have a main class defined in "
@@ -887,7 +895,7 @@ dependencies:
 
         createDualSupportJavaPlugin4();
 
-        await injectPlugins(flutterProject, androidPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
           .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
@@ -908,7 +916,7 @@ dependencies:
         flutterProject.isModule = true;
         androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
-        await injectPlugins(flutterProject, androidPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
           .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
@@ -929,7 +937,7 @@ dependencies:
 
         createNewJavaPlugin1();
 
-        await injectPlugins(flutterProject, androidPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
           .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
@@ -950,7 +958,7 @@ dependencies:
 
         createDualSupportJavaPlugin4();
 
-        await injectPlugins(flutterProject, androidPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
           .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
@@ -971,7 +979,7 @@ dependencies:
 
         createDualSupportJavaPlugin4();
 
-        await injectPlugins(flutterProject, androidPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
           .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
@@ -989,7 +997,7 @@ dependencies:
       testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {
         final File manifest = fs.file('AndroidManifest.xml');
         androidProject.appManifestFile = manifest;
-        await injectPlugins(flutterProject, androidPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, androidPlatform: true);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1099,7 +1107,7 @@ flutter:
         dartPluginClass: SomePlugin
     ''');
 
-        await injectPlugins(flutterProject, androidPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrantFile = androidProject.pluginRegistrantHost
           .childDirectory(fs.path.join('src', 'main', 'java', 'io', 'flutter', 'plugins'))
@@ -1128,7 +1136,6 @@ flutter:
           flutterProject,
           iosPlatform: true,
           darwinDependencyManagement: dependencyManagement,
-          useImplicitPubspecResolution: true,
         );
 
         final File registrantFile = iosProject.pluginRegistrantImplementation;
@@ -1156,7 +1163,6 @@ flutter:
           flutterProject,
           macOSPlatform: true,
           darwinDependencyManagement: dependencyManagement,
-          useImplicitPubspecResolution: true,
         );
 
         final File registrantFile = macosProject.managedDirectory.childFile('GeneratedPluginRegistrant.swift');
@@ -1185,7 +1191,6 @@ flutter:
           flutterProject,
           macOSPlatform: true,
           darwinDependencyManagement: dependencyManagement,
-          useImplicitPubspecResolution: true,
         );
 
         final File registrantFile = macosProject.managedDirectory.childFile('GeneratedPluginRegistrant.swift');
@@ -1210,7 +1215,6 @@ flutter:
           flutterProject,
           macOSPlatform: true,
           darwinDependencyManagement: dependencyManagement,
-          useImplicitPubspecResolution: true,
         );
 
         final File registrantFile = macosProject.managedDirectory.childFile('GeneratedPluginRegistrant.swift');
@@ -1224,7 +1228,7 @@ flutter:
       testUsingContext('Injecting creates generated Linux registrant', () async {
         createFakePlugin(fs);
 
-        await injectPlugins(flutterProject, linuxPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, linuxPlatform: true);
 
         final File registrantHeader = linuxProject.managedDirectory.childFile('generated_plugin_registrant.h');
         final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
@@ -1273,7 +1277,7 @@ dependencies:
 
         flutterProject.manifest = manifest;
 
-        await injectPlugins(flutterProject, linuxPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, linuxPlatform: true);
 
         final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
 
@@ -1331,7 +1335,7 @@ dependencies:
 
         flutterProject.manifest = manifest;
 
-        await injectPlugins(flutterProject, linuxPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, linuxPlatform: true);
 
         final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
 
@@ -1354,7 +1358,7 @@ flutter:
         dartPluginClass: SomePlugin
     ''');
 
-        await injectPlugins(flutterProject, linuxPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, linuxPlatform: true);
 
         final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
 
@@ -1378,7 +1382,7 @@ flutter:
         dartPluginClass: SomePlugin
     ''');
 
-        await injectPlugins(flutterProject, linuxPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, linuxPlatform: true);
 
         final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
 
@@ -1393,7 +1397,7 @@ flutter:
       testUsingContext('Injecting creates generated Linux plugin Cmake file', () async {
         createFakePlugin(fs);
 
-        await injectPlugins(flutterProject, linuxPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, linuxPlatform: true);
 
         final File pluginMakefile = linuxProject.generatedPluginCmakeFile;
 
@@ -1416,7 +1420,7 @@ flutter:
           '/local_plugins/plugin_b',
         ]);
 
-        await injectPlugins(flutterProject, linuxPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, linuxPlatform: true);
 
         final File pluginCmakeFile = linuxProject.generatedPluginCmakeFile;
         final File pluginRegistrant = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
@@ -1434,7 +1438,7 @@ flutter:
       testUsingContext('Injecting creates generated Windows registrant', () async {
         createFakePlugin(fs);
 
-        await injectPlugins(flutterProject, windowsPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, windowsPlatform: true);
 
         final File registrantHeader = windowsProject.managedDirectory.childFile('generated_plugin_registrant.h');
         final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
@@ -1458,7 +1462,7 @@ flutter:
         dartPluginClass: SomePlugin
     ''');
 
-        await injectPlugins(flutterProject, windowsPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, windowsPlatform: true);
 
         final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
 
@@ -1481,7 +1485,7 @@ flutter:
         dartPluginClass: SomePlugin
     ''');
 
-        await injectPlugins(flutterProject, windowsPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, windowsPlatform: true);
 
         final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
 
@@ -1501,7 +1505,7 @@ flutter:
           '/local_plugins/plugin_b',
         ]);
 
-        await injectPlugins(flutterProject, windowsPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, windowsPlatform: true);
 
         final File pluginCmakeFile = windowsProject.generatedPluginCmakeFile;
         final File pluginRegistrant = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
@@ -1521,7 +1525,7 @@ flutter:
         setUpProject(fsWindows);
         createFakePlugin(fsWindows);
 
-        await injectPlugins(flutterProject, linuxPlatform: true, windowsPlatform: true, useImplicitPubspecResolution: true);
+        await injectPlugins(flutterProject, linuxPlatform: true, windowsPlatform: true);
 
         for (final CmakeBasedProject? project in <CmakeBasedProject?>[linuxProject, windowsProject]) {
           final File pluginCmakefile = project!.generatedPluginCmakeFile;
@@ -1546,7 +1550,6 @@ flutter:
             linuxPlatform: true,
             windowsPlatform: true,
             allowedPlugins: PreviewDevice.supportedPubPlugins,
-            useImplicitPubspecResolution: true,
           ),
           throwsToolExit(message: '''
 The Flutter Preview device does not support the following plugins from your pubspec.yaml:
@@ -1566,7 +1569,6 @@ The Flutter Preview device does not support the following plugins from your pubs
           iosPlatform: true,
           macOSPlatform: true,
           darwinDependencyManagement: dependencyManagement,
-          useImplicitPubspecResolution: true,
         );
         expect(
           dependencyManagement.setupPlatforms,
@@ -1582,7 +1584,6 @@ The Flutter Preview device does not support the following plugins from your pubs
         await injectPlugins(
           flutterProject,
           darwinDependencyManagement: dependencyManagement,
-          useImplicitPubspecResolution: true,
         );
         expect(dependencyManagement.setupPlatforms, <SupportedPlatform>[]);
       }, overrides: <Type, Generator>{
@@ -1602,7 +1603,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         linuxProject.exists = true;
         createFakePlugin(fs);
         // refreshPluginsList should call createPluginSymlinks.
-        await refreshPluginsList(flutterProject, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject);
 
         expect(linuxProject.pluginSymlinkDirectory.childLink('some_plugin').existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -1615,7 +1616,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         windowsProject.exists = true;
         createFakePlugin(fs);
         // refreshPluginsList should call createPluginSymlinks.
-        await refreshPluginsList(flutterProject, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject);
 
         expect(windowsProject.pluginSymlinkDirectory.childLink('some_plugin').existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -1661,7 +1662,7 @@ The Flutter Preview device does not support the following plugins from your pubs
 
         // refreshPluginsList should remove existing links and recreate on changes.
         createFakePlugin(fs);
-        await refreshPluginsList(flutterProject, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject);
 
         for (final File file in dummyFiles) {
           expect(file.existsSync(), false);
@@ -1700,7 +1701,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         linuxProject.exists = true;
         windowsProject.exists = true;
         createFakePlugin(fs);
-        await refreshPluginsList(flutterProject, useImplicitPubspecResolution: true);
+        await refreshPluginsList(flutterProject);
 
         final List<Link> links = <Link>[
           linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
