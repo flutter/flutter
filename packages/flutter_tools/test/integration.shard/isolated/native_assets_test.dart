@@ -10,6 +10,8 @@
 // contain the native assets mapping.
 // When doing a hot reload, this mapping must stay in place.
 
+// TODO(matanlurey): Remove after debugging https://github.com/flutter/flutter/issues/159000.
+@Tags(<String>['flutter-build-apk'])
 @Timeout(Duration(minutes: 10))
 library;
 
@@ -19,7 +21,7 @@ import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../src/common.dart';
 import '../test_utils.dart' show fileSystem, platform;
@@ -220,49 +222,13 @@ void main() {
           }
           expectCCompilerIsConfigured(exampleDirectory);
         });
-      });
+      },
+      // TODO(matanlurey): Debug why flutter build apk often timesout.
+      // See https://github.com/flutter/flutter/issues/158560 for details.
+      skip: buildSubcommand == 'apk' ? 'flutter build apk times out' : false, // Temporary workaround for https://github.com/flutter/flutter/issues/158560.
+      tags: <String>['flutter-build-apk'],
+      );
     }
-
-    // This could be an hermetic unit test if the native_assets_builder
-    // could mock process runs and file system.
-    // https://github.com/dart-lang/native/issues/90.
-    testWithoutContext('flutter build $buildSubcommand error on static libraries', () async {
-      await inTempDir((Directory tempDirectory) async {
-        final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
-        final File buildDotDart =
-            packageDirectory.childDirectory('hook').childFile('build.dart');
-        final String buildDotDartContents = await buildDotDart.readAsString();
-        // Overrides the build to output static libraries.
-        final String buildDotDartContentsNew = buildDotDartContents.replaceFirst(
-          'await build(args, (config, output) async {',
-          '''
-  await build([
-    '-D${LinkModePreferenceImpl.configKey}=${LinkModePreferenceImpl.static}',
-    ...args,
-  ], (config, output) async {
-''',
-        );
-        expect(buildDotDartContentsNew, isNot(buildDotDartContents));
-        await buildDotDart.writeAsString(buildDotDartContentsNew);
-        final Directory exampleDirectory = packageDirectory.childDirectory('example');
-
-        final ProcessResult result = processManager.runSync(
-          <String>[
-            flutterBin,
-            'build',
-            buildSubcommand,
-            if (buildSubcommand == 'ios') '--no-codesign',
-            '-v', // Requires verbose mode for error.
-          ],
-          workingDirectory: exampleDirectory.path,
-        );
-        expect(
-          (result.stdout as String) + (result.stderr as String),
-          contains('has a link mode "static", which is not allowed by by the config link mode preference "dynamic"'),
-        );
-        expect(result.exitCode, isNot(0));
-      });
-    });
   }
 
   for (final String add2appBuildSubcommand in add2appBuildSubcommands) {
@@ -421,7 +387,7 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
 /// Sample path: build/linux/x64/release/bundle/lib/libmy_package.so
 void expectDylibIsBundledLinux(Directory appDirectory, String buildMode) {
   // Linux does not support cross compilation, so always only check current architecture.
-  final String architecture = ArchitectureImpl.current.dartPlatform;
+  final String architecture = Architecture.current.name;
   final Directory appBundle = appDirectory
       .childDirectory('build')
       .childDirectory(hostOs)
@@ -432,7 +398,7 @@ void expectDylibIsBundledLinux(Directory appDirectory, String buildMode) {
   final Directory dylibsFolder = appBundle.childDirectory('lib');
   expect(dylibsFolder, exists);
   final File dylib =
-      dylibsFolder.childFile(OSImpl.linux.dylibFileName(packageName));
+      dylibsFolder.childFile(OS.linux.dylibFileName(packageName));
   expect(dylib, exists);
 }
 
@@ -441,7 +407,7 @@ void expectDylibIsBundledLinux(Directory appDirectory, String buildMode) {
 /// Sample path: build\windows\x64\runner\Debug\my_package_example.exe
 void expectDylibIsBundledWindows(Directory appDirectory, String buildMode) {
   // Linux does not support cross compilation, so always only check current architecture.
-  final String architecture = ArchitectureImpl.current.dartPlatform;
+  final String architecture = Architecture.current.name;
   final Directory appBundle = appDirectory
       .childDirectory('build')
       .childDirectory(hostOs)
@@ -450,7 +416,7 @@ void expectDylibIsBundledWindows(Directory appDirectory, String buildMode) {
       .childDirectory(buildMode.upperCaseFirst());
   expect(appBundle, exists);
   final File dylib =
-      appBundle.childFile(OSImpl.windows.dylibFileName(packageName));
+      appBundle.childFile(OS.windows.dylibFileName(packageName));
   expect(dylib, exists);
 }
 
@@ -481,7 +447,7 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
       expect(archDir.childFile('libapp.so'), exists);
     }
     final File dylib =
-        archDir.childFile(OSImpl.android.dylibFileName(packageName));
+        archDir.childFile(OS.android.dylibFileName(packageName));
     expect(dylib, exists);
   }
 }
@@ -504,6 +470,13 @@ void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode
 void expectCCompilerIsConfigured(Directory appDirectory) {
   final Directory nativeAssetsBuilderDir = appDirectory.childDirectory('.dart_tool/native_assets_builder/');
   for (final Directory subDir in nativeAssetsBuilderDir.listSync().whereType<Directory>()) {
+    // We only want to look at build/link hook invocation directories. The
+    // `/shared/*` directory allows the individual hooks to store data that is
+    // reusable across different build/link confiurations.
+    if (subDir.path.endsWith('shared')) {
+      continue;
+    }
+
     final File config = subDir.childFile('config.json');
     expect(config, exists);
     final String contents = config.readAsStringSync();

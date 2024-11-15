@@ -13,10 +13,11 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/code_assets_builder.dart' hide BuildMode;
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
@@ -59,40 +60,53 @@ void main() {
           FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
           ProcessManager: () => FakeProcessManager.empty(),
         }, () async {
-      final File packageConfig =
-          environment.projectDir.childFile('.dart_tool/package_config.json');
-      final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
+      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+      final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
       await packageConfig.parent.create();
       await packageConfig.create();
       final File dylibAfterCompiling = fileSystem.file('libbar.so');
       // The mock doesn't create the file, so create it here.
       await dylibAfterCompiling.create();
+
+      final List<CodeAsset> codeAssets = <CodeAsset>[
+        CodeAsset(
+          package: 'bar',
+          name: 'bar.dart',
+          linkMode: DynamicLoadingBundled(),
+          os: OS.android,
+          architecture: Architecture.arm64,
+          file: Uri.file('libbar.so'),
+        ),
+      ];
       final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
-        buildResult: FakeFlutterNativeAssetsBuilderResult(
-          assets: <AssetImpl>[
-            NativeCodeAssetImpl(
-              id: 'package:bar/bar.dart',
-              linkMode: DynamicLoadingBundledImpl(),
-              os: OSImpl.android,
-              architecture: ArchitectureImpl.arm64,
-              file: Uri.file('libbar.so'),
-            ),
-          ],
+        buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          codeAssets: codeAssets,
+        ),
+        linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          codeAssets: codeAssets,
         ),
       );
-      await runFlutterSpecificDartBuild(
-        environmentDefines: <String, String>{
-          kBuildMode: buildMode.cliName,
-          kMinSdkVersion: minSdkVersion,
-        },
+      final Map<String, String> environmentDefines = <String, String>{
+        kBuildMode: buildMode.cliName,
+        kMinSdkVersion: minSdkVersion,
+      };
+      final DartBuildResult result = await runFlutterSpecificDartBuild(
+        environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.android_arm64,
         projectUri: projectUri,
-        nativeAssetsYamlUri: nonFlutterTesterAssetUri,
         fileSystem: fileSystem,
         buildRunner: buildRunner,
+      );
+      await installCodeAssets(
+        dartBuildResult: result,
+        environmentDefines: environmentDefines,
+        targetPlatform: TargetPlatform.android_arm64,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        nativeAssetsFileUri: nonFlutterTesterAssetUri,
       );
       expect(
         (globals.logger as BufferLogger).traceText,
@@ -102,10 +116,7 @@ void main() {
         ]),
       );
 
-      expect(
-        environment.buildDir.childFile('native_assets.yaml'),
-        exists,
-      );
+      expect(environment.buildDir.childFile('native_assets.yaml'), exists);
       expect(buildRunner.buildInvocations, 1);
       expect(
         buildRunner.linkInvocations,
@@ -124,7 +135,6 @@ void main() {
       }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await packageConfig.create(recursive: true);
     await runFlutterSpecificDartBuild(
       environmentDefines: <String, String>{
@@ -132,7 +142,6 @@ void main() {
         kMinSdkVersion: minSdkVersion,
       },
       targetPlatform: TargetPlatform.android_x64,
-      nativeAssetsYamlUri: nonFlutterTesterAssetUri,
       projectUri: projectUri,
       fileSystem: fileSystem,
       buildRunner: _BuildRunnerWithoutNdk(),
@@ -149,7 +158,6 @@ void main() {
       }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
@@ -160,7 +168,6 @@ void main() {
         },
         targetPlatform: TargetPlatform.android_arm64,
         projectUri: projectUri,
-        nativeAssetsYamlUri: nonFlutterTesterAssetUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutNdk(
           packagesWithNativeAssetsResult: <Package>[
@@ -182,6 +189,6 @@ class _BuildRunnerWithoutNdk extends FakeFlutterNativeAssetsBuildRunner {
   });
 
   @override
-  Future<CCompilerConfigImpl> get ndkCCompilerConfigImpl async =>
+  Future<CCompilerConfig> get ndkCCompilerConfig async =>
       throwToolExit('Android NDK Clang could not be found.');
 }
