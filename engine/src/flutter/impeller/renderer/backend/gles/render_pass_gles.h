@@ -19,6 +19,8 @@ class RenderPassGLES final
   // |RenderPass|
   ~RenderPassGLES() override;
 
+  static void ResetGLState(const ProcTableGLES& gl);
+
  private:
   friend class CommandBufferGLES;
 

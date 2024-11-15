@@ -93,6 +93,9 @@ class ContextGLES final : public Context,
   // |Context|
   void Shutdown() override;
 
+  // |Context|
+  void ResetThreadLocalState() const override;
+
   ContextGLES(const ContextGLES&) = delete;
 
   ContextGLES& operator=(const ContextGLES&) = delete;
