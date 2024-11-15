@@ -772,8 +772,8 @@ class FlutterPlugin implements Plugin<Project> {
         // Add plugin dependency to the app project.
         project.android.buildTypes.each { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
-            if (flutterBuildMode != "release" || !pluginProject.dev_dependency) {
-                flutterProject.dependencies {
+            if (flutterBuildMode != "release" || !pluginObject.dev_dependency) {
+                project.dependencies {
                     api(pluginProject)
                 }
             }
@@ -790,7 +790,7 @@ class FlutterPlugin implements Plugin<Project> {
             if (!pluginProject.hasProperty("android")) {
                 return
             }
-            if (flutterBuildMode == "release" && pluginProject.dev_dependency) {
+            if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
                 // This plugin will not be included in the build, so no need to add
                 // the embedding dependency to it.
                 return
@@ -956,10 +956,9 @@ class FlutterPlugin implements Plugin<Project> {
             return
         }
 
-        // TODO(camsim99): Determine if I need to pass flutterProject or if I can just reference project.
         project.android.buildTypes.each { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
-            if (flutterBuildMode == "release" && pluginProject.dev_dependency) {
+            if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
                 // This plugin will not be included in the build, so no need to add its dependencies.
                 return
             }
