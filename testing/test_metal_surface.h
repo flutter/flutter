@@ -11,7 +11,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
-namespace flutter {
+namespace flutter::testing {
 
 //------------------------------------------------------------------------------
 /// @brief      Creates a MTLTexture backed SkSurface and context that can be
@@ -53,6 +53,6 @@ class TestMetalSurface {
   FML_DISALLOW_COPY_AND_ASSIGN(TestMetalSurface);
 };
 
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_TEST_METAL_SURFACE_H_

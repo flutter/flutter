@@ -7,8 +7,7 @@
 #include <map>
 #include <sstream>
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 class PendingTests : public std::enable_shared_from_this<PendingTests> {
  public:
@@ -120,5 +119,4 @@ void TestTimeoutListener::OnTestEnd(const ::testing::TestInfo& test_info) {
       });
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

@@ -15,7 +15,7 @@
 
 static_assert(__has_feature(objc_arc), "ARC must be enabled.");
 
-namespace flutter {
+namespace flutter::testing {
 
 // TOOD(cbracken): https://github.com/flutter/flutter/issues/157942
 struct MetalObjCFields {
@@ -133,4 +133,4 @@ TestMetalContext::TextureInfo TestMetalContext::GetTextureInfo(int64_t texture_i
   }
 }
 
-}  // namespace flutter
+}  // namespace flutter::testing

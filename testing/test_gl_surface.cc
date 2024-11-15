@@ -24,8 +24,7 @@
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 static std::string GetEGLError() {
   std::stringstream stream;
@@ -433,5 +432,4 @@ bool TestGLSurface::MakeResourceCurrent() {
   return result == EGL_TRUE;
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

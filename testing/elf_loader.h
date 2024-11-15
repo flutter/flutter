@@ -11,8 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 inline constexpr const char* kDefaultAOTAppELFFileName = "app_elf_snapshot.so";
 
@@ -81,7 +80,6 @@ ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary(
 bool PrepareSettingsForAOTWithSymbols(Settings& settings,
                                       const ELFAOTSymbols& symbols);
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_ELF_LOADER_H_

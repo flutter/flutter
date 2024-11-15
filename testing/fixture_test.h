@@ -7,8 +7,7 @@
 
 #include "flutter/testing/dart_fixture.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 class FixtureTest : public DartFixture, public ThreadTest {
  public:
@@ -24,7 +23,6 @@ class FixtureTest : public DartFixture, public ThreadTest {
   FML_DISALLOW_COPY_AND_ASSIGN(FixtureTest);
 };
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_TESTING_FIXTURE_TEST_H_
