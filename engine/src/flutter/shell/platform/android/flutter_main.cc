@@ -240,7 +240,7 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     return AndroidRenderingAPI::kSoftware;
   }
   constexpr AndroidRenderingAPI kVulkanUnsupportedFallback =
-      AndroidRenderingAPI::kSkiaOpenGLES;
+      AndroidRenderingAPI::kImpellerOpenGLES;
 
   // Debug/Profile only functionality for testing a specific
   // backend configuration.

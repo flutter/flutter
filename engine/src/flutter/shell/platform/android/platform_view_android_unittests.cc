@@ -22,7 +22,7 @@ TEST(AndroidPlatformView, SelectsVulkanBasedOnApiLevel) {
               AndroidRenderingAPI::kImpellerVulkan);
   } else {
     EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings),
-              AndroidRenderingAPI::kSkiaOpenGLES);
+              AndroidRenderingAPI::kImpellerOpenGLES);
   }
 }
 
