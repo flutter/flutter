@@ -9,8 +9,7 @@ import 'recorder.dart';
 /// Repeatedly paints a grid of rectangles where each rectangle is drawn in its
 /// own [Picture].
 ///
-/// Measures the performance of updating many layers. For example, the HTML
-/// rendering backend attempts to reuse the DOM nodes created for engine layers.
+/// Measures the performance of updating many layers.
 ///
 /// See also `bench_draw_rect.dart`, which draws nearly identical UI but puts all
 /// rectangles into the same picture.
