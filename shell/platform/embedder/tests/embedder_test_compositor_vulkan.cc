@@ -22,6 +22,27 @@ EmbedderTestCompositorVulkan::EmbedderTestCompositorVulkan(
 
 EmbedderTestCompositorVulkan::~EmbedderTestCompositorVulkan() = default;
 
+void EmbedderTestCompositorVulkan::SetRenderTargetType(
+    EmbedderTestBackingStoreProducer::RenderTargetType type,
+    FlutterSoftwarePixelFormat software_pixfmt) {
+  switch (type) {
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage:
+      // no-op.
+      break;
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLSurface:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLTexture:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer2:
+      FML_LOG(FATAL) << "Unsupported render target type: "
+                     << static_cast<int>(type);
+      break;
+  }
+  backingstore_producer_ = std::make_unique<EmbedderTestBackingStoreProducer>(
+      context_, type, software_pixfmt);
+}
+
 bool EmbedderTestCompositorVulkan::UpdateOffscrenComposition(
     const FlutterLayer** layers,
     size_t layers_count) {

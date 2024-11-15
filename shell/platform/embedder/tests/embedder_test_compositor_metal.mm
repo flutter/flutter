@@ -20,6 +20,26 @@ EmbedderTestCompositorMetal::EmbedderTestCompositorMetal(SkISize surface_size,
 
 EmbedderTestCompositorMetal::~EmbedderTestCompositorMetal() = default;
 
+void EmbedderTestCompositorMetal::SetRenderTargetType(
+    EmbedderTestBackingStoreProducer::RenderTargetType type,
+    FlutterSoftwarePixelFormat software_pixfmt) {
+  switch (type) {
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture:
+      // no-op.
+      break;
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLSurface:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLTexture:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer2:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage:
+      FML_LOG(FATAL) << "Unsupported render target type: " << static_cast<int>(type);
+      break;
+  }
+  backingstore_producer_ =
+      std::make_unique<EmbedderTestBackingStoreProducer>(context_, type, software_pixfmt);
+}
+
 bool EmbedderTestCompositorMetal::UpdateOffscrenComposition(const FlutterLayer** layers,
                                                             size_t layers_count) {
   last_composition_ = nullptr;
