@@ -342,7 +342,6 @@ Future<void> runDartTest(String workingDirectory, {
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
   bool collectMetrics = false,
-  bool runSkipped = false,
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -380,8 +379,6 @@ Future<void> runDartTest(String workingDirectory, {
       '--coverage=$coverage',
     if (perTestTimeout != null)
       '--timeout=${perTestTimeout.inMilliseconds}ms',
-    if (runSkipped)
-      '--run-skipped',
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,
