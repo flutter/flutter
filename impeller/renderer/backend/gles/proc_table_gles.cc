@@ -140,6 +140,10 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
 
   capabilities_ = std::make_shared<CapabilitiesGLES>(*this);
 
+  // This this will force glUseProgram to only be used on one thread in debug
+  // builds to identify threading violations in the engine.
+  UseProgram.enforce_one_thread = true;
+
   is_valid_ = true;
 }
 
