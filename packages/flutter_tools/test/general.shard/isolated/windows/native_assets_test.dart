@@ -77,21 +77,25 @@ void main() {
         final File dylibAfterCompiling = fileSystem.file('bar.dll');
         // The mock doesn't create the file, so create it here.
         await dylibAfterCompiling.create();
+
+        final List<CodeAsset> codeAssets = <CodeAsset>[
+          CodeAsset(
+            package: 'bar',
+            name: 'bar.dart',
+            linkMode: DynamicLoadingBundled(),
+            os: OS.windows,
+            architecture: Architecture.x64,
+            file: dylibAfterCompiling.uri,
+          ),
+        ];
         final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
-          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
-            codeAssets: <CodeAsset>[
-              CodeAsset(
-                package: 'bar',
-                name: 'bar.dart',
-                linkMode: DynamicLoadingBundled(),
-                os: OS.windows,
-                architecture: Architecture.x64,
-                file: dylibAfterCompiling.uri,
-              ),
-            ],
+          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+          linkResult: buildMode == BuildMode.debug
+              ? null
+              : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets,
           ),
         );
         final (_, Uri nativeAssetsYaml) = await runFlutterSpecificDartBuild(

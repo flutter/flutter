@@ -750,9 +750,10 @@ Future<DartBuildResult> _runDartBuild({
     if (buildResult == null) {
       _throwNativeAssetsBuildFailed();
     }
-    assets.addAll(buildResult.encodedAssets);
     dependencies.addAll(buildResult.dependencies);
-    if (linkingEnabled) {
+    if (!linkingEnabled) {
+      assets.addAll(buildResult.encodedAssets);
+    } else {
       final LinkResult? linkResult = await buildRunner.link(
         supportedAssetTypes: <String>[CodeAsset.type],
         configCreator: () => LinkConfigBuilder()
