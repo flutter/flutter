@@ -21,7 +21,6 @@ import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 
 /// The function signature of the [print] function.
 typedef PrintFn = void Function(Object?);
@@ -305,7 +304,6 @@ class PackagesGetCommand extends FlutterCommand {
           projectDir: rootProject.directory,
           packageConfigPath: packageConfigPath(),
           generateDartPluginRegistry: true,
-          useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
         );
 
         await generateLocalizationsSyntheticPackage(
@@ -329,7 +327,6 @@ class PackagesGetCommand extends FlutterCommand {
           projectDir: rootProject.directory,
           packageConfigPath: packageConfigPath(),
           generateDartPluginRegistry: true,
-          useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
         );
         final BuildResult result = await globals.buildSystem.build(
           const GenerateLocalizationsTarget(),
@@ -386,15 +383,10 @@ class PackagesGetCommand extends FlutterCommand {
     if (rootProject != null) {
       // We need to regenerate the platform specific tooling for both the project
       // itself and example(if present).
-      final bool useImplicitPubspecResolution = boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true);
-      await rootProject.regeneratePlatformSpecificTooling(
-        useImplicitPubspecResolution: useImplicitPubspecResolution,
-      );
+      await rootProject.regeneratePlatformSpecificTooling();
       if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
         final FlutterProject exampleProject = rootProject.example;
-        await exampleProject.regeneratePlatformSpecificTooling(
-          useImplicitPubspecResolution: useImplicitPubspecResolution,
-        );
+        await exampleProject.regeneratePlatformSpecificTooling();
       }
     }
 
@@ -407,7 +399,7 @@ class PackagesGetCommand extends FlutterCommand {
       return <Plugin>[];
     }
 
-    return findPlugins(rootProject, throwOnError: false, useImplicitPubspecResolution: boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true));
+    return findPlugins(rootProject, throwOnError: false);
   })();
 
   late final String? _androidEmbeddingVersion = _rootProject?.android.getEmbeddingVersion().toString().split('.').last;
