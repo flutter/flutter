@@ -136,6 +136,8 @@ platform-android:
   - changed-files:
     - any-glob-to-any-file:
       - docs/platform/android/**/*
+      - packages/flutter_tools/lib/src/android/**/*
+      - packages/flutter_tools/gradle/**/*
 
 platform-ios:
   - changed-files:
