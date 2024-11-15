@@ -190,22 +190,26 @@ void main() {
     () async {
       await createPackageConfig(iosEnvironment);
 
+      final List<CodeAsset> codeAssets = <CodeAsset>[
+        CodeAsset(
+          package: 'foo',
+          name: 'foo.dart',
+          linkMode: DynamicLoadingBundled(),
+          os: OS.iOS,
+          architecture: Architecture.arm64,
+          file: Uri.file('foo.framework/foo'),
+        ),
+      ];
       final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[Package('foo', iosEnvironment.buildDir.uri)],
         buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
-          codeAssets: <CodeAsset>[
-            CodeAsset(
-              package: 'foo',
-              name: 'foo.dart',
-              linkMode: DynamicLoadingBundled(),
-              os: OS.iOS,
-              architecture: Architecture.arm64,
-              file: Uri.file('foo.framework/foo'),
-            ),
-          ],
+          codeAssets: codeAssets,
           dependencies: <Uri>[
             Uri.file('src/foo.c'),
           ],
+        ),
+        linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          codeAssets: codeAssets,
         ),
       );
       await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
@@ -252,25 +256,29 @@ void main() {
         await createPackageConfig(androidEnvironment);
         await fileSystem.file('libfoo.so').create();
 
+        final List<CodeAsset> codeAssets = <CodeAsset>[
+          if (hasAssets)
+            CodeAsset(
+              package: 'foo',
+              name: 'foo.dart',
+              linkMode: DynamicLoadingBundled(),
+              os: OS.android,
+              architecture: Architecture.arm64,
+              file: Uri.file('libfoo.so'),
+            ),
+        ];
         final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('foo', androidEnvironment.buildDir.uri)
           ],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
-            codeAssets: <CodeAsset>[
-              if (hasAssets)
-                CodeAsset(
-                  package: 'foo',
-                  name: 'foo.dart',
-                  linkMode: DynamicLoadingBundled(),
-                  os: OS.android,
-                  architecture: Architecture.arm64,
-                  file: Uri.file('libfoo.so'),
-                ),
-            ],
+            codeAssets: codeAssets,
             dependencies: <Uri>[
               Uri.file('src/foo.c'),
             ],
+          ),
+          linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+            codeAssets: codeAssets,
           ),
         );
         await NativeAssets(buildRunner: buildRunner).build(androidEnvironment);
