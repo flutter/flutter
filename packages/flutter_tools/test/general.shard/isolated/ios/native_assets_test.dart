@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -159,7 +160,7 @@ void main() {
       }
       final File packageConfig =
           environment.projectDir.childFile('.dart_tool/package_config.json');
-      final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
+      final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
       await packageConfig.parent.create();
       await packageConfig.create();
 
@@ -192,17 +193,25 @@ void main() {
             ? null
             : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets(config.targetOS, config.codeConfig)),
       );
-      await runFlutterSpecificDartBuild(
-        environmentDefines: <String, String>{
-          kBuildMode: buildMode.cliName,
-          kSdkRoot: '.../iPhone Simulator',
-          kIosArchs: 'arm64 x86_64',
-        },
+      final Map<String, String> environmentDefines = <String, String>{
+        kBuildMode: buildMode.cliName,
+        kSdkRoot: '.../iPhone Simulator',
+        kIosArchs: 'arm64 x86_64',
+      };
+      final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+        environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.ios,
         projectUri: projectUri,
-        nativeAssetsYamlUri: nonFlutterTesterAssetUri,
         fileSystem: fileSystem,
         buildRunner: buildRunner,
+      );
+      await installCodeAssets(
+        dartBuildResult: dartBuildResult,
+        environmentDefines: environmentDefines,
+        targetPlatform: TargetPlatform.ios,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        nativeAssetsFileUri: nonFlutterTesterAssetUri,
       );
       expect(
         (globals.logger as BufferLogger).traceText,
@@ -211,10 +220,7 @@ void main() {
           'Building native assets for [ios_arm64, ios_x64] $buildMode done.',
         ]),
       );
-      expect(
-        environment.buildDir.childFile('native_assets.yaml'),
-        exists,
-      );
+      expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
       // Two archs.
       expect(buildRunner.buildInvocations, 2);
       expect(
