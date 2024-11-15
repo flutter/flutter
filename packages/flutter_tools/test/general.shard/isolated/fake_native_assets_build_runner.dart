@@ -22,6 +22,7 @@ class FakeFlutterNativeAssetsBuildRunner
     this.hasPackageConfigResult = true,
     this.packagesWithNativeAssetsResult = const <Package>[],
     this.onBuild,
+    this.onLink,
     this.buildDryRunResult = const FakeFlutterNativeAssetsBuilderResult(),
     this.buildResult = const FakeFlutterNativeAssetsBuilderResult(),
     this.linkResult = const FakeFlutterNativeAssetsBuilderResult(),
@@ -32,6 +33,7 @@ class FakeFlutterNativeAssetsBuildRunner
             ndkCCompilerConfigResult ?? CCompilerConfig();
 
   final BuildResult? Function(BuildConfig)? onBuild;
+  final LinkResult? Function(LinkConfig)? onLink;
   final BuildResult? buildResult;
   final LinkResult? linkResult;
   final BuildDryRunResult? buildDryRunResult;
@@ -101,11 +103,29 @@ class FakeFlutterNativeAssetsBuildRunner
     required Uri workingDirectory,
     required BuildResult buildResult,
   }) async {
-    for (final Package _ in packagesWithNativeAssetsResult) {
+    LinkResult? result = linkResult;
+    for (final Package package in packagesWithNativeAssetsResult) {
+      final LinkConfigBuilder configBuilder = configCreator()
+          ..setupHookConfig(
+            packageRoot: package.root,
+            packageName: package.name,
+            targetOS: targetOS,
+            supportedAssetTypes: supportedAssetTypes,
+            buildMode: buildMode,
+          )
+          ..setupLinkRunConfig(
+            outputDirectory: Uri.parse('build-out-dir'),
+            outputDirectoryShared: Uri.parse('build-out-dir-shared'),
+            recordedUsesFile: null,
+          );
+      final LinkConfig buildConfig = LinkConfig(configBuilder.json);
+      if (onLink != null) {
+        result = onLink!(buildConfig);
+      }
       lastBuildMode = buildMode;
       linkInvocations++;
     }
-    return linkResult;
+    return result;
   }
 
   @override

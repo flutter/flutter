@@ -162,31 +162,35 @@ void main() {
       final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
       await packageConfig.parent.create();
       await packageConfig.create();
+
+      List<CodeAsset> codeAssets(OS targetOS, CodeConfig codeConfig) => <CodeAsset>[
+        CodeAsset(
+          package: 'bar',
+          name: 'bar.dart',
+          linkMode: DynamicLoadingBundled(),
+          os: targetOS,
+          architecture: codeConfig.targetArchitecture,
+          file: Uri.file('${codeConfig.targetArchitecture}/libbar.dylib'),
+        ),
+        CodeAsset(
+          package: 'buz',
+          name: 'buz.dart',
+          linkMode: DynamicLoadingBundled(),
+          os: targetOS,
+          architecture: codeConfig.targetArchitecture,
+          file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
+        ),
+      ];
       final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
         onBuild: (BuildConfig config) =>
-            FakeFlutterNativeAssetsBuilderResult.fromAssets(
-              codeAssets: <CodeAsset>[
-                CodeAsset(
-                  package: 'bar',
-                  name: 'bar.dart',
-                  linkMode: DynamicLoadingBundled(),
-                  os: config.targetOS,
-                  architecture: config.codeConfig.targetArchitecture,
-                  file: Uri.file('${config.codeConfig.targetArchitecture}/libbar.dylib'),
-                ),
-                CodeAsset(
-                  package: 'buz',
-                  name: 'buz.dart',
-                  linkMode: DynamicLoadingBundled(),
-                  os: config.targetOS,
-                  architecture: config.codeConfig.targetArchitecture,
-                  file: Uri.file('${config.codeConfig.targetArchitecture}/libbuz.dylib'),
-                ),
-              ],
-        ),
+            FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets(config.targetOS, config.codeConfig)),
+        onLink: (LinkConfig config) =>
+          buildMode == BuildMode.debug
+            ? null
+            : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets(config.targetOS, config.codeConfig)),
       );
       await runFlutterSpecificDartBuild(
         environmentDefines: <String, String>{
