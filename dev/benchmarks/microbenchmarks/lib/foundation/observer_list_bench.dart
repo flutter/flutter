@@ -10,8 +10,7 @@ import '../common.dart';
 
 const int _kNumIterationsList = 2 << 14;
 const int _kNumIterationsHashed = 2 << 19;
-const int _kNumWarmUp = 2 << 6;
-const List<int> callbackCounts = <int>[1, 10, 50, 200];
+const List<int> callbackCounts = <int>[1, 10, 50, 250];
 
 class TestAnimationController extends AnimationController {
   TestAnimationController() : super(vsync: const TestVSync());
@@ -163,18 +162,10 @@ Future<void> execute() async {
     }
   }
 
-  runNotifiyListenersLoopWithObserverList(_kNumWarmUp, addResult: false);
   runNotifiyListenersLoopWithObserverList(_kNumIterationsList);
-
-  runNotifiyListenersLoopWithObserverList(_kNumWarmUp,
-      failRemoval: true, addResult: false);
   runNotifiyListenersLoopWithObserverList(_kNumIterationsList,
       failRemoval: true);
-
-  runNotifiyListenersLoopWithHashedObserverList(_kNumWarmUp, addResult: false);
   runNotifiyListenersLoopWithHashedObserverList(_kNumIterationsHashed);
-
-  runNotifiyListenersLoopWithAnimationController(_kNumWarmUp, addResult: false);
   runNotifiyListenersLoopWithAnimationController(_kNumIterationsHashed);
 
   printer.printToStdout();
