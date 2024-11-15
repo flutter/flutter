@@ -68,7 +68,7 @@ const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
 final Map<String,String> localEngineEnv = <String, String>{};
 
 /// The arguments to pass to `flutter test` (typically the local engine
-/// configuration) -- prefilled with the arguments passed to test.dart.
+/// configuration) -- prefilled with  the arguments passed to test.dart.
 final List<String> flutterTestArgs = <String>[];
 
 /// Whether execution should be simulated for debugging purposes.
@@ -213,9 +213,6 @@ Never reportErrorsAndExit(String message) {
   }
   print(redLine);
   print('You may find the errors by searching for "╡ERROR #" in the logs.');
-  if (dryRun) {
-    throw StateError('');
-  }
   system.exit(1);
 }
 
