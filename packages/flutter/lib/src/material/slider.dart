@@ -442,10 +442,10 @@ class Slider extends StatefulWidget {
   /// maximum value.
   ///
   /// If null, [SliderThemeData.inactiveTrackColor] of the ambient [SliderTheme]
-  /// is used. If [Slider.year2023] is false, then [ColorScheme.secondaryContainer]
-  /// is used and if [ThemeData.useMaterial3] is false, [ColorScheme.primary] with
-  /// an opacity of 0.24 is used. Otherwise, [ColorScheme.surfaceContainerHighest]
-  /// is used.
+  /// is used. If [Slider.year2023] is false and [ThemeData.useMaterial3] is true,
+  /// then [ColorScheme.secondaryContainer] is used and if [ThemeData.useMaterial3]
+  /// is false, [ColorScheme.primary] with an opacity of 0.24 is used. Otherwise,
+  /// [ColorScheme.surfaceContainerHighest] is used.
   ///
   /// Using a [SliderTheme] gives much more fine-grained control over the
   /// appearance of various components of the slider.
