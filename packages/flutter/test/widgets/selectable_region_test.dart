@@ -609,19 +609,16 @@ void main() {
 
   testWidgets('Can extend StaticSelectionContainerDelegate', (WidgetTester tester) async {
     SelectedContent? content;
-    final FocusNode focusNode = FocusNode();
 
     // Inserts a new line between selected content of children selectables.
     final ColumnSelectionContainerDelegate selectionDelegate = ColumnSelectionContainerDelegate();
 
-    addTearDown(focusNode.dispose);
     addTearDown(selectionDelegate.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
           onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
-          focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
           child: SelectionContainer(
             delegate: selectionDelegate,
