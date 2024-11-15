@@ -3042,6 +3042,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     // a layer we can paint from.
     if (isRepaintBoundary && _wasRepaintBoundary) {
       if (_needsCompositedLayerUpdate) {
+        assert(owner == null || owner!._nodesNeedingPaint.contains(this));
         return;
       }
       assert(() {
