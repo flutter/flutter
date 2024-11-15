@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
+import '../../convert.dart';
 import '../../dart/package_map.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
