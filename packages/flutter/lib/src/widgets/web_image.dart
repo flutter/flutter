@@ -81,7 +81,10 @@ class WebImage extends StatefulWidget {
   /// {@macro flutter.widgets.Image.loadingBuilder}
   final ImageLoadingBuilder? loadingBuilder;
 
-  /// {@macro flutter.widgets.Image.frameBuilder}
+  /// A builder function responsible for creating the widget that represents
+  /// this image.
+  ///
+  /// See [Image.frameBuilder].
   final ImageFrameBuilder? frameBuilder;
 
   /// {@macro flutter.widgets.Image.errorBuilder}
@@ -108,7 +111,7 @@ class WebImage extends StatefulWidget {
   /// {@macro flutter.widgets.Image.matchTextDirection}
   final bool matchTextDirection;
 
-  /// {@macro flutter.widgets.Image.gapplessPlayback}
+  /// {@macro flutter.widgets.Image.gaplessPlayback}
   final bool gaplessPlayback;
 
   @override

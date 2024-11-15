@@ -715,7 +715,6 @@ class Image extends StatefulWidget {
   /// The image to display.
   final ImageProvider image;
 
-  /// {@template flutter.widgets.Image.framebuilder}
   /// A builder function responsible for creating the widget that represents
   /// this image.
   ///
@@ -775,7 +774,6 @@ class Image extends StatefulWidget {
   ///
   /// ** See code in examples/api/lib/widgets/image/image.frame_builder.0.dart **
   /// {@end-tool}
-  /// {@endtemplate}
   final ImageFrameBuilder? frameBuilder;
 
   /// {@template flutter.widgets.Image.loadingBuilder}

@@ -86,7 +86,7 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _stopListeningToStream();
     _completerHandle?.dispose();
-    _replaceImage(info: null);
+    _imageInfo = null;
     super.dispose();
   }
 
@@ -133,7 +133,7 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
     }
 
     if (!widget.gaplessPlayback) {
-      setState(() { _replaceImage(info: null); });
+      setState(() { _imageInfo = null; });
     }
 
     setState(() {
@@ -177,7 +177,7 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
 
   void _handleImageFrame(WebImageInfo imageInfo, bool synchronousCall) {
     setState(() {
-      _replaceImage(info: imageInfo);
+      _imageInfo = imageInfo;
       _lastException = null;
       _lastStack = null;
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
@@ -188,17 +188,13 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
 
   void _handleImageCanBeLoaded(bool synchronousCall) {
     setState(() {
-      _replaceImage(info: null);
+      _imageInfo = null;
       _lastException = null;
       _lastStack = null;
       _frameNumber = null;
       _imageCanBeFetched = true;
       _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
     });
-  }
-
-  void _replaceImage({required WebImageInfo? info}) {
-    _imageInfo = info;
   }
 
   void _listenToStream() {
@@ -316,11 +312,11 @@ class WebImageState extends State<WebImage> with WidgetsBindingObserver {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(DiagnosticsProperty<WebImageStream>('stream', _imageStream));
-    description.add(DiagnosticsProperty<WebImageInfo>('<img>', _imageInfo));
-    description.add(DiagnosticsProperty<bool>('wasSynchronouslyLoaded', _wasSynchronouslyLoaded));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<WebImageStream>('stream', _imageStream));
+    properties.add(DiagnosticsProperty<WebImageInfo>('<img>', _imageInfo));
+    properties.add(DiagnosticsProperty<bool>('wasSynchronouslyLoaded', _wasSynchronouslyLoaded));
   }
 }
 
