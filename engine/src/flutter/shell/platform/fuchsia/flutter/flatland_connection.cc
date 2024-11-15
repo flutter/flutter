@@ -222,7 +222,6 @@ void FlatlandConnection::OnNextFrameBegin(
   const auto now = fml::TimePoint::Now();
 
   std::scoped_lock<std::mutex> lock(threadsafe_state_.mutex_);
-  threadsafe_state_.first_feedback_received_ = true;
   threadsafe_state_.present_credits_ += values.additional_present_credits();
   TRACE_DURATION("flutter", "FlatlandConnection::OnNextFrameBegin",
                  "present_credits", threadsafe_state_.present_credits_);
@@ -319,15 +318,16 @@ fml::TimePoint FlatlandConnection::GetNextPresentationTime(
 bool FlatlandConnection::MaybeRunInitialVsyncCallback(
     const fml::TimePoint& now,
     FireCallbackCallback& callback) {
-  if (!threadsafe_state_.first_feedback_received_) {
-    TRACE_DURATION("flutter",
-                   "FlatlandConnection::MaybeRunInitialVsyncCallback");
-    const auto frame_end = now + kInitialFlatlandVsyncOffset;
-    threadsafe_state_.last_presentation_time_ = frame_end;
-    callback(now, frame_end);
-    return true;
+  // Only sent maybe_run_initial_vsync once.
+  if (threadsafe_state_.initial_vsync_callback_ran_) {
+    return false;
   }
-  return false;
+  TRACE_DURATION("flutter", "FlatlandConnection::MaybeRunInitialVsyncCallback");
+  const auto frame_end = now + kInitialFlatlandVsyncOffset;
+  threadsafe_state_.last_presentation_time_ = frame_end;
+  threadsafe_state_.initial_vsync_callback_ran_ = true;
+  callback(now, frame_end);
+  return true;
 }
 
 // This method may be called from the raster or UI thread, but it is safe
