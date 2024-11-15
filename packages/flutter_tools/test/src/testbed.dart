@@ -44,7 +44,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   Analytics: () => const NoOpAnalytics(),
   FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
   Signals: () => FakeSignals(),  // prevent registering actual signal handlers.
-  Pub: () => ThrowingPub(), // prevent accidental invocations of pub.
+  Pub: () => const ThrowingPub(), // prevent accidental invocations of pub.
 };
 
 /// Manages interaction with the tool injection and runner system.

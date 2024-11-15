@@ -16,14 +16,15 @@ import 'media_query.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=lkF0TQJO0bA}
 ///
-/// For example, this will indent the child by enough to avoid the status bar at
-/// the top of the screen.
-///
-/// It will also indent the child by the amount necessary to avoid The Notch on
-/// the iPhone X, or other similar creative physical features of the display.
-///
 /// When a [minimum] padding is specified, the greater of the minimum padding
 /// or the safe area padding will be applied.
+///
+/// {@tool dartpad}
+/// This example shows how `SafeArea` can apply padding within a mobile device's
+/// screen to make the relevant content completely visible.
+///
+/// ** See code in examples/api/lib/widgets/safe_area/safe_area.0.dart **
+/// {@end-tool}
 ///
 /// {@tool snippet}
 ///

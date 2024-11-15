@@ -54,6 +54,32 @@ void main() {
       );
     }
 
+    testUsingContext('usage (--help) explains how to use channel', () async {
+      final ChannelCommand command = ChannelCommand();
+
+      // Required because otherwise command.usage fails as it is not hooked up.
+      createTestCommandRunner(command);
+
+      // TODO(matanlurey): https://github.com/flutter/flutter/issues/158532
+      //
+      // <Command>.usage is checked instead of log output because by default
+      // every command emits usage directly to stdout (via print) instead of
+      // to the interfaces provided. It would be a much larger refactor to
+      // change how every command works:
+      expect(
+        command.usage,
+        stringContainsInOrder(<String>[
+          'List or switch Flutter channels',
+          'Common commands:',
+          'List Flutter channels',
+          "Switch to Flutter's main channel.",
+        ]),
+      );
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => MemoryFileSystem.test(),
+    });
+
     testUsingContext('list', () async {
       await simpleChannelTest(<String>['channel']);
     }, overrides: <Type, Generator>{
