@@ -114,14 +114,16 @@ Future<void> main(List<String> args) async {
         onError = () {
           system.exit(1);
         };
-      } else if (arg.startsWith('--dry-run')) {
+      } else if (arg == '--dry-run') {
         dryRunArgSet = true;
         printProgress('--dry-run enabled. Tests will not actually be executed.');
       } else {
         flutterTestArgs.add(arg);
       }
     }
-    dryRun = dryRunArgSet;
+    if (dryRunArgSet) {
+      enableDryRun();
+    }
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
       printProgress('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     }

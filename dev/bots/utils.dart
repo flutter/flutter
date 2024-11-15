@@ -75,9 +75,20 @@ final List<String> flutterTestArgs = <String>[];
 ///
 /// When `true`, calls to [runCommand] print to [io.stdout] instead of running
 /// the process. This is useful for determing what an invocation of `test.dart`
-/// _might_ due if not invoked with `--dry-mode`, or otherwise determine what
-/// the different test shards and sub-shards are configured as.
-bool dryRun = false;
+/// _might_ due if not invoked with `--dry-run`, or otherwise determine what the
+/// different test shards and sub-shards are configured as.
+bool get dryRun => _dryRun ?? false;
+
+/// Switches [dryRun] to `true`.
+/// 
+/// Expected to be called at most once during execution of a process.
+void enableDryRun() {
+  if (_dryRun != null) {
+    throw StateError('Should only be called at most once');
+  }
+  _dryRun = true;
+}
+bool? _dryRun;
 
 const int kESC = 0x1B;
 const int kOpenSquareBracket = 0x5B;
