@@ -140,6 +140,9 @@ static UIKeyboardType ToUIKeyboardType(NSDictionary* type) {
   if ([inputType isEqualToString:@"TextInputType.visiblePassword"]) {
     return UIKeyboardTypeASCIICapable;
   }
+  if ([inputType isEqualToString:@"TextInputType.webSearch"]) {
+    return UIKeyboardTypeWebSearch;
+  }
   return UIKeyboardTypeDefault;
 }
 

@@ -1357,6 +1357,40 @@ public class TextInputPluginTest {
   }
 
   @Test
+  public void showTextInput_textInputTypeWebSearch() {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = new View(ctx);
+    DartExecutor dartExecutor = mock(DartExecutor.class);
+    TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView, textInputChannel, scribeChannel, mock(PlatformViewsController.class));
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.WEB_SEARCH, false, false),
+            null,
+            null,
+            null,
+            null,
+            null));
+
+    EditorInfo editorInfo = new EditorInfo();
+    InputConnection connection =
+        textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), editorInfo);
+
+    assertEquals(
+        editorInfo.inputType, InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+  }
+
+  @Test
   public void inputConnection_textInputTypeMultilineAndSuggestionsDisabled() {
     // Regression test for https://github.com/flutter/flutter/issues/71679.
     View testView = new View(ctx);
