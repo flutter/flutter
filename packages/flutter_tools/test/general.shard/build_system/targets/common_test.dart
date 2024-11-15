@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/compile.dart';
 
 import '../../../src/common.dart';
@@ -437,7 +438,7 @@ native-assets:
         fileSystem.file('.dart_tool/package_config.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-        androidEnvironment.buildDir.childFile('native_assets.yaml')
+        androidEnvironment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename)
           ..createSync(recursive: true)
           ..writeAsStringSync(empty ? emptyNativeAssets : nonEmptyNativeAssets);
         final String build = androidEnvironment.buildDir.path;
@@ -463,7 +464,7 @@ native-assets:
               '--output-dill',
               '$build/native_assets.dill',
               '--native-assets',
-              '$build/native_assets.yaml',
+              '$build/${InstallCodeAssets.nativeAssetsFilename}',
               '--verbosity=error',
               '--native-assets-only',
             ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),

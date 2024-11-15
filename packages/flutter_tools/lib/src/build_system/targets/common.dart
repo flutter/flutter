@@ -289,7 +289,7 @@ class KernelSnapshotNativeAssets extends Target {
 
   @override
   List<Source> get inputs => <Source>[
-    const Source.pattern('{BUILD_DIR}/native_assets.yaml'),
+    const Source.pattern('{BUILD_DIR}/${InstallCodeAssets.nativeAssetsFilename}'),
     ...const KernelSnapshotProgram().inputs,
   ];
 
@@ -302,15 +302,15 @@ class KernelSnapshotNativeAssets extends Target {
   List<String> get depfiles => const <String>[];
 
   @override
-  List<Target> get dependencies => <Target>[
-    const NativeAssets(),
+  List<Target> get dependencies => const <Target>[
+    InstallCodeAssets(),
   ];
 
   static const String dillName = 'native_assets.dill';
 
   @override
   Future<void> build(Environment environment) async {
-    final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
+    final File nativeAssetsFile = environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename);
     final File dillFile = environment.buildDir.childFile(dillName);
 
     final YamlNode nativeAssetContents = loadYamlNode(await nativeAssetsFile.readAsString());

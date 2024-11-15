@@ -53,7 +53,6 @@ void main() {
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await packageConfig.create(recursive: true);
 
     await runFlutterSpecificDartBuild(
@@ -62,7 +61,6 @@ void main() {
       },
       targetPlatform: TargetPlatform.linux_x64,
       projectUri: projectUri,
-      nativeAssetsYamlUri: nonFlutterTesterAssetUri,
       fileSystem: fileSystem,
       buildRunner: _BuildRunnerWithoutClang(),
     );
