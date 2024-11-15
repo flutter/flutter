@@ -5,21 +5,30 @@
 #ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_TEST_COMPOSITOR_GL_H_
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_TEST_COMPOSITOR_GL_H_
 
+#include <memory>
+
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test_compositor.h"
+#include "flutter/testing/test_gl_surface.h"
 
 namespace flutter {
 namespace testing {
 
 class EmbedderTestCompositorGL : public EmbedderTestCompositor {
  public:
-  EmbedderTestCompositorGL(SkISize surface_size,
+  EmbedderTestCompositorGL(std::shared_ptr<TestEGLContext> egl_context,
+                           SkISize surface_size,
                            sk_sp<GrDirectContext> context);
 
   ~EmbedderTestCompositorGL() override;
 
+  void SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType type,
+      FlutterSoftwarePixelFormat software_pixfmt) override;
+
  private:
+  std::shared_ptr<TestEGLContext> egl_context_;
   bool UpdateOffscrenComposition(const FlutterLayer** layers,
                                  size_t layers_count) override;
 

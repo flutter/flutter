@@ -287,7 +287,7 @@ FlutterCompositor& EmbedderConfigBuilder::GetCompositor() {
 void EmbedderConfigBuilder::SetRenderTargetType(
     EmbedderTestBackingStoreProducer::RenderTargetType type,
     FlutterSoftwarePixelFormat software_pixfmt) {
-  context_.SetRenderTargetType(type, software_pixfmt);
+  context_.GetCompositor().SetRenderTargetType(type, software_pixfmt);
 }
 
 UniqueEngine EmbedderConfigBuilder::LaunchEngine() const {

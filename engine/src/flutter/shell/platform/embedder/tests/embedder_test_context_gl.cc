@@ -140,7 +140,7 @@ void EmbedderTestContextGL::SetupCompositor() {
   FML_CHECK(gl_surface_)
       << "Set up the GL surface before setting up a compositor.";
   compositor_ = std::make_unique<EmbedderTestCompositorGL>(
-      gl_surface_->GetSurfaceSize(), gl_surface_->GetGrContext());
+      egl_context_, gl_surface_->GetSurfaceSize(), gl_surface_->GetGrContext());
   GLClearCurrent();
 }
 
