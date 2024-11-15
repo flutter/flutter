@@ -47,7 +47,7 @@ bool CommandBufferVK::OnSubmitCommands(CompletionCallback callback) {
   FML_UNREACHABLE()
 }
 
-void CommandBufferVK::OnWaitUntilScheduled() {}
+void CommandBufferVK::OnWaitUntilCompleted() {}
 
 std::shared_ptr<RenderPass> CommandBufferVK::OnCreateRenderPass(
     RenderTarget target) {

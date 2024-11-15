@@ -128,7 +128,7 @@ class MockCommandBuffer : public CommandBuffer {
               OnSubmitCommands,
               (CompletionCallback callback),
               (override));
-  MOCK_METHOD(void, OnWaitUntilScheduled, (), (override));
+  MOCK_METHOD(void, OnWaitUntilCompleted, (), (override));
   MOCK_METHOD(std::shared_ptr<ComputePass>,
               OnCreateComputePass,
               (),
