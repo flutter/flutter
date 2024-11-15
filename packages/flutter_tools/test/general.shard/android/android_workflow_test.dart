@@ -693,7 +693,7 @@ Android sdkmanager tool was found, but failed to run
     expect(
       validationResult.messages.any(
         (ValidationMessage message) => message.message.contains(
-          'This JDK is specified by JAVA_HOME environment variable'
+          'This JDK is specified by the JAVA_HOME environment variable.'
         )
       ),
       true,
@@ -701,7 +701,7 @@ Android sdkmanager tool was found, but failed to run
     expect(
       validationResult.messages.any(
         (ValidationMessage message) => message.message.contains(
-          'To manually set a custom JDK path, use: `flutter config --jdk-dir="path/to/jdk"`'
+          'To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`'
         )
       ),
       true,
@@ -728,7 +728,7 @@ Android sdkmanager tool was found, but failed to run
     expect(
       validationResult.messages.any(
         (ValidationMessage message) => message.message.contains(
-          'This JDK was found in system PATH'
+          'This JDK was found in the system PATH.'
         )
       ),
       true,
@@ -736,7 +736,7 @@ Android sdkmanager tool was found, but failed to run
     expect(
       validationResult.messages.any(
         (ValidationMessage message) => message.message.contains(
-          'To manually set a custom JDK path, use: `flutter config --jdk-dir="path/to/jdk"`'
+          'To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.'
         )
       ),
       true,
@@ -763,7 +763,7 @@ Android sdkmanager tool was found, but failed to run
     expect(
       validationResult.messages.any(
         (ValidationMessage message) => message.message.contains(
-          'This JDK is specified in Flutter configuration'
+          'This JDK is specified in your Flutter configuration.'
         )
       ),
       true,
@@ -771,7 +771,7 @@ Android sdkmanager tool was found, but failed to run
     expect(
       validationResult.messages.any(
         (ValidationMessage message) => message.message.contains(
-          'To change current JDK, run: `flutter config --jdk-dir="path/to/jdk"`'
+          'To change the current JDK, run: `flutter config --jdk-dir="path/to/jdk"`.'
         )
       ),
       true,
