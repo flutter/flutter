@@ -30,8 +30,8 @@ bool CommandBuffer::SubmitCommands() {
   return SubmitCommands(nullptr);
 }
 
-void CommandBuffer::WaitUntilScheduled() {
-  return OnWaitUntilScheduled();
+void CommandBuffer::WaitUntilCompleted() {
+  return OnWaitUntilCompleted();
 }
 
 std::shared_ptr<RenderPass> CommandBuffer::CreateRenderPass(

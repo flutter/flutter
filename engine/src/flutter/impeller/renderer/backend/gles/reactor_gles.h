@@ -260,9 +260,9 @@ class ReactorGLES {
 
   std::unique_ptr<ProcTableGLES> proc_table_;
 
-  Mutex ops_execution_mutex_;
   mutable Mutex ops_mutex_;
-  std::vector<Operation> ops_ IPLR_GUARDED_BY(ops_mutex_);
+  std::map<std::thread::id, std::vector<Operation>> ops_ IPLR_GUARDED_BY(
+      ops_mutex_);
 
   // Make sure the container is one where erasing items during iteration doesn't
   // invalidate other iterators.
@@ -280,7 +280,7 @@ class ReactorGLES {
   bool can_set_debug_labels_ = false;
   bool is_valid_ = false;
 
-  bool ReactOnce() IPLR_REQUIRES(ops_execution_mutex_);
+  bool ReactOnce();
 
   bool HasPendingOperations() const;
 
