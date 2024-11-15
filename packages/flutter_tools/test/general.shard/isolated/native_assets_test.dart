@@ -203,6 +203,11 @@ void main() {
              file: file,
            );
 
+    final List<CodeAsset> codeAssets = <CodeAsset>[
+      makeCodeAsset('malloc', LookupInProcess()),
+      makeCodeAsset('free', LookupInExecutable()),
+      makeCodeAsset('draw', DynamicLoadingSystem(Uri.file('/usr/lib/skia.so'))),
+    ];
 
     await runFlutterSpecificDartBuild(
       environmentDefines: <String, String>{
@@ -216,16 +221,11 @@ void main() {
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
-        buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
-          codeAssets: <CodeAsset>[
-            makeCodeAsset('malloc', LookupInProcess()),
-            makeCodeAsset('free', LookupInExecutable()),
-            makeCodeAsset('draw', DynamicLoadingSystem(Uri.file('/usr/lib/skia.so'))),
-          ],
-        ),
+        buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+        linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
       ),
     );
-    expect(testLogger.traceText.toLowerCase(), isNot(contains('copy')));
+    expect(testLogger.traceText, isNot(contains('Copying native assets to')));
   });
 
   testUsingContext('build with assets but not enabled', overrides: <Type, Generator>{

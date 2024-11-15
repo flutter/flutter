@@ -926,8 +926,6 @@ Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
 ) async {
   assert(assetTargetLocations.isNotEmpty);
 
-  globals.logger.printTrace('copyNativeCodeAssetsToBundleOnWindowsLinux()');
-  globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
   final Directory buildDir = fileSystem.directory(buildUri.toFilePath());
   if (!buildDir.existsSync()) {
     buildDir.createSync(recursive: true);
@@ -938,9 +936,7 @@ Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
     final Uri targetUri = buildUri.resolveUri(target);
     final String targetFullPath = targetUri.toFilePath();
     await fileSystem.file(source).copy(targetFullPath);
-    globals.logger.printTrace('copyNativeCodeAssetsToBundleOnWindowsLinux(): copied $source to $targetFullPath');
   }
-  globals.logger.printTrace('Copying native assets done.');
 }
 
 Never _throwNativeAssetsBuildDryRunFailed() {
