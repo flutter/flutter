@@ -278,7 +278,7 @@ class SemanticTextField extends SemanticRole {
       // IMPORTANT: because this event listener can be triggered by either or
       // both a "focus" and a "click" DOM events, this code must be idempotent.
       EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-          semanticsObject.id, ui.SemanticsAction.focus, null);
+          viewId, semanticsObject.id, ui.SemanticsAction.focus, null);
     }));
     editableElement.addEventListener('click', createDomEventListener((DomEvent event) {
       editableElement.focusWithoutScroll();
