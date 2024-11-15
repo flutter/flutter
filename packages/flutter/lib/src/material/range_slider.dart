@@ -1106,14 +1106,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     }
   }
 
-  bool get showValueIndicator {
-    return switch (_sliderTheme.showValueIndicator!) {
-      ShowValueIndicator.onlyForDiscrete   => isDiscrete,
-      ShowValueIndicator.onlyForContinuous => !isDiscrete,
-      ShowValueIndicator.always => true,
-      ShowValueIndicator.never  => false,
-    };
-  }
+  bool get showValueIndicator => switch (_sliderTheme.showValueIndicator!) {
+    ShowValueIndicator.onlyForDiscrete   => isDiscrete,
+    ShowValueIndicator.onlyForContinuous => !isDiscrete,
+    ShowValueIndicator.always => true,
+    ShowValueIndicator.never  => false,
+  };
 
   Size get _thumbSize => _sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete);
 

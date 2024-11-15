@@ -883,4 +883,82 @@ void main() {
     expect(find.text('dos'), findsNothing);
     expect(find.text('tres'), findsNothing);
   });
+
+  testWidgets('TreeSliverNode should close all children when collapsed when animation is completed', (WidgetTester tester) async {
+    final TreeSliverController controller = TreeSliverController();
+    final List<TreeSliverNode<String>> tree = <TreeSliverNode<String>>[
+      TreeSliverNode<String>(
+        'First',
+        expanded: true,
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>(
+            'alpha',
+            expanded: true,
+            children: <TreeSliverNode<String>>[
+              TreeSliverNode<String>('uno'),
+              TreeSliverNode<String>('dos'),
+              TreeSliverNode<String>('tres'),
+            ],
+          ),
+          TreeSliverNode<String>('beta'),
+          TreeSliverNode<String>('kappa'),
+        ],
+      ),
+    ];
+
+
+    Widget buildTreeSliver(TreeSliverController controller) {
+      return MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            shrinkWrap: true,
+            slivers: <Widget>[
+              TreeSliver<String>(
+                tree: tree,
+                controller: controller,
+                toggleAnimationStyle: AnimationStyle(
+                  curve: Curves.easeInOut,
+                  duration: const Duration(milliseconds: 200),
+                ),
+                treeNodeBuilder: (
+                  BuildContext context,
+                  TreeSliverNode<Object?> node,
+                  AnimationStyle animationStyle,
+                ) {
+                  final Widget child = GestureDetector(
+                    key: ValueKey<String>(node.content! as String),
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => controller.toggleNode(node),
+                    child: TreeSliver.defaultTreeNodeBuilder(
+                      context,
+                      node,
+                      animationStyle,
+                    ),
+                  );
+                  return child;
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTreeSliver(controller));
+
+    expect(find.text('alpha'), findsOneWidget);
+    expect(find.text('uno'), findsOneWidget);
+    expect(find.text('dos'), findsOneWidget);
+    expect(find.text('tres'), findsOneWidget);
+
+    // Using runAsync to handle collapse and animations properly.
+    await tester.runAsync(() async {
+      await tester.tap(find.text('alpha'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('uno'), findsNothing);
+      expect(find.text('dos'), findsNothing);
+      expect(find.text('tres'), findsNothing);
+    });
+  });
 }

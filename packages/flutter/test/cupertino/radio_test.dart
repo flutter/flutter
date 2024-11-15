@@ -150,6 +150,7 @@ void main() {
           SemanticsFlag.isEnabled,
           SemanticsFlag.isFocusable,
           SemanticsFlag.isChecked,
+          if (isApple) SemanticsFlag.hasSelectedState,
           if (isApple) SemanticsFlag.isSelected,
         ],
         actions: <SemanticsAction>[

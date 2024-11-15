@@ -12,6 +12,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show isCanvasKit;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,7 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../impeller_test_helpers.dart';
 
 // TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
-const bool skipPerspectiveTextGoldens = isBrowser;
+final bool skipPerspectiveTextGoldens = isBrowser && !isCanvasKit;
 
 // A number of the hit tests below say "warnIfMissed: false". This is because
 // the way the CupertinoPicker works, the hits don't actually reach the labels,
@@ -258,6 +259,55 @@ void main() {
         distance,
       );
     });
+  });
+
+  testWidgets('showDayOfWeek is only supported in date mode', (WidgetTester tester) async {
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.date,
+        onDateTimeChanged: (DateTime _) {},
+        showDayOfWeek: true,
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.time,
+        onDateTimeChanged: (DateTime _) {},
+        showDayOfWeek: true,
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError e) => e.message ?? 'Unknown error',
+        'message',
+        contains('showDayOfWeek is only supported in date mode'),
+      )),
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.monthYear,
+        onDateTimeChanged: (DateTime _) {},
+        showDayOfWeek: true,
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError e) => e.message ?? 'Unknown error',
+        'message',
+        contains('showDayOfWeek is only supported in date mode'),
+      )),
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        onDateTimeChanged: (DateTime _) {},
+        showDayOfWeek: true,
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError e) => e.message ?? 'Unknown error',
+        'message',
+        contains('showDayOfWeek is only supported in date mode'),
+      )),
+    );
   });
 
   testWidgets('picker honors minuteInterval and secondInterval', (WidgetTester tester) async {

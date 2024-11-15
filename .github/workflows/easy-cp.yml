@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "COMMIT_SHA=$(echo ${{ github.event.pull_request.merge_commit_sha }})" >> $GITHUB_ENV
       - name: Checkout Flutter Repo
-        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
         with:
           repository: flutteractionsbot/flutter
           path: flutter

@@ -482,7 +482,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     elevation = resolvedElevation;
     backgroundColor = resolvedBackgroundColor;
 
-    Widget effectiveChild = Padding(
+    Widget result = Padding(
       padding: padding,
       child: Align(
         alignment: resolvedAlignment!,
@@ -494,53 +494,39 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       ),
     );
     if (resolvedBackgroundBuilder != null) {
-      effectiveChild = resolvedBackgroundBuilder(context, statesController.value, effectiveChild);
+      result = resolvedBackgroundBuilder(context, statesController.value, result);
     }
 
-    if (widget.tooltip != null) {
-      effectiveChild = Tooltip(
-        message: widget.tooltip,
-        child: effectiveChild,
-      );
-    }
-
-    final Widget result = ConstrainedBox(
-      constraints: effectiveConstraints,
-      child: Material(
-        elevation: resolvedElevation!,
-        textStyle: resolvedTextStyle?.copyWith(color: resolvedForegroundColor),
-        shape: resolvedShape!.copyWith(side: resolvedSide),
-        color: resolvedBackgroundColor,
-        shadowColor: resolvedShadowColor,
-        surfaceTintColor: resolvedSurfaceTintColor,
-        type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
-        animationDuration: resolvedAnimationDuration,
-        clipBehavior: effectiveClipBehavior,
-        child: InkWell(
-          onTap: widget.onPressed,
-          onLongPress: widget.onLongPress,
-          onHover: widget.onHover,
-          mouseCursor: mouseCursor,
-          enableFeedback: resolvedEnableFeedback,
-          focusNode: widget.focusNode,
-          canRequestFocus: widget.enabled,
-          onFocusChange: widget.onFocusChange,
-          autofocus: widget.autofocus,
-          splashFactory: resolvedSplashFactory,
-          overlayColor: overlayColor,
-          highlightColor: Colors.transparent,
-          customBorder: resolvedShape.copyWith(side: resolvedSide),
-          statesController: statesController,
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: resolvedIconColor ?? resolvedForegroundColor,
-              size: resolvedIconSize,
-            ),
-            child: effectiveChild,
-          ),
+    result = InkWell(
+      onTap: widget.onPressed,
+      onLongPress: widget.onLongPress,
+      onHover: widget.onHover,
+      mouseCursor: mouseCursor,
+      enableFeedback: resolvedEnableFeedback,
+      focusNode: widget.focusNode,
+      canRequestFocus: widget.enabled,
+      onFocusChange: widget.onFocusChange,
+      autofocus: widget.autofocus,
+      splashFactory: resolvedSplashFactory,
+      overlayColor: overlayColor,
+      highlightColor: Colors.transparent,
+      customBorder: resolvedShape!.copyWith(side: resolvedSide),
+      statesController: statesController,
+      child: IconTheme.merge(
+        data: IconThemeData(
+          color: resolvedIconColor ?? resolvedForegroundColor,
+          size: resolvedIconSize,
         ),
+        child: result,
       ),
     );
+
+    if (widget.tooltip != null) {
+      result = Tooltip(
+        message: widget.tooltip,
+        child: result,
+      );
+    }
 
     final Size minSize;
     switch (resolvedTapTargetSize!) {
@@ -561,7 +547,21 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       enabled: widget.enabled,
       child: _InputPadding(
         minSize: minSize,
-        child: result,
+        child: ConstrainedBox(
+          constraints: effectiveConstraints,
+          child: Material(
+            elevation: resolvedElevation!,
+            textStyle: resolvedTextStyle?.copyWith(color: resolvedForegroundColor),
+            shape: resolvedShape.copyWith(side: resolvedSide),
+            color: resolvedBackgroundColor,
+            shadowColor: resolvedShadowColor,
+            surfaceTintColor: resolvedSurfaceTintColor,
+            type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
+            animationDuration: resolvedAnimationDuration,
+            clipBehavior: effectiveClipBehavior,
+            child: result,
+          ),
+        ),
       ),
     );
   }

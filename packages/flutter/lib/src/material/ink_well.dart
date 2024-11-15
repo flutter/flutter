@@ -403,7 +403,7 @@ class InkResponse extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.hovered].
@@ -1092,12 +1092,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     });
   }
 
-  bool get _shouldShowFocus {
-    return switch (MediaQuery.maybeNavigationModeOf(context)) {
-      NavigationMode.traditional || null => enabled && _hasFocus,
-      NavigationMode.directional => _hasFocus,
-    };
-  }
+  bool get _shouldShowFocus => switch (MediaQuery.maybeNavigationModeOf(context)) {
+    NavigationMode.traditional || null => enabled && _hasFocus,
+    NavigationMode.directional => _hasFocus,
+  };
 
   void updateFocusHighlights() {
     final bool showFocus = switch (FocusManager.instance.highlightMode) {
@@ -1275,12 +1273,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     updateHighlight(_HighlightType.hover, value: _hovering);
   }
 
-  bool get _canRequestFocus {
-    return switch (MediaQuery.maybeNavigationModeOf(context)) {
-      NavigationMode.traditional || null => enabled && widget.canRequestFocus,
-      NavigationMode.directional => true,
-    };
-  }
+  bool get _canRequestFocus => switch (MediaQuery.maybeNavigationModeOf(context)) {
+    NavigationMode.traditional || null => enabled && widget.canRequestFocus,
+    NavigationMode.directional => true,
+  };
 
   @override
   Widget build(BuildContext context) {

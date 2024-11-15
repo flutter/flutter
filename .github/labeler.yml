@@ -39,9 +39,9 @@
 
 'a: text input':
   - changed-files:
-    - any-glob-to-any-file:
-      - '**/text/*'
+    - all-globs-to-any-file:
       - '**/*text*'
+      - '!**/*context*'
 
 'd: api docs':
   - changed-files:

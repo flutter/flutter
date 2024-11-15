@@ -2181,7 +2181,11 @@ class TestViewConfiguration implements ViewConfiguration {
     final double desiredWidth = size.width;
     final double desiredHeight = size.height;
     double scale, shiftX, shiftY;
-    if ((actualWidth / actualHeight) > (desiredWidth / desiredHeight)) {
+    if (desiredWidth == 0.0 || desiredHeight == 0.0) {
+      scale = 1.0;
+      shiftX = 0.0;
+      shiftY = 0.0;
+    } else if ((actualWidth / actualHeight) > (desiredWidth / desiredHeight)) {
       scale = actualHeight / desiredHeight;
       shiftX = (actualWidth - desiredWidth * scale) / 2.0;
       shiftY = 0.0;

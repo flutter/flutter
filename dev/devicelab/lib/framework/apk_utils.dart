@@ -256,18 +256,17 @@ class FlutterProject {
   String get rootPath => path.join(parent.path, name);
   String get androidPath => path.join(rootPath, 'android');
   String get iosPath => path.join(rootPath, 'ios');
+  File get appBuildFile => getAndroidBuildFile(path.join(androidPath, 'app'));
 
   Future<void> addCustomBuildType(String name, {required String initWith}) async {
-    final File buildScript = File(
-      path.join(androidPath, 'app', 'build.gradle'),
-    );
+    final File buildScript = appBuildFile;
 
     buildScript.openWrite(mode: FileMode.append).write('''
 
 android {
     buildTypes {
-        $name {
-            initWith $initWith
+        create("$name") {
+            initWith(getByName("$initWith"))
         }
     }
 }
@@ -288,14 +287,12 @@ android {
   }
 
   Future<void> setMinSdkVersion(int sdkVersion) async {
-    final File buildScript = File(
-      path.join(androidPath, 'app', 'build.gradle'),
-    );
+    final File buildScript = appBuildFile;
 
     buildScript.openWrite(mode: FileMode.append).write('''
 android {
     defaultConfig {
-        minSdkVersion $sdkVersion
+        minSdk = $sdkVersion
     }
 }
     ''');
@@ -308,22 +305,20 @@ android {
   }
 
   Future<void> addProductFlavors(Iterable<String> flavors) async {
-    final File buildScript = File(
-      path.join(androidPath, 'app', 'build.gradle'),
-    );
+    final File buildScript = appBuildFile;
 
     final String flavorConfig = flavors.map((String name) {
       return '''
-$name {
-    applicationIdSuffix ".$name"
-    versionNameSuffix "-$name"
+create("$name") {
+    applicationIdSuffix = ".$name"
+    versionNameSuffix = "-$name"
 }
       ''';
     }).join('\n');
 
     buildScript.openWrite(mode: FileMode.append).write('''
 android {
-    flavorDimensions "mode"
+    flavorDimensions.add("mode")
     productFlavors {
         $flavorConfig
     }
@@ -332,9 +327,7 @@ android {
   }
 
   Future<void> introduceError() async {
-    final File buildScript = File(
-      path.join(androidPath, 'app', 'build.gradle'),
-    );
+    final File buildScript = appBuildFile;
     await buildScript.writeAsString((await buildScript.readAsString()).replaceAll('buildTypes', 'builTypes'));
   }
 
@@ -476,4 +469,15 @@ String? validateSnapshotDependency(FlutterProject project, String expectedTarget
   final String contentSnapshot = snapshotBlob.readAsStringSync();
   return contentSnapshot.contains('$expectedTarget ')
     ? null : 'Dependency file should have $expectedTarget as target. Instead found $contentSnapshot';
+}
+
+File getAndroidBuildFile(String androidAppPath, {bool settings = false}) {
+  final File groovyFile = File(path.join(androidAppPath, settings ? 'settings.gradle' : 'build.gradle'));
+  final File kotlinFile = File(path.join(androidAppPath, settings ? 'settings.gradle.kts' : 'build.gradle.kts'));
+
+  if (groovyFile.existsSync()) {
+    return groovyFile;
+  }
+
+  return kotlinFile;
 }

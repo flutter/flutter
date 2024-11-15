@@ -1670,12 +1670,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   Axis get _viewportAxis => _isMultiline ? Axis.vertical : Axis.horizontal;
 
-  Offset get _paintOffset {
-    return switch (_viewportAxis) {
-      Axis.horizontal => Offset(-offset.pixels, 0.0),
-      Axis.vertical   => Offset(0.0, -offset.pixels),
-    };
-  }
+  Offset get _paintOffset => switch (_viewportAxis) {
+    Axis.horizontal => Offset(-offset.pixels, 0.0),
+    Axis.vertical   => Offset(0.0, -offset.pixels),
+  };
 
   double get _viewportExtent {
     assert(hasSize);

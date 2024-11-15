@@ -2765,8 +2765,9 @@ void main() {
                             TestSemantics(
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
-                                SemanticsFlag.isSelected,
                                 SemanticsFlag.isFocusable,
+                                SemanticsFlag.hasSelectedState,
+                                SemanticsFlag.isSelected,
                               ],
                               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                               label: 'A\nTab 1 of 2',
@@ -2776,6 +2777,7 @@ void main() {
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.isFocusable,
+                                SemanticsFlag.hasSelectedState,
                               ],
                               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                               label: 'B\nTab 2 of 2',

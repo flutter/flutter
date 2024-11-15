@@ -3920,6 +3920,46 @@ void main() {
         tester.getRect(find.byKey(contentKey)).bottom,
       );
     });
+
+    testWidgets('Menu is correctly offsetted when a LayerLink is provided and alignmentOffset is set', (WidgetTester tester) async {
+      final MenuController controller = MenuController();
+      final UniqueKey contentKey = UniqueKey();
+      const double horizontalOffset = 16.0;
+      const double verticalOffset = 20.0;
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: MenuAnchor(
+              controller: controller,
+              layerLink: LayerLink(),
+              alignmentOffset: const Offset(horizontalOffset, verticalOffset),
+              menuChildren: <Widget>[
+                MenuItemButton(
+                  onPressed: () {},
+                  child: const Text('Button 1'),
+                ),
+              ],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return SizedBox(key: contentKey, width: 100, height: 100);
+              },
+            ),
+          ),
+        ),
+      ));
+
+      controller.open();
+      await tester.pump();
+
+      expect(
+        tester.getRect(findMenuPanels()).top,
+        tester.getRect(find.byKey(contentKey)).bottom + verticalOffset,
+      );
+      expect(
+        tester.getRect(findMenuPanels()).left,
+        tester.getRect(find.byKey(contentKey)).left + horizontalOffset,
+      );
+    });
   });
 
   group('LocalizedShortcutLabeler', () {
@@ -4667,12 +4707,18 @@ void main() {
       return results;
     }
 
+    late final OverlayEntry overlayEntry;
+    addTearDown((){
+      overlayEntry.remove();
+      overlayEntry.dispose();
+    });
+
     Widget boilerplate() {
       return MaterialApp(
         home: Overlay(
           key: overlayKey,
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            overlayEntry = OverlayEntry(
               builder: (BuildContext context) {
                 return Scaffold(
                   body: Center(
@@ -4717,6 +4763,76 @@ void main() {
       ancestorRenderTheaters(tester.renderObject(find.byKey(menuItemKey))).single,
       tester.renderObject(find.byWidget(rootOverlay)),
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/156572.
+  testWidgets('Unattached MenuController does not throw when calling close', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    controller.close();
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Unattached MenuController returns false when calling isOpen', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    expect(controller.isOpen, false);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/157606.
+  testWidgets('MenuAnchor updates isOpen state correctly', (WidgetTester tester) async {
+    bool isOpen = false;
+    int openCount = 0;
+    int closeCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: MenuAnchor(
+              menuChildren: const <Widget>[
+                MenuItemButton(child: Text('menu item')),
+              ],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                isOpen = controller.isOpen;
+                return FilledButton(
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: Text(isOpen ? 'close' : 'open'),
+                );
+              },
+              onOpen: () => openCount++,
+              onClose: () => closeCount++,
+            ),
+          ),
+        ),
+      )
+    );
+
+    expect(find.text('open'), findsOneWidget);
+    expect(isOpen, false);
+    expect(openCount, 0);
+    expect(closeCount, 0);
+
+    await tester.tap(find.byType(FilledButton));
+    await tester.pump();
+
+    expect(find.text('close'), findsOneWidget);
+    expect(isOpen, true);
+    expect(openCount, 1);
+    expect(closeCount, 0);
+
+    await tester.tap(find.byType(FilledButton));
+    await tester.pump();
+
+    expect(find.text('open'), findsOneWidget);
+    expect(isOpen, false);
+    expect(openCount, 1);
+    expect(closeCount, 1);
   });
 }
 

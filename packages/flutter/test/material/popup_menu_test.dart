@@ -676,12 +676,8 @@ void main() {
         child: Text('XXX'),
       ),
     );
-    bool popupMenu(Widget widget) {
-      final String widgetType = widget.runtimeType.toString();
-      // TODO(mraleph): Remove the old case below.
-      return widgetType == '_PopupMenu<int?>' // normal case
-          || widgetType == '_PopupMenu'; // for old versions of Dart that don't reify method type arguments
-    }
+
+    bool popupMenu(Widget widget) => widget.runtimeType.toString() == '_PopupMenu<int?>';
 
     Future<void> openMenu(TextDirection textDirection, Alignment alignment) async {
       return TestAsyncUtils.guard<void>(() async {
@@ -4320,6 +4316,41 @@ void main() {
 
     inkWell = tester.widget<InkWell>(find.byType(InkWell));
     expect(inkWell.borderRadius, borderRadius);
+  });
+
+    testWidgets('PopupMenuButton respects materialTapTargetSize', (WidgetTester tester) async {
+    const double buttonSize = 10.0;
+
+
+    Widget buildPopupMenu({required MaterialTapTargetSize tapTargetSize}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              style: ButtonStyle(tapTargetSize: tapTargetSize),
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+              child: const SizedBox(height: buttonSize, width: buttonSize),
+            ),
+          ),
+        ),
+      );
+    }
+    // Popup menu with MaterialTapTargetSize.padded.
+    await tester.pumpWidget(buildPopupMenu(tapTargetSize: MaterialTapTargetSize.padded));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(InkWell)), const Size(48.0, 48.0));
+
+    // Popup menu with MaterialTapTargetSize.shrinkWrap.
+    await tester.pumpWidget(buildPopupMenu(tapTargetSize: MaterialTapTargetSize.shrinkWrap));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(InkWell)),  const Size(buttonSize, buttonSize));
   });
 
   testWidgets('If requestFocus is false, the original focus should be preserved upon menu appearance.', (WidgetTester tester) async {

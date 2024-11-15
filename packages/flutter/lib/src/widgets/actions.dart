@@ -1338,12 +1338,10 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
   }
 
-  bool get _canRequestFocus {
-    return switch (MediaQuery.maybeNavigationModeOf(context)) {
-      NavigationMode.traditional || null => widget.enabled,
-      NavigationMode.directional => true,
-    };
-  }
+  bool get _canRequestFocus => switch (MediaQuery.maybeNavigationModeOf(context)) {
+    NavigationMode.traditional || null => widget.enabled,
+    NavigationMode.directional => true,
+  };
 
   // This global key is needed to keep only the necessary widgets in the tree
   // while maintaining the subtree's state.
