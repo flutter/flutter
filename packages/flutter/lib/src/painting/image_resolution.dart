@@ -253,7 +253,8 @@ class AssetImage extends AssetBundleImageProvider {
   /// The name used to generate the key to obtain the asset. For local assets
   /// this is [assetName], and for assets from packages the [assetName] is
   /// prefixed 'packages/<package_name>/'.
-  String get keyName => package == null ? assetName : 'packages/$package/$assetName';
+  String get keyName =>
+      package == null ? assetName : 'packages/$package/$assetName';
 
   /// The bundle from which the image will be obtained.
   ///
@@ -280,43 +281,44 @@ class AssetImage extends AssetBundleImageProvider {
     // which all happens in one call frame; using native Futures would guarantee
     // that we resolve each future in a new call frame, and thus not in this
     // build/layout/paint sequence.)
-    final AssetBundle chosenBundle = bundle ?? configuration.bundle ?? rootBundle;
+    final AssetBundle chosenBundle =
+        bundle ?? configuration.bundle ?? rootBundle;
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
     AssetManifest.loadFromAssetBundle(chosenBundle)
-      .then((AssetManifest manifest) {
-        final Iterable<AssetMetadata>? candidateVariants = manifest.getAssetVariants(keyName);
-        final AssetMetadata chosenVariant = _chooseVariant(
-          keyName,
-          configuration,
-          candidateVariants,
-        );
-        final AssetBundleImageKey key = AssetBundleImageKey(
-          bundle: chosenBundle,
-          name: chosenVariant.key,
-          scale: chosenVariant.targetDevicePixelRatio ?? _naturalResolution,
-        );
-        if (completer != null) {
-          // We already returned from this function, which means we are in the
-          // asynchronous mode. Pass the value to the completer. The completer's
-          // future is what we returned.
-          completer.complete(key);
-        } else {
-          // We haven't yet returned, so we must have been called synchronously
-          // just after loadStructuredData returned (which means it provided us
-          // with a SynchronousFuture). Let's return a SynchronousFuture
-          // ourselves.
-          result = SynchronousFuture<AssetBundleImageKey>(key);
-        }
-      })
-      .onError((Object error, StackTrace stack) {
-        // We had an error. (This guarantees we weren't called synchronously.)
-        // Forward the error to the caller.
-        assert(completer != null);
-        assert(result == null);
-        completer!.completeError(error, stack);
-      });
+        .then((AssetManifest manifest) {
+      final Iterable<AssetMetadata>? candidateVariants =
+          manifest.getAssetVariants(keyName);
+      final AssetMetadata chosenVariant = _chooseVariant(
+        keyName,
+        configuration,
+        candidateVariants,
+      );
+      final AssetBundleImageKey key = AssetBundleImageKey(
+        bundle: chosenBundle,
+        name: chosenVariant.key,
+        scale: chosenVariant.targetDevicePixelRatio ?? _naturalResolution,
+      );
+      if (completer != null) {
+        // We already returned from this function, which means we are in the
+        // asynchronous mode. Pass the value to the completer. The completer's
+        // future is what we returned.
+        completer.complete(key);
+      } else {
+        // We haven't yet returned, so we must have been called synchronously
+        // just after loadStructuredData returned (which means it provided us
+        // with a SynchronousFuture). Let's return a SynchronousFuture
+        // ourselves.
+        result = SynchronousFuture<AssetBundleImageKey>(key);
+      }
+    }).onError((Object error, StackTrace stack) {
+      // We had an error. (This guarantees we weren't called synchronously.)
+      // Forward the error to the caller.
+      assert(completer != null);
+      assert(result == null);
+      completer!.completeError(error, stack);
+    });
 
     if (result != null) {
       // The code above ran synchronously, and came up with an answer.
@@ -329,20 +331,26 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  AssetMetadata _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetMetadata>? candidateVariants) {
-    if (candidateVariants == null || candidateVariants.isEmpty || config.devicePixelRatio == null) {
-      return AssetMetadata(key: mainAssetKey, targetDevicePixelRatio: null, main: true);
+  AssetMetadata _chooseVariant(String mainAssetKey, ImageConfiguration config,
+      Iterable<AssetMetadata>? candidateVariants) {
+    if (candidateVariants == null ||
+        candidateVariants.isEmpty ||
+        config.devicePixelRatio == null) {
+      return AssetMetadata(
+          key: mainAssetKey, targetDevicePixelRatio: null, main: true);
     }
 
     final SplayTreeMap<double, AssetMetadata> candidatesByDevicePixelRatio =
-      SplayTreeMap<double, AssetMetadata>();
+        SplayTreeMap<double, AssetMetadata>();
     for (final AssetMetadata candidate in candidateVariants) {
-      candidatesByDevicePixelRatio[candidate.targetDevicePixelRatio ?? _naturalResolution] = candidate;
+      candidatesByDevicePixelRatio[
+          candidate.targetDevicePixelRatio ?? _naturalResolution] = candidate;
     }
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
     // docs)
-    return _findBestVariant(candidatesByDevicePixelRatio, config.devicePixelRatio!);
+    return _findBestVariant(
+        candidatesByDevicePixelRatio, config.devicePixelRatio!);
   }
 
   // Returns the "best" asset variant amongst the available `candidates`.
@@ -357,7 +365,8 @@ class AssetImage extends AssetBundleImageProvider {
   //   lowest key higher than `value`.
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.
-  AssetMetadata _findBestVariant(SplayTreeMap<double, AssetMetadata> candidatesByDpr, double value) {
+  AssetMetadata _findBestVariant(
+      SplayTreeMap<double, AssetMetadata> candidatesByDpr, double value) {
     if (candidatesByDpr.containsKey(value)) {
       return candidatesByDpr[value]!;
     }
@@ -386,14 +395,15 @@ class AssetImage extends AssetBundleImageProvider {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is AssetImage
-        && other.keyName == keyName
-        && other.bundle == bundle;
+    return other is AssetImage &&
+        other.keyName == keyName &&
+        other.bundle == bundle;
   }
 
   @override
   int get hashCode => Object.hash(keyName, bundle);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';
+  String toString() =>
+      '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';
 }
