@@ -1590,7 +1590,12 @@ void main() {
 
       // Open the new route.
       await tester.tap(find.byType(ElevatedButton));
-      await tester.pump(const Duration(milliseconds: 1));
+      // Must pump two frames for the animation to take effect. The first pump
+      // starts the animation, the 2nd pump makes the wiget appear.
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(containerKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(containerKey)), const Offset(0, 600));
 
       await tester.pump(const Duration(milliseconds: 500));
       expect(find.byKey(containerKey), findsOneWidget);
@@ -1605,15 +1610,19 @@ void main() {
       // Pop the new route.
       tester.state<NavigatorState>(find.byType(Navigator)).pop();
       await tester.pump();
+      await tester.pump();
       expect(find.byKey(containerKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(containerKey)), Offset.zero);
 
       // Container should be present halfway through the transition.
       await tester.pump(const Duration(milliseconds: 500));
       expect(find.byKey(containerKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(containerKey)), const Offset(0, 300));
 
       // Container should be present at the very end of the transition.
       await tester.pump(const Duration(milliseconds: 490));
       expect(find.byKey(containerKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(containerKey)), const Offset(0, 594));
 
       // Container have transitioned out after 500ms.
       await tester.pump(const Duration(milliseconds: 200));
