@@ -307,6 +307,20 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(inputView.keyboardType, UIKeyboardTypeURL);
 }
 
+- (void)testKeyboardTypeWebSearch {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [config setValue:@{@"name" : @"TextInputType.webSearch"} forKey:@"inputType"];
+  [self setClientId:123 configuration:config];
+
+  // Find all the FlutterTextInputViews we created.
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+
+  FlutterTextInputView* inputView = inputFields[0];
+
+  // Verify keyboardType is set to the value specified in config.
+  XCTAssertEqual(inputView.keyboardType, UIKeyboardTypeWebSearch);
+}
+
 - (void)testVisiblePasswordUseAlphanumeric {
   NSDictionary* config = self.mutableTemplateCopy;
   [config setValue:@{@"name" : @"TextInputType.visiblePassword"} forKey:@"inputType"];
