@@ -35,9 +35,11 @@ import 'windows/native_assets.dart';
 /// again.
 final class DartBuildResult {
   const DartBuildResult(this.codeAssets, this.dependencies);
+
   const DartBuildResult.empty()
       : codeAssets = const <CodeAsset>[],
         dependencies = const <Uri>[];
+
   factory DartBuildResult.fromJson(Map<String, Object?> json) {
     final List<Uri> dependencies = <Uri>[
       for (final Object? encodedUri in json['dependencies']! as List<Object?>)
