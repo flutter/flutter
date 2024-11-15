@@ -17,7 +17,6 @@ import 'material.dart';
 import 'progress_indicator_theme.dart';
 import 'theme.dart';
 
-const double _kMinCircularProgressIndicatorSize = 36.0;
 const int _kIndeterminateLinearDuration = 1800;
 const int _kIndeterminateCircularDuration = 1333 * 2222;
 
@@ -550,7 +549,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 
 class _CircularProgressIndicatorPainter extends CustomPainter {
   _CircularProgressIndicatorPainter({
-    this.backgroundColor,
+    this.trackColor,
     required this.valueColor,
     required this.value,
     required this.headValue,
@@ -560,6 +559,8 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     required this.strokeWidth,
     required this.strokeAlign,
     this.strokeCap,
+    this.trackGap,
+    this.year2023 = true,
   }) : arcStart = value != null
          ? _startAngle
          : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 2.0 + offsetValue * 0.5 * math.pi,
@@ -567,7 +568,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
          ? clampDouble(value, 0.0, 1.0) * _sweep
          : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
 
-  final Color? backgroundColor;
+  final Color? trackColor;
   final Color valueColor;
   final double? value;
   final double headValue;
@@ -579,6 +580,8 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   final double arcStart;
   final double arcSweep;
   final StrokeCap? strokeCap;
+  final double? trackGap;
+  final bool year2023;
 
   static const double _twoPi = math.pi * 2.0;
   static const double _epsilon = .001;
@@ -601,27 +604,57 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       size.width - strokeOffset * 2,
       size.height - strokeOffset * 2,
     );
+    final bool hasGap = trackGap != null && trackGap! > 0;
 
-    if (backgroundColor != null) {
+    if (trackColor != null) {
       final Paint backgroundPaint = Paint()
-        ..color = backgroundColor!
+        ..color = trackColor!
         ..strokeWidth = strokeWidth
+        ..strokeCap = strokeCap ?? StrokeCap.round
         ..style = PaintingStyle.stroke;
-      canvas.drawArc(
-        arcBaseOffset & arcActualSize,
-        0,
-        _sweep,
-        false,
-        backgroundPaint,
-      );
+      // If hasGap is true, draw the background arc with a gap.
+      if (hasGap && value! > _epsilon) {
+        final double arcRadius = arcActualSize.shortestSide / 2;
+        final double strokeRadius =  strokeWidth / arcRadius;
+        final double gapRadius = trackGap! / arcRadius;
+        final double startGap = strokeRadius + gapRadius;
+        final double endGap = value! < _epsilon ? startGap : startGap * 2;
+        final double startSweep = (-math.pi / 2.0) + startGap;
+        final double endSweep = math.max(0.0, _twoPi - clampDouble(value!, 0.0,  1.0) * _twoPi - endGap);
+        // Flip the canvas for the background arc.
+        canvas.save();
+        canvas.scale(-1, 1);
+        canvas.translate(-size.width, 0);
+        canvas.drawArc(
+          arcBaseOffset & arcActualSize,
+          startSweep,
+          endSweep,
+          false,
+          backgroundPaint,
+        );
+        // Restore the canvas to draw the foreground arc.
+        canvas.restore();
+      } else {
+        canvas.drawArc(
+          arcBaseOffset & arcActualSize,
+          0,
+          _sweep,
+          false,
+          backgroundPaint,
+        );
+      }
     }
 
-    if (value == null && strokeCap == null) {
-      // Indeterminate
-      paint.strokeCap = StrokeCap.square;
+    if (year2023) {
+      if (value == null && strokeCap == null) {
+        // Indeterminate
+        paint.strokeCap = StrokeCap.square;
+      } else {
+        // Butt when determinate (value != null) && strokeCap == null;
+        paint.strokeCap = strokeCap ?? StrokeCap.butt;
+      }
     } else {
-      // Butt when determinate (value != null) && strokeCap == null;
-      paint.strokeCap = strokeCap ?? StrokeCap.butt;
+      paint.strokeCap = strokeCap ?? StrokeCap.round;
     }
 
     canvas.drawArc(
@@ -635,7 +668,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CircularProgressIndicatorPainter oldPainter) {
-    return oldPainter.backgroundColor != backgroundColor
+    return oldPainter.trackColor != trackColor
         || oldPainter.valueColor != valueColor
         || oldPainter.value != value
         || oldPainter.headValue != headValue
@@ -644,7 +677,9 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
         || oldPainter.rotationValue != rotationValue
         || oldPainter.strokeWidth != strokeWidth
         || oldPainter.strokeAlign != strokeAlign
-        || oldPainter.strokeCap != strokeCap;
+        || oldPainter.strokeCap != strokeCap
+        || oldPainter.trackGap != trackGap
+        || oldPainter.year2023 != year2023;
   }
 }
 
@@ -698,11 +733,18 @@ class CircularProgressIndicator extends ProgressIndicator {
     super.backgroundColor,
     super.color,
     super.valueColor,
-    this.strokeWidth = 4.0,
-    this.strokeAlign = strokeAlignCenter,
+    this.strokeWidth,
+    this.strokeAlign,
     super.semanticsLabel,
     super.semanticsValue,
     this.strokeCap,
+    this.constraints,
+    this.trackGap,
+    @Deprecated(
+      'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
+      'This feature was deprecated after v3.27.0-0.1.pre.'
+    )
+    this.year2023 = true,
   }) : _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
@@ -722,7 +764,14 @@ class CircularProgressIndicator extends ProgressIndicator {
     super.semanticsLabel,
     super.semanticsValue,
     this.strokeCap,
-    this.strokeAlign = strokeAlignCenter,
+    this.strokeAlign,
+    this.constraints,
+    this.trackGap,
+    @Deprecated(
+      'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
+      'This feature was deprecated after v3.26.0-0.1.pre.'
+    )
+    this.year2023 = true,
   }) : _indicatorType = _ActivityIndicatorType.adaptive;
 
   final _ActivityIndicatorType _indicatorType;
@@ -738,16 +787,19 @@ class CircularProgressIndicator extends ProgressIndicator {
   Color? get backgroundColor => super.backgroundColor;
 
   /// The width of the line used to draw the circle.
-  final double strokeWidth;
+  final double? strokeWidth;
 
   /// The relative position of the stroke on a [CircularProgressIndicator].
   ///
   /// Values typically range from -1.0 ([strokeAlignInside], inside stroke)
   /// to 1.0 ([strokeAlignOutside], outside stroke),
   /// without any bound constraints (e.g., a value of -2.0 is not typical, but allowed).
-  /// A value of 0 ([strokeAlignCenter], default) will center the border
+  /// A value of 0 ([strokeAlignCenter]) will center the border
   /// on the edge of the widget.
-  final double strokeAlign;
+  ///
+  /// If [year2023] is true, then the default value is [strokeAlignCenter].
+  /// Otherwise, the default value is [strokeAlignInside].
+  final double? strokeAlign;
 
   /// The progress indicator's line ending.
   ///
@@ -769,6 +821,36 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// and ends at 270 degrees. With [StrokeCap.square], it could start 85
   /// degrees and end at 275 degrees.
   final StrokeCap? strokeCap;
+
+  /// Defines minimum and maximum sizes for a [CircularProgressIndicator].
+  ///
+  /// If null, then the [ProgressIndicatorThemeData.constraints] will be used.
+  /// Otherwise, defaults to a minimum width and height of 36 pixels.
+  final BoxConstraints? constraints;
+
+  /// The gap between the active indicator and the background track.
+  ///
+  /// If [year2023] is false or [ThemeData.useMaterial3] is false, then no track
+  /// gap will be drawn.
+  ///
+  /// Set [trackGap] to 0 to hide the track gap.
+  ///
+  /// If null, then the [ProgressIndicatorThemeData.trackGap] will be used.
+  /// If that is null, then defaults to 4.
+  final double? trackGap;
+
+  /// When true, the [CircularProgressIndicator] will use the 2023 Material 3
+  /// Design appearance.
+  ///
+  /// Defaults to true. If false, the [CircularProgressIndicator] will use the
+  /// latest Material 3 Design appearance, which was introduced in December 2023.
+  ///
+  /// If [ThemeData.useMaterial3] is false, then this property is ignored.
+  @Deprecated(
+    'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
+    'This feature was deprecated after v3.27.0-0.1.pre.'
+  )
+  final bool year2023;
 
   /// The indicator stroke is drawn fully inside of the indicator path.
   ///
@@ -857,30 +939,50 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
-    final ProgressIndicatorThemeData defaults = Theme.of(context).useMaterial3
-      ? _CircularProgressIndicatorDefaultsM3(context)
-      : _CircularProgressIndicatorDefaultsM2(context);
-    final Color? trackColor = widget.backgroundColor ?? ProgressIndicatorTheme.of(context).circularTrackColor;
-
+    final ProgressIndicatorThemeData defaults = switch (Theme.of(context).useMaterial3) {
+      true => widget.year2023
+        ? _CircularProgressIndicatorDefaultsM3Year2023(context, indeterminate: widget.value == null)
+        : _CircularProgressIndicatorDefaultsM3(context, indeterminate: widget.value == null),
+      false => _CircularProgressIndicatorDefaultsM2(context, indeterminate: widget.value == null),
+    };
+    final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
+    final Color? trackColor = widget.backgroundColor
+      ?? indicatorTheme.circularTrackColor
+      ?? defaults.circularTrackColor;
+    final double strokeWidth = widget.strokeWidth
+      ?? indicatorTheme.strokeWidth
+      ?? defaults.strokeWidth!;
+    final double strokeAlign = widget.strokeAlign
+      ?? indicatorTheme.strokeAlign
+      ?? defaults.strokeAlign!;
+    final StrokeCap? strokeCap = widget.strokeCap
+      ?? indicatorTheme.strokeCap;
+    final BoxConstraints constraints = widget.constraints
+      ?? indicatorTheme.constraints
+      ?? defaults.constraints!;
+    final double? trackGap = widget.year2023
+      ? null
+      : widget.trackGap ??
+        indicatorTheme.trackGap ??
+        defaults.trackGap;
     return widget._buildSemanticsWrapper(
       context: context,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minWidth: _kMinCircularProgressIndicatorSize,
-          minHeight: _kMinCircularProgressIndicatorSize,
-        ),
+        constraints: constraints,
         child: CustomPaint(
           painter: _CircularProgressIndicatorPainter(
-            backgroundColor: trackColor,
+            trackColor: trackColor,
             valueColor: widget._getValueColor(context, defaultColor: defaults.color),
             value: widget.value, // may be null
             headValue: headValue, // remaining arguments are ignored if widget.value is not null
             tailValue: tailValue,
             offsetValue: offsetValue,
             rotationValue: rotationValue,
-            strokeWidth: widget.strokeWidth,
-            strokeAlign: widget.strokeAlign,
-            strokeCap: widget.strokeCap,
+            strokeWidth: strokeWidth,
+            strokeAlign: strokeAlign,
+            strokeCap: strokeCap,
+            trackGap: trackGap,
+            year2023: widget.year2023,
           ),
         ),
       ),
@@ -1128,10 +1230,22 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     final double opacity = valueColor.opacity;
     valueColor = valueColor.withOpacity(1.0);
 
-    final Color backgroundColor =
-      widget.backgroundColor ??
-      ProgressIndicatorTheme.of(context).refreshBackgroundColor ??
-      Theme.of(context).canvasColor;
+    final ProgressIndicatorThemeData defaults = switch (Theme.of(context).useMaterial3) {
+      true => _CircularProgressIndicatorDefaultsM3Year2023(context, indeterminate: value == null),
+      false => _CircularProgressIndicatorDefaultsM2(context, indeterminate: value == null),
+    };
+    final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
+    final Color backgroundColor = widget.backgroundColor
+      ?? indicatorTheme.refreshBackgroundColor
+      ?? Theme.of(context).canvasColor;
+    final double strokeWidth = widget.strokeWidth
+      ?? indicatorTheme.strokeWidth
+      ?? defaults.strokeWidth!;
+    final double strokeAlign = widget.strokeAlign
+      ?? indicatorTheme.strokeAlign
+      ?? defaults.strokeAlign!;
+    final StrokeCap? strokeCap = widget.strokeCap
+      ?? indicatorTheme.strokeCap;
 
     return widget._buildSemanticsWrapper(
       context: context,
@@ -1157,10 +1271,10 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
                       tailValue: tailValue,
                       offsetValue: offsetValue,
                       rotationValue: rotationValue,
-                      strokeWidth: widget.strokeWidth,
-                      strokeAlign: widget.strokeAlign,
+                      strokeWidth: strokeWidth,
+                      strokeAlign: strokeAlign,
                       arrowheadScale: arrowheadScale,
-                      strokeCap: widget.strokeCap,
+                      strokeCap: strokeCap,
                     ),
                   ),
                 ),
@@ -1175,13 +1289,26 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
 // Hand coded defaults based on Material Design 2.
 class _CircularProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
-  _CircularProgressIndicatorDefaultsM2(this.context);
+  _CircularProgressIndicatorDefaultsM2(this.context, { required this.indeterminate });
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
+  final bool indeterminate;
 
   @override
   Color get color => _colors.primary;
+
+  @override
+  double? get strokeWidth => 4.0;
+
+  @override
+  double? get strokeAlign => CircularProgressIndicator.strokeAlignCenter;
+
+  @override
+  BoxConstraints get constraints => const BoxConstraints(
+    minWidth: 36.0,
+    minHeight: 36.0,
+  );
 }
 
 class _LinearProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
@@ -1198,6 +1325,29 @@ class _LinearProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
 
   @override
   double get linearMinHeight => 4.0;
+}
+
+class _CircularProgressIndicatorDefaultsM3Year2023 extends ProgressIndicatorThemeData {
+  _CircularProgressIndicatorDefaultsM3Year2023(this.context, { required this.indeterminate });
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  final bool indeterminate;
+
+  @override
+  Color get color => _colors.primary;
+
+  @override
+  double get strokeWidth => 4.0;
+
+  @override
+  double? get strokeAlign => CircularProgressIndicator.strokeAlignCenter;
+
+  @override
+  BoxConstraints get constraints => const BoxConstraints(
+    minWidth: 36.0,
+    minHeight: 36.0,
+  );
 }
 
 class _LinearProgressIndicatorDefaultsM3Year2023 extends ProgressIndicatorThemeData {
@@ -1224,16 +1374,32 @@ class _LinearProgressIndicatorDefaultsM3Year2023 extends ProgressIndicatorThemeD
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
-  _CircularProgressIndicatorDefaultsM3(this.context);
+  _CircularProgressIndicatorDefaultsM3(this.context, { required this.indeterminate });
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
+  final bool indeterminate;
 
   @override
   Color get color => _colors.primary;
 
   @override
-  Color get circularTrackColor => _colors.secondaryContainer;
+  Color? get circularTrackColor => indeterminate ? null : _colors.secondaryContainer;
+
+  @override
+  double get strokeWidth => 4.0;
+
+  @override
+  double? get strokeAlign => CircularProgressIndicator.strokeAlignInside;
+
+  @override
+  BoxConstraints get constraints => const BoxConstraints(
+    minWidth: 48.0,
+    minHeight: 48.0,
+  );
+
+  @override
+  double? get trackGap => 4.0;
 }
 
 class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
