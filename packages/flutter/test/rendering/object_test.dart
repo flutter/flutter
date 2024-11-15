@@ -377,6 +377,25 @@ void main() {
     root.buildScene(ui.SceneBuilder()).dispose();
     expect(calledBack, true);
   });
+
+  test('Change isRepaintBoundary after both markNeedsCompositedLayerUpdate and markNeedsPaint', () {
+    List<FlutterErrorDetails?>? caughtErrors;
+    TestRenderingFlutterBinding.instance.onErrors = () {
+      caughtErrors = TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails().toList();
+    };
+    final TestRenderObject object = TestRenderObject(allowPaintBounds: true);
+    object.isRepaintBoundary = true;
+    object.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    object.layout(const BoxConstraints.tightForFinite());
+    PaintingContext.repaintCompositedChild(object, debugAlsoPaintedParent: true);
+
+    object.markNeedsCompositedLayerUpdate();
+    object.markNeedsPaint();
+    object.isRepaintBoundary = false;
+    object.markNeedsCompositingBitsUpdate();
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
+    expect(caughtErrors, isNull);
+  });
 }
 
 
