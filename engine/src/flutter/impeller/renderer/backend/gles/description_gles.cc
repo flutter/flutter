@@ -178,7 +178,10 @@ bool DescriptionGLES::HasExtension(const std::string& ext) const {
 }
 
 bool DescriptionGLES::HasDebugExtension() const {
-  return HasExtension("GL_KHR_debug");
+  // Angle just logs calls instead of forwarding debug information to the
+  // backend. This just overwhelms the logs and is of limited use. Disable on
+  // Angle.
+  return HasExtension("GL_KHR_debug") && !IsANGLE();
 }
 
 }  // namespace impeller
