@@ -105,8 +105,10 @@ bool ReactorGLES::RemoveWorker(WorkerID worker) {
 }
 
 bool ReactorGLES::HasPendingOperations() const {
+  auto thread_id = std::this_thread::get_id();
   Lock ops_lock(ops_mutex_);
-  return !ops_.empty();
+  auto it = ops_.find(thread_id);
+  return it != ops_.end() ? !it->second.empty() : false;
 }
 
 const ProcTableGLES& ReactorGLES::GetProcTable() const {
@@ -136,9 +138,10 @@ bool ReactorGLES::AddOperation(Operation operation) {
   if (!operation) {
     return false;
   }
+  auto thread_id = std::this_thread::get_id();
   {
     Lock ops_lock(ops_mutex_);
-    ops_.emplace_back(std::move(operation));
+    ops_[thread_id].emplace_back(std::move(operation));
   }
   // Attempt a reaction if able but it is not an error if this isn't possible.
   [[maybe_unused]] auto result = React();
@@ -191,10 +194,6 @@ bool ReactorGLES::React() {
   }
   TRACE_EVENT0("impeller", "ReactorGLES::React");
   while (HasPendingOperations()) {
-    // Both the raster thread and the IO thread can flush queued operations.
-    // Ensure that execution of the ops is serialized.
-    Lock execution_lock(ops_execution_mutex_);
-
     if (!ReactOnce()) {
       return false;
     }
@@ -279,10 +278,11 @@ bool ReactorGLES::FlushOps() {
 
   // Do NOT hold the ops or handles locks while performing operations in case
   // the ops enqueue more ops.
-  decltype(ops_) ops;
+  decltype(ops_)::mapped_type ops;
+  auto thread_id = std::this_thread::get_id();
   {
     Lock ops_lock(ops_mutex_);
-    std::swap(ops_, ops);
+    std::swap(ops_[thread_id], ops);
   }
   for (const auto& op : ops) {
     TRACE_EVENT0("impeller", "ReactorGLES::Operation");
