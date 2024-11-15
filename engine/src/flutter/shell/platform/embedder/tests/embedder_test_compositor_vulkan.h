@@ -19,6 +19,10 @@ class EmbedderTestCompositorVulkan : public EmbedderTestCompositor {
 
   ~EmbedderTestCompositorVulkan() override;
 
+  void SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType type,
+      FlutterSoftwarePixelFormat software_pixfmt) override;
+
  private:
   bool UpdateOffscrenComposition(const FlutterLayer** layers,
                                  size_t layers_count) override;

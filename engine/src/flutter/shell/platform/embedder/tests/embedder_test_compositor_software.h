@@ -16,6 +16,10 @@ class EmbedderTestCompositorSoftware : public EmbedderTestCompositor {
 
   ~EmbedderTestCompositorSoftware() override;
 
+  void SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType type,
+      FlutterSoftwarePixelFormat software_pixfmt) override;
+
  private:
   bool UpdateOffscrenComposition(const FlutterLayer** layers,
                                  size_t layers_count);

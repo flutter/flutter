@@ -15,11 +15,36 @@ namespace flutter {
 namespace testing {
 
 EmbedderTestCompositorGL::EmbedderTestCompositorGL(
+    std::shared_ptr<TestEGLContext> egl_context,
     SkISize surface_size,
     sk_sp<GrDirectContext> context)
-    : EmbedderTestCompositor(surface_size, std::move(context)) {}
+    : EmbedderTestCompositor(surface_size, std::move(context)),
+      egl_context_(std::move(egl_context)) {}
 
 EmbedderTestCompositorGL::~EmbedderTestCompositorGL() = default;
+
+void EmbedderTestCompositorGL::SetRenderTargetType(
+    EmbedderTestBackingStoreProducer::RenderTargetType type,
+    FlutterSoftwarePixelFormat software_pixfmt) {
+  switch (type) {
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLSurface:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLTexture:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer2:
+      // no-op: Rendering into GL and software render targets is supported.
+      break;
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture:
+    case EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage:
+      FML_LOG(FATAL) << "Unsupported render target type: "
+                     << static_cast<int>(type);
+      break;
+  }
+  auto producer = std::make_unique<EmbedderTestBackingStoreProducer>(
+      context_, type, software_pixfmt);
+  producer->SetEGLContext(egl_context_);
+  backingstore_producer_ = std::move(producer);
+}
 
 bool EmbedderTestCompositorGL::UpdateOffscrenComposition(
     const FlutterLayer** layers,

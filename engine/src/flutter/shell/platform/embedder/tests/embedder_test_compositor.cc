@@ -51,11 +51,6 @@ bool EmbedderTestCompositor::CollectBackingStore(
   return true;
 }
 
-void EmbedderTestCompositor::SetBackingStoreProducer(
-    std::unique_ptr<EmbedderTestBackingStoreProducer> backingstore_producer) {
-  backingstore_producer_ = std::move(backingstore_producer);
-}
-
 sk_sp<SkImage> EmbedderTestCompositor::GetLastComposition() {
   return last_composition_;
 }
