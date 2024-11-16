@@ -11,6 +11,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test_compositor_gl.h"
+#include "flutter/testing/test_gl_surface.h"
 #include "flutter/testing/testing.h"
 #include "tests/embedder_test.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
@@ -20,9 +21,8 @@ namespace flutter {
 namespace testing {
 
 EmbedderTestContextGL::EmbedderTestContextGL(std::string assets_path)
-    : EmbedderTestContext(std::move(assets_path)) {
-  egl_context_ = std::make_shared<TestEGLContext>();
-}
+    : EmbedderTestContext(std::move(assets_path)),
+      egl_context_(std::make_shared<TestEGLContext>()) {}
 
 EmbedderTestContextGL::~EmbedderTestContextGL() {
   SetGLGetFBOCallback(nullptr);
@@ -63,9 +63,10 @@ bool EmbedderTestContextGL::GLPresent(FlutterPresentInfo present_info) {
   return gl_surface_->Present();
 }
 
-void EmbedderTestContextGL::SetGLGetFBOCallback(GLGetFBOCallback callback) {
+void EmbedderTestContextGL::SetGLGetFBOCallback(
+    const GLGetFBOCallback& callback) {
   std::scoped_lock lock(gl_callback_mutex_);
-  gl_get_fbo_callback_ = std::move(callback);
+  gl_get_fbo_callback_ = callback;
 }
 
 void EmbedderTestContextGL::SetGLPopulateExistingDamageCallback(

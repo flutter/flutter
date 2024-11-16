@@ -6,6 +6,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer_software.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
@@ -23,8 +24,10 @@ void EmbedderTestCompositorSoftware::SetRenderTargetType(
   switch (type) {
     case EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer:
     case EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer2:
-      // no-op.
-      break;
+      backingstore_producer_ =
+          std::make_unique<EmbedderTestBackingStoreProducerSoftware>(
+              context_, type, software_pixfmt);
+      return;
     case EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture:
     case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer:
     case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLSurface:
@@ -32,10 +35,8 @@ void EmbedderTestCompositorSoftware::SetRenderTargetType(
     case EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage:
       FML_LOG(FATAL) << "Unsupported render target type: "
                      << static_cast<int>(type);
-      break;
+      return;
   }
-  backingstore_producer_ = std::make_unique<EmbedderTestBackingStoreProducer>(
-      context_, type, software_pixfmt);
 }
 
 bool EmbedderTestCompositorSoftware::UpdateOffscrenComposition(

@@ -284,6 +284,8 @@ if (enable_unittests) {
       "tests/embedder_test.h",
       "tests/embedder_test_backingstore_producer.cc",
       "tests/embedder_test_backingstore_producer.h",
+      "tests/embedder_test_backingstore_producer_software.cc",
+      "tests/embedder_test_backingstore_producer_software.h",
       "tests/embedder_test_compositor.cc",
       "tests/embedder_test_compositor.h",
       "tests/embedder_test_compositor_software.cc",
@@ -314,6 +316,8 @@ if (enable_unittests) {
     if (test_enable_gl) {
       sources += [
         "tests/embedder_config_builder_gl.cc",
+        "tests/embedder_test_backingstore_producer_gl.cc",
+        "tests/embedder_test_backingstore_producer_gl.h",
         "tests/embedder_test_compositor_gl.cc",
         "tests/embedder_test_compositor_gl.h",
         "tests/embedder_test_context_gl.cc",
@@ -330,6 +334,8 @@ if (enable_unittests) {
     if (test_enable_metal) {
       sources += [
         "tests/embedder_config_builder_metal.mm",
+        "tests/embedder_test_backingstore_producer_metal.h",
+        "tests/embedder_test_backingstore_producer_metal.mm",
         "tests/embedder_test_compositor_metal.h",
         "tests/embedder_test_compositor_metal.mm",
         "tests/embedder_test_context_metal.h",
@@ -343,6 +349,8 @@ if (enable_unittests) {
     if (test_enable_vulkan) {
       sources += [
         "tests/embedder_config_builder_vulkan.cc",
+        "tests/embedder_test_backingstore_producer_vulkan.cc",
+        "tests/embedder_test_backingstore_producer_vulkan.h",
         "tests/embedder_test_compositor_vulkan.cc",
         "tests/embedder_test_compositor_vulkan.h",
         "tests/embedder_test_context_vulkan.cc",
