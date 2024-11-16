@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_TEST_CONTEXT_GL_H_
 
 #include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
+
 #include "flutter/testing/test_gl_surface.h"
 
 namespace flutter {
@@ -39,7 +40,7 @@ class EmbedderTestContextGL : public EmbedderTestContext {
   /// @param[in]  callback  The callback to set. The previous callback will be
   ///                       un-registered.
   ///
-  void SetGLGetFBOCallback(GLGetFBOCallback callback);
+  void SetGLGetFBOCallback(const GLGetFBOCallback& callback);
 
   void SetGLPopulateExistingDamageCallback(
       GLPopulateExistingDamageCallback callback);
@@ -73,6 +74,7 @@ class EmbedderTestContextGL : public EmbedderTestContext {
   // This allows the builder to access the hooks.
   friend class EmbedderConfigBuilder;
 
+  std::shared_ptr<TestEGLContext> egl_context_;
   std::unique_ptr<TestGLSurface> gl_surface_;
   size_t gl_surface_present_count_ = 0;
   std::mutex gl_callback_mutex_;

@@ -27,6 +27,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer_software.h"
 #include "flutter/shell/platform/embedder/tests/embedder_unittests_util.h"
 #include "flutter/testing/assertions_skia.h"
 #include "flutter/testing/testing.h"
@@ -1845,7 +1846,7 @@ TEST_F(EmbedderTest, BackingStoresCorrespondToTheirViews) {
   builder.SetSoftwareRendererConfig(SkISize::Make(800, 600));
   builder.SetCompositor();
 
-  EmbedderTestBackingStoreProducer producer(
+  EmbedderTestBackingStoreProducerSoftware producer(
       context.GetCompositor().GetGrContext(),
       EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer);
 
