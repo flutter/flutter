@@ -237,7 +237,7 @@ FLUTTER_ASSERT_ARC
   @autoreleasepool {
     FlutterEngine* flutterEngine = OCMClassMock([FlutterEngine class]);
     weakFlutterEngine = flutterEngine;
-    NSAssert(weakFlutterEngine, @"flutter engine must not be nil");
+    XCTAssertNotNil(weakFlutterEngine, @"flutter engine must not be nil");
     FlutterTextInputPlugin* flutterTextInputPlugin = [[FlutterTextInputPlugin alloc]
         initWithDelegate:(id<FlutterTextInputDelegate>)flutterEngine];
     weakFlutterTextInputPlugin = flutterTextInputPlugin;
@@ -254,8 +254,8 @@ FLUTTER_ASSERT_ARC
     currentView = flutterTextInputPlugin.activeView;
   }
 
-  NSAssert(!weakFlutterEngine, @"flutter engine must be nil");
-  NSAssert(currentView, @"current view must not be nil");
+  XCTAssertNil(weakFlutterEngine, @"flutter engine must be nil");
+  XCTAssertNotNil(currentView, @"current view must not be nil");
 
   XCTAssertNil(weakFlutterTextInputPlugin);
   // Verify that the view can no longer access the deallocated engine/text input plugin
