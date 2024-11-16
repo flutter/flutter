@@ -58,13 +58,13 @@ class _StateSubclassVisitor extends SimpleAstVisitor<void> {
     return element.allSupertypes.any((InterfaceType interface) => _isState(interface.element));
   }
 
-  static bool _isState(InterfaceElement interfaceElement) {
+  static bool _isState(InterfaceElement element) {
     // Framework naming convention: each State subclass has "State" in its name.
-    if (!interfaceElement.name.contains('State')) {
+    if (!element.name.contains('State')) {
       return false;
     }
-    return interfaceElement.name == 'State'
-        || isStateResultCache.putIfAbsent(interfaceElement, () => isState(interfaceElement));
+    return element.name == 'State'
+        || isStateResultCache.putIfAbsent(element, () => isState(element));
   }
 
 
