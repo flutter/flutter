@@ -8,6 +8,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer_metal.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 
@@ -25,8 +26,9 @@ void EmbedderTestCompositorMetal::SetRenderTargetType(
     FlutterSoftwarePixelFormat software_pixfmt) {
   switch (type) {
     case EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture:
-      // no-op.
-      break;
+      backingstore_producer_ =
+          std::make_unique<EmbedderTestBackingStoreProducerMetal>(context_, type);
+      return;
     case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer:
     case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLSurface:
     case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLTexture:
@@ -34,10 +36,8 @@ void EmbedderTestCompositorMetal::SetRenderTargetType(
     case EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer2:
     case EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage:
       FML_LOG(FATAL) << "Unsupported render target type: " << static_cast<int>(type);
-      break;
+      return;
   }
-  backingstore_producer_ =
-      std::make_unique<EmbedderTestBackingStoreProducer>(context_, type, software_pixfmt);
 }
 
 bool EmbedderTestCompositorMetal::UpdateOffscrenComposition(const FlutterLayer** layers,

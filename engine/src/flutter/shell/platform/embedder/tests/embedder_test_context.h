@@ -120,10 +120,6 @@ class EmbedderTestContext {
 
   using NextSceneCallback = std::function<void(sk_sp<SkImage> image)>;
 
-#ifdef SHELL_ENABLE_GL
-  std::shared_ptr<TestEGLContext> egl_context_ = nullptr;
-#endif
-
   std::string assets_path_;
   ELFAOTSymbols aot_symbols_;
   std::unique_ptr<fml::Mapping> vm_snapshot_data_;
