@@ -1507,6 +1507,7 @@ void main() {
           matchesGoldenFile('m2_time_picker.dialog.separator.alignment.png'),
         );
       });
+
     testWidgets('TimePicker dialog displays centered separator between hour and minute selectors', (WidgetTester tester) async {
           tester.view.physicalSize = const Size(400, 800);
           tester.view.devicePixelRatio = 1.0;
