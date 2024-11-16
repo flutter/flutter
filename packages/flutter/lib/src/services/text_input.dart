@@ -2553,6 +2553,47 @@ class SystemContextMenuController with SystemContextMenuClient {
           'width': targetRect.width,
           'height': targetRect.height,
         },
+        // TODO(justinmc): Create Flutter class(es) that generate this stuff.
+        'items': <dynamic>[
+          <String, dynamic>{
+            'type': 'default',
+            'action': 'paste',
+          },
+          <String, dynamic>{
+            'type': 'default',
+            'action': 'cut',
+          },
+          <String, dynamic>{
+            'type': 'default',
+            'action': 'copy',
+          },
+          <String, dynamic>{
+            'type': 'default',
+            'action': 'selectAll',
+          },
+          <String, dynamic>{
+            'type': 'default',
+            'title': 'Look Up',
+            'action': 'lookUp',
+          },
+          <String, dynamic>{
+            'type': 'default',
+            'title': 'Search Web',
+            'action': 'searchWeb',
+          },
+          /*
+          // TODO(justinmc): This is mal-formatted, but it silently fails on the engine side.
+          <String, dynamic>{
+            'type': 'default',
+            'action': 'share',
+          },
+          */
+          <String, dynamic>{
+            'type': 'default',
+            'title': 'Go crazy',
+            'action': 'share',
+          },
+        ],
       },
     );
   }
