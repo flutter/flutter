@@ -635,7 +635,7 @@ class AppResourceBundle {
                 'The locale specified in @@locale and the arb filename do not match. \n'
                 'Please make sure that they match, since this prevents any confusion \n'
                 'with which locale to use. Otherwise, specify the locale in either the \n'
-                'filename of the @@locale key only.\n'
+                'filename or the @@locale key only.\n'
                 'Current @@locale value: $localeString\n'
                 'Current filename extension: $parserLocaleString'
               );
