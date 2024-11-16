@@ -42,7 +42,7 @@ const double _kFinalLabelScale = 0.75;
 ///
 /// See also:
 ///
-/// [InputDecorator.errorBuilder], which is of this type, and passes
+/// [InputDecoration.errorBuilder], which is of this type, and passes
 /// the errorText given by [TextFormField.validator].
 typedef InputErrorBuilder = Widget Function(String errorText);
 
