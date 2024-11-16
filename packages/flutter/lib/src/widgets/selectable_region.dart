@@ -37,7 +37,6 @@ import 'text_selection.dart';
 import 'text_selection_toolbar_anchors.dart';
 
 // Examples can assume:
-// FocusNode _focusNode = FocusNode();
 // late GlobalKey key;
 
 const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
@@ -105,7 +104,6 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// MaterialApp(
 ///   home: SelectableRegion(
 ///     selectionControls: materialTextSelectionControls,
-///     focusNode: _focusNode, // initialized to FocusNode()
 ///     child: Scaffold(
 ///       appBar: AppBar(title: const Text('Flutter Code Sample')),
 ///       body: ListView(
@@ -218,7 +216,7 @@ class SelectableRegion extends StatefulWidget {
   const SelectableRegion({
     super.key,
     this.contextMenuBuilder,
-    required this.focusNode,
+    this.focusNode,
     required this.selectionControls,
     required this.child,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
@@ -235,7 +233,7 @@ class SelectableRegion extends StatefulWidget {
   final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
-  final FocusNode focusNode;
+  final FocusNode? focusNode;
 
   /// The child widget this selection area applies to.
   ///
@@ -373,10 +371,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// The list of native text processing actions provided by the engine.
   final List<ProcessTextAction> _processTextActions = <ProcessTextAction>[];
 
+  // The focus node to use if the widget didn't supply one.
+  FocusNode? _localFocusNode;
+  FocusNode get _focusNode => widget.focusNode ?? (_localFocusNode ??= FocusNode(debugLabel: 'SelectableRegion'));
+
   @override
   void initState() {
     super.initState();
-    widget.focusNode.addListener(_handleFocusChanged);
+    _focusNode.addListener(_handleFocusChanged);
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
     // Right clicks.
@@ -426,9 +428,15 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void didUpdateWidget(SelectableRegion oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.focusNode != oldWidget.focusNode) {
-      oldWidget.focusNode.removeListener(_handleFocusChanged);
-      widget.focusNode.addListener(_handleFocusChanged);
-      if (widget.focusNode.hasFocus != oldWidget.focusNode.hasFocus) {
+      if (oldWidget.focusNode == null && widget.focusNode != null) {
+        _localFocusNode?.removeListener(_handleFocusChanged);
+        _localFocusNode?.dispose();
+        _localFocusNode = null;
+      } else if (widget.focusNode == null && oldWidget.focusNode != null) {
+        oldWidget.focusNode!.removeListener(_handleFocusChanged);
+      }
+      _focusNode.addListener(_handleFocusChanged);
+      if (_focusNode.hasFocus != oldWidget.focusNode?.hasFocus) {
         _handleFocusChanged();
       }
     }
@@ -439,7 +447,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleFocusChanged() {
-    if (!widget.focusNode.hasFocus) {
+    if (!_focusNode.hasFocus) {
       if (kIsWeb) {
         PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
       }
@@ -628,7 +636,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _lastPointerDeviceKind = details.kind;
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
-        widget.focusNode.requestFocus();
+        _focusNode.requestFocus();
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -843,7 +851,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   void _handleTouchLongPressStart(LongPressStartDetails details) {
     HapticFeedback.selectionClick();
-    widget.focusNode.requestFocus();
+    _focusNode.requestFocus();
     _selectWordAt(offset: details.globalPosition);
     // Platforms besides Android will show the text selection handles when
     // the long press is initiated. Android shows the text selection handles when
@@ -883,7 +891,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     final Offset? previousSecondaryTapDownPosition = _lastSecondaryTapDownPosition;
     final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
     _lastSecondaryTapDownPosition = details.globalPosition;
-    widget.focusNode.requestFocus();
+    _focusNode.requestFocus();
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1706,6 +1714,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectionOverlay?.hideMagnifier();
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
+    widget.focusNode?.removeListener(_handleFocusChanged);
+    _localFocusNode?.removeListener(_handleFocusChanged);
+    _localFocusNode?.dispose();
     super.dispose();
   }
 
@@ -1730,9 +1741,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         excludeFromSemantics: true,
         child: Actions(
           actions: _actions,
-          child: Focus(
+          child: Focus.withExternalFocusNode(
             includeSemantics: false,
-            focusNode: widget.focusNode,
+            focusNode: _focusNode,
             child: result,
           ),
         ),

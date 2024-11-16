@@ -342,6 +342,7 @@ Future<void> runDartTest(String workingDirectory, {
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
   bool collectMetrics = false,
+  List<String>? tags,
   bool runSkipped = false,
 }) async {
   int? cpus;
@@ -382,6 +383,8 @@ Future<void> runDartTest(String workingDirectory, {
       '--timeout=${perTestTimeout.inMilliseconds}ms',
     if (runSkipped)
       '--run-skipped',
+    if (tags != null)
+      ...tags.map((String t) => '--tags=$t'),
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,
