@@ -8,9 +8,10 @@ import '_web_image_io.dart' if (dart.library.js_interop) '_web_image_web.dart'
 
 /// A substitute for [Image.network] that follows the web's [same origin policy][].
 ///
-/// On mobile this widget delegates to [Image.network]. On the web this widget
-/// delegates to [Image.network] if the server allows fetching the image using
-/// a XHR. Otherwise, it uses an `<img>` element to display the image.
+/// On non-web platforms this widget delegates to [Image.network]. On the web
+/// this widget delegates to [Image.network] if the server allows fetching the
+/// image using a XHR. Otherwise, it uses an `<img>` element to display the
+/// image.
 ///
 /// If the [src] of the image is same-origin, or if a HEAD request for [src]
 /// indicates that a GET request would succeed, then this widget works exactly

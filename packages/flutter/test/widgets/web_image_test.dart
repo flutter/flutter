@@ -41,7 +41,6 @@ void main() {
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
-      ..mockEvent = MockEvent('load', web.Event('test error'))
       ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
@@ -62,7 +61,7 @@ void main() {
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
-      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..mockEvent = MockEvent('load', web.Event('test load event'))
       ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
@@ -82,8 +81,7 @@ void main() {
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 500
-      ..mockEvent = MockEvent('load', web.Event('test error'))
-      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+      ..mockEvent = MockEvent('load', web.Event('test error'));
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
@@ -95,8 +93,8 @@ void main() {
     // Pump once to create and start resolving the image.
     await tester.pumpAndSettle();
 
-    // Since the request for the bytes succeeds, this should put an
-    // Image.network (which resolves to a RawWebImage) in the widget tree.
+    // Since the request for the bytes fails, this should put a RawWebImage
+    // (which is backed by an HTMLElementView) in the widget tree.
     expect(find.byType(RawWebImage), findsOneWidget);
   });
 
@@ -121,14 +119,12 @@ void main() {
           if (frame == 0) {
             imageLoaded = true;
           }
-          return LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) => ValueListenableBuilder<int>(
+          return ValueListenableBuilder<int>(
               valueListenable: innerListenable,
               builder: (BuildContext context, int value, Widget? valueListenableChild) => KeyedSubtree(
                 key: UniqueKey(),
                 child: child,
               ),
-            ),
           );
         },
       ),
@@ -308,20 +304,20 @@ void main() {
 
     final _TestWebImageProvider imageProvider = _TestWebImageProvider('example.com/pic.jpg');
     await tester.pumpWidget(WebImage(image: imageProvider, excludeFromSemantics: true));
-    final State<WebImage> image = tester.state/*State<WebImage>*/(find.byType(WebImage));
+    final State<WebImage> image = tester.state<State<WebImage>>(find.byType(WebImage));
     expect(image.toString(), equalsIgnoringHashCodes('WebImageState#00000(stream: WebImageStream#00000(OneFrameWebImageStreamCompleter#00000, unresolved, 2 listeners, 0 ephemeralErrorListeners), <img>: null, wasSynchronouslyLoaded: false)'));
     imageProvider.complete(image100x100);
     await tester.pump();
     expect(image.toString(), equalsIgnoringHashCodes('WebImageState#00000(stream: WebImageStream#00000(OneFrameWebImageStreamCompleter#00000, $imageString, 1 listener, 0 ephemeralErrorListeners), <img>: $imageString, wasSynchronouslyLoaded: false)'));
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const SizedBox());
     expect(image.toString(), equalsIgnoringHashCodes('WebImageState#00000(lifecycle state: defunct, not mounted, stream: WebImageStream#00000(OneFrameWebImageStreamCompleter#00000, $imageString, 0 listeners, 0 ephemeralErrorListeners), <img>: null, wasSynchronouslyLoaded: false)'));
   });
 
   testWidgets('Stream completer errors can be listened to by attaching before resolving', (WidgetTester tester) async {
-    dynamic capturedException;
+    Object? capturedException;
     StackTrace? capturedStackTrace;
     WebImageInfo? capturedImage;
-    void errorListener(dynamic exception, StackTrace? stackTrace) {
+    void errorListener(Object? exception, StackTrace? stackTrace) {
       capturedException = exception;
       capturedStackTrace = stackTrace;
     }
@@ -351,12 +347,12 @@ void main() {
   });
 
   testWidgets('Stream completer errors can be listened to by attaching after resolving', (WidgetTester tester) async {
-    dynamic capturedException;
+    Object? capturedException;
     StackTrace? capturedStackTrace;
-    dynamic reportedException;
+    Object? reportedException;
     StackTrace? reportedStackTrace;
     WebImageInfo? capturedImage;
-    void errorListener(dynamic exception, StackTrace? stackTrace) {
+    void errorListener(Object? exception, StackTrace? stackTrace) {
       capturedException = exception;
       capturedStackTrace = stackTrace;
     }
@@ -395,10 +391,10 @@ void main() {
   });
 
   testWidgets('Duplicate listener registration does not affect error listeners', (WidgetTester tester) async {
-    dynamic capturedException;
+    Object? capturedException;
     StackTrace? capturedStackTrace;
     WebImageInfo? capturedImage;
-    void errorListener(dynamic exception, StackTrace? stackTrace) {
+    void errorListener(Object? exception, StackTrace? stackTrace) {
       capturedException = exception;
       capturedStackTrace = stackTrace;
     }
@@ -430,11 +426,11 @@ void main() {
   });
 
   testWidgets('Duplicate error listeners are all called', (WidgetTester tester) async {
-    dynamic capturedException;
+    Object? capturedException;
     StackTrace? capturedStackTrace;
     WebImageInfo? capturedImage;
     int errorListenerCalled = 0;
-    void errorListener(dynamic exception, StackTrace? stackTrace) {
+    void errorListener(Object? exception, StackTrace? stackTrace) {
       capturedException = exception;
       capturedStackTrace = stackTrace;
       errorListenerCalled++;
@@ -469,10 +465,10 @@ void main() {
 
   testWidgets('Listeners are only removed if callback tuple matches', (WidgetTester tester) async {
     bool errorListenerCalled = false;
-    dynamic reportedException;
+    Object? reportedException;
     StackTrace? reportedStackTrace;
     WebImageInfo? capturedImage;
-    void errorListener(dynamic exception, StackTrace? stackTrace) {
+    void errorListener(Object? exception, StackTrace? stackTrace) {
       errorListenerCalled = true;
       reportedException = exception;
       reportedStackTrace = stackTrace;
@@ -507,7 +503,7 @@ void main() {
   testWidgets('Removing listener removes one listener and error listener', (WidgetTester tester) async {
     int errorListenerCalled = 0;
     WebImageInfo? capturedImage;
-    void errorListener(dynamic exception, StackTrace? stackTrace) {
+    void errorListener(Object? exception, StackTrace? stackTrace) {
       errorListenerCalled++;
     }
     void listener(WebImageInfo info, bool synchronous) {
@@ -537,15 +533,14 @@ void main() {
     expect(capturedImage, isNull); // The image stream listeners should never be called.
   });
 
-  testWidgets('Precache',
-  (WidgetTester tester) async {
+  testWidgets('Second precache is synchronous', (WidgetTester tester) async {
     final _TestWebImageProvider provider = _TestWebImageProvider('example.com/pic.jpg');
     late Future<void> precache;
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
           precache = precacheWebImage(provider, context);
-          return Container();
+          return const SizedBox();
         },
       ),
     );
@@ -561,43 +556,44 @@ void main() {
     expect(isSync, isTrue);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/25143
   testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
-  (WidgetTester tester) async {
-    final _TestWebImageStreamCompleter imageStreamCompleter = _TestWebImageStreamCompleter();
-    final _TestWebImageProvider provider = _TestWebImageProvider('example.com/pic.jpg', streamCompleter: imageStreamCompleter);
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, see [_TestWebImageStreamCompleter].
+    (WidgetTester tester) async {
+      final _TestWebImageStreamCompleter imageStreamCompleter = _TestWebImageStreamCompleter();
+      final _TestWebImageProvider provider = _TestWebImageProvider('example.com/pic.jpg', streamCompleter: imageStreamCompleter);
 
-    await tester.pumpWidget(
-      Builder(
-        builder: (BuildContext context) {
-          precacheWebImage(provider, context);
-          return Container();
-        },
-      ),
-    );
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            precacheWebImage(provider, context);
+            return const SizedBox();
+          },
+        ),
+      );
 
-    // Two listeners - one is the listener added by precacheImage, the other by the ImageCache.
-    final List<WebImageStreamListener> listeners = imageStreamCompleter.listeners.toList();
-    expect(listeners.length, 2);
+      // Two listeners - one is the listener added by precacheImage, the other by the ImageCache.
+      final List<WebImageStreamListener> listeners = imageStreamCompleter.listeners.toList();
+      expect(listeners.length, 2);
 
-    // Make sure the first listener can be called re-entrantly
-    final WebImageInfo imageInfo = WebImageInfo(image10x10);
+      // Make sure the first listener can be called re-entrantly
+      final WebImageInfo imageInfo = WebImageInfo(image10x10);
 
-    listeners[1].onImage(imageInfo.clone(), false);
-    listeners[1].onImage(imageInfo.clone(), false);
+      listeners[1].onImage(imageInfo.clone(), false);
+      listeners[1].onImage(imageInfo.clone(), false);
 
-    // Make sure the second listener can be called re-entrantly.
-    listeners[0].onImage(imageInfo.clone(), false);
-    listeners[0].onImage(imageInfo.clone(), false);
+      // Make sure the second listener can be called re-entrantly.
+      listeners[0].onImage(imageInfo.clone(), false);
+      listeners[0].onImage(imageInfo.clone(), false);
 
-    imageStreamCompleter.dispose();
-    imageCache.clear();
+      imageStreamCompleter.dispose();
+      imageCache.clear();
   });
 
   testWidgets('Precache completes with onError on error', (WidgetTester tester) async {
-    dynamic capturedException;
+    Object? capturedException;
     StackTrace? capturedStackTrace;
-    void errorListener(dynamic exception, StackTrace? stackTrace) {
+    void errorListener(Object? exception, StackTrace? stackTrace) {
       capturedException = exception;
       capturedStackTrace = stackTrace;
     }
@@ -610,7 +606,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           precache = precacheWebImage(imageProvider, context, onError: errorListener);
-          return Container();
+          return const SizedBox();
         },
       ),
     );
@@ -644,6 +640,7 @@ void main() {
       ),
     );
     expect(imageStreamCompleter.listeners.length, 1);
+    imageStreamCompleter.dispose();
   });
 
   testWidgets('Verify WebImage shows correct RenderWebImage when changing to an already completed provider', (WidgetTester tester) async {
@@ -654,14 +651,14 @@ void main() {
     final web_shim.HTMLImageElement image100x100 = createTestWebImage(width: 100, height: 100);
 
     await tester.pumpWidget(
-        Container(
-            key: key,
-            child: WebImage(
-                excludeFromSemantics: true,
-                image: imageProvider1,
-            ),
+      Container(
+        key: key,
+        child: WebImage(
+          excludeFromSemantics: true,
+          image: imageProvider1,
         ),
-        phase: EnginePhase.layout,
+      ),
+      phase: EnginePhase.layout,
     );
     RenderWebImage renderImage = key.currentContext!.findRenderObject()! as RenderWebImage;
     expect(renderImage.image, isNull);
@@ -789,6 +786,7 @@ void main() {
 
     expect(lastFrame, 0);
     expect(lastFrameWasSync, isFalse);
+    streamCompleter.dispose();
   });
 
   testWidgets('Image invokes frameBuilder with correct wasSynchronouslyLoaded=true',
@@ -817,6 +815,7 @@ void main() {
     await tester.pump();
     expect(lastFrame, 1);
     expect(lastFrameWasSync, isTrue);
+    streamCompleter.dispose();
   });
 
   testWidgets('WebImage state handles frameBuilder update', (WidgetTester tester) async {
@@ -849,6 +848,7 @@ void main() {
     expect(find.byType(Padding), findsOneWidget);
     expect(find.byType(RawWebImage), findsOneWidget);
     expect(tester.state(find.byType(WebImage)), same(state));
+    streamCompleter.dispose();
   });
 
   testWidgets('WebImage chains the results of frameBuilder and loadingBuilder', (WidgetTester tester) async {
@@ -878,6 +878,7 @@ void main() {
     expect(find.byType(RawWebImage), findsOneWidget);
     expect(tester.widget<Center>(find.byType(Center)).child, isA<Padding>());
     expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawWebImage>());
+    streamCompleter.dispose();
   });
 
   testWidgets('Verify WebImage resets its WebImageListeners', (WidgetTester tester) async {
@@ -885,7 +886,7 @@ void main() {
     final _TestWebImageStreamCompleter imageStreamCompleter = _TestWebImageStreamCompleter();
     final _TestWebImageProvider imageProvider1 = _TestWebImageProvider('example.com/pic.jpg', streamCompleter: imageStreamCompleter);
     await tester.pumpWidget(
-      Container(
+      SizedBox(
         key: key,
         child: WebImage(
           image: imageProvider1,
@@ -895,10 +896,9 @@ void main() {
     // listener from resolveStreamForKey is always added.
     expect(imageStreamCompleter.listeners.length, 2);
 
-
     final _TestWebImageProvider imageProvider2 = _TestWebImageProvider('example.com/pic2.jpg');
     await tester.pumpWidget(
-      Container(
+      SizedBox(
         key: key,
         child: WebImage(
           image: imageProvider2,
@@ -910,6 +910,7 @@ void main() {
 
     // only listener from resolveStreamForKey is left.
     expect(imageStreamCompleter.listeners.length, 1);
+    imageStreamCompleter.dispose();
   });
 
   testWidgets('Verify WebImage resets its ErrorListeners', (WidgetTester tester) async {
@@ -917,21 +918,20 @@ void main() {
     final _TestWebImageStreamCompleter imageStreamCompleter = _TestWebImageStreamCompleter();
     final _TestWebImageProvider imageProvider1 = _TestWebImageProvider('example.com/pic.jpg', streamCompleter: imageStreamCompleter);
     await tester.pumpWidget(
-      Container(
+      SizedBox(
         key: key,
         child: WebImage(
           image: imageProvider1,
-          errorBuilder: (_,__,___) => Container(),
+          errorBuilder: (_,__,___) => const SizedBox(),
         ),
       ),
     );
     // listener from resolveStreamForKey is always added.
     expect(imageStreamCompleter.listeners.length, 2);
 
-
     final _TestWebImageProvider imageProvider2 = _TestWebImageProvider('example.com/pic2.jpg');
     await tester.pumpWidget(
-      Container(
+      SizedBox(
         key: key,
         child: WebImage(
           image: imageProvider2,
@@ -943,6 +943,7 @@ void main() {
 
     // only listener from resolveStreamForKey is left.
     expect(imageStreamCompleter.listeners.length, 1);
+    imageStreamCompleter.dispose();
   });
 
   testWidgets('Same web image provider in multiple parts of the tree, no cache room left', (WidgetTester tester) async {
@@ -1009,7 +1010,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           precache = precacheWebImage(provider, context);
-          return Container();
+          return const SizedBox();
         },
       ),
     );
@@ -1062,7 +1063,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           precache = precacheWebImage(provider, context);
-          return Container();
+          return const SizedBox();
         },
       ),
     );
@@ -1145,7 +1146,7 @@ void main() {
     late Object caughtException;
     await tester.pumpWidget(
       WebImage(
-        image: _FailingWebImageProvider('example.com/pic.jpg', failOnLoad: true, throws: 'threw', image: image10x10),
+        image: _FailingWebImageProvider('example.com/pic.jpg', failOnLoad: true, throws: _TestException('threw'), image: image10x10),
         errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
           caughtException = error;
           return SizedBox.expand(key: errorKey);
@@ -1156,20 +1157,20 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(errorKey), findsOneWidget);
-    expect(caughtException.toString(), 'threw');
+    expect(caughtException, isA<_TestException>().having((e) => e.message, 'message', 'threw'));
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('no errorBuilder - failure reported to FlutterError', (WidgetTester tester) async {
     await tester.pumpWidget(
       WebImage(
-        image: _FailingWebImageProvider('example.com/pic.jpg', failOnLoad: true, throws: 'threw', image: image10x10),
+        image: _FailingWebImageProvider('example.com/pic.jpg', failOnLoad: true, throws: _TestException('threw'), image: image10x10),
       ),
     );
 
     await tester.pump();
 
-    expect(tester.takeException(), 'threw');
+    expect(tester.takeException(), isA<_TestException>().having((e) => e.message, 'message', 'threw'));
   });
 }
 
@@ -1288,7 +1289,7 @@ class _FailingWebImageProvider extends WebImageProviderImpl {
   }) : assert(failOnLoad);
 
   final bool failOnLoad;
-  final Object throws;
+  final Exception throws;
   final web_shim.HTMLImageElement image;
 
   @override
@@ -1305,4 +1306,10 @@ class _FailingWebImageProvider extends WebImageProviderImpl {
       ),
     );
   }
+}
+
+class _TestException implements Exception {
+  _TestException(this.message);
+
+  final String message;
 }
