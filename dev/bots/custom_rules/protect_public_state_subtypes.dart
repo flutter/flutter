@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(nate-thegrate): remove this file if @protected changes, or add a test if it doesn't.
+// https://github.com/dart-lang/sdk/issues/57094
+
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
@@ -13,18 +16,16 @@ import 'analyze.dart';
 
 final AnalyzeRule protectPublicStateSubtypes = _ProtectPublicStateSubtypes();
 
-typedef _AstList = List<(AstNode, String)>;
-
 class _ProtectPublicStateSubtypes implements AnalyzeRule {
-  final Map<ResolvedUnitResult, _AstList> _errors = <ResolvedUnitResult, _AstList>{};
+  final Map<ResolvedUnitResult, List<MethodDeclaration>> _errors = <ResolvedUnitResult, List<MethodDeclaration>>{};
 
   @override
   void applyTo(ResolvedUnitResult unit) {
     final _StateSubclassVisitor visitor = _StateSubclassVisitor();
     unit.unit.visitChildren(visitor);
-    final _AstList violationsInUnit = visitor.violationNodes;
-    if (violationsInUnit.isNotEmpty) {
-      _errors.putIfAbsent(unit, () => <(AstNode, String)>[]).addAll(violationsInUnit);
+    final List<MethodDeclaration> unprotected = visitor.unprotectedMethods;
+    if (unprotected.isNotEmpty) {
+      _errors.putIfAbsent(unit, () => <MethodDeclaration>[]).addAll(unprotected);
     }
   }
 
@@ -36,9 +37,9 @@ class _ProtectPublicStateSubtypes implements AnalyzeRule {
 
     foundError(
       <String>[
-        for (final MapEntry<ResolvedUnitResult, _AstList> entry in _errors.entries)
-          for (final (AstNode node, String suggestion) in entry.value)
-            '${locationInFile(entry.key, node, workingDirectory)}: $node - $suggestion.',
+        for (final MapEntry<ResolvedUnitResult, List<MethodDeclaration>> entry in _errors.entries)
+          for (final MethodDeclaration method in entry.value)
+            '${locationInFile(entry.key, method, workingDirectory)}: $method - missing "@protected" annotation.',
         '\nPublic State subtypes should add @protected when overriding methods,',
         'to avoid exposing internal logic to developers.',
       ],
@@ -50,34 +51,36 @@ class _ProtectPublicStateSubtypes implements AnalyzeRule {
 }
 
 class _StateSubclassVisitor extends SimpleAstVisitor<void> {
-  final _AstList violationNodes = <(AstNode, String)>[];
+  final List<MethodDeclaration> unprotectedMethods = <MethodDeclaration>[];
 
-  static final Map<InterfaceElement, bool> isStateResultCache = <InterfaceElement, bool>{};
+  /// Holds the `State` class [DartType].
+  static DartType? stateType;
 
-  static bool isState(InterfaceElement element) {
-    return element.allSupertypes.any((InterfaceType interface) => _isState(interface.element));
-  }
-
-  static bool _isState(InterfaceElement element) {
-    // Framework naming convention: each State subclass has "State" in its name.
-    if (!element.name.contains('State')) {
+  static bool isPublicStateSubtype(InterfaceElement element) {
+    if (!element.isPublic) {
       return false;
     }
-    return element.name == 'State'
-        || isStateResultCache.putIfAbsent(element, () => isState(element));
+    if (stateType != null) {
+      return element.allSupertypes.contains(stateType);
+    }
+    for (final InterfaceType superType in element.allSupertypes) {
+      if (superType.element.name == 'State') {
+        stateType = superType;
+        return true;
+      }
+    }
+    return false;
   }
-
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {
-    final ClassElement? classElement = node.declaredElement;
-    if (classElement == null) {
-      violationNodes.add((node, '[internal error] class element could not be found'));
-    } else if (classElement.isPublic && isState(classElement)) {
+    if (isPublicStateSubtype(node.declaredElement!)) {
       node.visitChildren(this);
     }
   }
 
+  /// Checks whether overridden `State` methods have the `@protected` annotation,
+  /// and adds the declaration to [unprotectedMethods] if not.
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
     switch (node.name.lexeme) {
@@ -90,13 +93,8 @@ class _StateSubclassVisitor extends SimpleAstVisitor<void> {
       case 'dispose':
       case 'build':
       case 'debugFillProperties':
-        switch (node.declaredElement?.hasProtected) {
-          case true:
-            break;
-          case false:
-            violationNodes.add((node, 'missing "@protected" annotation'));
-          case null:
-            violationNodes.add((node, '[internal error] method element could not be found'));
+        if (!node.declaredElement!.hasProtected) {
+          unprotectedMethods.add(node);
         }
     }
   }
