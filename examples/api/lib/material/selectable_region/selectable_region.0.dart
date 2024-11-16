@@ -15,7 +15,8 @@ class SelectableRegionExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SelectionArea(
+      home: SelectableRegion(
+        selectionControls: materialTextSelectionControls,
         child: Scaffold(
           appBar: AppBar(title: const Text('SelectableRegion Sample')),
           body: const Center(
