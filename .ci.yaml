@@ -6370,7 +6370,6 @@ targets:
 
   - name: Windows windows_desktop_impeller
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
