@@ -1807,17 +1807,21 @@ void main() {
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
     expect(right('title'), 708.0);
   });
+  
   testWidgets('ListTile minTileHeight', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection, { double? minTileHeight, }) {
+    Widget buildFrame(TextDirection textDirection, { double? themeMinTileHeight, double? widgetMinTileHeight }) {
       return MediaQuery(
         data: const MediaQueryData(),
         child: Directionality(
           textDirection: textDirection,
           child: Material(
-            child: Container(
-              alignment: Alignment.topLeft,
-              child: ListTile(
-                minTileHeight: minTileHeight,
+            child: ListTileTheme(
+              data: ListTileThemeData(minTileHeight: themeMinTileHeight),
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: ListTile(
+                  minTileHeight: widgetMinTileHeight,
+                ),
               ),
             ),
           ),
@@ -1829,12 +1833,16 @@ void main() {
     await tester.pumpWidget(buildFrame(TextDirection.ltr));
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
 
-    // Set list tile height = 30.0
-    await tester.pumpWidget(buildFrame(TextDirection.ltr, minTileHeight: 30));
+    // Set list tile height = 30.0 by widget
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinTileHeight: 30));
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 30.0));
 
-    // Set list tile height = 60.0
-    await tester.pumpWidget(buildFrame(TextDirection.ltr, minTileHeight: 60));
+    // Set list tile height = 30.0 by theme
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinTileHeight: 30));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 30.0));
+
+    // Set list tile height = 60.0 by widget and height = 30.0 by theme
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinTileHeight: 60, themeMinTileHeight: 30));
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 60.0));
   });
 
