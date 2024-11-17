@@ -40,7 +40,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (MTLPixelFormat)pixelFormat {
-  if ([self.layer isKindOfClass:NSClassFromString(@"CAMetalLayer")]) {
+  if ([self.layer isKindOfClass:[CAMetalLayer class]]) {
 // It is a known Apple bug that CAMetalLayer incorrectly reports its supported
 // SDKs. It is, in fact, available since iOS 8.
 #pragma clang diagnostic push
@@ -93,7 +93,7 @@ static void PrintWideGamutWarningOnce() {
 }
 
 - (void)layoutSubviews {
-  if ([self.layer isKindOfClass:NSClassFromString(@"CAMetalLayer")]) {
+  if ([self.layer isKindOfClass:[CAMetalLayer class]]) {
 // It is a known Apple bug that CAMetalLayer incorrectly reports its supported
 // SDKs. It is, in fact, available since iOS 8.
 #pragma clang diagnostic push
