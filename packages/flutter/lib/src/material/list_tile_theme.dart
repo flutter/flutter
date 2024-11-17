@@ -337,6 +337,7 @@ class ListTileTheme extends InheritedTheme {
     double? horizontalTitleGap,
     double? minVerticalPadding,
     double? minLeadingWidth,
+    double? minTileHeight,
     ListTileControlAffinity? controlAffinity,
     required super.child,
   }) : assert(
@@ -353,6 +354,7 @@ class ListTileTheme extends InheritedTheme {
           horizontalTitleGap ??
           minVerticalPadding ??
           minLeadingWidth ??
+          minTileHeight ??
           controlAffinity) == null),
        _data = data,
        _dense = dense,
@@ -369,6 +371,7 @@ class ListTileTheme extends InheritedTheme {
        _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
        _minLeadingWidth = minLeadingWidth,
+       _minTileHeight = minTileHeight,
       _controlAffinity = controlAffinity;
 
   final ListTileThemeData? _data;
@@ -384,6 +387,7 @@ class ListTileTheme extends InheritedTheme {
   final double? _horizontalTitleGap;
   final double? _minVerticalPadding;
   final double? _minLeadingWidth;
+  final double? _minTileHeight;
   final bool? _enableFeedback;
   final MaterialStateProperty<MouseCursor?>? _mouseCursor;
   final ListTileControlAffinity? _controlAffinity;
@@ -405,6 +409,7 @@ class ListTileTheme extends InheritedTheme {
       horizontalTitleGap: _horizontalTitleGap,
       minVerticalPadding: _minVerticalPadding,
       minLeadingWidth: _minLeadingWidth,
+      minTileHeight: _minTileHeight,
       controlAffinity: _controlAffinity,
     );
   }
@@ -480,6 +485,12 @@ class ListTileTheme extends InheritedTheme {
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.minLeadingWidth] property instead.
   double? get minLeadingWidth => _data != null ? _data.minLeadingWidth : _minLeadingWidth;
+
+  /// Overrides the default value of [ListTile.minTileHeight].
+  ///
+  /// This property is obsolete: please use the [data]
+  /// [ListTileThemeData.minTileHeight] property instead.
+  double? get minTileHeight => _data != null ? _data.minTileHeight : _minTileHeight;
 
   /// Overrides the default value of [ListTile.enableFeedback].
   ///
