@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterNSBundleUtils.h"
+
 #include <Foundation/Foundation.h>
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 
 FLUTTER_ASSERT_ARC
 
-const NSString* kDefaultAssetPath = @"Frameworks/App.framework/flutter_assets";
+NSString* const kDefaultAssetPath = @"Frameworks/App.framework/flutter_assets";
+
 static NSString* GetFlutterAssetsPathFromBundle(NSBundle* bundle, NSString* relativeAssetsPath);
 
 NSBundle* FLTFrameworkBundleInternal(NSString* flutterFrameworkBundleID, NSURL* searchURL) {
