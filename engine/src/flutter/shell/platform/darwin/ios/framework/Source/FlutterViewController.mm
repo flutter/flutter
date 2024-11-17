@@ -153,7 +153,6 @@ typedef struct MouseState {
 @end
 
 @implementation FlutterViewController {
-  FlutterEngine* _engine;
   flutter::ViewportMetrics _viewportMetrics;
   MouseState _mouseState;
 }
@@ -300,10 +299,6 @@ typedef struct MouseState {
   // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
   // Eliminate method calls in initializers and dealloc.
   [self setUpNotificationCenterObservers];
-}
-
-- (FlutterEngine*)engine {
-  return _engine;
 }
 
 - (void)setUpNotificationCenterObservers {
