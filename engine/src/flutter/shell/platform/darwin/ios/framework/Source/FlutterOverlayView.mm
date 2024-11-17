@@ -42,7 +42,7 @@ FLUTTER_ASSERT_ARC
                           pixelFormat:(MTLPixelFormat)pixelFormat {
   self = [self init];
 
-  if ([self.layer isKindOfClass:NSClassFromString(@"CAMetalLayer")]) {
+  if ([self.layer isKindOfClass:[CAMetalLayer class]]) {
     self.layer.allowsGroupOpacity = NO;
     self.layer.contentsScale = contentsScale;
     self.layer.rasterizationScale = contentsScale;

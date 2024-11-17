@@ -62,7 +62,7 @@ FLUTTER_ASSERT_ARC
   delegate.isUsingImpeller = NO;
   FlutterView* view = [[FlutterView alloc] initWithDelegate:delegate opaque:NO enableWideGamut:YES];
   [view layoutSubviews];
-  XCTAssertTrue([view.layer isKindOfClass:NSClassFromString(@"CAMetalLayer")]);
+  XCTAssertTrue([view.layer isKindOfClass:[CAMetalLayer class]]);
   CAMetalLayer* layer = (CAMetalLayer*)view.layer;
   XCTAssertEqual(layer.pixelFormat, MTLPixelFormatBGRA8Unorm);
 }
