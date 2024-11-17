@@ -81,20 +81,20 @@ void main() {
       ),
     );
 
-    Finder findZoomPageTransition() {
+    Finder findFadeForwardsPageTransition() {
       return find.descendant(
         of: find.byType(MaterialApp),
-        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ZoomPageTransition'),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition'),
       );
     }
 
     expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
-    expect(findZoomPageTransition(), findsOneWidget);
+    expect(findFadeForwardsPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
-    expect(findZoomPageTransition(), findsOneWidget);
+    expect(findFadeForwardsPageTransition(), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('PageTransitionsTheme override builds a _OpenUpwardsPageTransition', (WidgetTester tester) async {
