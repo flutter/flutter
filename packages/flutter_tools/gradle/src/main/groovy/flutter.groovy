@@ -838,7 +838,7 @@ class FlutterPlugin implements Plugin<Project> {
      * For example, "2.8.0" vs "2.8" will always consider "2.8.0" to be the most recent version.
      * TODO: Remove this or compareVersionStrings. This does not handle strings like "8.6-rc-2".
      */
-   static String compareGradleVersions(String version1, String version2) {
+   static String mostRecentSemanticVersion(String version1, String version2) {
 
         def v1Parts = version1.tokenize('.-')
         def v2Parts = version2.tokenize('.-')
@@ -948,7 +948,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
 
                     String pluginNdkVersion = pluginProject.android.ndkVersion ?: ndkVersionIfUnspecified
-                    maxPluginNdkVersion = compareGradleVersions(pluginNdkVersion, maxPluginNdkVersion)
+                    maxPluginNdkVersion = mostRecentSemanticVersion(pluginNdkVersion, maxPluginNdkVersion)
                     if (pluginNdkVersion != projectNdkVersion) {
                         pluginsWithDifferentNdkVersion.add(new Tuple(pluginProject.name, pluginNdkVersion))
                     }
