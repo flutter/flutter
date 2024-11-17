@@ -11,8 +11,6 @@
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
-extern NSString* const kFlutterEngineWillDealloc;
-
 @class FlutterBinaryMessengerRelay;
 
 namespace flutter {
