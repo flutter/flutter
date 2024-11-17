@@ -839,16 +839,12 @@ class FlutterPlugin implements Plugin<Project> {
      * TODO: Remove this or compareVersionStrings. This does not handle strings like "8.6-rc-2".
      */
    static String mostRecentSemanticVersion(String version1, String version2) {
-
         def v1Parts = version1.tokenize('.-')
         def v2Parts = version2.tokenize('.-')
 
-
         for (int i = 0; i < Math.max(v1Parts.size(), v2Parts.size()); i++) {
-
             def v1Part = i < v1Parts.size() ? v1Parts[i] : '0'
             def v2Part = i < v2Parts.size() ? v2Parts[i] : '0'
-
 
             def v1Num = v1Part.isNumber() ? v1Part.toInteger() : 0
             def v2Num = v2Part.isNumber() ? v2Part.toInteger() : 0
@@ -857,7 +853,6 @@ class FlutterPlugin implements Plugin<Project> {
                 return v1Num > v2Num ? version1 : version2
             }
 
-            // like -rc-1 cass
             if (v1Part.isNumber() && !v2Part.isNumber()) {
                 return version1
             } else if (!v1Part.isNumber() && v2Part.isNumber()) {
@@ -866,15 +861,12 @@ class FlutterPlugin implements Plugin<Project> {
                 return comparePreReleaseIdentifiers(v1Part, v2Part) ? version1 : version2
             }
         }
-        return version1
-        // If both are same return one of thm
+
+        // If versions are equal, return the longest version string
+        return version1.length() >= version2.length() ? version1 : version2
     }
 
-    static def comparePreReleaseIdentifiers(String v1Part, String v2Part) {
-        // i tested "rc-1" vs "rc-2" worked (rc-2)
-        // i tested "8.7-rc-1" vs "8.7" worked (8.7)
-        // i tested "8.7-rc-1" vs "8.7.2" worked (8.7.2)
-        // i tested "8.7.1" vs ""8.7.2"" worked (8.7.2)
+    static boolean comparePreReleaseIdentifiers(String v1Part, String v2Part) {
         def v1PreRelease = v1Part.replaceAll("\\D", "")
         def v2PreRelease = v2Part.replaceAll("\\D", "")
 
