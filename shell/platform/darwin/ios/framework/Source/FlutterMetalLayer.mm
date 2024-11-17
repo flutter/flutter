@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterMetalLayer.h"
 
+#include <CoreMedia/CoreMedia.h>
 #include <IOSurface/IOSurfaceObjC.h>
 #include <Metal/Metal.h>
 #include <UIKit/UIKit.h>
@@ -316,9 +317,9 @@ extern CFTimeInterval display_link_target;
 
   if (self.colorspace != nil) {
     CFStringRef name = CGColorSpaceGetName(self.colorspace);
-    IOSurfaceSetValue(res, CFSTR("IOSurfaceColorSpace"), name);
+    IOSurfaceSetValue(res, kIOSurfaceColorSpace, name);
   } else {
-    IOSurfaceSetValue(res, CFSTR("IOSurfaceColorSpace"), kCGColorSpaceSRGB);
+    IOSurfaceSetValue(res, kIOSurfaceColorSpace, kCGColorSpaceSRGB);
   }
   return (__bridge_transfer IOSurface*)res;
 }

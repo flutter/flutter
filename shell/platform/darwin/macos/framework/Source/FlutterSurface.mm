@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.h"
 
+#import <CoreMedia/CoreMedia.h>
 #import <Metal/Metal.h>
 
 #import "flutter/fml/platform/darwin/cf_utils.h"
@@ -74,7 +75,7 @@
 }
 
 + (IOSurfaceRef)createIOSurfaceWithSize:(CGSize)size {
-  unsigned pixelFormat = 'BGRA';
+  unsigned pixelFormat = kCVPixelFormatType_32BGRA;
   unsigned bytesPerElement = 4;
 
   size_t bytesPerRow = IOSurfaceAlignProperty(kIOSurfaceBytesPerRow, size.width * bytesPerElement);
@@ -89,7 +90,7 @@
   };
 
   IOSurfaceRef res = IOSurfaceCreate((CFDictionaryRef)options);
-  IOSurfaceSetValue(res, CFSTR("IOSurfaceColorSpace"), kCGColorSpaceSRGB);
+  IOSurfaceSetValue(res, kIOSurfaceColorSpace, kCGColorSpaceSRGB);
   return res;
 }
 
