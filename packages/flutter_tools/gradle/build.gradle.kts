@@ -4,7 +4,7 @@
 
 plugins {
     `java-gradle-plugin`
-     groovy
+    groovy
 }
 
 group = "dev.flutter.plugin"
