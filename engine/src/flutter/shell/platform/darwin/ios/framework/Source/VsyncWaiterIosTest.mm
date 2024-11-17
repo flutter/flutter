@@ -53,7 +53,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   auto thread_task_runner = CreateNewThread("VsyncWaiterIosTest");
   auto callback = [](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {};
   id bundleMock = OCMPartialMock([NSBundle mainBundle]);
-  OCMStub([bundleMock objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"])
+  OCMStub([bundleMock objectForInfoDictionaryKey:kCADisableMinimumFrameDurationOnPhoneKey])
       .andReturn(@YES);
   id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
   double maxFrameRate = 120;
@@ -75,7 +75,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   auto thread_task_runner = CreateNewThread("VsyncWaiterIosTest");
   auto callback = [](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {};
   id bundleMock = OCMPartialMock([NSBundle mainBundle]);
-  OCMStub([bundleMock objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"])
+  OCMStub([bundleMock objectForInfoDictionaryKey:kCADisableMinimumFrameDurationOnPhoneKey])
       .andReturn(@NO);
   id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
   double maxFrameRate = 120;
