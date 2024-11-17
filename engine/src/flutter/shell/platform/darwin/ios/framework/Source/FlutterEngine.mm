@@ -84,7 +84,6 @@ NSString* const FlutterDefaultInitialRoute = nil;
 
 #pragma mark - Internal constants
 
-NSString* const kFlutterEngineWillDealloc = @"FlutterEngineWillDealloc";
 NSString* const kFlutterKeyDataChannel = @"flutter/keydata";
 static constexpr int kNumProfilerSamplesPerSec = 5;
 
@@ -281,10 +280,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
       [object detachFromEngineForRegistrar:registrar];
     }
   }];
-
-  [[NSNotificationCenter defaultCenter] postNotificationName:kFlutterEngineWillDealloc
-                                                      object:self
-                                                    userInfo:nil];
 
   // nil out weak references.
   // TODO(cbracken): https://github.com/flutter/flutter/issues/156222

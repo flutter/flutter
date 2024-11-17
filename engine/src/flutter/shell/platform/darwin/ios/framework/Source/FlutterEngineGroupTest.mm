@@ -37,11 +37,16 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testDeleteLastEngine {
+  __weak FlutterEngine* weakSpawner;
   FlutterEngineGroup* group = [[FlutterEngineGroup alloc] initWithName:@"foo" project:nil];
   @autoreleasepool {
     FlutterEngine* spawner = [group makeEngineWithEntrypoint:nil libraryURI:nil];
+    weakSpawner = spawner;
     XCTAssertNotNil(spawner);
+    XCTAssertNotNil(weakSpawner);
   }
+  XCTAssertNil(weakSpawner);
+
   FlutterEngine* spawnee = [group makeEngineWithEntrypoint:nil libraryURI:nil];
   XCTAssertNotNil(spawnee);
 }

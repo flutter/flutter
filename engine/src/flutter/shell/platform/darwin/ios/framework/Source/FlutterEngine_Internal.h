@@ -29,8 +29,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString* const kFlutterEngineWillDealloc;
-
 @interface FlutterEngine () <FlutterViewEngineDelegate>
 
 - (flutter::Shell&)shell;

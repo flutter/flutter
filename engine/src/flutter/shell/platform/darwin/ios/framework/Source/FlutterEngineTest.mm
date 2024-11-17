@@ -262,23 +262,6 @@ FLUTTER_ASSERT_ARC
   XCTAssertNotNil(spawn);
 }
 
-- (void)testDeallocNotification {
-  XCTestExpectation* deallocNotification = [self expectationWithDescription:@"deallocNotification"];
-  NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
-  id<NSObject> observer;
-  @autoreleasepool {
-    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
-    observer = [center addObserverForName:kFlutterEngineWillDealloc
-                                   object:engine
-                                    queue:[NSOperationQueue mainQueue]
-                               usingBlock:^(NSNotification* note) {
-                                 [deallocNotification fulfill];
-                               }];
-  }
-  [self waitForExpectations:@[ deallocNotification ]];
-  [center removeObserver:observer];
-}
-
 - (void)testSetHandlerAfterRun {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
   XCTestExpectation* gotMessage = [self expectationWithDescription:@"gotMessage"];

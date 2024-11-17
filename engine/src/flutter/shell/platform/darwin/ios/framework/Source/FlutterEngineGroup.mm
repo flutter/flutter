@@ -12,7 +12,7 @@ FLUTTER_ASSERT_ARC
 
 @interface FlutterEngineGroup ()
 @property(nonatomic, copy) NSString* name;
-@property(nonatomic, strong) NSMutableArray<NSValue*>* engines;
+@property(nonatomic, strong) NSPointerArray* engines;
 @property(nonatomic, copy) FlutterDartProject* project;
 @property(nonatomic, assign) NSUInteger enginesCreatedCount;
 @end
@@ -23,7 +23,7 @@ FLUTTER_ASSERT_ARC
   self = [super init];
   if (self) {
     _name = [name copy];
-    _engines = [[NSMutableArray<NSValue*> alloc] init];
+    _engines = [NSPointerArray weakObjectsPointerArray];
     _project = project;
   }
   return self;
@@ -51,6 +51,12 @@ FLUTTER_ASSERT_ARC
   NSArray<NSString*>* entrypointArgs = options.entrypointArgs;
 
   FlutterEngine* engine;
+  // NSPointerArray is clever and assumes that unless a mutation operation has occurred on it that
+  // has set one of its values to nil, nothing could have changed and it can skip compaction.
+  // That's reasonable behaviour on a regular NSPointerArray but not for a weakObjectPointerArray.
+  // As a workaround, we mutate it first. See: http://www.openradar.me/15396578
+  [self.engines addPointer:nil];
+  [self.engines compact];
   if (self.engines.count <= 0) {
     engine = [self makeEngine];
     [engine runWithEntrypoint:entrypoint
@@ -58,20 +64,13 @@ FLUTTER_ASSERT_ARC
                  initialRoute:initialRoute
                entrypointArgs:entrypointArgs];
   } else {
-    FlutterEngine* spawner = (FlutterEngine*)[self.engines[0] pointerValue];
+    FlutterEngine* spawner = (__bridge FlutterEngine*)[self.engines pointerAtIndex:0];
     engine = [spawner spawnWithEntrypoint:entrypoint
                                libraryURI:libraryURI
                              initialRoute:initialRoute
                            entrypointArgs:entrypointArgs];
   }
-  // TODO(cbracken): https://github.com/flutter/flutter/issues/155943
-  [self.engines addObject:[NSValue valueWithPointer:(__bridge void*)engine]];
-
-  NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
-  [center addObserver:self
-             selector:@selector(onEngineWillBeDealloced:)
-                 name:kFlutterEngineWillDealloc
-               object:engine];
+  [self.engines addPointer:(__bridge void*)engine];
 
   return engine;
 }
@@ -80,11 +79,6 @@ FLUTTER_ASSERT_ARC
   NSString* engineName =
       [NSString stringWithFormat:@"%@.%lu", self.name, ++self.enginesCreatedCount];
   return [[FlutterEngine alloc] initWithName:engineName project:self.project];
-}
-
-- (void)onEngineWillBeDealloced:(NSNotification*)notification {
-  // TODO(cbracken): https://github.com/flutter/flutter/issues/155943
-  [self.engines removeObject:[NSValue valueWithPointer:(__bridge void*)notification.object]];
 }
 
 @end
