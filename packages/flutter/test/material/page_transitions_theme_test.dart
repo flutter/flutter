@@ -153,7 +153,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           pageTransitionsTheme: const PageTransitionsTheme(
-            builders: {
+            builders: <TargetPlatform, PageTransitionsBuilder>{
               TargetPlatform.android: FadeForwardsPageTransitionsBuilder(
                 backgroundColor: Colors.lightGreen,
               )
