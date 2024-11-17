@@ -2458,7 +2458,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Find ForwardGestureRecognizer
   UIGestureRecognizer* forwardGectureRecognizer = nil;
   for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-    if ([gestureRecognizer isKindOfClass:NSClassFromString(@"ForwardingGestureRecognizer")]) {
+    if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
       forwardGectureRecognizer = gestureRecognizer;
       break;
     }
@@ -2525,7 +2525,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Find ForwardGestureRecognizer
   UIGestureRecognizer* forwardGectureRecognizer = nil;
   for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-    if ([gestureRecognizer isKindOfClass:NSClassFromString(@"ForwardingGestureRecognizer")]) {
+    if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
       forwardGectureRecognizer = gestureRecognizer;
       break;
     }
@@ -2649,7 +2649,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Find ForwardGestureRecognizer
   UIGestureRecognizer* forwardGectureRecognizer = nil;
   for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-    if ([gestureRecognizer isKindOfClass:NSClassFromString(@"ForwardingGestureRecognizer")]) {
+    if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
       forwardGectureRecognizer = gestureRecognizer;
       break;
     }
@@ -2763,7 +2763,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Find ForwardGestureRecognizer
   UIGestureRecognizer* forwardGectureRecognizer = nil;
   for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-    if ([gestureRecognizer isKindOfClass:NSClassFromString(@"ForwardingGestureRecognizer")]) {
+    if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
       forwardGectureRecognizer = gestureRecognizer;
       break;
     }
@@ -2828,7 +2828,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Find ForwardGestureRecognizer
   __block UIGestureRecognizer* forwardGestureRecognizer = nil;
   for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-    if ([gestureRecognizer isKindOfClass:NSClassFromString(@"ForwardingGestureRecognizer")]) {
+    if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
       forwardGestureRecognizer = gestureRecognizer;
       break;
     }
@@ -2851,7 +2851,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   dispatch_async(dispatch_get_main_queue(), ^{
     // Re-query forward gesture recognizer since it's recreated.
     for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-      if ([gestureRecognizer isKindOfClass:NSClassFromString(@"ForwardingGestureRecognizer")]) {
+      if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
         forwardGestureRecognizer = gestureRecognizer;
         break;
       }
@@ -2873,7 +2873,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   dispatch_async(dispatch_get_main_queue(), ^{
     // Re-query forward gesture recognizer since it's recreated.
     for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-      if ([gestureRecognizer isKindOfClass:NSClassFromString(@"ForwardingGestureRecognizer")]) {
+      if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
         forwardGestureRecognizer = gestureRecognizer;
         break;
       }
