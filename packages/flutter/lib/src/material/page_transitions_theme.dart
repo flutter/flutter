@@ -534,6 +534,9 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   }
 }
 
+// This transition slides a new page in from right to left while fading it in,
+// and simultaneously slides the previous page out to the left while fading it out.
+// This transition is designed to match the Android U activity transition.
 class _FadeForwardsPageTransition extends StatelessWidget {
   const _FadeForwardsPageTransition({
     required this.animation,
