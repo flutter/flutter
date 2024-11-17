@@ -18,6 +18,8 @@
 
 FLUTTER_ASSERT_ARC
 
+NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFrameDurationOnPhone";
+
 @interface VSyncClient ()
 @property(nonatomic, assign, readonly) double refreshRate;
 @end
@@ -170,7 +172,7 @@ double VsyncWaiterIOS::GetRefreshRate() const {
 }
 
 + (BOOL)maxRefreshRateEnabledOnIPhone {
-  return [[NSBundle.mainBundle objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"]
+  return [[NSBundle.mainBundle objectForInfoDictionaryKey:kCADisableMinimumFrameDurationOnPhoneKey]
       boolValue];
 }
 
