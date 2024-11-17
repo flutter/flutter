@@ -23,7 +23,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
 const UInt32 kKeyPressClickSoundId = 1306;
 
 #if not APPLICATION_EXTENSION_API_ONLY
-const NSString* searchURLPrefix = @"x-web-search://?";
+NSString* const kSearchURLPrefix = @"x-web-search://?";
 #endif
 
 }  // namespace
@@ -226,7 +226,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
   NSString* escapedText = [searchTerm
       stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet
                                                              URLHostAllowedCharacterSet]];
-  NSString* searchURL = [NSString stringWithFormat:@"%@%@", searchURLPrefix, escapedText];
+  NSString* searchURL = [NSString stringWithFormat:@"%@%@", kSearchURLPrefix, escapedText];
 
   [[UIApplication sharedApplication] openURL:[NSURL URLWithString:searchURL]
                                      options:@{}

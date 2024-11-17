@@ -9,7 +9,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern const NSString* kDefaultAssetPath;
+extern NSString* const kDefaultAssetPath;
 
 // Finds a bundle with the named `flutterFrameworkBundleID` within `searchURL`.
 //
