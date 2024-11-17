@@ -724,6 +724,12 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 /// transition animation that looks like the default page transition
 /// used on Android U.
 ///
+/// {@tool dartpad}
+/// This example shows the default page transition on Android.
+///
+/// ** See code in examples/api/lib/material/page_transitions_theme/page_transitions_theme.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
@@ -1030,7 +1036,7 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 /// and delegates to [buildTransitions].
 ///
 /// If a builder with a matching platform is not found, then the
-/// [ZoomPageTransitionsBuilder] is used.
+/// [FadeForwardsPageTransitionsBuilder] is used.
 ///
 /// {@tool dartpad}
 /// This example shows a [MaterialApp] that defines a custom [PageTransitionsTheme].
@@ -1048,6 +1054,8 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    that's similar to the one provided by Android P.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided by Android Q.
+///  * [FadeForwardsPageTransitionsBuilder], which defines the default page transition
+///    that's similar to the one provided by Android U.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 @immutable

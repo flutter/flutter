@@ -18,7 +18,10 @@ void main() {
     expect(
       find.ancestor(
         of: find.byType(FlutterLogo),
-        matching: find.byType(FadeTransition),
+        matching: find.descendant(
+          of: find.byType(ColoredBox),
+          matching: find.byType(FadeTransition)
+        ),
       ),
       findsOneWidget,
     );
@@ -31,7 +34,10 @@ void main() {
 
     final Finder fadeTransitionFinder = find.ancestor(
       of: find.byType(FlutterLogo),
-      matching: find.byType(FadeTransition),
+      matching: find.descendant(
+        of: find.byType(ColoredBox),
+        matching: find.byType(FadeTransition)
+      ),
     );
 
     const double beginOpacity = 0.0;
