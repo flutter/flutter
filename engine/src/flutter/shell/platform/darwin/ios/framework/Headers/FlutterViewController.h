@@ -233,7 +233,7 @@ FLUTTER_DARWIN_EXPORT
  * `FlutterViewController` is initialized with or a new `FlutterEngine` implicitly created if
  * no engine was supplied during initialization.
  */
-@property(weak, nonatomic, readonly) FlutterEngine* engine;
+@property(nonatomic, readonly) FlutterEngine* engine;
 
 /**
  * The `FlutterBinaryMessenger` associated with this FlutterViewController (used for communicating
