@@ -11,13 +11,24 @@
 #include "flutter/shell/common/variable_refresh_rate_reporter.h"
 #include "flutter/shell/common/vsync_waiter.h"
 
+//------------------------------------------------------------------------------
+/// @brief      Info.plist key enabling the full range of ProMotion refresh rates for CADisplayLink
+///             callbacks and CAAnimation animations in the app.
+///
+/// @see
+/// https://developer.apple.com/documentation/quartzcore/optimizing_promotion_refresh_rates_for_iphone_13_pro_and_ipad_pro#3885321
+///
+extern NSString* const kCADisableMinimumFrameDurationOnPhoneKey;
+
 @interface DisplayLinkManager : NSObject
 
-// Whether the max refresh rate on iPhone Pro-motion devices are enabled.
-// This reflects the value of `CADisableMinimumFrameDurationOnPhone` in the
-// info.plist file.
-//
-// Note on iPads that support Pro-motion, the max refresh rate is always enabled.
+//------------------------------------------------------------------------------
+/// @brief      Whether the max refresh rate on iPhone ProMotion devices are enabled. This reflects
+///             the value of `CADisableMinimumFrameDurationOnPhone` in the info.plist file. On iPads
+///             that support ProMotion, the max refresh rate is always enabled.
+///
+/// @return     YES if the max refresh rate on ProMotion devices is enabled.
+///
 @property(class, nonatomic, readonly) BOOL maxRefreshRateEnabledOnIPhone;
 
 //------------------------------------------------------------------------------
