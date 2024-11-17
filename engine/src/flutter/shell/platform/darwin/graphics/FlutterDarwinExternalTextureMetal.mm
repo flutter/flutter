@@ -277,14 +277,14 @@ FLUTTER_ASSERT_ARC
   return nullptr;
 #else   // SLIMPELLER
   GrMtlTextureInfo ySkiaTextureInfo;
-  ySkiaTextureInfo.fTexture = sk_cfp<const void*>{(__bridge_retained const void*)yTex};
+  ySkiaTextureInfo.fTexture.retain((__bridge GrMTLHandle)yTex);
 
   GrBackendTexture skiaBackendTextures[2];
   skiaBackendTextures[0] =
       GrBackendTextures::MakeMtl(width, height, skgpu::Mipmapped::kNo, ySkiaTextureInfo);
 
   GrMtlTextureInfo uvSkiaTextureInfo;
-  uvSkiaTextureInfo.fTexture = sk_cfp<const void*>{(__bridge_retained const void*)uvTex};
+  uvSkiaTextureInfo.fTexture.retain((__bridge GrMTLHandle)uvTex);
 
   skiaBackendTextures[1] =
       GrBackendTextures::MakeMtl(width, height, skgpu::Mipmapped::kNo, uvSkiaTextureInfo);
@@ -308,7 +308,7 @@ FLUTTER_ASSERT_ARC
 #else   // SLIMPELLER
 
   GrMtlTextureInfo skiaTextureInfo;
-  skiaTextureInfo.fTexture = sk_cfp<const void*>{(__bridge_retained const void*)rgbaTex};
+  skiaTextureInfo.fTexture.retain((__bridge GrMTLHandle)rgbaTex);
 
   GrBackendTexture skiaBackendTexture =
       GrBackendTextures::MakeMtl(width, height, skgpu::Mipmapped ::kNo, skiaTextureInfo);
