@@ -747,6 +747,9 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 
   /// The background color during transition between two routes.
   ///
+  /// When a new page fades in and the old page fades out, this background color
+  /// helps avoid a black background between two page.
+  ///
   /// Defaults to [ColorScheme.surface]
   final Color? backgroundColor;
 
