@@ -167,6 +167,7 @@ void main() {
             horizontalTitleGap: 200,
             minVerticalPadding: 300,
             minLeadingWidth: 400,
+            minTileHeight: 30,
             enableFeedback: true,
             mouseCursor: MaterialStateMouseCursor.clickable,
             child: Center(
@@ -194,6 +195,7 @@ void main() {
     expect(theme.horizontalTitleGap, 200);
     expect(theme.minVerticalPadding, 300);
     expect(theme.minLeadingWidth, 400);
+    expect(theme.minTileHeight, 30);
     expect(theme.enableFeedback, true);
     expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);
   });
