@@ -79,7 +79,7 @@ class IOSCoreDeviceControl {
 
     try {
       final RunResult result = await _processUtils.run(command, throwOnError: true);
-      final bool isPossiblyShutdown = _fileSystem is LocalFileSystem && _fileSystem.disposed;
+      final bool isToolPossiblyShutdown = _fileSystem is LocalFileSystem && _fileSystem.disposed;
 
       // It's possible that the tool is in the process of shutting down, which
       // could result in the temp directory being deleted after the shutdown hooks run
@@ -88,7 +88,7 @@ class IOSCoreDeviceControl {
       // its own.
       //
       // See https://github.com/flutter/flutter/issues/141892 for details.
-      if (!isPossiblyShutdown && !output.existsSync()) {
+      if (!isToolPossiblyShutdown && !output.existsSync()) {
         _logger.printError('After running the command ${command.join(' ')} the file');
         _logger.printError('${output.path} was expected to exist, but it did not.');
         _logger.printError('The process exited with code ${result.exitCode} and');
