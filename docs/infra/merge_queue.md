@@ -3,9 +3,9 @@
 If you are not hacking on flutter/flutter, you can stop reading now.
 
 > [!IMPORTANT]
-> __tl;dr__ GitHub merge queue will be enabled in the flutter/flutter repo, which slightly changes the PR merge process, but you should not notice a change in your workflow.
+> **TL;DR** GitHub merge queue will be enabled in the `flutter/flutter` repo, which slightly changes the PR merge process, but you should not notice a change in your workflow.
 
-On Friday November 15, 2024, GitHub merge queue feature will be enabled in the flutter/flutter repo. After this change, pull requests will first need to pass merge queue tests before landing on the target branch (e.g. `main` or `master`). At this time, no additional tests will run in the merge queue. A PR that passes presubmit checks will be allowed to land on the target branch immediately.
+On Friday November 15th, 2024, GitHub merge queue feature will be enabled in the `flutter/flutter` repo. After this change, pull requests will first need to pass merge queue tests before landing on the target branch (e.g. `main` or `master`). At this time, no additional tests will run in the merge queue. A PR that passes presubmit checks will be allowed to land on the target branch immediately.
 
 ---
 
@@ -28,7 +28,7 @@ Unlike "Squash and merge", the new button does not immediately land the PR on th
 
 Yes! Feel free to continue using the `autosubmit` label as normal. The bots will run your PR through the merge queue and land it automatically.
 
-If you have an older PR from before this change, `autosubmit` may refuse to merge ot. Resync your pull request to resolve this issue.
+If you have an older PR from before this change, `autosubmit` may refuse to merge it. Resync your pull request to resolve this issue.
 
 ---
 
@@ -51,6 +51,6 @@ If you have any questions or concerns, or If you suspect you are unable to land 
 
 ### Why do we need the merge queue?
 
-The main reason for this change is that flutter/engine and flutter/flutter repos will be combined into one "monorepo". In order to preserve the current lightweight dev cycle for the framework code, we need to provide pre-built engine artifacts. This way you don't need to compile any C++ code, or install extra tooling (e.g. `depot_tools`), when hacking on the framework alone. The merge queue is what will be building those engine binaries.
+The main reason for this change is that `flutter/engine` and `flutter/flutter` repos will be combined into one "monorepo". In order to preserve the current lightweight dev cycle for the framework code, we need to provide pre-built engine artifacts. This way you don't need to compile any C++ code, or install extra tooling (e.g. `depot_tools`), when hacking on the framework alone. The merge queue is what will be building those engine binaries.
 
 The second reason is we want to be able to catch bugs earlier. Currently a PR can land on the target branch if it passes presubmit tests. However, there's no guarantee that those same tests will pass after the PR is combined with other concurrent changes to the code. When the merge queue runs tests, it will run them against combined code changes, discovering bugs from merge conflicts immediately. This should reduce the number of reverts that have to be done on our `main` and `master` branches, keeping the tree green for longer periods of time.
