@@ -52,8 +52,8 @@ _flutter_framework_headers_copy_dir =
 
 source_set("flutter_framework_source") {
   visibility = [ ":*" ]
-  cflags_objc = flutter_cflags_objc_arc
-  cflags_objcc = flutter_cflags_objcc_arc
+  cflags_objc = flutter_cflags_objc
+  cflags_objcc = flutter_cflags_objcc
 
   sources = [
     "framework/Source/AccessibilityBridgeMac.h",
@@ -173,8 +173,8 @@ test_fixtures("flutter_desktop_darwin_fixtures") {
 
 executable("flutter_desktop_darwin_unittests") {
   testonly = true
-  cflags_objc = flutter_cflags_objc_arc
-  cflags_objcc = flutter_cflags_objcc_arc
+  cflags_objc = flutter_cflags_objc
+  cflags_objcc = flutter_cflags_objcc
   ldflags = [ "-ObjC" ]
 
   sources = [

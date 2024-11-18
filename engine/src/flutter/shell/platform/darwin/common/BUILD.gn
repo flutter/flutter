@@ -9,8 +9,8 @@ import("//flutter/testing/testing.gni")
 import("framework_common.gni")
 
 source_set("common") {
-  cflags_objc = flutter_cflags_objc_arc
-  cflags_objcc = flutter_cflags_objcc_arc
+  cflags_objc = flutter_cflags_objc
+  cflags_objcc = flutter_cflags_objcc
 
   sources = [
     "buffer_conversions.h",
@@ -75,8 +75,8 @@ config("framework_relative_headers") {
 
 # Framework code shared between iOS and macOS.
 source_set("framework_common") {
-  cflags_objc = flutter_cflags_objc_arc
-  cflags_objcc = flutter_cflags_objcc_arc
+  cflags_objc = flutter_cflags_objc
+  cflags_objcc = flutter_cflags_objcc
 
   sources = [
     "framework/Source/FlutterBinaryMessengerRelay.mm",
@@ -111,8 +111,8 @@ test_fixtures("framework_common_fixtures") {
 # Unit tests for channels.
 executable("framework_common_unittests") {
   testonly = true
-  cflags_objc = flutter_cflags_objc_arc
-  cflags_objcc = flutter_cflags_objcc_arc
+  cflags_objc = flutter_cflags_objc
+  cflags_objcc = flutter_cflags_objcc
   ldflags = [ "-ObjC" ]
 
   sources = [

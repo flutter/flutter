@@ -71,8 +71,8 @@ source_set("gpu_surface_vulkan") {
 
 if (shell_enable_metal) {
   source_set("gpu_surface_metal") {
-    cflags_objc = flutter_cflags_objc_arc
-    cflags_objcc = flutter_cflags_objcc_arc
+    cflags_objc = flutter_cflags_objc
+    cflags_objcc = flutter_cflags_objcc
 
     sources = [
       "gpu_surface_metal_delegate.cc",
@@ -99,8 +99,8 @@ if (shell_enable_metal) {
 if (is_mac) {
   impeller_component("gpu_surface_metal_unittests") {
     testonly = true
-    cflags_objc = flutter_cflags_objc_arc
-    cflags_objcc = flutter_cflags_objcc_arc
+    cflags_objc = flutter_cflags_objc
+    cflags_objcc = flutter_cflags_objcc
 
     target_type = "executable"
     sources = [

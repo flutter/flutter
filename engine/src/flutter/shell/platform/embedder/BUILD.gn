@@ -144,8 +144,8 @@ template("embedder_source_set") {
     }
 
     if (embedder_enable_metal) {
-      cflags_objc = flutter_cflags_objc_arc
-      cflags_objcc = flutter_cflags_objcc_arc
+      cflags_objc = flutter_cflags_objc
+      cflags_objcc = flutter_cflags_objcc
 
       sources += [
         "embedder_external_texture_metal.h",
@@ -389,8 +389,8 @@ if (enable_unittests) {
     }
 
     if (test_enable_metal) {
-      cflags_objc = flutter_cflags_objc_arc
-      cflags_objcc = flutter_cflags_objcc_arc
+      cflags_objc = flutter_cflags_objc
+      cflags_objcc = flutter_cflags_objcc
 
       sources += [ "tests/embedder_metal_unittests.mm" ]
     }
