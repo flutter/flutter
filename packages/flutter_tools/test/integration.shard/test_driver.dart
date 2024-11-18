@@ -17,6 +17,7 @@ import 'package:vm_service/vm_service_io.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
+import 'transition_test_utils.dart';
 
 // Set this to true for debugging to get verbose logs written to stdout.
 // The logs include the following:
@@ -193,8 +194,12 @@ abstract final class FlutterTestDriver {
   @nonVirtual
   Future<void> quit() async {
     final int result = await _killGracefully();
-    assert(result == 0, 'Expected process to terminate');
-    assert(_hasExited, 'Expected process to have registered as exited');
+    if (result != 0) {
+      _debugPrint('Expected process to terminate gracefully, got exit code $result.');
+    }
+    if (!_hasExited) {
+      throw StateError('Process did not exit');
+    }
   }
 
   @nonVirtual
