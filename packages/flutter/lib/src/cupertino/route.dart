@@ -1153,11 +1153,6 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
-  final Tween<Offset> _offsetTween = Tween<Offset>(
-    begin: const Offset(0.0, 1.0),
-    end: Offset.zero,
-  );
-
   /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
 
@@ -1165,7 +1160,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   Simulation createSimulation({ required bool forward }) {
     assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     final double end = forward ? 1.0 : 0.0;
-    return SpringSimulation(_kStandardSpring, controller!.value, end, 0);
+    return _DelayedSimulation(SpringSimulation(_kStandardSpring, controller!.value, end, 0), _kStandardDelay);
   }
 
   @override
@@ -1189,6 +1184,11 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
       ),
     );
   }
+
+  static final Tween<Offset> _offsetTween = Tween<Offset>(
+    begin: const Offset(0.0, 1.0),
+    end: Offset.zero,
+  );
 }
 
 /// Shows a modal iOS-style popup that slides up from the bottom of the screen.
@@ -1278,12 +1278,6 @@ Future<T?> showCupertinoModalPopup<T>({
     ),
   );
 }
-
-// The curve and initial scale values were mostly eyeballed from iOS, however
-// they reuse the same animation curve that was modeled after native page
-// transitions.
-final Animatable<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0)
-  .chain(CurveTween(curve: Curves.linearToEaseOut));
 
 Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
   return child;
@@ -1432,33 +1426,29 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   CurvedAnimation? _fadeAnimation;
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Simulation createSimulation({ required bool forward }) {
+    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
+    final double end = forward ? 1.0 : 0.0;
+    return _DelayedSimulation(SpringSimulation(_kStandardSpring, controller!.value, end, 0), _kStandardDelay);
+  }
 
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     if (transitionBuilder != null) {
       return super.buildTransitions(context, animation, secondaryAnimation, child);
     }
 
-    if (_fadeAnimation?.parent != animation) {
-      _fadeAnimation?.dispose();
-      _fadeAnimation = CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeInOut,
-      );
-    }
-
-    final CurvedAnimation fadeAnimation = _fadeAnimation!;
-
     if (animation.status == AnimationStatus.reverse) {
       return FadeTransition(
-        opacity: fadeAnimation,
-        child: super.buildTransitions(context, animation, secondaryAnimation, child),
+        opacity: animation,
+        child: child,
       );
     }
     return FadeTransition(
-      opacity: fadeAnimation,
+      opacity: animation,
       child: ScaleTransition(
         scale: animation.drive(_dialogScaleTween),
-        child: super.buildTransitions(context, animation, secondaryAnimation, child),
+        child: child,
       ),
     );
   }
@@ -1468,4 +1458,37 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     _fadeAnimation?.dispose();
     super.dispose();
   }
+
+  // The curve and initial scale values were mostly eyeballed from iOS, however
+  // they reuse the same animation curve that was modeled after native page
+  // transitions.
+  static final Tween<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0);
+}
+
+const double _kStandardDelay = 0.020;
+class _DelayedSimulation extends Simulation {
+  _DelayedSimulation(this.baseSimulation, this.delay);
+
+  final Simulation baseSimulation;
+  // Delayed time in seconds.
+  final double delay;
+
+  double delayed(double time) {
+    return time < delay ? 0 : time - delay;
+  }
+
+  @override
+  double x(double time) => baseSimulation.x(delayed(time));
+
+  @override
+  double dx(double time) => baseSimulation.dx(delayed(time));
+
+  @override
+  bool isDone(double time) => baseSimulation.isDone(delayed(time));
+
+  @override
+  Tolerance get tolerance => baseSimulation.tolerance;
+
+  @override
+  String toString() => '$baseSimulation delayed by $delay';
 }
