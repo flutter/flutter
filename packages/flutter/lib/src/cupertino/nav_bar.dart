@@ -1073,10 +1073,19 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   Widget? effectiveLeading;
   Widget? effectiveTrailing;
   Widget? effectiveMiddle;
+  bool? effectiveStretch;
   NavigationBarBottomMode? effectiveBottomMode;
   late AnimationController _animationController;
-  late Tween<double> persistentHeightTween;
-  late Tween<double> largeTitleHeightTween;
+  Tween<double> persistentHeightTween = Tween<double>(
+    begin: _kNavBarPersistentHeight,
+    end: 0.0,
+  );
+  Tween<double> largeTitleHeightTween = Tween<double>(
+    begin: _kNavBarLargeTitleHeightExtension,
+    end: 0.0,
+  );
+  late Animation<double> persistentHeightAnimation;
+  late Animation<double> largeTitleHeightAnimation;
   bool atTop = false;
 
   @override
@@ -1085,9 +1094,16 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     keys = _NavigationBarStaticComponentsKeys();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 300),
     );
-    _animationController.forward();
+    persistentHeightAnimation = persistentHeightTween.animate(_animationController)
+      ..addListener(() {
+        setState(() { });
+      });
+    largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController)
+      ..addListener(() {
+        setState(() { });
+      });
   }
 
   @override
@@ -1140,15 +1156,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
   @override
   Widget build(BuildContext context) {
-    persistentHeightTween = Tween<double>(
-      begin: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
-      end: MediaQuery.paddingOf(context).top,
-    );
-    largeTitleHeightTween = Tween<double>(
-      begin: _kNavBarLargeTitleHeightExtension,
-      end: 0.0,
-    );
-
     if (widget.bottom is _NavigationBarSearchField && !atTop) {
       effectiveBottom = GestureDetector(
         behavior: HitTestBehavior.translucent,
@@ -1159,8 +1166,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
             effectiveTrailing = const SizedBox.shrink();
             effectiveMiddle = const SizedBox.shrink();
             effectiveBottomMode = NavigationBarBottomMode.always;
+            effectiveStretch = false;
             atTop = true;
-            _animationController.reverse();
+            _animationController.forward();
           });
         },
       );
@@ -1183,16 +1191,14 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                 effectiveTrailing = widget.trailing;
                 effectiveMiddle = widget.middle;
                 effectiveBottomMode = widget.bottomMode;
+                effectiveStretch = widget.stretch;
                 atTop = false;
-                _animationController.forward();
+                _animationController.reverse();
               });
             }),
         ],
       );
     }
-
-    final double effectivePersistentHeight = persistentHeightTween.animate(_animationController).value;
-    final double effectiveLargeTitleHeight = largeTitleHeightTween.animate(_animationController).value;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
@@ -1206,7 +1212,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       userLargeTitle: widget.largeTitle,
       padding: widget.padding,
       large: true,
-      staticBar: false // This one scrolls.
+      staticBar: false, // This one scrolls.
     );
 
     return MediaQuery.withNoTextScaling(
@@ -1227,10 +1233,10 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               actionsForegroundColor: CupertinoTheme.of(context).primaryColor,
               transitionBetweenRoutes: widget.transitionBetweenRoutes,
               heroTag: widget.heroTag,
-              persistentHeight: effectivePersistentHeight,
-              largeTitleHeight: effectiveLargeTitleHeight,
+              persistentHeight: persistentHeightAnimation.value + MediaQuery.paddingOf(context).top,
+              largeTitleHeight: largeTitleHeightAnimation.value,
               alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
-              stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
+              stretchConfiguration: effectiveStretch ?? widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
               enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
               bottom: effectiveBottom ?? widget.bottom ?? const SizedBox.shrink(),
               bottomMode: effectiveBottomMode ?? widget.bottomMode ?? NavigationBarBottomMode.automatic,
