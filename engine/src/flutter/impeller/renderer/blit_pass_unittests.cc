@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 #include <cstdint>
+#include "flutter/display_list/dl_builder.h"
+#include "flutter/impeller/display_list/aiks_unittests.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "fml/mapping.h"
 #include "gtest/gtest.h"
 #include "impeller/base/validation.h"
@@ -16,7 +19,12 @@
 namespace impeller {
 namespace testing {
 
-using BlitPassTest = PlaygroundTest;
+using flutter::DisplayListBuilder;
+using flutter::DlColor;
+using flutter::DlImageSampling;
+using flutter::DlPaint;
+
+using BlitPassTest = AiksTest;
 INSTANTIATE_PLAYGROUND_SUITE(BlitPassTest);
 
 TEST_P(BlitPassTest, BlitAcrossDifferentPixelFormatsFails) {
@@ -228,6 +236,37 @@ TEST_P(BlitPassTest, CanResizeTextures) {
   EXPECT_TRUE(blit_pass->ResizeTexture(src, dst));
   EXPECT_TRUE(blit_pass->EncodeCommands(GetContext()->GetResourceAllocator()));
   EXPECT_TRUE(context->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok());
+}
+
+TEST_P(BlitPassTest, CanResizeTexturesPlayground) {
+  auto context = GetContext();
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+
+  std::shared_ptr<Texture> src = CreateTextureForFixture("kalimba.jpg");
+
+  TextureDescriptor dst_format;
+  dst_format.storage_mode = StorageMode::kDevicePrivate;
+  dst_format.format = PixelFormat::kR8G8B8A8UNormInt;
+  dst_format.size = {src->GetSize().width / 2, src->GetSize().height};
+  dst_format.usage = TextureUsage::kShaderRead | TextureUsage::kShaderWrite;
+  auto dst = context->GetResourceAllocator()->CreateTexture(dst_format);
+
+  ASSERT_TRUE(dst);
+  ASSERT_TRUE(src);
+
+  EXPECT_TRUE(blit_pass->ResizeTexture(src, dst));
+  EXPECT_TRUE(blit_pass->EncodeCommands(GetContext()->GetResourceAllocator()));
+  EXPECT_TRUE(context->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok());
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  DlPaint paint;
+  paint.setColor(DlColor::kRed());
+  auto image = DlImageImpeller::Make(dst);
+  builder.DrawImage(image, SkPoint::Make(100.0, 100.0),
+                    DlImageSampling::kNearestNeighbor, &paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 }  // namespace testing
