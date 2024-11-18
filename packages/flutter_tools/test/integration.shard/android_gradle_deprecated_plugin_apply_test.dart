@@ -28,8 +28,6 @@ void main() {
   testWithoutContext(
       'gradle prints warning when Flutter\'s Gradle plugins are applied using deprecated "apply plugin" way', () async {
     // Create a new flutter project.
-    final String flutterBin =
-    fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',

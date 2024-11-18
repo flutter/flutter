@@ -31,12 +31,6 @@ void main() {
   });
 
   testWithoutContext('flutter run in non-machine mode reports an early error in an application', () async {
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
-
     final StringBuffer stdout = StringBuffer();
 
     final Process process = await processManager.start(<String>[

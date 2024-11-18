@@ -31,8 +31,6 @@ void main() {
   testWithoutContext(
       'gradle task exists named printBuildVariants that prints build variants', () async {
     // Create a new flutter project.
-    final String flutterBin =
-    fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',
