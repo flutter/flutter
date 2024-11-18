@@ -3,22 +3,20 @@
 // found in the LICENSE file.
 
 import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/native_assets_cli.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../../base/file_system.dart';
 import '../../../build_info.dart' hide BuildMode;
 import '../../../build_info.dart' as build_info;
-import '../../../globals.dart' as globals;
 import '../macos/native_assets_host.dart';
 
 // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
 const int targetIOSVersion = 12;
 
-IOSSdkImpl getIOSSdk(EnvironmentType environmentType) {
+IOSSdk getIOSSdk(EnvironmentType environmentType) {
   return switch (environmentType) {
-    EnvironmentType.physical  => IOSSdkImpl.iPhoneOS,
-    EnvironmentType.simulator => IOSSdkImpl.iPhoneSimulator,
+    EnvironmentType.physical  => IOSSdk.iPhoneOS,
+    EnvironmentType.simulator => IOSSdk.iPhoneSimulator,
   };
 }
 
@@ -31,13 +29,13 @@ Target getNativeIOSTarget(DarwinArch darwinArch) {
   };
 }
 
-Map<KernelAssetPath, List<NativeCodeAssetImpl>> fatAssetTargetLocationsIOS(
-    List<NativeCodeAssetImpl> nativeAssets) {
+Map<KernelAssetPath, List<CodeAsset>> fatAssetTargetLocationsIOS(
+    List<CodeAsset> nativeAssets) {
   final Set<String> alreadyTakenNames = <String>{};
-  final Map<KernelAssetPath, List<NativeCodeAssetImpl>> result =
-      <KernelAssetPath, List<NativeCodeAssetImpl>>{};
+  final Map<KernelAssetPath, List<CodeAsset>> result =
+      <KernelAssetPath, List<CodeAsset>>{};
   final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
-  for (final NativeCodeAssetImpl asset in nativeAssets) {
+  for (final CodeAsset asset in nativeAssets) {
     // Use same target path for all assets with the same id.
     final KernelAssetPath path = idToPath[asset.id] ??
         _targetLocationIOS(
@@ -45,19 +43,18 @@ Map<KernelAssetPath, List<NativeCodeAssetImpl>> fatAssetTargetLocationsIOS(
           alreadyTakenNames,
         ).path;
     idToPath[asset.id] = path;
-    result[path] ??= <NativeCodeAssetImpl>[];
+    result[path] ??= <CodeAsset>[];
     result[path]!.add(asset);
   }
   return result;
 }
 
-Map<NativeCodeAssetImpl, KernelAsset> assetTargetLocationsIOS(
-    List<NativeCodeAssetImpl> nativeAssets) {
+Map<CodeAsset, KernelAsset> assetTargetLocationsIOS(
+    List<CodeAsset> nativeAssets) {
   final Set<String> alreadyTakenNames = <String>{};
   final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
-  final Map<NativeCodeAssetImpl, KernelAsset> result =
-      <NativeCodeAssetImpl, KernelAsset>{};
-  for (final NativeCodeAssetImpl asset in nativeAssets) {
+  final Map<CodeAsset, KernelAsset> result = <CodeAsset, KernelAsset>{};
+  for (final CodeAsset asset in nativeAssets) {
     final KernelAssetPath path =
         idToPath[asset.id] ?? _targetLocationIOS(asset, alreadyTakenNames).path;
     idToPath[asset.id] = path;
@@ -70,8 +67,7 @@ Map<NativeCodeAssetImpl, KernelAsset> assetTargetLocationsIOS(
   return result;
 }
 
-KernelAsset _targetLocationIOS(
-    NativeCodeAssetImpl asset, Set<String> alreadyTakenNames) {
+KernelAsset _targetLocationIOS(CodeAsset asset, Set<String> alreadyTakenNames) {
   final LinkMode linkMode = asset.linkMode;
   final KernelAssetPath kernelAssetPath;
   switch (linkMode) {
@@ -113,52 +109,46 @@ KernelAsset _targetLocationIOS(
 /// in xcode_backend.dart.
 Future<void> copyNativeCodeAssetsIOS(
   Uri buildUri,
-  Map<KernelAssetPath, List<NativeCodeAssetImpl>> assetTargetLocations,
+  Map<KernelAssetPath, List<CodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   build_info.BuildMode buildMode,
   FileSystem fileSystem,
 ) async {
-  if (assetTargetLocations.isNotEmpty) {
-    globals.logger
-        .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
+  assert(assetTargetLocations.isNotEmpty);
+  final Map<String, String> oldToNewInstallNames = <String, String>{};
+  final List<(File, String, Directory)> dylibs = <(File, String, Directory)>[];
 
-    final Map<String, String> oldToNewInstallNames = <String, String>{};
-    final List<(File, String, Directory)> dylibs = <(File, String, Directory)>[];
-
-    for (final MapEntry<KernelAssetPath, List<NativeCodeAssetImpl>> assetMapping
-        in assetTargetLocations.entries) {
-      final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
-      final List<File> sources = <File>[
-        for (final NativeCodeAssetImpl source in assetMapping.value)
-          fileSystem.file(source.file)
-      ];
-      final Uri targetUri = buildUri.resolveUri(target);
-      final File dylibFile = fileSystem.file(targetUri);
-      final Directory frameworkDir = dylibFile.parent;
-      if (!await frameworkDir.exists()) {
-        await frameworkDir.create(recursive: true);
-      }
-      await lipoDylibs(dylibFile, sources);
-
-      final String dylibFileName = dylibFile.basename;
-      final String newInstallName =
-          '@rpath/$dylibFileName.framework/$dylibFileName';
-      final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
-      for (final String oldInstallName in oldInstallNames) {
-        oldToNewInstallNames[oldInstallName] = newInstallName;
-      }
-      dylibs.add((dylibFile, newInstallName, frameworkDir));
-
-      // TODO(knopp): Wire the value once there is a way to configure that in the hook.
-      // https://github.com/dart-lang/native/issues/1133
-      await createInfoPlist(targetUri.pathSegments.last, frameworkDir, minimumIOSVersion: '12.0');
+  for (final MapEntry<KernelAssetPath, List<CodeAsset>> assetMapping
+      in assetTargetLocations.entries) {
+    final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
+    final List<File> sources = <File>[
+      for (final CodeAsset source in assetMapping.value)
+        fileSystem.file(source.file)
+    ];
+    final Uri targetUri = buildUri.resolveUri(target);
+    final File dylibFile = fileSystem.file(targetUri);
+    final Directory frameworkDir = dylibFile.parent;
+    if (!await frameworkDir.exists()) {
+      await frameworkDir.create(recursive: true);
     }
+    await lipoDylibs(dylibFile, sources);
 
-    for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
-      await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
-      await codesignDylib(codesignIdentity, buildMode, frameworkDir);
+    final String dylibFileName = dylibFile.basename;
+    final String newInstallName =
+        '@rpath/$dylibFileName.framework/$dylibFileName';
+    final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+    for (final String oldInstallName in oldInstallNames) {
+      oldToNewInstallNames[oldInstallName] = newInstallName;
     }
+    dylibs.add((dylibFile, newInstallName, frameworkDir));
 
-    globals.logger.printTrace('Copying native assets done.');
+    // TODO(knopp): Wire the value once there is a way to configure that in the hook.
+    // https://github.com/dart-lang/native/issues/1133
+    await createInfoPlist(targetUri.pathSegments.last, frameworkDir, minimumIOSVersion: '12.0');
+  }
+
+  for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
+    await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
+    await codesignDylib(codesignIdentity, buildMode, frameworkDir);
   }
 }

@@ -20,6 +20,7 @@ import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../project.dart';
 import '../resident_runner.dart';
+import '../vmservice.dart';
 import 'debounce_data_stream.dart';
 import 'file_transfer.dart';
 
@@ -517,6 +518,9 @@ class _ProxiedLogReader extends DeviceLogReader {
       });
     }
   }
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async { }
 }
 
 /// A port forwarded by a [ProxiedPortForwarder].

@@ -257,6 +257,7 @@ class FormState extends State<Form> {
     _fields.remove(field);
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     switch (widget.autovalidateMode) {
@@ -660,24 +661,28 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @override
   String? get restorationId => widget.restorationId;
 
+  @protected
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_errorText, 'error_text');
     registerForRestoration(_hasInteractedByUser, 'has_interacted_by_user');
   }
 
+  @protected
   @override
   void deactivate() {
     Form.maybeOf(context)?._unregister(this);
     super.deactivate();
   }
 
+  @protected
   @override
   void initState() {
     super.initState();
     _errorText = RestorableStringN(widget.forceErrorText);
   }
 
+  @protected
   @override
   void didUpdateWidget(FormField<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -686,6 +691,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     }
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -713,6 +719,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     super.dispose();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     if (widget.enabled) {

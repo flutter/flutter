@@ -22,7 +22,9 @@ Future<void> processPodsIfNeeded(
 
   // When using Swift Package Manager, the Podfile may not exist so if there
   // isn't a Podfile, skip processing pods.
-  if (project.usesSwiftPackageManager && !xcodeProject.podfile.existsSync() && !forceCocoaPodsOnly) {
+  if (xcodeProject.usesSwiftPackageManager &&
+      !xcodeProject.podfile.existsSync() &&
+      !forceCocoaPodsOnly) {
     return;
   }
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
@@ -36,18 +38,20 @@ Future<void> processPodsIfNeeded(
     //  file being generated. A better long-term fix would be not to have a call to refreshPluginsList
     //  at all, and instead have it implicitly run by the FlutterCommand instead. See
     //  https://github.com/flutter/flutter/issues/157391 for details.
-    writeLegacyPluginsList: false,
+    determineDevDependencies: false,
+    generateLegacyPlugins: false,
   );
 
   // If there are no plugins and if the project is a not module with an existing
   // podfile, skip processing pods
-  if (!hasPlugins(project) && !(project.isModule && xcodeProject.podfile.existsSync())) {
+  if (!hasPlugins(project) &&
+      !(project.isModule && xcodeProject.podfile.existsSync())) {
     return;
   }
 
   // If forcing the use of only CocoaPods, but the project is using Swift
   // Package Manager, print a warning that CocoaPods will be used.
-  if (forceCocoaPodsOnly && project.usesSwiftPackageManager) {
+  if (forceCocoaPodsOnly && xcodeProject.usesSwiftPackageManager) {
     globals.logger.printWarning(
         'Swift Package Manager does not yet support this command. '
         'CocoaPods will be used instead.');
@@ -66,7 +70,8 @@ Future<void> processPodsIfNeeded(
   // If the Xcode project, Podfile, generated plugin Swift Package, or podhelper
   // have changed since last run, pods should be updated.
   final Fingerprinter fingerprinter = Fingerprinter(
-    fingerprintPath: globals.fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
+    fingerprintPath:
+        globals.fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,
@@ -85,10 +90,11 @@ Future<void> processPodsIfNeeded(
   );
 
   final bool didPodInstall = await globals.cocoaPods?.processPods(
-    xcodeProject: xcodeProject,
-    buildMode: buildMode,
-    dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
-  ) ?? false;
+        xcodeProject: xcodeProject,
+        buildMode: buildMode,
+        dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
+      ) ??
+      false;
   if (didPodInstall) {
     fingerprinter.writeFingerprint();
   }

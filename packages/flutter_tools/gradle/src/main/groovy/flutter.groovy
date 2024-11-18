@@ -79,7 +79,7 @@ class FlutterExtension {
     public String flutterVersionName = null
 
     /** Returns flutterVersionCode as an integer with error handling. */
-    public Integer getVersionCode() {
+    Integer getVersionCode() {
         if (flutterVersionCode == null) {
             throw new GradleException("flutterVersionCode must not be null.")
         }
@@ -92,7 +92,7 @@ class FlutterExtension {
     }
 
     /** Returns flutterVersionName with error handling. */
-    public String getVersionName() {
+    String getVersionName() {
         if (flutterVersionName == null) {
             throw new GradleException("flutterVersionName must not be null.")
         }
@@ -271,17 +271,11 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        Object flutterVersionCode = localProperties.getProperty("flutter.versionCode")
-        if (flutterVersionCode == null) {
-            flutterVersionCode = "1"
-        }
-        extension.flutterVersionCode = flutterVersionCode
+        String flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+        extension.flutterVersionCode = flutterVersionCode ?: "1"
 
-        Object flutterVersionName = localProperties.getProperty("flutter.versionName")
-        if (flutterVersionName == null) {
-            flutterVersionName = "1.0"
-        }
-        extension.flutterVersionName = flutterVersionName
+        String flutterVersionName = localProperties.getProperty("flutter.versionName")
+        extension.flutterVersionName = flutterVersionName ?: "1.0"
 
         this.addFlutterTasks(project)
 
@@ -683,7 +677,12 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private void configureLegacyPluginEachProjects(Project project) {
         try {
-            if (!settingsGradleFile(project).text.contains("'.flutter-plugins'")) {
+            // Read the contents of the settings.gradle file.
+            // Remove block/line comments
+            String settingsText = settingsGradleFile(project).text
+            settingsText = settingsText.replaceAll(/(?s)\/\*.*?\*\//, '').replaceAll(/(?m)\/\/.*$/, '')
+
+            if (!settingsText.contains("'.flutter-plugins'")) {
                 return
             }
         } catch (FileNotFoundException ignored) {
@@ -717,7 +716,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns `true` if the given project is a plugin project having an `android` directory
      * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    private Boolean pluginSupportsAndroidPlatform(Project project) {
+    private static Boolean pluginSupportsAndroidPlatform(Project project) {
         File buildGradle = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle")
         File buildGradleKts = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle.kts")
         return buildGradle.exists() || buildGradleKts.exists()
@@ -728,7 +727,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Kotlin variants exist, then Groovy (build.gradle) is preferred over
      * Kotlin (build.gradle.kts). This is the same behavior as Gradle 8.5.
      */
-    private File buildGradleFile(Project project) {
+    private static File buildGradleFile(Project project) {
         File buildGradle = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle")
         File buildGradleKts = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle.kts")
         if (buildGradle.exists() && buildGradleKts.exists()) {
@@ -746,7 +745,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Kotlin variants exist, then Groovy (settings.gradle) is preferred over
      * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
      */
-    private File settingsGradleFile(Project project) {
+    private static File settingsGradleFile(Project project) {
         File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
         if (settingsGradle.exists() && settingsGradleKts.exists()) {
@@ -929,7 +928,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
      * or string version.
      */
-    private String getCompileSdkFromProject(Project gradleProject) {
+    private static String getCompileSdkFromProject(Project gradleProject) {
         return gradleProject.android.compileSdkVersion.substring(8)
     }
 
@@ -997,17 +996,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (localProperties == null) {
             localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
         }
-        String result
-        if (project.hasProperty(name)) {
-            result = project.property(name)
-        }
-        if (result == null) {
-            result = localProperties.getProperty(name)
-        }
-        if (result == null) {
-            result = defaultValue
-        }
-        return result
+        String result = project.hasProperty(name) ? project.property(name) : null
+        result = result ?: localProperties?.getProperty(name)
+        return result ?: defaultValue
     }
 
     private List<String> getTargetPlatforms() {
@@ -1071,10 +1062,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Gets the target file. This is typically `lib/main.dart`.
      */
     private String getFlutterTarget() {
-        String target = project.flutter.target
-        if (target == null) {
-            target = "lib/main.dart"
-        }
+        String target = project.flutter.target ?: "lib/main.dart"
         final String propTarget = "target"
         if (project.hasProperty(propTarget)) {
             target = project.property(propTarget)
@@ -1135,7 +1123,7 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
-    private Task getAssembleTask(variant) {
+    private static Task getAssembleTask(variant) {
         // `assemble` became `assembleProvider` in AGP 3.3.0.
         return variant.hasProperty("assembleProvider") ? variant.assembleProvider.get() : variant.assemble
     }
@@ -1306,7 +1294,7 @@ class FlutterPlugin implements Plugin<Project> {
                         }
                     }
                     // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
-                    // The `$project.buildDir` is '.android/Flutter/build/' instead of 'build/'.
+                    // The `$project.layout.buildDirectory` is '.android/Flutter/build/' instead of 'build/'.
                     String buildDir = "${getFlutterSourceDirectory()}/build"
                     String nativeAssetsDir = "${buildDir}/native_assets/android/jniLibs/lib"
                     from("${nativeAssetsDir}/${abi}") {
@@ -1433,7 +1421,7 @@ class FlutterPlugin implements Plugin<Project> {
             // This path is not flavor specific and must only be added once.
             // If support for flavors is added to native assets, then they must only be added
             // once per flavor; see https://github.com/dart-lang/native/issues/1359.
-            String nativeAssetsDir = "${project.buildDir}/../native_assets/android/jniLibs/lib/"
+            String nativeAssetsDir = "${project.layout.buildDirectory.get()}/../native_assets/android/jniLibs/lib/"
             project.android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             configurePlugins(project)
             detectLowCompileSdkVersionOrNdkVersion()
@@ -1476,9 +1464,7 @@ class FlutterPlugin implements Plugin<Project> {
                     if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
                         return
                     }
-                    if (copyFlutterAssetsTask == null) {
-                        copyFlutterAssetsTask = addFlutterDeps(libraryVariant)
-                    }
+                    copyFlutterAssetsTask = copyFlutterAssetsTask ?: addFlutterDeps(libraryVariant)
                     Task mergeAssets = project
                         .tasks
                         .findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
