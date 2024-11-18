@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(matanlurey): Remove after debugging https://github.com/flutter/flutter/issues/159000.
+@Tags(<String>['flutter-build-apk'])
+library;
+
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -11,7 +15,6 @@ import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../test_utils.dart';
-import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
 /// Regression test as part of https://github.com/flutter/flutter/pull/150742.
@@ -143,6 +146,7 @@ void main(List<String> args) async {
     // TODO(matanlurey): Debug why flutter build apk often timesout.
     // See https://github.com/flutter/flutter/issues/158560 for details.
     skip: buildCommand == 'apk' ? 'flutter build apk times out' : false, // Temporary workaround for https://github.com/flutter/flutter/issues/158560.
+    tags: <String>['flutter-build-apk'],
   );
 }
 

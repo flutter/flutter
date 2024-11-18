@@ -23,6 +23,7 @@ import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
+import '../vmservice.dart';
 import 'custom_device_config.dart';
 import 'custom_device_workflow.dart';
 import 'custom_devices_config.dart';
@@ -111,6 +112,9 @@ class CustomDeviceLogReader extends DeviceLogReader {
 
   @override
   Stream<String> get logLines => logLinesController.stream;
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async { }
 }
 
 /// A [DevicePortForwarder] that uses commands to forward / unforward a port.
