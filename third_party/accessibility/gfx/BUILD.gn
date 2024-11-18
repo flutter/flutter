@@ -51,8 +51,8 @@ source_set("gfx") {
       "mac/coordinate_conversion.h",
       "mac/coordinate_conversion.mm",
     ]
-    cflags_objc = flutter_cflags_objc_arc
-    cflags_objcc = flutter_cflags_objcc_arc
+    cflags_objc = flutter_cflags_objc
+    cflags_objcc = flutter_cflags_objcc
   }
 
   deps = [

@@ -193,8 +193,8 @@ if (is_mac || is_ios) {
     testonly = true
 
     if (shell_enable_metal) {
-      cflags_objc = flutter_cflags_objc_arc
-      cflags_objcc = flutter_cflags_objcc_arc
+      cflags_objc = flutter_cflags_objc
+      cflags_objcc = flutter_cflags_objcc
 
       sources = [
         "test_metal_context.h",
@@ -257,8 +257,8 @@ if (enable_unittests) {
     ]
 
     if (test_enable_metal) {
-      cflags_objc = flutter_cflags_objc_arc
-      cflags_objcc = flutter_cflags_objcc_arc
+      cflags_objc = flutter_cflags_objc
+      cflags_objcc = flutter_cflags_objcc
 
       sources += [ "test_metal_surface_unittests.mm" ]
       deps += [ ":metal" ]
