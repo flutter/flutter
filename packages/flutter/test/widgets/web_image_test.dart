@@ -1157,7 +1157,7 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(errorKey), findsOneWidget);
-    expect(caughtException, isA<_TestException>().having((e) => e.message, 'message', 'threw'));
+    expect(caughtException, isA<_TestException>().having((_TestException e) => e.message, 'message', 'threw'));
     expect(tester.takeException(), isNull);
   });
 
@@ -1170,7 +1170,7 @@ void main() {
 
     await tester.pump();
 
-    expect(tester.takeException(), isA<_TestException>().having((e) => e.message, 'message', 'threw'));
+    expect(tester.takeException(), isA<_TestException>().having((_TestException e) => e.message, 'message', 'threw'));
   });
 }
 
