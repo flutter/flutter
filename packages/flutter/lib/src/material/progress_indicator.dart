@@ -748,11 +748,13 @@ class CircularProgressIndicator extends ProgressIndicator {
   }) : _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
-  /// [CupertinoActivityIndicator] in [TargetPlatform.iOS] & [TargetPlatform.macOS] and [CircularProgressIndicator] in
-  /// material theme/non-Apple platforms.
+  /// [CupertinoActivityIndicator] on [TargetPlatform.iOS] &
+  /// [TargetPlatform.macOS] and a [CircularProgressIndicator] in material
+  /// theme/non-Apple platforms.
   ///
-  /// The [value], [valueColor], [strokeWidth], [semanticsLabel], and
-  /// [semanticsValue] will be ignored in iOS & macOS.
+  /// The [valueColor], [strokeWidth], [strokeAlign], [strokeCap],
+  /// [semanticsLabel], [semanticsValue], [trackGap], [year2023] will be
+  /// ignored on iOS & macOS.
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator.adaptive({
@@ -769,7 +771,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.trackGap,
     @Deprecated(
       'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
-      'This feature was deprecated after v3.26.0-0.1.pre.'
+      'This feature was deprecated after v3.27.0-0.2.pre.'
     )
     this.year2023 = true,
   }) : _indicatorType = _ActivityIndicatorType.adaptive;
@@ -848,7 +850,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
   @Deprecated(
     'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
-    'This feature was deprecated after v3.27.0-0.1.pre.'
+    'This feature was deprecated after v3.27.0-0.2.pre.'
   )
   final bool year2023;
 
