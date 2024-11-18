@@ -871,7 +871,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     super.settings,
     super.requestFocus,
     this.popUpAnimationStyle,
-  }) : assert(position != null || positionBuilder != null,
+  }) : assert((position != null) != (positionBuilder != null),
         'Either position or positionBuilder must be provided.'),
        itemSizes = List<Size?>.filled(items.length, null),
        // Menus always cycle focus through their items irrespective of the
