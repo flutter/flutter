@@ -1458,7 +1458,7 @@ void main() {
     expect(focusNode2.hasFocus, isTrue);
   });
 
-  testWidgets('AutovalidateMode.always should validate on first build', (WidgetTester tester) async {
+  testWidgets('AutovalidateMode.always should validate on second build', (WidgetTester tester) async {
     String errorText(String? value) => '$value/error';
 
     await tester.pumpWidget(
@@ -1482,12 +1482,18 @@ void main() {
               ),
             ),
           ),
-        )
-      )
+        ),
+      ),
     );
+
+    // The validation happens in a post frame callback, so the error
+    // doesn't show up until the second frame.
+    expect(find.text(errorText('foo')), findsNothing);
+    expect(find.text(errorText('bar')), findsNothing);
 
     await tester.pump();
 
+    // The error shows up on the second frame.
     expect(find.text(errorText('foo')), findsOneWidget);
     expect(find.text(errorText('bar')), findsOneWidget);
   });
