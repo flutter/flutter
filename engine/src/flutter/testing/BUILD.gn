@@ -223,8 +223,12 @@ if (use_swiftshader) {
     testonly = true
 
     sources = [
+      "test_gl_context.cc",
+      "test_gl_context.h",
       "test_gl_surface.cc",
       "test_gl_surface.h",
+      "test_gl_utils.cc",
+      "test_gl_utils.h",
     ]
 
     deps = [

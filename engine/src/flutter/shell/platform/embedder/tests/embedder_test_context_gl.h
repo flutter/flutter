@@ -7,7 +7,7 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
 
-#include "flutter/testing/test_gl_surface.h"
+#include "flutter/testing/test_gl_context.h"
 
 namespace flutter {
 namespace testing {
