@@ -24,7 +24,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../src/common.dart';
-import '../test_utils.dart' show fileSystem, platform;
+import '../test_utils.dart' show fileSystem, flutterBin, platform;
 import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 

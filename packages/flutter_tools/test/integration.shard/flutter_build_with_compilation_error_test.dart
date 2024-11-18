@@ -15,7 +15,6 @@ import 'test_utils.dart';
 void main() {
   late Directory tempDir;
   late Directory projectRoot;
-  late String flutterBin;
   final List<String> targetPlatforms = <String>[
     'apk',
     'web',
@@ -27,11 +26,6 @@ void main() {
 
   setUpAll(() {
     tempDir = createResolvedTempDirectorySync('build_compilation_error_test.');
-    flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
     processManager.runSync(<String>[flutterBin, 'config',
       '--enable-macos-desktop',
       '--enable-windows-desktop',
