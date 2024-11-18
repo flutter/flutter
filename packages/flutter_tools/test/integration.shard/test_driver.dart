@@ -17,7 +17,6 @@ import 'package:vm_service/vm_service_io.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
-import 'transition_test_utils.dart';
 
 // Set this to true for debugging to get verbose logs written to stdout.
 // The logs include the following:
