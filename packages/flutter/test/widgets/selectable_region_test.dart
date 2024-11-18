@@ -4693,19 +4693,16 @@ void main() {
   );
 
   testWidgets('SelectionListener onSelectionChanged is accurate with WidgetSpans', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
     final List<String> dataModel = <String>[
       'Hello world, ',
       'how are you today.',
     ];
     final SelectionListenerNotifier selectionNotifier = SelectionListenerNotifier();
-    addTearDown(focusNode.dispose);
     addTearDown(selectionNotifier.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
           child: SelectionListener(
             selectionNotifier: selectionNotifier,
@@ -4815,7 +4812,6 @@ void main() {
   });
 
   testWidgets('onSelectionChanged SelectedContentRange is accurate', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
     final List<String> dataModel = <String>[
       'How are you?',
       'Good, and you?',
@@ -4823,13 +4819,11 @@ void main() {
     ];
     final SelectionListenerNotifier selectionNotifier = SelectionListenerNotifier();
     SelectedContentRange? selectedRange;
-    addTearDown(focusNode.dispose);
     addTearDown(selectionNotifier.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
           child: SelectionListener(
             selectionNotifier: selectionNotifier,
