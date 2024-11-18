@@ -22,8 +22,6 @@ void main() {
   testWithoutContext(
       'gradle task succeeds when adding plugins with gradle daemon enabled',
       () async {
-    final String flutterBin =
-        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final Directory appDir = tempDir.childDirectory('testapp');
     final Directory androidDir = appDir.childDirectory('android');
 

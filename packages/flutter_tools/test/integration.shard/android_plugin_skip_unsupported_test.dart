@@ -37,12 +37,6 @@ void main() {
     required Project project,
     required bool createAndroidPluginFolder,
   }) async {
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
-
     // Create dummy plugin that supports iOS and optionally Android.
     processManager.runSync(<String>[
       flutterBin,

@@ -17,7 +17,6 @@ final String automatedTestsDirectory = fileSystem.path.join('..', '..', 'dev', '
 final String missingDependencyDirectory = fileSystem.path.join('..', '..', 'dev', 'missing_dependency_tests');
 final String flutterTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'flutter_test');
 final String integrationTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'integration_test');
-final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
 
 // Running Integration Tests in the Flutter Tester will still exercise the same
 // flows specific to Integration Tests.

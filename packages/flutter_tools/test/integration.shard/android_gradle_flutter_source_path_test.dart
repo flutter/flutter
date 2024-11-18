@@ -29,11 +29,6 @@ void main() {
     final Project project = DeferredComponentsProject(
       MissingFlutterSourcePathDeferredComponentsConfig(),
     );
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
 
     final Directory exampleAppDir = tempDir.childDirectory('example');
     await project.setUpIn(exampleAppDir);

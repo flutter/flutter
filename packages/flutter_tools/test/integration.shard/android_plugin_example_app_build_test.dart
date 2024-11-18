@@ -32,12 +32,6 @@ void main() {
     required String template,
     required Directory tempDir,
   }) async {
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
-
     final String testName = '${template}_test';
 
     ProcessResult result = processManager.runSync(<String>[

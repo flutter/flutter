@@ -92,7 +92,6 @@ abstract class FlutterTestDriver {
     bool withDebugger = false,
     bool verbose = false,
   }) async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     if (withDebugger) {
       arguments.add('--start-paused');
     }

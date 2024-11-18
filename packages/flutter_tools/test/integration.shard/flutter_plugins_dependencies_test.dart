@@ -30,9 +30,6 @@ void main() {
       '.flutter-plugins-dependencies correctly denotes project dev dependencies on all default platforms',
       () async {
     // Create Flutter project.
-    final String flutterBin =
-        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-
     await processManager.run(<String>[
       flutterBin,
       'create',

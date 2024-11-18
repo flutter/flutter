@@ -24,12 +24,6 @@ void main() {
   });
 
   test('error logged when plugin Android compileSdk version higher than project', () async {
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
-
     // Create dummy plugin
     processManager.runSync(<String>[
       flutterBin,

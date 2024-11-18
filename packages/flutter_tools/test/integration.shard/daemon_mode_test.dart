@@ -31,8 +31,6 @@ void main() {
     final BasicProject project = BasicProject();
     await project.setUpIn(tempDir);
 
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-
     const ProcessManager processManager = LocalProcessManager();
     daemonProcess = await processManager.start(
       <String>[flutterBin, ...getLocalEngineArguments(), '--show-test-device', 'daemon'],

@@ -20,7 +20,6 @@ const String runDevToolsMessage = 'dart devtools ';
 void main() {
   testWithoutContext('--analyze-size flag produces expected output on hello_world for Android', () async {
     final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'build',
@@ -53,7 +52,6 @@ void main() {
 
   testWithoutContext('--analyze-size flag produces expected output on hello_world for iOS', () async {
     final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_size_test.');
     final Directory codeSizeDir = tempDir.childDirectory('code size dir')..createSync();
     final ProcessResult result = await processManager.run(<String>[
@@ -91,7 +89,6 @@ void main() {
 
   testWithoutContext('--analyze-size flag produces expected output on hello_world for macOS', () async {
     final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_size_test.');
     final Directory codeSizeDir = tempDir.childDirectory('code size dir')..createSync();
 
@@ -143,7 +140,6 @@ void main() {
   }, skip: !platform.isMacOS); // [intended] this is a macos only test.
 
   testWithoutContext('--analyze-size is only supported in release mode', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'build',
@@ -163,7 +159,6 @@ void main() {
   });
 
   testWithoutContext('--analyze-size is not supported in combination with --split-debug-info', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final List<String> command = <String>[
       flutterBin,
       'build',
@@ -188,7 +183,6 @@ void main() {
   });
 
   testWithoutContext('--analyze-size allows overriding the directory for code size files', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_size_test.');
 
     final List<String> command = <String>[

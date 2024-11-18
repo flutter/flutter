@@ -67,11 +67,6 @@ Future<void> main() async {
         ..createSync(recursive: true)
         ..writeAsStringSync('abc');
 
-      final String flutterBin = fileSystem.path.join(
-        getFlutterRoot(),
-        'bin',
-        'flutter',
-      );
       final ProcessResult result = await processManager.run(
         <String>[
           flutterBin,

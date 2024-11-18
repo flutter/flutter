@@ -15,7 +15,6 @@ import 'test_utils.dart';
 void main() {
   test('android project using deprecated settings.gradle will still build', () async {
     final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'gradle_deprecated_settings');
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
     final File settingsDotGradleFile = fileSystem.file(
         fileSystem.path.join(workingDirectory, 'android', 'settings.gradle'));
