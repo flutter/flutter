@@ -13,6 +13,13 @@
 
 namespace flutter::testing {
 
+namespace {
+struct UserData {
+  sk_sp<SkSurface> surface;
+  FlutterVulkanImage* image;
+};
+}  // namespace
+
 EmbedderTestBackingStoreProducerVulkan::EmbedderTestBackingStoreProducerVulkan(
     sk_sp<GrDirectContext> context,
     RenderTargetType type)
@@ -83,7 +90,7 @@ bool EmbedderTestBackingStoreProducerVulkan::Create(
 
   // Collect all allocated resources in the destruction_callback.
   {
-    auto user_data = new UserData(surface, image);
+    auto user_data = new UserData{.surface = surface, .image = image};
     backing_store_out->user_data = user_data;
     backing_store_out->vulkan.user_data = user_data;
     backing_store_out->vulkan.destruction_callback = [](void* user_data) {
@@ -94,6 +101,18 @@ bool EmbedderTestBackingStoreProducerVulkan::Create(
   }
 
   return true;
+}
+
+sk_sp<SkSurface> EmbedderTestBackingStoreProducerVulkan::GetSurface(
+    const FlutterBackingStore* backing_store) const {
+  UserData* user_data = reinterpret_cast<UserData*>(backing_store->user_data);
+  return user_data->surface;
+}
+
+sk_sp<SkImage> EmbedderTestBackingStoreProducerVulkan::MakeImageSnapshot(
+    const FlutterBackingStore* backing_store) const {
+  UserData* user_data = reinterpret_cast<UserData*>(backing_store->user_data);
+  return user_data->surface->makeImageSnapshot();
 }
 
 }  // namespace flutter::testing
