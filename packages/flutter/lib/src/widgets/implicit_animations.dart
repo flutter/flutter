@@ -369,6 +369,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   Animation<double> get animation => _animation;
   late CurvedAnimation _animation = _createCurve();
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -381,6 +382,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     didUpdateTweens();
   }
 
+  @protected
   @override
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -405,6 +407,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     return CurvedAnimation(parent: _controller, curve: widget.curve);
   }
 
+  @protected
   @override
   void dispose() {
     _animation.dispose();
@@ -554,6 +557,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 /// [AnimatedWidgetBaseState] to iterate through the subclasses' widget's fields
 /// and animate them.
 abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends ImplicitlyAnimatedWidgetState<T> {
+  @protected
   @override
   void initState() {
     super.initState();
