@@ -216,6 +216,7 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     }
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollMetricsNotification>(
@@ -239,6 +240,7 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     );
   }
 
+  @protected
   @override
   void dispose() {
     assert(_debugAssertNotDisposed());

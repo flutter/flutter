@@ -375,6 +375,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   FocusNode? _localFocusNode;
   FocusNode get _focusNode => widget.focusNode ?? (_localFocusNode ??= FocusNode(debugLabel: 'SelectableRegion'));
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -398,6 +399,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _processTextActions.addAll(await _processTextService.queryTextActions());
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -424,6 +426,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
   }
 
+  @protected
   @override
   void didUpdateWidget(SelectableRegion oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1704,6 +1707,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectable = null;
   }
 
+  @protected
   @override
   void dispose() {
     _selectable?.removeListener(_updateSelectionStatus);
@@ -1720,6 +1724,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     super.dispose();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));

@@ -706,6 +706,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     return true;
   }
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -715,6 +716,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -797,6 +799,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       : SelectionContainer.disabled(child: overlayChild);
   }
 
+  @protected
   @override
   void dispose() {
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
@@ -815,6 +818,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     // If message is empty then no need to create a tooltip overlay to show

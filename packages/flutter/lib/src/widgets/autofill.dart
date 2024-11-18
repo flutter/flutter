@@ -213,12 +213,14 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
     _clients.remove(autofillId);
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _isTopmostAutofillGroup = AutofillGroup.maybeOf(context) == null;
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     return _AutofillScope(
@@ -227,6 +229,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
     );
   }
 
+  @protected
   @override
   void dispose() {
     super.dispose();

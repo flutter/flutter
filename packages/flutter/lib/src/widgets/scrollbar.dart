@@ -1378,6 +1378,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   bool get enableGestures => widget.interactive ?? true;
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -1404,6 +1405,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     );
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -1562,6 +1564,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..ignorePointer = !enableGestures;
   }
 
+  @protected
   @override
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -2159,6 +2162,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
   }
 
+  @protected
   @override
   void dispose() {
     _fadeoutAnimationController.dispose();
@@ -2168,6 +2172,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     super.dispose();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     updateScrollbarPainter();

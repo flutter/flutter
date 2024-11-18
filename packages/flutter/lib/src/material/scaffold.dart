@@ -197,6 +197,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   Timer? _snackBarTimer;
   bool? _accessibleNavigation;
 
+  @protected
   @override
   void didChangeDependencies() {
     final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
@@ -604,6 +605,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     hideCurrentMaterialBanner();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -632,6 +634,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     );
   }
 
+  @protected
   @override
   void dispose() {
     _materialBannerController?.dispose();
@@ -2116,6 +2119,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   @override
   String? get restorationId => widget.restorationId;
 
+  @protected
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_drawerOpened, 'drawer_open');
@@ -2676,6 +2680,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     return widget.resizeToAvoidBottomInset ?? true;
   }
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -2695,6 +2700,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     );
   }
 
+  @protected
   @override
   void didUpdateWidget(Scaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -2732,6 +2738,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     }
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     // Using maybeOf is valid here since both the Scaffold and ScaffoldMessenger
@@ -2750,6 +2757,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     super.didChangeDependencies();
   }
 
+  @protected
   @override
   void dispose() {
     _geometryNotifier.dispose();
@@ -2864,6 +2872,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     });
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
