@@ -1012,9 +1012,10 @@ typedef PopupMenuPositionBuilder = RelativeRect Function();
 ///
 /// The `items` parameter must not be empty.
 ///
-/// Either [position] or [positionBuilder] must be provided. If both are specified,
-/// [position] takes precedence. The [positionBuilder] is called at the time the
-/// menu is shown to compute its position, which is useful when the position needs
+/// Only one of [position] or [positionBuilder] should be provided. Providing both
+/// throws an assertion error. The [positionBuilder] is called at the time the
+/// menu is shown to compute its position and every time the layout is updated,
+/// which is useful when the position needs
 /// to be determined at runtime based on the current layout.
 ///
 /// If `initialValue` is specified then the first item with a matching value
