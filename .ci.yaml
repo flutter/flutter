@@ -1561,7 +1561,6 @@ targets:
 
   - name: Linux web_benchmarks_skwasm_st
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -6370,7 +6369,6 @@ targets:
 
   - name: Windows windows_desktop_impeller
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
