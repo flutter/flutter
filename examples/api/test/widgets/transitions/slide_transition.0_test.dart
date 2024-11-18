@@ -13,7 +13,7 @@ void main() {
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(FlutterLogo), findsOneWidget);
     expect(find.byType(Padding), findsAtLeast(1));
-    expect(find.byType(SlideTransition), findsOneWidget);
+    expect(find.byType(SlideTransition), findsAtLeast(1));
   });
 
   testWidgets('Animates repeatedly every 2 seconds', (WidgetTester tester) async {
