@@ -152,7 +152,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     final Duration duration = _getTransitionDuration(context);
     controller?.duration = duration;
-    controller?.reverseDuration = duration;
+    controller?.reverseDuration = reverseTransitionDuration;
 
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }

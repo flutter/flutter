@@ -802,44 +802,36 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
         Animation<double> animation,
         Widget? child
       ) {
-        child = FadeTransition(
-          opacity: _fadeInTransition.animate(animation),
-          child: SlideTransition(
-            position: _secondaryForwardTranslationTween.animate(animation),
-            child: child,
+        return ColoredBox(
+          color: animation.isAnimating
+            ? backgroundColor ?? Theme.of(context).colorScheme.surface
+            : Colors.transparent,
+          child: FadeTransition(
+            opacity: _fadeInTransition.animate(animation),
+            child: SlideTransition(
+              position: _secondaryForwardTranslationTween.animate(animation),
+              child: child,
+            ),
           ),
         );
-
-        if (animation.isAnimating) {
-          return ColoredBox(
-            color: backgroundColor ?? Theme.of(context).colorScheme.surface,
-            child: child,
-          );
-        }
-
-        return child;
       },
       reverseBuilder: (
         BuildContext context,
         Animation<double> animation,
         Widget? child
       ) {
-        child = FadeTransition(
-          opacity: _fadeOutTransition.animate(animation),
-          child: SlideTransition(
-            position: _secondaryBackwardTranslationTween.animate(animation),
-            child: child,
+        return ColoredBox(
+          color: animation.isAnimating
+            ? backgroundColor ?? Theme.of(context).colorScheme.surface
+            : Colors.transparent,
+          child: FadeTransition(
+            opacity: _fadeOutTransition.animate(animation),
+            child: SlideTransition(
+              position: _secondaryBackwardTranslationTween.animate(animation),
+              child: child,
+            ),
           ),
         );
-
-        if (animation.isAnimating) {
-          return ColoredBox(
-            color: backgroundColor ?? Theme.of(context).colorScheme.surface,
-            child: child,
-          );
-        }
-
-        return child;
       },
       child: child,
     );

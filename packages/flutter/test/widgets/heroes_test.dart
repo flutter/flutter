@@ -460,7 +460,7 @@ Future<void> main() async {
     // Expect the height of the secondKey Hero to vary from 100 to 150
     // over duration and according to curve.
 
-    const Duration duration = Duration(milliseconds: 300);
+    const Duration duration = Duration(milliseconds: 800);
     const Curve curve = Curves.fastOutSlowIn;
     final double initialHeight = tester.getSize(find.byKey(firstKey, skipOffstage: false)).height;
     final double finalHeight = tester.getSize(find.byKey(secondKey, skipOffstage: false)).height;
@@ -875,7 +875,7 @@ Future<void> main() async {
     expect(midflightHeight, greaterThan(initialHeight));
     expect(midflightHeight, lessThan(200.0));
 
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
     double finalHeight = tester.getSize(find.byKey(routeHeroKey)).height;
     expect(finalHeight, 200.0);
@@ -906,7 +906,7 @@ Future<void> main() async {
     });
     await tester.pump();
 
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 800));
     finalHeight = tester.getSize(find.byKey(homeHeroKey)).height;
     expect(finalHeight, 100.0);
 
@@ -1071,7 +1071,7 @@ Future<void> main() async {
     expect(yAt110ms, lessThan(yAt100ms));
     expect(yAt110ms, greaterThan(100.0));
 
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
     expect(find.byKey(routeHeroKey), findsNothing);
   });
@@ -1175,11 +1175,11 @@ Future<void> main() async {
     final double initialY = tester.getTopLeft(find.byKey(heroABKey)).dy;
     expect(initialY, 200.0);
 
-    await tester.pump(const Duration(milliseconds: 200));
-    final double yAt200ms = tester.getTopLeft(find.byKey(heroABKey)).dy;
+    await tester.pump(const Duration(milliseconds: 600));
+    final double yAt600ms = tester.getTopLeft(find.byKey(heroABKey)).dy;
     // Hero AB is mid flight.
-    expect(yAt200ms, lessThan(200.0));
-    expect(yAt200ms, greaterThan(100.0));
+    expect(yAt600ms, lessThan(200.0));
+    expect(yAt600ms, greaterThan(100.0));
 
     // Pushes route C, causes hero AB's flight to abort, hero BC's flight to start
     await tester.tap(find.text('PUSH C'));
@@ -1188,7 +1188,7 @@ Future<void> main() async {
 
     // Hero AB's aborted flight finishes where it was expected although
     // it's been faded out.
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 200));
     expect(tester.getTopLeft(find.byKey(heroABKey)).dy, 100.0);
 
     bool isVisible(RenderObject node) {
@@ -1207,7 +1207,7 @@ Future<void> main() async {
     expect(renderObjects.where(isVisible).length, 1);
 
     // Hero BC's flight finishes normally.
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 800));
     expect(tester.getTopLeft(find.byKey(heroBCKey)).dy, 0.0);
   });
 
@@ -1341,7 +1341,7 @@ Future<void> main() async {
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
 
     const double epsilon = 0.001;
-    const Duration duration = Duration(milliseconds: 300);
+    const Duration duration = Duration(milliseconds: 800);
     const Curve curve = Curves.fastOutSlowIn;
     final MaterialPointArcTween pushCenterTween = MaterialPointArcTween(
       begin: const Offset(50.0, 50.0),
@@ -1461,7 +1461,7 @@ Future<void> main() async {
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(leftPadding + 50.0, 50.0));
 
     const double epsilon = 0.001;
-    const Duration duration = Duration(milliseconds: 300);
+    const Duration duration = Duration(milliseconds: 800);
     const Curve curve = Curves.fastOutSlowIn;
     final RectTween pushRectTween = RectTween(
       begin: const Rect.fromLTWH(leftPadding, 0.0, 100.0, 100.0),
@@ -1534,7 +1534,7 @@ Future<void> main() async {
     await tester.pump(); // begin navigation from / to /twoInset.
 
     const double epsilon = 0.001;
-    const Duration duration = Duration(milliseconds: 300);
+    const Duration duration = Duration(milliseconds: 800);
 
     await tester.pump();
     final double x0 = tester.getTopLeft(find.byKey(secondKey)).dx;
@@ -2940,23 +2940,23 @@ Future<void> main() async {
     navigator.currentState!.pop();
     await tester.pump();
 
-    // Jump 25% into the transition (total length = 300ms)
-    await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
+    // Jump 25% into the transition (total length = 200ms)
+    await tester.pump(const Duration(milliseconds: 200)); // 25% of 800ms
     Size heroSize = tester.getSize(find.byKey(container1));
     expect(heroSize, tween.transform(0.25));
 
     // Jump to 50% into the transition.
-    await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
+    await tester.pump(const Duration(milliseconds: 200)); // 25% of 800ms
     heroSize = tester.getSize(find.byKey(container1));
     expect(heroSize, tween.transform(0.50));
 
     // Jump to 75% into the transition.
-    await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
+    await tester.pump(const Duration(milliseconds: 200)); // 25% of 800ms
     heroSize = tester.getSize(find.byKey(container1));
     expect(heroSize, tween.transform(0.75));
 
     // Jump to 100% into the transition.
-    await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
+    await tester.pump(const Duration(milliseconds: 200)); // 25% of 800ms
     heroSize = tester.getSize(find.byKey(container1));
     expect(heroSize, tween.transform(1.0));
   });
@@ -3378,7 +3378,7 @@ Future<void> main() async {
 
     navigatorKey.currentState!.pop(route2);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 800));
     expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
