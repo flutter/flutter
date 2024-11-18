@@ -126,6 +126,9 @@ abstract final class FlutterTestDriver {
     // via a getter for external uses.
     unawaited(_process!.exitCode.then((int code) {
       _debugPrint('Process exited ($code)');
+      // The timing of this signal is important to the implementation of the
+      // "quit" method, so only change how this is implemented by careful
+      // testing of tests that use FlutterTestDriver.
       _hasExited = true;
     }));
     transformToLines(_process!.stdout).listen(_stdout.add);
@@ -196,6 +199,11 @@ abstract final class FlutterTestDriver {
     if (result != 0) {
       _debugPrint('Expected process to terminate gracefully, got exit code $result.');
     }
+
+    // The _hasExited signal could be on the microtask queue. Waiting for a
+    // Future(...) queues an event similar to Timer.run(Duration.zero), which
+    // guarantees the current queue has elapsed before moving on.
+    await Future<void>(() {});
     if (!_hasExited) {
       throw StateError('Process did not exit');
     }
