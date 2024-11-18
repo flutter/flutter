@@ -689,10 +689,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // Intrinsic cross size is the max of the intrinsic cross sizes of the
       // children, after the flexible children are fit into the available space,
       // with the children sized using their max intrinsic dimensions.
-      final bool isHorizontal = switch (direction) {
-        Axis.horizontal => true,
-        Axis.vertical   => false,
-      };
+      final bool isHorizontal = direction == Axis.horizontal;
 
       Size layoutChild(RenderBox child, BoxConstraints constraints) {
         final double mainAxisSizeFromConstraints = isHorizontal ? constraints.maxWidth : constraints.maxHeight;
@@ -795,27 +792,19 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   // left-to-right/top-to-bottom (false), or right-to-left/bottom-to-top
   // (true). Returns false in cases when the layout direction does not matter
   // (for instance, there is no child).
-  bool get _flipMainAxis => firstChild != null && switch (direction) {
-    Axis.horizontal => switch (textDirection) {
-      null || TextDirection.ltr => false,
-      TextDirection.rtl => true,
-    },
-    Axis.vertical => switch (verticalDirection) {
-      VerticalDirection.down => false,
-      VerticalDirection.up => true,
-    },
-  };
+  bool get _flipMainAxis =>
+      firstChild != null &&
+      switch (direction) {
+        Axis.horizontal => textDirection == TextDirection.rtl,
+        Axis.vertical => verticalDirection == VerticalDirection.up,
+      };
 
-  bool get _flipCrossAxis => firstChild != null && switch (direction) {
-    Axis.vertical => switch (textDirection) {
-      null || TextDirection.ltr => false,
-      TextDirection.rtl => true,
-    },
-    Axis.horizontal => switch (verticalDirection) {
-      VerticalDirection.down => false,
-      VerticalDirection.up => true,
-    },
-  };
+  bool get _flipCrossAxis =>
+      firstChild != null &&
+      switch (direction) {
+        Axis.vertical => textDirection == TextDirection.rtl,
+        Axis.horizontal => verticalDirection == VerticalDirection.up,
+      };
 
   BoxConstraints _constraintsForNonFlexChild(BoxConstraints constraints) {
     final bool fillCrossAxis = switch (crossAxisAlignment) {
