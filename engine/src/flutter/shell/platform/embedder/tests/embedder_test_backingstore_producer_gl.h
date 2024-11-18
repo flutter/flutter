@@ -9,7 +9,7 @@
 
 #include <memory>
 
-#include "flutter/testing/test_gl_surface.h"
+#include "flutter/testing/test_gl_context.h"
 
 namespace flutter::testing {
 

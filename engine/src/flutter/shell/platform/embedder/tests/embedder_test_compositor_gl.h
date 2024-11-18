@@ -10,7 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test_compositor.h"
-#include "flutter/testing/test_gl_surface.h"
+#include "flutter/testing/test_gl_context.h"
 
 namespace flutter {
 namespace testing {
