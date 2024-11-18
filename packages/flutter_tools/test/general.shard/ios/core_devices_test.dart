@@ -1434,8 +1434,9 @@ invalid JSON
         fakeProcessManager.addCommand(FakeCommand(
           command: args,
           onRun: (_) {
-            // Simulate that this command deleted tempFile, did not create a
-            // new one, and exited successfully
+            // Simulate that the tool started shutting down and disposed the
+            // file system, causing the temp directory to be deleted before
+            // this program invocation returns a result.
             localFs.dispose();
             expect(localFs.disposed, true);
           },
