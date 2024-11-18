@@ -21,29 +21,6 @@ namespace flutter::testing {
 
 class EmbedderTestBackingStoreProducer {
  public:
-  struct UserData {
-    UserData() : surface(nullptr), image(nullptr){};
-
-    explicit UserData(sk_sp<SkSurface> surface)
-        : surface(std::move(surface)), image(nullptr){};
-
-    UserData(sk_sp<SkSurface> surface, FlutterVulkanImage* vk_image)
-        : surface(std::move(surface)), image(vk_image){};
-
-    sk_sp<SkSurface> surface;
-    FlutterVulkanImage* image;
-#ifdef SHELL_ENABLE_GL
-    UserData(sk_sp<SkSurface> surface,
-             FlutterVulkanImage* vk_image,
-             std::unique_ptr<TestGLOnscreenOnlySurface> gl_surface)
-        : surface(std::move(surface)),
-          image(vk_image),
-          gl_surface(std::move(gl_surface)){};
-
-    std::unique_ptr<TestGLOnscreenOnlySurface> gl_surface;
-#endif
-  };
-
   enum class RenderTargetType {
     kSoftwareBuffer,
     kSoftwareBuffer2,
@@ -60,6 +37,12 @@ class EmbedderTestBackingStoreProducer {
 
   virtual bool Create(const FlutterBackingStoreConfig* config,
                       FlutterBackingStore* backing_store_out) = 0;
+
+  virtual sk_sp<SkSurface> GetSurface(
+      const FlutterBackingStore* backing_store) const = 0;
+
+  virtual sk_sp<SkImage> MakeImageSnapshot(
+      const FlutterBackingStore* backing_store) const = 0;
 
  protected:
   sk_sp<GrDirectContext> context_;

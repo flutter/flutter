@@ -12,6 +12,12 @@
 
 namespace flutter::testing {
 
+namespace {
+struct UserData {
+  sk_sp<SkSurface> surface;
+};
+}  // namespace
+
 EmbedderTestBackingStoreProducerSoftware::
     EmbedderTestBackingStoreProducerSoftware(
         sk_sp<GrDirectContext> context,
@@ -46,6 +52,18 @@ bool EmbedderTestBackingStoreProducerSoftware::Create(
   }
 }
 
+sk_sp<SkSurface> EmbedderTestBackingStoreProducerSoftware::GetSurface(
+    const FlutterBackingStore* backing_store) const {
+  UserData* user_data = reinterpret_cast<UserData*>(backing_store->user_data);
+  return user_data->surface;
+}
+
+sk_sp<SkImage> EmbedderTestBackingStoreProducerSoftware::MakeImageSnapshot(
+    const FlutterBackingStore* backing_store) const {
+  auto user_data = reinterpret_cast<UserData*>(backing_store->user_data);
+  return user_data->surface->makeImageSnapshot();
+}
+
 bool EmbedderTestBackingStoreProducerSoftware::CreateSoftware(
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out) {
@@ -64,8 +82,7 @@ bool EmbedderTestBackingStoreProducerSoftware::CreateSoftware(
     return false;
   }
 
-  auto user_data = new UserData(surface);
-
+  auto user_data = new UserData{.surface = surface};
   backing_store_out->type = kFlutterBackingStoreTypeSoftware;
   backing_store_out->user_data = user_data;
   backing_store_out->software.allocation = pixmap.addr();
@@ -101,8 +118,7 @@ bool EmbedderTestBackingStoreProducerSoftware::CreateSoftware2(
     return false;
   }
 
-  auto user_data = new UserData(surface);
-
+  auto user_data = new UserData{.surface = surface};
   backing_store_out->type = kFlutterBackingStoreTypeSoftware2;
   backing_store_out->user_data = user_data;
   backing_store_out->software2.struct_size =
