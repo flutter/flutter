@@ -372,6 +372,8 @@ bool BlitResizeTextureCommandGLES::Encode(const ReactorGLES& reactor) const {
     return false;
   }
 
+  destination->SetCoordinateSystem(source->GetCoordinateSystem());
+
   GLuint read_fbo = GL_NONE;
   GLuint draw_fbo = GL_NONE;
   fml::ScopedCleanupClosure delete_fbos([&gl, &read_fbo, &draw_fbo]() {

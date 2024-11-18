@@ -131,6 +131,7 @@ class CapabilitiesGLES final
   ISize GetMaximumRenderPassAttachmentSize() const override;
 
  private:
+  bool supports_texture_to_texture_blits_ = false;
   bool supports_framebuffer_fetch_ = false;
   bool supports_decal_sampler_address_mode_ = false;
   bool supports_offscreen_msaa_ = false;

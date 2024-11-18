@@ -17,7 +17,7 @@ TEST(CapabilitiesGLES, CanInitializeWithDefaults) {
 
   EXPECT_FALSE(capabilities->SupportsOffscreenMSAA());
   EXPECT_FALSE(capabilities->SupportsSSBO());
-  EXPECT_FALSE(capabilities->SupportsTextureToTextureBlits());
+  EXPECT_TRUE(capabilities->SupportsTextureToTextureBlits());
   EXPECT_FALSE(capabilities->SupportsFramebufferFetch());
   EXPECT_FALSE(capabilities->SupportsCompute());
   EXPECT_FALSE(capabilities->SupportsComputeSubgroups());
