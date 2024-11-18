@@ -49,6 +49,7 @@ class SystemContextMenu extends StatefulWidget {
   const SystemContextMenu._({
     super.key,
     required this.anchor,
+    this.items,
     this.onSystemHide,
   });
 
@@ -57,6 +58,7 @@ class SystemContextMenu extends StatefulWidget {
   factory SystemContextMenu.editableText({
     Key? key,
     required EditableTextState editableTextState,
+    List<SystemContextMenuItem>? items,
   }) {
     final (
       startGlyphHeight: double startGlyphHeight,
@@ -72,6 +74,7 @@ class SystemContextMenu extends StatefulWidget {
           editableTextState.textEditingValue.selection,
         ),
       ),
+      items: items,
       onSystemHide: () {
         editableTextState.hideToolbar();
       },
@@ -80,6 +83,8 @@ class SystemContextMenu extends StatefulWidget {
 
   /// The [Rect] that the context menu should point to.
   final Rect anchor;
+
+  final List<SystemContextMenuItem>? items;
 
   /// Called when the system hides this context menu.
   ///
@@ -110,14 +115,14 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     _systemContextMenuController = SystemContextMenuController(
       onSystemHide: widget.onSystemHide,
     );
-    _systemContextMenuController.show(widget.anchor);
+    _systemContextMenuController.show(widget.anchor, widget.items);
   }
 
   @override
   void didUpdateWidget(SystemContextMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.anchor != oldWidget.anchor) {
-      _systemContextMenuController.show(widget.anchor);
+      _systemContextMenuController.show(widget.anchor, widget.items);
     }
   }
 

@@ -2484,6 +2484,28 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// After calling [dispose], this instance can no longer be used.
   bool _isDisposed = false;
 
+  /// Convert the given items to the format required to be sent over
+  /// [MethodChannel.invokeMethod].
+  static List<dynamic> _itemsToJson(List<SystemContextMenuItem> items) {
+    return items
+        .map<dynamic>((SystemContextMenuItem item) => _itemToJson(item))
+        .toList();
+  }
+
+  /// Convert the given item to the format required to be sent over
+  /// [MethodChannel.invokeMethod].
+  static Map<String, dynamic> _itemToJson(SystemContextMenuItem item) {
+    return <String, dynamic>{
+      'type': item.type.json,
+      'action': item.action.name,
+      // TODO(justinmc): I guess Flutter should always pass a title for the default actions. Encode that into the backend or no?
+      // TODO(justinmc): Enforce the existence of a title in SystemContextMenuItem.
+      if (item.type == SystemContextMenuType.defaultType)
+        // TODO(justinmc): Localilze. As in (Cupertino)AdaptiveContextMenu.
+        'title': item.title,
+    };
+  }
+
   // Begin SystemContextMenuClient.
 
   @override
@@ -2524,7 +2546,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [hide], which hides the menu shown by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
-  Future<void> show(Rect targetRect) {
+  Future<void> show(Rect targetRect, [ List<SystemContextMenuItem>? items ]) {
     assert(!_isDisposed);
     assert(
       TextInput._instance._currentConnection != null,
@@ -2553,47 +2575,8 @@ class SystemContextMenuController with SystemContextMenuClient {
           'width': targetRect.width,
           'height': targetRect.height,
         },
-        // TODO(justinmc): Create Flutter class(es) that generate this stuff.
-        'items': <dynamic>[
-          <String, dynamic>{
-            'type': 'default',
-            'action': 'paste',
-          },
-          <String, dynamic>{
-            'type': 'default',
-            'action': 'cut',
-          },
-          <String, dynamic>{
-            'type': 'default',
-            'action': 'copy',
-          },
-          <String, dynamic>{
-            'type': 'default',
-            'action': 'selectAll',
-          },
-          <String, dynamic>{
-            'type': 'default',
-            'title': 'Look Up',
-            'action': 'lookUp',
-          },
-          <String, dynamic>{
-            'type': 'default',
-            'title': 'Search Web',
-            'action': 'searchWeb',
-          },
-          /*
-          // TODO(justinmc): This is mal-formatted, but it silently fails on the engine side.
-          <String, dynamic>{
-            'type': 'default',
-            'action': 'share',
-          },
-          */
-          <String, dynamic>{
-            'type': 'default',
-            'title': 'Go crazy',
-            'action': 'share',
-          },
-        ],
+        if (items != null)
+          'items': _itemsToJson(items),
       },
     );
   }
@@ -2637,4 +2620,39 @@ class SystemContextMenuController with SystemContextMenuClient {
     ServicesBinding.unregisterSystemContextMenuClient(this);
     _isDisposed = true;
   }
+}
+
+class SystemContextMenuItem {
+  const SystemContextMenuItem({
+    required this.action,
+    required this.type,
+    this.title,
+  });
+
+  final SystemContextMenuAction action;
+  final String? title;
+  final SystemContextMenuType type;
+}
+
+enum SystemContextMenuType {
+  // TODO(justinmc): Make sure toString gives "default" not "defaultValue".
+  defaultType;
+
+  String get json => switch (this) {
+    SystemContextMenuType.defaultType => 'default',
+  };
+
+  // TODO(justinmc): Support the "custom" type.
+  // https://github.com/flutter/flutter/issues/103163
+}
+
+// TODO(justinmc): Needs to be narrow to Apple, I think. Here and other classes too.
+enum SystemContextMenuAction {
+  copy,
+  cut,
+  lookUp,
+  paste,
+  searchWeb,
+  selectAll,
+  share,
 }
