@@ -385,6 +385,19 @@ Future<void> testMain() async {
     return info.image;
   });
 
+  test('decode rotated jpeg', () async {
+    // This image (from skia's test images) has a rotated orientation in its exif data.
+    // This should result in a 3024x4032 image, not 4032x3024 image.
+    final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+      Uri(path: '/test_images/iphone_15.jpeg')
+    );
+    expect(codec.frameCount, 1);
+
+    final ui.FrameInfo info = await codec.getNextFrame();
+    expect(info.image.width, 3024);
+    expect(info.image.height, 4032);
+  });
+
   // This API doesn't work in headless Firefox due to requiring WebGL
   // See https://github.com/flutter/flutter/issues/109265
   if (!isFirefox) {
