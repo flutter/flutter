@@ -53,7 +53,7 @@ void main() {
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     artifacts = Artifacts.test(fileSystem: fileSystem);
     logger = BufferLogger.test();
-    processManager = FakeProcessManager.empty();
+    processManager = FakeProcessManager.any();
     processUtils = ProcessUtils(
       logger: logger,
       processManager: processManager,
@@ -170,7 +170,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       expect(environment.defines, <String, String>{
         'TargetFile': 'lib/main.dart',

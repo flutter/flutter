@@ -626,6 +626,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     _effectiveScrollController.attach(position);
   }
 
+  @protected
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_persistedScrollOffset, 'offset');
@@ -635,6 +636,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
   }
 
+  @protected
   @override
   void saveOffset(double offset) {
     assert(debugIsSerializableForRestoration(offset));
@@ -644,6 +646,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     ServicesBinding.instance.restorationManager.flushData();
   }
 
+  @protected
   @override
   void initState() {
     if (widget.controller == null) {
@@ -652,6 +655,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     super.initState();
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     _mediaQueryGestureSettings = MediaQuery.maybeGestureSettingsOf(context);
@@ -680,6 +684,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return widget.controller?.runtimeType != oldWidget.controller?.runtimeType;
   }
 
+  @protected
   @override
   void didUpdateWidget(Scrollable oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -711,6 +716,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
   }
 
+  @protected
   @override
   void dispose() {
     if (widget.controller != null) {
@@ -980,6 +986,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // DESCRIPTION
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(_position != null);
@@ -1064,6 +1071,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return (<Future<void>>[ ensureVisibleFuture ], this);
   }
 
+  @protected
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -1934,6 +1942,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
     return _horizontalInnerScrollableKey.currentState!;
   }
 
+  @protected
   @override
   void initState() {
     if (widget.verticalDetails.controller == null) {
@@ -1945,6 +1954,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
     super.initState();
   }
 
+  @protected
   @override
   void didUpdateWidget(TwoDimensionalScrollable oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1985,6 +1995,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
     }
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(
@@ -2049,6 +2060,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
     );
   }
 
+  @protected
   @override
   void dispose() {
     _verticalFallbackController?.dispose();
