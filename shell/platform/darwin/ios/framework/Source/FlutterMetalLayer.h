@@ -9,16 +9,20 @@
 
 /// Drop-in replacement (as far as Flutter is concerned) for CAMetalLayer
 /// that can present with transaction from a background thread.
+///
+/// Properties and method declarations must exactly match those in the
+/// CAMetalLayer interface declaration.
 @interface FlutterMetalLayer : CALayer
 
 @property(nullable, retain) id<MTLDevice> device;
-@property(nullable, readonly) id<MTLDevice> preferredDevice;
+@property(nullable, readonly)
+    id<MTLDevice> preferredDevice API_AVAILABLE(macos(10.15), ios(13.0), tvos(13.0))
+        API_UNAVAILABLE(watchos);
 @property MTLPixelFormat pixelFormat;
 @property BOOL framebufferOnly;
 @property CGSize drawableSize;
 @property BOOL presentsWithTransaction;
 @property(nullable) CGColorSpaceRef colorspace;
-@property BOOL wantsExtendedDynamicRangeContent;
 
 - (nullable id<CAMetalDrawable>)nextDrawable;
 

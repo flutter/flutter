@@ -473,6 +473,7 @@ struct FlutterKeyPendingResponse {
 
 @implementation FlutterEmbedderKeyResponder
 
+// Synthesize properties declared in FlutterKeyPrimaryResponder protocol.
 @synthesize layoutMap;
 
 - (nonnull instancetype)initWithSendEvent:(FlutterSendEmbedderKeyEvent)sendEvent {

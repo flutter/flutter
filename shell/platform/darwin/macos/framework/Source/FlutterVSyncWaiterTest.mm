@@ -7,8 +7,7 @@
 
 #import "flutter/testing/testing.h"
 
-@interface TestDisplayLink : FlutterDisplayLink {
-}
+@interface TestDisplayLink : FlutterDisplayLink
 
 @property(nonatomic) CFTimeInterval nominalOutputRefreshPeriod;
 
@@ -16,20 +15,19 @@
 
 @implementation TestDisplayLink
 
+// Synthesize properties declared readonly in FlutterDisplayLink.
 @synthesize nominalOutputRefreshPeriod = _nominalOutputRefreshPeriod;
-@synthesize delegate = _delegate;
-@synthesize paused = _paused;
 
 - (instancetype)init {
   if (self = [super init]) {
-    _paused = YES;
+    self.paused = YES;
   }
   return self;
 }
 
 - (void)tickWithTimestamp:(CFTimeInterval)timestamp
           targetTimestamp:(CFTimeInterval)targetTimestamp {
-  [_delegate onDisplayLink:timestamp targetTimestamp:targetTimestamp];
+  [self.delegate onDisplayLink:timestamp targetTimestamp:targetTimestamp];
 }
 
 - (void)invalidate {
