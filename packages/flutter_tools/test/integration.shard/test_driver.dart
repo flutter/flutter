@@ -10,7 +10,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
-import 'package:process/process.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
@@ -35,7 +35,7 @@ const Duration defaultTimeout = Duration(seconds: 5);
 const Duration appStartTimeout = Duration(seconds: 120);
 const Duration quitTimeout = Duration(seconds: 10);
 
-abstract class FlutterTestDriver {
+abstract final class FlutterTestDriver {
   FlutterTestDriver(
     this._projectFolder, {
     String? logPrefix,
@@ -86,12 +86,22 @@ abstract class FlutterTestDriver {
     }
   }
 
+  @mustCallSuper
   Future<void> _setupProcess(
     List<String> arguments, {
     String? script,
     bool withDebugger = false,
     bool verbose = false,
   }) async {
+    if (_process != null) {
+      throw StateError(
+        'A process was already started with this instance of FlutterTestDriver.'
+        '\n'
+        'Each FlutterTestDriver (and subclass) is intended to be used exactly '
+        'once, and terminated ("quit") at the end of the test as necessary.',
+      );
+    }
+
     if (withDebugger) {
       arguments.add('--start-paused');
     }
@@ -103,11 +113,8 @@ abstract class FlutterTestDriver {
     }
     _debugPrint('Spawning flutter $arguments in ${_projectFolder.path}');
 
-    const ProcessManager processManager = LocalProcessManager();
     _process = await processManager.start(
-      <String>[flutterBin]
-        .followedBy(arguments)
-        .toList(),
+      <String>[flutterBin, ...arguments],
       workingDirectory: _projectFolder.path,
       // The web environment variable has the same effect as `flutter config --enable-web`.
       environment: <String, String>{
@@ -484,7 +491,7 @@ abstract class FlutterTestDriver {
   }
 }
 
-class FlutterRunTestDriver extends FlutterTestDriver {
+final class FlutterRunTestDriver extends FlutterTestDriver {
   FlutterRunTestDriver(
     super.projectFolder, {
     super.logPrefix,
@@ -609,6 +616,11 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         // shell, not the flutter tool's Dart process).
         final Map<String, Object?> connected = await _waitFor(event: 'daemon.connected');
         _processPid = (connected['params'] as Map<String, Object?>?)?['pid'] as int?;
+
+        // TODO(matanlurey): If this passes presubmit, remove _processPid.
+        if (_processPid != _process?.pid) {
+          throw StateError('Unexpected: params.pid returned $_processPid but the running process is ${_process?.pid}');
+        }
 
         // Set this up now, but we don't wait it yet. We want to make sure we don't
         // miss it while waiting for debugPort below.
@@ -770,7 +782,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   final bool spawnDdsInstance;
 }
 
-class FlutterTestTestDriver extends FlutterTestDriver {
+final class FlutterTestTestDriver extends FlutterTestDriver {
   FlutterTestTestDriver(super.projectFolder, {super.logPrefix});
 
   Future<void> test({
@@ -814,6 +826,11 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     // script).
     final Map<String, Object?>? version = await _waitForJson();
     _processPid = version?['pid'] as int?;
+  
+    // TODO(matanlurey): If this passes presubmit, remove _processPid.
+    if (_processPid != _process?.pid) {
+      throw StateError('Unexpected: version.pid returned $_processPid but the running process is ${_process?.pid}');
+    }
 
     if (withDebugger) {
       final Map<String, Object?> startedProcessParams =
