@@ -1847,17 +1847,17 @@ class EditableText extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
-  /// {@template flutter.widgets.shadow.scrollBehavior}
+  /// {@template flutter.widgets.editableText.scrollBehavior}
   /// A [ScrollBehavior] that will be applied to this widget individually.
   ///
   /// Defaults to null, wherein the inherited [ScrollBehavior] is copied and
   /// modified to alter the viewport decoration, like [Scrollbar]s.
-  /// {@endtemplate}
   ///
   /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
   /// [ScrollPhysics] is provided in [scrollPhysics], it will take precedence,
   /// followed by [scrollBehavior], and then the inherited ancestor
   /// [ScrollBehavior].
+  /// {@endtemplate}
   ///
   /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
   /// modified by default to only apply a [Scrollbar] if [maxLines] is greater
