@@ -662,6 +662,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 @implementation FlutterTextSelectionRect
 
+// Synthesize properties declared readonly in UITextSelectionRect.
 @synthesize rect = _rect;
 @synthesize writingDirection = _writingDirection;
 @synthesize containsStart = _containsStart;
