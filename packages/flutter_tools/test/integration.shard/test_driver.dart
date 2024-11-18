@@ -10,6 +10,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
@@ -35,7 +36,7 @@ const Duration defaultTimeout = Duration(seconds: 5);
 const Duration appStartTimeout = Duration(seconds: 120);
 const Duration quitTimeout = Duration(seconds: 10);
 
-abstract class FlutterTestDriver {
+abstract final class FlutterTestDriver {
   FlutterTestDriver(
     this._projectFolder, {
     String? logPrefix,
@@ -86,12 +87,17 @@ abstract class FlutterTestDriver {
     }
   }
 
+  @mustCallSuper
   Future<void> _setupProcess(
     List<String> arguments, {
     String? script,
     bool withDebugger = false,
     bool verbose = false,
   }) async {
+    if (_process != null && !_hasExited) {
+      throw StateError('Cannot start another process while the previous runs');
+    }
+
     if (withDebugger) {
       arguments.add('--start-paused');
     }
@@ -183,8 +189,15 @@ abstract class FlutterTestDriver {
     );
   }
 
-  Future<int> quit() => _killGracefully();
+  /// Quits the currently running process.
+  @nonVirtual
+  Future<void> quit() async {
+    final int result = await _killGracefully();
+    assert(result == 0, 'Expected process to terminate');
+    assert(_hasExited, 'Expected process to have registered as exited');
+  }
 
+  @nonVirtual
   Future<int> _killGracefully() async {
     if (_processPid == null) {
       return -1;
@@ -484,7 +497,7 @@ abstract class FlutterTestDriver {
   }
 }
 
-class FlutterRunTestDriver extends FlutterTestDriver {
+final class FlutterRunTestDriver extends FlutterTestDriver {
   FlutterRunTestDriver(
     super.projectFolder, {
     super.logPrefix,
@@ -770,7 +783,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   final bool spawnDdsInstance;
 }
 
-class FlutterTestTestDriver extends FlutterTestDriver {
+final class FlutterTestTestDriver extends FlutterTestDriver {
   FlutterTestTestDriver(super.projectFolder, {super.logPrefix});
 
   Future<void> test({
