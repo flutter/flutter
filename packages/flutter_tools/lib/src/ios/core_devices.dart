@@ -95,7 +95,7 @@ class IOSCoreDeviceControl {
         _logger.printError('Stdout:\n\n${result.stdout.trim()}\n');
         _logger.printError('Stderr:\n\n${result.stderr.trim()}');
         throw StateError('Expected the file ${output.path} to exist but it did not');
-      } else if (isPossiblyShutdown) {
+      } else if (isToolPossiblyShutdown) {
         return <Object?>[];
       }
       final String stringOutput = output.readAsStringSync();
