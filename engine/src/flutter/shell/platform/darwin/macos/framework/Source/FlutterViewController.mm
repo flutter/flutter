@@ -341,7 +341,9 @@ static void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
   FlutterThreadSynchronizer* _threadSynchronizer;
 }
 
+// Synthesize properties declared readonly.
 @synthesize viewIdentifier = _viewIdentifier;
+
 @dynamic accessibilityBridge;
 
 /**

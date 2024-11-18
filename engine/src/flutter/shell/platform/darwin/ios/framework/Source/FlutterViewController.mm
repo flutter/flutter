@@ -79,6 +79,9 @@ typedef struct MouseState {
 @property(nonatomic, assign) BOOL isHomeIndicatorHidden;
 @property(nonatomic, assign) BOOL isPresentingViewControllerAnimating;
 
+// Internal state backing override of UIView.prefersStatusBarHidden.
+@property(nonatomic, assign) BOOL flutterPrefersStatusBarHidden;
+
 @property(nonatomic, strong) NSMutableSet<NSNumber*>* ongoingTouches;
 // This scroll view is a workaround to accommodate iOS 13 and higher.  There isn't a way to get
 // touches on the status bar to trigger scrolling to the top of a scroll view.  We place a
@@ -157,9 +160,13 @@ typedef struct MouseState {
   MouseState _mouseState;
 }
 
+// Synthesize properties with an overridden getter/setter.
 @synthesize viewOpaque = _viewOpaque;
 @synthesize displayingFlutterUI = _displayingFlutterUI;
-@synthesize prefersStatusBarHidden = _flutterPrefersStatusBarHidden;
+
+// TODO(dkwingsmt): https://github.com/flutter/flutter/issues/138168
+// No backing ivar is currently required; when multiple views are supported, we'll need to
+// synthesize the ivar and store the view identifier.
 @dynamic viewIdentifier;
 
 #pragma mark - Manage and override all designated initializers
@@ -2302,14 +2309,14 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (void)setPrefersStatusBarHidden:(BOOL)hidden {
-  if (hidden != _flutterPrefersStatusBarHidden) {
-    _flutterPrefersStatusBarHidden = hidden;
+  if (hidden != self.flutterPrefersStatusBarHidden) {
+    self.flutterPrefersStatusBarHidden = hidden;
     [self setNeedsStatusBarAppearanceUpdate];
   }
 }
 
 - (BOOL)prefersStatusBarHidden {
-  return _flutterPrefersStatusBarHidden;
+  return self.flutterPrefersStatusBarHidden;
 }
 
 #pragma mark - Platform views

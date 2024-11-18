@@ -25,6 +25,8 @@
 @end
 
 @implementation FakePluginRegistrar
+
+// Synthesize properties declared in FlutterPluginRegistrar protocol.
 @synthesize messenger;
 @synthesize textures;
 @synthesize view;

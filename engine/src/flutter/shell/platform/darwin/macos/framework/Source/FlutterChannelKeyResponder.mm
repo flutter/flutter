@@ -29,6 +29,7 @@
 
 @implementation FlutterChannelKeyResponder
 
+// Synthesize properties declared in FlutterKeyPrimaryResponder protocol.
 @synthesize layoutMap;
 
 - (nonnull instancetype)initWithChannel:(nonnull FlutterBasicMessageChannel*)channel {

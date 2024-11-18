@@ -28,8 +28,6 @@
   FlutterThreadSynchronizer* _synchronizer;
 }
 
-@synthesize synchronizer = _synchronizer;
-
 - (nullable instancetype)init {
   self = [super init];
   if (self != nil) {

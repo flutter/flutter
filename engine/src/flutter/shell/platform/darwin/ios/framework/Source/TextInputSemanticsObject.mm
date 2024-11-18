@@ -22,6 +22,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 
 @implementation FlutterInactiveTextInput
 
+// Synthesize properties declared in UITextInput protocol.
 @synthesize beginningOfDocument = _beginningOfDocument;
 @synthesize endOfDocument = _endOfDocument;
 @synthesize inputDelegate = _inputDelegate;

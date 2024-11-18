@@ -57,11 +57,7 @@ extern CFTimeInterval display_link_target;
 
 @end
 
-@interface FlutterTexture : NSObject {
-  id<MTLTexture> _texture;
-  IOSurface* _surface;
-  CFTimeInterval _presentedTime;
-}
+@interface FlutterTexture : NSObject
 
 @property(readonly, nonatomic) id<MTLTexture> texture;
 @property(readonly, nonatomic) IOSurface* surface;
@@ -71,11 +67,6 @@ extern CFTimeInterval display_link_target;
 @end
 
 @implementation FlutterTexture
-
-@synthesize texture = _texture;
-@synthesize surface = _surface;
-@synthesize presentedTime = _presentedTime;
-@synthesize waitingForCompletion;
 
 - (instancetype)initWithTexture:(id<MTLTexture>)texture surface:(IOSurface*)surface {
   if (self = [super init]) {
@@ -186,13 +177,6 @@ extern CFTimeInterval display_link_target;
 @end
 
 @implementation FlutterMetalLayer
-
-@synthesize preferredDevice = _preferredDevice;
-@synthesize device = _device;
-@synthesize pixelFormat = _pixelFormat;
-@synthesize framebufferOnly = _framebufferOnly;
-@synthesize colorspace = _colorspace;
-@synthesize wantsExtendedDynamicRangeContent = _wantsExtendedDynamicRangeContent;
 
 - (instancetype)init {
   if (self = [super init]) {
