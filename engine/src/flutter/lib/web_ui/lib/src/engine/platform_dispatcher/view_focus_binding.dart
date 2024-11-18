@@ -27,18 +27,20 @@ final class ViewFocusBinding {
   StreamSubscription<int>? _onViewCreatedListener;
 
   void init() {
+    // We need a global listener here to know if the user was pressing "shift"
+    // when the Flutter view receives focus, to move the Flutter focus to the
+    // *last* focusable element.
     domDocument.body?.addEventListener(_keyDown, _handleKeyDown);
     domDocument.body?.addEventListener(_keyUp, _handleKeyUp);
-    domDocument.body?.addEventListener(_focusin, _handleFocusin);
-    domDocument.body?.addEventListener(_focusout, _handleFocusout);
+
+    // If so, update `_handleViewCreated` and add a `_handleViewDisposed` to attach
+    // and remove the focus/blur listener.
     _onViewCreatedListener = _viewManager.onViewCreated.listen(_handleViewCreated);
   }
 
   void dispose() {
     domDocument.body?.removeEventListener(_keyDown, _handleKeyDown);
     domDocument.body?.removeEventListener(_keyUp, _handleKeyUp);
-    domDocument.body?.removeEventListener(_focusin, _handleFocusin);
-    domDocument.body?.removeEventListener(_focusout, _handleFocusout);
     _onViewCreatedListener?.cancel();
   }
 
@@ -48,13 +50,14 @@ final class ViewFocusBinding {
     }
     final DomElement? viewElement = _viewManager[viewId]?.dom.rootElement;
 
-    if (state == ui.ViewFocusState.focused) {
-      // Only move the focus to the flutter view if nothing inside it is focused already.
-      if (viewId != _viewId(domDocument.activeElement)) {
-        viewElement?.focusWithoutScroll();
-      }
-    } else {
-      viewElement?.blur();
+    switch (state) {
+      case ui.ViewFocusState.focused:
+        // Only move the focus to the flutter view if nothing inside it is focused already.
+        if (viewId != _viewId(domDocument.activeElement)) {
+          viewElement?.focusWithoutScroll();
+        }
+      case ui.ViewFocusState.unfocused:
+        viewElement?.blur();
     }
   }
 
@@ -115,8 +118,8 @@ final class ViewFocusBinding {
         direction: _viewFocusDirection,
       );
     }
-    _maybeMarkViewAsFocusable(_lastViewId, reachableByKeyboard: true);
-    _maybeMarkViewAsFocusable(viewId, reachableByKeyboard: false);
+    _updateViewKeyboardReachability(_lastViewId, reachable: true);
+    _updateViewKeyboardReachability(viewId, reachable: false);
     _lastViewId = viewId;
     _onViewFocusChange(event);
   }
@@ -127,29 +130,32 @@ final class ViewFocusBinding {
   }
 
   void _handleViewCreated(int viewId) {
-    _maybeMarkViewAsFocusable(viewId, reachableByKeyboard: true);
+    final DomElement? rootElement = _viewManager[viewId]?.dom.rootElement;
+
+    rootElement?.addEventListener(_focusin, _handleFocusin);
+    rootElement?.addEventListener(_focusout, _handleFocusout);
+
+    _updateViewKeyboardReachability(viewId, reachable: true);
   }
 
-  void _maybeMarkViewAsFocusable(
+  // Controls whether the Flutter view identified by [viewId] is reachable by
+  // keyboard.
+  void _updateViewKeyboardReachability(
     int? viewId, {
-    required bool reachableByKeyboard,
+    required bool reachable,
   }) {
     if (viewId == null) {
       return;
     }
 
     final DomElement? rootElement = _viewManager[viewId]?.dom.rootElement;
-    if (EngineSemantics.instance.semanticsEnabled) {
-      rootElement?.removeAttribute('tabindex');
-    } else {
-      // A tabindex with value zero means the DOM element can be reached by using
-      // the keyboard (tab, shift + tab). When its value is -1 it is still focusable
-      // but can't be focused by the result of keyboard events This is specially
-      // important when the semantics tree is enabled as it puts DOM nodes inside
-      // the flutter view and having it with a zero tabindex messes the focus
-      // traversal order when pressing tab or shift tab.
-      rootElement?.setAttribute('tabindex', reachableByKeyboard ? 0 : -1);
-    }
+    // A tabindex with value zero means the DOM element can be reached using the
+    // keyboard (tab, shift + tab). When its value is -1 it is still focusable
+    // but can't be focused as the result of keyboard events. This is specially
+    // important when the semantics tree is enabled as it puts DOM nodes inside
+    // the flutter view and having it with a zero tabindex messes the focus
+    // traversal order when pressing tab or shift tab.
+    rootElement?.setAttribute('tabindex', reachable ? 0 : -1);
   }
 
   static const String _focusin = 'focusin';

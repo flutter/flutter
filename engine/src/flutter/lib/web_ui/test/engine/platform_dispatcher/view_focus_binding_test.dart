@@ -68,28 +68,6 @@ void testMain() {
       expect(view2.dom.rootElement.getAttribute('tabindex'), '0');
     });
 
-    test('never marks the views as focusable with semantincs enabled', () async {
-      EngineSemantics.instance.semanticsEnabled = true;
-
-      final EngineFlutterView view1 = createAndRegisterView(dispatcher);
-      final EngineFlutterView view2 = createAndRegisterView(dispatcher);
-
-      expect(view1.dom.rootElement.getAttribute('tabindex'), isNull);
-      expect(view2.dom.rootElement.getAttribute('tabindex'), isNull);
-
-      view1.dom.rootElement.focusWithoutScroll();
-      expect(view1.dom.rootElement.getAttribute('tabindex'), isNull);
-      expect(view2.dom.rootElement.getAttribute('tabindex'), isNull);
-
-      view2.dom.rootElement.focusWithoutScroll();
-      expect(view1.dom.rootElement.getAttribute('tabindex'), isNull);
-      expect(view2.dom.rootElement.getAttribute('tabindex'), isNull);
-
-      view2.dom.rootElement.blur();
-      expect(view1.dom.rootElement.getAttribute('tabindex'), isNull);
-      expect(view2.dom.rootElement.getAttribute('tabindex'), isNull);
-    });
-
     test('fires a focus event - a view was focused', () async {
       final EngineFlutterView view = createAndRegisterView(dispatcher);
 
