@@ -23,8 +23,14 @@ class EmbedderTestBackingStoreProducerGL
 
   virtual ~EmbedderTestBackingStoreProducerGL();
 
-  virtual bool Create(const FlutterBackingStoreConfig* config,
-                      FlutterBackingStore* backing_store_out);
+  bool Create(const FlutterBackingStoreConfig* config,
+              FlutterBackingStore* backing_store_out) override;
+
+  sk_sp<SkSurface> GetSurface(
+      const FlutterBackingStore* backing_store) const override;
+
+  sk_sp<SkImage> MakeImageSnapshot(
+      const FlutterBackingStore* backing_store) const override;
 
  private:
   bool CreateFramebuffer(const FlutterBackingStoreConfig* config,

@@ -14,6 +14,13 @@
 
 namespace flutter::testing {
 
+namespace {
+struct UserData {
+  sk_sp<SkSurface> surface;
+  std::unique_ptr<TestGLOnscreenOnlySurface> gl_surface;
+};
+}  // namespace
+
 EmbedderTestBackingStoreProducerGL::EmbedderTestBackingStoreProducerGL(
     sk_sp<GrDirectContext> context,
     RenderTargetType type,
@@ -37,6 +44,30 @@ bool EmbedderTestBackingStoreProducerGL::Create(
     default:
       return false;
   };
+}
+
+sk_sp<SkSurface> EmbedderTestBackingStoreProducerGL::GetSurface(
+    const FlutterBackingStore* backing_store) const {
+  UserData* user_data = reinterpret_cast<UserData*>(backing_store->user_data);
+  return user_data->surface;
+}
+
+sk_sp<SkImage> EmbedderTestBackingStoreProducerGL::MakeImageSnapshot(
+    const FlutterBackingStore* backing_store) const {
+  UserData* user_data = reinterpret_cast<UserData*>(backing_store->user_data);
+  if (user_data->gl_surface != nullptr) {
+    // This backing store is an OpenGL Surface.
+    // We need to make it current so we can snapshot it.
+    user_data->gl_surface->MakeCurrent();
+
+    // GetRasterSurfaceSnapshot() does two
+    // gl_surface->makeImageSnapshot()'s. Doing a single
+    // ->makeImageSnapshot() will not work.
+    return user_data->gl_surface->GetRasterSurfaceSnapshot();
+  }
+
+  // Otherwise, it's a GL Texture or FrameBuffer.
+  return user_data->surface->makeImageSnapshot();
 }
 
 bool EmbedderTestBackingStoreProducerGL::CreateFramebuffer(
@@ -75,8 +106,7 @@ bool EmbedderTestBackingStoreProducerGL::CreateFramebuffer(
     return false;
   }
 
-  auto user_data = new UserData(surface);
-
+  auto user_data = new UserData{.surface = surface};
   backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
   backing_store_out->user_data = user_data;
   backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
@@ -124,8 +154,7 @@ bool EmbedderTestBackingStoreProducerGL::CreateTexture(
     return false;
   }
 
-  auto user_data = new UserData(surface);
-
+  auto user_data = new UserData{.surface = surface};
   backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
   backing_store_out->user_data = user_data;
   backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeTexture;
@@ -165,8 +194,10 @@ bool EmbedderTestBackingStoreProducerGL::CreateSurface(
 
   auto sk_surface = surface->GetOnscreenSurface();
 
-  auto user_data = new UserData(sk_surface, nullptr, std::move(surface));
-
+  auto user_data = new UserData{
+      .surface = sk_surface,
+      .gl_surface = std::move(surface),
+  };
   backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
   backing_store_out->user_data = user_data;
   backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeSurface;

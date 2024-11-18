@@ -82,9 +82,7 @@ bool EmbedderTestCompositorVulkan::UpdateOffscrenComposition(
     switch (layer->type) {
       case kFlutterLayerContentTypeBackingStore:
         layer_image =
-            reinterpret_cast<EmbedderTestBackingStoreProducer::UserData*>(
-                layer->backing_store->user_data)
-                ->surface->makeImageSnapshot();
+            backingstore_producer_->MakeImageSnapshot(layer->backing_store);
         break;
       case kFlutterLayerContentTypePlatformView:
         layer_image =

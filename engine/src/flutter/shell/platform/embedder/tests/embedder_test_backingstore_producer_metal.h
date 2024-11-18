@@ -18,8 +18,14 @@ class EmbedderTestBackingStoreProducerMetal
 
   virtual ~EmbedderTestBackingStoreProducerMetal();
 
-  virtual bool Create(const FlutterBackingStoreConfig* config,
-                      FlutterBackingStore* backing_store_out);
+  bool Create(const FlutterBackingStoreConfig* config,
+              FlutterBackingStore* backing_store_out) override;
+
+  sk_sp<SkSurface> GetSurface(
+      const FlutterBackingStore* backing_store) const override;
+
+  sk_sp<SkImage> MakeImageSnapshot(
+      const FlutterBackingStore* backing_store) const override;
 
  private:
   std::unique_ptr<TestMetalContext> test_metal_context_;

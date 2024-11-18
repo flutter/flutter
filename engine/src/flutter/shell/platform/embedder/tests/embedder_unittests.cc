@@ -2735,17 +2735,15 @@ static void expectSoftwareRenderingOutputMatches(
   ASSERT_TRUE(engine.is_valid());
 
   context.GetCompositor().SetNextPresentCallback(
-      [&matches, &bytes, &latch](FlutterViewId view_id,
-                                 const FlutterLayer** layers,
-                                 size_t layers_count) {
+      [&context, &matches, &bytes, &latch](FlutterViewId view_id,
+                                           const FlutterLayer** layers,
+                                           size_t layers_count) {
         ASSERT_EQ(layers[0]->type, kFlutterLayerContentTypeBackingStore);
         ASSERT_EQ(layers[0]->backing_store->type,
                   kFlutterBackingStoreTypeSoftware2);
-        matches = SurfacePixelDataMatchesBytes(
-            reinterpret_cast<EmbedderTestBackingStoreProducer::UserData*>(
-                layers[0]->backing_store->software2.user_data)
-                ->surface.get(),
-            bytes);
+        sk_sp<SkSurface> surface =
+            context.GetCompositor().GetSurface(layers[0]->backing_store);
+        matches = SurfacePixelDataMatchesBytes(surface.get(), bytes);
         latch.Signal();
       });
 

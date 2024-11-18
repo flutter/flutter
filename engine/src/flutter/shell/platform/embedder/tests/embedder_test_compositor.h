@@ -45,6 +45,8 @@ class EmbedderTestCompositor {
   void SetPlatformViewRendererCallback(
       const PlatformViewRendererCallback& callback);
 
+  sk_sp<SkSurface> GetSurface(const FlutterBackingStore* backing_store) const;
+
   //----------------------------------------------------------------------------
   /// @brief      Allows tests to install a callback to notify them when the
   ///             entire render tree has been finalized so they can run their

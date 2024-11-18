@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer_metal.h"
 
+#include <exception>
+
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
@@ -54,6 +56,18 @@ bool EmbedderTestBackingStoreProducerMetal::Create(const FlutterBackingStoreConf
   };
 
   return true;
+}
+
+sk_sp<SkSurface> EmbedderTestBackingStoreProducerMetal::GetSurface(
+    const FlutterBackingStore* backing_store) const {
+  FML_LOG(FATAL) << "Unimplemented.";
+  std::terminate();
+}
+
+sk_sp<SkImage> EmbedderTestBackingStoreProducerMetal::MakeImageSnapshot(
+    const FlutterBackingStore* backing_store) const {
+  FML_LOG(FATAL) << "Unimplemented.";
+  std::terminate();
 }
 
 }  // namespace flutter::testing
