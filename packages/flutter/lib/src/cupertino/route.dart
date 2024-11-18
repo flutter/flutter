@@ -1160,7 +1160,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   Simulation createSimulation({ required bool forward }) {
     assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     final double end = forward ? 1.0 : 0.0;
-    return _DelayedSimulation(SpringSimulation(_kStandardSpring, controller!.value, end, 0), _kStandardDelay);
+    return SpringSimulation(_kStandardSpring, controller!.value, end, 0);
   }
 
   @override
@@ -1429,7 +1429,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   Simulation createSimulation({ required bool forward }) {
     assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     final double end = forward ? 1.0 : 0.0;
-    return _DelayedSimulation(SpringSimulation(_kStandardSpring, controller!.value, end, 0), _kStandardDelay);
+    return SpringSimulation(_kStandardSpring, controller!.value, end, 0);
   }
 
   @override
@@ -1463,32 +1463,4 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   // they reuse the same animation curve that was modeled after native page
   // transitions.
   static final Tween<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0);
-}
-
-const double _kStandardDelay = 0.020;
-class _DelayedSimulation extends Simulation {
-  _DelayedSimulation(this.baseSimulation, this.delay);
-
-  final Simulation baseSimulation;
-  // Delayed time in seconds.
-  final double delay;
-
-  double delayed(double time) {
-    return time < delay ? 0 : time - delay;
-  }
-
-  @override
-  double x(double time) => baseSimulation.x(delayed(time));
-
-  @override
-  double dx(double time) => baseSimulation.dx(delayed(time));
-
-  @override
-  bool isDone(double time) => baseSimulation.isDone(delayed(time));
-
-  @override
-  Tolerance get tolerance => baseSimulation.tolerance;
-
-  @override
-  String toString() => '$baseSimulation delayed by $delay';
 }
