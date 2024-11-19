@@ -242,7 +242,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
 
   @override
   String get androidGradleProperties => '''
-  org.gradle.jvmargs=-Xmx4G -XX:MaxMetaspaceSize=2G -XX:+HeapDumpOnOutOfMemoryError
+  org.gradle.jvmargs=-Xmx8G -XX:MaxMetaspaceSize=2G -XX:+HeapDumpOnOutOfMemoryError
   android.useAndroidX=true
   android.enableJetifier=true
   android.enableR8=true

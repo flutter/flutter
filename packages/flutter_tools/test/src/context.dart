@@ -121,7 +121,7 @@ void testUsingContext(
           FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
-          Pub: () => ThrowingPub(), // prevent accidentally using pub.
+          Pub: () => const ThrowingPub(), // prevent accidentally using pub.
           CrashReporter: () => const NoopCrashReporter(),
           TemplateRenderer: () => const MustacheTemplateRenderer(),
           BuildTargets: () => const BuildTargetsImpl(),
@@ -183,7 +183,7 @@ void testUsingContext(
       // can provide the AlwaysFalseBotDetector in the overrides, or its own
       // BotDetector implementation in the overrides.
       BotDetector: overrides[BotDetector] ?? () => const FakeBotDetector(true),
-    }, useImplicitPubspecResolution: true);
+    });
   }, testOn: testOn, skip: skip);
   // We don't support "timeout"; see ../../dart_test.yaml which
   // configures all tests to have a 15 minute timeout which should
