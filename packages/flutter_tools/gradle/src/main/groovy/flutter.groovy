@@ -1249,7 +1249,7 @@ class FlutterPlugin implements Plugin<Project> {
             // original value. You either need to hoist the value
             // into a separate variable `verbose verboseValue` or prefix with
             // `this` (`verbose this.isVerbose()`).
-            TaskProvider<FlutterTask> compileTask = project.tasks.register(name: taskName, type: FlutterTask) {
+            TaskProvider<FlutterTask> compileTaskProvider = project.tasks.register(name: taskName, type: FlutterTask) {
                 flutterRoot(this.flutterRoot)
                 flutterExecutable(this.flutterExecutable)
                 buildMode(variantBuildMode)
