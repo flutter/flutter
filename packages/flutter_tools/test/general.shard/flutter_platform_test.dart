@@ -100,7 +100,7 @@ void main() {
 
     testUsingContext('a shutdown signal terminates the test device', () async {
       final _WorkingDevice testDevice = _WorkingDevice();
-      
+
       final ShutdownHooks shutdownHooks = ShutdownHooks();
       final FlutterPlatform flutterPlatform = FlutterPlatform(
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
