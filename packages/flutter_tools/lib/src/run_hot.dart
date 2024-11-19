@@ -215,7 +215,7 @@ class HotRunner extends ResidentRunner {
         if (compilerOutput != null && compilerOutput.errorCount == 0 && compilerOutput.expressionData != null) {
           return base64.encode(compilerOutput.expressionData!);
         } else if (compilerOutput!.errorCount > 0 && compilerOutput.errorMessage != null) {
-          throw Exception(compilerOutput.errorMessage);
+          throw VmServiceExpressionCompilationException(compilerOutput.errorMessage!);
         }
       }
     }

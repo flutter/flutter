@@ -228,7 +228,7 @@ Future<void> evaluateInvalidExpression(FlutterTestDriver flutter) async {
     expect(e.message, RPCErrorKind.kExpressionCompilationError.message);
     expect(
       e.details,
-      "Exception: org-dartlang-debug:synthetic_debug_expression:1:1: Error: Expected an identifier, but got 'is'.\n"
+      "org-dartlang-debug:synthetic_debug_expression:1:1: Error: Expected an identifier, but got 'is'.\n"
       "Try inserting an identifier before 'is'.\n"
       'is Foo\n'
       '^^\n'

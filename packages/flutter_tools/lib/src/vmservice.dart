@@ -254,7 +254,7 @@ Future<vm_service.VmService> setUpVmService({
           kResultType: kResultTypeSuccess,
           'result': <String, String>{'kernelBytes': kernelBytesBase64},
         };
-      } on Exception catch(e) {
+      } on VmServiceExpressionCompilationException catch(e) {
         // In most situations, we'd just let VmService catch this exception and
         // build the error response. However, in this case we build the error
         // response manually and return it to avoid including the stack trace
@@ -265,7 +265,7 @@ Future<vm_service.VmService> setUpVmService({
             'compileExpression',
             vm_service.RPCErrorKind.kExpressionCompilationError.code,
             vm_service.RPCErrorKind.kExpressionCompilationError.message,
-            details: e.toString(),
+            details: e.errorMessage,
           ).toMap(),
         };
       }
@@ -1088,6 +1088,14 @@ class FlutterVmService {
 
 /// Thrown when the VM Service disappears while calls are being made to it.
 class VmServiceDisappearedException implements Exception { }
+
+/// Thrown when the frontend service fails to compile an expression due to an
+/// error.
+class VmServiceExpressionCompilationException implements Exception {
+  const VmServiceExpressionCompilationException(this.errorMessage);
+
+  final String errorMessage;
+}
 
 /// Whether the event attached to an [Isolate.pauseEvent] should be considered
 /// a "pause" event.

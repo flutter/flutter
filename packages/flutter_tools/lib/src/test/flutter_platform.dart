@@ -26,6 +26,7 @@ import '../native_assets.dart';
 import '../project.dart';
 import '../test/test_wrapper.dart';
 
+import '../vmservice.dart';
 import 'flutter_tester_device.dart';
 import 'font_config_manager.dart';
 import 'integration_test_device.dart';
@@ -425,7 +426,7 @@ class FlutterPlatform extends PlatformPlugin {
     if (compilerOutput != null && compilerOutput.errorCount == 0 && compilerOutput.expressionData != null) {
       return base64.encode(compilerOutput.expressionData!);
     } else if (compilerOutput!.errorCount > 0 && compilerOutput.errorMessage != null) {
-      throw Exception(compilerOutput.errorMessage);
+      throw VmServiceExpressionCompilationException(compilerOutput.errorMessage!);
     }
     throw Exception('Failed to compile $expression');
   }
