@@ -1286,8 +1286,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     final ThemeData theme = Theme.of(context);
     const Set<MaterialState> highlightableStates = <MaterialState>{MaterialState.focused, MaterialState.hovered, MaterialState.pressed};
     final Set<MaterialState> nonHighlightableStates = statesController.value.difference(highlightableStates);
-    // Each highlightable states will be resolved separatly to get the corresponding color.
-    // For this resolution to be correct, The non-highlightable states should be preserved.
+    // Each highlightable state will be resolved separately to get the corresponding color.
+    // For this resolution to be correct, the non-highlightable states should be preserved.
     final Set<MaterialState> pressed = <MaterialState>{...nonHighlightableStates, MaterialState.pressed};
     final Set<MaterialState> focused = <MaterialState>{...nonHighlightableStates, MaterialState.focused};
     final Set<MaterialState> hovered = <MaterialState>{...nonHighlightableStates, MaterialState.hovered};
