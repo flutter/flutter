@@ -1,4 +1,4 @@
-Signature: 08fd3039d2ff7b6195bed70c3852a26e
+Signature: 9a68133c40dd14821226da1a166e9a26
 
 ====================================================================================================
 LIBRARY: etc1
@@ -399,6 +399,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
+FILE: ../../../flutter/third_party/skia/relnotes/GpuStats.md
 FILE: ../../../flutter/third_party/skia/relnotes/SkColorSpaceMakeCICP.md
 FILE: ../../../flutter/third_party/skia/relnotes/precompilecontext.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
