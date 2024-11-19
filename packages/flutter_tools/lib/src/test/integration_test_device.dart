@@ -143,6 +143,9 @@ class IntegrationTestTestDevice implements TestDevice {
     }
 
     await device.dispose();
+    if (debuggingOptions.enableDds) {
+      _ddsLauncher.shutdown();
+    }
     _finished.complete();
   }
 
