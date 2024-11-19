@@ -1072,7 +1072,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   Widget? effectiveBottom;
   Widget? effectiveLeading;
   Widget? effectiveTrailing;
-  Widget? effectiveMiddle;
   bool? effectiveStretch;
   NavigationBarBottomMode? effectiveBottomMode;
   late AnimationController _animationController;
@@ -1094,16 +1093,13 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     keys = _NavigationBarStaticComponentsKeys();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 200),
     );
     persistentHeightAnimation = persistentHeightTween.animate(_animationController)
       ..addListener(() {
         setState(() { });
       });
-    largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController)
-      ..addListener(() {
-        setState(() { });
-      });
+    largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
   }
 
   @override
@@ -1164,7 +1160,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           setState(() {
             effectiveLeading = const SizedBox.shrink();
             effectiveTrailing = const SizedBox.shrink();
-            effectiveMiddle = const SizedBox.shrink();
             effectiveBottomMode = NavigationBarBottomMode.always;
             effectiveStretch = false;
             atTop = true;
@@ -1179,23 +1174,24 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
         children: <Widget>[
           const Expanded(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              padding: EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
               child: CupertinoSearchTextField(),
             ),
           ),
-          CupertinoButton(
-            child: const Text('Cancel'),
-            onPressed: () {
-              setState(() {
-                effectiveLeading = widget.leading;
-                effectiveTrailing = widget.trailing;
-                effectiveMiddle = widget.middle;
-                effectiveBottomMode = widget.bottomMode;
-                effectiveStretch = widget.stretch;
-                atTop = false;
-                _animationController.reverse();
-              });
-            }),
+          Center(
+            child: CupertinoButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                setState(() {
+                  effectiveLeading = widget.leading;
+                  effectiveTrailing = widget.trailing;
+                  effectiveBottomMode = widget.bottomMode;
+                  effectiveStretch = widget.stretch;
+                  atTop = false;
+                  _animationController.reverse();
+                });
+              }),
+          ),
         ],
       );
     }
@@ -1207,7 +1203,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       automaticallyImplyLeading: widget.automaticallyImplyLeading,
       automaticallyImplyTitle: widget.automaticallyImplyTitle,
       previousPageTitle: widget.previousPageTitle,
-      userMiddle: effectiveMiddle ?? widget.middle,
+      userMiddle: _animationController.isAnimating ? const Text('') : widget.middle,
       userTrailing: effectiveTrailing ?? widget.trailing,
       userLargeTitle: widget.largeTitle,
       padding: widget.padding,
@@ -1224,7 +1220,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
             delegate: _LargeTitleNavigationBarSliverDelegate(
               keys: keys,
               components: components,
-              userMiddle: effectiveMiddle ?? widget.middle,
+              userMiddle: widget.middle,
               backgroundColor: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor,
               automaticBackgroundVisibility: widget.automaticBackgroundVisibility,
               brightness: widget.brightness,
