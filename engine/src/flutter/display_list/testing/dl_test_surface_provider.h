@@ -97,6 +97,11 @@ class DlSurfaceProvider {
 
  protected:
   DlSurfaceProvider() = default;
+
+ private:
+  static std::unique_ptr<DlSurfaceProvider> CreateSoftware();
+  static std::unique_ptr<DlSurfaceProvider> CreateMetal();
+  static std::unique_ptr<DlSurfaceProvider> CreateOpenGL();
 };
 
 }  // namespace testing
