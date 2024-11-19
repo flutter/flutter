@@ -1249,7 +1249,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               bottom: effectiveBottom ?? widget.bottom ?? const SizedBox.shrink(),
               bottomMode: effectiveBottomMode ?? widget.bottomMode ?? NavigationBarBottomMode.automatic,
               bottomHeight: widget.bottom != null ? widget.bottom!.preferredSize.height : 0.0,
-              controller: _animationController,
             ),
           );
         }
@@ -1280,7 +1279,6 @@ class _LargeTitleNavigationBarSliverDelegate
     required this.bottom,
     required this.bottomMode,
     required this.bottomHeight,
-    required this.controller,
   });
 
   final _NavigationBarStaticComponentsKeys keys;
@@ -1301,7 +1299,6 @@ class _LargeTitleNavigationBarSliverDelegate
   final Widget bottom;
   final NavigationBarBottomMode bottomMode;
   final double bottomHeight;
-  final AnimationController controller;
 
   @override
   double get minExtent => persistentHeight + (bottomMode == NavigationBarBottomMode.always ? bottomHeight : 0.0);
@@ -1466,8 +1463,7 @@ class _LargeTitleNavigationBarSliverDelegate
         || enableBackgroundFilterBlur != oldDelegate.enableBackgroundFilterBlur
         || bottom != oldDelegate.bottom
         || bottomMode != oldDelegate.bottomMode
-        || bottomHeight != oldDelegate.bottomHeight
-        || controller != oldDelegate.controller;
+        || bottomHeight != oldDelegate.bottomHeight;
   }
 }
 
