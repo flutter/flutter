@@ -240,16 +240,15 @@ Future<void> _runIntegrationToolTests() async {
 }
 
 Future<void> _runFlutterBuildApkHealthTests() async {
-  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'flutter_build_apk.shard'))
-      .listSync(recursive: true).whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-      .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
-
   await runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: selectIndexOfTotalSubshard<String>(allTests),
+    testPaths: <String>[
+      path.join(_toolsPath, 'test', 'integration.shard'),
+    ],
     collectMetrics: true,
+    runSkipped: true,
+    tags: <String>['flutter-build-apk'],
   );
 }
 
