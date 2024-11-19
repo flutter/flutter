@@ -2640,6 +2640,175 @@ void main() {
     );
   });
 
+  testWidgets('Can customize track gap when year2023 is false', (WidgetTester tester) async {
+    debugDisableShadows = false;
+    try {
+      Widget buildSlider({ double? trackGap }) {
+        return MaterialApp(
+          theme: ThemeData(
+            sliderTheme: SliderThemeData(
+              trackGap: trackGap,
+            ),
+          ),
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: Center(
+                child: Slider(
+                  year2023: false,
+                  value: 0.5,
+                  onChanged: (double value) { },
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildSlider(trackGap: 0));
+
+      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+
+      // Test default track shape.
+      const Radius trackOuterCornerRadius = Radius.circular(8.0);
+      const Radius trackInnerCornderRadius = Radius.circular(2.0);
+      expect(
+        material,
+        paints
+          // Active track.
+          ..rrect(
+            rrect: RRect.fromLTRBAndCorners(
+              24.0, 292.0, 400.0, 308.0,
+              topLeft: trackOuterCornerRadius,
+              topRight: trackInnerCornderRadius,
+              bottomRight: trackInnerCornderRadius,
+              bottomLeft: trackOuterCornerRadius,
+            ),
+          )
+          // Inctive track.
+          ..rrect(
+            rrect: RRect.fromLTRBAndCorners(
+              400.0, 292.0, 776.0, 308.0,
+              topLeft: trackInnerCornderRadius,
+              topRight: trackOuterCornerRadius,
+              bottomRight: trackOuterCornerRadius,
+              bottomLeft: trackInnerCornderRadius,
+            ),
+          )
+      );
+
+      await tester.pumpWidget(buildSlider(trackGap: 10));
+      await tester.pumpAndSettle();
+      expect(
+        material,
+        paints
+          // Active track.
+          ..rrect(
+            rrect: RRect.fromLTRBAndCorners(
+              24.0, 292.0, 390.0, 308.0,
+              topLeft: trackOuterCornerRadius,
+              topRight: trackInnerCornderRadius,
+              bottomRight: trackInnerCornderRadius,
+              bottomLeft: trackOuterCornerRadius,
+            ),
+          )
+          // Inctive track.
+          ..rrect(
+            rrect: RRect.fromLTRBAndCorners(
+              410.0, 292.0, 776.0, 308.0,
+              topLeft: trackInnerCornderRadius,
+              topRight: trackOuterCornerRadius,
+              bottomRight: trackOuterCornerRadius,
+              bottomLeft: trackInnerCornderRadius,
+            ),
+          )
+      );
+    } finally {
+      debugDisableShadows = true;
+    }
+  });
+
+  testWidgets('Can customize thumb size when year2023 is false', (WidgetTester tester) async {
+    debugDisableShadows = false;
+    try {
+      Widget buildSlider({ WidgetStateProperty<Size?>? thumbSize }) {
+        return MaterialApp(
+          theme: ThemeData(
+            sliderTheme: SliderThemeData(
+              thumbSize: thumbSize,
+            ),
+          ),
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: Center(
+                child: Slider(
+                  year2023: false,
+                  value: 0.5,
+                  onChanged: (double value) { },
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildSlider(thumbSize: const WidgetStatePropertyAll<Size>(Size(20, 20))));
+
+      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+      expect(
+        material,
+        paints
+          ..circle()
+          ..rrect(
+            rrect: RRect.fromLTRBR(
+            390.0, 290.0, 410.0, 310.0,
+            const Radius.circular(10.0),
+          ),
+      ));
+
+      await tester.pumpWidget(buildSlider(thumbSize: const WidgetStateProperty<Size?>.fromMap(
+        <WidgetStatesConstraint, Size>{
+          WidgetState.pressed: Size(20, 20),
+          WidgetState.any:  Size(10, 10),
+        },
+      )));
+      await tester.pumpAndSettle();
+
+      expect(
+        material,
+        paints
+          ..circle()
+          ..rrect(
+            rrect: RRect.fromLTRBR(
+            395.0, 295.0, 405.0, 305.0,
+            const Radius.circular(5.0),
+          ),
+      ));
+
+
+      final Offset center = tester.getCenter(find.byType(Slider));
+      final TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(
+        material,
+        paints
+          ..circle()
+          ..rrect(
+            rrect: RRect.fromLTRBR(
+            390.0, 295.0, 410.0, 305.0,
+            const Radius.circular(5.0),
+          ),
+      ));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    } finally {
+      debugDisableShadows = true;
+    }
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
