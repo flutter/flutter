@@ -1792,7 +1792,6 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       }
       await project.regeneratePlatformSpecificTooling(
         allowedPlugins: allowedPlugins,
-        writeLegacyPluginsList: boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true),
       );
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);

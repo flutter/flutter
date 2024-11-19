@@ -3,15 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/native_assets_cli.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../../android/android_sdk.dart';
 import '../../../android/gradle_utils.dart';
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../build_info.dart' hide BuildMode;
-import '../../../globals.dart' as globals;
 
 int targetAndroidNdkApi(Map<String, String> environmentDefines) {
   return int.parse(environmentDefines[kMinSdkVersion] ?? minSdkVersion);
@@ -19,33 +17,29 @@ int targetAndroidNdkApi(Map<String, String> environmentDefines) {
 
 Future<void> copyNativeCodeAssetsAndroid(
   Uri buildUri,
-  Map<NativeCodeAssetImpl, KernelAsset> assetTargetLocations,
+  Map<CodeAsset, KernelAsset> assetTargetLocations,
   FileSystem fileSystem,
 ) async {
-  if (assetTargetLocations.isNotEmpty) {
-    globals.logger
-        .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-    final List<String> jniArchDirs = <String>[
-      for (final AndroidArch androidArch in AndroidArch.values)
-        androidArch.archName,
-    ];
-    for (final String jniArchDir in jniArchDirs) {
-      final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
-      await fileSystem.directory(archUri).create(recursive: true);
-    }
-    for (final MapEntry<NativeCodeAssetImpl, KernelAsset> assetMapping
-        in assetTargetLocations.entries) {
-      final Uri source = assetMapping.key.file!;
-      final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
-      final AndroidArch androidArch =
-          _getAndroidArch(assetMapping.value.target);
-      final String jniArchDir = androidArch.archName;
-      final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
-      final Uri targetUri = archUri.resolveUri(target);
-      final String targetFullPath = targetUri.toFilePath();
-      await fileSystem.file(source).copy(targetFullPath);
-    }
-    globals.logger.printTrace('Copying native assets done.');
+  assert(assetTargetLocations.isNotEmpty);
+  final List<String> jniArchDirs = <String>[
+    for (final AndroidArch androidArch in AndroidArch.values)
+      androidArch.archName,
+  ];
+  for (final String jniArchDir in jniArchDirs) {
+    final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
+    await fileSystem.directory(archUri).create(recursive: true);
+  }
+  for (final MapEntry<CodeAsset, KernelAsset> assetMapping
+      in assetTargetLocations.entries) {
+    final Uri source = assetMapping.key.file!;
+    final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
+    final AndroidArch androidArch =
+        _getAndroidArch(assetMapping.value.target);
+    final String jniArchDir = androidArch.archName;
+    final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
+    final Uri targetUri = archUri.resolveUri(target);
+    final String targetFullPath = targetUri.toFilePath();
+    await fileSystem.file(source).copy(targetFullPath);
   }
 }
 
@@ -71,17 +65,17 @@ AndroidArch _getAndroidArch(Target target) {
   };
 }
 
-Map<NativeCodeAssetImpl, KernelAsset> assetTargetLocationsAndroid(
-    List<NativeCodeAssetImpl> nativeAssets) {
-  return <NativeCodeAssetImpl, KernelAsset>{
-    for (final NativeCodeAssetImpl asset in nativeAssets)
+Map<CodeAsset, KernelAsset> assetTargetLocationsAndroid(
+    List<CodeAsset> nativeAssets) {
+  return <CodeAsset, KernelAsset>{
+    for (final CodeAsset asset in nativeAssets)
       asset: _targetLocationAndroid(asset),
   };
 }
 
 /// Converts the `path` of [asset] as output from a `build.dart` invocation to
 /// the path used inside the Flutter app bundle.
-KernelAsset _targetLocationAndroid(NativeCodeAssetImpl asset) {
+KernelAsset _targetLocationAndroid(CodeAsset asset) {
   final LinkMode linkMode = asset.linkMode;
   final KernelAssetPath kernelAssetPath;
   switch (linkMode) {
@@ -113,12 +107,12 @@ KernelAsset _targetLocationAndroid(NativeCodeAssetImpl asset) {
 /// Should only be invoked if a native assets build is performed. If the native
 /// assets feature is disabled, or none of the packages have native assets, a
 /// missing NDK is okay.
-Future<CCompilerConfigImpl> cCompilerConfigAndroid() async {
+Future<CCompilerConfig> cCompilerConfigAndroid() async {
   final AndroidSdk? androidSdk = AndroidSdk.locateAndroidSdk();
   if (androidSdk == null) {
     throwToolExit('Android SDK could not be found.');
   }
-  final CCompilerConfigImpl result = CCompilerConfigImpl(
+  final CCompilerConfig result = CCompilerConfig(
     compiler: _toOptionalFileUri(androidSdk.getNdkClangPath()),
     archiver: _toOptionalFileUri(androidSdk.getNdkArPath()),
     linker: _toOptionalFileUri(androidSdk.getNdkLdPath()),

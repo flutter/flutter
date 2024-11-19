@@ -27,6 +27,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -67,6 +68,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -117,6 +119,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -162,6 +165,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -210,6 +214,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -239,6 +244,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(
@@ -263,6 +269,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(
@@ -287,6 +294,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(
@@ -311,6 +319,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(
@@ -336,6 +345,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(
@@ -361,6 +371,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(message: _kTestPluginName),
@@ -391,6 +402,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -423,6 +435,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -449,6 +462,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -473,6 +487,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(
@@ -495,6 +510,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -520,6 +536,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -538,6 +555,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(message: 'Invalid "plugin" specification.'),
@@ -556,6 +574,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(message: 'Invalid "platforms" specification.'),
@@ -576,6 +595,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(message: 'Invalid "android" plugin specification.'),

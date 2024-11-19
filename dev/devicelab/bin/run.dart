@@ -99,8 +99,8 @@ Future<void> main(List<String> rawArgs) async {
       stderr.writeln(argParser.usage);
       exit(1);
     }
-    if (localEngineHost == null) {
-      stderr.writeln('When running in A/B test mode --local-engine-host is required.\n');
+    if (localWebSdk == null && localEngineHost == null) {
+      stderr.writeln('When running in A/B test mode for mobile --local-engine-host is required.\n');
       stderr.writeln(argParser.usage);
       exit(1);
     }
@@ -137,7 +137,7 @@ Future<void> _runABTest({
   required int runsPerTest,
   required bool silent,
   required String? localEngine,
-  required String localEngineHost,
+  required String? localEngineHost,
   required String? localWebSdk,
   required String? localEngineSrcPath,
   required String? deviceId,
