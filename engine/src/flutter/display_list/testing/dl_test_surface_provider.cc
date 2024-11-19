@@ -10,50 +10,29 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 
-#ifdef ENABLE_SOFTWARE_BENCHMARKS
-#include "flutter/display_list/testing/dl_test_surface_software.h"
-#endif
-#ifdef ENABLE_OPENGL_BENCHMARKS
-#include "flutter/display_list/testing/dl_test_surface_gl.h"
-#endif
-#ifdef ENABLE_METAL_BENCHMARKS
-#include "flutter/display_list/testing/dl_test_surface_metal.h"
-#endif
-
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 std::string DlSurfaceProvider::BackendName(BackendType type) {
   switch (type) {
-    case kMetalBackend:
-      return "Metal";
-    case kOpenGlBackend:
-      return "OpenGL";
     case kSoftwareBackend:
       return "Software";
+    case kOpenGlBackend:
+      return "OpenGL";
+    case kMetalBackend:
+      return "Metal";
   }
 }
 
 std::unique_ptr<DlSurfaceProvider> DlSurfaceProvider::Create(
     BackendType backend_type) {
   switch (backend_type) {
-#ifdef ENABLE_SOFTWARE_BENCHMARKS
     case kSoftwareBackend:
-      return std::make_unique<DlSoftwareSurfaceProvider>();
-#endif
-#ifdef ENABLE_OPENGL_BENCHMARKS
-    case kOpenGLBackend:
-      return std::make_unique<DlOpenGLSurfaceProvider>();
-#endif
-#ifdef ENABLE_METAL_BENCHMARKS
+      return CreateSoftware();
+    case kOpenGlBackend:
+      return CreateOpenGL();
     case kMetalBackend:
-      return std::make_unique<DlMetalSurfaceProvider>();
-#endif
-    default:
-      return nullptr;
+      return CreateMetal();
   }
-
-  return nullptr;
 }
 
 bool DlSurfaceProvider::Snapshot(std::string& filename) const {
@@ -78,5 +57,20 @@ bool DlSurfaceProvider::Snapshot(std::string& filename) const {
 #endif
 }
 
-}  // namespace testing
-}  // namespace flutter
+#ifndef ENABLE_SOFTWARE_BENCHMARKS
+std::unique_ptr<DlSurfaceProvider> DlSurfaceProvider::CreateSoftware() {
+  return nullptr;
+}
+#endif
+#ifndef ENABLE_OPENGL_BENCHMARKS
+std::unique_ptr<DlSurfaceProvider> DlSurfaceProvider::CreateOpenGL() {
+  return nullptr;
+}
+#endif
+#ifndef ENABLE_METAL_BENCHMARKS
+std::unique_ptr<DlSurfaceProvider> DlSurfaceProvider::CreateMetal() {
+  return nullptr;
+}
+#endif
+
+}  // namespace flutter::testing

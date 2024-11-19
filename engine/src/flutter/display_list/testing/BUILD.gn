@@ -86,6 +86,7 @@ source_set("display_list_surface_provider") {
 
   if (surface_provider_include_software) {
     sources += [
+      "dl_test_surface_provider_software.cc",
       "dl_test_surface_software.cc",
       "dl_test_surface_software.h",
     ]
@@ -95,6 +96,7 @@ source_set("display_list_surface_provider") {
     sources += [
       "dl_test_surface_gl.cc",
       "dl_test_surface_gl.h",
+      "dl_test_surface_provider_gl.cc",
     ]
     deps += [ "//flutter/testing:opengl" ]
   }
@@ -103,6 +105,7 @@ source_set("display_list_surface_provider") {
     sources += [
       "dl_test_surface_metal.h",
       "dl_test_surface_metal.mm",
+      "dl_test_surface_provider_metal.mm",
     ]
     deps += [
       "//flutter/impeller/display_list",
