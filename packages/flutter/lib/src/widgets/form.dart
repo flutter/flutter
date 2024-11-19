@@ -357,8 +357,8 @@ class FormState extends State<Form> {
       if (!validateOnFocusChange || !field._focusNode.hasFocus) {
         final bool isFieldValid = field.validate();
         hasError = !isFieldValid || hasError;
+        // Ensure that only the first error message gets announced to the user.
         if (errorMessage.isEmpty) {
-          // Ensure that only the first error message gets announced to the user.
           errorMessage = field.errorText ?? '';
         }
         if (invalidFields != null && !isFieldValid) {
