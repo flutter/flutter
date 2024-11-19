@@ -14,9 +14,9 @@ import 'impeller_enabled.dart';
 const Color red = Color(0xFFAA0000);
 const Color green = Color(0xFF00AA00);
 
-const int greenCenterBlurred = 0x1C001300;
-const int greenSideBlurred = 0x15000E00;
-const int greenCornerBlurred = 0x10000A00;
+const int greenCenterBlurred = 0x29001B00;
+const int greenSideBlurred = 0x19001000;
+const int greenCornerBlurred = 0x0F000A00;
 
 const int greenCenterScaled = 0xFF00AA00;
 const int greenSideScaled = 0x80005500;
