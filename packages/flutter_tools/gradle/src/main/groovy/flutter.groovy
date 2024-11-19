@@ -1280,8 +1280,9 @@ class FlutterPlugin implements Plugin<Project> {
                 validateDeferredComponents(validateDeferredComponentsValue)
                 flavor(flavorValue)
             }
+            Task compileTask = compileTaskProvider.get();
             File libJar = project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar"))
-            TaskProvider<Jar> packJniLibsTask = project.tasks.register(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+            TaskProvider<Jar> packJniLibsTaskProvider = project.tasks.register(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
                 dependsOn compileTask
@@ -1306,10 +1307,11 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
+            Task packJniLibsTask = packJniLibsTaskProvider.get();
             addApiDependencies(project, variant.name, project.files {
                 packJniLibsTask
             })
-            TaskProvider<Copy> copyFlutterAssetsTask = project.tasks.register(
+            TaskProvider<Copy> copyFlutterAssetsTaskProvider = project.tasks.register(
                 name: "copyFlutterAssets${variant.name.capitalize()}",
                 type: Copy,
             ) {
@@ -1345,6 +1347,7 @@ class FlutterPlugin implements Plugin<Project> {
                 mergeAssets.mustRunAfter("clean${mergeAssets.name.capitalize()}")
                 into(mergeAssets.outputDir)
             }
+            Task copyFlutterAssetsTask = copyFlutterAssetsTaskProvider.get();
             if (!isUsedAsSubproject) {
                 def variantOutput = variant.outputs.first()
                 def processResources = variantOutput.hasProperty(propProcessResourcesProvider) ?
