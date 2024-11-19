@@ -35,9 +35,6 @@ class EmbedderTestContextMetal : public EmbedderTestContext {
   // |EmbedderTestContext|
   size_t GetSurfacePresentCount() const override;
 
-  // |EmbedderTestContext|
-  void SetupCompositor() override;
-
   void SetExternalTextureCallback(
       TestExternalTextureCallback external_texture_frame_callback);
 
@@ -61,8 +58,11 @@ class EmbedderTestContextMetal : public EmbedderTestContext {
   FlutterMetalTexture GetNextDrawable(const FlutterFrameInfo* frame_info);
 
  private:
-  // This allows the builder to access the hooks.
-  friend class EmbedderConfigBuilder;
+  // |EmbedderTestContext|
+  void SetSurface(SkISize surface_size) override;
+
+  // |EmbedderTestContext|
+  void SetupCompositor() override;
 
   TestExternalTextureCallback external_texture_frame_callback_ = nullptr;
   SkISize surface_size_ = SkISize::MakeEmpty();
@@ -71,8 +71,6 @@ class EmbedderTestContextMetal : public EmbedderTestContext {
   size_t present_count_ = 0;
   PresentCallback present_callback_ = nullptr;
   NextDrawableCallback next_drawable_callback_ = nullptr;
-
-  void SetupSurface(SkISize surface_size) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContextMetal);
 };

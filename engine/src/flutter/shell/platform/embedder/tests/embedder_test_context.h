@@ -72,9 +72,7 @@ class EmbedderTestContext {
 
   void SetRootSurfaceTransformation(SkMatrix matrix);
 
-  void SetRenderTargetType(
-      EmbedderTestBackingStoreProducer::RenderTargetType type,
-      FlutterSoftwarePixelFormat software_pixfmt);
+  FlutterRendererConfig& GetRendererConfig();
 
   void AddIsolateCreateCallback(const fml::closure& closure);
 
@@ -129,6 +127,7 @@ class EmbedderTestContext {
   UniqueAOTData aot_data_;
   std::vector<fml::closure> isolate_create_callbacks_;
   std::shared_ptr<TestDartNativeResolver> native_resolver_;
+  FlutterRendererConfig renderer_config_ = {};
   SemanticsUpdateCallback2 update_semantics_callback2_;
   SemanticsUpdateCallback update_semantics_callback_;
   SemanticsNodeCallback update_semantics_node_callback_;
@@ -163,6 +162,8 @@ class EmbedderTestContext {
 
   void SetupAOTDataIfNecessary();
 
+  virtual void SetSurface(SkISize surface_size) = 0;
+
   virtual void SetupCompositor() = 0;
 
   void FireIsolateCreateCallbacks();
@@ -177,8 +178,6 @@ class EmbedderTestContext {
       const std::function<sk_sp<SkImage>(void)>& image_callback);
 
   void SetNextSceneCallback(const NextSceneCallback& next_scene_callback);
-
-  virtual void SetupSurface(SkISize surface_size) = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContext);
 };

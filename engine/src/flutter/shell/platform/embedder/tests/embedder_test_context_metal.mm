@@ -11,35 +11,41 @@
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test_compositor_metal.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 EmbedderTestContextMetal::EmbedderTestContextMetal(std::string assets_path)
     : EmbedderTestContext(std::move(assets_path)) {
   metal_context_ = std::make_unique<TestMetalContext>();
+  renderer_config_.type = FlutterRendererType::kMetal;
+  renderer_config_.metal = {
+      .struct_size = sizeof(FlutterMetalRendererConfig),
+      .device = metal_context_->GetMetalDevice(),
+      .present_command_queue = metal_context_->GetMetalCommandQueue(),
+      .get_next_drawable_callback =
+          [](void* user_data, const FlutterFrameInfo* frame_info) {
+            return reinterpret_cast<EmbedderTestContextMetal*>(user_data)->GetNextDrawable(
+                frame_info);
+          },
+      .present_drawable_callback = [](void* user_data, const FlutterMetalTexture* texture) -> bool {
+        return reinterpret_cast<EmbedderTestContextMetal*>(user_data)->Present(texture->texture_id);
+      },
+      .external_texture_frame_callback = [](void* user_data, int64_t texture_id, size_t width,
+                                            size_t height,
+                                            FlutterMetalExternalTexture* texture_out) -> bool {
+        return reinterpret_cast<EmbedderTestContextMetal*>(user_data)->PopulateExternalTexture(
+            texture_id, width, height, texture_out);
+      },
+  };
 }
 
 EmbedderTestContextMetal::~EmbedderTestContextMetal() {}
-
-void EmbedderTestContextMetal::SetupSurface(SkISize surface_size) {
-  FML_CHECK(surface_size_.isEmpty());
-  surface_size_ = surface_size;
-  metal_surface_ = TestMetalSurface::Create(*metal_context_, surface_size_);
-}
-
-size_t EmbedderTestContextMetal::GetSurfacePresentCount() const {
-  return present_count_;
-}
 
 EmbedderTestContextType EmbedderTestContextMetal::GetContextType() const {
   return EmbedderTestContextType::kMetalContext;
 }
 
-void EmbedderTestContextMetal::SetupCompositor() {
-  FML_CHECK(!compositor_) << "Already set up a compositor in this context.";
-  FML_CHECK(metal_surface_) << "Set up the Metal surface before setting up a compositor.";
-  compositor_ =
-      std::make_unique<EmbedderTestCompositorMetal>(surface_size_, metal_surface_->GetGrContext());
+size_t EmbedderTestContextMetal::GetSurfacePresentCount() const {
+  return present_count_;
 }
 
 TestMetalContext* EmbedderTestContextMetal::GetTestMetalContext() {
@@ -98,5 +104,17 @@ FlutterMetalTexture EmbedderTestContextMetal::GetNextDrawable(const FlutterFrame
   return texture;
 }
 
-}  // namespace testing
-}  // namespace flutter
+void EmbedderTestContextMetal::SetSurface(SkISize surface_size) {
+  FML_CHECK(surface_size_.isEmpty());
+  surface_size_ = surface_size;
+  metal_surface_ = TestMetalSurface::Create(*metal_context_, surface_size_);
+}
+
+void EmbedderTestContextMetal::SetupCompositor() {
+  FML_CHECK(!compositor_) << "Already set up a compositor in this context.";
+  FML_CHECK(metal_surface_) << "Set up the Metal surface before setting up a compositor.";
+  compositor_ =
+      std::make_unique<EmbedderTestCompositorMetal>(surface_size_, metal_surface_->GetGrContext());
+}
+
+}  // namespace flutter::testing

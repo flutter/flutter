@@ -18,21 +18,24 @@ class EmbedderTestContextSoftware : public EmbedderTestContext {
 
   ~EmbedderTestContextSoftware() override;
 
-  size_t GetSurfacePresentCount() const override;
-
   // |EmbedderTestContext|
   EmbedderTestContextType GetContextType() const override;
 
+  // |EmbedderTestContext|
+  size_t GetSurfacePresentCount() const override;
+
   bool Present(const sk_sp<SkImage>& image);
 
- protected:
-  virtual void SetupCompositor() override;
-
  private:
+  // |EmbedderTestContext|
+  void SetSurface(SkISize surface_size) override;
+
+  // |EmbedderTestContext|
+  void SetupCompositor() override;
+
   sk_sp<SkSurface> surface_;
   SkISize surface_size_;
   size_t software_surface_present_count_ = 0;
-  void SetupSurface(SkISize surface_size) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContextSoftware);
 };

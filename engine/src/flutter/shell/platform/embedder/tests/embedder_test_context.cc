@@ -96,6 +96,10 @@ void EmbedderTestContext::SetRootSurfaceTransformation(SkMatrix matrix) {
   root_surface_transformation_ = matrix;
 }
 
+FlutterRendererConfig& EmbedderTestContext::GetRendererConfig() {
+  return renderer_config_;
+}
+
 void EmbedderTestContext::AddIsolateCreateCallback(
     const fml::closure& closure) {
   if (closure) {
