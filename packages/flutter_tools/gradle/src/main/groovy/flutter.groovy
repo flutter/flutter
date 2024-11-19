@@ -1248,7 +1248,7 @@ class FlutterPlugin implements Plugin<Project> {
             // original value. You either need to hoist the value
             // into a separate variable `verbose verboseValue` or prefix with
             // `this` (`verbose this.isVerbose()`).
-            FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
+            FlutterTask compileTask = project.tasks.register(name: taskName, type: FlutterTask) {
                 flutterRoot(this.flutterRoot)
                 flutterExecutable(this.flutterExecutable)
                 buildMode(variantBuildMode)
@@ -1280,7 +1280,7 @@ class FlutterPlugin implements Plugin<Project> {
                 flavor(flavorValue)
             }
             File libJar = project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar"))
-            Task packJniLibsTask = project.tasks.create(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+            Task packJniLibsTask = project.tasks.register(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
                 dependsOn compileTask
@@ -1308,7 +1308,7 @@ class FlutterPlugin implements Plugin<Project> {
             addApiDependencies(project, variant.name, project.files {
                 packJniLibsTask
             })
-            Task copyFlutterAssetsTask = project.tasks.create(
+            Task copyFlutterAssetsTask = project.tasks.register(
                 name: "copyFlutterAssets${variant.name.capitalize()}",
                 type: Copy,
             ) {
