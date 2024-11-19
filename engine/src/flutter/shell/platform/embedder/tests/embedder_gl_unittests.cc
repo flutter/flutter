@@ -45,14 +45,9 @@ namespace flutter::testing {
 
 using EmbedderTest = testing::EmbedderTest;
 
-TEST_F(EmbedderTest, CanGetVulkanEmbedderContext) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kVulkanContext);
-  EmbedderConfigBuilder builder(context);
-}
-
 TEST_F(EmbedderTest, CanCreateOpenGLRenderingEngine) {
-  EmbedderConfigBuilder builder(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
+  EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(1, 1));
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -65,7 +60,7 @@ TEST_F(EmbedderTest, CanCreateOpenGLRenderingEngine) {
 ///
 TEST_F(EmbedderTest,
        MustPreventEngineLaunchWhenRequiredCompositorArgsAreAbsent) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(1, 1));
   builder.SetCompositor();
@@ -83,7 +78,7 @@ TEST_F(EmbedderTest,
 /// render a frame at a later point in time.
 ///
 TEST_F(EmbedderTest, LaunchFailsWhenMultiplePresentCallbacks) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(1, 1));
   builder.SetCompositor();
@@ -102,7 +97,7 @@ TEST_F(EmbedderTest, LaunchFailsWhenMultiplePresentCallbacks) {
 /// complete OpenGL textures.
 ///
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLFramebuffer) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -222,7 +217,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLFramebuffer) {
 /// Layers in a hierarchy containing a platform view should not be cached. The
 /// other layers in the hierarchy should be, however.
 TEST_F(EmbedderTest, RasterCacheDisabledWithPlatformViews) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -355,7 +350,7 @@ TEST_F(EmbedderTest, RasterCacheDisabledWithPlatformViews) {
 /// The RasterCache should normally be enabled.
 ///
 TEST_F(EmbedderTest, RasterCacheEnabled) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -441,7 +436,7 @@ TEST_F(EmbedderTest, RasterCacheEnabled) {
 /// the individual layers are OpenGL textures.
 ///
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLTexture) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -562,7 +557,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLTexture) {
 /// individual layers are software buffers.
 ///
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToSoftwareBuffer) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -683,7 +678,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToSoftwareBuffer) {
 /// Test the layer structure and pixels rendered when using a custom compositor.
 ///
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -897,7 +892,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
 /// thread merging mechanism must not interfere with the custom compositor.
 ///
 TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
 
@@ -1065,7 +1060,7 @@ TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
 /// and a single layer.
 ///
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithRootLayerOnly) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -1147,7 +1142,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithRootLayerOnly) {
 /// and ensure that a redundant layer is not added.
 ///
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -1275,7 +1270,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
 ///
 TEST_F(EmbedderTest,
        CompositorMustBeAbleToRenderKnownSceneWithRootSurfaceTransformation) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(600, 800));
@@ -1492,7 +1487,7 @@ TEST_F(EmbedderTest,
 }
 
 TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositor) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
 
@@ -1518,7 +1513,7 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositor) {
 }
 
 TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorWithTransformation) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   const auto root_surface_transformation =
       SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
@@ -1553,7 +1548,6 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorWithTransformation) {
 TEST_P(EmbedderTestMultiBackend, CanRenderGradientWithoutCompositor) {
   EmbedderTestContextType backend = GetParam();
   auto& context = GetEmbedderContext(backend);
-
   EmbedderConfigBuilder builder(context);
   builder.SetDartEntrypoint("render_gradient");
   builder.SetSurface(SkISize::Make(800, 600));
@@ -1577,7 +1571,7 @@ TEST_P(EmbedderTestMultiBackend, CanRenderGradientWithoutCompositor) {
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithoutCompositorWithXform) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   const auto root_surface_transformation =
       SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
@@ -1638,7 +1632,7 @@ TEST_P(EmbedderTestMultiBackend, CanRenderGradientWithCompositor) {
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithCompositorWithXform) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   // This must match the transformation provided in the
   // |CanRenderGradientWithoutCompositorWithXform| test to ensure that
@@ -1808,7 +1802,7 @@ TEST_P(EmbedderTestMultiBackend,
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   // This must match the transformation provided in the
   // |CanRenderGradientWithoutCompositorWithXform| test to ensure that
@@ -1951,7 +1945,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
 }
 
 TEST_F(EmbedderTest, VerifyB141980393) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
 
@@ -2072,8 +2066,8 @@ TEST_F(EmbedderTest, CanCreateEmbedderWithCustomRenderTaskRunner) {
           task_latch.Signal();
         }
       });
-  EmbedderConfigBuilder builder(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
+  EmbedderConfigBuilder builder(context);
   builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
   builder.SetSurface(SkISize::Make(800, 600));
   builder.SetRenderTaskRunner(
@@ -2132,7 +2126,8 @@ TEST_P(EmbedderTestMultiBackend,
 
   platform_task_runner->PostTask([&]() {
     EmbedderTestContextType backend = GetParam();
-    EmbedderConfigBuilder builder(GetEmbedderContext(backend));
+    auto& context = GetEmbedderContext(backend);
+    EmbedderConfigBuilder builder(context);
     builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
     builder.SetSurface(SkISize::Make(800, 600));
     builder.SetRenderTaskRunner(
@@ -2305,7 +2300,7 @@ TEST_P(EmbedderTestMultiBackend,
 TEST_F(
     EmbedderTest,
     CompositorMustBeAbleToRenderKnownScenePixelRatioOnSurfaceWithRootSurfaceXformation) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(600, 800));
@@ -2428,7 +2423,7 @@ TEST_F(
 
 TEST_F(EmbedderTest,
        PushingMutlipleFramesSetsUpNewRecordingCanvasWithCustomCompositor) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(600, 1024));
@@ -2472,7 +2467,7 @@ TEST_F(EmbedderTest,
 
 TEST_F(EmbedderTest,
        PushingMutlipleFramesSetsUpNewRecordingCanvasWithoutCustomCompositor) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(600, 1024));
@@ -2621,7 +2616,7 @@ TEST_P(EmbedderTestMultiBackend, PlatformViewMutatorsAreValid) {
 }
 
 TEST_F(EmbedderTest, PlatformViewMutatorsAreValidWithPixelRatio) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -2733,7 +2728,7 @@ TEST_F(EmbedderTest, PlatformViewMutatorsAreValidWithPixelRatio) {
 
 TEST_F(EmbedderTest,
        PlatformViewMutatorsAreValidWithPixelRatioAndRootSurfaceTransformation) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -2850,7 +2845,7 @@ TEST_F(EmbedderTest,
 }
 
 TEST_F(EmbedderTest, EmptySceneIsAcceptable) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -2876,7 +2871,7 @@ TEST_F(EmbedderTest, EmptySceneIsAcceptable) {
 }
 
 TEST_F(EmbedderTest, SceneWithNoRootContainerIsAcceptable) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -2906,7 +2901,7 @@ TEST_F(EmbedderTest, SceneWithNoRootContainerIsAcceptable) {
 // Verifies that https://skia-review.googlesource.com/c/skia/+/259174 is pulled
 // into the engine.
 TEST_F(EmbedderTest, ArcEndCapsAreDrawnCorrectly) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 1024));
@@ -2940,7 +2935,7 @@ TEST_F(EmbedderTest, ArcEndCapsAreDrawnCorrectly) {
 }
 
 TEST_F(EmbedderTest, ClipsAreCorrectlyCalculated) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(400, 300));
@@ -3020,7 +3015,7 @@ TEST_F(EmbedderTest, ClipsAreCorrectlyCalculated) {
 }
 
 TEST_F(EmbedderTest, ComplexClipsAreCorrectlyCalculated) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(1024, 600));
@@ -3105,7 +3100,7 @@ TEST_F(EmbedderTest, ComplexClipsAreCorrectlyCalculated) {
 }
 
 TEST_F(EmbedderTest, ObjectsCanBePostedViaPorts) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 1024));
   builder.SetDartEntrypoint("objects_can_be_posted");
@@ -3304,7 +3299,7 @@ TEST_F(EmbedderTest, ObjectsCanBePostedViaPorts) {
 }
 
 TEST_F(EmbedderTest, CompositorCanPostZeroLayersForPresentation) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(300, 200));
@@ -3338,7 +3333,7 @@ TEST_F(EmbedderTest, CompositorCanPostZeroLayersForPresentation) {
 }
 
 TEST_F(EmbedderTest, CompositorCanPostOnlyPlatformViews) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(300, 200));
@@ -3402,7 +3397,7 @@ TEST_F(EmbedderTest, CompositorCanPostOnlyPlatformViews) {
 }
 
 TEST_F(EmbedderTest, CompositorRenderTargetsAreRecycled) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(300, 200));
@@ -3448,7 +3443,7 @@ TEST_F(EmbedderTest, CompositorRenderTargetsAreRecycled) {
 }
 
 TEST_F(EmbedderTest, CompositorRenderTargetsAreInStableOrder) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(300, 200));
@@ -3518,8 +3513,7 @@ TEST_F(EmbedderTest, CompositorRenderTargetsAreInStableOrder) {
 }
 
 TEST_F(EmbedderTest, FrameInfoContainsValidWidthAndHeight) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   const auto root_surface_transformation =
       SkMatrix().preTranslate(0, 1024).preRotate(-90, 0, 0);
   context.SetRootSurfaceTransformation(root_surface_transformation);
@@ -3558,8 +3552,7 @@ TEST_F(EmbedderTest, FrameInfoContainsValidWidthAndHeight) {
 }
 
 TEST_F(EmbedderTest, MustNotRunWithBothFBOCallbacksSet) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.SetOpenGLFBOCallBack();
 
   EmbedderConfigBuilder builder(context);
@@ -3570,8 +3563,7 @@ TEST_F(EmbedderTest, MustNotRunWithBothFBOCallbacksSet) {
 }
 
 TEST_F(EmbedderTest, MustNotRunWithBothPresentCallbacksSet) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.SetOpenGLPresentCallBack();
 
   EmbedderConfigBuilder builder(context);
@@ -3582,8 +3574,7 @@ TEST_F(EmbedderTest, MustNotRunWithBothPresentCallbacksSet) {
 }
 
 TEST_F(EmbedderTest, MustStillRunWhenPopulateExistingDamageIsNotProvided) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.GetRendererConfig().open_gl.populate_existing_damage = nullptr;
 
   EmbedderConfigBuilder builder(context);
@@ -3594,8 +3585,7 @@ TEST_F(EmbedderTest, MustStillRunWhenPopulateExistingDamageIsNotProvided) {
 }
 
 TEST_F(EmbedderTest, MustRunWhenPopulateExistingDamageIsProvided) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.GetRendererConfig().open_gl.populate_existing_damage =
       [](void* context, const intptr_t id,
          FlutterDamage* existing_damage) -> void {
@@ -3610,8 +3600,7 @@ TEST_F(EmbedderTest, MustRunWhenPopulateExistingDamageIsProvided) {
 }
 
 TEST_F(EmbedderTest, MustRunWithPopulateExistingDamageAndFBOCallback) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.GetRendererConfig().open_gl.fbo_callback =
       [](void* context) -> uint32_t { return 0; };
   context.GetRendererConfig().open_gl.fbo_with_frame_info_callback = nullptr;
@@ -3630,8 +3619,7 @@ TEST_F(EmbedderTest, MustRunWithPopulateExistingDamageAndFBOCallback) {
 
 TEST_F(EmbedderTest,
        MustNotRunWhenPopulateExistingDamageButNoOtherFBOCallback) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.GetRendererConfig().open_gl.fbo_callback = nullptr;
   context.GetRendererConfig().open_gl.fbo_with_frame_info_callback = nullptr;
   context.GetRendererConfig().open_gl.populate_existing_damage =
@@ -3648,17 +3636,14 @@ TEST_F(EmbedderTest,
 }
 
 TEST_F(EmbedderTest, PresentInfoContainsValidFBOId) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
+  const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 1024).preRotate(-90, 0, 0);
+  context.SetRootSurfaceTransformation(root_surface_transformation);
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(600, 1024));
   builder.SetDartEntrypoint("push_frames_over_and_over");
-
-  const auto root_surface_transformation =
-      SkMatrix().preTranslate(0, 1024).preRotate(-90, 0, 0);
-
-  context.SetRootSurfaceTransformation(root_surface_transformation);
 
   auto engine = builder.LaunchEngine();
 
@@ -3692,8 +3677,7 @@ TEST_F(EmbedderTest, PresentInfoContainsValidFBOId) {
 
 TEST_F(EmbedderTest,
        PresentInfoReceivesFullDamageWhenExistingDamageIsWholeScreen) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.GetRendererConfig().open_gl.populate_existing_damage =
       [](void* context, const intptr_t id,
          FlutterDamage* existing_damage) -> void {
@@ -3773,8 +3757,7 @@ TEST_F(EmbedderTest,
 }
 
 TEST_F(EmbedderTest, PresentInfoReceivesEmptyDamage) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.GetRendererConfig().open_gl.populate_existing_damage =
       [](void* context, const intptr_t id,
          FlutterDamage* existing_damage) -> void {
@@ -3853,8 +3836,7 @@ TEST_F(EmbedderTest, PresentInfoReceivesEmptyDamage) {
 }
 
 TEST_F(EmbedderTest, PresentInfoReceivesPartialDamage) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.GetRendererConfig().open_gl.populate_existing_damage =
       [](void* context, const intptr_t id,
          FlutterDamage* existing_damage) -> void {
@@ -3934,8 +3916,7 @@ TEST_F(EmbedderTest, PresentInfoReceivesPartialDamage) {
 }
 
 TEST_F(EmbedderTest, PopulateExistingDamageReceivesValidID) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.GetRendererConfig().open_gl.populate_existing_damage =
       [](void* context, const intptr_t id,
          FlutterDamage* existing_damage) -> void {
@@ -3969,8 +3950,7 @@ TEST_F(EmbedderTest, PopulateExistingDamageReceivesValidID) {
 }
 
 TEST_F(EmbedderTest, PopulateExistingDamageReceivesInvalidID) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.GetRendererConfig().open_gl.populate_existing_damage =
       [](void* context, const intptr_t id,
          FlutterDamage* existing_damage) -> void {
@@ -4014,7 +3994,7 @@ TEST_F(EmbedderTest, PopulateExistingDamageReceivesInvalidID) {
 }
 
 TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithDisplayId) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -4056,7 +4036,7 @@ TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithDisplayId) {
 }
 
 TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithoutDisplayId) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -4098,7 +4078,7 @@ TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithoutDisplayId) {
 }
 
 TEST_F(EmbedderTest, SetValidMultiDisplayConfiguration) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -4147,7 +4127,7 @@ TEST_F(EmbedderTest, SetValidMultiDisplayConfiguration) {
 }
 
 TEST_F(EmbedderTest, MultipleDisplaysWithSingleDisplayTrueIsInvalid) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -4193,7 +4173,7 @@ TEST_F(EmbedderTest, MultipleDisplaysWithSingleDisplayTrueIsInvalid) {
 }
 
 TEST_F(EmbedderTest, MultipleDisplaysWithSameDisplayIdIsInvalid) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -4239,7 +4219,7 @@ TEST_F(EmbedderTest, MultipleDisplaysWithSameDisplayIdIsInvalid) {
 }
 
 TEST_F(EmbedderTest, CompositorRenderTargetsNotRecycledWhenAvoidsCacheSet) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(300, 200));
@@ -4287,7 +4267,7 @@ TEST_F(EmbedderTest, CompositorRenderTargetsNotRecycledWhenAvoidsCacheSet) {
 }
 
 TEST_F(EmbedderTest, SnapshotRenderTargetScalesDownToDriverMax) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -4330,7 +4310,7 @@ TEST_F(EmbedderTest, SnapshotRenderTargetScalesDownToDriverMax) {
 }
 
 TEST_F(EmbedderTest, ObjectsPostedViaPortsServicedOnSecondaryTaskHeap) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 1024));
   builder.SetDartEntrypoint("objects_can_be_posted");
@@ -4380,7 +4360,7 @@ TEST_F(EmbedderTest, ObjectsPostedViaPortsServicedOnSecondaryTaskHeap) {
 }
 
 TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLTexture) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
   builder.SetCompositor();
@@ -4443,7 +4423,7 @@ TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLTexture) {
 }
 
 TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLFramebuffer) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
   builder.SetCompositor();
@@ -4506,7 +4486,7 @@ TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLFramebuffer) {
 }
 
 TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLSurface) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
   builder.SetCompositor();
@@ -4628,8 +4608,7 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
 TEST_F(
     EmbedderTest,
     PresentInfoReceivesFullScreenDamageWhenPopulateExistingDamageIsNotProvided) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.GetRendererConfig().open_gl.populate_existing_damage = nullptr;
 
   EmbedderConfigBuilder builder(context);
@@ -4695,8 +4674,7 @@ TEST_F(
 
 TEST_F(EmbedderTest,
        PresentInfoReceivesJoinedDamageWhenExistingDamageContainsMultipleRects) {
-  auto& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   context.GetRendererConfig().open_gl.populate_existing_damage =
       [](void* context, const intptr_t id,
          FlutterDamage* existing_damage) -> void {
@@ -4778,8 +4756,7 @@ TEST_F(EmbedderTest,
 }
 
 TEST_F(EmbedderTest, CanRenderWithImpellerOpenGL) {
-  EmbedderTestContextGL& context = static_cast<EmbedderTestContextGL&>(
-      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
   EmbedderConfigBuilder builder(context);
 
   bool present_called = false;
@@ -4838,7 +4815,7 @@ TEST_F(EmbedderTest, CanRenderWithImpellerOpenGL) {
 }
 
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLSurface) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));
@@ -4954,7 +4931,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLSurface) {
 }
 
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneToOpenGLSurfaces) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(SkISize::Make(800, 600));

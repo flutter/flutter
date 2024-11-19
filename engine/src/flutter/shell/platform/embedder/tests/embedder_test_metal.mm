@@ -8,8 +8,11 @@
 
 namespace flutter::testing {
 
-std::unique_ptr<EmbedderTestContext> EmbedderTest::CreateMetalContext() {
-  return std::make_unique<EmbedderTestContextMetal>(GetFixturesDirectory());
+EmbedderTestContext& EmbedderTest::GetMetalContext() {
+  if (!metal_context_) {
+    metal_context_ = std::make_unique<EmbedderTestContextMetal>(GetFixturesDirectory());
+  }
+  return *metal_context_.get();
 }
 
 }  // namespace flutter::testing

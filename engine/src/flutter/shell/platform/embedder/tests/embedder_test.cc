@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
+
+#include <exception>
+#include <utility>
+
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_software.h"
 
 namespace flutter::testing {
@@ -13,62 +17,53 @@ std::string EmbedderTest::GetFixturesDirectory() const {
   return GetFixturesPath();
 }
 
-EmbedderTestContext& EmbedderTest::GetEmbedderContext(
-    EmbedderTestContextType type) {
-  // Setup the embedder context lazily instead of in the constructor because we
-  // don't to do all the work if the test won't end up using context.
-  if (!embedder_contexts_[type]) {
-    switch (type) {
-      case EmbedderTestContextType::kSoftwareContext:
-        embedder_contexts_[type] = CreateSoftwareContext();
-        break;
-      case EmbedderTestContextType::kOpenGLContext:
-        embedder_contexts_[type] = CreateGLContext();
-        break;
-      case EmbedderTestContextType::kVulkanContext:
-        embedder_contexts_[type] = CreateVulkanContext();
-        break;
-      case EmbedderTestContextType::kMetalContext:
-        embedder_contexts_[type] = CreateMetalContext();
-        break;
-      default:
-        FML_DCHECK(false) << "Invalid context type specified.";
-        break;
-    }
+EmbedderTestContext& EmbedderTest::GetSoftwareContext() {
+  if (!software_context_) {
+    software_context_ =
+        std::make_unique<EmbedderTestContextSoftware>(GetFixturesDirectory());
   }
-
-  return *embedder_contexts_[type];
-}
-
-std::unique_ptr<EmbedderTestContext> EmbedderTest::CreateSoftwareContext() {
-  return std::make_unique<EmbedderTestContextSoftware>(GetFixturesDirectory());
+  return *software_context_.get();
 }
 
 #ifndef SHELL_ENABLE_GL
 // Fallback implementation.
 // See: flutter/shell/platform/embedder/tests/embedder_test_gl.cc.
-std::unique_ptr<EmbedderTestContext> EmbedderTest::CreateGLContext() {
+EmbedderTestContext& EmbedderTest::GetGLContext() {
   FML_LOG(FATAL) << "OpenGL is not supported in this build";
-  return nullptr;
+  std::terminate();
 }
 #endif
 
 #ifndef SHELL_ENABLE_METAL
 // Fallback implementation.
 // See: flutter/shell/platform/embedder/tests/embedder_test_metal.mm.
-std::unique_ptr<EmbedderTestContext> EmbedderTest::CreateMetalContext() {
+EmbedderTestContext& EmbedderTest::GetMetalContext() {
   FML_LOG(FATAL) << "Metal is not supported in this build";
-  return nullptr;
+  std::terminate();
 }
 #endif
 
 #ifndef SHELL_ENABLE_VULKAN
 // Fallback implementation.
 // See: flutter/shell/platform/embedder/tests/embedder_test_vulkan.cc.
-std::unique_ptr<EmbedderTestContext> EmbedderTest::CreateVulkanContext() {
+EmbedderTestContext& EmbedderTest::GetVulkanContext() {
   FML_LOG(FATAL) << "Vulkan is not supported in this build";
-  return nullptr;
+  std::terminate();
 }
 #endif
+
+EmbedderTestContext& EmbedderTestMultiBackend::GetEmbedderContext(
+    EmbedderTestContextType type) {
+  switch (type) {
+    case EmbedderTestContextType::kOpenGLContext:
+      return GetGLContext();
+    case EmbedderTestContextType::kMetalContext:
+      return GetMetalContext();
+    case EmbedderTestContextType::kSoftwareContext:
+      return GetSoftwareContext();
+    case EmbedderTestContextType::kVulkanContext:
+      return GetVulkanContext();
+  }
+}
 
 }  // namespace flutter::testing
