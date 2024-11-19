@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_gl.h"
 
+#include <memory>
 #include <utility>
 
 #include "flutter/fml/make_copyable.h"
@@ -11,26 +12,85 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test_compositor_gl.h"
-#include "flutter/testing/test_gl_surface.h"
 #include "flutter/testing/testing.h"
 #include "tests/embedder_test.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 EmbedderTestContextGL::EmbedderTestContextGL(std::string assets_path)
     : EmbedderTestContext(std::move(assets_path)),
-      egl_context_(std::make_shared<TestEGLContext>()) {}
+      egl_context_(std::make_shared<TestEGLContext>()) {
+  renderer_config_.type = FlutterRendererType::kOpenGL;
+  renderer_config_.open_gl = {
+      .struct_size = sizeof(FlutterOpenGLRendererConfig),
+      .make_current = [](void* context) -> bool {
+        return reinterpret_cast<EmbedderTestContextGL*>(context)
+            ->GLMakeCurrent();
+      },
+      .clear_current = [](void* context) -> bool {
+        return reinterpret_cast<EmbedderTestContextGL*>(context)
+            ->GLClearCurrent();
+      },
+      .make_resource_current = [](void* context) -> bool {
+        return reinterpret_cast<EmbedderTestContextGL*>(context)
+            ->GLMakeResourceCurrent();
+      },
+      .fbo_reset_after_present = true,
+      .surface_transformation = [](void* context) -> FlutterTransformation {
+        return reinterpret_cast<EmbedderTestContextGL*>(context)
+            ->GetRootSurfaceTransformation();
+      },
+      .gl_proc_resolver = [](void* context, const char* name) -> void* {
+        return reinterpret_cast<EmbedderTestContextGL*>(context)
+            ->GLGetProcAddress(name);
+      },
+      .fbo_with_frame_info_callback =
+          [](void* context, const FlutterFrameInfo* frame_info) -> uint32_t {
+        return reinterpret_cast<EmbedderTestContextGL*>(context)
+            ->GLGetFramebuffer(*frame_info);
+      },
+      .present_with_info = [](void* context,
+                              const FlutterPresentInfo* present_info) -> bool {
+        return reinterpret_cast<EmbedderTestContextGL*>(context)->GLPresent(
+            *present_info);
+      },
+      .populate_existing_damage = nullptr,
+  };
+}
 
 EmbedderTestContextGL::~EmbedderTestContextGL() {
   SetGLGetFBOCallback(nullptr);
 }
 
-void EmbedderTestContextGL::SetupSurface(SkISize surface_size) {
-  FML_CHECK(!gl_surface_);
-  gl_surface_ = std::make_unique<TestGLSurface>(egl_context_, surface_size);
+void EmbedderTestContextGL::SetOpenGLFBOCallBack() {
+  // SetOpenGLRendererConfig must be called before this.
+  FML_CHECK(renderer_config_.type == FlutterRendererType::kOpenGL);
+
+  renderer_config_.open_gl.fbo_callback = [](void* context) -> uint32_t {
+    FlutterFrameInfo frame_info = {};
+    // fbo_callback doesn't use the frame size information, only
+    // fbo_callback_with_frame_info does.
+    frame_info.struct_size = sizeof(FlutterFrameInfo);
+    frame_info.size.width = 0;
+    frame_info.size.height = 0;
+    return reinterpret_cast<EmbedderTestContextGL*>(context)->GLGetFramebuffer(
+        frame_info);
+  };
+}
+
+void EmbedderTestContextGL::SetOpenGLPresentCallBack() {
+  // SetOpenGLRendererConfig must be called before this.
+  FML_CHECK(renderer_config_.type == FlutterRendererType::kOpenGL);
+
+  renderer_config_.open_gl.present = [](void* context) -> bool {
+    // passing a placeholder fbo_id.
+    return reinterpret_cast<EmbedderTestContextGL*>(context)->GLPresent(
+        FlutterPresentInfo{
+            .fbo_id = 0,
+        });
+  };
 }
 
 bool EmbedderTestContextGL::GLMakeCurrent() {
@@ -136,6 +196,11 @@ uint32_t EmbedderTestContextGL::GetWindowFBOId() const {
   return gl_surface_->GetWindowFBOId();
 }
 
+void EmbedderTestContextGL::SetSurface(SkISize surface_size) {
+  FML_CHECK(!gl_surface_);
+  gl_surface_ = std::make_unique<TestGLSurface>(egl_context_, surface_size);
+}
+
 void EmbedderTestContextGL::SetupCompositor() {
   FML_CHECK(!compositor_) << "Already set up a compositor in this context.";
   FML_CHECK(gl_surface_)
@@ -145,5 +210,4 @@ void EmbedderTestContextGL::SetupCompositor() {
   GLClearCurrent();
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing

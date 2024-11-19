@@ -35,7 +35,7 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   {
     EmbedderConfigBuilder builder(
         GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
-    builder.SetSoftwareRendererConfig();
+    builder.SetSurface(SkISize::Make(1, 1));
     builder.GetProjectArgs().update_semantics_callback =
         [](const FlutterSemanticsUpdate* update, void* user_data) {};
     builder.GetProjectArgs().update_semantics_callback2 =
@@ -48,7 +48,7 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   {
     EmbedderConfigBuilder builder(
         GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
-    builder.SetSoftwareRendererConfig();
+    builder.SetSurface(SkISize::Make(1, 1));
     builder.GetProjectArgs().update_semantics_callback2 =
         [](const FlutterSemanticsUpdate2* update, void* user_data) {};
     builder.GetProjectArgs().update_semantics_node_callback =
@@ -63,7 +63,7 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   {
     EmbedderConfigBuilder builder(
         GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
-    builder.SetSoftwareRendererConfig();
+    builder.SetSurface(SkISize::Make(1, 1));
     builder.GetProjectArgs().update_semantics_callback =
         [](const FlutterSemanticsUpdate* update, void* user_data) {};
     builder.GetProjectArgs().update_semantics_node_callback =
@@ -78,7 +78,7 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   {
     EmbedderConfigBuilder builder(
         GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
-    builder.SetSoftwareRendererConfig();
+    builder.SetSurface(SkISize::Make(1, 1));
     builder.GetProjectArgs().update_semantics_callback2 =
         [](const FlutterSemanticsUpdate2* update, void* user_data) {};
     builder.GetProjectArgs().update_semantics_callback =
@@ -171,7 +171,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
       });
 
   EmbedderConfigBuilder builder(context);
-  builder.SetSoftwareRendererConfig();
+  builder.SetSurface(SkISize::Make(1, 1));
   builder.SetDartEntrypoint("a11y_main");
 
   auto engine = builder.LaunchEngine();
@@ -375,7 +375,7 @@ TEST_F(EmbedderA11yTest, A11yStringAttributes) {
       });
 
   EmbedderConfigBuilder builder(context);
-  builder.SetSoftwareRendererConfig();
+  builder.SetSurface(SkISize::Make(1, 1));
   builder.SetDartEntrypoint("a11y_string_attributes");
 
   auto engine = builder.LaunchEngine();
@@ -468,7 +468,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
   });
 
   EmbedderConfigBuilder builder(context);
-  builder.SetSoftwareRendererConfig();
+  builder.SetSurface(SkISize::Make(1, 1));
   builder.SetDartEntrypoint("a11y_main");
 
   auto engine = builder.LaunchEngine();
@@ -662,7 +662,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV1Callbacks) {
       });
 
   EmbedderConfigBuilder builder(context);
-  builder.SetSoftwareRendererConfig();
+  builder.SetSurface(SkISize::Make(1, 1));
   builder.SetDartEntrypoint("a11y_main");
 
   auto engine = builder.LaunchEngine();

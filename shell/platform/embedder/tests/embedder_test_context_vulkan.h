@@ -26,18 +26,24 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
   // |EmbedderTestContext|
   size_t GetSurfacePresentCount() const override;
 
-  // |EmbedderTestContext|
-  void SetupCompositor() override;
-
   VkImage GetNextImage(const SkISize& size);
 
   bool PresentImage(VkImage image);
+
+  void SetVulkanInstanceProcAddressCallback(
+      FlutterVulkanInstanceProcAddressCallback callback);
 
   static void* InstanceProcAddr(void* user_data,
                                 FlutterVulkanInstanceHandle instance,
                                 const char* name);
 
  private:
+  // |EmbedderTestContext|
+  void SetSurface(SkISize surface_size) override;
+
+  // |EmbedderTestContext|
+  void SetupCompositor() override;
+
   // The TestVulkanContext destructor must be called _after_ the compositor is
   // freed.
   fml::RefPtr<TestVulkanContext> vulkan_context_ = nullptr;
@@ -46,10 +52,6 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
 
   SkISize surface_size_ = SkISize::MakeEmpty();
   size_t present_count_ = 0;
-
-  void SetupSurface(SkISize surface_size) override;
-
-  friend class EmbedderConfigBuilder;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContextVulkan);
 };
