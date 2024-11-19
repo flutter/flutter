@@ -1249,7 +1249,7 @@ class FlutterPlugin implements Plugin<Project> {
             // original value. You either need to hoist the value
             // into a separate variable `verbose verboseValue` or prefix with
             // `this` (`verbose this.isVerbose()`).
-            TaskProvider<FlutterTask> compileTaskProvider = project.tasks.register(name: taskName, type: FlutterTask) {
+            TaskProvider<FlutterTask> compileTaskProvider = project.tasks.register(taskName , FlutterTask) {
                 flutterRoot(this.flutterRoot)
                 flutterExecutable(this.flutterExecutable)
                 buildMode(variantBuildMode)
@@ -1282,7 +1282,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
             Task compileTask = compileTaskProvider.get();
             File libJar = project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar"))
-            TaskProvider<Jar> packJniLibsTaskProvider = project.tasks.register(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+            TaskProvider<Jar> packJniLibsTaskProvider = project.tasks.register("packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}") {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
                 dependsOn compileTask
@@ -1312,8 +1312,7 @@ class FlutterPlugin implements Plugin<Project> {
                 packJniLibsTask
             })
             TaskProvider<Copy> copyFlutterAssetsTaskProvider = project.tasks.register(
-                name: "copyFlutterAssets${variant.name.capitalize()}",
-                type: Copy,
+            "copyFlutterAssets${variant.name.capitalize()}"
             ) {
                 dependsOn(compileTask)
                 with(compileTask.assets)
