@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -11,8 +13,9 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-//import '../src/context.dart';
 import '../src/common.dart';
+import '../src/context.dart';
+import 'hot_shared.dart';
 
 void main() {
   testWithoutContext('defaultReloadSourcesHelper() handles empty DeviceReloadReports)', () {
@@ -29,6 +32,40 @@ void main() {
       const NoOpAnalytics(),
     );
   });
+
+  group('signal handling', () {
+    late final FlutterDevice flutterDevice;
+
+    setUpAll(() {
+      flutterDevice = FakeFlutterDevice(FakeDevice());
+    });
+
+    late HotRunner runner;
+
+    setUp(() {
+      runner = HotRunner(
+        <FlutterDevice>[
+          flutterDevice,
+        ],
+        target: 'main.dart',
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        analytics: _FakeAnalytics(),
+      );
+    });
+
+    testUsingContext('a signal kill without a detach kills the test device', () async {
+
+    });
+
+    testUsingContext('a signal kill with a detach keeps the test device running', () async {
+
+    });
+  });
+}
+
+class _FakeAnalytics extends Fake implements Analytics {
+  @override
+  void send(Event event) {}
 }
 
 class _FakeHotRunner extends Fake implements HotRunner {}

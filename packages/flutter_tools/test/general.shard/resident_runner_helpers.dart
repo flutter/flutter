@@ -146,6 +146,9 @@ class FakeDartDevelopmentService extends Fake with DartDevelopmentServiceLocalOp
 
   @override
   Uri? get uri => null;
+
+  @override
+  void shutdown() {}
 }
 
 class FakeDartDevelopmentServiceException implements DartDevelopmentServiceException {

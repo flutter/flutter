@@ -96,6 +96,12 @@ void main() {
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
   }));
 
+  testUsingContext('ResidentRunner reports whether detach() was used', () => testbed.run(() async {
+    expect(residentRunner.isDetached, false);
+    await residentRunner.detach();
+    expect(residentRunner.isDetached, true);
+  }));
+
   testUsingContext('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       .createSync(recursive: true);

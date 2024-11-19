@@ -1121,6 +1121,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   /// Whether [detach] was used and the runner should keep the device running.
   @protected
+  @visibleForTesting
   bool get isDetached => _detached;
 
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
