@@ -304,12 +304,17 @@ class Scrollable extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationId;
 
-  /// {@macro flutter.widgets.shadow.scrollBehavior}
+  /// {@template flutter.widgets.scrollable.scrollBehavior}
+  /// A [ScrollBehavior] that will be applied to this widget individually.
+  ///
+  /// Defaults to null, wherein the inherited [ScrollBehavior] is copied and
+  /// modified to alter the viewport decoration, like [Scrollbar]s.
   ///
   /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
   /// [ScrollPhysics] is provided in [physics], it will take precedence,
   /// followed by [scrollBehavior], and then the inherited ancestor
   /// [ScrollBehavior].
+  /// {@endtemplate}
   final ScrollBehavior? scrollBehavior;
 
   /// {@macro flutter.material.Material.clipBehavior}
