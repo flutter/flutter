@@ -26,7 +26,7 @@ Future<void> waitForVmServiceMessage(Process process, int port) async {
     .transform(utf8.decoder)
     .listen((String line) {
       printOnFailure(line);
-      if (line.contains('A Dart VM Service on Flutter test device is available at')) {
+      if (line.contains('The Flutter DevTools debugger and profiler on Flutter test device is available at')) {
         if (line.contains('http://127.0.0.1:$port')) {
           completer.complete();
         } else {
@@ -66,7 +66,7 @@ void main() {
       'flutter-tester',
     ], workingDirectory: tempDir.path);
     await waitForVmServiceMessage(process, port);
-    process.kill();
+    process.stdin.writeln('q');
     await process.exitCode;
   });
 
@@ -88,7 +88,7 @@ void main() {
       'flutter-tester',
     ], workingDirectory: tempDir.path);
     await waitForVmServiceMessage(process, ddsPort);
-    process.kill();
+    process.stdin.writeln('q');
     await process.exitCode;
   });
 
@@ -105,7 +105,7 @@ void main() {
       'flutter-tester',
     ], workingDirectory: tempDir.path);
     await waitForVmServiceMessage(process, ddsPort);
-    process.kill();
+    process.stdin.writeln('q');
     await process.exitCode;
   });
 
