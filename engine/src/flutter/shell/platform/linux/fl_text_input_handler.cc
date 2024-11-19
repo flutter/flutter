@@ -95,6 +95,8 @@ struct _FlTextInputHandler {
   // range. This value is updated via `TextInput.setMarkedTextRect` messages
   // over the text input channel.
   GdkRectangle composing_rect;
+
+  GCancellable* cancellable;
 };
 
 G_DEFINE_TYPE(FlTextInputHandler, fl_text_input_handler, G_TYPE_OBJECT)
@@ -117,8 +119,10 @@ static void update_editing_state_response_cb(GObject* object,
                                              gpointer user_data) {
   g_autoptr(GError) error = nullptr;
   if (!finish_method(object, result, &error)) {
-    g_warning("Failed to call %s: %s", kUpdateEditingStateMethod,
-              error->message);
+    if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+      g_warning("Failed to call %s: %s", kUpdateEditingStateMethod,
+                error->message);
+    }
   }
 }
 
@@ -157,7 +161,7 @@ static void update_editing_state(FlTextInputHandler* self) {
   fl_value_append(args, value);
 
   fl_method_channel_invoke_method(self->channel, kUpdateEditingStateMethod,
-                                  args, nullptr,
+                                  args, self->cancellable,
                                   update_editing_state_response_cb, self);
 }
 
@@ -212,8 +216,8 @@ static void update_editing_state_with_delta(FlTextInputHandler* self,
   fl_value_append(args, value);
 
   fl_method_channel_invoke_method(
-      self->channel, kUpdateEditingStateWithDeltasMethod, args, nullptr,
-      update_editing_state_response_cb, self);
+      self->channel, kUpdateEditingStateWithDeltasMethod, args,
+      self->cancellable, update_editing_state_response_cb, self);
 }
 
 // Called when a response is received from TextInputClient.performAction()
@@ -222,7 +226,9 @@ static void perform_action_response_cb(GObject* object,
                                        gpointer user_data) {
   g_autoptr(GError) error = nullptr;
   if (!finish_method(object, result, &error)) {
-    g_warning("Failed to call %s: %s", kPerformActionMethod, error->message);
+    if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+      g_warning("Failed to call %s: %s", kPerformActionMethod, error->message);
+    }
   }
 }
 
@@ -237,7 +243,8 @@ static void perform_action(FlTextInputHandler* self) {
   fl_value_append_take(args, fl_value_new_string(self->input_action));
 
   fl_method_channel_invoke_method(self->channel, kPerformActionMethod, args,
-                                  nullptr, perform_action_response_cb, self);
+                                  self->cancellable, perform_action_response_cb,
+                                  self);
 }
 
 // Signal handler for GtkIMContext::preedit-start
@@ -559,6 +566,8 @@ static void method_call_cb(FlMethodChannel* channel,
 static void fl_text_input_handler_dispose(GObject* object) {
   FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(object);
 
+  g_cancellable_cancel(self->cancellable);
+
   g_clear_object(&self->channel);
   g_clear_pointer(&self->input_action, g_free);
   g_clear_object(&self->im_context);
@@ -567,6 +576,7 @@ static void fl_text_input_handler_dispose(GObject* object) {
     self->text_model = nullptr;
   }
   g_weak_ref_clear(&self->view_delegate);
+  g_clear_object(&self->cancellable);
 
   G_OBJECT_CLASS(fl_text_input_handler_parent_class)->dispose(object);
 }
@@ -581,6 +591,7 @@ static void fl_text_input_handler_init(FlTextInputHandler* self) {
   self->client_id = kClientIdUnset;
   self->input_type = kFlTextInputTypeText;
   self->text_model = new flutter::TextInputModel();
+  self->cancellable = g_cancellable_new();
 }
 
 static void init_im_context(FlTextInputHandler* self,
