@@ -1093,6 +1093,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   ResidentDevtoolsHandler? _residentDevtoolsHandler;
 
   bool _exited = false;
+  bool _detached = false;
   Completer<int> _finished = Completer<int>();
   BuildResult? _lastBuild;
   Environment? _environment;
@@ -1117,6 +1118,10 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     return 'main.dart${swap ? '.swap' : ''}.dill';
   }
+
+  /// Whether [detach] was used and the runner should keep the device running.
+  @protected
+  bool get isDetached => _detached;
 
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
 
@@ -1254,7 +1259,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   @override
+  @mustCallSuper
   Future<void> detach() async {
+    _detached = true;
+
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
@@ -1398,6 +1406,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
+  @protected
   void appFinished() {
     if (_finished.isCompleted) {
       return;

@@ -1239,7 +1239,7 @@ class HotRunner extends ResidentRunner {
   Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
     await hotRunnerConfig!.runPreShutdownOperations();
-    if (_didAttach) {
+    if (_didAttach && isDetached) {
       appFinished();
     } else {
       await exitApp();
