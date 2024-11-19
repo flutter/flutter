@@ -19,8 +19,9 @@ EmbedderTestContextMetal::EmbedderTestContextMetal(std::string assets_path)
   renderer_config_.type = FlutterRendererType::kMetal;
   renderer_config_.metal = {
       .struct_size = sizeof(FlutterMetalRendererConfig),
-      .device = metal_context_->GetMetalDevice(),
-      .present_command_queue = metal_context_->GetMetalCommandQueue(),
+      .device = (__bridge FlutterMetalDeviceHandle)metal_context_->GetMetalDevice(),
+      .present_command_queue =
+          (__bridge FlutterMetalCommandQueueHandle)metal_context_->GetMetalCommandQueue(),
       .get_next_drawable_callback =
           [](void* user_data, const FlutterFrameInfo* frame_info) {
             return reinterpret_cast<EmbedderTestContextMetal*>(user_data)->GetNextDrawable(

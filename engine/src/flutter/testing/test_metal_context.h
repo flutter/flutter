@@ -9,6 +9,8 @@
 #include <memory>
 #include <mutex>
 
+#include <Metal/Metal.h>
+
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/ports/SkCFObject.h"
 
@@ -27,9 +29,9 @@ class TestMetalContext {
 
   ~TestMetalContext();
 
-  void* GetMetalDevice() const;
+  id<MTLDevice> GetMetalDevice() const;
 
-  void* GetMetalCommandQueue() const;
+  id<MTLCommandQueue> GetMetalCommandQueue() const;
 
   sk_sp<GrDirectContext> GetSkiaContext() const;
 
@@ -41,7 +43,8 @@ class TestMetalContext {
   TextureInfo GetTextureInfo(int64_t texture_id);
 
  private:
-  std::unique_ptr<MetalObjCFields> metal_;
+  id<MTLDevice> device_;
+  id<MTLCommandQueue> command_queue_;
   sk_sp<GrDirectContext> skia_context_;
   std::mutex textures_mutex_;
   int64_t texture_id_ctr_ = 1;                 // guarded by textures_mutex
