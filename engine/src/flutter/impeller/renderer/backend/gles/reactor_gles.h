@@ -158,6 +158,8 @@ class ReactorGLES {
   ///
   std::optional<GLuint> GetGLHandle(const HandleGLES& handle) const;
 
+  std::optional<GLsync> GetGLFence(const HandleGLES& handle) const;
+
   //----------------------------------------------------------------------------
   /// @brief      Create a reactor handle.
   ///
@@ -245,15 +247,23 @@ class ReactorGLES {
   [[nodiscard]] bool React();
 
  private:
+  /// @brief Storage for either a GL handle or sync fence.
+  struct GLStorage {
+    union {
+      GLuint handle;
+      GLsync sync;
+    };
+  };
+
   struct LiveHandle {
-    std::optional<GLuint> name;
+    std::optional<GLStorage> name;
     std::optional<std::string> pending_debug_label;
     bool pending_collection = false;
     fml::ScopedCleanupClosure callback = {};
 
     LiveHandle() = default;
 
-    explicit LiveHandle(std::optional<GLuint> p_name) : name(p_name) {}
+    explicit LiveHandle(std::optional<GLStorage> p_name) : name(p_name) {}
 
     constexpr bool IsLive() const { return name.has_value(); }
   };
@@ -291,6 +301,15 @@ class ReactorGLES {
   bool FlushOps();
 
   void SetupDebugGroups();
+
+  std::optional<GLStorage> GetHandle(const HandleGLES& handle) const;
+
+  static std::optional<GLStorage> CreateGLHandle(const ProcTableGLES& gl,
+                                                 HandleType type);
+
+  static bool CollectGLHandle(const ProcTableGLES& gl,
+                              HandleType type,
+                              GLStorage handle);
 
   ReactorGLES(const ReactorGLES&) = delete;
 

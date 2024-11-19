@@ -22,6 +22,7 @@ enum class HandleType {
   kProgram,
   kRenderBuffer,
   kFrameBuffer,
+  kFence,
 };
 
 std::string HandleTypeToString(HandleType type);

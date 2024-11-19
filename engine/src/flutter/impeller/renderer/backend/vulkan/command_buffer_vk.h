@@ -103,6 +103,9 @@ class CommandBufferVK final
   void OnWaitUntilCompleted() override;
 
   // |CommandBuffer|
+  void OnWaitUntilScheduled() override;
+
+  // |CommandBuffer|
   std::shared_ptr<RenderPass> OnCreateRenderPass(RenderTarget target) override;
 
   // |CommandBuffer|

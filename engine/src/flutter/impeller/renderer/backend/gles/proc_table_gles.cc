@@ -334,6 +334,8 @@ static std::optional<GLenum> ToDebugIdentifier(DebugResourceType type) {
       return GL_RENDERBUFFER;
     case DebugResourceType::kFrameBuffer:
       return GL_FRAMEBUFFER;
+    case DebugResourceType::kFence:
+      return GL_SYNC_FENCE;
   }
   FML_UNREACHABLE();
 }
@@ -354,6 +356,8 @@ static bool ResourceIsLive(const ProcTableGLES& gl,
       return gl.IsRenderbuffer(name);
     case DebugResourceType::kFrameBuffer:
       return gl.IsFramebuffer(name);
+    case DebugResourceType::kFence:
+      return true;
   }
   FML_UNREACHABLE();
 }

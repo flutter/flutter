@@ -67,6 +67,12 @@ class CommandBuffer {
   void WaitUntilCompleted();
 
   //----------------------------------------------------------------------------
+  /// @brief      Block the current thread until the GPU has completed
+  ///             scheduling execution of the commands.
+  ///
+  void WaitUntilScheduled();
+
+  //----------------------------------------------------------------------------
   /// @brief      Create a render pass to record render commands into.
   ///
   /// @param[in]  render_target  The description of the render target this pass
@@ -104,6 +110,8 @@ class CommandBuffer {
   [[nodiscard]] virtual bool OnSubmitCommands(CompletionCallback callback) = 0;
 
   virtual void OnWaitUntilCompleted() = 0;
+
+  virtual void OnWaitUntilScheduled() = 0;
 
   virtual std::shared_ptr<ComputePass> OnCreateComputePass() = 0;
 

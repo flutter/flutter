@@ -359,7 +359,6 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
       resize_desc.usage |= impeller::TextureUsage::kShaderWrite;
       resize_desc.compression_type = impeller::CompressionType::kLossless;
     }
-
     auto resize_texture =
         context->GetResourceAllocator()->CreateTexture(resize_desc);
     if (!resize_texture) {
@@ -386,7 +385,11 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
 
   // Flush the pending command buffer to ensure that its output becomes visible
   // to the raster thread.
-  command_buffer->WaitUntilCompleted();
+  if (context->AddTrackingFence(result_texture)) {
+    command_buffer->WaitUntilScheduled();
+  } else {
+    command_buffer->WaitUntilCompleted();
+  }
 
   context->DisposeThreadLocalCachedResources();
 

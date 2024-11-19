@@ -33,4 +33,8 @@ void Context::ResetThreadLocalState() const {
   // Nothing to do.
 }
 
+bool Context::AddTrackingFence(const std::shared_ptr<Texture>& texture) const {
+  return false;
+}
+
 }  // namespace impeller
