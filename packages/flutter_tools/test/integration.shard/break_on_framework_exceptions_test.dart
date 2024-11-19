@@ -51,10 +51,9 @@ void main() {
       );
 
       expect(breakLine, project.lineContaining(project.test, exceptionMessage));
-
-      await flutter.resume();
-      await flutter.done;
     } finally {
+      // Some of the tests will quit naturally, and others won't.
+      // By this point we don't need the tool anymore, so just force quit.
       await flutter.quit();
     }
   }
