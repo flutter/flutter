@@ -8,8 +8,12 @@
 
 namespace flutter::testing {
 
-std::unique_ptr<EmbedderTestContext> EmbedderTest::CreateVulkanContext() {
-  return std::make_unique<EmbedderTestContextVulkan>(GetFixturesDirectory());
+EmbedderTestContext& EmbedderTest::GetVulkanContext() {
+  if (!vulkan_context_) {
+    vulkan_context_ =
+        std::make_unique<EmbedderTestContextVulkan>(GetFixturesDirectory());
+  }
+  return *vulkan_context_.get();
 }
 
 }  // namespace flutter::testing
