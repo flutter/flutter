@@ -34,6 +34,10 @@ void CommandBuffer::WaitUntilCompleted() {
   return OnWaitUntilCompleted();
 }
 
+void CommandBuffer::WaitUntilScheduled() {
+  return OnWaitUntilScheduled();
+}
+
 std::shared_ptr<RenderPass> CommandBuffer::CreateRenderPass(
     const RenderTarget& render_target) {
   auto pass = OnCreateRenderPass(render_target);

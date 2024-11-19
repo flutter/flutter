@@ -22,6 +22,8 @@ std::string HandleTypeToString(HandleType type) {
       return "RenderBuffer";
     case HandleType::kFrameBuffer:
       return "Framebuffer";
+    case HandleType::kFence:
+      return "Fence";
   }
   FML_UNREACHABLE();
 }

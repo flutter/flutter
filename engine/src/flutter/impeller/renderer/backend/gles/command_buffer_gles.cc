@@ -44,6 +44,11 @@ void CommandBufferGLES::OnWaitUntilCompleted() {
 }
 
 // |CommandBuffer|
+void CommandBufferGLES::OnWaitUntilScheduled() {
+  reactor_->GetProcTable().Flush();
+}
+
+// |CommandBuffer|
 std::shared_ptr<RenderPass> CommandBufferGLES::OnCreateRenderPass(
     RenderTarget target) {
   if (!IsValid()) {
