@@ -1312,7 +1312,7 @@ class FlutterPlugin implements Plugin<Project> {
                 packJniLibsTask
             })
             TaskProvider<Copy> copyFlutterAssetsTaskProvider = project.tasks.register(
-            "copyFlutterAssets${variant.name.capitalize()}"
+            "copyFlutterAssets${variant.name.capitalize()}" , Copy
             ) {
                 dependsOn(compileTask)
                 with(compileTask.assets)
