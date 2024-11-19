@@ -15,20 +15,52 @@
 #include "flutter/vulkan/vulkan_device.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 EmbedderTestContextVulkan::EmbedderTestContextVulkan(std::string assets_path)
     : EmbedderTestContext(std::move(assets_path)), surface_() {
   vulkan_context_ = fml::MakeRefCounted<TestVulkanContext>();
+  renderer_config_.type = FlutterRendererType::kVulkan;
+  renderer_config_.vulkan = {
+      .struct_size = sizeof(FlutterVulkanRendererConfig),
+      .version = vulkan_context_->application_->GetAPIVersion(),
+      .instance = vulkan_context_->application_->GetInstance(),
+      .physical_device = vulkan_context_->device_->GetPhysicalDeviceHandle(),
+      .device = vulkan_context_->device_->GetHandle(),
+      .queue_family_index = vulkan_context_->device_->GetGraphicsQueueIndex(),
+      .queue = vulkan_context_->device_->GetQueueHandle(),
+      .get_instance_proc_address_callback =
+          EmbedderTestContextVulkan::InstanceProcAddr,
+      .get_next_image_callback =
+          [](void* context,
+             const FlutterFrameInfo* frame_info) -> FlutterVulkanImage {
+        VkImage image =
+            reinterpret_cast<EmbedderTestContextVulkan*>(context)->GetNextImage(
+                {static_cast<int>(frame_info->size.width),
+                 static_cast<int>(frame_info->size.height)});
+        return {
+            .struct_size = sizeof(FlutterVulkanImage),
+            .image = reinterpret_cast<uint64_t>(image),
+            .format = VK_FORMAT_R8G8B8A8_UNORM,
+        };
+      },
+      .present_image_callback = [](void* context,
+                                   const FlutterVulkanImage* image) -> bool {
+        return reinterpret_cast<EmbedderTestContextVulkan*>(context)
+            ->PresentImage(reinterpret_cast<VkImage>(image->image));
+      },
+  };
 }
 
 EmbedderTestContextVulkan::~EmbedderTestContextVulkan() {}
 
-void EmbedderTestContextVulkan::SetupSurface(SkISize surface_size) {
-  FML_CHECK(surface_size_.isEmpty());
-  surface_size_ = surface_size;
-  surface_ = TestVulkanSurface::Create(*vulkan_context_, surface_size_);
+EmbedderTestContextType EmbedderTestContextVulkan::GetContextType() const {
+  return EmbedderTestContextType::kVulkanContext;
+}
+
+void EmbedderTestContextVulkan::SetVulkanInstanceProcAddressCallback(
+    FlutterVulkanInstanceProcAddressCallback callback) {
+  renderer_config_.vulkan.get_instance_proc_address_callback = callback;
 }
 
 size_t EmbedderTestContextVulkan::GetSurfacePresentCount() const {
@@ -46,18 +78,6 @@ bool EmbedderTestContextVulkan::PresentImage(VkImage image) {
   return true;
 }
 
-EmbedderTestContextType EmbedderTestContextVulkan::GetContextType() const {
-  return EmbedderTestContextType::kVulkanContext;
-}
-
-void EmbedderTestContextVulkan::SetupCompositor() {
-  FML_CHECK(!compositor_) << "Already set up a compositor in this context.";
-  FML_CHECK(surface_)
-      << "Set up the Vulkan surface before setting up a compositor.";
-  compositor_ = std::make_unique<EmbedderTestCompositorVulkan>(
-      surface_size_, vulkan_context_->GetGrDirectContext());
-}
-
 void* EmbedderTestContextVulkan::InstanceProcAddr(
     void* user_data,
     FlutterVulkanInstanceHandle instance,
@@ -68,5 +88,18 @@ void* EmbedderTestContextVulkan::InstanceProcAddr(
   return reinterpret_cast<void*>(proc_addr);
 }
 
-}  // namespace testing
-}  // namespace flutter
+void EmbedderTestContextVulkan::SetSurface(SkISize surface_size) {
+  FML_CHECK(surface_size_.isEmpty());
+  surface_size_ = surface_size;
+  surface_ = TestVulkanSurface::Create(*vulkan_context_, surface_size_);
+}
+
+void EmbedderTestContextVulkan::SetupCompositor() {
+  FML_CHECK(!compositor_) << "Already set up a compositor in this context.";
+  FML_CHECK(surface_)
+      << "Set up the Vulkan surface before setting up a compositor.";
+  compositor_ = std::make_unique<EmbedderTestCompositorVulkan>(
+      surface_size_, vulkan_context_->GetGrDirectContext());
+}
+
+}  // namespace flutter::testing

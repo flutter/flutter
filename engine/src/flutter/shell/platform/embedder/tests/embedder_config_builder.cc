@@ -8,7 +8,6 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "tests/embedder_test_context.h"
-#include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter::testing {
@@ -26,28 +25,6 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
       };
 
   custom_task_runners_.struct_size = sizeof(FlutterCustomTaskRunners);
-
-  InitializeGLRendererConfig();
-  InitializeMetalRendererConfig();
-  InitializeVulkanRendererConfig();
-
-  software_renderer_config_.struct_size = sizeof(FlutterSoftwareRendererConfig);
-  software_renderer_config_.surface_present_callback =
-      [](void* context, const void* allocation, size_t row_bytes,
-         size_t height) {
-        auto image_info =
-            SkImageInfo::MakeN32Premul(SkISize::Make(row_bytes / 4, height));
-        SkBitmap bitmap;
-        if (!bitmap.installPixels(image_info, const_cast<void*>(allocation),
-                                  row_bytes)) {
-          FML_LOG(ERROR) << "Could not copy pixels for the software "
-                            "composition from the engine.";
-          return false;
-        }
-        bitmap.setImmutable();
-        return reinterpret_cast<EmbedderTestContextSoftware*>(context)->Present(
-            SkImages::RasterFromBitmap(bitmap));
-      };
 
   // The first argument is always the executable name. Don't make tests have to
   // do this manually.
@@ -77,30 +54,6 @@ EmbedderConfigBuilder::~EmbedderConfigBuilder() = default;
 
 FlutterProjectArgs& EmbedderConfigBuilder::GetProjectArgs() {
   return project_args_;
-}
-
-void EmbedderConfigBuilder::SetSoftwareRendererConfig(SkISize surface_size) {
-  renderer_config_.type = FlutterRendererType::kSoftware;
-  renderer_config_.software = software_renderer_config_;
-  context_.SetupSurface(surface_size);
-}
-
-void EmbedderConfigBuilder::SetRendererConfig(EmbedderTestContextType type,
-                                              SkISize surface_size) {
-  switch (type) {
-    case EmbedderTestContextType::kOpenGLContext:
-      SetOpenGLRendererConfig(surface_size);
-      break;
-    case EmbedderTestContextType::kMetalContext:
-      SetMetalRendererConfig(surface_size);
-      break;
-    case EmbedderTestContextType::kVulkanContext:
-      SetVulkanRendererConfig(surface_size);
-      break;
-    case EmbedderTestContextType::kSoftwareContext:
-      SetSoftwareRendererConfig(surface_size);
-      break;
-  }
 }
 
 void EmbedderConfigBuilder::SetAssetsPath() {
@@ -215,10 +168,6 @@ void EmbedderConfigBuilder::SetupVsyncCallback() {
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
     context->RunVsyncCallback(baton);
   };
-}
-
-FlutterRendererConfig& EmbedderConfigBuilder::GetRendererConfig() {
-  return renderer_config_;
 }
 
 void EmbedderConfigBuilder::SetRenderTaskRunner(
@@ -336,11 +285,12 @@ UniqueEngine EmbedderConfigBuilder::SetupEngine(bool run) const {
     project_args.dart_entrypoint_argc = 0;
   }
 
-  auto result =
-      run ? FlutterEngineRun(FLUTTER_ENGINE_VERSION, &renderer_config_,
-                             &project_args, &context_, &engine)
-          : FlutterEngineInitialize(FLUTTER_ENGINE_VERSION, &renderer_config_,
-                                    &project_args, &context_, &engine);
+  auto result = run ? FlutterEngineRun(FLUTTER_ENGINE_VERSION,
+                                       &context_.GetRendererConfig(),
+                                       &project_args, &context_, &engine)
+                    : FlutterEngineInitialize(
+                          FLUTTER_ENGINE_VERSION, &context_.GetRendererConfig(),
+                          &project_args, &context_, &engine);
 
   if (result != kSuccess) {
     return {};
@@ -348,53 +298,5 @@ UniqueEngine EmbedderConfigBuilder::SetupEngine(bool run) const {
 
   return UniqueEngine{engine};
 }
-
-#ifndef SHELL_ENABLE_GL
-// OpenGL fallback implementations.
-// See: flutter/shell/platform/embedder/tests/embedder_config_builder_gl.cc.
-
-void EmbedderConfigBuilder::InitializeGLRendererConfig() {
-  // no-op.
-}
-
-void EmbedderConfigBuilder::SetOpenGLFBOCallBack() {
-  FML_LOG(FATAL) << "OpenGL is not enabled in this build.";
-}
-
-void EmbedderConfigBuilder::SetOpenGLPresentCallBack() {
-  FML_LOG(FATAL) << "OpenGL is not enabled in this build.";
-}
-
-void EmbedderConfigBuilder::SetOpenGLRendererConfig(SkISize surface_size) {
-  FML_LOG(FATAL) << "OpenGL is not enabled in this build.";
-}
-#endif
-#ifndef SHELL_ENABLE_METAL
-// Metal fallback implementations.
-// See: flutter/shell/platform/embedder/tests/embedder_config_builder_metal.mm.
-
-void EmbedderConfigBuilder::InitializeMetalRendererConfig() {
-  // no-op.
-}
-
-void EmbedderConfigBuilder::SetMetalRendererConfig(SkISize surface_size) {
-  FML_LOG(FATAL) << "Metal is not enabled in this build.";
-}
-#endif
-#ifndef SHELL_ENABLE_VULKAN
-// Vulkan fallback implementations.
-// See: flutter/shell/platform/embedder/tests/embedder_config_builder_vulkan.cc.
-
-void EmbedderConfigBuilder::InitializeVulkanRendererConfig() {
-  // no-op.
-}
-
-void EmbedderConfigBuilder::SetVulkanRendererConfig(
-    SkISize surface_size,
-    std::optional<FlutterVulkanInstanceProcAddressCallback>
-        instance_proc_address_callback) {
-  FML_LOG(FATAL) << "Vulkan is not enabled in this build.";
-}
-#endif
 
 }  // namespace flutter::testing
