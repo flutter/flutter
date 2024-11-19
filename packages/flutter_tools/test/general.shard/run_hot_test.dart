@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -18,7 +21,8 @@ import '../src/context.dart';
 import 'hot_shared.dart';
 
 void main() {
-  testWithoutContext('defaultReloadSourcesHelper() handles empty DeviceReloadReports)', () {
+  testWithoutContext(
+      'defaultReloadSourcesHelper() handles empty DeviceReloadReports)', () {
     defaultReloadSourcesHelper(
       _FakeHotRunner(),
       <FlutterDevice?>[_FakeFlutterDevice()],
@@ -34,32 +38,62 @@ void main() {
   });
 
   group('signal handling', () {
-    late final FlutterDevice flutterDevice;
+    late final _FakeHotCompatibleFlutterDevice flutterDevice;
 
     setUpAll(() {
-      flutterDevice = FakeFlutterDevice(FakeDevice());
+      flutterDevice = _FakeHotCompatibleFlutterDevice(FakeDevice());
     });
 
-    late HotRunner runner;
+    late MemoryFileSystem fileSystem;
 
     setUp(() {
-      runner = HotRunner(
-        <FlutterDevice>[
-          flutterDevice,
-        ],
-        target: 'main.dart',
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-        analytics: _FakeAnalytics(),
-      );
+      fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext('a signal kill without a detach kills the test device', () async {
+    testUsingContext(
+      'kills the test device',
+      () async {
+        final HotRunner runner = HotRunner(
+          <FlutterDevice>[
+            flutterDevice,
+          ],
+          target: 'main.dart',
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          analytics: _FakeAnalytics(),
+        );
 
-    });
+        await runner.run();
+        await runner.cleanupAfterSignal();
+        expect(flutterDevice.wasExited, true);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: FakeProcessManager.empty,
+      },
+    );
 
-    testUsingContext('a signal kill with a detach keeps the test device running', () async {
+    testUsingContext(
+      'kill with a detach keeps the test device running',
+      () async {
+        final HotRunner runner = HotRunner(
+          <FlutterDevice>[
+            flutterDevice,
+          ],
+          target: 'main.dart',
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          analytics: _FakeAnalytics(),
+        );
 
-    });
+        await runner.run();
+        await runner.detach();
+        await runner.cleanupAfterSignal();
+        expect(flutterDevice.wasExited, false);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: FakeProcessManager.empty,
+      },
+    );
   });
 }
 
@@ -75,6 +109,9 @@ class _FakeDevFS extends Fake implements DevFS {
   final Uri? baseUri = Uri();
 
   @override
+  Future<void> destroy() async {}
+
+  @override
   void resetLastCompiled() {}
 }
 
@@ -84,6 +121,36 @@ class _FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   final FlutterVmService? vmService = _FakeFlutterVmService();
+}
+
+class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
+  _FakeHotCompatibleFlutterDevice(this.device);
+
+  @override
+  final Device device;
+
+  @override
+  DevFS? devFS = _FakeDevFS();
+
+  @override
+  ResidentCompiler? get generator => null;
+
+  @override
+  Future<int> runHot({required HotRunner hotRunner, String? route}) async {
+    return 0;
+  }
+
+  @override
+  Future<void> stopEchoingDeviceLog() async {}
+
+  @override
+  Future<void> exitApps({
+    Duration timeoutDelay = const Duration(seconds: 10),
+  }) async {
+    wasExited = true;
+  }
+
+  bool wasExited = false;
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
