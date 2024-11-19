@@ -6,16 +6,12 @@
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_TEST_BACKINGSTORE_PRODUCER_H_
 
 #include <memory>
+
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_ptr_internal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
-
-#ifdef SHELL_ENABLE_GL
-#include "flutter/testing/test_gl_surface.h"
-#endif
 
 namespace flutter::testing {
 
