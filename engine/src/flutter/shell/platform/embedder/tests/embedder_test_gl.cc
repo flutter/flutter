@@ -8,8 +8,12 @@
 
 namespace flutter::testing {
 
-std::unique_ptr<EmbedderTestContext> EmbedderTest::CreateGLContext() {
-  return std::make_unique<EmbedderTestContextGL>(GetFixturesDirectory());
+EmbedderTestContext& EmbedderTest::GetGLContext() {
+  if (!gl_context_) {
+    gl_context_ =
+        std::make_unique<EmbedderTestContextGL>(GetFixturesDirectory());
+  }
+  return *gl_context_.get();
 }
 
 }  // namespace flutter::testing

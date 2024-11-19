@@ -33,8 +33,8 @@ constexpr static char kTooltip[] = "tooltip";
 
 TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   {
-    EmbedderConfigBuilder builder(
-        GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
+    auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+    EmbedderConfigBuilder builder(context);
     builder.SetSurface(SkISize::Make(1, 1));
     builder.GetProjectArgs().update_semantics_callback =
         [](const FlutterSemanticsUpdate* update, void* user_data) {};
@@ -46,8 +46,8 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   }
 
   {
-    EmbedderConfigBuilder builder(
-        GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
+    auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+    EmbedderConfigBuilder builder(context);
     builder.SetSurface(SkISize::Make(1, 1));
     builder.GetProjectArgs().update_semantics_callback2 =
         [](const FlutterSemanticsUpdate2* update, void* user_data) {};
@@ -61,8 +61,8 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   }
 
   {
-    EmbedderConfigBuilder builder(
-        GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
+    auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+    EmbedderConfigBuilder builder(context);
     builder.SetSurface(SkISize::Make(1, 1));
     builder.GetProjectArgs().update_semantics_callback =
         [](const FlutterSemanticsUpdate* update, void* user_data) {};
@@ -76,8 +76,8 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   }
 
   {
-    EmbedderConfigBuilder builder(
-        GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
+    auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+    EmbedderConfigBuilder builder(context);
     builder.SetSurface(SkISize::Make(1, 1));
     builder.GetProjectArgs().update_semantics_callback2 =
         [](const FlutterSemanticsUpdate2* update, void* user_data) {};
@@ -98,7 +98,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
   GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
 #else
 
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
 
   fml::AutoResetWaitableEvent signal_native_latch;
 
@@ -277,7 +277,7 @@ TEST_F(EmbedderA11yTest, A11yStringAttributes) {
   GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
 #else
 
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
 
   fml::AutoResetWaitableEvent signal_native_latch;
 
@@ -397,7 +397,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
   GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
 #else
 
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
 
   fml::AutoResetWaitableEvent signal_native_latch;
 
@@ -570,7 +570,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
 }
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV1Callbacks) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
 
   fml::AutoResetWaitableEvent signal_native_latch;
 

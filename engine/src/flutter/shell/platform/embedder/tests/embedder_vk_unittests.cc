@@ -95,11 +95,15 @@ static_assert(
     CheckSameSignature<decltype(QueueSubmit), decltype(vkQueueSubmit)>::value);
 }  // namespace
 
+TEST_F(EmbedderTest, CanGetVulkanEmbedderContext) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderConfigBuilder builder(context);
+}
+
 TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
   fml::AutoResetWaitableEvent latch;
 
-  auto& context = static_cast<EmbedderTestContextVulkan&>(
-      GetEmbedderContext(EmbedderTestContextType::kVulkanContext));
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
   context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
   context.SetVulkanInstanceProcAddressCallback(
       [](void* user_data, FlutterVulkanInstanceHandle instance,
