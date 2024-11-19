@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Shows flutter logo in transition', (WidgetTester tester) async {
     await tester.pumpWidget(const example.AlignTransitionExampleApp());
-    expect(find.byType(ColoredBox), findsOneWidget);
+    expect(find.byType(ColoredBox).last, findsOneWidget);
     expect(
       find.byWidgetPredicate((Widget padding) => padding is Padding
         && padding.padding == const EdgeInsets.all(8.0)),

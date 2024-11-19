@@ -19,7 +19,7 @@ void main() {
       find.ancestor(
         of: find.byType(FlutterLogo),
         matching: find.descendant(
-          of: find.byType(ColoredBox),
+          of: find.byType(ColoredBox).last,
           matching: find.byType(FadeTransition)
         ),
       ),
@@ -35,7 +35,7 @@ void main() {
     final Finder fadeTransitionFinder = find.ancestor(
       of: find.byType(FlutterLogo),
       matching: find.descendant(
-        of: find.byType(ColoredBox),
+        of: find.byType(ColoredBox).last,
         matching: find.byType(FadeTransition)
       ),
     );
