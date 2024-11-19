@@ -218,7 +218,7 @@ void main() {
     final BottomAppBar bottomAppBar = tester.widget(find.byType(BottomAppBar));
     expect(bottomAppBar.padding, customPadding);
     final Rect babRect = tester.getRect(find.byType(BottomAppBar));
-    final Rect childRect = tester.getRect(find.byType(ColoredBox));
+    final Rect childRect = tester.getRect(find.byType(ColoredBox).last);
     expect(childRect, const Rect.fromLTRB(250, 530, 550, 590));
     expect(babRect, const Rect.fromLTRB(240, 520, 560, 600));
   });
