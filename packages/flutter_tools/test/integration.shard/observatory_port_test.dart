@@ -66,6 +66,8 @@ void main() {
       'flutter-tester',
     ], workingDirectory: tempDir.path);
     await waitForVmServiceMessage(process, port);
+    // Send a quit command to flutter_tools to cleanly shut down the tool
+    // and its child processes.
     process.stdin.writeln('q');
     await process.exitCode;
   });
