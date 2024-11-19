@@ -412,7 +412,7 @@ targets:
 
   - name: Linux_android_emu android views
     recipe: devicelab/devicelab_drone
-    bringup: false
+    bringup: true
     properties:
       tags: >
         ["framework","hostonly","linux"]
@@ -1489,7 +1489,7 @@ targets:
 
   - name: Linux_android_emu flutter_driver_android_test
     recipe: flutter/flutter_drone
-    bringup: false
+    bringup: true
     timeout: 60
     properties:
       shard: flutter_driver_android
@@ -2240,7 +2240,7 @@ targets:
 
   - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2653,7 +2653,7 @@ targets:
 
   - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: false
+    bringup: true
     timeout: 60
     # Functionally the same as "presubmit: false", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
