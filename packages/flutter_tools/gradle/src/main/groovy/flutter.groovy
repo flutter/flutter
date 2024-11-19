@@ -91,7 +91,6 @@ class FlutterExtension {
         return flutterVersionCode.toInteger()
     }
 
-    /** Returns flutterVersionName with error handling. */
     String getVersionName() {
         if (flutterVersionName == null) {
             throw new GradleException("flutterVersionName must not be null.")
