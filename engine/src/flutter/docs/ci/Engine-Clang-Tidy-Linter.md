@@ -6,7 +6,7 @@ In May 2020, [`clang-tidy`](https://clang.llvm.org/extra/clang-tidy/) was added 
 
 If a file has `// FLUTTER_NOLINT` at the top, it has issues with the lint that haven't been addressed and the linter will ignore it.  As the issues are fixed the comments should be removed.
 
-You can run the linter locally by running `flutter/ci/lint.sh`.
+You can run the linter locally by running `flutter/ci/clang_tidy.sh`.
 
 ## CI background information
 
