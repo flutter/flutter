@@ -11,6 +11,7 @@ import '../base/logger.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../features.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';
@@ -26,6 +27,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     required Logger logger,
     required FileSystem fileSystem,
     required PlistParser plistParser,
+    required FeatureFlags features,
   })  : _xcodeProject = project,
         _platform = platform,
         _buildInfo = buildInfo,
@@ -33,6 +35,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         _xcodeProjectInterpreter = xcodeProjectInterpreter,
         _fileSystem = fileSystem,
         _plistParser = plistParser,
+        _features = features,
         super(logger);
 
   final XcodeBasedProject _xcodeProject;
@@ -42,6 +45,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   final FileSystem _fileSystem;
   final File _xcodeProjectInfoFile;
   final PlistParser _plistParser;
+  final FeatureFlags _features;
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
   static const String _flutterPluginsSwiftPackageBuildFileIdentifier = '78A318202AECB46A00862997';
@@ -107,6 +111,23 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// will revert any changes made and throw an error.
   @override
   Future<void> migrate() async {
+    if (!_features.isSwiftPackageManagerEnabled) {
+      logger.printTrace(
+        'The Swift Package Manager feature is off. '
+        'Skipping the migration that adds Swift Package Manager integration...',
+      );
+      return;
+    }
+
+    if (!_xcodeProject.flutterPluginSwiftPackageManifest.existsSync()) {
+      logger.printTrace(
+        'The tool did not generate a Swift package. '
+        "This can happen if the project doesn't have any plugins. "
+        'Skipping the migration that adds Swift Package Manager integration...',
+      );
+      return;
+    }
+
     Status? migrationStatus;
     SchemeInfo? schemeInfo;
     try {
