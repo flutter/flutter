@@ -79,7 +79,7 @@ class FlutterExtension {
     public String flutterVersionName = null
 
     /** Returns flutterVersionCode as an integer with error handling. */
-    Integer getVersionCode() {
+ /*   Integer getVersionCode() {
         if (flutterVersionCode == null) {
             throw new GradleException("flutterVersionCode must not be null.")
         }
@@ -99,7 +99,7 @@ class FlutterExtension {
 
         return flutterVersionName
     }
-}
+}*/
 
 // This buildscript block supplies dependencies for this file's own import
 // declarations above. It exists solely for compatibility with projects that
