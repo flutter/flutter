@@ -99,7 +99,8 @@ class FlutterExtension {
 
         return flutterVersionName
     }
-}*/
+*/
+}
 
 // This buildscript block supplies dependencies for this file's own import
 // declarations above. It exists solely for compatibility with projects that
