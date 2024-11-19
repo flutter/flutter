@@ -2488,22 +2488,8 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// [MethodChannel.invokeMethod].
   static List<dynamic> _itemsToJson(List<SystemContextMenuItem> items) {
     return items
-        .map<dynamic>((SystemContextMenuItem item) => _itemToJson(item))
+        .map<dynamic>((SystemContextMenuItem item) => item.json)
         .toList();
-  }
-
-  /// Convert the given item to the format required to be sent over
-  /// [MethodChannel.invokeMethod].
-  static Map<String, dynamic> _itemToJson(SystemContextMenuItem item) {
-    return <String, dynamic>{
-      'type': item.type.json,
-      'action': item.action.name,
-      // TODO(justinmc): I guess Flutter should always pass a title for the default actions. Encode that into the backend or no?
-      // TODO(justinmc): Enforce the existence of a title in SystemContextMenuItem.
-      if (item.type == SystemContextMenuType.defaultType)
-        // TODO(justinmc): Localilze. As in (Cupertino)AdaptiveContextMenu.
-        'title': item.title,
-    };
   }
 
   // Begin SystemContextMenuClient.
@@ -2622,8 +2608,27 @@ class SystemContextMenuController with SystemContextMenuClient {
   }
 }
 
-class SystemContextMenuItem {
-  const SystemContextMenuItem({
+/// Represents a single menu item in a system context menu.
+///
+/// Can be sent to the engine to be displayed in a system context menu via the
+/// `ContextMenu.showSystemContextMenu` [MethodChannel] method with [toJson].
+sealed class SystemContextMenuItem {
+  const SystemContextMenuItem();
+
+  /// Returns a representation of this item that can be sent to the engine.
+  ///
+  /// For example, this is used when calling the
+  /// `ContextMenu.showSystemContextMenu` [MethodChannel] method.
+  Map<String, dynamic> get json;
+}
+
+/// Represents a single menu item in a system context menu on iOS or macOS.
+///
+/// Can be sent to the engine to be displayed in a system context menu via the
+/// `ContextMenu.showSystemContextMenu` [MethodChannel] method.
+class AppleSystemContextMenuItem extends SystemContextMenuItem {
+  /// Creates an instance of [AppleSystemContextMenuItem].
+  const AppleSystemContextMenuItem({
     required this.action,
     required this.type,
     this.title,
@@ -2632,10 +2637,22 @@ class SystemContextMenuItem {
   final SystemContextMenuAction action;
   final String? title;
   final SystemContextMenuType type;
+
+  @override
+  Map<String, dynamic> get json {
+    return <String, dynamic>{
+      'type': type.json,
+      'action': action.name,
+      // TODO(justinmc): I guess Flutter should always pass a title for the default actions. Encode that into the backend or no?
+      // TODO(justinmc): Enforce the existence of a title in SystemContextMenuItem.
+      if (type == SystemContextMenuType.defaultType)
+        // TODO(justinmc): Localilze. As in (Cupertino)AdaptiveContextMenu.
+        'title': title,
+    };
+  }
 }
 
 enum SystemContextMenuType {
-  // TODO(justinmc): Make sure toString gives "default" not "defaultValue".
   defaultType;
 
   String get json => switch (this) {
@@ -2646,13 +2663,30 @@ enum SystemContextMenuType {
   // https://github.com/flutter/flutter/issues/103163
 }
 
-// TODO(justinmc): Needs to be narrow to Apple, I think. Here and other classes too.
+/// The built-in supported actions of iOS's system context menu items.
+///
+/// See also:
+///
+///  * [SystemContextMenuItem], for which this specifies the action.
 enum SystemContextMenuAction {
+  /// Copies the currently selected text.
   copy,
+
+  /// Cuts the currently selected text.
   cut,
+
+  /// Looks up the current selection in a dictionary.
   lookUp,
+
+  /// Pastes from the clipboard.
   paste,
+
+  /// Searches the web for the current selection.
   searchWeb,
+
+  /// Selects everything in the current field.
   selectAll,
+
+  /// Opens the share dialog with the current selection.
   share,
 }
