@@ -54,7 +54,6 @@ void main() {
   });
 
   testWithoutContext('flutter run --vm-service-port', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final int port = await getFreePort();
     // If only --vm-service-port is provided, --vm-service-port will be used by DDS
     // and the VM service will bind to a random port.
@@ -72,7 +71,6 @@ void main() {
   });
 
   testWithoutContext('flutter run --dds-port --vm-service-port', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final int vmServicePort = await getFreePort();
     int ddsPort = await getFreePort();
     while (ddsPort == vmServicePort) {
@@ -95,7 +93,6 @@ void main() {
   });
 
   testWithoutContext('flutter run --dds-port', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final int ddsPort = await getFreePort();
     // If only --dds-port is provided, --dds-port will be used by DDS and the VM service
     // will bind to a random port.

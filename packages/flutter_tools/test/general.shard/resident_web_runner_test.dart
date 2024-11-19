@@ -1761,9 +1761,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Future<void> stopEchoingDeviceLog() async {}
 
   @override
-  Future<void> tryInitLogReader() async {}
-
-  @override
   Future<Uri?> setupDevFS(String fsName, Directory rootDirectory) async {
     return testUri;
   }
