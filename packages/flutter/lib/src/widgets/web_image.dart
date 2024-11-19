@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../../widgets.dart';
-import '_web_image_io.dart' if (dart.library.js_interop) '_web_image_web.dart'
+import '_web_image_io.dart' if (dart.library.js_util) '_web_image_web.dart'
     as impl;
 
 /// A substitute for [Image.network] that follows the web's [same origin policy][].
