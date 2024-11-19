@@ -313,12 +313,7 @@ class NestedScrollView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
-  /// {@macro flutter.widgets.shadow.scrollBehavior}
-  ///
-  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
-  /// [ScrollPhysics] is provided in [physics], it will take precedence,
-  /// followed by [scrollBehavior], and then the inherited ancestor
-  /// [ScrollBehavior].
+  /// {@macro flutter.widgets.scrollable.scrollBehavior}
   ///
   /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
   /// modified by default to not apply a [Scrollbar]. This is because the
@@ -425,6 +420,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
 
   _NestedScrollCoordinator? _coordinator;
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -436,12 +432,14 @@ class NestedScrollViewState extends State<NestedScrollView> {
     );
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _coordinator!.setParent(widget.controller);
   }
 
+  @protected
   @override
   void didUpdateWidget(NestedScrollView oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -450,6 +448,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
     }
   }
 
+  @protected
   @override
   void dispose() {
     _coordinator!.dispose();
@@ -476,6 +475,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
     }
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     final ScrollPhysics scrollPhysics = widget.physics?.applyTo(const ClampingScrollPhysics())

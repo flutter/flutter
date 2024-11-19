@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -69,14 +70,12 @@ void main() {
   testUsingContext('build with no package config', overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await runFlutterSpecificDartBuild(
       environmentDefines: <String, String>{
         kBuildMode: BuildMode.debug.cliName,
       },
       targetPlatform: TargetPlatform.windows_x64,
       projectUri: projectUri,
-      nativeAssetsYamlUri: nonFlutterTesterAssetUri,
       fileSystem: fileSystem,
       buildRunner: FakeFlutterNativeAssetsBuildRunner(
         hasPackageConfigResult: false,
@@ -171,7 +170,7 @@ void main() {
     );
     expect(
       nativeAssetsYaml,
-      projectUri.resolve('build/native_assets/windows/native_assets.yaml'),
+      projectUri.resolve('build/native_assets/windows/${InstallCodeAssets.nativeAssetsFilename}'),
     );
     expect(
       await fileSystem.file(nativeAssetsYaml).readAsString(),
@@ -180,11 +179,65 @@ void main() {
     expect(buildRunner.buildDryRunInvocations, 1);
   });
 
+  testUsingContext('Native assets: non-bundled libraries require no copying', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
+    await packageConfig.parent.create();
+    await packageConfig.create();
+
+    final File directSoFile = environment.projectDir.childFile('direct.so');
+    directSoFile.writeAsBytesSync(<int>[]);
+
+    CodeAsset makeCodeAsset(String name, LinkMode linkMode, [Uri? file])
+        => CodeAsset(
+             package: 'bar',
+             name: name,
+             linkMode: linkMode,
+             os: OS.linux,
+             architecture: Architecture.x64,
+             file: file,
+           );
+
+    final Map<String, String> environmentDefines = <String, String>{
+      kBuildMode: BuildMode.release.cliName,
+    };
+    final List<CodeAsset> codeAssets = <CodeAsset>[
+      makeCodeAsset('malloc', LookupInProcess()),
+      makeCodeAsset('free', LookupInExecutable()),
+      makeCodeAsset('draw', DynamicLoadingSystem(Uri.file('/usr/lib/skia.so'))),
+    ];
+    final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+      environmentDefines: environmentDefines,
+      targetPlatform: TargetPlatform.linux_x64,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      buildRunner: FakeFlutterNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+        buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+        linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+      ),
+    );
+    await installCodeAssets(
+      dartBuildResult: dartBuildResult,
+      environmentDefines: environmentDefines,
+      targetPlatform: TargetPlatform.windows_x64,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      nativeAssetsFileUri: nonFlutterTesterAssetUri,
+    );
+    expect(testLogger.traceText, isNot(contains('Copying native assets to')));
+  });
+
   testUsingContext('build with assets but not enabled', overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
@@ -194,7 +247,6 @@ void main() {
         },
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
-        nativeAssetsYamlUri: nonFlutterTesterAssetUri,
         fileSystem: fileSystem,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
@@ -214,16 +266,17 @@ void main() {
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
+    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
     await packageConfig.parent.create();
     await packageConfig.create();
-    final (_, Uri nativeAssetsYaml) = await runFlutterSpecificDartBuild(
-      environmentDefines: <String, String>{
-        kBuildMode: BuildMode.debug.cliName,
-      },
+
+    final Map<String, String> environmentDefines = <String, String>{
+      kBuildMode: BuildMode.debug.cliName,
+    };
+    final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+      environmentDefines: environmentDefines,
       targetPlatform: TargetPlatform.windows_x64,
       projectUri: projectUri,
-      nativeAssetsYamlUri: nonFlutterTesterAssetUri,
       fileSystem: fileSystem,
       buildRunner: FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
@@ -231,9 +284,16 @@ void main() {
         ],
       ),
     );
-    expect(nativeAssetsYaml, nonFlutterTesterAssetUri);
+    await installCodeAssets(
+      dartBuildResult: dartBuildResult,
+      environmentDefines: environmentDefines,
+      targetPlatform: TargetPlatform.windows_x64,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      nativeAssetsFileUri: nonFlutterTesterAssetUri,
+    );
     expect(
-      await fileSystem.file(nativeAssetsYaml).readAsString(),
+      await fileSystem.file(nonFlutterTesterAssetUri).readAsString(),
       isNot(contains('package:bar/bar.dart')),
     );
     expect(
@@ -275,7 +335,6 @@ void main() {
   }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
@@ -285,7 +344,6 @@ void main() {
         },
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
-        nativeAssetsYamlUri: nonFlutterTesterAssetUri,
         fileSystem: fileSystem,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
@@ -307,7 +365,6 @@ void main() {
   }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await packageConfig.parent.create();
     await packageConfig.create();
 
@@ -328,14 +385,13 @@ void main() {
              file: file,
            );
 
-    final (DartBuildResult result, _) = await runFlutterSpecificDartBuild(
+    final DartBuildResult result = await runFlutterSpecificDartBuild(
       environmentDefines: <String, String>{
         // Release mode means the dart build has linking enabled.
         kBuildMode: BuildMode.release.cliName,
       },
       targetPlatform: TargetPlatform.linux_x64,
       projectUri: projectUri,
-      nativeAssetsYamlUri: nonFlutterTesterAssetUri,
       fileSystem: fileSystem,
       buildRunner: FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[

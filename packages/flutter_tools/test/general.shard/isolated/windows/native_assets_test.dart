@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -71,7 +72,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.empty(),
       }, () async {
         final File packageConfig = environment.projectDir.childDirectory('.dart_tool').childFile('package_config.json');
-        final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
+        final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
         await packageConfig.parent.create();
         await packageConfig.create();
         final File dylibAfterCompiling = fileSystem.file('bar.dll');
@@ -98,17 +99,32 @@ void main() {
               : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets,
           ),
         );
-        final (_, Uri nativeAssetsYaml) = await runFlutterSpecificDartBuild(
-          environmentDefines: <String, String>{
-            kBuildMode: buildMode.cliName,
-          },
-          targetPlatform: flutterTester
-              ? TargetPlatform.tester
-              : TargetPlatform.windows_x64,
+        final Map<String, String> environmentDefines = <String, String>{
+          kBuildMode: buildMode.cliName,
+        };
+        final TargetPlatform targetPlatform = flutterTester
+            ? TargetPlatform.tester
+            : TargetPlatform.windows_x64;
+        final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+          environmentDefines: environmentDefines,
+          targetPlatform: targetPlatform,
           projectUri: projectUri,
-          nativeAssetsYamlUri: flutterTester ? null : nonFlutterTesterAssetUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
+        );
+        final String expectedDirectory = flutterTester
+            ? native_assets_cli.OS.current.toString()
+            : 'windows';
+        final Uri nativeAssetsFileUri = flutterTester
+            ? projectUri.resolve('build/native_assets/$expectedDirectory/${InstallCodeAssets.nativeAssetsFilename}')
+            : nonFlutterTesterAssetUri;
+        await installCodeAssets(
+          dartBuildResult: dartBuildResult,
+          environmentDefines: environmentDefines,
+          targetPlatform: targetPlatform,
+          projectUri: projectUri,
+          fileSystem: fileSystem,
+          nativeAssetsFileUri: nativeAssetsFileUri,
         );
         final String expectedOS = flutterTester
             ? native_assets_cli.Target.current.toString()
@@ -120,16 +136,8 @@ void main() {
             'Building native assets for $expectedOS $buildMode done.',
           ]),
         );
-        final String expectedDirectory = flutterTester
-            ? native_assets_cli.OS.current.toString()
-            : 'windows';
-        expect(nativeAssetsYaml,
-               flutterTester
-                   ? projectUri.resolve('build/native_assets/$expectedDirectory/native_assets.yaml')
-                   : nonFlutterTesterAssetUri
-        );
         expect(
-          await fileSystem.file(nativeAssetsYaml).readAsString(),
+          await fileSystem.file(nativeAssetsFileUri).readAsString(),
           stringContainsInOrder(<String>[
             'package:bar/bar.dart',
             if (flutterTester)
