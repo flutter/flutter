@@ -36,6 +36,7 @@ import 'application_package.dart';
 import 'code_signing.dart';
 import 'migrations/host_app_info_plist_migration.dart';
 import 'migrations/ios_deployment_target_migration.dart';
+import 'migrations/metal_api_validation_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_bitcode_migration.dart';
@@ -167,6 +168,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     RemoveBitcodeMigration(app.project, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, globals.logger),
     UIApplicationMainDeprecationMigration(app.project, globals.logger),
+    MetalAPIValidationMigrator(app.project, globals.logger),
     SwiftPackageManagerIntegrationMigration(
       app.project,
       SupportedPlatform.ios,
