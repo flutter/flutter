@@ -1358,10 +1358,10 @@ void main() {
 
     await tester.tap(find.text('/')); // pushNamed('/A'), stack becomes /, /A
     await tester.pumpAndSettle();
-    pageValue.then((String? value) { assert(false); });
 
     final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
-    navigator.removeRoute(routes['/A']!); // stack becomes /, pageValue will not complete
+    navigator.removeRoute(routes['/A']!, 'B'); // stack becomes /, pageValue will complete and return 'B'
+    expect(await pageValue, 'B');
   });
 
   testWidgets('replacing route can be observed', (WidgetTester tester) async {

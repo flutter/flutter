@@ -2738,27 +2738,36 @@ class Navigator extends StatefulWidget {
   /// the given context, and [Route.dispose] it.
   ///
   /// {@template flutter.widgets.navigator.removeRoute}
-  /// The removed route is removed without being completed, so this method does
-  /// not take a return value argument. No animations are run as a result of
-  /// this method call.
+  /// No animations are run as a result of this method call.
   ///
   /// The routes below and above the removed route are notified (see
   /// [Route.didChangeNext] and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
   /// [NavigatorObserver.didRemove]). The removed route is disposed without
   /// being notified. The future that had been returned from pushing that routes
-  /// will not complete.
+  /// will complete.
   ///
   /// The given `route` must be in the history; this method will throw an
   /// exception if it is not.
+  ///
+  /// If non-null, `result` will be used as the result of the route that is
+  /// removed; the future that had been returned from pushing the removed route
+  /// will complete with `result`. If provided, must match the type argument of
+  /// the class of the popped route (`T`).
+  ///
+  /// The `T` type argument is the type of the return value of the popped route.
+  ///
+  /// The type of `result`, if provided, must match the type argument of the
+  /// class of the removed route (`T`).
   ///
   /// Ongoing gestures within the current route are canceled.
   /// {@endtemplate}
   ///
   /// This method is used, for example, to instantly dismiss dropdown menus that
   /// are up when the screen's orientation changes.
-  static void removeRoute(BuildContext context, Route<dynamic> route) {
-    return Navigator.of(context).removeRoute(route);
+  @optionalTypeArgs
+  static void removeRoute<T extends Object?>(BuildContext context, Route<T> route, [ T? result ]) {
+    return Navigator.of(context).removeRoute<T>(route, result);
   }
 
   /// Immediately remove a route from the navigator that most tightly encloses
@@ -2774,7 +2783,7 @@ class Navigator extends StatefulWidget {
   /// [Route.didChangeNext] and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
   /// [NavigatorObserver.didRemove]). The removed route is disposed without
-  /// being notified. The future that had been returned from pushing that routes
+  /// being notified. The future that had been returned from pushing that route
   /// will not complete.
   ///
   /// The given `anchorRoute` must be in the history and must have a route below
@@ -5454,7 +5463,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Immediately remove `route` from the navigator, and [Route.dispose] it.
   ///
   /// {@macro flutter.widgets.navigator.removeRoute}
-  void removeRoute(Route<dynamic> route) {
+  @optionalTypeArgs
+  void removeRoute<T extends Object?>(Route<T> route, [ T? result ]) {
     assert(!_debugLocked);
     assert(() {
       _debugLocked = true;
@@ -5474,6 +5484,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate)?.route,
       );
     }
+    route.didComplete(result);
   }
 
   /// Immediately remove a route from the navigator, and [Route.dispose] it. The
