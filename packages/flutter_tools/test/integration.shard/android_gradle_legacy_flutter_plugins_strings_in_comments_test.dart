@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(matanlurey): Remove after debugging https://github.com/flutter/flutter/issues/159000.
+@Tags(<String>['flutter-build-apk'])
+library;
+
 // This test can be removed once https://github.com/flutter/flutter/issues/155484 is resolved.
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -24,12 +28,6 @@ void main() {
   });
 
   test('should build Android app with commented-out ".flutter-plugins" in settings.gradle', () async {
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
-
     // Create Android app project instead of plugin
     processManager.runSync(<String>[
       flutterBin,

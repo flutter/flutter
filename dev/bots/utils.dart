@@ -68,9 +68,27 @@ const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
 final Map<String,String> localEngineEnv = <String, String>{};
 
 /// The arguments to pass to `flutter test` (typically the local engine
-/// configuration) -- prefilled with the arguments passed to test.dart.
+/// configuration) -- prefilled with  the arguments passed to test.dart.
 final List<String> flutterTestArgs = <String>[];
 
+/// Whether execution should be simulated for debugging purposes.
+///
+/// When `true`, calls to [runCommand] print to [io.stdout] instead of running
+/// the process. This is useful for determing what an invocation of `test.dart`
+/// _might_ due if not invoked with `--dry-run`, or otherwise determine what the
+/// different test shards and sub-shards are configured as.
+bool get dryRun => _dryRun ?? false;
+
+/// Switches [dryRun] to `true`.
+///
+/// Expected to be called at most once during execution of a process.
+void enableDryRun() {
+  if (_dryRun != null) {
+    throw StateError('Should only be called at most once');
+  }
+  _dryRun = true;
+}
+bool? _dryRun;
 
 const int kESC = 0x1B;
 const int kOpenSquareBracket = 0x5B;
@@ -135,6 +153,10 @@ final List<String> _pendingLogs = <String>[];
 Timer? _hideTimer; // When this is null, the output is verbose.
 
 void foundError(List<String> messages) {
+  if (dryRun) {
+    printProgress(messages.join('\n'));
+    return;
+  }
   assert(messages.isNotEmpty);
   // Make the error message easy to notice in the logs by
   // wrapping it in a red box.
@@ -342,6 +364,8 @@ Future<void> runDartTest(String workingDirectory, {
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
   bool collectMetrics = false,
+  List<String>? tags,
+  bool runSkipped = false,
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -379,6 +403,10 @@ Future<void> runDartTest(String workingDirectory, {
       '--coverage=$coverage',
     if (perTestTimeout != null)
       '--timeout=${perTestTimeout.inMilliseconds}ms',
+    if (runSkipped)
+      '--run-skipped',
+    if (tags != null)
+      ...tags.map((String t) => '--tags=$t'),
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,
@@ -406,6 +434,10 @@ Future<void> runDartTest(String workingDirectory, {
     environment: environment,
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
+
+  if (dryRun) {
+    return;
+  }
 
   final TestFileReporterResults test = TestFileReporterResults.fromFile(metricFile); // --file-reporter name
   final File info = fileSystem.file(path.join(flutterRoot, 'error.log'));
@@ -502,7 +534,9 @@ Future<void> runFlutterTest(String workingDirectory, {
   // metriciFile is a transitional file that needs to be deleted once it is parsed.
   // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
   // https://github.com/flutter/flutter/issues/146003
-  metricFile.deleteSync();
+  if (!dryRun) {
+    metricFile.deleteSync();
+  }
 
   if (outputChecker != null) {
     final String? message = outputChecker(result);
@@ -613,27 +647,33 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
 }
 
 Future<void> _runFromList(Map<String, ShardRunner> items, String key, String name, int positionInTaskName) async {
-  String? item = Platform.environment[key];
-  if (item == null && Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
-    final List<String> parts = Platform.environment[CIRRUS_TASK_NAME]!.split('-');
-    assert(positionInTaskName < parts.length);
-    item = parts[positionInTaskName];
-  }
-  if (item == null) {
-    for (final String currentItem in items.keys) {
-      printProgress('$bold$key=$currentItem$reset');
-      await items[currentItem]!();
+  try {
+    String? item = Platform.environment[key];
+    if (item == null && Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
+      final List<String> parts = Platform.environment[CIRRUS_TASK_NAME]!.split('-');
+      assert(positionInTaskName < parts.length);
+      item = parts[positionInTaskName];
     }
-  } else {
-    printProgress('$bold$key=$item$reset');
-    if (!items.containsKey(item)) {
-      foundError(<String>[
-        '${red}Invalid $name: $item$reset',
-        'The available ${name}s are: ${items.keys.join(", ")}',
-      ]);
-      return;
+    if (item == null) {
+      for (final String currentItem in items.keys) {
+        printProgress('$bold$key=$currentItem$reset');
+        await items[currentItem]!();
+      }
+    } else {
+      printProgress('$bold$key=$item$reset');
+      if (!items.containsKey(item)) {
+        foundError(<String>[
+          '${red}Invalid $name: $item$reset',
+          'The available ${name}s are: ${items.keys.join(", ")}',
+        ]);
+        return;
+      }
+      await items[item]!();
     }
-    await items[item]!();
+  } catch (_) {
+    if (!dryRun) {
+      rethrow;
+    }
   }
 }
 
