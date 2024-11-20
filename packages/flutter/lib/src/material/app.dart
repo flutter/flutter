@@ -905,6 +905,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
 }
 
 class _MaterialAppState extends State<MaterialApp> {
+  static const double _moveExitWidgetSelectionIconSize = 32;
+  static const double _moveExitWidgetSelectionTargetSize = 40;
+
   late HeroController _heroController;
 
   bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
@@ -944,7 +947,12 @@ class _MaterialAppState extends State<MaterialApp> {
       key: key,
       onPressed: onPressed,
       mini: true,
-      child: const Icon(Icons.close),
+      backgroundColor: _widgetSelectionButtonsBackgroundColor(context),
+      foregroundColor: _widgetSelectionButtonsForegroundColor(context),
+      child: const Icon(
+        Icons.close,
+        semanticLabel: 'Exit Select Widget mode.',
+      ),
     );
   }
 
@@ -954,16 +962,39 @@ class _MaterialAppState extends State<MaterialApp> {
     bool isLeftAligned = true,
   }) {
     return IconButton(
-        padding: const EdgeInsets.all(-8.0),
-        iconSize: 32,
+        color: _widgetSelectionButtonsBackgroundColor(context),
+        padding: EdgeInsets.zero,
+        iconSize: _moveExitWidgetSelectionIconSize,
         onPressed: onPressed,
         constraints: const BoxConstraints(
-          minWidth: 40,
-          minHeight: 40,
+          minWidth: _moveExitWidgetSelectionTargetSize,
+          minHeight: _moveExitWidgetSelectionTargetSize,
         ),
         icon: Icon(
           isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
+          semanticLabel:
+              'Move "Exit Select Widget mode" button to the ${isLeftAligned ? 'right' : 'left'}.',
         ));
+  }
+
+  Color _widgetSelectionButtonsForegroundColor(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return _isDarkTheme(context)
+        ? theme.colorScheme.onPrimaryContainer
+        : theme.colorScheme.primaryContainer;
+  }
+
+  Color _widgetSelectionButtonsBackgroundColor(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return _isDarkTheme(context)
+        ? theme.colorScheme.primaryContainer
+        : theme.colorScheme.onPrimaryContainer;
+  }
+
+  bool _isDarkTheme(BuildContext context) {
+    return widget.themeMode == ThemeMode.dark ||
+        widget.themeMode == ThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark;
   }
 
   ThemeData _themeBuilder(BuildContext context) {
