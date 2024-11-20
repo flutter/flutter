@@ -410,7 +410,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   Widget _buildError() {
     assert(
-      widget.error != null || widget.errorText != null,
+      _hasError,
       'errorText or error must be provided'
     );
 
