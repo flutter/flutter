@@ -407,7 +407,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final VisualDensity? resolvedVisualDensity = effectiveValue((ButtonStyle? style) => style?.visualDensity);
     final MaterialTapTargetSize? resolvedTapTargetSize = effectiveValue((ButtonStyle? style) => style?.tapTargetSize);
     final Duration? resolvedAnimationDuration = effectiveValue((ButtonStyle? style) => style?.animationDuration);
-    final bool? resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback);
+    final bool resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback) ?? true;
     final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
     final InteractiveInkFeatureFactory? resolvedSplashFactory = effectiveValue((ButtonStyle? style) => style?.splashFactory);
@@ -502,7 +502,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       onLongPress: widget.onLongPress,
       onHover: widget.onHover,
       mouseCursor: mouseCursor,
-      enableFeedback: resolvedEnableFeedback ?? true,
+      enableFeedback: resolvedEnableFeedback,
       focusNode: widget.focusNode,
       canRequestFocus: widget.enabled,
       onFocusChange: widget.onFocusChange,
