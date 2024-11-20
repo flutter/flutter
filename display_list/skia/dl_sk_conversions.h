@@ -86,8 +86,7 @@ inline sk_sp<SkShader> ToSk(const DlColorSource& source) {
 }
 
 extern sk_sp<SkImageFilter> ToSk(const DlImageFilter* filter);
-inline sk_sp<SkImageFilter> ToSk(
-    const std::shared_ptr<const DlImageFilter>& filter) {
+inline sk_sp<SkImageFilter> ToSk(const std::shared_ptr<DlImageFilter>& filter) {
   return ToSk(filter.get());
 }
 inline sk_sp<SkImageFilter> ToSk(const DlImageFilter& filter) {

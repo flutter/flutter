@@ -88,6 +88,9 @@ class DiffContext {
   // Instruct DiffContext that current layer will paint with integral transform.
   void WillPaintWithIntegralTransform() { state_.integral_transform = true; }
 
+  // Returns current transform as DlMatrix.
+  const DlMatrix& GetMatrix() const;
+
   // Returns current transform as SkMatrix.
   SkMatrix GetTransform3x3() const;
 

@@ -72,7 +72,7 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void PushFilterToVisitedPlatformViews(
-      const std::shared_ptr<const DlImageFilter>& filter,
+      const std::shared_ptr<DlImageFilter>& filter,
       const SkRect& filter_rect) override;
 
   // |ExternalViewEmbedder|

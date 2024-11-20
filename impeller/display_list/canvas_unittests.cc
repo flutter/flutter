@@ -4,9 +4,9 @@
 
 #include <unordered_map>
 
-#include "display_list/dl_tile_mode.h"
-#include "display_list/effects/dl_image_filter.h"
-#include "display_list/geometry/dl_geometry_types.h"
+#include "flutter/display_list/dl_tile_mode.h"
+#include "flutter/display_list/effects/dl_blur_image_filter.h"
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/core/formats.h"

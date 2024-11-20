@@ -9,6 +9,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_runtime_effect.h"
+#include "flutter/display_list/effects/dl_runtime_effect_image_filter.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "include/core/SkPath.h"
@@ -101,7 +102,7 @@ TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
 
   DlPaint paint;
   paint.setColor(DlColor::kAqua());
-  paint.setImageFilter(std::make_shared<DlRuntimeEffectImageFilter>(
+  paint.setImageFilter(DlRuntimeEffectImageFilter::Make(
       DlRuntimeEffect::MakeImpeller(runtime_stage), sampler_inputs,
       uniform_data));
 

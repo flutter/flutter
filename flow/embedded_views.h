@@ -50,7 +50,7 @@ enum MutatorType {
 // https://github.com/flutter/flutter/issues/108470
 class ImageFilterMutation {
  public:
-  ImageFilterMutation(std::shared_ptr<const DlImageFilter> filter,
+  ImageFilterMutation(std::shared_ptr<DlImageFilter> filter,
                       const SkRect& filter_rect)
       : filter_(std::move(filter)), filter_rect_(filter_rect) {}
 
@@ -66,7 +66,7 @@ class ImageFilterMutation {
   }
 
  private:
-  std::shared_ptr<const DlImageFilter> filter_;
+  std::shared_ptr<DlImageFilter> filter_;
   const SkRect filter_rect_;
 };
 
@@ -111,7 +111,7 @@ class Mutator {
   explicit Mutator(const SkMatrix& matrix)
       : type_(kTransform), matrix_(matrix) {}
   explicit Mutator(const int& alpha) : type_(kOpacity), alpha_(alpha) {}
-  explicit Mutator(const std::shared_ptr<const DlImageFilter>& filter,
+  explicit Mutator(const std::shared_ptr<DlImageFilter>& filter,
                    const SkRect& filter_rect)
       : type_(kBackdropFilter),
         filter_mutation_(
@@ -197,7 +197,7 @@ class MutatorsStack {
   void PushTransform(const SkMatrix& matrix);
   void PushOpacity(const int& alpha);
   // `filter_rect` is in global coordinates.
-  void PushBackdropFilter(const std::shared_ptr<const DlImageFilter>& filter,
+  void PushBackdropFilter(const std::shared_ptr<DlImageFilter>& filter,
                           const SkRect& filter_rect);
 
   // Removes the `Mutator` on the top of the stack
@@ -296,7 +296,7 @@ class EmbeddedViewParams {
   // Pushes the stored DlImageFilter object to the mutators stack.
   //
   // `filter_rect` is in global coordinates.
-  void PushImageFilter(const std::shared_ptr<const DlImageFilter>& filter,
+  void PushImageFilter(const std::shared_ptr<DlImageFilter>& filter,
                        const SkRect& filter_rect) {
     mutators_stack_.PushBackdropFilter(filter, filter_rect);
   }
@@ -510,7 +510,7 @@ class ExternalViewEmbedder {
   // See also: |PushVisitedPlatformView| for pushing platform view ids to the
   // visited platform views list.
   virtual void PushFilterToVisitedPlatformViews(
-      const std::shared_ptr<const DlImageFilter>& filter,
+      const std::shared_ptr<DlImageFilter>& filter,
       const SkRect& filter_rect) {}
 
  private:

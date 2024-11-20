@@ -6,6 +6,7 @@
 
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 
+#include "flutter/display_list/effects/dl_blur_image_filter.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 #include "flutter/fml/trace_event.h"
@@ -52,7 +53,7 @@ void DlSkCanvasAdapter::Save() {
   delegate_->save();
 }
 
-void DlSkCanvasAdapter::SaveLayer(std::optional<const DlRect>& bounds,
+void DlSkCanvasAdapter::SaveLayer(const std::optional<DlRect>& bounds,
                                   const DlPaint* paint,
                                   const DlImageFilter* backdrop,
                                   std::optional<int64_t> backdrop_id) {

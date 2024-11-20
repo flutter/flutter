@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/display_list/effects/dl_blur_image_filter.h"
 #include "flutter/flow/embedded_views.h"
 #include "gtest/gtest.h"
 
@@ -93,7 +94,7 @@ TEST(MutatorsStack, PushBackdropFilter) {
   MutatorsStack stack;
   const int num_of_mutators = 10;
   for (int i = 0; i < num_of_mutators; i++) {
-    auto filter = std::make_shared<DlBlurImageFilter>(i, 5, DlTileMode::kClamp);
+    auto filter = DlBlurImageFilter::Make(i, 5, DlTileMode::kClamp);
     stack.PushBackdropFilter(filter, SkRect::MakeXYWH(i, i, i, i));
   }
 
@@ -168,7 +169,7 @@ TEST(MutatorsStack, Equality) {
   stack.PushClipPath(path);
   int alpha = 240;
   stack.PushOpacity(alpha);
-  auto filter = std::make_shared<DlBlurImageFilter>(5, 5, DlTileMode::kClamp);
+  auto filter = DlBlurImageFilter::Make(5, 5, DlTileMode::kClamp);
   stack.PushBackdropFilter(filter, SkRect::MakeEmpty());
 
   MutatorsStack stack_other;
@@ -182,8 +183,7 @@ TEST(MutatorsStack, Equality) {
   stack_other.PushClipPath(other_path);
   int other_alpha = 240;
   stack_other.PushOpacity(other_alpha);
-  auto other_filter =
-      std::make_shared<DlBlurImageFilter>(5, 5, DlTileMode::kClamp);
+  auto other_filter = DlBlurImageFilter::Make(5, 5, DlTileMode::kClamp);
   stack_other.PushBackdropFilter(other_filter, SkRect::MakeEmpty());
 
   ASSERT_TRUE(stack == stack_other);
@@ -215,7 +215,7 @@ TEST(Mutator, Initialization) {
   Mutator mutator5 = Mutator(alpha);
   ASSERT_TRUE(mutator5.GetType() == MutatorType::kOpacity);
 
-  auto filter = std::make_shared<DlBlurImageFilter>(5, 5, DlTileMode::kClamp);
+  auto filter = DlBlurImageFilter::Make(5, 5, DlTileMode::kClamp);
   Mutator mutator6 = Mutator(filter, SkRect::MakeEmpty());
   ASSERT_TRUE(mutator6.GetType() == MutatorType::kBackdropFilter);
   ASSERT_TRUE(mutator6.GetFilterMutation().GetFilter() == *filter);
@@ -248,7 +248,7 @@ TEST(Mutator, CopyConstructor) {
   Mutator copy5 = Mutator(mutator5);
   ASSERT_TRUE(mutator5 == copy5);
 
-  auto filter = std::make_shared<DlBlurImageFilter>(5, 5, DlTileMode::kClamp);
+  auto filter = DlBlurImageFilter::Make(5, 5, DlTileMode::kClamp);
   Mutator mutator6 = Mutator(filter, SkRect::MakeEmpty());
   Mutator copy6 = Mutator(mutator6);
   ASSERT_TRUE(mutator6 == copy6);
@@ -281,8 +281,8 @@ TEST(Mutator, Equality) {
   Mutator other_mutator5 = Mutator(alpha);
   ASSERT_TRUE(mutator5 == other_mutator5);
 
-  auto filter1 = std::make_shared<DlBlurImageFilter>(5, 5, DlTileMode::kClamp);
-  auto filter2 = std::make_shared<DlBlurImageFilter>(5, 5, DlTileMode::kClamp);
+  auto filter1 = DlBlurImageFilter::Make(5, 5, DlTileMode::kClamp);
+  auto filter2 = DlBlurImageFilter::Make(5, 5, DlTileMode::kClamp);
   Mutator mutator6 = Mutator(filter1, SkRect::MakeEmpty());
   Mutator other_mutator6 = Mutator(filter2, SkRect::MakeEmpty());
   ASSERT_TRUE(mutator6 == other_mutator6);
@@ -302,9 +302,8 @@ TEST(Mutator, UnEquality) {
   Mutator other_mutator2 = Mutator(alpha2);
   ASSERT_TRUE(mutator2 != other_mutator2);
 
-  auto filter = std::make_shared<DlBlurImageFilter>(5, 5, DlTileMode::kClamp);
-  auto filter2 =
-      std::make_shared<DlBlurImageFilter>(10, 10, DlTileMode::kClamp);
+  auto filter = DlBlurImageFilter::Make(5, 5, DlTileMode::kClamp);
+  auto filter2 = DlBlurImageFilter::Make(10, 10, DlTileMode::kClamp);
   Mutator mutator3 = Mutator(filter, SkRect::MakeEmpty());
   Mutator other_mutator3 = Mutator(filter2, SkRect::MakeEmpty());
   ASSERT_TRUE(mutator3 != other_mutator3);

@@ -1008,6 +1008,52 @@ TEST(GeometryTest, PointMin) {
   ASSERT_POINT_NEAR(result, expected);
 }
 
+TEST(GeometryTest, Vector4IsFinite) {
+  {
+    Vector4 v;
+    ASSERT_TRUE(v.IsFinite());
+    v.x = std::numeric_limits<Scalar>::infinity();
+    ASSERT_FALSE(v.IsFinite());
+    v.x = -std::numeric_limits<Scalar>::infinity();
+    ASSERT_FALSE(v.IsFinite());
+    v.x = -std::numeric_limits<Scalar>::quiet_NaN();
+    ASSERT_FALSE(v.IsFinite());
+  }
+
+  {
+    Vector4 v;
+    ASSERT_TRUE(v.IsFinite());
+    v.y = std::numeric_limits<Scalar>::infinity();
+    ASSERT_FALSE(v.IsFinite());
+    v.y = -std::numeric_limits<Scalar>::infinity();
+    ASSERT_FALSE(v.IsFinite());
+    v.y = -std::numeric_limits<Scalar>::quiet_NaN();
+    ASSERT_FALSE(v.IsFinite());
+  }
+
+  {
+    Vector4 v;
+    ASSERT_TRUE(v.IsFinite());
+    v.z = std::numeric_limits<Scalar>::infinity();
+    ASSERT_FALSE(v.IsFinite());
+    v.z = -std::numeric_limits<Scalar>::infinity();
+    ASSERT_FALSE(v.IsFinite());
+    v.z = -std::numeric_limits<Scalar>::quiet_NaN();
+    ASSERT_FALSE(v.IsFinite());
+  }
+
+  {
+    Vector4 v;
+    ASSERT_TRUE(v.IsFinite());
+    v.w = std::numeric_limits<Scalar>::infinity();
+    ASSERT_FALSE(v.IsFinite());
+    v.w = -std::numeric_limits<Scalar>::infinity();
+    ASSERT_FALSE(v.IsFinite());
+    v.w = -std::numeric_limits<Scalar>::quiet_NaN();
+    ASSERT_FALSE(v.IsFinite());
+  }
+}
+
 TEST(GeometryTest, Vector3Min) {
   Vector3 p(1, 2, 3);
   Vector3 result = p.Min({0, 10, 2});

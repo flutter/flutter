@@ -79,6 +79,10 @@ extern std::ostream& operator<<(std::ostream& os,
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DisplayListOpCategory& category);
 extern std::ostream& operator<<(std::ostream& os, const flutter::DlPath& path);
+extern std::ostream& operator<<(std::ostream& os,
+                                const flutter::DlImageFilter& type);
+extern std::ostream& operator<<(std::ostream& os,
+                                const flutter::DlColorFilter& type);
 
 }  // namespace std
 
@@ -195,6 +199,11 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
                   bool transparent_occluder,
                   DlScalar dpr) override;
 
+  void out(const DlColorFilter& filter);
+  void out(const DlColorFilter* filter);
+  void out(const DlImageFilter& filter);
+  void out(const DlImageFilter* filter);
+
  private:
   std::ostream& os_;
   int cur_indent_;
@@ -209,11 +218,6 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   std::ostream& out_array(std::string name, int count, const T array[]);
 
   std::ostream& startl();
-
-  void out(const DlColorFilter& filter);
-  void out(const DlColorFilter* filter);
-  void out(const DlImageFilter& filter);
-  void out(const DlImageFilter* filter);
 };
 
 class DisplayListGeneralReceiver : public DlOpReceiver {

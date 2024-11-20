@@ -150,11 +150,11 @@ class DlPaint {
     return *this;
   }
 
-  std::shared_ptr<const DlImageFilter> getImageFilter() const {
+  std::shared_ptr<DlImageFilter> getImageFilter() const {
     return image_filter_;
   }
   const DlImageFilter* getImageFilterPtr() const { return image_filter_.get(); }
-  DlPaint& setImageFilter(const std::shared_ptr<const DlImageFilter>& filter) {
+  DlPaint& setImageFilter(const std::shared_ptr<DlImageFilter>& filter) {
     image_filter_ = filter;
     return *this;
   }
@@ -212,7 +212,7 @@ class DlPaint {
 
   std::shared_ptr<const DlColorSource> color_source_;
   std::shared_ptr<const DlColorFilter> color_filter_;
-  std::shared_ptr<const DlImageFilter> image_filter_;
+  std::shared_ptr<DlImageFilter> image_filter_;
   std::shared_ptr<const DlMaskFilter> mask_filter_;
 };
 

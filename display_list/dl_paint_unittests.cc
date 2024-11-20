@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/dl_paint.h"
 
+#include "flutter/display_list/effects/dl_blur_image_filter.h"
 #include "flutter/display_list/utils/dl_comparable.h"
 #include "gtest/gtest.h"
 
