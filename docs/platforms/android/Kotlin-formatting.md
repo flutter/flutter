@@ -17,7 +17,7 @@ then there is good news! Android Studio can be configured to use `ktlint` to aut
 
    a. Both of these options should be available under `Android Studio > Settings > Tools > ktlint`.
 
-3. Additionally, Kotlin code in the Flutter repository currently uses some additional rules for compatibility with older versions of Kotlin. 
+3. Additionally, Kotlin code in the Flutter repository currently uses some additional rules for compatibility with older versions of Kotlin.
 These rules can only be configured by an `.editorconfig` file in the directory from which Android Studio was opened. To configure these rules, create a new `.editorconfig` file in the root of your flutter repository with the following content
 ```
 [*.{kt,kts}]
