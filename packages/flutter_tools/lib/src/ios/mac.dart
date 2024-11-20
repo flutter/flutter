@@ -168,7 +168,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     RemoveBitcodeMigration(app.project, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, globals.logger),
     UIApplicationMainDeprecationMigration(app.project, globals.logger),
-    MetalAPIValidationMigrator(app.project, globals.logger),
     SwiftPackageManagerIntegrationMigration(
       app.project,
       SupportedPlatform.ios,
@@ -180,6 +179,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       features: featureFlags,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
+    MetalAPIValidationMigrator.ios(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);

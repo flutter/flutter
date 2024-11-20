@@ -1,4 +1,3 @@
-
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -12,7 +11,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-
 
 void main() {
   testWithoutContext('Adds Metal API setting to matching file', () {
@@ -34,7 +32,7 @@ void main() {
     allowLocationSimulation = "YES">
 ''');
     final FakeIosProject project = FakeIosProject(file);
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator(project, BufferLogger.test());
+    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
 
     expect(() async => validator.migrate(), returnsNormally);
 
@@ -63,7 +61,7 @@ void main() {
     allowLocationSimulation = "YES">
 ''');
     final FakeIosProject project = FakeIosProject(file);
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator(project, BufferLogger.test());
+    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
 
     final String initialContents = file.readAsStringSync();
 
@@ -78,7 +76,7 @@ void main() {
       ..createSync()
       ..writeAsStringSync('NO_OP');
     final FakeIosProject project = FakeIosProject(file);
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator(project, BufferLogger.test());
+    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
 
     expect(() async => validator.migrate(), returnsNormally);
 
@@ -88,7 +86,7 @@ void main() {
   testWithoutContext('No-op on missing file', () async {
     final FileSystem fs = MemoryFileSystem.test();
     final FakeIosProject project = FakeIosProject(fs.file('does_not_exist'));
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator(project, BufferLogger.test());
+    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
 
     expect(() async => validator.migrate(), returnsNormally);
   });

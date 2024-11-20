@@ -8,8 +8,13 @@ import '../../xcode_project.dart';
 
 /// Remove Metal API validation setting that slows down applications.
 class MetalAPIValidationMigrator extends ProjectMigrator {
-  MetalAPIValidationMigrator(
+  MetalAPIValidationMigrator.ios(
     IosProject project,
+    super.logger,
+  )   : _xcodeProjectScheme = project.xcodeProjectSchemeFile();
+
+  MetalAPIValidationMigrator.macos(
+    MacOSProject project,
     super.logger,
   )   : _xcodeProjectScheme = project.xcodeProjectSchemeFile();
 
