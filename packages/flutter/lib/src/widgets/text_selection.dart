@@ -2899,10 +2899,6 @@ class TextSelectionGestureDetectorBuilder {
                   from: details.globalPosition,
                   cause: SelectionChangedCause.drag,
                 );
-                // TODO(justinmc): This shouldn't show the magnifier unless the
-                // drag is moving the cursor. If it's horizontally outside of
-                // the field, no magnifier. The magnifier will show and hide as
-                // a drag moves into and out of the text.
                 _showMagnifierIfSupportedByPlatform(details.globalPosition);
               }
             case null:
