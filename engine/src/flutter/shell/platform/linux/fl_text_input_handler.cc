@@ -8,61 +8,16 @@
 
 #include "flutter/shell/platform/common/text_editing_delta.h"
 #include "flutter/shell/platform/common/text_input_model.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_json_method_codec.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
-
-static constexpr char kChannelName[] = "flutter/textinput";
-
-static constexpr char kBadArgumentsError[] = "Bad Arguments";
-
-static constexpr char kSetClientMethod[] = "TextInput.setClient";
-static constexpr char kShowMethod[] = "TextInput.show";
-static constexpr char kSetEditingStateMethod[] = "TextInput.setEditingState";
-static constexpr char kClearClientMethod[] = "TextInput.clearClient";
-static constexpr char kHideMethod[] = "TextInput.hide";
-static constexpr char kUpdateEditingStateMethod[] =
-    "TextInputClient.updateEditingState";
-static constexpr char kUpdateEditingStateWithDeltasMethod[] =
-    "TextInputClient.updateEditingStateWithDeltas";
-static constexpr char kPerformActionMethod[] = "TextInputClient.performAction";
-static constexpr char kSetEditableSizeAndTransform[] =
-    "TextInput.setEditableSizeAndTransform";
-static constexpr char kSetMarkedTextRect[] = "TextInput.setMarkedTextRect";
-
-static constexpr char kInputActionKey[] = "inputAction";
-static constexpr char kTextInputTypeKey[] = "inputType";
-static constexpr char kEnableDeltaModel[] = "enableDeltaModel";
-static constexpr char kTextInputTypeNameKey[] = "name";
-static constexpr char kTextKey[] = "text";
-static constexpr char kSelectionBaseKey[] = "selectionBase";
-static constexpr char kSelectionExtentKey[] = "selectionExtent";
-static constexpr char kSelectionAffinityKey[] = "selectionAffinity";
-static constexpr char kSelectionIsDirectionalKey[] = "selectionIsDirectional";
-static constexpr char kComposingBaseKey[] = "composingBase";
-static constexpr char kComposingExtentKey[] = "composingExtent";
-
-static constexpr char kTransform[] = "transform";
-
-static constexpr char kTextAffinityDownstream[] = "TextAffinity.downstream";
-static constexpr char kMultilineInputType[] = "TextInputType.multiline";
-static constexpr char kNoneInputType[] = "TextInputType.none";
+#include "flutter/shell/platform/linux/fl_text_input_channel.h"
 
 static constexpr char kNewlineInputAction[] = "TextInputAction.newline";
 
 static constexpr int64_t kClientIdUnset = -1;
 
-typedef enum {
-  kFlTextInputTypeText,
-  // Send newline when multi-line and enter is pressed.
-  kFlTextInputTypeMultiline,
-  // The input method is not shown at all.
-  kFlTextInputTypeNone,
-} FlTextInputType;
-
 struct _FlTextInputHandler {
   GObject parent_instance;
 
-  FlMethodChannel* channel;
+  FlTextInputChannel* channel;
 
   // Client ID provided by Flutter to report events with.
   int64_t client_id;
@@ -101,26 +56,29 @@ struct _FlTextInputHandler {
 
 G_DEFINE_TYPE(FlTextInputHandler, fl_text_input_handler, G_TYPE_OBJECT)
 
-// Completes method call and returns TRUE if the call was successful.
-static gboolean finish_method(GObject* object,
-                              GAsyncResult* result,
-                              GError** error) {
-  g_autoptr(FlMethodResponse) response = fl_method_channel_invoke_method_finish(
-      FL_METHOD_CHANNEL(object), result, error);
-  if (response == nullptr) {
-    return FALSE;
-  }
-  return fl_method_response_get_result(response, error) != nullptr;
-}
-
 // Called when a response is received from TextInputClient.updateEditingState()
 static void update_editing_state_response_cb(GObject* object,
                                              GAsyncResult* result,
                                              gpointer user_data) {
   g_autoptr(GError) error = nullptr;
-  if (!finish_method(object, result, &error)) {
+  if (!fl_text_input_channel_update_editing_state_finish(object, result,
+                                                         &error)) {
     if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
-      g_warning("Failed to call %s: %s", kUpdateEditingStateMethod,
+      g_warning("Failed to update editing state: %s", error->message);
+    }
+  }
+}
+
+// Called when a response is received from
+// TextInputClient.updateEditingStateWithDeltas()
+static void update_editing_state_with_deltas_response_cb(GObject* object,
+                                                         GAsyncResult* result,
+                                                         gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  if (!fl_text_input_channel_update_editing_state_with_deltas_finish(
+          object, result, &error)) {
+    if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+      g_warning("Failed to update editing state with deltas: %s",
                 error->message);
     }
   }
@@ -128,96 +86,36 @@ static void update_editing_state_response_cb(GObject* object,
 
 // Informs Flutter of text input changes.
 static void update_editing_state(FlTextInputHandler* self) {
-  g_autoptr(FlValue) args = fl_value_new_list();
-  fl_value_append_take(args, fl_value_new_int(self->client_id));
-  g_autoptr(FlValue) value = fl_value_new_map();
-
-  flutter::TextRange selection = self->text_model->selection();
-  fl_value_set_string_take(
-      value, kTextKey,
-      fl_value_new_string(self->text_model->GetText().c_str()));
-  fl_value_set_string_take(value, kSelectionBaseKey,
-                           fl_value_new_int(selection.base()));
-  fl_value_set_string_take(value, kSelectionExtentKey,
-                           fl_value_new_int(selection.extent()));
-
   int composing_base = -1;
   int composing_extent = -1;
   if (!self->text_model->composing_range().collapsed()) {
     composing_base = self->text_model->composing_range().base();
     composing_extent = self->text_model->composing_range().extent();
   }
-  fl_value_set_string_take(value, kComposingBaseKey,
-                           fl_value_new_int(composing_base));
-  fl_value_set_string_take(value, kComposingExtentKey,
-                           fl_value_new_int(composing_extent));
-
-  // The following keys are not implemented and set to default values.
-  fl_value_set_string_take(value, kSelectionAffinityKey,
-                           fl_value_new_string(kTextAffinityDownstream));
-  fl_value_set_string_take(value, kSelectionIsDirectionalKey,
-                           fl_value_new_bool(FALSE));
-
-  fl_value_append(args, value);
-
-  fl_method_channel_invoke_method(self->channel, kUpdateEditingStateMethod,
-                                  args, self->cancellable,
-                                  update_editing_state_response_cb, self);
+  flutter::TextRange selection = self->text_model->selection();
+  fl_text_input_channel_update_editing_state(
+      self->channel, self->client_id, self->text_model->GetText().c_str(),
+      selection.base(), selection.extent(), FL_TEXT_AFFINITY_DOWNSTREAM, FALSE,
+      composing_base, composing_extent, self->cancellable,
+      update_editing_state_response_cb, self);
 }
 
 // Informs Flutter of text input changes by passing just the delta.
 static void update_editing_state_with_delta(FlTextInputHandler* self,
                                             flutter::TextEditingDelta* delta) {
-  g_autoptr(FlValue) args = fl_value_new_list();
-  fl_value_append_take(args, fl_value_new_int(self->client_id));
-
-  g_autoptr(FlValue) deltaValue = fl_value_new_map();
-  fl_value_set_string_take(deltaValue, "oldText",
-                           fl_value_new_string(delta->old_text().c_str()));
-
-  fl_value_set_string_take(deltaValue, "deltaText",
-                           fl_value_new_string(delta->delta_text().c_str()));
-
-  fl_value_set_string_take(deltaValue, "deltaStart",
-                           fl_value_new_int(delta->delta_start()));
-
-  fl_value_set_string_take(deltaValue, "deltaEnd",
-                           fl_value_new_int(delta->delta_end()));
-
   flutter::TextRange selection = self->text_model->selection();
-  fl_value_set_string_take(deltaValue, "selectionBase",
-                           fl_value_new_int(selection.base()));
-
-  fl_value_set_string_take(deltaValue, "selectionExtent",
-                           fl_value_new_int(selection.extent()));
-
-  fl_value_set_string_take(deltaValue, "selectionAffinity",
-                           fl_value_new_string(kTextAffinityDownstream));
-
-  fl_value_set_string_take(deltaValue, "selectionIsDirectional",
-                           fl_value_new_bool(FALSE));
-
   int composing_base = -1;
   int composing_extent = -1;
   if (!self->text_model->composing_range().collapsed()) {
     composing_base = self->text_model->composing_range().base();
     composing_extent = self->text_model->composing_range().extent();
   }
-  fl_value_set_string_take(deltaValue, "composingBase",
-                           fl_value_new_int(composing_base));
-  fl_value_set_string_take(deltaValue, "composingExtent",
-                           fl_value_new_int(composing_extent));
-
-  g_autoptr(FlValue) deltas = fl_value_new_list();
-  fl_value_append(deltas, deltaValue);
-  g_autoptr(FlValue) value = fl_value_new_map();
-  fl_value_set_string(value, "deltas", deltas);
-
-  fl_value_append(args, value);
-
-  fl_method_channel_invoke_method(
-      self->channel, kUpdateEditingStateWithDeltasMethod, args,
-      self->cancellable, update_editing_state_response_cb, self);
+  fl_text_input_channel_update_editing_state_with_deltas(
+      self->channel, self->client_id, delta->old_text().c_str(),
+      delta->delta_text().c_str(), delta->delta_start(), delta->delta_end(),
+      selection.base(), selection.extent(), FL_TEXT_AFFINITY_DOWNSTREAM, FALSE,
+      composing_base, composing_extent, self->cancellable,
+      update_editing_state_with_deltas_response_cb, self);
 }
 
 // Called when a response is received from TextInputClient.performAction()
@@ -225,9 +123,9 @@ static void perform_action_response_cb(GObject* object,
                                        GAsyncResult* result,
                                        gpointer user_data) {
   g_autoptr(GError) error = nullptr;
-  if (!finish_method(object, result, &error)) {
+  if (!fl_text_input_channel_perform_action_finish(object, result, &error)) {
     if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
-      g_warning("Failed to call %s: %s", kPerformActionMethod, error->message);
+      g_warning("Failed to perform action: %s", error->message);
     }
   }
 }
@@ -238,13 +136,9 @@ static void perform_action(FlTextInputHandler* self) {
   g_return_if_fail(self->client_id != 0);
   g_return_if_fail(self->input_action != nullptr);
 
-  g_autoptr(FlValue) args = fl_value_new_list();
-  fl_value_append_take(args, fl_value_new_int(self->client_id));
-  fl_value_append_take(args, fl_value_new_string(self->input_action));
-
-  fl_method_channel_invoke_method(self->channel, kPerformActionMethod, args,
-                                  self->cancellable, perform_action_response_cb,
-                                  self);
+  fl_text_input_channel_perform_action(self->channel, self->client_id,
+                                       self->input_action, self->cancellable,
+                                       perform_action_response_cb, self);
 }
 
 // Signal handler for GtkIMContext::preedit-start
@@ -344,76 +238,50 @@ static gboolean im_delete_surrounding_cb(FlTextInputHandler* self,
 }
 
 // Called when the input method client is set up.
-static FlMethodResponse* set_client(FlTextInputHandler* self, FlValue* args) {
-  if (fl_value_get_type(args) != FL_VALUE_TYPE_LIST ||
-      fl_value_get_length(args) < 2) {
-    return FL_METHOD_RESPONSE(fl_method_error_response_new(
-        kBadArgumentsError, "Expected 2-element list", nullptr));
-  }
+static void set_client(int64_t client_id,
+                       const gchar* input_action,
+                       gboolean enable_delta_model,
+                       FlTextInputType input_type,
+                       gpointer user_data) {
+  FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(user_data);
 
-  self->client_id = fl_value_get_int(fl_value_get_list_value(args, 0));
-  FlValue* config_value = fl_value_get_list_value(args, 1);
+  self->client_id = client_id;
   g_free(self->input_action);
-  FlValue* input_action_value =
-      fl_value_lookup_string(config_value, kInputActionKey);
-  if (fl_value_get_type(input_action_value) == FL_VALUE_TYPE_STRING) {
-    self->input_action = g_strdup(fl_value_get_string(input_action_value));
-  }
-
-  FlValue* enable_delta_model_value =
-      fl_value_lookup_string(config_value, kEnableDeltaModel);
-  gboolean enable_delta_model = fl_value_get_bool(enable_delta_model_value);
+  self->input_action = g_strdup(input_action);
   self->enable_delta_model = enable_delta_model;
-
-  // Reset the input type, then set only if appropriate.
-  self->input_type = kFlTextInputTypeText;
-  FlValue* input_type_value =
-      fl_value_lookup_string(config_value, kTextInputTypeKey);
-  if (fl_value_get_type(input_type_value) == FL_VALUE_TYPE_MAP) {
-    FlValue* input_type_name =
-        fl_value_lookup_string(input_type_value, kTextInputTypeNameKey);
-    if (fl_value_get_type(input_type_name) == FL_VALUE_TYPE_STRING) {
-      const gchar* input_type = fl_value_get_string(input_type_name);
-      if (g_strcmp0(input_type, kMultilineInputType) == 0) {
-        self->input_type = kFlTextInputTypeMultiline;
-      } else if (g_strcmp0(input_type, kNoneInputType) == 0) {
-        self->input_type = kFlTextInputTypeNone;
-      }
-    }
-  }
-
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  self->input_type = input_type;
 }
 
 // Hides the input method.
-static FlMethodResponse* hide(FlTextInputHandler* self) {
-  gtk_im_context_focus_out(self->im_context);
+static void hide(gpointer user_data) {
+  FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(user_data);
 
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  gtk_im_context_focus_out(self->im_context);
 }
 
 // Shows the input method.
-static FlMethodResponse* show(FlTextInputHandler* self) {
-  if (self->input_type == kFlTextInputTypeNone) {
-    return hide(self);
+static void show(gpointer user_data) {
+  FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(user_data);
+
+  if (self->input_type == FL_TEXT_INPUT_TYPE_NONE) {
+    hide(user_data);
+    return;
   }
 
   gtk_im_context_focus_in(self->im_context);
-
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
 
 // Updates the editing state from Flutter.
-static FlMethodResponse* set_editing_state(FlTextInputHandler* self,
-                                           FlValue* args) {
-  const gchar* text =
-      fl_value_get_string(fl_value_lookup_string(args, kTextKey));
+static void set_editing_state(const gchar* text,
+                              int64_t selection_base,
+                              int64_t selection_extent,
+                              int64_t composing_base,
+                              int64_t composing_extent,
+                              gpointer user_data) {
+  FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(user_data);
+
   self->text_model->SetText(text);
 
-  int64_t selection_base =
-      fl_value_get_int(fl_value_lookup_string(args, kSelectionBaseKey));
-  int64_t selection_extent =
-      fl_value_get_int(fl_value_lookup_string(args, kSelectionExtentKey));
   // Flutter uses -1/-1 for invalid; translate that to 0/0 for the model.
   if (selection_base == -1 && selection_extent == -1) {
     selection_base = selection_extent = 0;
@@ -423,10 +291,6 @@ static FlMethodResponse* set_editing_state(FlTextInputHandler* self,
   self->text_model->SetSelection(
       flutter::TextRange(selection_base, selection_extent));
 
-  int64_t composing_base =
-      fl_value_get_int(fl_value_lookup_string(args, kComposingBaseKey));
-  int64_t composing_extent =
-      fl_value_get_int(fl_value_lookup_string(args, kComposingExtentKey));
   if (composing_base == -1 && composing_extent == -1) {
     self->text_model->EndComposing();
   } else {
@@ -435,25 +299,22 @@ static FlMethodResponse* set_editing_state(FlTextInputHandler* self,
     self->text_model->SetComposingRange(
         flutter::TextRange(composing_base, composing_extent), cursor_offset);
   }
-
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
 
 // Called when the input method client is complete.
-static FlMethodResponse* clear_client(FlTextInputHandler* self) {
+static void clear_client(gpointer user_data) {
+  FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(user_data);
   self->client_id = kClientIdUnset;
-
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
 
 // Update the IM cursor position.
 //
 // As text is input by the user, the framework sends two streams of updates
-// over the text input channel: updates to the composing rect (cursor rect when
-// not in IME composing mode) and updates to the matrix transform from local
-// coordinates to Flutter root coordinates. This function is called after each
-// of these updates. It transforms the composing rect to GDK window coordinates
-// and notifies GTK of the updated cursor position.
+// over the text input channel: updates to the composing rect (cursor rect
+// when not in IME composing mode) and updates to the matrix transform from
+// local coordinates to Flutter root coordinates. This function is called
+// after each of these updates. It transforms the composing rect to GDK window
+// coordinates and notifies GTK of the updated cursor position.
 static void update_im_cursor_position(FlTextInputHandler* self) {
   g_autoptr(FlTextInputViewDelegate) view_delegate =
       FL_TEXT_INPUT_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
@@ -480,8 +341,8 @@ static void update_im_cursor_position(FlTextInputHandler* self) {
   fl_text_input_view_delegate_translate_coordinates(
       view_delegate, x, y, &preedit_rect.x, &preedit_rect.y);
 
-  // Set the cursor location in window coordinates so that GTK can position any
-  // system input method windows.
+  // Set the cursor location in window coordinates so that GTK can position
+  // any system input method windows.
   gtk_im_context_set_cursor_location(self->im_context, &preedit_rect);
 }
 
@@ -491,20 +352,14 @@ static void update_im_cursor_position(FlTextInputHandler* self) {
 // EditableText, this update may be triggered. It provides an updated size and
 // transform from the local coordinate system of the EditableText to root
 // Flutter coordinate system.
-static FlMethodResponse* set_editable_size_and_transform(
-    FlTextInputHandler* self,
-    FlValue* args) {
-  FlValue* transform = fl_value_lookup_string(args, kTransform);
-  size_t transform_len = fl_value_get_length(transform);
-  g_warn_if_fail(transform_len == 16);
+static void set_editable_size_and_transform(double* transform,
+                                            gpointer user_data) {
+  FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(user_data);
 
-  for (size_t i = 0; i < transform_len; ++i) {
-    double val = fl_value_get_float(fl_value_get_list_value(transform, i));
-    self->editabletext_transform[i / 4][i % 4] = val;
+  for (size_t i = 0; i < 16; i++) {
+    self->editabletext_transform[i / 4][i % 4] = transform[i];
   }
   update_im_cursor_position(self);
-
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
 
 // Handles updates to the composing rect from the framework.
@@ -513,53 +368,18 @@ static FlMethodResponse* set_editable_size_and_transform(
 // may be triggered. It provides an updated rect for the composing region in
 // local coordinates of the EditableText. In the case where there is no
 // composing region, the cursor rect is sent.
-static FlMethodResponse* set_marked_text_rect(FlTextInputHandler* self,
-                                              FlValue* args) {
-  self->composing_rect.x =
-      fl_value_get_float(fl_value_lookup_string(args, "x"));
-  self->composing_rect.y =
-      fl_value_get_float(fl_value_lookup_string(args, "y"));
-  self->composing_rect.width =
-      fl_value_get_float(fl_value_lookup_string(args, "width"));
-  self->composing_rect.height =
-      fl_value_get_float(fl_value_lookup_string(args, "height"));
-  update_im_cursor_position(self);
-
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
-}
-
-// Called when a method call is received from Flutter.
-static void method_call_cb(FlMethodChannel* channel,
-                           FlMethodCall* method_call,
-                           gpointer user_data) {
+static void set_marked_text_rect(double x,
+                                 double y,
+                                 double width,
+                                 double height,
+                                 gpointer user_data) {
   FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(user_data);
 
-  const gchar* method = fl_method_call_get_name(method_call);
-  FlValue* args = fl_method_call_get_args(method_call);
-
-  g_autoptr(FlMethodResponse) response = nullptr;
-  if (strcmp(method, kSetClientMethod) == 0) {
-    response = set_client(self, args);
-  } else if (strcmp(method, kShowMethod) == 0) {
-    response = show(self);
-  } else if (strcmp(method, kSetEditingStateMethod) == 0) {
-    response = set_editing_state(self, args);
-  } else if (strcmp(method, kClearClientMethod) == 0) {
-    response = clear_client(self);
-  } else if (strcmp(method, kHideMethod) == 0) {
-    response = hide(self);
-  } else if (strcmp(method, kSetEditableSizeAndTransform) == 0) {
-    response = set_editable_size_and_transform(self, args);
-  } else if (strcmp(method, kSetMarkedTextRect) == 0) {
-    response = set_marked_text_rect(self, args);
-  } else {
-    response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
-  }
-
-  g_autoptr(GError) error = nullptr;
-  if (!fl_method_call_respond(method_call, response, &error)) {
-    g_warning("Failed to send method call response: %s", error->message);
-  }
+  self->composing_rect.x = x;
+  self->composing_rect.y = y;
+  self->composing_rect.width = width;
+  self->composing_rect.height = height;
+  update_im_cursor_position(self);
 }
 
 // Disposes of an FlTextInputHandler.
@@ -589,7 +409,7 @@ static void fl_text_input_handler_class_init(FlTextInputHandlerClass* klass) {
 // Initializes an instance of the FlTextInputHandler class.
 static void fl_text_input_handler_init(FlTextInputHandler* self) {
   self->client_id = kClientIdUnset;
-  self->input_type = kFlTextInputTypeText;
+  self->input_type = FL_TEXT_INPUT_TYPE_TEXT;
   self->text_model = new flutter::TextInputModel();
   self->cancellable = g_cancellable_new();
 }
@@ -622,6 +442,16 @@ static void init_im_context(FlTextInputHandler* self,
                           G_CONNECT_SWAPPED);
 }
 
+static FlTextInputChannelVTable text_input_vtable = {
+    .set_client = set_client,
+    .hide = hide,
+    .show = show,
+    .set_editing_state = set_editing_state,
+    .clear_client = clear_client,
+    .set_editable_size_and_transform = set_editable_size_and_transform,
+    .set_marked_text_rect = set_marked_text_rect,
+};
+
 FlTextInputHandler* fl_text_input_handler_new(
     FlBinaryMessenger* messenger,
     GtkIMContext* im_context,
@@ -633,11 +463,8 @@ FlTextInputHandler* fl_text_input_handler_new(
   FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(
       g_object_new(fl_text_input_handler_get_type(), nullptr));
 
-  g_autoptr(FlJsonMethodCodec) codec = fl_json_method_codec_new();
   self->channel =
-      fl_method_channel_new(messenger, kChannelName, FL_METHOD_CODEC(codec));
-  fl_method_channel_set_method_call_handler(self->channel, method_call_cb, self,
-                                            nullptr);
+      fl_text_input_channel_new(messenger, &text_input_vtable, self);
 
   init_im_context(self, im_context);
 
@@ -681,7 +508,7 @@ gboolean fl_text_input_handler_filter_keypress(FlTextInputHandler* self,
       case GDK_KEY_Return:
       case GDK_KEY_KP_Enter:
       case GDK_KEY_ISO_Enter:
-        if (self->input_type == kFlTextInputTypeMultiline &&
+        if (self->input_type == FL_TEXT_INPUT_TYPE_MULTILINE &&
             strcmp(self->input_action, kNewlineInputAction) == 0) {
           self->text_model->AddCodePoint('\n');
           text = "\n";
