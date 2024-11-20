@@ -2120,7 +2120,8 @@ Future<void> lintKotlinFiles(String workingDirectory) async {
         'To reproduce this lint locally:\n'
         '1. Identify the CIPD version tag used to resolve this particular version of ktlint (check the dependencies section of this shard in the ci.yaml). \n'
         '2. Download that version from https://chrome-infra-packages.appspot.com/p/flutter/ktlint/linux-amd64/+/<version_tag>\n'
-        '3. From the repository root, run `<path_to_ktlint>/ktlint --editorconfig=$editorConfigRelativePath --baseline=$baselineRelativePath`';
+        '3. From the repository root, run `<path_to_ktlint>/ktlint --editorconfig=$editorConfigRelativePath --baseline=$baselineRelativePath`\n'
+        'Alternatively, if you use Android Studio, follow the docs at docs/platforms/android/Kotlin-formatting.md to enable auto formatting.';
     foundError(<String>[errorMessage]);
   }
 }
