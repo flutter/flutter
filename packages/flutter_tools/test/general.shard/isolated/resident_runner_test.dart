@@ -71,7 +71,6 @@ void main() {
           )),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
-          nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
           analytics: FakeAnalytics(),
           nativeAssetsYamlFile: 'foo.yaml',
         );
@@ -80,7 +79,6 @@ void main() {
         expect(result, 0);
 
         expect(buildRunner.buildInvocations, 0);
-        expect(buildRunner.buildDryRunInvocations, 0);
         expect(buildRunner.linkInvocations, 0);
         expect(buildRunner.hasPackageConfigInvocations, 0);
         expect(buildRunner.packagesWithNativeAssetsInvocations, 0);

@@ -1611,7 +1611,6 @@ class CapturingAppDomain extends AppDomain {
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
-    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     this.userIdentifier = userIdentifier;
     enableDevTools = options.enableDevTools;

@@ -419,6 +419,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       webUseWasm: useWasm,
     );
 
+    final Uri? nativeAssetsYaml = await nativeAssetsBuilder?.build(buildInfo);
+    final Uri? nativeAssetsJson = nativeAssetsYaml?.resolve('native_assets.json');
     String? testAssetDirectory;
     if (buildTestAssets) {
       await _buildTestAsset(
@@ -427,8 +429,20 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         buildMode: debuggingOptions.buildInfo.mode,
         packageConfigPath: buildInfo.packageConfigPath,
       );
+    }
+    if (buildTestAssets || nativeAssetsJson != null) {
       testAssetDirectory = globals.fs.path.
         join(flutterProject.directory.path, 'build', 'unit_test_assets');
+    }
+    if (nativeAssetsJson != null) {
+      final Directory testAssetDirectory2 =
+          globals.fs.directory(testAssetDirectory);
+      if (!await testAssetDirectory2.exists()) {
+        await testAssetDirectory2.create(recursive: true);
+      }
+      final File nativeAssetsManifest =
+          globals.fs.directory(testAssetDirectory).childFile('NativeAssetsManifest.json');
+      await globals.fs.file(nativeAssetsJson).copy(nativeAssetsManifest.path);
     }
 
     final String? concurrencyString = stringArg('concurrency');

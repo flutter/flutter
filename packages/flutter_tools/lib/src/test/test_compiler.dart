@@ -169,8 +169,6 @@ class TestCompiler {
         invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
       }
 
-      final Uri? nativeAssetsYaml = await _nativeAssetsBuilder?.build(buildInfo);
-
       final CompilerOutput? compilerOutput = await compiler!.recompile(
         request.mainUri,
         <Uri>[request.mainUri, ...invalidatedRegistrantFiles],
@@ -179,7 +177,6 @@ class TestCompiler {
         projectRootPath: flutterProject?.directory.absolute.path,
         checkDartPluginRegistry: true,
         fs: globals.fs,
-        nativeAssetsYaml: nativeAssetsYaml,
       );
       final String? outputPath = compilerOutput?.outputFilename;
 

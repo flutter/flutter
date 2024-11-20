@@ -116,7 +116,7 @@ class DartBuildForNative extends DartBuild {
 
   @override
   List<Target> get dependencies => const <Target>[
-    KernelSnapshotProgram(),
+    KernelSnapshot(),
   ];
 }
 
@@ -188,7 +188,7 @@ class InstallCodeAssets extends Target {
     Source.pattern('{BUILD_DIR}/$nativeAssetsFilename'),
   ];
 
-  static const String nativeAssetsFilename = 'native_assets.yaml';
+  static const String nativeAssetsFilename = 'native_assets.json';
   static const String depFilename = 'install_code_assets.d';
 }
 
