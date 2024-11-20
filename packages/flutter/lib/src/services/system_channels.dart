@@ -561,4 +561,17 @@ abstract final class SystemChannels {
   static const MethodChannel keyboard = OptionalMethodChannel(
     'flutter/keyboard',
   );
+
+  /// A [MethodChannel] for setting content sensitivity of native Flutter views.
+  /// 
+  /// The following outgoing method is defined for this channel (invvoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  /// 
+  ///  * `setContentSensitivity`: Sets the content sensitivity of the Flutter view.
+  ///     Only one of the [ContentSensitivity] levels allowed.
+  /// 
+  /// Current only suppoted on Android.
+  static const MethodChannel sensitiveContent = OptionalMethodChannel(
+    'flutter/sensitivecontent',
+  );
 }

@@ -2,30 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart' show ContentSensitivity, SensitiveContentService;
+
 import 'framework.dart';
-
-/// Specifies the sensitivity level that a [SensitiveContent] widget could
-/// set for the Flutter app screen on Android.
-enum ContentSensitivity {
-  /// The screen does not display sensitive content.
-  /// 
-  /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
-  notSensitive,
-  
-  /// The screen displays sensitive content and the window hosting the screen
-  /// will be marked as secure during an active media projection session.
-  /// 
-  /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
-  sensitive,
-
-  /// 
-  /// 
-  /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO.
-  // TODO(camsim99): Implement `autoSensitive` mode that will attempt to match
-  // the behavior of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented
-  // based on autofill hints.
-  autoSensitive,
-}
 
 /// Host of the current content sensitivity level.
 class SensitiveContentSetting {
@@ -38,6 +17,8 @@ class SensitiveContentSetting {
     ContentSensitivity.autoSensitive: 0,
     ContentSensitivity.notSensitive: 0,
   };
+
+  final SensitiveContentService _sensitiveContentService = SensitiveContentService();
 
   static final SensitiveContentSetting _instance = SensitiveContentSetting._();
 
@@ -62,7 +43,8 @@ class SensitiveContentSetting {
     if (_getTotalSensitiveContentWidgets() == 1) {
       // There are no other attempts to alter ContentSensitivity, so
       // set the desired level.
-      SensitiveContentUtils.setContentSensitivity(desiredSensitivityLevel);
+      // TODO(camsim99): Make this compatible with multi-window.
+      _sensitiveContentService.setContentSensitivity(/*default Flutter view ID */ 0, desiredSensitivityLevel);
       return;
     }
     if (!shouldSetContentSensitivity(desiredSensitivityLevel)) {
@@ -70,7 +52,8 @@ class SensitiveContentSetting {
     }
 
     // Update stored data.
-    SensitiveContentUtils.setContentSensitivity(desiredSensitivityLevel);
+    // TODO(camsim99): Make this compatible with multi-window.
+    _sensitiveContentService.setContentSensitivity(/*default Flutter view ID */ 0, desiredSensitivityLevel);
     _currentSensitivityLevel = desiredSensitivityLevel;
   }
 
@@ -87,7 +70,8 @@ class SensitiveContentSetting {
       // There is no more content to mark sensitive. Reset to the default mode.
       // TODO(camsim99): Determine if we should set `autoSensitive`
       // since this is technically the default, though it will not work for Flutter.
-      SensitiveContentUtils.setContentSensitivity(ContentSensitivity.autoSensitive);
+      // TODO(camsim99): Make this compatible with multi-window.
+      _sensitiveContentService.setContentSensitivity(/*default Flutter view ID */ 0, ContentSensitivity.autoSensitive);
       return;
     }
 
@@ -119,7 +103,8 @@ class SensitiveContentSetting {
         throw StateError('The SensitiveContentSetting has gone out of sync with the SensitiveContent widgets in the tree.');
     }
 
-    SensitiveContentUtils.setContentSensitivity(sensitivityLevelToSet);
+    // TODO(camsim99): Make this compatible with multi-window.
+    _sensitiveContentService.setContentSensitivity(/*default Flutter view ID */ 0, sensitivityLevelToSet);
   }
 
   /// A desired [ContentSensitivity] level should be set only if it is less
