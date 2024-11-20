@@ -166,7 +166,7 @@ std::optional<GLsync> ReactorGLES::GetGLFence(const HandleGLES& handle) const {
   return std::nullopt;
 }
 
-bool ReactorGLES::AddOperation(Operation operation) {
+bool ReactorGLES::AddOperation(Operation operation, bool defer) {
   if (!operation) {
     return false;
   }
@@ -176,7 +176,9 @@ bool ReactorGLES::AddOperation(Operation operation) {
     ops_[thread_id].emplace_back(std::move(operation));
   }
   // Attempt a reaction if able but it is not an error if this isn't possible.
-  [[maybe_unused]] auto result = React();
+  if (!defer) {
+    [[maybe_unused]] auto result = React();
+  }
   return true;
 }
 
