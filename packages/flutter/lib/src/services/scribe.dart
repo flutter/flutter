@@ -17,6 +17,8 @@ import 'system_channels.dart';
 ///    built-in text fields support handwriting input.
 ///  * [SystemChannels.scribe], which is the [MethodChannel] used by this
 ///    class, and which has a list of the methods that this class handles.
+///  * <https://developer.android.com/develop/ui/views/touch-and-input/stylus-input/stylus-input-in-text-fields>,
+///    which is the Android documentation explaining the Scribe feature.
 abstract final class Scribe {
   static const MethodChannel _channel = SystemChannels.scribe;
 

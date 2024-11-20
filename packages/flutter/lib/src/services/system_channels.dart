@@ -298,7 +298,9 @@ abstract final class SystemChannels {
   ///
   ///  * [Scribe], which uese this channel.
   ///  * [ScribbleClient], which implements the iOS version of this feature,
-  ///  [Scribble](https://support.apple.com/guide/ipad/enter-text-with-scribble-ipad355ab2a7/ipados).
+  ///    [Scribble](https://support.apple.com/guide/ipad/enter-text-with-scribble-ipad355ab2a7/ipados).
+  ///  * <https://developer.android.com/develop/ui/views/touch-and-input/stylus-input/stylus-input-in-text-fields>,
+  ///    which is the Android documentation explaining the Scribe feature.
   static const MethodChannel scribe = OptionalMethodChannel(
       'flutter/scribe',
       JSONMethodCodec(),
