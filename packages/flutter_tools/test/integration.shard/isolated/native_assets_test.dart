@@ -10,6 +10,8 @@
 // contain the native assets mapping.
 // When doing a hot reload, this mapping must stay in place.
 
+// TODO(matanlurey): Remove after debugging https://github.com/flutter/flutter/issues/159000.
+@Tags(<String>['flutter-build-apk'])
 @Timeout(Duration(minutes: 10))
 library;
 
@@ -22,7 +24,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../src/common.dart';
-import '../test_utils.dart' show fileSystem, platform;
+import '../test_utils.dart' show fileSystem, flutterBin, platform;
 import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
@@ -220,7 +222,12 @@ void main() {
           }
           expectCCompilerIsConfigured(exampleDirectory);
         });
-      });
+      },
+      // TODO(matanlurey): Debug why flutter build apk often timesout.
+      // See https://github.com/flutter/flutter/issues/158560 for details.
+      skip: buildSubcommand == 'apk' ? 'flutter build apk times out' : false, // Temporary workaround for https://github.com/flutter/flutter/issues/158560.
+      tags: <String>['flutter-build-apk'],
+      );
     }
   }
 

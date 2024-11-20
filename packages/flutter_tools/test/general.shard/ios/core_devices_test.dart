@@ -7,6 +7,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -14,6 +15,15 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+
+class LocalFileSystemFake extends LocalFileSystem {
+  LocalFileSystemFake.test({required super.signals}) : super.test();
+
+  MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
+
+  @override
+  Directory get systemTempDirectory => memoryFileSystem.systemTempDirectory;
+}
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -1399,6 +1409,53 @@ invalid JSON
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
+
+      testWithoutContext('Handles file system disposal', () async {
+        final LocalFileSystem localFs = LocalFileSystemFake.test(signals: Signals.test());
+        deviceControl = IOSCoreDeviceControl(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: xcode,
+          fileSystem: localFs,
+        );
+        final Directory tempDir = localFs.systemTempDirectory
+            .childDirectory('core_devices.rand0');
+        final File tempFile = tempDir.childFile('core_device_list.json');
+        final List<String> args = <String>[
+          'xcrun',
+          'devicectl',
+          'list',
+          'devices',
+          '--timeout',
+          '5',
+          '--json-output',
+          tempFile.path,
+        ];
+        fakeProcessManager.addCommand(FakeCommand(
+          command: args,
+          onRun: (_) {
+            // Simulate that the tool started shutting down and disposed the
+            // file system, causing the temp directory to be deleted before
+            // this program invocation returns a result.
+            localFs.dispose();
+            expect(localFs.disposed, true);
+          },
+        ));
+
+        final List<IOSCoreDevice> coreDevices = await deviceControl.getCoreDevices();
+        expect(coreDevices, isEmpty);
+        expect(
+          logger.errorText,
+          isNot(
+            contains('After running the command xcrun devicectl list devices '
+              '--timeout 5 --json-output ${tempFile.path} the file\n'
+              '${tempFile.path} was expected to exist, but it did not',
+            ),
+          ),
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
 
       testWithoutContext('No devices', () async {
         const String deviceControlOutput = '''
