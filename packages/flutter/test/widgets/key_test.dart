@@ -57,4 +57,13 @@ void main() {
     expect(GlobalKey(debugLabel: 'hello'), hasOneLineDescription);
     expect(const GlobalObjectKey(true), hasOneLineDescription);
   });
+
+  test('Widget.objectKey control test', () {
+    Widget widget = Container(key: UniqueKey());
+    expect(identical(widget.key, widget.objectKey), isTrue);
+
+    widget = const SizedBox.shrink();
+    expect(widget.key, isNull);
+    expect(widget.objectKey, isNull);
+  });
 }
