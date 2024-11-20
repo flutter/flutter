@@ -46,6 +46,13 @@ class WidgetPreview extends StatefulWidget {
 class _WidgetPreviewState extends State<WidgetPreview> {
   final TransformationController transformationController =
       TransformationController();
+
+  @override
+  void dispose() {
+    transformationController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final BoxConstraints previewerConstraints =
