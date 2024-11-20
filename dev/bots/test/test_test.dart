@@ -162,7 +162,7 @@ void main() {
       );
       expectExitCode(result, 0);
       expect(result.stdout, contains('|> bin/flutter'));
-    });
+    }, testOn: 'posix');
   });
 
   test('selectTestsForSubShard distributes tests amongst subshards correctly', () async {
