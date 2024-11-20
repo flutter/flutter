@@ -17282,11 +17282,6 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  Rect getHandleRect(TextSelectionHandleType type, double preferredLineHeight) {
-    return Rect.zero;
-  }
-
-  @override
   Size getHandleSize(double textLineHeight) {
     return Size.zero;
   }
