@@ -2484,14 +2484,6 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// After calling [dispose], this instance can no longer be used.
   bool _isDisposed = false;
 
-  /// Convert the given items to the format required to be sent over
-  /// [MethodChannel.invokeMethod].
-  static List<dynamic> _itemsToJson(List<SystemContextMenuItem> items) {
-    return items
-        .map<dynamic>((SystemContextMenuItem item) => item.json)
-        .toList();
-  }
-
   // Begin SystemContextMenuClient.
 
   @override
@@ -2532,7 +2524,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [hide], which hides the menu shown by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
-  Future<void> show(Rect targetRect, [ List<SystemContextMenuItem>? items ]) {
+  Future<void> show(Rect targetRect, [ List<dynamic>? itemsJson ]) {
     assert(!_isDisposed);
     assert(
       TextInput._instance._currentConnection != null,
@@ -2561,8 +2553,8 @@ class SystemContextMenuController with SystemContextMenuClient {
           'width': targetRect.width,
           'height': targetRect.height,
         },
-        if (items != null)
-          'items': _itemsToJson(items),
+        if (itemsJson != null)
+          'items': itemsJson,
       },
     );
   }
@@ -2631,27 +2623,49 @@ class AppleSystemContextMenuItem extends SystemContextMenuItem {
   const AppleSystemContextMenuItem({
     required this.action,
     required this.type,
+    // TODO(justinmc): Oh, where will I look up the title? Maybe it's not required here if I look it up in json below.
     this.title,
   });
 
+  /// The action to take when this menu item is invoked.
   final SystemContextMenuAction action;
+
+  /// The text to display to the user.
   final String? title;
+
+  /// The type of this menu item.
   final SystemContextMenuType type;
 
   @override
   Map<String, dynamic> get json {
+    /*
+        assert(debugCheckHasMaterialLocalizations(context));
+        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+        return switch (buttonItem.type) {
+          ContextMenuButtonType.cut       => localizations.cutButtonLabel,
+
+    assert(debugCheckHasLocalizations(context));
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    return switch (buttonItem.type) {
+      ContextMenuButtonType.cut       => localizations.cutButtonLabel,
+      */
+
     return <String, dynamic>{
       'type': type.json,
       'action': action.name,
       // TODO(justinmc): I guess Flutter should always pass a title for the default actions. Encode that into the backend or no?
-      // TODO(justinmc): Enforce the existence of a title in SystemContextMenuItem.
-      if (type == SystemContextMenuType.defaultType)
-        // TODO(justinmc): Localilze. As in (Cupertino)AdaptiveContextMenu.
-        'title': title,
+      // TODO(justinmc): Localilze. As in (Cupertino)AdaptiveContextMenu.
+      'title': title,
     };
   }
 }
 
+/// The type of a [SystemContextMenuItem].
+///
+/// See also:
+///
+///  * [SystemContextMenuAction], which specifies the action to take when a menu
+///    item is invoked.
 enum SystemContextMenuType {
   defaultType;
 
@@ -2663,6 +2677,7 @@ enum SystemContextMenuType {
   // https://github.com/flutter/flutter/issues/103163
 }
 
+// TODO(justinmc): Revisit docs now that name doesn't include Apple.
 /// The built-in supported actions of iOS's system context menu items.
 ///
 /// See also:

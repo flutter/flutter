@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'basic.dart';
 import 'editable_text.dart';
 import 'framework.dart';
+import 'localizations.dart';
 import 'media_query.dart';
 import 'text_selection_toolbar_anchors.dart';
 
@@ -109,13 +110,25 @@ class SystemContextMenu extends StatefulWidget {
 class _SystemContextMenuState extends State<SystemContextMenu> {
   late final SystemContextMenuController _systemContextMenuController;
 
+  /// Convert the given items to the format required to be sent over
+  /// [MethodChannel.invokeMethod].
+  static List<dynamic> _itemsToJson(List<SystemContextMenuItem> items) {
+    return items
+        .map<dynamic>((SystemContextMenuItem item) => item.json)
+        .toList();
+  }
+
   @override
   void initState() {
     super.initState();
     _systemContextMenuController = SystemContextMenuController(
       onSystemHide: widget.onSystemHide,
     );
-    _systemContextMenuController.show(widget.anchor, widget.items);
+    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+    _systemContextMenuController.show(
+      widget.anchor,
+      widget.items == null ? null : _itemsToJson(widget.items!),
+    );
   }
 
   @override
