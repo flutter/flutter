@@ -20,12 +20,12 @@ IOSSdk getIOSSdk(EnvironmentType environmentType) {
   };
 }
 
-/// Extract the [Target] from a [DarwinArch].
-Target getNativeIOSTarget(DarwinArch darwinArch) {
+/// Extract the [Architecture] from a [DarwinArch].
+Architecture getNativeIOSArchitecture(DarwinArch darwinArch) {
   return switch (darwinArch) {
-    DarwinArch.armv7  => Target.iOSArm,
-    DarwinArch.arm64  => Target.iOSArm64,
-    DarwinArch.x86_64 => Target.iOSX64,
+    DarwinArch.armv7  => Architecture.arm,
+    DarwinArch.arm64  => Architecture.arm64,
+    DarwinArch.x86_64 => Architecture.x64,
   };
 }
 

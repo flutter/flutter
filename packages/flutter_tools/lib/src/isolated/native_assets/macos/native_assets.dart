@@ -13,11 +13,11 @@ import 'native_assets_host.dart';
 // TODO(dcharkes): Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
 const int targetMacOSVersion = 13;
 
-/// Extract the [Target] from a [DarwinArch].
-Target getNativeMacOSTarget(DarwinArch darwinArch) {
+/// Extract the [Architecture] from a [DarwinArch].
+Architecture getNativeMacOSArchitecture(DarwinArch darwinArch) {
   return switch (darwinArch) {
-    DarwinArch.arm64  => Target.macOSArm64,
-    DarwinArch.x86_64 => Target.macOSX64,
+    DarwinArch.arm64  => Architecture.arm64,
+    DarwinArch.x86_64 => Architecture.x64,
     DarwinArch.armv7  => throw Exception('Unknown DarwinArch: $darwinArch.'),
   };
 }

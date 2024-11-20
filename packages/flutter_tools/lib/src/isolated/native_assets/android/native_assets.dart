@@ -34,7 +34,7 @@ Future<void> copyNativeCodeAssetsAndroid(
     final Uri source = assetMapping.key.file!;
     final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
     final AndroidArch androidArch =
-        _getAndroidArch(assetMapping.value.target);
+        _getAndroidArch(assetMapping.value.target.architecture);
     final String jniArchDir = androidArch.archName;
     final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
     final Uri targetUri = archUri.resolveUri(target);
@@ -43,25 +43,25 @@ Future<void> copyNativeCodeAssetsAndroid(
   }
 }
 
-/// Get the [Target] for [androidArch].
-Target getNativeAndroidTarget(AndroidArch androidArch) {
+/// Get the [Architecture] for [androidArch].
+Architecture getNativeAndroidArchitecture(AndroidArch androidArch) {
   return switch (androidArch) {
-    AndroidArch.armeabi_v7a => Target.androidArm,
-    AndroidArch.arm64_v8a   => Target.androidArm64,
-    AndroidArch.x86         => Target.androidIA32,
-    AndroidArch.x86_64      => Target.androidX64,
+    AndroidArch.armeabi_v7a => Architecture.arm,
+    AndroidArch.arm64_v8a   => Architecture.arm64,
+    AndroidArch.x86         => Architecture.ia32,
+    AndroidArch.x86_64      => Architecture.x64,
   };
 }
 
-/// Get the [AndroidArch] for [target].
-AndroidArch _getAndroidArch(Target target) {
-  return switch (target) {
-    Target.androidArm   => AndroidArch.armeabi_v7a,
-    Target.androidArm64 => AndroidArch.arm64_v8a,
-    Target.androidIA32  => AndroidArch.x86,
-    Target.androidX64   => AndroidArch.x86_64,
-    Target.androidRiscv64 => throwToolExit('Android RISC-V not yet supported.'),
-    _ => throwToolExit('Invalid target: $target.'),
+/// Get the [AndroidArch] for [architecture].
+AndroidArch _getAndroidArch(Architecture architecture) {
+  return switch (architecture) {
+    Architecture.arm     => AndroidArch.armeabi_v7a,
+    Architecture.arm64   => AndroidArch.arm64_v8a,
+    Architecture.ia32    => AndroidArch.x86,
+    Architecture.x64     => AndroidArch.x86_64,
+    Architecture.riscv64 => throwToolExit('Android RISC-V not yet supported.'),
+    _ => throwToolExit('Invalid architecture: $architecture.'),
   };
 }
 
