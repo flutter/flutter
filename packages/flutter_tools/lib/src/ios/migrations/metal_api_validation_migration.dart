@@ -27,11 +27,15 @@ class MetalAPIValidationMigrator extends ProjectMigrator {
 
   @override
   String migrateFileContents(String fileContents) {
+    // If this string is anywhere in the file, assume that either we already
+    // migrated it or the developer made an intentional choice to opt in or out.
+    if (fileContents.contains('enableGPUValidationMode')) {
+      return fileContents;
+    }
     // Look for a setting that is included in LaunchAction by default and
     // insert the opt out after it.
     const String kDebugServiceExtension = 'debugServiceExtension = "internal"';
     const String kReplacement = '''debugServiceExtension = "internal"\n    enableGPUValidationMode = "1"''';
-
     return fileContents.replaceFirst(kDebugServiceExtension, kReplacement);
   }
 

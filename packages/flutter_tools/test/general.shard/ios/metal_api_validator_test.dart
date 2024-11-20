@@ -18,7 +18,7 @@ void main() {
   testWithoutContext('Adds Metal API setting to matching file', () {
     final FileSystem fs = MemoryFileSystem.test();
 
-    final File file = fs.file('does_not_exist')
+    final File file = fs.file('test_file')
       ..createSync()
       ..writeAsStringSync('''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -41,6 +41,34 @@ void main() {
     expect(file.readAsStringSync(), contains(
       'debugServiceExtension = "internal"'
     '\n    enableGPUValidationMode = "1"'));
+  });
+
+  testWithoutContext('Skips modifying file that already references Metal API setting', () {
+    final FileSystem fs = MemoryFileSystem.test();
+
+    final File file = fs.file('test_file')
+      ..createSync()
+      ..writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+  <LaunchAction
+    buildConfiguration = "Debug"
+    selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+    selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+    launchStyle = "0"
+    useCustomWorkingDirectory = "NO"
+    ignoresPersistentStateOnLaunch = "NO"
+    debugDocumentVersioning = "YES"
+    debugServiceExtension = "internal"
+    enableGPUValidationMode = "1"
+    allowLocationSimulation = "YES">
+''');
+    final FakeIosProject project = FakeIosProject(file);
+    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator(project, BufferLogger.test());
+
+    final String initialContents = file.readAsStringSync();
+
+    expect(() async => validator.migrate(), returnsNormally);
+    expect(file.readAsStringSync(), initialContents);
   });
 
   testWithoutContext('No-op on file with no match', () {
