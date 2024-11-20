@@ -93,5 +93,29 @@ TEST(ReactorGLES, PerThreadOperationQueues) {
   EXPECT_TRUE(op2_called);
 }
 
+TEST(ReactorGLES, CanDeferOperations) {
+  auto mock_gles = MockGLES::Init();
+  ProcTableGLES::Resolver resolver = kMockResolverGLES;
+  auto proc_table = std::make_unique<ProcTableGLES>(resolver);
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+
+  // Add operation executes tasks as long as the reactor can run tasks on
+  // the current thread.
+  bool did_run = false;
+  EXPECT_TRUE(
+      reactor->AddOperation([&](const ReactorGLES&) { did_run = true; }));
+  EXPECT_TRUE(did_run);
+
+  //...unless defer=true is specified, which only enqueues in the reactor.
+  did_run = false;
+  EXPECT_TRUE(reactor->AddOperation([&](const ReactorGLES&) { did_run = true; },
+                                    /*defer=*/true));
+  EXPECT_FALSE(did_run);
+  EXPECT_TRUE(reactor->React());
+  EXPECT_TRUE(did_run);
+}
+
 }  // namespace testing
 }  // namespace impeller

@@ -585,14 +585,15 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
 
   std::shared_ptr<const RenderPassGLES> shared_this = shared_from_this();
   auto tracer = ContextGLES::Cast(context).GetGPUTracer();
-  return reactor_->AddOperation([pass_data,
-                                 allocator = context.GetResourceAllocator(),
-                                 render_pass = std::move(shared_this),
-                                 tracer](const auto& reactor) {
-    auto result = EncodeCommandsInReactor(*pass_data, allocator, reactor,
-                                          render_pass->commands_, tracer);
-    FML_CHECK(result) << "Must be able to encode GL commands without error.";
-  });
+  return reactor_->AddOperation(
+      [pass_data, allocator = context.GetResourceAllocator(),
+       render_pass = std::move(shared_this), tracer](const auto& reactor) {
+        auto result = EncodeCommandsInReactor(*pass_data, allocator, reactor,
+                                              render_pass->commands_, tracer);
+        FML_CHECK(result)
+            << "Must be able to encode GL commands without error.";
+      },
+      /*defer=*/true);
 }
 
 }  // namespace impeller
