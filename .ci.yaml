@@ -5052,6 +5052,7 @@ targets:
       task_name: microbenchmarks_ios
 
   - name: Mac native_assets_ios_simulator
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/159185
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
