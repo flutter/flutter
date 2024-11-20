@@ -79,7 +79,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(SemanticsDebugger), paints..rect()..rect(color: const Color(0xFF9A360F)));
+    expect(find.byType(SemanticsDebugger), paints..rect()..rect(color: const Color(0xFFF866FF)));
   });
 
   testWidgets('SemanticsDebugger reparents subtree', (WidgetTester tester) async {
