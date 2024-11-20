@@ -74,6 +74,15 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// ** See code in examples/api/lib/widgets/nested_scroll_view/nested_scroll_view.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to keep the state of tabs using
+/// [AutomaticKeepAliveClientMixin] in [NestedScrollView]. By switching between
+/// [ScrollController] and [PrimaryScrollController] based on the selected tab,
+/// the scroll positions of the tabs can be made independent.
+///
+/// ** See code in examples/api/lib/widgets/nested_scroll_view/nested_scroll_view.3.dart **
+/// {@end-tool}
+///
 /// ## [SliverAppBar]s with [NestedScrollView]s
 ///
 /// Using a [SliverAppBar] in the outer scroll view, or [headerSliverBuilder],
