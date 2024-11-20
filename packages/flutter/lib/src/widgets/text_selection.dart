@@ -2295,7 +2295,7 @@ class TextSelectionGestureDetectorBuilder {
           if (stylusEnabled) {
             Scribe.isFeatureAvailable().then((bool isAvailable) {
               if (isAvailable) {
-                renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+                renderEditable.selectPosition(cause: SelectionChangedCause.scribble);
                 Scribe.startStylusHandwriting();
               }
             });

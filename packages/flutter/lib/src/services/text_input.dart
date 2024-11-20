@@ -1066,7 +1066,12 @@ enum SelectionChangedCause {
   /// of text.
   drag,
 
-  /// The user used iPadOS 14+ Scribble to change the selection.
+  // TODO(justinmc): Rename this to stylusHandwriting.
+  // https://github.com/flutter/flutter/issues/159223
+  /// The user used stylus handwriting to change the selection.
+  ///
+  /// Currently, this is only supported on iPadOS 14+ via the Scribble feature,
+  /// or on Android API 34 and above via the Scribe feature.
   scribble,
 }
 
