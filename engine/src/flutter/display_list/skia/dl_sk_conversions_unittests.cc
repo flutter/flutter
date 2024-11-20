@@ -7,7 +7,9 @@
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/dl_vertices.h"
+#include "flutter/display_list/effects/dl_blur_image_filter.h"
 #include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/effects/dl_local_matrix_image_filter.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -18,10 +20,9 @@ namespace flutter {
 namespace testing {
 
 TEST(DisplayListImageFilter, LocalImageSkiaNull) {
-  auto blur_filter =
-      std::make_shared<DlBlurImageFilter>(0, 0, DlTileMode::kClamp);
-  DlLocalMatrixImageFilter dl_local_matrix_filter(SkMatrix::RotateDeg(45),
-                                                  blur_filter);
+  auto blur_filter = DlBlurImageFilter::Make(0, 0, DlTileMode::kClamp);
+  DlLocalMatrixImageFilter dl_local_matrix_filter(
+      DlMatrix::MakeRotationZ(DlDegrees(45)), blur_filter);
   // With sigmas set to zero on the blur filter, Skia will return a null filter.
   // The local matrix filter should return nullptr instead of crashing.
   ASSERT_EQ(ToSk(dl_local_matrix_filter), nullptr);

@@ -3,13 +3,15 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/dl_blend_mode.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
-#include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/testing/dl_test_equality.h"
 #include "flutter/display_list/utils/dl_comparable.h"
+#include "flutter/testing/display_list_testing.h"
 #include "gtest/gtest.h"
 
 #include "include/core/SkMatrix.h"
@@ -29,34 +31,34 @@ namespace testing {
 // and bottom edges are contained even if they are on the right or
 // bottom edge. This method does the "all sides inclusive" version
 // of SkRect::contains.
-static bool containsInclusive(const SkRect rect, const SkPoint p) {
+static bool containsInclusive(const DlRect rect, const DlPoint p) {
   // Test with a slight offset of 1E-9 to "forgive" IEEE bit-rounding
   // Ending up with bounds that are off by 1E-9 (these numbers are all
   // being tested in device space with this method) will be off by a
   // negligible amount of a pixel that wouldn't contribute to changing
   // the color of a pixel.
-  return (p.fX >= rect.fLeft - 1E-9 &&   //
-          p.fX <= rect.fRight + 1E-9 &&  //
-          p.fY >= rect.fTop - 1E-9 &&    //
-          p.fY <= rect.fBottom + 1E-9);
+  return (p.x >= rect.GetLeft() - 1E-9 &&   //
+          p.x <= rect.GetRight() + 1E-9 &&  //
+          p.y >= rect.GetTop() - 1E-9 &&    //
+          p.y <= rect.GetBottom() + 1E-9);
 }
 
-static bool containsInclusive(const SkRect rect, const SkPoint quad[4]) {
+static bool containsInclusive(const DlRect rect, const DlQuad quad) {
   return (containsInclusive(rect, quad[0]) &&  //
           containsInclusive(rect, quad[1]) &&  //
           containsInclusive(rect, quad[2]) &&  //
           containsInclusive(rect, quad[3]));
 }
 
-static bool containsInclusive(const SkIRect rect, const SkPoint quad[4]) {
-  return containsInclusive(SkRect::Make(rect), quad);
+static bool containsInclusive(const DlIRect rect, const DlQuad quad) {
+  return containsInclusive(DlRect::Make(rect), quad);
 }
 
-static bool containsInclusive(const SkIRect rect, const SkRect bounds) {
-  return (bounds.fLeft >= rect.fLeft - 1E-9 &&
-          bounds.fTop >= rect.fTop - 1E-9 &&
-          bounds.fRight <= rect.fRight + 1E-9 &&
-          bounds.fBottom <= rect.fBottom + 1E-9);
+static bool containsInclusive(const DlIRect rect, const DlRect bounds) {
+  return (bounds.GetLeft() >= rect.GetLeft() - 1E-9 &&
+          bounds.GetTop() >= rect.GetTop() - 1E-9 &&
+          bounds.GetRight() <= rect.GetRight() + 1E-9 &&
+          bounds.GetBottom() <= rect.GetBottom() + 1E-9);
 }
 
 // Used to verify that the expected output bounds and reverse-engineered
@@ -64,43 +66,61 @@ static bool containsInclusive(const SkIRect rect, const SkRect bounds) {
 // returned from the various bounds computation methods under the specified
 // matrix.
 static void TestBoundsWithMatrix(const DlImageFilter& filter,
-                                 const SkMatrix& matrix,
-                                 const SkRect& sourceBounds,
-                                 const SkPoint expectedLocalOutputQuad[4]) {
-  SkRect device_input_bounds = matrix.mapRect(sourceBounds);
-  SkPoint expected_output_quad[4];
-  matrix.mapPoints(expected_output_quad, expectedLocalOutputQuad, 4);
+                                 const DlMatrix& matrix,
+                                 const DlRect& sourceBounds,
+                                 const DlQuad& expectedLocalOutputQuad) {
+  DlRect device_input_bounds = sourceBounds.TransformAndClipBounds(matrix);
+  DlQuad expected_output_quad = matrix.Transform(expectedLocalOutputQuad);
 
-  SkIRect device_filter_ibounds;
-  ASSERT_EQ(filter.map_device_bounds(device_input_bounds.roundOut(), matrix,
-                                     device_filter_ibounds),
+  DlIRect device_filter_ibounds;
+  ASSERT_EQ(filter.map_device_bounds(DlIRect::RoundOut(device_input_bounds),
+                                     matrix, device_filter_ibounds),
             &device_filter_ibounds);
-  ASSERT_TRUE(containsInclusive(device_filter_ibounds, expected_output_quad));
+  EXPECT_TRUE(containsInclusive(device_filter_ibounds, expected_output_quad))
+      << filter << std::endl
+      << sourceBounds << ", {" << std::endl
+      << "  " << expectedLocalOutputQuad[0] << ", " << std::endl
+      << "  " << expectedLocalOutputQuad[1] << ", " << std::endl
+      << "  " << expectedLocalOutputQuad[2] << ", " << std::endl
+      << "  " << expectedLocalOutputQuad[3] << std::endl
+      << "}, " << matrix << ", " << std::endl
+      << device_filter_ibounds << std::endl
+      << device_input_bounds << ", {" << std::endl
+      << "  " << expected_output_quad[0] << ", " << std::endl
+      << "  " << expected_output_quad[1] << ", " << std::endl
+      << "  " << expected_output_quad[2] << ", " << std::endl
+      << "  " << expected_output_quad[3] << std::endl
+      << "}";
 
-  SkIRect reverse_input_ibounds;
+  DlIRect reverse_input_ibounds;
   ASSERT_EQ(filter.get_input_device_bounds(device_filter_ibounds, matrix,
                                            reverse_input_ibounds),
             &reverse_input_ibounds);
-  ASSERT_TRUE(containsInclusive(reverse_input_ibounds, device_input_bounds));
+  EXPECT_TRUE(containsInclusive(reverse_input_ibounds, device_input_bounds))
+      << filter << std::endl
+      << matrix << ", " << std::endl
+      << reverse_input_ibounds << ", " << std::endl
+      << device_input_bounds;
 }
 
 static void TestInvalidBounds(const DlImageFilter& filter,
-                              const SkMatrix& matrix,
-                              const SkRect& localInputBounds) {
-  SkIRect device_input_bounds = matrix.mapRect(localInputBounds).roundOut();
+                              const DlMatrix& matrix,
+                              const DlRect& localInputBounds) {
+  DlIRect device_input_bounds =
+      DlIRect::RoundOut(localInputBounds.TransformBounds(matrix));
 
-  SkRect local_filter_bounds;
+  DlRect local_filter_bounds;
   ASSERT_EQ(filter.map_local_bounds(localInputBounds, local_filter_bounds),
             nullptr);
   ASSERT_EQ(local_filter_bounds, localInputBounds);
 
-  SkIRect device_filter_ibounds;
+  DlIRect device_filter_ibounds;
   ASSERT_EQ(filter.map_device_bounds(device_input_bounds, matrix,
                                      device_filter_ibounds),
             nullptr);
   ASSERT_EQ(device_filter_ibounds, device_input_bounds);
 
-  SkIRect reverse_input_ibounds;
+  DlIRect reverse_input_ibounds;
   ASSERT_EQ(filter.get_input_device_bounds(device_input_bounds, matrix,
                                            reverse_input_ibounds),
             nullptr);
@@ -116,26 +136,30 @@ static void TestInvalidBounds(const DlImageFilter& filter,
 // be assumed to be unable to perform their computations for the given
 // image filter and will be returning null.
 static void TestBounds(const DlImageFilter& filter,
-                       const SkRect& sourceBounds,
-                       const SkPoint expectedLocalOutputQuad[4]) {
-  SkRect local_filter_bounds;
+                       const DlRect& sourceBounds,
+                       const DlQuad& expectedLocalOutputQuad) {
+  DlRect local_filter_bounds;
   ASSERT_EQ(filter.map_local_bounds(sourceBounds, local_filter_bounds),
             &local_filter_bounds);
   ASSERT_TRUE(containsInclusive(local_filter_bounds, expectedLocalOutputQuad));
 
-  for (int scale = 1; scale <= 4; scale++) {
-    for (int skew = 0; skew < 8; skew++) {
+  for (int i_scale = 1; i_scale <= 4; i_scale++) {
+    DlScalar scale = i_scale;
+    for (int skew_eighths = 0; skew_eighths < 7; skew_eighths++) {
+      DlScalar skew = skew_eighths / 8.0f;
       for (int degrees = 0; degrees <= 360; degrees += 15) {
-        SkMatrix matrix;
-        matrix.setScale(scale, scale);
-        matrix.postSkew(skew / 8.0, skew / 8.0);
-        matrix.postRotate(degrees);
-        ASSERT_TRUE(matrix.invert(nullptr));
+        DlMatrix matrix;
+        matrix = matrix.Scale({scale, scale, 1});
+        matrix = DlMatrix::MakeSkew(skew, skew) * matrix;
+        matrix = DlMatrix::MakeRotationZ(DlDegrees(degrees)) * matrix;
+        ASSERT_TRUE(matrix.IsInvertible()) << matrix;
+        ASSERT_FALSE(matrix.HasPerspective2D()) << matrix;
         TestBoundsWithMatrix(filter, matrix, sourceBounds,
                              expectedLocalOutputQuad);
-        matrix.setPerspX(0.001);
-        matrix.setPerspY(0.001);
-        ASSERT_TRUE(matrix.invert(nullptr));
+        matrix.m[3] = 0.001f;
+        matrix.m[7] = 0.001f;
+        ASSERT_TRUE(matrix.IsInvertible()) << matrix;
+        ASSERT_TRUE(matrix.HasPerspective2D()) << matrix;
         TestBoundsWithMatrix(filter, matrix, sourceBounds,
                              expectedLocalOutputQuad);
       }
@@ -144,10 +168,10 @@ static void TestBounds(const DlImageFilter& filter,
 }
 
 static void TestBounds(const DlImageFilter& filter,
-                       const SkRect& sourceBounds,
-                       const SkRect& expectedLocalOutputBounds) {
-  SkPoint expected_local_output_quad[4];
-  expectedLocalOutputBounds.toQuad(expected_local_output_quad);
+                       const DlRect& sourceBounds,
+                       const DlRect& expectedLocalOutputBounds) {
+  DlQuad expected_local_output_quad = expectedLocalOutputBounds.GetPoints();
+  ASSERT_EQ(expected_local_output_quad.size(), 4u);  // Only 0u when empty
   TestBounds(filter, sourceBounds, expected_local_output_quad);
 }
 
@@ -188,7 +212,7 @@ TEST(DisplayListImageFilter, BlurWithLocalMatrixEquals) {
   DlBlurImageFilter filter1(5.0, 6.0, DlTileMode::kMirror);
   DlBlurImageFilter filter2(5.0, 6.0, DlTileMode::kMirror);
 
-  SkMatrix local_matrix = SkMatrix::Translate(10, 10);
+  DlMatrix local_matrix = DlMatrix::MakeTranslation({10, 10});
   TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
              *filter2.makeWithLocalMatrix(local_matrix));
 }
@@ -206,8 +230,8 @@ TEST(DisplayListImageFilter, BlurNotEquals) {
 
 TEST(DisplayListImageFilter, BlurBounds) {
   DlBlurImageFilter filter = DlBlurImageFilter(5, 10, DlTileMode::kDecal);
-  SkRect input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
-  SkRect expected_output_bounds = input_bounds.makeOutset(15, 30);
+  DlRect input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
+  DlRect expected_output_bounds = input_bounds.Expand(15, 30);
   TestBounds(filter, input_bounds, expected_output_bounds);
 }
 
@@ -264,7 +288,7 @@ TEST(DisplayListImageFilter, DilateWithLocalMatrixEquals) {
   DlDilateImageFilter filter1(5.0, 6.0);
   DlDilateImageFilter filter2(5.0, 6.0);
 
-  SkMatrix local_matrix = SkMatrix::Translate(10, 10);
+  DlMatrix local_matrix = DlMatrix::MakeTranslation({10, 10});
   TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
              *filter2.makeWithLocalMatrix(local_matrix));
 }
@@ -280,8 +304,8 @@ TEST(DisplayListImageFilter, DilateNotEquals) {
 
 TEST(DisplayListImageFilter, DilateBounds) {
   DlDilateImageFilter filter = DlDilateImageFilter(5, 10);
-  SkRect input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
-  SkRect expected_output_bounds = input_bounds.makeOutset(5, 10);
+  DlRect input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
+  DlRect expected_output_bounds = input_bounds.Expand(5, 10);
   TestBounds(filter, input_bounds, expected_output_bounds);
 }
 
@@ -321,7 +345,7 @@ TEST(DisplayListImageFilter, ErodeWithLocalMatrixEquals) {
   DlErodeImageFilter filter1(5.0, 6.0);
   DlErodeImageFilter filter2(5.0, 6.0);
 
-  SkMatrix local_matrix = SkMatrix::Translate(10, 10);
+  DlMatrix local_matrix = DlMatrix::MakeTranslation({10, 10});
   TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
              *filter2.makeWithLocalMatrix(local_matrix));
 }
@@ -337,22 +361,24 @@ TEST(DisplayListImageFilter, ErodeNotEquals) {
 
 TEST(DisplayListImageFilter, ErodeBounds) {
   DlErodeImageFilter filter = DlErodeImageFilter(5, 10);
-  SkRect input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
-  SkRect expected_output_bounds = input_bounds.makeInset(5, 10);
+  DlRect input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
+  DlRect expected_output_bounds = input_bounds.Expand(-5, -10);
   TestBounds(filter, input_bounds, expected_output_bounds);
 }
 
 TEST(DisplayListImageFilter, MatrixConstructor) {
-  DlMatrixImageFilter filter(SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                               0.5, 3.0, 15,  //
-                                               0.0, 0.0, 1),
+  DlMatrixImageFilter filter(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                               0.5, 3.0, 0.0, 15,   //
+                                               0.0, 0.0, 1.0, 0.0,  //
+                                               0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
 }
 
 TEST(DisplayListImageFilter, MatrixShared) {
-  DlMatrixImageFilter filter(SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                               0.5, 3.0, 15,  //
-                                               0.0, 0.0, 1),
+  DlMatrixImageFilter filter(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                               0.5, 3.0, 0.0, 15,   //
+                                               0.0, 0.0, 1.0, 0.0,  //
+                                               0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
 
   ASSERT_NE(filter.shared().get(), &filter);
@@ -360,9 +386,10 @@ TEST(DisplayListImageFilter, MatrixShared) {
 }
 
 TEST(DisplayListImageFilter, MatrixAsMatrix) {
-  DlMatrixImageFilter filter(SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                               0.5, 3.0, 15,  //
-                                               0.0, 0.0, 1),
+  DlMatrixImageFilter filter(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                               0.5, 3.0, 0.0, 15,   //
+                                               0.0, 0.0, 1.0, 0.0,  //
+                                               0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
 
   ASSERT_NE(filter.asMatrix(), nullptr);
@@ -370,9 +397,10 @@ TEST(DisplayListImageFilter, MatrixAsMatrix) {
 }
 
 TEST(DisplayListImageFilter, MatrixContents) {
-  SkMatrix matrix = SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                      0.5, 3.0, 15,  //
-                                      0.0, 0.0, 1);
+  DlMatrix matrix = DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                      0.5, 3.0, 0.0, 15,   //
+                                      0.0, 0.0, 1.0, 0.0,  //
+                                      0.0, 0.0, 0.0, 1.0);
   DlMatrixImageFilter filter(matrix, DlImageSampling::kLinear);
 
   ASSERT_EQ(filter.matrix(), matrix);
@@ -380,9 +408,10 @@ TEST(DisplayListImageFilter, MatrixContents) {
 }
 
 TEST(DisplayListImageFilter, MatrixEquals) {
-  SkMatrix matrix = SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                      0.5, 3.0, 15,  //
-                                      0.0, 0.0, 1);
+  DlMatrix matrix = DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                      0.5, 3.0, 0.0, 15,   //
+                                      0.0, 0.0, 1.0, 0.0,  //
+                                      0.0, 0.0, 0.0, 1.0);
   DlMatrixImageFilter filter1(matrix, DlImageSampling::kLinear);
   DlMatrixImageFilter filter2(matrix, DlImageSampling::kLinear);
 
@@ -390,24 +419,27 @@ TEST(DisplayListImageFilter, MatrixEquals) {
 }
 
 TEST(DisplayListImageFilter, MatrixWithLocalMatrixEquals) {
-  SkMatrix matrix = SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                      0.5, 3.0, 15,  //
-                                      0.0, 0.0, 1);
+  DlMatrix matrix = DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                      0.5, 3.0, 0.0, 15,   //
+                                      0.0, 0.0, 1.0, 0.0,  //
+                                      0.0, 0.0, 0.0, 1.0);
   DlMatrixImageFilter filter1(matrix, DlImageSampling::kLinear);
   DlMatrixImageFilter filter2(matrix, DlImageSampling::kLinear);
 
-  SkMatrix local_matrix = SkMatrix::Translate(10, 10);
+  DlMatrix local_matrix = DlMatrix::MakeTranslation({10, 10});
   TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
              *filter2.makeWithLocalMatrix(local_matrix));
 }
 
 TEST(DisplayListImageFilter, MatrixNotEquals) {
-  SkMatrix matrix1 = SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                       0.5, 3.0, 15,  //
-                                       0.0, 0.0, 1);
-  SkMatrix matrix2 = SkMatrix::MakeAll(5.0, 0.0, 10,  //
-                                       0.5, 3.0, 15,  //
-                                       0.0, 0.0, 1);
+  DlMatrix matrix1 = DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                       0.5, 3.0, 0.0, 15,   //
+                                       0.0, 0.0, 1.0, 0.0,  //
+                                       0.0, 0.0, 0.0, 1.0);
+  DlMatrix matrix2 = DlMatrix::MakeRow(5.0, 0.0, 0.0, 10,   //
+                                       0.5, 3.0, 0.0, 15,   //
+                                       0.0, 0.0, 1.0, 0.0,  //
+                                       0.0, 0.0, 0.0, 1.0);
   DlMatrixImageFilter filter1(matrix1, DlImageSampling::kLinear);
   DlMatrixImageFilter filter2(matrix2, DlImageSampling::kLinear);
   DlMatrixImageFilter filter3(matrix1, DlImageSampling::kNearestNeighbor);
@@ -417,35 +449,37 @@ TEST(DisplayListImageFilter, MatrixNotEquals) {
 }
 
 TEST(DisplayListImageFilter, MatrixBounds) {
-  SkMatrix matrix = SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                      0.5, 3.0, 7,   //
-                                      0.0, 0.0, 1);
-  SkMatrix inverse;
-  ASSERT_TRUE(matrix.invert(&inverse));
+  DlMatrix matrix = DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                      0.5, 3.0, 0.0, 7,    //
+                                      0.0, 0.0, 1.0, 0.0,  //
+                                      0.0, 0.0, 0.0, 1.0);
+  EXPECT_TRUE(matrix.IsInvertible());
   DlMatrixImageFilter filter(matrix, DlImageSampling::kLinear);
-  SkRect input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
-  SkPoint expectedOutputQuad[4] = {
-      {50, 77},    // (20,20) => (20*2 + 10, 20/2 + 20*3 + 7) == (50, 77)
-      {50, 257},   // (20,80) => (20*2 + 10, 20/2 + 80*3 + 7) == (50, 257)
-      {170, 287},  // (80,80) => (80*2 + 10, 80/2 + 80*3 + 7) == (170, 287)
-      {170, 107},  // (80,20) => (80*2 + 10, 80/2 + 20*3 + 7) == (170, 107)
+  DlRect input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
+  DlQuad expectedOutputQuad = {
+      DlPoint(50, 77),    // == (20,20) => (20*2 + 10, 20/2 + 20*3 + 7)
+      DlPoint(50, 257),   // == (20,80) => (20*2 + 10, 20/2 + 80*3 + 7)
+      DlPoint(170, 287),  // == (80,80) => (80*2 + 10, 80/2 + 80*3 + 7)
+      DlPoint(170, 107),  // == (80,20) => (80*2 + 10, 80/2 + 20*3 + 7)
   };
   TestBounds(filter, input_bounds, expectedOutputQuad);
 }
 
 TEST(DisplayListImageFilter, ComposeConstructor) {
-  DlMatrixImageFilter outer(SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                              0.5, 3.0, 15,  //
-                                              0.0, 0.0, 1),
+  DlMatrixImageFilter outer(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                              0.5, 3.0, 0.0, 15,   //
+                                              0.0, 0.0, 1.0, 0.0,  //
+                                              0.0, 0.0, 0.0, 1.0),
                             DlImageSampling::kLinear);
   DlBlurImageFilter inner(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter(outer, inner);
 }
 
 TEST(DisplayListImageFilter, ComposeShared) {
-  DlMatrixImageFilter outer(SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                              0.5, 3.0, 15,  //
-                                              0.0, 0.0, 1),
+  DlMatrixImageFilter outer(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                              0.5, 3.0, 0.0, 15,   //
+                                              0.0, 0.0, 1.0, 0.0,  //
+                                              0.0, 0.0, 0.0, 1.0),
                             DlImageSampling::kLinear);
   DlBlurImageFilter inner(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter(outer, inner);
@@ -455,9 +489,10 @@ TEST(DisplayListImageFilter, ComposeShared) {
 }
 
 TEST(DisplayListImageFilter, ComposeAsCompose) {
-  DlMatrixImageFilter outer(SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                              0.5, 3.0, 15,  //
-                                              0.0, 0.0, 1),
+  DlMatrixImageFilter outer(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                              0.5, 3.0, 0.0, 15,   //
+                                              0.0, 0.0, 1.0, 0.0,  //
+                                              0.0, 0.0, 0.0, 1.0),
                             DlImageSampling::kLinear);
   DlBlurImageFilter inner(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter(outer, inner);
@@ -467,9 +502,10 @@ TEST(DisplayListImageFilter, ComposeAsCompose) {
 }
 
 TEST(DisplayListImageFilter, ComposeContents) {
-  DlMatrixImageFilter outer(SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                              0.5, 3.0, 15,  //
-                                              0.0, 0.0, 1),
+  DlMatrixImageFilter outer(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                              0.5, 3.0, 0.0, 15,   //
+                                              0.0, 0.0, 1.0, 0.0,  //
+                                              0.0, 0.0, 0.0, 1.0),
                             DlImageSampling::kLinear);
   DlBlurImageFilter inner(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter(outer, inner);
@@ -479,16 +515,18 @@ TEST(DisplayListImageFilter, ComposeContents) {
 }
 
 TEST(DisplayListImageFilter, ComposeEquals) {
-  DlMatrixImageFilter outer1(SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                               0.5, 3.0, 15,  //
-                                               0.0, 0.0, 1),
+  DlMatrixImageFilter outer1(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                               0.5, 3.0, 0.0, 15,   //
+                                               0.0, 0.0, 1.0, 0.0,  //
+                                               0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
   DlBlurImageFilter inner1(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter1(outer1, inner1);
 
-  DlMatrixImageFilter outer2(SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                               0.5, 3.0, 15,  //
-                                               0.0, 0.0, 1),
+  DlMatrixImageFilter outer2(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                               0.5, 3.0, 0.0, 15,   //
+                                               0.0, 0.0, 1.0, 0.0,  //
+                                               0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
   DlBlurImageFilter inner2(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter2(outer1, inner1);
@@ -497,35 +535,39 @@ TEST(DisplayListImageFilter, ComposeEquals) {
 }
 
 TEST(DisplayListImageFilter, ComposeWithLocalMatrixEquals) {
-  DlMatrixImageFilter outer1(SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                               0.5, 3.0, 15,  //
-                                               0.0, 0.0, 1),
+  DlMatrixImageFilter outer1(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                               0.5, 3.0, 0.0, 15,   //
+                                               0.0, 0.0, 1.0, 0.0,  //
+                                               0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
   DlBlurImageFilter inner1(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter1(outer1, inner1);
 
-  DlMatrixImageFilter outer2(SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                               0.5, 3.0, 15,  //
-                                               0.0, 0.0, 1),
+  DlMatrixImageFilter outer2(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                               0.5, 3.0, 0.0, 15,   //
+                                               0.0, 0.0, 1.0, 0.0,  //
+                                               0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
   DlBlurImageFilter inner2(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter2(outer1, inner1);
 
-  SkMatrix local_matrix = SkMatrix::Translate(10, 10);
+  DlMatrix local_matrix = DlMatrix::MakeTranslation({10, 10});
   TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
              *filter2.makeWithLocalMatrix(local_matrix));
 }
 
 TEST(DisplayListImageFilter, ComposeNotEquals) {
-  DlMatrixImageFilter outer1(SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                               0.5, 3.0, 15,  //
-                                               0.0, 0.0, 1),
+  DlMatrixImageFilter outer1(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                               0.5, 3.0, 0.0, 15,   //
+                                               0.0, 0.0, 1.0, 0.0,  //
+                                               0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
   DlBlurImageFilter inner1(5.0, 6.0, DlTileMode::kMirror);
 
-  DlMatrixImageFilter outer2(SkMatrix::MakeAll(5.0, 0.0, 10,  //
-                                               0.5, 3.0, 15,  //
-                                               0.0, 0.0, 1),
+  DlMatrixImageFilter outer2(DlMatrix::MakeRow(5.0, 0.0, 0.0, 10,   //
+                                               0.5, 3.0, 0.0, 15,   //
+                                               0.0, 0.0, 1.0, 0.0,  //
+                                               0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
   DlBlurImageFilter inner2(7.0, 6.0, DlTileMode::kMirror);
 
@@ -541,35 +583,34 @@ TEST(DisplayListImageFilter, ComposeBounds) {
   DlDilateImageFilter outer = DlDilateImageFilter(5, 10);
   DlBlurImageFilter inner = DlBlurImageFilter(12, 5, DlTileMode::kDecal);
   DlComposeImageFilter filter = DlComposeImageFilter(outer, inner);
-  SkRect input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
-  SkRect expected_output_bounds =
-      input_bounds.makeOutset(36, 15).makeOutset(5, 10);
+  DlRect input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
+  DlRect expected_output_bounds = input_bounds.Expand(36, 15).Expand(5, 10);
   TestBounds(filter, input_bounds, expected_output_bounds);
 }
 
 static void TestUnboundedBounds(DlImageFilter& filter,
-                                const SkRect& sourceBounds,
-                                const SkRect& expectedOutputBounds,
-                                const SkRect& expectedInputBounds) {
-  SkRect bounds;
+                                const DlRect& sourceBounds,
+                                const DlRect& expectedOutputBounds,
+                                const DlRect& expectedInputBounds) {
+  DlRect bounds;
   EXPECT_EQ(filter.map_local_bounds(sourceBounds, bounds), nullptr);
   EXPECT_EQ(bounds, expectedOutputBounds);
 
-  SkIRect ibounds;
-  EXPECT_EQ(
-      filter.map_device_bounds(sourceBounds.roundOut(), SkMatrix::I(), ibounds),
-      nullptr);
-  EXPECT_EQ(ibounds, expectedOutputBounds.roundOut());
-
-  EXPECT_EQ(filter.get_input_device_bounds(sourceBounds.roundOut(),
-                                           SkMatrix::I(), ibounds),
+  DlIRect ibounds;
+  EXPECT_EQ(filter.map_device_bounds(DlIRect::RoundOut(sourceBounds),
+                                     DlMatrix(), ibounds),
             nullptr);
-  EXPECT_EQ(ibounds, expectedInputBounds.roundOut());
+  EXPECT_EQ(ibounds, DlIRect::RoundOut(expectedOutputBounds));
+
+  EXPECT_EQ(filter.get_input_device_bounds(DlIRect::RoundOut(sourceBounds),
+                                           DlMatrix(), ibounds),
+            nullptr);
+  EXPECT_EQ(ibounds, DlIRect::RoundOut(expectedInputBounds));
 }
 
 TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedInner) {
-  auto input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
-  auto expected_bounds = SkRect::MakeLTRB(5, 2, 95, 98);
+  auto input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
+  auto expected_bounds = DlRect::MakeLTRB(5, 2, 95, 98);
 
   DlBlendColorFilter color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
   auto outer = DlBlurImageFilter(5.0, 6.0, DlTileMode::kRepeat);
@@ -580,8 +621,8 @@ TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedInner) {
 }
 
 TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedOuter) {
-  auto input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
-  auto expected_bounds = SkRect::MakeLTRB(5, 2, 95, 98);
+  auto input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
+  auto expected_bounds = DlRect::MakeLTRB(5, 2, 95, 98);
 
   DlBlendColorFilter color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
   auto outer = DlColorFilterImageFilter(color_filter.shared());
@@ -592,7 +633,7 @@ TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedOuter) {
 }
 
 TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedInnerAndOuter) {
-  auto input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
+  auto input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
   auto expected_bounds = input_bounds;
 
   DlBlendColorFilter color_filter1(DlColor::kRed(), DlBlendMode::kSrcOver);
@@ -606,18 +647,17 @@ TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedInnerAndOuter) {
 
 // See https://github.com/flutter/flutter/issues/108433
 TEST(DisplayListImageFilter, Issue108433) {
-  auto input_bounds = SkIRect::MakeLTRB(20, 20, 80, 80);
-  auto expected_bounds = SkIRect::MakeLTRB(5, 2, 95, 98);
+  auto input_bounds = DlIRect::MakeLTRB(20, 20, 80, 80);
+  auto expected_bounds = DlIRect::MakeLTRB(5, 2, 95, 98);
 
   DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
   auto dl_outer = DlBlurImageFilter(5.0, 6.0, DlTileMode::kRepeat);
   auto dl_inner = DlColorFilterImageFilter(dl_color_filter.shared());
   auto dl_compose = DlComposeImageFilter(dl_outer, dl_inner);
 
-  SkIRect dl_bounds;
-  ASSERT_EQ(
-      dl_compose.map_device_bounds(input_bounds, SkMatrix::I(), dl_bounds),
-      nullptr);
+  DlIRect dl_bounds;
+  ASSERT_EQ(dl_compose.map_device_bounds(input_bounds, DlMatrix(), dl_bounds),
+            nullptr);
   ASSERT_EQ(dl_bounds, expected_bounds);
 }
 
@@ -665,7 +705,7 @@ TEST(DisplayListImageFilter, ColorFilterWithLocalMatrixEquals) {
   DlBlendColorFilter dl_color_filter2(DlColor::kRed(), DlBlendMode::kLighten);
   DlColorFilterImageFilter filter2(dl_color_filter2);
 
-  SkMatrix local_matrix = SkMatrix::Translate(10, 10);
+  DlMatrix local_matrix = DlMatrix::MakeTranslation({10, 10});
   TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
              *filter2.makeWithLocalMatrix(local_matrix));
 }
@@ -687,28 +727,30 @@ TEST(DisplayListImageFilter, ColorFilterNotEquals) {
 TEST(DisplayListImageFilter, ColorFilterBounds) {
   DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kSrcIn);
   DlColorFilterImageFilter filter(dl_color_filter);
-  SkRect input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
+  DlRect input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
   TestBounds(filter, input_bounds, input_bounds);
 }
 
 TEST(DisplayListImageFilter, ColorFilterModifiesTransparencyBounds) {
   DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
   DlColorFilterImageFilter filter(dl_color_filter);
-  SkRect input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
-  TestInvalidBounds(filter, SkMatrix::I(), input_bounds);
+  DlRect input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
+  TestInvalidBounds(filter, DlMatrix(), input_bounds);
 }
 
 TEST(DisplayListImageFilter, LocalImageFilterBounds) {
-  auto filter_matrix = SkMatrix::MakeAll(2.0, 0.0, 10,  //
-                                         0.5, 3.0, 15,  //
-                                         0.0, 0.0, 1);
+  auto filter_matrix = DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                                         0.5, 3.0, 0.0, 15,   //
+                                         0.0, 0.0, 1.0, 0.0,  //
+                                         0.0, 0.0, 0.0, 1.0);
   std::vector<sk_sp<SkImageFilter>> sk_filters{
       SkImageFilters::Blur(5.0, 6.0, SkTileMode::kRepeat, nullptr),
       SkImageFilters::ColorFilter(
           SkColorFilters::Blend(SK_ColorRED, SkBlendMode::kSrcOver), nullptr),
       SkImageFilters::Dilate(5.0, 10.0, nullptr),
-      SkImageFilters::MatrixTransform(
-          filter_matrix, SkSamplingOptions(SkFilterMode::kLinear), nullptr),
+      SkImageFilters::MatrixTransform(ToSkMatrix(filter_matrix),
+                                      SkSamplingOptions(SkFilterMode::kLinear),
+                                      nullptr),
       SkImageFilters::Compose(
           SkImageFilters::Blur(5.0, 6.0, SkTileMode::kRepeat, nullptr),
           SkImageFilters::ColorFilter(
@@ -717,47 +759,58 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
 
   DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
   std::vector<std::shared_ptr<DlImageFilter>> dl_filters{
-      std::make_shared<DlBlurImageFilter>(5.0, 6.0, DlTileMode::kRepeat),
-      std::make_shared<DlColorFilterImageFilter>(dl_color_filter.shared()),
-      std::make_shared<DlDilateImageFilter>(5, 10),
-      std::make_shared<DlMatrixImageFilter>(filter_matrix,
-                                            DlImageSampling::kLinear),
-      std::make_shared<DlComposeImageFilter>(
-          std::make_shared<DlBlurImageFilter>(5.0, 6.0, DlTileMode::kRepeat),
-          std::make_shared<DlColorFilterImageFilter>(
-              dl_color_filter.shared()))};
+      DlBlurImageFilter::Make(5.0, 6.0, DlTileMode::kRepeat),
+      DlColorFilterImageFilter::Make(dl_color_filter.shared()),
+      DlDilateImageFilter::Make(5, 10),
+      DlMatrixImageFilter::Make(filter_matrix, DlImageSampling::kLinear),
+      DlComposeImageFilter::Make(
+          DlBlurImageFilter::Make(5.0, 6.0, DlTileMode::kRepeat),
+          DlColorFilterImageFilter::Make(dl_color_filter.shared())),
+  };
 
   auto persp = SkMatrix::I();
   persp.setPerspY(0.001);
-  std::vector<SkMatrix> matrices = {
+  std::vector<SkMatrix> sk_matrices = {
       SkMatrix::Translate(10.0, 10.0),
       SkMatrix::Scale(2.0, 2.0).preTranslate(10.0, 10.0),
-      SkMatrix::RotateDeg(45).preTranslate(5.0, 5.0), persp};
-  std::vector<SkMatrix> bounds_matrices{SkMatrix::Translate(5.0, 10.0),
-                                        SkMatrix::Scale(2.0, 2.0)};
+      SkMatrix::RotateDeg(45).preTranslate(5.0, 5.0),  //
+      persp};
+  std::vector<DlMatrix> dl_matrices = {
+      DlMatrix::MakeTranslation({10.0, 10.0}),
+      DlMatrix::MakeScale({2.0, 2.0, 1.0}).Translate({10.0, 10.0}),
+      DlMatrix::MakeRotationZ(DlDegrees(45)).Translate({5.0, 5.0}),
+      ToDlMatrix(persp)};
+  std::vector<SkMatrix> sk_bounds_matrices{
+      SkMatrix::Translate(5.0, 10.0),
+      SkMatrix::Scale(2.0, 2.0),
+  };
+  std::vector<DlMatrix> dl_bounds_matrices{
+      DlMatrix::MakeTranslation({5.0, 10.0}),
+      DlMatrix::MakeScale({2.0, 2.0, 1.0}),
+  };
 
-  for (unsigned j = 0; j < matrices.size(); j++) {
-    DlLocalMatrixImageFilter filter(matrices[j], nullptr);
+  for (unsigned j = 0; j < dl_matrices.size(); j++) {
+    DlLocalMatrixImageFilter filter(dl_matrices[j], nullptr);
     {
-      const auto input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
-      SkRect output_bounds;
+      const auto input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
+      DlRect output_bounds;
       EXPECT_EQ(filter.map_local_bounds(input_bounds, output_bounds),
                 &output_bounds);
       EXPECT_EQ(input_bounds, output_bounds);
     }
-    for (unsigned k = 0; k < bounds_matrices.size(); k++) {
-      auto& bounds_matrix = bounds_matrices[k];
+    for (unsigned k = 0; k < dl_bounds_matrices.size(); k++) {
+      auto& bounds_matrix = dl_bounds_matrices[k];
       {
-        const auto input_bounds = SkIRect::MakeLTRB(20, 20, 80, 80);
-        SkIRect output_bounds;
+        const auto input_bounds = DlIRect::MakeLTRB(20, 20, 80, 80);
+        DlIRect output_bounds;
         EXPECT_EQ(filter.map_device_bounds(input_bounds, bounds_matrix,
                                            output_bounds),
                   &output_bounds);
         EXPECT_EQ(input_bounds, output_bounds);
       }
       {
-        const auto output_bounds = SkIRect::MakeLTRB(20, 20, 80, 80);
-        SkIRect input_bounds;
+        const auto output_bounds = DlIRect::MakeLTRB(20, 20, 80, 80);
+        DlIRect input_bounds;
         EXPECT_EQ(filter.get_input_device_bounds(output_bounds, bounds_matrix,
                                                  input_bounds),
                   &input_bounds);
@@ -767,15 +820,15 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
   }
 
   for (unsigned i = 0; i < sk_filters.size(); i++) {
-    for (unsigned j = 0; j < matrices.size(); j++) {
-      for (unsigned k = 0; k < bounds_matrices.size(); k++) {
+    for (unsigned j = 0; j < dl_matrices.size(); j++) {
+      for (unsigned k = 0; k < dl_bounds_matrices.size(); k++) {
         auto desc = "filter " + std::to_string(i + 1)             //
                     + ", filter matrix " + std::to_string(j + 1)  //
                     + ", bounds matrix " + std::to_string(k + 1);
-        auto& m = matrices[j];
-        auto& bounds_matrix = bounds_matrices[k];
-        auto sk_local_filter = sk_filters[i]->makeWithLocalMatrix(m);
-        auto dl_local_filter = dl_filters[i]->makeWithLocalMatrix(m);
+        auto sk_local_filter =
+            sk_filters[i]->makeWithLocalMatrix(sk_matrices[j]);
+        auto dl_local_filter =
+            dl_filters[i]->makeWithLocalMatrix(dl_matrices[j]);
         if (!sk_local_filter || !dl_local_filter) {
           // Temporarily relax the equivalence testing to allow Skia to expand
           // their behavior. Once the Skia fixes are rolled in, the
@@ -786,13 +839,14 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
         }
         {
           auto input_bounds = SkIRect::MakeLTRB(20, 20, 80, 80);
-          SkIRect sk_rect, dl_rect;
+          SkIRect sk_rect;
+          DlIRect dl_rect;
           sk_rect = sk_local_filter->filterBounds(
-              input_bounds, bounds_matrix,
+              input_bounds, sk_bounds_matrices[k],
               SkImageFilter::MapDirection::kForward_MapDirection);
-          if (dl_local_filter->map_device_bounds(input_bounds, bounds_matrix,
-                                                 dl_rect)) {
-            ASSERT_EQ(sk_rect, dl_rect) << desc;
+          if (dl_local_filter->map_device_bounds(
+                  ToDlIRect(input_bounds), dl_bounds_matrices[k], dl_rect)) {
+            ASSERT_EQ(sk_rect, ToSkIRect(dl_rect)) << desc;
           } else {
             ASSERT_TRUE(dl_local_filter->modifies_transparent_black()) << desc;
             ASSERT_FALSE(sk_local_filter->canComputeFastBounds()) << desc;
@@ -808,13 +862,14 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
             continue;
           }
           auto outset_bounds = SkIRect::MakeLTRB(20, 20, 80, 80);
-          SkIRect sk_rect, dl_rect;
+          SkIRect sk_rect;
+          DlIRect dl_rect;
           sk_rect = sk_local_filter->filterBounds(
-              outset_bounds, bounds_matrix,
+              outset_bounds, sk_bounds_matrices[k],
               SkImageFilter::MapDirection::kReverse_MapDirection);
           if (dl_local_filter->get_input_device_bounds(
-                  outset_bounds, bounds_matrix, dl_rect)) {
-            ASSERT_EQ(sk_rect, dl_rect) << desc;
+                  ToDlIRect(outset_bounds), dl_bounds_matrices[k], dl_rect)) {
+            ASSERT_EQ(sk_rect, ToSkIRect(dl_rect)) << desc;
           } else {
             ASSERT_TRUE(dl_local_filter->modifies_transparent_black());
             ASSERT_FALSE(sk_local_filter->canComputeFastBounds());
@@ -862,13 +917,14 @@ TEST(DisplayListImageFilter, RuntimeEffectMapDeviceBounds) {
   DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr},
                                       std::make_shared<std::vector<uint8_t>>());
 
-  auto input_bounds = SkIRect::MakeLTRB(0, 0, 100, 100);
-  SkMatrix identity;
-  SkIRect output_bounds;
-  SkIRect* result =
+  auto input_bounds = DlIRect::MakeLTRB(0, 0, 100, 100);
+  DlMatrix identity;
+  DlIRect output_bounds;
+  DlIRect* result =
       filter_a.map_device_bounds(input_bounds, identity, output_bounds);
 
   EXPECT_NE(result, nullptr);
+  EXPECT_EQ(result, &output_bounds);
   EXPECT_EQ(output_bounds, input_bounds);
 }
 
@@ -876,12 +932,13 @@ TEST(DisplayListImageFilter, RuntimeEffectMapInputBounds) {
   DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr},
                                       std::make_shared<std::vector<uint8_t>>());
 
-  auto input_bounds = SkRect::MakeLTRB(0, 0, 100, 100);
+  auto input_bounds = DlRect::MakeLTRB(0, 0, 100, 100);
 
-  SkRect output_bounds;
-  SkRect* result = filter_a.map_local_bounds(input_bounds, output_bounds);
+  DlRect output_bounds;
+  DlRect* result = filter_a.map_local_bounds(input_bounds, output_bounds);
 
   EXPECT_NE(result, nullptr);
+  EXPECT_EQ(result, &output_bounds);
   EXPECT_EQ(output_bounds, input_bounds);
 }
 
@@ -889,14 +946,15 @@ TEST(DisplayListImageFilter, RuntimeEffectGetInputDeviceBounds) {
   DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr},
                                       std::make_shared<std::vector<uint8_t>>());
 
-  auto output_bounds = SkIRect::MakeLTRB(0, 0, 100, 100);
+  auto output_bounds = DlIRect::MakeLTRB(0, 0, 100, 100);
 
-  SkMatrix identity;
-  SkIRect input_bounds;
-  SkIRect* result =
+  DlMatrix identity;
+  DlIRect input_bounds;
+  DlIRect* result =
       filter_a.get_input_device_bounds(output_bounds, identity, input_bounds);
 
   EXPECT_NE(result, nullptr);
+  EXPECT_EQ(result, &input_bounds);
   EXPECT_EQ(output_bounds, input_bounds);
 }
 

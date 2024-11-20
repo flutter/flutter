@@ -8,6 +8,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_flags.h"
 #include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
@@ -3939,8 +3940,10 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
       0, 0, 0, .7, 0,
       // clang-format on
   };
-  SkMatrix contract_matrix;
-  contract_matrix.setScale(0.9f, 0.9f, kRenderCenterX, kRenderCenterY);
+  DlMatrix contract_matrix;
+  contract_matrix.Translate({kRenderCenterX, kRenderCenterY});
+  contract_matrix.Scale({0.9f, 0.9f});
+  contract_matrix.Translate({kRenderCenterX, kRenderCenterY});
 
   std::vector<SkScalar> opacities = {
       0,
@@ -3956,11 +3959,10 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
       DlLinearToSrgbGammaColorFilter::kInstance,
   };
   std::vector<std::shared_ptr<DlImageFilter>> image_filters = {
-      std::make_shared<DlBlurImageFilter>(5.0f, 5.0f, DlTileMode::kDecal),
-      std::make_shared<DlDilateImageFilter>(5.0f, 5.0f),
-      std::make_shared<DlErodeImageFilter>(5.0f, 5.0f),
-      std::make_shared<DlMatrixImageFilter>(contract_matrix,
-                                            DlImageSampling::kLinear),
+      DlBlurImageFilter::Make(5.0f, 5.0f, DlTileMode::kDecal),
+      DlDilateImageFilter::Make(5.0f, 5.0f),
+      DlErodeImageFilter::Make(5.0f, 5.0f),
+      DlMatrixImageFilter::Make(contract_matrix, DlImageSampling::kLinear),
   };
 
   auto render_content = [](DisplayListBuilder& builder) {
@@ -4603,7 +4605,7 @@ class DisplayListNopTest : public DisplayListRendering {
     desc_stream << BlendModeToString(mode);
     desc_stream << "/" << color;
     std::string desc = desc_stream.str();
-    DisplayListBuilder builder({0.0f, 0.0f, 100.0f, 100.0f});
+    DisplayListBuilder builder(DlRect::MakeWH(100.0f, 100.0f));
     DlPaint paint = DlPaint(color).setBlendMode(mode);
     builder.DrawRect(SkRect{0.0f, 0.0f, 10.0f, 10.0f}, paint);
     auto dl = builder.Build();
@@ -4697,7 +4699,7 @@ class DisplayListNopTest : public DisplayListRendering {
     desc_stream << ", IF: " << if_mtb;
     std::string desc = desc_stream.str();
 
-    DisplayListBuilder builder({0.0f, 0.0f, 100.0f, 100.0f});
+    DisplayListBuilder builder(DlRect::MakeWH(100.0f, 100.0f));
     DlPaint paint = DlPaint(color)                     //
                         .setBlendMode(mode)            //
                         .setColorFilter(color_filter)  //

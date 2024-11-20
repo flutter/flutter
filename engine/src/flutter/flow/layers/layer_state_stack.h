@@ -177,7 +177,7 @@ class LayerStateStack {
     // outstanding attributes.
     // (Currently only opacity is recorded for batching)
     void applyImageFilter(const SkRect& bounds,
-                          const std::shared_ptr<const DlImageFilter>& filter);
+                          const std::shared_ptr<DlImageFilter>& filter);
 
     // Records the color filter for application at the next call to
     // saveLayer or applyState. A saveLayer may be executed at
@@ -196,7 +196,7 @@ class LayerStateStack {
     // subsequent canvas or builder objects that are made delegates
     // will only see a saveLayer with the indicated blend_mode.
     void applyBackdropFilter(const SkRect& bounds,
-                             const std::shared_ptr<const DlImageFilter>& filter,
+                             const std::shared_ptr<DlImageFilter>& filter,
                              DlBlendMode blend_mode,
                              std::optional<int64_t> backdrop_id);
 
@@ -252,7 +252,7 @@ class LayerStateStack {
     return outstanding_.color_filter;
   }
 
-  std::shared_ptr<const DlImageFilter> outstanding_image_filter() const {
+  std::shared_ptr<DlImageFilter> outstanding_image_filter() const {
     return outstanding_.image_filter;
   }
 
@@ -277,6 +277,12 @@ class LayerStateStack {
   // The cull_rect (not the exact clip) relative to the local coordinates.
   // This rectangle may be a conservative estimate of the true clip region.
   SkRect local_cull_rect() const { return delegate_->local_cull_rect(); }
+
+  // The transform from the local coordinates to the device coordinates
+  // in 4x4 DlMatrix representation. This matrix provides all information
+  // needed to compute bounds for a 2D rendering primitive, and it will
+  // accurately concatenate with other 4x4 matrices without losing information.
+  const DlMatrix matrix() const { return delegate_->matrix(); }
 
   // The transform from the local coordinates to the device coordinates
   // in the most capable 4x4 matrix representation. This matrix may be
@@ -332,9 +338,9 @@ class LayerStateStack {
   void push_color_filter(const SkRect& bounds,
                          const std::shared_ptr<const DlColorFilter>& filter);
   void push_image_filter(const SkRect& bounds,
-                         const std::shared_ptr<const DlImageFilter>& filter);
+                         const std::shared_ptr<DlImageFilter>& filter);
   void push_backdrop(const SkRect& bounds,
-                     const std::shared_ptr<const DlImageFilter>& filter,
+                     const std::shared_ptr<DlImageFilter>& filter,
                      DlBlendMode blend_mode,
                      std::optional<int64_t> backdrop_id);
 
@@ -362,7 +368,7 @@ class LayerStateStack {
   void maybe_save_layer(int apply_flags);
   void maybe_save_layer(SkScalar opacity);
   void maybe_save_layer(const std::shared_ptr<const DlColorFilter>& filter);
-  void maybe_save_layer(const std::shared_ptr<const DlImageFilter>& filter);
+  void maybe_save_layer(const std::shared_ptr<DlImageFilter>& filter);
   // ---------------------
 
   struct RenderingAttributes {
@@ -379,7 +385,7 @@ class LayerStateStack {
 
     SkScalar opacity = SK_Scalar1;
     std::shared_ptr<const DlColorFilter> color_filter;
-    std::shared_ptr<const DlImageFilter> image_filter;
+    std::shared_ptr<DlImageFilter> image_filter;
 
     DlPaint* fill(DlPaint& paint,
                   DlBlendMode mode = DlBlendMode::kSrcOver) const;
@@ -441,6 +447,7 @@ class LayerStateStack {
 
     virtual SkRect local_cull_rect() const = 0;
     virtual SkRect device_cull_rect() const = 0;
+    virtual DlMatrix matrix() const = 0;
     virtual SkM44 matrix_4x4() const = 0;
     virtual SkMatrix matrix_3x3() const = 0;
     virtual bool content_culled(const SkRect& content_bounds) const = 0;

@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 
+#include "flutter/display_list/effects/dl_image_filters.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
@@ -203,7 +204,8 @@ sk_sp<SkImageFilter> ToSk(const DlImageFilter* filter) {
       const DlMatrixImageFilter* matrix_filter = filter->asMatrix();
       FML_DCHECK(matrix_filter != nullptr);
       return SkImageFilters::MatrixTransform(
-          matrix_filter->matrix(), ToSk(matrix_filter->sampling()), nullptr);
+          ToSkMatrix(matrix_filter->matrix()), ToSk(matrix_filter->sampling()),
+          nullptr);
     }
     case DlImageFilterType::kCompose: {
       const DlComposeImageFilter* compose_filter = filter->asCompose();
@@ -229,7 +231,7 @@ sk_sp<SkImageFilter> ToSk(const DlImageFilter* filter) {
       if (!skia_filter) {
         return nullptr;
       }
-      return skia_filter->makeWithLocalMatrix(lm_filter->matrix());
+      return skia_filter->makeWithLocalMatrix(ToSkMatrix(lm_filter->matrix()));
     }
     case DlImageFilterType::kRuntimeEffect:
       // UNSUPPORTED.

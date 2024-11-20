@@ -7,6 +7,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/testing/testing.h"
 
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -150,13 +151,13 @@ static const DlErodeImageFilter kTestErodeImageFilter1(4.0, 4.0);
 static const DlErodeImageFilter kTestErodeImageFilter2(4.0, 3.0);
 static const DlErodeImageFilter kTestErodeImageFilter3(3.0, 4.0);
 static const DlMatrixImageFilter kTestMatrixImageFilter1(
-    SkMatrix::RotateDeg(45),
+    DlMatrix::MakeRotationZ(DlDegrees(45)),
     kNearestSampling);
 static const DlMatrixImageFilter kTestMatrixImageFilter2(
-    SkMatrix::RotateDeg(85),
+    DlMatrix::MakeRotationZ(DlDegrees(85)),
     kNearestSampling);
 static const DlMatrixImageFilter kTestMatrixImageFilter3(
-    SkMatrix::RotateDeg(45),
+    DlMatrix::MakeRotationZ(DlDegrees(45)),
     kLinearSampling);
 static const DlComposeImageFilter kTestComposeImageFilter1(
     kTestBlurImageFilter1,

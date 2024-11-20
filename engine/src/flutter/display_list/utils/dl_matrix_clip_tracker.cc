@@ -241,7 +241,7 @@ DlRect DisplayListMatrixClipState::GetLocalCullCoverage() const {
     // We could do a 4-point long-form conversion, but since this is
     // only used for culling, let's just return a non-constricting
     // cull rect.
-    return ToDlRect(DisplayListBuilder::kMaxCullRect);
+    return DisplayListBuilder::kMaxCullRect;
   }
   DlMatrix inverse = matrix_.Invert();
   // We eliminated perspective above so we can use the cheaper non-clipping

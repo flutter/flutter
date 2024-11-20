@@ -8,7 +8,7 @@
 #include <iomanip>
 
 #include "flutter/display_list/display_list.h"
-#include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/dl_image_filters.h"
 
 namespace flutter::testing {
 
@@ -385,6 +385,18 @@ std::ostream& operator<<(std::ostream& os, const DlImage* image) {
   return os << "isTextureBacked: " << image->isTextureBacked() << ")";
 }
 
+std::ostream& operator<<(std::ostream& os,
+                         const flutter::DlImageFilter& filter) {
+  DisplayListStreamDispatcher(os, 0).out(filter);
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os,
+                         const flutter::DlColorFilter& filter) {
+  DisplayListStreamDispatcher(os, 0).out(filter);
+  return os;
+}
+
 }  // namespace std
 
 namespace flutter::testing {
@@ -611,7 +623,7 @@ void DisplayListStreamDispatcher::out(const DlImageFilter& filter) {
     case DlImageFilterType::kErode: {
       const DlErodeImageFilter* erode = filter.asErode();
       FML_DCHECK(erode);
-      os_ << "DlDilateImageFilter(" << erode->radius_x() << ", " << erode->radius_y() << ")";
+      os_ << "DlErodeImageFilter(" << erode->radius_x() << ", " << erode->radius_y() << ")";
       break;
     }
     case DlImageFilterType::kMatrix: {
@@ -663,7 +675,9 @@ void DisplayListStreamDispatcher::out(const DlImageFilter& filter) {
     case flutter::DlImageFilterType::kRuntimeEffect: {
       [[maybe_unused]] const DlRuntimeEffectImageFilter* runtime_effect = filter.asRuntimeEffectFilter();
       FML_DCHECK(runtime_effect);
-      os_ << "DlRuntimeEffectImageFilter()";
+      os_ << "DlRuntimeEffectImageFilter(";
+      os_ << runtime_effect->samplers().size() << " samplers, ";
+      os_ << runtime_effect->uniform_data()->size() << " uniform bytes)";
       break;
     }
   }
@@ -699,9 +713,9 @@ void DisplayListStreamDispatcher::saveLayer(const DlRect& bounds,
     os_ << "," << std::endl;
     indent(10);
     if (backdrop_id.has_value()) {
-      startl() << "backdrop: " << backdrop_id.value();
+      startl() << "backdrop: " << backdrop_id.value() << ", ";
     } else {
-      startl() << "backdrop: (no id)";
+      startl() << "backdrop: (no id), ";
     }
     out(backdrop);
     outdent(10);

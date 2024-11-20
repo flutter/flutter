@@ -4,9 +4,11 @@
 
 #include "impeller/toolkit/interop/image_filter.h"
 
+#include "flutter/display_list/effects/dl_image_filters.h"
+
 namespace impeller::interop {
 
-ImageFilter::ImageFilter(std::shared_ptr<const flutter::DlImageFilter> filter)
+ImageFilter::ImageFilter(std::shared_ptr<flutter::DlImageFilter> filter)
     : filter_(std::move(filter)) {}
 
 ImageFilter::~ImageFilter() = default;
@@ -42,8 +44,7 @@ ScopedObject<ImageFilter> ImageFilter::MakeErode(Scalar x_radius,
 ScopedObject<ImageFilter> ImageFilter::MakeMatrix(
     const Matrix& matrix,
     flutter::DlImageSampling sampling) {
-  auto filter =
-      flutter::DlMatrixImageFilter::Make(ToSkMatrix(matrix), sampling);
+  auto filter = flutter::DlMatrixImageFilter::Make(matrix, sampling);
   if (!filter) {
     return nullptr;
   }
@@ -60,8 +61,8 @@ ScopedObject<ImageFilter> ImageFilter::MakeCompose(const ImageFilter& outer,
   return Create<ImageFilter>(std::move(filter));
 }
 
-const std::shared_ptr<const flutter::DlImageFilter>&
-ImageFilter::GetImageFilter() const {
+const std::shared_ptr<flutter::DlImageFilter>& ImageFilter::GetImageFilter()
+    const {
   return filter_;
 }
 

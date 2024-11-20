@@ -37,14 +37,14 @@ class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
   void initComposeFilter(ImageFilter* outer, ImageFilter* inner);
   void initShader(ReusableFragmentShader* shader);
 
-  const std::shared_ptr<const DlImageFilter> filter(DlTileMode mode) const;
+  const std::shared_ptr<DlImageFilter> filter(DlTileMode mode) const;
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   ImageFilter();
 
-  std::shared_ptr<const DlImageFilter> filter_;
+  std::shared_ptr<DlImageFilter> filter_;
   bool is_dynamic_tile_mode_ = false;
 };
 

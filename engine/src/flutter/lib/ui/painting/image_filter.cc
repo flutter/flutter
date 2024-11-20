@@ -5,7 +5,7 @@
 #include "flutter/lib/ui/painting/image_filter.h"
 
 #include "display_list/dl_sampling_options.h"
-#include "display_list/effects/dl_image_filter.h"
+#include "display_list/effects/dl_image_filters.h"
 #include "flutter/lib/ui/floating_point.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -55,7 +55,7 @@ ImageFilter::ImageFilter() {}
 
 ImageFilter::~ImageFilter() {}
 
-const std::shared_ptr<const DlImageFilter> ImageFilter::filter(
+const std::shared_ptr<DlImageFilter> ImageFilter::filter(
     DlTileMode mode) const {
   if (is_dynamic_tile_mode_) {
     FML_DCHECK(filter_.get() != nullptr);
@@ -104,7 +104,7 @@ void ImageFilter::initMatrix(const tonic::Float64List& matrix4,
                              int filterQualityIndex) {
   is_dynamic_tile_mode_ = false;
   auto sampling = ImageFilter::SamplingFromIndex(filterQualityIndex);
-  filter_ = DlMatrixImageFilter::Make(ToSkMatrix(matrix4), sampling);
+  filter_ = DlMatrixImageFilter::Make(ToDlMatrix(matrix4), sampling);
 }
 
 void ImageFilter::initColorFilter(ColorFilter* colorFilter) {

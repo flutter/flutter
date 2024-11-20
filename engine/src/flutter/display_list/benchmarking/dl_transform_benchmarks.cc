@@ -457,7 +457,7 @@ class ImpellerMatrixAdapter : public TransformAdapter {
   bool InvertAndCheck(const TestTransform& transform,
                       TestTransform& result) const override {
     result.impeller_matrix = transform.impeller_matrix.Invert();
-    return transform.impeller_matrix.GetDeterminant() != 0.0f;
+    return transform.impeller_matrix.IsInvertible();
   }
 };
 

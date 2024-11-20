@@ -4,6 +4,8 @@
 
 #include "flutter/display_list/dl_paint.h"
 
+#include "flutter/display_list/utils/dl_comparable.h"
+
 namespace flutter {
 
 DlPaint::DlPaint(DlColor color)

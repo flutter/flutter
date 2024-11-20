@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 #include "impeller/display_list/image_filter.h"
-#include "display_list/effects/dl_image_filter.h"
+
+#include "flutter/display_list/effects/dl_image_filters.h"
 #include "fml/logging.h"
 #include "impeller/display_list/color_filter.h"
 #include "impeller/display_list/skia_conversions.h"
@@ -56,7 +57,7 @@ std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
       auto matrix_filter = filter->asMatrix();
       FML_DCHECK(matrix_filter);
 
-      auto matrix = skia_conversions::ToMatrix(matrix_filter->matrix());
+      auto matrix = matrix_filter->matrix();
       auto desc =
           skia_conversions::ToSamplerDescriptor(matrix_filter->sampling());
       return FilterContents::MakeMatrixFilter(input, matrix, desc);
@@ -66,7 +67,7 @@ std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
       FML_DCHECK(matrix_filter);
       FML_DCHECK(matrix_filter->image_filter());
 
-      auto matrix = skia_conversions::ToMatrix(matrix_filter->matrix());
+      auto matrix = matrix_filter->matrix();
       return FilterContents::MakeLocalMatrixFilter(
           FilterInput::Make(
               WrapInput(matrix_filter->image_filter().get(), input)),

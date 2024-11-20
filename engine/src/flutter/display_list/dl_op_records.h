@@ -10,6 +10,7 @@
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/utils/dl_comparable.h"
 #include "flutter/fml/macros.h"
 
 #include "flutter/impeller/geometry/path.h"
