@@ -226,7 +226,7 @@ class HotRunner extends ResidentRunner {
     bool needsFullRestart = true,
   }) async {
     stopAppDuringCleanup = true;
-    return _attachWithoutMarkingDetached(
+    return _attachWithoutStoppingAppOnDetach(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
       allowExistingDdsInstance: allowExistingDdsInstance,
@@ -234,7 +234,7 @@ class HotRunner extends ResidentRunner {
     );
   }
 
-  Future<int> _attachWithoutMarkingDetached({
+  Future<int> _attachWithoutStoppingAppOnDetach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool allowExistingDdsInstance = false,
