@@ -3511,13 +3511,11 @@ class _ExitWidgetSelectionButtonGroupState
     final Widget? moveExitWidgetSelectionButton =
         widget.moveExitWidgetSelectionButtonBuilder != null
             ? Padding(
-                padding: _leftAligned
-                    ? const EdgeInsets.only(
-                        left: _kExitWidgetSelectionButtonPadding,
-                      )
-                    : const EdgeInsets.only(
-                        right: _kExitWidgetSelectionButtonPadding,
-                      ),
+                padding: EdgeInsets.only(
+                  left: _leftAligned ? _kExitWidgetSelectionButtonPadding : 0.0,
+                  right:
+                      _leftAligned ? 0.0 : _kExitWidgetSelectionButtonPadding,
+                ),
                 child: _TooltipGestureDetector(
                   button: widget.moveExitWidgetSelectionButtonBuilder!(
                     context,
@@ -3569,17 +3567,12 @@ class _ExitWidgetSelectionButtonGroupState
       ],
     );
 
-    return _leftAligned
-        ? Positioned(
-            left: _kExitWidgetSelectionButtonMargin,
-            bottom: _kExitWidgetSelectionButtonMargin,
-            child: buttonGroup,
-          )
-        : Positioned(
-            right: _kExitWidgetSelectionButtonMargin,
-            bottom: _kExitWidgetSelectionButtonMargin,
-            child: buttonGroup,
-          );
+    return Positioned(
+      left: _leftAligned ? _kExitWidgetSelectionButtonMargin : null,
+      right: _leftAligned ? null : _kExitWidgetSelectionButtonMargin,
+      bottom: _kExitWidgetSelectionButtonMargin,
+      child: buttonGroup,
+    );
   }
 
   void _exitWidgetSelectionMode() {
@@ -3633,6 +3626,15 @@ class _TooltipGestureDetector extends StatefulWidget {
 class _TooltipGestureDetectorState extends State<_TooltipGestureDetector> {
   Timer? _tooltipVisibleTimer;
   Timer? _tooltipHiddenTimer;
+
+  @override
+  void dispose() {
+    _tooltipVisibleTimer?.cancel();
+    _tooltipVisibleTimer = null;
+    _tooltipHiddenTimer?.cancel();
+    _tooltipHiddenTimer = null;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -885,6 +885,92 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked() // [intended] Test requires --track-widget-creation flag.
     );
 
+    testWidgets(
+        'WidgetInspector Move Exit Selection Mode button to the right / left',
+        (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
+      final GlobalKey inspectorKey = GlobalKey();
+      setupDefaultPubRootDirectory(service);
+
+      Widget exitWidgetSelectionButtonBuilder(
+        BuildContext context, {
+        required VoidCallback onPressed,
+        required GlobalKey key,
+      }) {
+        return Material(
+          child: ElevatedButton(
+            onPressed: onPressed,
+            key: key,
+            child: const Text('EXIT SELECT MODE'),
+          ),
+        );
+      }
+
+      Widget moveWidgetSelectionButtonBuilder(
+        BuildContext context, {
+        required VoidCallback onPressed,
+        bool isLeftAligned = true,
+      }) {
+        return Material(
+          child: ElevatedButton(
+            onPressed: onPressed,
+            child: Text(isLeftAligned ? 'MOVE RIGHT' : 'MOVE LEFT'),
+          ),
+        );
+      }
+
+      Finder buttonFinder(String buttonText) {
+        return find.ancestor(
+          of: find.text(buttonText),
+          matching: find.byType(ElevatedButton),
+        );
+      }
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: WidgetInspector(
+            key: inspectorKey,
+            exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+            moveExitWidgetSelectionButtonBuilder:
+                moveWidgetSelectionButtonBuilder,
+            child: const Text('APP'),
+          ),
+        ),
+      );
+
+      // Intitially the exit select button is on the left.
+      final Finder exitButton = buttonFinder('EXIT SELECT MODE');
+      expect(exitButton, findsOneWidget);
+      final Finder moveRightButton = buttonFinder('MOVE RIGHT');
+      expect(moveRightButton, findsOneWidget);
+      final double initialExitButtonX = tester.getCenter(exitButton).dx;
+
+      // Move the button to the right.
+      await tester.tap(moveRightButton);
+      await tester.pump();
+
+      // Verify the button is now on the right.
+      expect(moveRightButton, findsNothing);
+      final Finder moveLeftButton = buttonFinder('MOVE LEFT');
+      expect(moveLeftButton, findsOneWidget);
+      final double exitButtonXAfterMovingRight =
+          tester.getCenter(exitButton).dx;
+      expect(initialExitButtonX, lessThan(exitButtonXAfterMovingRight));
+
+      // Move the button to the left again.
+      await tester.tap(moveLeftButton);
+      await tester.pump();
+
+      // Verify the button is in its original position.
+      expect(moveLeftButton, findsNothing);
+      expect(moveRightButton, findsOneWidget);
+      final double exitButtonXAfterMovingLeft = tester.getCenter(exitButton).dx;
+      expect(exitButtonXAfterMovingLeft, equals(initialExitButtonX));
+    });
+
     testWidgets('test transformDebugCreator will re-order if after stack trace', (WidgetTester tester) async {
       final bool widgetTracked = WidgetInspectorService.instance.isWidgetCreationTracked();
       await tester.pumpWidget(
