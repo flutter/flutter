@@ -102,7 +102,8 @@ abstract final class Scribe {
   /// See also:
   ///
   /// * <https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#isStylusHandwritingAvailable()>,
-  ///   which is the corresponding API on Android.
+  ///   which is the corresponding API on Android that this method attempts to
+  ///   mirror.
   static Future<bool> isStylusHandwritingAvailable() async {
     final bool? result = await _channel.invokeMethod<bool?>(
       'Scribe.isStylusHandwritingAvailable',
@@ -126,7 +127,8 @@ abstract final class Scribe {
   /// See also:
   ///
   /// * <https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#startStylusHandwriting(android.view.View)>,
-  ///   which is the corresponding API on Android.
+  ///   which is the corresponding API on Android that this method attempts to
+  ///   mirror.
   ///  * [EditableText.stylusHandwritingEnabled], which controls whether
   ///    Flutter's built-in text fields support handwriting input.
   static Future<void> startStylusHandwriting() {
