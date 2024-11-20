@@ -94,6 +94,28 @@ void main() {
         ProcessManager: FakeProcessManager.empty,
       },
     );
+
+    testUsingContext(
+      'kill on an attached device keeps the test device running',
+      () async {
+        final HotRunner runner = HotRunner(
+          <FlutterDevice>[
+            flutterDevice,
+          ],
+          target: 'main.dart',
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          analytics: _FakeAnalytics(),
+        );
+
+        await runner.attach();
+        await runner.cleanupAfterSignal();
+        expect(flutterDevice.wasExited, false);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: FakeProcessManager.empty,
+      },
+    );
   });
 }
 
