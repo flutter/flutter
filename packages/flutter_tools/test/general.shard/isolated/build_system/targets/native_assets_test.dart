@@ -68,7 +68,7 @@ void main() {
 
   testWithoutContext('NativeAssets throws error if missing target platform', () async {
     iosEnvironment.defines.remove(kTargetPlatform);
-    expect(const NativeAssets().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
+    expect(const DartBuildForNative().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
 
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
@@ -77,14 +77,12 @@ void main() {
     iosEnvironment.defines.remove(kIosArchs);
 
     final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
-    await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
+    await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
+    await const InstallCodeAssets().build(iosEnvironment);
 
-    final File nativeAssetsYaml =
-        iosEnvironment.buildDir.childFile('native_assets.yaml');
-
-    final File depsFile = iosEnvironment.buildDir.childFile('native_assets.d');
-    expect(depsFile, exists);
-    expect(nativeAssetsYaml, exists);
+    expect(iosEnvironment.buildDir.childFile(DartBuild.depFilename), exists);
+    expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.depFilename), exists);
+    expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
   });
 
   testUsingContext('NativeAssets throws error if missing sdk root', overrides: <Type, Generator>{
@@ -98,7 +96,7 @@ void main() {
       ]);
 
     iosEnvironment.defines.remove(kSdkRoot);
-    expect(NativeAssets(buildRunner: buildRunner).build(iosEnvironment), throwsA(isA<MissingDefineException>()));
+    expect(DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
 
   // The NativeAssets Target should _always_ be creating a yaml an d file.
@@ -118,10 +116,12 @@ void main() {
         await createPackageConfig(iosEnvironment);
 
         final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
-        await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
+        await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
+        await const InstallCodeAssets().build(iosEnvironment);
 
-        expect(iosEnvironment.buildDir.childFile('native_assets.d'), exists);
-        expect(iosEnvironment.buildDir.childFile('native_assets.yaml'), exists);
+        expect(iosEnvironment.buildDir.childFile(DartBuild.depFilename), exists);
+        expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.depFilename), exists);
+        expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
       },
     );
   }
@@ -190,38 +190,56 @@ void main() {
     () async {
       await createPackageConfig(iosEnvironment);
 
+      final List<CodeAsset> codeAssets = <CodeAsset>[
+        CodeAsset(
+          package: 'foo',
+          name: 'foo.dart',
+          linkMode: DynamicLoadingBundled(),
+          os: OS.iOS,
+          architecture: Architecture.arm64,
+          file: Uri.file('foo.framework/foo'),
+        ),
+      ];
       final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[Package('foo', iosEnvironment.buildDir.uri)],
         buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
-          codeAssets: <CodeAsset>[
-            CodeAsset(
-              package: 'foo',
-              name: 'foo.dart',
-              linkMode: DynamicLoadingBundled(),
-              os: OS.iOS,
-              architecture: Architecture.arm64,
-              file: Uri.file('foo.framework/foo'),
-            ),
-          ],
+          codeAssets: codeAssets,
           dependencies: <Uri>[
             Uri.file('src/foo.c'),
           ],
         ),
+        linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          codeAssets: codeAssets,
+        ),
       );
-      await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
+      await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
+      await const InstallCodeAssets().build(iosEnvironment);
 
-      final File nativeAssetsYaml = iosEnvironment.buildDir.childFile('native_assets.yaml');
-      final File depsFile = iosEnvironment.buildDir.childFile('native_assets.d');
-      expect(depsFile, exists);
-      // We don't care about the specific format, but it should contain the
-      // yaml as the file depending on the source files that went in to the
-      // build.
+      // We don't care about the specific format, but
+      //  * dart build output should depend on C source
+      //  * installation output should depend on shared library from dart build
+
+      final File dartBuildResult = iosEnvironment.buildDir.childFile(DartBuild.dartBuildResultFilename);
+      final File buildDepsFile = iosEnvironment.buildDir.childFile(DartBuild.depFilename);
+      expect(buildDepsFile, exists);
       expect(
-        depsFile.readAsStringSync(),
+        buildDepsFile.readAsStringSync(),
+        stringContainsInOrder(<String>[
+          dartBuildResult.path,
+          ':',
+          'src/foo.c',
+        ]),
+      );
+
+      final File nativeAssetsYaml = iosEnvironment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename);
+      final File installDepsFile = iosEnvironment.buildDir.childFile(InstallCodeAssets.depFilename);
+      expect(installDepsFile, exists);
+      expect(
+        installDepsFile.readAsStringSync(),
         stringContainsInOrder(<String>[
           nativeAssetsYaml.path,
           ':',
-          'src/foo.c',
+          'foo.framework/foo',
         ]),
       );
       expect(nativeAssetsYaml, exists);
@@ -252,28 +270,32 @@ void main() {
         await createPackageConfig(androidEnvironment);
         await fileSystem.file('libfoo.so').create();
 
+        final List<CodeAsset> codeAssets = <CodeAsset>[
+          if (hasAssets)
+            CodeAsset(
+              package: 'foo',
+              name: 'foo.dart',
+              linkMode: DynamicLoadingBundled(),
+              os: OS.android,
+              architecture: Architecture.arm64,
+              file: Uri.file('libfoo.so'),
+            ),
+        ];
         final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('foo', androidEnvironment.buildDir.uri)
           ],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
-            codeAssets: <CodeAsset>[
-              if (hasAssets)
-                CodeAsset(
-                  package: 'foo',
-                  name: 'foo.dart',
-                  linkMode: DynamicLoadingBundled(),
-                  os: OS.android,
-                  architecture: Architecture.arm64,
-                  file: Uri.file('libfoo.so'),
-                ),
-            ],
+            codeAssets: codeAssets,
             dependencies: <Uri>[
               Uri.file('src/foo.c'),
             ],
           ),
+          linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+            codeAssets: codeAssets,
+          ),
         );
-        await NativeAssets(buildRunner: buildRunner).build(androidEnvironment);
+        await DartBuildForNative(buildRunner: buildRunner).build(androidEnvironment);
         expect(
           buildRunner.lastBuildMode,
           native_assets_cli.BuildMode.release,

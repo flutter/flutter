@@ -1583,14 +1583,14 @@ class DaemonCapturingRunCommand extends RunCommand {
   @override
   Daemon createMachineDaemon() {
     daemon = super.createMachineDaemon();
-    appDomain = daemon.appDomain = CapturingAppDomain(daemon, useImplicitPubspecResolution: true);
+    appDomain = daemon.appDomain = CapturingAppDomain(daemon);
     daemon.registerDomain(appDomain);
     return daemon;
   }
 }
 
 class CapturingAppDomain extends AppDomain {
-  CapturingAppDomain(super.daemon, {required super.useImplicitPubspecResolution});
+  CapturingAppDomain(super.daemon);
 
   String? userIdentifier;
   bool? enableDevTools;

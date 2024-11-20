@@ -279,7 +279,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             ? _logger
             : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
           logToStdout: true,
-          useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
         )
       : null;
 
@@ -373,7 +372,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         } on Exception catch (error) {
           throwToolExit(error.toString());
         }
-        result = await app.runner!.waitForAppToFinish();
+        result = await app.runner.waitForAppToFinish();
         return;
       }
       while (true) {
@@ -466,7 +465,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
     );
 
-    final bool useImplicitPubspecResolution = globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution);
     return buildInfo.isDebug
       ? _hotRunnerFactory.build(
           flutterDevices,
@@ -479,13 +477,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
           nativeAssetsBuilder: _nativeAssetsBuilder,
           analytics: analytics,
-          useImplicitPubspecResolution: useImplicitPubspecResolution,
         )
       : ColdRunner(
           flutterDevices,
           target: targetFile,
           debuggingOptions: debuggingOptions,
-          useImplicitPubspecResolution: useImplicitPubspecResolution,
         );
   }
 
@@ -512,7 +508,6 @@ class HotRunnerFactory {
     FlutterProject? flutterProject,
     String? nativeAssetsYamlFile,
     required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
-    required bool useImplicitPubspecResolution,
     required Analytics analytics,
   }) => HotRunner(
     devices,
@@ -527,6 +522,5 @@ class HotRunnerFactory {
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     nativeAssetsBuilder: nativeAssetsBuilder,
     analytics: analytics,
-    useImplicitPubspecResolution: useImplicitPubspecResolution,
   );
 }

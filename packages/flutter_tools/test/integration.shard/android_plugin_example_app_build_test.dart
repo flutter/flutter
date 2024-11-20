@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(matanlurey): Remove after debugging https://github.com/flutter/flutter/issues/159000.
+@Tags(<String>['flutter-build-apk'])
+library;
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -28,12 +32,6 @@ void main() {
     required String template,
     required Directory tempDir,
   }) async {
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
-
     final String testName = '${template}_test';
 
     ProcessResult result = processManager.runSync(<String>[

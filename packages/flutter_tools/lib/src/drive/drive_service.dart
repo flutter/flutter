@@ -28,20 +28,17 @@ class FlutterDriverFactory {
     required ProcessUtils processUtils,
     required String dartSdkPath,
     required DevtoolsLauncher devtoolsLauncher,
-    required bool useImplicitPubspecResolution,
   }) : _applicationPackageFactory = applicationPackageFactory,
        _logger = logger,
        _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
-       _devtoolsLauncher = devtoolsLauncher,
-       _useImplicitPubspecResolution = useImplicitPubspecResolution;
+       _devtoolsLauncher = devtoolsLauncher;
 
   final ApplicationPackageFactory _applicationPackageFactory;
   final Logger _logger;
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
-  final bool _useImplicitPubspecResolution;
 
   /// Create a driver service for running `flutter drive`.
   DriverService createDriverService(bool web) {
@@ -50,7 +47,6 @@ class FlutterDriverFactory {
         logger: _logger,
         processUtils: _processUtils,
         dartSdkPath: _dartSdkPath,
-        useImplicitPubspecResolution: _useImplicitPubspecResolution,
       );
     }
     return FlutterDriverService(
@@ -235,9 +231,7 @@ class FlutterDriverService extends DriverService {
     _vmService = await _vmServiceConnector(uri, device: _device, logger: _logger);
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
     logReader.logLines.listen(_logger.printStatus);
-
-    final vm_service.VM vm = await _vmService.service.getVM();
-    logReader.appPid = vm.pid;
+    await logReader.provideVmService(_vmService);
   }
 
   @override

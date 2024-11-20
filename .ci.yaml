@@ -51,7 +51,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8735216702926189361"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8733065022087935185"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -68,7 +68,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "android_virtual_device", "version": "android_34_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8735216702926189361"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8733065022087935185"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -412,7 +412,7 @@ targets:
 
   - name: Linux_android_emu android views
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/153445
+    bringup: true
     properties:
       tags: >
         ["framework","hostonly","linux"]
@@ -1330,6 +1330,29 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux flutter_build_apk_health_tests
+    recipe: flutter/flutter_drone
+    # WARNING: Do *NOT* enable. This intended for testing on CI only.
+    # Ask matanlurey@ or @gmackall if you have any questions.
+    bringup: true
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:35v1"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      shard: flutter_build_apk_health_tests
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700"
+
   - name: Linux android_preview_tool_integration_tests
     recipe: flutter/flutter_drone
     timeout: 60
@@ -1466,7 +1489,7 @@ targets:
 
   - name: Linux_android_emu flutter_driver_android_test
     recipe: flutter/flutter_drone
-    bringup: true # https://github.com/flutter/flutter/issues/153445
+    bringup: true
     timeout: 60
     properties:
       shard: flutter_driver_android
@@ -1518,23 +1541,6 @@ targets:
         ["devicelab","hostonly", "linux"]
       task_name: web_benchmarks_canvaskit
 
-  - name: Linux web_benchmarks_html
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
-        ]
-      tags: >
-        ["devicelab"]
-      task_name: web_benchmarks_html
-    runIf:
-      - dev/**
-      - bin/**
-      - .ci.yaml
-
   - name: Linux web_benchmarks_skwasm
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1555,7 +1561,6 @@ targets:
 
   - name: Linux web_benchmarks_skwasm_st
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2235,7 +2240,7 @@ targets:
 
   - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/153445
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2648,7 +2653,7 @@ targets:
 
   - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/153445
+    bringup: true
     timeout: 60
     # Functionally the same as "presubmit: false", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
@@ -4873,6 +4878,7 @@ targets:
       task_name: hello_world_ios__compile
 
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/158568
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -5405,7 +5411,6 @@ targets:
   - name: Mac_arm64 mac_desktop_impeller
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -6364,7 +6369,6 @@ targets:
 
   - name: Windows windows_desktop_impeller
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
