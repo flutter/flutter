@@ -708,7 +708,9 @@ class WebTestsSuite {
     // metriciFile is a transitional file that needs to be deleted once it is parsed.
     // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
     // https://github.com/flutter/flutter/issues/146003
-    metricFile.deleteSync();
+    if (!dryRun) {
+      metricFile.deleteSync();
+    }
   }
 
   // The `chromedriver` process created by this test.

@@ -162,6 +162,15 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = workingDirectory ?? path.relative(io.Directory.current.path);
+  if (dryRun) {
+    printProgress(_prettyPrintRunCommand(executable, arguments, workingDirectory));
+    return CommandResult._(
+      0,
+      Duration.zero,
+      '$executable ${arguments.join(' ')}',
+      'Simulated execution due to --dry-run',
+    );
+  }
 
   final Command command = await startCommand(executable, arguments,
     workingDirectory: workingDirectory,
@@ -203,6 +212,23 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
     print('ELAPSED TIME: ${prettyPrintDuration(result.elapsedTime)} for $green$commandDescription$reset in $cyan$relativeWorkingDir$reset');
   }
   return result;
+}
+
+final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(io.Platform.script))));
+
+String _prettyPrintRunCommand(String executable, List<String> arguments, String? workingDirectory) {
+  final StringBuffer output = StringBuffer();
+
+  // Print CWD relative to the root.
+  output.write('|> ');
+  output.write(path.relative(executable, from: _flutterRoot));
+  if (workingDirectory != null) {
+    output.write(' (${path.relative(workingDirectory, from: _flutterRoot)})');
+  }
+  output.writeln(': ');
+  output.writeAll(arguments.map((String a) => '  $a'), '\n');
+
+  return output.toString();
 }
 
 /// Specifies what to do with the command output from [runCommand] and [startCommand].
