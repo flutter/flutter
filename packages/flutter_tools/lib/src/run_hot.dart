@@ -225,7 +225,7 @@ class HotRunner extends ResidentRunner {
     bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
-    isDetached = true;
+    stopAppDuringCleanup = true;
     return _attachWithoutMarkingDetached(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
@@ -1153,7 +1153,7 @@ class HotRunner extends ResidentRunner {
     } else {
       commandHelp.hWithoutDetails.print();
     }
-    if (!isDetached) {
+    if (!stopAppDuringCleanup) {
       commandHelp.d.print();
     }
     commandHelp.c.print();
@@ -1250,7 +1250,7 @@ class HotRunner extends ResidentRunner {
   Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
     await hotRunnerConfig!.runPreShutdownOperations();
-    if (isDetached) {
+    if (stopAppDuringCleanup) {
       appFinished();
     } else {
       await exitApp();
