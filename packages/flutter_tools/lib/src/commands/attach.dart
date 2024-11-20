@@ -372,7 +372,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         } on Exception catch (error) {
           throwToolExit(error.toString());
         }
-        result = await app.runner!.waitForAppToFinish();
+        result = await app.runner.waitForAppToFinish();
         return;
       }
       while (true) {
