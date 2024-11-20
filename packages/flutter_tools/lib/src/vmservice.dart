@@ -254,7 +254,7 @@ Future<vm_service.VmService> setUpVmService({
           kResultType: kResultTypeSuccess,
           'result': <String, String>{'kernelBytes': kernelBytesBase64},
         };
-      } on VmServiceExpressionCompilationException catch(e) {
+      } on VmServiceExpressionCompilationException catch (e) {
         // In most situations, we'd just let VmService catch this exception and
         // build the error response. However, in this case we build the error
         // response manually and return it to avoid including the stack trace

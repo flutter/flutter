@@ -223,7 +223,7 @@ Future<void> evaluateInvalidExpression(FlutterTestDriver flutter) async {
   try {
     await flutter.evaluateInFrame('is Foo');
     fail("'is Foo' is not a valid expression");
-  } on RPCError catch(e) {
+  } on RPCError catch (e) {
     expect(e.code, RPCErrorKind.kExpressionCompilationError.code);
     expect(e.message, RPCErrorKind.kExpressionCompilationError.message);
     expect(

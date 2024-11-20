@@ -43,6 +43,7 @@ import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/commands/widget_preview.dart';
 import 'src/devtools_launcher.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
@@ -258,6 +259,7 @@ List<FlutterCommand> generateCommands({
     stdio: globals.stdio,
     fileSystem: globals.fs,
   ),
+  WidgetPreviewCommand(),
   // Development-only commands. These are always hidden,
   IdeConfigCommand(),
   UpdatePackagesCommand(),
