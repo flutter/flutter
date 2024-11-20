@@ -97,9 +97,9 @@ void main() {
   }));
 
   testUsingContext('ResidentRunner reports whether detach() was used', () => testbed.run(() async {
-    expect(residentRunner.stopAppDuringCleanup, false);
-    await residentRunner.detach();
     expect(residentRunner.stopAppDuringCleanup, true);
+    await residentRunner.detach();
+    expect(residentRunner.stopAppDuringCleanup, false);
   }));
 
   testUsingContext('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {

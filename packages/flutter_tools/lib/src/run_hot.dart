@@ -225,7 +225,7 @@ class HotRunner extends ResidentRunner {
     bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
-    stopAppDuringCleanup = true;
+    stopAppDuringCleanup = false;
     return _attach(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
@@ -1153,7 +1153,7 @@ class HotRunner extends ResidentRunner {
     } else {
       commandHelp.hWithoutDetails.print();
     }
-    if (!stopAppDuringCleanup) {
+    if (stopAppDuringCleanup) {
       commandHelp.d.print();
     }
     commandHelp.c.print();
@@ -1251,10 +1251,9 @@ class HotRunner extends ResidentRunner {
     await stopEchoingDeviceLog();
     await hotRunnerConfig!.runPreShutdownOperations();
     if (stopAppDuringCleanup) {
-      appFinished();
-    } else {
-      await exitApp();
+      return exitApp();
     }
+    appFinished();
   }
 
   @override

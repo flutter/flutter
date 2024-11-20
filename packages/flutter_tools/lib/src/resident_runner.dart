@@ -1126,7 +1126,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   /// - [attach] is used to explicitly connect to an already running app.
   @protected
   @visibleForTesting
-  bool stopAppDuringCleanup = false;
+  bool stopAppDuringCleanup = true;
 
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
 
@@ -1266,7 +1266,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   @mustCallSuper
   Future<void> detach() async {
-    stopAppDuringCleanup = true;
+    stopAppDuringCleanup = false;
 
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     await residentDevtoolsHandler!.shutdown();

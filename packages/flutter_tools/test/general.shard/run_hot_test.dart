@@ -38,15 +38,11 @@ void main() {
   });
 
   group('signal handling', () {
-    late final _FakeHotCompatibleFlutterDevice flutterDevice;
-
-    setUpAll(() {
-      flutterDevice = _FakeHotCompatibleFlutterDevice(FakeDevice());
-    });
-
+    late _FakeHotCompatibleFlutterDevice flutterDevice;
     late MemoryFileSystem fileSystem;
 
     setUp(() {
+      flutterDevice = _FakeHotCompatibleFlutterDevice(FakeDevice());
       fileSystem = MemoryFileSystem.test();
     });
 
