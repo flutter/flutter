@@ -6,20 +6,14 @@
 
 #include <cstring>
 
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
-
-static constexpr char kChannelName[] = "flutter/mousecursor";
-static constexpr char kBadArgumentsError[] = "Bad Arguments";
-static constexpr char kActivateSystemCursorMethod[] = "activateSystemCursor";
-static constexpr char kKindKey[] = "kind";
+#include "flutter/shell/platform/linux/fl_mouse_cursor_channel.h"
 
 static constexpr char kFallbackCursor[] = "default";
 
 struct _FlMouseCursorHandler {
   GObject parent_instance;
 
-  FlMethodChannel* channel;
+  FlMouseCursorChannel* channel;
 
   GHashTable* system_cursor_table;
 
@@ -89,18 +83,8 @@ static void populate_system_cursor_table(GHashTable* table) {
 }
 
 // Sets the mouse cursor.
-FlMethodResponse* activate_system_cursor(FlMouseCursorHandler* self,
-                                         FlValue* args) {
-  if (fl_value_get_type(args) != FL_VALUE_TYPE_MAP) {
-    return FL_METHOD_RESPONSE(fl_method_error_response_new(
-        kBadArgumentsError, "Argument map missing or malformed", nullptr));
-  }
-
-  FlValue* kind_value = fl_value_lookup_string(args, kKindKey);
-  const gchar* kind = nullptr;
-  if (fl_value_get_type(kind_value) == FL_VALUE_TYPE_STRING) {
-    kind = fl_value_get_string(kind_value);
-  }
+static void activate_system_cursor(const gchar* kind, gpointer user_data) {
+  FlMouseCursorHandler* self = FL_MOUSE_CURSOR_HANDLER(user_data);
 
   if (self->system_cursor_table == nullptr) {
     self->system_cursor_table = g_hash_table_new(g_str_hash, g_str_equal);
@@ -117,30 +101,6 @@ FlMethodResponse* activate_system_cursor(FlMouseCursorHandler* self,
   self->cursor_name = g_strdup(cursor_name);
 
   g_signal_emit(self, fl_mouse_cursor_handler_signals[kSignalCursorChanged], 0);
-
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
-}
-
-// Called when a method call is received from Flutter.
-static void method_call_cb(FlMethodChannel* channel,
-                           FlMethodCall* method_call,
-                           gpointer user_data) {
-  FlMouseCursorHandler* self = FL_MOUSE_CURSOR_HANDLER(user_data);
-
-  const gchar* method = fl_method_call_get_name(method_call);
-  FlValue* args = fl_method_call_get_args(method_call);
-
-  g_autoptr(FlMethodResponse) response = nullptr;
-  if (strcmp(method, kActivateSystemCursorMethod) == 0) {
-    response = activate_system_cursor(self, args);
-  } else {
-    response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
-  }
-
-  g_autoptr(GError) error = nullptr;
-  if (!fl_method_call_respond(method_call, response, &error)) {
-    g_warning("Failed to send method call response: %s", error->message);
-  }
 }
 
 static void fl_mouse_cursor_handler_dispose(GObject* object) {
@@ -166,6 +126,10 @@ static void fl_mouse_cursor_handler_init(FlMouseCursorHandler* self) {
   self->cursor_name = g_strdup("");
 }
 
+static FlMouseCursorChannelVTable mouse_cursor_vtable = {
+    .activate_system_cursor = activate_system_cursor,
+};
+
 FlMouseCursorHandler* fl_mouse_cursor_handler_new(
     FlBinaryMessenger* messenger) {
   g_return_val_if_fail(FL_IS_BINARY_MESSENGER(messenger), nullptr);
@@ -173,11 +137,8 @@ FlMouseCursorHandler* fl_mouse_cursor_handler_new(
   FlMouseCursorHandler* self = FL_MOUSE_CURSOR_HANDLER(
       g_object_new(fl_mouse_cursor_handler_get_type(), nullptr));
 
-  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   self->channel =
-      fl_method_channel_new(messenger, kChannelName, FL_METHOD_CODEC(codec));
-  fl_method_channel_set_method_call_handler(self->channel, method_call_cb, self,
-                                            nullptr);
+      fl_mouse_cursor_channel_new(messenger, &mouse_cursor_vtable, self);
 
   return self;
 }
