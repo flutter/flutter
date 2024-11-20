@@ -4,7 +4,9 @@ Kotlin code in this repository is formatted and linted with [`ktlint`](https://g
 If you
 1. have submitted Kotlin code only to learn this when the analyzer check fails
 2. use Android Studio
-then there is good news! Android Studio can be configured to use `ktlint` to automatically apply formatting and highlight issues. To do this,
+then there is good news! 
+
+Android Studio can be configured to use `ktlint` to automatically apply formatting and highlight issues. To do this,
 
 
 1. Install the `ktlint` extension for Android Studio
