@@ -2074,7 +2074,6 @@ void main() {
     // Enter invalid hour.
     await tester.enterText(find.byType(TextField).first, 'AB');
     await tester.tap(find.text(okString));
-    await tester.pumpAndSettle();
 
     expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
   });
@@ -2093,7 +2092,6 @@ void main() {
     // Enter invalid hour.
     await tester.enterText(find.byType(TextField).first, 'AB');
     await tester.tap(find.text(okString));
-    await tester.pumpAndSettle();
 
     expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
   });

@@ -109,18 +109,11 @@ class SelectionArea extends StatefulWidget {
 
 /// State for a [SelectionArea].
 class SelectionAreaState extends State<SelectionArea> {
-  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_internalNode ??= FocusNode());
-  FocusNode? _internalNode;
   final GlobalKey<SelectableRegionState> _selectableRegionKey = GlobalKey<SelectableRegionState>();
   /// The [State] of the [SelectableRegion] for which this [SelectionArea] wraps.
   SelectableRegionState get selectableRegion => _selectableRegionKey.currentState!;
 
-  @override
-  void dispose() {
-    _internalNode?.dispose();
-    super.dispose();
-  }
-
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -133,7 +126,7 @@ class SelectionAreaState extends State<SelectionArea> {
     return SelectableRegion(
       key: _selectableRegionKey,
       selectionControls: controls,
-      focusNode: _effectiveFocusNode,
+      focusNode: widget.focusNode,
       contextMenuBuilder: widget.contextMenuBuilder,
       magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
       onSelectionChanged: widget.onSelectionChanged,
