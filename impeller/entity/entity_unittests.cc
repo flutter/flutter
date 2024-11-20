@@ -119,7 +119,7 @@ TEST_P(EntityTest, ThreeStrokesInOnePath) {
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
   auto contents = std::make_unique<SolidColorContents>();
 
-  static std::unique_ptr<Geometry> geom = Geometry::MakeStrokePath(path, 5.0);
+  std::unique_ptr<Geometry> geom = Geometry::MakeStrokePath(path, 5.0);
   contents->SetGeometry(geom.get());
   contents->SetColor(Color::Red());
   entity.SetContents(std::move(contents));
@@ -140,7 +140,7 @@ TEST_P(EntityTest, StrokeWithTextureContents) {
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
   auto contents = std::make_unique<TiledTextureContents>();
-  static std::unique_ptr<Geometry> geom = Geometry::MakeStrokePath(path, 100.0);
+  std::unique_ptr<Geometry> geom = Geometry::MakeStrokePath(path, 100.0);
   contents->SetGeometry(geom.get());
   contents->SetTexture(bridge);
   contents->SetTileModes(Entity::TileMode::kClamp, Entity::TileMode::kClamp);
@@ -152,20 +152,19 @@ TEST_P(EntityTest, TriangleInsideASquare) {
   auto callback = [&](ContentContext& context, RenderPass& pass) {
     Point offset(100, 100);
 
-    static PlaygroundPoint point_a(Point(10, 10) + offset, 20, Color::White());
+    PlaygroundPoint point_a(Point(10, 10) + offset, 20, Color::White());
     Point a = DrawPlaygroundPoint(point_a);
-    static PlaygroundPoint point_b(Point(210, 10) + offset, 20, Color::White());
+    PlaygroundPoint point_b(Point(210, 10) + offset, 20, Color::White());
     Point b = DrawPlaygroundPoint(point_b);
-    static PlaygroundPoint point_c(Point(210, 210) + offset, 20,
-                                   Color::White());
+    PlaygroundPoint point_c(Point(210, 210) + offset, 20, Color::White());
     Point c = DrawPlaygroundPoint(point_c);
-    static PlaygroundPoint point_d(Point(10, 210) + offset, 20, Color::White());
+    PlaygroundPoint point_d(Point(10, 210) + offset, 20, Color::White());
     Point d = DrawPlaygroundPoint(point_d);
-    static PlaygroundPoint point_e(Point(50, 50) + offset, 20, Color::White());
+    PlaygroundPoint point_e(Point(50, 50) + offset, 20, Color::White());
     Point e = DrawPlaygroundPoint(point_e);
-    static PlaygroundPoint point_f(Point(100, 50) + offset, 20, Color::White());
+    PlaygroundPoint point_f(Point(100, 50) + offset, 20, Color::White());
     Point f = DrawPlaygroundPoint(point_f);
-    static PlaygroundPoint point_g(Point(50, 150) + offset, 20, Color::White());
+    PlaygroundPoint point_g(Point(50, 150) + offset, 20, Color::White());
     Point g = DrawPlaygroundPoint(point_g);
     Path path = PathBuilder{}
                     .MoveTo(a)
@@ -182,8 +181,7 @@ TEST_P(EntityTest, TriangleInsideASquare) {
     Entity entity;
     entity.SetTransform(Matrix::MakeScale(GetContentScale()));
     auto contents = std::make_unique<SolidColorContents>();
-    static std::unique_ptr<Geometry> geom =
-        Geometry::MakeStrokePath(path, 20.0);
+    std::unique_ptr<Geometry> geom = Geometry::MakeStrokePath(path, 20.0);
     contents->SetGeometry(geom.get());
     contents->SetColor(Color::Red());
     entity.SetContents(std::move(contents));
@@ -219,7 +217,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     auto render_path = [width = width, &context, &pass, &world_matrix](
                            const Path& path, Cap cap, Join join) {
       auto contents = std::make_unique<SolidColorContents>();
-      static std::unique_ptr<Geometry> geom =
+      std::unique_ptr<Geometry> geom =
           Geometry::MakeStrokePath(path, width, miter_limit, cap, join);
       contents->SetGeometry(geom.get());
       contents->SetColor(Color::Red());
@@ -232,7 +230,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
       if (coverage.has_value()) {
         auto bounds_contents = std::make_unique<SolidColorContents>();
 
-        static std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(
+        std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(
             PathBuilder{}.AddRect(entity.GetCoverage().value()).TakePath());
 
         bounds_contents->SetGeometry(geom.get());
@@ -251,11 +249,11 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     // Cap::kButt demo.
     {
       Point off = Point(0, 0) * padding + margin;
-      static PlaygroundPoint point_a(off + a_def, r, Color::Black());
-      static PlaygroundPoint point_b(off + b_def, r, Color::White());
+      PlaygroundPoint point_a(off + a_def, r, Color::Black());
+      PlaygroundPoint point_b(off + b_def, r, Color::White());
       auto [a, b] = DrawPlaygroundLine(point_a, point_b);
-      static PlaygroundPoint point_c(off + c_def, r, Color::Black());
-      static PlaygroundPoint point_d(off + d_def, r, Color::White());
+      PlaygroundPoint point_c(off + c_def, r, Color::Black());
+      PlaygroundPoint point_d(off + d_def, r, Color::White());
       auto [c, d] = DrawPlaygroundLine(point_c, point_d);
       render_path(PathBuilder{}.AddCubicCurve(a, b, d, c).TakePath(),
                   Cap::kButt, Join::kBevel);
@@ -264,11 +262,11 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     // Cap::kSquare demo.
     {
       Point off = Point(1, 0) * padding + margin;
-      static PlaygroundPoint point_a(off + a_def, r, Color::Black());
-      static PlaygroundPoint point_b(off + b_def, r, Color::White());
+      PlaygroundPoint point_a(off + a_def, r, Color::Black());
+      PlaygroundPoint point_b(off + b_def, r, Color::White());
       auto [a, b] = DrawPlaygroundLine(point_a, point_b);
-      static PlaygroundPoint point_c(off + c_def, r, Color::Black());
-      static PlaygroundPoint point_d(off + d_def, r, Color::White());
+      PlaygroundPoint point_c(off + c_def, r, Color::Black());
+      PlaygroundPoint point_d(off + d_def, r, Color::White());
       auto [c, d] = DrawPlaygroundLine(point_c, point_d);
       render_path(PathBuilder{}.AddCubicCurve(a, b, d, c).TakePath(),
                   Cap::kSquare, Join::kBevel);
@@ -277,11 +275,11 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     // Cap::kRound demo.
     {
       Point off = Point(2, 0) * padding + margin;
-      static PlaygroundPoint point_a(off + a_def, r, Color::Black());
-      static PlaygroundPoint point_b(off + b_def, r, Color::White());
+      PlaygroundPoint point_a(off + a_def, r, Color::Black());
+      PlaygroundPoint point_b(off + b_def, r, Color::White());
       auto [a, b] = DrawPlaygroundLine(point_a, point_b);
-      static PlaygroundPoint point_c(off + c_def, r, Color::Black());
-      static PlaygroundPoint point_d(off + d_def, r, Color::White());
+      PlaygroundPoint point_c(off + c_def, r, Color::Black());
+      PlaygroundPoint point_d(off + d_def, r, Color::White());
       auto [c, d] = DrawPlaygroundLine(point_c, point_d);
       render_path(PathBuilder{}.AddCubicCurve(a, b, d, c).TakePath(),
                   Cap::kRound, Join::kBevel);
@@ -290,12 +288,9 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     // Join::kBevel demo.
     {
       Point off = Point(0, 1) * padding + margin;
-      static PlaygroundPoint point_a =
-          PlaygroundPoint(off + a_def, r, Color::White());
-      static PlaygroundPoint point_b =
-          PlaygroundPoint(off + e_def, r, Color::White());
-      static PlaygroundPoint point_c =
-          PlaygroundPoint(off + c_def, r, Color::White());
+      PlaygroundPoint point_a = PlaygroundPoint(off + a_def, r, Color::White());
+      PlaygroundPoint point_b = PlaygroundPoint(off + e_def, r, Color::White());
+      PlaygroundPoint point_c = PlaygroundPoint(off + c_def, r, Color::White());
       Point a = DrawPlaygroundPoint(point_a);
       Point b = DrawPlaygroundPoint(point_b);
       Point c = DrawPlaygroundPoint(point_c);
@@ -307,9 +302,9 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     // Join::kMiter demo.
     {
       Point off = Point(1, 1) * padding + margin;
-      static PlaygroundPoint point_a(off + a_def, r, Color::White());
-      static PlaygroundPoint point_b(off + e_def, r, Color::White());
-      static PlaygroundPoint point_c(off + c_def, r, Color::White());
+      PlaygroundPoint point_a(off + a_def, r, Color::White());
+      PlaygroundPoint point_b(off + e_def, r, Color::White());
+      PlaygroundPoint point_c(off + c_def, r, Color::White());
       Point a = DrawPlaygroundPoint(point_a);
       Point b = DrawPlaygroundPoint(point_b);
       Point c = DrawPlaygroundPoint(point_c);
@@ -321,9 +316,9 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     // Join::kRound demo.
     {
       Point off = Point(2, 1) * padding + margin;
-      static PlaygroundPoint point_a(off + a_def, r, Color::White());
-      static PlaygroundPoint point_b(off + e_def, r, Color::White());
-      static PlaygroundPoint point_c(off + c_def, r, Color::White());
+      PlaygroundPoint point_a(off + a_def, r, Color::White());
+      PlaygroundPoint point_b(off + e_def, r, Color::White());
+      PlaygroundPoint point_c(off + c_def, r, Color::White());
       Point a = DrawPlaygroundPoint(point_a);
       Point b = DrawPlaygroundPoint(point_b);
       Point c = DrawPlaygroundPoint(point_c);
@@ -356,7 +351,7 @@ TEST_P(EntityTest, CubicCurveTest) {
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
 
-  static std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
+  std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
 
   auto contents = std::make_shared<SolidColorContents>();
   contents->SetColor(Color::Red());
@@ -407,7 +402,7 @@ TEST_P(EntityTest, CanDrawCorrectlyWithRotatedTransform) {
     Entity entity;
     entity.SetTransform(result_transform);
 
-    static std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
+    std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
 
     auto contents = std::make_shared<SolidColorContents>();
     contents->SetColor(Color::Red());
@@ -644,7 +639,7 @@ TEST_P(EntityTest, CubicCurveAndOverlapTest) {
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
 
-  static std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
+  std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
 
   auto contents = std::make_shared<SolidColorContents>();
   contents->SetColor(Color::Red());
@@ -808,11 +803,11 @@ TEST_P(EntityTest, BlendingModeOptions) {
     BlendMode selected_mode = blend_mode_values[current_blend_index];
 
     Point a, b, c, d;
-    static PlaygroundPoint point_a(Point(400, 100), 20, Color::White());
-    static PlaygroundPoint point_b(Point(200, 300), 20, Color::White());
+    PlaygroundPoint point_a(Point(400, 100), 20, Color::White());
+    PlaygroundPoint point_b(Point(200, 300), 20, Color::White());
     std::tie(a, b) = DrawPlaygroundLine(point_a, point_b);
-    static PlaygroundPoint point_c(Point(470, 190), 20, Color::White());
-    static PlaygroundPoint point_d(Point(270, 390), 20, Color::White());
+    PlaygroundPoint point_c(Point(470, 190), 20, Color::White());
+    PlaygroundPoint point_d(Point(270, 390), 20, Color::White());
     std::tie(c, d) = DrawPlaygroundLine(point_c, point_d);
 
     bool result = true;
@@ -858,7 +853,7 @@ TEST_P(EntityTest, BezierCircleScaled) {
     entity.SetTransform(
         Matrix::MakeScale({scale, scale, 1.0}).Translate({-90, -20, 0}));
 
-    static std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
+    std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
 
     auto contents = std::make_shared<SolidColorContents>();
     contents->SetColor(Color::Red());
@@ -987,6 +982,8 @@ TEST_P(EntityTest, GaussianBlurFilter) {
 
     auto input_rect =
         Rect::MakeXYWH(path_rect[0], path_rect[1], path_rect[2], path_rect[3]);
+
+    std::unique_ptr<Geometry> solid_color_input;
     if (selected_input_type == 0) {
       auto texture = std::make_shared<TextureContents>();
       texture->SetSourceRect(Rect::MakeSize(boston->GetSize()));
@@ -999,10 +996,10 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     } else {
       auto fill = std::make_shared<SolidColorContents>();
       fill->SetColor(input_color);
-      static std::unique_ptr<Geometry> geom =
+      solid_color_input =
           Geometry::MakeFillPath(PathBuilder{}.AddRect(input_rect).TakePath());
 
-      fill->SetGeometry(geom.get());
+      fill->SetGeometry(solid_color_input.get());
 
       input = fill;
       input_size = input_rect.GetSize();
@@ -1047,7 +1044,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     // Renders a red "cover" rectangle that shows the original position of the
     // unfiltered input.
     Entity cover_entity;
-    static std::unique_ptr<Geometry> geom =
+    std::unique_ptr<Geometry> geom =
         Geometry::MakeFillPath(PathBuilder{}.AddRect(input_rect).TakePath());
     auto contents = std::make_shared<SolidColorContents>();
     contents->SetColor(cover_color);
@@ -1061,7 +1058,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     std::optional<Rect> target_contents_coverage =
         target_contents->GetCoverage(entity);
     if (target_contents_coverage.has_value()) {
-      static std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(
+      std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(
           PathBuilder{}
               .AddRect(target_contents->GetCoverage(entity).value())
               .TakePath());
@@ -1159,7 +1156,7 @@ TEST_P(EntityTest, MorphologyFilter) {
     // Renders a red "cover" rectangle that shows the original position of  the
     // unfiltered input.
     Entity cover_entity;
-    static std::unique_ptr<Geometry> geom =
+    std::unique_ptr<Geometry> geom =
         Geometry::MakeFillPath(PathBuilder{}.AddRect(input_rect).TakePath());
     auto cover_contents = std::make_shared<SolidColorContents>();
     cover_contents->SetColor(cover_color);
@@ -1170,7 +1167,7 @@ TEST_P(EntityTest, MorphologyFilter) {
 
     // Renders a green bounding rect of the target filter.
     Entity bounds_entity;
-    static std::unique_ptr<Geometry> bounds_geom = Geometry::MakeFillPath(
+    std::unique_ptr<Geometry> bounds_geom = Geometry::MakeFillPath(
         PathBuilder{}
             .AddRect(contents->GetCoverage(entity).value())
             .TakePath());
@@ -1349,9 +1346,8 @@ TEST_P(EntityTest, RRectShadowTest) {
     }
     ImGui::End();
 
-    static PlaygroundPoint top_left_point(Point(200, 200), 30, Color::White());
-    static PlaygroundPoint bottom_right_point(Point(600, 400), 30,
-                                              Color::White());
+    PlaygroundPoint top_left_point(Point(200, 200), 30, Color::White());
+    PlaygroundPoint bottom_right_point(Point(600, 400), 30, Color::White());
     auto [top_left, bottom_right] =
         DrawPlaygroundLine(top_left_point, bottom_right_point);
     auto rect =
@@ -1700,7 +1696,7 @@ TEST_P(EntityTest, RuntimeEffect) {
 
   bool expect_dirty = true;
   Pipeline<PipelineDescriptor>* first_pipeline;
-  static std::unique_ptr<Geometry> geom = Geometry::MakeCover();
+  std::unique_ptr<Geometry> geom = Geometry::MakeCover();
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     EXPECT_EQ(runtime_stage->IsDirty(), expect_dirty);
@@ -2292,7 +2288,7 @@ TEST_P(EntityTest, CanRenderEmptyPathsWithoutCrashing) {
   EXPECT_TRUE(path.GetBoundingBox()->IsEmpty());
 
   auto contents = std::make_shared<SolidColorContents>();
-  static std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
+  std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
   contents->SetGeometry(geom.get());
   contents->SetColor(Color::Red());
 
@@ -2321,7 +2317,7 @@ TEST_P(EntityTest, DrawSuperEllipse) {
     ImGui::End();
 
     auto contents = std::make_shared<SolidColorContents>();
-    static std::unique_ptr<SuperellipseGeometry> geom =
+    std::unique_ptr<SuperellipseGeometry> geom =
         std::make_unique<SuperellipseGeometry>(Point{400, 400}, radius, degree,
                                                alpha, beta);
     contents->SetColor(color);
