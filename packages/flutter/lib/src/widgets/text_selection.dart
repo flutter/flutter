@@ -94,24 +94,6 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 ///  * [SelectionArea], which selects appropriate text selection controls
 ///    based on the current platform.
 abstract class TextSelectionControls {
-  /// Returns the bounding [Rect] of the text selection handle in local
-  /// coordinates.
-  ///
-  /// When interacting with a text seletion handle through a touch event, the
-  /// interactive area should be at least [kMinInteractiveDimension] square,
-  /// which this method does not consider.
-  Rect getHandleRect(TextSelectionHandleType type, double preferredLineHeight) {
-    final Size handleSize = getHandleSize(
-      preferredLineHeight,
-    );
-    return Rect.fromLTWH(
-      0.0,
-      0.0,
-      handleSize.width,
-      handleSize.height,
-    );
-  }
-
   /// Builds a selection handle of the given `type`.
   ///
   /// The top left corner of this widget is positioned at the bottom of the
@@ -1875,6 +1857,24 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
     }
   }
 
+  /// Returns the bounding [Rect] of the text selection handle in local
+  /// coordinates.
+  ///
+  /// When interacting with a text seletion handle through a touch event, the
+  /// interactive area should be at least [kMinInteractiveDimension] square,
+  /// which this method does not consider.
+  Rect _getHandleRect(TextSelectionHandleType type, double preferredLineHeight) {
+    final Size handleSize = widget.selectionControls.getHandleSize(
+      preferredLineHeight,
+    );
+    return Rect.fromLTWH(
+      0.0,
+      0.0,
+      handleSize.width,
+      handleSize.height,
+    );
+  }
+
   @override
   void didUpdateWidget(_SelectionHandleOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1892,7 +1892,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
 
   @override
   Widget build(BuildContext context) {
-    final Rect handleRect = widget.selectionControls.getHandleRect(
+    final Rect handleRect = _getHandleRect(
       widget.type,
       widget.preferredLineHeight,
     );
