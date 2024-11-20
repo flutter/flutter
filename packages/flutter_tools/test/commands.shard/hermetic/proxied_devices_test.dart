@@ -71,7 +71,6 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         notifyingLogger: notifyingLogger,
-        useImplicitPubspecResolution: true,
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
@@ -93,7 +92,6 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         notifyingLogger: notifyingLogger,
-        useImplicitPubspecResolution: true,
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
@@ -116,7 +114,6 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         notifyingLogger: notifyingLogger,
-        useImplicitPubspecResolution: true,
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
@@ -147,7 +144,6 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         notifyingLogger: notifyingLogger,
-        useImplicitPubspecResolution: true,
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
@@ -201,7 +197,6 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         notifyingLogger: notifyingLogger,
-        useImplicitPubspecResolution: true,
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
@@ -359,10 +354,7 @@ class FakeDeviceLogReader implements DeviceLogReader {
   bool disposeCalled = false;
 
   @override
-  int? appPid;
-
-  @override
-  FlutterVmService? connectedVMService;
+  Future<void> provideVmService(FlutterVmService? connectedVmService) async { }
 
   @override
   void dispose() {

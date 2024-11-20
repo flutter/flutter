@@ -18,6 +18,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
+import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -166,17 +167,17 @@ Future<XcodeBuildResult> buildXcodeProject({
     RemoveBitcodeMigration(app.project, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, globals.logger),
     UIApplicationMainDeprecationMigration(app.project, globals.logger),
-    if (app.project.usesSwiftPackageManager && app.project.flutterPluginSwiftPackageManifest.existsSync())
-      SwiftPackageManagerIntegrationMigration(
-        app.project,
-        SupportedPlatform.ios,
-        buildInfo,
-        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-        logger: globals.logger,
-        fileSystem: globals.fs,
-        plistParser: globals.plistParser,
-      ),
-      SwiftPackageManagerGitignoreMigration(project, globals.logger),
+    SwiftPackageManagerIntegrationMigration(
+      app.project,
+      SupportedPlatform.ios,
+      buildInfo,
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+      logger: globals.logger,
+      fileSystem: globals.fs,
+      plistParser: globals.plistParser,
+      features: featureFlags,
+    ),
+    SwiftPackageManagerGitignoreMigration(project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -938,7 +939,7 @@ Future<bool> _isPluginSwiftPackageOnly({
   required String pluginName,
   required FileSystem fileSystem,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project, useImplicitPubspecResolution: true);
+  final List<Plugin> plugins = await findPlugins(project);
   final Plugin? matched = plugins
       .where((Plugin plugin) =>
           plugin.name.toLowerCase() == pluginName.toLowerCase() &&
