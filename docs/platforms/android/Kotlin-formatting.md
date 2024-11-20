@@ -5,6 +5,8 @@ If you
 1. have submitted Kotlin code only to learn this when the analyzer check fails
 2. use Android Studio
 then there is good news! Android Studio can be configured to use `ktlint` to automatically apply formatting and highlight issues. To do this,
+
+
 1. Install the `ktlint` extension for Android Studio
    a) On Mac, this is `Android Studio > Settings > Plugins > ` Search for `ktlint`.
 2. Set the ruleset to be the same as the version used in `ci.yaml` (as of writing this is 1.1.1), and the baseline to be `dev/bots/test/analyze-test-input/ktlint-baseline.xml`.
