@@ -336,11 +336,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     return super.verifyThenRunCommand(commandPath);
   }
 
-  WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
-    stringArg(FlutterOptions.kWebRendererFlag),
-    useWasm: useWasm
-  );
-
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (!globals.fs.isFileSync('pubspec.yaml')) {
@@ -414,7 +409,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       usingCISystem: usingCISystem,
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
       debugLogsDirectoryPath: debugLogsDirectoryPath,
-      webRenderer: webRenderer,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
     );
@@ -528,12 +522,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit('--wasm is only supported on the web platform');
     }
 
-    if (webRenderer == WebRendererMode.skwasm && !useWasm) {
-      throwToolExit('Skwasm renderer requires --wasm');
-    }
-
-    if (webRenderer.isDeprecated) {
-      globals.logger.printWarning(webRenderer.deprecationWarning);
+    if (stringArg(FlutterOptions.kWebRendererFlag) != null) {
+      globals.logger.printWarning(WebRendererMode.deprecationWarning);
     }
 
     Device? integrationTestDevice;

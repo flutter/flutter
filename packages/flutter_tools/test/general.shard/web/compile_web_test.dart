@@ -83,7 +83,6 @@ void main() {
         ),
         const JsCompilerConfig.run(
           nativeNullAssertions: true,
-          renderer: WebRendererMode.canvaskit,
         ),
       ],
     );
@@ -170,7 +169,7 @@ void main() {
               BuildInfo.debug,
               ServiceWorkerStrategy.offlineFirst,
               compilerConfigs: <WebCompilerConfig>[
-                const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.canvaskit),
+                const JsCompilerConfig.run(nativeNullAssertions: true),
               ]
             ),
         throwsToolExit(message: 'Failed to compile application for the Web.'));

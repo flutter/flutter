@@ -87,7 +87,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     required Logger logger,
     required Artifacts? artifacts,
     required ProcessManager processManager,
-    required this.webRenderer,
     required this.useWasm,
     TestTimeRecorder? testTimeRecorder,
   }) : _fileSystem = fileSystem,
@@ -101,7 +100,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_webSocketHandler.handler)
         .add(createDirectoryHandler(
           fileSystem.directory(fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools')),
-          crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
+          crossOriginIsolated: useWasm,
         ))
         .add(_handleStaticArtifact)
         .add(_localCanvasKitHandler)
@@ -110,7 +109,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_handleTestRequest)
         .add(createDirectoryHandler(
           fileSystem.directory(fileSystem.path.join(fileSystem.currentDirectory.path, 'test')),
-          crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
+          crossOriginIsolated: useWasm,
         ))
         .add(_packageFilesHandler);
     _server.mount(cascade.handler);
@@ -138,7 +137,6 @@ class FlutterWebPlatform extends PlatformPlugin {
   final OneOffHandler _webSocketHandler = OneOffHandler();
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
   final String _root;
-  final WebRendererMode webRenderer;
   final bool useWasm;
 
   /// Allows only one test suite (typically one test file) to be loaded and run
@@ -167,7 +165,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     required ChromiumLauncher chromiumLauncher,
     required Artifacts? artifacts,
     required ProcessManager processManager,
-    required WebRendererMode webRenderer,
     required bool useWasm,
     TestTimeRecorder? testTimeRecorder,
     Uri? testPackageUri,
@@ -208,7 +205,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       logger: logger,
       nullAssertions: nullAssertions,
       processManager: processManager,
-      webRenderer: webRenderer,
       useWasm: useWasm,
       testTimeRecorder: testTimeRecorder,
     );
@@ -266,6 +262,8 @@ class FlutterWebPlatform extends PlatformPlugin {
     _artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
     'flutter.js',
   ));
+
+  WebRendererMode get webRenderer => WebRendererMode.getDefault(useWasm: useWasm);
 
   File get _dartSdk {
     final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap = buildInfo.ddcModuleFormat == DdcModuleFormat.ddc ? kDdcDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
@@ -392,7 +390,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         final String basename = _fileSystem.path.basename(fileUri.toFilePath());
         final shelf.Handler handler = createDirectoryHandler(
           _fileSystem.directory(dirname),
-          crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
+          crossOriginIsolated: useWasm,
         );
         final shelf.Request modifiedRequest = shelf.Request(
           request.method,
@@ -498,14 +496,14 @@ class FlutterWebPlatform extends PlatformPlugin {
     return useWasm ? '''
       {
         compileTarget: "dart2wasm",
-        renderer: "${webRenderer.name}",
+        renderer: "${WebRendererMode.skwasm.name}",
         mainWasmPath: "main.dart.wasm",
         jsSupportRuntimePath: "main.dart.mjs",
       }
 ''' : '''
       {
         compileTarget: "dartdevc",
-        renderer: "${webRenderer.name}",
+        renderer: "${WebRendererMode.canvaskit.name}",
         mainJsPath: "main.dart.browser_test.dart.js",
       }
 ''';
@@ -539,7 +537,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         </html>
       ''', headers: <String, String>{
         'Content-Type': 'text/html',
-        if (webRenderer == WebRendererMode.skwasm)
+        if (useWasm)
           ...<String, String>{
             'Cross-Origin-Opener-Policy': 'same-origin',
             'Cross-Origin-Embedder-Policy': 'credentialless',

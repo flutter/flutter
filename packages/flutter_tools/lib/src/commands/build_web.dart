@@ -141,21 +141,14 @@ class BuildWebCommand extends BuildSubCommand {
         ? int.parse(dart2jsOptimizationLevelValue.substring(1))
         : optimizationLevel;
 
-    final String? webRendererString = stringArg(FlutterOptions.kWebRendererFlag);
-    final WebRendererMode? webRenderer = webRendererString == null
-        ? null
-        : WebRendererMode.values.byName(webRendererString);
+    if (stringArg(FlutterOptions.kWebRendererFlag) != null) {
+      globals.logger.printWarning(WebRendererMode.deprecationWarning);
+    }
 
     final bool sourceMaps = boolArg('source-maps');
 
     final List<WebCompilerConfig> compilerConfigs;
-    if (webRenderer != null && webRenderer.isDeprecated) {
-      globals.logger.printWarning(webRenderer.deprecationWarning);
-    }
     if (boolArg(FlutterOptions.kWebWasmFlag)) {
-      if (webRenderer != null) {
-        throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');
-      }
       globals.logger.printBox(
         title: 'New feature',
         '''
@@ -185,7 +178,6 @@ class BuildWebCommand extends BuildSubCommand {
         nativeNullAssertions: boolArg('native-null-assertions'),
         noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
         sourceMaps: sourceMaps,
-        renderer: webRenderer ?? WebRendererMode.defaultForJs,
       )];
     }
 

@@ -317,7 +317,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
-          webRenderer: debuggingOptions.webRenderer,
           isWasm: debuggingOptions.webUseWasm,
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
@@ -395,15 +394,13 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
   WebCompilerConfig get _compilerConfig {
     if (debuggingOptions.webUseWasm) {
-      return WasmCompilerConfig(
+      return const WasmCompilerConfig(
         optimizationLevel: 0,
         stripWasm: false,
-        renderer: debuggingOptions.webRenderer
       );
     }
     return JsCompilerConfig.run(
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-      renderer: debuggingOptions.webRenderer,
     );
   }
 

@@ -90,7 +90,6 @@ class WebTestCompiler {
     required String testOutputDir,
     required List<String> testFiles,
     required BuildInfo buildInfo,
-    required WebRendererMode webRenderer,
     required bool useWasm,
   }) async {
     return useWasm ? _compileWasm(
@@ -98,13 +97,11 @@ class WebTestCompiler {
       testOutputDir: testOutputDir,
       testFiles: testFiles,
       buildInfo: buildInfo,
-      webRenderer: webRenderer,
     ) : _compileJS(
       projectDirectory: projectDirectory,
       testOutputDir: testOutputDir,
       testFiles: testFiles,
       buildInfo: buildInfo,
-      webRenderer: webRenderer,
     );
   }
 
@@ -113,7 +110,6 @@ class WebTestCompiler {
     required String testOutputDir,
     required List<String> testFiles,
     required BuildInfo buildInfo,
-    required WebRendererMode webRenderer,
   }) async {
     LanguageVersion languageVersion = LanguageVersion(2, 8);
     late final String platformDillName;
@@ -156,7 +152,7 @@ class WebTestCompiler {
       fileSystem: _fileSystem,
       config: _config,
     );
-    final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
+    final List<String> dartDefines = WebRendererMode.defaultForJs.updateDartDefines(buildInfo.dartDefines);
     final ResidentCompiler residentCompiler = ResidentCompiler(
       _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       buildMode: buildInfo.mode,
@@ -211,7 +207,6 @@ class WebTestCompiler {
     required String testOutputDir,
     required List<String> testFiles,
     required BuildInfo buildInfo,
-    required WebRendererMode webRenderer,
   }) async {
     final Directory outputDirectory = _fileSystem.directory(testOutputDir)
       ..createSync(recursive: true);
@@ -224,7 +219,7 @@ class WebTestCompiler {
 
     final String platformBinariesPath = _artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
     final String platformFilePath = _fileSystem.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
-    final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
+    final List<String> dartDefines = WebRendererMode.defaultForWasm.updateDartDefines(buildInfo.dartDefines);
     final File outputWasmFile = outputDirectory.childFile('main.dart.wasm');
 
     final List<String> compilationArgs = <String>[
@@ -238,10 +233,8 @@ class WebTestCompiler {
       '--extra-compiler-option=--multi-root=${outputDirectory.path}',
       '--extra-compiler-option=--enable-asserts',
       '--extra-compiler-option=--no-inlining',
-      if (webRenderer == WebRendererMode.skwasm) ...<String>[
-        '--extra-compiler-option=--import-shared-memory',
-        '--extra-compiler-option=--shared-memory-max-pages=32768',
-      ],
+      '--extra-compiler-option=--import-shared-memory',
+      '--extra-compiler-option=--shared-memory-max-pages=32768',
       ...buildInfo.extraFrontEndOptions,
       for (final String dartDefine in dartDefines)
         '-D$dartDefine',

@@ -234,11 +234,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
-  WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
-    stringArg(FlutterOptions.kWebRendererFlag),
-    useWasm: useWasm
-  );
-
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   @visibleForTesting
   @protected
@@ -271,7 +266,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
         webHeaders: webHeaders,
-        webRenderer: webRenderer,
         webUseWasm: useWasm,
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
@@ -322,7 +316,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
         webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
         webHeaders: webHeaders,
-        webRenderer: webRenderer,
         webUseWasm: useWasm,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
@@ -654,12 +647,8 @@ class RunCommand extends RunCommandBase {
       throwToolExit('--wasm is only supported on the web platform');
     }
 
-    if (webRenderer.isDeprecated) {
-      globals.logger.printWarning(webRenderer.deprecationWarning);
-    }
-
-    if (webRenderer == WebRendererMode.skwasm && !useWasm) {
-      throwToolExit('Skwasm renderer requires --wasm');
+    if (stringArg(FlutterOptions.kWebRendererFlag) != null) {
+      globals.logger.printWarning(WebRendererMode.deprecationWarning);
     }
 
     final String? flavor = stringArg('flavor');

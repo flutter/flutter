@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/test/flutter_web_platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
-import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/memory_fs.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:test/test.dart';
@@ -92,7 +91,6 @@ void main() {
       chromiumLauncher: chromiumLauncher,
       artifacts: artifacts,
       processManager: processManager,
-      webRenderer: WebRendererMode.canvaskit,
       useWasm: false,
       serverFactory: () async => server,
       testPackageUri: Uri.parse('test'),
@@ -142,7 +140,6 @@ void main() {
       chromiumLauncher: chromiumLauncher,
       artifacts: artifacts,
       processManager: processManager,
-      webRenderer: WebRendererMode.canvaskit,
       useWasm: false,
       serverFactory: () async => server,
       testPackageUri: Uri.parse('test'),

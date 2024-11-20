@@ -12,8 +12,7 @@ enum CompileTarget {
 }
 
 sealed class WebCompilerConfig {
-  const WebCompilerConfig({required this.renderer,
-                           this.optimizationLevel,
+  const WebCompilerConfig({this.optimizationLevel,
                            required this.sourceMaps});
   /// Build environment flag for [optimizationLevel].
   static const String kOptimizationLevel = 'OptimizationLevel';
@@ -42,7 +41,7 @@ sealed class WebCompilerConfig {
 
   /// Returns which target this compiler outputs (js or wasm)
   CompileTarget get compileTarget;
-  final WebRendererMode renderer;
+  WebRendererMode get renderer;
 
   String get buildKey;
 
@@ -66,16 +65,13 @@ class JsCompilerConfig extends WebCompilerConfig {
     super.optimizationLevel,
     this.noFrequencyBasedMinification = false,
     super.sourceMaps = true,
-    super.renderer = WebRendererMode.defaultForJs,
   });
 
   /// Instantiates [JsCompilerConfig] suitable for the `flutter run` command.
   const JsCompilerConfig.run({
     required bool nativeNullAssertions,
-    required WebRendererMode renderer,
   }) : this(
           nativeNullAssertions: nativeNullAssertions,
-          renderer: renderer,
         );
 
   /// Build environment flag for [dumpInfo].
@@ -99,6 +95,9 @@ class JsCompilerConfig extends WebCompilerConfig {
 
   /// Whether native null assertions are enabled.
   final bool nativeNullAssertions;
+
+  @override
+  WebRendererMode get renderer => WebRendererMode.defaultForJs;
 
   // If `--no-frequency-based-minification` should be passed to dart2js
   // TODO(kevmoo): consider renaming this to be "positive". Double negatives are confusing.
@@ -155,7 +154,6 @@ class WasmCompilerConfig extends WebCompilerConfig {
     super.optimizationLevel,
     this.stripWasm = true,
     super.sourceMaps = true,
-    super.renderer = WebRendererMode.defaultForWasm,
   });
 
   /// Build environment for [stripWasm].
@@ -163,6 +161,9 @@ class WasmCompilerConfig extends WebCompilerConfig {
 
   /// Whether to strip the wasm file of static symbols.
   final bool stripWasm;
+
+  @override
+  WebRendererMode get renderer => WebRendererMode.defaultForJs;
 
   @override
   CompileTarget get compileTarget => CompileTarget.wasm;

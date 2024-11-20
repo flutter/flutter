@@ -190,7 +190,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         testOutputDir: tempBuildDir,
         testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
-        webRenderer: debuggingOptions.webRenderer,
         useWasm: debuggingOptions.webUseWasm,
       );
       testArgs
@@ -223,7 +222,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
               logger: globals.logger,
             ),
             testTimeRecorder: testTimeRecorder,
-            webRenderer: debuggingOptions.webRenderer,
             useWasm: debuggingOptions.webUseWasm,
           );
         },

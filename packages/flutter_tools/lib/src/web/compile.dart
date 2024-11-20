@@ -192,14 +192,6 @@ enum WebRendererMode implements CliEnum {
   /// Always use skwasm.
   skwasm;
 
-  factory WebRendererMode.fromCliOption(String? webRendererString,
-      {required bool useWasm}) {
-    if (webRendererString == null) {
-      return getDefault(useWasm: useWasm);
-    }
-    return WebRendererMode.values.byName(webRendererString);
-  }
-
   static WebRendererMode getDefault({required bool useWasm}) {
     return useWasm ? defaultForWasm : defaultForJs;
   }
@@ -218,8 +210,8 @@ enum WebRendererMode implements CliEnum {
       };
 
   /// Returns a consistent deprecation warning for the WebRendererMode.
-  String get deprecationWarning =>
-      'The HTML Renderer is deprecated. Do not use "--web-renderer=$name".'
+  static String get deprecationWarning =>
+      'The --web-renderer flag is not supported anymore.'
       '\nSee: https://docs.flutter.dev/to/web-html-renderer-deprecation';
 
   @override

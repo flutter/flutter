@@ -1069,7 +1069,6 @@ void main() {
                   WasmCompilerConfig(
                     optimizationLevel: level,
                     stripWasm: strip,
-                    renderer: renderer,
                     sourceMaps: sourceMaps,
                   )
                 ).build(environment);
@@ -1097,7 +1096,6 @@ void main() {
       JsCompilerConfig(optimizationLevel: 0),
       JsCompilerConfig(noFrequencyBasedMinification: true),
       JsCompilerConfig(sourceMaps: false),
-      JsCompilerConfig(renderer: WebRendererMode.html),
 
       // All properties non-default
       JsCompilerConfig(
@@ -1107,7 +1105,6 @@ void main() {
         optimizationLevel: 0,
         noFrequencyBasedMinification: true,
         sourceMaps: false,
-        renderer: WebRendererMode.html,
       ),
     ];
 
@@ -1127,14 +1124,14 @@ void main() {
 
       // Each individual property being made non-default
       WasmCompilerConfig(optimizationLevel: 0),
-      WasmCompilerConfig(renderer: WebRendererMode.canvaskit),
       WasmCompilerConfig(stripWasm: false),
+      WasmCompilerConfig(sourceMaps: false),
 
       // All properties non-default
       WasmCompilerConfig(
         optimizationLevel: 0,
         stripWasm: false,
-        renderer: WebRendererMode.canvaskit,
+        sourceMaps: false,
       ),
     ];
 

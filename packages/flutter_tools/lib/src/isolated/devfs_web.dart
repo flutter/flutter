@@ -180,7 +180,6 @@ class WebAssetServer implements AssetReader {
     ExpressionCompiler? expressionCompiler,
     Map<String, String> extraHeaders,
     NullSafetyMode nullSafetyMode, {
-    required WebRendererMode webRenderer,
     required bool isWasm,
     required bool useLocalCanvasKit,
     bool testMode = false,
@@ -222,6 +221,8 @@ class WebAssetServer implements AssetReader {
     for (final MapEntry<String, String> header in extraHeaders.entries) {
       httpServer.defaultResponseHeaders.add(header.key, header.value);
     }
+
+    final WebRendererMode webRenderer = WebRendererMode.getDefault(useWasm: isWasm);
 
     final PackageConfig packageConfig = buildInfo.packageConfig;
     final Map<String, String> digests = <String, String>{};
@@ -744,7 +745,6 @@ class WebDevFS implements DevFS {
     required this.nativeNullAssertions,
     required this.nullSafetyMode,
     required this.ddcModuleSystem,
-    required this.webRenderer,
     required this.isWasm,
     required this.useLocalCanvasKit,
     required this.rootDirectory,
@@ -772,7 +772,6 @@ class WebDevFS implements DevFS {
   final NullSafetyMode nullSafetyMode;
   final String? tlsCertPath;
   final String? tlsCertKeyPath;
-  final WebRendererMode webRenderer;
   final bool isWasm;
   final bool useLocalCanvasKit;
 
@@ -874,7 +873,6 @@ class WebDevFS implements DevFS {
       expressionCompiler,
       extraHeaders,
       nullSafetyMode,
-      webRenderer: webRenderer,
       isWasm: isWasm,
       useLocalCanvasKit: useLocalCanvasKit,
       testMode: testMode,

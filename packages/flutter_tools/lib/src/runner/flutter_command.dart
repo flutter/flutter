@@ -722,13 +722,9 @@ abstract class FlutterCommand extends Command<void> {
       hide: true,
       FlutterOptions.kWebRendererFlag,
       allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
-      help: 'This option is deprecated and will be removed in a future Flutter '
-            'release.\n'
-            'Selects the renderer implementation to use when building for the '
-            'web. The supported renderers are "canvaskit" when compiling to '
-            'JavaScript, and "skwasm" when compiling to WebAssembly. Other '
-            'renderer and compiler combinations are no longer supported. '
-            'Consider migrating your app to a supported renderer.',
+      help: 'This option is no longer available!\n'
+            'CanvasKit is the default renderer. To use the Skwasm renderer, '
+            'set the --${FlutterOptions.kWebWasmFlag} flag.',
       allowedHelp: CliEnum.allowedHelp(WebRendererMode.values)
     );
   }

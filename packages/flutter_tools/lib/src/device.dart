@@ -992,7 +992,6 @@ class DebuggingOptions {
     this.webEnableExpressionEvaluation = false,
     this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
-    WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.vmserviceOutFile,
     this.fastStart = false,
@@ -1010,8 +1009,7 @@ class DebuggingOptions {
     this.ipv6 = false,
     this.google3WorkspaceRoot,
     this.printDtd = false,
-   }) : debuggingEnabled = true,
-        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
+   }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
       this.dartEntrypointArgs = const <String>[],
@@ -1028,7 +1026,6 @@ class DebuggingOptions {
       this.webBrowserFlags = const <String>[],
       this.webLaunchUrl,
       this.webHeaders = const <String, String>{},
-      WebRendererMode? webRenderer,
       this.webUseWasm = false,
       this.cacheSkSL = false,
       this.traceAllowlist,
@@ -1070,8 +1067,7 @@ class DebuggingOptions {
       enableDevTools = false,
       ipv6 = false,
       google3WorkspaceRoot = null,
-      printDtd = false,
-      webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
+      printDtd = false;
 
   DebuggingOptions._({
     required this.buildInfo,
@@ -1114,7 +1110,6 @@ class DebuggingOptions {
     required this.webEnableExpressionEvaluation,
     required this.webHeaders,
     required this.webLaunchUrl,
-    required this.webRenderer,
     required this.webUseWasm,
     required this.vmserviceOutFile,
     required this.fastStart,
@@ -1209,7 +1204,7 @@ class DebuggingOptions {
   final Map<String, String> webHeaders;
 
   /// Which web renderer to use for the debugging session
-  final WebRendererMode webRenderer;
+  WebRendererMode get webRenderer => WebRendererMode.getDefault(useWasm: webUseWasm);
 
   /// Whether to compile to webassembly
   final bool webUseWasm;
@@ -1321,7 +1316,6 @@ class DebuggingOptions {
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
     'webHeaders': webHeaders,
-    'webRenderer': webRenderer.name,
     'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
@@ -1386,7 +1380,6 @@ class DebuggingOptions {
       webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
       webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
       webLaunchUrl: json['webLaunchUrl'] as String?,
-      webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
       webUseWasm: json['webUseWasm']! as bool,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,
