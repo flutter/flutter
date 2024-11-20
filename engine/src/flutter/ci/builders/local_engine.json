@@ -291,6 +291,33 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
+        "os=Linux",
+        "device_type=none"
+      ],
+      "gclient_variables": {
+        "use_rbe": true
+      },
+      "gn": [
+        "--runtime-mode",
+        "debug",
+        "--unoptimized",
+        "--android",
+        "--android-cpu=x64",
+        "--no-stripped",
+        "--no-lto",
+        "--rbe",
+        "--no-goma"
+      ],
+      "name": "linux/android_debug_unopt_x64",
+      "description": "Builds an unoptimized debug mode engine that targets 64-bit x64 Android from a Linux host.",
+      "ninja": {
+        "config": "android_debug_unopt_x64",
+        "targets": []
+      }
+    },
+    {
+      "cas_archive": false,
+      "drone_dimensions": [
         "os=Windows-10",
         "device_type=none"
       ],
