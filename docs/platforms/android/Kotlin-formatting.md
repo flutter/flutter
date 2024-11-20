@@ -2,7 +2,7 @@
 
 Kotlin code in this repository is formatted and linted with [`ktlint`](https://github.com/pinterest/ktlint).
 If you
-1. have submitted Kotlin code only to learn this when the analyzer check fails
+1. have submitted Kotlin code that failed the analyzer check step
 2. use Android Studio
 
 
