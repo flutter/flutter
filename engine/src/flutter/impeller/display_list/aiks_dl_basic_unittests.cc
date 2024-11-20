@@ -7,7 +7,7 @@
 #include "display_list/dl_tile_mode.h"
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
-#include "display_list/effects/dl_image_filter.h"
+#include "display_list/effects/dl_image_filters.h"
 #include "display_list/effects/dl_mask_filter.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
@@ -835,7 +835,7 @@ TEST_P(AiksTest, CanRenderClippedBackdropFilter) {
   builder.ClipRRect(clip_rrect, DlCanvas::ClipOp::kIntersect);
 
   DlPaint save_paint;
-  auto backdrop_filter = std::make_shared<DlColorFilterImageFilter>(
+  auto backdrop_filter = DlColorFilterImageFilter::Make(
       DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kExclusion));
   builder.SaveLayer(&clip_rect, &save_paint, backdrop_filter.get());
 
@@ -996,7 +996,7 @@ TEST_P(AiksTest, MatrixImageFilterDoesntCullWhenTranslatedFromOffscreen) {
   // Draw a circle in a SaveLayer at -300, but move it back on-screen with a
   // +300 translation applied by a SaveLayer image filter.
   DlPaint paint;
-  SkMatrix translate = SkMatrix::Translate(300, 0);
+  DlMatrix translate = DlMatrix::MakeTranslation({300, 0});
   paint.setImageFilter(
       DlMatrixImageFilter::Make(translate, DlImageSampling::kLinear));
   builder.SaveLayer(nullptr, &paint);
@@ -1020,7 +1020,7 @@ TEST_P(AiksTest,
 
   DlPaint paint;
   paint.setImageFilter(DlMatrixImageFilter::Make(
-      SkMatrix::Translate(300, 0) * SkMatrix::Scale(2, 2),
+      DlMatrix::MakeTranslation({300, 0}) * DlMatrix::MakeScale({2, 2, 1}),
       DlImageSampling::kNearestNeighbor));
   builder.SaveLayer(nullptr, &paint);
 
@@ -1043,7 +1043,7 @@ TEST_P(AiksTest, ClearColorOptimizationWhenSubpassIsBiggerThanParentPass) {
   paint.setColor(DlColor::kRed());
   builder.DrawRect(SkRect::MakeLTRB(200, 200, 300, 300), paint);
 
-  paint.setImageFilter(DlMatrixImageFilter::Make(SkMatrix::Scale(2, 2),
+  paint.setImageFilter(DlMatrixImageFilter::Make(DlMatrix::MakeScale({2, 2, 1}),
                                                  DlImageSampling::kLinear));
   builder.SaveLayer(nullptr, &paint);
   // Draw a rectangle that would fully cover the parent pass size, but not
@@ -1538,8 +1538,8 @@ TEST_P(AiksTest, MassiveScalingMatrixImageFilter) {
   }
   DisplayListBuilder builder(SkRect::MakeSize(SkSize::Make(1000, 1000)));
 
-  auto filter = DlMatrixImageFilter::Make(SkMatrix::Scale(0.001, 0.001),
-                                          DlImageSampling::kLinear);
+  auto filter = DlMatrixImageFilter::Make(
+      DlMatrix::MakeScale({0.001, 0.001, 1}), DlImageSampling::kLinear);
 
   DlPaint paint;
   paint.setImageFilter(filter);

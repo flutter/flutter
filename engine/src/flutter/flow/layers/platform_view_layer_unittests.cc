@@ -132,7 +132,7 @@ TEST_F(PlatformViewLayerTest, StateTransfer) {
   transform_layer2->Add(child2);
 
   auto embedder = MockViewEmbedder();
-  DisplayListBuilder builder({0, 0, 500, 500});
+  DisplayListBuilder builder(DlRect::MakeWH(500, 500));
   embedder.AddCanvas(&builder);
 
   PrerollContext* preroll_ctx = preroll_context();

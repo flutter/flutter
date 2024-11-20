@@ -14,7 +14,7 @@
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
 #include "flutter/display_list/effects/dl_color_source.h"
-#include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
@@ -1010,9 +1010,10 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
 
       // Set the matrix filter
       auto filter_matrix =
-          SkMatrix::MakeAll(scale[0], skew[0], translation[0],  //
-                            skew[1], scale[1], translation[1],  //
-                            0, 0, 1);
+          Matrix::MakeRow(scale[0], skew[0], 0.0f, translation[0],  //
+                          skew[1], scale[1], 0.0f, translation[1],  //
+                          0.0f, 0.0f, 1.0f, 0.0f,                   //
+                          0.0f, 0.0f, 0.0f, 1.0f);
 
       if (enable) {
         switch (selected_matrix_type) {
@@ -1071,8 +1072,8 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilterWhenSavingLayer) {
 
     flutter::DlPaint save_paint;
     SkRect bounds = SkRect::MakeXYWH(100, 100, 100, 100);
-    SkMatrix translate_matrix =
-        SkMatrix::Translate(translation[0], translation[1]);
+    Matrix translate_matrix =
+        Matrix::MakeTranslation({translation[0], translation[1]});
     if (enable_save_layer) {
       auto filter = flutter::DlMatrixImageFilter(
           translate_matrix, flutter::DlImageSampling::kNearestNeighbor);
@@ -1083,10 +1084,10 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilterWhenSavingLayer) {
       builder.Transform(translate_matrix);
     }
 
-    SkMatrix filter_matrix = SkMatrix::I();
-    filter_matrix.postTranslate(-150, -150);
-    filter_matrix.postScale(0.2f, 0.2f);
-    filter_matrix.postTranslate(150, 150);
+    Matrix filter_matrix;
+    filter_matrix.Translate({150, 150});
+    filter_matrix.Scale({0.2f, 0.2f});
+    filter_matrix.Translate({-150, -150});
     auto filter = flutter::DlMatrixImageFilter(
         filter_matrix, flutter::DlImageSampling::kNearestNeighbor);
 
@@ -1532,7 +1533,7 @@ TEST_P(DisplayListTest, DrawMaskBlursThatMightUseSaveLayers) {
   auto normal_filter =
       flutter::DlBlurMaskFilter::Make(flutter::DlBlurStyle::kNormal, 5.0f);
   auto rotate_if = flutter::DlMatrixImageFilter::Make(
-      SkMatrix::RotateDeg(10), flutter::DlImageSampling::kLinear);
+      Matrix::MakeRotationZ(Degrees(10)), flutter::DlImageSampling::kLinear);
   flutter::DlPaint normal_if_paint =
       flutter::DlPaint()                         //
           .setMaskFilter(solid_filter)           //

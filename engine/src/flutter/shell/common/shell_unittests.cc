@@ -21,6 +21,7 @@
 #include "assets/asset_resolver.h"
 #include "assets/directory_asset_bundle.h"
 #include "common/graphics/persistent_cache.h"
+#include "flutter/display_list/effects/dl_blur_image_filter.h"
 #include "flutter/flow/layers/backdrop_filter_layer.h"
 #include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/layers/display_list_layer.h"
@@ -990,7 +991,7 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
     auto clip_rect_layer = std::make_shared<ClipRectLayer>(
         SkRect::MakeLTRB(0, 0, 30, 30), Clip::kHardEdge);
     transform_layer->Add(clip_rect_layer);
-    auto filter = std::make_shared<DlBlurImageFilter>(5, 5, DlTileMode::kClamp);
+    auto filter = DlBlurImageFilter::Make(5, 5, DlTileMode::kClamp);
     auto backdrop_filter_layer =
         std::make_shared<BackdropFilterLayer>(filter, DlBlendMode::kSrcOver);
     clip_rect_layer->Add(backdrop_filter_layer);

@@ -110,7 +110,7 @@ std::optional<Rect> MatrixFilterContents::GetFilterSourceCoverage(
   auto transform = effect_transform *          //
                    matrix_ *                   //
                    effect_transform.Invert();  //
-  if (transform.GetDeterminant() == 0.0) {
+  if (!transform.IsInvertible()) {
     return std::nullopt;
   }
   auto inverse = transform.Invert();

@@ -53,7 +53,7 @@ class DisplayListMatrixClipState {
   }
 
   bool using_4x4_matrix() const { return !matrix_.IsAffine(); }
-  bool is_matrix_invertable() const { return matrix_.GetDeterminant() != 0.0f; }
+  bool is_matrix_invertable() const { return matrix_.IsInvertible(); }
   bool has_perspective() const { return matrix_.HasPerspective(); }
 
   const DlMatrix& matrix() const { return matrix_; }

@@ -31,7 +31,7 @@ class ImageFilter final
   static ScopedObject<ImageFilter> MakeCompose(const ImageFilter& outer,
                                                const ImageFilter& inner);
 
-  explicit ImageFilter(std::shared_ptr<const flutter::DlImageFilter> filter);
+  explicit ImageFilter(std::shared_ptr<flutter::DlImageFilter> filter);
 
   ~ImageFilter() override;
 
@@ -39,10 +39,10 @@ class ImageFilter final
 
   ImageFilter& operator=(const ImageFilter&) = delete;
 
-  const std::shared_ptr<const flutter::DlImageFilter>& GetImageFilter() const;
+  const std::shared_ptr<flutter::DlImageFilter>& GetImageFilter() const;
 
  private:
-  std::shared_ptr<const flutter::DlImageFilter> filter_;
+  std::shared_ptr<flutter::DlImageFilter> filter_;
 };
 
 }  // namespace impeller::interop

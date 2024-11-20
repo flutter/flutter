@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "display_list/effects/dl_color_source.h"
+#include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/skia/dl_sk_paint_dispatcher.h"
 
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"

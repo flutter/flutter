@@ -4,6 +4,7 @@
 
 #include "gtest/gtest.h"
 
+#include "flutter/display_list/effects/dl_blur_image_filter.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/flow/layers/layer.h"
@@ -287,14 +288,15 @@ TEST(LayerStateStack, ColorFilter) {
 
 TEST(LayerStateStack, ImageFilter) {
   SkRect rect = {10, 10, 20, 20};
-  std::shared_ptr<DlBlurImageFilter> outer_filter =
-      std::make_shared<DlBlurImageFilter>(2.0f, 2.0f, DlTileMode::kClamp);
-  std::shared_ptr<DlBlurImageFilter> inner_filter =
-      std::make_shared<DlBlurImageFilter>(3.0f, 3.0f, DlTileMode::kClamp);
+  std::shared_ptr<DlImageFilter> outer_filter =
+      DlBlurImageFilter::Make(2.0f, 2.0f, DlTileMode::kClamp);
+  std::shared_ptr<DlImageFilter> inner_filter =
+      DlBlurImageFilter::Make(3.0f, 3.0f, DlTileMode::kClamp);
   SkRect inner_src_rect = rect;
-  SkRect outer_src_rect;
-  ASSERT_EQ(inner_filter->map_local_bounds(rect, outer_src_rect),
-            &outer_src_rect);
+  DlRect dl_outer_src_rect;
+  ASSERT_EQ(inner_filter->map_local_bounds(ToDlRect(rect), dl_outer_src_rect),
+            &dl_outer_src_rect);
+  SkRect outer_src_rect = ToSkRect(dl_outer_src_rect);
 
   LayerStateStack state_stack;
   state_stack.set_preroll_delegate(SkRect::MakeLTRB(0, 0, 50, 50));
@@ -429,8 +431,8 @@ TEST(LayerStateStack, OpacityAndColorFilterInteraction) {
 
 TEST(LayerStateStack, OpacityAndImageFilterInteraction) {
   SkRect rect = {10, 10, 20, 20};
-  std::shared_ptr<DlBlurImageFilter> image_filter =
-      std::make_shared<DlBlurImageFilter>(2.0f, 2.0f, DlTileMode::kClamp);
+  std::shared_ptr<DlImageFilter> image_filter =
+      DlBlurImageFilter::Make(2.0f, 2.0f, DlTileMode::kClamp);
 
   DisplayListBuilder builder;
   LayerStateStack state_stack;
@@ -491,8 +493,8 @@ TEST(LayerStateStack, ColorFilterAndImageFilterInteraction) {
   std::shared_ptr<DlBlendColorFilter> color_filter =
       std::make_shared<DlBlendColorFilter>(DlColor::kYellow(),
                                            DlBlendMode::kColorBurn);
-  std::shared_ptr<DlBlurImageFilter> image_filter =
-      std::make_shared<DlBlurImageFilter>(2.0f, 2.0f, DlTileMode::kClamp);
+  std::shared_ptr<DlImageFilter> image_filter =
+      DlBlurImageFilter::Make(2.0f, 2.0f, DlTileMode::kClamp);
 
   DisplayListBuilder builder;
   LayerStateStack state_stack;

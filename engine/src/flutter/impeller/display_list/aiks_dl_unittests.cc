@@ -8,7 +8,7 @@
 #include "display_list/dl_tile_mode.h"
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
-#include "display_list/effects/dl_image_filter.h"
+#include "display_list/effects/dl_image_filters.h"
 #include "display_list/geometry/dl_geometry_types.h"
 #include "display_list/geometry/dl_path.h"
 #include "display_list/image/dl_image.h"
@@ -641,7 +641,7 @@ TEST_P(AiksTest, MatrixImageFilterMagnify) {
 
     builder.Translate(600, -200);
 
-    SkMatrix matrix = SkMatrix::Scale(scale, scale);
+    DlMatrix matrix = DlMatrix::MakeScale({scale, scale, 1});
     DlPaint paint;
     paint.setImageFilter(
         DlMatrixImageFilter::Make(matrix, DlImageSampling::kLinear));
@@ -663,7 +663,7 @@ TEST_P(AiksTest, ImageFilteredSaveLayerWithUnboundedContents) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
-  auto test = [&builder](const std::shared_ptr<const DlImageFilter>& filter) {
+  auto test = [&builder](const std::shared_ptr<DlImageFilter>& filter) {
     auto DrawLine = [&builder](const SkPoint& p0, const SkPoint& p1,
                                const DlPaint& p) {
       DlPaint paint = p;
@@ -696,22 +696,22 @@ TEST_P(AiksTest, ImageFilteredSaveLayerWithUnboundedContents) {
     builder.Restore();
   };
 
-  test(std::make_shared<DlBlurImageFilter>(10.0, 10.0, DlTileMode::kDecal));
+  test(DlBlurImageFilter::Make(10.0, 10.0, DlTileMode::kDecal));
 
   builder.Translate(200.0, 0.0);
 
-  test(std::make_shared<DlDilateImageFilter>(10.0, 10.0));
+  test(DlDilateImageFilter::Make(10.0, 10.0));
 
   builder.Translate(200.0, 0.0);
 
-  test(std::make_shared<DlErodeImageFilter>(10.0, 10.0));
+  test(DlErodeImageFilter::Make(10.0, 10.0));
 
   builder.Translate(-400.0, 200.0);
 
-  SkMatrix sk_matrix = SkMatrix::RotateDeg(10);
+  DlMatrix matrix = DlMatrix::MakeRotationZ(DlDegrees(10));
 
-  auto rotate_filter = std::make_shared<DlMatrixImageFilter>(
-      sk_matrix, DlImageSampling::kLinear);
+  auto rotate_filter =
+      DlMatrixImageFilter::Make(matrix, DlImageSampling::kLinear);
   test(rotate_filter);
 
   builder.Translate(200.0, 0.0);
@@ -722,8 +722,8 @@ TEST_P(AiksTest, ImageFilteredSaveLayerWithUnboundedContents) {
       1, 0, 0, 0, 0,  //
       0, 0, 0, 1, 0   //
   };
-  auto rgb_swap_filter = std::make_shared<DlColorFilterImageFilter>(
-      std::make_shared<DlMatrixColorFilter>(m));
+  auto rgb_swap_filter =
+      DlColorFilterImageFilter::Make(std::make_shared<DlMatrixColorFilter>(m));
   test(rgb_swap_filter);
 
   builder.Translate(200.0, 0.0);
@@ -732,18 +732,18 @@ TEST_P(AiksTest, ImageFilteredSaveLayerWithUnboundedContents) {
 
   builder.Translate(-400.0, 200.0);
 
-  test(std::make_shared<DlLocalMatrixImageFilter>(
-      SkMatrix::Translate(25.0, 25.0), rotate_filter));
+  test(DlLocalMatrixImageFilter::Make(DlMatrix::MakeTranslation({25.0, 25.0}),
+                                      rotate_filter));
 
   builder.Translate(200.0, 0.0);
 
-  test(std::make_shared<DlLocalMatrixImageFilter>(
-      SkMatrix::Translate(25.0, 25.0), rgb_swap_filter));
+  test(DlLocalMatrixImageFilter::Make(DlMatrix::MakeTranslation({25.0, 25.0}),
+                                      rgb_swap_filter));
 
   builder.Translate(200.0, 0.0);
 
-  test(std::make_shared<DlLocalMatrixImageFilter>(
-      SkMatrix::Translate(25.0, 25.0),
+  test(DlLocalMatrixImageFilter::Make(
+      DlMatrix::MakeTranslation({25.0, 25.0}),
       DlComposeImageFilter::Make(rotate_filter, rgb_swap_filter)));
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -769,10 +769,10 @@ TEST_P(AiksTest, MatrixBackdropFilter) {
     builder.DrawCircle(SkPoint::Make(200, 200), 100, paint);
     // Should render a second circle, centered on the bottom-right-most edge of
     // the circle.
-    SkMatrix matrix = SkMatrix::Translate((100 + 100 * k1OverSqrt2),
-                                          (100 + 100 * k1OverSqrt2)) *
-                      SkMatrix::Scale(0.5, 0.5) *
-                      SkMatrix::Translate(-100, -100);
+    DlMatrix matrix = DlMatrix::MakeTranslation({(100 + 100 * k1OverSqrt2),
+                                                 (100 + 100 * k1OverSqrt2)}) *
+                      DlMatrix::MakeScale({0.5, 0.5, 1}) *
+                      DlMatrix::MakeTranslation({-100, -100});
     auto backdrop_filter =
         DlMatrixImageFilter::Make(matrix, DlImageSampling::kLinear);
     builder.SaveLayer(nullptr, nullptr, backdrop_filter.get());
@@ -797,10 +797,10 @@ TEST_P(AiksTest, MatrixSaveLayerFilter) {
     // Should render a second circle, centered on the bottom-right-most edge of
     // the circle.
 
-    SkMatrix matrix = SkMatrix::Translate((200 + 100 * k1OverSqrt2),
-                                          (200 + 100 * k1OverSqrt2)) *
-                      SkMatrix::Scale(0.5, 0.5) *
-                      SkMatrix::Translate(-200, -200);
+    DlMatrix matrix = DlMatrix::MakeTranslation({(200 + 100 * k1OverSqrt2),
+                                                 (200 + 100 * k1OverSqrt2)}) *
+                      DlMatrix::MakeScale({0.5, 0.5, 1}) *
+                      DlMatrix::MakeTranslation({-200, -200});
     DlPaint save_paint;
     save_paint.setImageFilter(
         DlMatrixImageFilter::Make(matrix, DlImageSampling::kLinear));

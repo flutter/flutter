@@ -151,6 +151,16 @@ struct TRect {
     return TRect(0.0, 0.0, size.width, size.height);
   }
 
+  /// Construct a floating point rect |Rect| from another Rect of a
+  /// potentially different storage type (eg. |IRect|).
+  template <class U, class FT = T>
+  constexpr static std::enable_if_t<std::is_floating_point_v<FT>, TRect> Make(
+      const TRect<U>& rect) {
+    return MakeLTRB(
+        static_cast<FT>(rect.GetLeft()), static_cast<FT>(rect.GetTop()),
+        static_cast<FT>(rect.GetRight()), static_cast<FT>(rect.GetBottom()));
+  }
+
   template <typename U>
   constexpr static std::optional<TRect> MakePointBounds(const U& value) {
     return MakePointBounds(value.begin(), value.end());
@@ -788,7 +798,7 @@ namespace std {
 template <class T>
 inline std::ostream& operator<<(std::ostream& out,
                                 const impeller::TRect<T>& r) {
-  out << "(" << r.GetOrigin() << ", " << r.GetSize() << ")";
+  out << "(" << r.GetLeftTop() << " => " << r.GetRightBottom() << ")";
   return out;
 }
 

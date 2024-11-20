@@ -224,7 +224,7 @@ std::optional<MatrixDecomposition> Matrix::Decompose() const {
 
   perpectiveMatrix.e[3][3] = 1;
 
-  if (perpectiveMatrix.GetDeterminant() == 0.0) {
+  if (!perpectiveMatrix.IsInvertible()) {
     return std::nullopt;
   }
 

@@ -177,15 +177,15 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setImageFilter(&kTestErodeImageFilter2); }},
            {0, 24, 0,
             [](DlOpReceiver& r) { r.setImageFilter(&kTestErodeImageFilter3); }},
-           {0, 64, 0,
+           {0, 88, 0,
             [](DlOpReceiver& r) {
               r.setImageFilter(&kTestMatrixImageFilter1);
             }},
-           {0, 64, 0,
+           {0, 88, 0,
             [](DlOpReceiver& r) {
               r.setImageFilter(&kTestMatrixImageFilter2);
             }},
-           {0, 64, 0,
+           {0, 88, 0,
             [](DlOpReceiver& r) {
               r.setImageFilter(&kTestMatrixImageFilter3);
             }},
@@ -209,7 +209,7 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) {
               r.setImageFilter(
                   kTestBlurImageFilter1
-                      .makeWithLocalMatrix(SkMatrix::Translate(2, 2))
+                      .makeWithLocalMatrix(DlMatrix::MakeTranslation({2, 2}))
                       .get());
             }},
 

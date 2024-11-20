@@ -9,8 +9,7 @@
 namespace impeller::interop {
 
 DisplayListBuilder::DisplayListBuilder(const ImpellerRect* rect)
-    : builder_(ToSkiaType(rect).value_or(
-          flutter::DisplayListBuilder::kMaxCullRect)) {}
+    : builder_(rect) {}
 
 DisplayListBuilder::~DisplayListBuilder() = default;
 

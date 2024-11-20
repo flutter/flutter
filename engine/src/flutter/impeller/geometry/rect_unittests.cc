@@ -161,6 +161,20 @@ TEST(RectTest, IRectSimpleWH) {
   EXPECT_FALSE(rect.IsEmpty());
 }
 
+TEST(RectTest, RectFromIRect) {
+  IRect irect = IRect::MakeLTRB(10, 20, 30, 40);
+  Rect rect = Rect::Make(irect);
+
+  EXPECT_EQ(rect.GetLeft(), 10);
+  EXPECT_EQ(rect.GetTop(), 20);
+  EXPECT_EQ(rect.GetRight(), 30);
+  EXPECT_EQ(rect.GetBottom(), 40);
+
+  // The following do not compile
+  // IRect irect2 = IRect::Make(rect);
+  // IRect irect2 = IRect::Make(irect);
+}
+
 TEST(RectTest, RectOverflowXYWH) {
   auto min = std::numeric_limits<Scalar>::lowest();
   auto max = std::numeric_limits<Scalar>::max();

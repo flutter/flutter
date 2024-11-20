@@ -8,6 +8,7 @@
 #include "fml/synchronization/count_down_latch.h"
 #include "shell/platform/darwin/ios/framework/Source/platform_views_controller.h"
 
+#import "flutter/display_list/effects/dl_image_filters.h"
 #import "flutter/fml/thread.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
@@ -347,7 +348,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push a backdrop filter
-  auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
   stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
 
   auto embeddedViewParams =
@@ -424,7 +425,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push a backdrop filter
-  auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
   stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 8, screenScale * 8));
 
   auto embeddedViewParams =
@@ -502,7 +503,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   stack.PushTransform(screenScaleMatrix);
   // Push backdrop filters
   for (int i = 0; i < 50; i++) {
-    auto filter = std::make_shared<flutter::DlBlurImageFilter>(i, 2, flutter::DlTileMode::kClamp);
+    auto filter = flutter::DlBlurImageFilter::Make(i, 2, flutter::DlTileMode::kClamp);
     stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
@@ -579,7 +580,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push a backdrop filter
-  auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
   stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
 
   auto embeddedViewParams =
@@ -700,7 +701,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push backdrop filters
-  auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
   for (int i = 0; i < 5; i++) {
     stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
@@ -846,7 +847,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push backdrop filters
-  auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
   for (int i = 0; i < 5; i++) {
     stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
@@ -886,8 +887,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Push backdrop filters
   for (int i = 0; i < 5; i++) {
     if (i == 3) {
-      auto filter2 =
-          std::make_shared<flutter::DlBlurImageFilter>(2, 5, flutter::DlTileMode::kClamp);
+      auto filter2 = flutter::DlBlurImageFilter::Make(2, 5, flutter::DlTileMode::kClamp);
 
       stack2.PushBackdropFilter(filter2,
                                 SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
@@ -943,8 +943,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Push backdrop filters
   for (int i = 0; i < 5; i++) {
     if (i == 0) {
-      auto filter2 =
-          std::make_shared<flutter::DlBlurImageFilter>(2, 5, flutter::DlTileMode::kClamp);
+      auto filter2 = flutter::DlBlurImageFilter::Make(2, 5, flutter::DlTileMode::kClamp);
       stack2.PushBackdropFilter(filter2,
                                 SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
@@ -997,8 +996,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Push backdrop filters
   for (int i = 0; i < 5; i++) {
     if (i == 4) {
-      auto filter2 =
-          std::make_shared<flutter::DlBlurImageFilter>(2, 5, flutter::DlTileMode::kClamp);
+      auto filter2 = flutter::DlBlurImageFilter::Make(2, 5, flutter::DlTileMode::kClamp);
       stack2.PushBackdropFilter(filter2,
                                 SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
@@ -1052,7 +1050,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   }
   // Push backdrop filters
   for (int i = 0; i < 5; i++) {
-    auto filter2 = std::make_shared<flutter::DlBlurImageFilter>(i, 2, flutter::DlTileMode::kClamp);
+    auto filter2 = flutter::DlBlurImageFilter::Make(i, 2, flutter::DlTileMode::kClamp);
 
     stack2.PushBackdropFilter(filter2, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
@@ -1136,7 +1134,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push a dilate backdrop filter
-  auto dilateFilter = std::make_shared<flutter::DlDilateImageFilter>(5, 2);
+  auto dilateFilter = flutter::DlDilateImageFilter::Make(5, 2);
   stack.PushBackdropFilter(dilateFilter, SkRect::MakeEmpty());
 
   auto embeddedViewParams =
@@ -1168,7 +1166,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Layer tree always pushes a screen scale factor to the stack
   stack2.PushTransform(screenScaleMatrix);
   // Push backdrop filters and dilate filter
-  auto blurFilter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+  auto blurFilter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
 
   for (int i = 0; i < 5; i++) {
     if (i == 2) {
@@ -1522,7 +1520,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController->BeginFrame(SkISize::Make(0, 0));
   flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
   flutterPlatformViewsController->PushVisitedPlatformView(2);
-  auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
   flutterPlatformViewsController->PushFilterToVisitedPlatformViews(
       filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   flutterPlatformViewsController->CompositeWithParams(

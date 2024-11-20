@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "display_list/dl_color.h"
+#include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_runtime_effect.h"

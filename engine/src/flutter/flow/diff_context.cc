@@ -166,6 +166,10 @@ bool DiffContext::PushCullRect(const SkRect& clip) {
   return !state_.matrix_clip.device_cull_rect().isEmpty();
 }
 
+const DlMatrix& DiffContext::GetMatrix() const {
+  return state_.matrix_clip.matrix();
+}
+
 SkMatrix DiffContext::GetTransform3x3() const {
   return state_.matrix_clip.matrix_3x3();
 }
