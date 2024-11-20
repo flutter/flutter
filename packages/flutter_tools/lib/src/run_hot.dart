@@ -475,7 +475,7 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
-    return _attachWithoutMarkingDetached(
+    return _attachWithoutStoppingAppDuringCleanup(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
       needsFullRestart: false,
