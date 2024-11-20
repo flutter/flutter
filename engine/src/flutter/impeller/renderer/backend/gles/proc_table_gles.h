@@ -6,9 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_PROC_TABLE_GLES_H_
 
 #include <functional>
-#include <mutex>
 #include <string>
-#include <thread>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
@@ -102,14 +100,6 @@ struct GLProc {
   bool log_calls = false;
 
   //----------------------------------------------------------------------------
-  /// Whether the OpenGL call asserts it is only used from / one thread in
-  /// IMPELLER_DEBUG builds.
-  ///
-  /// This is used to block drawing calls from happening anywhere but the raster
-  /// thread.
-  bool enforce_one_thread = false;
-
-  //----------------------------------------------------------------------------
   /// @brief      Call the GL function with the appropriate parameters. Lookup
   ///             the documentation for the GL function being called to
   ///             understand the arguments and return types. The arguments
@@ -127,16 +117,6 @@ struct GLProc {
     if (log_calls) {
       FML_LOG(IMPORTANT) << name
                          << BuildGLArguments(std::forward<Args>(args)...);
-    }
-    if (enforce_one_thread) {
-      static std::thread::id allowed_thread;
-      static std::once_flag flag;
-      std::call_once(flag,
-                     []() { allowed_thread = std::this_thread::get_id(); });
-      FML_CHECK(std::this_thread::get_id() == allowed_thread)
-          << "This symbol is expected to be called from one thread, the raster "
-             "thread. As of this addition, the design of the engine should be "
-             "using non-raster threads only for uploading images.";
     }
 #endif  // defined(IMPELLER_DEBUG) && !defined(NDEBUG)
     return function(std::forward<Args>(args)...);
