@@ -4442,6 +4442,11 @@ class _SemanticsConfigurationProvider {
   }
 
   /// The original config without any change through [updateConfig].
+  ///
+  /// This is typically use to recalculate certain properties when mutating
+  /// [effective] since [effective] may contain stale data from previous update.
+  /// Examples are [SemanticsConfiguration.isBlockingUserActions] or
+  /// [SemanticsConfiguration.elevation]. Otherwise, use [effective] instead.
   SemanticsConfiguration get original {
     if (_cachedConfiguration == null) {
       _effectiveConfiguration = _cachedConfiguration = SemanticsConfiguration();
@@ -4747,7 +4752,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     // Parent data changes may result in node formation changes.
     markNeedsBuild();
     parentData = newParentData;
-    updateChildren();
 
     final Set<SemanticsTag>? tags = newParentData.tagsForChildren;
     if (tags != null) {
@@ -4760,9 +4764,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final bool effectiveBlocksUserAction = newParentData.blocksUserActions || configProvider.original.isBlockingUserActions;
     if (effectiveBlocksUserAction != configProvider.effective.isBlockingUserActions) {
       configProvider.updateConfig((SemanticsConfiguration config) {
-        config.isBlockingUserActions = effectiveBlocksUserAction;
+        config.isBlockingUserActions = newParentData.blocksUserActions || configProvider.original.isBlockingUserActions;
       });
     }
+    updateChildren();
   }
 
   void updateChildren() {
@@ -4790,10 +4795,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     for (final _RenderObjectSemantics childSemantics in _getNonBlockedChildren()) {
       assert(!childSemantics.renderObject._needsLayout);
       final _SemanticsParentData childParentData = _SemanticsParentData(
-        // Need to use original config as the effective config may have been
-        // modified.
-        mergeIntoParent: (parentData?.mergeIntoParent ?? false) || configProvider.original.isMergingSemanticsOfDescendants,
-        blocksUserActions: (parentData?.blocksUserActions ?? false) || configProvider.original.isBlockingUserActions,
+        mergeIntoParent: (parentData?.mergeIntoParent ?? false) || configProvider.effective.isMergingSemanticsOfDescendants,
+        blocksUserActions: (parentData?.blocksUserActions ?? false) || configProvider.effective.isBlockingUserActions,
         explicitChildNodes: explicitChildNodesForChildren,
         tagsForChildren: tagsForChildren,
       );
@@ -4821,11 +4824,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       final ChildSemanticsConfigurationsResult result = childConfigurationsDelegate(childConfigurations);
       children.addAll(
         result.mergeUp.map<_SemanticsFragment>((SemanticsConfiguration config) {
-          final _SemanticsFragment? semantics = configToFragment[config];
-          if (semantics != null) {
-            return semantics;
-          }
-          return _IncompleteSemanticsFragment(config, this);
+          return configToFragment[config] ?? _IncompleteSemanticsFragment(config, this);
         }),
       );
       for (final Iterable<SemanticsConfiguration> group in result.siblingMergeGroups) {
@@ -4836,21 +4835,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         );
       }
     }
-    mergeUp.addAll(children);
-    if (contributesToSemanticsTree) {
-      // Decide which fragments should merge up or form semantics nodes.
-      // Remove old value
-      for (final _SemanticsFragment fragment in mergeUp) {
-        fragment.markSiblingConfigurationConflict(false);
-      }
-      for (final List<_SemanticsFragment> group in siblingMergeGroups) {
-        for (final _SemanticsFragment fragment in group) {
-          fragment.markSiblingConfigurationConflict(false);
-        }
-      }
 
-      _marksExplicitInMergeGroup(mergeUp, isMergeUp: true);
-      siblingMergeGroups.forEach(_marksExplicitInMergeGroup);
+    if (contributesToSemanticsTree) {
+      _marksConflictsInMergeGroup(mergeUp, isMergeUp: true);
+      siblingMergeGroups.forEach(_marksConflictsInMergeGroup);
 
       final Iterable<SemanticsConfiguration> mergeUpConfigs = mergeUp
           .map<SemanticsConfiguration?>((_SemanticsFragment fragment) => fragment.configToMergeUp)
@@ -4858,7 +4846,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       configProvider.absorbAll(mergeUpConfigs);
       // merge up fragments below this object will not be visible to parent
       // because they are either absorbed or will form a semantics node.
-      mergeUp.clear();
       mergeUp.add(this);
       for (final _RenderObjectSemantics childSemantics in children.whereType<_RenderObjectSemantics>()) {
         assert(childSemantics.contributesToSemanticsTree);
@@ -4874,6 +4861,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
         }
       }
+    } else {
+      mergeUp.addAll(children);
     }
   }
 
@@ -5016,6 +5005,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     required Set<int> usedSemanticsIds,
     required _SemanticsGeometry geometry,
   }) {
+    assert(!built);
     built = true;
     final SemanticsNode node = cachedSemanticsNode ??= _createSemanticsNode();
     semanticsNodes.add(node);
@@ -5248,10 +5238,12 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     }
   }
 
-  void _marksExplicitInMergeGroup(List<_SemanticsFragment> mergeGroup, {bool isMergeUp = false}) {
+  void _marksConflictsInMergeGroup(List<_SemanticsFragment> mergeGroup, {bool isMergeUp = false}) {
     final Set<_SemanticsFragment> hasSiblingConflict = <_SemanticsFragment>{};
     for (int i = 0; i < mergeGroup.length; i += 1) {
       final _SemanticsFragment fragment = mergeGroup[i];
+      // Remove old value
+      fragment.markSiblingConfigurationConflict(false);
       if (fragment.configToMergeUp == null) {
         continue;
       }
