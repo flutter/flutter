@@ -118,9 +118,13 @@ abstract final class Scribe {
 
   /// Tell Android to begin receiving stylus handwriting input.
   ///
-  /// This is typically called after detecting a [PointerDownEvent] on an active
-  /// text field, indicating the start of stylus handwriting input. If there is
-  /// no active [TextInputConnection], the call will be ignored.
+  /// This is typically called after detecting a [PointerDownEvent] from a
+  /// [PointerDeviceKind.stylus] on an active text field, indicating the start
+  /// of stylus handwriting input. If there is no active [TextInputConnection],
+  /// the call will be ignored.
+  ///
+  /// Call [isFeatureAvailable] each time before calling this to make sure that
+  /// stylus handwriting input is supported and available.
   ///
   /// Supported on Android API 33 and above.
   ///

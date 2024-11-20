@@ -1071,7 +1071,7 @@ enum SelectionChangedCause {
   /// The user used stylus handwriting to change the selection.
   ///
   /// Currently, this is only supported on iPadOS 14+ via the Scribble feature,
-  /// or on Android API 34 and above via the Scribe feature.
+  /// or on Android API 34+ via the Scribe feature.
   scribble,
 }
 
