@@ -2609,6 +2609,88 @@ void testMain() {
     },
   );
 
+  test('ignores pointerId on coalesced events', () {
+    final _MultiPointerEventMixin context = _PointerEventContext();
+    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    List<ui.PointerData> data;
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    context.multiTouchDown(const <_TouchDetails>[
+      _TouchDetails(pointer: 52, clientX: 100, clientY: 101),
+    ]).forEach(rootElement.dispatchEvent);
+    expect(packets.length, 1);
+
+    data = packets.single.data;
+    expect(data, hasLength(2));
+    expect(data[0].change, equals(ui.PointerChange.add));
+    expect(data[0].synthesized, isTrue);
+    expect(data[0].device, equals(52));
+    expect(data[0].physicalX, equals(100 * dpi));
+    expect(data[0].physicalY, equals(101 * dpi));
+
+    expect(data[1].change, equals(ui.PointerChange.down));
+    expect(data[1].device, equals(52));
+    expect(data[1].buttons, equals(1));
+    expect(data[1].physicalX, equals(100 * dpi));
+    expect(data[1].physicalY, equals(101 * dpi));
+    expect(data[1].physicalDeltaX, equals(0));
+    expect(data[1].physicalDeltaY, equals(0));
+    packets.clear();
+
+    // Pointer move with coaleasced events
+    context.multiTouchMove(const <_TouchDetails>[
+      _TouchDetails(pointer: 52, coalescedEvents: <_CoalescedTouchDetails>[
+        _CoalescedTouchDetails(pointer: 0, clientX: 301, clientY: 302),
+        _CoalescedTouchDetails(pointer: 0, clientX: 401, clientY: 402),
+      ]),
+    ]).forEach(rootElement.dispatchEvent);
+    expect(packets.length, 1);
+
+    data = packets.single.data;
+    expect(data, hasLength(2));
+    expect(data[0].change, equals(ui.PointerChange.move));
+    expect(data[0].device, equals(52));
+    expect(data[0].buttons, equals(1));
+    expect(data[0].physicalX, equals(301 * dpi));
+    expect(data[0].physicalY, equals(302 * dpi));
+    expect(data[0].physicalDeltaX, equals(201 * dpi));
+    expect(data[0].physicalDeltaY, equals(201 * dpi));
+
+    expect(data[1].change, equals(ui.PointerChange.move));
+    expect(data[1].device, equals(52));
+    expect(data[1].buttons, equals(1));
+    expect(data[1].physicalX, equals(401 * dpi));
+    expect(data[1].physicalY, equals(402 * dpi));
+    expect(data[1].physicalDeltaX, equals(100 * dpi));
+    expect(data[1].physicalDeltaY, equals(100 * dpi));
+    packets.clear();
+
+    // Pointer up
+    context.multiTouchUp(const <_TouchDetails>[
+      _TouchDetails(pointer: 52, clientX: 401, clientY: 402),
+    ]).forEach(rootElement.dispatchEvent);
+    expect(packets, hasLength(1));
+    expect(packets[0].data, hasLength(2));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.up));
+    expect(packets[0].data[0].device, equals(52));
+    expect(packets[0].data[0].buttons, equals(0));
+    expect(packets[0].data[0].physicalX, equals(401 * dpi));
+    expect(packets[0].data[0].physicalY, equals(402 * dpi));
+    expect(packets[0].data[0].physicalDeltaX, equals(0));
+    expect(packets[0].data[0].physicalDeltaY, equals(0));
+
+    expect(packets[0].data[1].change, equals(ui.PointerChange.remove));
+    expect(packets[0].data[1].device, equals(52));
+    expect(packets[0].data[1].buttons, equals(0));
+    expect(packets[0].data[1].physicalX, equals(401 * dpi));
+    expect(packets[0].data[1].physicalY, equals(402 * dpi));
+    expect(packets[0].data[1].physicalDeltaX, equals(0));
+    expect(packets[0].data[1].physicalDeltaY, equals(0));
+    packets.clear();
+  });
+
   test(
     'correctly parses cancel event',
     () {
@@ -3419,7 +3501,26 @@ mixin _ButtonedEventMixin on _BasicEventContext {
 }
 
 class _TouchDetails {
-  const _TouchDetails({this.pointer, this.clientX, this.clientY});
+  const _TouchDetails({
+    this.pointer,
+    this.clientX,
+    this.clientY,
+    this.coalescedEvents,
+  });
+
+  final int? pointer;
+  final double? clientX;
+  final double? clientY;
+
+  final List<_CoalescedTouchDetails>? coalescedEvents;
+}
+
+class _CoalescedTouchDetails {
+  const _CoalescedTouchDetails({
+    this.pointer,
+    this.clientX,
+    this.clientY,
+  });
 
   final int? pointer;
   final double? clientX;
@@ -3478,6 +3579,10 @@ class _PointerEventContext extends _BasicEventContext
 
   @override
   List<DomEvent> multiTouchDown(List<_TouchDetails> touches) {
+    assert(
+      touches.every((_TouchDetails details) => details.coalescedEvents == null),
+      'Coalesced events are not allowed for pointerdown events.',
+    );
     return touches
         .map((_TouchDetails details) => _downWithFullDetails(
               pointer: details.pointer,
@@ -3541,6 +3646,7 @@ class _PointerEventContext extends _BasicEventContext
               clientX: details.clientX,
               clientY: details.clientY,
               pointerType: 'touch',
+              coalescedEvents: details.coalescedEvents,
             ))
         .toList();
   }
@@ -3570,8 +3676,9 @@ class _PointerEventContext extends _BasicEventContext
     int? buttons,
     int? pointer,
     String? pointerType,
+    List<_CoalescedTouchDetails>? coalescedEvents,
   }) {
-    return createDomPointerEvent('pointermove', <String, dynamic>{
+    final event = createDomPointerEvent('pointermove', <String, dynamic>{
       'bubbles': true,
       'pointerId': pointer,
       'button': button,
@@ -3580,6 +3687,26 @@ class _PointerEventContext extends _BasicEventContext
       'clientY': clientY,
       'pointerType': pointerType,
     });
+
+    if (coalescedEvents != null) {
+      // There's no JS API for setting coalesced events, so we need to
+      // monkey-patch the `getCoalescedEvents` method to return what we want.
+      final coalescedEventJs = coalescedEvents
+          .map((_CoalescedTouchDetails details) => _moveWithFullDetails(
+                pointer: details.pointer,
+                button: button,
+                buttons: buttons,
+                clientX: details.clientX,
+                clientY: details.clientY,
+                pointerType: 'touch',
+              )).toJSAnyDeep;
+
+      js_util.setProperty(event, 'getCoalescedEvents', js_util.allowInterop(() {
+        return coalescedEventJs;
+      }));
+    }
+
+    return event;
   }
 
   @override
@@ -3620,6 +3747,10 @@ class _PointerEventContext extends _BasicEventContext
 
   @override
   List<DomEvent> multiTouchUp(List<_TouchDetails> touches) {
+    assert(
+      touches.every((_TouchDetails details) => details.coalescedEvents == null),
+      'Coalesced events are not allowed for pointerup events.',
+    );
     return touches
         .map((_TouchDetails details) => _upWithFullDetails(
               pointer: details.pointer,
@@ -3670,6 +3801,10 @@ class _PointerEventContext extends _BasicEventContext
 
   @override
   List<DomEvent> multiTouchCancel(List<_TouchDetails> touches) {
+    assert(
+      touches.every((_TouchDetails details) => details.coalescedEvents == null),
+      'Coalesced events are not allowed for pointercancel events.',
+    );
     return touches
         .map((_TouchDetails details) =>
             createDomPointerEvent('pointercancel', <String, dynamic>{
