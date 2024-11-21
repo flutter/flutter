@@ -1072,7 +1072,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 // A state class exists for the nav bar so that the keys of its sub-components
 // don't change when rebuilding the nav bar, causing the sub-components to
 // lose their own states.
-class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar> with SingleTickerProviderStateMixin {
+class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar> with TickerProviderStateMixin {
   late _NavigationBarStaticComponentsKeys keys;
   ScrollableState? _scrollableState;
   Widget? effectiveBottom;
@@ -1081,6 +1081,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   bool? effectiveStretch;
   NavigationBarBottomMode? effectiveBottomMode;
   late AnimationController _animationController;
+  late AnimationController _fadeController;
   Tween<double> persistentHeightTween = Tween<double>(
     begin: _kNavBarPersistentHeight,
     end: 0.0,
@@ -1099,7 +1100,11 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     keys = _NavigationBarStaticComponentsKeys();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 300),
+    );
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
     );
     persistentHeightAnimation = persistentHeightTween.animate(_animationController)
       ..addListener(() {
@@ -1122,6 +1127,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
     }
     _animationController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
@@ -1173,6 +1179,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               widget.onSearchFocused!(atTop);
             }
             _animationController.forward();
+            _fadeController.forward();
           });
         },
       );
@@ -1201,6 +1208,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                     widget.onSearchFocused!(atTop);
                   }
                   _animationController.reverse();
+                  _fadeController.reverse();
                 });
               }),
           ),
@@ -1217,7 +1225,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       previousPageTitle: widget.previousPageTitle,
       userMiddle: _animationController.isAnimating ? const Text('') : widget.middle,
       userTrailing: effectiveTrailing ?? widget.trailing,
-      userLargeTitle: widget.largeTitle,
+      userLargeTitle: FadeTransition(opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fadeController), child: widget.largeTitle),
       padding: widget.padding,
       large: true,
       staticBar: false, // This one scrolls.
