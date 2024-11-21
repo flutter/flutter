@@ -1039,20 +1039,32 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     //
     // TODO(dkwingsmt): Investigate whether we can configure the behavior for
     // `_viewTarget`. https://github.com/flutter/flutter/issues/157968
-    _addPointerEventListener(_globalTarget, 'pointermove', (DomPointerEvent event) {
-      final int device = _getPointerId(event);
+    _addPointerEventListener(_globalTarget, 'pointermove', (DomPointerEvent moveEvent) {
+      final int device = _getPointerId(moveEvent);
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
-      final List<DomPointerEvent> expandedEvents = _expandEvents(event);
+      final List<DomPointerEvent> expandedEvents = _expandEvents(moveEvent);
       for (final DomPointerEvent event in expandedEvents) {
         final _SanitizedDetails? up = sanitizer.sanitizeMissingRightClickUp(buttons: event.buttons!.toInt());
         if (up != null) {
-          _convertEventsToPointerData(data: pointerData, event: event, details: up);
+          _convertEventsToPointerData(
+            data: pointerData,
+            event: event,
+            details: up,
+            pointerId: device,
+            eventTarget: moveEvent.target,
+          );
         }
         final _SanitizedDetails move = sanitizer.sanitizeMoveEvent(buttons: event.buttons!.toInt());
-        _convertEventsToPointerData(data: pointerData, event: event, details: move);
+        _convertEventsToPointerData(
+          data: pointerData,
+          event: event,
+          details: move,
+          pointerId: device,
+          eventTarget: moveEvent.target,
+        );
       }
-      _callback(event, pointerData);
+      _callback(moveEvent, pointerData);
     });
 
     _addPointerEventListener(_viewTarget, 'pointerleave', (DomPointerEvent event) {
@@ -1106,12 +1118,17 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     required List<ui.PointerData> data,
     required DomPointerEvent event,
     required _SanitizedDetails details,
+    // `pointerId` and `eventTarget` are optional but useful when it's not
+    // desired to get those values from the event object. For example, when the
+    // event is a coalesced event.
+    int? pointerId,
+    DomEventTarget? eventTarget,
   }) {
     final ui.PointerDeviceKind kind = _pointerTypeToDeviceKind(event.pointerType!);
     final double tilt = _computeHighestTilt(event);
     final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
     final num? pressure = event.pressure;
-    final ui.Offset offset = computeEventOffsetToTarget(event, _view);
+    final ui.Offset offset = computeEventOffsetToTarget(event, _view, eventTarget: eventTarget);
     _pointerDataConverter.convert(
       data,
       viewId: _view.viewId,
@@ -1119,7 +1136,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       timeStamp: timeStamp,
       kind: kind,
       signalKind: ui.PointerSignalKind.none,
-      device: _getPointerId(event),
+      device: pointerId ?? _getPointerId(event),
       physicalX: offset.dx * _view.devicePixelRatio,
       physicalY: offset.dy * _view.devicePixelRatio,
       buttons: details.buttons,

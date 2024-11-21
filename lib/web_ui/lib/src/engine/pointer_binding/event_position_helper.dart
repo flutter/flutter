@@ -12,18 +12,23 @@ import '../text_editing/text_editing.dart';
 import '../vector_math.dart';
 import '../window.dart';
 
-/// Returns an [ui.Offset] of the position of [event], relative to the position of [actualTarget].
+/// Returns an [ui.Offset] of the position of [event], relative to the position
+/// of the Flutter [view].
 ///
 /// The offset is *not* multiplied by DPR or anything else, it's the closest
 /// to what the DOM would return if we had currentTarget readily available.
 ///
-/// This needs an `actualTarget`, because the `event.currentTarget` (which is what
-/// this would really need to use) gets lost when the `event` comes from a "coalesced"
-/// event.
+/// This needs an `eventTarget`, because the `event.target` (which is what
+/// this would really need to use) gets lost when the `event` comes from a
+/// "coalesced" event (see https://github.com/flutter/flutter/issues/155987).
 ///
 /// It also takes into account semantics being enabled to fix the case where
 /// offsetX, offsetY == 0 (TalkBack events).
-ui.Offset computeEventOffsetToTarget(DomMouseEvent event, EngineFlutterView view) {
+ui.Offset computeEventOffsetToTarget(
+  DomMouseEvent event,
+  EngineFlutterView view, {
+  DomEventTarget? eventTarget,
+}) {
   final DomElement actualTarget = view.dom.rootElement;
   // On a TalkBack event
   if (EngineSemantics.instance.semanticsEnabled && event.offsetX == 0 && event.offsetY == 0) {
@@ -31,7 +36,8 @@ ui.Offset computeEventOffsetToTarget(DomMouseEvent event, EngineFlutterView view
   }
 
   // On one of our text-editing nodes
-  final bool isInput = view.dom.textEditingHost.contains(event.target! as DomNode);
+  eventTarget ??= event.target!;
+  final bool isInput = view.dom.textEditingHost.contains(eventTarget as DomNode);
   if (isInput) {
     final EditableTextGeometry? inputGeometry = textEditing.strategy.geometry;
     if (inputGeometry != null) {
