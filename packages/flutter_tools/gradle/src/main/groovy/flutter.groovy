@@ -1240,13 +1240,13 @@ class FlutterPlugin implements Plugin<Project> {
 
             try {
                 packageAssets = project.tasks.named("package${variant.name.capitalize()}Assets").get()
-            } catch (Exception e) {
+            } catch (UnknownTaskException ignored) {
                 packageAssets = null
             }
 
             try {
                 cleanPackageAssets = project.tasks.named("cleanPackage${variant.name.capitalize()}Assets").get()
-            } catch (Exception e) {
+            } catch (UnknownTaskException ignored) {
                 cleanPackageAssets = null
             }
             boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
