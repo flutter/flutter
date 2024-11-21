@@ -12,11 +12,11 @@ final class ViewFocusBinding {
   ViewFocusBinding(this._viewManager, this._onViewFocusChange);
 
 
-  /// Wether [FlutterView] focus changes will be reported and performed.
+  /// Whether [FlutterView] focus changes will be reported and performed.
   ///
   /// DO NOT rely on this bit as it will go away soon. You're warned :)!
   @visibleForTesting
-  static bool isEnabled = false;
+  static bool isEnabled = true;
 
   final FlutterViewManager _viewManager;
   final ui.ViewFocusChangeCallback _onViewFocusChange;
