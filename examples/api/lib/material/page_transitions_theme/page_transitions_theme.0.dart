@@ -18,7 +18,7 @@ class PageTransitionsThemeApp extends StatelessWidget {
         // Defines the page transition animations used by MaterialPageRoute
         // for different target platforms.
         // Non-specified target platforms will default to
-        // FadeForwardsPageTransitionBuilder().
+        // ZoomPageTransitionsBuilder().
         pageTransitionsTheme: const PageTransitionsTheme(
           builders: <TargetPlatform, PageTransitionsBuilder>{
             TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
