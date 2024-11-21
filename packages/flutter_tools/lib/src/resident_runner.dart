@@ -1118,6 +1118,16 @@ abstract class ResidentRunner extends ResidentHandlers {
     return 'main.dart${swap ? '.swap' : ''}.dill';
   }
 
+  /// Whether the app being instrumented by the runner should be stopped during
+  /// cleanup.
+  ///
+  /// A detached app can happen one of two ways:
+  /// - [run] is used, and then the created application is manually [detach]ed;
+  /// - [attach] is used to explicitly connect to an already running app.
+  @protected
+  @visibleForTesting
+  bool stopAppDuringCleanup = true;
+
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
 
   @override
@@ -1254,7 +1264,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   @override
+  @mustCallSuper
   Future<void> detach() async {
+    stopAppDuringCleanup = false;
+
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
@@ -1398,6 +1411,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
+  @protected
   void appFinished() {
     if (_finished.isCompleted) {
       return;
