@@ -150,6 +150,18 @@ base class SamplerOptions {
   SamplerAddressMode heightAddressMode;
 }
 
+base class Scissor {
+  Scissor({this.x = 0, this.y = 0, this.width = 0, this.height = 0});
+
+  int x, y, width, height;
+
+  void _validate() {
+    if (x < 0 || y < 0 || width < 0 || height < 0) {
+      throw Exception("Invalid values for scissor. All values should be positive.");
+    }
+  }
+}
+
 base class RenderTarget {
   const RenderTarget(
       {this.colorAttachments = const <ColorAttachment>[],
@@ -326,6 +338,14 @@ base class RenderPass extends NativeFieldWrapperClass1 {
         targetFace.index);
   }
 
+  void setScissor(Scissor scissor) {
+    assert(() {
+      scissor._validate();
+      return true;
+    }());
+    _setScissor(scissor.x, scissor.y, scissor.width, scissor.height);
+  }
+
   void setCullMode(CullMode cullMode) {
     _setCullMode(cullMode.index);
   }
@@ -477,6 +497,14 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       int readMask,
       int writeMask,
       int target_face);
+
+  @Native<Void Function(Pointer<Void>, Int, Int, Int, Int)>(
+      symbol: 'InternalFlutterGpu_RenderPass_SetScissor')
+  external void _setScissor(
+      int x,
+      int y,
+      int width,
+      int height);
 
   @Native<Void Function(Pointer<Void>, Int)>(
       symbol: 'InternalFlutterGpu_RenderPass_SetCullMode')

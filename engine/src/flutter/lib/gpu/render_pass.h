@@ -74,6 +74,7 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   size_t element_count = 0;
 
   uint32_t stencil_reference = 0;
+  std::optional<impeller::TRect<int64_t>> scissor;
 
   // Helper flag to determine whether the vertex_count should override the
   // element count. The index count takes precedent.
@@ -233,6 +234,14 @@ extern void InternalFlutterGpu_RenderPass_SetStencilConfig(
     int read_mask,
     int write_mask,
     int target);
+
+FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_SetScissor(
+    flutter::gpu::RenderPass* wrapper,
+    int x,
+    int y,
+    int width,
+    int height);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_SetCullMode(
