@@ -143,9 +143,6 @@ void main(List<String> args) async {
         expect(await process.exitCode, 0);
       },);
     },
-    // TODO(matanlurey): Debug why flutter build apk often timesout.
-    // See https://github.com/flutter/flutter/issues/158560 for details.
-    skip: buildCommand == 'apk' ? 'flutter build apk times out' : false, // Temporary workaround for https://github.com/flutter/flutter/issues/158560.
     tags: <String>['flutter-build-apk'],
   );
 }
