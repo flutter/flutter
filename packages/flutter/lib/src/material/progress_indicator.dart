@@ -859,7 +859,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// The padding around the indicator track.
   ///
   /// If null, then the [ProgressIndicatorThemeData.circularTrackPadding] will be
-  /// used. If that is null and [year2023] is false, then defaults to 8 pixels of
+  /// used. If that is null and [year2023] is false, then defaults to `EdgeInsets.all(4.0)`
   /// padding. Otherwise, defaults to zero padding.
   final EdgeInsetsGeometry? padding;
 
