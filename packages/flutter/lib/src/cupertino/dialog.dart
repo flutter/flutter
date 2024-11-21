@@ -536,7 +536,6 @@ class CupertinoPopupSurface extends StatelessWidget {
     super.key,
     this.blurSigma = defaultBlurSigma,
     this.isSurfacePainted = true,
-    this.debugIsVibrancePainted = true,
     required this.child,
   }) : assert(blurSigma >= 0, 'CupertinoPopupSurface requires a non-negative blur sigma.');
 
@@ -546,17 +545,6 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// Defaults to [defaultBlurSigma]. Setting [blurSigma] to 0 will remove the
   /// blur filter.
   final double blurSigma;
-
-  /// Whether or not the area beneath this surface should be saturated with a
-  /// [ColorFilter].
-  ///
-  /// The appearance of the [ColorFilter] is determined by the [Brightness]
-  /// value obtained from the ambient [CupertinoTheme].
-  ///
-  /// The vibrance is always painted if asserts are disabled.
-  ///
-  /// Defaults to true.
-  final bool debugIsVibrancePainted;
 
   /// Whether or not to paint a translucent white on top of this surface's
   /// blurred background. [isSurfacePainted] should be true for a typical popup
@@ -648,6 +636,17 @@ class CupertinoPopupSurface extends StatelessWidget {
      0.00,  0.00,  0.00, 1.00, 0.00
   ];
 
+  /// Whether or not the area beneath this surface should be saturated with a
+  /// [ColorFilter].
+  ///
+  /// The appearance of the [ColorFilter] is determined by the [Brightness]
+  /// value obtained from the ambient [CupertinoTheme].
+  ///
+  /// The vibrance is always painted if asserts are disabled.
+  ///
+  /// Defaults to true.
+  static bool debugIsVibrancePainted = true;
+
   ImageFilter? _buildFilter(Brightness? brightness) {
     bool isVibrancePainted = true;
     assert(() {
@@ -698,7 +697,6 @@ class CupertinoPopupSurface extends StatelessWidget {
       return ClipRRect(
         borderRadius: _clipper,
         child: BackdropFilter(
-          blendMode: BlendMode.src,
           filter: filter,
           child: contents,
         ),
