@@ -2671,7 +2671,7 @@ void main() {
     expect(find.text(snackBarText), findsOneWidget);
     expect(find.text(firstHeader), findsOneWidget);
     expect(find.text(secondHeader), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 850));
+    await tester.pump(const Duration(milliseconds: 750));
     expect(find.text(snackBarText), findsOneWidget);
     expect(find.text(firstHeader), findsNothing);
     expect(find.text(secondHeader), findsOneWidget);

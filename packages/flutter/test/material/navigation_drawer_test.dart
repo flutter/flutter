@@ -520,7 +520,7 @@ ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
       .firstWidget<Container>(
         find.descendant(
-          of: find.byType(FadeTransition).last,
+          of: find.byType(FadeTransition),
           matching: find.byType(Container),
         ),
       )
