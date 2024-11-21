@@ -41,7 +41,7 @@ void main() {
 
     final Directory tempDir = createResolvedTempDirectorySync('macos_content_validation.');
 
-    // Pre-cache iOS engine Flutter.xcframework artifacts.
+    // Pre-cache macOS engine FlutterMacOS.xcframework artifacts.
     final ProcessResult result = processManager.runSync(
       <String>[
         flutterBin,
@@ -54,6 +54,17 @@ void main() {
 
     expect(result, const ProcessResultMatcher());
     expect(xcframeworkArtifact.existsSync(), isTrue);
+
+    final Directory frameworkArtifact = fileSystem.directory(
+      fileSystem.path.joinAll(<String>[
+        xcframeworkArtifact.path,
+        'macos-arm64_x86_64',
+        'FlutterMacOS.framework',
+      ]),
+    );
+    // Check read/write permissions are set correctly in the framework engine artifact.
+    final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
+    expect(artifactStat, '40755');
   });
 
   for (final String buildMode in <String>['Debug', 'Release']) {
@@ -164,10 +175,16 @@ void main() {
         ),
       );
 
+<<<<<<< HEAD
       // Check read/write permissions are being correctly set
       final String rawStatString = outputFlutterFramework.statSync().modeString();
       final String statString = rawStatString.substring(rawStatString.length - 9);
       expect(statString, 'rwxr-xr-x');
+=======
+      // Check read/write permissions are being correctly set.
+      final String outputFrameworkStat = outputFlutterFramework.statSync().mode.toRadixString(8);
+      expect(outputFrameworkStat, '40755');
+>>>>>>> dec2ee5c1f98f8e84a7d5380c05eb8a3d0a81668
 
       // Check complicated macOS framework symlink structure.
       final Link current = outputFlutterFramework.childDirectory('Versions').childLink('Current');
@@ -185,6 +202,19 @@ void main() {
       expect(outputFlutterFramework.childDirectory('Headers'), isNot(exists));
       expect(outputFlutterFramework.childLink('Modules'), isNot(exists));
       expect(outputFlutterFramework.childDirectory('Modules'), isNot(exists));
+
+      // PrivacyInfo.xcprivacy was first added to the top-level path, but
+      // the correct location is Versions/A/Resources/PrivacyInfo.xcprivacy.
+      // TODO(jmagman): Switch expectation to only check Resources/ once the new path rolls.
+      // https://github.com/flutter/flutter/issues/157016#issuecomment-2420786225
+      final File topLevelPrivacy =  outputFlutterFramework.childFile('PrivacyInfo.xcprivacy');
+      final File resourcesLevelPrivacy = fileSystem.file(fileSystem.path.join(
+        outputFlutterFramework.path,
+        'Resources',
+        'PrivacyInfo.xcprivacy',
+      ));
+
+      expect(topLevelPrivacy.existsSync() || resourcesLevelPrivacy.existsSync(), isTrue);
 
       // Build again without cleaning.
       final ProcessResult secondBuild = processManager.runSync(buildCommand, workingDirectory: workingDirectory);

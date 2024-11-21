@@ -806,7 +806,8 @@ class RenderTable extends RenderBox {
   double? _baselineDistance;
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    // returns the baseline of the first cell that has a baseline in the first row
+    // returns the baseline offset of the cell in the first row with
+    // the lowest baseline, and uses `TableCellVerticalAlignment.baseline`.
     assert(!debugNeedsLayout);
     return _baselineDistance;
   }
@@ -1024,6 +1025,36 @@ class RenderTable extends RenderBox {
     assert(row < rows);
     assert(!debugNeedsLayout);
     return Rect.fromLTRB(0.0, _rowTops[row], size.width, _rowTops[row + 1]);
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    if (rows * columns == 0) {
+      return null;
+    }
+    final List<double> widths = _computeColumnWidths(constraints);
+    double? baselineOffset;
+    for (int col = 0; col < columns; col += 1) {
+      final RenderBox? child = _children[col];
+      final BoxConstraints childConstraints = BoxConstraints.tightFor(width: widths[col]);
+      if (child == null) {
+        continue;
+      }
+      final TableCellParentData childParentData = child.parentData! as TableCellParentData;
+      final double? childBaseline = switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
+        TableCellVerticalAlignment.baseline => child.getDryBaseline(childConstraints, baseline),
+        TableCellVerticalAlignment.baseline ||
+        TableCellVerticalAlignment.top ||
+        TableCellVerticalAlignment.middle ||
+        TableCellVerticalAlignment.bottom ||
+        TableCellVerticalAlignment.fill ||
+        TableCellVerticalAlignment.intrinsicHeight => null,
+      };
+      if (childBaseline != null && (baselineOffset == null || baselineOffset < childBaseline)) {
+        baselineOffset = childBaseline;
+      }
+    }
+    return baselineOffset;
   }
 
   @override
@@ -1260,19 +1291,13 @@ class RenderTable extends RenderBox {
       return <DiagnosticsNode>[DiagnosticsNode.message('table is empty')];
     }
 
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    for (int y = 0; y < rows; y += 1) {
-      for (int x = 0; x < columns; x += 1) {
-        final int xy = x + y * columns;
-        final RenderBox? child = _children[xy];
-        final String name = 'child ($x, $y)';
-        if (child != null) {
-          children.add(child.toDiagnosticsNode(name: name));
-        } else {
-          children.add(DiagnosticsProperty<Object>(name, null, ifNull: 'is null', showSeparator: false));
-        }
-      }
-    }
-    return children;
+    return <DiagnosticsNode>[
+      for (int y = 0; y < rows; y += 1)
+        for (int x = 0; x < columns; x += 1)
+          if (_children[x + y * columns] case final RenderBox child)
+            child.toDiagnosticsNode(name: 'child ($x, $y)')
+          else
+            DiagnosticsProperty<Object>('child ($x, $y)', null, ifNull: 'is null', showSeparator: false),
+    ];
   }
 }

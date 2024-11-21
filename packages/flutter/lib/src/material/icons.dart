@@ -27,7 +27,7 @@ final class PlatformAdaptiveIcons implements Icons {
   }
 
   // Generated code: do not hand-edit.
-  // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
+  // https://github.com/flutter/flutter/blob/main/docs/libraries/material/Updating-Material-Design-Fonts-%26-Icons.md
 
   // BEGIN GENERATED PLATFORM ADAPTIVE ICONS
 
@@ -178,7 +178,7 @@ abstract final class Icons {
   static PlatformAdaptiveIcons get adaptive => const PlatformAdaptiveIcons._();
 
   // Generated code: do not hand-edit.
-  // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
+  // https://github.com/flutter/flutter/blob/main/docs/libraries/material/Updating-Material-Design-Fonts-%26-Icons.md
   // BEGIN GENERATED ICONS
 
   /// <i class="material-icons md-36">10k</i> &#x2014; material icon named "10k".

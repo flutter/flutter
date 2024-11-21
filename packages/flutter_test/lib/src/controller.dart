@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/scheduler.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'finders.dart';
+/// @docImport 'matchers.dart';
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';

@@ -545,6 +545,221 @@ void main() {
     expect(find.byType(Viewport), paints..clipRect());
   });
 
+  testWidgets('ListView allows touch on children when reaching an edge and over-scrolling / settling', (WidgetTester tester) async {
+    bool tapped = false;
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    const Duration frame = Duration(milliseconds: 16);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller,
+          physics: const BouncingScrollPhysics(),
+          itemCount: 15,
+          itemBuilder: (BuildContext context, int index) {
+            return GestureDetector(
+              onTap: () {
+                tapped = true;
+              },
+              child: SizedBox(
+                height: 100.0,
+                child: Text('Item $index'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Tapping on an item in an idle scrollable should register the tap
+    await tester.tap(find.text('Item 0'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.fling(find.byType(ListView), const Offset(0.0, 80.0), 1000.0);
+    // Pump a few frames to ensure the scrollable is in an over-scrolled state
+    for (int i = 0; i < 5; i++) {
+      await tester.pump(frame);
+    }
+
+    expect(controller.offset, lessThan(0.0));
+
+    // Tapping on an item in an over-scrolled state should register the tap
+    await tester.tap(find.text('Item 1'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
+
+    // Tapping on an item in an idle scrollable should register the tap
+    await tester.tap(find.text('Item 2'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    // Jump somewhere in the middle of the list
+    controller.jumpTo(101.0);
+    expect(controller.offset, equals(101.0));
+
+    await tester.tap(find.text('Item 3'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pumpAndSettle();
+
+    // Strong fling down, to over-scroll the list at the top
+    await tester.fling(find.byType(ListView), const Offset(0.0, 500.0), 5000.0);
+
+    for (int i = 0; i < 5; i++) {
+      await tester.pump(frame);
+    }
+
+    // Ensure the scrollable is over-scrolled
+    expect(controller.offset, lessThan(0.0));
+
+    // Now we are settling, all taps should be registered
+    await tester.tap(find.text('Item 2'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pump(frame);
+
+    await tester.tap(find.text('Item 2'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Item 2'));
+    expect(tapped, isTrue);
+    tapped = false;
+  });
+
+  testWidgets('ListView absorbs touch to stop scrolling when not at the edge', (WidgetTester tester) async {
+    bool tapped = false;
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    const Duration frame = Duration(milliseconds: 16);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller,
+          physics: const BouncingScrollPhysics(),
+          itemCount: 15,
+          itemBuilder: (BuildContext context, int index) {
+            return GestureDetector(
+              onTap: () {
+                tapped = true;
+              },
+              child: SizedBox(
+                height: 100.0,
+                child: Text('Item $index'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Jump somewhere in the middle of the list
+    controller.jumpTo(101.0);
+    expect(controller.offset, equals(101.0));
+
+    // Tap on an item, it should register the tap
+    await tester.tap(find.text('Item 3'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    // Fling the list, it should start scrolling. Bot not to the edge
+    await tester.fling(find.byType(ListView), const Offset(0.0, 100.0), 1000.0);
+
+    await tester.pump(frame);
+
+    final double offset = controller.offset;
+
+    // Ensure we are somewhere between 0 and the starting offset
+    expect(controller.offset, lessThan(101.0));
+    expect(controller.offset, greaterThan(0.0));
+
+    await tester.tap(find.text('Item 2'), warnIfMissed: false); // The tap should be absorbed by the ListView. Therefore warnIfMissed is set to false
+    expect(tapped, isFalse);
+
+    // Ensure the scrollable stops in place and doesn't scroll further
+    await tester.pump(frame);
+    expect(offset, equals(controller.offset));
+    await tester.pumpAndSettle();
+    expect(offset, equals(controller.offset));
+
+    // Tapping on an item should register the tap normally, as the scrollable is idle
+    await tester.tap(find.text('Item 2'));
+    expect(tapped, isTrue);
+    tapped = false;
+  });
+
+  testWidgets('Horizontal ListView, when over-scrolled at the end allows touches on children', (WidgetTester tester) async {
+    bool tapped = false;
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    const Duration frame = Duration(milliseconds: 16);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          itemExtent: 100.0,
+          controller: controller,
+          physics: const BouncingScrollPhysics(),
+          scrollDirection: Axis.horizontal,
+          itemCount: 15,
+          itemBuilder: (BuildContext context, int index) {
+            return GestureDetector(
+              onTap: () {
+                tapped = true;
+              },
+              child: SizedBox(
+                width: 100.0,
+                child: Text('Item $index'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Tap on an item, it should register the tap
+    await tester.tap(find.text('Item 3'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    // Fling the list, it should start scrolling
+    await tester.fling(find.byType(ListView), const Offset(-500.0, 0.0), 10000.0);
+
+    for (int i = 0; i < 5; i++) {
+      await tester.pump(frame);
+    }
+
+    // Ensure the scrollable is over-scrolled at the end
+    expect(controller.offset, greaterThan(controller.position.maxScrollExtent));
+
+    // Tap on an item, it should register the tap
+    await tester.tap(find.text('Item 14'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pumpAndSettle();
+
+    // Tap on an item, it should register the tap
+    await tester.tap(find.text('Item 14'));
+    expect(tapped, isTrue);
+  });
+
   testWidgets('ListView does not clips if no overflow', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

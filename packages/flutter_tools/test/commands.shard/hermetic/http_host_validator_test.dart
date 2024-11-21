@@ -179,7 +179,7 @@ void main() {
           result.messages,
           contains(const ValidationMessage.error(
             'Environment variable PUB_HOSTED_URL does not specify a valid URL: "::Not A Uri::"\n'
-            'Please see https://flutter.dev/community/china for an example of how to use it.',
+            'Please see https://flutter.dev/to/use-mirror-site for an example of how to use it.',
           )),
         );
       });
@@ -204,7 +204,7 @@ void main() {
           result.messages,
           contains(const ValidationMessage.error(
             'Environment variable FLUTTER_STORAGE_BASE_URL does not specify a valid URL: ""\n'
-            'Please see https://flutter.dev/community/china for an example of how to use it.'
+            'Please see https://flutter.dev/to/use-mirror-site for an example of how to use it.'
           )),
         );
       });

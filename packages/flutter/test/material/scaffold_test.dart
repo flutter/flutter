@@ -2867,7 +2867,7 @@ void main() {
       expect(tester.takeException(), isNull);
   });
 
-   testWidgets('ScaffoldMessenger showSnackBar default animatiom', (WidgetTester tester) async {
+   testWidgets('ScaffoldMessenger showSnackBar default animation', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
@@ -3255,6 +3255,168 @@ void main() {
 
     // The bottom sheet is dismissed.
     expect(find.byKey(sheetKey), findsNothing);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/145585.
+  testWidgets('FAB default entrance and exit animations', (WidgetTester tester) async {
+    bool showFab = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    showFab = !showFab;
+                  });
+                },
+                child: const Text('Toggle FAB'),
+              ),
+              floatingActionButton: !showFab
+                ? null
+                : FloatingActionButton(
+                    onPressed: () {},
+                    child: const Icon(Icons.add),
+                  ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // FAB is not visible.
+    expect(find.byType(FloatingActionButton), findsNothing);
+
+    // Tap the button to show the FAB.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Toggle FAB'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance the animation by 100ms.
+    // FAB is partially animated in.
+    expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, closeTo(743.8, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 100)); // Advance the animation by 100ms.
+    // FAB is fully animated in.
+    expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, equals(728.0));
+
+    // Tap the button to hide the FAB.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Toggle FAB'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance the animation by 100ms.
+    // FAB is partially animated out.
+    expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, closeTo(747.1, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 100)); // Advance the animation by 100ms.
+    // FAB is fully animated out.
+    expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, equals(756.0));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 50ms.
+    // FAB is not visible.
+    expect(find.byType(FloatingActionButton), findsNothing);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/145585.
+  testWidgets('FAB default entrance and exit animations can be disabled', (WidgetTester tester) async {
+    bool showFab = false;
+    FloatingActionButtonLocation fabLocation = FloatingActionButtonLocation.endFloat;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              // Disable FAB animations.
+              floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
+              floatingActionButtonLocation: fabLocation,
+              body: Column(
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        showFab = !showFab;
+                      });
+                    },
+                    child: const Text('Toggle FAB'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        fabLocation = FloatingActionButtonLocation.centerFloat;
+                      });
+                    },
+                    child: const Text('Update FAB Location'),
+                  ),
+                ],
+              ),
+              floatingActionButton: !showFab
+                ? null
+                : FloatingActionButton(
+                    onPressed: () {},
+                    child: const Icon(Icons.add),
+                  ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // FAB is not visible.
+    expect(find.byType(FloatingActionButton), findsNothing);
+
+    // Tap the button to show the FAB.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Toggle FAB'));
+    await tester.pump();
+    // FAB is visible.
+    expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, equals(728.0));
+
+    // Tap the button to hide the FAB.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Toggle FAB'));
+    await tester.pump();
+    // FAB is not visible.
+    expect(find.byType(FloatingActionButton), findsNothing);
+
+    // Tap the button to show the FAB.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Toggle FAB'));
+    await tester.pump();
+    // FAB is visible.
+    expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, equals(728.0));
+
+    // Tap the update location button.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Update FAB Location'));
+    await tester.pump();
+
+    // FAB is visible at the new location.
+    expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, equals(372.0));
+
+    // Tap the button to hide the FAB.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Toggle FAB'));
+    await tester.pump();
+    // FAB is not visible.
+    expect(find.byType(FloatingActionButton), findsNothing);
+  });
+
+  testWidgets('Scaffold background color defaults to ColorScheme.surface', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      colorScheme: ThemeData().colorScheme.copyWith(
+        surface: Colors.orange,
+        background: Colors.green,
+      )
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Scaffold(
+          body: SizedBox.expand(),
+        ),
+      ),
+    );
+
+    final Material scaffoldMaterial = tester.widget<Material>(find.descendant(
+      of: find.byType(Scaffold),
+      matching: find.byType(Material).first,
+    ));
+    expect(scaffoldMaterial.color, theme.colorScheme.surface);
   });
 }
 

@@ -91,19 +91,8 @@ class _CategoryListItemState extends State<CategoryListItem>
     super.dispose();
   }
 
-  bool _shouldOpenList() {
-    switch (_controller.status) {
-      case AnimationStatus.completed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        return false;
-      case AnimationStatus.dismissed:
-        return true;
-    }
-  }
-
   void _handleTap() {
-    if (_shouldOpenList()) {
+    if (_controller.isDismissed) {
       _controller.forward();
       if (widget.onTap != null) {
         widget.onTap!(true);
@@ -148,7 +137,7 @@ class _CategoryListItemState extends State<CategoryListItem>
     return AnimatedBuilder(
       animation: _controller.view,
       builder: _buildHeaderWithChildren,
-      child: _shouldOpenList()
+      child: _controller.isDismissed
           ? null
           : _ExpandedCategoryDemos(
               category: widget.category,

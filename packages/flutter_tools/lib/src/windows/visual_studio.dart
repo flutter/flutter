@@ -179,13 +179,10 @@ class VisualStudio {
   /// version.
   String? get cmakeGenerator {
     // From https://cmake.org/cmake/help/v3.22/manual/cmake-generators.7.html#visual-studio-generators
-    switch (_majorVersion) {
-      case 17:
-        return 'Visual Studio 17 2022';
-      case 16:
-      default:
-        return 'Visual Studio 16 2019';
-    }
+    return switch (_majorVersion) {
+      17 => 'Visual Studio 17 2022',
+      _  => 'Visual Studio 16 2019',
+    };
   }
 
   /// The path to cl.exe, or null if no Visual Studio installation has

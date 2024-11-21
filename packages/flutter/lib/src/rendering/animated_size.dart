@@ -381,12 +381,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   void _animationStatusListener(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.completed:
-        _onEnd?.call();
-      case AnimationStatus.dismissed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
+    if (status.isCompleted) {
+      _onEnd?.call();
     }
   }
 

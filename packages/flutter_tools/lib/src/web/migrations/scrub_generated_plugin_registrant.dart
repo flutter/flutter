@@ -18,7 +18,7 @@ class ScrubGeneratedPluginRegistrant extends ProjectMigrator {
   final Logger _logger;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     final File registrant = _project.libDirectory.childFile('generated_plugin_registrant.dart');
     final File gitignore = _project.parent.directory.childFile('.gitignore');
 

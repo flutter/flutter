@@ -397,7 +397,7 @@ void main() {
         '    ! App icon is set to the default placeholder icon. Replace with unique icons.\n',
         '    ! App icon is using the incorrect size (e.g. Icon-App-20x20@1x.png).\n',
         '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.\n',
-        'To update the settings, please refer to https://docs.flutter.dev/deployment/ios\n',
+        'To update the settings, please refer to https://flutter.dev/to/ios-deploy\n',
       ];
       expect(expectedValidationMessages, unorderedEquals(expectedValidationMessages));
 
@@ -463,10 +463,16 @@ void main() {
       );
       expect(appCodesign, const ProcessResultMatcher());
 
+<<<<<<< HEAD
       // Check read/write permissions are being correctly set
       final String rawStatString = flutterFrameworkDir.statSync().modeString();
       final String statString = rawStatString.substring(rawStatString.length - 9);
       expect(statString, 'rwxr-xr-x');
+=======
+      // Check read/write permissions are being correctly set.
+      final String statString = flutterFrameworkDir.statSync().mode.toRadixString(8);
+      expect(statString, '40755');
+>>>>>>> dec2ee5c1f98f8e84a7d5380c05eb8a3d0a81668
     });
   }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
      timeout: const Timeout(Duration(minutes: 10))

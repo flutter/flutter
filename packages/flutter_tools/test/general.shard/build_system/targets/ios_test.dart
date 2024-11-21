@@ -42,7 +42,7 @@ const List<String> _kSharedConfig = <String>[
 
 void main() {
   late Environment environment;
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late FakeProcessManager processManager;
   late Artifacts artifacts;
   late BufferLogger logger;
@@ -526,6 +526,8 @@ void main() {
     late Directory outputDir;
     late File binary;
     late FakeCommand copyPhysicalFrameworkCommand;
+    late FakeCommand copyPhysicalFrameworkDsymCommand;
+    late FakeCommand copyPhysicalFrameworkDsymCommandFailure;
     late FakeCommand lipoCommandNonFatResult;
     late FakeCommand lipoVerifyArm64Command;
     late FakeCommand xattrCommand;
@@ -535,6 +537,7 @@ void main() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       outputDir = fileSystem.directory('output');
       binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter');
+
       copyPhysicalFrameworkCommand = FakeCommand(command: <String>[
         'rsync',
         '-av',
@@ -545,6 +548,28 @@ void main() {
         'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
         outputDir.path,
       ]);
+
+      copyPhysicalFrameworkDsymCommand = FakeCommand(command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
+        outputDir.path,
+      ]);
+
+      copyPhysicalFrameworkDsymCommandFailure = FakeCommand(command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
+        outputDir.path,
+      ], exitCode: 1);
 
       lipoCommandNonFatResult = FakeCommand(command: <String>[
         'lipo',
@@ -640,6 +665,42 @@ void main() {
           (Exception exception) => exception.toString(),
           'description',
           contains('Flutter.framework/Flutter does not exist, cannot thin'),
+        )));
+    });
+
+    testWithoutContext('fails when framework dSYM copy fails', () async {
+      binary.createSync(recursive: true);
+      final Directory dSYM = fileSystem.directory(
+       artifacts.getArtifactPath(Artifact.flutterFrameworkDsym,
+         platform: TargetPlatform.ios,
+         mode: BuildMode.debug,
+         environmentType: EnvironmentType.physical,
+       ),
+      );
+      dSYM.createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64',
+          kSdkRoot: 'path/to/iPhoneOS.sdk',
+        },
+      );
+      processManager.addCommands(<FakeCommand>[
+        copyPhysicalFrameworkCommand,
+        copyPhysicalFrameworkDsymCommandFailure,
+      ]);
+      await expectLater(
+        const DebugUnpackIOS().build(environment),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('Failed to copy framework dSYM'),
         )));
     });
 
@@ -894,6 +955,14 @@ void main() {
 
     testWithoutContext('codesigns framework', () async {
       binary.createSync(recursive: true);
+      final Directory dSYM = fileSystem.directory(
+       artifacts.getArtifactPath(Artifact.flutterFrameworkDsym,
+         platform: TargetPlatform.ios,
+         mode: BuildMode.debug,
+         environmentType: EnvironmentType.physical,
+       ),
+      );
+      dSYM.createSync(recursive: true);
 
       final Environment environment = Environment.test(
         fileSystem.currentDirectory,
@@ -911,6 +980,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        copyPhysicalFrameworkDsymCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,

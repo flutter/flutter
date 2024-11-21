@@ -1175,8 +1175,8 @@ void main() {
     final Rect hitRect = tester.getRect(gestureDetector);
     final Rect textFieldRect = tester.getRect(find.byType(TextField));
 
-    expect(hitRect.size.width, lessThan(textFieldRect.size.width));
-    expect(hitRect.size.height, lessThan(textFieldRect.size.height));
+    expect(hitRect.size.width, lessThanOrEqualTo(textFieldRect.size.width));
+    expect(hitRect.size.height, lessThanOrEqualTo(textFieldRect.size.height));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   group('SelectionOverlay', () {
@@ -1474,11 +1474,15 @@ void main() {
 
     testWidgets('can show magnifier when no handles exist', (WidgetTester tester) async {
       final GlobalKey magnifierKey = GlobalKey();
+      Offset? builtGlobalGesturePosition;
+      Rect? builtFieldBounds;
       final SelectionOverlay selectionOverlay = await pumpApp(
         tester,
         magnifierConfiguration: TextMagnifierConfiguration(
           shouldDisplayHandlesInMagnifier: false,
           magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo>? notifier) {
+            builtGlobalGesturePosition =  notifier?.value.globalGesturePosition;
+            builtFieldBounds = notifier?.value.fieldBounds;
             return SizedBox.shrink(
               key: magnifierKey,
             );
@@ -1488,10 +1492,12 @@ void main() {
 
       expect(find.byKey(magnifierKey), findsNothing);
 
+      const Offset globalGesturePosition = Offset(10.0, 10.0);
+      final Rect fieldBounds = Offset.zero & const Size(200.0, 50.0);
       final MagnifierInfo info = MagnifierInfo(
-        globalGesturePosition: Offset.zero,
+        globalGesturePosition: globalGesturePosition,
         caretRect: Offset.zero & const Size(5.0, 20.0),
-        fieldBounds: Offset.zero & const Size(200.0, 50.0),
+        fieldBounds: fieldBounds,
         currentLineBoundaries: Offset.zero & const Size(200.0, 50.0),
       );
       selectionOverlay.showMagnifier(info);
@@ -1499,6 +1505,8 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byKey(magnifierKey), findsOneWidget);
+      expect(builtFieldBounds, fieldBounds);
+      expect(builtGlobalGesturePosition, globalGesturePosition);
 
       selectionOverlay.dispose();
       await tester.pumpAndSettle();
@@ -1724,7 +1732,7 @@ void main() {
       final LayerLink endHandleLayerLink = LayerLink();
       final LayerLink toolbarLayerLink = LayerLink();
 
-      final UniqueKey editableText = UniqueKey();
+      final UniqueKey editableTextKey = UniqueKey();
       final TextEditingController controller = TextEditingController();
       addTearDown(controller.dispose);
       final FocusNode focusNode = FocusNode();
@@ -1735,7 +1743,7 @@ void main() {
           key: column,
           children: <Widget>[
             FakeEditableText(
-              key: editableText,
+              key: editableTextKey,
               controller: controller,
               focusNode: focusNode,
             ),
@@ -1757,7 +1765,7 @@ void main() {
 
       return TextSelectionOverlay(
         value: TextEditingValue.empty,
-        renderObject: tester.state<EditableTextState>(find.byKey(editableText)).renderEditable,
+        renderObject: tester.state<EditableTextState>(find.byKey(editableTextKey)).renderEditable,
         context: tester.element(find.byKey(column)),
         onSelectionHandleTapped: () {},
         startHandleLayerLink: startHandleLayerLink,

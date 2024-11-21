@@ -116,7 +116,8 @@ class _FullNode extends _TrieNode {
 /// Instead of storing the full array of outgoing edges this node uses a
 /// compressed representation:
 ///
-///   * [_CompressedNode.occupied] has a bit set for indices which are occupied.
+///   * [_CompressedNode.occupiedIndices] has a bit set for indices which are
+///     occupied.
 ///   * furthermore, each occupied index can either be a `(key, value)` pair
 ///     representing an actual key/value mapping or a `(null, trieNode)` pair
 ///     representing a descendant node.

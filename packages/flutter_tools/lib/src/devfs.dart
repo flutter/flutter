@@ -442,6 +442,7 @@ class DevFS {
     required FileSystem fileSystem,
     required ProcessManager processManager,
     required Artifacts artifacts,
+    required BuildMode buildMode,
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
@@ -465,6 +466,7 @@ class DevFS {
             processManager: processManager,
             fileSystem: fileSystem,
             dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
+            buildMode: buildMode,
           ),
           fileSystem: fileSystem,
           logger: logger,
@@ -514,7 +516,8 @@ class DevFS {
       final vm_service.Response response = await _vmService.createDevFS(fsName);
       _baseUri = Uri.parse(response.json!['uri'] as String);
     } on vm_service.RPCError catch (rpcException) {
-      if (rpcException.code == RPCErrorCodes.kServiceDisappeared) {
+      if (rpcException.code == RPCErrorCodes.kServiceDisappeared ||
+          rpcException.message.contains('Service connection disposed')) {
         // This can happen if the device has been disconnected, so translate to
         // a DevFSException, which the caller will handle.
         throw DevFSException('Service disconnected', rpcException);
@@ -730,6 +733,7 @@ class DevFS {
       return UpdateFSReport();
     }
 
+    _logger.printTrace('Pending asset builds completed. Writing dirty entries.');
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri!, _httpWriter);
     }

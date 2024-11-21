@@ -43,7 +43,7 @@ class MainActivity : FlutterActivity() {
                 flutterEngine.dartExecutor,
                 "dev.flutter.echo.background.standard",
                 StandardMessageCodec.INSTANCE,
-                taskQueue,
+                taskQueue
             )
         backgroundStandard.setMessageHandler { message, reply -> reply.reply(message) }
         super.configureFlutterEngine(flutterEngine)

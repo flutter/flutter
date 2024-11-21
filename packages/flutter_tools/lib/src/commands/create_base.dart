@@ -351,6 +351,7 @@ abstract class CreateBase extends FlutterCommand {
     String? kotlinVersion,
     String? gradleVersion,
     bool withPlatformChannelPluginHook = false,
+    bool withSwiftPackageManager = false,
     bool withFfiPluginHook = false,
     bool withFfiPackage = false,
     bool withEmptyMain = false,
@@ -404,6 +405,7 @@ abstract class CreateBase extends FlutterCommand {
       'withFfiPackage': withFfiPackage,
       'withFfiPluginHook': withFfiPluginHook,
       'withPlatformChannelPluginHook': withPlatformChannelPluginHook,
+      'withSwiftPackageManager': withSwiftPackageManager,
       'withPluginHook': withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook,
       'withEmptyMain': withEmptyMain,
       'androidLanguage': androidLanguage,
@@ -667,8 +669,18 @@ abstract class CreateBase extends FlutterCommand {
       'templates',
       'template_manifest.json',
     );
+    final String manifestFileContents;
+    try {
+      manifestFileContents = globals.fs.file(manifestPath).readAsStringSync();
+    } on FileSystemException catch (e) {
+      throwToolExit(
+        'Unable to read the template manifest at path "$manifestPath".\n'
+        'Make sure that your user account has sufficient permissions to read this file.\n'
+        'Exception details: $e',
+      );
+    }
     final Map<String, Object?> manifest = json.decode(
-      globals.fs.file(manifestPath).readAsStringSync(),
+      manifestFileContents,
     ) as Map<String, Object?>;
     return Set<Uri>.from(
       (manifest['files']! as List<Object?>).cast<String>().map<Uri>(
@@ -696,11 +708,11 @@ abstract class CreateBase extends FlutterCommand {
 
 // A valid Dart identifier that can be used for a package, i.e. no
 // capital letters.
-// https://dart.dev/guides/language/language-tour#important-concepts
+// https://dart.dev/language#important-concepts
 final RegExp _identifierRegExp = RegExp('[a-z_][a-z0-9_]*');
 
 // non-contextual dart keywords.
-//' https://dart.dev/guides/language/language-tour#keywords
+// https://dart.dev/language/keywords
 const Set<String> _keywords = <String>{
   'abstract',
   'as',

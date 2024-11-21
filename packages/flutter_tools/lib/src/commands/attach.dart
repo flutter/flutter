@@ -21,13 +21,11 @@ import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
-import '../fuchsia/fuchsia_device.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../ios/devices.dart';
-import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
-import '../protocol_discovery.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -40,19 +38,19 @@ import '../vmservice.dart';
 ///
 /// With an application already running, a HotRunner can be attached to it
 /// with:
-/// ```
+/// ```bash
 /// $ flutter attach --debug-url http://127.0.0.1:12345/QqL7EFEDNG0=/
 /// ```
 ///
 /// If `--disable-service-auth-codes` was provided to the application at startup
 /// time, a HotRunner can be attached with just a port:
-/// ```
+/// ```bash
 /// $ flutter attach --debug-port 12345
 /// ```
 ///
 /// Alternatively, the attach command can start listening and scan for new
 /// programs that become active:
-/// ```
+/// ```bash
 /// $ flutter attach
 /// ```
 /// As soon as a new VM Service is detected the command attaches to it and
@@ -286,116 +284,48 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       : null;
 
     Stream<Uri>? vmServiceUri;
-    bool usesIpv6 = ipv6!;
+    final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
     final bool isWirelessIOSDevice = (device is IOSDevice) && device.isWirelesslyConnected;
 
     if ((debugPort == null && debugUri == null) || isWirelessIOSDevice) {
-      if (device is FuchsiaDevice) {
-        final String? module = stringArg('module');
-        if (module == null) {
-          throwToolExit("'--module' is required for attaching to a Fuchsia device");
-        }
-        usesIpv6 = device.ipv6;
-        FuchsiaIsolateDiscoveryProtocol? isolateDiscoveryProtocol;
-        try {
-          isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
-          vmServiceUri = Stream<Uri>.value(await isolateDiscoveryProtocol.uri).asBroadcastStream();
-        } on Exception {
-          isolateDiscoveryProtocol?.dispose();
-          final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
-          for (final ForwardedPort port in ports) {
-            await device.portForwarder.unforward(port);
+      // The device port we expect to have the debug port be listening
+      final int? devicePort = debugPort ?? debugUri?.port ?? deviceVmservicePort;
+
+      final VMServiceDiscoveryForAttach vmServiceDiscovery = device.getVMServiceDiscoveryForAttach(
+        appId: appId,
+        fuchsiaModule: stringArg('module'),
+        filterDevicePort: devicePort,
+        expectedHostPort: hostVmservicePort,
+        ipv6: usesIpv6,
+        logger: _logger,
+      );
+
+      _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
+      final Status discoveryStatus = _logger.startSpinner(
+        timeout: const Duration(seconds: 30),
+        slowWarningCallback: () {
+          // On iOS we rely on mDNS to find Dart VM Service. Remind the user to allow local network permissions on the device.
+          if (_isIOSDevice(device)) {
+            return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n\n'
+              'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
+              'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
+              "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n";
           }
-          rethrow;
-        }
-      } else if (_isIOSDevice(device)) {
-        // Protocol Discovery relies on logging. On iOS earlier than 13, logging is gathered using syslog.
-        // syslog is not available for iOS 13+. For iOS 13+, Protocol Discovery gathers logs from the VMService.
-        // Since we don't have access to the VMService yet, Protocol Discovery cannot be used for iOS 13+.
-        // Also, wireless devices must be found using mDNS and cannot use Protocol Discovery.
-        final bool compatibleWithProtocolDiscovery = (device is IOSDevice) &&
-          device.majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
-          !isWirelessIOSDevice;
 
-        _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
-        final Status discoveryStatus = _logger.startSpinner(
-          timeout: const Duration(seconds: 30),
-          slowWarningCallback: () {
-            // If relying on mDNS to find Dart VM Service, remind the user to allow local network permissions.
-            if (!compatibleWithProtocolDiscovery) {
-              return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n\n'
-                'Click "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
-                'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
-                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n";
-            }
+          return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n';
+        },
+      );
 
-            return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n';
-          },
-        );
+      vmServiceUri = vmServiceDiscovery.uris;
 
-        int? devicePort;
-        if (debugPort != null) {
-          devicePort = debugPort;
-        } else if (debugUri != null) {
-          devicePort = debugUri?.port;
-        } else if (deviceVmservicePort != null) {
-          devicePort = deviceVmservicePort;
-        }
-
-        final Future<Uri?> mDNSDiscoveryFuture = MDnsVmServiceDiscovery.instance!.getVMServiceUriForAttach(
-          appId,
-          device,
-          usesIpv6: usesIpv6,
-          useDeviceIPAsHost: isWirelessIOSDevice,
-          deviceVmservicePort: devicePort,
-        );
-
-        Future<Uri?>? protocolDiscoveryFuture;
-        if (compatibleWithProtocolDiscovery) {
-          final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(
-            device.getLogReader(),
-            portForwarder: device.portForwarder,
-            ipv6: ipv6!,
-            devicePort: devicePort,
-            hostPort: hostVmservicePort,
-            logger: _logger,
-          );
-          protocolDiscoveryFuture = vmServiceDiscovery.uri;
-        }
-
-        final Uri? foundUrl;
-        if (protocolDiscoveryFuture == null) {
-          foundUrl = await mDNSDiscoveryFuture;
-        } else {
-          foundUrl = await Future.any(
-            <Future<Uri?>>[mDNSDiscoveryFuture, protocolDiscoveryFuture]
-          );
-        }
+      // Stop the timer once we receive the first uri.
+      vmServiceUri = vmServiceUri.map((Uri uri) {
         discoveryStatus.stop();
-
-        vmServiceUri = foundUrl == null
-          ? null
-          : Stream<Uri>.value(foundUrl).asBroadcastStream();
-      }
-      // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.
-      if (vmServiceUri == null) {
-        final ProtocolDiscovery vmServiceDiscovery =
-          ProtocolDiscovery.vmService(
-            // If it's an Android device, attaching relies on past log searching
-            // to find the service protocol.
-            await device.getLogReader(includePastLogs: device is AndroidDevice),
-            portForwarder: device.portForwarder,
-            ipv6: ipv6!,
-            devicePort: deviceVmservicePort,
-            hostPort: hostVmservicePort,
-            logger: _logger,
-          );
-        _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
-        vmServiceUri = vmServiceDiscovery.uris;
-      }
+        return uri;
+      });
     } else {
       vmServiceUri = Stream<Uri>
         .fromFuture(
@@ -486,7 +416,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         _logger.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
     } on RPCError catch (err) {
-      if (err.code == RPCErrorCodes.kServiceDisappeared) {
+      if (err.code == RPCErrorCodes.kServiceDisappeared ||
+          err.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }
       rethrow;
@@ -559,8 +490,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   Future<void> _validateArguments() async { }
 
   bool _isIOSDevice(Device device) {
-    return (device is IOSDevice) ||
-        (device is IOSSimulator) ||
+    return (device.platformType == PlatformType.ios) ||
         (device is MacOSDesignedForIPadDevice);
   }
 }

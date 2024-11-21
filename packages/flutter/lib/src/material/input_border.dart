@@ -254,15 +254,15 @@ class UnderlineInputBorder extends InputBorder {
         bottomRight: borderRadius.bottomRight.clamp(maximum: Radius.circular(rect.height / 2)),
       );
 
-      // We set the strokeAlign to center, so the behavior is consistent with
-      // drawLine and with the historical behavior of this border.
       BoxBorder.paintNonUniformBorder(canvas, rect,
-          textDirection: textDirection,
-          borderRadius: updatedBorderRadius,
-          bottom: borderSide.copyWith(strokeAlign: BorderSide.strokeAlignCenter),
-          color: borderSide.color);
+        textDirection: textDirection,
+        borderRadius: updatedBorderRadius,
+        bottom: borderSide.copyWith(strokeAlign: BorderSide.strokeAlignInside),
+        color: borderSide.color,
+      );
     } else {
-      canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
+      final Offset alignInsideOffset = Offset(0, borderSide.width / 2);
+      canvas.drawLine(rect.bottomLeft - alignInsideOffset, rect.bottomRight - alignInsideOffset, borderSide.toPaint());
     }
   }
 
@@ -539,15 +539,12 @@ class OutlineInputBorder extends InputBorder {
       canvas.drawRRect(center, paint);
     } else {
       final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage)!;
-      switch (textDirection!) {
-        case TextDirection.rtl:
-          final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart + gapPadding - extent), extent);
-          canvas.drawPath(path, paint);
-
-        case TextDirection.ltr:
-          final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart - gapPadding), extent);
-          canvas.drawPath(path, paint);
-      }
+      final double start = switch (textDirection!) {
+        TextDirection.rtl => gapStart + gapPadding - extent,
+        TextDirection.ltr => gapStart - gapPadding,
+      };
+      final Path path = _gapBorderPath(canvas, center, math.max(0.0, start), extent);
+      canvas.drawPath(path, paint);
     }
   }
 

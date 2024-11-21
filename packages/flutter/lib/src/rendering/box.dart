@@ -540,14 +540,11 @@ class BoxConstraints extends Constraints {
         if (affectedFieldsList.length > 1) {
           affectedFieldsList.add('and ${affectedFieldsList.removeLast()}');
         }
-        String whichFields = '';
-        if (affectedFieldsList.length > 2) {
-          whichFields = affectedFieldsList.join(', ');
-        } else if (affectedFieldsList.length == 2) {
-          whichFields = affectedFieldsList.join(' ');
-        } else {
-          whichFields = affectedFieldsList.single;
-        }
+        final String whichFields = switch (affectedFieldsList.length) {
+          1 => affectedFieldsList.single,
+          2 => affectedFieldsList.join(' '),
+          _ => affectedFieldsList.join(', '),
+        };
         throwError(ErrorSummary('BoxConstraints has ${affectedFieldsList.length == 1 ? 'a NaN value' : 'NaN values' } in $whichFields.'));
       }
       if (minWidth < 0.0 && minHeight < 0.0) {
@@ -984,7 +981,7 @@ extension type const BaselineOffset(double? offset) {
 ///
 /// Subclasses do not own their own cache storage. Rather, their [memoize]
 /// implementation takes a `cacheStorage`. If a prior computation with the same
-/// input valus has already been memoized in `cacheStorage`, it returns the
+/// input values has already been memoized in `cacheStorage`, it returns the
 /// memoized value without running `computer`. Otherwise the method runs the
 /// `computer` to compute the return value, and caches the result to
 /// `cacheStorage`.
@@ -1185,7 +1182,7 @@ final class _LayoutCacheStorage {
 /// positioned at 0,0. If this is not true, then use [RenderShiftedBox] instead.
 ///
 /// See
-/// [proxy_box.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/rendering/proxy_box.dart)
+/// [proxy_box.dart](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/rendering/proxy_box.dart)
 /// for examples of inheriting from [RenderProxyBox].
 ///
 /// #### Using RenderShiftedBox
@@ -1196,7 +1193,7 @@ final class _LayoutCacheStorage {
 /// default layout algorithm.
 ///
 /// See
-/// [shifted_box.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/rendering/shifted_box.dart)
+/// [shifted_box.dart](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/rendering/shifted_box.dart)
 /// for examples of inheriting from [RenderShiftedBox].
 ///
 /// #### Kinds of children and child-specific data
@@ -1522,7 +1519,7 @@ abstract class RenderBox extends RenderObject {
     assert(RenderObject.debugCheckingIntrinsics || !debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
     bool shouldCache = true;
     assert(() {
-      // we don't want the checked-mode intrinsic tests to affect
+      // we don't want the debug-mode intrinsic tests to affect
       // who gets marked dirty, etc.
       shouldCache = !RenderObject.debugCheckingIntrinsics;
       return true;
@@ -2046,7 +2043,9 @@ abstract class RenderBox extends RenderObject {
     final double? baselineOffset = _computeIntrinsics(_CachedLayoutCalculation.baseline, (constraints, baseline), _computeDryBaseline).offset;
     // This assert makes sure computeDryBaseline always gets called in debug mode,
     // in case the computeDryBaseline implementation invokes debugCannotComputeDryLayout.
-    assert(baselineOffset == computeDryBaseline(constraints, baseline));
+    // This check should be skipped when debugCheckingIntrinsics is true to avoid
+    // slowing down the app significantly.
+    assert(RenderObject.debugCheckingIntrinsics || baselineOffset == computeDryBaseline(constraints, baseline));
     return baselineOffset;
   }
 
@@ -2192,7 +2191,7 @@ abstract class RenderBox extends RenderObject {
           '${objectRuntimeType(renderBoxDoingDryBaseline, 'RenderBox')}.computeDryBaseline.'
           'The computeDryBaseline method must not access '
           '${renderBoxDoingDryBaseline == this ? "the RenderBox's own size" : "the size of its child"},'
-          "because it's established in peformLayout or peformResize using different BoxConstraints."
+          "because it's established in performLayout or performResize using different BoxConstraints."
         );
         assert(size == _size);
       }
@@ -2468,7 +2467,7 @@ abstract class RenderBox extends RenderObject {
           ...information,
           DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.errorProperty),
           DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty),
-          ErrorHint('See https://flutter.dev/docs/development/ui/layout/box-constraints for more information.'),
+          ErrorHint('See https://flutter.dev/to/unbounded-constraints for more information.'),
         ]);
       }
       // verify that the size is within the constraints
@@ -2508,18 +2507,20 @@ abstract class RenderBox extends RenderObject {
           }
         }
 
-        testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', double.infinity);
-        testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.infinity);
-        if (constraints.hasBoundedWidth) {
-          testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', constraints.maxHeight);
-        }
-        if (constraints.hasBoundedHeight) {
-          testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', constraints.maxWidth);
+        try {
+          testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', double.infinity);
+          testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.infinity);
+          if (constraints.hasBoundedWidth) {
+            testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', constraints.maxHeight);
+          }
+          if (constraints.hasBoundedHeight) {
+            testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', constraints.maxWidth);
+          }
+          // TODO(ianh): Test that values are internally consistent in more ways than the above.
+        } finally {
+          RenderObject.debugCheckingIntrinsics = false;
         }
 
-        // TODO(ianh): Test that values are internally consistent in more ways than the above.
-
-        RenderObject.debugCheckingIntrinsics = false;
         if (failures.isNotEmpty) {
           // TODO(jacobr): consider nesting the failures object so it is collapsible.
           throw FlutterError.fromParts(<DiagnosticsNode>[

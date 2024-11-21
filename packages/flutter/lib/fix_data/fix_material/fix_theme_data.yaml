@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # For details regarding the *Flutter Fix* feature, see
-# https://flutter.dev/docs/development/tools/flutter-fix
+# https://flutter.dev/to/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -1697,5 +1697,16 @@ transforms:
     changes:
       - kind: 'removeParameter'
         name: 'useMaterial3'
+
+  # Changes made in https://github.com/flutter/flutter/pull/145523
+  - title: "Remove 'buttonBarTheme'"
+    date: 2024-04-28
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonBarTheme'
 
 # Before adding a new fix: read instructions at the top of this file.

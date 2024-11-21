@@ -205,7 +205,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/47651.
     expect(
       const CupertinoTheme(
-        data: CupertinoThemeData(primaryColor: Color(0x00000000)),
+        data: CupertinoThemeData(primaryColor: CupertinoColors.transparent),
         child: SizedBox(),
       ).toStringDeep().trimRight(),
       isNot(contains('\n')),

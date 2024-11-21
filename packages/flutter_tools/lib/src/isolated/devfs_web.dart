@@ -120,6 +120,7 @@ class WebAssetServer implements AssetReader {
     this._nullSafetyMode,
     this._ddcModuleSystem, {
     required this.webRenderer,
+    required this.useLocalCanvasKit,
   }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
@@ -180,6 +181,8 @@ class WebAssetServer implements AssetReader {
     Map<String, String> extraHeaders,
     NullSafetyMode nullSafetyMode, {
     required WebRendererMode webRenderer,
+    required bool isWasm,
+    required bool useLocalCanvasKit,
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
     // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
@@ -232,13 +235,14 @@ class WebAssetServer implements AssetReader {
       nullSafetyMode,
       ddcModuleSystem,
       webRenderer: webRenderer,
+      useLocalCanvasKit: useLocalCanvasKit,
     );
     if (testMode) {
       return server;
     }
 
-    // In release builds deploy a simpler proxy server.
-    if (buildInfo.mode != BuildMode.debug) {
+    // In release builds (or wasm builds) deploy a simpler proxy server.
+    if (buildInfo.mode != BuildMode.debug || isWasm) {
       final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
         entrypoint,
         fileSystem: globals.fs,
@@ -246,6 +250,7 @@ class WebAssetServer implements AssetReader {
         flutterRoot: Cache.flutterRoot,
         webBuildDirectory: getWebBuildDirectory(),
         basePath: server.basePath,
+        needsCoopCoep: webRenderer == WebRendererMode.skwasm,
       );
       runZonedGuarded(() {
         shelf.serveRequests(httpServer!, releaseAssetServer.handle);
@@ -290,7 +295,7 @@ class WebAssetServer implements AssetReader {
       },
       toolConfiguration: ToolConfiguration(
         loadStrategy: ddcModuleSystem
-            ? FrontendServerLegacyStrategyProvider(
+            ? FrontendServerDdcStrategyProvider(
         ReloadConfiguration.none,
         server,
         PackageUriMapper(packageConfig),
@@ -528,6 +533,8 @@ class WebAssetServer implements AssetReader {
   /// Determines what rendering backed to use.
   final WebRendererMode webRenderer;
 
+  final bool useLocalCanvasKit;
+
   String get _buildConfigString {
     final Map<String, dynamic> buildConfig = <String, dynamic>{
       'engineRevision': globals.flutterVersion.engineRevision,
@@ -538,6 +545,7 @@ class WebAssetServer implements AssetReader {
           'mainJsPath': 'main.dart.js',
         },
       ],
+      if (useLocalCanvasKit) 'useLocalCanvasKit' : true,
     };
     return '''
 if (!window._flutter) {
@@ -737,6 +745,8 @@ class WebDevFS implements DevFS {
     required this.nullSafetyMode,
     required this.ddcModuleSystem,
     required this.webRenderer,
+    required this.isWasm,
+    required this.useLocalCanvasKit,
     required this.rootDirectory,
     this.testMode = false,
   }) : _port = port;
@@ -763,6 +773,8 @@ class WebDevFS implements DevFS {
   final String? tlsCertPath;
   final String? tlsCertKeyPath;
   final WebRendererMode webRenderer;
+  final bool isWasm;
+  final bool useLocalCanvasKit;
 
   late WebAssetServer webAssetServer;
 
@@ -863,6 +875,8 @@ class WebDevFS implements DevFS {
       extraHeaders,
       nullSafetyMode,
       webRenderer: webRenderer,
+      isWasm: isWasm,
+      useLocalCanvasKit: useLocalCanvasKit,
       testMode: testMode,
       ddcModuleSystem: ddcModuleSystem,
     );
@@ -998,6 +1012,7 @@ class WebDevFS implements DevFS {
           artifacts: globals.artifacts!,
           logger: globals.logger,
           projectDir: rootDirectory,
+          buildMode: buildInfo.mode,
         );
       }
     }
@@ -1108,11 +1123,13 @@ class ReleaseAssetServer {
     required String? webBuildDirectory,
     required String? flutterRoot,
     required Platform platform,
+    required bool needsCoopCoep,
     this.basePath = '',
   })  : _fileSystem = fileSystem,
         _platform = platform,
         _flutterRoot = flutterRoot,
         _webBuildDirectory = webBuildDirectory,
+        _needsCoopCoep = needsCoopCoep,
         _fileSystemUtils =
             FileSystemUtils(fileSystem: fileSystem, platform: platform);
 
@@ -1122,6 +1139,7 @@ class ReleaseAssetServer {
   final FileSystem _fileSystem;
   final FileSystemUtils _fileSystemUtils;
   final Platform _platform;
+  final bool _needsCoopCoep;
 
   /// The base path to serve from.
   ///
@@ -1174,14 +1192,23 @@ class ReleaseAssetServer {
               'application/octet-stream';
       return shelf.Response.ok(bytes, headers: <String, String>{
         'Content-Type': mimeType,
+        if (_needsCoopCoep && file.basename == 'index.html') ...<String, String>{
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp',
+        }
       });
     }
 
     final File file = _fileSystem
         .file(_fileSystem.path.join(_webBuildDirectory!, 'index.html'));
-    return shelf.Response.ok(file.readAsBytesSync(), headers: <String, String>{
-      'Content-Type': 'text/html',
-    });
+    return shelf.Response.ok(file.readAsBytesSync(),
+      headers: <String, String>{
+        'Content-Type': 'text/html',
+        if (_needsCoopCoep) ...<String, String>{
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp',
+        },
+      });
   }
 }
 
@@ -1204,14 +1231,7 @@ void log(logging.LogRecord event) {
 
 Future<Directory> _loadDwdsDirectory(
     FileSystem fileSystem, Logger logger) async {
-  final String toolPackagePath =
-      fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
-  final String packageFilePath =
-      fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
-  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-    fileSystem.file(packageFilePath),
-    logger: logger,
-  );
+  final PackageConfig packageConfig = await currentPackageConfig();
   return fileSystem.directory(packageConfig['dwds']!.packageUriRoot);
 }
 

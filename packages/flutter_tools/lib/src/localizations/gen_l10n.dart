@@ -692,7 +692,7 @@ class LocalizationsGenerator {
   /// Whether to generate the Dart localization methods with named parameters.
   ///
   /// If this sets to true, the generated Dart localization methods will be:
-  /// ```
+  /// ```dart
   /// String helloWorld({required String name});
   /// ```
   final bool useNamedParameters;

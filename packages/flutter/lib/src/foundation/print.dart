@@ -6,6 +6,9 @@
 // calling "print" is sort of a non-starter here...
 // ignore_for_file: avoid_print
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 

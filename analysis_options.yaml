@@ -40,10 +40,11 @@ linter:
     - always_specify_types
     # - always_use_package_imports # we do this commonly
     - annotate_overrides
+    - annotate_redeclares
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
     - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses # blocked on https://github.com/dart-lang/linter/issues/3023
-    # - avoid_catching_errors # blocked on https://github.com/dart-lang/linter/issues/3023
+    # - avoid_catching_errors # blocked on https://github.com/dart-lang/linter/issues/4998
     # - avoid_classes_with_only_static_members # we do this commonly for `abstract final class`es
     - avoid_double_and_int_checks
     - avoid_dynamic_calls
@@ -121,6 +122,7 @@ linter:
     # - lines_longer_than_80_chars # not required by flutter style
     - literal_only_boolean_expressions
     # - matching_super_parameters # blocked on https://github.com/dart-lang/language/issues/2509
+    - missing_code_block_language_in_doc_comment
     - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list
     - no_default_cases
@@ -156,7 +158,7 @@ linter:
     # - prefer_constructors_over_static_methods # far too many false positives
     - prefer_contains
     # - prefer_double_quotes # opposite of prefer_single_quotes
-    # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
+    # - prefer_expression_function_bodies # conflicts with ./docs/contributing/Style-guide-for-Flutter-repo.md#consider-using--for-short-functions-and-methods
     - prefer_final_fields
     - prefer_final_in_for_each
     - prefer_final_locals
@@ -169,7 +171,7 @@ linter:
     - prefer_if_null_operators
     - prefer_initializing_formals
     - prefer_inlined_adds
-    # - prefer_int_literals # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#use-double-literals-for-double-constants
+    # - prefer_int_literals # conflicts with ./docs/contributing/Style-guide-for-Flutter-repo.md#use-double-literals-for-double-constants
     - prefer_interpolation_to_compose_strings
     - prefer_is_empty
     - prefer_is_not_empty
@@ -212,6 +214,7 @@ linter:
     # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
     - unnecessary_late
     - unnecessary_library_directive
+    # - unnecessary_library_name # blocked on https://github.com/dart-lang/lints/issues/181#issuecomment-2018919034
     - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_aware_operator_on_extension_on_nullable

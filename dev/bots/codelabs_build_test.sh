@@ -29,7 +29,7 @@ if [ ${PIPESTATUS[0]} -eq 0 ] || is_expected_failure "$log_file"; then
   rm "$log_file"
 else
   all_builds_ok=0
-  echo "View https://github.com/flutter/flutter/blob/master/dev/bots/README.md for steps to resolve this failed build test." >> ${log_file}
+  echo "View https://github.com/flutter/flutter/blob/main/dev/bots/README.md for steps to resolve this failed build test." >> ${log_file}
   echo
   echo "Log left in $log_file."
   echo

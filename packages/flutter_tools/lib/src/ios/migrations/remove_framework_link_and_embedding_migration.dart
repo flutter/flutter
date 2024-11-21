@@ -28,7 +28,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   final Analytics _analytics;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     if (!_xcodeProjectInfoFile.existsSync()) {
       logger.printTrace('Xcode project not found, skipping framework link and embedding migration');
       return;
@@ -101,7 +101,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
         parameter: 'remove-frameworks',
         result: 'failure',
       ));
-      throwToolExit('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
+      throwToolExit('Your Xcode project requires migration. See https://docs.flutter.dev/ios-project-migration for details.');
     }
 
     return line;

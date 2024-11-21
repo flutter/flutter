@@ -84,6 +84,7 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
     this.applyDimensions = true,
     this.forgetToLayoutChild = false,
     this.setLayoutOffset = true,
+    super.hitTestBehavior,
   }) : super(delegate: delegate);
 
   // Piped through for testing in RenderTwoDimensionalViewport
@@ -236,12 +237,12 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
       double yLayoutOffset = (leadingRow * 200) - verticalOffset.pixels;
       for (int row = leadingRow; row <= trailingRow; row++) {
         final ChildVicinity vicinity = ChildVicinity(xIndex: column, yIndex: row);
-        final RenderBox child = buildOrObtainChildFor(vicinity)!;
+        final RenderBox? child = buildOrObtainChildFor(vicinity);
         if (!forgetToLayoutChild) {
-          child.layout(constraints.tighten(width: 200.0, height: 200.0));
+          child?.layout(constraints.tighten(width: 200.0, height: 200.0));
         }
 
-        if (setLayoutOffset) {
+        if (setLayoutOffset && child != null) {
           parentDataOf(child).layoutOffset = Offset(xLayoutOffset, yLayoutOffset);
         }
         yLayoutOffset += 200;

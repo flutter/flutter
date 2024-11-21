@@ -16,7 +16,10 @@ void main() {
     await tester.tap(find.byType(TextFormField));
     await tester.pumpAndSettle();
 
-    final AnimatedDefaultTextStyle label = tester.firstWidget(find.ancestor(of: find.text('Name'), matching: find.byType(AnimatedDefaultTextStyle)));
+    final AnimatedDefaultTextStyle label = tester.firstWidget(find.ancestor(
+      of: find.text('Name'),
+      matching: find.byType(AnimatedDefaultTextStyle),
+    ));
     expect(label.style.color, theme.data.colorScheme.error);
   });
 }

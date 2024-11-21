@@ -41,6 +41,47 @@ void main() {
     expect(find.text('update'), findsOneWidget);
   });
 
+  testWidgets('Router respects update order',
+  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
+  (WidgetTester tester) async {
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
+    addTearDown(provider.dispose);
+    provider.value = RouteInformation(
+      uri: Uri.parse('initial'),
+    );
+
+    final MutableRouterDelegate delegate = MutableRouterDelegate();
+    addTearDown(delegate.dispose);
+
+    final ValueNotifier<int> notifier = ValueNotifier<int>(0);
+    addTearDown(notifier.dispose);
+    await tester.pumpWidget(buildBoilerPlate(
+        IntInheritedNotifier(
+          notifier: notifier,
+          child: Router<RouteInformation>(
+            routeInformationProvider: provider,
+            routeInformationParser: CustomRouteInformationParser(
+                  (RouteInformation information, BuildContext context) {
+                IntInheritedNotifier.of(context); // create dependency
+                return information;
+              },
+            ),
+            routerDelegate: delegate,
+          ),
+        )
+    ));
+    expect(find.text('initial'), findsOneWidget);
+    expect(delegate.currentConfiguration!.uri.toString(), 'initial');
+
+    delegate.updateConfiguration(RouteInformation(uri: Uri.parse('update')));
+    notifier.value = 1;
+
+    // The delegate should still retain the update.
+    await tester.pumpAndSettle();
+    expect(find.text('update'), findsOneWidget);
+    expect(delegate.currentConfiguration!.uri.toString(), 'update');
+  });
+
   testWidgets('Simple router basic functionality - asynchronized', (WidgetTester tester) async {
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
     addTearDown(provider.dispose);
@@ -1932,5 +1973,45 @@ class RedirectingInformationParser extends RouteInformationParser<RouteInformati
   @override
   RouteInformation restoreRouteInformation(RouteInformation configuration) {
     return configuration;
+  }
+}
+
+class MutableRouterDelegate extends RouterDelegate<RouteInformation> with ChangeNotifier {
+  MutableRouterDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
+  @override
+  RouteInformation? currentConfiguration;
+
+  @override
+  Future<void> setNewRoutePath(RouteInformation configuration) {
+    currentConfiguration = configuration;
+    return SynchronousFuture<void>(null);
+  }
+
+  void updateConfiguration(RouteInformation newConfig) {
+    currentConfiguration = newConfig;
+    notifyListeners();
+  }
+
+  @override
+  Future<bool> popRoute() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(currentConfiguration?.uri.toString() ?? '');
+  }
+}
+
+class IntInheritedNotifier extends InheritedNotifier<ValueListenable<int>> {
+  const IntInheritedNotifier({super.key,  required super.notifier, required super.child});
+
+  static int of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<IntInheritedNotifier>()!.notifier!.value;
   }
 }

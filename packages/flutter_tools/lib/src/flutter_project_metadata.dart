@@ -76,9 +76,7 @@ enum FlutterProjectType implements CliEnum {
   static List<FlutterProjectType> get enabledValues {
     return <FlutterProjectType>[
       for (final FlutterProjectType value in values)
-        if (value == FlutterProjectType.packageFfi) ...<FlutterProjectType>[
-          if (featureFlags.isNativeAssetsEnabled) value
-        ] else
+        if (value != FlutterProjectType.packageFfi || featureFlags.isNativeAssetsEnabled)
           value,
     ];
   }

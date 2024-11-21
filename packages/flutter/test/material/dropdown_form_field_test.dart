@@ -1274,4 +1274,37 @@ void main() {
     expect(value, equals('One'));
     expect(stateKey.currentState!.value, equals('One'));
   });
+
+  testWidgets('DropdownButtonFormField with onChanged set to null does not throw on form reset', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/146335.
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Form(
+            key: formKey,
+            child: DropdownButtonFormField<String>(
+              key: stateKey,
+              value: 'One',
+              items: <String>['One', 'Two', 'Free', 'Four']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: null,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Reset the form.
+    formKey.currentState!.reset();
+
+    expect(tester.takeException(), isNull);
+  });
 }

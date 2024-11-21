@@ -11,7 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
-import 'feedback.dart';
 import 'ink_highlight.dart';
 import 'material.dart';
 import 'material_state.dart';

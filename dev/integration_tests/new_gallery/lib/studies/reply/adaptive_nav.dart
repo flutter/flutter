@@ -520,11 +520,7 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  bool get _bottomDrawerVisible {
-    final AnimationStatus status = _drawerController.status;
-    return status == AnimationStatus.completed ||
-        status == AnimationStatus.forward;
-  }
+  bool get _bottomDrawerVisible => _drawerController.isForwardOrCompleted;
 
   void _toggleBottomDrawerVisibility() {
     if (_drawerController.value < 0.4) {
@@ -550,8 +546,7 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (_drawerController.isAnimating ||
-        _drawerController.status == AnimationStatus.completed) {
+    if (!_drawerController.isDismissed) {
       return;
     }
 

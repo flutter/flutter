@@ -101,9 +101,13 @@ class _DestinationImage extends StatelessWidget {
       label: destination.assetSemanticLabel,
       child: ExcludeSemantics(
         child: FadeInImagePlaceholder(
-          image: AssetImage(
-            destination.assetName,
-            package: 'flutter_gallery_assets',
+          image: ResizeImage(
+            AssetImage(
+              destination.assetName,
+              package: 'flutter_gallery_assets',
+            ),
+            width: isDesktop ? null : mobileThumbnailSize.toInt(),
+            height: isDesktop ? null : mobileThumbnailSize.toInt(),
           ),
           fit: BoxFit.cover,
           width: isDesktop ? null : mobileThumbnailSize,

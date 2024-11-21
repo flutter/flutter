@@ -35,14 +35,14 @@ Future<void> main() async {
     output.writeln('--- TEST FAILED ---');
   }
 
-  print(output);
-  web.window.fetch(
+  await web.window.fetch(
     '/test-result'.toJS,
     web.RequestInit(
       method: 'POST',
       body: '$output'.toJS,
     )
-  );
+  ).toDart;
+  print(output);
 }
 
 bool _errorMessageFormattedCorrectly(String errorMessage) {

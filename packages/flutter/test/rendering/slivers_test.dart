@@ -1019,6 +1019,25 @@ void main() {
     }
     expect(threw, true);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/150305
+  test('SliverLayoutDimensions has correct hashCode', () {
+    const SliverLayoutDimensions dimensions = SliverLayoutDimensions(
+      scrollOffset: 1.0,
+      precedingScrollExtent: 2.0,
+      viewportMainAxisExtent: 3.0,
+      crossAxisExtent: 4.0,
+    );
+    expect(
+      dimensions.hashCode,
+      Object.hash(
+        dimensions.scrollOffset,
+        dimensions.precedingScrollExtent,
+        dimensions.viewportMainAxisExtent,
+        dimensions.crossAxisExtent,
+      ),
+    );
+  });
 }
 
 class _DummyHitTestTarget implements HitTestTarget {

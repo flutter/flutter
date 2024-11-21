@@ -62,29 +62,12 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     /// across various countries. For example, we know Taiwan uses traditional (Hant)
     /// script, so it is safe to apply (Hant) to Taiwanese languages.
     if (deriveScriptCode && scriptCode == null) {
-      switch (languageCode) {
-        case 'zh': {
-          if (countryCode == null) {
-            scriptCode = 'Hans';
-          }
-          switch (countryCode) {
-            case 'CN':
-            case 'SG':
-              scriptCode = 'Hans';
-            case 'TW':
-            case 'HK':
-            case 'MO':
-              scriptCode = 'Hant';
-          }
-          break;
-        }
-        case 'sr': {
-          if (countryCode == null) {
-            scriptCode = 'Cyrl';
-          }
-          break;
-        }
-      }
+      scriptCode = switch ((languageCode, countryCode)) {
+        ('zh', 'CN' || 'SG' || null) => 'Hans',
+        ('zh', 'TW' || 'HK' || 'MO') => 'Hant',
+        ('sr', null) => 'Cyrl',
+        _ => null,
+      };
       // Increment length if we were able to assume a scriptCode.
       if (scriptCode != null) {
         length += 1;
@@ -395,7 +378,7 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 
 /// Return the input string as a Dart-parseable string.
 ///
-/// ```
+/// ```none
 /// foo => 'foo'
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
@@ -407,7 +390,7 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// in JSON files are escaped. For example, the backspace character (\b)
 /// has to be properly escaped by this function so that the generated
 /// Dart code correctly represents this character:
-/// ```
+/// ```none
 /// foo\bar => 'foo\\bar'
 /// foo\nbar => 'foo\\nbar'
 /// foo\\nbar => 'foo\\\\nbar'

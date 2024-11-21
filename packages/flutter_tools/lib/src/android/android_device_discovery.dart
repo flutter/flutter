@@ -74,7 +74,8 @@ class AndroidDevices extends PollingDeviceDiscovery {
     } on ProcessException catch (exception) {
       throwToolExit(
         'Unable to run "adb", check your Android SDK installation and '
-        '$kAndroidHome environment variable: ${exception.executable}',
+        '$kAndroidHome environment variable: ${exception.executable}\n'
+        'Error details: ${exception.message}',
       );
     }
     final List<AndroidDevice> devices = <AndroidDevice>[];

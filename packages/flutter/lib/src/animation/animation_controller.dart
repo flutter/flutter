@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
 
 import 'dart:ui' as ui show lerpDouble;
 
@@ -432,9 +434,10 @@ class AnimationController extends Animation<double>
     } else if (_value == upperBound) {
       _status = AnimationStatus.completed;
     } else {
-      _status = (_direction == _AnimationDirection.forward) ?
-        AnimationStatus.forward :
-        AnimationStatus.reverse;
+      _status = switch (_direction) {
+        _AnimationDirection.forward => AnimationStatus.forward,
+        _AnimationDirection.reverse => AnimationStatus.reverse,
+      };
     }
   }
 
@@ -451,6 +454,11 @@ class AnimationController extends Animation<double>
   /// controller's ticker might get muted, in which case the animation
   /// controller's callbacks will no longer fire even though time is continuing
   /// to pass. See [Ticker.muted] and [TickerMode].
+  ///
+  /// If the animation was stopped (e.g. with [stop] or by setting a new [value]),
+  /// [isAnimating] will return `false` but the [status] will not change,
+  /// so the value of [AnimationStatus.isAnimating] might still be `true`.
+  @override
   bool get isAnimating => _ticker != null && _ticker!.isActive;
 
   _AnimationDirection _direction;
@@ -462,6 +470,9 @@ class AnimationController extends Animation<double>
   /// Starts running this animation forwards (towards the end).
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
+  ///
+  /// If [from] is non-null, it will be set as the current [value] before running
+  /// the animation.
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
@@ -497,6 +508,9 @@ class AnimationController extends Animation<double>
   ///
   /// Returns a [TickerFuture] that completes when the animation is dismissed.
   ///
+  /// If [from] is non-null, it will be set as the current [value] before running
+  /// the animation.
+  ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
@@ -525,6 +539,48 @@ class AnimationController extends Animation<double>
       value = from;
     }
     return _animateToInternal(lowerBound);
+  }
+
+  /// Toggles the direction of this animation, based on whether it [isForwardOrCompleted].
+  ///
+  /// Specifically, this function acts the same way as [reverse] if the [status] is
+  /// either [AnimationStatus.forward] or [AnimationStatus.completed], and acts as
+  /// [forward] for [AnimationStatus.reverse] or [AnimationStatus.dismissed].
+  ///
+  /// If [from] is non-null, it will be set as the current [value] before running
+  /// the animation.
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
+  TickerFuture toggle({ double? from }) {
+    assert(() {
+      Duration? duration = this.duration;
+      if (isForwardOrCompleted) {
+        duration ??= reverseDuration;
+      }
+      if (duration == null) {
+        throw FlutterError(
+          'AnimationController.toggle() called with no default duration.\n'
+          'The "duration" property should be set, either in the constructor or later, before '
+          'calling the toggle() function.',
+        );
+      }
+      return true;
+    }());
+    assert(
+      _ticker != null,
+      'AnimationController.toggle() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.',
+    );
+    _direction = isForwardOrCompleted ? _AnimationDirection.reverse : _AnimationDirection.forward;
+    if (from != null) {
+      value = from;
+    }
+    return _animateToInternal(switch (_direction) {
+      _AnimationDirection.forward => upperBound,
+      _AnimationDirection.reverse => lowerBound,
+    });
   }
 
   /// Drives the animation from its current value to target.
@@ -886,13 +942,11 @@ class _InterpolationSimulation extends Simulation {
   @override
   double x(double timeInSeconds) {
     final double t = clampDouble(timeInSeconds / _durationInSeconds, 0.0, 1.0);
-    if (t == 0.0) {
-      return _begin;
-    } else if (t == 1.0) {
-      return _end;
-    } else {
-      return _begin + (_end - _begin) * _curve.transform(t);
-    }
+    return switch (t) {
+      0.0 => _begin,
+      1.0 => _end,
+      _ => _begin + (_end - _begin) * _curve.transform(t),
+    };
   }
 
   @override

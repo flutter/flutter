@@ -280,4 +280,60 @@ void main() {
     await tester.pumpAndSettle();
     expect(notification, isNull);
   });
+
+  testWidgets('ScrollBar thumb drag triggers scroll start-update-end notifications', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    ScrollNotification? notification;
+
+    addTearDown(scrollController.dispose);
+
+    bool handleScrollNotification(ScrollNotification value) {
+      if (value is ScrollStartNotification || value is ScrollUpdateNotification || value is ScrollEndNotification) {
+        notification = value;
+      }
+      return true;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox.expand(
+            child: Scrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: handleScrollNotification,
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: const SizedBox(height: 1200.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0);
+    expect(notification, isNull);
+
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(790, 45));
+    await tester.pumpAndSettle();
+    expect(notification, isA<ScrollStartNotification>());
+
+    await dragScrollbarGesture.moveBy(const Offset(0, -20));
+    await tester.pumpAndSettle();
+    expect(notification, isA<ScrollUpdateNotification>());
+    expect(scrollController.offset, 20);
+
+    await dragScrollbarGesture.moveBy(const Offset(0, -20));
+    await tester.pumpAndSettle();
+    expect(notification, isA<ScrollUpdateNotification>());
+    expect(scrollController.offset, 40);
+
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+    expect(notification, isA<ScrollEndNotification>());
+  });
 }

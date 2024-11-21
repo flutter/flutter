@@ -1073,6 +1073,7 @@ void main() {
           TestSemantics.rootChild(
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
             ],
             label: 'ABC',
             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
@@ -1172,7 +1173,7 @@ void main() {
 
     expect(tester.getSize(find.byType(OutlinedButton)), const Size(134.0, 48.0));
     expect(tester.getSize(find.byType(Text)), const Size(126.0, 42.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/122066
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/122066
 
   testWidgets('OutlinedButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
     bool didPressButton = false;
@@ -2466,6 +2467,173 @@ void main() {
 
     // The icon is aligned to the left of the button.
     expect(buttonTopLeft.dx, iconTopLeft.dx - 24.0); // 24.0 - padding between icon and button edge.
+  });
+
+  testWidgets("OutlinedButton.icon response doesn't hover when disabled", (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    final FocusNode focusNode = FocusNode(debugLabel: 'OutlinedButton.icon Focus');
+    final GlobalKey childKey = GlobalKey();
+    bool hovering = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: OutlinedButton.icon(
+            autofocus: true,
+            onPressed: () {},
+            onLongPress: () {},
+            onHover: (bool value) { hovering = value; },
+            focusNode: focusNode,
+            label: SizedBox(key: childKey),
+            icon: const Icon(Icons.add),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byKey(childKey)));
+    await tester.pumpAndSettle();
+    expect(hovering, isTrue);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: OutlinedButton.icon(
+            focusNode: focusNode,
+            onHover: (bool value) { hovering = value; },
+            onPressed: null,
+            label: SizedBox(key: childKey),
+            icon: const Icon(Icons.add),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    focusNode.dispose();
+  });
+
+  testWidgets('disabled and hovered OutlinedButton.icon responds to mouse-exit', (WidgetTester tester) async {
+    int onHoverCount = 0;
+    late bool hover;
+    const Key key = Key('OutlinedButton.icon');
+    Widget buildFrame({ required bool enabled }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: OutlinedButton.icon(
+              key: key,
+              onPressed: enabled ? () { } : null,
+              onHover: (bool value) {
+                onHoverCount += 1;
+                hover = value;
+              },
+              label: const Text('OutlinedButton'),
+              icon: const Icon(Icons.add),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(enabled: true));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+
+    await gesture.moveTo(tester.getCenter(find.byKey(key)));
+    await tester.pumpAndSettle();
+    expect(onHoverCount, 1);
+    expect(hover, true);
+
+    await tester.pumpWidget(buildFrame(enabled: false));
+    await tester.pumpAndSettle();
+    await gesture.moveTo(Offset.zero);
+    // Even though the OutlinedButton has been disabled, the mouse-exit still
+    // causes onHover(false) to be called.
+    expect(onHoverCount, 2);
+    expect(hover, false);
+
+    await gesture.moveTo(tester.getCenter(find.byKey(key)));
+    await tester.pumpAndSettle();
+    // We no longer see hover events because the OutlinedButton is disabled
+    // and it's no longer in the "hovering" state.
+    expect(onHoverCount, 2);
+    expect(hover, false);
+
+    await tester.pumpWidget(buildFrame(enabled: true));
+    await tester.pumpAndSettle();
+    // The OutlinedButton was enabled while it contained the mouse, however
+    // we do not call onHover() because it may call setState().
+    expect(onHoverCount, 2);
+    expect(hover, false);
+
+    await gesture.moveTo(tester.getCenter(find.byKey(key)) - const Offset(1, 1));
+    await tester.pumpAndSettle();
+    // Moving the mouse a little within the OutlinedButton doesn't change anything.
+    expect(onHoverCount, 2);
+    expect(hover, false);
+  });
+
+  testWidgets('Can set OutlinedButton.icon focus and Can set unFocus.', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'OutlinedButton.icon Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlinedButton.icon(
+          focusNode: node,
+          onFocusChange: (bool focused) => gotFocus = focused,
+          onPressed: () {  },
+          label: const SizedBox(),
+          icon: const Icon(Icons.add),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+    await tester.pump();
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+    node.unfocus();
+    await tester.pump();
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+    node.dispose();
+  });
+
+  testWidgets('When OutlinedButton.icon disable, Can not set OutlinedButton.icon focus.', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'OutlinedButton.icon Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlinedButton.icon(
+          focusNode: node,
+          onFocusChange: (bool focused) => gotFocus = focused,
+          onPressed: null,
+          label: const SizedBox(),
+          icon: const Icon(Icons.add),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+    await tester.pump();
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+    node.dispose();
   });
 }
 

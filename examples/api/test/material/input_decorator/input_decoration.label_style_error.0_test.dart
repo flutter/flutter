@@ -13,7 +13,10 @@ void main() {
     );
     final Theme theme = tester.firstWidget(find.byType(Theme));
 
-    final AnimatedDefaultTextStyle label = tester.firstWidget(find.ancestor(of: find.text('Name'), matching: find.byType(AnimatedDefaultTextStyle)));
+    final AnimatedDefaultTextStyle label = tester.firstWidget(find.ancestor(
+      of: find.text('Name'),
+      matching: find.byType(AnimatedDefaultTextStyle),
+    ));
     expect(label.style.color, theme.data.colorScheme.error);
   });
 }

@@ -6,12 +6,19 @@ import 'dart:js_interop';
 
 import 'package:web/web.dart' as web;
 
-// Attempt to load CanvasKit resources hosted on gstatic.
 Future<void> main() async {
+  if (await testFetchResources()) {
+    print('--- TEST SUCCEEDED ---');
+  } else {
+    print('--- TEST FAILED ---');
+  }
+}
+
+// Attempt to load CanvasKit resources hosted on gstatic.
+Future<bool> testFetchResources() async {
   const String engineVersion = String.fromEnvironment('TEST_FLUTTER_ENGINE_VERSION');
   if (engineVersion.isEmpty) {
-    print('--- TEST FAILED ---');
-    return;
+    return false;
   }
   try {
     final web.Response response = await web.window.fetch(
@@ -20,14 +27,12 @@ Future<void> main() async {
         method: 'GET',
       ),
     ).toDart;
-    if (response.ok) {
-      print('--- TEST SUCCEEDED ---');
-    } else {
-      print('--- TEST FAILED ---');
+    if (!response.ok) {
+      return false;
     }
   } catch (err) {
     print(err);
-    print('--- TEST FAILED ---');
+    return false;
   }
   try {
     final web.Response response = await web.window.fetch(
@@ -36,13 +41,12 @@ Future<void> main() async {
         method: 'GET',
       )
     ).toDart;
-    if (response.ok) {
-      print('--- TEST SUCCEEDED ---');
-    } else {
-      print('--- TEST FAILED ---');
+    if (!response.ok) {
+      return false;
     }
   } catch (err) {
     print(err);
-    print('--- TEST FAILED ---');
+    return false;
   }
+  return true;
 }

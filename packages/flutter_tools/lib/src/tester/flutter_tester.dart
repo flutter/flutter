@@ -166,7 +166,7 @@ class FlutterTesterDevice extends Device {
       '--non-interactive',
       if (debuggingOptions.enableDartProfiling)
         '--enable-dart-profiling',
-      '--packages=${debuggingOptions.buildInfo.packagesPath}',
+      '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       '--flutter-assets-dir=${assetDirectory.path}',
       if (debuggingOptions.startPaused)
         '--start-paused',

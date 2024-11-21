@@ -52,11 +52,11 @@ abstract class FlutterTestRunner {
     String? icudtlPath,
     Directory? coverageDirectory,
     bool web = false,
-    bool useWasm = false,
     String? randomSeed,
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -85,6 +85,7 @@ abstract class FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -118,11 +119,11 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String? icudtlPath,
     Directory? coverageDirectory,
     bool web = false,
-    bool useWasm = false,
     String? randomSeed,
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -160,6 +161,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['--tags', tags],
       if (excludeTags != null)
         ...<String>['--exclude-tags', excludeTags],
+      if (failFast)
+        '--fail-fast',
       if (runSkipped)
         '--run-skipped',
       if (totalShards != null)
@@ -188,7 +191,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
         webRenderer: debuggingOptions.webRenderer,
-        useWasm: useWasm,
+        useWasm: debuggingOptions.webUseWasm,
       );
       testArgs
         ..add('--platform=chrome')
@@ -221,7 +224,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             ),
             testTimeRecorder: testTimeRecorder,
             webRenderer: debuggingOptions.webRenderer,
-            useWasm: useWasm,
+            useWasm: debuggingOptions.webUseWasm,
           );
         },
       );
@@ -667,6 +670,7 @@ class SpawnPlugin extends PlatformPlugin {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -736,6 +740,8 @@ class SpawnPlugin extends PlatformPlugin {
         ...<String>['--tags', tags],
       if (excludeTags != null)
         ...<String>['--exclude-tags', excludeTags],
+      if (failFast)
+        '--fail-fast',
       if (runSkipped)
         '--run-skipped',
       if (totalShards != null)
@@ -795,7 +801,7 @@ class SpawnPlugin extends PlatformPlugin {
       '--non-interactive',
       '--use-test-fonts',
       '--disable-asset-fonts',
-      '--packages=${debuggingOptions.buildInfo.packagesPath}',
+      '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       if (testAssetDirectory != null)
         '--flutter-assets-dir=$testAssetDirectory',
       if (debuggingOptions.nullAssertions)

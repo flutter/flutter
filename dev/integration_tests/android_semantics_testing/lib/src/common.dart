@@ -154,14 +154,11 @@ class AndroidSemanticsNode {
     if (actions == null) {
       return const <AndroidSemanticsAction>[];
     }
-    final List<AndroidSemanticsAction> convertedActions = <AndroidSemanticsAction>[];
-    for (final int id in actions) {
-      final AndroidSemanticsAction? action = AndroidSemanticsAction.deserialize(id);
-      if (action != null) {
-        convertedActions.add(action);
-      }
-    }
-    return convertedActions;
+    return <AndroidSemanticsAction>[
+      for (final int id in actions)
+        if (AndroidSemanticsAction.deserialize(id) case final AndroidSemanticsAction action)
+          action,
+    ];
   }
 
   @override

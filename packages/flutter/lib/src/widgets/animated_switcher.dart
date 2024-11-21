@@ -340,7 +340,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       controller: controller,
     );
     animation.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed) {
+      if (status.isDismissed) {
         setState(() {
           assert(mounted);
           assert(_outgoingEntries.contains(entry));

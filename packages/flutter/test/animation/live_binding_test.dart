@@ -9,7 +9,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   /*
@@ -79,8 +78,6 @@ void main() {
   }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
 
   testWidgets('Should show event indicator for pointer events with setSurfaceSize',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     addTearDown(animationSheet.dispose);
@@ -113,6 +110,7 @@ void main() {
     );
 
     await tester.binding.setSurfaceSize(const Size(300, 300));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(target(recording: false));
 
     await tester.pumpFrames(target(), const Duration(milliseconds: 50));

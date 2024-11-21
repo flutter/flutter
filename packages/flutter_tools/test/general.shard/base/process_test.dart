@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -444,4 +446,37 @@ void main() {
       );
     });
   });
+
+  group('writeToStdinGuarded', () {
+    testWithoutContext('handles any error thrown by stdin.flush', () async {
+      final _ThrowsOnFlushIOSink stdin = _ThrowsOnFlushIOSink();
+      Object? errorPassedToCallback;
+
+      await ProcessUtils.writeToStdinGuarded(
+        stdin: stdin,
+        content: 'message to stdin',
+        onError: (Object error, StackTrace stackTrace) {
+          errorPassedToCallback = error;
+        },
+      );
+
+      expect(
+        errorPassedToCallback,
+        isNotNull,
+        reason: 'onError callback should have been invoked.',
+      );
+
+      expect(errorPassedToCallback, const TypeMatcher<SocketException>());
+    });
+  });
+}
+
+class _ThrowsOnFlushIOSink extends MemoryIOSink {
+  @override
+  Future<Object?> flush() async {
+    throw const SocketException(
+      'Write failed',
+      osError: OSError('Broken pipe', 32),
+    );
+  }
 }

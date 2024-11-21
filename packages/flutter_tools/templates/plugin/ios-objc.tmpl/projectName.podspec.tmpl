@@ -13,11 +13,28 @@ Pod::Spec.new do |s|
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
+  {{#withSwiftPackageManager}}
+  s.source_files = '{{projectName}}/Sources/{{projectName}}/**/*'
+  s.public_header_files = '{{projectName}}/Sources/{{projectName}}/include/{{projectName}}/**/*.h'
+  {{/withSwiftPackageManager}}
+  {{^withSwiftPackageManager}}
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
+  {{/withSwiftPackageManager}}
   s.dependency 'Flutter'
   s.platform = :ios, '12.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
+
+  # If your plugin requires a privacy manifest, for example if it uses any
+  # required reason APIs, update the PrivacyInfo.xcprivacy file to describe your
+  # plugin's privacy impact, and then uncomment this line. For more information,
+  # see https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
+  {{#withSwiftPackageManager}}
+  # s.resource_bundles = {'{{projectName}}_privacy' => ['{{projectName}}/Sources/{{projectName}}/PrivacyInfo.xcprivacy']}
+  {{/withSwiftPackageManager}}
+  {{^withSwiftPackageManager}}
+  # s.resource_bundles = {'{{projectName}}_privacy' => ['Resources/PrivacyInfo.xcprivacy']}
+  {{/withSwiftPackageManager}}
 end
