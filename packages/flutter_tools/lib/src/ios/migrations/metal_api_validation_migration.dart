@@ -47,9 +47,4 @@ class MetalAPIValidationMigrator extends ProjectMigrator {
       return '$group${' ' * leadingCount}$kValidationString\n';
     });
   }
-
-  @override
-  String? migrateLine(String line) {
-    return line;
-  }
 }
