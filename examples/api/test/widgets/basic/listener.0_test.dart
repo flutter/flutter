@@ -19,7 +19,7 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    await gesture.down(tester.getCenter(find.byType(ColoredBox).last));
+    await gesture.down(tester.getCenter(find.byType(ColoredBox)));
     await tester.pump();
 
     expect(find.text('1 presses\n0 releases'), findsOneWidget);
