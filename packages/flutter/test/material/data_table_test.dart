@@ -2417,6 +2417,99 @@ void main() {
     headerCenter = tester.getCenter(find.text('Header'));
     expect(headerCenter.dx, equals(400));
   });
+
+  testWidgets('DataTable with custom columm widths - checkbox', (WidgetTester tester) async {
+    Widget buildTable() {
+      return MaterialApp(
+        home: Material(
+          child: SizedBox(
+            width: 500,
+            child: DataTable(
+              columns: const <DataColumn>[
+                DataColumn(
+                  label: Text('Flex Numeric'),
+                  columnWidth: FlexColumnWidth(),
+                  numeric: true,
+                ),
+                DataColumn(
+                  label: Text('Numeric'),
+                  numeric: true,
+                ),
+                DataColumn(
+                  label: Text('Text'),
+                ),
+              ],
+              rows: <DataRow>[
+                DataRow(
+                  onSelectChanged: (bool? value) {},
+                  cells: const <DataCell>[
+                    DataCell(Text('1')),
+                    DataCell(Text('1')),
+                    DataCell(Text('D')),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTable());
+    
+    {
+      final Table table = tester.widget(find.byType(Table));
+      expect(table.columnWidths![1], const FlexColumnWidth());
+      expect(table.columnWidths![2], const IntrinsicColumnWidth());
+      expect(table.columnWidths![3], const IntrinsicColumnWidth(flex: 1));
+    }
+  });
+
+  testWidgets('DataTable with custom columm widths - no checkbox', (WidgetTester tester) async {
+    Widget buildTable() {
+      return MaterialApp(
+        home: Material(
+          child: SizedBox(
+            width: 500,
+            child: DataTable(
+              columns: const <DataColumn>[
+                DataColumn(
+                  label: Text('Flex Numeric'),
+                  columnWidth: FlexColumnWidth(),
+                  numeric: true,
+                ),
+                DataColumn(
+                  label: Text('Numeric'),
+                  numeric: true,
+                ),
+                DataColumn(
+                  label: Text('Text'),
+                ),
+              ],
+              rows: const <DataRow>[
+                DataRow(
+                  cells: <DataCell>[
+                    DataCell(Text('1')),
+                    DataCell(Text('1')),
+                    DataCell(Text('D')),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTable());
+    
+    {
+      final Table table = tester.widget(find.byType(Table));
+      expect(table.columnWidths![0], const FlexColumnWidth());
+      expect(table.columnWidths![1], const IntrinsicColumnWidth());
+      expect(table.columnWidths![2], const IntrinsicColumnWidth(flex: 1));
+    }
+  });
 }
 
 RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
