@@ -62,12 +62,12 @@ class SheetScaffold extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('The sheet'),
+            const Text('CupertinoSheetRoute'),
             CupertinoButton.filled(
               onPressed: () {
                 Navigator.of(context).maybePop();
               },
-              child: const Text('Go back'),
+              child: const Text('Go Back'),
             ),
             CupertinoButton.filled(
               onPressed: () {
@@ -75,7 +75,7 @@ class SheetScaffold extends StatelessWidget {
                   builder: (BuildContext context) => const SheetScaffold()
                 ));
               },
-              child: const Text('Push Sheet'),
+              child: const Text('Push Another Sheet'),
             ),
           ],
         ),

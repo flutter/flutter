@@ -5,6 +5,7 @@
 import 'package:flutter/cupertino.dart';
 
 /// Flutter code sample for [CupertinoSheetRoute] with restorable state and nested navigation.
+/// Do we include?
 
 void main() => runApp(const RestorableSheetExampleApp());
 
@@ -84,7 +85,7 @@ class _RestorableSheetState extends State<RestorableSheet>
                     Navigator.of(context).pop();
                   },
                   child: CounterSheetScaffold(
-                    counter: arguments as int,
+                    counter: arguments! as int,
                   )
                 );
               }
@@ -121,7 +122,7 @@ class _RestorableSheetState extends State<RestorableSheet>
               '${_counter.value}',
             ),
             CupertinoButton(
-              child: Text("Open sheet"),
+              child: const Text('Open Sheet'),
               onPressed: () {
                 _restorableSheetRouteFuture.present();
               }
@@ -169,10 +170,10 @@ class _CounterSheetScaffoldState extends State<CounterSheetScaffold> with Restor
   @pragma('vm:entry-point')
   static Route<void> _multiplicationRouteBuilder(BuildContext context, Object? arguments) {
     return CupertinoPageRoute<int?>(
-      settings: RouteSettings(name: '/multiplication'),
+      settings: const RouteSettings(name: '/multiplication'),
       builder: (BuildContext context) {
         return MultiplicationPage(
-            counter: arguments as int,
+            counter: arguments! as int,
         );
       }
     );
@@ -187,7 +188,7 @@ class _CounterSheetScaffoldState extends State<CounterSheetScaffold> with Restor
   }
 
   @override
-  String? get restorationId => "sheet_scaffold";
+  String? get restorationId => 'sheet_scaffold';
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -213,28 +214,28 @@ class _CounterSheetScaffoldState extends State<CounterSheetScaffold> with Restor
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text("Current count"),
+            const Text('Current Count'),
             Text(_counter.value.toString()),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 CupertinoButton(
                   onPressed: () {setState(() => _counter.value = _counter.value - 1);},
-                  child: Text('Decrease'),
+                  child: const Text('Decrease'),
                 ),
                 CupertinoButton(
                   onPressed: () {setState(() => _counter.value = _counter.value + 1);},
-                  child: Text('Increase'),
+                  child: const Text('Increase'),
                 ),
               ],
             ),
             CupertinoButton(
               onPressed: () => _multiplicationRouteFuture.present(),
-              child: Text("Go to multiplication page"),
+              child: const Text('Go to Multiplication Page'),
             ),
             CupertinoButton(
               onPressed: () => Navigator.of(context, rootNavigator: true).pop(_counter.value),
-              child: Text("Pop sheet"),
+              child: const Text('Pop Sheet'),
             ),
           ]
         ),
@@ -259,7 +260,7 @@ class _MultiplicationPageState extends State<MultiplicationPage> with Restoratio
   late final RestorableInt _counter = RestorableInt(widget.counter);
 
   @override
-  String? get restorationId => "multiplication_page";
+  String? get restorationId => 'multiplication_page';
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -279,15 +280,15 @@ class _MultiplicationPageState extends State<MultiplicationPage> with Restoratio
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text("Current count"),
+            const Text('Current Count'),
             Text(_counter.value.toString()),
             CupertinoButton(
               onPressed: () {setState(() => _counter.value = _counter.value * 2);},
-              child: Text('Double it'),
+              child: const Text('Double it'),
             ),
             CupertinoButton(
               onPressed: () => Navigator.pop(context, _counter.value),
-              child: Text("Pass it on to the last sheet"),
+              child: const Text('Pass it on to the last sheet'),
             ),
           ]
         ),

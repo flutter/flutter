@@ -96,7 +96,7 @@ Future<T?> showCupertinoSheet<T>({
     builder = (BuildContext context) {
       return NavigatorPopHandler(
         onPopWithResult: (T? result) {
-          Navigator.of(context, rootNavigator: true).maybePop();
+          Navigator.of(context, rootNavigator: true).maybePop(result);
         },
         child: Navigator(
           initialRoute: '/',
@@ -109,7 +109,7 @@ Future<T?> showCupertinoSheet<T>({
                     if (didPop) {
                       return;
                     }
-                    Navigator.of(context, rootNavigator: true).pop();
+                    Navigator.of(context, rootNavigator: true).pop(result);
                   },
                   child: pageBuilder(context),
                 );

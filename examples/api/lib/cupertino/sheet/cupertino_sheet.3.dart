@@ -4,6 +4,9 @@
 
 import 'package:flutter/cupertino.dart';
 
+/// Flutter code sample for [CupertinoSheetRoute] with restorable state.
+/// Do we include?
+
 void main() => runApp(const RestorableSheetExampleApp());
 
 class RestorableSheetExampleApp extends StatelessWidget {
@@ -95,7 +98,7 @@ class _RestorableSheetState extends State<RestorableSheet>
               '${_counter.value}',
             ),
             CupertinoButton(
-              child: const Text('Open sheet'),
+              child: const Text('Open Sheet'),
               onPressed: () {
                 _restorableSheetRouteFuture.present();
               }
@@ -144,7 +147,7 @@ class _CounterSheetScaffoldState extends State<CounterSheetScaffold> with Restor
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('Current count'),
+            const Text('Current Count'),
             Text(_counter.value.toString()),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -161,7 +164,7 @@ class _CounterSheetScaffoldState extends State<CounterSheetScaffold> with Restor
             ),
             CupertinoButton(
               onPressed: () => Navigator.pop(context, _counter.value),
-              child: const Text('Pop sheet'),
+              child: const Text('Pop Sheet'),
             ),
           ]
         ),

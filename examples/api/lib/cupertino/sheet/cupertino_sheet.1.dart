@@ -4,7 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 
-/// Flutter code sample for [CupertinoSheetRoute].
+/// Flutter code sample for [CupertinoSheetRoute], with nested navigation.
 
 void main() {
   runApp(const CupertinoSheetApp());
@@ -56,111 +56,102 @@ class SheetContentWithNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      initialRoute: '/',
-      onGenerateRoute: (RouteSettings settings) {
-        return CupertinoPageRoute<void>(
-          builder: (BuildContext context) {
-            return PopScope(
-              canPop: settings.name != '/',
-              onPopInvokedWithResult: (bool didPop, Object? result) {
-                if (didPop) {
-                  return;
-                }
-                Navigator.of(context).pop();
-              },
-              child: const SheetScaffold(),
-            );
-          }
-        );
+    return NavigatorPopHandler(
+      onPopWithResult: (dynamic result) {
+        Navigator.of(context, rootNavigator: true).maybePop();
       },
-    );
-  }
-}
-
-class SheetScaffold extends StatelessWidget {
-  const SheetScaffold({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('The sheet'),
-            CupertinoButton.filled(
-              onPressed: () {
-                Navigator.of(context).maybePop();
-              },
-              child: const Text('Go back'),
-            ),
-            CupertinoButton.filled(
-              onPressed: () {
-                Navigator.of(context).push(
-                  CupertinoPageRoute<void>(builder: (BuildContext context) => const SheetNextPage())
-                );
-              },
-              child: const Text('Push Page'),
-            ),
-            CupertinoButton.filled(
-              onPressed: () {
-                Navigator.of(context, rootNavigator: true).push(CupertinoSheetRoute<void>(
-                  builder: (BuildContext context) => const SheetContentWithNavigator()
-                ));
-              },
-              child: const Text('Push Sheet'),
-            ),
-          ],
-        ),
+      child: Navigator(
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          return CupertinoPageRoute<void>(
+            builder: (BuildContext context) {
+              return PopScope(
+                canPop: settings.name != '/',
+                onPopInvokedWithResult: (bool didPop, Object? result) {
+                  if (didPop) {
+                    return;
+                  }
+                  Navigator.of(context).pop();
+                },
+                child: const SheetFirstPage(),
+              );
+            }
+          );
+        },
       )
     );
   }
 }
+
+class SheetFirstPage extends StatelessWidget {
+  const SheetFirstPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const CupertinoPageScaffold(
+      child: SheetBody(title: 'CupertinoSheetRoute')
+    );
+  }
+}
+
+class SheetBody extends StatelessWidget {
+  const SheetBody({
+    super.key,
+    required this.title,
+  });
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(title),
+          CupertinoButton.filled(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Go Back'),
+          ),
+          CupertinoButton.filled(
+            onPressed: () {
+              CupertinoSheetRoute.popSheet(context);
+            },
+            child: const Text('Pop Whole Sheet'),
+          ),
+          CupertinoButton.filled(
+            onPressed: () {
+              Navigator.of(context).push(
+                CupertinoPageRoute<void>(builder: (BuildContext context) => const SheetNextPage())
+              );
+            },
+            child: const Text('Push Nested Page'),
+          ),
+          CupertinoButton.filled(
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).push(CupertinoSheetRoute<void>(
+                builder: (BuildContext context) => const SheetContentWithNavigator()
+              ));
+            },
+            child: const Text('Push Another Sheet'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
 class SheetNextPage extends StatelessWidget {
   const SheetNextPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
+    return const CupertinoPageScaffold(
       backgroundColor: CupertinoColors.activeOrange,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Second Page'),
-            CupertinoButton.filled(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Go back'),
-            ),
-            CupertinoButton.filled(
-              onPressed: () {
-                CupertinoSheetRoute.popSheet(context);
-              },
-              child: const Text('Pop whole sheet'),
-            ),
-            CupertinoButton.filled(
-              onPressed: () {
-                Navigator.of(context).push(
-                  CupertinoPageRoute<void>(builder: (BuildContext context) => const SheetNextPage())
-                );
-              },
-              child: const Text('Push Page'),
-            ),
-            CupertinoButton.filled(
-              onPressed: () {
-                Navigator.of(context, rootNavigator: true).push(CupertinoSheetRoute<void>(
-                  builder: (BuildContext context) => const SheetContentWithNavigator()
-                ));
-              },
-              child: const Text('Push Sheet'),
-            ),
-          ],
-        ),
-      )
+      child: SheetBody(title: 'Next Page')
     );
   }
 }
