@@ -280,6 +280,7 @@
 /dev/devicelab/bin/tasks/plugin_test_linux.dart @stuartmorgan @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test_macos.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test_windows.dart @loic-sharma @flutter/desktop
+/dev/devicelab/bin/tasks/release_builds_exclude_dev_dependencies_test.dart @camsim99 @flutter/android
 /dev/devicelab/bin/tasks/run_debug_test_android.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/run_debug_test_android.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/run_debug_test_linux.dart @loic-sharma @flutter/tool
