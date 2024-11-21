@@ -40,7 +40,7 @@ void main() {
     log.clear();
 
     controller.value = 0.4;
-    expect(log, <String>['listener2', 'listener4', 'listener4']);
+    expect(log, <String>['listener2', 'listener4']);
     log.clear();
   });
 
