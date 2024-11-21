@@ -15,17 +15,17 @@ import 'bottom_sheet_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
-import 'curves.dart';
 import 'debug.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
+import 'motion.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
 const Duration _bottomSheetEnterDuration = Duration(milliseconds: 250);
 const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
-const Curve _modalBottomSheetCurve = decelerateEasing;
+const Curve _modalBottomSheetCurve = Easing.legacyDecelerate;
 const double _minFlingVelocity = 700.0;
 const double _closeProgressThreshold = 0.5;
 const double _defaultScrollControlDisabledMaxHeightRatio = 9.0 / 16.0;
@@ -266,11 +266,11 @@ class _BottomSheetState extends State<BottomSheet> {
 
   bool get _dismissUnderway => widget.animationController!.status == AnimationStatus.reverse;
 
-  Set<MaterialState> dragHandleMaterialState = <MaterialState>{};
+  Set<WidgetState> dragHandleState = <WidgetState>{};
 
   void _handleDragStart(DragStartDetails details) {
     setState(() {
-      dragHandleMaterialState.add(MaterialState.dragged);
+      dragHandleState.add(WidgetState.dragged);
     });
     widget.onDragStart?.call(details);
   }
@@ -297,7 +297,7 @@ class _BottomSheetState extends State<BottomSheet> {
       return;
     }
     setState(() {
-      dragHandleMaterialState.remove(MaterialState.dragged);
+      dragHandleState.remove(WidgetState.dragged);
     });
     bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
@@ -335,12 +335,12 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   void _handleDragHandleHover(bool hovering) {
-    if (hovering != dragHandleMaterialState.contains(MaterialState.hovered)) {
+    if (hovering != dragHandleState.contains(WidgetState.hovered)) {
       setState(() {
         if (hovering){
-          dragHandleMaterialState.add(MaterialState.hovered);
+          dragHandleState.add(WidgetState.hovered);
         } else {
-          dragHandleMaterialState.remove(MaterialState.hovered);
+          dragHandleState.remove(WidgetState.hovered);
         }
       });
     }
@@ -361,11 +361,11 @@ class _BottomSheetState extends State<BottomSheet> {
     final bool showDragHandle = widget.showDragHandle ?? (widget.enableDrag && (bottomSheetTheme.showDragHandle ?? false));
 
     Widget? dragHandle;
-    if (showDragHandle){
+    if (showDragHandle) {
       dragHandle = _DragHandle(
         onSemanticsTap: widget.onClosing,
         handleHover: _handleDragHandleHover,
-        materialState: dragHandleMaterialState,
+        state: dragHandleState,
         dragHandleColor: widget.dragHandleColor,
         dragHandleSize: widget.dragHandleSize,
       );
@@ -431,20 +431,20 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // See scaffold.dart
 
-typedef _SizeChangeCallback<Size> = void Function(Size size);
+typedef _SizeChangeCallback = void Function(Size size);
 
 class _DragHandle extends StatelessWidget {
   const _DragHandle({
     required this.onSemanticsTap,
     required this.handleHover,
-    required this.materialState,
+    required this.state,
     this.dragHandleColor,
     this.dragHandleSize,
   });
 
   final VoidCallback? onSemanticsTap;
   final ValueChanged<bool> handleHover;
-  final Set<MaterialState> materialState;
+  final Set<WidgetState> state;
   final Color? dragHandleColor;
   final Size? dragHandleSize;
 
@@ -470,8 +470,8 @@ class _DragHandle extends StatelessWidget {
               width: handleSize.width,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(handleSize.height/2),
-                color: MaterialStateProperty.resolveAs<Color?>(dragHandleColor, materialState)
-                  ?? MaterialStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, materialState)
+                color: WidgetStateProperty.resolveAs<Color?>(dragHandleColor, state)
+                  ?? WidgetStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, state)
                   ?? m3Defaults.dragHandleColor,
               ),
             ),
@@ -491,7 +491,7 @@ class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
     super.child,
   });
 
-  final _SizeChangeCallback<Size> onChildSizeChanged;
+  final _SizeChangeCallback onChildSizeChanged;
   final double animationValue;
   final bool isScrollControlled;
   final double scrollControlDisabledMaxHeightRatio;
@@ -518,7 +518,7 @@ class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
 class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   _RenderBottomSheetLayoutWithSizeListener({
     RenderBox? child,
-    required _SizeChangeCallback<Size> onChildSizeChanged,
+    required _SizeChangeCallback onChildSizeChanged,
     required double animationValue,
     required bool isScrollControlled,
     required double scrollControlDisabledMaxHeightRatio,
@@ -530,9 +530,9 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
 
   Size _lastSize = Size.zero;
 
-  _SizeChangeCallback<Size> get onChildSizeChanged => _onChildSizeChanged;
-  _SizeChangeCallback<Size> _onChildSizeChanged;
-  set onChildSizeChanged(_SizeChangeCallback<Size> newCallback) {
+  _SizeChangeCallback get onChildSizeChanged => _onChildSizeChanged;
+  _SizeChangeCallback _onChildSizeChanged;
+  set onChildSizeChanged(_SizeChangeCallback newCallback) {
     if (_onChildSizeChanged == newCallback) {
       return;
     }
@@ -574,50 +574,32 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  Size _getSize(BoxConstraints constraints) {
-    return constraints.constrain(constraints.biggest);
-  }
-
   @override
   double computeMinIntrinsicWidth(double height) {
-    final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
-    if (width.isFinite) {
-      return width;
-    }
-    return 0.0;
+    final double width = BoxConstraints.tightForFinite(height: height).biggest.width;
+    return width.isFinite ? width : 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
-    if (width.isFinite) {
-      return width;
-    }
-    return 0.0;
+    final double width = BoxConstraints.tightForFinite(height: height).biggest.width;
+    return width.isFinite ? width : 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
-    if (height.isFinite) {
-      return height;
-    }
-    return 0.0;
+    final double height = BoxConstraints.tightForFinite(width: width).biggest.height;
+    return height.isFinite ? height : 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
-    if (height.isFinite) {
-      return height;
-    }
-    return 0.0;
+    final double height = BoxConstraints.tightForFinite(width: width).biggest.height;
+    return height.isFinite ? height : 0.0;
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    return _getSize(constraints);
-  }
+  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
 
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
@@ -631,7 +613,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
       return null;
     }
     final Size childSize = childConstraints.isTight ? childConstraints.smallest : child.getDryLayout(childConstraints);
-    return result + _getPositionForChild(_getSize(constraints), childSize).dy;
+    return result + _getPositionForChild(constraints.biggest, childSize).dy;
   }
 
   BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
@@ -650,7 +632,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
 
   @override
   void performLayout() {
-    size = _getSize(constraints);
+    size = constraints.biggest;
     final RenderBox? child = this.child;
     if (child == null) {
       return;
@@ -1137,11 +1119,11 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildModalBarrier() {
-    if (barrierColor.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
-      assert(barrierColor != barrierColor.withOpacity(0.0));
+    if (barrierColor.a != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
+      assert(barrierColor != barrierColor.withValues(alpha: 0.0));
       final Animation<Color?> color = animation!.drive(
         ColorTween(
-          begin: barrierColor.withOpacity(0.0),
+          begin: barrierColor.withValues(alpha: 0.0),
           end: barrierColor, // changedInternalState is called if barrierColor updates
         ).chain(CurveTween(curve: barrierCurve)), // changedInternalState is called if barrierCurve updates
       );
