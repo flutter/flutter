@@ -12,6 +12,7 @@ import 'dart:developer' as developer;
 import 'dart:io' show HttpClient, SocketException, WebSocket;
 import 'dart:ui';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -23,8 +24,6 @@ import 'common.dart';
 import 'src/callback.dart' as driver_actions;
 import 'src/channel.dart';
 import 'src/extension.dart';
-
-const String _success = 'success';
 
 /// Whether results should be reported to the native side over the method
 /// channel.
@@ -40,7 +39,7 @@ const bool _shouldReportResultsToNative = bool.fromEnvironment(
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.
-class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding implements IntegrationTestResults {
+class IntegrationTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding implements IntegrationTestResults {
   /// Sets up a listener to report that the tests are finished when everything is
   /// torn down.
   IntegrationTestWidgetsFlutterBinding() {
@@ -108,7 +107,6 @@ https://docs.flutter.dev/testing/integration-tests
   @override
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
-      assert(inTest);
       if (_surfaceSize == size) {
         return;
       }
@@ -226,28 +224,75 @@ https://docs.flutter.dev/testing/integration-tests
   }
 
   @override
+  bool get inTest => _inTest;
+  bool _inTest = false;
+
+  @override
   Future<void> runTest(
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
-    @Deprecated(
-      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration? timeout,
   }) async {
-    await super.runTest(
-      testBody,
-      invariantTester,
-      description: description,
-    );
-    results[description] ??= _success;
+    assert(!inTest);
+    _inTest = true;
+    await testBody();
+    invariantTester();
   }
 
-  // Do not paint a description label because it could show up in screenshots
-  // of the integration test.
   @override
-  void setLabel(String value) {}
+  void postTest() {
+    assert(inTest);
+    _inTest = false;
+  }
+
+  @override
+  Future<void> delayed(Duration duration) => Future<void>.delayed(duration);
+
+  @override
+  Future<void> pump([Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate]) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<T?> runAsync<T>(Future<T> Function() callback) async {
+    assert(() {
+      if (!_runningAsyncTasks) {
+        return true;
+      }
+      fail(
+        'Reentrant call to runAsync() denied.\n'
+        'runAsync() was called, then before its future completed, it '
+        'was called again. You must wait for the first returned future '
+        'to complete before calling runAsync() again.'
+      );
+    }());
+
+    _runningAsyncTasks = true;
+    try {
+      return await callback();
+    } catch (error, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: error,
+        stack: stack,
+        library: 'Flutter test framework',
+        context: ErrorSummary('while running async test code'),
+      ));
+      return null;
+    } finally {
+      _runningAsyncTasks = false;
+    }
+  }
+  bool _runningAsyncTasks = false;
+
+  @override
+  Clock get clock => const Clock();
+
+  @override
+  int get microtaskCount {
+    // The Dart SDK doesn't report this number.
+    assert(false, 'microtaskCount cannot be reported when running in real time');
+    return -1;
+  }
 
   vm.VmService? _vmService;
 
