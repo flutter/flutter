@@ -22,8 +22,6 @@ struct _FlViewAccessible {
   gboolean root_node_created;
 };
 
-enum { kProp0, kPropEngine, kPropLast };
-
 G_DEFINE_TYPE(FlViewAccessible, fl_view_accessible, ATK_TYPE_PLUG)
 
 static FlAccessibleNode* create_node(FlViewAccessible* self,

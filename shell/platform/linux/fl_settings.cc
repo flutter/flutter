@@ -9,11 +9,11 @@
 G_DEFINE_INTERFACE(FlSettings, fl_settings, G_TYPE_OBJECT)
 
 enum {
-  kSignalChanged,
-  kSignalLastSignal,
+  SIGNAL_CHANGED,
+  LAST_SIGNAL,
 };
 
-static guint signals[kSignalLastSignal];
+static guint signals[LAST_SIGNAL];
 
 static void fl_settings_default_init(FlSettingsInterface* iface) {
   /**
@@ -22,7 +22,7 @@ static void fl_settings_default_init(FlSettingsInterface* iface) {
    *
    * This signal is emitted after the settings have been changed.
    */
-  signals[kSignalChanged] =
+  signals[SIGNAL_CHANGED] =
       g_signal_new("changed", G_TYPE_FROM_INTERFACE(iface), G_SIGNAL_RUN_LAST,
                    0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
@@ -49,7 +49,7 @@ gdouble fl_settings_get_text_scaling_factor(FlSettings* self) {
 
 void fl_settings_emit_changed(FlSettings* self) {
   g_return_if_fail(FL_IS_SETTINGS(self));
-  g_signal_emit(self, signals[kSignalChanged], 0);
+  g_signal_emit(self, signals[SIGNAL_CHANGED], 0);
 }
 
 FlSettings* fl_settings_new() {

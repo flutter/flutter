@@ -62,7 +62,11 @@ static const FlSetting kAllSettings[] = {
 static constexpr char kClockFormat12Hour[] = "12h";
 static constexpr char kGtkThemeDarkSuffix[] = "-dark";
 
-typedef enum { kDefault, kPreferDark, kPreferLight } ColorScheme;
+typedef enum {
+  COLOR_SCHEME_DEFAULT,
+  COLOR_SCHEME_PREFER_DARK,
+  COLOR_SCHEME_PREFER_LIGHT
+} ColorScheme;
 
 struct _FlSettingsPortal {
   GObject parent_instance;
@@ -183,7 +187,7 @@ static FlColorScheme fl_settings_portal_get_color_scheme(FlSettings* settings) {
 
   g_autoptr(GVariant) value = nullptr;
   if (get_value(self, &kColorScheme, &value)) {
-    if (g_variant_get_uint32(value) == kPreferDark) {
+    if (g_variant_get_uint32(value) == COLOR_SCHEME_PREFER_DARK) {
       color_scheme = FL_COLOR_SCHEME_DARK;
     }
   } else if (get_value(self, &kGtkTheme, &value)) {

@@ -125,9 +125,9 @@ static FlKeyEmbedderUserData* fl_key_embedder_user_data_new(
 namespace {
 
 typedef enum {
-  kStateLogicUndecided,
-  kStateLogicNormal,
-  kStateLogicReversed,
+  STATE_LOGIC_INFERRENCE_UNDECIDED,
+  STATE_LOGIC_INFERRENCE_NORMAL,
+  STATE_LOGIC_INFERRENCE_REVERSED,
 } StateLogicInferrence;
 
 }
@@ -246,7 +246,7 @@ FlKeyEmbedderResponder* fl_key_embedder_responder_new(
   self->pressing_records = g_hash_table_new(g_direct_hash, g_direct_equal);
   self->mapping_records = g_hash_table_new(g_direct_hash, g_direct_equal);
   self->lock_records = 0;
-  self->caps_lock_state_logic_inferrence = kStateLogicUndecided;
+  self->caps_lock_state_logic_inferrence = STATE_LOGIC_INFERRENCE_UNDECIDED;
 
   self->modifier_bit_to_checked_keys =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
@@ -557,7 +557,8 @@ static void update_caps_lock_state_logic_inferrence(
     bool is_down_event,
     bool enabled_by_state,
     int stage_by_record) {
-  if (self->caps_lock_state_logic_inferrence != kStateLogicUndecided) {
+  if (self->caps_lock_state_logic_inferrence !=
+      STATE_LOGIC_INFERRENCE_UNDECIDED) {
     return;
   }
   if (!is_down_event) {
@@ -567,9 +568,9 @@ static void update_caps_lock_state_logic_inferrence(
       stage_by_record, is_down_event, enabled_by_state, false);
   if ((stage_by_event == 0 && stage_by_record == 2) ||
       (stage_by_event == 2 && stage_by_record == 0)) {
-    self->caps_lock_state_logic_inferrence = kStateLogicReversed;
+    self->caps_lock_state_logic_inferrence = STATE_LOGIC_INFERRENCE_REVERSED;
   } else {
-    self->caps_lock_state_logic_inferrence = kStateLogicNormal;
+    self->caps_lock_state_logic_inferrence = STATE_LOGIC_INFERRENCE_NORMAL;
   }
 }
 
@@ -639,11 +640,11 @@ static void synchronize_lock_states_loop_body(gpointer key,
     update_caps_lock_state_logic_inferrence(self, context->is_down,
                                             enabled_by_state, stage_by_record);
     g_return_if_fail(self->caps_lock_state_logic_inferrence !=
-                     kStateLogicUndecided);
+                     STATE_LOGIC_INFERRENCE_UNDECIDED);
   }
   const bool reverse_state_logic =
       checked_key->is_caps_lock &&
-      self->caps_lock_state_logic_inferrence == kStateLogicReversed;
+      self->caps_lock_state_logic_inferrence == STATE_LOGIC_INFERRENCE_REVERSED;
   const int stage_by_event =
       this_key_is_event_key
           ? find_stage_by_self_event(stage_by_record, context->is_down,

@@ -20,9 +20,7 @@ G_BEGIN_DECLS
  */
 
 typedef enum {
-  // NOLINTBEGIN(readability-identifier-naming)
   FL_RENDERER_ERROR_FAILED,
-  // NOLINTEND(readability-identifier-naming)
 } FlRendererError;
 
 GQuark fl_renderer_error_quark(void) G_GNUC_CONST;
