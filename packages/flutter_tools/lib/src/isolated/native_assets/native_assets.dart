@@ -96,16 +96,16 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
     return const DartBuildResult.empty();
   }
 
-  final build_info.BuildMode buildMode = _getBuildMode(targetPlatform, environmentDefines, flutterTester);
-  final List<Target> targets = flutterTester
-      ? <Target>[Target.current]
-      : _targetsForOS(targetPlatform, targetOS, environmentDefines);
-  final DartBuildResult result = targets.isEmpty
+  final build_info.BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
+  final List<Architecture> architectures = flutterTester
+      ? <Architecture>[Architecture.current]
+      : _architecturesForOS(targetPlatform, targetOS, environmentDefines);
+  final DartBuildResult result = architectures.isEmpty
       ? const DartBuildResult.empty()
       : await _runDartBuild(
           environmentDefines: environmentDefines,
           buildRunner: buildRunner,
-          targets: targets,
+          architectures: architectures,
           projectUri: projectUri,
           buildMode: _nativeAssetsBuildMode(buildMode),
           fileSystem: fileSystem,
@@ -124,7 +124,7 @@ Future<void> installCodeAssets({
   final OS targetOS = getNativeOSFromTargetPlatfrorm(targetPlatform);
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   final bool flutterTester = targetPlatform == build_info.TargetPlatform.tester;
-  final build_info.BuildMode buildMode = _getBuildMode(targetPlatform, environmentDefines, flutterTester);
+  final build_info.BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
   final String? codesignIdentity = environmentDefines[build_info.kCodesignIdentity];
   final Map<CodeAsset, KernelAsset> assetTargetLocations = assetTargetLocationsForOS(targetOS, dartBuildResult.codeAssets, flutterTester, buildUri);
@@ -711,20 +711,23 @@ Future<void> _copyNativeCodeAssetsForOS(
 Future<DartBuildResult> _runDartBuild({
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
-  required List<Target> targets,
+  required List<Architecture> architectures,
   required Uri projectUri,
   required BuildMode buildMode,
   required FileSystem fileSystem,
-  required OS targetOS,
+  required OS? targetOS,
 }) async {
   final bool linkingEnabled = buildMode == BuildMode.release;
-  final String targetString = targets.length == 1
-      ? targets.single.toString()
-      : targets.toList().toString();
+
+  final String architectureString = architectures.length == 1
+      ? architectures.single.toString()
+      : architectures.toList().toString();
+
   globals.logger
-      .printTrace('Building native assets for $targetString $buildMode.');
+      .printTrace('Building native assets for $targetOS $architectureString $buildMode.');
   final List<EncodedAsset> assets = <EncodedAsset>[];
   final Set<Uri> dependencies = <Uri>{};
+
   final build_info.EnvironmentType? environmentType;
   if (targetOS == OS.iOS) {
     final String? sdkRoot = environmentDefines[build_info.kSdkRoot];
@@ -748,12 +751,12 @@ Future<DartBuildResult> _runDartBuild({
   final int? macOSVersion = targetOS == OS.macOS ? targetMacOSVersion : null;
   final IOSSdk? iOSSdk = targetOS == OS.iOS ? getIOSSdk(environmentType!) : null;
 
-  for (final Target target in targets) {
+  for (final Architecture architecture in architectures) {
     final BuildResult? buildResult = await buildRunner.build(
       supportedAssetTypes: <String>[CodeAsset.type],
       configCreator: () => BuildConfigBuilder()
           ..setupCodeConfig(
-            targetArchitecture: target.architecture,
+            targetArchitecture: architecture,
             linkModePreference: LinkModePreference.dynamic,
             cCompilerConfig: cCompilerConfig,
             targetAndroidNdkApi: androidNdkApi,
@@ -770,7 +773,7 @@ Future<DartBuildResult> _runDartBuild({
       applicationAssetValidator: (List<EncodedAsset> assets) async => <String>[
         ...await validateCodeAssetInApplication(assets),
       ],
-      targetOS: target.os,
+      targetOS: targetOS!,
       buildMode: buildMode,
       workingDirectory: projectUri,
       includeParentEnvironment: true,
@@ -787,7 +790,7 @@ Future<DartBuildResult> _runDartBuild({
         supportedAssetTypes: <String>[CodeAsset.type],
         configCreator: () => LinkConfigBuilder()
             ..setupCodeConfig(
-              targetArchitecture: target.architecture,
+              targetArchitecture: architecture,
               linkModePreference: LinkModePreference.dynamic,
               cCompilerConfig: cCompilerConfig,
               targetAndroidNdkApi: androidNdkApi,
@@ -823,7 +826,7 @@ Future<DartBuildResult> _runDartBuild({
       .map<CodeAsset>(CodeAsset.fromEncoded)
       .toList();
   globals.logger
-      .printTrace('Building native assets for $targetString $buildMode done.');
+      .printTrace('Building native assets for $targetOS $architectureString $buildMode done.');
   return DartBuildResult(codeAssets, dependencies.toList());
 }
 
@@ -865,13 +868,13 @@ Future<DartBuildResult> _runDartDryRunBuild({
     dependencies.toList());
 }
 
-List<Target> _targetsForOS(build_info.TargetPlatform targetPlatform,
+List<Architecture> _architecturesForOS(build_info.TargetPlatform targetPlatform,
     OS targetOS, Map<String, String> environmentDefines) {
   switch (targetOS) {
     case OS.linux:
-      return <Target>[_getNativeTarget(targetPlatform)];
+      return <Architecture>[_getNativeArchitecture(targetPlatform)];
     case OS.windows:
-      return <Target>[_getNativeTarget(targetPlatform)];
+      return <Architecture>[_getNativeArchitecture(targetPlatform)];
     case OS.macOS:
       final List<build_info.DarwinArch> darwinArchs =
           _emptyToNull(environmentDefines[build_info.kDarwinArchs])
@@ -882,7 +885,7 @@ List<Target> _targetsForOS(build_info.TargetPlatform targetPlatform,
                 build_info.DarwinArch.x86_64,
                 build_info.DarwinArch.arm64
               ];
-      return darwinArchs.map(getNativeMacOSTarget).toList();
+      return darwinArchs.map(getNativeMacOSArchitecture).toList();
     case OS.android:
       final String? androidArchsEnvironment =
           environmentDefines[build_info.kAndroidArchs];
@@ -890,7 +893,7 @@ List<Target> _targetsForOS(build_info.TargetPlatform targetPlatform,
         targetPlatform,
         androidArchsEnvironment,
       );
-      return androidArchs.map(getNativeAndroidTarget).toList();
+      return androidArchs.map(getNativeAndroidArchitecture).toList();
     case OS.iOS:
       final List<build_info.DarwinArch> iosArchs =
           _emptyToNull(environmentDefines[build_info.kIosArchs])
@@ -898,24 +901,22 @@ List<Target> _targetsForOS(build_info.TargetPlatform targetPlatform,
                   .map(build_info.getIOSArchForName)
                   .toList() ??
               <build_info.DarwinArch>[build_info.DarwinArch.arm64];
-      return iosArchs.map(getNativeIOSTarget).toList();
+      return iosArchs.map(getNativeIOSArchitecture).toList();
     default:
       // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
       // Write the file we claim to have in the [outputs].
-      return <Target>[];
+      return <Architecture>[];
   }
 }
 
-Target _getNativeTarget(build_info.TargetPlatform targetPlatform) {
+Architecture _getNativeArchitecture(build_info.TargetPlatform targetPlatform) {
   switch (targetPlatform) {
     case build_info.TargetPlatform.linux_x64:
-      return Target.linuxX64;
-    case build_info.TargetPlatform.linux_arm64:
-      return Target.linuxArm64;
     case build_info.TargetPlatform.windows_x64:
-      return Target.windowsX64;
+      return Architecture.x64;
+    case build_info.TargetPlatform.linux_arm64:
     case build_info.TargetPlatform.windows_arm64:
-      return Target.windowsArm64;
+      return Architecture.arm64;
     case build_info.TargetPlatform.android:
     case build_info.TargetPlatform.ios:
     case build_info.TargetPlatform.darwin:
@@ -1097,7 +1098,7 @@ const Map<OS, Set<Architecture>> _osTargets = <OS, Set<Architecture>>{
   },
 };
 
-build_info.BuildMode _getBuildMode(build_info.TargetPlatform targetPlatform, Map<String, String> environmentDefines, bool isFlutterTester) {
+build_info.BuildMode _getBuildMode(Map<String, String> environmentDefines, bool isFlutterTester) {
   if (isFlutterTester) {
     return build_info.BuildMode.debug;
   }

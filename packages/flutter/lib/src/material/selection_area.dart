@@ -113,6 +113,7 @@ class SelectionAreaState extends State<SelectionArea> {
   /// The [State] of the [SelectableRegion] for which this [SelectionArea] wraps.
   SelectableRegionState get selectableRegion => _selectableRegionKey.currentState!;
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));

@@ -223,9 +223,6 @@ void main() {
           expectCCompilerIsConfigured(exampleDirectory);
         });
       },
-      // TODO(matanlurey): Debug why flutter build apk often timesout.
-      // See https://github.com/flutter/flutter/issues/158560 for details.
-      skip: buildSubcommand == 'apk' ? 'flutter build apk times out' : false, // Temporary workaround for https://github.com/flutter/flutter/issues/158560.
       tags: <String>['flutter-build-apk'],
       );
     }

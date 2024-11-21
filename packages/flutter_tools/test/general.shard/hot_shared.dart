@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -53,6 +54,9 @@ class FakeDevice extends Fake implements Device {
   bool disposed = false;
 
   @override
+  final DartDevelopmentService dds = _FakeDartDevelopmentService();
+
+  @override
   bool isSupported() => true;
 
   @override
@@ -88,6 +92,11 @@ class FakeDevice extends Fake implements Device {
   Future<void> dispose() async {
     disposed = true;
   }
+}
+
+class _FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+  @override
+  void shutdown() {}
 }
 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
