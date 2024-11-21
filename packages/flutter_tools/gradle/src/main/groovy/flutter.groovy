@@ -1239,13 +1239,13 @@ class FlutterPlugin implements Plugin<Project> {
             Task cleanPackageAssets
 
             try {
-                packageAssets = project.tasks.named("package${variant.name.capitalize()}Assets")
+                packageAssets = project.tasks.named("package${variant.name.capitalize()}Assets").get()
             } catch (Exception e) {
                 packageAssets = null
             }
 
             try {
-                cleanPackageAssets = project.tasks.named("cleanPackage${variant.name.capitalize()}Assets")
+                cleanPackageAssets = project.tasks.named("cleanPackage${variant.name.capitalize()}Assets").get()
             } catch (Exception e) {
                 cleanPackageAssets = null
             }
