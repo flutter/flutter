@@ -124,11 +124,11 @@ Future<void> main() async {
       });
     });
 
-    // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
-    testWidgets('root widgets are wrapped with a RepaintBoundary', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66006.
+    testWidgets('root view reports correct dimensions', (WidgetTester tester) async {
       await tester.pumpWidget(const Placeholder());
 
-      expect(find.byType(RepaintBoundary), findsOneWidget);
+      expect(tester.binding.renderView.paintBounds, const Rect.fromLTWH(0, 0, 2400, 1800));
     });
 
     testWidgets('integration test has no label', (WidgetTester tester) async {
