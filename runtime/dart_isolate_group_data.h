@@ -9,6 +9,7 @@
 #include <mutex>
 #include <string>
 
+#include "assets/native_assets.h"
 #include "flutter/common/settings.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/memory/ref_ptr.h"
@@ -30,13 +31,15 @@ using ChildIsolatePreparer = std::function<bool(DartIsolate*)>;
 // group cleanup callback on any thread.
 class DartIsolateGroupData : public PlatformMessageHandlerStorage {
  public:
-  DartIsolateGroupData(const Settings& settings,
-                       fml::RefPtr<const DartSnapshot> isolate_snapshot,
-                       std::string advisory_script_uri,
-                       std::string advisory_script_entrypoint,
-                       const ChildIsolatePreparer& child_isolate_preparer,
-                       const fml::closure& isolate_create_callback,
-                       const fml::closure& isolate_shutdown_callback);
+  DartIsolateGroupData(
+      const Settings& settings,
+      fml::RefPtr<const DartSnapshot> isolate_snapshot,
+      std::string advisory_script_uri,
+      std::string advisory_script_entrypoint,
+      const ChildIsolatePreparer& child_isolate_preparer,
+      const fml::closure& isolate_create_callback,
+      const fml::closure& isolate_shutdown_callback,
+      std::shared_ptr<NativeAssetsManager> native_assets_manager = nullptr);
 
   ~DartIsolateGroupData();
 
@@ -55,6 +58,8 @@ class DartIsolateGroupData : public PlatformMessageHandlerStorage {
   const fml::closure& GetIsolateShutdownCallback() const;
 
   void SetChildIsolatePreparer(const ChildIsolatePreparer& value);
+
+  std::shared_ptr<NativeAssetsManager> GetNativeAssetsManager() const;
 
   /// Adds a kernel buffer mapping to the kernels loaded for this isolate group.
   void AddKernelBuffer(const std::shared_ptr<const fml::Mapping>& buffer);
@@ -82,6 +87,7 @@ class DartIsolateGroupData : public PlatformMessageHandlerStorage {
   ChildIsolatePreparer child_isolate_preparer_;
   const fml::closure isolate_create_callback_;
   const fml::closure isolate_shutdown_callback_;
+  std::shared_ptr<NativeAssetsManager> native_assets_manager_;
   std::map<int64_t, std::weak_ptr<PlatformMessageHandler>>
       platform_message_handlers_;
   mutable std::mutex platform_message_handlers_mutex_;

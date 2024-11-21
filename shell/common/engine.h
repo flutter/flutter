@@ -25,11 +25,8 @@
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
 #include "flutter/shell/common/animator.h"
-#include "flutter/shell/common/display_manager.h"
-#include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/pointer_data_dispatcher.h"
 #include "flutter/shell/common/run_configuration.h"
-#include "flutter/shell/common/shell_io_manager.h"
 
 namespace flutter {
 
@@ -1055,6 +1052,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   std::string initial_route_;
   std::shared_ptr<AssetManager> asset_manager_;
   std::shared_ptr<FontCollection> font_collection_;
+  std::shared_ptr<NativeAssetsManager> native_assets_manager_;
   const std::unique_ptr<ImageDecoder> image_decoder_;
   ImageGeneratorRegistry image_generator_registry_;
   TaskRunners task_runners_;

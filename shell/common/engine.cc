@@ -10,17 +10,12 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/assets/native_assets.h"
 #include "flutter/common/settings.h"
-#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/lib/snapshot/snapshot.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/shell/common/animator.h"
-#include "flutter/shell/common/platform_view.h"
-#include "flutter/shell/common/shell.h"
-#include "impeller/runtime_stage/runtime_stage.h"
 #include "rapidjson/document.h"
-#include "third_party/dart/runtime/include/dart_tools_api.h"
 
 namespace flutter {
 
@@ -195,6 +190,11 @@ bool Engine::UpdateAssetManager(
     font_collection_->RegisterTestFonts();
   }
 
+  if (native_assets_manager_ == nullptr) {
+    native_assets_manager_ = std::make_shared<NativeAssetsManager>();
+  }
+  native_assets_manager_->RegisterNativeAssets(asset_manager_);
+
   return true;
 }
 
@@ -244,7 +244,8 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
           configuration.GetEntrypoint(),             //
           configuration.GetEntrypointLibrary(),      //
           configuration.GetEntrypointArgs(),         //
-          configuration.TakeIsolateConfiguration())  //
+          configuration.TakeIsolateConfiguration(),  //
+          native_assets_manager_)                    //
   ) {
     return RunStatus::Failure;
   }

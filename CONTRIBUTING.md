@@ -243,6 +243,7 @@ $ ./run_tests.py --variant=host_debug_unopt_arm64 --type=engine
 | Name                                     | run_tests.py type   | Description                                                     |
 | ---------------------------------------- | ------------------- | --------------------------------------------------------------- |
 | accessibility_unittests                  | engine              |                                                                 |
+| assets_unittests                         | engine              |                                                                 |
 | client_wrapper_glfw_unittests            | engine              |                                                                 |
 | client_wrapper_unittests                 | engine              |                                                                 |
 | common_cpp_core_unittests                | engine              |                                                                 |

@@ -418,6 +418,7 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
     return (name, flags, extra_env)
 
   unittests = [
+      make_test('assets_unittests'),
       make_test('client_wrapper_glfw_unittests'),
       make_test('client_wrapper_unittests'),
       make_test('common_cpp_core_unittests'),
