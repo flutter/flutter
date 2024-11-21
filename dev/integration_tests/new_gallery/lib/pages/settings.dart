@@ -96,17 +96,33 @@ class _SettingsPageState extends State<SettingsPage> {
           ? DisplayOption(localeNativeName, subtitle: localeName)
           : DisplayOption(localeName);
     } else {
-      // gsw, fil, and es_419 aren't in flutter_localized_countries' dataset
-      // so we handle them separately
+      // es_419, fil, gsw, lzh, nan, nan_Hant, yue and yue_Hant aren't in
+      // flutter_localized_countries' dataset so we handle them separately
       switch (localeCode) {
-        case 'gsw':
-          return DisplayOption('Schwiizertüütsch', subtitle: 'Swiss German');
-        case 'fil':
-          return DisplayOption('Filipino', subtitle: 'Filipino');
         case 'es_419':
           return DisplayOption(
             'español (Latinoamérica)',
             subtitle: 'Spanish (Latin America)',
+          );
+        case 'fil':
+          return DisplayOption('Filipino', subtitle: 'Filipino');
+        case 'gsw':
+          return DisplayOption('Schwiizertüütsch', subtitle: 'Swiss German');
+        case 'lzh':
+          return DisplayOption('文言', subtitle: 'Literary Chinese');
+        case 'nan':
+          return DisplayOption('閩南語', subtitle: 'Hokkien');
+        case 'nan_Hant':
+          return DisplayOption(
+            '閩南語（傳統漢字）',
+            subtitle: 'Hokkien (Traditional Han script)'
+          );
+        case 'yue':
+          return DisplayOption('粵語', subtitle: 'Cantonese');
+        case 'yue_Hant':
+          return DisplayOption(
+            '粵語（繁體）',
+            subtitle: 'Cantonese (Traditional Han script)'
           );
       }
     }
