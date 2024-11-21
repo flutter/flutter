@@ -25,7 +25,7 @@
 // stacktrace wouldn't print where the function is called in the unit tests.
 
 #define EXPECT_KEY_EVENT(RECORD, TYPE, PHYSICAL, LOGICAL, CHAR, SYNTHESIZED) \
-  EXPECT_EQ((RECORD).type, CallRecord::kKeyCallEmbedder);                    \
+  EXPECT_EQ((RECORD).type, CallRecord::KEY_CALL_EMBEDDER);                   \
   EXPECT_EQ((RECORD).event->type, (TYPE));                                   \
   EXPECT_EQ((RECORD).event->physical, (PHYSICAL));                           \
   EXPECT_EQ((RECORD).event->logical, (LOGICAL));                             \
@@ -33,7 +33,7 @@
   EXPECT_EQ((RECORD).event->synthesized, (SYNTHESIZED));
 
 #define VERIFY_DOWN(OUT_LOGICAL, OUT_CHAR)                          \
-  EXPECT_EQ(call_records[0].type, CallRecord::kKeyCallEmbedder);    \
+  EXPECT_EQ(call_records[0].type, CallRecord::KEY_CALL_EMBEDDER);   \
   EXPECT_EQ(call_records[0].event->type, kFlutterKeyEventTypeDown); \
   EXPECT_EQ(call_records[0].event->logical, (OUT_LOGICAL));         \
   EXPECT_STREQ(call_records[0].event->character, (OUT_CHAR));       \
@@ -78,8 +78,8 @@ typedef std::function<void(FlKeyEvent*)> RedispatchHandler;
 // An instance of `CallRecord` might not have all the fields filled.
 typedef struct {
   enum {
-    kKeyCallEmbedder,
-    kKeyCallChannel,
+    KEY_CALL_EMBEDDER,
+    KEY_CALL_CHANNEL,
   } type;
 
   AsyncKeyCallback callback;
@@ -436,7 +436,7 @@ class KeyboardTester {
       char* new_event_character = cloneString(event->character);
       new_event->character = new_event_character;
       storage.push_back(CallRecord{
-          .type = CallRecord::kKeyCallEmbedder,
+          .type = CallRecord::KEY_CALL_EMBEDDER,
           .callback = std::move(callback),
           .event = std::move(new_event),
           .event_character = std::unique_ptr<char[]>(new_event_character),
@@ -455,7 +455,7 @@ class KeyboardTester {
       char* new_event_character = cloneString(event->character);
       new_event->character = new_event_character;
       storage.push_back(CallRecord{
-          .type = CallRecord::kKeyCallEmbedder,
+          .type = CallRecord::KEY_CALL_EMBEDDER,
           .event = std::move(new_event),
           .event_character = std::unique_ptr<char[]>(new_event_character),
       });
@@ -476,7 +476,7 @@ class KeyboardTester {
         messenger_, [&storage, this](AsyncKeyCallback callback) {
           EXPECT_FALSE(during_redispatch_);
           storage.push_back(CallRecord{
-              .type = CallRecord::kKeyCallChannel,
+              .type = CallRecord::KEY_CALL_CHANNEL,
               .callback = std::move(callback),
           });
         });
@@ -703,8 +703,8 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(call_records.size(), 2u);
 
-  EXPECT_EQ(call_records[0].type, CallRecord::kKeyCallEmbedder);
-  EXPECT_EQ(call_records[1].type, CallRecord::kKeyCallChannel);
+  EXPECT_EQ(call_records[0].type, CallRecord::KEY_CALL_EMBEDDER);
+  EXPECT_EQ(call_records[1].type, CallRecord::KEY_CALL_CHANNEL);
 
   call_records[0].callback(true);
   call_records[1].callback(false);
@@ -723,8 +723,8 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(call_records.size(), 2u);
 
-  EXPECT_EQ(call_records[0].type, CallRecord::kKeyCallEmbedder);
-  EXPECT_EQ(call_records[1].type, CallRecord::kKeyCallChannel);
+  EXPECT_EQ(call_records[0].type, CallRecord::KEY_CALL_EMBEDDER);
+  EXPECT_EQ(call_records[1].type, CallRecord::KEY_CALL_CHANNEL);
 
   call_records[0].callback(false);
   call_records[1].callback(false);

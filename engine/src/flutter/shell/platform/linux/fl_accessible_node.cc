@@ -81,7 +81,7 @@ struct FlAccessibleNodePrivate {
   FlutterSemanticsFlag flags;
 };
 
-enum { kProp0, kPropEngine, kPropId, kPropLast };
+enum { PROP_0, PROP_ENGINE, PROP_ID, PROP_LAST };
 
 #define FL_ACCESSIBLE_NODE_GET_PRIVATE(node)                          \
   ((FlAccessibleNodePrivate*)fl_accessible_node_get_instance_private( \
@@ -145,13 +145,13 @@ static void fl_accessible_node_set_property(GObject* object,
                                             GParamSpec* pspec) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(object);
   switch (prop_id) {
-    case kPropEngine:
+    case PROP_ENGINE:
       g_assert(priv->engine == nullptr);
       priv->engine = FL_ENGINE(g_value_get_object(value));
       g_object_add_weak_pointer(object,
                                 reinterpret_cast<gpointer*>(&priv->engine));
       break;
-    case kPropId:
+    case PROP_ID:
       priv->id = g_value_get_int(value);
       break;
     default:
@@ -448,13 +448,13 @@ static void fl_accessible_node_class_init(FlAccessibleNodeClass* klass) {
       fl_accessible_node_perform_action_impl;
 
   g_object_class_install_property(
-      G_OBJECT_CLASS(klass), kPropEngine,
+      G_OBJECT_CLASS(klass), PROP_ENGINE,
       g_param_spec_object(
           "engine", "engine", "Flutter engine", fl_engine_get_type(),
           static_cast<GParamFlags>(G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY |
                                    G_PARAM_STATIC_STRINGS)));
   g_object_class_install_property(
-      G_OBJECT_CLASS(klass), kPropId,
+      G_OBJECT_CLASS(klass), PROP_ID,
       g_param_spec_int(
           "id", "id", "Accessibility node ID", 0, G_MAXINT, 0,
           static_cast<GParamFlags>(G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY |

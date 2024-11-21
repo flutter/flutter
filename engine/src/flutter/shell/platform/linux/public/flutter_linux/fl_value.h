@@ -61,7 +61,6 @@ typedef struct _FlValue FlValue;
  */
 typedef enum {
   // Parts of the public API, so fixing the names is a breaking change.
-  // NOLINTBEGIN(readability-identifier-naming)
   FL_VALUE_TYPE_NULL,
   FL_VALUE_TYPE_BOOL,
   FL_VALUE_TYPE_INT,
@@ -75,7 +74,6 @@ typedef enum {
   FL_VALUE_TYPE_MAP,
   FL_VALUE_TYPE_FLOAT32_LIST,
   FL_VALUE_TYPE_CUSTOM,
-  // NOLINTEND(readability-identifier-naming)
 } FlValueType;
 
 /**
