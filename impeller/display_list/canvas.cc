@@ -1667,15 +1667,10 @@ bool Canvas::BlitToOnscreen() {
   auto offscreen_target = render_passes_.back()
                               .inline_pass_context->GetPassTarget()
                               .GetRenderTarget();
-  // Unlike other backends the blit to restore the onscreen fails for GLES
-  // if the src is a multisample framebuffer, even if we specifically target
-  // the non-multisampled resolve of the dst.
-  bool is_gles_and_must_skip_blit = renderer_.GetContext()->GetBackendType() ==
-                                    Context::BackendType::kOpenGLES;
+
   if (renderer_.GetContext()
           ->GetCapabilities()
-          ->SupportsTextureToTextureBlits() &&
-      !is_gles_and_must_skip_blit) {
+          ->SupportsTextureToTextureBlits()) {
     auto blit_pass = command_buffer->CreateBlitPass();
     blit_pass->AddCopy(offscreen_target.GetRenderTargetTexture(),
                        render_target_.GetRenderTargetTexture());
