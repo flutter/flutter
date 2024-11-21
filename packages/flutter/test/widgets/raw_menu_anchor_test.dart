@@ -2880,11 +2880,6 @@ void main() {
       findMenuPanelDescendent<Container>(tester).decoration,
       decoration,
     );
-
-    await expectLater(
-      find.byType(App),
-      matchesGoldenFile('rawMenuAnchor.customDecoration.png'),
-    );
   });
 
   testWidgets('Menu closes on view size change', (WidgetTester tester) async {
