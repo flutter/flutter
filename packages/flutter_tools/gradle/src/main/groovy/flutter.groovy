@@ -1280,7 +1280,7 @@ class FlutterPlugin implements Plugin<Project> {
                 flavor(flavorValue)
             }
             File libJar = project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar"))
-            Task packJniLibsTask = project.tasks.create(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+            /*Task packJniLibsTask = project.tasks.create(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
                 dependsOn compileTask
@@ -1304,9 +1304,9 @@ class FlutterPlugin implements Plugin<Project> {
                         }
                     }
                 }
-            }
+            }*/
             addApiDependencies(project, variant.name, project.files {
-                packJniLibsTask
+                //packJniLibsTask
             })
             Task copyFlutterAssetsTask = project.tasks.create(
                 name: "copyFlutterAssets${variant.name.capitalize()}",
