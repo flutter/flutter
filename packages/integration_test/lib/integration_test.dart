@@ -136,6 +136,7 @@ https://docs.flutter.dev/testing/integration-tests
   void initInstances() {
     super.initInstances();
     _instance = this;
+    LiveTestWidgetsFlutterBinding;
   }
 
   /// The singleton instance of this object.
@@ -250,7 +251,16 @@ https://docs.flutter.dev/testing/integration-tests
 
   @override
   Future<void> pump([Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate]) {
-    throw UnimplementedError();
+    return TestAsyncUtils.guard<void>(() {
+      assert(inTest);
+      if (hasScheduledFrame) {
+        handleBeginFrame(Duration(
+          microseconds: clock.now().microsecondsSinceEpoch,
+        ));
+        handleDrawFrame();
+      }
+      return Future<void>.value();
+    });
   }
 
   @override
