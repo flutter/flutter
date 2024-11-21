@@ -23,25 +23,23 @@ class NestedScrollViewExample extends StatefulWidget {
   const NestedScrollViewExample({super.key});
 
   @override
-  State<NestedScrollViewExample> createState() =>
-      NestedScrollViewExampleState();
+  State<NestedScrollViewExample> createState() => NestedScrollViewExampleState();
 }
 
 class NestedScrollViewExampleState extends State<NestedScrollViewExample>
     with TickerProviderStateMixin {
-  final List<String> _tabs = <String>['Tab 1', 'Tab 2'];
+  static const List<String> _tabs = <String>['Tab 1', 'Tab 2'];
 
-  late TabController _tabController;
+  late final TabController _tabController = TabController(
+    initialIndex: _selectedIndex,
+    vsync: this,
+    length: _tabs.length,
+  );
   int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(
-      initialIndex: _selectedIndex,
-      vsync: this,
-      length: _tabs.length,
-    );
     _tabController.addListener(() {
       setState(() {
         _selectedIndex = _tabController.index;
@@ -116,10 +114,10 @@ class TabViewContentExample extends StatefulWidget {
   final bool isSelected;
 
   @override
-  State<TabViewContentExample> createState() => TabViewContentExampleState();
+  State<TabViewContentExample> createState() => _TabViewContentExampleState();
 }
 
-class TabViewContentExampleState extends State<TabViewContentExample>
+class _TabViewContentExampleState extends State<TabViewContentExample>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
@@ -139,58 +137,49 @@ class TabViewContentExampleState extends State<TabViewContentExample>
     return SafeArea(
       top: false,
       bottom: false,
-      child: Builder(
-        // This Builder is needed to provide a BuildContext that is "inside"
-        // the NestedScrollView, so that sliverOverlapAbsorberHandleFor() can
-        // find the NestedScrollView.
-        builder: (BuildContext context) {
-          final ScrollController scrollController = PrimaryScrollController.of(context);
-          return CustomScrollView(
-            // When this inner scroll view is associated with the
-            // PrimaryScrollController, the NestedScrollView can control it.
-            // If the "controller" property is set, then this scroll view will
-            // not be associated with the NestedScrollView.
-            // The PageStorageKey should be unique to this ScrollView;
-            // it allows the list to remember its scroll position when
-            // the tab view is not on the screen.
-            controller:
-                widget.isSelected ? scrollController : _scrollController,
-            key: PageStorageKey<String>(widget.name),
-            slivers: <Widget>[
-              SliverOverlapInjector(
-                // This is the flip side of the SliverOverlapAbsorber above.
-                handle:
-                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.all(8.0),
-                // In this example, the inner scroll view has fixed-height list
-                // items, hence the use of SliverFixedExtentList. However, one
-                // could use any sliver widget here, e.g. SliverList or
-                // SliverGrid.
-                sliver: SliverFixedExtentList(
-                  // The items in this example are fixed to 48 pixels high.
-                  // This matches the Material Design spec for ListTile widgets.
-                  itemExtent: 48.0,
-                  delegate: SliverChildBuilderDelegate(
+      child: CustomScrollView(
+        // When this inner scroll view is associated with the
+        // PrimaryScrollController, the NestedScrollView can control it.
+        // If the "controller" property is set, then this scroll view will not
+        // be associated with the NestedScrollView.
+        // The PageStorageKey should be unique to this ScrollView;
+        // it allows the list to remember its scroll position when the tab view
+        // is not on the screen.
+        controller: widget.isSelected
+            ? PrimaryScrollController.of(context)
+            : _scrollController,
+        key: PageStorageKey<String>(widget.name),
+        slivers: <Widget>[
+          SliverOverlapInjector(
+            // This is the flip side of the SliverOverlapAbsorber above.
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(8.0),
+            // In this example, the inner scroll view has fixed-height list
+            // items, hence the use of SliverFixedExtentList. However, one could
+            // use any sliver widget here, e.g. SliverList or SliverGrid.
+            sliver: SliverFixedExtentList(
+              // The items in this example are fixed to 48 pixels high.
+              // This matches the Material Design spec for ListTile widgets.
+              itemExtent: 48.0,
+              delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      // This builder is called for each child.
-                      // In this example, we just number each list item.
-                      return ListTile(
-                        title: Text('Item $index'),
-                      );
-                    },
-                    // The childCount of the SliverChildBuilderDelegate
-                    // specifies how many children this inner list has.
-                    // In this example, each tab has a list of exactly 30 items,
-                    // but this is arbitrary.
-                    childCount: 30,
-                  ),
-                ),
+                  // This builder is called for each child.
+                  // In this example, we just number each list item.
+                  return ListTile(
+                    title: Text('Item $index'),
+                  );
+                },
+                // The childCount of the SliverChildBuilderDelegate
+                // specifies how many children this inner list has.
+                // In this example, each tab has a list of exactly 30 items, but
+                // this is arbitrary.
+                childCount: 30,
               ),
-            ],
-          );
-        },
+            ),
+          ),
+        ],
       ),
     );
   }
