@@ -183,6 +183,7 @@ group("unittests") {
   # Compile all unittests targets if enabled.
   if (enable_unittests) {
     public_deps += [
+      "//flutter/assets:assets_unittests",
       "//flutter/display_list:display_list_rendertests",
       "//flutter/display_list:display_list_unittests",
       "//flutter/flow:flow_unittests",

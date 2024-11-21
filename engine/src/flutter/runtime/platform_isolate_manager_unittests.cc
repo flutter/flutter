@@ -4,6 +4,7 @@
 
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
+#include "flutter/runtime/isolate_configuration.h"
 #include "flutter/runtime/platform_isolate_manager.h"
 #include "flutter/testing/fixture_test.h"
 #include "flutter/testing/testing.h"

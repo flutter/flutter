@@ -5,11 +5,9 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <algorithm>
-#include <chrono>
 #include <ctime>
 #include <future>
 #include <memory>
-#include <strstream>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -30,7 +28,6 @@
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/fml/backtrace.h"
 #include "flutter/fml/command_line.h"
-#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -317,7 +314,8 @@ class ThreadCheckingAssetResolver : public AssetResolver {
   // |AssetResolver|
   std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const override {
-    if (asset_name == "FontManifest.json") {
+    if (asset_name == "FontManifest.json" ||
+        asset_name == "NativeAssetsManifest.json") {
       // This file is loaded directly by the engine.
       return nullptr;
     }

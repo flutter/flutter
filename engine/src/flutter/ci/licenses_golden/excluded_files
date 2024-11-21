@@ -24,6 +24,7 @@
 ../../../flutter/Doxyfile
 ../../../flutter/README.md
 ../../../flutter/analysis_options.yaml
+../../../flutter/assets/native_assets_unittests.cc
 ../../../flutter/build
 ../../../flutter/build_overrides
 ../../../flutter/buildtools

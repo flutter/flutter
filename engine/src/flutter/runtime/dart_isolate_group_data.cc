@@ -17,14 +17,16 @@ DartIsolateGroupData::DartIsolateGroupData(
     std::string advisory_script_entrypoint,
     const ChildIsolatePreparer& child_isolate_preparer,
     const fml::closure& isolate_create_callback,
-    const fml::closure& isolate_shutdown_callback)
+    const fml::closure& isolate_shutdown_callback,
+    std::shared_ptr<NativeAssetsManager> native_assets_manager)
     : settings_(settings),
       isolate_snapshot_(std::move(isolate_snapshot)),
       advisory_script_uri_(std::move(advisory_script_uri)),
       advisory_script_entrypoint_(std::move(advisory_script_entrypoint)),
       child_isolate_preparer_(child_isolate_preparer),
       isolate_create_callback_(isolate_create_callback),
-      isolate_shutdown_callback_(isolate_shutdown_callback) {
+      isolate_shutdown_callback_(isolate_shutdown_callback),
+      native_assets_manager_(std::move(native_assets_manager)) {
   FML_DCHECK(isolate_snapshot_) << "Must contain a valid isolate snapshot.";
 }
 
@@ -64,6 +66,11 @@ void DartIsolateGroupData::SetChildIsolatePreparer(
     const ChildIsolatePreparer& value) {
   std::scoped_lock lock(child_isolate_preparer_mutex_);
   child_isolate_preparer_ = value;
+}
+
+std::shared_ptr<NativeAssetsManager>
+DartIsolateGroupData::GetNativeAssetsManager() const {
+  return native_assets_manager_;
 }
 
 void DartIsolateGroupData::SetPlatformMessageHandler(

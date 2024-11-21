@@ -8,9 +8,9 @@
 #include <memory>
 #include <vector>
 
+#include "assets/native_assets.h"
 #include "flutter/assets/asset_manager.h"
 #include "flutter/common/task_runners.h"
-#include "flutter/flow/layers/layer_tree.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/lib/ui/io_manager.h"
@@ -23,8 +23,6 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/platform_data.h"
 #include "flutter/runtime/platform_isolate_manager.h"
-#include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
 
 namespace flutter {
 
@@ -167,7 +165,8 @@ class RuntimeController : public PlatformConfigurationClient,
       std::optional<std::string> dart_entrypoint,
       std::optional<std::string> dart_entrypoint_library,
       const std::vector<std::string>& dart_entrypoint_args,
-      std::unique_ptr<IsolateConfiguration> isolate_configuration);
+      std::unique_ptr<IsolateConfiguration> isolate_configuration,
+      std::shared_ptr<NativeAssetsManager> native_assets_manager);
 
   //----------------------------------------------------------------------------
   /// @brief      Clone the runtime controller. Launching an isolate with a

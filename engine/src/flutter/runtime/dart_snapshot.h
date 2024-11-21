@@ -6,7 +6,6 @@
 #define FLUTTER_RUNTIME_DART_SNAPSHOT_H_
 
 #include <memory>
-#include <string>
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
