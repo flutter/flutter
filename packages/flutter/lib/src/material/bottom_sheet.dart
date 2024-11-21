@@ -18,7 +18,6 @@ import 'constants.dart';
 import 'debug.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'motion.dart';
 import 'scaffold.dart';
 import 'theme.dart';
