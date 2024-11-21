@@ -633,8 +633,14 @@ abstract class PageTransitionsBuilder {
   /// {@macro flutter.widgets.delegatedTransition}
   DelegatedTransitionBuilder? get delegatedTransition => null;
 
+  /// {@macro flutter.widgets.TransitionRoute.transitionDuration}
+  ///
+  /// Defaults to 300 milliseconds.
   Duration get transitionDuration => const Duration(milliseconds: 300);
 
+  /// {@macro flutter.widgets.TransitionRoute.reverseTransitionDuration}
+  ///
+  /// Defaults to 300 milliseconds.
   Duration get reverseTransitionDuration => transitionDuration;
 
   /// Wraps the child with one or more transition widgets which define how [route]
