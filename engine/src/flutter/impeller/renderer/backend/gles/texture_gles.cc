@@ -45,8 +45,7 @@ static bool IsDepthStencilFormat(PixelFormat format) {
 }
 
 static TextureGLES::Type GetTextureTypeFromDescriptor(
-    const TextureDescriptor& desc,
-    bool supports_implict_msaa) {
+    const TextureDescriptor& desc) {
   const auto usage = static_cast<TextureUsageMask>(desc.usage);
   const auto render_target = TextureUsage::kRenderTarget;
   const auto is_msaa = desc.sample_count == SampleCount::kCount4;
@@ -54,9 +53,7 @@ static TextureGLES::Type GetTextureTypeFromDescriptor(
     return is_msaa ? TextureGLES::Type::kRenderBufferMultisampled
                    : TextureGLES::Type::kRenderBuffer;
   }
-  return is_msaa ? (supports_implict_msaa
-                        ? TextureGLES::Type::kTextureMultisampled
-                        : TextureGLES::Type::kRenderBufferMultisampled)
+  return is_msaa ? TextureGLES::Type::kTextureMultisampled
                  : TextureGLES::Type::kTexture;
 }
 
@@ -193,11 +190,7 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
                          std::optional<HandleGLES> external_handle)
     : Texture(desc),
       reactor_(std::move(reactor)),
-      type_(
-          GetTextureTypeFromDescriptor(GetTextureDescriptor(),
-                                       reactor_->GetProcTable()
-                                           .GetCapabilities()
-                                           ->SupportsImplicitResolvingMSAA())),
+      type_(GetTextureTypeFromDescriptor(GetTextureDescriptor())),
       handle_(external_handle.has_value()
                   ? external_handle.value()
                   : reactor_->CreateHandle(ToHandleType(type_))),
@@ -369,7 +362,7 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kB8G8R8A8UNormInt:
     case PixelFormat::kR8G8B8A8UNormInt:
-      return GL_RGBA8;
+      return GL_RGBA4;
     case PixelFormat::kR32G32B32A32Float:
       return GL_RGBA32F;
     case PixelFormat::kR16G16B16A16Float:
@@ -452,32 +445,19 @@ void TextureGLES::InitializeContentsIfNecessary() const {
       {
         TRACE_EVENT0("impeller", "RenderBufferStorageInitialization");
         if (type_ == Type::kRenderBufferMultisampled) {
-          // BEWARE: these functions are not at all equivalent! the extensions
-          // are from EXT_multisampled_render_to_texture and cannot be used
-          // with regular GLES 3.0 multisampled renderbuffers/textures.
-          if (gl.GetCapabilities()->SupportsImplicitResolvingMSAA()) {
-            gl.RenderbufferStorageMultisampleEXT(
-                /*target=*/GL_RENDERBUFFER,                        //
-                /*samples=*/4,                                     //
-                /*internal_format=*/render_buffer_format.value(),  //
-                /*width=*/size.width,                              //
-                /*height=*/size.height                             //
-            );
-          } else {
-            gl.RenderbufferStorageMultisample(
-                /*target=*/GL_RENDERBUFFER,                        //
-                /*samples=*/4,                                     //
-                /*internal_format=*/render_buffer_format.value(),  //
-                /*width=*/size.width,                              //
-                /*height=*/size.height                             //
-            );
-          }
+          gl.RenderbufferStorageMultisampleEXT(
+              GL_RENDERBUFFER,               // target
+              4,                             // samples
+              render_buffer_format.value(),  // internal format
+              size.width,                    // width
+              size.height                    // height
+          );
         } else {
           gl.RenderbufferStorage(
-              /*target=*/GL_RENDERBUFFER,                        //
-              /*internal_format=*/render_buffer_format.value(),  //
-              /*width=*/size.width,                              //
-              /*height=*/size.height                             //
+              GL_RENDERBUFFER,               // target
+              render_buffer_format.value(),  // internal format
+              size.width,                    // width
+              size.height                    // height
           );
         }
       }
