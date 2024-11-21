@@ -2651,7 +2651,7 @@ class AppleSystemContextMenuItem extends SystemContextMenuItem {
       */
 
     return <String, dynamic>{
-      'type': type.json,
+      'type': type.name,
       'action': action.name,
       // TODO(justinmc): I guess Flutter should always pass a title for the default actions. Encode that into the backend or no?
       // TODO(justinmc): Localilze. As in (Cupertino)AdaptiveContextMenu.
@@ -2667,11 +2667,7 @@ class AppleSystemContextMenuItem extends SystemContextMenuItem {
 ///  * [SystemContextMenuAction], which specifies the action to take when a menu
 ///    item is invoked.
 enum SystemContextMenuType {
-  defaultType;
-
-  String get json => switch (this) {
-    SystemContextMenuType.defaultType => 'default',
-  };
+  builtIn,
 
   // TODO(justinmc): Support the "custom" type.
   // https://github.com/flutter/flutter/issues/103163
