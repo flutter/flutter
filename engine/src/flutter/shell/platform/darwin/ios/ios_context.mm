@@ -56,6 +56,7 @@ std::unique_ptr<IOSContext> IOSContext::Create(
 }
 
 IOSRenderingBackend IOSContext::GetBackend() const {
+  // Overridden by Impeller subclasses.
   return IOSRenderingBackend::kSkia;
 }
 

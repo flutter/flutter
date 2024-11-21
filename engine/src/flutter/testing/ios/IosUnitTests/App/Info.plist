@@ -46,8 +46,6 @@
 	</dict>
 	<key>FLTLeakDartVM</key>
 	<false/>
-	<key>FLTEnableImpeller</key>
-	<false/>
 	<key>FLTTraceSystrace</key>
 	<false/>
 	<key>FLTEnableDartProfiling</key>
