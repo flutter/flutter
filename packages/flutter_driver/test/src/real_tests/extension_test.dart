@@ -280,7 +280,7 @@ void main() {
           'response': <String, dynamic>{},
         },
       );
-    }, semanticsEnabled: false); // Disabling semantics to prevent unexpected message.
+    }, semanticsEnabled: false); // Disabling semantics to prevent the unexpected message.
 
     testWidgets(
         'waiting for NoPendingPlatformMessages returns until a single method channel call returns', (WidgetTester tester) async {
@@ -313,7 +313,7 @@ void main() {
           'response': <String, dynamic>{},
         },
       );
-    }, semanticsEnabled: false); // Disabling semantics to prevent unexpected message.
+    }, semanticsEnabled: false); // Disabling semantics to prevent the unexpected message.
 
     testWidgets(
         'waiting for NoPendingPlatformMessages returns until both method channel calls return', (WidgetTester tester) async {
@@ -362,7 +362,7 @@ void main() {
           'response': <String, dynamic>{},
         },
       );
-    }, semanticsEnabled: false); // Disabling semantics to prevent unexpected message.
+    }, semanticsEnabled: false); // Disabling semantics to prevent the unexpected message.
 
     testWidgets(
         'waiting for NoPendingPlatformMessages returns until new method channel call returns', (WidgetTester tester) async {
@@ -413,7 +413,7 @@ void main() {
           'response': <String, dynamic>{},
         },
       );
-    }, semanticsEnabled: false); // Disabling semantics to prevent unexpected message.
+    }, semanticsEnabled: false); // Disabling semantics to prevent the unexpected message.
 
     testWidgets(
         'waiting for NoPendingPlatformMessages returns until both old and new method channel calls return', (WidgetTester tester) async {
@@ -463,7 +463,7 @@ void main() {
           'response': <String, dynamic>{},
         },
       );
-    }, semanticsEnabled: false); // Disabling semantics to prevent unexpected message.
+    }, semanticsEnabled: false); // Disabling semantics to prevent the unexpected message.
   });
 
   group('getSemanticsId', () {
