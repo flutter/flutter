@@ -64,7 +64,7 @@ void main() {
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Default PageTransitionsTheme builds a _FadeForwardsPageTransition for android', (WidgetTester tester) async {
+  testWidgets('Default PageTransitionsTheme builds a _ZoomPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
@@ -81,20 +81,20 @@ void main() {
       ),
     );
 
-    Finder findFadeForwardsPageTransition() {
+    Finder findZoomPageTransition() {
       return find.descendant(
         of: find.byType(MaterialApp),
-        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition'),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ZoomPageTransition'),
       );
     }
 
     expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
-    expect(findFadeForwardsPageTransition(), findsOneWidget);
+    expect(findZoomPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
-    expect(findFadeForwardsPageTransition(), findsOneWidget);
+    expect(findZoomPageTransition(), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('Default background color when FadeForwardsPageTransitionBuilder is used', (WidgetTester tester) async {
@@ -111,6 +111,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeForwardsPageTransitionsBuilder()
+            }
+          ),
           colorScheme: ThemeData().colorScheme.copyWith(surface: Colors.pink)
         ),
         routes: routes,
@@ -199,6 +204,13 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeForwardsPageTransitionsBuilder()
+            }
+          ),
+        ),
         routes: routes,
       ),
     );
@@ -295,7 +307,6 @@ void main() {
     expect(find.text('push'), findsOneWidget); // The first page
     expect(find.byType(ColoredBox), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
-
 
   testWidgets('PageTransitionsTheme override builds a _OpenUpwardsPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
