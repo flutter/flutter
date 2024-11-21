@@ -1235,8 +1235,20 @@ class FlutterPlugin implements Plugin<Project> {
             boolean isBuildingAar = project.hasProperty("is-plugin")
             // In add to app scenarios, a Gradle project contains a `:flutter` and `:app` project.
             // `:flutter` is used as a subproject when these tasks exists and the build isn't building an AAR.
-            Task packageAssets = project.tasks.named(":flutter:package${variant.name.capitalize()}Assets").getOrNull()
-            Task cleanPackageAssets = project.tasks.named(":flutter:cleanPackage${variant.name.capitalize()}Assets").getOrNull()
+            Task packageAssets
+            Task cleanPackageAssets
+
+            try {
+                packageAssets = project.tasks.findByName("package${variant.name.capitalize()}Assets")
+            } catch (Exception e) {
+                packageAssets = null
+            }
+
+            try {
+                cleanPackageAssets = project.tasks.findByName("cleanPackage${variant.name.capitalize()}Assets")
+            } catch (Exception e) {
+                cleanPackageAssets = null
+            }
             boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
 
             String variantBuildMode = buildModeFor(variant.buildType)
