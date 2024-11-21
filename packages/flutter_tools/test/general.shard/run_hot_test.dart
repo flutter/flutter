@@ -64,7 +64,7 @@ void main() {
         await runner.cleanupAfterSignal();
         expect(flutterDevice.wasExited, true);
         expect((flutterDevice.device.dds as FakeDartDevelopmentService).wasShutdown, true);
-        expect((runner.residentDevtoolsHandler as NoOpDevtoolsHandler).wasShutdown, true);
+        expect((runner.residentDevtoolsHandler! as NoOpDevtoolsHandler).wasShutdown, true);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
