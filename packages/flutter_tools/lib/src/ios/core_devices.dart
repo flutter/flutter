@@ -94,10 +94,6 @@ class IOSCoreDeviceControl {
         _logger.printError('The process exited with code ${result.exitCode} and');
         _logger.printError('Stdout:\n\n${result.stdout.trim()}\n');
         _logger.printError('Stderr:\n\n${result.stderr.trim()}');
-        _logger.printError('Using file system type: ${_fileSystem.runtimeType}');
-        if (_fileSystem is LocalFileSystem) {
-          _logger.printError('LocalFileSystem disposed: ${_fileSystem.disposed}');
-        }
         throw StateError('Expected the file ${output.path} to exist but it did not');
       } else if (isToolPossiblyShutdown) {
         return <Object?>[];
