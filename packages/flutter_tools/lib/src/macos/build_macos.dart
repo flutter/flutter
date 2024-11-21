@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:unified_analytics/unified_analytics.dart';
-import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
