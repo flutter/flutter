@@ -2459,6 +2459,7 @@ void main() {
     
     {
       final Table table = tester.widget(find.byType(Table));
+      expect(table.columnWidths![0], isA<FixedColumnWidth>()); // Checkbox column
       expect(table.columnWidths![1], const FlexColumnWidth());
       expect(table.columnWidths![2], const IntrinsicColumnWidth());
       expect(table.columnWidths![3], const IntrinsicColumnWidth(flex: 1));
