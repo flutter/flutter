@@ -9,8 +9,6 @@ import 'dart:typed_data';
 import 'package:args/command_runner.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:csslib/parser.dart' as csslib;
-import 'package:csslib/visitor.dart' show StyleSheet, UriTerm, Visitor;
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
@@ -346,13 +344,14 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
                 'Chrome/112.0.0.0 Safari/537.36'
       });
       final String cssString = response.body;
-      final StyleSheet stylesheet = csslib.parse(cssString);
-      final UriCollector uriCollector = UriCollector();
-      stylesheet.visit(uriCollector);
+      // Match the patterns that look like:
+      // `src: url(...some url...)`
+      final r = RegExp(r'src:\s*url\((https?://[^)]+?\.woff2)\)');
       int familyCount = 0;
       // Give each font shard a unique family name.
-      for (final Uri uri in uriCollector.uris) {
+      for (final match in r.allMatches(cssString)) {
         final String family = '$font $familyCount';
+        final Uri uri = Uri.parse(match.group(1)!);
         processedFonts.add((
           family: family,
           uri: uri,
@@ -361,15 +360,6 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       }
     }
     return processedFonts;
-  }
-}
-
-class UriCollector extends Visitor {
-  final List<Uri> uris = <Uri>[];
-
-  @override
-  void visitUriTerm(UriTerm uriTerm) {
-    uris.add(Uri.parse(uriTerm.value as String));
   }
 }
 
