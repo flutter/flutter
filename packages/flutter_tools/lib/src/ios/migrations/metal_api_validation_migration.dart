@@ -39,9 +39,13 @@ class MetalAPIValidationMigrator extends ProjectMigrator {
     }
     // Look for a setting that is included in LaunchAction by default and
     // insert the opt out after it.
-    const String kDebugServiceExtension = 'debugServiceExtension = "internal"';
-    const String kReplacement = '''debugServiceExtension = "internal"\n    enableGPUValidationMode = "1"''';
-    return fileContents.replaceFirst(kDebugServiceExtension, kReplacement);
+    final RegExp kDebugServiceExtension = RegExp('(\\s)*debugServiceExtension = "internal"\n');
+    const String kValidationString = 'enableGPUValidationMode = "1"';
+    return fileContents.replaceFirstMapped(kDebugServiceExtension, (Match match) {
+      final String group = match.group(0)!;
+      final int leadingCount = group.split('debugServiceExtension')[0].codeUnits.where((int codeUnit) => codeUnit == 32).length;
+      return '$group${' ' * leadingCount}$kValidationString\n';
+    });
   }
 
   @override
