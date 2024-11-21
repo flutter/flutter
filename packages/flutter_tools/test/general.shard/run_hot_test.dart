@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -56,11 +57,14 @@ void main() {
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           analytics: _FakeAnalytics(),
+          devtoolsHandler: createNoOpHandler,
         );
 
         await runner.run();
         await runner.cleanupAfterSignal();
         expect(flutterDevice.wasExited, true);
+        expect((flutterDevice.device.dds as FakeDartDevelopmentService).wasShutdown, true);
+        expect((runner.residentDevtoolsHandler as NoOpDevtoolsHandler).wasShutdown, true);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
