@@ -1487,7 +1487,6 @@ void main() {
       home: SubCategoryScreenView(),
     ));
 
-    final int opacityLayerCount = tester.layers.whereType<OpacityLayer>().length;
     expect(RenderRebuildTracker.count, 1);
     expect(
       tester.layers.lastWhere((Layer element) => element is OpacityLayer),
@@ -1511,7 +1510,7 @@ void main() {
     }
 
     expect(RenderRebuildTracker.count, greaterThan(1));
-    expect(tester.layers.whereType<OpacityLayer>().length, opacityLayerCount - 1);
+    expect(tester.layers.whereType<OpacityLayer>(), isEmpty);
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/132030.

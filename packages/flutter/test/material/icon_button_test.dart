@@ -3017,7 +3017,7 @@ void main() {
       ),
     );
 
-    final Offset topLeft = tester.getTopLeft(find.byType(ColoredBox).last);
+    final Offset topLeft = tester.getTopLeft(find.byType(ColoredBox));
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
