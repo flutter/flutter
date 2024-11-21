@@ -87,15 +87,17 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   Widget buildContent(BuildContext context);
 
   @override
-  Duration get transitionDuration => _getTransitionDuration(navigator!.context);
+  Duration get transitionDuration => _getPageTransitionBuilder(navigator!.context)?.transitionDuration
+    ?? const Duration(microseconds: 300);
 
-  Duration _getTransitionDuration(BuildContext context) {
+  @override
+  Duration get reverseTransitionDuration => _getPageTransitionBuilder(navigator!.context)?.reverseTransitionDuration
+    ?? const Duration(microseconds: 300);
+
+  PageTransitionsBuilder? _getPageTransitionBuilder(BuildContext context) {
     final TargetPlatform platform = Theme.of(context).platform;
     final PageTransitionsTheme pageTransitionsTheme = Theme.of(context).pageTransitionsTheme;
-    final PageTransitionsBuilder? pageTransitionBuilder = pageTransitionsTheme.builders[platform];
-    return pageTransitionBuilder is FadeForwardsPageTransitionsBuilder
-      ? const Duration(milliseconds: 800)
-      : const Duration(milliseconds: 300);
+    return pageTransitionsTheme.builders[platform];
   }
 
   @override
@@ -112,6 +114,18 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     final TargetPlatform platform = Theme.of(context).platform;
     final DelegatedTransitionBuilder? themeDelegatedTransition = theme.delegatedTransition(platform);
     return themeDelegatedTransition != null ? themeDelegatedTransition(context, animation, secondaryAnimation, allowSnapshotting, child) : null;
+  }
+
+  @override
+  TickerFuture didPush() {
+    controller?.duration = transitionDuration;
+    return super.didPush();
+  }
+
+  @override
+  bool didPop(T? result) {
+    controller?.reverseDuration = reverseTransitionDuration;
+    return super.didPop(result);
   }
 
   @override
@@ -156,10 +170,6 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
-    final Duration duration = _getTransitionDuration(context);
-    controller?.duration = duration;
-    controller?.reverseDuration = reverseTransitionDuration;
-
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
