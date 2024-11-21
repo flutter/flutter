@@ -1248,8 +1248,10 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAfterSignal() async {
+    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
     await hotRunnerConfig!.runPreShutdownOperations();
+    shutdownDartDevelopmentService();
     if (stopAppDuringCleanup) {
       return exitApp();
     }

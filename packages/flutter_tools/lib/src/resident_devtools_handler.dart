@@ -69,7 +69,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   final ResidentRunner _residentRunner;
   final Logger _logger;
   bool _shutdown = false;
-  bool _served = false;
 
   @visibleForTesting
   bool launchedInBrowser = false;
@@ -105,7 +104,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       _devToolsLauncher.devToolsUrl = devToolsServerAddress;
     } else {
       await _devToolsLauncher.serve();
-      _served = true;
     }
     await _devToolsLauncher.ready;
     // Do not attempt to print debugger list if the connection has failed or if we're shutting down.
@@ -305,7 +303,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   @override
   Future<void> shutdown() async {
     _shutdown = true;
-    if (_devToolsLauncher == null || !_served) {
+    if (_devToolsLauncher == null) {
       return;
     }
     _readyToAnnounce = false;

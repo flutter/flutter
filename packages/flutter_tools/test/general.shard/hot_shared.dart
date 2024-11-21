@@ -54,7 +54,7 @@ class FakeDevice extends Fake implements Device {
   bool disposed = false;
 
   @override
-  final DartDevelopmentService dds = _FakeDartDevelopmentService();
+  final DartDevelopmentService dds = FakeDartDevelopmentService();
 
   @override
   bool isSupported() => true;
@@ -94,9 +94,13 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
-class _FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+  bool wasShutdown = false;
+
   @override
-  void shutdown() {}
+  void shutdown() {
+    wasShutdown = true;
+  }
 }
 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
