@@ -25,6 +25,8 @@ import 'src/callback.dart' as driver_actions;
 import 'src/channel.dart';
 import 'src/extension.dart';
 
+const String _success = 'success';
+
 /// Whether results should be reported to the native side over the method
 /// channel.
 ///
@@ -93,14 +95,15 @@ https://docs.flutter.dev/testing/integration-tests
   }
 
   /// Formerly was the strategy for [pump]ing and requesting new frames.
-  /// 
+  ///
   /// [framePolicy] used to be inherited from [LiveTestWidgetsFlutterBinding],
   /// which is no longer the base class of [IntegrationTestWidgetsFlutterBinding];
   /// see https://github.com/flutter/flutter/issues/81534 for details.
   @Deprecated(
     'This field no longer has any effect and can be safely removed. '
     'IntegrationTestWidgetsFlutterBinding no longer inherits from LiveTestWidgetsFlutterBinding '
-    'and as a result does not have a framePolicy. Remove all references to this field.'
+    'and as a result does not have a framePolicy. Remove all references to this field. '
+    'This feature was deprecated after v3.27.0-0.2.pre.'
   )
   LiveTestWidgetsFlutterBindingFramePolicy get framePolicy => throw UnsupportedError('IntegrationTestWidgetsFlutterBinding no longer inherits from LiveTestWidgetsFlutterBinding');
   set framePolicy(LiveTestWidgetsFlutterBindingFramePolicy _) {}
@@ -250,6 +253,7 @@ https://docs.flutter.dev/testing/integration-tests
     _inTest = true;
     await testBody();
     invariantTester();
+    results[description] ??= _success;
   }
 
   @override
