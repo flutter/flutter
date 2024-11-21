@@ -129,9 +129,7 @@ Future<bool> run(List<String> arguments) async {
   return runTests(
     repeat: repeat,
     skipOnFetchFailure: skipOnFetchFailure,
-    // TODO(Piinks): Restore after resolving https://github.com/flutter/flutter/issues/154251
-    // Needed to see time stamps of individual test runs and identify long running test.
-    verbose: true,
+    verbose: verbose,
     numberShards: numberShards,
     shardIndex: shardIndex,
     files: files,

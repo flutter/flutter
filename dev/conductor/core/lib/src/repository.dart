@@ -32,12 +32,10 @@ class Remote {
   final RemoteName _name;
 
   /// The name of the remote.
-  String get name {
-    return switch (_name) {
-      RemoteName.upstream => 'upstream',
-      RemoteName.mirror   => 'mirror',
-    };
-  }
+  String get name => switch (_name) {
+    RemoteName.upstream => 'upstream',
+    RemoteName.mirror   => 'mirror',
+  };
 
   /// The URL of the remote.
   final String url;
@@ -621,33 +619,58 @@ class FrameworkRepository extends Repository {
 
   Future<io.ProcessResult> runFlutter(List<String> args) async {
     await _ensureToolReady();
-    return processManager.run(<String>[
-      fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
-      ...args,
-    ]);
+    final String workingDirectory = (await checkoutDirectory).path;
+    return processManager.run(
+      <String>[
+        fileSystem.path.join(workingDirectory, 'bin', 'flutter'),
+        ...args,
+      ],
+      workingDirectory: workingDirectory,
+    );
   }
 
-  Future<void> streamDart(List<String> args) async => _streamProcess(<String>[
-    fileSystem.path.join((await checkoutDirectory).path, 'bin', 'dart'),
-    ...args,
-  ]);
+  Future<void> streamDart(
+    List<String> args, {
+    String? workingDirectory,
+  }) async {
+    final String repoWorkingDirectory = (await checkoutDirectory).path;
+
+    await _streamProcess(
+      <String>[
+        fileSystem.path.join(repoWorkingDirectory, 'bin', 'dart'),
+        ...args,
+      ],
+      workingDirectory: workingDirectory ?? repoWorkingDirectory,
+    );
+  }
 
   Future<io.Process> streamFlutter(
     List<String> args, {
     void Function(String)? stdoutCallback,
     void Function(String)? stderrCallback,
-  }) async => _streamProcess(<String>[
-    fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
-    ...args,
-  ]);
+  }) async {
+    final String workingDirectory = (await checkoutDirectory).path;
+
+    return _streamProcess(
+      <String>[
+        fileSystem.path.join(workingDirectory, 'bin', 'flutter'),
+        ...args,
+      ],
+      workingDirectory: workingDirectory,
+    );
+  }
 
   Future<io.Process> _streamProcess(
     List<String> cmd, {
     void Function(String)? stdoutCallback,
     void Function(String)? stderrCallback,
+    String? workingDirectory,
   }) async {
     stdio.printTrace('Executing $cmd...');
-    final io.Process process = await processManager.start(cmd);
+    final io.Process process = await processManager.start(
+      cmd,
+      workingDirectory: workingDirectory,
+    );
     process
         .stdout
         .transform(utf8.decoder)

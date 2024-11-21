@@ -19,6 +19,7 @@ class Plugin {
     this.flutterConstraint,
     required this.dependencies,
     required this.isDirectDependency,
+    required this.isDevDependency,
     this.implementsPackage,
   });
 
@@ -48,6 +49,12 @@ class Plugin {
   ///          linux:
   ///            # A plugin implemented purely in Dart code.
   ///            dartPluginClass: SamplePlugin
+  ///            # Optional field to determine file containing dartPluginClass.
+  ///            # This file will be used in imports in generated files, e.g.:
+  ///            #   import 'package:{{pluginName}}/{{dartFileName}}'
+  ///            # instead of default:
+  ///            #    import 'package:{{pluginName}}/{{pluginName}}.dart'
+  ///            dartFileName: src/sample_plugin.dart
   ///          macos:
   ///            # A plugin implemented with `dart:ffi`.
   ///            ffiPlugin: true
@@ -62,6 +69,7 @@ class Plugin {
     VersionConstraint? flutterConstraint,
     List<String> dependencies, {
     required FileSystem fileSystem,
+    required bool isDevDependency,
     Set<String>? appDependencies,
   }) {
     final List<String> errors = validatePluginYaml(pluginYaml);
@@ -76,6 +84,7 @@ class Plugin {
         flutterConstraint,
         dependencies,
         fileSystem,
+        isDevDependency: isDevDependency,
         appDependencies != null && appDependencies.contains(name),
       );
     }
@@ -86,6 +95,7 @@ class Plugin {
       flutterConstraint,
       dependencies,
       fileSystem,
+      isDevDependency: isDevDependency,
       appDependencies != null && appDependencies.contains(name),
     );
   }
@@ -97,8 +107,9 @@ class Plugin {
     VersionConstraint? flutterConstraint,
     List<String> dependencies,
     FileSystem fileSystem,
-    bool isDirectDependency,
-  ) {
+    bool isDirectDependency, {
+    required bool isDevDependency,
+  }) {
     assert (pluginYaml['platforms'] != null, 'Invalid multi-platform plugin specification $name.');
     final YamlMap platformsYaml = pluginYaml['platforms'] as YamlMap;
 
@@ -152,15 +163,19 @@ class Plugin {
       WindowsPlugin.kConfigKey,
     ];
     final Map<String, String> defaultPackages = <String, String>{};
-    final Map<String, String> dartPluginClasses = <String, String>{};
+    final Map<String, DartPluginClassAndFilePair> dartPluginClasses = <String, DartPluginClassAndFilePair>{};
     for (final String platform in sharedHandlingPlatforms) {
         final String? defaultPackage = _getDefaultPackageForPlatform(platformsYaml, platform);
         if (defaultPackage != null) {
           defaultPackages[platform] = defaultPackage;
         }
-        final String? dartClass = _getPluginDartClassForPlatform(platformsYaml, platform);
-        if (dartClass != null) {
-          dartPluginClasses[platform] = dartClass;
+        final DartPluginClassAndFilePair? dartPair = _getPluginDartClassForPlatform(
+          platformsYaml,
+          platformKey: platform,
+          pluginName: name,
+        );
+        if (dartPair != null) {
+          dartPluginClasses[platform] = dartPair;
         }
     }
 
@@ -174,6 +189,7 @@ class Plugin {
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
       implementsPackage: pluginYaml['implements'] != null ? pluginYaml['implements'] as String : '',
+      isDevDependency: isDevDependency,
     );
   }
 
@@ -184,8 +200,9 @@ class Plugin {
     VersionConstraint? flutterConstraint,
     List<String> dependencies,
     FileSystem fileSystem,
-    bool isDirectDependency,
-  ) {
+    bool isDirectDependency, {
+    required bool isDevDependency,
+  }) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String? pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
     if (pluginClass != null) {
@@ -213,10 +230,11 @@ class Plugin {
       path: path,
       platforms: platforms,
       defaultPackagePlatforms: <String, String>{},
-      pluginDartClassPlatforms: <String, String>{},
+      pluginDartClassPlatforms: <String, DartPluginClassAndFilePair>{},
       flutterConstraint: flutterConstraint,
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
+      isDevDependency: isDevDependency,
     );
   }
 
@@ -343,12 +361,20 @@ class Plugin {
     return null;
   }
 
-  static String? _getPluginDartClassForPlatform(YamlMap platformsYaml, String platformKey) {
+  static DartPluginClassAndFilePair? _getPluginDartClassForPlatform(
+    YamlMap platformsYaml,{
+    required String platformKey,
+    required String pluginName,
+  }) {
     if (!_supportsPlatform(platformsYaml, platformKey)) {
       return null;
     }
     if ((platformsYaml[platformKey] as YamlMap).containsKey(kDartPluginClass)) {
-      return (platformsYaml[platformKey] as YamlMap)[kDartPluginClass] as String;
+      final String dartClass = (platformsYaml[platformKey] as YamlMap)[kDartPluginClass] as String;
+      final String dartFileName = (platformsYaml[platformKey] as YamlMap)[kDartFileName]
+        as String?
+        ?? '$pluginName.dart';
+      return (dartClass: dartClass, dartFileName: dartFileName);
     }
     return null;
   }
@@ -383,11 +409,21 @@ class Plugin {
   final Map<String, String> defaultPackagePlatforms;
 
   /// This is a mapping from platform config key to the Dart plugin class for the given platform.
-  final Map<String, String> pluginDartClassPlatforms;
+  final Map<String, DartPluginClassAndFilePair> pluginDartClassPlatforms;
 
   /// Whether this plugin is a direct dependency of the app.
   /// If [false], the plugin is a dependency of another plugin.
   final bool isDirectDependency;
+
+  /// Whether this plugin is exclusively used as a dev dependency of the app.
+  ///
+  /// If [false], the plugin is either:
+  /// - _Not_ a dev dependency
+  /// - _Not_ a dev dependency of some dependency that itself is not a dev
+  ///   dependency
+  ///
+  /// Dev dependencies are intended to be stripped out in release builds.
+  final bool isDevDependency;
 
   /// Expected path to the plugin's Package.swift. Returns null if the plugin
   /// does not support the [platform] or the [platform] is not iOS or macOS.
@@ -451,7 +487,8 @@ class PluginInterfaceResolution {
     return <String, String> {
       'pluginName': plugin.name,
       'platform': platform,
-      'dartClass': plugin.pluginDartClassPlatforms[platform] ?? '',
+      'dartClass': plugin.pluginDartClassPlatforms[platform]?.dartClass ?? '',
+      'dartFileName': plugin.pluginDartClassPlatforms[platform]?.dartFileName ?? '',
     };
   }
 
@@ -460,3 +497,14 @@ class PluginInterfaceResolution {
     return '<PluginInterfaceResolution ${plugin.name} for $platform>';
   }
 }
+
+/// A record representing pair of dartPluginClass and dartFileName used as metadata
+/// in [PluginInterfaceResolution].
+///
+/// The [dartClass] and [dartFileName] fields are guaranteed to be non-null:
+/// - record should be created only if dartClassName exists in plugin configuration.
+/// - dartFileName either taken from configuration, or, if absent, should be
+/// constructed from plugin name.
+/// See also:
+/// - [PluginInterfaceResolution], which uses this record to create Map with metadata.
+typedef DartPluginClassAndFilePair = ({String dartClass, String dartFileName});

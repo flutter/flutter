@@ -127,7 +127,10 @@ void main() {
       expect(saveText, findsOneWidget);
 
       // Test the close button position.
-      final Offset closeButtonBottomRight = tester.getBottomRight(find.byType(CloseButton));
+      final Offset closeButtonBottomRight = tester.getBottomRight(find.ancestor(
+        of: find.byType(IconButton),
+        matching: find.byType(Center),
+      ));
       final Offset helpTextTopLeft = tester.getTopLeft(helpText);
       expect(closeButtonBottomRight.dx, 56.0);
       expect(closeButtonBottomRight.dy, helpTextTopLeft.dy);
@@ -1592,6 +1595,30 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  // This is a regression test for https://github.com/flutter/flutter/issues/154393.
+  testWidgets('DateRangePicker close button shape should be square', (WidgetTester tester) async {
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      final ThemeData theme = ThemeData();
+      final Finder buttonFinder = find.widgetWithIcon(IconButton, Icons.close);
+      expect(tester.getSize(buttonFinder), const Size(48.0, 48.0));
+
+      // Test the close button overlay size is square.
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(buttonFinder));
+      await tester.pumpAndSettle();
+      expect(
+        buttonFinder,
+        paints
+          ..rect(
+            rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 40.0),
+            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08),
+          ),
+      );
+    }, useMaterial3: true);
+  });
 
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2

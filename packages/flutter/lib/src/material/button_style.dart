@@ -196,7 +196,7 @@ class ButtonStyle with Diagnosticable {
   /// The button's background fill color.
   final MaterialStateProperty<Color?>? backgroundColor;
 
-  /// The color for the button's [Text] and [Icon] widget descendants.
+  /// The color for the button's [Text] widget descendants.
   ///
   /// This color is typically used instead of the color of the [textStyle]. All
   /// of the components that compute defaults from [ButtonStyle] values
@@ -274,8 +274,6 @@ class ButtonStyle with Diagnosticable {
   final MaterialStateProperty<Size?>? maximumSize;
 
   /// The icon's color inside of the button.
-  ///
-  /// If this is null, the icon color will be [foregroundColor].
   final MaterialStateProperty<Color?>? iconColor;
 
   /// The icon's size inside of the button.

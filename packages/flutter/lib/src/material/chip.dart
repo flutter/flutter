@@ -1407,6 +1407,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         onTapDown: canTap ? _handleTapDown : null,
         onTapCancel: canTap ? _handleTapCancel : null,
         onHover: canTap ? updateMaterialState(MaterialState.hovered) : null,
+        hoverColor: (widget.color ?? chipTheme.color) == null ? null : Colors.transparent,
         customBorder: resolvedShape,
         child: AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[selectController, enableController]),
@@ -2441,7 +2442,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
 
   @override
   BorderSide? get side => isEnabled
-    ? BorderSide(color: _colors.outline)
+    ? BorderSide(color: _colors.outlineVariant)
     : BorderSide(color: _colors.onSurface.withOpacity(0.12));
 
   @override

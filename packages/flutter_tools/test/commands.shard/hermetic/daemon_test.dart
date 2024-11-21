@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/preview_device.dart';
@@ -498,7 +497,6 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => FakeAndroidWorkflow(),
       IOSWorkflow: () => FakeIOSWorkflow(),
-      FuchsiaWorkflow: () => FakeFuchsiaWorkflow(),
       WindowsWorkflow: () => FakeWindowsWorkflow(),
     });
 
@@ -1109,13 +1107,6 @@ class FakeWindowsWorkflow extends Fake implements WindowsWorkflow {
   final bool canListDevices;
 }
 
-class FakeFuchsiaWorkflow extends Fake implements FuchsiaWorkflow {
-  FakeFuchsiaWorkflow({ this.canListDevices = true });
-
-  @override
-  final bool canListDevices;
-}
-
 class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
   FakeAndroidWorkflow({ this.canListDevices = true });
 
@@ -1272,12 +1263,6 @@ class FakeDeviceLogReader implements DeviceLogReader {
   bool disposeCalled = false;
 
   @override
-  int? appPid;
-
-  @override
-  FlutterVmService? connectedVMService;
-
-  @override
   void dispose() {
     disposeCalled = true;
   }
@@ -1288,6 +1273,8 @@ class FakeDeviceLogReader implements DeviceLogReader {
   @override
   String get name => 'device';
 
+  @override
+  Future<void> provideVmService(FlutterVmService? connectedVmService) async { }
 }
 
 class FakeApplicationPackageFactory implements ApplicationPackageFactory {

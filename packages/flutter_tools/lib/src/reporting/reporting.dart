@@ -22,7 +22,7 @@ import '../globals.dart' as globals;
 import '../version.dart';
 import 'first_run.dart';
 
+part 'custom_dimensions.dart';
 part 'disabled_usage.dart';
 part 'events.dart';
 part 'usage.dart';
-part 'custom_dimensions.dart';

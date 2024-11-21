@@ -187,17 +187,10 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// The current state is null if (1) there is no widget in the tree that
   /// matches this global key, (2) that widget is not a [StatefulWidget], or the
   /// associated [State] object is not a subtype of `T`.
-  T? get currentState {
-    final Element? element = _currentElement;
-    if (element is StatefulElement) {
-      final StatefulElement statefulElement = element;
-      final State state = statefulElement.state;
-      if (state is T) {
-        return state;
-      }
-    }
-    return null;
-  }
+  T? get currentState => switch (_currentElement) {
+    StatefulElement(:final T state) => state,
+    _ => null,
+  };
 }
 
 /// A global key with a debugging label.
@@ -1502,6 +1495,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
     properties.add(ObjectFlagProperty<T>('_widget', _widget, ifNull: 'no widget'));
     properties.add(ObjectFlagProperty<StatefulElement>('_element', _element, ifNull: 'not mounted'));
   }
+
+  // If @protected State methods are added or removed, the analysis rule should be
+  // updated accordingly (dev/bots/custom_rules/protect_public_state_subtypes.dart)
 }
 
 /// A widget that has a child widget provided to it, instead of building a new
@@ -2911,15 +2907,14 @@ class BuildOwner {
                   'The dirty list for the current build scope is: ${buildScope._dirtyElements}',
         );
       }
-      // When reactivating an inactivate Element, _scheduleBuildFor should only be
-      // called within _flushDirtyElements.
       if (!_debugBuilding && element._inDirtyList) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('BuildOwner.scheduleBuildFor() called inappropriately.'),
           ErrorHint(
-            'The BuildOwner.scheduleBuildFor() method should only be called while the '
-            'buildScope() method is actively rebuilding the widget tree.',
+            'The BuildOwner.scheduleBuildFor() method called on an Element '
+            'that is already in the dirty list.',
           ),
+          element.describeElement('the dirty Element was'),
         ]);
       }
       return true;
@@ -5145,8 +5140,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Returns true if the element has been marked as needing rebuilding.
   ///
   /// The flag is true when the element is first created and after
-  /// [markNeedsBuild] has been called. The flag is reset to false in the
-  /// [performRebuild] implementation.
+  /// [markNeedsBuild] has been called. The flag is typically reset to false in
+  /// the [performRebuild] implementation, but certain elements (that of the
+  /// [LayoutBuilder] widget, for example) may choose to override [markNeedsBuild]
+  /// such that it does not set the [dirty] flag to `true` when called.
   bool get dirty => _dirty;
   bool _dirty = true;
 
@@ -5385,13 +5382,18 @@ class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
   final bool stateful;
 
   @override
-  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    final Map<String, Object?> json = super.toJsonMap(delegate);
+  Map<String, Object?> toJsonMap(
+    DiagnosticsSerializationDelegate delegate, {
+    bool fullDetails = true,
+  }) {
+    final Map<String, Object?> json = super.toJsonMap(delegate, fullDetails: fullDetails,);
     final Element element = value as Element;
     if (!element.debugIsDefunct) {
       json['widgetRuntimeType'] = element.widget.runtimeType.toString();
     }
-    json['stateful'] = stateful;
+    if (fullDetails) {
+      json['stateful'] = stateful;
+    }
     return json;
   }
 }

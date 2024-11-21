@@ -58,29 +58,6 @@ set openChannelForTesting(WebSocketConnector? connector) {
   _openChannel = connector ?? _defaultOpenChannel;
 }
 
-/// The error codes for the JSON-RPC standard, including VM service specific
-/// error codes.
-///
-/// See also: https://www.jsonrpc.org/specification#error_object
-abstract class RPCErrorCodes {
-  /// The method does not exist or is not available.
-  static const int kMethodNotFound = -32601;
-
-  /// Invalid method parameter(s), such as a mismatched type.
-  static const int kInvalidParams = -32602;
-
-  /// Internal JSON-RPC error.
-  static const int kInternalError = -32603;
-
-  /// Application specific error codes.
-  static const int kServerError = -32000;
-
-  /// Non-standard JSON-RPC error codes:
-
-  /// The VM service or extension service has disappeared.
-  static const int kServiceDisappeared = 112;
-}
-
 /// A function that reacts to the invocation of the 'reloadSources' service.
 ///
 /// The VM Service Protocol allows clients to register custom services that
@@ -424,7 +401,7 @@ String _validateRpcStringParam(String methodName, Map<String, Object?> params, S
   if (value is! String || value.isEmpty) {
     throw vm_service.RPCError(
       methodName,
-      RPCErrorCodes.kInvalidParams,
+      vm_service.RPCErrorKind.kInvalidParams.code,
       "Invalid '$paramName': $value",
     );
   }
@@ -436,7 +413,7 @@ bool _validateRpcBoolParam(String methodName, Map<String, Object?> params, Strin
   if (value != null && value is! bool) {
     throw vm_service.RPCError(
       methodName,
-      RPCErrorCodes.kInvalidParams,
+      vm_service.RPCErrorKind.kInvalidParams.code,
       "Invalid '$paramName': $value",
     );
   }
@@ -491,6 +468,22 @@ class FlutterVmService {
   final Uri? wsAddress;
   final Uri? httpAddress;
 
+  /// Calls [service.getVM]. However, in the case that an [vm_service.RPCError]
+  /// is thrown due to the service being disconnected, the error is discarded
+  /// and null is returned.
+  Future<vm_service.VM?> getVmGuarded() async {
+    try {
+      return await service.getVM();
+    } on vm_service.RPCError catch (err) {
+      if (err.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+          err.message.contains('Service connection disposed')) {
+        globals.printTrace('VmService.getVm call failed: $err');
+        return null;
+      }
+      rethrow;
+    }
+  }
+
   Future<vm_service.Response?> callMethodWrapper(
     String method, {
     String? isolateId,
@@ -503,7 +496,7 @@ class FlutterVmService {
       // and should begin to shutdown due to the service connection closing.
       // Swallow the exception here and let the shutdown logic elsewhere deal
       // with cleaning up.
-      if (e.code == RPCErrorCodes.kServiceDisappeared ||
+      if (e.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
           e.message.contains('Service connection disposed')) {
         return null;
       }
@@ -573,8 +566,7 @@ class FlutterVmService {
       await service.streamListen(vm_service.EventStreams.kIsolate);
     } on vm_service.RPCError catch (e) {
       // Do nothing if the tool is already subscribed.
-      const int streamAlreadySubscribed = 103;
-      if (e.code != streamAlreadySubscribed) {
+      if (e.code != vm_service.RPCErrorKind.kStreamAlreadySubscribed.code) {
         rethrow;
       }
     }
@@ -835,8 +827,8 @@ class FlutterVmService {
         ? <String, Object>{'value': platform}
         : <String, String>{},
     );
-    if (result != null && result['value'] is String) {
-      return result['value']! as String;
+    if (result case {'value': final String value}) {
+      return value;
     }
     return 'unknown';
   }
@@ -874,8 +866,8 @@ class FlutterVmService {
     } on vm_service.RPCError catch (err) {
       // If an application is not using the framework or the VM service
       // disappears while handling a request, return null.
-      if ((err.code == RPCErrorCodes.kMethodNotFound) ||
-          (err.code == RPCErrorCodes.kServiceDisappeared) ||
+      if ((err.code == vm_service.RPCErrorKind.kMethodNotFound.code) ||
+          (err.code == vm_service.RPCErrorKind.kServiceDisappeared.code) ||
           (err.message.contains('Service connection disposed'))) {
         return null;
       }
@@ -1013,7 +1005,7 @@ class FlutterVmService {
         onError: (Object? error, StackTrace stackTrace) {
           if (error is vm_service.SentinelException ||
             error == null ||
-            (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared)) {
+            (error is vm_service.RPCError && error.code == vm_service.RPCErrorKind.kServiceDisappeared.code)) {
             return null;
           }
           return Future<vm_service.Isolate?>.error(error, stackTrace);
@@ -1029,7 +1021,7 @@ class FlutterVmService {
         onError: (Object? error, StackTrace stackTrace) {
           if (error is vm_service.SentinelException ||
             error == null ||
-            (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared)) {
+            (error is vm_service.RPCError && error.code == vm_service.RPCErrorKind.kServiceDisappeared.code)) {
             return null;
           }
           return Future<vm_service.Event?>.error(error, stackTrace);

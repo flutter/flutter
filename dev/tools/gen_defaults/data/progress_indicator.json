@@ -1,5 +1,5 @@
 {
-  "version": "5_0_0",
+  "version": "6_1_0",
 
   "md.comp.progress-indicator.active-indicator.color": "primary",
   "md.comp.progress-indicator.active-indicator.shape": "md.sys.shape.corner.full",

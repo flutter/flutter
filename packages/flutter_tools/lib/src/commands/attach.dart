@@ -31,7 +31,6 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
-import '../vmservice.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -373,7 +372,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         } on Exception catch (error) {
           throwToolExit(error.toString());
         }
-        result = await app.runner!.waitForAppToFinish();
+        result = await app.runner.waitForAppToFinish();
         return;
       }
       while (true) {
@@ -414,7 +413,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         _logger.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
     } on RPCError catch (err) {
-      if (err.code == RPCErrorCodes.kServiceDisappeared ||
+      if (err.code == RPCErrorKind.kServiceDisappeared.code ||
           err.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }

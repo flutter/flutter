@@ -114,7 +114,7 @@ const double _kActionSheetButtonVerticalPaddingBase = 1.8;
 // Extracted from https://developer.apple.com/design/resources/.
 const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xCCF2F2F2),
-  darkColor: Color(0xBF1E1E1E),
+  darkColor: Color(0xCC2D2D2D),
 );
 
 // Translucent light gray that is painted on top of the blurred backdrop as the
@@ -122,7 +122,7 @@ const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
 // Eyeballed from iOS 13 beta simulator.
 const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFE1E1E1),
-  darkColor: Color(0xFF2E2E2E),
+  darkColor: Color(0xFF404040),
 );
 
 // Translucent light gray that is painted on top of the blurred backdrop as the
@@ -461,14 +461,16 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                         width: isInAccessibilityMode
                             ? _kAccessibilityCupertinoDialogWidth
                             : _kCupertinoDialogWidth,
-                        child: CupertinoPopupSurface(
-                          isSurfacePainted: false,
-                          child: Semantics(
-                            namesRoute: true,
-                            scopesRoute: true,
-                            explicitChildNodes: true,
-                            label: localizations.alertDialogLabel,
-                            child: _buildBody(context),
+                        child: _ActionSheetGestureDetector(
+                          child: CupertinoPopupSurface(
+                            isSurfacePainted: false,
+                            child: Semantics(
+                              namesRoute: true,
+                              scopesRoute: true,
+                              explicitChildNodes: true,
+                              label: localizations.alertDialogLabel,
+                              child: _buildBody(context),
+                            ),
                           ),
                         ),
                       ),
@@ -821,10 +823,10 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
 // Multiple `_SlideTarget`s might be nested.
 // `_TargetSelectionGestureRecognizer` uses a simple algorithm that only
 // compares if the inner-most slide target has changed (which suffices our use
-// case).  Semantically, this means that all outer targets will be treated as
-// identical to the inner-most one, i.e. when the pointer enters or leaves a
-// slide target, the corresponding method will be called on all targets that
-// nest it.
+// case). Semantically, this means that all outer targets will be treated as
+// having the identical area as the inner-most one, i.e. when the pointer enters
+// or leaves a slide target, the corresponding method will be called on all
+// targets that nest it.
 abstract class _SlideTarget {
   // A pointer has entered this region.
   //
@@ -837,7 +839,10 @@ abstract class _SlideTarget {
   //
   // The `fromPointerDown` should be true if this callback is triggered by a
   // PointerDownEvent, i.e. the second case from the list above.
-  void didEnter({required bool fromPointerDown});
+  //
+  // The return value of this method is used as the `innerEnabled` for the next
+  // target, while `innerEnabled` of the innermost target is true.
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled});
 
   // A pointer has exited this region.
   //
@@ -858,6 +863,10 @@ abstract class _SlideTarget {
 
 // Recognizes sliding taps and thereupon interacts with
 // `_SlideTarget`s.
+//
+// TODO(dkwingsmt): It should recompute hit testing when the app is updated,
+// or better, share code with `MouseTracker`.
+// https://github.com/flutter/flutter/issues/155266
 class _TargetSelectionGestureRecognizer extends GestureRecognizer {
   _TargetSelectionGestureRecognizer({super.debugOwner, required this.hitTest})
     : _slidingTap = _SlidingTapGestureRecognizer(debugOwner: debugOwner) {
@@ -930,8 +939,12 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
       _currentTargets
         ..clear()
         ..addAll(foundTargets);
+      bool enabled = true;
       for (final _SlideTarget target in _currentTargets) {
-        target.didEnter(fromPointerDown: fromPointerDown);
+        enabled = target.didEnter(
+          fromPointerDown: fromPointerDown,
+          innerEnabled: enabled,
+        );
       }
     }
   }
@@ -1360,6 +1373,7 @@ class CupertinoActionSheetAction extends StatefulWidget {
     required this.onPressed,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
+    this.mouseCursor,
     required this.child,
   });
 
@@ -1379,6 +1393,12 @@ class CupertinoActionSheetAction extends StatefulWidget {
   /// Destructive buttons have red text.
   final bool isDestructiveAction;
 
+  /// The cursor that will be shown when hovering over the button.
+  ///
+  /// If null, defaults to [SystemMouseCursors.click] on web and
+  /// [MouseCursor.defer] on other platforms.
+  final MouseCursor? mouseCursor;
+
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Text] widget.
@@ -1392,7 +1412,9 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     implements _SlideTarget {
   // |_SlideTarget|
   @override
-  void didEnter({required bool fromPointerDown}) {}
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
+    return innerEnabled;
+  }
 
   // |_SlideTarget|
   @override
@@ -1455,7 +1477,7 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
         + fontSize * _kActionSheetButtonVerticalPaddingFactor;
 
     return MouseRegion(
-      cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor: widget.mouseCursor ?? (kIsWeb ? SystemMouseCursors.click : MouseCursor.defer),
       child: MetaData(
         metaData: this,
         behavior: HitTestBehavior.opaque,
@@ -1535,11 +1557,15 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 
   // |_SlideTarget|
   @override
-  void didEnter({required bool fromPointerDown}) {
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
+    // Action sheet doesn't support disabled buttons, therefore `innerEnabled`
+    // is always true.
+    assert(innerEnabled);
     widget.onPressStateChange?.call(true);
     if (!fromPointerDown) {
       _emitVibration();
     }
+    return innerEnabled;
   }
 
   // |_SlideTarget|
@@ -1576,7 +1602,7 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
           borderRadius: borderRadius,
         ),
         child: widget.child,
-      )
+      ),
     );
   }
 }
@@ -2001,7 +2027,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
 // Renders the background of a button (both the pressed background and the idle
 // background) and reports its state to the parent with `onPressStateChange`.
-class _AlertDialogButtonBackground extends StatelessWidget {
+class _AlertDialogButtonBackground extends StatefulWidget {
   const _AlertDialogButtonBackground({
     required this.idleColor,
     required this.pressedColor,
@@ -2026,37 +2052,58 @@ class _AlertDialogButtonBackground extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
-  void onTapDown(TapDownDetails details) {
-    onPressStateChange?.call(true);
+  @override
+  _AlertDialogButtonBackgroundState createState() => _AlertDialogButtonBackgroundState();
+}
+
+class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackground>
+    implements _SlideTarget {
+  void _emitVibration(){
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+        HapticFeedback.selectionClick();
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
+    }
   }
 
-  void onTapUp(TapUpDetails details) {
-    onPressStateChange?.call(false);
+  // |_SlideTarget|
+  @override
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
+    widget.onPressStateChange?.call(innerEnabled);
+    if (innerEnabled && !fromPointerDown) {
+      _emitVibration();
+    }
+    return innerEnabled;
   }
 
-  void onTapCancel() {
-    onPressStateChange?.call(false);
+  // |_SlideTarget|
+  @override
+  void didLeave() {
+    widget.onPressStateChange?.call(false);
+  }
+
+  // |_SlideTarget|
+  @override
+  void didConfirm() {
+    widget.onPressStateChange?.call(false);
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = pressed ? pressedColor : idleColor;
-    return MergeSemantics(
-      // TODO(mattcarroll): Button press dynamics need overhaul for iOS:
-      // https://github.com/flutter/flutter/issues/19786
-      child: GestureDetector(
-        excludeFromSemantics: true,
-        behavior: HitTestBehavior.opaque,
-        onTapDown: onTapDown,
-        onTapUp: onTapUp,
-        // TODO(mattcarroll): Cancel is currently triggered when user moves
-        //  past slop instead of off button: https://github.com/flutter/flutter/issues/19783
-        onTapCancel: onTapCancel,
+    final Color backgroundColor = widget.pressed ? widget.pressedColor : widget.idleColor;
+    return MetaData(
+      metaData: this,
+      child: MergeSemantics(
         child: Container(
           decoration: BoxDecoration(
             color: CupertinoDynamicColor.resolve(backgroundColor, context),
           ),
-          child: child,
+          child: widget.child,
         ),
       ),
     );
@@ -2069,7 +2116,7 @@ class _AlertDialogButtonBackground extends StatelessWidget {
 ///
 ///  * [CupertinoAlertDialog], a dialog that informs the user about situations
 ///    that require acknowledgment.
-class CupertinoDialogAction extends StatelessWidget {
+class CupertinoDialogAction extends StatefulWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({
     super.key,
@@ -2116,10 +2163,31 @@ class CupertinoDialogAction extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
-  /// Whether the button is enabled or disabled. Buttons are disabled by
-  /// default. To enable a button, set its [onPressed] property to a non-null
-  /// value.
-  bool get enabled => onPressed != null;
+  @override
+  State<CupertinoDialogAction> createState() => _CupertinoDialogActionState();
+}
+
+class _CupertinoDialogActionState extends State<CupertinoDialogAction>
+    implements _SlideTarget {
+
+  // The button is enabled when it has [onPressed].
+  bool get enabled => widget.onPressed != null;
+
+  // |_SlideTarget|
+  @override
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
+    return enabled;
+  }
+
+  // |_SlideTarget|
+  @override
+  void didLeave() {}
+
+  // |_SlideTarget|
+  @override
+  void didConfirm() {
+    widget.onPressed?.call();
+  }
 
   // Dialog action content shrinks to fit, up to a certain point, and if it still
   // cannot fit at the minimum size, the text content is ellipsized.
@@ -2149,7 +2217,7 @@ class CupertinoDialogAction extends StatelessWidget {
         ),
         child: Semantics(
           button: true,
-          onTap: onPressed,
+          onTap: widget.onPressed,
           child: DefaultTextStyle(
             style: textStyle,
             textAlign: TextAlign.center,
@@ -2180,12 +2248,12 @@ class CupertinoDialogAction extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle style = _kCupertinoDialogActionStyle.copyWith(
       color: CupertinoDynamicColor.resolve(
-        isDestructiveAction ? CupertinoColors.systemRed : CupertinoTheme.of(context).primaryColor,
+        widget.isDestructiveAction ? CupertinoColors.systemRed : CupertinoTheme.of(context).primaryColor,
         context,
       ),
-    ).merge(textStyle);
+    ).merge(widget.textStyle);
 
-    if (isDefaultAction) {
+    if (widget.isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
 
@@ -2205,20 +2273,19 @@ class CupertinoDialogAction extends StatelessWidget {
     final Widget sizedContent = _isInAccessibilityMode(context)
         ? _buildContentWithAccessibilitySizingPolicy(
             textStyle: style,
-            content: child,
+            content: widget.child,
           )
         : _buildContentWithRegularSizingPolicy(
             context: context,
             textStyle: style,
-            content: child,
+            content: widget.child,
             padding: padding,
           );
 
     return MouseRegion(
-      cursor: onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-      child: GestureDetector(
-        excludeFromSemantics: true,
-        onTap: onPressed,
+      cursor: widget.onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: MetaData(
+        metaData: this,
         behavior: HitTestBehavior.opaque,
         child: ConstrainedBox(
           constraints: const BoxConstraints(

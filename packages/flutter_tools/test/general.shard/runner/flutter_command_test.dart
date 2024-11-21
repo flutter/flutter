@@ -637,7 +637,7 @@ void main() {
       Pub: () => FakePub(),
       Usage: () => usage,
       FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('use packagesPath to generate BuildInfo', () async {
@@ -814,7 +814,6 @@ void main() {
       testUsingContext('parses values from JSON files and includes them in defines list', () async {
         fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('config1.json').writeAsString(
           '''
             {
@@ -864,7 +863,6 @@ void main() {
           .file(fileSystem.path.join('lib', 'main.dart'))
           .createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         fileSystem.file('.env').writeAsStringSync('''
             MY_VALUE=VALUE_FROM_ENV_FILE
           ''');
@@ -893,7 +891,6 @@ void main() {
             .file(fileSystem.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('.env').writeAsString('''
             # comment
             kInt=1
@@ -956,7 +953,6 @@ void main() {
             .file(fileSystem.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('.env').writeAsString('what is this');
 
         await dummyCommandRunner.run(<String>[
@@ -982,7 +978,6 @@ void main() {
             .file(fileSystem.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('.env').writeAsString('''
             # single line value
             name=piotrfleury
@@ -1015,7 +1010,6 @@ void main() {
             .file(fileSystem.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('.env').writeAsString('''
             kInt=1
             kDouble=1.1
@@ -1053,7 +1047,6 @@ void main() {
       testUsingContext('when files contain entries with duplicate keys, uses the value from the lattermost file', () async {
         fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('config1.json').writeAsString(
             '''
             {
@@ -1095,7 +1088,6 @@ void main() {
       testUsingContext('throws a ToolExit when the argued path points to a directory', () async {
         fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         fileSystem.directory('config').createSync();
 
         await dummyCommandRunner.run(<String>[
@@ -1115,7 +1107,6 @@ void main() {
       testUsingContext('throws a ToolExit when the given JSON file is malformed', () async {
         fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         await fileSystem.file('config.json').writeAsString(
           '''
             {
@@ -1174,7 +1165,6 @@ void main() {
       testUsingContext("tool exits when FLUTTER_APP_FLAVOR is already set in user's environment", () async {
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
 
         final FakeDevice device = FakeDevice(
           'name',
@@ -1204,7 +1194,6 @@ void main() {
       testUsingContext('tool exits when FLUTTER_APP_FLAVOR is set in --dart-define or --dart-define-from-file', () async {
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages').createSync();
         fileSystem.file('config.json')..createSync()..writeAsStringSync('{"FLUTTER_APP_FLAVOR": "strawberry"}');
 
         final FakeDevice device = FakeDevice(

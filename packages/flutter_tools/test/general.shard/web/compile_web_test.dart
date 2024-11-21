@@ -37,7 +37,11 @@ void main() {
     );
 
     flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-    fileSystem.file('.packages').createSync();
+
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
   });
 
   testUsingContext('WebBuilder sets environment on success', () async {
@@ -103,7 +107,7 @@ void main() {
         label: 'web-compile',
             parameters: CustomDimensions(
               buildEventSettings:
-                  'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+                  'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
 
       ),
           ),
@@ -117,7 +121,7 @@ void main() {
         Event.flutterBuildInfo(
           label: 'web-compile',
           buildType: 'web',
-          settings: 'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+          settings: 'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
         ),
       ]),
     );
@@ -134,6 +138,8 @@ void main() {
       ),
       true,
     );
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('WebBuilder throws tool exit on failure', () async {
@@ -172,5 +178,7 @@ void main() {
     expect(logger.errorText, contains('Target hello failed: FormatException: illegal character in input string'));
     expect(testUsage.timings, isEmpty);
     expect(fakeAnalytics.sentEvents, isEmpty);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }

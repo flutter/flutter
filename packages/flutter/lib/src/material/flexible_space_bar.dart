@@ -273,9 +273,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                   sigmaX: blurAmount,
                   sigmaY: blurAmount,
                 ),
-                child: Container(
-                  color: Colors.transparent,
-                ),
+                child: const ColoredBox(color: Colors.transparent),
               ),
             ));
           }
@@ -331,7 +329,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             final Matrix4 scaleTransform = Matrix4.identity()
               ..scale(scaleValue, scaleValue, 1.0);
             final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
-            children.add(Container(
+            children.add(Padding(
               padding: padding,
               child: Transform(
                 alignment: titleAlignment,
@@ -342,10 +340,12 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                     style: titleStyle,
                     child: LayoutBuilder(
                       builder: (BuildContext context, BoxConstraints constraints) {
-                        return Container(
+                        return SizedBox(
                           width: constraints.maxWidth / scaleValue,
-                          alignment: titleAlignment,
-                          child: title,
+                          child: Align(
+                            alignment: titleAlignment,
+                            child: title,
+                          ),
                         );
                       },
                     ),

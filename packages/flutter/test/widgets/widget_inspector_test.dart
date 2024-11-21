@@ -1982,6 +1982,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             return childJson['createdByLocalProject'] == true;
           }
 
+          /// Returns whether the child is missing the "type" field.
+          ///
+          /// This should always be true for nodes in the widget tree without
+          /// full details.
+          bool isMissingType(Map<String, Object?> childJson) {
+            return childJson['type'] == null;
+          }
+
           /// Returns whether the child has a description matching [description].
           bool hasDescription(
             Map<String, Object?> childJson, {
@@ -2280,6 +2288,79 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
             expect(
               allChildrenSatisfyCondition(rootJson,
+                condition: isMissingType,
+              ),
+              isFalse,
+            );
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: wasCreatedByLocalProject,
+              ),
+              isFalse,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    !hasTextPreview(child, preview: 'a');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    !hasTextPreview(child, preview: 'b');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    !hasTextPreview(child, preview: 'c');
+                },
+              ),
+              isTrue,
+            );
+          });
+
+          testWidgets(
+              'tree without full details using ext.flutter.inspector.getRootWidgetTree',
+              (WidgetTester tester) async {
+            const String group = 'test-group';
+
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
+            final Map<String, dynamic> jsonA =
+                await selectedWidgetResponseForElement(elementA);
+
+            final Map<String, Object?> creationLocation =
+                verifyAndReturnCreationLocation(jsonA);
+            final String testFile = verifyAndReturnTestFile(creationLocation);
+            addPubRootDirectoryFor(testFile);
+
+            final Map<String, Object?> rootJson = (await service.testExtension(
+              WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+              <String, String>{
+                'groupName': group,
+                'isSummaryTree': 'false',
+                'withPreviews': 'false',
+                'fullDetails': 'false',
+              },
+            ))! as Map<String, Object?>;
+
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: isMissingType,
+              ),
+              isTrue,
+            );
+
+            expect(
+              allChildrenSatisfyCondition(rootJson,
                 condition: wasCreatedByLocalProject,
               ),
               isFalse,
@@ -2337,6 +2418,79 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               },
             ))! as Map<String, Object?>;
 
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: isMissingType,
+              ),
+              isFalse,
+            );
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: wasCreatedByLocalProject,
+              ),
+              isFalse,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    hasTextPreview(child, preview: 'a');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    hasTextPreview(child, preview: 'b');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    hasTextPreview(child, preview: 'c');
+                },
+              ),
+              isTrue,
+            );
+          });
+
+          testWidgets(
+              'tree without full details and with previews using ext.flutter.inspector.getRootWidgetTree',
+              (WidgetTester tester) async {
+            const String group = 'test-group';
+
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
+            final Map<String, dynamic> jsonA =
+                await selectedWidgetResponseForElement(elementA);
+
+            final Map<String, Object?> creationLocation =
+                verifyAndReturnCreationLocation(jsonA);
+            final String testFile = verifyAndReturnTestFile(creationLocation);
+            addPubRootDirectoryFor(testFile);
+
+            final Map<String, Object?> rootJson = (await service.testExtension(
+              WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+              <String, String>{
+                'groupName': group,
+                'isSummaryTree': 'false',
+                'withPreviews': 'true',
+                'fullDetails': 'false',
+              },
+            ))! as Map<String, Object?>;
+
+
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: isMissingType,
+              ),
+              isTrue,
+            );
             expect(
               allChildrenSatisfyCondition(rootJson,
                 condition: wasCreatedByLocalProject,
@@ -5258,33 +5412,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         ),
       );
-      final Finder columnWidgetFinder = find.byType(Column);
-      expect(columnWidgetFinder, findsOneWidget);
-      final Element columnWidgetElement = columnWidgetFinder
-        .evaluate()
-        .first;
-      final DiagnosticsNode node = columnWidgetElement.toDiagnosticsNode();
-      final InspectorSerializationDelegate delegate =
-        InspectorSerializationDelegate(
-          service: service,
-          includeProperties: true,
-          addAdditionalPropertiesCallback:
-            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
-              final Map<String, Object> additionalJson = <String, Object>{};
-              final Object? value = node.value;
-              if (value is Element) {
-                final RenderObject? renderObject = value.renderObject;
-                if (renderObject != null) {
-                  additionalJson['renderObject'] =
-                      renderObject.toDiagnosticsNode().toJsonMap(
-                        delegate.copyWith(subtreeDepth: 0),
-                      );
-                }
-              }
-              additionalJson['callbackExecuted'] = true;
-              return additionalJson;
-            },
-        );
+
+      final Finder columnFinder = find.byType(Column);
+      expect(columnFinder, findsOneWidget);
+
+      final DiagnosticsNode node = columnFinder.evaluate().first.toDiagnosticsNode();
+      final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(
+        service: service,
+        includeProperties: true,
+        addAdditionalPropertiesCallback:
+          (DiagnosticsNode node, InspectorSerializationDelegate delegate) => <String, Object>{
+            if (node.value case Element(:final RenderObject renderObject))
+              'renderObject': renderObject.toDiagnosticsNode().toJsonMap(
+                  delegate.copyWith(subtreeDepth: 0),
+                ),
+            'callbackExecuted': true,
+          },
+      );
       final Map<String, Object?> json = node.toJsonMap(delegate);
       expect(json['callbackExecuted'], true);
       expect(json.containsKey('renderObject'), true);
@@ -5400,6 +5544,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         node.toJsonMap(const DiagnosticsSerializationDelegate()),
         equals(<String, dynamic>{
           'description': 'description of the deep link',
+          'shouldIndent': true,
           'type': 'DevToolsDeepLinkProperty',
           'name': '',
           'style': 'singleLine',

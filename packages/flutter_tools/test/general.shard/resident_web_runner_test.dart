@@ -127,7 +127,10 @@ void main() {
       .._devFS = webDevFS
       ..device = mockDevice
       ..generator = residentCompiler;
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: test_fakes.FakeFlutterVersion(),
@@ -969,10 +972,10 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
-      const FakeVmServiceRequest(
+      FakeVmServiceRequest(
         method: kHotRestartServiceName,
         // Failed response,
-        error: FakeRPCError(code: RPCErrorCodes.kInternalError),
+        error: FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
       ),
     ]);
     setupMocks();
@@ -985,7 +988,10 @@ void main() {
     final OperationResult result = await residentWebRunner.restart();
 
     expect(result.code, 1);
-    expect(result.message, contains(RPCErrorCodes.kInternalError.toString()));
+    expect(
+      result.message,
+      contains(vm_service.RPCErrorKind.kInternalError.code.toString()),
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1753,9 +1759,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> stopEchoingDeviceLog() async {}
-
-  @override
-  Future<void> initLogReader() async {}
 
   @override
   Future<Uri?> setupDevFS(String fsName, Directory rootDirectory) async {

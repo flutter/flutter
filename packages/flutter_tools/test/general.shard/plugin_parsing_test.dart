@@ -27,6 +27,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -67,6 +68,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -117,6 +119,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -162,6 +165,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -183,6 +187,173 @@ void main() {
     expect(windowsPlugin.dartPluginClass, 'WinSamplePlugin');
   });
 
+  testWithoutContext('Plugin parsing allows a dartFileName field with dartPluginClass', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' android:\n'
+      '  dartPluginClass: AndroidClass\n'
+      '  dartFileName: src/android_class.dart\n'
+      ' ios:\n'
+      '  dartPluginClass: IosClass\n'
+      '  dartFileName: src/ios_class.dart\n'
+      ' linux:\n'
+      '  dartPluginClass: LinuxClass\n'
+      '  dartFileName: src/linux_class.dart\n'
+      ' macos:\n'
+      '  dartPluginClass: MacOSClass\n'
+      '  dartFileName: src/macos_class.dart\n'
+      ' windows:\n'
+      '  dartPluginClass: WindowsClass\n'
+      '  dartFileName: src/windows_class.dart\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final Plugin plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      null,
+      const <String>[],
+      isDevDependency: false,
+      fileSystem: fileSystem,
+    );
+
+    expect(plugin.pluginDartClassPlatforms, <String, DartPluginClassAndFilePair>{
+      'android': const (dartClass: 'AndroidClass', dartFileName: 'src/android_class.dart'),
+      'ios': const (dartClass: 'IosClass', dartFileName: 'src/ios_class.dart'),
+      'linux':  const (dartClass: 'LinuxClass', dartFileName: 'src/linux_class.dart'),
+      'macos':  const (dartClass: 'MacOSClass', dartFileName: 'src/macos_class.dart'),
+      'windows':  const (dartClass: 'WindowsClass', dartFileName: 'src/windows_class.dart'),
+    });
+  });
+
+  testWithoutContext('dartFileName without dartPluginClass throws (Android)', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' android:\n'
+      '  package: com.example\n'
+      '  pluginClass: AndroidClass\n'
+      '  dartFileName: src/android_class.dart\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+     () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        isDevDependency: false,
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message: '"dartFileName" cannot be specified without "dartPluginClass" in Android platform of plugin "$_kTestPluginName"',
+      ),
+    );
+  });
+
+  testWithoutContext('dartFileName without dartPluginClass throws (iOS)', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' ios:\n'
+      '  pluginClass: IosClass\n'
+      '  dartFileName: src/ios_class.dart\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+     () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        isDevDependency: false,
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message: '"dartFileName" cannot be specified without "dartPluginClass" in iOS platform of plugin "$_kTestPluginName"',
+      ),
+    );
+  });
+
+  testWithoutContext('dartFileName without dartPluginClass throws (Linux)', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' linux:\n'
+      '  pluginClass: LinuxClass\n'
+      '  dartFileName: src/linux_class.dart\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+     () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        isDevDependency: false,
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message: '"dartFileName" cannot be specified without "dartPluginClass" in Linux platform of plugin "$_kTestPluginName"',
+      ),
+    );
+  });
+
+  testWithoutContext('dartFileName without dartPluginClass throws (MacOS)', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' macos:\n'
+      '  pluginClass: MacOSClass\n'
+      '  dartFileName: src/macos_class.dart\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+     () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        isDevDependency: false,
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message: '"dartFileName" cannot be specified without "dartPluginClass" in macOS platform of plugin "$_kTestPluginName"',
+      ),
+    );
+  });
+
+
+  testWithoutContext('dartFileName without dartPluginClass throws (Windows)', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' windows:\n'
+      '  pluginClass: WindowsClass\n'
+      '  dartFileName: src/windows_class.dart\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+     () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        isDevDependency: false,
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message: '"dartFileName" cannot be specified without "dartPluginClass" in Windows platform of plugin "$_kTestPluginName"',
+      ),
+    );
+  });
+
   testWithoutContext('Plugin parsing of legacy format and multi-platform format together is not allowed '
     'and fatal error message contains plugin name', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -200,6 +371,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(message: _kTestPluginName),
@@ -230,6 +402,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -262,13 +435,14 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
-    expect(plugin.pluginDartClassPlatforms, <String, String>{
-      'linux': 'LinuxClass',
-      'macos': 'MacOSClass',
-      'windows': 'WindowsClass',
+    expect(plugin.pluginDartClassPlatforms, <String, DartPluginClassAndFilePair>{
+      'linux':  const (dartClass: 'LinuxClass', dartFileName: 'test_plugin_name.dart'),
+      'macos':  const (dartClass: 'MacOSClass', dartFileName: 'test_plugin_name.dart'),
+      'windows':  const (dartClass: 'WindowsClass', dartFileName: 'test_plugin_name.dart'),
     });
   });
 
@@ -288,6 +462,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -312,6 +487,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(
@@ -334,6 +510,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -359,6 +536,7 @@ void main() {
       pluginYaml,
       null,
       const <String>[],
+      isDevDependency: false,
       fileSystem: fileSystem,
     );
 
@@ -377,6 +555,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(message: 'Invalid "plugin" specification.'),
@@ -395,6 +574,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(message: 'Invalid "platforms" specification.'),
@@ -415,6 +595,7 @@ void main() {
         pluginYaml,
         null,
         const <String>[],
+        isDevDependency: false,
         fileSystem: fileSystem,
       ),
       throwsToolExit(message: 'Invalid "android" plugin specification.'),

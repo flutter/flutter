@@ -313,7 +313,7 @@ class ChromiumLauncher {
           if (retry >= kMaxRetries) {
             errors.forEach(_logger.printError);
             _logger.printError('Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}');
-            throw ToolExit(
+            throwToolExit(
               'Failed to launch browser. Make sure you are using an up-to-date '
               'Chrome or Edge. Otherwise, consider using -d web-server instead '
               'and filing an issue at https://github.com/flutter/flutter/issues.',
@@ -578,7 +578,7 @@ Future<ChromeTab?> getChromeTabGuarded(
   void Function(Object error, StackTrace stackTrace)? onIoError,
 }) async {
   try {
-    return asyncGuard(
+    return await asyncGuard(
       () => chromeConnection.getTab(
         accept,
         retryFor: retryFor,

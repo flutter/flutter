@@ -1,5 +1,5 @@
 {
-  "version": "5_0_0",
+  "version": "6_1_0",
 
   "md.comp.date-picker.modal.container.color": "surfaceContainerHigh",
   "md.comp.date-picker.modal.container.elevation": "md.sys.elevation.level3",

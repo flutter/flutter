@@ -144,7 +144,7 @@
   "menuDismissLabel": "Отфрлете го менито",
   "lookUpButtonLabel": "Погледнете нагоре",
   "searchWebButtonLabel": "Пребарајте на интернет",
-  "shareButtonLabel": "Споделете...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Сподели",
+  "clearButtonTooltip": "Избриши го текстот",
+  "selectedDateLabel": "Избрано"
 }

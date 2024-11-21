@@ -579,10 +579,50 @@ void main() {
     expect(hintText.style?.fontSize, delegate.searchFieldStyle?.fontSize);
     expect(textField.style?.color, delegate.searchFieldStyle?.color);
     expect(textField.style?.fontSize, delegate.searchFieldStyle?.fontSize);
-
   });
 
-  testWidgets('keyboard show search button by default', (WidgetTester tester) async {
+  testWidgets('Default autocorrect and enableSuggestions value', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    addTearDown(() => delegate.dispose());
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+
+    expect(textField.autocorrect, isTrue);
+    expect(textField.enableSuggestions, isTrue);
+  });
+
+  testWidgets('Custom autocorrect value', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate(autocorrect: false);
+    addTearDown(() => delegate.dispose());
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+
+    expect(textField.autocorrect, isFalse);
+  });
+
+  testWidgets('Custom enableSuggestions value', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate(enableSuggestions: false);
+    addTearDown(() => delegate.dispose());
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+
+    expect(textField.enableSuggestions, isFalse);
+  });
+
+  testWidgets('keyboard show search button by default',
+      (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
@@ -1299,6 +1339,8 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     super.searchFieldStyle,
     String? searchHint,
     super.textInputAction,
+    super.autocorrect,
+    super.enableSuggestions,
   }) : super(
           searchFieldLabel: searchHint,
         );

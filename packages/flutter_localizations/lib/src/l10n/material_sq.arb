@@ -144,7 +144,7 @@
   "menuDismissLabel": "Hiqe menynë",
   "lookUpButtonLabel": "Kërko",
   "searchWebButtonLabel": "Kërko në ueb",
-  "shareButtonLabel": "Ndaj...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Ndaj",
+  "clearButtonTooltip": "Pastro tekstin",
+  "selectedDateLabel": "Zgjedhur"
 }

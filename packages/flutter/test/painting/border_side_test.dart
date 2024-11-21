@@ -123,7 +123,7 @@ void main() {
   test('BorderSide - toString', () {
     expect(
       const BorderSide(color: Color(0xFFAABBCC), width: 1.2345).toString(),
-      'BorderSide(color: Color(0xffaabbcc), width: 1.2)',
+      'BorderSide(color: ${const Color(0xffaabbcc)}, width: 1.2)',
     );
   });
 

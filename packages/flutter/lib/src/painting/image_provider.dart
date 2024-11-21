@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Examples can assume:
+// late BuildContext context;
+
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
@@ -1196,6 +1199,28 @@ enum ResizeImagePolicy {
 ///
 /// The decoded image may still be displayed at sizes other than the
 /// cached size provided here.
+///
+/// The [width] and [height] parameters determine the image resolution.
+/// These values also set the image's width & height in logical pixels
+/// if it is unconstrained.
+///
+/// {@tool snippet}
+/// This example shows how to size the image to half of the screen's width.
+///
+/// ```dart
+///    Image(
+///      image: ResizeImage(
+///        FileImage(File('path/to/image')),
+///        width: MediaQuery.sizeOf(context).width ~/ 2, // Half of the screen's width.
+///      ),
+///    );
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [ui.FlutterView.devicePixelRatio], used to convert between physical and
+///    logical pixels.
 class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// Creates an ImageProvider that decodes the image to the specified size.
   ///
@@ -1385,12 +1410,6 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
 /// The image will be cached regardless of cache headers from the server.
-///
-/// When a network image is used on the Web platform, the `getTargetSize`
-/// parameter of the [ImageDecoderCallback] is only supported when the
-/// application is running with the CanvasKit renderer. When the application is
-/// using the HTML renderer, the web engine delegates image decoding of network
-/// images to the Web, which does not support custom decode sizes.
 ///
 /// See also:
 ///

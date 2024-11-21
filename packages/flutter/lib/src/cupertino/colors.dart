@@ -8,7 +8,7 @@
 /// @docImport 'nav_bar.dart';
 library;
 
-import 'dart:ui' show Brightness, Color;
+import 'dart:ui' show Brightness, Color, ColorSpace;
 
 import '../../foundation.dart';
 import '../widgets/basic.dart';
@@ -611,7 +611,7 @@ abstract final class CupertinoColors {
     highContrastColor: Color.fromARGB(94, 60, 60, 67),
     darkHighContrastColor: Color.fromARGB(173, 84, 84, 88),
     elevatedColor: Color.fromARGB(73, 60, 60, 67),
-    darkElevatedColor: Color.fromARGB(153, 84, 84, 88),
+    darkElevatedColor: Color.fromARGB(153, 210, 210, 210),
     highContrastElevatedColor: Color.fromARGB(94, 60, 60, 67),
     darkHighContrastElevatedColor: Color.fromARGB(173, 84, 84, 88),
   );
@@ -748,7 +748,7 @@ abstract final class CupertinoColors {
 ///  * [CupertinoTheme.of], a static method that retrieves the ambient [CupertinoThemeData],
 ///    and then resolves [CupertinoDynamicColor]s used in the retrieved data.
 @immutable
-class CupertinoDynamicColor extends Color with Diagnosticable {
+class CupertinoDynamicColor with Diagnosticable implements Color {
   /// Creates an adaptive [Color] that changes its effective color based on the
   /// [BuildContext] given. The default effective color is [color].
   const CupertinoDynamicColor({
@@ -828,19 +828,13 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
     this.darkHighContrastElevatedColor,
     this._debugResolveContext,
     this._debugLabel,
-  ) : // The super constructor has to be called with a dummy value in order to mark
-      // this constructor const.
-      // The field `value` is overridden in the class implementation.
-      super(0);
+  );
 
   /// The current effective color.
   ///
   /// Defaults to [color] if this [CupertinoDynamicColor] has never been
   /// resolved.
   final Color _effectiveColor;
-
-  @override
-  int get value => _effectiveColor.value;
 
   final String? _debugLabel;
 
@@ -1151,6 +1145,76 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
       properties.add(DiagnosticsProperty<Element>('last resolved', _debugResolveContext));
     }
   }
+
+  @override
+  int get value => _effectiveColor.value;
+
+  @override
+  // TODO(matanl): Remove once https://github.com/flutter/engine/pull/56329 lands in the framework.
+  // ignore: override_on_non_overriding_member, public_member_api_docs
+  int toARGB32() => value;
+
+  @override
+  int get alpha => _effectiveColor.alpha;
+
+  @override
+  int get blue => _effectiveColor.blue;
+
+  @override
+  double computeLuminance() => _effectiveColor.computeLuminance();
+
+  @override
+  int get green => _effectiveColor.green;
+
+  @override
+  double get opacity => _effectiveColor.opacity;
+
+  @override
+  int get red => _effectiveColor.red;
+
+  @override
+  Color withAlpha(int a) => _effectiveColor.withAlpha(a);
+
+  @override
+  Color withBlue(int b) => _effectiveColor.withBlue(b);
+
+  @override
+  Color withGreen(int g) => _effectiveColor.withGreen(g);
+
+  @override
+  Color withOpacity(double opacity) => _effectiveColor.withOpacity(opacity);
+
+  @override
+  Color withRed(int r) => _effectiveColor.withRed(r);
+
+  @override
+  double get a => _effectiveColor.a;
+
+  @override
+  double get r => _effectiveColor.r;
+
+  @override
+  double get g => _effectiveColor.g;
+
+  @override
+  double get b => _effectiveColor.b;
+
+  @override
+  ColorSpace get colorSpace => _effectiveColor.colorSpace;
+
+  @override
+  Color withValues(
+          {double? alpha,
+          double? red,
+          double? green,
+          double? blue,
+          ColorSpace? colorSpace}) =>
+      _effectiveColor.withValues(
+          alpha: alpha,
+          red: red,
+          green: green,
+          blue: blue,
+          colorSpace: colorSpace);
 }
 
 /// Creates a diagnostics property for [CupertinoDynamicColor].

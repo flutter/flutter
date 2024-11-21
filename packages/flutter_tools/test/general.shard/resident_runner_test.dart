@@ -51,8 +51,6 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      globals.fs.file('.packages')
-        .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
@@ -96,6 +94,12 @@ void main() {
     expect((await connectionInfo).baseUri, 'foo://bar');
     expect(futureAppStart.isCompleted, true);
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
+  }));
+
+  testUsingContext('ResidentRunner reports whether detach() was used', () => testbed.run(() async {
+    expect(residentRunner.stopAppDuringCleanup, true);
+    await residentRunner.detach();
+    expect(residentRunner.stopAppDuringCleanup, false);
   }));
 
   testUsingContext('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {
@@ -684,10 +688,6 @@ void main() {
   testUsingContext('ResidentRunner reports hot reload time details', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
-      FakeVmServiceRequest(
-        method: 'getVM',
-        jsonResponse: fakeVM.toJson(),
-      ),
       listViews,
       listViews,
       FakeVmServiceRequest(
@@ -1173,9 +1173,6 @@ dependencies:
   ]
 }
 ''');
-    globals.fs.file('.packages').writeAsStringSync('''
-path_provider_linux:/path_provider_linux/lib/
-''');
     final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
     final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');
     pluginPubspec.createSync(recursive: true);
@@ -1311,6 +1308,7 @@ flutter:
           commandHelp.M,
           commandHelp.g,
           commandHelp.hWithDetails,
+          commandHelp.d,
           commandHelp.c,
           commandHelp.q,
           '',
@@ -1340,6 +1338,7 @@ flutter:
           commandHelp.r,
           commandHelp.R,
           commandHelp.hWithoutDetails,
+          commandHelp.d,
           commandHelp.c,
           commandHelp.q,
           '',
@@ -1947,7 +1946,7 @@ flutter:
       bool enableServicePortFallback = false,
       List<String> cachedUserTags = const <String>[],
       String? dartExecutable,
-      Uri? google3WorkspaceRoot,
+      String? google3WorkspaceRoot,
     }) {
       throw DartDevelopmentServiceException.existingDdsInstance(
         'Existing DDS at http://localhost/existingDdsInMessage.',
@@ -1996,7 +1995,7 @@ flutter:
         bool enableServicePortFallback = false,
         List<String> cachedUserTags = const <String>[],
         String? dartExecutable,
-        Uri? google3WorkspaceRoot,
+        String? google3WorkspaceRoot,
       }) async {
       expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isFalse);
@@ -2025,65 +2024,6 @@ flutter:
       FlutterProject? flutterProject,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
       io.CompressionOptions? compression,
-      Device? device,
-      required Logger logger,
-    }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
-  }));
-
-  testUsingContext('Failed DDS start outputs error message', () => testbed.run(() async {
-    // See https://github.com/flutter/flutter/issues/72385 for context.
-    final FakeDevice device = FakeDevice()
-      ..dds = DartDevelopmentService(logger: testLogger);
-    ddsLauncherCallback = ({
-        required Uri remoteVmServiceUri,
-        Uri? serviceUri,
-        bool enableAuthCodes = true,
-        bool serveDevTools = false,
-        Uri? devToolsServerAddress,
-        bool enableServicePortFallback = false,
-        List<String> cachedUserTags = const <String>[],
-        String? dartExecutable,
-        Uri? google3WorkspaceRoot,
-      }) {
-      expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
-      expect(enableAuthCodes, isTrue);
-      expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
-      expect(cachedUserTags, isEmpty);
-      throw FakeDartDevelopmentServiceException(message: 'No URI');
-    };
-    final TestFlutterDevice flutterDevice = TestFlutterDevice(
-      device,
-      vmServiceUris: Stream<Uri>.value(testUri),
-    );
-    bool caught = false;
-    final Completer<void>done = Completer<void>();
-    runZonedGuarded(() {
-      flutterDevice.connect(
-        allowExistingDdsInstance: true,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, enableDevTools: false),
-      ).then((_) => done.complete());
-    }, (Object e, StackTrace st) {
-      expect(e, isA<StateError>());
-      expect((e as StateError).message, contains('No URI'));
-      expect(testLogger.errorText, contains(
-        'DDS has failed to start and there is not an existing DDS instance',
-      ));
-      done.complete();
-      caught = true;
-    });
-    await done.future;
-    if (!caught) {
-      fail('Expected a StateError to be thrown.');
-    }
-  }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
       Device? device,
       required Logger logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,

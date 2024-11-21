@@ -18,6 +18,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
+import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -35,6 +36,7 @@ import 'application_package.dart';
 import 'code_signing.dart';
 import 'migrations/host_app_info_plist_migration.dart';
 import 'migrations/ios_deployment_target_migration.dart';
+import 'migrations/metal_api_validation_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_bitcode_migration.dart';
@@ -56,7 +58,7 @@ const String kConcurrentRunFailureMessage2 = 'there are two concurrent builds ru
 String missingPlatformInstructions(String simulatorVersion) => '''
 ════════════════════════════════════════════════════════════════════════════════
 $simulatorVersion is not installed. To download and install the platform, open
-Xcode, select Xcode > Settings > Platforms, and click the GET button for the
+Xcode, select Xcode > Settings > Components, and click the GET button for the
 required platform.
 
 For more information, please visit:
@@ -166,17 +168,18 @@ Future<XcodeBuildResult> buildXcodeProject({
     RemoveBitcodeMigration(app.project, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, globals.logger),
     UIApplicationMainDeprecationMigration(app.project, globals.logger),
-    if (project.usesSwiftPackageManager && app.project.flutterPluginSwiftPackageManifest.existsSync())
-      SwiftPackageManagerIntegrationMigration(
-        app.project,
-        SupportedPlatform.ios,
-        buildInfo,
-        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-        logger: globals.logger,
-        fileSystem: globals.fs,
-        plistParser: globals.plistParser,
-      ),
-      SwiftPackageManagerGitignoreMigration(project, globals.logger),
+    SwiftPackageManagerIntegrationMigration(
+      app.project,
+      SupportedPlatform.ios,
+      buildInfo,
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+      logger: globals.logger,
+      fileSystem: globals.fs,
+      plistParser: globals.plistParser,
+      features: featureFlags,
+    ),
+    SwiftPackageManagerGitignoreMigration(project, globals.logger),
+    MetalAPIValidationMigrator.ios(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -267,7 +270,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-  if (project.usesSwiftPackageManager) {
+  if (app.project.usesSwiftPackageManager) {
     final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
     if (iosDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
@@ -351,12 +354,15 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   if (activeArch != null) {
-    final String activeArchName = activeArch.name;
-    buildCommands.add('ONLY_ACTIVE_ARCH=YES');
     // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
     // as it cannot be build for the architecture of the Flutter app.
     if (!hasWatchCompanion) {
-      buildCommands.add('ARCHS=$activeArchName');
+      // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
+      // the native architecture.
+      final bool onlyActiveArch = activeArch == getCurrentDarwinArch();
+
+      buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch? 'YES' : 'NO'}');
+      buildCommands.add('ARCHS=${activeArch.name}');
     }
   }
 
@@ -885,7 +891,7 @@ Future<bool> _handleIssues(
     logger.printError(missingPlatformInstructions(missingPlatform), emphasis: true);
   } else if (duplicateModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
-    final bool usesSwiftPackageManager = project.usesSwiftPackageManager;
+    final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     if (usesCocoapods && usesSwiftPackageManager) {
       logger.printError(
         'Your project uses both CocoaPods and Swift Package Manager, which can '
@@ -903,7 +909,7 @@ Future<bool> _handleIssues(
     }
   } else if (missingModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
-    final bool usesSwiftPackageManager = project.usesSwiftPackageManager;
+    final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     if (usesCocoapods && !usesSwiftPackageManager) {
       final List<String> swiftPackageOnlyPlugins = <String>[];
       for (final String module in missingModules) {

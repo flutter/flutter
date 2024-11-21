@@ -122,7 +122,7 @@ void main() {
       final CustomDevice device = CustomDevice(
         config: testConfig,
         processManager: FakeProcessManager.any(),
-        logger: BufferLogger.test()
+        logger: BufferLogger.test(),
       );
 
       final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
@@ -165,7 +165,7 @@ void main() {
         fileSystem: fs,
         directory: dir,
         logger: BufferLogger.test()
-      )
+      ),
     ).devices(), <Device>[]);
   });
 
@@ -183,7 +183,7 @@ void main() {
         fileSystem: fs,
         directory: dir,
         logger: BufferLogger.test()
-      )
+      ),
     ).devices(), <Device>[]);
   });
 
@@ -207,7 +207,7 @@ void main() {
           fileSystem: fs,
           directory: dir,
           logger: BufferLogger.test()
-        )
+        ),
       ).devices(),
       hasLength(1)
     );
@@ -297,7 +297,10 @@ void main() {
   testWithoutContext('CustomDevice.isSupportedForProject is true with editable host app', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
 
     final FlutterProject flutterProject = _setUpFlutterProject(fileSystem.currentDirectory);
 
@@ -314,12 +317,12 @@ void main() {
       bool bothCommandsWereExecuted = false;
 
       final CustomDevice device = CustomDevice(
-          config: testConfig,
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.list(<FakeCommand>[
-            FakeCommand(command: testConfig.uninstallCommand),
-            FakeCommand(command: testConfig.installCommand, onRun: (_) => bothCommandsWereExecuted = true),
-          ])
+        config: testConfig,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(command: testConfig.uninstallCommand),
+          FakeCommand(command: testConfig.installCommand, onRun: (_) => bothCommandsWereExecuted = true),
+        ]),
       );
 
       expect(await device.installApp(PrebuiltLinuxApp(executable: 'exe')), true);
@@ -381,7 +384,7 @@ void main() {
       device: CustomDevice(
         config: testConfig,
         logger: BufferLogger.test(),
-        processManager: processManager
+        processManager: processManager,
       ),
       appPackage: PrebuiltLinuxApp(executable: 'testexecutable'),
       logger: BufferLogger.test(),
@@ -418,7 +421,7 @@ void main() {
       device: CustomDevice(
         config: testConfigNonForwarding,
         logger: BufferLogger.test(),
-        processManager: processManager
+        processManager: processManager,
       ),
       appPackage: PrebuiltLinuxApp(executable: 'testexecutable'),
       logger: BufferLogger.test(),
@@ -483,7 +486,7 @@ void main() {
           fileSystem: fs,
           directory: configFileDir,
           logger: BufferLogger.test()
-        )
+        ),
       );
 
       final List<Device> devices = await customDevices.discoverDevices();
@@ -532,7 +535,7 @@ void main() {
     final CustomDevice device = CustomDevice(
       config: testConfig,
       logger: BufferLogger.test(),
-      processManager: processManager
+      processManager: processManager,
     );
 
     expect(device.supportsScreenshot, true);
@@ -560,7 +563,7 @@ void main() {
           explicitScreenshotCommand: true
         ),
         logger: BufferLogger.test(),
-        processManager: processManager
+        processManager: processManager,
     );
 
     expect(device.supportsScreenshot, false);
@@ -578,7 +581,7 @@ void main() {
         platform: TargetPlatform.linux_x64
       ),
       logger: BufferLogger.test(),
-      processManager: FakeProcessManager.empty()
+      processManager: FakeProcessManager.empty(),
     );
 
     expect(await device.targetPlatform, TargetPlatform.linux_x64);

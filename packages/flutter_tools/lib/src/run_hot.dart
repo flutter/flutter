@@ -125,9 +125,6 @@ class HotRunner extends ResidentRunner {
   /// reload process do not have this issue.
   bool _swap = false;
 
-  /// Whether the resident runner has correctly attached to the running application.
-  bool _didAttach = false;
-
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
 
   String? _targetPlatform;
@@ -175,7 +172,7 @@ class HotRunner extends ResidentRunner {
     if (!result.isOk) {
       throw vm_service.RPCError(
         'Unable to reload sources',
-        RPCErrorCodes.kInternalError,
+        vm_service.RPCErrorKind.kInternalError.code,
         '',
       );
     }
@@ -187,7 +184,7 @@ class HotRunner extends ResidentRunner {
     if (!result.isOk) {
       throw vm_service.RPCError(
         'Unable to restart',
-        RPCErrorCodes.kInternalError,
+        vm_service.RPCErrorKind.kInternalError.code,
         '',
       );
     }
@@ -220,15 +217,29 @@ class HotRunner extends ResidentRunner {
     throw Exception('Failed to compile $expression');
   }
 
-  // Returns the exit code of the flutter tool process, like [run].
   @override
+  @nonVirtual
   Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
-    _didAttach = true;
+    stopAppDuringCleanup = false;
+    return _attach(
+      connectionInfoCompleter: connectionInfoCompleter,
+      appStartedCompleter: appStartedCompleter,
+      allowExistingDdsInstance: allowExistingDdsInstance,
+      needsFullRestart: needsFullRestart,
+    );
+  }
+
+  Future<int> _attach({
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    Completer<void>? appStartedCompleter,
+    bool allowExistingDdsInstance = false,
+    bool needsFullRestart = true,
+  }) async {
     try {
       await connectToServiceProtocol(
         reloadSources: _reloadSourcesService,
@@ -261,8 +272,7 @@ class HotRunner extends ResidentRunner {
     }
 
     for (final FlutterDevice? device in flutterDevices) {
-      await device!.initLogReader();
-      device
+      device!
         .developmentShaderCompiler
         .configureCompiler(device.targetPlatform);
     }
@@ -465,7 +475,7 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
-    return attach(
+    return _attach(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
       needsFullRestart: false,
@@ -1143,7 +1153,7 @@ class HotRunner extends ResidentRunner {
     } else {
       commandHelp.hWithoutDetails.print();
     }
-    if (_didAttach) {
+    if (stopAppDuringCleanup) {
       commandHelp.d.print();
     }
     commandHelp.c.print();
@@ -1240,11 +1250,10 @@ class HotRunner extends ResidentRunner {
   Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
     await hotRunnerConfig!.runPreShutdownOperations();
-    if (_didAttach) {
-      appFinished();
-    } else {
-      await exitApp();
+    if (stopAppDuringCleanup) {
+      return exitApp();
     }
+    appFinished();
   }
 
   @override
