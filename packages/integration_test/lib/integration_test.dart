@@ -136,7 +136,6 @@ https://docs.flutter.dev/testing/integration-tests
   void initInstances() {
     super.initInstances();
     _instance = this;
-    LiveTestWidgetsFlutterBinding;
   }
 
   /// The singleton instance of this object.
