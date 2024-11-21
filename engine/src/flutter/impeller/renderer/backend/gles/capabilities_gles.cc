@@ -125,11 +125,7 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
 
     // We hard-code 4x MSAA, so let's make sure it's supported.
     GLint value = 0;
-    gl.GetIntegerv(GL_MAX_SAMPLES, &value);
-    supports_offscreen_msaa_ = value >= 4;
-  } else if (desc->GetGlVersion().major_version >= 3 && desc->IsES()) {
-    GLint value = 0;
-    gl.GetIntegerv(GL_MAX_SAMPLES, &value);
+    gl.GetIntegerv(GL_MAX_SAMPLES_EXT, &value);
     supports_offscreen_msaa_ = value >= 4;
   }
   is_es_ = desc->IsES();
