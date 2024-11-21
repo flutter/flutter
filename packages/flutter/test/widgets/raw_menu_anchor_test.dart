@@ -2,11 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is run as part of a reduced test set in CI on Mac and Windows
-// machines.
-@Tags(<String>['reduced-test-set'])
-library;
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -187,49 +182,48 @@ void main() {
   });
 
   testWidgets('[Overlays] MenuController.closeChildren closes submenu children', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
-      await tester.pumpWidget(
-        App(
-          RawMenuAnchor(
-            controller: controller,
-            menuChildren: <Widget>[
-              Text(Tag.a.text),
-              RawMenuAnchor(
-                childFocusNode: focusNode,
-                menuChildren: <Widget>[ Text(Tag.b.a.text) ],
-                child: AnchorButton(Tag.b, focusNode: focusNode),
-              ),
-            ],
-            child: const AnchorButton(Tag.anchor),
-          ),
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchor(
+          controller: controller,
+          menuChildren: <Widget>[
+            Text(Tag.a.text),
+            RawMenuAnchor(
+              childFocusNode: focusNode,
+              menuChildren: <Widget>[ Text(Tag.b.a.text) ],
+              child: AnchorButton(Tag.b, focusNode: focusNode),
+            ),
+          ],
+          child: const AnchorButton(Tag.anchor),
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.text(Tag.anchor.text));
-      await tester.pump();
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
 
-      await tester.tap(find.text(Tag.b.text));
-      await tester.pump();
+    await tester.tap(find.text(Tag.b.text));
+    await tester.pump();
 
-      focusNode.requestFocus();
-      await tester.pump();
+    focusNode.requestFocus();
+    await tester.pump();
 
-      expect(find.text(Tag.b.text), findsOneWidget);
-      expect(find.text(Tag.b.a.text), findsOneWidget);
+    expect(find.text(Tag.b.text), findsOneWidget);
+    expect(find.text(Tag.b.a.text), findsOneWidget);
 
-      controller.closeChildren();
-      await tester.pump();
+    controller.closeChildren();
+    await tester.pump();
 
-      expect(controller.isOpen, isTrue);
-      expect(find.text(Tag.b.text), findsOneWidget);
-      expect(find.text(Tag.b.a.text), findsNothing);
+    expect(controller.isOpen, isTrue);
+    expect(find.text(Tag.b.text), findsOneWidget);
+    expect(find.text(Tag.b.a.text), findsNothing);
 
-      // Focus should stay on the anchor button.
-      expect(FocusManager.instance.primaryFocus, focusNode);
-    },
-  );
+    // Focus should stay on the anchor button.
+    expect(FocusManager.instance.primaryFocus, focusNode);
+  });
 
   testWidgets('[Overlays] Can only have one open child anchor', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -531,7 +525,6 @@ void main() {
     expect(find.text(Tag.b.a.text), findsOneWidget);
   });
 
-  // This test could be merged with the next one.
   testWidgets('MenuController notifies dependents on open and close', (WidgetTester tester) async {
     final MenuController controller = MenuController();
     final MenuController nestedController = MenuController();
@@ -947,13 +940,16 @@ void main() {
     await tester.pump();
 
     expect(
-        invokedIntents,
-        equals(const <Intent>[
+      invokedIntents,
+      equals(
+        const <Intent>[
           DirectionalFocusIntent(TraversalDirection.up),
           NextFocusIntent(),
           PreviousFocusIntent(),
           DismissIntent()
-        ]));
+        ],
+      ),
+    );
   });
 
   testWidgets('[OverlayBuilder] Focus traversal shortcuts are not bound to actions', (WidgetTester tester) async {
@@ -1090,52 +1086,51 @@ void main() {
   );
 
   testWidgets('Actions that wrap RawMenuAnchor are invoked by both anchor and overlay', (WidgetTester tester) async {
-      final FocusNode anchorFocusNode = FocusNode();
-      final FocusNode aFocusNode = FocusNode();
-      addTearDown(anchorFocusNode.dispose);
-      addTearDown(aFocusNode.dispose);
-      bool invokedAnchor = false;
-      bool invokedOverlay = false;
+    final FocusNode anchorFocusNode = FocusNode();
+    final FocusNode aFocusNode = FocusNode();
+    addTearDown(anchorFocusNode.dispose);
+    addTearDown(aFocusNode.dispose);
+    bool invokedAnchor = false;
+    bool invokedOverlay = false;
 
-      await tester.pumpWidget(
-        App(
-          Actions(
-            actions: <Type, Action<Intent>>{
-              VoidCallbackIntent: CallbackAction<VoidCallbackIntent>(
-                onInvoke: (VoidCallbackIntent intent) {
-                  intent.callback();
-                  return null;
-                },
-              ),
-            },
-            child: RawMenuAnchor(
-              childFocusNode: anchorFocusNode,
-              menuChildren: <Widget>[
-                Button.tag(Tag.a, focusNode: aFocusNode),
-              ],
-              child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
+    await tester.pumpWidget(
+      App(
+        Actions(
+          actions: <Type, Action<Intent>>{
+            VoidCallbackIntent: CallbackAction<VoidCallbackIntent>(
+              onInvoke: (VoidCallbackIntent intent) {
+                intent.callback();
+                return null;
+              },
             ),
+          },
+          child: RawMenuAnchor(
+            childFocusNode: anchorFocusNode,
+            menuChildren: <Widget>[
+              Button.tag(Tag.a, focusNode: aFocusNode),
+            ],
+            child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
           ),
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.text(Tag.anchor.text));
-      await tester.pump();
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
 
-      Actions.invoke(anchorFocusNode.context!, VoidCallbackIntent(() {
-        invokedAnchor = true;
-      }));
-      Actions.invoke(aFocusNode.context!, VoidCallbackIntent(() {
-        invokedOverlay = true;
-      }));
+    Actions.invoke(anchorFocusNode.context!, VoidCallbackIntent(() {
+      invokedAnchor = true;
+    }));
+    Actions.invoke(aFocusNode.context!, VoidCallbackIntent(() {
+      invokedOverlay = true;
+    }));
 
-      await tester.pump();
+    await tester.pump();
 
-      // DismissIntent should not close the menu.
-      expect(invokedAnchor, isTrue);
-      expect(invokedOverlay, isTrue);
-    },
-  );
+    // DismissIntent should not close the menu.
+    expect(invokedAnchor, isTrue);
+    expect(invokedOverlay, isTrue);
+  });
 
   testWidgets('DismissMenuAction closes menus', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -2789,12 +2784,29 @@ void main() {
 
     expect(
       findMenuPanelDescendent<Container>(tester).decoration,
-      RawMenuAnchor.defaultLightOverlayDecoration,
-    );
-
-    await expectLater(
-      find.byType(App),
-      matchesGoldenFile('rawMenuAnchor.surfaceDecoration.light.png'),
+      const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(6.0)),
+        color: ui.Color.fromARGB(255, 253, 253, 253),
+        border: Border.fromBorderSide(
+            BorderSide(
+              color: ui.Color.fromARGB(255, 255, 255, 255),
+              width: 0.5,
+            ),
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: ui.Color.fromARGB(30, 0, 0, 0),
+            offset: Offset(0, 2),
+            blurRadius: 6.0,
+          ),
+          BoxShadow(
+            color: ui.Color.fromARGB(12, 0, 0, 0),
+            offset: Offset(0, 6),
+            spreadRadius: 8,
+            blurRadius: 12.0,
+          ),
+        ]
+      ),
     );
   });
 
@@ -2820,12 +2832,28 @@ void main() {
 
     expect(
       findMenuPanelDescendent<Container>(tester).decoration,
-      RawMenuAnchor.defaultDarkOverlayDecoration,
-    );
-
-    await expectLater(
-      find.byType(App),
-      matchesGoldenFile('rawMenuAnchor.surfaceDecoration.dark.png'),
+      const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(6.0)),
+        color: ui.Color.fromARGB(255, 32, 33, 36),
+        border: Border.fromBorderSide(
+          BorderSide(
+            color: ui.Color.fromARGB(200, 0, 0, 0),
+            width: 0.5
+          ),
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: ui.Color.fromARGB(45, 0, 0, 0),
+            offset: Offset(0, 1),
+            blurRadius: 4.0,
+          ),
+          BoxShadow(
+            color: ui.Color.fromARGB(65, 0, 0, 0),
+            offset: Offset(0, 4),
+            blurRadius: 12.0,
+          ),
+        ]
+      ),
     );
   });
 
@@ -3047,27 +3075,27 @@ void main() {
 
     await tester.pumpWidget(
       App(
-         RawMenuAnchor(
-              menuChildren: <Widget>[
-                Button.text('Menu Item'),
-              ],
-              builder: (BuildContext context, MenuController controller, Widget? child) {
-                isOpen = controller.isOpen;
-                return Button(
-                  Text(isOpen ? 'close' : 'open'),
-                  onPressed: () {
-                    if (controller.isOpen) {
-                      controller.close();
-                    } else {
-                      controller.open();
-                    }
-                  },
-                );
+        RawMenuAnchor(
+          menuChildren: <Widget>[
+            Button.text('Menu Item'),
+          ],
+          builder: (BuildContext context, MenuController controller, Widget? child) {
+            isOpen = controller.isOpen;
+            return Button(
+              Text(isOpen ? 'close' : 'open'),
+              onPressed: () {
+                if (controller.isOpen) {
+                  controller.close();
+                } else {
+                  controller.open();
+                }
               },
-              onOpen: () => openCount++,
-              onClose: () => closeCount++,
-            ),
-          ),
+            );
+          },
+          onOpen: () => openCount++,
+          onClose: () => closeCount++,
+        ),
+      ),
     );
 
     expect(find.text('open'), findsOneWidget);
@@ -3229,7 +3257,7 @@ void main() {
           alignment.resolve(TextDirection.ltr).withinRect(anchorRect),
           overlay.center,
           reason: 'Anchor alignment: $alignment \n'
-              'Menu rect: $overlay \n',
+                  'Menu rect: $overlay \n',
         );
       }
     });
