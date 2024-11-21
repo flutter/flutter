@@ -11,17 +11,13 @@
 G_BEGIN_DECLS
 
 typedef enum {
-  // NOLINTBEGIN(readability-identifier-naming)
   FL_PLATFORM_CHANNEL_EXIT_TYPE_CANCELABLE,
   FL_PLATFORM_CHANNEL_EXIT_TYPE_REQUIRED,
-  // NOLINTEND(readability-identifier-naming)
 } FlPlatformChannelExitType;
 
 typedef enum {
-  // NOLINTBEGIN(readability-identifier-naming)
   FL_PLATFORM_CHANNEL_EXIT_RESPONSE_CANCEL,
   FL_PLATFORM_CHANNEL_EXIT_RESPONSE_EXIT,
-  // NOLINTEND(readability-identifier-naming)
 } FlPlatformChannelExitResponse;
 
 G_DECLARE_FINAL_TYPE(FlPlatformChannel,

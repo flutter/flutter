@@ -77,9 +77,9 @@ struct _FlView {
   GCancellable* cancellable;
 };
 
-enum { kSignalFirstFrame, kSignalLastSignal };
+enum { SIGNAL_FIRST_FRAME, LAST_SIGNAL };
 
-static guint fl_view_signals[kSignalLastSignal];
+static guint fl_view_signals[LAST_SIGNAL];
 
 static void fl_renderable_iface_init(FlRenderableInterface* iface);
 
@@ -108,7 +108,7 @@ G_DEFINE_TYPE_WITH_CODE(
 static gboolean first_frame_idle_cb(gpointer user_data) {
   FlView* self = FL_VIEW(user_data);
 
-  g_signal_emit(self, fl_view_signals[kSignalFirstFrame], 0);
+  g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
 
   return FALSE;
 }
@@ -665,7 +665,7 @@ static void fl_view_class_init(FlViewClass* klass) {
   widget_class->key_press_event = fl_view_key_press_event;
   widget_class->key_release_event = fl_view_key_release_event;
 
-  fl_view_signals[kSignalFirstFrame] =
+  fl_view_signals[SIGNAL_FIRST_FRAME] =
       g_signal_new("first-frame", fl_view_get_type(), G_SIGNAL_RUN_LAST, 0,
                    NULL, NULL, NULL, G_TYPE_NONE, 0);
 

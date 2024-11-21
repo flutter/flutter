@@ -21,9 +21,9 @@ struct _FlMouseCursorHandler {
   gchar* cursor_name;
 };
 
-enum { kSignalCursorChanged, kSignalLastSignal };
+enum { SIGNAL_CURSOR_CHANGED, LAST_SIGNAL };
 
-static guint fl_mouse_cursor_handler_signals[kSignalLastSignal];
+static guint fl_mouse_cursor_handler_signals[LAST_SIGNAL];
 
 G_DEFINE_TYPE(FlMouseCursorHandler, fl_mouse_cursor_handler, G_TYPE_OBJECT)
 
@@ -100,7 +100,8 @@ static void activate_system_cursor(const gchar* kind, gpointer user_data) {
   g_free(self->cursor_name);
   self->cursor_name = g_strdup(cursor_name);
 
-  g_signal_emit(self, fl_mouse_cursor_handler_signals[kSignalCursorChanged], 0);
+  g_signal_emit(self, fl_mouse_cursor_handler_signals[SIGNAL_CURSOR_CHANGED],
+                0);
 }
 
 static void fl_mouse_cursor_handler_dispose(GObject* object) {
@@ -117,7 +118,7 @@ static void fl_mouse_cursor_handler_class_init(
     FlMouseCursorHandlerClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_mouse_cursor_handler_dispose;
 
-  fl_mouse_cursor_handler_signals[kSignalCursorChanged] =
+  fl_mouse_cursor_handler_signals[SIGNAL_CURSOR_CHANGED] =
       g_signal_new("cursor-changed", fl_mouse_cursor_handler_get_type(),
                    G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }

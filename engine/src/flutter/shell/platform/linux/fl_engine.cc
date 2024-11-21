@@ -92,9 +92,9 @@ G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
 static void fl_engine_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface);
 
-enum { kSignalOnPreEngineRestart, kSignalLastSignal };
+enum { SIGNAL_ON_PRE_ENGINE_RESTART, LAST_SIGNAL };
 
-static guint fl_engine_signals[kSignalLastSignal];
+static guint fl_engine_signals[LAST_SIGNAL];
 
 G_DEFINE_TYPE_WITH_CODE(
     FlEngine,
@@ -103,7 +103,7 @@ G_DEFINE_TYPE_WITH_CODE(
     G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                           fl_engine_plugin_registry_iface_init))
 
-enum { kProp0, kPropBinaryMessenger, kPropLast };
+enum { PROP_0, PROP_BINARY_MESSENGER, PROP_LAST };
 
 // Parse a locale into its components.
 static void parse_locale(const gchar* locale,
@@ -386,7 +386,7 @@ static void fl_engine_update_semantics_cb(const FlutterSemanticsUpdate2* update,
 static void fl_engine_on_pre_engine_restart_cb(void* user_data) {
   FlEngine* self = FL_ENGINE(user_data);
 
-  g_signal_emit(self, fl_engine_signals[kSignalOnPreEngineRestart], 0);
+  g_signal_emit(self, fl_engine_signals[SIGNAL_ON_PRE_ENGINE_RESTART], 0);
 }
 
 // Called when a response to a sent platform message is received from the
@@ -420,7 +420,7 @@ static void fl_engine_set_property(GObject* object,
                                    GParamSpec* pspec) {
   FlEngine* self = FL_ENGINE(object);
   switch (prop_id) {
-    case kPropBinaryMessenger:
+    case PROP_BINARY_MESSENGER:
       g_set_object(&self->binary_messenger,
                    FL_BINARY_MESSENGER(g_value_get_object(value)));
       break;
@@ -477,14 +477,14 @@ static void fl_engine_class_init(FlEngineClass* klass) {
   G_OBJECT_CLASS(klass)->set_property = fl_engine_set_property;
 
   g_object_class_install_property(
-      G_OBJECT_CLASS(klass), kPropBinaryMessenger,
+      G_OBJECT_CLASS(klass), PROP_BINARY_MESSENGER,
       g_param_spec_object(
           "binary-messenger", "messenger", "Binary messenger",
           fl_binary_messenger_get_type(),
           static_cast<GParamFlags>(G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY |
                                    G_PARAM_STATIC_STRINGS)));
 
-  fl_engine_signals[kSignalOnPreEngineRestart] = g_signal_new(
+  fl_engine_signals[SIGNAL_ON_PRE_ENGINE_RESTART] = g_signal_new(
       "on-pre-engine-restart", fl_engine_get_type(), G_SIGNAL_RUN_LAST, 0,
       nullptr, nullptr, nullptr, G_TYPE_NONE, 0);
 }

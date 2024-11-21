@@ -21,7 +21,7 @@ struct _FlStandardMethodCodec {
   FlStandardMessageCodec* message_codec;
 };
 
-enum { kPropMessageCodec = 1, kPropLast };
+enum { PROP_MESSAGE_CODEC = 1, PROP_LAST };
 
 G_DEFINE_TYPE(FlStandardMethodCodec,
               fl_standard_method_codec,
@@ -34,7 +34,7 @@ static void fl_standard_method_codec_set_property(GObject* object,
   FlStandardMethodCodec* self = FL_STANDARD_METHOD_CODEC(object);
 
   switch (prop_id) {
-    case kPropMessageCodec:
+    case PROP_MESSAGE_CODEC:
       g_set_object(&self->message_codec,
                    FL_STANDARD_MESSAGE_CODEC(g_value_get_object(value)));
       break;
@@ -51,7 +51,7 @@ static void fl_standard_method_codec_get_property(GObject* object,
   FlStandardMethodCodec* self = FL_STANDARD_METHOD_CODEC(object);
 
   switch (prop_id) {
-    case kPropMessageCodec:
+    case PROP_MESSAGE_CODEC:
       g_value_set_object(value, self->message_codec);
       break;
     default:
@@ -278,7 +278,7 @@ static void fl_standard_method_codec_class_init(
       fl_standard_method_codec_decode_response;
 
   g_object_class_install_property(
-      G_OBJECT_CLASS(klass), kPropMessageCodec,
+      G_OBJECT_CLASS(klass), PROP_MESSAGE_CODEC,
       g_param_spec_object(
           "message-codec", "message-codec", "Message codec to use",
           fl_message_codec_get_type(),

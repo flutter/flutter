@@ -22,9 +22,9 @@ struct FlApplicationPrivate {
   ((FlApplicationPrivate*)fl_application_get_instance_private( \
       FL_APPLICATION(app)))
 
-enum { kSignalRegisterPlugins, kSignalCreateWindow, kSignalLastSignal };
+enum { SIGNAL_REGISTER_PLUGINS, SIGNAL_CREATE_WINDOW, LAST_SIGNAL };
 
-static guint fl_application_signals[kSignalLastSignal];
+static guint fl_application_signals[LAST_SIGNAL];
 
 G_DEFINE_TYPE_WITH_CODE(FlApplication,
                         fl_application,
@@ -95,14 +95,14 @@ static void fl_application_activate(GApplication* application) {
   gtk_widget_show(GTK_WIDGET(view));
 
   GtkWindow* window;
-  g_signal_emit(self, fl_application_signals[kSignalCreateWindow], 0, view,
+  g_signal_emit(self, fl_application_signals[SIGNAL_CREATE_WINDOW], 0, view,
                 &window);
 
   // Make the resources for the view so rendering can start.
   // We'll show the view when we have the first frame.
   gtk_widget_realize(GTK_WIDGET(view));
 
-  g_signal_emit(self, fl_application_signals[kSignalRegisterPlugins], 0,
+  g_signal_emit(self, fl_application_signals[SIGNAL_REGISTER_PLUGINS], 0,
                 FL_PLUGIN_REGISTRY(view));
 }
 
@@ -150,11 +150,11 @@ static void fl_application_class_init(FlApplicationClass* klass) {
   klass->register_plugins = fl_application_register_plugins;
   klass->create_window = fl_application_create_window;
 
-  fl_application_signals[kSignalRegisterPlugins] = g_signal_new(
+  fl_application_signals[SIGNAL_REGISTER_PLUGINS] = g_signal_new(
       "register-plugins", fl_application_get_type(), G_SIGNAL_RUN_LAST,
       G_STRUCT_OFFSET(FlApplicationClass, register_plugins), nullptr, nullptr,
       nullptr, G_TYPE_NONE, 1, fl_plugin_registry_get_type());
-  fl_application_signals[kSignalCreateWindow] = g_signal_new(
+  fl_application_signals[SIGNAL_CREATE_WINDOW] = g_signal_new(
       "create-window", fl_application_get_type(), G_SIGNAL_RUN_LAST,
       G_STRUCT_OFFSET(FlApplicationClass, create_window),
       g_signal_accumulator_first_wins, nullptr, nullptr, GTK_TYPE_WINDOW, 1,
