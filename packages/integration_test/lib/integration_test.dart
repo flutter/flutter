@@ -92,6 +92,19 @@ https://docs.flutter.dev/testing/integration-tests
     };
   }
 
+  /// Formerly was the strategy for [pump]ing and requesting new frames.
+  /// 
+  /// [framePolicy] used to be inherited from [LiveTestWidgetsFlutterBinding],
+  /// which is no longer the base class of [IntegrationTestWidgetsFlutterBinding];
+  /// see https://github.com/flutter/flutter/issues/81534 for details.
+  @Deprecated(
+    'This field no longer has any effect and can be safely removed. '
+    'IntegrationTestWidgetsFlutterBinding no longer inherits from LiveTestWidgetsFlutterBinding '
+    'and as a result does not have a framePolicy. Remove all references to this field.'
+  )
+  LiveTestWidgetsFlutterBindingFramePolicy get framePolicy => throw UnsupportedError('IntegrationTestWidgetsFlutterBinding no longer inherits from LiveTestWidgetsFlutterBinding');
+  set framePolicy(LiveTestWidgetsFlutterBindingFramePolicy _) {}
+
   @override
   bool get overrideHttpClient => false;
 
