@@ -633,6 +633,10 @@ abstract class PageTransitionsBuilder {
   /// {@macro flutter.widgets.delegatedTransition}
   DelegatedTransitionBuilder? get delegatedTransition => null;
 
+  Duration get transitionDuration => const Duration(milliseconds: 300);
+
+  Duration get reverseTransitionDuration => transitionDuration;
+
   /// Wraps the child with one or more transition widgets which define how [route]
   /// arrives on and leaves the screen.
   ///
@@ -758,6 +762,9 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   ///
   /// Defaults to [ColorScheme.surface]
   final Color? backgroundColor;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 800);
 
   @override
   DelegatedTransitionBuilder? get delegatedTransition => (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child)
