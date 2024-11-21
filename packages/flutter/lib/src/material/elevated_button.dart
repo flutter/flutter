@@ -106,7 +106,7 @@ class ElevatedButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
-    IconAlignment iconAlignment = IconAlignment.start,
+    IconAlignment? iconAlignment,
   }) {
     if (icon == null) {
       return ElevatedButton(
@@ -136,7 +136,7 @@ class ElevatedButton extends ButtonStyleButton {
       statesController: statesController,
       icon: icon,
       label: label,
-      iconAlignment: iconAlignment,
+      iconAlignment: iconAlignment ?? IconAlignment.start,
     );
   }
 
