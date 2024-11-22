@@ -117,18 +117,6 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
-  TickerFuture didPush() {
-    controller?.duration = transitionDuration;
-    return super.didPush();
-  }
-
-  @override
-  bool didPop(T? result) {
-    controller?.reverseDuration = reverseTransitionDuration;
-    return super.didPop(result);
-  }
-
-  @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog,
     // or there is no matching transition to use.
