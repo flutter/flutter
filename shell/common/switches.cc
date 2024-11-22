@@ -443,7 +443,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.use_asset_fonts =
       !command_line.HasOption(FlagForSwitch(Switch::DisableAssetFonts));
 
-#if FML_OS_IOS && !FML_OS_IOS_SIMULATOR
+#if FML_OS_IOS || FML_OS_IOS_SIMULATOR
 // On these configurations, the Impeller flags are completely ignored with the
 // default taking hold.
 #else   // FML_OS_IOS && !FML_OS_IOS_SIMULATOR
