@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_COMMON_SHELL_TEST_PLATFORM_VIEW_H_
 #define FLUTTER_SHELL_COMMON_SHELL_TEST_PLATFORM_VIEW_H_
 
+#include <exception>
+
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/shell_test_external_view_embedder.h"
 #include "flutter/shell/common/vsync_waiters_test.h"
@@ -15,18 +17,30 @@ namespace testing {
 class ShellTestPlatformView : public PlatformView {
  public:
   enum class BackendType {
-    kDefaultBackend = 0,
     kGLBackend,
     kVulkanBackend,
     kMetalBackend,
   };
 
+  static BackendType DefaultBackendType() {
+#if defined(SHELL_ENABLE_GL)
+    return BackendType::kGLBackend;
+#elif defined(SHELL_ENABLE_METAL)
+    return BackendType::kMetalBackend;
+#elif defined(SHELL_ENABLE_VULKAN)
+    return BackendType::kVulkanBackend;
+#else
+    FML_LOG(FATAL) << "No backend is enabled in this build.";
+    std::terminate();
+#endif
+  }
+
   static std::unique_ptr<ShellTestPlatformView> Create(
+      BackendType backend,
       PlatformView::Delegate& delegate,
       const TaskRunners& task_runners,
       const std::shared_ptr<ShellTestVsyncClock>& vsync_clock,
       const CreateVsyncWaiter& create_vsync_waiter,
-      BackendType backend,
       const std::shared_ptr<ShellTestExternalViewEmbedder>&
           shell_test_external_view_embedder,
       const std::shared_ptr<const fml::SyncSwitch>&
@@ -50,7 +64,7 @@ class ShellTestPlatformViewBuilder {
     std::shared_ptr<ShellTestExternalViewEmbedder>
         shell_test_external_view_embedder = nullptr;
     ShellTestPlatformView::BackendType rendering_backend =
-        ShellTestPlatformView::BackendType::kDefaultBackend;
+        ShellTestPlatformView::DefaultBackendType();
   };
 
   explicit ShellTestPlatformViewBuilder(Config config);
