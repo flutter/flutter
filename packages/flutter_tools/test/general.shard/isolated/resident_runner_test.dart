@@ -17,7 +17,6 @@ import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 import '../resident_runner_helpers.dart';
-import 'fake_native_assets_build_runner.dart';
 
 void main() {
   late Testbed testbed;
