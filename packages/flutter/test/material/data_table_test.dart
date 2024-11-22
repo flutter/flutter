@@ -2419,8 +2419,8 @@ void main() {
   });
 
   testWidgets('DataTable with custom columm widths - checkbox', (WidgetTester tester) async {
-    Widget buildTable() {
-      return MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         home: Material(
           child: SizedBox(
             width: 500,
@@ -2452,11 +2452,9 @@ void main() {
             ),
           ),
         ),
-      );
-    }
+      )
+    );
 
-    await tester.pumpWidget(buildTable());
-    
     {
       final Table table = tester.widget(find.byType(Table));
       expect(table.columnWidths![0], isA<FixedColumnWidth>()); // Checkbox column
@@ -2467,8 +2465,8 @@ void main() {
   });
 
   testWidgets('DataTable with custom columm widths - no checkbox', (WidgetTester tester) async {
-    Widget buildTable() {
-      return MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         home: Material(
           child: SizedBox(
             width: 500,
@@ -2499,11 +2497,9 @@ void main() {
             ),
           ),
         ),
-      );
-    }
+      )
+    );
 
-    await tester.pumpWidget(buildTable());
-    
     {
       final Table table = tester.widget(find.byType(Table));
       expect(table.columnWidths![0], const FlexColumnWidth());
