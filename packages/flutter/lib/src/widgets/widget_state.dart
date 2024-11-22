@@ -10,6 +10,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -991,6 +992,41 @@ class WidgetStateMapper<T> with Diagnosticable implements WidgetStateProperty<T>
 
   final WidgetStateMap<T> _map;
 
+  /// Returns a copy of this [WidgetStateMapper] that invokes the provided
+  /// [onResolve] callback during its [resolve] method.
+  ///
+  /// {@tool snippet}
+  ///
+  /// This example shows how to create an [ElevatedButton] whose elevation
+  /// depends on a [WidgetStateMap]. This property will [print] the selected
+  /// [MapEntry] each time one is resolved.
+  ///
+  /// An `// ignore` was added, as this method is intended to be
+  /// ephemerally used during development or local testing.
+  ///
+  /// ```dart
+  /// ElevatedButton(
+  ///   style: ButtonStyle(
+  ///     elevation: const WidgetStateMapper<double>(
+  ///       <WidgetStatesConstraint, double>{
+  ///         WidgetState.hovered: 5.0,
+  ///         WidgetState.pressed: 0.0,
+  ///         WidgetState.any:     2.0,
+  ///       },
+  ///     ).withObserver(print), // ignore: avoid_print, invalid_use_of_do_not_submit_member
+  ///   ),
+  ///   onPressed: () {},
+  ///   child: const Text('button'),
+  /// );
+  /// ```
+  /// {@end-tool}
+  @doNotSubmit
+  WidgetStateMapper<T> withObserver(
+    void Function(MapEntry<WidgetStatesConstraint?, T> entry) onResolve,
+  ) {
+    return _WidgetStateMapObserver<T>(_map, onResolve);
+  }
+
   @override
   T resolve(Set<WidgetState> states) {
     for (final MapEntry<WidgetStatesConstraint, T> entry in _map.entries) {
@@ -1050,6 +1086,36 @@ class WidgetStateMapper<T> with Diagnosticable implements WidgetStateProperty<T>
   void debugFillProperties(DiagnosticPropertiesBuilder properties, {String prefix = ''}) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<WidgetStateMap<T>>('map', _map));
+  }
+}
+
+class _WidgetStateMapObserver<T> extends WidgetStateMapper<T> {
+  @doNotSubmit
+  const _WidgetStateMapObserver(super.map, this.onResolve);
+
+  final void Function(MapEntry<WidgetStatesConstraint?, T> entry) onResolve;
+
+  @override
+  T resolve(Set<WidgetState> states) {
+    for (final MapEntry<WidgetStatesConstraint, T> entry in _map.entries) {
+      if (entry.key.isSatisfiedBy(states)) {
+        onResolve(entry);
+        return entry.value;
+      }
+    }
+
+    try {
+      onResolve(MapEntry<WidgetState?, T>(null, null as T));
+      return null as T;
+    } on TypeError {
+      throw ArgumentError(
+        'The current set of material states is $states.\n'
+        'None of the provided map keys matched this set, '
+        'and the type "$T" is non-nullable.\n'
+        'Consider using "WidgetStateProperty<$T?>.fromMap()", '
+        'or adding the "WidgetState.any" key to this map.',
+      );
+    }
   }
 }
 
