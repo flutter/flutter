@@ -79,7 +79,7 @@ void batch1() {
     await evaluateComplexReturningExpressions(flutter);
   });
 
-    testWithoutContext('evaluating invalid expressions throws an exception with compilation error details', () async {
+  testWithoutContext('evaluating invalid expressions throws an exception with compilation error details', () async {
     await flutter.run(withDebugger: true);
     await breakInTopLevelFunction(flutter);
     await evaluateInvalidExpression(flutter);
