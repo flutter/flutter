@@ -722,10 +722,12 @@ class WebTestsSuite {
         if (webRenderer == 'canvaskit') ...<String>[
           // See: WebRendererMode.dartDefines[canvaskit]
           '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=false',
         ],
         if (webRenderer == 'html') ...<String>[
           // See: WebRendererMode.dartDefines[html]
           '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=false',
         ],
         '--dart-define=DART_HHH_BOT=$runningInDartHHHBot',
         ...flutterTestArgs,
