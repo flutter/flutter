@@ -460,17 +460,18 @@ class ScrollAction extends ContextAction<ScrollIntent> {
         return true;
       }());
 
-      if (primaryScrollController.position.context.notificationContext == null
-          && Scrollable.maybeOf(primaryScrollController.position.context.notificationContext!) == null) {
+      final BuildContext? notificationContext = primaryScrollController.position.context.notificationContext;
+      if (notificationContext != null) {
+        state = Scrollable.maybeOf(notificationContext);
+      }
+      if (state == null) {
         return;
       }
-      state = Scrollable.maybeOf(primaryScrollController.position.context.notificationContext!);
     }
-    assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
-    assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
+    assert(state.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
 
     // Don't do anything if the user isn't allowed to scroll.
-    if (state!.resolvedPhysics != null && !state.resolvedPhysics!.shouldAcceptUserOffset(state.position)) {
+    if (state.resolvedPhysics != null && !state.resolvedPhysics!.shouldAcceptUserOffset(state.position)) {
       return;
     }
     final double increment = getDirectionalIncrement(state, intent);
