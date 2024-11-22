@@ -300,7 +300,7 @@ void main() {
     await tester.tap(find.text('pop'));
     await tester.pump(const Duration(milliseconds: 299));
     expect(find.text('page b'), findsOneWidget);
-    expect(find.byType(ColoredBox), findsNothing); // ColoredBox doesn't exist in CupertinoPageTransition.
+    expect(find.byType(ColoredBox), findsNothing); // ColoredBox doesn't exist in FadeUpwardsPageTransition.
 
     await tester.pump(const Duration(milliseconds: 301));
     expect(find.text('page b'), findsNothing);
