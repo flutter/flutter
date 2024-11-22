@@ -105,7 +105,7 @@ class WebTestsSuite {
           testAppDirectory: path.join('packages', 'integration_test', 'example'),
           target: path.join('test_driver', 'failure.dart'),
           buildMode: buildMode,
-          renderer: 'canvaskit',
+          webRenderer: 'canvaskit',
           // This test intentionally fails and prints stack traces in the browser
           // logs. To avoid confusion, silence browser output.
           silenceBrowserOutput: true,
@@ -115,7 +115,7 @@ class WebTestsSuite {
           target: path.join('integration_test', 'example_test.dart'),
           driver: path.join('test_driver', 'integration_test.dart'),
           buildMode: buildMode,
-          renderer: 'canvaskit',
+          webRenderer: 'canvaskit',
           expectWriteResponseFile: true,
           expectResponseFileContent: 'null',
         ),
@@ -124,7 +124,7 @@ class WebTestsSuite {
           target: path.join('integration_test', 'extended_test.dart'),
           driver: path.join('test_driver', 'extended_integration_test.dart'),
           buildMode: buildMode,
-          renderer: 'canvaskit',
+          webRenderer: 'canvaskit',
           expectWriteResponseFile: true,
           expectResponseFileContent: '''
 {
@@ -177,7 +177,7 @@ class WebTestsSuite {
         testAppDirectory: path.join(flutterRoot, 'examples', 'hello_world'),
         target: 'test_driver/smoke_web_engine.dart',
         buildMode: 'profile',
-        renderer: 'auto',
+        webRenderer: 'auto',
       ),
       () => _runGalleryE2eWebTest('debug'),
       () => _runGalleryE2eWebTest('debug', canvasKit: true),
@@ -278,7 +278,7 @@ class WebTestsSuite {
     await _runFlutterDriverWebTest(
       target: path.join('test_driver', '$name.dart'),
       buildMode: buildMode,
-      renderer: renderer,
+      webRenderer: renderer,
       testAppDirectory: path.join(flutterRoot, 'dev', 'integration_tests', 'web_e2e_tests'),
     );
   }
@@ -286,7 +286,7 @@ class WebTestsSuite {
   Future<void> _runFlutterDriverWebTest({
     required String target,
     required String buildMode,
-    required String renderer,
+    required String webRenderer,
     required String testAppDirectory,
     String? driver,
     bool expectFailure = false,
@@ -318,7 +318,22 @@ class WebTestsSuite {
         '-d',
         'web-server',
         '--$buildMode',
-        '--web-renderer=$renderer',
+        // '--web-renderer=$webRenderer',
+        '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
+        if (webRenderer == 'skwasm') ...<String>[
+          // See: WebRendererMode.dartDefines[skwasm]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=true',
+        ],
+        if (webRenderer == 'canvaskit') ...<String>[
+          // See: WebRendererMode.dartDefines[canvaskit]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+        ],
+        if (webRenderer == 'html') ...<String>[
+          // See: WebRendererMode.dartDefines[html]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+        ],
+
       ],
       expectNonZeroExit: expectFailure,
       workingDirectory: testAppDirectory,
@@ -695,7 +710,21 @@ class WebTestsSuite {
         '-v',
         '--platform=chrome',
         if (useWasm) '--wasm',
-        '--web-renderer=$webRenderer',
+        '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
+        // '--web-renderer=$webRenderer',
+        if (webRenderer == 'skwasm') ...<String>[
+          // See: WebRendererMode.dartDefines[skwasm]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=true',
+        ],
+        if (webRenderer == 'canvaskit') ...<String>[
+          // See: WebRendererMode.dartDefines[canvaskit]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+        ],
+        if (webRenderer == 'html') ...<String>[
+          // See: WebRendererMode.dartDefines[html]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+        ],
         '--dart-define=DART_HHH_BOT=$runningInDartHHHBot',
         ...flutterTestArgs,
         ...tests,
