@@ -40,6 +40,7 @@ void main() {
       strokeCap: StrokeCap.butt,
       constraints: BoxConstraints.tightFor(width: 80.0, height: 80.0),
       trackGap: 16.0,
+      circularTrackPadding: EdgeInsets.all(12.0),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -60,7 +61,8 @@ void main() {
       'strokeAlign: 1.0',
       'strokeCap: StrokeCap.butt',
       'constraints: BoxConstraints(w=80.0, h=80.0)',
-      'trackGap: 16.0'
+      'trackGap: 16.0',
+      'circularTrackPadding: EdgeInsets.all(12.0)'
     ]));
   });
 
@@ -237,6 +239,7 @@ void main() {
     const double strokeAlign = BorderSide.strokeAlignOutside;
     const StrokeCap strokeCap = StrokeCap.butt;
     const BoxConstraints constraints = BoxConstraints.tightFor(width: 80.0, height: 80.0);
+    const EdgeInsets padding = EdgeInsets.all(14.0);
     final ThemeData theme = ThemeData(
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: color,
@@ -245,6 +248,7 @@ void main() {
         strokeAlign: strokeAlign,
         strokeCap: strokeCap,
         constraints: constraints,
+        circularTrackPadding: padding,
       ),
     );
     await tester.pumpWidget(
@@ -262,7 +266,10 @@ void main() {
 
     expect(
       tester.getSize(find.byType(CircularProgressIndicator)),
-      equals(Size(constraints.maxWidth, constraints.maxHeight)),
+      equals(Size(
+        constraints.maxWidth + padding.horizontal,
+        constraints.maxHeight + padding.vertical,
+      )),
     );
     expect(
       find.byType(CircularProgressIndicator),
@@ -294,6 +301,7 @@ void main() {
     const StrokeCap strokeCap = StrokeCap.butt;
     const BoxConstraints constraints = BoxConstraints.tightFor(width: 80.0, height: 80.0);
     const double trackGap = 12.0;
+    const EdgeInsets padding = EdgeInsets.all(18.0);
     final ThemeData theme = ThemeData(
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: color,
@@ -303,6 +311,7 @@ void main() {
         strokeCap: strokeCap,
         constraints: constraints,
         trackGap: trackGap,
+        circularTrackPadding: padding,
       ),
     );
     await tester.pumpWidget(
@@ -319,9 +328,17 @@ void main() {
       ),
     );
 
+    final Size indicatorBoxSize = tester.getSize(find.descendant(
+      of: find.byType(CircularProgressIndicator),
+      matching: find.byType(ConstrainedBox),
+    ));
+    expect(indicatorBoxSize, constraints.biggest);
     expect(
       tester.getSize(find.byType(CircularProgressIndicator)),
-      equals(Size(constraints.maxWidth, constraints.maxHeight)),
+      equals(Size(
+        indicatorBoxSize.width + padding.horizontal,
+        indicatorBoxSize.height + padding.vertical,
+      )),
     );
     expect(
       find.byType(CircularProgressIndicator),

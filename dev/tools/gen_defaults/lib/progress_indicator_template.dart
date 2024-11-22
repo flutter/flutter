@@ -32,12 +32,15 @@ class _Circular${blockName}DefaultsM3 extends ProgressIndicatorThemeData {
 
   @override
   BoxConstraints get constraints => const BoxConstraints(
-    minWidth: 48.0,
-    minHeight: 48.0,
+    minWidth: 40.0,
+    minHeight: 40.0,
   );
 
   @override
   double? get trackGap => ${getToken('md.comp.progress-indicator.active-indicator-track-space')};
+
+  @override
+  EdgeInsetsGeometry? get circularTrackPadding => const EdgeInsets.all(4.0);
 }
 
 class _Linear${blockName}DefaultsM3 extends ProgressIndicatorThemeData {

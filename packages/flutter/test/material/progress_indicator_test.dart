@@ -1566,6 +1566,7 @@ void main() {
   });
 
   testWidgets('Default determinate CircularProgressIndicator when year2023 is false', (WidgetTester tester) async {
+    const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
     await tester.pumpWidget(MaterialApp(
       theme: theme,
       home: const Center(
@@ -1576,13 +1577,23 @@ void main() {
       ),
     ));
 
-    expect(tester.getSize(find.byType(CircularProgressIndicator)), equals(const Size(48, 48)));
+    final Size indicatorBoxSize = tester.getSize(find.descendant(
+      of: find.byType(CircularProgressIndicator),
+      matching: find.byType(ConstrainedBox),
+    ));
+    expect(
+      tester.getSize(find.byType(CircularProgressIndicator)),
+      equals(Size(
+        indicatorBoxSize.width + padding.horizontal,
+        indicatorBoxSize.height + padding.vertical,
+      )),
+    );
     expect(
       find.byType(CircularProgressIndicator),
       paints
         // Track.
         ..arc(
-          rect: const Rect.fromLTRB(2.0, 2.0, 46.0, 46.0),
+          rect: const Rect.fromLTRB(2.0, 2.0, 38.0, 38.0),
           color: theme.colorScheme.secondaryContainer,
           strokeWidth: 4.0,
           strokeCap: StrokeCap.round,
@@ -1590,7 +1601,7 @@ void main() {
         )
         // Active indicator.
         ..arc(
-          rect: const Rect.fromLTRB(2.0, 2.0, 46.0, 46.0),
+          rect: const Rect.fromLTRB(2.0, 2.0, 38.0, 38.0),
           color: theme.colorScheme.primary,
           strokeWidth: 4.0,
           strokeCap: StrokeCap.round,
@@ -1604,6 +1615,7 @@ void main() {
   });
 
   testWidgets('Default indeterminate CircularProgressIndicator when year2023 is false', (WidgetTester tester) async {
+    const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
     await tester.pumpWidget(MaterialApp(
       theme: theme,
       home: const Center(child: CircularProgressIndicator(year2023: false)),
@@ -1612,13 +1624,23 @@ void main() {
     // Advance the animation.
     await tester.pump(const Duration(milliseconds: 200));
 
-    expect(tester.getSize(find.byType(CircularProgressIndicator)), equals(const Size(48, 48)));
+    final Size indicatorBoxSize = tester.getSize(find.descendant(
+      of: find.byType(CircularProgressIndicator),
+      matching: find.byType(ConstrainedBox),
+    ));
+    expect(
+      tester.getSize(find.byType(CircularProgressIndicator)),
+      equals(Size(
+        indicatorBoxSize.width + padding.horizontal,
+        indicatorBoxSize.height + padding.vertical,
+      )),
+    );
     expect(
       find.byType(CircularProgressIndicator),
       paints
         // Active indicator.
         ..arc(
-          rect: const Rect.fromLTRB(2.0, 2.0, 46.0, 46.0),
+          rect: const Rect.fromLTRB(2.0, 2.0, 38.0, 38.0),
           color: theme.colorScheme.primary,
           strokeWidth: 4.0,
           strokeCap: StrokeCap.round,
@@ -1708,6 +1730,33 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(CircularProgressIndicator)), equals(size));
+  });
+
+  testWidgets('CircularProgressIndicator padding can be customized', (WidgetTester tester) async {
+    const EdgeInsetsGeometry padding = EdgeInsets.all(12.0);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: CircularProgressIndicator(
+            padding: padding,
+            year2023: false,
+            value: 0.5,
+          ),
+        ),
+      )
+    );
+
+    final Size indicatorBoxSize = tester.getSize(find.descendant(
+      of: find.byType(CircularProgressIndicator),
+      matching: find.byType(ConstrainedBox),
+    ));
+    expect(
+      tester.getSize(find.byType(CircularProgressIndicator)),
+      equals(Size(
+        indicatorBoxSize.width + padding.horizontal,
+        indicatorBoxSize.height + padding.vertical,
+      )),
+    );
   });
 }
 

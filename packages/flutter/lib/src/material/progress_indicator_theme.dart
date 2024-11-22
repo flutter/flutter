@@ -47,6 +47,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
     this.strokeCap,
     this.constraints,
     this.trackGap,
+    this.circularTrackPadding,
   });
 
   /// The color of the [ProgressIndicator]'s indicator.
@@ -110,6 +111,9 @@ class ProgressIndicatorThemeData with Diagnosticable {
   /// is false, then no track gap will be drawn.
   final double? trackGap;
 
+  /// Overrides the padding of the [CircularProgressIndicator].
+  final EdgeInsetsGeometry? circularTrackPadding;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ProgressIndicatorThemeData copyWith({
@@ -126,6 +130,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
     StrokeCap? strokeCap,
     BoxConstraints? constraints,
     double? trackGap,
+    EdgeInsetsGeometry? circularTrackPadding,
   }) {
     return ProgressIndicatorThemeData(
       color: color ?? this.color,
@@ -141,6 +146,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
       strokeCap : strokeCap ?? this.strokeCap,
       constraints: constraints ?? this.constraints,
       trackGap : trackGap ?? this.trackGap,
+      circularTrackPadding: circularTrackPadding ?? this.circularTrackPadding,
     );
   }
 
@@ -165,6 +171,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
       strokeCap : t < 0.5 ? a?.strokeCap : b?.strokeCap,
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
       trackGap : lerpDouble(a?.trackGap, b?.trackGap, t),
+      circularTrackPadding: EdgeInsetsGeometry.lerp(a?.circularTrackPadding, b?.circularTrackPadding, t),
     );
   }
 
@@ -183,6 +190,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
     strokeCap,
     constraints,
     trackGap,
+    circularTrackPadding,
   );
 
   @override
@@ -206,7 +214,8 @@ class ProgressIndicatorThemeData with Diagnosticable {
       && other.strokeWidth == strokeWidth
       && other.strokeCap == strokeCap
       && other.constraints == constraints
-      && other.trackGap == trackGap;
+      && other.trackGap == trackGap
+      && other.circularTrackPadding == circularTrackPadding;
   }
 
   @override
@@ -225,6 +234,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<StrokeCap>('strokeCap', strokeCap, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
     properties.add(DoubleProperty('trackGap', trackGap, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('circularTrackPadding', circularTrackPadding, defaultValue: null));
   }
 }
 
