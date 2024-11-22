@@ -4,12 +4,28 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
   ? LogicalKeyboardKey.metaLeft
   : LogicalKeyboardKey.controlLeft;
+
+class _NoNotificationContextScrollable extends Scrollable {
+  const _NoNotificationContextScrollable({
+    super.controller,
+    required super.viewportBuilder,
+  });
+
+  @override
+  ScrollableState createState() => _NoNotificationContextScrollableState();
+}
+
+class _NoNotificationContextScrollableState extends ScrollableState {
+  @override
+  BuildContext? get notificationContext => null;
+}
 
 void main() {
   group('ScrollableDetails', (){
@@ -590,4 +606,73 @@ void main() {
     expect(find.text('The cape as red as blood'), findsOneWidget);
     expect(find.text('The hair as yellow as corn'), findsOneWidget);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/158063.
+  testWidgets('Invoking a ScrollAction when notificationContext is null does not cause an exception.', (WidgetTester tester) async {
+    const List<LogicalKeyboardKey> keysWithModifier = <LogicalKeyboardKey>[
+      LogicalKeyboardKey.arrowDown, LogicalKeyboardKey.arrowUp,
+    ];
+    const List<LogicalKeyboardKey> keys = <LogicalKeyboardKey>[
+      ...keysWithModifier,
+      LogicalKeyboardKey.pageDown, LogicalKeyboardKey.pageUp,
+    ];
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.fuchsia),
+        home: PrimaryScrollController(
+          controller: controller,
+          child: Focus(
+            autofocus: true,
+            child: _NoNotificationContextScrollable(
+              controller: controller,
+              viewportBuilder: (BuildContext context, ViewportOffset offset) => Viewport(
+                offset: offset,
+                slivers: List<Widget>.generate(
+                  20,
+                  (int index) => SliverToBoxAdapter(
+                    child: SizedBox(
+                      key: ValueKey<String>('Box $index'),
+                      height: 50.0,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Verify the initial scroll offset.
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
+    );
+
+    for (final LogicalKeyboardKey key in keys) {
+      // The default web shortcuts do not use a modifier key for ScrollActions.
+      if (!kIsWeb && keysWithModifier.contains(key)) {
+        await tester.sendKeyDownEvent(modifierKey);
+      }
+
+      await tester.sendKeyEvent(key);
+      expect(tester.takeException(), isNull);
+
+      if (!kIsWeb && keysWithModifier.contains(key)) {
+        await tester.sendKeyUpEvent(modifierKey);
+      }
+
+      // No scrollable is found, so the scroll position should not change.
+      await tester.pumpAndSettle();
+      expect(controller.position.pixels, equals(0.0));
+      expect(
+        tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+        equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
+      );
+    }
+  }, variant: KeySimulatorTransitModeVariant.all());
 }
