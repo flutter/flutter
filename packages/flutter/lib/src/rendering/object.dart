@@ -4764,7 +4764,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final bool effectiveBlocksUserAction = newParentData.blocksUserActions || configProvider.original.isBlockingUserActions;
     if (effectiveBlocksUserAction != configProvider.effective.isBlockingUserActions) {
       configProvider.updateConfig((SemanticsConfiguration config) {
-        config.isBlockingUserActions = newParentData.blocksUserActions || configProvider.original.isBlockingUserActions;
+        config.isBlockingUserActions = effectiveBlocksUserAction;
       });
     }
     updateChildren();
@@ -4836,6 +4836,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       }
     }
 
+    mergeUp.addAll(children);
     if (contributesToSemanticsTree) {
       _marksConflictsInMergeGroup(mergeUp, isMergeUp: true);
       siblingMergeGroups.forEach(_marksConflictsInMergeGroup);
@@ -4846,6 +4847,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       configProvider.absorbAll(mergeUpConfigs);
       // merge up fragments below this object will not be visible to parent
       // because they are either absorbed or will form a semantics node.
+      mergeUp.clear();
       mergeUp.add(this);
       for (final _RenderObjectSemantics childSemantics in children.whereType<_RenderObjectSemantics>()) {
         assert(childSemantics.contributesToSemanticsTree);
@@ -4861,8 +4863,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
         }
       }
-    } else {
-      mergeUp.addAll(children);
     }
   }
 
