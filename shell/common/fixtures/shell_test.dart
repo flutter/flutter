@@ -640,3 +640,13 @@ void testSemanticsActions() {
     });
   };
 }
+
+@pragma('vm:entry-point')
+void testPointerActions() {
+  PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket pointer) async {
+    await null;
+    Future<void>.value().then((_) {
+      notifyNative();
+    });
+  };
+}

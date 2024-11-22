@@ -128,7 +128,10 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
     fml::TaskQueueId ui_task_queue_id =
         task_runners_.GetUITaskRunner()->GetTaskQueueId();
 
-    task_runners_.GetUITaskRunner()->PostTask(
+    // This task does not need to use RunNowAndFlushMessages as the
+    // vsync callback will explicitly flush the Dart event loop.
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetUITaskRunner(),
         [ui_task_queue_id, callback, flow_identifier, frame_start_time,
          frame_target_time, pause_secondary_tasks]() {
           FML_TRACE_EVENT_WITH_FLOW_IDS(
