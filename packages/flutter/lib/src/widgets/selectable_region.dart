@@ -186,6 +186,28 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// child selection area can not extend past its subtree, and the selection of
 /// the parent selection area can not extend inside the child selection area.
 ///
+/// ## Selection status
+///
+/// A [SelectableRegion]s [SelectableRegionSelectionStatus] is used to indicate whether
+/// the [SelectableRegion] is actively changing the selection, or has finalized it. For
+/// example, during a mouse click + drag, the [SelectableRegionSelectionStatus] will be
+/// set to [SelectableRegionSelectionStatus.changing], and when the mouse click is released
+/// the status will be set to [SelectableRegionSelectionStatus.finalized].
+///
+/// The default value of [SelectableRegion]s selection status
+/// is [SelectableRegionSelectionStatus.finalized].
+///
+/// To access the [SelectableRegionSelectionStatus] of a parent [SelectableRegion]
+/// use [SelectableRegionSelectionStatusScope.maybeOf] and retrieve the value from
+/// the [ValueListenable].
+///
+/// One can also listen for changes to the [SelectableRegionSelectionStatus] by
+/// adding a listener to the [ValueListenable] retrieved from [SelectableRegionSelectionStatusScope.maybeOf]
+/// through [ValueListenable.addListener]. In Stateful widgets this is typically
+/// done in [State.didChangeDependencies]. Remove the listener when no longer
+/// needed, typically in your Stateful widgets [State.dispose] method through
+/// [ValueListenable.removeListener].
+///
 /// ## Tests
 ///
 /// In a test, a region can be selected either by faking drag events (e.g. using
@@ -208,6 +230,8 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 ///    selection events.
 ///  * [SelectionContainer], which collects selectable widgets in the subtree
 ///    and provides api to dispatch selection event to the collected widget.
+///  * [SelectionListener], which enables accessing the [SelectionDetails] of
+///    the selectable subtree it wraps.
 class SelectableRegion extends StatefulWidget {
   /// Create a new [SelectableRegion] widget.
   ///
@@ -3248,15 +3272,12 @@ final class SelectableRegionSelectionStatusScope extends InheritedWidget {
   }
 }
 
-/// A [SelectionContainer] that allows the user to access the selection and listen
-/// to selection changes for the child subtree it wraps under a [SelectionArea]
+/// A [SelectionContainer] that allows the user to access the [SelectionDetails] and
+/// listen to selection changes for the child subtree it wraps under a [SelectionArea]
 /// or [SelectableRegion].
 ///
 /// The selection updates are provided through the [selectionNotifier], to listen
 /// to these updates attach a listener through [SelectionListenerNotifier.addListener].
-///
-/// This widget should have an ancestor [SelectionArea] or [SelectableRegion]
-/// to be able to listen to selection changes in this widgets subtree.
 ///
 /// This widget does not listen to selection changes of nested [SelectionArea]s
 /// or [SelectableRegion]s in its subtree because those widgets are self-contained
@@ -3265,15 +3286,15 @@ final class SelectableRegionSelectionStatusScope extends InheritedWidget {
 /// an additional [SelectionListener] under each one.
 ///
 /// {@tool dartpad}
-/// This example shows how to use [SelectionListener] to listen to selection changes
+/// This example shows how to use [SelectionListener] to access the [SelectionDetails]
 /// under a [SelectionArea] or [SelectableRegion].
 ///
 /// ** See code in examples/api/lib/material/selection_area/selection_area.1.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows how to color the active selection red
-/// under a [SelectionArea] or [SelectableRegion].
+/// This example shows how to color the active selection red under a
+/// [SelectionArea] or [SelectableRegion].
 ///
 /// ** See code in examples/api/lib/material/selection_area/selection_area.2.dart **
 /// {@end-tool}

@@ -112,7 +112,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   int get contentLength;
 }
 
-/// This class stores the information of the selection under a [Selectable]
+/// This class stores the range information of the selection under a [Selectable]
 /// or [SelectionHandler].
 ///
 /// The [SelectedContentRange] for a given [Selectable] or [SelectionHandler]
