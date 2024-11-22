@@ -31,7 +31,9 @@ impeller_component("interop") {
     "image_filter.h",
     "impeller.cc",
     "impeller.h",
+    "impeller.hpp",
     "impeller_c.c",
+    "impeller_cc.cc",
     "mask_filter.cc",
     "mask_filter.h",
     "object.cc",
@@ -120,12 +122,16 @@ zip_bundle("sdk") {
 
   files = [
     {
+      source = "README.md"
+      destination = "README.md"
+    },
+    {
       source = "impeller.h"
       destination = "include/impeller.h"
     },
     {
-      source = "README.md"
-      destination = "README.md"
+      source = "impeller.hpp"
+      destination = "include/impeller.hpp"
     },
   ]
 
