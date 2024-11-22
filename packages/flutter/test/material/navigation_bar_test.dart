@@ -296,8 +296,8 @@ void main() {
       ),
     );
 
-    expect(_getMaterial(tester).color, theme.colorScheme.surface);
-    expect(_getMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(_getMaterial(tester).color, theme.colorScheme.surfaceContainer);
+    expect(_getMaterial(tester).surfaceTintColor, Colors.transparent);
     expect(_getMaterial(tester).elevation, 3);
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
     expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
@@ -307,9 +307,9 @@ void main() {
   testWidgets('Material2 - NavigationBar shows tooltips with text scaling', (WidgetTester tester) async {
     const String label = 'A';
 
-    Widget buildApp({ required double textScaleFactor }) {
+    Widget buildApp({ required TextScaler textScaler }) {
       return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -346,7 +346,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
@@ -357,7 +357,7 @@ void main() {
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4.0)));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(tester.getSize(find.text(label).last), Size(defaultTooltipSize.width * 4, defaultTooltipSize.height * 4));
@@ -366,9 +366,9 @@ void main() {
   testWidgets('Material3 - NavigationBar shows tooltips with text scaling', (WidgetTester tester) async {
     const String label = 'A';
 
-    Widget buildApp({ required double textScaleFactor }) {
+    Widget buildApp({ required TextScaler textScaler }) {
       return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -405,23 +405,88 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
 
-    if (!kIsWeb || isCanvasKit) {
+    if (!kIsWeb || isSkiaWeb) {
       expect(tester.getSize(find.text(label).last), const Size(14.25, 20.0));
     }
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4.0)));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
 
-    if (!kIsWeb || isCanvasKit) {
+    if (!kIsWeb || isSkiaWeb) {
       expect(tester.getSize(find.text(label).last), const Size(56.25, 80.0));
+    }
+  });
+
+    testWidgets('Material3 - NavigationBar label can scale and has maxScaleFactor', (WidgetTester tester) async {
+    const String label = 'A';
+
+    Widget buildApp({ required TextScaler textScaler }) {
+      return MediaQuery(
+        data: MediaQueryData(textScaler: textScaler),
+        child: Localizations(
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: MaterialApp(
+            home: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return Scaffold(
+                      bottomNavigationBar: NavigationBar(
+                        destinations: const <NavigationDestination>[
+                          NavigationDestination(
+                            label: label,
+                            icon: Icon(Icons.ac_unit),
+                          ),
+                          NavigationDestination(
+                            label: 'B',
+                            icon: Icon(Icons.battery_alert),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
+    expect(find.text(label), findsOneWidget);
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
+      expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(12.5, 16.0)), true);
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.1)));
+    await tester.pumpAndSettle();
+
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
+      expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(13.7, 18.0)), true);
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.3)));
+
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
+      expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(16.1, 21.0)), true);
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4)));
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
+      expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(16.1, 21.0)), true);
     }
   });
 
@@ -494,6 +559,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -503,6 +569,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
 
@@ -515,6 +582,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -525,6 +593,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -559,6 +628,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -568,6 +638,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
 
@@ -580,6 +651,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -590,6 +662,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -597,10 +670,10 @@ void main() {
   testWidgets('Navigation bar does not grow with text scale factor', (WidgetTester tester) async {
     const int animationMilliseconds = 800;
 
-    Widget widget({double textScaleFactor = 1}) {
+    Widget widget({ TextScaler textScaler = TextScaler.noScaling }) {
       return _buildWidget(
         MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: textScaler),
           child: NavigationBar(
             animationDuration: const Duration(milliseconds: animationMilliseconds),
             destinations: const <NavigationDestination>[
@@ -621,7 +694,7 @@ void main() {
     await tester.pumpWidget(widget());
     final double initialHeight = tester.getSize(find.byType(NavigationBar)).height;
 
-    await tester.pumpWidget(widget(textScaleFactor: 2));
+    await tester.pumpWidget(widget(textScaler: const TextScaler.linear(2)));
     final double newHeight = tester.getSize(find.byType(NavigationBar)).height;
 
     expect(newHeight, equals(initialHeight));
@@ -826,7 +899,7 @@ void main() {
           color: const Color(0x0a000000),
         )
     );
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material3 - Navigation indicator ripple golden test', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/117420.
@@ -1498,4 +1571,9 @@ class IconWithRandomColor extends StatelessWidget {
     final Color randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
     return Icon(icon, color: randomColor);
   }
+}
+
+
+bool _sizeAlmostEqual(Size a, Size b, {double maxDiff=0.05}) {
+  return (a.width - b.width).abs() <= maxDiff && (a.height - b.height).abs() <= maxDiff;
 }

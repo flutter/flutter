@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class StateMarker extends StatefulWidget {
   const StateMarker({ super.key, this.child });
@@ -23,10 +24,7 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child != null) {
-      return widget.child!;
-    }
-    return Container();
+    return widget.child ?? Container();
   }
 }
 
@@ -45,6 +43,8 @@ void main() {
 
   testWidgets('Focus handling', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -58,6 +58,7 @@ void main() {
 
   testWidgets('Can place app inside FocusScope', (WidgetTester tester) async {
     final FocusScopeNode focusScopeNode = FocusScopeNode();
+    addTearDown(focusScopeNode.dispose);
 
     await tester.pumpWidget(FocusScope(
       autofocus: true,
@@ -68,7 +69,6 @@ void main() {
     ));
 
     expect(find.text('Home'), findsOneWidget);
-    focusScopeNode.dispose();
   });
 
   testWidgets('Can show grid without losing sync', (WidgetTester tester) async {
@@ -370,7 +370,9 @@ void main() {
     expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
-  testWidgets('onGenerateRoute / onUnknownRoute', (WidgetTester tester) async {
+  testWidgets('onGenerateRoute / onUnknownRoute',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -1116,6 +1118,52 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
+  testWidgets('MaterialApp.router works with onNavigationNotification', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/139903.
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
+      ),
+    );
+    addTearDown(provider.dispose);
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
+        );
+        return route.didPop(result);
+      },
+    );
+    addTearDown(delegate.dispose);
+
+    int navigationCount = 0;
+
+    await tester.pumpWidget(MaterialApp.router(
+      routeInformationProvider: provider,
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: delegate,
+      onNavigationNotification: (NavigationNotification? notification) {
+        navigationCount += 1;
+        return true;
+      },
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    expect(navigationCount, greaterThan(0));
+    final int navigationCountAfterBuild = navigationCount;
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+
+    expect(navigationCount, greaterThan(navigationCountAfterBuild));
+  });
+
   testWidgets('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
@@ -1542,7 +1590,7 @@ void main() {
     // Test the initial Scaffold background color.
     await tester.pumpWidget(buildWidget());
 
-    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xfffffbfe));
+    expect(tester.widget<Material>(find.byType(Material)).color, lightTheme.colorScheme.surface);
 
     // Test the Scaffold background color animation from light to dark theme.
     await tester.pumpWidget(buildWidget(themeMode: ThemeMode.dark));
@@ -1550,20 +1598,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50)); // Advance animation by 50 milliseconds.
 
     // Scaffold background color is slightly updated.
-    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffc6c3c6));
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffc3bdc5));
 
     // Let the animation finish.
     await tester.pumpAndSettle();
 
     // Scaffold background color is fully updated to dark theme.
-    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xff1c1b1f));
+    expect(tester.widget<Material>(find.byType(Material)).color, darkTheme.colorScheme.surface);
 
     // Reset to light theme to compare the Scaffold background color animation
     // with the default animation curve.
     await tester.pumpWidget(buildWidget());
     await tester.pumpAndSettle();
 
-    // Switch to dark theme with overriden animation curve.
+    // Switch to dark theme with overridden animation curve.
     await tester.pumpWidget(buildWidget(
       themeMode: ThemeMode.dark,
       animationStyle: AnimationStyle(curve: Curves.easeIn,
@@ -1573,21 +1621,21 @@ void main() {
 
     // Scaffold background color is slightly updated but with a different
     // color than the default animation curve.
-    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffe9e5e9));
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffe7e1e9));
 
     // Let the animation finish.
     await tester.pumpAndSettle();
 
     // Scaffold background color is fully updated to dark theme.
-    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xff1c1b1f));
+    expect(tester.widget<Material>(find.byType(Material)).color, darkTheme.colorScheme.surface);
 
-    // Switch from dark to light theme with overriden animation duration.
+    // Switch from dark to light theme with overridden animation duration.
     await tester.pumpWidget(buildWidget(animationStyle: AnimationStyle.noAnimation));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
-    expect(tester.widget<Material>(find.byType(Material)).color, isNot(const Color(0xff1c1b1f)));
-    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xfffffbfe));
+    expect(tester.widget<Material>(find.byType(Material)).color, isNot(darkTheme.colorScheme.surface));
+    expect(tester.widget<Material>(find.byType(Material)).color, lightTheme.colorScheme.surface);
   });
 
   testWidgets('AnimationStyle.noAnimation removes AnimatedTheme from the tree', (WidgetTester tester) async {

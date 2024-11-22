@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/test/web_test_compiler.dart';
+import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/expect.dart';
 
 import '../../src/context.dart';
@@ -44,6 +45,8 @@ void main() {
         '--incremental',
         '--target=dartdevc',
         '--experimental-emit-debug-metadata',
+        '-DFLUTTER_WEB_AUTO_DETECT=false',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--output-dill',
         'build/out',
         '--packages',
@@ -80,6 +83,7 @@ void main() {
       BuildMode.debug,
       '',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
 
     await compiler.initialize(
@@ -87,6 +91,8 @@ void main() {
       testOutputDir: 'build',
       testFiles: <String>['project/test/fake_test.dart'],
       buildInfo: buildInfo,
+      webRenderer: WebRendererMode.canvaskit,
+      useWasm: false,
     );
 
     expect(processManager.hasRemainingExpectations, isFalse);

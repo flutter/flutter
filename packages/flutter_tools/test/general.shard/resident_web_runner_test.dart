@@ -16,8 +16,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/targets/scene_importer.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
+import 'package:flutter_tools/src/build_system/tools/scene_importer.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -63,6 +63,9 @@ const List<VmServiceExpectation> kAttachLogExpectations =
 const List<VmServiceExpectation> kAttachIsolateExpectations =
     <VmServiceExpectation>[
   FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+    'streamId': 'Service',
+  }),
+  FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
     'streamId': 'Isolate',
   }),
   FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
@@ -102,7 +105,7 @@ void main() {
   late FakeWebServerDevice webServerDevice;
   late FakeDevice mockDevice;
   late FakeVmServiceHost fakeVmServiceHost;
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
   late TestUsage testUsage;
   late FakeAnalytics fakeAnalytics;
@@ -269,7 +272,7 @@ void main() {
   testUsingContext('WebRunner copies compiled app.dill to cache during startup',
       () async {
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
-      const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
+      const BuildInfo(BuildMode.debug, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'),
     );
     final ResidentRunner residentWebRunner =
         setUpResidentRunner(flutterDevice, debuggingOptions: debuggingOptions);
@@ -1318,6 +1321,59 @@ flutter:
     ProcessManager: () => processManager,
   });
 
+  testUsingContext('Turns HttpException from ChromeTab::connect into ToolExit', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final ResidentRunner residentWebRunner = setUpResidentRunner(
+      flutterDevice,
+      logger: logger,
+    );
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    setupMocks();
+    final FakeChromeConnection chromeConnection = FakeChromeConnection();
+    final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
+    final FakeProcess process = FakeProcess();
+    final Chromium chrome = Chromium(
+      1,
+      chromeConnection,
+      chromiumLauncher: chromiumLauncher,
+      process: process,
+      logger: logger,
+    );
+    chromiumLauncher.setInstance(chrome);
+
+    flutterDevice.device = GoogleChromeDevice(
+      fileSystem: fileSystem,
+      chromiumLauncher: chromiumLauncher,
+      logger: logger,
+      platform: FakePlatform(),
+      processManager: FakeProcessManager.any(),
+    );
+    webDevFS.baseUri = Uri.parse('http://localhost:8765/app/');
+
+    final FakeChromeTab chromeTab = FakeChromeTab(
+      'index.html',
+      connectException: HttpException(
+        'Connection closed before full header was received',
+        uri: Uri(
+          path: 'http://localhost:50094/devtools/page/3036A94908353E86E183B6A40F54104B',
+        ),
+      ),
+    );
+    chromeConnection.tabs.add(chromeTab);
+
+    await expectLater(
+      residentWebRunner.run,
+      throwsToolExit(
+        message: 'Failed to establish connection with the application instance in Chrome.',
+      ),
+    );
+    expect(logger.errorText, contains('HttpException'));
+    expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
   testUsingContext('Successfully turns AppConnectionException into ToolExit',
       () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
@@ -1562,7 +1618,6 @@ class FakeWebDevFS extends Fake implements WebDevFS {
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
     String? projectRootPath,
@@ -1599,14 +1654,21 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
 }
 
 class FakeChromeTab extends Fake implements ChromeTab {
-  FakeChromeTab(this.url);
+  FakeChromeTab(this.url, {
+    Exception? connectException,
+  }): _connectException = connectException;
 
   @override
   final String url;
+
+  final Exception? _connectException;
   final FakeWipConnection connection = FakeWipConnection();
 
   @override
   Future<WipConnection> connect({Function? onError}) async {
+    if (_connectException != null) {
+      throw _connectException;
+    }
     return connection;
   }
 }
@@ -1731,7 +1793,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     Uri? mainUri,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
@@ -1756,10 +1817,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
-  }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

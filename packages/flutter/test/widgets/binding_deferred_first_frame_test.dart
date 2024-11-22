@@ -88,7 +88,7 @@ void main() {
 }
 
 class _DeferringWidget extends StatefulWidget {
-  const _DeferringWidget({required Key key, required this.loader}) : super(key: key);
+  const _DeferringWidget({required Key super.key, required this.loader});
 
   final Future<void> loader;
 

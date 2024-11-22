@@ -1,14 +1,18 @@
 {
-  "version": "v0_162",
+  "version": "v4_1_0",
 
   "md.comp.filled-icon-button.container.color": "primary",
+  "md.comp.filled-icon-button.container.height": 40.0,
   "md.comp.filled-icon-button.container.shape": "md.sys.shape.corner.full",
-  "md.comp.filled-icon-button.container.size": 40.0,
+  "md.comp.filled-icon-button.container.width": 40.0,
   "md.comp.filled-icon-button.disabled.container.color": "onSurface",
   "md.comp.filled-icon-button.disabled.container.opacity": 0.12,
   "md.comp.filled-icon-button.disabled.icon.color": "onSurface",
   "md.comp.filled-icon-button.disabled.icon.opacity": 0.38,
   "md.comp.filled-icon-button.focus.icon.color": "onPrimary",
+  "md.comp.filled-icon-button.focus.indicator.color": "secondary",
+  "md.comp.filled-icon-button.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
+  "md.comp.filled-icon-button.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.filled-icon-button.focus.state-layer.color": "onPrimary",
   "md.comp.filled-icon-button.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
   "md.comp.filled-icon-button.hover.icon.color": "onPrimary",
@@ -34,5 +38,5 @@
   "md.comp.filled-icon-button.toggle.unselected.icon.color": "primary",
   "md.comp.filled-icon-button.toggle.unselected.pressed.icon.color": "primary",
   "md.comp.filled-icon-button.toggle.unselected.pressed.state-layer.color": "primary",
-  "md.comp.filled-icon-button.unselected.container.color": "surfaceVariant"
+  "md.comp.filled-icon-button.unselected.container.color": "surfaceContainerHighest"
 }

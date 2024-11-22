@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -44,6 +45,8 @@ void main() {
   });
 
   testWidgets('Chip caches baseline', (WidgetTester tester) async {
+    final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
+    debugCheckIntrinsicSizes = false;
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -53,6 +56,7 @@ void main() {
             baselineType: TextBaseline.alphabetic,
             child: Chip(
               label: BaselineDetector(() {
+                assert(!debugCheckIntrinsicSizes);
                 calls += 1;
               }),
             ),
@@ -66,9 +70,12 @@ void main() {
     tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
     await tester.pump();
     expect(calls, 2);
+    debugCheckIntrinsicSizes = checkIntrinsicSizes;
   });
 
   testWidgets('ListTile caches baseline', (WidgetTester tester) async {
+    final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
+    debugCheckIntrinsicSizes = false;
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -78,6 +85,7 @@ void main() {
             baselineType: TextBaseline.alphabetic,
             child: ListTile(
               title: BaselineDetector(() {
+                assert(!debugCheckIntrinsicSizes);
                 calls += 1;
               }),
             ),
@@ -91,6 +99,7 @@ void main() {
     tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
     await tester.pump();
     expect(calls, 2);
+    debugCheckIntrinsicSizes = checkIntrinsicSizes;
   });
 
   testWidgets("LayoutBuilder returns child's baseline", (WidgetTester tester) async {

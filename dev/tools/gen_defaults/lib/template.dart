@@ -38,7 +38,11 @@ abstract class TokenTemplate {
   bool tokenAvailable(String tokenName) => _tokens.containsKey(tokenName);
 
   /// Resolve a token while logging its usage.
-  dynamic getToken(String tokenName) {
+  /// There will be no log if [optional] is true and the token doesn't exist.
+  dynamic getToken(String tokenName, {bool optional = false}) {
+    if (optional && !tokenAvailable(tokenName)) {
+      return null;
+    }
     tokenLogger.log(tokenName);
     return _tokens[tokenName];
   }
@@ -65,7 +69,7 @@ abstract class TokenTemplate {
   /// If the file already contains a generated text block matching the
   /// [blockName], it will be replaced by the [generate] output. Otherwise
   /// the content will just be appended to the end of the file.
-  Future<void> updateFile() async {
+  void updateFile() {
     final String contents = File(fileName).readAsStringSync();
     final String beginComment = '$beginGeneratedComment - $blockName\n';
     final String endComment = '$endGeneratedComment - $blockName\n';
@@ -108,14 +112,17 @@ abstract class TokenTemplate {
   /// If there is a value for the given token, this will return
   /// the value prepended with [colorSchemePrefix].
   ///
-  /// Otherwise it will return [defaultValue].
+  /// Otherwise it will return [defaultValue] if provided or 'null' if not.
+  ///
+  /// If a [defaultValue] is not provided and the token doesn't exist, the token
+  /// lookup is logged and a warning will be shown at the end of the process.
   ///
   /// See also:
   ///   * [componentColor], that provides support for an optional opacity.
-  String color(String colorToken, [String defaultValue = 'null']) {
-    return tokenAvailable(colorToken)
-      ? '$colorSchemePrefix${getToken(colorToken)}'
-      : defaultValue;
+  String color(String colorToken, [String? defaultValue]) {
+    final String effectiveDefault = defaultValue ?? 'null';
+    final dynamic tokenVal = getToken(colorToken, optional: defaultValue != null);
+    return tokenVal == null ? effectiveDefault : '$colorSchemePrefix$tokenVal';
   }
 
   /// Generate a [ColorScheme] color name for the given token or a transparent
@@ -162,16 +169,13 @@ abstract class TokenTemplate {
   }
 
   String? _numToString(Object? value, [int? digits]) {
-    if (value == null) {
-      return null;
-    }
-    if (value is num) {
-      if (value == double.infinity) {
-        return 'double.infinity';
-      }
-      return digits == null ? value.toString() : value.toStringAsFixed(digits);
-    }
-    return getToken(value as String).toString();
+    return switch (value) {
+      null => null,
+      double.infinity => 'double.infinity',
+      num() when digits == null => value.toString(),
+      num() => value.toStringAsFixed(digits!),
+      _ => getToken(value as String).toString(),
+    };
   }
 
   /// Generate an elevation value for the given component token.
@@ -244,7 +248,11 @@ abstract class TokenTemplate {
       return 'null';
     }
     final String borderColor = componentColor(componentToken);
-    final double width = (getToken('$componentToken.width') ?? getToken('$componentToken.height') ?? 1.0) as double;
+    final double width = (
+      getToken('$componentToken.width', optional: true) ??
+      getToken('$componentToken.height', optional: true) ??
+      1.0
+    ) as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 

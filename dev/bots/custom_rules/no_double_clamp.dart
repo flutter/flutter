@@ -7,7 +7,6 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 import 'analyze.dart';
@@ -39,14 +38,10 @@ class _NoDoubleClamp implements AnalyzeRule {
       return;
     }
 
-    String locationInFile(ResolvedUnitResult unit, AstNode node) {
-      return '${path.relative(path.relative(unit.path, from: workingDirectory))}:${unit.lineInfo.getLocation(node.offset).lineNumber}';
-    }
-
     foundError(<String>[
       for (final MapEntry<ResolvedUnitResult, List<AstNode>> entry in _errors.entries)
         for (final AstNode node in entry.value)
-          '${locationInFile(entry.key, node)}: ${node.parent}',
+          '${locationInFile(entry.key, node, workingDirectory)}: ${node.parent}',
       '\n${bold}For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".$reset',
     ]);
   }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -9,6 +10,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/semantics_tester.dart';
 
 void main() {
   // Returns the RenderEditable at the given index, or the first if not given.
@@ -1126,8 +1129,8 @@ void main() {
     await tester.pumpAndSettle();
     final Material material = getSearchViewMaterial(tester);
     expect(material.elevation, 6.0);
-    expect(material.color, colorScheme.surface);
-    expect(material.surfaceTintColor, colorScheme.surfaceTint);
+    expect(material.color, colorScheme.surfaceContainerHigh);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.clipBehavior, Clip.antiAlias);
 
     final Finder findDivider = find.byType(Divider);
@@ -1137,10 +1140,6 @@ void main() {
 
     // Default search view has a leading back button on the start of the header.
     expect(find.widgetWithIcon(IconButton, Icons.arrow_back), findsOneWidget);
-
-    // Default search view has a trailing close button on the end of the header.
-    // It is used to clear the input in the text field.
-    expect(find.widgetWithIcon(IconButton, Icons.close), findsOneWidget);
 
     final Text helperText = tester.widget(find.text('hint text'));
     expect(helperText.style?.color, colorScheme.onSurfaceVariant);
@@ -1441,7 +1440,9 @@ void main() {
     await tester.pumpWidget(buildAnchor());
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
-    // Default is a icon button with close icon.
+    // Default is a icon button with close icon when input is not empty.
+    await tester.enterText(findTextField(), 'a');
+    await tester.pump();
     expect(find.widgetWithIcon(IconButton, Icons.close), findsOneWidget);
 
     await tester.pumpWidget(Container());
@@ -2684,7 +2685,7 @@ void main() {
 
     // Test the search view background color.
     Material material = getSearchViewMaterial(tester);
-    expect(material.color, theme.colorScheme.surface);
+    expect(material.color, theme.colorScheme.surfaceContainerHigh);
 
     // Change the theme brightness.
     theme = ThemeData(brightness: Brightness.dark);
@@ -2693,7 +2694,7 @@ void main() {
 
     // Test the search view background color.
     material = getSearchViewMaterial(tester);
-    expect(material.color, theme.colorScheme.surface);
+    expect(material.color, theme.colorScheme.surfaceContainerHigh);
   });
 
   testWidgets('Search view widgets can inherit local themes', (WidgetTester tester) async {
@@ -2744,7 +2745,7 @@ void main() {
 
     // Test the search view background color.
     final Material searchViewMaterial = getSearchViewMaterial(tester);
-    expect(searchViewMaterial.color, localTheme.colorScheme.surface);
+    expect(searchViewMaterial.color, localTheme.colorScheme.surfaceContainerHigh);
 
     // Test the search view icons background color.
     final Material iconButtonMaterial = tester.widget<Material>(find.descendant(
@@ -2945,6 +2946,334 @@ void main() {
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.textInputAction, TextInputAction.previous);
   });
+
+  testWidgets('Block entering text on disabled widget', (WidgetTester tester) async {
+    const String initValue = 'init';
+    final TextEditingController controller = TextEditingController(text: initValue);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchBar(
+              controller: controller,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abcdefghi';
+    await tester.enterText(find.byType(SearchBar), testValue);
+    expect(controller.value.text, initValue);
+  });
+
+  testWidgets('Disabled SearchBar semantics node still contains value', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController(text: 'text');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchBar(
+              controller: controller,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[], value: 'text'));
+    semantics.dispose();
+  });
+
+  testWidgets('Check SearchBar opacity when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchBar(
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder searchBarFinder = find.byType(SearchBar);
+    expect(searchBarFinder, findsOneWidget);
+    final Finder opacityFinder = find.descendant(
+      of: searchBarFinder,
+      matching: find.byType(Opacity),
+    );
+    expect(opacityFinder, findsOneWidget);
+    final Opacity opacityWidget = tester.widget<Opacity>(opacityFinder);
+    expect(opacityWidget.opacity, 0.38);
+  });
+
+  testWidgets('SearchAnchor respects headerHeight', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: Material(
+          child: SearchAnchor(
+            isFullScreen: true,
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            headerHeight: 32,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+    final Finder findHeader = find.descendant(of: findViewContent(), matching: find.byType(SearchBar));
+    expect(tester.getSize(findHeader).height, 32);
+  });
+
+  testWidgets('SearchAnchor.bar respects viewHeaderHeight', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: Material(
+          child: SearchAnchor.bar(
+            isFullScreen: true,
+            viewHeaderHeight: 32,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byType(SearchBar)); // Open search view.
+    await tester.pumpAndSettle();
+    final Finder findHeader = find.descendant(of: findViewContent(), matching: find.byType(SearchBar));
+    final RenderBox box = tester.renderObject(findHeader);
+    expect(box.size.height, 32);
+  });
+
+  testWidgets('Tapping outside searchbar should unfocus the searchbar on mobile', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SearchAnchor(
+              builder: (BuildContext context, SearchController controller){
+                return SearchBar(
+                  controller: controller,
+                  onTap: () {
+                    controller.openView();
+                  },
+                  onTapOutside: (PointerDownEvent event) {
+                    focusNode.unfocus();
+                  },
+                  onChanged: (_) {
+                    controller.openView();
+                  },
+                  autoFocus: true,
+                  focusNode: focusNode,
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller){
+                return List<ListTile>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(title: Text(item));
+                });
+              },
+            )
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await tester.tapAt(const Offset(50, 50));
+      await tester.pump();
+
+      expect(focusNode.hasPrimaryFocus, isFalse);
+    }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets('The default clear button only shows when text input is not empty '
+      'on the search view', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: Material(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithIcon(IconButton, Icons.close), findsNothing);
+    await tester.enterText(findTextField(), 'a');
+    await tester.pump();
+    expect(find.widgetWithIcon(IconButton, Icons.close), findsOneWidget);
+    await tester.enterText(findTextField(), '');
+    await tester.pump();
+    expect(find.widgetWithIcon(IconButton, Icons.close), findsNothing);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/139880.
+  testWidgets('suggestionsBuilder with Future is not called twice on layout resize', (WidgetTester tester) async {
+    int suggestionsLoadingCount = 0;
+
+    Future<List<String>> createListData() async {
+      return List<String>.generate(1000, (int index) {
+        return  'Hello World - $index';
+      });
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[
+                FutureBuilder<List<String>>(
+                  future: createListData(),
+                  builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return const LinearProgressIndicator();
+                    }
+                    final List<String>? result = snapshot.data;
+                    if (result == null) {
+                      return const LinearProgressIndicator();
+                    }
+                    suggestionsLoadingCount++;
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: result.map((String text) {
+                          return ListTile(title: Text(text));
+                        }).toList(),
+                      ),
+                    );
+                  },
+                ),
+              ];
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+
+    // Simulate the keyboard opening resizing the view.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500.0);
+    addTearDown(tester.view.reset);
+    await tester.pumpAndSettle();
+
+    expect(suggestionsLoadingCount, 1);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/139880.
+  testWidgets('suggestionsBuilder is not called when the search value does not change', (WidgetTester tester) async {
+    int suggestionsBuilderCalledCount = 0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              suggestionsBuilderCalledCount++;
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+
+    // Simulate the keyboard opening resizing the view.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500.0);
+    addTearDown(tester.view.reset);
+    // Show the keyboard.
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    expect(suggestionsBuilderCalledCount, 2);
+
+    // Remove the viewInset, as if the keyboard were hidden.
+    tester.view.resetViewInsets();
+    // Hide the keyboard.
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+
+    expect(suggestionsBuilderCalledCount, 2);
+  });
+
+  testWidgets('Suggestions gets refreshed after long API call', (WidgetTester tester) async {
+    Timer? debounceTimer;
+    const Duration apiCallDuration = Duration(seconds: 1);
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) async {
+              final Completer<List<String>> completer = Completer<List<String>>();
+              debounceTimer?.cancel();
+              debounceTimer = Timer(apiCallDuration, () {
+                completer.complete(List<String>.generate(10, (int index) => 'Item - $index'));
+              });
+              final List<String> options = await completer.future;
+
+              final List<Widget> suggestions = List<Widget>.generate(options.length, (int index) {
+                final String item = options[index];
+                return ListTile(
+                  title: Text(item),
+                );
+              });
+              return suggestions;
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+
+    // Simulate the keyboard opening resizing the view.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500.0);
+    addTearDown(tester.view.reset);
+
+    // Show the keyboard.
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.pumpAndSettle(apiCallDuration);
+
+    expect(find.text('Item - 1'), findsOneWidget);
+  });
 }
 
 Future<void> checkSearchBarDefaults(WidgetTester tester, ColorScheme colorScheme, Material material) async {
@@ -2952,10 +3281,10 @@ Future<void> checkSearchBarDefaults(WidgetTester tester, ColorScheme colorScheme
   expect(material.borderOnForeground, true);
   expect(material.borderRadius, null);
   expect(material.clipBehavior, Clip.none);
-  expect(material.color, colorScheme.surface);
+  expect(material.color, colorScheme.surfaceContainerHigh);
   expect(material.elevation, 6.0);
   expect(material.shadowColor, colorScheme.shadow);
-  expect(material.surfaceTintColor, colorScheme.surfaceTint);
+  expect(material.surfaceTintColor, Colors.transparent);
   expect(material.shape, const StadiumBorder());
 
   final Text helperText = tester.widget(find.text('hint text'));

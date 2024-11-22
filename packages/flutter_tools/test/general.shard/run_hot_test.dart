@@ -26,7 +26,7 @@ void main() {
       false,
       'test-reason',
       TestUsage(),
-      NoOpAnalytics(),
+      const NoOpAnalytics(),
     );
   });
 }

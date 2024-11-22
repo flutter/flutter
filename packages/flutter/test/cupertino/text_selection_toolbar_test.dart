@@ -204,12 +204,7 @@ void main() {
 
     // Adding 7 more children overflows onto a third page.
     setState(() {
-      children.add(const TestBox());
-      children.add(const TestBox());
-      children.add(const TestBox());
-      children.add(const TestBox());
-      children.add(const TestBox());
-      children.add(const TestBox());
+      children.addAll(List<TestBox>.filled(6, const TestBox()));
     });
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(7));
@@ -271,6 +266,62 @@ void main() {
     expect(find.byType(TestBox), findsNWidgets(children.length));
     expect(findOverflowNextButton(), findsNothing);
     expect(findOverflowBackButton(), findsNothing);
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+
+  testWidgets('correctly sizes large toolbar buttons', (WidgetTester tester) async {
+    final GlobalKey firstBoxKey = GlobalKey();
+    final GlobalKey secondBoxKey = GlobalKey();
+    final GlobalKey thirdBoxKey = GlobalKey();
+    final GlobalKey fourthBoxKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            width: 420,
+            child: CupertinoTextSelectionToolbar(
+              anchorAbove: const Offset(50.0, 100.0),
+              anchorBelow: const Offset(50.0, 200.0),
+              children: <Widget>[
+                SizedBox(key: firstBoxKey, width: 100),
+                SizedBox(key: secondBoxKey, width: 300),
+                SizedBox(key: thirdBoxKey, width: 100),
+                SizedBox(key: fourthBoxKey, width: 100),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The first page isn't wide enough to show the second button.
+    expect(find.byKey(firstBoxKey), findsOneWidget);
+    expect(find.byKey(secondBoxKey), findsNothing);
+    expect(find.byKey(thirdBoxKey), findsNothing);
+    expect(find.byKey(fourthBoxKey), findsNothing);
+
+    // Show the next page.
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+    await tester.pumpAndSettle();
+
+    // The second page should show only the second button.
+    expect(find.byKey(firstBoxKey), findsNothing);
+    expect(find.byKey(secondBoxKey), findsOneWidget);
+    expect(find.byKey(thirdBoxKey), findsNothing);
+    expect(find.byKey(fourthBoxKey), findsNothing);
+
+    // The button's width shouldn't be limited by the first page's width.
+    expect(tester.getSize(find.byKey(secondBoxKey)).width, 300);
+
+    // Show the next page.
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+    await tester.pumpAndSettle();
+
+    // The third page should show the last two items.
+    expect(find.byKey(firstBoxKey), findsNothing);
+    expect(find.byKey(secondBoxKey), findsNothing);
+    expect(find.byKey(thirdBoxKey), findsOneWidget);
+    expect(find.byKey(fourthBoxKey), findsOneWidget);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
@@ -343,6 +394,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'Select me custom menu',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -414,12 +466,7 @@ void main() {
 
         // Theme brightness is preferred, otherwise MediaQuery brightness is
         // used. If both are null, defaults to light.
-        late final Brightness effectiveBrightness;
-        if (themeBrightness != null) {
-          effectiveBrightness = themeBrightness;
-        } else {
-          effectiveBrightness = mediaBrightness ?? Brightness.light;
-        }
+        final Brightness effectiveBrightness = themeBrightness ?? mediaBrightness ?? Brightness.light;
 
         expect(
           text.style!.color!.value,

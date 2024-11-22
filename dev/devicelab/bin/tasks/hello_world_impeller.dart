@@ -54,6 +54,7 @@ Future<TaskResult> run() async {
       'run',
       options: <String>[
         '--enable-impeller',
+        '--enable-vulkan-validation',
         '-d',
         device.deviceId,
       ],

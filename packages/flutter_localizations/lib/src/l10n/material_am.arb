@@ -144,5 +144,7 @@
   "menuDismissLabel": "ምናሌን አሰናብት",
   "lookUpButtonLabel": "ይመልከቱ",
   "searchWebButtonLabel": "ድርን ፈልግ",
-  "shareButtonLabel": "አጋራ..."
+  "shareButtonLabel": "አጋራ...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

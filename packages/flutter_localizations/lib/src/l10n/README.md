@@ -9,7 +9,7 @@ flutter_localizations package.
 
 If you're looking for information about internationalizing Flutter
 apps in general, see the
-[Internationalizing Flutter Apps](https://flutter.dev/tutorials/internationalization/) tutorial.
+[Internationalizing Flutter Apps](https://flutter.dev/to/internationalization) tutorial.
 
 
 ### Translations for one locale: .arb files
@@ -216,7 +216,7 @@ If you have feedback about the translations please
 
 ### See Also
 
-The [Internationalizing Flutter Apps](https://flutter.dev/tutorials/internationalization/)
+The [Internationalizing Flutter Apps](https://flutter.dev/to/internationalization)
 tutorial describes how to use the internationalization APIs in an
 ordinary Flutter app.
 

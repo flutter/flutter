@@ -198,6 +198,8 @@ class ChipThemeData with Diagnosticable {
     this.elevation,
     this.pressElevation,
     this.iconTheme,
+    this.avatarBoxConstraints,
+    this.deleteIconBoxConstraints,
   });
 
   /// Generates a ChipThemeData from a brightness, a primary color, and a text
@@ -436,6 +438,19 @@ class ChipThemeData with Diagnosticable {
   /// [FilterChip], [InputChip], [RawChip].
   final IconThemeData? iconTheme;
 
+  /// Overrides the default for [ChipAttributes.avatarBoxConstraints],
+  /// the size constraints for the avatar widget.
+  ///
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
+  final BoxConstraints? avatarBoxConstraints;
+
+  /// Overrides the default for [DeletableChipAttributes.deleteIconBoxConstraints].
+  /// the size constraints for the delete icon widget.
+  ///
+  /// This property applies to [Chip], [FilterChip], [InputChip], [RawChip].
+  final BoxConstraints? deleteIconBoxConstraints;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ChipThemeData copyWith({
@@ -460,6 +475,8 @@ class ChipThemeData with Diagnosticable {
     double? elevation,
     double? pressElevation,
     IconThemeData? iconTheme,
+    BoxConstraints? avatarBoxConstraints,
+    BoxConstraints? deleteIconBoxConstraints,
   }) {
     return ChipThemeData(
       color: color ?? this.color,
@@ -483,6 +500,8 @@ class ChipThemeData with Diagnosticable {
       elevation: elevation ?? this.elevation,
       pressElevation: pressElevation ?? this.pressElevation,
       iconTheme: iconTheme ?? this.iconTheme,
+      avatarBoxConstraints: avatarBoxConstraints ?? this.avatarBoxConstraints,
+      deleteIconBoxConstraints: deleteIconBoxConstraints ?? this.deleteIconBoxConstraints,
     );
   }
 
@@ -517,6 +536,8 @@ class ChipThemeData with Diagnosticable {
       iconTheme: a?.iconTheme != null || b?.iconTheme != null
         ? IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t)
         : null,
+      avatarBoxConstraints: BoxConstraints.lerp(a?.avatarBoxConstraints, b?.avatarBoxConstraints, t),
+      deleteIconBoxConstraints: BoxConstraints.lerp(a?.deleteIconBoxConstraints, b?.deleteIconBoxConstraints, t),
     );
   }
 
@@ -524,6 +545,12 @@ class ChipThemeData with Diagnosticable {
   static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
     if (a == null && b == null) {
       return null;
+    }
+    if (a is MaterialStateBorderSide) {
+      a = a.resolve(<WidgetState>{});
+    }
+    if (b is MaterialStateBorderSide) {
+      b = b.resolve(<WidgetState>{});
     }
     if (a == null) {
       return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
@@ -565,6 +592,8 @@ class ChipThemeData with Diagnosticable {
     elevation,
     pressElevation,
     iconTheme,
+    avatarBoxConstraints,
+    deleteIconBoxConstraints,
   ]);
 
   @override
@@ -596,7 +625,9 @@ class ChipThemeData with Diagnosticable {
         && other.brightness == brightness
         && other.elevation == elevation
         && other.pressElevation == pressElevation
-        && other.iconTheme == iconTheme;
+        && other.iconTheme == iconTheme
+        && other.avatarBoxConstraints == avatarBoxConstraints
+        && other.deleteIconBoxConstraints == deleteIconBoxConstraints;
   }
 
   @override
@@ -623,5 +654,7 @@ class ChipThemeData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DoubleProperty('pressElevation', pressElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>('avatarBoxConstraints', avatarBoxConstraints, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>('deleteIconBoxConstraints', deleteIconBoxConstraints, defaultValue: null));
   }
 }

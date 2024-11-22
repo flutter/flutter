@@ -23,8 +23,8 @@ const double _kSelectionHandleRadius = 6;
 const double _kArrowScreenPadding = 26.0;
 
 /// Draws a single text selection handle with a bar and a ball.
-class _TextSelectionHandlePainter extends CustomPainter {
-  const _TextSelectionHandlePainter(this.color);
+class _CupertinoTextSelectionHandlePainter extends CustomPainter {
+  const _CupertinoTextSelectionHandlePainter(this.color);
 
   final Color color;
 
@@ -51,7 +51,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => color != oldPainter.color;
+  bool shouldRepaint(_CupertinoTextSelectionHandlePainter oldPainter) => color != oldPainter.color;
 }
 
 /// iOS Cupertino styled text selection handle controls.
@@ -116,7 +116,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     final Widget handle;
 
     final Widget customPaint = CustomPaint(
-      painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
+      painter: _CupertinoTextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
     );
 
     // [buildHandle]'s widget is positioned at the selection cursor's bottom
@@ -143,9 +143,10 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
             ..translate(-desiredSize.width / 2, -desiredSize.height / 2),
           child: handle,
         );
-      // iOS doesn't draw anything for collapsed selections.
+      // iOS should draw an invisible box so the handle can still receive gestures
+      // on collapsed selections.
       case TextSelectionHandleType.collapsed:
-        return const SizedBox.shrink();
+        return SizedBox.fromSize(size: getHandleSize(textLineHeight));
     }
   }
 
@@ -154,13 +155,12 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   /// See [TextSelectionControls.getHandleAnchor].
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    final Size handleSize;
+    final Size handleSize = getHandleSize(textLineHeight);
 
     switch (type) {
       // The circle is at the top for the left handle, and the anchor point is
       // all the way at the bottom of the line.
       case TextSelectionHandleType.left:
-        handleSize = getHandleSize(textLineHeight);
         return Offset(
           handleSize.width / 2,
           handleSize.height,
@@ -168,14 +168,12 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
       // The right handle is vertically flipped, and the anchor point is near
       // the top of the circle to give slight overlap.
       case TextSelectionHandleType.right:
-        handleSize = getHandleSize(textLineHeight);
         return Offset(
           handleSize.width / 2,
           handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
         );
       // A collapsed handle anchors itself so that it's centered.
       case TextSelectionHandleType.collapsed:
-        handleSize = getHandleSize(textLineHeight);
         return Offset(
           handleSize.width / 2,
           textLineHeight + (handleSize.height - textLineHeight) / 2,

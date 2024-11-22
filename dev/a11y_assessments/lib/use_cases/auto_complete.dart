@@ -35,7 +35,6 @@ class _MainWidgetState extends State<_MainWidget> {
   static Widget _fieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
     return TextFormField(
       focusNode: focusNode,
-      autofocus: true,
       controller: textEditingController,
       onFieldSubmitted: (String value) {
         onFieldSubmitted();

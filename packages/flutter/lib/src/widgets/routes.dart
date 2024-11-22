@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -17,6 +18,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
+import 'inherited_model.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
@@ -97,7 +99,7 @@ abstract class OverlayRoute<T> extends Route<T> {
 /// See also:
 ///
 ///  * [Route], which documents the meaning of the `T` generic type argument.
-abstract class TransitionRoute<T> extends OverlayRoute<T> {
+abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveBackRoute {
   /// Creates a route that animates itself when it is pushed or popped.
   TransitionRoute({
     super.settings,
@@ -166,7 +168,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   //
   // This situation arises when dealing with the Cupertino dismiss gesture.
   @override
-  bool get finishedWhenPopped => _controller!.status == AnimationStatus.dismissed && !_popFinalized;
+  bool get finishedWhenPopped => _controller!.isDismissed && !_popFinalized;
 
   bool _popFinalized = false;
 
@@ -341,11 +343,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
       if (current != null) {
         final Animation<double> currentTrain = (current is TrainHoppingAnimation ? current.currentTrain : current)!;
         final Animation<double> nextTrain = nextRoute._animation!;
-        if (
-          currentTrain.value == nextTrain.value ||
-          nextTrain.status == AnimationStatus.completed ||
-          nextTrain.status == AnimationStatus.dismissed
-        ) {
+        if (currentTrain.value == nextTrain.value || !nextTrain.isAnimating) {
           _setSecondaryAnimation(nextTrain, nextRoute.completed);
         } else {
           // Two trains animate at different values. We have to do train hopping.
@@ -360,20 +358,15 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           //     properly clean up the existing train hopping.
           TrainHoppingAnimation? newAnimation;
           void jumpOnAnimationEnd(AnimationStatus status) {
-            switch (status) {
-              case AnimationStatus.completed:
-              case AnimationStatus.dismissed:
-                // The nextTrain has stopped animating without train hopping.
-                // Directly sets the secondary animation and disposes the
-                // TrainHoppingAnimation.
-                _setSecondaryAnimation(nextTrain, nextRoute.completed);
-                if (_trainHoppingListenerRemover != null) {
-                  _trainHoppingListenerRemover!();
-                  _trainHoppingListenerRemover = null;
-                }
-              case AnimationStatus.forward:
-              case AnimationStatus.reverse:
-                break;
+            if (!status.isAnimating) {
+              // The nextTrain has stopped animating without train hopping.
+              // Directly sets the secondary animation and disposes the
+              // TrainHoppingAnimation.
+              _setSecondaryAnimation(nextTrain, nextRoute.completed);
+              if (_trainHoppingListenerRemover != null) {
+                _trainHoppingListenerRemover!();
+                _trainHoppingListenerRemover = null;
+              }
             }
           }
           _trainHoppingListenerRemover = () {
@@ -476,6 +469,84 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///    [ModalRoute.buildTransitions] `secondaryAnimation` to run.
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => true;
 
+  // Begin PredictiveBackRoute.
+
+  @override
+  void handleStartBackGesture({double progress = 0.0}) {
+    assert(isCurrent);
+    _controller?.value = progress;
+    navigator?.didStartUserGesture();
+  }
+
+  @override
+  void handleUpdateBackGestureProgress({required double progress}) {
+    // If some other navigation happened during this gesture, don't mess with
+    // the transition anymore.
+    if (!isCurrent) {
+      return;
+    }
+    _controller?.value = progress;
+  }
+
+  @override
+  void handleCancelBackGesture() {
+    _handleDragEnd(animateForward: true);
+  }
+
+  @override
+  void handleCommitBackGesture() {
+    _handleDragEnd(animateForward: false);
+  }
+
+  void _handleDragEnd({required bool animateForward}) {
+    if (isCurrent) {
+      if (animateForward) {
+        // The closer the panel is to dismissing, the shorter the animation is.
+        // We want to cap the animation time, but we want to use a linear curve
+        // to determine it.
+        // These values were eyeballed to match the native predictive back
+        // animation on a Pixel 2 running Android API 34.
+        final int droppedPageForwardAnimationTime = min(
+          ui.lerpDouble(800, 0, _controller!.value)!.floor(),
+          300,
+        );
+        _controller?.animateTo(
+          1.0,
+          duration: Duration(milliseconds: droppedPageForwardAnimationTime),
+          curve: Curves.fastLinearToSlowEaseIn,
+        );
+      } else {
+        // This route is destined to pop at this point. Reuse navigator's pop.
+        navigator?.pop();
+
+        // The popping may have finished inline if already at the target destination.
+        if (_controller?.isAnimating ?? false) {
+          // Otherwise, use a custom popping animation duration and curve.
+          final int droppedPageBackAnimationTime =
+              ui.lerpDouble(0, 800, _controller!.value)!.floor();
+          _controller!.animateBack(0.0,
+              duration: Duration(milliseconds: droppedPageBackAnimationTime),
+              curve: Curves.fastLinearToSlowEaseIn);
+        }
+      }
+    }
+
+    if (_controller?.isAnimating ?? false) {
+      // Keep the userGestureInProgress in true state since AndroidBackGesturePageTransitionsBuilder
+      // depends on userGestureInProgress.
+      late final AnimationStatusListener animationStatusCallback;
+      animationStatusCallback = (AnimationStatus status) {
+        navigator?.didStopUserGesture();
+        _controller!.removeStatusListener(animationStatusCallback);
+      };
+      _controller!.addStatusListener(animationStatusCallback);
+    } else {
+      navigator?.didStopUserGesture();
+    }
+  }
+
+  // End PredictiveBackRoute.
+
   @override
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
@@ -494,6 +565,39 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   @override
   String toString() => '${objectRuntimeType(this, 'TransitionRoute')}(animation: $_controller)';
+}
+
+/// An interface for a route that supports predictive back gestures.
+///
+/// See also:
+///
+///  * [PredictiveBackPageTransitionsBuilder], which builds page transitions for
+///    predictive back.
+abstract interface class PredictiveBackRoute {
+  /// Whether this route is the top-most route on the navigator.
+  bool get isCurrent;
+
+  /// Whether a pop gesture can be started by the user for this route.
+  bool get popGestureEnabled;
+
+  /// Handles a predictive back gesture starting.
+  ///
+  /// The `progress` parameter indicates the progress of the gesture from 0.0 to
+  /// 1.0, as in [PredictiveBackEvent.progress].
+  void handleStartBackGesture({double progress = 0.0});
+
+  /// Handles a predictive back gesture updating as the user drags across the
+  /// screen.
+  ///
+  /// The `progress` parameter indicates the progress of the gesture from 0.0 to
+  /// 1.0, as in [PredictiveBackEvent.progress].
+  void handleUpdateBackGestureProgress({required double progress});
+
+  /// Handles a predictive back gesture ending successfully.
+  void handleCommitBackGesture();
+
+  /// Handles a predictive back gesture ending in cancellation.
+  void handleCancelBackGesture();
 }
 
 /// An entry in the history of a [LocalHistoryRoute].
@@ -780,7 +884,16 @@ class _DismissModalAction extends DismissAction {
   }
 }
 
-class _ModalScopeStatus extends InheritedWidget {
+enum _ModalRouteAspect {
+  /// Specifies the aspect corresponding to [ModalRoute.isCurrent].
+  isCurrent,
+  /// Specifies the aspect corresponding to [ModalRoute.canPop].
+  canPop,
+  /// Specifies the aspect corresponding to [ModalRoute.settings].
+  settings,
+}
+
+class _ModalScopeStatus extends InheritedModel<_ModalRouteAspect> {
   const _ModalScopeStatus({
     required this.isCurrent,
     required this.canPop,
@@ -808,6 +921,15 @@ class _ModalScopeStatus extends InheritedWidget {
     description.add(FlagProperty('isCurrent', value: isCurrent, ifTrue: 'active', ifFalse: 'inactive'));
     description.add(FlagProperty('canPop', value: canPop, ifTrue: 'can pop'));
     description.add(FlagProperty('impliesAppBarDismissal', value: impliesAppBarDismissal, ifTrue: 'implies app bar dismissal'));
+  }
+
+  @override
+  bool updateShouldNotifyDependent(covariant _ModalScopeStatus oldWidget, Set<_ModalRouteAspect> dependencies) {
+    return dependencies.any((_ModalRouteAspect dependency) => switch (dependency) {
+      _ModalRouteAspect.isCurrent => isCurrent != oldWidget.isCurrent,
+      _ModalRouteAspect.canPop    => canPop != oldWidget.canPop,
+      _ModalRouteAspect.settings  => route.settings != oldWidget.route.settings,
+    });
   }
 }
 
@@ -910,6 +1032,8 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   @override
   Widget build(BuildContext context) {
+    // Only top most route can participate in focus traversal.
+    focusScopeNode.skipTraversal = !widget.route.isCurrent;
     return AnimatedBuilder(
       animation: widget.route.restorationScopeId,
       builder: (BuildContext context, Widget? child) {
@@ -936,24 +1060,22 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                   },
                   child: PrimaryScrollController(
                     controller: primaryScrollController,
-                    child: FocusScope(
-                      node: focusScopeNode, // immutable
-                      // Only top most route can participate in focus traversal.
-                      skipTraversal: !widget.route.isCurrent,
+                    child: FocusScope.withExternalFocusNode(
+                      focusScopeNode: focusScopeNode, // immutable
                       child: RepaintBoundary(
-                        child: AnimatedBuilder(
-                          animation: _listenable, // immutable
+                        child: ListenableBuilder(
+                          listenable: _listenable, // immutable
                           builder: (BuildContext context, Widget? child) {
                             return widget.route.buildTransitions(
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,
-                              // This additional AnimatedBuilder is include because if the
+                              // This additional ListenableBuilder is include because if the
                               // value of the userGestureInProgressNotifier changes, it's
                               // only necessary to rebuild the IgnorePointer widget and set
                               // the focus node's ability to focus.
-                              AnimatedBuilder(
-                                animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                              ListenableBuilder(
+                                listenable: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
                                 builder: (BuildContext context, Widget? child) {
                                   final bool ignoreEvents = _shouldIgnoreFocusRequest;
                                   focusScopeNode.canRequestFocus = !ignoreEvents;
@@ -1043,9 +1165,39 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// while it is visible (specifically, if [isCurrent] or [canPop] change value).
   @optionalTypeArgs
   static ModalRoute<T>? of<T extends Object?>(BuildContext context) {
-    final _ModalScopeStatus? widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
-    return widget?.route as ModalRoute<T>?;
+    return _of<T>(context);
   }
+
+  static ModalRoute<T>? _of<T extends Object?>(BuildContext context, [_ModalRouteAspect? aspect]) {
+    return InheritedModel.inheritFrom<_ModalScopeStatus>(context, aspect: aspect)?.route as ModalRoute<T>?;
+  }
+
+  /// Returns [ModalRoute.isCurrent] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [ModalRoute.isCurrent] property of the ancestor [_ModalScopeStatus] changes.
+  static bool? isCurrentOf(BuildContext context) => _of(context, _ModalRouteAspect.isCurrent)?.isCurrent;
+
+  /// Returns [ModalRoute.canPop] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [ModalRoute.canPop] property of the ancestor [_ModalScopeStatus] changes.
+  static bool? canPopOf(BuildContext context) => _of(context, _ModalRouteAspect.canPop)?.canPop;
+
+  /// Returns [ModalRoute.settings] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [ModalRoute.settings] property of the ancestor [_ModalScopeStatus] changes.
+  static RouteSettings? settingsOf(BuildContext context) => _of(context, _ModalRouteAspect.settings)?.settings;
 
   /// Schedule a call to [buildTransitions].
   ///
@@ -1368,7 +1520,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// background color, one could say:
   ///
   /// ```dart
-  /// Color get barrierColor => Theme.of(navigator.context).colorScheme.background;
+  /// Color get barrierColor => Theme.of(navigator.context).colorScheme.surface;
   /// ```
   ///
   /// {@end-tool}
@@ -1451,7 +1603,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// visible.
   ///
   /// Setting [maintainState] to false does not guarantee that the route will be
-  /// discarded. For instance, it will not be descarded if it is still visible
+  /// discarded. For instance, it will not be discarded if it is still visible
   /// because the next above it is not opaque (e.g. it is a popup dialog).
   /// {@endtemplate}
   ///
@@ -1465,6 +1617,55 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    of this property.
   bool get maintainState;
 
+  /// True if a back gesture (iOS-style back swipe or Android predictive back)
+  /// is currently underway for this route.
+  ///
+  /// See also:
+  ///
+  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
+  ///    would be allowed.
+  bool get popGestureInProgress => navigator!.userGestureInProgress;
+
+  /// Whether a pop gesture can be started by the user for this route.
+  ///
+  /// Returns true if the user can edge-swipe to a previous route.
+  ///
+  /// This should only be used between frames, not during build.
+  @override
+  bool get popGestureEnabled {
+    // If there's nothing to go back to, then obviously we don't support
+    // the back gesture.
+    if (isFirst) {
+      return false;
+    }
+    // If the route wouldn't actually pop if we popped it, then the gesture
+    // would be really confusing (or would skip internal routes), so disallow it.
+    if (willHandlePopInternally) {
+      return false;
+    }
+    // If attempts to dismiss this route might be vetoed such as in a page
+    // with forms, then do not allow the user to dismiss the route with a swipe.
+    if (hasScopedWillPopCallback || popDisposition == RoutePopDisposition.doNotPop) {
+      return false;
+    }
+    // If we're in an animation already, we cannot be manually swiped.
+    if (!animation!.isCompleted) {
+      return false;
+    }
+    // If we're being popped into, we also cannot be swiped until the pop above
+    // it completes. This translates to our secondary animation being
+    // dismissed.
+    if (!secondaryAnimation!.isDismissed) {
+      return false;
+    }
+    // If we're in a gesture already, we cannot start another.
+    if (popGestureInProgress) {
+      return false;
+    }
+
+    // Looks like a back gesture would be welcome!
+    return true;
+  }
 
   // The API for _ModalScope and HeroController
 
@@ -1507,7 +1708,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
-  final Set<PopEntry> _popEntries = <PopEntry>{};
+  // Holding as Object? instead of T so that PopScope in this route can be
+  // declared with any supertype of T.
+  final Set<PopEntry<Object?>> _popEntries = <PopEntry<Object?>>{};
 
   /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
   /// [addScopedWillPopCallback] returns either false or null. If they all
@@ -1555,28 +1758,28 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  ///  * [Form], which provides an `onPopInvoked` callback that is similar.
+  ///  * [Form], which provides an `onPopInvokedWithResult` callback that is similar.
   ///  * [registerPopEntry], which adds a [PopEntry] to the list this method
   ///    checks.
   ///  * [unregisterPopEntry], which removes a [PopEntry] from the list this
   ///    method checks.
   @override
   RoutePopDisposition get popDisposition {
-    final bool canPop = _popEntries.every((PopEntry popEntry) {
-      return popEntry.canPopNotifier.value;
-    });
-
-    if (!canPop) {
-      return RoutePopDisposition.doNotPop;
+    for (final PopEntry<Object?> popEntry in _popEntries) {
+      if (!popEntry.canPopNotifier.value) {
+        return RoutePopDisposition.doNotPop;
+      }
     }
+
     return super.popDisposition;
   }
 
   @override
-  void onPopInvoked(bool didPop) {
-    for (final PopEntry popEntry in _popEntries) {
-      popEntry.onPopInvoked?.call(didPop);
+  void onPopInvokedWithResult(bool didPop, T? result) {
+    for (final PopEntry<Object?> popEntry in _popEntries) {
+      popEntry.onPopInvokedWithResult(didPop, result);
     }
+    super.onPopInvokedWithResult(didPop, result);
   }
 
   /// Enables this route to veto attempts by the user to dismiss it.
@@ -1625,17 +1828,17 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Registers the existence of a [PopEntry] in the route.
   ///
   /// [PopEntry] instances registered in this way will have their
-  /// [PopEntry.onPopInvoked] callbacks called when a route is popped or a pop
+  /// [PopEntry.onPopInvokedWithResult] callbacks called when a route is popped or a pop
   /// is attempted. They will also be able to block pop operations with
   /// [PopEntry.canPopNotifier] through this route's [popDisposition] method.
   ///
   /// See also:
   ///
   ///  * [unregisterPopEntry], which performs the opposite operation.
-  void registerPopEntry(PopEntry popEntry) {
+  void registerPopEntry(PopEntry<Object?> popEntry) {
     _popEntries.add(popEntry);
-    popEntry.canPopNotifier.addListener(_handlePopEntryChange);
-    _handlePopEntryChange();
+    popEntry.canPopNotifier.addListener(_maybeDispatchNavigationNotification);
+    _maybeDispatchNavigationNotification();
   }
 
   /// Unregisters a [PopEntry] in the route's widget subtree.
@@ -1643,13 +1846,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// See also:
   ///
   ///  * [registerPopEntry], which performs the opposite operation.
-  void unregisterPopEntry(PopEntry popEntry) {
+  void unregisterPopEntry(PopEntry<Object?> popEntry) {
     _popEntries.remove(popEntry);
-    popEntry.canPopNotifier.removeListener(_handlePopEntryChange);
-    _handlePopEntryChange();
+    popEntry.canPopNotifier.removeListener(_maybeDispatchNavigationNotification);
+    _maybeDispatchNavigationNotification();
   }
 
-  void _handlePopEntryChange() {
+  void _maybeDispatchNavigationNotification() {
     if (!isCurrent) {
       return;
     }
@@ -1718,6 +1921,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void didPopNext(Route<dynamic> nextRoute) {
     super.didPopNext(nextRoute);
     changedInternalState();
+    _maybeDispatchNavigationNotification();
   }
 
   @override
@@ -1775,9 +1979,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       );
     }
     barrier = IgnorePointer(
-      ignoring: animation!.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
-                animation!.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
-      child: barrier,
+      ignoring: !animation!.isForwardOrCompleted, // changedInternalState is called when animation.status updates
+      child: barrier,                             // dismissed is possible when doing a manual pop gesture
     );
     if (semanticsDismissible && barrierDismissible) {
       // To be sorted after the _modalScope.
@@ -1910,60 +2113,16 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// than only specific subtypes. For example, to watch for all [ModalRoute]
 /// variants, the `RouteObserver<ModalRoute<dynamic>>` type may be used.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
+/// This example demonstrates how to implement a [RouteObserver] that notifies
+/// [RouteAware] widget of changes to the state of their [Route].
 ///
-/// To make a [StatefulWidget] aware of its current [Route] state, implement
-/// [RouteAware] in its [State] and subscribe it to a [RouteObserver]:
-///
-/// ```dart
-/// // Register the RouteObserver as a navigation observer.
-/// final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
-///
-/// void main() {
-///   runApp(MaterialApp(
-///     home: Container(),
-///     navigatorObservers: <RouteObserver<ModalRoute<void>>>[ routeObserver ],
-///   ));
-/// }
-///
-/// class RouteAwareWidget extends StatefulWidget {
-///   const RouteAwareWidget({super.key});
-///
-///   @override
-///   State<RouteAwareWidget> createState() => RouteAwareWidgetState();
-/// }
-///
-/// // Implement RouteAware in a widget's state and subscribe it to the RouteObserver.
-/// class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
-///
-///   @override
-///   void didChangeDependencies() {
-///     super.didChangeDependencies();
-///     routeObserver.subscribe(this, ModalRoute.of(context)!);
-///   }
-///
-///   @override
-///   void dispose() {
-///     routeObserver.unsubscribe(this);
-///     super.dispose();
-///   }
-///
-///   @override
-///   void didPush() {
-///     // Route was pushed onto navigator and is now topmost route.
-///   }
-///
-///   @override
-///   void didPopNext() {
-///     // Covering route was popped off the navigator.
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) => Container();
-///
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/routes/route_observer.0.dart **
 /// {@end-tool}
+///
+/// See also:
+///  * [RouteAware], this is used with [RouteObserver] to make a widget aware
+///   of changes to the [Navigator]'s session history.
 class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   final Map<R, Set<RouteAware>> _listeners = <R, Set<RouteAware>>{};
 
@@ -2167,10 +2326,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     if (_transitionBuilder == null) {
       // Some default transition.
       return FadeTransition(
-        opacity: CurvedAnimation(
-          parent: animation,
-          curve: Curves.linear,
-        ),
+        opacity: animation,
         child: child,
       );
     }
@@ -2296,11 +2452,13 @@ typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animatio
 ///
 /// Accepts a didPop boolean indicating whether or not back navigation
 /// succeeded.
-typedef PopInvokedCallback = void Function(bool didPop);
+///
+/// The `result` contains the pop result.
+typedef PopInvokedWithResultCallback<T> = void Function(bool didPop, T? result);
 
 /// Allows listening to and preventing pops.
 ///
-/// Can be registered in [ModalRoute] to listen to pops with [onPopInvoked] or
+/// Can be registered in [ModalRoute] to listen to pops with [onPopInvokedWithResult] or
 /// to enable/disable them with [canPopNotifier].
 ///
 /// See also:
@@ -2308,15 +2466,23 @@ typedef PopInvokedCallback = void Function(bool didPop);
 ///  * [PopScope], which provides similar functionality in a widget.
 ///  * [ModalRoute.registerPopEntry], which unregisters instances of this.
 ///  * [ModalRoute.unregisterPopEntry], which unregisters instances of this.
-abstract class PopEntry {
-  /// {@macro flutter.widgets.PopScope.onPopInvoked}
-  PopInvokedCallback? get onPopInvoked;
+abstract class PopEntry<T> {
+
+  /// {@macro flutter.widgets.PopScope.onPopInvokedWithResult}
+  @Deprecated(
+    'Use onPopInvokedWithResult instead. '
+    'This feature was deprecated after v3.22.0-12.0.pre.',
+  )
+  void onPopInvoked(bool didPop) { }
+
+  /// {@macro flutter.widgets.PopScope.onPopInvokedWithResult}
+  void onPopInvokedWithResult(bool didPop, T? result) => onPopInvoked(didPop);
 
   /// {@macro flutter.widgets.PopScope.canPop}
   ValueListenable<bool> get canPopNotifier;
 
   @override
   String toString() {
-    return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvoked';
+    return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvokedWithResult';
   }
 }

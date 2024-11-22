@@ -121,7 +121,7 @@ class ModuleTest {
 
       content = content.replaceFirst(
         '${platformLineSep}dependencies:$platformLineSep',
-        '${platformLineSep}dependencies:$platformLineSep  device_info: 2.0.3$platformLineSep  package_info: 2.0.2$platformLineSep',
+        '${platformLineSep}dependencies:$platformLineSep',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -132,43 +132,6 @@ class ModuleTest {
       });
 
       // TODO(dacoharkes): Implement Add2app. https://github.com/flutter/flutter/issues/129757
-      section('Check native assets error');
-
-      await inDirectory(Directory(path.join(projectDir.path, '.android')),
-          () async {
-        final StringBuffer stderr = StringBuffer();
-        final int exitCode = await exec(
-          gradlewExecutable,
-          <String>['flutter:assembleDebug'],
-          environment: <String, String>{'JAVA_HOME': javaHome},
-          canFail: true,
-          stderr: stderr,
-        );
-        const String errorString =
-            'Native assets are not yet supported in Android add2app.';
-        if (!stderr.toString().contains(errorString) || exitCode == 0) {
-          throw TaskResult.failure(
-              '''
-Expected to find `$errorString` in stderr and nonZero exit code.
-$stderr
-exitCode: $exitCode
-''');
-        }
-      });
-
-      section('Remove FFI package');
-
-      content = content.replaceFirst(
-        '  $ffiPackageName:$platformLineSep    path: ..${Platform.pathSeparator}$ffiPackageName$platformLineSep',
-        '',
-      );
-      await pubspec.writeAsString(content, flush: true);
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'packages',
-          options: <String>['get'],
-        );
-      });
 
       section('Build Flutter module library archive');
 
@@ -331,6 +294,8 @@ exitCode: $exitCode
         ...flutterAssets,
         ...debugAssets,
         ...baseApkFiles,
+        'lib/arm64-v8a/lib$ffiPackageName.so',
+        'lib/armeabi-v7a/lib$ffiPackageName.so',
       ], await getFilesInApk(debugHostApk));
 
       section('Check debug AndroidManifest.xml');
@@ -409,8 +374,10 @@ exitCode: $exitCode
       checkCollectionContains<String>(<String>[
         ...flutterAssets,
         ...baseApkFiles,
+        'lib/arm64-v8a/lib$ffiPackageName.so',
         'lib/arm64-v8a/libapp.so',
         'lib/arm64-v8a/libflutter.so',
+        'lib/armeabi-v7a/lib$ffiPackageName.so',
         'lib/armeabi-v7a/libapp.so',
         'lib/armeabi-v7a/libflutter.so',
       ], await getFilesInApk(releaseHostApk));
@@ -483,5 +450,6 @@ Future<void> main() async {
   await task(combine(<TaskFunction>[
     // ignore: avoid_redundant_argument_values
     ModuleTest('module-gradle-7.6', gradleVersion: '7.6.3').call,
+    ModuleTest('module-gradle-7.6', gradleVersion: '7.6-rc-2').call,
   ]));
 }

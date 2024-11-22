@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'context_menu_action.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -56,15 +59,6 @@ typedef _DismissCallback = void Function(
   double opacity,
 );
 
-/// A function that produces the preview when the CupertinoContextMenu is open.
-///
-/// Called every time the animation value changes.
-typedef ContextMenuPreviewBuilder = Widget Function(
-  BuildContext context,
-  Animation<double> animation,
-  Widget child,
-);
-
 /// A function that builds the child and handles the transition between the
 /// default child and the preview when the CupertinoContextMenu is open.
 typedef CupertinoContextMenuBuilder = Widget Function(
@@ -95,22 +89,16 @@ enum _ContextMenuLocation {
 
 /// A full-screen modal route that opens when the [child] is long-pressed.
 ///
-/// When open, the [CupertinoContextMenu] shows the child, or the widget returned
-/// by [previewBuilder] if given, in a large full-screen [Overlay] with a list
-/// of buttons specified by [actions]. The child/preview is placed in an
-/// [Expanded] widget so that it will grow to fill the Overlay if its size is
-/// unconstrained.
+/// When open, the [CupertinoContextMenu] shows the child in a large full-screen
+/// [Overlay] with a list of buttons specified by [actions]. The child/preview is
+/// placed in an [Expanded] widget so that it will grow to fill the Overlay if
+/// its size is unconstrained.
 ///
 /// When closed, the [CupertinoContextMenu] displays the child as if the
 /// [CupertinoContextMenu] were not there. Sizing and positioning is unaffected.
 /// The menu can be closed like other [PopupRoute]s, such as by tapping the
 /// background or by calling `Navigator.pop(context)`. Unlike [PopupRoute], it can
 /// also be closed by swiping downwards.
-///
-/// The [previewBuilder] parameter is most commonly used to display a slight
-/// variation of [child]. See [previewBuilder] for an example of rounding the
-/// child's corners and allowing its aspect ratio to expand, similar to the
-/// Photos app on iOS.
 ///
 /// {@tool dartpad}
 /// This sample shows a very simple [CupertinoContextMenu] for the Flutter logo.
@@ -138,11 +126,6 @@ class CupertinoContextMenu extends StatefulWidget {
     required this.actions,
     required Widget this.child,
     this.enableHapticFeedback = false,
-    @Deprecated(
-      'Use CupertinoContextMenu.builder instead. '
-      'This feature was deprecated after v3.4.0-34.1.pre.',
-    )
-    this.previewBuilder = _defaultPreviewBuilder,
   }) : assert(actions.isNotEmpty),
        builder = ((BuildContext context, Animation<double> animation) => child);
 
@@ -158,8 +141,7 @@ class CupertinoContextMenu extends StatefulWidget {
     required this.builder,
     this.enableHapticFeedback = false,
   }) : assert(actions.isNotEmpty),
-       child = null,
-       previewBuilder = null;
+       child = null;
 
   /// Exposes the default border radius for matching iOS 16.0 behavior. This
   /// value was eyeballed from the iOS simulator running iOS 16.0.
@@ -193,11 +175,9 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   ///     final Animation<Decoration> boxDecorationAnimation = DecorationTween(
   ///       begin: const BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: <BoxShadow>[],
   ///       ),
   ///       end: const BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: CupertinoContextMenu.kEndBoxShadow,
   ///       ),
   ///      ).animate(
@@ -300,11 +280,9 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   ///     final Animation<Decoration> boxDecorationAnimation = DecorationTween(
   ///       begin: const BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: <BoxShadow>[],
   ///       ),
   ///       end: const BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: CupertinoContextMenu.kEndBoxShadow,
   ///       ),
   ///      ).animate(
@@ -353,28 +331,14 @@ class CupertinoContextMenu extends StatefulWidget {
   /// {@end-tool}
   final CupertinoContextMenuBuilder builder;
 
-  /// The default preview builder if none is provided. It makes a rectangle
-  /// around the child widget with rounded borders, matching the iOS 16 opened
-  /// context menu eyeballed on the XCode iOS simulator.
-  static Widget _defaultPreviewBuilder(BuildContext context, Animation<double> animation, Widget child) {
-    return FittedBox(
-      fit: BoxFit.cover,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(_previewBorderRadiusRatio * animation.value),
-        child: child,
-      ),
-    );
-  }
-
   // TODO(mitchgoodwin): deprecate [child] with builder refactor https://github.com/flutter/flutter/issues/116306
 
   /// The widget that can be "opened" with the [CupertinoContextMenu].
   ///
   /// When the [CupertinoContextMenu] is long-pressed, the menu will open and
-  /// this widget (or the widget returned by [previewBuilder], if provided) will
-  /// be moved to the new route and placed inside of an [Expanded] widget. This
-  /// allows the child to resize to fit in its place in the new route, if it
-  /// doesn't size itself.
+  /// this widget will be moved to the new route and placed inside of an
+  /// [Expanded] widget. This allows the child to resize to fit in its place in
+  /// the new route, if it doesn't size itself.
   ///
   /// When the [CupertinoContextMenu] is "closed", this widget acts like a
   /// [Container], i.e. it does not constrain its child's size or affect its
@@ -394,74 +358,6 @@ class CupertinoContextMenu extends StatefulWidget {
   /// Uses [HapticFeedback.heavyImpact] when activated.
   /// Defaults to false.
   final bool enableHapticFeedback;
-
-  /// A function that returns an alternative widget to show when the
-  /// [CupertinoContextMenu] is open.
-  ///
-  /// If not specified, [child] will be shown.
-  ///
-  /// The preview is often used to show a slight variation of the [child]. For
-  /// example, the child could be given rounded corners in the preview but have
-  /// sharp corners when in the page.
-  ///
-  /// In addition to the current [BuildContext], the function is also called
-  /// with an [Animation] and the [child]. The animation goes from 0 to 1 when
-  /// the CupertinoContextMenu opens, and from 1 to 0 when it closes, and it can
-  /// be used to animate the preview in sync with this opening and closing. The
-  /// child parameter provides access to the child displayed when the
-  /// CupertinoContextMenu is closed.
-  ///
-  /// {@tool snippet}
-  ///
-  /// Below is an example of using [previewBuilder] to show an image tile that's
-  /// similar to each tile in the iOS iPhoto app's context menu. Several of
-  /// these could be used in a GridView for a similar effect.
-  ///
-  /// When opened, the child animates to show its full aspect ratio and has
-  /// rounded corners. The larger size of the open CupertinoContextMenu allows
-  /// the FittedBox to fit the entire image, even when it has a very tall or
-  /// wide aspect ratio compared to the square of a GridView, so this animates
-  /// into view as the CupertinoContextMenu is opened. The preview is swapped in
-  /// right when the open animation begins, which includes the rounded corners.
-  ///
-  /// ```dart
-  /// CupertinoContextMenu(
-  ///   // The FittedBox in the preview here allows the image to animate its
-  ///   // aspect ratio when the CupertinoContextMenu is animating its preview
-  ///   // widget open and closed.
-  ///   // ignore: deprecated_member_use
-  ///   previewBuilder: (BuildContext context, Animation<double> animation, Widget child) {
-  ///     return FittedBox(
-  ///       fit: BoxFit.cover,
-  ///       // This ClipRRect rounds the corners of the image when the
-  ///       // CupertinoContextMenu is open, even though it's not rounded when
-  ///       // it's closed. It uses the given animation to animate the corners
-  ///       // in sync with the opening animation.
-  ///       child: ClipRRect(
-  ///         borderRadius: BorderRadius.circular(64.0 * animation.value),
-  ///         child: Image.asset('assets/photo.jpg'),
-  ///       ),
-  ///     );
-  ///   },
-  ///   actions: <Widget>[
-  ///     CupertinoContextMenuAction(
-  ///       child: const Text('Action one'),
-  ///       onPressed: () {},
-  ///     ),
-  ///   ],
-  ///   child: FittedBox(
-  ///     fit: BoxFit.cover,
-  ///     child: Image.asset('assets/photo.jpg'),
-  ///   ),
-  /// )
-  /// ```
-  ///
-  /// {@end-tool}
-  @Deprecated(
-    'Use CupertinoContextMenu.builder instead. '
-    'This feature was deprecated after v3.4.0-34.1.pre.',
-  )
-  final ContextMenuPreviewBuilder? previewBuilder;
 
   @override
   State<CupertinoContextMenu> createState() => _CupertinoContextMenuState();
@@ -532,6 +428,19 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     return _ContextMenuLocation.left;
   }
 
+  /// The default preview builder if none is provided. It makes a rectangle
+  /// around the child widget with rounded borders, matching the iOS 16 opened
+  /// context menu eyeballed on the XCode iOS simulator.
+  static Widget _defaultPreviewBuilder(BuildContext context, Animation<double> animation, Widget child) {
+    return FittedBox(
+      fit: BoxFit.cover,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(_previewBorderRadiusRatio * animation.value),
+        child: child,
+      ),
+    );
+  }
+
   // Push the new route and open the CupertinoContextMenu overlay.
   void _openContextMenu() {
     setState(() {
@@ -552,7 +461,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           final Animation<double> localAnimation = Tween<double>(begin: CupertinoContextMenu.animationOpensAt, end: 1).animate(animation);
           return widget.builder(context, localAnimation);
         }
-        return widget.previewBuilder!(context, animation, widget.child!);
+        return _defaultPreviewBuilder(context, animation, widget.child!);
       },
     );
     Navigator.of(context, rootNavigator: true).push<void>(_route!);
@@ -596,7 +505,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   // Watch for when _ContextMenuRoute is closed and return to the state where
   // the CupertinoContextMenu just behaves as a Container.
   void _routeAnimationStatusListener(AnimationStatus status) {
-    if (status != AnimationStatus.dismissed) {
+    if (!status.isDismissed) {
       return;
     }
     if (mounted) {
@@ -720,6 +629,7 @@ class _DecoyChild extends StatefulWidget {
 class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin {
   late Animation<Rect?> _rect;
   late Animation<Decoration> _boxDecoration;
+  late final CurvedAnimation _boxDecorationCurvedAnimation;
 
   @override
   void initState() {
@@ -764,20 +674,18 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
       ),
     ]).animate(widget.controller);
 
+    _boxDecorationCurvedAnimation = CurvedAnimation(
+        parent: widget.controller,
+        curve: Interval(0.0, CupertinoContextMenu.animationOpensAt),
+    );
     _boxDecoration = DecorationTween(
       begin: const BoxDecoration(
-        color: Color(0xFFFFFFFF),
         boxShadow: <BoxShadow>[],
       ),
       end: const BoxDecoration(
-        color: Color(0xFFFFFFFF),
         boxShadow: _endBoxShadow,
       ),
-    ).animate(CurvedAnimation(
-        parent: widget.controller,
-        curve: Interval(0.0, CupertinoContextMenu.animationOpensAt),
-      ),
-    );
+    ).animate(_boxDecorationCurvedAnimation);
   }
 
   Widget _buildAnimation(BuildContext context, Widget? child) {
@@ -795,6 +703,12 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
       rect: _rect.value!,
       child: widget.builder!(context, widget.controller),
     );
+  }
+
+  @override
+  void dispose() {
+    _boxDecorationCurvedAnimation.dispose();
+    super.dispose();
   }
 
   @override
@@ -889,6 +803,10 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
+  CurvedAnimation? _curvedAnimation;
+
+  CurvedAnimation? _sheetOpacityCurvedAnimation;
+
   // Getting the RenderBox doesn't include the scale from the Transform.scale,
   // so it's manually accounted for here.
   static Rect _getScaledRect(GlobalKey globalKey, double scale) {
@@ -904,14 +822,11 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   // Get the alignment for the _ContextMenuSheet's Transform.scale based on the
   // contextMenuLocation.
   static AlignmentDirectional getSheetAlignment(_ContextMenuLocation contextMenuLocation) {
-    switch (contextMenuLocation) {
-      case _ContextMenuLocation.center:
-        return AlignmentDirectional.topCenter;
-      case _ContextMenuLocation.right:
-        return AlignmentDirectional.topEnd;
-      case _ContextMenuLocation.left:
-        return AlignmentDirectional.topStart;
-    }
+    return switch (contextMenuLocation) {
+      _ContextMenuLocation.center => AlignmentDirectional.topCenter,
+      _ContextMenuLocation.right  => AlignmentDirectional.topEnd,
+      _ContextMenuLocation.left   => AlignmentDirectional.topStart,
+    };
   }
 
   // The place to start the sheetRect animation from.
@@ -939,10 +854,11 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   void _onDismiss(BuildContext context, double scale, double opacity) {
     _scale = scale;
     _opacityTween.end = opacity;
-    _sheetOpacity = _opacityTween.animate(CurvedAnimation(
+    _sheetOpacityCurvedAnimation = CurvedAnimation(
       parent: animation!,
       curve: const Interval(0.9, 1.0),
-    ));
+    );
+    _sheetOpacity = _opacityTween.animate(_sheetOpacityCurvedAnimation!);
     Navigator.of(context).pop();
   }
 
@@ -1017,10 +933,14 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   @override
   Animation<double> createAnimation() {
     final Animation<double> animation = super.createAnimation();
-    _sheetOpacity = _opacityTween.animate(CurvedAnimation(
-      parent: animation,
-      curve: Curves.linear,
-    ));
+    if (_curvedAnimation?.parent != animation) {
+      _curvedAnimation?.dispose();
+      _curvedAnimation = CurvedAnimation(
+        parent: animation,
+        curve: Curves.linear,
+      );
+    }
+    _sheetOpacity = _opacityTween.animate(_curvedAnimation!);
     return animation;
   }
 
@@ -1094,6 +1014,13 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       },
     );
   }
+
+  @override
+  void dispose() {
+    _curvedAnimation?.dispose();
+    _sheetOpacityCurvedAnimation?.dispose();
+    super.dispose();
+  }
 }
 
 // The final state of the _ContextMenuRoute after animating in and before
@@ -1133,8 +1060,10 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
   late Offset _dragOffset;
   double _lastScale = 1.0;
-  late AnimationController _moveController;
-  late AnimationController _sheetController;
+  late final AnimationController _moveController;
+  late final CurvedAnimation _moveCurvedAnimation;
+  late final AnimationController _sheetController;
+  late final CurvedAnimation _sheetCurvedAnimation;
   late Animation<Offset> _moveAnimation;
   late Animation<double> _sheetScaleAnimation;
   late Animation<double> _sheetOpacityAnimation;
@@ -1199,14 +1128,14 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     // When the scale passes the threshold, animate the sheet back in.
     if (_lastScale > _kSheetScaleThreshold) {
       _moveController.removeListener(_moveListener);
-      if (_sheetController.status != AnimationStatus.dismissed) {
+      if (!_sheetController.isDismissed) {
         _sheetController.reverse();
       }
     }
   }
 
   void _flingStatusListener(AnimationStatus status) {
-    if (status != AnimationStatus.completed) {
+    if (!status.isCompleted) {
       return;
     }
 
@@ -1223,20 +1152,14 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   }
 
   Alignment _getChildAlignment(Orientation orientation, _ContextMenuLocation contextMenuLocation) {
-    switch (contextMenuLocation) {
-      case _ContextMenuLocation.center:
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topRight;
-      case _ContextMenuLocation.right:
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topLeft;
-      case _ContextMenuLocation.left:
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topRight;
+    if (orientation == Orientation.portrait) {
+      return Alignment.bottomCenter;
     }
+    return switch (contextMenuLocation) {
+      _ContextMenuLocation.left   => Alignment.topRight,
+      _ContextMenuLocation.center => Alignment.topRight,
+      _ContextMenuLocation.right  => Alignment.topLeft,
+    };
   }
 
   void _setDragOffset(Offset dragOffset) {
@@ -1253,12 +1176,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
           clampDouble(endX, -_kPadding, _kPadding),
           endY,
         ),
-      ).animate(
-        CurvedAnimation(
-          parent: _moveController,
-          curve: Curves.elasticIn,
-        ),
-      );
+      ).animate(_moveCurvedAnimation);
 
       // Fade the _ContextMenuSheet out or in, if needed.
       if (_lastScale <= _kSheetScaleThreshold
@@ -1307,16 +1225,12 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       ),
     );
 
-    switch (contextMenuLocation) {
-      case _ContextMenuLocation.center:
-        return <Widget>[child, spacer, sheet];
-      case _ContextMenuLocation.right:
-        return orientation == Orientation.portrait
-          ? <Widget>[child, spacer, sheet]
-          : <Widget>[sheet, spacer, child];
-      case _ContextMenuLocation.left:
-        return <Widget>[child, spacer, sheet];
-    }
+    return switch (contextMenuLocation) {
+      _ContextMenuLocation.right when orientation == Orientation.portrait => <Widget>[child, spacer, sheet],
+      _ContextMenuLocation.right  => <Widget>[sheet, spacer, child],
+      _ContextMenuLocation.center => <Widget>[child, spacer, sheet],
+      _ContextMenuLocation.left   => <Widget>[child, spacer, sheet],
+    };
   }
 
   // Build the animation for the _ContextMenuSheet.
@@ -1361,21 +1275,24 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       value: 1.0,
       vsync: this,
     );
+    _moveCurvedAnimation = CurvedAnimation(
+      parent: _moveController,
+     curve: Curves.elasticIn,
+    );
     _sheetController = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 300),
       vsync: this,
     );
+    _sheetCurvedAnimation = CurvedAnimation(
+      parent: _sheetController,
+        curve: Curves.linear,
+        reverseCurve: Curves.easeInBack,
+    );
     _sheetScaleAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _sheetController,
-        curve: Curves.linear,
-        reverseCurve: Curves.easeInBack,
-      ),
-    );
+    ).animate(_sheetCurvedAnimation);
     _sheetOpacityAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
@@ -1386,7 +1303,9 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   @override
   void dispose() {
     _moveController.dispose();
+    _moveCurvedAnimation.dispose();
     _sheetController.dispose();
+    _sheetCurvedAnimation.dispose();
     super.dispose();
   }
 
@@ -1407,15 +1326,14 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
           child: AnimatedBuilder(
             animation: _moveController,
             builder: _buildAnimation,
-            child: widget.orientation == Orientation.portrait
-              ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: children,
-              )
-              : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: children,
-              ),
+            child: Flex(
+              direction: switch (widget.orientation) {
+                Orientation.portrait  => Axis.vertical,
+                Orientation.landscape => Axis.horizontal,
+              },
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
           ),
         ),
       ),
@@ -1475,29 +1393,12 @@ class _ContextMenuSheet extends StatelessWidget {
       ),
     );
 
-    switch (_contextMenuLocation) {
-      case _ContextMenuLocation.center:
-        return _orientation == Orientation.portrait
-          ? <Widget>[
-            const Spacer(),
-            menu,
-            const Spacer(),
-          ]
-        : <Widget>[
-            menu,
-            const Spacer(),
-          ];
-      case _ContextMenuLocation.right:
-        return <Widget>[
-          const Spacer(),
-          menu,
-        ];
-      case _ContextMenuLocation.left:
-        return <Widget>[
-          menu,
-          const Spacer(),
-        ];
-    }
+    return switch (_contextMenuLocation) {
+      _ContextMenuLocation.center when _orientation == Orientation.portrait => <Widget>[const Spacer(), menu, const Spacer()],
+      _ContextMenuLocation.center => <Widget>[menu, const Spacer()],
+      _ContextMenuLocation.right  => <Widget>[const Spacer(), menu],
+      _ContextMenuLocation.left   => <Widget>[menu, const Spacer()],
+    };
   }
 
   @override

@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 Widget wrap({ required Widget child }) {
   return MediaQuery(
@@ -78,7 +78,7 @@ void main() {
             SemanticsFlag.isFocusable,
             SemanticsFlag.isToggled,
           ],
-          actions: SemanticsAction.tap.index,
+          actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
           label: 'aaa\nAAA',
         ),
         TestSemantics.rootChild(
@@ -92,7 +92,7 @@ void main() {
             SemanticsFlag.isEnabled,
             SemanticsFlag.isFocusable,
           ],
-          actions: SemanticsAction.tap.index,
+          actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
           label: 'bbb\nBBB',
         ),
         TestSemantics.rootChild(
@@ -106,7 +106,7 @@ void main() {
             SemanticsFlag.isFocusable,
             SemanticsFlag.isInMutuallyExclusiveGroup,
           ],
-          actions: SemanticsAction.tap.index,
+          actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
           label: 'CCC\nccc',
         ),
       ],
@@ -359,7 +359,19 @@ void main() {
     final ListTile listTile = tester.widget(find.byType(ListTile));
     // When controlAffinity is ListTileControlAffinity.leading, the position of
     // Switch is at leading edge and SwitchListTile.secondary at trailing edge.
-    expect(listTile.leading.runtimeType, Switch);
+
+    // Find the ExcludeFocus widget within the ListTile's leading
+    final ExcludeFocus excludeFocusWidget = tester.widget(
+      find.byWidgetPredicate((Widget widget) => listTile.leading == widget && widget is ExcludeFocus),
+    );
+
+    // Assert that the ExcludeFocus widget is not null
+    expect(excludeFocusWidget, isNotNull);
+
+    // Assert that the child of ExcludeFocus is Switch
+    expect(excludeFocusWidget.child.runtimeType, Switch);
+
+    // Assert that the trailing is Icon
     expect(listTile.trailing.runtimeType, Icon);
   });
 
@@ -379,8 +391,20 @@ void main() {
     // By default, value of controlAffinity is ListTileControlAffinity.platform,
     // where the position of SwitchListTile.secondary is at leading edge and Switch
     // at trailing edge. This also covers test for ListTileControlAffinity.trailing.
+
+    // Find the ExcludeFocus widget within the ListTile's trailing
+    final ExcludeFocus excludeFocusWidget = tester.widget(
+      find.byWidgetPredicate((Widget widget) => listTile.trailing == widget && widget is ExcludeFocus),
+    );
+
+    // Assert that the ExcludeFocus widget is not null
+    expect(excludeFocusWidget, isNotNull);
+
+    // Assert that the child of ExcludeFocus is Switch
+    expect(excludeFocusWidget.child.runtimeType, Switch);
+
+    // Assert that the leading is Icon
     expect(listTile.leading.runtimeType, Icon);
-    expect(listTile.trailing.runtimeType, Switch);
   });
 
   testWidgets('SwitchListTile respects shape', (WidgetTester tester) async {
@@ -1631,5 +1655,40 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints..rrect()..rrect(color: hoveredTrackColor, style: PaintingStyle.stroke)
     );
+  });
+
+  testWidgets('SwitchListTile.control widget should not request focus on traversal', (WidgetTester tester) async {
+    final GlobalKey firstChildKey = GlobalKey();
+    final GlobalKey secondChildKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              SwitchListTile(
+                value: true,
+                onChanged: (bool? value) {},
+                title: Text('Hey', key: firstChildKey),
+              ),
+              SwitchListTile(
+                value: true,
+                onChanged: (bool? value) {},
+                title: Text('There', key: secondChildKey),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    Focus.of(firstChildKey.currentContext!).requestFocus();
+    await tester.pump();
+    expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isTrue);
+    Focus.of(firstChildKey.currentContext!).nextFocus();
+    await tester.pump();
+    expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isFalse);
+    expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 }

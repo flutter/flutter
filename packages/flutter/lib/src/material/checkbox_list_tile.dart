@@ -475,55 +475,53 @@ class CheckboxListTile extends StatelessWidget {
 
     switch (_checkboxType) {
       case _CheckboxType.material:
-        control = Checkbox(
-          value: value,
-          onChanged: enabled ?? true ? onChanged : null,
-          mouseCursor: mouseCursor,
-          activeColor: activeColor,
-          fillColor: fillColor,
-          checkColor: checkColor,
-          hoverColor: hoverColor,
-          overlayColor: overlayColor,
-          splashRadius: splashRadius,
-          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-          autofocus: autofocus,
-          tristate: tristate,
-          shape: checkboxShape,
-          side: side,
-          isError: isError,
-          semanticLabel: checkboxSemanticLabel,
+        control = ExcludeFocus(
+          child: Checkbox(
+            value: value,
+            onChanged: enabled ?? true ? onChanged : null,
+            mouseCursor: mouseCursor,
+            activeColor: activeColor,
+            fillColor: fillColor,
+            checkColor: checkColor,
+            hoverColor: hoverColor,
+            overlayColor: overlayColor,
+            splashRadius: splashRadius,
+            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+            autofocus: autofocus,
+            tristate: tristate,
+            shape: checkboxShape,
+            side: side,
+            isError: isError,
+            semanticLabel: checkboxSemanticLabel,
+          ),
         );
       case _CheckboxType.adaptive:
-        control = Checkbox.adaptive(
-          value: value,
-          onChanged: enabled ?? true ? onChanged : null,
-          mouseCursor: mouseCursor,
-          activeColor: activeColor,
-          fillColor: fillColor,
-          checkColor: checkColor,
-          hoverColor: hoverColor,
-          overlayColor: overlayColor,
-          splashRadius: splashRadius,
-          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-          autofocus: autofocus,
-          tristate: tristate,
-          shape: checkboxShape,
-          side: side,
-          isError: isError,
-          semanticLabel: checkboxSemanticLabel,
+        control = ExcludeFocus(
+          child: Checkbox.adaptive(
+            value: value,
+            onChanged: enabled ?? true ? onChanged : null,
+            mouseCursor: mouseCursor,
+            activeColor: activeColor,
+            fillColor: fillColor,
+            checkColor: checkColor,
+            hoverColor: hoverColor,
+            overlayColor: overlayColor,
+            splashRadius: splashRadius,
+            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+            autofocus: autofocus,
+            tristate: tristate,
+            shape: checkboxShape,
+            side: side,
+            isError: isError,
+            semanticLabel: checkboxSemanticLabel,
+          ),
         );
     }
 
-    Widget? leading, trailing;
-    switch (controlAffinity) {
-      case ListTileControlAffinity.leading:
-        leading = control;
-        trailing = secondary;
-      case ListTileControlAffinity.trailing:
-      case ListTileControlAffinity.platform:
-        leading = secondary;
-        trailing = control;
-    }
+    final (Widget? leading, Widget? trailing) = switch (controlAffinity) {
+      ListTileControlAffinity.leading => (control, secondary),
+      ListTileControlAffinity.trailing || ListTileControlAffinity.platform => (secondary, control),
+    };
     final ThemeData theme = Theme.of(context);
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
     final Set<MaterialState> states = <MaterialState>{

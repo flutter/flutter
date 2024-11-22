@@ -121,7 +121,7 @@ class FlutterTesterTestDevice extends TestDevice {
       '--non-interactive',
       '--use-test-fonts',
       '--disable-asset-fonts',
-      '--packages=${debuggingOptions.buildInfo.packagesPath}',
+      '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       if (testAssetDirectory != null)
         '--flutter-assets-dir=$testAssetDirectory',
       if (debuggingOptions.nullAssertions)
@@ -143,6 +143,8 @@ class FlutterTesterTestDevice extends TestDevice {
       'FONTCONFIG_FILE': fontConfigManager.fontConfigFile.path,
       'SERVER_PORT': _server!.port.toString(),
       'APP_NAME': flutterProject?.manifest.appName ?? '',
+      if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
+        'FLUTTER_TEST_IMPELLER': 'true',
       if (testAssetDirectory != null)
         'UNIT_TEST_ASSETS': testAssetDirectory!,
     };
@@ -373,22 +375,15 @@ class FlutterTesterTestDevice extends TestDevice {
 }
 
 String _getExitCodeMessage(int exitCode) {
-  switch (exitCode) {
-    case 1:
-      return 'Shell subprocess cleanly reported an error. Check the logs above for an error message.';
-    case 0:
-      return 'Shell subprocess ended cleanly. Did main() call exit()?';
-    case -0x0f: // ProcessSignal.SIGTERM
-      return 'Shell subprocess crashed with SIGTERM ($exitCode).';
-    case -0x0b: // ProcessSignal.SIGSEGV
-      return 'Shell subprocess crashed with segmentation fault.';
-    case -0x06: // ProcessSignal.SIGABRT
-      return 'Shell subprocess crashed with SIGABRT ($exitCode).';
-    case -0x02: // ProcessSignal.SIGINT
-      return 'Shell subprocess terminated by ^C (SIGINT, $exitCode).';
-    default:
-      return 'Shell subprocess crashed with unexpected exit code $exitCode.';
-  }
+  return switch (exitCode) {
+    1     => 'Shell subprocess cleanly reported an error. Check the logs above for an error message.',
+    0     => 'Shell subprocess ended cleanly. Did main() call exit()?',
+    -0x0f => 'Shell subprocess crashed with SIGTERM ($exitCode).',     // ProcessSignal.SIGTERM
+    -0x0b => 'Shell subprocess crashed with segmentation fault.',      // ProcessSignal.SIGSEGV
+    -0x06 => 'Shell subprocess crashed with SIGABRT ($exitCode).',     // ProcessSignal.SIGABRT
+    -0x02 => 'Shell subprocess terminated by ^C (SIGINT, $exitCode).', // ProcessSignal.SIGINT
+    _     => 'Shell subprocess crashed with unexpected exit code $exitCode.',
+  };
 }
 
 StreamChannel<String> _webSocketToStreamChannel(WebSocket webSocket) {

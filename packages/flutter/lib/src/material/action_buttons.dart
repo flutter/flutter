@@ -179,7 +179,7 @@ class BackButtonIcon extends StatelessWidget {
 /// will override [color] for states where [ButtonStyle.foregroundColor] resolves to non-null.
 ///
 /// When deciding to display a [BackButton], consider using
-/// `ModalRoute.of(context)?.canPop` to check whether the current route can be
+/// `ModalRoute.canPopOf(context)` to check whether the current route can be
 /// popped. If that value is false (e.g., because the current route is the
 /// initial route), the [BackButton] will not have any effect when pressed,
 /// which could frustrate the user.
@@ -337,6 +337,7 @@ class DrawerButton extends _ActionButton {
   /// Creates a Material Design drawer icon button.
   const DrawerButton({
     super.key,
+    super.color,
     super.style,
     super.onPressed,
   }) : super(icon: const DrawerButtonIcon());
@@ -402,6 +403,7 @@ class EndDrawerButton extends _ActionButton {
   /// Creates a Material Design end drawer icon button.
   const EndDrawerButton({
     super.key,
+    super.color,
     super.style,
     super.onPressed,
   }) : super(icon: const EndDrawerButtonIcon());

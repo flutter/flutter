@@ -146,5 +146,7 @@
   "menuDismissLabel": "Ondoa menyu",
   "lookUpButtonLabel": "Tafuta",
   "searchWebButtonLabel": "Tafuta kwenye Wavuti",
-  "shareButtonLabel": "Shiriki..."
+  "shareButtonLabel": "Shiriki...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

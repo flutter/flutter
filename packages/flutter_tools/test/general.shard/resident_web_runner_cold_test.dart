@@ -29,7 +29,7 @@ import '../src/test_build_system.dart';
 void main() {
   late FakeFlutterDevice mockFlutterDevice;
   late FakeWebDevFS mockWebDevFS;
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();

@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
@@ -144,7 +145,11 @@ Future<void> run(List<String> args) async {
           BuildMode.debug,
           '',
           treeShakeIcons: false,
-          packagesPath: globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
+          packageConfigPath: globals.fs.path.normalize(
+            globals.fs.path.absolute(
+              argResults[_kOptionPackages] as String,
+            ),
+          ),
         ),
       ),
       watcher: collector,
@@ -153,6 +158,7 @@ Future<void> run(List<String> args) async {
       concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
       icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
       coverageDirectory: coverageDirectory,
+      nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
     );
 
     if (collector != null) {

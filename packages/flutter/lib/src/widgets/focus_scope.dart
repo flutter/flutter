@@ -511,7 +511,7 @@ class _FocusWithExternalFocusNode extends Focus {
 
 class _FocusState extends State<Focus> {
   FocusNode? _internalNode;
-  FocusNode get focusNode => widget.focusNode ?? _internalNode!;
+  FocusNode get focusNode => widget.focusNode ?? (_internalNode ??= _createNode());
   late bool _hadPrimaryFocus;
   late bool _couldRequestFocus;
   late bool _descendantsWereFocusable;
@@ -526,17 +526,13 @@ class _FocusState extends State<Focus> {
   }
 
   void _initNode() {
-    if (widget.focusNode == null) {
-      // Only create a new node if the widget doesn't have one.
-      // This calls a function instead of just allocating in place because
-      // _createNode is overridden in _FocusScopeState.
-      _internalNode ??= _createNode();
-    }
-    focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
-    focusNode.descendantsAreTraversable = widget.descendantsAreTraversable;
-    focusNode.skipTraversal = widget.skipTraversal;
-    if (widget._canRequestFocus != null) {
-      focusNode.canRequestFocus = widget._canRequestFocus!;
+    if (!widget._usingExternalFocus) {
+      focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
+      focusNode.descendantsAreTraversable = widget.descendantsAreTraversable;
+      focusNode.skipTraversal = widget.skipTraversal;
+      if (widget._canRequestFocus != null) {
+        focusNode.canRequestFocus = widget._canRequestFocus!;
+      }
     }
     _couldRequestFocus = focusNode.canRequestFocus;
     _descendantsWereFocusable = focusNode.descendantsAreFocusable;
@@ -675,6 +671,15 @@ class _FocusState extends State<Focus> {
     Widget child = widget.child;
     if (widget.includeSemantics) {
       child = Semantics(
+        // Automatically request the focus for a focusable widget when it
+        // receives an input focus action from the semantics. Nothing is needed
+        // for losing the focus because if focus is lost, that means another
+        // node will gain focus and take focus from this widget.
+        // TODO(gspencergoog): Allow this to be set on iOS once the issue is
+        // addressed: https://github.com/flutter/flutter/issues/150030
+        onFocus: defaultTargetPlatform != TargetPlatform.iOS && _couldRequestFocus
+          ? focusNode.requestFocus
+          : null,
         focusable: _couldRequestFocus,
         focused: _hadPrimaryFocus,
         child: widget.child,
@@ -761,6 +766,9 @@ class FocusScope extends Focus {
     super.onKeyEvent,
     super.onKey,
     super.debugLabel,
+    super.includeSemantics,
+    super.descendantsAreFocusable,
+    super.descendantsAreTraversable,
   })  : super(
           focusNode: node,
         );
@@ -774,6 +782,7 @@ class FocusScope extends Focus {
     required FocusScopeNode focusScopeNode,
     FocusNode? parentNode,
     bool autofocus,
+    bool includeSemantics,
     ValueChanged<bool>? onFocusChange,
   })  = _FocusScopeWithExternalFocusNode;
 
@@ -802,6 +811,7 @@ class _FocusScopeWithExternalFocusNode extends FocusScope {
     required FocusScopeNode focusScopeNode,
     super.parentNode,
     super.autofocus,
+    super.includeSemantics,
     super.onFocusChange,
   }) : super(
     node: focusScopeNode,
@@ -838,13 +848,17 @@ class _FocusScopeState extends _FocusState {
   @override
   Widget build(BuildContext context) {
     _focusAttachment!.reparent(parent: widget.parentNode);
-    return Semantics(
-      explicitChildNodes: true,
-      child: _FocusInheritedScope(
-        node: focusNode,
-        child: widget.child,
-      ),
+    Widget result = _FocusInheritedScope(
+      node: focusNode,
+      child: widget.child,
     );
+    if (widget.includeSemantics) {
+      result = Semantics(
+        explicitChildNodes: true,
+        child: result,
+      );
+    }
+    return result;
   }
 }
 

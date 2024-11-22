@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -274,11 +273,11 @@ class OverlayEntry implements Listenable {
 
 class _OverlayEntryWidget extends StatefulWidget {
   const _OverlayEntryWidget({
-    required Key key,
+    required Key super.key,
     required this.entry,
     required this.overlayState,
     this.tickerEnabled = true,
-  }) : super(key: key);
+  });
 
   final OverlayEntry entry;
   final OverlayState overlayState;
@@ -864,6 +863,12 @@ class _WrappingOverlayState extends State<_WrappingOverlay> {
   }
 
   @override
+  void dispose() {
+    _entry..remove()..dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Overlay(
       clipBehavior: widget.clipBehavior,
@@ -959,6 +964,35 @@ mixin _RenderTheaterMixin on RenderBox {
     if (child.parentData is! StackParentData) {
       child.parentData = StackParentData();
     }
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    assert(!debugNeedsLayout);
+    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+    for (final RenderBox child in _childrenInPaintOrder()) {
+      assert(!child.debugNeedsLayout);
+      final StackParentData childParentData = child.parentData! as StackParentData;
+      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDistanceToActualBaseline(baseline)) + childParentData.offset.dy);
+    }
+    return baselineOffset.offset;
+  }
+
+  static double? baselineForChild(RenderBox child, Size theaterSize, BoxConstraints nonPositionedChildConstraints, Alignment alignment, TextBaseline baseline) {
+    final StackParentData childParentData = child.parentData! as StackParentData;
+    final BoxConstraints childConstraints = childParentData.isPositioned
+      ? childParentData.positionedChildConstraints(theaterSize)
+      : nonPositionedChildConstraints;
+    final double? baselineOffset = child.getDryBaseline(childConstraints, baseline);
+    if (baselineOffset == null) {
+      return null;
+    }
+    final double y = switch (childParentData) {
+      StackParentData(:final double top?) => top,
+      StackParentData(:final double bottom?) => theaterSize.height - bottom - child.getDryLayout(childConstraints).height,
+      StackParentData() => alignment.alongOffset(theaterSize - child.getDryLayout(childConstraints) as Offset).dy,
+    };
+    return baselineOffset + y;
   }
 
   void layoutChild(RenderBox child, BoxConstraints nonPositionedChildConstraints) {
@@ -1137,7 +1171,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
     // After adding `child` to the render tree, we want to make sure it will be
     // laid out in the same frame. This is done by calling markNeedsLayout on the
-    // layout surrgate. This ensures `child` is reachable via tree walk (see
+    // layout surrogate. This ensures `child` is reachable via tree walk (see
     // _RenderLayoutSurrogateProxyBox.performLayout).
     child._layoutSurrogate.markNeedsLayout();
   }
@@ -1195,25 +1229,20 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
   }
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(!debugNeedsLayout);
-    double? result;
-    RenderBox? child = _firstOnstageChild;
-    while (child != null) {
-      assert(!child.debugNeedsLayout);
-      final StackParentData childParentData = child.parentData! as StackParentData;
-      double? candidate = child.getDistanceToActualBaseline(baseline);
-      if (candidate != null) {
-        candidate += childParentData.offset.dy;
-        if (result != null) {
-          result = math.min(result, candidate);
-        } else {
-          result = candidate;
-        }
-      }
-      child = childParentData.nextSibling;
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final Size size = constraints.biggest.isFinite
+      ? constraints.biggest
+      : _findSizeDeterminingChild().getDryLayout(constraints);
+    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(size);
+    final Alignment alignment = theater._resolvedAlignment;
+
+    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+    for (final RenderBox child in _childrenInPaintOrder()) {
+      baselineOffset = baselineOffset.minOf(BaselineOffset(
+        _RenderTheaterMixin.baselineForChild(child, size, nonPositionedChildConstraints, alignment, baseline),
+      ));
     }
-    return result;
+    return baselineOffset.offset;
   }
 
   @override
@@ -1923,7 +1952,7 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   //
   // Generally, `assert(_debugIsLocationValid())` should be used to prevent
   // invalid accesses to an invalid `_OverlayEntryLocation` object. Exceptions
-  // to this rule are _removeChild, _deactive, which will be called when the
+  // to this rule are _removeChild, _deactivate, which will be called when the
   // OverlayPortal is being removed from the widget tree and may use the
   // location information to perform cleanup tasks.
   //
@@ -2107,7 +2136,7 @@ class _OverlayPortalElement extends RenderObjectElement {
     final Element? overlayChild = _overlayChild;
     // Instead of just detaching the render objects, removing them from the
     // render subtree entirely. This is a workaround for the
-    // !renderObject.attached assert in the `super.deactive()` method.
+    // !renderObject.attached assert in the `super.deactivate()` method.
     if (overlayChild != null) {
       final _RenderDeferredLayoutBox? box = overlayChild.renderObject as _RenderDeferredLayoutBox?;
       if (box != null) {
@@ -2188,8 +2217,8 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 //
 // This `RenderObject` must be a child of a `_RenderTheater`. It guarantees that:
 //
-// 1. It's a relayout boundary, and `markParentNeedsLayout` is overridden such
-//    that it never dirties its `_RenderTheater`.
+// 1. It's a relayout boundary, so calling `markNeedsLayout` on it never dirties
+//    its `_RenderTheater`.
 //
 // 2. Its `layout` implementation is overridden such that `performLayout` does
 //    not do anything when its called from `layout`, preventing the parent
@@ -2231,19 +2260,6 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
     super.redepthChildren();
   }
 
-  bool _callingMarkParentNeedsLayout = false;
-  @override
-  void markParentNeedsLayout() {
-    // No re-entrant calls.
-    if (_callingMarkParentNeedsLayout) {
-      return;
-    }
-    _callingMarkParentNeedsLayout = true;
-    markNeedsLayout();
-    _layoutSurrogate.markNeedsLayout();
-    _callingMarkParentNeedsLayout = false;
-  }
-
   @override
   bool get sizedByParent => true;
 
@@ -2252,6 +2268,15 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
   void markNeedsLayout() {
     _needsLayout = true;
     super.markNeedsLayout();
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    return _RenderTheaterMixin.baselineForChild(child, constraints.biggest, constraints, theater._resolvedAlignment, baseline);
   }
 
   @override

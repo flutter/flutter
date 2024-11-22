@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -1361,12 +1361,15 @@ TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
   final ProcessInfo processInfo = ProcessInfo.test(MemoryFileSystem.test());
   final FlutterDevice device = FlutterDevice(
     FakeDevice()..supportsScreenshot = supportsScreenshot,
-    buildInfo: BuildInfo(buildMode, '', treeShakeIcons: false),
+    buildInfo: BuildInfo(
+      buildMode,
+      '',
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    ),
     generator: FakeResidentCompiler(),
     developmentShaderCompiler: const FakeShaderCompiler(),
-    targetPlatform: web
-      ? TargetPlatform.web_javascript
-      : TargetPlatform.android_arm,
+    targetPlatform: web ? TargetPlatform.web_javascript : TargetPlatform.android_arm,
   );
   device.vmService = FakeVmServiceHost(requests: requests).vmService;
   final FakeResidentRunner residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)
@@ -1475,10 +1478,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
-  }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

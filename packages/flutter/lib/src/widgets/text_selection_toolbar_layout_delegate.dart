@@ -6,8 +6,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 
-/// Positions the toolbar above [anchorAbove] if it fits, or otherwise below
+/// A [SingleChildLayoutDelegate] for use with [CustomSingleChildLayout] that
+/// positions its child above [anchorAbove] if it fits, or otherwise below
 /// [anchorBelow].
+///
+/// Primarily intended for use with toolbars or context menus.
 ///
 /// See also:
 ///
@@ -16,6 +19,8 @@ import 'package:flutter/rendering.dart';
 ///     itself.
 class TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
   /// Creates an instance of TextSelectionToolbarLayoutDelegate.
+  ///
+  /// The [fitsAbove] parameter is optional; if omitted, it will be calculated.
   TextSelectionToolbarLayoutDelegate({
     required this.anchorAbove,
     required this.anchorBelow,
@@ -41,8 +46,8 @@ class TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
   /// If not provided, it will be calculated.
   final bool? fitsAbove;
 
-  /// Return the value that centers width as closely as possible to position
-  /// while fitting inside of min and max.
+  /// Return the distance from zero that centers `width` as closely as possible
+  /// to `position` from zero while fitting between zero and `max`.
   static double centerOn(double position, double width, double max) {
     // If it overflows on the left, put it as far left as possible.
     if (position - width / 2.0 < 0.0) {

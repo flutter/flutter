@@ -119,7 +119,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ...IntelliJValidator.installedValidators(
         fileSystem: globals.fs,
         platform: platform,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         plistParser: globals.plistParser,
         processManager: globals.processManager,
         logger: _logger,
@@ -134,7 +134,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         flutterVersion: () => globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
         devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         artifacts: globals.artifacts!,
         flutterRoot: () => Cache.flutterRoot!,
         operatingSystemUtils: globals.os,
@@ -142,6 +142,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (platform.isWindows)
         WindowsVersionValidator(
           operatingSystemUtils: globals.os,
+          processLister: ProcessLister(globals.processManager),
         ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
@@ -149,7 +150,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         GroupedValidator(<DoctorValidator>[
           XcodeValidator(
             xcode: globals.xcode!,
-            userMessages: userMessages,
+            userMessages: globals.userMessages,
             iosSimulatorUtils: globals.iosSimulatorUtils!,
           ),
           globals.cocoapodsValidator!,
@@ -169,7 +170,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(
           processManager: globals.processManager,
-          userMessages: userMessages,
+          userMessages: globals.userMessages,
         ),
       if (windowsWorkflow!.appliesToHostPlatform)
         visualStudioValidator!,
@@ -195,42 +196,16 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   @override
   List<Workflow> get workflows {
-    if (_workflows == null) {
-      _workflows = <Workflow>[];
-
-      if (globals.iosWorkflow!.appliesToHostPlatform) {
-        _workflows!.add(globals.iosWorkflow!);
-      }
-
-      if (androidWorkflow?.appliesToHostPlatform ?? false) {
-        _workflows!.add(androidWorkflow!);
-      }
-
-      if (fuchsiaWorkflow?.appliesToHostPlatform ?? false) {
-        _workflows!.add(fuchsiaWorkflow!);
-      }
-
-      if (linuxWorkflow.appliesToHostPlatform) {
-        _workflows!.add(linuxWorkflow);
-      }
-
-      if (macOSWorkflow.appliesToHostPlatform) {
-        _workflows!.add(macOSWorkflow);
-      }
-
-      if (windowsWorkflow?.appliesToHostPlatform ?? false) {
-        _workflows!.add(windowsWorkflow!);
-      }
-
-      if (webWorkflow.appliesToHostPlatform) {
-        _workflows!.add(webWorkflow);
-      }
-
-      if (customDeviceWorkflow.appliesToHostPlatform) {
-        _workflows!.add(customDeviceWorkflow);
-      }
-    }
-    return _workflows!;
+    return _workflows ??= <Workflow>[
+      if (globals.iosWorkflow!.appliesToHostPlatform)      globals.iosWorkflow!,
+      if (androidWorkflow?.appliesToHostPlatform ?? false) androidWorkflow!,
+      if (fuchsiaWorkflow?.appliesToHostPlatform ?? false) fuchsiaWorkflow!,
+      if (linuxWorkflow.appliesToHostPlatform)             linuxWorkflow,
+      if (macOSWorkflow.appliesToHostPlatform)             macOSWorkflow,
+      if (windowsWorkflow?.appliesToHostPlatform ?? false) windowsWorkflow!,
+      if (webWorkflow.appliesToHostPlatform)               webWorkflow,
+      if (customDeviceWorkflow.appliesToHostPlatform)      customDeviceWorkflow,
+    ];
   }
 }
 
@@ -427,7 +402,7 @@ class Doctor {
             final DoctorValidator subValidator = validator.subValidators[i];
 
             // Ensure that all of the subvalidators in the group have
-            // a corresponding subresult incase a validator crashed
+            // a corresponding subresult in case a validator crashed
             final ValidationResult subResult;
             try {
               subResult = validator.subResults[i];
@@ -452,7 +427,8 @@ class Doctor {
             doctorInvocationId: analyticsTimestamp,
           ));
         }
-        // TODO(eliasyishak): remove this after migrating from package:usage
+        // TODO(eliasyishak): remove this after migrating from package:usage,
+        //  https://github.com/flutter/flutter/issues/128251
         DoctorResultEvent(validator: validator, result: result).send();
       }
 

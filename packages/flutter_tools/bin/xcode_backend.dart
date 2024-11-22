@@ -49,6 +49,8 @@ class Context {
     switch (subCommand) {
       case 'build':
         buildApp();
+      case 'prepare':
+        prepare();
       case 'thin':
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
@@ -351,20 +353,85 @@ class Context {
     }
   }
 
-  void buildApp() {
-    final bool verbose = environment['VERBOSE_SCRIPT_LOGGING'] != null && environment['VERBOSE_SCRIPT_LOGGING'] != '';
+  void prepare() {
+    // The "prepare" command runs in a pre-action script, which also runs when
+    // using the Xcode/xcodebuild clean command. Skip if cleaning.
+    if (environment['ACTION'] == 'clean') {
+      return;
+    }
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
-    String projectPath = '$sourceRoot/..';
-    if (environment['FLUTTER_APPLICATION_PATH'] != null) {
-      projectPath = environment['FLUTTER_APPLICATION_PATH']!;
+    final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
+
+    final String buildMode = parseFlutterBuildMode();
+
+    final List<String> flutterArgs = _generateFlutterArgsForAssemble(
+      'prepare',
+      buildMode,
+      verbose,
+    );
+
+    // The "prepare" command only targets the UnpackIOS target, which copies the
+    // Flutter framework to the BUILT_PRODUCTS_DIR.
+    flutterArgs.add('${buildMode}_unpack_ios');
+
+    final ProcessResult result = runSync(
+      '${environmentEnsure('FLUTTER_ROOT')}/bin/flutter',
+      flutterArgs,
+      verbose: verbose,
+      allowFail: true,
+      workingDirectory: projectPath, // equivalent of RunCommand pushd "${project_path}"
+    );
+
+    if (result.exitCode != 0) {
+      echoError('Failed to copy Flutter framework.');
+      exitApp(-1);
+    }
+  }
+
+  void buildApp() {
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
+    final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
+    final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
+
+    final String buildMode = parseFlutterBuildMode();
+
+    final List<String> flutterArgs = _generateFlutterArgsForAssemble(
+      'build',
+      buildMode,
+      verbose,
+    );
+
+    flutterArgs.add('${buildMode}_ios_bundle_flutter_assets');
+
+    final ProcessResult result = runSync(
+      '${environmentEnsure('FLUTTER_ROOT')}/bin/flutter',
+      flutterArgs,
+      verbose: verbose,
+      allowFail: true,
+      workingDirectory: projectPath, // equivalent of RunCommand pushd "${project_path}"
+    );
+
+    if (result.exitCode != 0) {
+      echoError('Failed to package $projectPath.');
+      exitApp(-1);
     }
 
+    streamOutput('done');
+    streamOutput(' └─Compiling, linking and signing...');
+
+    echo('Project $projectPath built and packaged successfully.');
+  }
+
+  List<String> _generateFlutterArgsForAssemble(
+    String command,
+    String buildMode,
+    bool verbose,
+  ) {
     String targetPath = 'lib/main.dart';
     if (environment['FLUTTER_TARGET'] != null) {
       targetPath = environment['FLUTTER_TARGET']!;
     }
-
-    final String buildMode = parseFlutterBuildMode();
 
     // Warn the user if not archiving (ACTION=install) in release mode.
     final String? action = environment['ACTION'];
@@ -394,6 +461,22 @@ class Context {
       flutterArgs.add('--local-engine-host=${environment['LOCAL_ENGINE_HOST']}');
     }
 
+    String architectures = environment['ARCHS'] ?? '';
+    if (command == 'prepare') {
+      // The "prepare" command runs in a pre-action script, which doesn't always
+      // filter the "ARCHS" build setting to only the active arch. To workaround,
+      // if "ONLY_ACTIVE_ARCH" is true and the "NATIVE_ARCH" is arm, assume the
+      // active arch is also arm to improve caching. If this assumption is
+      // incorrect, it will later be corrected by the "build" command.
+      if (environment['ONLY_ACTIVE_ARCH'] == 'YES' && environment['NATIVE_ARCH'] != null) {
+        if (environment['NATIVE_ARCH']!.contains('arm')) {
+          architectures = 'arm64';
+        } else {
+          architectures = 'x86_64';
+        }
+      }
+    }
+
     flutterArgs.addAll(<String>[
       'assemble',
       '--no-version-check',
@@ -402,7 +485,7 @@ class Context {
       '-dTargetFile=$targetPath',
       '-dBuildMode=$buildMode',
       if (environment['FLAVOR'] != null) '-dFlavor=${environment['FLAVOR']}',
-      '-dIosArchs=${environment['ARCHS'] ?? ''}',
+      '-dIosArchs=$architectures',
       '-dSdkRoot=${environment['SDKROOT'] ?? ''}',
       '-dSplitDebugInfo=${environment['SPLIT_DEBUG_INFO'] ?? ''}',
       '-dTreeShakeIcons=${environment['TREE_SHAKE_ICONS'] ?? ''}',
@@ -414,6 +497,14 @@ class Context {
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
     ]);
+
+    if (command == 'prepare') {
+      // Use the PreBuildAction define flag to force the tool to use a different
+      // filecache file for the "prepare" command. This will make the environment
+      // buildPrefix for the "prepare" command unique from the "build" command.
+      // This will improve caching since the "build" command has more target dependencies.
+      flutterArgs.add('-dPreBuildAction=PrepareFramework');
+    }
 
     if (environment['PERFORMANCE_MEASUREMENT_FILE'] != null && environment['PERFORMANCE_MEASUREMENT_FILE']!.isNotEmpty) {
       flutterArgs.add('--performance-measurement-file=${environment['PERFORMANCE_MEASUREMENT_FILE']}');
@@ -432,24 +523,6 @@ class Context {
       flutterArgs.add('-dCodeSizeDirectory=${environment['CODE_SIZE_DIRECTORY']}');
     }
 
-    flutterArgs.add('${buildMode}_ios_bundle_flutter_assets');
-
-    final ProcessResult result = runSync(
-      '${environmentEnsure('FLUTTER_ROOT')}/bin/flutter',
-      flutterArgs,
-      verbose: verbose,
-      allowFail: true,
-      workingDirectory: projectPath, // equivalent of RunCommand pushd "${project_path}"
-    );
-
-    if (result.exitCode != 0) {
-      echoError('Failed to package $projectPath.');
-      exitApp(-1);
-    }
-
-    streamOutput('done');
-    streamOutput(' └─Compiling, linking and signing...');
-
-    echo('Project $projectPath built and packaged successfully.');
+    return flutterArgs;
   }
 }

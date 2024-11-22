@@ -71,10 +71,10 @@ void main() {
     expect(
       description,
       equalsIgnoringHashCodes(<String>[
-        'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))',
-        'fillColor: MaterialStatePropertyAll(Color(0xfffffff0))',
-        'checkColor: MaterialStatePropertyAll(Color(0xfffffff1))',
-        'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))',
+        'mouseCursor: WidgetStatePropertyAll(SystemMouseCursor(click))',
+        'fillColor: WidgetStatePropertyAll(Color(0xfffffff0))',
+        'checkColor: WidgetStatePropertyAll(Color(0xfffffff1))',
+        'overlayColor: WidgetStatePropertyAll(Color(0xfffffff2))',
         'splashRadius: 1.0',
         'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
@@ -470,6 +470,47 @@ void main() {
     expect(lerped.visualDensity,  const VisualDensity(vertical: 2.0, horizontal: 2.0));
     expect(lerped.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.5))));
     expect(lerped.side, const BorderSide(width: 3.5));
+  });
+
+  testWidgets('MaterialStateBorderSide properly lerp in CheckboxThemeData.side', (WidgetTester tester) async {
+    late ColorScheme colorScheme;
+
+    Widget buildCheckbox({ required  Color seedColor }) {
+      colorScheme = ColorScheme.fromSeed(seedColor: seedColor);
+      return MaterialApp(
+        theme: ThemeData(
+          colorScheme: colorScheme,
+          checkboxTheme: CheckboxThemeData(
+            side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+              return BorderSide(
+                color: colorScheme.primary,
+                width: 4.0,
+              );
+            }),
+          ),
+        ),
+        home: Scaffold(
+          body: Checkbox(
+            value: false,
+            onChanged: (_) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCheckbox(seedColor: Colors.red));
+    await tester.pumpAndSettle();
+
+    RenderBox getCheckboxRendeBox() {
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
+    }
+
+    expect(getCheckboxRendeBox(), paints..drrect(color: colorScheme.primary));
+
+    await tester.pumpWidget(buildCheckbox(seedColor: Colors.blue));
+    await tester.pump(kPressTimeout);
+
+    expect(getCheckboxRendeBox(), paints..drrect(color: colorScheme.primary));
   });
 }
 

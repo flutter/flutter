@@ -21,7 +21,7 @@ import '../../../src/fakes.dart';
 
 void main() {
   late Environment environment;
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late Artifacts artifacts;
   late FakeProcessManager processManager;
   late File binary;
@@ -73,6 +73,7 @@ void main() {
         '--delete',
         '--filter',
         '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
         'Artifact.flutterMacOSFramework.debug',
         environment.outputDir.path,
       ],
@@ -133,12 +134,13 @@ void main() {
           '--delete',
           '--filter',
           '- .DS_Store/',
+          '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
           // source
           'Artifact.flutterMacOSFramework.debug',
           // destination
           environment.outputDir.path,
         ],
-        onRun: () {
+        onRun: (_) {
           entitlements.writeAsStringSync('foo');
           withoutEntitlements.writeAsStringSync('bar');
           nestedEntitlements.writeAsStringSync('somefile.bin');

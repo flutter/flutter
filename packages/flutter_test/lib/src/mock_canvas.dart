@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'matchers.dart';
+library;
+
 import 'dart:ui' as ui show Image, Paragraph;
 
 import 'package:flutter/foundation.dart';
@@ -520,24 +525,19 @@ class _MismatchedCall extends Error {
 }
 
 bool _evaluatePainter(Object? object, Canvas canvas, PaintingContext context) {
-  if (object is _ContextPainterFunction) {
-    final _ContextPainterFunction function = object;
-    function(context, Offset.zero);
-  } else if (object is _CanvasPainterFunction) {
-    final _CanvasPainterFunction function = object;
-    function(canvas);
-  } else {
-    if (object is Finder) {
+  switch (object) {
+    case final _ContextPainterFunction function:
+      function(context, Offset.zero);
+    case final _CanvasPainterFunction function:
+      function(canvas);
+    case final Finder finder:
       TestAsyncUtils.guardSync();
-      final Finder finder = object;
-      object = finder.evaluate().single.renderObject;
-    }
-    if (object is RenderObject) {
-      final RenderObject renderObject = object;
+      final RenderObject? result = finder.evaluate().single.renderObject;
+      return (result?..paint(context, Offset.zero)) != null;
+    case final RenderObject renderObject:
       renderObject.paint(context, Offset.zero);
-    } else {
+    default:
       return false;
-    }
   }
   return true;
 }

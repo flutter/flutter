@@ -87,7 +87,7 @@ class DeferredComponentModule {
         }
 
         defaultConfig {
-            minSdkVersion 19
+            minSdkVersion 21
             targetSdkVersion 33
             versionCode flutterVersionCode.toInteger()
             versionName flutterVersionName

@@ -172,7 +172,7 @@ class _PreferredAppBarSize extends Size {
 ///    can expand and collapse.
 ///  * <https://material.io/design/components/app-bars-top.html>
 ///  * <https://m3.material.io/components/top-app-bar>
-///  * Cookbook: [Place a floating app bar above a list](https://flutter.dev/docs/cookbook/lists/floating-app-bar)
+///  * Cookbook: [Place a floating app bar above a list](https://docs.flutter.dev/cookbook/lists/floating-app-bar)
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design app bar.
   ///
@@ -479,6 +479,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// zero.
   /// {@endtemplate}
   ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to implement a custom app bar shape for the
+  /// [shape] property.
+  ///
+  /// ** See code in examples/api/lib/material/app_bar/app_bar.4.dart **
+  /// {@end-tool}
   /// See also:
   ///
   ///  * [elevation], which defines the size of the shadow below the app bar.
@@ -489,9 +495,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The fill color to use for an app bar's [Material].
   ///
   /// If null, then the [AppBarTheme.backgroundColor] is used. If that value is also
-  /// null, then [AppBar] uses the overall theme's [ColorScheme.primary] if the
+  /// null:
+  /// In Material v2 (i.e., when [ThemeData.useMaterial3] is false),
+  /// then [AppBar] uses the overall theme's [ColorScheme.primary] if the
   /// overall theme's brightness is [Brightness.light], and [ColorScheme.surface]
   /// if the overall theme's brightness is [Brightness.dark].
+  /// In Material v3 (i.e., when [ThemeData.useMaterial3] is true),
+  /// then [AppBar] uses the overall theme's [ColorScheme.surface]
   ///
   /// If this color is a [MaterialStateColor] it will be resolved against
   /// [MaterialState.scrolledUnder] when the content of the app's
@@ -514,10 +524,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The default color for [Text] and [Icon]s within the app bar.
   ///
   /// If null, then [AppBarTheme.foregroundColor] is used. If that
-  /// value is also null, then [AppBar] uses the overall theme's
-  /// [ColorScheme.onPrimary] if the overall theme's brightness is
-  /// [Brightness.light], and [ColorScheme.onSurface] if the overall
-  /// theme's brightness is [Brightness.dark].
+  /// value is also null:
+  /// In Material v2 (i.e., when [ThemeData.useMaterial3] is false),
+  /// then [AppBar] uses the overall theme's [ColorScheme.onPrimary] if the
+  /// overall theme's brightness is [Brightness.light], and [ColorScheme.onSurface]
+  /// if the overall theme's brightness is [Brightness.dark].
+  /// In Material v3 (i.e., when [ThemeData.useMaterial3] is true),
+  /// then [AppBar] uses the overall theme's [ColorScheme.onSurface].
   ///
   /// This color is used to configure [DefaultTextStyle] that contains
   /// the toolbar's children, and the default [IconTheme] widgets that
@@ -841,6 +854,17 @@ class _AppBarState extends State<AppBar> {
       defaults.backgroundColor!,
     );
 
+    final Color scrolledUnderBackground = _resolveColor(
+      states,
+      widget.backgroundColor,
+      appBarTheme.backgroundColor,
+      Theme.of(context).colorScheme.surfaceContainer,
+    );
+
+    final Color effectiveBackgroundColor = states.contains(MaterialState.scrolledUnder)
+        ? scrolledUnderBackground
+        : backgroundColor;
+
     final Color foregroundColor = widget.foregroundColor
       ?? appBarTheme.foregroundColor
       ?? defaults.foregroundColor!;
@@ -1106,7 +1130,7 @@ class _AppBarState extends State<AppBar> {
       ?? appBarTheme.systemOverlayStyle
       ?? defaults.systemOverlayStyle
       ?? _systemOverlayStyleForBrightness(
-        ThemeData.estimateBrightnessForColor(backgroundColor),
+        ThemeData.estimateBrightnessForColor(effectiveBackgroundColor),
         // Make the status bar transparent for M3 so the elevation overlay
         // color is picked up by the statusbar.
         theme.useMaterial3 ? const Color(0x00000000) : null,
@@ -1117,7 +1141,7 @@ class _AppBarState extends State<AppBar> {
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Material(
-          color: backgroundColor,
+          color: theme.useMaterial3 ? effectiveBackgroundColor : backgroundColor,
           elevation: effectiveElevation,
           type: widget.forceMaterialTransparency
               ? MaterialType.transparency
@@ -1127,7 +1151,10 @@ class _AppBarState extends State<AppBar> {
             ?? defaults.shadowColor,
           surfaceTintColor: widget.surfaceTintColor
             ?? appBarTheme.surfaceTintColor
-            ?? defaults.surfaceTintColor,
+            // M3 `defaults.surfaceTint` is Colors.transparent now. It is not used
+            // here because otherwise, it will cause breaking change for
+            // `scrolledUnderElevation`.
+            ?? (theme.useMaterial3 ? theme.colorScheme.surfaceTint : null),
           shape: widget.shape ?? appBarTheme.shape ?? defaults.shape,
           child: Semantics(
             explicitChildNodes: true,
@@ -1178,6 +1205,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.forceMaterialTransparency,
     required this.clipBehavior,
     required this.variant,
+    required this.accessibleNavigation,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize.height ?? 0.0;
 
@@ -1215,6 +1243,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool forceMaterialTransparency;
   final Clip? clipBehavior;
   final _SliverAppVariant variant;
+  final bool accessibleNavigation;
 
   @override
   double get minExtent => collapsedHeight;
@@ -1242,7 +1271,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
     final bool isScrolledUnder = overlapsContent || forceElevated || (pinned && shrinkOffset > maxExtent - minExtent);
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
-    final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
+    final double toolbarOpacity =  !accessibleNavigation && (!pinned || isPinnedWithOpacityFade)
       ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
       : 1.0;
     final Widget? effectiveTitle = switch (variant) {
@@ -1333,7 +1362,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || toolbarTextStyle != oldDelegate.toolbarTextStyle
         || titleTextStyle != oldDelegate.titleTextStyle
         || systemOverlayStyle != oldDelegate.systemOverlayStyle
-        || forceMaterialTransparency != oldDelegate.forceMaterialTransparency;
+        || forceMaterialTransparency != oldDelegate.forceMaterialTransparency
+        || accessibleNavigation != oldDelegate.accessibleNavigation;
   }
 
   @override
@@ -2015,6 +2045,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           forceMaterialTransparency: widget.forceMaterialTransparency,
           clipBehavior: widget.clipBehavior,
           variant: widget._variant,
+          accessibleNavigation: MediaQuery.of(context).accessibleNavigation,
         ),
       ),
     );
@@ -2050,6 +2081,21 @@ class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
     final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
     final Size childSize = child!.getDryLayout(innerConstraints);
     return constraints.constrain(childSize);
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(innerConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(innerConstraints);
+    return result + resolvedAlignment.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
   }
 
   @override
@@ -2228,28 +2274,11 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
     return child == null ? 0.0 : child.getMinIntrinsicWidth(double.infinity) + padding.horizontal;
   }
 
-  Size _computeSize(BoxConstraints constraints, ChildLayouter layoutChild) {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      return Size.zero;
-    }
-    layoutChild(child, constraints.widthConstraints().deflate(padding));
-    return constraints.biggest;
-  }
-
   @override
-  Size computeDryLayout(BoxConstraints constraints) => _computeSize(constraints, ChildLayoutHelper.dryLayoutChild);
+  Size computeDryLayout(BoxConstraints constraints) => child == null ? Size.zero : constraints.biggest;
 
-  @override
-  void performLayout() {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      this.size = constraints.smallest;
-      return;
-    }
-    final Size size = this.size = _computeSize(constraints, ChildLayoutHelper.layoutChild);
-    final Size childSize = child.size;
-
+  Offset _childOffsetFromSize(Size childSize, Size size) {
+    assert(child != null);
     assert(padding.isNonNegative);
     assert(titleAlignment.y == 1.0);
     // yAdjustment is the minimum additional y offset to shift the child in
@@ -2259,11 +2288,34 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
     // top padding is basically ignored since the expanded title is
     // bottom-aligned).
     final double yAdjustment = clampDouble(childSize.height + padding.bottom - maxExtent, 0, padding.bottom);
-    final double offsetY = size.height - childSize.height - padding.bottom + yAdjustment;
     final double offsetX = (titleAlignment.x + 1) / 2 * (size.width - padding.horizontal - childSize.width) + padding.left;
+    final double offsetY = size.height - childSize.height - padding.bottom + yAdjustment;
+    return Offset(offsetX, offsetY);
+  }
 
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = constraints.widthConstraints().deflate(padding);
+    final BaselineOffset result = BaselineOffset(child.getDryBaseline(childConstraints, baseline))
+      + _childOffsetFromSize(child.getDryLayout(childConstraints), getDryLayout(constraints)).dy;
+    return result.offset;
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+    size = constraints.biggest;
+    child.layout(constraints.widthConstraints().deflate(padding), parentUsesSize: true);
     final BoxParentData childParentData = child.parentData! as BoxParentData;
-    childParentData.offset = Offset(offsetX, offsetY);
+    childParentData.offset = _childOffsetFromSize(child.size, size);
   }
 }
 
@@ -2334,7 +2386,7 @@ class _AppBarDefaultsM3 extends AppBarTheme {
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   IconThemeData? get iconTheme => IconThemeData(

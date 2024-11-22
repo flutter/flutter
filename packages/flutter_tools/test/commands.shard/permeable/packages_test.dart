@@ -218,9 +218,11 @@ void main() {
 
       expect(mockStdio.stdout.writes.map(utf8.decode),
         allOf(
-          contains(matches(RegExp(r'Resolving dependencies in .+flutter_project\.\.\.'))),
+          // The output of pub changed, adding backticks around the directory name.
+          // These regexes are tolerant of the backticks being present or absent.
+          contains(matches(RegExp(r'Resolving dependencies in .+flutter_project`?\.\.\.'))),
           contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
-          contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project!'))),
+          contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project`?!'))),
         ),
       );
 
@@ -443,42 +445,6 @@ flutter:
         (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
             .eventData['packagesProjectModule'],
         true,
-      );
-    }, overrides: <Type, Generator>{
-      Stdio: () => mockStdio,
-      Pub: () => Pub.test(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-        stdio: mockStdio,
-      ),
-    });
-
-    testUsingContext('indicate that Android project reports v1 in usage value', () async {
-      final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub']);
-      removeGeneratedFiles(projectPath);
-
-      final File androidManifest = globals.fs.file(globals.fs.path.join(
-        projectPath,
-        'android/app/src/main/AndroidManifest.xml',
-      ));
-      final String updatedAndroidManifestString =
-          androidManifest.readAsStringSync().replaceAll('android:value="2"', 'android:value="1"');
-
-      androidManifest.writeAsStringSync(updatedAndroidManifestString);
-
-      final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
-
-      expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v1');
-      expect(
-        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
-            .eventData['packagesAndroidEmbeddingVersion'],
-        'v1',
       );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,

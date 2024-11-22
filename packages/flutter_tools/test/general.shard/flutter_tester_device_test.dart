@@ -40,6 +40,7 @@ void main() {
   FlutterTesterTestDevice createDevice({
     List<String> dartEntrypointArgs = const <String>[],
     bool enableVmService = false,
+    bool enableImpeller = false,
   }) =>
     TestFlutterTesterDevice(
       platform: platform,
@@ -48,6 +49,7 @@ void main() {
       enableVmService: enableVmService,
       dartEntrypointArgs: dartEntrypointArgs,
       uriConverter: (String input) => '$input/converted',
+      enableImpeller: enableImpeller,
     );
 
   testUsingContext('Missing dir error caught for FontConfigManger.dispose', () async {
@@ -57,6 +59,38 @@ void main() {
     fontsDirectory.deleteSync(recursive: true);
 
     await fontConfigManager.dispose();
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('Flutter tester passes through impeller config and environment variables.', () async {
+    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    device = createDevice(enableImpeller: true);
+    processManager.addCommand(FakeCommand(command: const <String>[
+        '/',
+        '--disable-vm-service',
+        '--ipv6',
+        '--enable-checked-mode',
+        '--verify-entry-points',
+        '--enable-impeller',
+        '--enable-dart-profiling',
+        '--non-interactive',
+        '--use-test-fonts',
+        '--disable-asset-fonts',
+        '--packages=.dart_tool/package_config.json',
+        'example.dill',
+      ], environment: <String, String>{
+        'FLUTTER_TEST': 'true',
+        'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
+        'SERVER_PORT': '0',
+        'APP_NAME': '',
+        'FLUTTER_TEST_IMPELLER': 'true',
+      }));
+
+    await device.start('example.dill');
+
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -222,6 +256,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required super.enableVmService,
     required List<String> dartEntrypointArgs,
     required UriConverter uriConverter,
+    required bool enableImpeller,
   }) : super(
     id: 999,
     shellPath: '/',
@@ -231,9 +266,11 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
         BuildMode.debug,
         '',
         treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       hostVmServicePort: 1234,
       dartEntrypointArgs: dartEntrypointArgs,
+      enableImpeller: enableImpeller ? ImpellerStatus.enabled : ImpellerStatus.platformDefault,
     ),
     machine: false,
     host: InternetAddress.loopbackIPv6,

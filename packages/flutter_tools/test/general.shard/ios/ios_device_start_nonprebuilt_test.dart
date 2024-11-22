@@ -335,7 +335,7 @@ void main() {
     });
 
     group('in release mode', () {
-      testUsingContext('suceeds when install and launch succeed', () async {
+      testUsingContext('succeeds when install and launch succeed', () async {
         final IOSDevice iosDevice = setUpIOSDevice(
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
@@ -518,6 +518,7 @@ void main() {
             buildName: '1.2.3',
             buildNumber: '4',
             treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
           )),
           platformArgs: <String, Object>{},
         );
@@ -592,6 +593,7 @@ void main() {
               buildName: '1.2.3',
               buildNumber: '4',
               treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
             )),
             platformArgs: <String, Object>{},
           );
@@ -659,6 +661,7 @@ void main() {
             buildName: '1.2.3',
             buildNumber: '4',
             treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
           )),
           platformArgs: <String, Object>{},
         );
@@ -710,6 +713,7 @@ void main() {
             buildName: '1.2.3',
             buildNumber: '4',
             treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
           )),
           platformArgs: <String, Object>{},
         );
@@ -748,6 +752,7 @@ void main() {
             buildName: '1.2.3',
             buildNumber: '4',
             treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
           )),
           platformArgs: <String, Object>{},
         );
@@ -797,6 +802,7 @@ void main() {
             buildName: '1.2.3',
             buildNumber: '4',
             treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
           )),
           platformArgs: <String, Object>{},
         ), throwsToolExit());
@@ -869,6 +875,7 @@ IOSDevice setUpIOSDevice({
     cpuArchitecture: DarwinArch.arm64,
     connectionInterface: DeviceConnectionInterface.attached,
     isConnected: true,
+    isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
   );

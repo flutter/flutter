@@ -291,8 +291,16 @@ abstract class Emulator {
       return <String>[];
     }
 
+    const List<String> tableHeader = <String>[
+      'Id',
+      'Name',
+      'Manufacturer',
+      'Platform',
+    ];
+
     // Extract emulators information
     final List<List<String>> table = <List<String>>[
+      tableHeader,
       for (final Emulator emulator in emulators)
         <String>[
           emulator.id,
@@ -323,7 +331,10 @@ abstract class Emulator {
   }
 
   static void printEmulators(List<Emulator> emulators, Logger logger) {
-    descriptions(emulators).forEach(logger.printStatus);
+    final List<String> emulatorDescriptions = descriptions(emulators);
+    // Prints the first description as the table header, followed by a newline.
+    logger.printStatus('${emulatorDescriptions.first}\n');
+    emulatorDescriptions.sublist(1).forEach(logger.printStatus);
   }
 }
 

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:string_scanner/string_scanner.dart';
 
 class SyntaxHighlighterStyle {
-  SyntaxHighlighterStyle({
+  const SyntaxHighlighterStyle({
     this.baseStyle,
     this.numberStyle,
     this.commentStyle,
@@ -17,31 +17,27 @@ class SyntaxHighlighterStyle {
     this.constantStyle,
   });
 
-  static SyntaxHighlighterStyle lightThemeStyle() {
-    return SyntaxHighlighterStyle(
-      baseStyle: const TextStyle(color: Color(0xFF000000)),
-      numberStyle: const TextStyle(color: Color(0xFF1565C0)),
-      commentStyle: const TextStyle(color: Color(0xFF9E9E9E)),
-      keywordStyle: const TextStyle(color: Color(0xFF9C27B0)),
-      stringStyle: const TextStyle(color: Color(0xFF43A047)),
-      punctuationStyle: const TextStyle(color: Color(0xFF000000)),
-      classStyle: const TextStyle(color: Color(0xFF512DA8)),
-      constantStyle: const TextStyle(color: Color(0xFF795548)),
-    );
-  }
+  static const SyntaxHighlighterStyle lightThemeStyle = SyntaxHighlighterStyle(
+    baseStyle: TextStyle(color: Color(0xFF000000)),
+    numberStyle: TextStyle(color: Color(0xFF1565C0)),
+    commentStyle: TextStyle(color: Color(0xFF9E9E9E)),
+    keywordStyle: TextStyle(color: Color(0xFF9C27B0)),
+    stringStyle: TextStyle(color: Color(0xFF43A047)),
+    punctuationStyle: TextStyle(color: Color(0xFF000000)),
+    classStyle: TextStyle(color: Color(0xFF512DA8)),
+    constantStyle: TextStyle(color: Color(0xFF795548)),
+  );
 
-  static SyntaxHighlighterStyle darkThemeStyle() {
-    return SyntaxHighlighterStyle(
-      baseStyle: const TextStyle(color: Color(0xFFFFFFFF)),
-      numberStyle: const TextStyle(color: Color(0xFF1565C0)),
-      commentStyle: const TextStyle(color: Color(0xFF9E9E9E)),
-      keywordStyle: const TextStyle(color: Color(0xFF80CBC4)),
-      stringStyle: const TextStyle(color: Color(0xFF009688)),
-      punctuationStyle: const TextStyle(color: Color(0xFFFFFFFF)),
-      classStyle: const TextStyle(color: Color(0xFF009688)),
-      constantStyle: const TextStyle(color: Color(0xFF795548)),
-    );
-  }
+  static const SyntaxHighlighterStyle darkThemeStyle = SyntaxHighlighterStyle(
+    baseStyle: TextStyle(color: Color(0xFFFFFFFF)),
+    numberStyle: TextStyle(color: Color(0xFF1565C0)),
+    commentStyle: TextStyle(color: Color(0xFF9E9E9E)),
+    keywordStyle: TextStyle(color: Color(0xFF80CBC4)),
+    stringStyle: TextStyle(color: Color(0xFF009688)),
+    punctuationStyle: TextStyle(color: Color(0xFFFFFFFF)),
+    classStyle: TextStyle(color: Color(0xFF009688)),
+    constantStyle: TextStyle(color: Color(0xFF795548)),
+  );
 
   final TextStyle? baseStyle;
   final TextStyle? numberStyle;
@@ -60,7 +56,7 @@ abstract class SyntaxHighlighter {
 class DartSyntaxHighlighter extends SyntaxHighlighter {
   DartSyntaxHighlighter([this._style]) {
     _spans = <_HighlightSpan>[];
-    _style ??= SyntaxHighlighterStyle.darkThemeStyle();
+    _style ??= SyntaxHighlighterStyle.darkThemeStyle;
   }
 
   SyntaxHighlighterStyle? _style;
@@ -341,22 +337,14 @@ class _HighlightSpan {
   }
 
   TextStyle? textStyle(SyntaxHighlighterStyle? style) {
-    if (type == _HighlightType.number) {
-      return style!.numberStyle;
-    } else if (type == _HighlightType.comment) {
-      return style!.commentStyle;
-    } else if (type == _HighlightType.keyword) {
-      return style!.keywordStyle;
-    } else if (type == _HighlightType.string) {
-      return style!.stringStyle;
-    } else if (type == _HighlightType.punctuation) {
-      return style!.punctuationStyle;
-    } else if (type == _HighlightType.klass) {
-      return style!.classStyle;
-    } else if (type == _HighlightType.constant) {
-      return style!.constantStyle;
-    } else {
-      return style!.baseStyle;
-    }
+    return switch (type) {
+      _HighlightType.number      => style!.numberStyle,
+      _HighlightType.comment     => style!.commentStyle,
+      _HighlightType.keyword     => style!.keywordStyle,
+      _HighlightType.string      => style!.stringStyle,
+      _HighlightType.punctuation => style!.punctuationStyle,
+      _HighlightType.klass       => style!.classStyle,
+      _HighlightType.constant    => style!.constantStyle,
+    };
   }
 }

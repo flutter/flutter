@@ -83,7 +83,7 @@ No widgets found at Offset(1.0, 1.0).
       ),
     );
 
-    final Size originalSize = tester.binding.createViewConfigurationFor(tester.binding.renderView).size; // ignore: deprecated_member_use
+    final Size originalSize = tester.binding.renderView.size;
     await tester.binding.setSurfaceSize(const Size(2000, 1800));
     try {
       await tester.pump();

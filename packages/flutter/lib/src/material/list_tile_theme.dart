@@ -63,6 +63,7 @@ class ListTileThemeData with Diagnosticable {
     this.enableFeedback,
     this.mouseCursor,
     this.visualDensity,
+    this.minTileHeight,
     this.titleAlignment,
   });
 
@@ -111,6 +112,9 @@ class ListTileThemeData with Diagnosticable {
   /// Overrides the default value of [ListTile.minLeadingWidth].
   final double? minLeadingWidth;
 
+  /// Overrides the default value of [ListTile.minTileHeight].
+  final double? minTileHeight;
+
   /// Overrides the default value of [ListTile.enableFeedback].
   final bool? enableFeedback;
 
@@ -141,6 +145,7 @@ class ListTileThemeData with Diagnosticable {
     double? horizontalTitleGap,
     double? minVerticalPadding,
     double? minLeadingWidth,
+    double? minTileHeight,
     bool? enableFeedback,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     bool? isThreeLine,
@@ -163,6 +168,7 @@ class ListTileThemeData with Diagnosticable {
       horizontalTitleGap: horizontalTitleGap ?? this.horizontalTitleGap,
       minVerticalPadding: minVerticalPadding ?? this.minVerticalPadding,
       minLeadingWidth: minLeadingWidth ?? this.minLeadingWidth,
+      minTileHeight: minTileHeight ?? this.minTileHeight,
       enableFeedback: enableFeedback ?? this.enableFeedback,
       mouseCursor: mouseCursor ?? this.mouseCursor,
       visualDensity: visualDensity ?? this.visualDensity,
@@ -191,6 +197,7 @@ class ListTileThemeData with Diagnosticable {
       horizontalTitleGap: lerpDouble(a?.horizontalTitleGap, b?.horizontalTitleGap, t),
       minVerticalPadding: lerpDouble(a?.minVerticalPadding, b?.minVerticalPadding, t),
       minLeadingWidth: lerpDouble(a?.minLeadingWidth, b?.minLeadingWidth, t),
+      minTileHeight: lerpDouble(a?.minTileHeight, b?.minTileHeight, t),
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
@@ -215,6 +222,7 @@ class ListTileThemeData with Diagnosticable {
     horizontalTitleGap,
     minVerticalPadding,
     minLeadingWidth,
+    minTileHeight,
     enableFeedback,
     mouseCursor,
     visualDensity,
@@ -245,6 +253,7 @@ class ListTileThemeData with Diagnosticable {
       && other.horizontalTitleGap == horizontalTitleGap
       && other.minVerticalPadding == minVerticalPadding
       && other.minLeadingWidth == minLeadingWidth
+      && other.minTileHeight == minTileHeight
       && other.enableFeedback == enableFeedback
       && other.mouseCursor == mouseCursor
       && other.visualDensity == visualDensity
@@ -269,6 +278,7 @@ class ListTileThemeData with Diagnosticable {
     properties.add(DoubleProperty('horizontalTitleGap', horizontalTitleGap, defaultValue: null));
     properties.add(DoubleProperty('minVerticalPadding', minVerticalPadding, defaultValue: null));
     properties.add(DoubleProperty('minLeadingWidth', minLeadingWidth, defaultValue: null));
+    properties.add(DoubleProperty('minTileHeight', minTileHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
@@ -488,6 +498,7 @@ class ListTileTheme extends InheritedTheme {
     double? horizontalTitleGap,
     double? minVerticalPadding,
     double? minLeadingWidth,
+    double? minTileHeight,
     ListTileTitleAlignment? titleAlignment,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     VisualDensity? visualDensity,
@@ -515,6 +526,7 @@ class ListTileTheme extends InheritedTheme {
             horizontalTitleGap: horizontalTitleGap ?? parent.horizontalTitleGap,
             minVerticalPadding: minVerticalPadding ?? parent.minVerticalPadding,
             minLeadingWidth: minLeadingWidth ?? parent.minLeadingWidth,
+            minTileHeight: minTileHeight ?? parent.minTileHeight,
             titleAlignment: titleAlignment ?? parent.titleAlignment,
             mouseCursor: mouseCursor ?? parent.mouseCursor,
             visualDensity: visualDensity ?? parent.visualDensity,

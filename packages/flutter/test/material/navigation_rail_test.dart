@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -79,7 +80,7 @@ void main() {
       ),
     );
 
-    expect(_railMaterial(tester).color, equals(const Color(0xFFFFFBFE))); // default surface color in M3 colorScheme
+    expect(_railMaterial(tester).color, equals(const Color(0xfffef7ff))); // default surface color in M3 colorScheme
 
     await _pumpNavigationRail(
       tester,
@@ -540,7 +541,7 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         secondIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -555,7 +556,7 @@ void main() {
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         thirdIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -570,7 +571,7 @@ void main() {
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         fourthIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -638,7 +639,7 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         secondIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -653,7 +654,7 @@ void main() {
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         thirdIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -668,7 +669,7 @@ void main() {
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         fourthIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -736,7 +737,7 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         secondIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -751,7 +752,7 @@ void main() {
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         thirdIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -766,7 +767,7 @@ void main() {
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         fourthIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -833,7 +834,7 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         secondIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -848,7 +849,7 @@ void main() {
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         thirdIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -863,7 +864,7 @@ void main() {
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         fourthIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -931,7 +932,7 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         secondIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -946,7 +947,7 @@ void main() {
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         thirdIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -961,7 +962,7 @@ void main() {
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         fourthIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -1029,7 +1030,7 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         secondIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -1044,7 +1045,7 @@ void main() {
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         thirdIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -1059,7 +1060,7 @@ void main() {
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(
         fourthIconRenderBox.localToGlobal(Offset.zero),
         equals(
@@ -1856,8 +1857,9 @@ void main() {
             return Scaffold(
               body: Row(
                 children: <Widget>[
-                  MediaQuery(
-                    data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+                  MediaQuery.withClampedTextScaling(
+                    minScaleFactor: 3.0,
+                    maxScaleFactor: 3.0,
                     child: NavigationRail(
                       selectedIndex: 0,
                       destinations: const <NavigationRailDestination>[
@@ -2071,7 +2073,7 @@ void main() {
     expect(selectedIndex, 2);
 
     // Wait for any pending shader compilation.
-    tester.pumpAndSettle();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('onDestinationSelected is not called if null', (WidgetTester tester) async {
@@ -2089,7 +2091,7 @@ void main() {
     expect(selectedIndex, 0);
 
     // Wait for any pending shader compilation.
-    tester.pumpAndSettle();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Changing destinations animate when [labelType]=selected', (WidgetTester tester) async {
@@ -2822,7 +2824,7 @@ void main() {
           color: const Color(0xffe8def8),
         ),
     );
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('NavigationRail indicator renders ripple - extended', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/117126
@@ -3170,7 +3172,7 @@ void main() {
           color: const Color(0xffe8def8),
         ),
     );
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('NavigationRail indicator renders properly with large icon', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/133799.
@@ -3273,7 +3275,7 @@ void main() {
           color: const Color(0xffe8def8),
         ),
     );
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('NavigationRail indicator renders properly when text direction is rtl', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/134361.
@@ -3372,7 +3374,7 @@ void main() {
           color: const Color(0xffe8def8),
         ),
     );
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('NavigationRail indicator scale transform', (WidgetTester tester) async {
     int selectedIndex = 0;
@@ -3503,7 +3505,7 @@ void main() {
     expect(selectedIndex, 1);
 
     // Wait for any pending shader compilation.
-    tester.pumpAndSettle();
+    await tester.pumpAndSettle();
   });
 
   testWidgets("Destination's label with the right opacity while disabled", (WidgetTester tester) async {
@@ -3602,7 +3604,82 @@ void main() {
 
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..circle(color: Colors.transparent));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+
+  testWidgets('Navigation rail can have expanded widgets inside', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            label: Text('Bcd'),
+          ),
+        ],
+        trailing: const Expanded(
+          child: Icon(Icons.search),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('NavigationRail labels shall not overflow if longer texts provided - extended', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110901.
+    // The navigation rail has a narrow width constraint. The text should wrap.
+    const String normalLabel = 'Abc';
+    const String longLabel = 'Very long bookmark text for navigation destination';
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: Row(
+              children: <Widget>[
+                SizedBox(
+                  width: 140.0,
+                  child: NavigationRail(
+                    selectedIndex: 1,
+                    extended: true,
+                    destinations: const <NavigationRailDestination>[
+                      NavigationRailDestination(
+                        icon: Icon(Icons.favorite_border),
+                        selectedIcon: Icon(Icons.favorite),
+                        label: Text(normalLabel),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.bookmark_border),
+                        selectedIcon: Icon(Icons.bookmark),
+                        label: Text(longLabel),
+                      ),
+                    ],
+                  ),
+                ),
+                const Expanded(
+                  child: Text('body'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ));
+
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.text(normalLabel), findsOneWidget);
+    expect(find.text(longLabel), findsOneWidget);
+
+    // If the widget manages to layout without throwing an overflow exception,
+    // the test passes.
+    expect(tester.takeException(), isNull);
+  });
 
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
@@ -3718,7 +3795,7 @@ void main() {
           ),
         ),
       );
-    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+    }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
     testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=3.0', (WidgetTester tester) async {
       // Since the rail is icon only, its destinations should not be affected by
@@ -3788,7 +3865,7 @@ void main() {
           ),
         ),
       );
-    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+    }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
     testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=0.75', (WidgetTester tester) async {
       // Since the rail is icon only, its destinations should not be affected by
@@ -3858,7 +3935,7 @@ void main() {
           ),
         ),
       );
-    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+    }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
     testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
       await _pumpNavigationRail(
@@ -5135,8 +5212,9 @@ void main() {
               return Scaffold(
                 body: Row(
                   children: <Widget>[
-                    MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+                    MediaQuery.withClampedTextScaling(
+                      minScaleFactor: 3.0,
+                      maxScaleFactor: 3.0,
                       child: NavigationRail(
                         selectedIndex: 0,
                         destinations: const <NavigationRailDestination>[
@@ -5435,25 +5513,25 @@ TestSemantics _expectedSemantics() {
                       SemanticsFlag.isSelected,
                       SemanticsFlag.isFocusable,
                     ],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     label: 'Abc\nTab 1 of 4',
                     textDirection: TextDirection.ltr,
                   ),
                   TestSemantics(
                     flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     label: 'Def\nTab 2 of 4',
                     textDirection: TextDirection.ltr,
                   ),
                   TestSemantics(
                     flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     label: 'Ghi\nTab 3 of 4',
                     textDirection: TextDirection.ltr,
                   ),
                   TestSemantics(
                     flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     label: 'Jkl\nTab 4 of 4',
                     textDirection: TextDirection.ltr,
                   ),
@@ -5511,8 +5589,9 @@ Future<void> _pumpNavigationRail(
       ),
       home: Builder(
         builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: textScaleFactor,
+            maxScaleFactor: textScaleFactor,
             child: Scaffold(
               body: Row(
                 children: <Widget>[

@@ -178,8 +178,9 @@ class _DemoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
-    // ignore: deprecated_member_use, https://github.com/flutter/flutter/issues/128825
-    final double textScaleFactor = MediaQuery.textScalerOf(context).textScaleFactor;
+    // The fontSize to use for computing the heuristic UI scaling factor.
+    const double defaultFontSize = 14.0;
+    final double containerScalingFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
     return RawMaterialButton(
       splashColor: theme.primaryColor.withOpacity(0.12),
       highlightColor: Colors.transparent,
@@ -187,7 +188,7 @@ class _DemoItem extends StatelessWidget {
         _launchDemo(context);
       },
       child: Container(
-        constraints: BoxConstraints(minHeight: _kDemoItemHeight * textScaleFactor),
+        constraints: BoxConstraints(minHeight: _kDemoItemHeight * containerScalingFactor),
         child: Row(
           children: <Widget>[
             Container(
@@ -325,9 +326,9 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
       backgroundColor: isDark ? _kFlutterBlue : theme.primaryColor,
       body: SafeArea(
         bottom: false,
-        child: PopScope(
+        child: PopScope<Object?>(
           canPop: _category == null,
-          onPopInvoked: (bool didPop) {
+          onPopInvokedWithResult: (bool didPop, Object? result) {
             if (didPop) {
               return;
             }

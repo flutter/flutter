@@ -8,6 +8,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
+import 'sliver_fixed_extent_list.dart';
 
 /// A delegate used by [RenderSliverMultiBoxAdaptor] to manage its children.
 ///
@@ -78,6 +79,17 @@ abstract class RenderSliverBoxChildManager {
   /// [createChild] is always able to create a child (e.g. for an infinite
   /// list).
   int get childCount;
+
+  /// The best available estimate of [childCount], or null if no estimate is available.
+  ///
+  /// This differs from [childCount] in that [childCount] never returns null (and must
+  /// not be accessed if the child count is not yet available, meaning the [createChild]
+  /// method has not been provided an index that does not create a child).
+  ///
+  /// See also:
+  ///
+  ///  * [SliverChildDelegate.estimatedChildCount], to which this getter defers.
+  int? get estimatedChildCount => null;
 
   /// Called during [RenderSliverMultiBoxAdaptor.adoptChild] or
   /// [RenderSliverMultiBoxAdaptor.move].
@@ -493,6 +505,48 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     return null;
   }
 
+  /// Returns the number of children preceding the `firstIndex` that need to be
+  /// garbage collected.
+  ///
+  /// See also:
+  ///
+  ///   * [collectGarbage], which takes the leading and trailing number of
+  ///     children to be garbage collected.
+  ///   * [calculateTrailingGarbage], which similarly returns the number of
+  ///     trailing children to be garbage collected.
+  @visibleForTesting
+  @protected
+  int calculateLeadingGarbage({required int firstIndex}) {
+    RenderBox? walker = firstChild;
+    int leadingGarbage = 0;
+    while (walker != null && indexOf(walker) < firstIndex) {
+      leadingGarbage += 1;
+      walker = childAfter(walker);
+    }
+    return leadingGarbage;
+  }
+
+  /// Returns the number of children following the `lastIndex` that need to be
+  /// garbage collected.
+  ///
+  /// See also:
+  ///
+  ///   * [collectGarbage], which takes the leading and trailing number of
+  ///     children to be garbage collected.
+  ///   * [calculateLeadingGarbage], which similarly returns the number of
+  ///     leading children to be garbage collected.
+  @visibleForTesting
+  @protected
+  int calculateTrailingGarbage({required int lastIndex}) {
+    RenderBox? walker = lastChild;
+    int trailingGarbage = 0;
+    while (walker != null && indexOf(walker) > lastIndex) {
+      trailingGarbage += 1;
+      walker = childBefore(walker);
+    }
+    return trailingGarbage;
+  }
+
   /// Called after layout with the number of children that can be garbage
   /// collected at the head and tail of the child list.
   ///
@@ -502,6 +556,13 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// This method also collects any children that were previously kept alive but
   /// are now no longer necessary. As such, it should be called every time
   /// [performLayout] is run, even if the arguments are both zero.
+  ///
+  /// See also:
+  ///
+  ///   * [calculateLeadingGarbage], which can be used to determine
+  ///     `leadingGarbage` here.
+  ///   * [calculateTrailingGarbage], which can be used to determine
+  ///     `trailingGarbage` here.
   @protected
   void collectGarbage(int leadingGarbage, int trailingGarbage) {
     assert(_debugAssertChildListLocked());
@@ -542,12 +603,10 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @protected
   double paintExtentOf(RenderBox child) {
     assert(child.hasSize);
-    switch (constraints.axis) {
-      case Axis.horizontal:
-        return child.size.width;
-      case Axis.vertical:
-        return child.size.height;
-    }
+    return switch (constraints.axis) {
+      Axis.horizontal => child.size.width,
+      Axis.vertical   => child.size.height,
+    };
   }
 
   @override

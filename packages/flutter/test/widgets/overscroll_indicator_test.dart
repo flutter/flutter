@@ -291,7 +291,8 @@ void main() {
     expect(painter, doesNotOverscroll);
   });
 
-  testWidgets('Nested overscrolls do not throw exceptions', (WidgetTester tester) async {
+  testWidgets('Nested overscrolls do not throw exceptions',
+  (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(

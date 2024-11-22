@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'recognizer.dart';
+/// @docImport 'tap.dart';
+library;
+
 // Modeled after Android's ViewConfiguration:
-// https://github.com/android/platform_frameworks_base/blob/master/core/java/android/view/ViewConfiguration.java
+// https://github.com/android/platform_frameworks_base/blob/main/core/java/android/view/ViewConfiguration.java
 
 /// The time that must elapse before a tap gesture sends onTapDown, if there's
 /// any doubt that the gesture is a tap.

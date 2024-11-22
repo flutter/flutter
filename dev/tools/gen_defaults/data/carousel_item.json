@@ -1,5 +1,5 @@
 {
-  "version": "v0_202",
+  "version": "v4_1_0",
 
   "md.comp.carousel-item.container.color": "surface",
   "md.comp.carousel-item.container.elevation": "md.sys.elevation.level0",
@@ -9,6 +9,9 @@
   "md.comp.carousel-item.disabled.container.elevation": "md.sys.elevation.level0",
   "md.comp.carousel-item.disabled.container.opacity": 0.38,
   "md.comp.carousel-item.focus.container.elevation": "md.sys.elevation.level0",
+  "md.comp.carousel-item.focus.indicator.color": "secondary",
+  "md.comp.carousel-item.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
+  "md.comp.carousel-item.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.carousel-item.focus.state-layer.color": "onSurface",
   "md.comp.carousel-item.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
   "md.comp.carousel-item.hover.container.elevation": "md.sys.elevation.level1",

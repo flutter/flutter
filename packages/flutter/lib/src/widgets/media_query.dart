@@ -74,6 +74,8 @@ enum _MediaQueryAspect {
   gestureSettings,
   /// Specifies the aspect corresponding to [MediaQueryData.displayFeatures].
   displayFeatures,
+  /// Specifies the aspect corresponding to [MediaQueryData.supportsShowingSystemContextMenu].
+  supportsShowingSystemContextMenu,
 }
 
 /// Information about a piece of media (e.g., a window).
@@ -173,6 +175,7 @@ class MediaQueryData {
     this.navigationMode = NavigationMode.traditional,
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
+    this.supportsShowingSystemContextMenu = false,
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
        assert(
@@ -190,7 +193,7 @@ class MediaQueryData {
     'This constructor was deprecated in preparation for the upcoming multi-window support. '
     'This feature was deprecated after v3.7.0-32.0.pre.'
   )
-  factory MediaQueryData.fromWindow(ui.FlutterView window) => MediaQueryData.fromView(window);
+  factory MediaQueryData.fromWindow(ui.FlutterView window) = MediaQueryData.fromView;
 
   /// Creates data for a [MediaQuery] based on the given `view`.
   ///
@@ -250,7 +253,8 @@ class MediaQueryData {
       alwaysUse24HourFormat = platformData?.alwaysUse24HourFormat ?? view.platformDispatcher.alwaysUse24HourFormat,
       navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
       gestureSettings = DeviceGestureSettings.fromView(view),
-      displayFeatures = view.displayFeatures;
+      displayFeatures = view.displayFeatures,
+      supportsShowingSystemContextMenu = platformData?.supportsShowingSystemContextMenu ?? view.platformDispatcher.supportsShowingSystemContextMenu;
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
     final double scaleFactor = platformData?.textScaleFactor ?? view.platformDispatcher.textScaleFactor;
@@ -285,7 +289,7 @@ class MediaQueryData {
   /// are automatically rebuilt.
   ///
   /// See the article on [Creating responsive and adaptive
-  /// apps](https://docs.flutter.dev/development/ui/layout/adaptive-responsive)
+  /// apps](https://docs.flutter.dev/ui/adaptive-responsive)
   /// for an introduction.
   ///
   /// See also:
@@ -562,6 +566,19 @@ class MediaQueryData {
   ///  [dart:ui.DisplayFeatureType.hinge]).
   final List<ui.DisplayFeature> displayFeatures;
 
+  /// Whether showing the system context menu is supported.
+  ///
+  /// For example, on iOS 16.0 and above, the system text selection context menu
+  /// may be shown instead of the Flutter-drawn context menu in order to avoid
+  /// the iOS clipboard access notification when the "Paste" button is pressed.
+  ///
+  /// See also:
+  ///
+  ///  * [SystemContextMenuController] and [SystemContextMenu], which may be
+  ///    used to show the system context menu when this flag indicates it's
+  ///    supported.
+  final bool supportsShowingSystemContextMenu;
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -598,6 +615,7 @@ class MediaQueryData {
     NavigationMode? navigationMode,
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
+    bool? supportsShowingSystemContextMenu,
   }) {
     assert(textScaleFactor == null || textScaler == null);
     if (textScaleFactor != null) {
@@ -622,6 +640,7 @@ class MediaQueryData {
       navigationMode: navigationMode ?? this.navigationMode,
       gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
+      supportsShowingSystemContextMenu: supportsShowingSystemContextMenu ?? this.supportsShowingSystemContextMenu,
     );
   }
 
@@ -814,7 +833,8 @@ class MediaQueryData {
         && other.boldText == boldText
         && other.navigationMode == navigationMode
         && other.gestureSettings == gestureSettings
-        && listEquals(other.displayFeatures, displayFeatures);
+        && listEquals(other.displayFeatures, displayFeatures)
+        && other.supportsShowingSystemContextMenu == supportsShowingSystemContextMenu;
   }
 
   @override
@@ -836,6 +856,7 @@ class MediaQueryData {
     navigationMode,
     gestureSettings,
     Object.hashAll(displayFeatures),
+    supportsShowingSystemContextMenu,
   );
 
   @override
@@ -859,6 +880,7 @@ class MediaQueryData {
       'navigationMode: ${navigationMode.name}',
       'gestureSettings: $gestureSettings',
       'displayFeatures: $displayFeatures',
+      'supportsShowingSystemContextMenu: $supportsShowingSystemContextMenu',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
@@ -924,29 +946,23 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///    adds a [Padding] widget.
   ///  * [MediaQueryData.padding], the affected property of the
   ///    [MediaQueryData].
-  ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
-  ///  * [removeViewPadding], the same thing but for
+  ///  * [MediaQuery.removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
+  ///  * [MediaQuery.removeViewPadding], the same thing but for
   ///    [MediaQueryData.viewPadding].
-  factory MediaQuery.removePadding({
-    Key? key,
+  MediaQuery.removePadding({
+    super.key,
     required BuildContext context,
     bool removeLeft = false,
     bool removeTop = false,
     bool removeRight = false,
     bool removeBottom = false,
-    required Widget child,
-  }) {
-    return MediaQuery(
-      key: key,
-      data: MediaQuery.of(context).removePadding(
+    required super.child,
+  }) : data = MediaQuery.of(context).removePadding(
         removeLeft: removeLeft,
         removeTop: removeTop,
         removeRight: removeRight,
         removeBottom: removeBottom,
-      ),
-      child: child,
-    );
-  }
+      );
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified view insets.
@@ -966,29 +982,23 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   ///  * [MediaQueryData.viewInsets], the affected property of the
   ///    [MediaQueryData].
-  ///  * [removePadding], the same thing but for [MediaQueryData.padding].
-  ///  * [removeViewPadding], the same thing but for
+  ///  * [MediaQuery.removePadding], the same thing but for [MediaQueryData.padding].
+  ///  * [MediaQuery.removeViewPadding], the same thing but for
   ///    [MediaQueryData.viewPadding].
-  factory MediaQuery.removeViewInsets({
-    Key? key,
+  MediaQuery.removeViewInsets({
+    super.key,
     required BuildContext context,
     bool removeLeft = false,
     bool removeTop = false,
     bool removeRight = false,
     bool removeBottom = false,
-    required Widget child,
-  }) {
-    return MediaQuery(
-      key: key,
-      data: MediaQuery.of(context).removeViewInsets(
+    required super.child,
+  }) : data = MediaQuery.of(context).removeViewInsets(
         removeLeft: removeLeft,
         removeTop: removeTop,
         removeRight: removeRight,
         removeBottom: removeBottom,
-      ),
-      child: child,
-    );
-  }
+      );
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified view padding.
@@ -1008,28 +1018,22 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   ///  * [MediaQueryData.viewPadding], the affected property of the
   ///    [MediaQueryData].
-  ///  * [removePadding], the same thing but for [MediaQueryData.padding].
-  ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
-  factory MediaQuery.removeViewPadding({
-    Key? key,
+  ///  * [MediaQuery.removePadding], the same thing but for [MediaQueryData.padding].
+  ///  * [MediaQuery.removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
+  MediaQuery.removeViewPadding({
+    super.key,
     required BuildContext context,
     bool removeLeft = false,
     bool removeTop = false,
     bool removeRight = false,
     bool removeBottom = false,
-    required Widget child,
-  }) {
-    return MediaQuery(
-      key: key,
-      data: MediaQuery.of(context).removeViewPadding(
+    required super.child,
+  }) : data = MediaQuery.of(context).removeViewPadding(
         removeLeft: removeLeft,
         removeTop: removeTop,
         removeRight: removeRight,
         removeBottom: removeBottom,
-      ),
-      child: child,
-    );
-  }
+      );
 
   /// Deprecated. Use [MediaQuery.fromView] instead.
   ///
@@ -1580,20 +1584,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool boldTextOf(BuildContext context) => maybeBoldTextOf(context) ?? false;
 
   /// Returns the [MediaQueryData.boldText] accessibility setting for the
-  /// nearest [MediaQuery] ancestor or false, if no such ancestor exists.
-  ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.boldText] property of the ancestor [MediaQuery]
-  /// changes.
-  ///
-  /// Deprecated in favor of [boldTextOf].
-  @Deprecated(
-    'Migrate to boldTextOf. '
-    'This feature was deprecated after v3.5.0-9.0.pre.'
-  )
-  static bool boldTextOverride(BuildContext context) => boldTextOf(context);
-
-  /// Returns the [MediaQueryData.boldText] accessibility setting for the
   /// nearest [MediaQuery] ancestor or null, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
@@ -1663,6 +1653,26 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static List<ui.DisplayFeature>? maybeDisplayFeaturesOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.displayFeatures)?.displayFeatures;
 
+  /// Returns [MediaQueryData.supportsShowingSystemContextMenu] for the nearest
+  /// [MediaQuery] ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.supportsShowingSystemContextMenu] property of the
+  /// ancestor [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static bool supportsShowingSystemContextMenu(BuildContext context) => _of(context, _MediaQueryAspect.supportsShowingSystemContextMenu).supportsShowingSystemContextMenu;
+
+  /// Returns [MediaQueryData.supportsShowingSystemContextMenu] for the nearest
+  /// [MediaQuery] ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.supportsShowingSystemContextMenu] property of the
+  /// ancestor [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static bool? maybeSupportsShowingSystemContextMenu(BuildContext context) => _maybeOf(context, _MediaQueryAspect.supportsShowingSystemContextMenu)?.supportsShowingSystemContextMenu;
+
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
 
@@ -1674,93 +1684,29 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
 
   @override
   bool updateShouldNotifyDependent(MediaQuery oldWidget, Set<Object> dependencies) {
-    for (final Object dependency in dependencies) {
-      if (dependency is _MediaQueryAspect) {
-        switch (dependency) {
-          case _MediaQueryAspect.size:
-            if (data.size != oldWidget.data.size) {
-              return true;
-            }
-          case _MediaQueryAspect.orientation:
-            if (data.orientation != oldWidget.data.orientation) {
-              return true;
-            }
-          case _MediaQueryAspect.devicePixelRatio:
-            if (data.devicePixelRatio != oldWidget.data.devicePixelRatio) {
-              return true;
-            }
-          case _MediaQueryAspect.textScaleFactor:
-            if (data.textScaleFactor != oldWidget.data.textScaleFactor) {
-              return true;
-            }
-          case _MediaQueryAspect.textScaler:
-            if (data.textScaler != oldWidget.data.textScaler) {
-              return true;
-            }
-          case _MediaQueryAspect.platformBrightness:
-            if (data.platformBrightness != oldWidget.data.platformBrightness) {
-              return true;
-            }
-          case _MediaQueryAspect.padding:
-            if (data.padding != oldWidget.data.padding) {
-              return true;
-            }
-          case _MediaQueryAspect.viewInsets:
-            if (data.viewInsets != oldWidget.data.viewInsets) {
-              return true;
-            }
-          case _MediaQueryAspect.systemGestureInsets:
-            if (data.systemGestureInsets != oldWidget.data.systemGestureInsets) {
-              return true;
-            }
-          case _MediaQueryAspect.viewPadding:
-            if (data.viewPadding != oldWidget.data.viewPadding) {
-              return true;
-            }
-          case _MediaQueryAspect.alwaysUse24HourFormat:
-            if (data.alwaysUse24HourFormat != oldWidget.data.alwaysUse24HourFormat) {
-              return true;
-            }
-          case _MediaQueryAspect.accessibleNavigation:
-            if (data.accessibleNavigation != oldWidget.data.accessibleNavigation) {
-              return true;
-            }
-          case _MediaQueryAspect.invertColors:
-            if (data.invertColors != oldWidget.data.invertColors) {
-              return true;
-            }
-          case _MediaQueryAspect.highContrast:
-            if (data.highContrast != oldWidget.data.highContrast) {
-              return true;
-            }
-          case _MediaQueryAspect.onOffSwitchLabels:
-            if (data.onOffSwitchLabels != oldWidget.data.onOffSwitchLabels) {
-              return true;
-            }
-          case _MediaQueryAspect.disableAnimations:
-            if (data.disableAnimations != oldWidget.data.disableAnimations) {
-              return true;
-            }
-          case _MediaQueryAspect.boldText:
-            if (data.boldText != oldWidget.data.boldText) {
-              return true;
-            }
-          case _MediaQueryAspect.navigationMode:
-            if (data.navigationMode != oldWidget.data.navigationMode) {
-              return true;
-            }
-          case _MediaQueryAspect.gestureSettings:
-            if (data.gestureSettings != oldWidget.data.gestureSettings) {
-              return true;
-            }
-          case _MediaQueryAspect.displayFeatures:
-            if (data.displayFeatures != oldWidget.data.displayFeatures) {
-              return true;
-            }
-        }
-      }
-    }
-    return false;
+    return dependencies.any((Object dependency) => dependency is _MediaQueryAspect && switch (dependency) {
+      _MediaQueryAspect.size               => data.size != oldWidget.data.size,
+      _MediaQueryAspect.orientation        => data.orientation != oldWidget.data.orientation,
+      _MediaQueryAspect.devicePixelRatio   => data.devicePixelRatio != oldWidget.data.devicePixelRatio,
+      _MediaQueryAspect.textScaleFactor    => data.textScaleFactor != oldWidget.data.textScaleFactor,
+      _MediaQueryAspect.textScaler         => data.textScaler != oldWidget.data.textScaler,
+      _MediaQueryAspect.platformBrightness => data.platformBrightness != oldWidget.data.platformBrightness,
+      _MediaQueryAspect.padding            => data.padding != oldWidget.data.padding,
+      _MediaQueryAspect.viewInsets         => data.viewInsets != oldWidget.data.viewInsets,
+      _MediaQueryAspect.viewPadding        => data.viewPadding != oldWidget.data.viewPadding,
+      _MediaQueryAspect.invertColors       => data.invertColors != oldWidget.data.invertColors,
+      _MediaQueryAspect.highContrast       => data.highContrast != oldWidget.data.highContrast,
+      _MediaQueryAspect.onOffSwitchLabels  => data.onOffSwitchLabels != oldWidget.data.onOffSwitchLabels,
+      _MediaQueryAspect.disableAnimations  => data.disableAnimations != oldWidget.data.disableAnimations,
+      _MediaQueryAspect.boldText           => data.boldText != oldWidget.data.boldText,
+      _MediaQueryAspect.navigationMode     => data.navigationMode != oldWidget.data.navigationMode,
+      _MediaQueryAspect.gestureSettings    => data.gestureSettings != oldWidget.data.gestureSettings,
+      _MediaQueryAspect.displayFeatures    => data.displayFeatures != oldWidget.data.displayFeatures,
+      _MediaQueryAspect.systemGestureInsets => data.systemGestureInsets != oldWidget.data.systemGestureInsets,
+      _MediaQueryAspect.accessibleNavigation => data.accessibleNavigation != oldWidget.data.accessibleNavigation,
+      _MediaQueryAspect.alwaysUse24HourFormat => data.alwaysUse24HourFormat != oldWidget.data.alwaysUse24HourFormat,
+      _MediaQueryAspect.supportsShowingSystemContextMenu => data.supportsShowingSystemContextMenu != oldWidget.data.supportsShowingSystemContextMenu,
+    });
   }
 }
 

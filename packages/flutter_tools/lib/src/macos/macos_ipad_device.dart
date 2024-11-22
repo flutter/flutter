@@ -14,6 +14,7 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../ios/ios_workflow.dart';
 import '../project.dart';
 
@@ -28,7 +29,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required OperatingSystemUtils operatingSystemUtils,
   })  : _operatingSystemUtils = operatingSystemUtils,
         super(
-          'designed-for-ipad',
+          'mac-designed-for-ipad',
           platformType: PlatformType.macos,
           ephemeral: false,
           processManager: processManager,
@@ -60,6 +61,37 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) => null;
 
   @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) {
+    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: false,
+    );
+
+    return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
+      mdnsVMServiceDiscoveryForAttach,
+      super.getVMServiceDiscoveryForAttach(
+        appId: appId,
+        fuchsiaModule: fuchsiaModule,
+        filterDevicePort: filterDevicePort,
+        expectedHostPort: expectedHostPort,
+        ipv6: ipv6,
+        logger: logger,
+      ),
+    ]);
+  }
+
+  @override
   Future<LaunchResult> startApp(
     ApplicationPackage? package, {
     String? mainPath,
@@ -84,6 +116,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
+    bool usingCISystem = false,
   }) async {
     // Only attaching to a running app launched from Xcode is supported.
     throw UnimplementedError('Building for "$name" is not supported.');
@@ -120,10 +153,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   /// and discovery is allowed for this command.
   @override
   bool get canListAnything =>
-      _iosWorkflow.canListDevices && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64 && allowDiscovery;
-
-  /// Set to show ARM macOS as an iOS device target.
-  static bool allowDiscovery = false;
+      _iosWorkflow.canListDevices && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
 
   @override
   Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
@@ -144,5 +174,5 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async => const <String>[];
 
   @override
-  List<String> get wellKnownIds => const <String>['designed-for-ipad'];
+  List<String> get wellKnownIds => const <String>['mac-designed-for-ipad'];
 }

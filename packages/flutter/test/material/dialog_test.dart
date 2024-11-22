@@ -30,8 +30,9 @@ MaterialApp _buildAppWithDialog(
                   context: context,
                   traversalEdgeBehavior: traversalEdgeBehavior,
                   builder: (BuildContext context) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                    return MediaQuery.withClampedTextScaling(
+                      minScaleFactor: textScaleFactor,
+                      maxScaleFactor: textScaleFactor,
                       child: dialog,
                     );
                   },
@@ -108,6 +109,28 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.color, customColor);
+  });
+
+  testWidgets('Dialog background defaults to ColorScheme.surface', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      colorScheme: ThemeData().colorScheme.copyWith(
+        surface: Colors.orange,
+        background: Colors.green,
+      )
+    );
+    const Dialog dialog = Dialog(
+      child: SizedBox(
+        width: 200,
+        height: 200
+      ),
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.color, theme.colorScheme.surface);
   });
 
   testWidgets('Material2 - Dialog Defaults', (WidgetTester tester) async {
@@ -1655,12 +1678,12 @@ void main() {
     // The default testing screen (800, 600)
     const Rect screenRect = Rect.fromLTRB(0.0, 0.0, 800.0, 600.0);
 
-    // Test with no padding
+    // Test with no padding.
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(),
         child: Dialog(
-          insetPadding: null,
+          insetPadding: EdgeInsets.zero,
           child: Placeholder(),
         ),
       ),
@@ -1668,7 +1691,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byType(Placeholder)), screenRect);
 
-    // Test with an insetPadding
+    // Test with an insetPadding.
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(),
@@ -2839,6 +2862,21 @@ void main() {
     expect(await nextFocus(), false);
     expect(okNode.hasFocus, false);
     expect(cancelNode.hasFocus, false);
+  });
+
+  testWidgets('Dialog.insetPadding is nullable', (WidgetTester tester) async {
+    const Dialog dialog = Dialog();
+    expect(dialog.insetPadding, isNull);
+  });
+
+  testWidgets('AlertDialog.insetPadding is nullable', (WidgetTester tester) async {
+    const AlertDialog alertDialog = AlertDialog();
+    expect(alertDialog.insetPadding, isNull);
+  });
+
+  testWidgets('SimpleDialog.insetPadding is nullable', (WidgetTester tester) async {
+    const SimpleDialog simpleDialog = SimpleDialog();
+    expect(simpleDialog.insetPadding, isNull);
   });
 }
 

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'dart:ui' hide window;
 
 import 'package:flutter/foundation.dart';
@@ -154,6 +160,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }) : _platformDispatcher = platformDispatcher {
     _updateViewsAndDisplays();
     _platformDispatcher.onMetricsChanged = _handleMetricsChanged;
+    _platformDispatcher.onViewFocusChange = _handleViewFocusChanged;
   }
 
   /// The [PlatformDispatcher] that is wrapped by this [TestPlatformDispatcher].
@@ -176,10 +183,21 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   set onMetricsChanged(VoidCallback? callback) {
     _onMetricsChanged = callback;
   }
-
   void _handleMetricsChanged() {
     _updateViewsAndDisplays();
     _onMetricsChanged?.call();
+  }
+
+  @override
+  ViewFocusChangeCallback? get onViewFocusChange => _platformDispatcher.onViewFocusChange;
+  ViewFocusChangeCallback? _onViewFocusChange;
+  @override
+  set onViewFocusChange(ViewFocusChangeCallback? callback) {
+    _onViewFocusChange = callback;
+  }
+  void _handleViewFocusChanged(ViewFocusEvent event) {
+    _updateViewsAndDisplays();
+    _onViewFocusChange?.call(event);
   }
 
   @override
@@ -305,6 +323,18 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// service is defined and returns to the real value.
   void clearNativeSpellCheckServiceDefined() {
     _nativeSpellCheckServiceDefinedTestValue = null;
+  }
+
+  @override
+  bool get supportsShowingSystemContextMenu => _supportsShowingSystemContextMenu ?? _platformDispatcher.supportsShowingSystemContextMenu;
+  bool? _supportsShowingSystemContextMenu;
+  set supportsShowingSystemContextMenu(bool value) { // ignore: avoid_setters_without_getters
+    _supportsShowingSystemContextMenu = value;
+  }
+
+  /// Resets [supportsShowingSystemContextMenu] to the default value.
+  void resetSupportsShowingSystemContextMenu() {
+    _supportsShowingSystemContextMenu = null;
   }
 
   @override
@@ -458,6 +488,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     clearTextScaleFactorTestValue();
     clearNativeSpellCheckServiceDefined();
     resetBrieflyShowPassword();
+    resetSupportsShowingSystemContextMenu();
     resetInitialLifecycleState();
     resetSystemFontFamily();
   }
@@ -611,9 +642,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   void updateSemantics(SemanticsUpdate update) {
-    // Using the deprecated method to maintain backwards compatibility during
-    // the multi-view transition window.
-    // ignore: deprecated_member_use
     _platformDispatcher.updateSemantics(update);
   }
 
@@ -750,6 +778,9 @@ class TestFlutterView implements FlutterView {
   /// can only be set in a test environment to emulate different view
   /// configurations. A standard [FlutterView] is not mutable from the framework.
   ///
+  /// Setting this value also sets [physicalConstraints] to tight constraints
+  /// based on the given size.
+  ///
   /// See also:
   ///
   ///   * [FlutterView.physicalSize] for the standard implementation
@@ -760,12 +791,39 @@ class TestFlutterView implements FlutterView {
   Size? _physicalSize;
   set physicalSize(Size value) {
     _physicalSize = value;
+    // For backwards compatibility the constraints are set based on the provided size.
+    physicalConstraints = ViewConstraints.tight(value);
+  }
+
+  /// Resets [physicalSize] (and implicitly also the [physicalConstraints]) to
+  /// the default value for this view.
+  void resetPhysicalSize() {
+    _physicalSize = null;
+    resetPhysicalConstraints();
+  }
+
+  /// The physical constraints to use for this test.
+  ///
+  /// Defaults to the value provided by [FlutterView.physicalConstraints]. This
+  /// can only be set in a test environment to emulate different view
+  /// configurations. A standard [FlutterView] is not mutable from the framework.
+  ///
+  /// See also:
+  ///
+  ///   * [FlutterView.physicalConstraints] for the standard implementation
+  ///   * [physicalConstraints] to reset this value specifically
+  ///   * [reset] to reset all test values for this view
+  @override
+  ViewConstraints get physicalConstraints => _physicalConstraints ?? _view.physicalConstraints;
+  ViewConstraints? _physicalConstraints;
+  set physicalConstraints(ViewConstraints value) {
+    _physicalConstraints = value;
     platformDispatcher.onMetricsChanged?.call();
   }
 
-  /// Resets [physicalSize] to the default value for this view.
-  void resetPhysicalSize() {
-    _physicalSize = null;
+  /// Resets [physicalConstraints] to the default value for this view.
+  void resetPhysicalConstraints() {
+    _physicalConstraints = null;
     platformDispatcher.onMetricsChanged?.call();
   }
 
@@ -874,8 +932,7 @@ class TestFlutterView implements FlutterView {
 
   @override
   void render(Scene scene, {Size? size}) {
-    // TODO(goderbauer): Wire through size after https://github.com/flutter/engine/pull/48090 rolled in.
-    _view.render(scene);
+    _view.render(scene, size: size);
   }
 
   @override
@@ -900,6 +957,7 @@ class TestFlutterView implements FlutterView {
     resetDisplayFeatures();
     resetPadding();
     resetPhysicalSize();
+    // resetPhysicalConstraints is implicitly called by resetPhysicalSize.
     resetSystemGestureInsets();
     resetViewInsets();
     resetViewPadding();
@@ -1636,8 +1694,7 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   void render(Scene scene, {Size? size}) {
-    // TODO(goderbauer): Wire through size after https://github.com/flutter/engine/pull/48090 rolled in.
-    _view.render(scene);
+    _view.render(scene, size: size);
   }
 
   @Deprecated(

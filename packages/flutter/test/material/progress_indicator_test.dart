@@ -228,6 +228,27 @@ void main() {
   });
 
   testWidgets('LinearProgressIndicator with colors', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              value: 0.25,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Defaults.
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0), color: theme.colorScheme.secondaryContainer)
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: theme.colorScheme.primary),
+    );
+
     // With valueColor & color provided
     await tester.pumpWidget(
       Theme(
@@ -1085,6 +1106,34 @@ void main() {
   );
 
   testWidgets(
+    'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS/macOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(),
+          home: const Scaffold(
+            body: Material(
+              child: CircularProgressIndicator.adaptive(
+                value: 0.5,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+      final double actualProgress = tester.widget<CupertinoActivityIndicator>(
+        find.byType(CupertinoActivityIndicator),
+      ).progress;
+      expect(actualProgress, 0.5);
+   },
+   variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
     'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1270,7 +1319,7 @@ class _RefreshProgressIndicatorGoldenState extends State<_RefreshProgressIndicat
         setState(() {});
       })
     ..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.completed) {
+        if (status.isCompleted) {
           indeterminate = true;
         }
       });

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -539,12 +543,10 @@ class AlignmentDirectional extends AlignmentGeometry {
   @override
   Alignment resolve(TextDirection? direction) {
     assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
-    switch (direction!) {
-      case TextDirection.rtl:
-        return Alignment(-start, y);
-      case TextDirection.ltr:
-        return Alignment(start, y);
-    }
+    return switch (direction!) {
+      TextDirection.rtl => Alignment(-start, y),
+      TextDirection.ltr => Alignment(start, y),
+    };
   }
 
   static String _stringify(double start, double y) {
@@ -643,12 +645,10 @@ class _MixedAlignment extends AlignmentGeometry {
   @override
   Alignment resolve(TextDirection? direction) {
     assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
-    switch (direction!) {
-      case TextDirection.rtl:
-        return Alignment(_x - _start, _y);
-      case TextDirection.ltr:
-        return Alignment(_x + _start, _y);
-    }
+    return switch (direction!) {
+      TextDirection.rtl => Alignment(_x - _start, _y),
+      TextDirection.ltr => Alignment(_x + _start, _y),
+    };
   }
 }
 

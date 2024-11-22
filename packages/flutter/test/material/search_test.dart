@@ -662,7 +662,7 @@ void main() {
                                   SemanticsFlag.isEnabled,
                                   SemanticsFlag.isFocusable,
                                 ],
-                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                                 tooltip: 'Back',
                                 textDirection: TextDirection.ltr,
                               ),
@@ -670,6 +670,8 @@ void main() {
                                 id: 9,
                                 flags: <SemanticsFlag>[
                                   SemanticsFlag.isTextField,
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isEnabled,
                                   SemanticsFlag.isFocused,
                                   SemanticsFlag.isHeader,
                                   if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
@@ -716,7 +718,7 @@ void main() {
                           SemanticsFlag.isEnabled,
                           SemanticsFlag.isFocusable,
                         ],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'Suggestions',
                         textDirection: TextDirection.ltr,
                       ),
@@ -810,7 +812,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             tooltip: 'Back',
                             textDirection: TextDirection.ltr,
                           ),
@@ -818,6 +820,8 @@ void main() {
                             id: 11,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocused,
                               SemanticsFlag.isHeader,
                               if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
@@ -852,7 +856,7 @@ void main() {
                           SemanticsFlag.isEnabled,
                           SemanticsFlag.isFocusable,
                         ],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'Suggestions',
                         textDirection: TextDirection.ltr,
                       ),

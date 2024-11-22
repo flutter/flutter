@@ -1404,9 +1404,9 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         home: Material(
           child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-            bodyLargeStyle = Theme.of(context).textTheme.bodyText1!;
-            bodyMediumStyle = Theme.of(context).textTheme.bodyText2!;
-            bodySmallStyle = Theme.of(context).textTheme.caption!;
+            bodyLargeStyle = Theme.of(context).textTheme.bodyLarge!;
+            bodyMediumStyle = Theme.of(context).textTheme.bodyMedium!;
+            bodySmallStyle = Theme.of(context).textTheme.bodySmall!;
             return Stepper(
               type: StepperType.horizontal,
               currentStep: index,
@@ -1530,7 +1530,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(circleColor('1'), selectedColor);
     expect(circleColor('2'), disabledColor);
     // in two steps case there will be single line
-    expect(lineColor('line0'), disabledColor);
+    expect(lineColor('line0'), selectedColor);
 
     // now hitting step two
     await tester.tap(find.text('step2'));
@@ -1587,6 +1587,139 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(find.text('!'), findsOneWidget);
   });
 
+  testWidgets('StepperProperties test', (WidgetTester tester) async {
+    const Widget widget = SizedBox.shrink();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            stepIconHeight: 24,
+            stepIconWidth: 24,
+            stepIconMargin: const EdgeInsets.all(8),
+             steps: List<Step>.generate(3, (int index) {
+               return Step(
+                 title: Text('Step $index'),
+                 content: widget,
+               );
+             }),
+          ),
+        ),
+      ),
+    );
+
+    final Finder stepperFinder = find.byType(Stepper);
+    final Stepper stepper = tester.widget<Stepper>(stepperFinder);
+
+    expect(stepper.stepIconHeight, 24);
+    expect(stepper.stepIconWidth, 24);
+    expect(stepper.stepIconMargin, const EdgeInsets.all(8));
+  });
+
+  testWidgets('StepStyle test', (WidgetTester tester) async {
+    final StepStyle stepStyle = StepStyle(
+      color: Colors.white,
+      errorColor: Colors.orange,
+      connectorColor: Colors.red,
+      connectorThickness: 2,
+      border: Border.all(),
+      gradient: const LinearGradient(
+        colors: <Color>[Colors.red, Colors.blue],
+      ),
+      indexStyle: const TextStyle(color: Colors.black),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            steps: <Step>[
+              Step(
+                title: const Text('Regular title'),
+                content: const Text('Text content'),
+                stepStyle: stepStyle,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder stepperFinder = find.byType(Stepper);
+    final Stepper stepper = tester.widget<Stepper>(stepperFinder);
+    final StepStyle? style = stepper.steps.first.stepStyle;
+
+    expect(style?.color, stepStyle.color);
+    expect(style?.errorColor, stepStyle.errorColor);
+    expect(style?.connectorColor, stepStyle.connectorColor);
+    expect(style?.connectorThickness, stepStyle.connectorThickness);
+    expect(style?.border, stepStyle.border);
+    expect(style?.gradient, stepStyle.gradient);
+    expect(style?.indexStyle, stepStyle.indexStyle);
+
+    //copyWith
+    final StepStyle newStyle = stepStyle.copyWith(
+      color: Colors.black,
+      errorColor: Colors.red,
+      connectorColor: Colors.blue,
+      connectorThickness: 3,
+      border: Border.all(),
+      gradient: const LinearGradient(
+        colors: <Color>[Colors.red, Colors.blue],
+      ),
+      indexStyle: const TextStyle(color: Colors.black),
+    );
+
+    expect(newStyle.color, Colors.black);
+    expect(newStyle.errorColor, Colors.red);
+    expect(newStyle.connectorColor, Colors.blue);
+    expect(newStyle.connectorThickness, 3);
+    expect(newStyle.border, stepStyle.border);
+    expect(newStyle.gradient, stepStyle.gradient);
+    expect(newStyle.indexStyle, stepStyle.indexStyle);
+
+    //merge
+    final StepStyle mergedStyle = stepStyle.merge(newStyle);
+
+    expect(mergedStyle.color, Colors.black);
+    expect(mergedStyle.errorColor, Colors.red);
+    expect(mergedStyle.connectorColor, Colors.blue);
+    expect(mergedStyle.connectorThickness, 3);
+    expect(mergedStyle.border, stepStyle.border);
+    expect(mergedStyle.gradient, stepStyle.gradient);
+    expect(mergedStyle.indexStyle, stepStyle.indexStyle);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/144376.
+  testWidgets('Vertical Stepper does not draw connector on the last step', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Stepper(
+            currentStep: 1,
+              steps: const <Step>[
+                Step(
+                  title: Text('step1'),
+                  content: Text('step1 content'),
+                ),
+                Step(
+                  title: Text('step2'),
+                  content: Text('step2 content'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      )
+    );
+
+    final SizedBox lastConnector = tester.widget<SizedBox>(
+      find.descendant(of: find.byType(PositionedDirectional),
+      matching: find.byType(SizedBox).last,
+    ));
+    expect(lastConnector.width, equals(0.0));
+  });
 }
 
 class _TappableColorWidget extends StatefulWidget {

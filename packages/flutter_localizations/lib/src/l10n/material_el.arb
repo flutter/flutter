@@ -144,5 +144,7 @@
   "menuDismissLabel": "Παράβλεψη μενού",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Αναζήτηση στον ιστό",
-  "shareButtonLabel": "Κοινοποίηση…"
+  "shareButtonLabel": "Κοινοποίηση…",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

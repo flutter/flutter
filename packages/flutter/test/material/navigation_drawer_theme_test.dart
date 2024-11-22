@@ -60,8 +60,8 @@ void main() {
         'indicatorColor: Color(0x00000096)',
         'indicatorShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
         'indicatorSize: Size(10.0, 10.0)',
-        'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))',
-        'iconTheme: MaterialStatePropertyAll(IconThemeData#00000(color: Color(0x00000095)))'
+        'labelTextStyle: WidgetStatePropertyAll(TextStyle(inherit: true, size: 7.0))',
+        'iconTheme: WidgetStatePropertyAll(IconThemeData#00000(color: Color(0x00000095)))'
       ],
     ));
   });

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -184,7 +188,7 @@ enum SystemUiMode {
 ///
 /// Used by [AppBar.systemOverlayStyle] for declaratively setting the style of
 /// the system overlays, and by [SystemChrome.setSystemUIOverlayStyle] for
-/// imperatively setting the style of the systeme overlays.
+/// imperatively setting the style of the system overlays.
 @immutable
 class SystemUiOverlayStyle {
   /// Creates a new [SystemUiOverlayStyle].

@@ -9,8 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 Widget wrap({Widget? child}) {
   return MediaQuery(
@@ -411,7 +411,7 @@ void main() {
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               label: 'Title',
               textDirection: TextDirection.ltr,
             ),
@@ -448,7 +448,7 @@ void main() {
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               label: 'Title',
               textDirection: TextDirection.ltr,
             ),
@@ -483,6 +483,7 @@ void main() {
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
+              actions: <SemanticsAction>[SemanticsAction.focus],
               label: 'Title',
               textDirection: TextDirection.ltr,
             ),
@@ -1258,6 +1259,43 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(Radio<bool>)), const Size(48.0, 48.0));
+  });
+
+  testWidgets('RadioListTile.control widget should not request focus on traversal', (WidgetTester tester) async {
+    final GlobalKey firstChildKey = GlobalKey();
+    final GlobalKey secondChildKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              RadioListTile<bool>(
+                value: true,
+                groupValue: true,
+                onChanged: (bool? value) {},
+                title: Text('Hey', key: firstChildKey),
+              ),
+              RadioListTile<bool>(
+                value: true,
+                groupValue: true,
+                onChanged: (bool? value) {},
+                title: Text('There', key: secondChildKey),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    Focus.of(firstChildKey.currentContext!).requestFocus();
+    await tester.pump();
+    expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isTrue);
+    Focus.of(firstChildKey.currentContext!).nextFocus();
+    await tester.pump();
+    expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isFalse);
+    expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 
   testWidgets('RadioListTile.adaptive shows the correct radio platform widget', (WidgetTester tester) async {

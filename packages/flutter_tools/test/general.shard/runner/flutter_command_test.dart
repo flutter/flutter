@@ -27,7 +27,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
-import 'package:unified_analytics/src/enums.dart';
+import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -643,7 +643,7 @@ void main() {
     testUsingContext('use packagesPath to generate BuildInfo', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
       final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
-      expect(buildInfo.packagesPath, 'foo');
+      expect(buildInfo.packageConfigPath, 'foo');
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -1216,6 +1216,45 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('CLI option overrides default flavor from manifest', () async {
+        final File pubspec = fileSystem.file('pubspec.yaml');
+        await pubspec.create();
+        await pubspec.writeAsString('''
+name: test
+flutter:
+  default-flavor: foo
+        ''');
+
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.flavor, 'foo');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.empty(),
+      });
+
+      testUsingContext('tool loads default flavor from manifest, but cli overrides', () async {
+        final File pubspec = fileSystem.file('pubspec.yaml');
+        await pubspec.create();
+        await pubspec.writeAsString('''
+name: test
+flutter:
+  default-flavor: foo
+        ''');
+
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(commandFunction: () async {
+          return FlutterCommandResult.success();
+        },);
+        flutterCommand.usesFlavorOption();
+        final CommandRunner<void> runner =  createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--flavor', 'bar']);
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.flavor, 'bar');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.empty(),
       });
     });
   });

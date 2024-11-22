@@ -22,11 +22,7 @@ class DartPluginRegistrantTarget extends Target {
   ///
   /// If `project` is unset, a [FlutterProject] based on environment is used.
   @visibleForTesting
-  factory DartPluginRegistrantTarget.test(FlutterProject project) {
-    return DartPluginRegistrantTarget._(project);
-  }
-
-  DartPluginRegistrantTarget._(this._project);
+  const DartPluginRegistrantTarget.test(FlutterProject project) : _project = project;
 
   final FlutterProject? _project;
 

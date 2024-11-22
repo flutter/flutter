@@ -154,7 +154,7 @@ void main() {
     expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('ScrollBehavior multitouchDragStrategy test', (WidgetTester tester) async {
+  testWidgets('ScrollBehavior multitouchDragStrategy test - 1', (WidgetTester tester) async {
     const ScrollBehavior behavior1 = ScrollBehavior();
     final ScrollBehavior behavior2 = const ScrollBehavior().copyWith(
       multitouchDragStrategy: MultitouchDragStrategy.sumAllPointers
@@ -201,11 +201,11 @@ void main() {
     await gesture2.moveBy(const Offset(0, -50));
     await tester.pump();
 
-    // The default multitouchDragStrategy should be MultitouchDragStrategy.latestPointer.
-    // Only the latest active pointer be tracked.
+    // The default multitouchDragStrategy is 'latestPointer' or 'averageBoundaryPointers,
+    // the received delta should be 50.0.
     expect(controller.position.pixels, 50.0);
 
-    // Change to MultitouchDragStrategy.sumAllPointers.
+    // Change to sumAllPointers.
     await tester.pumpWidget(buildFrame(behavior2));
 
     await gesture1.moveBy(const Offset(0, -50));
@@ -217,6 +217,147 @@ void main() {
     // All active pointers be tracked.
     expect(controller.position.pixels, 50.0 + 50.0 + 50.0);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('ScrollBehavior multitouchDragStrategy test (non-Apple platforms) - 2', (WidgetTester tester) async {
+    const ScrollBehavior behavior1 = ScrollBehavior();
+    final ScrollBehavior behavior2 = const ScrollBehavior().copyWith(
+        multitouchDragStrategy: MultitouchDragStrategy.averageBoundaryPointers
+    );
+    final ScrollController controller = ScrollController();
+    late BuildContext capturedContext;
+    addTearDown(() => controller.dispose());
+
+    Widget buildFrame(ScrollBehavior behavior) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ScrollConfiguration(
+          behavior: behavior,
+          child: Builder(
+            builder: (BuildContext context) {
+              capturedContext = context;
+              return ListView(
+              controller: controller,
+              children: const <Widget>[
+                SizedBox(
+                  height: 1000.0,
+                  width: 1000.0,
+                  child: Text('I Love Flutter!'),
+                ),
+              ],
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(behavior1));
+
+    expect(controller.position.pixels, 0.0);
+
+    final Offset listLocation = tester.getCenter(find.byType(ListView));
+
+    final TestGesture gesture1 = await tester.createGesture(pointer: 1);
+    await gesture1.down(listLocation);
+    await tester.pump();
+
+    final TestGesture gesture2 = await tester.createGesture(pointer: 2);
+    await gesture2.down(listLocation);
+    await tester.pump();
+
+    await gesture1.moveBy(const Offset(0, -50));
+    await tester.pump();
+
+    await gesture2.moveBy(const Offset(0, -40));
+    await tester.pump();
+
+    // The default multitouchDragStrategy is latestPointer.
+    // Only the latest active pointer be tracked.
+    final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
+    expect(scrollBehavior.getMultitouchDragStrategy(capturedContext), MultitouchDragStrategy.latestPointer);
+    expect(controller.position.pixels, 40.0);
+
+    // Change to averageBoundaryPointers.
+    await tester.pumpWidget(buildFrame(behavior2));
+
+    await gesture1.moveBy(const Offset(0, -70));
+    await tester.pump();
+
+    await gesture2.moveBy(const Offset(0, -60));
+    await tester.pump();
+
+    expect(controller.position.pixels, 40.0 + 70.0);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.linux, TargetPlatform.fuchsia, TargetPlatform.windows }));
+
+  testWidgets('ScrollBehavior multitouchDragStrategy test (Apple platforms) - 3', (WidgetTester tester) async {
+    const ScrollBehavior behavior1 = ScrollBehavior();
+    final ScrollBehavior behavior2 = const ScrollBehavior().copyWith(
+        multitouchDragStrategy: MultitouchDragStrategy.latestPointer
+    );
+    final ScrollController controller = ScrollController();
+    late BuildContext capturedContext;
+    addTearDown(() => controller.dispose());
+
+    Widget buildFrame(ScrollBehavior behavior) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ScrollConfiguration(
+          behavior: behavior,
+          child: Builder(
+            builder: (BuildContext context) {
+              capturedContext = context;
+              return ListView(
+                controller: controller,
+                children: const <Widget>[
+                  SizedBox(
+                    height: 1000.0,
+                    width: 1000.0,
+                    child: Text('I Love Flutter!'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(behavior1));
+
+    expect(controller.position.pixels, 0.0);
+
+    final Offset listLocation = tester.getCenter(find.byType(ListView));
+
+    final TestGesture gesture1 = await tester.createGesture(pointer: 1);
+    await gesture1.down(listLocation);
+    await tester.pump();
+
+    final TestGesture gesture2 = await tester.createGesture(pointer: 2);
+    await gesture2.down(listLocation);
+    await tester.pump();
+
+    await gesture1.moveBy(const Offset(0, -40));
+    await tester.pump();
+
+    await gesture2.moveBy(const Offset(0, -50));
+    await tester.pump();
+
+    // The default multitouchDragStrategy is averageBoundaryPointers.
+    final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
+    expect(scrollBehavior.getMultitouchDragStrategy(capturedContext), MultitouchDragStrategy.averageBoundaryPointers);
+    expect(controller.position.pixels, 50.0);
+
+    // Change to latestPointer.
+    await tester.pumpWidget(buildFrame(behavior2));
+
+    await gesture1.moveBy(const Offset(0, -50));
+    await tester.pump();
+
+    await gesture2.moveBy(const Offset(0, -40));
+    await tester.pump();
+
+    expect(controller.position.pixels, 50.0 + 40.0);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   group('ScrollBehavior configuration is maintained over multiple copies', () {
     testWidgets('dragDevices', (WidgetTester tester) async {

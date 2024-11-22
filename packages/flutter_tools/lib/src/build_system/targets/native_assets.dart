@@ -3,22 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:native_assets_cli/native_assets_cli.dart' show Asset;
+import 'package:native_assets_builder/native_assets_builder.dart' hide NativeAssetsBuildRunner;
 import 'package:package_config/package_config_types.dart';
 
 import '../../android/gradle_utils.dart';
-import '../../android/native_assets.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
-import '../../ios/native_assets.dart';
-import '../../linux/native_assets.dart';
-import '../../macos/native_assets.dart';
+import '../../isolated/native_assets/android/native_assets.dart';
+import '../../isolated/native_assets/ios/native_assets.dart';
+import '../../isolated/native_assets/linux/native_assets.dart';
+import '../../isolated/native_assets/macos/native_assets.dart';
+import '../../isolated/native_assets/native_assets.dart';
+import '../../isolated/native_assets/windows/native_assets.dart';
 import '../../macos/xcode.dart';
-import '../../native_assets.dart';
-import '../../windows/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -56,7 +56,7 @@ class NativeAssets extends Target {
     final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
     if (nativeAssetsEnvironment == 'false') {
       dependencies = <Uri>[];
-      await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
+      await writeNativeAssetsYaml(KernelAssets(), environment.buildDir.uri, fileSystem);
     } else {
       final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
       if (targetPlatformEnvironment == null) {
@@ -104,6 +104,7 @@ class NativeAssets extends Target {
             fileSystem,
             buildRunner,
           );
+        case TargetPlatform.windows_arm64:
         case TargetPlatform.windows_x64:
           dependencies = await _buildWindows(
             environment,
@@ -144,7 +145,7 @@ class NativeAssets extends Target {
           } else {
             // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
             // Write the file we claim to have in the [outputs].
-            await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
+            await writeNativeAssetsYaml(KernelAssets(), environment.buildDir.uri, fileSystem);
             dependencies = <Uri>[];
           }
         case TargetPlatform.android_arm:
@@ -164,7 +165,7 @@ class NativeAssets extends Target {
         case TargetPlatform.web_javascript:
           // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
           // Write the file we claim to have in the [outputs].
-          await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
+          await writeNativeAssetsYaml(KernelAssets(), environment.buildDir.uri, fileSystem);
           dependencies = <Uri>[];
       }
     }
@@ -306,8 +307,6 @@ class NativeAssets extends Target {
       Uri projectUri,
       FileSystem fileSystem,
       NativeAssetsBuildRunner buildRunner) {
-    final bool isAndroidLibrary =
-        environment.defines[kIsAndroidLibrary] == 'true';
     final String? androidArchsEnvironment = environment.defines[kAndroidArchs];
     final List<AndroidArch> androidArchs = _androidArchs(
       targetPlatform,
@@ -315,15 +314,19 @@ class NativeAssets extends Target {
     );
     final int targetAndroidNdkApi =
         int.parse(environment.defines[kMinSdkVersion] ?? minSdkVersion);
+    final String? environmentBuildMode = environment.defines[kBuildMode];
+    if (environmentBuildMode == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
     return buildNativeAssetsAndroid(
-      buildMode: BuildMode.debug,
+      buildMode: buildMode,
       projectUri: projectUri,
       yamlParentDirectory: environment.buildDir.uri,
       fileSystem: fileSystem,
       buildRunner: buildRunner,
       androidArchs: androidArchs,
       targetAndroidNdkApi: targetAndroidNdkApi,
-      isAndroidLibrary: isAndroidLibrary,
     );
   }
 
@@ -357,6 +360,7 @@ class NativeAssets extends Target {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         throwToolExit('Unsupported Android target platform: $targetPlatform.');
     }
   }
@@ -367,13 +371,17 @@ class NativeAssets extends Target {
   ];
 
   @override
-  List<Target> get dependencies => <Target>[];
+  List<Target> get dependencies => const <Target>[
+    // In AOT, depends on tree-shaking information (resources.json) from compiling dart.
+    KernelSnapshotProgram(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart'),
     // If different packages are resolved, different native assets might need to be built.
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
+    // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
   @override

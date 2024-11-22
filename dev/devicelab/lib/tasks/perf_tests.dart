@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert' show LineSplitter, json, utf8;
+import 'dart:ffi' show Abi;
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -57,6 +58,17 @@ TaskFunction createUiKitViewScrollPerfTest({bool? enableImpeller}) {
     'test_driver/uikit_view_scroll_perf.dart',
     'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
+    needsFullTimeline: false,
+    enableImpeller: enableImpeller,
+  ).run;
+}
+
+TaskFunction createUiKitViewScrollPerfAdBannersTest({bool? enableImpeller}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/uikit_view_scroll_perf_ad_banners.dart',
+    'platform_views_scroll_perf_ad_banners',
+    testDriver: 'test_driver/scroll_perf_ad_banners_test.dart',
     needsFullTimeline: false,
     enableImpeller: enableImpeller,
   ).run;
@@ -654,6 +666,21 @@ TaskFunction createAnimatedAdvancedBlendPerfTest({
   ).run;
 }
 
+TaskFunction createRRectBlurPerfTest({
+  bool? enableImpeller,
+  bool? forceOpenGLES,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'rrect_blur_perf',
+    enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
+    testDriver: 'test_driver/rrect_blur_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedBlurBackropFilterPerfTest({
   bool? enableImpeller,
   bool? forceOpenGLES,
@@ -815,15 +842,7 @@ Future<void> _resetPlist(String testDirectory) async {
   await exec('git', <String>['checkout', file.path]);
 }
 
-/// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
-/// and adds the following entry to the application.
-/// <meta-data
-///   android:name="io.flutter.embedding.android.ImpellerBackend"
-///   android:value="opengles" />
-/// <meta-data
-///   android:name="io.flutter.embedding.android.EnableOpenGLGPUTracing"
-///   android:value="true" />
-void _addOpenGLESToManifest(String testDirectory) {
+void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPairs) {
   final String manifestPath = path.join(
       testDirectory, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
   final File file = File(manifestPath);
@@ -834,11 +853,6 @@ void _addOpenGLESToManifest(String testDirectory) {
 
   final String xmlStr = file.readAsStringSync();
   final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
-  final List<(String, String)> keyPairs = <(String, String)>[
-    ('io.flutter.embedding.android.ImpellerBackend', 'opengles'),
-    ('io.flutter.embedding.android.EnableOpenGLGPUTracing', 'true')
-  ];
-
   final XmlElement applicationNode =
       xmlDoc.findAllElements('application').first;
 
@@ -859,12 +873,38 @@ void _addOpenGLESToManifest(String testDirectory) {
           XmlAttribute(XmlName('android:value'), value)
         ],
       );
-
       applicationNode.children.add(metaData);
     }
   }
 
   file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
+}
+
+/// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
+/// <meta-data
+///   android:name="io.flutter.embedding.android.EnableVulkanGPUTracing"
+///   android:value="true" />
+void _addVulkanGPUTracingToManifest(String testDirectory) {
+  final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.EnableVulkanGPUTracing', 'true'),
+  ];
+  _addMetadataToManifest(testDirectory, keyPairs);
+}
+
+/// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
+/// and adds the following entry to the application.
+/// <meta-data
+///   android:name="io.flutter.embedding.android.ImpellerBackend"
+///   android:value="opengles" />
+/// <meta-data
+///   android:name="io.flutter.embedding.android.EnableOpenGLGPUTracing"
+///   android:value="true" />
+void _addOpenGLESToManifest(String testDirectory) {
+  final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.ImpellerBackend', 'opengles'),
+    ('io.flutter.embedding.android.EnableOpenGLGPUTracing', 'true'),
+  ];
+  _addMetadataToManifest(testDirectory, keyPairs);
 }
 
 Future<void> _resetManifest(String testDirectory) async {
@@ -953,11 +993,12 @@ class StartupTest {
             '--target=$target',
           ]);
           final String basename = path.basename(testDirectory);
+          final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
           applicationBinaryPath = path.join(
             testDirectory,
             'build',
             'windows',
-            'x64',
+            arch,
             'runner',
             'Profile',
             '$basename.exe'
@@ -984,9 +1025,6 @@ class StartupTest {
             '--verbose',
             '--profile',
             '--trace-startup',
-            // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
-            if (device is IosDevice)
-              '--verbose-system-logs',
             '--target=$target',
             '-d',
             device.deviceId,
@@ -1173,6 +1211,7 @@ class PerfTest {
     this.enableImpeller,
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
+    this.createPlatforms = const <String>[],
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -1192,6 +1231,7 @@ class PerfTest {
     this.enableImpeller,
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
+    this.createPlatforms = const <String>[],
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -1262,6 +1302,10 @@ class PerfTest {
   /// Additional flags for `--dart-define` to control the test
   final String dartDefine;
 
+  /// Additional platforms to create with `flutter create` before running
+  /// the test.
+  final List<String> createPlatforms;
+
   Future<TaskResult> run() {
     return internalRun();
   }
@@ -1272,16 +1316,21 @@ class PerfTest {
   }) {
     return inDirectory<TaskResult>(testDirectory, () async {
       late Device selectedDevice;
-      if (device != null) {
-        selectedDevice = device!;
-      } else {
-        selectedDevice = await devices.workingDevice;
-      }
+      selectedDevice = device ?? await devices.workingDevice;
       await selectedDevice.unlock();
       final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;
       final String? localEngineHost = localEngineHostFromEnv;
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
+
+      if (createPlatforms.isNotEmpty) {
+        await flutter('create', options: <String>[
+          '--platforms',
+          createPlatforms.join(','),
+          '--no-overwrite',
+          '.'
+        ]);
+      }
 
       bool changedPlist = false;
       bool changedManifest = false;
@@ -1309,10 +1358,12 @@ class PerfTest {
       }
 
       try {
-        if (forceOpenGLES ?? false) {
-          assert(enableImpeller!);
+        if (enableImpeller ?? false) {
           changedManifest = true;
-          _addOpenGLESToManifest(testDirectory);
+          _addVulkanGPUTracingToManifest(testDirectory);
+          if (forceOpenGLES ?? false) {
+            _addOpenGLESToManifest(testDirectory);
+          }
         }
         if (disablePartialRepaint) {
           changedPlist = true;
@@ -1426,10 +1477,16 @@ class PerfTest {
           if (data['120hz_frame_percentage'] != null) '120hz_frame_percentage',
           if (data['illegal_refresh_rate_frame_count'] != null) 'illegal_refresh_rate_frame_count',
           if (recordGPU) ...<String>[
+            // GPU Frame Time.
             if (data['average_gpu_frame_time'] != null) 'average_gpu_frame_time',
             if (data['90th_percentile_gpu_frame_time'] != null) '90th_percentile_gpu_frame_time',
             if (data['99th_percentile_gpu_frame_time'] != null) '99th_percentile_gpu_frame_time',
             if (data['worst_gpu_frame_time'] != null) 'worst_gpu_frame_time',
+            // GPU Memory.
+            if (data['average_gpu_memory_mb'] != null) 'average_gpu_memory_mb',
+            if (data['90th_percentile_gpu_memory_mb'] != null) '90th_percentile_gpu_memory_mb',
+            if (data['99th_percentile_gpu_memory_mb'] != null) '99th_percentile_gpu_memory_mb',
+            if (data['worst_gpu_memory_mb'] != null) 'worst_gpu_memory_mb',
           ]
         ],
       );
@@ -1763,11 +1820,12 @@ class CompileTest {
         await flutter('build', options: options);
         watch.stop();
         final String basename = path.basename(cwd);
+        final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
         final String exePath = path.join(
           cwd,
           'build',
           'windows',
-          'x64',
+          arch,
           'runner',
           'release',
           '$basename.exe');
@@ -1910,11 +1968,12 @@ class CompileTest {
 
 /// Measure application memory usage.
 class MemoryTest {
-  MemoryTest(this.project, this.test, this.package);
+  MemoryTest(this.project, this.test, this.package, {this.requiresTapToStart = false});
 
   final String project;
   final String test;
   final String package;
+  final bool requiresTapToStart;
 
   /// Completes when the log line specified in the last call to
   /// [prepareForNextMessage] is seen by `adb logcat`.
@@ -2003,6 +2062,38 @@ class MemoryTest {
     await receivedNextMessage;
   }
 
+  /// Taps the application and looks for acknowldgement.
+  ///
+  /// This is used by several tests to ensure scrolling gestures are installed.
+  Future<void> tapNotification() async {
+    // Keep "tapping" the device till it responds with the string we expect,
+    // or throw an error instead of tying up the infrastructure for 30 minutes.
+    prepareForNextMessage('TAPPED');
+    bool tapped = false;
+    int tapCount = 0;
+    await Future.any(<Future<void>>[
+      () async {
+        while (true) {
+          if (tapped) {
+            break;
+          }
+          tapCount += 1;
+          print('tapping device... [$tapCount]');
+          await device!.tap(100, 100);
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+        }
+      }(),
+      () async {
+        print('awaiting "tapped" message... (timeout: 10 seconds)');
+        try {
+          await receivedNextMessage?.timeout(const Duration(seconds: 10));
+        } finally {
+          tapped = true;
+        }
+      }(),
+    ]);
+  }
+
   /// To change the behavior of the test, override this.
   ///
   /// Make sure to call recordStart() and recordEnd() once each in that order.
@@ -2012,10 +2103,11 @@ class MemoryTest {
   Future<void> useMemory() async {
     await launchApp();
     await recordStart();
+    if (requiresTapToStart) {
+      await tapNotification();
+    }
 
     prepareForNextMessage('DONE');
-    print('tapping device...');
-    await device!.tap(100, 100);
     print('awaiting "done" message...');
     await receivedNextMessage;
 

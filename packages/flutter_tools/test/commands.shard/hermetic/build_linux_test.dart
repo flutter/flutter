@@ -90,7 +90,7 @@ void main() {
   // Returns the command matching the build_linux call to cmake.
   FakeCommand cmakeCommand(String buildMode, {
     String target = 'x64',
-    void Function()? onRun,
+    void Function(List<String> command)? onRun,
   }) {
     return FakeCommand(
       command: <String>[
@@ -110,7 +110,7 @@ void main() {
   FakeCommand ninjaCommand(String buildMode, {
     Map<String, String>? environment,
     String target = 'x64',
-    void Function()? onRun,
+    void Function(List<String> command)? onRun,
     String stdout = '',
   }) {
     return FakeCommand(
@@ -141,7 +141,7 @@ void main() {
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--no-pub']
     ), throwsToolExit(message: 'No Linux desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://flutter.dev/to/add-desktop-support '
       'to learn about adding Linux support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
@@ -192,6 +192,35 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     FeatureFlags: () => TestFeatureFlags(),
+  });
+
+  testUsingContext('Linux build outputs path when successful', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release'),
+      ninjaCommand('release'),
+    ]);
+
+    setUpMockProjectFilesForBuild();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub']
+    );
+    expect(testLogger.statusText, contains('✓ Built build/linux/x64/release/bundle'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   });
 
   testUsingContext('Linux build invokes CMake and ninja, and writes temporary files', () async {
@@ -279,7 +308,7 @@ void main() {
     setUpMockProjectFilesForBuild();
     processManager.addCommands(<FakeCommand>[
       cmakeCommand('release'),
-      ninjaCommand('release', onRun: () {
+      ninjaCommand('release', onRun: (_) {
         throw ArgumentError();
       }),
     ]);
@@ -694,7 +723,7 @@ set(BINARY_NAME "fizz_bar")
     setUpMockProjectFilesForBuild();
     processManager.addCommands(<FakeCommand>[
       cmakeCommand('release'),
-      ninjaCommand('release', onRun: () {
+      ninjaCommand('release', onRun: (_) {
         fileSystem.file('build/flutter_size_01/snapshot.linux-x64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -751,7 +780,7 @@ set(BINARY_NAME "fizz_bar")
     setUpMockProjectFilesForBuild();
     processManager.addCommands(<FakeCommand>[
       cmakeCommand('release', target: 'arm64'),
-      ninjaCommand('release', target: 'arm64', onRun: () {
+      ninjaCommand('release', target: 'arm64', onRun: (_) {
         fileSystem.file('build/flutter_size_01/snapshot.linux-arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''

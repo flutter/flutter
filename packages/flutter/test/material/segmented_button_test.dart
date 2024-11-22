@@ -6,8 +6,10 @@
 // machines.
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -20,6 +22,10 @@ Widget boilerplate({required Widget child}) {
 }
 
 void main() {
+  RenderObject getOverlayColor(WidgetTester tester) {
+    return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+  }
+
   testWidgets('SegmentsButton when compositing does not crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/135747
     // If the render object holds on to a stale canvas reference, this will
@@ -443,6 +449,7 @@ void main() {
               label: '1',
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
 
@@ -460,6 +467,7 @@ void main() {
               label: '2',
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
 
@@ -523,6 +531,7 @@ void main() {
               label: '1',
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
 
@@ -538,6 +547,7 @@ void main() {
               label: '2',
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
 
@@ -583,10 +593,6 @@ void main() {
       ),
     );
 
-    RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    }
-
     final Material material = tester.widget<Material>(find.descendant(
       of: find.byType(TextButton),
       matching: find.byType(Material),
@@ -600,13 +606,13 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)));
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
@@ -751,7 +757,6 @@ void main() {
       of: find.byType(SegmentedButton<int>),
       matching: find.byType(Material),
     ).first);
-    expect(material.shape, styleFromStyle.shape?.resolve(enabled)?.copyWith(side: BorderSide.none));
     expect(material.elevation, styleFromStyle.elevation?.resolve(enabled));
     expect(material.shadowColor, styleFromStyle.shadowColor?.resolve(enabled));
     expect(material.surfaceTintColor, styleFromStyle.surfaceTintColor?.resolve(enabled));
@@ -763,16 +768,13 @@ void main() {
     );
 
     // Test foreground color is applied to the overlay color.
-    RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    }
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
     await gesture.down(tester.getCenter(find.text('1')));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: foregroundColor.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: foregroundColor.withOpacity(0.08)));
   });
 
   testWidgets('Disabled SegmentedButton has correct states when rebuilding', (WidgetTester tester) async {
@@ -813,6 +815,313 @@ void main() {
     state = tester.state(find.byType(SegmentedButton<int>));
     expect(state.statesControllers.values.first.value, states);
   });
+
+  testWidgets('Min button hit target height is 48.0 and min (painted) button height is 40 '
+    'by default with standard density and MaterialTapTargetSize.padded', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              children: <Widget>[
+                SegmentedButton<int>(
+                  segments: const <ButtonSegment<int>>[
+                    ButtonSegment<int>(value: 0, label: Text('Day'), icon: Icon(Icons.calendar_view_day)),
+                    ButtonSegment<int>(value: 1, label: Text('Week'), icon: Icon(Icons.calendar_view_week)),
+                    ButtonSegment<int>(value: 2, label: Text('Month'), icon: Icon(Icons.calendar_view_month)),
+                    ButtonSegment<int>(value: 3, label: Text('Year'), icon: Icon(Icons.calendar_today)),
+                  ],
+                  selected: const <int>{0},
+                  onSelectionChanged: (Set<int> value) {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(theme.visualDensity, VisualDensity.standard);
+    expect(theme.materialTapTargetSize, MaterialTapTargetSize.padded);
+
+    final Finder button = find.byType(SegmentedButton<int>);
+    expect(tester.getSize(button).height, 48.0);
+    expect(
+      find.byType(SegmentedButton<int>),
+      paints..rrect(
+        style: PaintingStyle.stroke,
+        strokeWidth: 1.0,
+        // Button border height is button.bottom(43.5) - button.top(4.5) + stoke width(1) = 40.
+        rrect: RRect.fromLTRBR(0.5, 4.5, 497.5, 43.5, const Radius.circular(19.5))
+      )
+    );
+  });
+
+  testWidgets('SegmentedButton expands to fill the available width when expandedInsets is not null', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SegmentedButton<int>(
+            segments: const <ButtonSegment<int>>[
+              ButtonSegment<int>(value: 1, label: Text('Segment 1')),
+              ButtonSegment<int>(value: 2, label: Text('Segment 2')),
+            ],
+           selected: const <int>{1},
+           expandedInsets: EdgeInsets.zero,
+          ),
+        ),
+      ),
+    ));
+
+    // Get the width of the SegmentedButton.
+    final RenderBox box = tester.renderObject(find.byType(SegmentedButton<int>));
+    final double segmentedButtonWidth = box.size.width;
+
+    // Get the width of the parent widget.
+    final double screenWidth = tester.getSize(find.byType(Scaffold)).width;
+
+    // The width of the SegmentedButton must be equal to the width of the parent widget.
+    expect(segmentedButtonWidth, equals(screenWidth));
+  });
+
+  testWidgets('SegmentedButton does not expand when expandedInsets is null', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SegmentedButton<int>(
+            segments: const <ButtonSegment<int>>[
+              ButtonSegment<int>(value: 1, label: Text('Segment 1')),
+              ButtonSegment<int>(value: 2, label: Text('Segment 2')),
+            ],
+            selected: const <int>{1},
+          ),
+        ),
+      ),
+    ));
+
+    // Get the width of the SegmentedButton.
+    final RenderBox box = tester.renderObject(find.byType(SegmentedButton<int>));
+    final double segmentedButtonWidth = box.size.width;
+
+    // Get the width of the parent widget.
+    final double screenWidth = tester.getSize(find.byType(Scaffold)).width;
+
+    // The width of the SegmentedButton must be less than the width of the parent widget.
+    expect(segmentedButtonWidth, lessThan(screenWidth));
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
+
+  testWidgets('SegmentedButton.styleFrom overlayColor overrides default overlay color', (WidgetTester tester) async {
+    const Color overlayColor = Color(0xffff0000);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              style: IconButton.styleFrom(overlayColor: overlayColor),
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(
+                  value: 0,
+                  label: Text('Option 1'),
+                ),
+                ButtonSegment<int>(
+                  value: 1,
+                  label: Text('Option 2'),
+                ),
+              ],
+              onSelectionChanged: (Set<int> selected) {},
+              selected: const <int>{1},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Hovered selected segment,
+    Offset center = tester.getCenter(find.text('Option 1'));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+
+    // Hovered unselected segment,
+    center = tester.getCenter(find.text('Option 2'));
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+
+    // Highlighted unselected segment (pressed).
+    center = tester.getCenter(find.text('Option 1'));
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(
+      getOverlayColor(tester),
+      paints
+        ..rect(color: overlayColor.withOpacity(0.08))
+        ..rect(color: overlayColor.withOpacity(0.1)),
+    );
+    // Remove pressed and hovered states,
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Highlighted selected segment (pressed)
+    center = tester.getCenter(find.text('Option 2'));
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(
+      getOverlayColor(tester),
+      paints
+        ..rect(color: overlayColor.withOpacity(0.08))
+        ..rect(color: overlayColor.withOpacity(0.1)),
+    );
+    // Remove pressed and hovered states,
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused unselected segment.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.1)));
+
+    // Focused selected segment.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.1)));
+  });
+
+  testWidgets('SegmentedButton.styleFrom with transparent overlayColor', (WidgetTester tester) async {
+    const Color overlayColor = Colors.transparent;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              style: IconButton.styleFrom(overlayColor: overlayColor),
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(
+                  value: 0,
+                  label: Text('Option'),
+                ),
+              ],
+              onSelectionChanged: (Set<int> selected) {},
+              selected: const <int>{0},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Hovered,
+    final Offset center = tester.getCenter(find.text('Option'));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(
+      getOverlayColor(tester),
+      paints
+        ..rect(color: overlayColor)
+        ..rect(color: overlayColor),
+    );
+    // Remove pressed and hovered states,
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/144990.
+  testWidgets('SegmentedButton clips border path when drawing segments', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(
+                  value: 0,
+                  label: Text('Option 1'),
+                ),
+                ButtonSegment<int>(
+                  value: 1,
+                  label: Text('Option 2'),
+                ),
+              ],
+              onSelectionChanged: (Set<int> selected) {},
+              selected: const <int>{0},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(SegmentedButton<int>),
+      paints
+        ..save()
+        ..clipPath() // Clip the border.
+        ..path(color: const Color(0xffe8def8)) // Draw segment 0.
+        ..save()
+        ..clipPath() // Clip the border.
+        ..path(color: const Color(0x00000000)), // Draw segment 1.
+    );
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/144990.
+  testWidgets('SegmentedButton dividers matches border rect size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(
+                  value: 0,
+                  label: Text('Option 1'),
+                ),
+                ButtonSegment<int>(
+                  value: 1,
+                  label: Text('Option 2'),
+                ),
+              ],
+              onSelectionChanged: (Set<int> selected) {},
+              selected: const <int>{0},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const double tapTargetSize = 48.0;
+    expect(
+      find.byType(SegmentedButton<int>),
+      paints
+        ..line(
+          p1: const Offset(166.8000030517578, 4.0),
+          p2: const Offset(166.8000030517578, tapTargetSize - 4.0),
+        ),
+    );
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 }
 
 Set<MaterialState> enabled = const <MaterialState>{};

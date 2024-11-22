@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/material/reorderable_list/reorderable_list_view.build_default_drag_handles.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
@@ -19,9 +18,7 @@ void main() {
 
   testWidgets('Reorder list item', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: example.ReorderableApp(),
-      ),
+      const example.ReorderableApp(),
     );
 
     expect(tester.getCenter(find.text('Item 3')).dy, 280.0);

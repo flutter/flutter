@@ -503,6 +503,23 @@ void main() {
       // At least 2 lines.
       expect(constrainedHeight, greaterThanOrEqualTo(2 * unconstrainedHeight));
     });
+
+    test('paints even when its size is empty', () {
+      // Regression test for https://github.com/flutter/flutter/issues/146840.
+      final RenderParagraph child = RenderParagraph(
+        const TextSpan(text: ''),
+        textDirection: TextDirection.ltr,
+      );
+      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+        child: child,
+      );
+
+      layout(box, constraints: BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
+      expect(box, paints..paragraph());
+    });
   });
 
   test ('getMinIntrinsicWidth error handling', () {
@@ -1226,6 +1243,23 @@ void main() {
       baselineType: TextBaseline.alphabetic,
     );
     layout(goodRoot, onErrors: () { assert(false); });
+  });
+
+  group('BaselineOffset', () {
+    test('minOf', () {
+      expect(BaselineOffset.noBaseline.minOf(BaselineOffset.noBaseline), BaselineOffset.noBaseline);
+
+      expect(BaselineOffset.noBaseline.minOf(const BaselineOffset(1)), const BaselineOffset(1));
+      expect(const BaselineOffset(1).minOf(BaselineOffset.noBaseline), const BaselineOffset(1));
+
+      expect(const BaselineOffset(2).minOf(const BaselineOffset(1)), const BaselineOffset(1));
+      expect(const BaselineOffset(1).minOf(const BaselineOffset(2)), const BaselineOffset(1));
+    });
+
+    test('+', () {
+      expect(BaselineOffset.noBaseline + 2, BaselineOffset.noBaseline);
+      expect(const BaselineOffset(1) + 2, const BaselineOffset(3));
+    });
   });
 }
 

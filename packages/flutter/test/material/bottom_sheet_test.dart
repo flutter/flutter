@@ -7,7 +7,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -944,7 +943,8 @@ void main() {
     final Material material = tester.widget<Material>(finder);
 
     expect(material.color, surfaceColor);
-    expect(material.surfaceTintColor, surfaceTintColor);
+    // Surface tint is no longer used by default.
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 1.0);
     expect(material.shape, defaultShape);
     expect(tester.getSize(finder).width, 640);
@@ -1194,26 +1194,64 @@ void main() {
   });
 
   testWidgets('Drag handle color can take MaterialStateProperty', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color defaultColor=Colors.blue;
     const Color hoveringColor=Colors.green;
 
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData.light().copyWith(
-        bottomSheetTheme:  BottomSheetThemeData(
-          dragHandleColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
-              return hoveringColor;
-            }
-            return defaultColor;
-          }),
+    Future<void> checkDragHandleAndColors() async {
+      await tester.pump(); // bottom sheet show animation starts
+      await tester.pump(const Duration(seconds: 1)); // animation done
+
+      final Finder dragHandle = find.bySemanticsLabel('Dismiss');
+      expect(
+        tester.getSize(dragHandle),
+        const Size(48, 48),
+      );
+      final Offset center = tester.getCenter(dragHandle);
+      final Offset edge = tester.getTopLeft(dragHandle) - const Offset(1, 1);
+
+      // Shows default drag handle color
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+      await gesture.addPointer(location: edge);
+      await tester.pump();
+      BoxDecoration boxDecoration=tester.widget<Container>(find.descendant(
+        of: dragHandle,
+        matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration != null),
+      )).decoration! as BoxDecoration;
+      expect(boxDecoration.color, defaultColor);
+
+      // Shows hovering drag handle color
+      await gesture.moveTo(center);
+      await tester.pump();
+      boxDecoration = tester.widget<Container>(find.descendant(
+        of: dragHandle,
+        matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration != null),
+      )).decoration! as BoxDecoration;
+
+      expect(boxDecoration.color, hoveringColor);
+      await gesture.removePointer();
+    }
+
+    Widget buildScaffold(GlobalKey scaffoldKey) {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+          bottomSheetTheme:  BottomSheetThemeData(
+            dragHandleColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return hoveringColor;
+              }
+              return defaultColor;
+            }),
+          ),
         ),
-      ),
-      home: Scaffold(
-        key: scaffoldKey,
-        body: const Center(child: Text('body')),
-      ),
-    ));
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      );
+    }
+
+    GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(buildScaffold(scaffoldKey));
 
     showModalBottomSheet<void>(
       context: scaffoldKey.currentContext!,
@@ -1223,36 +1261,24 @@ void main() {
       },
     );
 
-    await tester.pump(); // bottom sheet show animation starts
-    await tester.pump(const Duration(seconds: 1)); // animation done
+    await checkDragHandleAndColors();
 
-    final Finder dragHandle = find.bySemanticsLabel('Dismiss');
-    expect(
-      tester.getSize(dragHandle),
-      const Size(48, 48),
-    );
-    final Offset center = tester.getCenter(dragHandle);
-    final Offset edge = tester.getTopLeft(dragHandle) - const Offset(1, 1);
+    await tester.pumpWidget(Container()); // Reset
+    scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(buildScaffold(scaffoldKey));
 
-    // Shows default drag handle color
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(location: edge);
-    await tester.pump();
-    BoxDecoration boxDecoration=tester.widget<Container>(find.descendant(
-      of: dragHandle,
-      matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration != null),
-    )).decoration! as BoxDecoration;
-    expect(boxDecoration.color, defaultColor);
+    scaffoldKey.currentState!.showBottomSheet((_) {
+      return Builder(
+        builder: (BuildContext context) {
+          return const SizedBox(
+            height: 200.0,
+            child: Text('Bottom Sheet'),
+          );
+        },
+      );
+    }, showDragHandle: true);
 
-    // Shows hovering drag handle color
-    await gesture.moveTo(center);
-    await tester.pump();
-    boxDecoration = tester.widget<Container>(find.descendant(
-     of: dragHandle,
-     matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration != null),
-   )).decoration! as BoxDecoration;
-
-    expect(boxDecoration.color, hoveringColor);
+    await checkDragHandleAndColors();
   });
 
   testWidgets('showModalBottomSheet does not use root Navigator by default', (WidgetTester tester) async {
@@ -1331,7 +1357,7 @@ void main() {
       context: scaffoldKey.currentContext!,
       routeSettings: routeSettings,
       builder: (BuildContext context) {
-        retrievedRouteSettings = ModalRoute.of(context)!.settings;
+        retrievedRouteSettings = ModalRoute.settingsOf(context)!;
         return const Text('BottomSheet');
       },
     );
@@ -2262,6 +2288,252 @@ void main() {
           tester.widget(find.byType(ModalBarrier).last);
       expect(modalBarrier.semanticsLabel, MaterialLocalizations.of(scaffoldKey.currentContext!).scrimLabel);
     });
+  });
+
+  testWidgets('Bottom sheet animation can be customized', (WidgetTester tester) async {
+    final Key sheetKey = UniqueKey();
+
+    Widget buildWidget({ AnimationStyle? sheetAnimationStyle }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  showBottomSheet(
+                    context: context,
+                    sheetAnimationStyle: sheetAnimationStyle,
+                    builder: (BuildContext context) {
+                      return SizedBox.expand(
+                        child: ColoredBox(
+                          key: sheetKey,
+                          color: Theme.of(context).colorScheme.primary,
+                          child: FilledButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Close'),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // Test custom animation style.
+    await tester.pumpWidget(buildWidget(
+      sheetAnimationStyle: AnimationStyle(
+        duration: const Duration(milliseconds: 800),
+        reverseDuration: const Duration(milliseconds: 400),
+      ),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump();
+    // Advance the animation by 1/2 of the custom forward duration.
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // The bottom sheet is partially visible.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, closeTo(134.6, 0.1));
+
+    // Advance the animation by 1/2 of the custom forward duration.
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // The bottom sheet is fully visible.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, equals(0.0));
+
+    // Dismiss the bottom sheet.
+    await tester.tap(find.widgetWithText(FilledButton, 'Close'));
+    await tester.pump();
+    // Advance the animation by 1/2 of the custom reverse duration.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // The bottom sheet is partially visible.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, closeTo(134.6, 0.1));
+
+    // Advance the animation by 1/2 of the custom reverse duration.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // The bottom sheet is dismissed.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, equals(600.0));
+
+    // Test no animation style.
+    await tester.pumpWidget(buildWidget(sheetAnimationStyle: AnimationStyle.noAnimation));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('X'));
+    await tester.pump();
+
+    // The bottom sheet is fully visible.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, equals(0.0));
+
+    // Dismiss the bottom sheet.
+    await tester.tap(find.widgetWithText(FilledButton, 'Close'));
+    await tester.pump();
+
+    // The bottom sheet is dismissed.
+    expect(find.byKey(sheetKey), findsNothing);
+  });
+
+  testWidgets('Modal bottom sheet default animation', (WidgetTester tester) async {
+    final Key sheetKey = UniqueKey();
+
+    // Test default modal bottom sheet animation.
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return SizedBox.expand(
+                      child: ColoredBox(
+                        key: sheetKey,
+                        color: Theme.of(context).colorScheme.primary,
+                        child: FilledButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Close'),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    // Tap the 'X' to show the bottom sheet.
+    await tester.tap(find.text('X'));
+    await tester.pump();
+    // Advance the animation by 1/2 of the default forward duration.
+    await tester.pump(const Duration(milliseconds: 125));
+
+    // The modal bottom sheet is partially visible.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, closeTo(316.7, 0.1));
+
+    // Advance the animation by 1/2 of the default forward duration.
+    await tester.pump(const Duration(milliseconds: 125));
+
+    // The modal bottom sheet is fully visible.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, equals(262.5));
+
+    // Dismiss the bottom sheet.
+    await tester.tap(find.widgetWithText(FilledButton, 'Close'));
+    await tester.pump();
+    // Advance the animation by 1/2 of the default reverse duration.
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The modal bottom sheet is partially visible.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, closeTo(316.7, 0.1));
+
+    // Advance the animation by 1/2 of the default reverse duration.
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The modal bottom sheet is dismissed.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, equals(600.0));
+  });
+
+  testWidgets('Modal bottom sheet animation can be customized', (WidgetTester tester) async {
+    final Key sheetKey = UniqueKey();
+
+    Widget buildWidget({ AnimationStyle? sheetAnimationStyle }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    sheetAnimationStyle: sheetAnimationStyle,
+                    builder: (BuildContext context) {
+                      return SizedBox.expand(
+                        child: ColoredBox(
+                          key: sheetKey,
+                          color: Theme.of(context).colorScheme.primary,
+                          child: FilledButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Close'),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // Test custom animation style.
+    await tester.pumpWidget(buildWidget(
+      sheetAnimationStyle: AnimationStyle(
+        duration: const Duration(milliseconds: 800),
+        reverseDuration: const Duration(milliseconds: 400),
+      ),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump();
+    // Advance the animation by 1/2 of the custom forward duration.
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // The bottom sheet is partially visible.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, closeTo(316.7, 0.1));
+
+    // Advance the animation by 1/2 of the custom forward duration.
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // The bottom sheet is fully visible.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, equals(262.5));
+
+    // Dismiss the bottom sheet.
+    await tester.tap(find.widgetWithText(FilledButton, 'Close'));
+    await tester.pump();
+    // Advance the animation by 1/2 of the custom reverse duration.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // The bottom sheet is partially visible.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, closeTo(316.7, 0.1));
+
+    // Advance the animation by 1/2 of the custom reverse duration.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // The bottom sheet is dismissed.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, equals(600.0));
+
+    // Test no animation style.
+    await tester.pumpWidget(buildWidget(sheetAnimationStyle: AnimationStyle.noAnimation));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('X'));
+    await tester.pump();
+
+    // The bottom sheet is fully visible.
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, equals(262.5));
+
+    // Dismiss the bottom sheet.
+    await tester.tap(find.widgetWithText(FilledButton, 'Close'));
+    await tester.pump();
+
+    // The bottom sheet is dismissed.
+    expect(find.byKey(sheetKey), findsNothing);
   });
 }
 

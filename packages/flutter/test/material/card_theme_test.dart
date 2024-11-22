@@ -31,15 +31,15 @@ void main() {
       ),
     ));
 
-    final Container container = _getCardContainer(tester);
+    final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
 
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, theme.colorScheme.surface);
+    expect(material.color, theme.colorScheme.surfaceContainerLow);
     expect(material.shadowColor, theme.colorScheme.shadow);
-    expect(material.surfaceTintColor, theme.colorScheme.surfaceTint); // Default primary color
+    expect(material.surfaceTintColor, Colors.transparent); // Default primary color
     expect(material.elevation, 1.0);
-    expect(container.margin, const EdgeInsets.all(4.0));
+    expect(padding.padding, const EdgeInsets.all(4.0));
     expect(material.shape, const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12.0)),
     ));
@@ -55,7 +55,7 @@ void main() {
       ),
     ));
 
-    final Container container = _getCardContainer(tester);
+    final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
 
     expect(material.clipBehavior, cardTheme.clipBehavior);
@@ -63,7 +63,7 @@ void main() {
     expect(material.shadowColor, cardTheme.shadowColor);
     expect(material.surfaceTintColor, cardTheme.surfaceTintColor);
     expect(material.elevation, cardTheme.elevation);
-    expect(container.margin, cardTheme.margin);
+    expect(padding.padding, cardTheme.margin);
     expect(material.shape, cardTheme.shape);
   });
 
@@ -91,14 +91,14 @@ void main() {
       ),
     ));
 
-    final Container container = _getCardContainer(tester);
+    final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
 
     expect(material.clipBehavior, clip);
     expect(material.color, color);
     expect(material.shadowColor, shadowColor);
     expect(material.elevation, elevation);
-    expect(container.margin, margin);
+    expect(padding.padding, margin);
     expect(material.shape, shape);
   });
 
@@ -128,7 +128,7 @@ void main() {
     ));
 
     final Material material = _getCardMaterial(tester);
-    expect(material.color, themeData.colorScheme.surface);
+    expect(material.color, themeData.colorScheme.surfaceContainerLow);
   });
 
   testWidgets('Material3 - CardTheme customizes shape', (WidgetTester tester) async {
@@ -187,7 +187,7 @@ void main() {
         ),
       ));
 
-      final Container container = _getCardContainer(tester);
+      final Padding padding = _getCardPadding(tester);
       final Material material = _getCardMaterial(tester);
 
       expect(material.clipBehavior, Clip.none);
@@ -195,7 +195,7 @@ void main() {
       expect(material.shadowColor, Colors.black);
       expect(material.surfaceTintColor, null);
       expect(material.elevation, 1.0);
-      expect(container.margin, const EdgeInsets.all(4.0));
+      expect(padding.padding, const EdgeInsets.all(4.0));
       expect(material.shape, const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(4.0)),
       ));
@@ -261,11 +261,11 @@ Material _getCardMaterial(WidgetTester tester) {
   );
 }
 
-Container _getCardContainer(WidgetTester tester) {
-  return tester.widget<Container>(
+Padding _getCardPadding(WidgetTester tester) {
+  return tester.widget<Padding>(
     find.descendant(
       of: find.byType(Card),
-      matching: find.byType(Container),
+      matching: find.byType(Padding),
     ),
   );
 }

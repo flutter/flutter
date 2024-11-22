@@ -22,8 +22,6 @@ import 'constants.dart';
 ///
 ///   * [AccessibilityNodeInfo](https://developer.android.com/reference/android/view/accessibility/AccessibilityNodeInfo)
 class AndroidSemanticsNode {
-  AndroidSemanticsNode._(this._values);
-
   /// Deserializes a new [AndroidSemanticsNode] from a json map.
   ///
   /// The structure of the JSON:
@@ -54,9 +52,7 @@ class AndroidSemanticsNode {
   ///         int,
   ///       ]
   ///     }
-  factory AndroidSemanticsNode.deserialize(String value) {
-    return AndroidSemanticsNode._(json.decode(value));
-  }
+  AndroidSemanticsNode.deserialize(String value) : _values = json.decode(value);
 
   final dynamic _values;
   final List<AndroidSemanticsNode> _children = <AndroidSemanticsNode>[];
@@ -158,14 +154,11 @@ class AndroidSemanticsNode {
     if (actions == null) {
       return const <AndroidSemanticsAction>[];
     }
-    final List<AndroidSemanticsAction> convertedActions = <AndroidSemanticsAction>[];
-    for (final int id in actions) {
-      final AndroidSemanticsAction? action = AndroidSemanticsAction.deserialize(id);
-      if (action != null) {
-        convertedActions.add(action);
-      }
-    }
-    return convertedActions;
+    return <AndroidSemanticsAction>[
+      for (final int id in actions)
+        if (AndroidSemanticsAction.deserialize(id) case final AndroidSemanticsAction action)
+          action,
+    ];
   }
 
   @override

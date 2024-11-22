@@ -9,16 +9,15 @@ import 'package:flutter_test/flutter_test.dart';
 Widget wrapForChip({
   required Widget child,
   TextDirection textDirection = TextDirection.ltr,
-  double textScaleFactor = 1.0,
+  TextScaler textScaler = TextScaler.noScaling,
   Brightness brightness = Brightness.light,
-  bool? useMaterial3,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
+    theme: ThemeData(brightness: brightness),
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Material(child: child),
       ),
     ),
@@ -72,8 +71,65 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgets('ActionChip defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+  testWidgets('Material2 - ActionChip defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
+    const String label = 'action chip';
+
+    // Test enabled ActionChip defaults.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: ActionChip(
+              onPressed: () {},
+              label: const Text(label),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test default chip size.
+    expect(tester.getSize(find.byType(ActionChip)), const Size(178.0, 48.0));
+    // Test default label style.
+    expect(
+      getLabelStyle(tester, label).style.color,
+      theme.textTheme.bodyLarge!.color!.withAlpha(0xde),
+    );
+
+    Material chipMaterial = getMaterial(tester);
+    expect(chipMaterial.elevation, 0);
+    expect(chipMaterial.shadowColor, Colors.black);
+    expect(chipMaterial.shape, const StadiumBorder());
+
+    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    expect(decoration.color, Colors.black.withAlpha(0x1f));
+
+    // Test disabled ActionChip defaults.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Material(
+          child: ActionChip(
+            label: Text(label),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    chipMaterial = getMaterial(tester);
+    expect(chipMaterial.elevation, 0);
+    expect(chipMaterial.shadowColor, Colors.black);
+    expect(chipMaterial.shape, const StadiumBorder());
+
+    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    expect(decoration.color, Colors.black38);
+  });
+
+  testWidgets('Material3 - ActionChip defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
     const String label = 'action chip';
 
     // Test enabled ActionChip defaults.
@@ -99,13 +155,13 @@ void main() {
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
-      theme.textTheme.labelLarge!.color!.value,
+      theme.colorScheme.onSurface.value,
     );
 
     Material chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 0);
     expect(chipMaterial.shadowColor, Colors.transparent);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       RoundedRectangleBorder(
@@ -133,7 +189,7 @@ void main() {
     chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 0);
     expect(chipMaterial.shadowColor, Colors.transparent);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       RoundedRectangleBorder(
@@ -146,8 +202,8 @@ void main() {
     expect(decoration.color, null);
   });
 
-  testWidgets('ActionChip.elevated defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+  testWidgets('Material3 - ActionChip.elevated defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
     const String label = 'action chip';
 
     // Test enabled ActionChip defaults.
@@ -173,13 +229,13 @@ void main() {
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
-      theme.textTheme.labelLarge!.color!.value,
+      theme.colorScheme.onSurface.value,
     );
 
     Material chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 1);
     expect(chipMaterial.shadowColor, theme.colorScheme.shadow);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       const RoundedRectangleBorder(
@@ -189,7 +245,7 @@ void main() {
     );
 
     ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
-    expect(decoration.color, null);
+    expect(decoration.color, theme.colorScheme.surfaceContainerLow);
 
     // Test disabled ActionChip.elevated defaults.
     await tester.pumpWidget(
@@ -207,7 +263,7 @@ void main() {
     chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 0);
     expect(chipMaterial.shadowColor, theme.colorScheme.shadow);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       const RoundedRectangleBorder(
@@ -231,7 +287,6 @@ void main() {
     });
     Widget buildApp({ required bool enabled, required bool selected }) {
       return wrapForChip(
-        useMaterial3: true,
         child: Column(
           children: <Widget>[
             ActionChip(
@@ -284,7 +339,6 @@ void main() {
     const Color backgroundColor = Color(0xff0000ff);
     Widget buildApp({ required bool enabled, required bool selected }) {
       return wrapForChip(
-        useMaterial3: true,
         child: Column(
           children: <Widget>[
             ActionChip(
@@ -382,5 +436,97 @@ void main() {
     await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
 
     expect(getIconData(tester).color, const Color(0xff00ff00));
+  });
+
+  testWidgets('ActionChip avatar layout constraints can be customized', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
+
+    Widget buildChip({BoxConstraints? avatarBoxConstraints}) {
+      return wrapForChip(
+        child: Center(
+          child: ActionChip(
+            avatarBoxConstraints: avatarBoxConstraints,
+            avatar: const Icon(Icons.favorite),
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default avatar layout constraints.
+    await tester.pumpWidget(buildChip());
+
+    expect(tester.getSize(find.byType(ActionChip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(ActionChip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    Offset chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    final Offset avatarCenter = tester.getCenter(find.byIcon(Icons.favorite));
+    expect(chipTopLeft.dx, avatarCenter.dx - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (labelSize.width / 2) + labelPadding);
+
+    // Test custom avatar layout constraints.
+    await tester.pumpWidget(buildChip(avatarBoxConstraints: const BoxConstraints.tightForFinite()));
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(ActionChip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(ActionChip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
+  });
+
+  testWidgets('ActionChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle(duration: Durations.extralong4),
+      selectAnimation: AnimationStyle.noAnimation,
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: ActionChip(
+          chipAnimationStyle: chipAnimationStyle,
+          label: const Text('ActionChip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
+
+  testWidgets('Elevated ActionChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle(duration: Durations.extralong4),
+      selectAnimation: AnimationStyle.noAnimation,
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: ActionChip.elevated(
+          chipAnimationStyle: chipAnimationStyle,
+          label: const Text('ActionChip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
   });
 }

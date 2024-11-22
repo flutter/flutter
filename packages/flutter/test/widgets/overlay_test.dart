@@ -704,7 +704,7 @@ void main() {
 
   testWidgets('debugVerifyInsertPosition', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
-    OverlayEntry base;
+    late OverlayEntry base;
 
     await tester.pumpWidget(
       Directionality(
@@ -712,8 +712,7 @@ void main() {
         child: Overlay(
           key: overlayKey,
           initialEntries: <OverlayEntry>[
-            base = OverlayEntry(
-              builder: (BuildContext context) {
+            base = _buildOverlayEntry((BuildContext context) {
                 return Container();
               },
             ),
@@ -726,16 +725,14 @@ void main() {
 
     try {
       overlay.insert(
-        OverlayEntry(builder: (BuildContext context) {
+        _buildOverlayEntry((BuildContext context) {
           return Container();
         }),
-        above: OverlayEntry(
-          builder: (BuildContext context) {
+        above: _buildOverlayEntry((BuildContext context) {
             return Container();
           },
         ),
-        below: OverlayEntry(
-          builder: (BuildContext context) {
+        below: _buildOverlayEntry((BuildContext context) {
             return Container();
           },
         ),
@@ -745,7 +742,7 @@ void main() {
     }
 
     expect(() => overlay.insert(
-      OverlayEntry(builder: (BuildContext context) {
+      _buildOverlayEntry((BuildContext context) {
         return Container();
       }),
       above: base,
@@ -753,11 +750,10 @@ void main() {
 
     try {
       overlay.insert(
-        OverlayEntry(builder: (BuildContext context) {
+        _buildOverlayEntry((BuildContext context) {
           return Container();
         }),
-        above: OverlayEntry(
-          builder: (BuildContext context) {
+        above: _buildOverlayEntry((BuildContext context) {
             return Container();
           },
         ),
@@ -767,8 +763,7 @@ void main() {
     }
 
     try {
-      overlay.rearrange(<OverlayEntry>[base], above: OverlayEntry(
-        builder: (BuildContext context) {
+      overlay.rearrange(<OverlayEntry>[base], above: _buildOverlayEntry((BuildContext context) {
           return Container();
         },
       ));
@@ -1183,9 +1178,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) => Positioned(left: 2000, right: 2500, child: Container()),
-            ),
+            _buildOverlayEntry((BuildContext context) => Positioned(left: 2000, right: 2500, child: Container())),
           ],
         ),
       ),
@@ -1201,9 +1194,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
-                builder: (BuildContext context) => Container(),
-              ),
+              _buildOverlayEntry((BuildContext context) => Container()),
             ],
             clipBehavior: clip,
           ),
@@ -1619,6 +1610,8 @@ void main() {
         return const SizedBox(width: 123, height: 456);
       }
     );
+    addTearDown(() => initialEntry..remove()..dispose());
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1643,6 +1636,7 @@ void main() {
         );
       },
     );
+    addTearDown(nonSizingEntry.dispose);
 
     overlay.insert(nonSizingEntry);
     await tester.pump();
@@ -1659,6 +1653,7 @@ void main() {
         );
       },
     );
+    addTearDown(sizingEntry.dispose);
 
     overlay.insert(sizingEntry);
     await tester.pump();
@@ -1714,6 +1709,7 @@ void main() {
         );
       },
     );
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -1743,6 +1739,7 @@ void main() {
         return const SizedBox(width: 600, height: 600);
       },
     );
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -1779,3 +1776,6 @@ class StatefulTestState extends State<StatefulTestWidget> {
     return Container();
   }
 }
+
+/// This helper makes leak tracker forgiving the entry is not disposed.
+OverlayEntry _buildOverlayEntry(WidgetBuilder builder) => OverlayEntry(builder: builder);

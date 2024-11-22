@@ -354,7 +354,120 @@ void main() {
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library x86_64'));
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
     });
+
+    testWithoutContext('archive', () {
+      final File appIconFile = fileSystem.file(fileSystem.path.join(
+        projectRoot,
+        'ios',
+        'Runner',
+        'Assets.xcassets',
+        'AppIcon.appiconset',
+        'Icon-App-20x20@1x.png',
+      ));
+      // Resizes app icon to 123x456 (it is supposed to be 20x20).
+      appIconFile.writeAsBytesSync(appIconFile.readAsBytesSync()
+        ..buffer.asByteData().setInt32(16, 123)
+        ..buffer.asByteData().setInt32(20, 456));
+
+      final ProcessResult output = processManager.runSync(
+        <String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'build',
+          'xcarchive',
+          '--verbose',
+        ],
+        workingDirectory: projectRoot,
+      );
+
+      // Note this isBot so usage won't actually be sent,
+      // this log line is printed whenever the app is archived.
+      expect(output.stdout, contains('Sending archive event if usage enabled'));
+
+      // The output contains extra time related prefix, so cannot use a single string.
+      const List<String> expectedValidationMessages = <String>[
+        '[!] App Settings Validation\n',
+        '    • Version Number: 1.0.0\n',
+        '    • Build Number: 1\n',
+        '    • Display Name: Hello\n',
+        '    • Deployment Target: 12.0\n',
+        '    • Bundle Identifier: com.example.hello\n',
+        '    ! Your application still contains the default "com.example" bundle identifier.\n',
+        '[!] App Icon and Launch Image Assets Validation\n',
+        '    ! App icon is set to the default placeholder icon. Replace with unique icons.\n',
+        '    ! App icon is using the incorrect size (e.g. Icon-App-20x20@1x.png).\n',
+        '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.\n',
+        'To update the settings, please refer to https://flutter.dev/to/ios-deploy\n',
+      ];
+      expect(expectedValidationMessages, unorderedEquals(expectedValidationMessages));
+
+      final Directory archivePath = fileSystem.directory(fileSystem.path.join(
+        projectRoot,
+        'build',
+        'ios',
+        'archive',
+        'Runner.xcarchive',
+      ));
+
+      final Directory products = archivePath.childDirectory('Products');
+      expect(products, exists);
+
+      final Directory dSYM = archivePath.childDirectory('dSYMs').childDirectory('Runner.app.dSYM');
+      expect(dSYM, exists);
+
+      final Directory applications = products.childDirectory('Applications');
+
+      final Directory appBundle = applications
+          .listSync()
+          .whereType<Directory>()
+          .singleWhere((Directory directory) => fileSystem.path.extension(directory.path) == '.app');
+
+      final Directory flutterFrameworkDir = fileSystem.directory(
+        fileSystem.path.join(
+          appBundle.path,
+          'Frameworks',
+          'Flutter.framework',
+        ),
+      );
+
+      final String flutterFramework = fileSystem.path.join(
+        flutterFrameworkDir.path,
+        'Flutter',
+      );
+
+      // Exits 0 only if codesigned.
+      final ProcessResult flutterCodesign = processManager.runSync(
+        <String>[
+          'xcrun',
+          'codesign',
+          '--verify',
+          flutterFramework,
+        ],
+      );
+      expect(flutterCodesign, const ProcessResultMatcher());
+
+      final String appFramework = fileSystem.path.join(
+        appBundle.path,
+        'Frameworks',
+        'App.framework',
+        'App',
+      );
+
+      final ProcessResult appCodesign = processManager.runSync(
+        <String>[
+          'xcrun',
+          'codesign',
+          '--verify',
+          appFramework,
+        ],
+      );
+      expect(appCodesign, const ProcessResultMatcher());
+
+      // Check read/write permissions are being correctly set.
+      final String statString = flutterFrameworkDir.statSync().mode.toRadixString(8);
+      expect(statString, '40755');
+    });
   }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
-     timeout: const Timeout(Duration(minutes: 7))
+     timeout: const Timeout(Duration(minutes: 10))
   );
 }

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -61,6 +62,8 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
 void main() {
   Cache.flutterRoot = '';
 
+  (BufferLogger, Artifacts) getTestState() => (BufferLogger.test(), Artifacts.test());
+
   testWithoutContext('Does not serve devtools if launcher is null', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       null,
@@ -86,10 +89,11 @@ void main() {
   });
 
   testWithoutContext('Can use devtools with existing devtools URI', () async {
+    final (BufferLogger logger, Artifacts artifacts) = getTestState();
     final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
       processManager: FakeProcessManager.empty(),
-      dartExecutable: 'dart',
-      logger: BufferLogger.test(),
+      artifacts: artifacts,
+      logger: logger,
       botDetector: const FakeBotDetector(false),
     );
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
@@ -427,22 +431,6 @@ void main() {
 
     expect(urlToDisplayString(uri), 'http://127.0.0.1:9100?uri=http://127.0.0.1:57922/_MXpzytpH20=/');
   });
-}
-
-class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
-  @override
-  DevToolsServerAddress? activeDevToolsServer;
-
-  @override
-  Uri? devToolsUrl;
-
-  @override
-  Future<DevToolsServerAddress?> serve() async => null;
-
-  @override
-  Future<void> get ready => readyCompleter.future;
-
-  Completer<void> readyCompleter = Completer<void>()..complete();
 }
 
 class FakeResidentRunner extends Fake implements ResidentRunner {

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -15,10 +18,10 @@ import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
 
-/// Signature for the callback taken by [_createErrorHandlerAndKey].
+/// Signature for the callback taken by [ImageProvider._createErrorHandlerAndKey].
 typedef _KeyAndErrorHandlerCallback<T> = void Function(T key, ImageErrorListener handleError);
 
-/// Signature used for error handling by [_createErrorHandlerAndKey].
+/// Signature used for error handling by [ImageProvider._createErrorHandlerAndKey].
 typedef _AsyncKeyErrorHandler<T> = Future<void> Function(T key, Object exception, StackTrace? stack);
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
@@ -645,7 +648,7 @@ abstract class ImageProvider<T extends Object> {
 }
 
 /// A class that exists to facilitate backwards compatibility in the transition
-/// from [ImageProvider.load] to [ImageProvider.loadBuffer] to [ImageProvider.loadImage]
+/// from [ImageProvider.loadBuffer] to [ImageProvider.loadImage]
 class _AbstractImageStreamCompleter extends ImageStreamCompleter {}
 
 /// Key for the image obtained by an [AssetImage] or [ExactAssetImage].
@@ -808,7 +811,7 @@ enum ResizeImagePolicy {
   /// If only one of `width` and `height` is non-null, then the output image
   /// will be scaled to the associated width or height, and the other dimension
   /// will take whatever value is needed to maintain the image's original aspect
-  /// ratio. These cases are simnilar to [BoxFit.fitWidth] and
+  /// ratio. These cases are similar to [BoxFit.fitWidth] and
   /// [BoxFit.fitHeight], respectively.
   ///
   /// If [ResizeImage.allowUpscaling] is false (the default), the width and the

@@ -1,5 +1,5 @@
 {
-  "version": "v0_162",
+  "version": "v4_1_0",
 
   "md.comp.full-screen-dialog.container.color": "surface",
   "md.comp.full-screen-dialog.container.elevation": "md.sys.elevation.level0",
@@ -18,10 +18,10 @@
   "md.comp.full-screen-dialog.header.container.color": "surface",
   "md.comp.full-screen-dialog.header.container.elevation": "md.sys.elevation.level0",
   "md.comp.full-screen-dialog.header.container.height": 56.0,
-  "md.comp.full-screen-dialog.header.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.full-screen-dialog.header.headline.color": "onSurface",
   "md.comp.full-screen-dialog.header.headline.text-style": "titleLarge",
   "md.comp.full-screen-dialog.header.icon.color": "onSurface",
   "md.comp.full-screen-dialog.header.icon.size": 24.0,
+  "md.comp.full-screen-dialog.header.on-scroll.container.color": "surfaceContainer",
   "md.comp.full-screen-dialog.header.on-scroll.container.elevation": "md.sys.elevation.level2"
 }

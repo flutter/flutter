@@ -64,6 +64,41 @@ Future<void> analyzeWithRules(String flutterRootDirectory, List<AnalyzeRule> rul
   }
 }
 
+Future<void> analyzeToolWithRules(String flutterRootDirectory, List<AnalyzeRule> rules) async {
+  final String libPath = path.canonicalize('$flutterRootDirectory/packages/flutter_tools/lib');
+  if (!Directory(libPath).existsSync()) {
+    foundError(<String>['Analyzer error: the specified $libPath does not exist.']);
+  }
+  final String testPath = path.canonicalize('$flutterRootDirectory/packages/flutter_tools/test');
+  final AnalysisContextCollection collection = AnalysisContextCollection(
+    includedPaths: <String>[libPath, testPath],
+  );
+
+  final List<String> analyzerErrors = <String>[];
+  for (final AnalysisContext context in collection.contexts) {
+    final Iterable<String> analyzedFilePaths = context.contextRoot.analyzedFiles();
+    final AnalysisSession session = context.currentSession;
+
+    for (final String filePath in analyzedFilePaths) {
+      final SomeResolvedUnitResult unit = await session.getResolvedUnit(filePath);
+      if (unit is ResolvedUnitResult) {
+        for (final AnalyzeRule rule in rules) {
+          rule.applyTo(unit);
+        }
+      } else {
+        analyzerErrors.add('Analyzer error: file $unit could not be resolved. Expected "ResolvedUnitResult", got ${unit.runtimeType}.');
+      }
+    }
+  }
+
+  if (analyzerErrors.isNotEmpty) {
+    foundError(analyzerErrors);
+  }
+  for (final AnalyzeRule verifier in rules) {
+    verifier.reportViolations(flutterRootDirectory);
+  }
+}
+
 /// An interface that defines a set of best practices, and collects information
 /// about code that violates the best practices in a [ResolvedUnitResult].
 ///

@@ -601,19 +601,17 @@ const Duration _kPauseBetweenIsolateRefresh = Duration(milliseconds: 100);
 // See `timeline_streams` in
 // https://github.com/dart-lang/sdk/blob/main/runtime/vm/timeline.cc
 List<String> _timelineStreamsToString(List<TimelineStream> streams) {
-  return streams.map<String>((TimelineStream stream) {
-    switch (stream) {
-      case TimelineStream.all: return 'all';
-      case TimelineStream.api: return 'API';
-      case TimelineStream.compiler: return 'Compiler';
-      case TimelineStream.compilerVerbose: return 'CompilerVerbose';
-      case TimelineStream.dart: return 'Dart';
-      case TimelineStream.debugger: return 'Debugger';
-      case TimelineStream.embedder: return 'Embedder';
-      case TimelineStream.gc: return 'GC';
-      case TimelineStream.isolate: return 'Isolate';
-      case TimelineStream.vm: return 'VM';
-    }
+  return streams.map<String>((TimelineStream stream) => switch (stream) {
+    TimelineStream.all      => 'all',
+    TimelineStream.api      => 'API',
+    TimelineStream.dart     => 'Dart',
+    TimelineStream.debugger => 'Debugger',
+    TimelineStream.embedder => 'Embedder',
+    TimelineStream.gc       => 'GC',
+    TimelineStream.isolate  => 'Isolate',
+    TimelineStream.vm       => 'VM',
+    TimelineStream.compiler => 'Compiler',
+    TimelineStream.compilerVerbose => 'CompilerVerbose',
   }).toList();
 }
 

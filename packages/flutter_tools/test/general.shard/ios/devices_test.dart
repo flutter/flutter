@@ -85,6 +85,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
@@ -106,6 +107,7 @@ void main() {
         cpuArchitecture: DarwinArch.armv7,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
@@ -128,6 +130,7 @@ void main() {
         sdkVersion: '1.0.0',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).majorSdkVersion, 1);
@@ -146,6 +149,7 @@ void main() {
         sdkVersion: '13.1.1',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).majorSdkVersion, 13);
@@ -164,6 +168,7 @@ void main() {
         sdkVersion: '10',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).majorSdkVersion, 10);
@@ -182,6 +187,7 @@ void main() {
         sdkVersion: '0',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).majorSdkVersion, 0);
@@ -200,6 +206,7 @@ void main() {
         sdkVersion: 'bogus',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).majorSdkVersion, 0);
@@ -221,6 +228,7 @@ void main() {
         sdkVersion: '13.3.1',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
@@ -244,6 +252,7 @@ void main() {
         sdkVersion: '13.3.1 (20ADBC)',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
@@ -267,6 +276,7 @@ void main() {
         sdkVersion: '16.4.1(a) (20ADBC)',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
@@ -290,6 +300,7 @@ void main() {
         sdkVersion: '0',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
@@ -312,6 +323,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
@@ -332,6 +344,7 @@ void main() {
         sdkVersion: 'bogus',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
@@ -354,6 +367,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
@@ -377,6 +391,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
@@ -406,6 +421,7 @@ void main() {
               cpuArchitecture: DarwinArch.arm64,
               connectionInterface: DeviceConnectionInterface.attached,
               isConnected: true,
+              isPaired: true,
               devModeEnabled: true,
               isCoreDevice: false,
             );
@@ -501,6 +517,7 @@ void main() {
           cpuArchitecture: DarwinArch.arm64,
           connectionInterface: DeviceConnectionInterface.attached,
           isConnected: true,
+          isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
         );
@@ -571,6 +588,7 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
@@ -590,6 +608,7 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
@@ -640,7 +659,7 @@ void main() {
       await iosDevices.startPolling();
       expect(xcdevice.getAvailableIOSDevicesCount, 1);
 
-      expect(iosDevices.deviceNotifier!.items, isEmpty);
+      expect(iosDevices.deviceNotifier.items, isEmpty);
       expect(xcdevice.deviceEventController.hasListener, isTrue);
 
       xcdevice.deviceEventController.add(
@@ -651,9 +670,9 @@ void main() {
         ),
       );
       await added.future;
-      expect(iosDevices.deviceNotifier!.items.length, 2);
-      expect(iosDevices.deviceNotifier!.items, contains(device1));
-      expect(iosDevices.deviceNotifier!.items, contains(device2));
+      expect(iosDevices.deviceNotifier.items.length, 2);
+      expect(iosDevices.deviceNotifier.items, contains(device1));
+      expect(iosDevices.deviceNotifier.items, contains(device2));
       expect(iosDevices.eventsReceived, 1);
 
       iosDevices.resetEventCompleter();
@@ -665,9 +684,9 @@ void main() {
         ),
       );
       await iosDevices.receivedEvent.future;
-      expect(iosDevices.deviceNotifier!.items.length, 2);
-      expect(iosDevices.deviceNotifier!.items, contains(device1));
-      expect(iosDevices.deviceNotifier!.items, contains(device2));
+      expect(iosDevices.deviceNotifier.items.length, 2);
+      expect(iosDevices.deviceNotifier.items, contains(device1));
+      expect(iosDevices.deviceNotifier.items, contains(device2));
       expect(iosDevices.eventsReceived, 2);
 
       iosDevices.resetEventCompleter();
@@ -679,9 +698,9 @@ void main() {
         ),
       );
       await iosDevices.receivedEvent.future;
-      expect(iosDevices.deviceNotifier!.items.length, 2);
-      expect(iosDevices.deviceNotifier!.items, contains(device1));
-      expect(iosDevices.deviceNotifier!.items, contains(device2));
+      expect(iosDevices.deviceNotifier.items.length, 2);
+      expect(iosDevices.deviceNotifier.items, contains(device1));
+      expect(iosDevices.deviceNotifier.items, contains(device2));
       expect(iosDevices.eventsReceived, 3);
 
       xcdevice.deviceEventController.add(
@@ -692,7 +711,7 @@ void main() {
         ),
       );
       await removed.future;
-      expect(iosDevices.deviceNotifier!.items, <Device>[device2]);
+      expect(iosDevices.deviceNotifier.items, <Device>[device2]);
       expect(iosDevices.eventsReceived, 4);
 
       iosDevices.resetEventCompleter();
@@ -758,7 +777,7 @@ void main() {
       xcdevice.devices.add(<IOSDevice>[]);
 
       await iosDevices.startPolling();
-      expect(iosDevices.deviceNotifier!.items, isEmpty);
+      expect(iosDevices.deviceNotifier.items, isEmpty);
       expect(xcdevice.deviceEventController.hasListener, isTrue);
 
       iosDevices.dispose();
@@ -889,6 +908,7 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: false,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );

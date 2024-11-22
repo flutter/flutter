@@ -557,11 +557,9 @@ class Cache {
 
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() {
-    if (_rootOverride != null) {
-      return _fileSystem.directory(_fileSystem.path.join(_rootOverride.path, 'bin', 'cache'));
-    } else {
-      return _fileSystem.directory(_fileSystem.path.join(flutterRoot!, 'bin', 'cache'));
-    }
+    return _fileSystem.directory(
+      _fileSystem.path.join(_rootOverride?.path ?? flutterRoot!, 'bin', 'cache'),
+    );
   }
 
   String getHostPlatformArchName() {
@@ -718,7 +716,7 @@ class Cache {
           _logger.printError(
             'Failed to retrieve Flutter tool dependencies: ${e.message}.\n'
             "If you're in China, please see this page: "
-            'https://flutter.dev/community/china',
+            'https://flutter.dev/to/china-setup',
             emphasis: true,
           );
         }
@@ -946,14 +944,6 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       await artifactUpdater.downloadZipArchive('Downloading $friendlyName tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir, operatingSystemUtils);
-
-      final File frameworkZip = fileSystem.file(fileSystem.path.join(dir.path, 'FlutterMacOS.framework.zip'));
-      if (frameworkZip.existsSync()) {
-        final Directory framework = fileSystem.directory(fileSystem.path.join(dir.path, 'FlutterMacOS.framework'));
-        ErrorHandlingFileSystem.deleteIfExists(framework, recursive: true);
-        framework.createSync();
-        operatingSystemUtils.unzip(frameworkZip, framework);
-      }
     }
 
     final File licenseSource = cache.getLicenseFile();
@@ -1121,7 +1111,7 @@ class ArtifactUpdater {
           _logger.printError(error.toString());
           throwToolExit(
             'The value of $kFlutterStorageBaseUrl ($overrideUrl) could not be '
-            'parsed as a valid url. Please see https://flutter.dev/community/china '
+            'parsed as a valid url. Please see https://flutter.dev/to/use-mirror-site '
             'for an example of how to use it.\n'
             'Full URL: $url',
             exitCode: kNetworkProblemExitCode,
@@ -1166,7 +1156,7 @@ class ArtifactUpdater {
           throwToolExit(
             'Flutter could not download and/or extract $url. Ensure you have '
             'network connectivity and all of the required dependencies listed at '
-            'flutter.dev/setup.\nThe original exception was: $err.'
+            'https://flutter.dev/setup.\nThe original exception was: $err.'
           );
         }
         _deleteIgnoringErrors(tempFile);

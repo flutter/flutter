@@ -123,6 +123,7 @@ Future<void> precacheImage(
       // image stream.
       // See ImageCache._liveImages
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        image?.dispose();
         stream.removeListener(listener!);
       }, debugLabel: 'precacheImage.removeListener');
     },
@@ -326,9 +327,8 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 ///    material application (especially if the image is in a [Material] and will
 ///    have an [InkWell] on top of it).
 ///  * [Image](dart-ui/Image-class.html), the class in the [dart:ui] library.
-///  * Cookbook: [Display images from the internet](https://flutter.dev/docs/cookbook/images/network-image)
-///  * Cookbook: [Work with cached images](https://flutter.dev/docs/cookbook/images/cached-images)
-///  * Cookbook: [Fade in images with a placeholder](https://flutter.dev/docs/cookbook/images/fading-in-images)
+///  * Cookbook: [Display images from the internet](https://docs.flutter.dev/cookbook/images/network-image)
+///  * Cookbook: [Fade in images with a placeholder](https://docs.flutter.dev/cookbook/images/fading-in-images)
 class Image extends StatefulWidget {
   /// Creates a widget that displays an image.
   ///
@@ -365,7 +365,7 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
   });
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
@@ -413,7 +413,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
     this.isAntiAlias = false,
     Map<String, String>? headers,
     int? cacheWidth,
@@ -470,7 +470,7 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
   }) :
@@ -606,7 +606,7 @@ class Image extends StatefulWidget {
   ///    omitted.
   ///  * [ExactAssetImage], which is used to implement the behavior when the
   ///    scale is present.
-  ///  * <https://flutter.dev/assets-and-images/>, an introduction to assets in
+  ///  * <https://docs.flutter.dev/ui/assets/assets-and-images>, an introduction to assets in
   ///    Flutter.
   Image.asset(
     String name, {
@@ -630,7 +630,7 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
     String? package,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
   }) : image = ResizeImage.resizeIfNeeded(
@@ -692,7 +692,7 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
   }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
@@ -871,6 +871,8 @@ class Image extends StatefulWidget {
   /// undesirable artifacts. Consider using other [FilterQuality] values to
   /// improve the rendered image quality in this case. Pixels may be misaligned
   /// with the screen pixels as a result of transforms or scaling.
+  ///
+  /// Defaults to [FilterQuality.medium].
   ///
   /// See also:
   ///

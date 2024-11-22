@@ -196,7 +196,7 @@ class XCDevice {
   /// Observe identifiers (UDIDs) of devices as they attach and detach.
   ///
   /// Each attach and detach event contains information on the event type,
-  /// the event interface, and the device identifer.
+  /// the event interface, and the device identifier.
   Stream<XCDeviceEventNotification>? observedDeviceEvents() {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
@@ -544,6 +544,7 @@ class XCDevice {
         }
         bool devModeEnabled = true;
         bool isConnected = true;
+        bool isPaired = true;
         final Map<String, Object?>? errorProperties = _errorProperties(device);
         if (errorProperties != null) {
           final String? errorMessage = _parseErrorMessage(errorProperties);
@@ -563,6 +564,10 @@ class XCDevice {
           // Other times this is a false positive and the app will successfully launch despite the error.
           if (code != -10) {
             isConnected = false;
+          }
+          // Error: iPhone is not paired with your computer. To use iPhone with Xcode, unlock it and choose to trust this computer when prompted. (code -9)
+          if (code == -9) {
+            isPaired = false;
           }
 
           if (code == 6) {
@@ -635,6 +640,7 @@ class XCDevice {
           xcodeDebug: _xcodeDebug,
           platform: globals.platform,
           devModeEnabled: devModeEnabled,
+          isPaired: isPaired,
           isCoreDevice: coreDevice != null,
         );
       }

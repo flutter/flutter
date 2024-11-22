@@ -13,6 +13,7 @@ import '../bundle_builder.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
@@ -21,6 +22,8 @@ import '../test/runner.dart';
 import '../test/test_time_recorder.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
+import '../web/compile.dart';
+import '../web/web_constants.dart';
 
 /// The name of the directory where Integration Tests are placed.
 ///
@@ -43,8 +46,8 @@ const String _kIntegrationTestDirectory = 'integration_test';
 /// the `*_test.dart` suffix, and run them in a single invocation.
 ///
 /// See:
-/// - https://flutter.dev/docs/cookbook/testing/unit/introduction
-/// - https://flutter.dev/docs/cookbook/testing/widget/introduction
+/// - https://flutter.dev/to/unit-testing
+/// - https://flutter.dev/to/widget-testing
 ///
 /// ## Integration Tests
 ///
@@ -56,13 +59,14 @@ const String _kIntegrationTestDirectory = 'integration_test';
 /// your package. To run these tests, use `flutter test integration_test`.
 ///
 /// See:
-/// - https://flutter.dev/docs/testing/integration-tests
+/// - https://flutter.dev/to/integration-testing
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
     bool verboseHelp = false,
     this.testWrapper = const TestWrapper(),
     this.testRunner = const FlutterTestRunner(),
     this.verbose = false,
+    this.nativeAssetsBuilder,
   }) {
     requiresPubspecYaml();
     usesPubOption();
@@ -77,6 +81,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     addEnableImpellerFlag(verboseHelp: verboseHelp);
 
     argParser
+      ..addFlag('experimental-faster-testing',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Run each test in a separate lightweight Flutter Engine to speed up testing.'
+      )
       ..addMultiOption('name',
         help: 'A regular expression matching substrings of the names of tests to run.',
         valueHelp: 'regexp',
@@ -101,6 +110,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'You must specify a single test file to run, explicitly.\n'
               'Instructions for connecting with a debugger are printed to the '
               'console once the test has started.',
+      )
+      ..addFlag('fail-fast',
+        help: 'Stop running tests after the first failure.',
       )
       ..addFlag('run-skipped',
         help: 'Run skipped tests instead of skipping them.',
@@ -207,12 +219,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption('reporter',
         abbr: 'r',
         help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
-        allowed: <String>['compact', 'expanded', 'github', 'json'],
+        allowed: <String>['compact', 'expanded', 'failures-only', 'github', 'json', 'silent'],
         allowedHelp: <String, String>{
-          'compact':  'A single line that updates dynamically (The default reporter).',
+          'compact':  'A single line, updated continuously (the default).',
           'expanded': 'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
+          'failures-only': 'A separate line for failing tests, with no output for passing tests.',
           'github':   'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
           'json':     'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
+          'silent':   'A reporter with no output. May be useful when only the exit code is meaningful.'
         },
       )
       ..addOption('file-reporter',
@@ -225,7 +239,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'in seconds (e.g. "60s"), '
               'as a multiplier of the default timeout (e.g. "2x"), '
               'or as the string "none" to disable the timeout entirely.',
+      )
+      ..addFlag(
+        FlutterOptions.kWebWasmFlag,
+        help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
+        negatable: false,
       );
+
     addDdsOptions(verboseHelp: verboseHelp);
     addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
@@ -237,6 +257,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   /// Interface for running the tester process.
   final FlutterTestRunner testRunner;
 
+  final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
+
   final bool verbose;
 
   @visibleForTesting
@@ -246,6 +268,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   final Set<Uri> _testFileUris = <Uri>{};
 
   bool get isWeb => stringArg('platform') == 'chrome';
+  bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
@@ -312,6 +335,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     return super.verifyThenRunCommand(commandPath);
   }
 
+  WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
+    stringArg(FlutterOptions.kWebRendererFlag),
+    useWasm: useWasm
+  );
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (!globals.fs.isFileSync('pubspec.yaml')) {
@@ -345,11 +373,21 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    String? testAssetDirectory;
-    if (buildTestAssets) {
-      await _buildTestAsset(flavor: buildInfo.flavor);
-      testAssetDirectory = globals.fs.path.
-        join(flutterProject.directory.path, 'build', 'unit_test_assets');
+    bool experimentalFasterTesting = boolArg('experimental-faster-testing');
+    if (experimentalFasterTesting) {
+      if (_isIntegrationTest || isWeb) {
+        experimentalFasterTesting = false;
+        globals.printStatus(
+          '--experimental-faster-testing was parsed but will be ignored. This '
+          'option is not supported when running integration tests or web tests.',
+        );
+      } else if (_testFileUris.length == 1) {
+        experimentalFasterTesting = false;
+        globals.printStatus(
+          '--experimental-faster-testing was parsed but will be ignored. This '
+          'option should not be used when running a single test file.',
+        );
+      }
     }
 
     final bool startPaused = boolArg('start-paused');
@@ -358,6 +396,34 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'When using --start-paused, you must specify a single test file to run.',
         exitCode: 1,
       );
+    }
+
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+      buildInfo,
+      startPaused: startPaused,
+      disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      serveObservatory: boolArg('serve-observatory'),
+      // On iOS >=14, keeping this enabled will leave a prompt on the screen.
+      disablePortPublication: true,
+      enableDds: enableDds,
+      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
+      usingCISystem: usingCISystem,
+      enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
+      debugLogsDirectoryPath: debugLogsDirectoryPath,
+      webRenderer: webRenderer,
+      webUseWasm: useWasm,
+      webUseLocalCanvaskit: true,
+    );
+
+    String? testAssetDirectory;
+    if (buildTestAssets) {
+      await _buildTestAsset(
+        flavor: buildInfo.flavor,
+        impellerStatus: debuggingOptions.enableImpeller,
+        buildMode: debuggingOptions.buildInfo.mode,
+      );
+      testAssetDirectory = globals.fs.path.
+        join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
 
     final String? concurrencyString = stringArg('concurrency');
@@ -378,6 +444,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       // Running with concurrency will result in deploying multiple test apps
       // on the connected device concurrently, which is not supported.
       jobs = 1;
+    } else if (experimentalFasterTesting) {
+      if (argResults!.wasParsed('concurrency')) {
+        globals.printStatus(
+          '-j/--concurrency was parsed but will be ignored. This option is not '
+          'compatible with --experimental-faster-testing.',
+        );
+      }
     }
 
     final int? shardIndex = int.tryParse(stringArg('shard-index') ?? '');
@@ -401,6 +474,25 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           'If you set --shard-index you need to also set --total-shards.');
     }
 
+    final bool enableVmService = boolArg('enable-vmservice');
+    if (experimentalFasterTesting && enableVmService) {
+      globals.printStatus(
+        '--enable-vmservice was parsed but will be ignored. This option is not '
+        'compatible with --experimental-faster-testing.',
+      );
+    }
+
+    final bool ipv6 = boolArg('ipv6');
+    if (experimentalFasterTesting && ipv6) {
+      // [ipv6] is set when the user desires for the test harness server to use
+      // IPv6, but a test harness server will not be started at all when
+      // [experimentalFasterTesting] is set.
+      globals.printStatus(
+        '--ipv6 was parsed but will be ignored. This option is not compatible '
+        'with --experimental-faster-testing.',
+      );
+    }
+
     final bool machine = boolArg('machine');
     CoverageCollector? collector;
     if (boolArg('coverage') || boolArg('merge-coverage') ||
@@ -413,8 +505,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryNames: packagesToInclude,
-        packagesPath: buildInfo.packagesPath,
-        resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
+        packagesPath: buildInfo.packageConfigPath,
+        resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
         testTimeRecorder: testTimeRecorder,
         branchCoverage: boolArg('branch-coverage'),
       );
@@ -427,18 +519,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       watcher = collector;
     }
 
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
-      buildInfo,
-      startPaused: startPaused,
-      disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
-      serveObservatory: boolArg('serve-observatory'),
-      // On iOS >=14, keeping this enabled will leave a prompt on the screen.
-      disablePortPublication: true,
-      enableDds: enableDds,
-      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
-      usingCISystem: usingCISystem,
-      enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
-    );
+    if (!isWeb && useWasm) {
+      throwToolExit('--wasm is only supported on the web platform');
+    }
+
+    if (webRenderer == WebRendererMode.skwasm && !useWasm) {
+      throwToolExit('Skwasm renderer requires --wasm');
+    }
 
     Device? integrationTestDevice;
     if (_isIntegrationTest) {
@@ -476,34 +563,63 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final Stopwatch? testRunnerTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.TestRunner);
-    final int result = await testRunner.runTests(
-      testWrapper,
-      _testFileUris.toList(),
-      debuggingOptions: debuggingOptions,
-      names: names,
-      plainNames: plainNames,
-      tags: tags,
-      excludeTags: excludeTags,
-      watcher: watcher,
-      enableVmService: collector != null || startPaused || boolArg('enable-vmservice'),
-      ipv6: boolArg('ipv6'),
-      machine: machine,
-      updateGoldens: boolArg('update-goldens'),
-      concurrency: jobs,
-      testAssetDirectory: testAssetDirectory,
-      flutterProject: flutterProject,
-      web: isWeb,
-      randomSeed: stringArg('test-randomize-ordering-seed'),
-      reporter: stringArg('reporter'),
-      fileReporter: stringArg('file-reporter'),
-      timeout: stringArg('timeout'),
-      runSkipped: boolArg('run-skipped'),
-      shardIndex: shardIndex,
-      totalShards: totalShards,
-      integrationTestDevice: integrationTestDevice,
-      integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
-      testTimeRecorder: testTimeRecorder,
-    );
+    final int result;
+    if (experimentalFasterTesting) {
+      assert(!isWeb && !_isIntegrationTest && _testFileUris.length > 1);
+      result = await testRunner.runTestsBySpawningLightweightEngines(
+        _testFileUris.toList(),
+        debuggingOptions: debuggingOptions,
+        names: names,
+        plainNames: plainNames,
+        tags: tags,
+        excludeTags: excludeTags,
+        machine: machine,
+        updateGoldens: boolArg('update-goldens'),
+        concurrency: jobs,
+        testAssetDirectory: testAssetDirectory,
+        flutterProject: flutterProject,
+        randomSeed: stringArg('test-randomize-ordering-seed'),
+        reporter: stringArg('reporter'),
+        fileReporter: stringArg('file-reporter'),
+        timeout: stringArg('timeout'),
+        failFast: boolArg('fail-fast'),
+        runSkipped: boolArg('run-skipped'),
+        shardIndex: shardIndex,
+        totalShards: totalShards,
+        testTimeRecorder: testTimeRecorder,
+      );
+    } else {
+      result = await testRunner.runTests(
+        testWrapper,
+        _testFileUris.toList(),
+        debuggingOptions: debuggingOptions,
+        names: names,
+        plainNames: plainNames,
+        tags: tags,
+        excludeTags: excludeTags,
+        watcher: watcher,
+        enableVmService: collector != null || startPaused || enableVmService,
+        ipv6: ipv6,
+        machine: machine,
+        updateGoldens: boolArg('update-goldens'),
+        concurrency: jobs,
+        testAssetDirectory: testAssetDirectory,
+        flutterProject: flutterProject,
+        web: isWeb,
+        randomSeed: stringArg('test-randomize-ordering-seed'),
+        reporter: stringArg('reporter'),
+        fileReporter: stringArg('file-reporter'),
+        timeout: stringArg('timeout'),
+        failFast: boolArg('fail-fast'),
+        runSkipped: boolArg('run-skipped'),
+        shardIndex: shardIndex,
+        totalShards: totalShards,
+        integrationTestDevice: integrationTestDevice,
+        integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
+        testTimeRecorder: testTimeRecorder,
+        nativeAssetsBuilder: nativeAssetsBuilder,
+      );
+    }
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
 
     if (collector != null) {
@@ -569,6 +685,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   Future<void> _buildTestAsset({
     required String? flavor,
+    required ImpellerStatus impellerStatus,
+    required BuildMode buildMode,
   }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
@@ -578,21 +696,38 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (_needRebuild(assetBundle.entries)) {
+    if (_needsRebuild(assetBundle.entries, flavor)) {
       await writeBundle(
         globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
         assetBundle.entries,
-        assetBundle.entryKinds,
         targetPlatform: TargetPlatform.tester,
+        impellerStatus: impellerStatus,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
+        projectDir: globals.fs.currentDirectory,
+        buildMode: buildMode,
       );
+
+      final File cachedFlavorFile = globals.fs.file(
+        globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+      );
+      if (cachedFlavorFile.existsSync()) {
+        await cachedFlavorFile.delete();
+      }
+      if (flavor != null) {
+        cachedFlavorFile.createSync(recursive: true);
+        cachedFlavorFile.writeAsStringSync(flavor);
+      }
     }
   }
 
-  bool _needRebuild(Map<String, DevFSContent> entries) {
+  bool _needsRebuild(Map<String, AssetBundleEntry> entries, String? flavor) {
     // TODO(andrewkolos): This logic might fail in the future if we change the
-    // schema of the contents of the asset manifest file and the user does not
-    // perform a `flutter clean` after upgrading.
-    // See https://github.com/flutter/flutter/issues/128563.
+    //  schema of the contents of the asset manifest file and the user does not
+    //  perform a `flutter clean` after upgrading.
+    //  See https://github.com/flutter/flutter/issues/128563.
     final File manifest = globals.fs.file(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     if (!manifest.existsSync()) {
       return true;
@@ -603,13 +738,27 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       return true;
     }
 
-    for (final DevFSFileContent entry in entries.values.whereType<DevFSFileContent>()) {
+    final Iterable<DevFSFileContent> files = entries.values
+      .map((AssetBundleEntry asset) => asset.content)
+      .whereType<DevFSFileContent>();
+    for (final DevFSFileContent entry in files) {
       // Calling isModified to access file stats first in order for isModifiedAfter
       // to work.
       if (entry.isModified && entry.isModifiedAfter(lastModified)) {
         return true;
       }
     }
+
+    final File cachedFlavorFile = globals.fs.file(
+      globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+    );
+    final String? cachedFlavor = cachedFlavorFile.existsSync()
+        ? cachedFlavorFile.readAsStringSync()
+        : null;
+    if (cachedFlavor != flavor) {
+      return true;
+    }
+
     return false;
   }
 }

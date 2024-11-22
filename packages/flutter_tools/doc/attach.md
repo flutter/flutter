@@ -23,4 +23,4 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
 ## Source
 
-See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter_tools/lib/src/commands/attach.dart) for the attach command.
+See the [source](https://github.com/flutter/flutter/blob/main/packages/flutter_tools/lib/src/commands/attach.dart) for the attach command.

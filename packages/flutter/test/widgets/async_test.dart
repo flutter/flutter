@@ -202,7 +202,7 @@ void main() {
         await tester.pumpWidget(FutureBuilder<String>(
           future: completer.future,
           builder: snapshotText,
-        ), const Duration(seconds: 1));
+        ), duration: const Duration(seconds: 1));
         completer.completeError('bad');
       }, (Object error, StackTrace stack) {
         expectSync(error, equals('bad'));

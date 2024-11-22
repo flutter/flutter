@@ -13,11 +13,11 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/terminal.dart';
-import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
+import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
@@ -36,6 +36,7 @@ abstract final class FlutterGlobalOptions {
   static const String kMachineFlag = 'machine';
   static const String kPackagesOption = 'packages';
   static const String kPrefixedErrorsFlag = 'prefixed-errors';
+  static const String kPrintDtd = 'print-dtd';
   static const String kQuietFlag = 'quiet';
   static const String kShowTestDeviceFlag = 'show-test-device';
   static const String kShowWebServerDeviceFlag = 'show-web-server-device';
@@ -45,6 +46,7 @@ abstract final class FlutterGlobalOptions {
   static const String kVersionFlag = 'version';
   static const String kWrapColumnOption = 'wrap-column';
   static const String kWrapFlag = 'wrap';
+  static const String kDebugLogsDirectoryFlag = 'debug-logs-dir';
 }
 
 class FlutterCommandRunner extends CommandRunner<void> {
@@ -116,6 +118,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addOption(FlutterGlobalOptions.kPackagesOption,
         hide: !verboseHelp,
         help: 'Path to your "package_config.json" file.');
+    argParser.addFlag(
+      FlutterGlobalOptions.kPrintDtd,
+      negatable: false,
+      help: 'Print the address of the Dart Tooling Daemon, if one is hosted by the Flutter CLI.',
+      hide: !verboseHelp,
+    );
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
     }
@@ -163,6 +171,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
       FlutterGlobalOptions.kContinuousIntegrationFlag,
       negatable: false,
       help: 'Enable a set of CI-specific test debug settings.',
+      hide: !verboseHelp,
+    );
+    argParser.addOption(
+      FlutterGlobalOptions.kDebugLogsDirectoryFlag,
+      help: 'Path to a directory where logs for debugging may be added.',
       hide: !verboseHelp,
     );
   }
@@ -214,6 +227,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
   }
 
+  // See https://github.com/flutter/flutter/issues/145158.
+  late bool _machineFlagPresentInAnyCliArg;
+
   @override
   Future<void> run(Iterable<String> args) {
     // Have invocations of 'build', 'custom-devices', and 'pub' print out
@@ -229,7 +245,60 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
     }
 
+    _machineFlagPresentInAnyCliArg = args.contains('--${FlutterGlobalOptions.kMachineFlag}');
     return super.run(args);
+  }
+
+  /// Whether to perform a flutter version check, which prints a warning if old.
+  ///
+  /// This method should be narrowly used in the following manner:
+  /// ```dart
+  /// final bool topLevelMachineFlag = topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
+  /// if (await _shouldCheckForUpdates(topLevelResults, topLevelMachineFlag: topLevelMachineFlag)) {
+  ///   await globals.flutterVersion.checkFlutterVersionFreshness();
+  /// }
+  /// ```
+  Future<bool> _shouldCheckForUpdates(
+    ArgResults topLevelResults, {
+    required bool topLevelMachineFlag,
+  }) async {
+    // Check if the user has explicitly requested a version check.
+    final bool versionCheckFlag = topLevelResults[FlutterGlobalOptions.kVersionCheckFlag] as bool? ?? false;
+    final bool explicitVersionCheckPassed = topLevelResults.wasParsed(FlutterGlobalOptions.kVersionCheckFlag) && versionCheckFlag;
+    if (explicitVersionCheckPassed) {
+      return true;
+    }
+
+
+    // If the top level --machine flag is set, we don't want to check for updates.
+    if (topLevelMachineFlag) {
+      return false;
+    }
+
+    // Running the "upgrade" command is already checking, don't check twice.
+    if (topLevelResults.command?.name == 'upgrade') {
+      return false;
+    }
+
+    // If the same flag appears in any subcommand, we don't want to check for updates.
+    //
+    // A better solution would be the flag not being in any specific subcommand, just
+    // in the top level command, but that would require a more significant refactor
+    // and deprecation of the current behaviors.
+    //
+    // See https://github.com/flutter/flutter/issues/145158.
+    if (_machineFlagPresentInAnyCliArg) {
+      return false;
+    }
+
+    // e.g. `flutter bash-completion` or `flutter zsh-completion`
+    final bool isShellCompletionCommand = !globals.stdio.hasTerminal && (topLevelResults.command?.name ?? '').endsWith('-completion');
+    if (isShellCompletionCommand || await globals.botDetector.isRunningOnBot) {
+      return false;
+    }
+
+    // Otherwise, check for updates based on the flag which is typically set by default.
+    return versionCheckFlag;
   }
 
   @override
@@ -251,10 +320,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
       try {
         wrapColumn = int.parse(topLevelResults[FlutterGlobalOptions.kWrapColumnOption] as String);
         if (wrapColumn < 0) {
-          throwToolExit(userMessages.runnerWrapColumnInvalid(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
+          throwToolExit(globals.userMessages.runnerWrapColumnInvalid(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
         }
       } on FormatException {
-        throwToolExit(userMessages.runnerWrapColumnParseError(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
+        throwToolExit(globals.userMessages.runnerWrapColumnParseError(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
       }
     }
 
@@ -310,15 +379,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         globals.flutterVersion.ensureVersionFile();
         final bool machineFlag = topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
-        final bool ci = await globals.botDetector.isRunningOnBot;
-        final bool redirectedCompletion = !globals.stdio.hasTerminal &&
-            (topLevelResults.command?.name ?? '').endsWith('-completion');
-        final bool isMachine = machineFlag || ci || redirectedCompletion;
-        final bool versionCheckFlag = topLevelResults[FlutterGlobalOptions.kVersionCheckFlag] as bool? ?? false;
-        final bool explicitVersionCheckPassed = topLevelResults.wasParsed(FlutterGlobalOptions.kVersionCheckFlag) && versionCheckFlag;
-
-        if (topLevelResults.command?.name != 'upgrade' &&
-            (explicitVersionCheckPassed || (versionCheckFlag && !isMachine))) {
+        if (await _shouldCheckForUpdates(topLevelResults, topLevelMachineFlag: machineFlag)) {
           await globals.flutterVersion.checkFlutterVersionFreshness();
         }
 
@@ -352,6 +413,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
         if (machineFlag && topLevelResults.command?.name != 'analyze') {
           throwToolExit('The "--machine" flag is only valid with the "--version" flag or the "analyze --suggestions" command.', exitCode: 2);
         }
+
+        final bool shouldPrintDtdUri = topLevelResults[FlutterGlobalOptions.kPrintDtd] as bool? ?? false;
+        DevtoolsLauncher.instance!.printDtdUri = shouldPrintDtdUri;
+
         await super.runCommand(topLevelResults);
       },
     );

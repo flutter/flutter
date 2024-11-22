@@ -155,5 +155,7 @@
   "menuDismissLabel": "Diystyru'r ddewislen",
   "lookUpButtonLabel": "Chwilio",
   "searchWebButtonLabel": "Chwilio'r We",
-  "shareButtonLabel": "Rhannu..."
+  "shareButtonLabel": "Rhannu...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

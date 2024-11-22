@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'tab_scaffold.dart';
+/// @docImport 'tab_view.dart';
+library;
+
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';

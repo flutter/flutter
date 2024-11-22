@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -21,7 +24,7 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// Enables control over a single [ExpansionTile]'s expanded/collapsed state.
 ///
 /// It can be useful to expand or collapse an [ExpansionTile]
-/// programatically, for example to reconfigure an existing expansion
+/// programmatically, for example to reconfigure an existing expansion
 /// tile based on a system event. To do so, create an [ExpansionTile]
 /// with an [ExpansionTileController] that's owned by a stateful widget
 /// or look up the tile's automatically created [ExpansionTileController]
@@ -209,7 +212,7 @@ class ExpansionTileController {
 ///
 /// {@tool dartpad}
 /// This example demonstrates how an [ExpansionTileController] can be used to
-/// programatically expand or collapse an [ExpansionTile].
+/// programmatically expand or collapse an [ExpansionTile].
 ///
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
 /// {@end-tool}
@@ -232,6 +235,7 @@ class ExpansionTile extends StatefulWidget {
     this.onExpansionChanged,
     this.children = const <Widget>[],
     this.trailing,
+    this.showTrailingIcon = true,
     this.initiallyExpanded = false,
     this.maintainState = false,
     this.tilePadding,
@@ -251,6 +255,7 @@ class ExpansionTile extends StatefulWidget {
     this.controller,
     this.dense,
     this.visualDensity,
+    this.minTileHeight,
     this.enableFeedback = true,
     this.enabled = true,
     this.expansionAnimationStyle,
@@ -317,6 +322,9 @@ class ExpansionTile extends StatefulWidget {
   /// Depending on the value of [controlAffinity], the [trailing] widget
   /// may replace the rotating expansion arrow icon.
   final Widget? trailing;
+
+  /// Specifies if the [ExpansionTile] should build a default trailing icon if [trailing] is null.
+  final bool showTrailingIcon;
 
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
@@ -475,8 +483,11 @@ class ExpansionTile extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
+  /// If this is not null and a custom collapsed or expanded shape is provided,
+  /// the value of [clipBehavior] will be used to clip the expansion tile.
+  ///
   /// If this property is null, the [ExpansionTileThemeData.clipBehavior] is used. If that
-  /// is also null, a [Clip.none] is used
+  /// is also null, defaults to [Clip.antiAlias].
   ///
   /// See also:
   ///
@@ -505,6 +516,9 @@ class ExpansionTile extends StatefulWidget {
   /// {@macro flutter.material.themedata.visualDensity}
   final VisualDensity? visualDensity;
 
+  /// {@macro flutter.material.ListTile.minTileHeight}
+  final double? minTileHeight;
+
   /// {@macro flutter.material.ListTile.enableFeedback}
   final bool? enableFeedback;
 
@@ -529,6 +543,11 @@ class ExpansionTile extends StatefulWidget {
   /// from the [ExpansionTileThemeData.expansionAnimationStyle] will be used.
   /// Otherwise, defaults to [Curves.easeIn].
   ///
+  /// If [AnimationStyle.reverseCurve] is provided, it will be used to override
+  /// the collapse animation curve. If it is null, then [AnimationStyle.reverseCurve]
+  /// from the [ExpansionTileThemeData.expansionAnimationStyle] will be used.
+  /// Otherwise, the same curve will be used as for expansion.
+  ///
   /// To disable the theme animation, use [AnimationStyle.noAnimation].
   ///
   /// {@tool dartpad}
@@ -552,11 +571,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   final ColorTween _headerColorTween = ColorTween();
   final ColorTween _iconColorTween = ColorTween();
   final ColorTween _backgroundColorTween = ColorTween();
-  final CurveTween _heightFactorTween = CurveTween(curve: Curves.easeIn);
+  final Tween<double> _heightFactorTween = Tween<double>(begin: 0.0, end: 1.0);
 
   late AnimationController _animationController;
   late Animation<double> _iconTurns;
-  late Animation<double> _heightFactor;
+  late CurvedAnimation _heightFactor;
   late Animation<ShapeBorder?> _border;
   late Animation<Color?> _headerColor;
   late Animation<Color?> _iconColor;
@@ -564,12 +583,16 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
   bool _isExpanded = false;
   late ExpansionTileController _tileController;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(duration: _kExpand, vsync: this);
-    _heightFactor = _animationController.drive(_heightFactorTween);
+    _heightFactor = CurvedAnimation(
+      parent: _animationController.drive(_heightFactorTween),
+      curve: Curves.easeIn,
+    );
     _iconTurns = _animationController.drive(_halfTween.chain(_easeInTween));
     _border = _animationController.drive(_borderTween.chain(_easeOutTween));
     _headerColor = _animationController.drive(_headerColorTween.chain(_easeInTween));
@@ -590,6 +613,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   void dispose() {
     _tileController._state = null;
     _animationController.dispose();
+    _heightFactor.dispose();
+    _timer?.cancel();
+    _timer = null;
     super.dispose();
   }
 
@@ -614,7 +640,19 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       PageStorage.maybeOf(context)?.writeState(context, _isExpanded);
     });
     widget.onExpansionChanged?.call(_isExpanded);
-    SemanticsService.announce(stateHint, textDirection);
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // TODO(tahatesser): This is a workaround for VoiceOver interrupting
+      // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
+      _timer?.cancel();
+      _timer = Timer(const Duration(seconds: 1), () {
+        SemanticsService.announce(stateHint, textDirection);
+        _timer?.cancel();
+        _timer = null;
+      });
+    } else {
+      SemanticsService.announce(stateHint, textDirection);
+    }
   }
 
   void _handleTap() {
@@ -656,11 +694,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   Widget _buildChildren(BuildContext context, Widget? child) {
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
+    final Color backgroundColor = _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent;
     final ShapeBorder expansionTileBorder = _border.value ?? const Border(
-            top: BorderSide(color: Colors.transparent),
-            bottom: BorderSide(color: Colors.transparent),
-          );
-    final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.none;
+      top: BorderSide(color: Colors.transparent),
+      bottom: BorderSide(color: Colors.transparent),
+    );
+    final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.antiAlias;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String onTapHint = _isExpanded
       ? localizations.expansionTileExpandedTapHint
@@ -679,12 +718,13 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         break;
     }
 
-    return Container(
-      clipBehavior: clipBehavior,
-      decoration: ShapeDecoration(
-        color: _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent,
-        shape: expansionTileBorder,
-      ),
+    final Decoration decoration = ShapeDecoration(
+      color: backgroundColor,
+      shape: expansionTileBorder,
+    );
+
+    final Widget tile = Padding(
+      padding: decoration.padding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -704,7 +744,8 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
                 leading: widget.leading ?? _buildLeadingIcon(context),
                 title: widget.title,
                 subtitle: widget.subtitle,
-                trailing: widget.trailing ?? _buildTrailingIcon(context),
+                trailing: widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
+                minTileHeight: widget.minTileHeight,
               ),
             ),
           ),
@@ -719,6 +760,23 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           ),
         ],
       ),
+    );
+
+    final bool isShapeProvided = widget.shape != null || expansionTileTheme.shape != null
+      || widget.collapsedShape != null || expansionTileTheme.collapsedShape != null;
+
+    if (isShapeProvided) {
+      return Material(
+        clipBehavior: clipBehavior,
+        color: backgroundColor,
+        shape: expansionTileBorder,
+        child: tile,
+      );
+    }
+
+    return DecoratedBox(
+      decoration: decoration,
+      child: tile,
     );
   }
 
@@ -813,9 +871,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   void _updateHeightFactorCurve(ExpansionTileThemeData expansionTileTheme) {
-    _heightFactorTween.curve = widget.expansionAnimationStyle?.curve
+    _heightFactor.curve = widget.expansionAnimationStyle?.curve
       ?? expansionTileTheme.expansionAnimationStyle?.curve
       ?? Curves.easeIn;
+    _heightFactor.reverseCurve = widget.expansionAnimationStyle?.reverseCurve
+      ?? expansionTileTheme.expansionAnimationStyle?.reverseCurve;
   }
 
   @override

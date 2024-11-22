@@ -4,7 +4,7 @@
 
 import 'bitfield.dart' as bitfield;
 
-/// The dart:html implementation of [bitfield.kMaxUnsignedSMI].
+/// The web implementation of [bitfield.kMaxUnsignedSMI].
 ///
 /// This value is used as an optimization to coerce some numbers to be within
 /// the SMI range and avoid heap allocations. Because number encoding is
@@ -13,14 +13,14 @@ import 'bitfield.dart' as bitfield;
 /// does not have to guarantee efficiency.
 const int kMaxUnsignedSMI = -1;
 
-/// The dart:html implementation of [bitfield.Bitfield].
+/// The web implementation of [bitfield.BitField].
 class BitField<T extends dynamic> implements bitfield.BitField<T> {
-  /// The dart:html implementation of [bitfield.Bitfield].
+  /// The web implementation of [bitfield.BitField].
   // Can remove when we have metaclasses.
   // ignore: avoid_unused_constructor_parameters
   BitField(int length);
 
-  /// The dart:html implementation of [bitfield.Bitfield.filled].
+  /// The web implementation of [bitfield.Bitfield.filled].
   // Can remove when we have metaclasses.
   // ignore: avoid_unused_constructor_parameters
   BitField.filled(int length, bool value);

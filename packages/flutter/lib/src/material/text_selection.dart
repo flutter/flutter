@@ -92,20 +92,11 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     // [handle] is a circle, with a rectangle in the top left quadrant of that
     // circle (an onion pointing to 10:30). We rotate [handle] to point
     // straight up or up-right depending on the handle type.
-    switch (type) {
-      case TextSelectionHandleType.left: // points up-right
-        return Transform.rotate(
-          angle: math.pi / 2.0,
-          child: handle,
-        );
-      case TextSelectionHandleType.right: // points up-left
-        return handle;
-      case TextSelectionHandleType.collapsed: // points up
-        return Transform.rotate(
-          angle: math.pi / 4.0,
-          child: handle,
-        );
-    }
+    return switch (type) {
+      TextSelectionHandleType.left => Transform.rotate(angle: math.pi / 2.0, child: handle), // points up-right
+      TextSelectionHandleType.right => handle, // points up-left
+      TextSelectionHandleType.collapsed => Transform.rotate(angle: math.pi / 4.0, child: handle), // points up
+    };
   }
 
   /// Gets anchor for material-style text selection handles.
@@ -113,14 +104,11 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   /// See [TextSelectionControls.getHandleAnchor].
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    switch (type) {
-      case TextSelectionHandleType.left:
-        return const Offset(_kHandleSize, 0);
-      case TextSelectionHandleType.right:
-        return Offset.zero;
-      case TextSelectionHandleType.collapsed:
-        return const Offset(_kHandleSize / 2, -4);
-    }
+    return switch (type) {
+      TextSelectionHandleType.collapsed => const Offset(_kHandleSize / 2, -4),
+      TextSelectionHandleType.left      => const Offset(_kHandleSize, 0),
+      TextSelectionHandleType.right     => Offset.zero,
+    };
   }
 
   @Deprecated(
@@ -279,6 +267,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
       children: itemDatas.asMap().entries.map((MapEntry<int, _TextSelectionToolbarItemData> entry) {
         return TextSelectionToolbarTextButton(
           padding: TextSelectionToolbarTextButton.getPadding(entry.key, itemDatas.length),
+          alignment: AlignmentDirectional.centerStart,
           onPressed: entry.value.onPressed,
           child: Text(entry.value.label),
         );

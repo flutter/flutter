@@ -6,7 +6,7 @@ Dart web debug services (dwds) and Flutter integration.
 
 Use this command to run (from the `flutter_tools` directory):
 
-```shell
+```sh
 ../../bin/cache/dart-sdk/bin/dart run test test/web.shard
 ```
 

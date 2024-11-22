@@ -277,4 +277,85 @@ void main() {
       expect(indicator.borderStyle, BorderStyle.solid);
     }
   });
+
+  testWidgets('PageSelector responds correctly to TabController.animateTo() from the default tab controller', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Theme(
+            data: ThemeData(colorScheme: const ColorScheme.light().copyWith(secondary: kSelectedColor)),
+            child: const SizedBox.expand(
+              child: Center(
+                child: SizedBox(
+                  width: 400.0,
+                  height: 400.0,
+                  child: DefaultTabController(
+                    length: 3,
+                    child: Column(
+                      children: <Widget>[
+                        TabPageSelector(
+                        ),
+                        Flexible(
+                          child: TabBarView(
+                            children: <Widget>[
+                              Center(child: Text('0')),
+                              Center(child: Text('1')),
+                              Center(child: Text('2')),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TabController tabController = DefaultTabController.of(tester.element(find.byType(TabPageSelector)));
+
+    expect(tabController.index, 0);
+    expect(indicatorColors(tester), const <Color>[kSelectedColor, kUnselectedColor, kUnselectedColor]);
+
+    tabController.animateTo(1, duration: const Duration(milliseconds: 200));
+    await tester.pump();
+    // Verify that indicator 0's color is becoming increasingly transparent,
+    // and indicator 1's color is becoming increasingly opaque during the
+    // 200ms animation. Indicator 2 remains transparent throughout.
+    await tester.pump(const Duration(milliseconds: 10));
+    List<Color> colors = indicatorColors(tester);
+    expect(colors[0].alpha, greaterThan(colors[1].alpha));
+    expect(colors[2], kUnselectedColor);
+    await tester.pump(const Duration(milliseconds: 175));
+    colors = indicatorColors(tester);
+    expect(colors[0].alpha, lessThan(colors[1].alpha));
+    expect(colors[2], kUnselectedColor);
+    await tester.pumpAndSettle();
+    expect(tabController.index, 1);
+    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
+
+    tabController.animateTo(2, duration: const Duration(milliseconds: 200));
+    await tester.pump();
+    // Same animation test as above for indicators 1 and 2.
+    await tester.pump(const Duration(milliseconds: 10));
+    colors = indicatorColors(tester);
+    expect(colors[1].alpha, greaterThan(colors[2].alpha));
+    expect(colors[0], kUnselectedColor);
+    await tester.pump(const Duration(milliseconds: 175));
+    colors = indicatorColors(tester);
+    expect(colors[1].alpha, lessThan(colors[2].alpha));
+    expect(colors[0], kUnselectedColor);
+    await tester.pumpAndSettle();
+    expect(tabController.index, 2);
+    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
+  });
 }

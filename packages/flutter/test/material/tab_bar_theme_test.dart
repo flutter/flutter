@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -153,7 +154,7 @@ void main() {
       tabBarBox,
       paints
         ..line(
-          color: theme.colorScheme.surfaceVariant,
+          color: theme.colorScheme.outlineVariant,
           strokeWidth: 1.0,
         )
         ..rrect(color: theme.colorScheme.primary),
@@ -209,7 +210,7 @@ void main() {
       tabBarBox,
       paints
         ..line(
-          color: theme.colorScheme.surfaceVariant,
+          color: theme.colorScheme.outlineVariant,
           strokeWidth: 1.0,
         )
         ..line(color: theme.colorScheme.primary),
@@ -637,7 +638,7 @@ void main() {
       paints
         // Divider.
         ..line(
-          color: theme.colorScheme.surfaceVariant,
+          color: theme.colorScheme.outlineVariant,
           strokeWidth: 1.0,
         )
         // Tab indicator.
@@ -691,7 +692,7 @@ void main() {
       paints
         // Divider.
         ..line(
-          color: theme.colorScheme.surfaceVariant,
+          color: theme.colorScheme.outlineVariant,
           strokeWidth: 1.0,
         )
         // Tab indicator
@@ -956,7 +957,7 @@ void main() {
       await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
       final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
-      final IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
+      final IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
       final TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text))
         .text.style!;
       final TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text))
@@ -967,14 +968,13 @@ void main() {
       expect(selectedTextStyle.color, labelStyle.color);
       expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
       // Unselected tab should use unselectedLabelStyle color.
-      expect(uselectedTabIcon.color, unselectedLabelStyle.color);
+      expect(unselectedTabIcon.color, unselectedLabelStyle.color);
       expect(unselectedTextStyle.color, unselectedLabelStyle.color);
       expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
   });
 
   testWidgets(
-    "TabBarTheme's labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors",
-    (WidgetTester tester) async {
+    "TabBarTheme's labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors", (WidgetTester tester) async {
       const Color labelColor = Color(0xfff00000);
       const Color unselectedLabelColor = Color(0x95ff0000);
       const TextStyle labelStyle = TextStyle(
@@ -996,7 +996,7 @@ void main() {
       await tester.pumpWidget(buildTabBar());
 
       IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
-      IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
+      IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
       TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text))
         .text.style!;
       TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text))
@@ -1007,7 +1007,7 @@ void main() {
       expect(selectedTextStyle.color, labelStyle.color);
       expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
       // Unselected tab should use the unselectedLabelStyle color.
-      expect(uselectedTabIcon.color, unselectedLabelStyle.color);
+      expect(unselectedTabIcon.color, unselectedLabelStyle.color);
       expect(unselectedTextStyle.color, unselectedLabelStyle.color);
       expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
 
@@ -1022,7 +1022,7 @@ void main() {
       await tester.pumpAndSettle();
 
       selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
-      uselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
+      unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
       selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
       unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
 
@@ -1031,7 +1031,7 @@ void main() {
       expect(selectedTextStyle.color, labelColor);
       expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
       // Unselected tab should use the unselectedLabelColor.
-      expect(uselectedTabIcon.color, unselectedLabelColor);
+      expect(unselectedTabIcon.color, unselectedLabelColor);
       expect(unselectedTextStyle.color, unselectedLabelColor);
       expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
   });
@@ -1073,7 +1073,7 @@ void main() {
       await tester.pumpWidget(buildTabBar());
 
       IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
-      IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
+      IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
       TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text))
         .text.style!;
       TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text))
@@ -1084,7 +1084,7 @@ void main() {
       expect(selectedTextStyle.color, labelStyle.color);
       expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
       // Unselected tab should use the [TabBar.unselectedLabelStyle] color.
-      expect(uselectedTabIcon.color, unselectedLabelStyle.color);
+      expect(unselectedTabIcon.color, unselectedLabelStyle.color);
       expect(unselectedTextStyle.color, unselectedLabelStyle.color);
       expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
 
@@ -1096,7 +1096,7 @@ void main() {
       await tester.pumpAndSettle();
 
       selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
-      uselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
+      unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
       selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
       unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
 
@@ -1105,7 +1105,7 @@ void main() {
       expect(selectedTextStyle.color, labelColor);
       expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
       // Unselected tab should use the [TabBarTheme.unselectedLabelColor].
-      expect(uselectedTabIcon.color, unselectedLabelColor);
+      expect(unselectedTabIcon.color, unselectedLabelColor);
       expect(unselectedTextStyle.color, unselectedLabelColor);
       expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
   });
@@ -1484,12 +1484,12 @@ void main() {
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
     final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
-    final IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
+    final IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
     final TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
     final TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
 
     expect(selectedTabIcon.color, selectedColor);
-    expect(uselectedTabIcon.color, unselectedColor);
+    expect(unselectedTabIcon.color, unselectedColor);
     expect(selectedTextStyle.color, selectedColor);
     expect(unselectedTextStyle.color, unselectedColor);
   });
@@ -1513,12 +1513,12 @@ void main() {
       await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
       IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
-      IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
+      IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
       TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
       TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
 
       expect(selectedTabIcon.color, selectedStateColor);
-      expect(uselectedTabIcon.color, unselectedStateColor);
+      expect(unselectedTabIcon.color, unselectedStateColor);
       expect(selectedTextStyle.color, selectedStateColor);
       expect(unselectedTextStyle.color, unselectedStateColor);
 
@@ -1531,13 +1531,57 @@ void main() {
       await tester.pumpAndSettle();
 
       selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
-      uselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
+      unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
       selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
       unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
 
       expect(selectedTabIcon.color, selectedColor);
-      expect(uselectedTabIcon.color, unselectedColor);
+      expect(unselectedTabIcon.color, unselectedColor);
       expect(selectedTextStyle.color, selectedColor);
       expect(unselectedTextStyle.color, unselectedColor);
   });
+
+  testWidgets('TabBarTheme.textScaler overrides tab label text scale, textScaleFactor = noScaling, 1.75, 2.0', (WidgetTester tester) async {
+    final List<String> tabs = <String>['Tab 1', 'Tab 2'];
+
+    Widget buildTabs({ TextScaler? textScaler }) {
+      return MaterialApp(
+        theme: ThemeData(
+          tabBarTheme: TabBarTheme(
+            textScaler: textScaler,
+          ),
+        ),
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(3.0)),
+          child: DefaultTabController(
+            length: tabs.length,
+            child: Scaffold(
+              appBar: AppBar(
+                bottom: TabBar(
+                  tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabs(textScaler: TextScaler.noScaling));
+
+    Size labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(70.5, 20.0)));
+
+    await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(1.75)));
+    await tester.pumpAndSettle();
+
+    labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(123.0, 35.0)));
+
+    await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(2.0)));
+    await tester.pumpAndSettle();
+
+    labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(140.5, 40.0)));
+  }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87543
 }

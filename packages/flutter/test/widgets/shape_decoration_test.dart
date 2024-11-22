@@ -16,7 +16,9 @@ Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
   final ui.Image rawImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
   final ImageProvider image = TestImageProvider(0, 0, image: rawImage);
+
   testWidgets('ShapeDecoration.image', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     await tester.pumpWidget(
       MaterialApp(
         home: DecoratedBox(
@@ -90,6 +92,7 @@ Future<void> main() async {
   });
 
   testWidgets('TestBorder and Directionality - 2', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     final List<String> log = <String>[];
     await tester.pumpWidget(
       Directionality(

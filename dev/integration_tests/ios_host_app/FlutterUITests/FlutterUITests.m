@@ -73,7 +73,17 @@ static const CGFloat kStandardTimeOut = 60.0;
     XCTAssertTrue(newPageAppeared);
 
     [self waitForAndTapElement:app.otherElements[@"Increment via Flutter"]];
-    XCTAssertTrue([app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:kStandardTimeOut]);
+    BOOL countIncremented = [app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:kStandardTimeOut];
+    if (!countIncremented) {
+        // Sometimes, the element doesn't respond to the tap, it seems to be an iOS 17 Simulator issue where the
+        // simulator reboots. Try to tap the element again.
+        [self waitForAndTapElement:app.otherElements[@"Increment via Flutter"]];
+        countIncremented = [app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:kStandardTimeOut];
+        if (!countIncremented) {
+            os_log(OS_LOG_DEFAULT, "%@", app.debugDescription);
+        }
+    }
+    XCTAssertTrue(countIncremented);
 
     // Back navigation.
     [app.buttons[@"POP"] tap];

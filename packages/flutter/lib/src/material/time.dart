@@ -64,7 +64,7 @@ class TimeOfDay {
   ///
   /// The [hour] is set to the current hour and the [minute] is set to the
   /// current minute in the local time zone.
-  factory TimeOfDay.now() { return TimeOfDay.fromDateTime(DateTime.now()); }
+  TimeOfDay.now() : this.fromDateTime(DateTime.now());
 
   /// The number of hours in one day, i.e. 24.
   static const int hoursPerDay = 24;

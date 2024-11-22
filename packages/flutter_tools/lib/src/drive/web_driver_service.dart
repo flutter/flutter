@@ -78,12 +78,18 @@ class WebDriverService extends DriverService {
           buildInfo,
           port: debuggingOptions.port,
           hostname: debuggingOptions.hostname,
+          webRenderer: debuggingOptions.webRenderer,
+          webUseWasm: debuggingOptions.webUseWasm,
+          webUseLocalCanvaskit: debuggingOptions.webUseLocalCanvaskit,
         )
         : DebuggingOptions.enabled(
           buildInfo,
           port: debuggingOptions.port,
           hostname: debuggingOptions.hostname,
           disablePortPublication: debuggingOptions.disablePortPublication,
+          webRenderer: debuggingOptions.webRenderer,
+          webUseWasm: debuggingOptions.webUseWasm,
+          webUseLocalCanvaskit: debuggingOptions.webUseLocalCanvaskit,
         ),
       stayResident: true,
       flutterProject: FlutterProject.current(),
@@ -127,7 +133,7 @@ class WebDriverService extends DriverService {
     }
 
     if (debuggingOptions.webLaunchUrl != null) {
-      // It should thow an error if the provided url is invalid so no tryParse
+      // It should throw an error if the provided url is invalid so no tryParse
       _webUri = Uri.parse(debuggingOptions.webLaunchUrl!);
     } else {
       _webUri = _residentRunner.uri;
@@ -167,7 +173,7 @@ class WebDriverService extends DriverService {
         'Unable to start a WebDriver session for web testing.\n'
         'Make sure you have the correct WebDriver server (e.g. chromedriver) running at $driverPort.\n'
         'For instructions on how to obtain and run a WebDriver server, see:\n'
-        'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser\n'
+        'https://flutter.dev/to/integration-test-on-web\n'
       );
     }
 
@@ -264,7 +270,7 @@ enum Browser implements CliEnum {
   };
 
   @override
-  String get cliName => snakeCase(name, '-');
+  String get cliName => kebabCase(name);
 
   static Browser fromCliName(String? value) => Browser.values.singleWhere(
     (Browser element) => element.cliName == value,

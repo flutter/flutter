@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../impeller_test_helpers.dart';
+
 void main() {
   testWidgets('Color filter - red', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -29,6 +31,7 @@ void main() {
   });
 
   testWidgets('Color filter - sepia', (WidgetTester tester) async {
+
     const ColorFilter sepia = ColorFilter.matrix(<double>[
       0.39,  0.769, 0.189, 0, 0, //
       0.349, 0.686, 0.168, 0, 0, //
@@ -40,6 +43,7 @@ void main() {
         child: ColorFiltered(
           colorFilter: sepia,
           child: MaterialApp(
+            debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
             title: 'Flutter Demo',
             theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
             home: Scaffold(
@@ -63,7 +67,7 @@ void main() {
       find.byType(ColorFiltered),
       matchesGoldenFile('color_filter_sepia.png'),
     );
-  });
+  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
 
   testWidgets('Color filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithColor(Color color) async {
