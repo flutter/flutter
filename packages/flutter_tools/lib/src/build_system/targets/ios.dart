@@ -632,6 +632,7 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   @override
   List<Target> get dependencies => const <Target>[
     AotAssemblyProfile(),
+    InstallCodeAssets(),
   ];
 }
 
@@ -645,6 +646,7 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   @override
   List<Target> get dependencies => const <Target>[
     AotAssemblyRelease(),
+    InstallCodeAssets(),
   ];
 
   @override
