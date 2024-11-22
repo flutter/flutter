@@ -48,7 +48,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
 
   testWithoutContext('$testName: hot restart works without error', () async {
     flutter.stdout.listen(printOnFailure);
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
     await flutter.hotRestart();
   });
 
@@ -60,7 +60,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
         completer.complete();
       }
     });
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
@@ -78,7 +78,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
         completer.complete();
       }
     });
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=canvaskit']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();

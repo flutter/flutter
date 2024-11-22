@@ -360,37 +360,6 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  // Tests whether using a deprecated webRenderer toggles a warningText.
-  Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
-    testUsingContext('Using --web-renderer=${webRenderer.name} triggers a warningText.', () async {
-      // Run the command so it parses --web-renderer, but ignore all errors.
-      // We only care about the logger.
-      try {
-        final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
-        await createTestCommandRunner(buildCommand).run(<String>[
-          'build',
-          'web',
-          '--no-pub',
-          '--web-renderer=${webRenderer.name}',
-        ]);
-      } on ToolExit catch (error) {
-        expect(error, isA<ToolExit>());
-      }
-      expect(logger.warningText, contains(
-        'See: https://docs.flutter.dev/to/web-html-renderer-deprecation'
-      ));
-    }, overrides: <Type, Generator>{
-      Platform: () => fakePlatform,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Logger: () => logger,
-    });
-  }
-  /// Do test all the deprecated WebRendererModes
-  WebRendererMode.values
-    .where((WebRendererMode mode) => mode.isDeprecated)
-    .forEach(testWebRendererDeprecationMessage);
-
   testUsingContext('flutter build web option visibility', () async {
     final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
     createTestCommandRunner(buildCommand);

@@ -1007,50 +1007,6 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('throws a ToolExit when using the skwasm renderer without --wasm', () async {
-        final RunCommand command = RunCommand();
-        await expectLater(
-          () => createTestCommandRunner(command).run(<String>[
-            'run',
-            '--no-pub',
-            '--web-renderer=skwasm',
-          ]), throwsToolExit(message: 'Skwasm renderer requires --wasm'));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        DeviceManager: () => testDeviceManager,
-      });
-
-      // Tests whether using a deprecated webRenderer toggles a warningText.
-      Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
-        testUsingContext('Using --web-renderer=${webRenderer.name} triggers a warningText.', () async {
-          // Run the command so it parses --web-renderer, but ignore all errors.
-          // We only care about the logger.
-          try {
-            await createTestCommandRunner(RunCommand()).run(<String>[
-              'run',
-              '--no-pub',
-              '--web-renderer=${webRenderer.name}',
-            ]);
-          } on ToolExit catch (error) {
-            expect(error, isA<ToolExit>());
-          }
-          expect(logger.warningText, contains(
-            'See: https://docs.flutter.dev/to/web-html-renderer-deprecation'
-          ));
-        }, overrides: <Type, Generator>{
-          FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-          Logger: () => logger,
-          DeviceManager: () => testDeviceManager,
-        });
-      }
-      /// Do test all the deprecated WebRendererModes
-      WebRendererMode.values
-        .where((WebRendererMode mode) => mode.isDeprecated)
-        .forEach(testWebRendererDeprecationMessage);
-
       testUsingContext('accepts headers with commas in them', () async {
         final RunCommand command = RunCommand();
         await expectLater(
