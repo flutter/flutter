@@ -2907,16 +2907,19 @@ class _WidgetInspectorState extends State<WidgetInspector>
   }
 
   void _handlePanDown(DragDownDetails event) {
+    print('on pan down!');
     _lastPointerLocation = event.globalPosition;
     _inspectAt(event.globalPosition);
   }
 
   void _handlePanUpdate(DragUpdateDetails event) {
+    print('on pan update!');
     _lastPointerLocation = event.globalPosition;
     _inspectAt(event.globalPosition);
   }
 
   void _handlePanEnd(DragEndDetails details) {
+    print('on pan end!');
     // If the pan ends on the edge of the window assume that it indicates the
     // pointer is being dragged off the edge of the display not a regular touch
     // on the edge of the display. If the pointer is being dragged off the edge
@@ -2930,6 +2933,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
   }
 
   void _handleTap() {
+    print('on tap!');
     if (!isSelectMode) {
       return;
     }
