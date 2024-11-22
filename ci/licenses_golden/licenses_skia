@@ -1,4 +1,4 @@
-Signature: 5d6c620016c29cb2024caa0775f84da9
+Signature: 59342f4d7b5ab9509ab02179d966438f
 
 ====================================================================================================
 LIBRARY: etc1
@@ -400,6 +400,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
 FILE: ../../../flutter/third_party/skia/relnotes/GpuStats.md
+FILE: ../../../flutter/third_party/skia/relnotes/GraphiteLogPriority.md
 FILE: ../../../flutter/third_party/skia/relnotes/SkColorSpaceMakeCICP.md
 FILE: ../../../flutter/third_party/skia/relnotes/precompilecontext.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
@@ -9511,6 +9512,7 @@ ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/win/GrGLMakeWinI
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSemaphore.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSurface.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/GrMtlDirectContext.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/LogPriority.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/PrecompileContext.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/precompile/PaintOptions.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/precompile/Precompile.h + ../../../flutter/third_party/skia/LICENSE
@@ -9637,6 +9639,7 @@ FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/win/GrGLMakeWinInt
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSemaphore.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSurface.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/GrMtlDirectContext.h
+FILE: ../../../flutter/third_party/skia/include/gpu/graphite/LogPriority.h
 FILE: ../../../flutter/third_party/skia/include/gpu/graphite/PrecompileContext.h
 FILE: ../../../flutter/third_party/skia/include/gpu/graphite/precompile/PaintOptions.h
 FILE: ../../../flutter/third_party/skia/include/gpu/graphite/precompile/Precompile.h
