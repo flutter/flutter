@@ -266,49 +266,18 @@ https://docs.flutter.dev/testing/integration-tests
   Future<void> delayed(Duration duration) => Future<void>.delayed(duration);
 
   @override
-  Future<void> pump([Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate]) {
-    return TestAsyncUtils.guard<void>(() {
-      assert(inTest);
-      if (hasScheduledFrame) {
-        handleBeginFrame(Duration(
-          microseconds: clock.now().microsecondsSinceEpoch,
-        ));
-        handleDrawFrame();
-      }
-      return Future<void>.value();
-    });
+  Future<void> pump([Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate]) async {
+    if (duration != null) {
+      await delayed(duration);
+    }
+    scheduleFrame();
+    await endOfFrame;
   }
 
   @override
   Future<T?> runAsync<T>(Future<T> Function() callback) async {
-    assert(() {
-      if (!_runningAsyncTasks) {
-        return true;
-      }
-      fail(
-        'Reentrant call to runAsync() denied.\n'
-        'runAsync() was called, then before its future completed, it '
-        'was called again. You must wait for the first returned future '
-        'to complete before calling runAsync() again.'
-      );
-    }());
-
-    _runningAsyncTasks = true;
-    try {
-      return await callback();
-    } catch (error, stack) {
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: error,
-        stack: stack,
-        library: 'Flutter test framework',
-        context: ErrorSummary('while running async test code'),
-      ));
-      return null;
-    } finally {
-      _runningAsyncTasks = false;
-    }
+    return callback();
   }
-  bool _runningAsyncTasks = false;
 
   @override
   Clock get clock => const Clock();
