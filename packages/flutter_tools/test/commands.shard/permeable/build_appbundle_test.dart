@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -144,6 +145,49 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
+      AndroidBuilder: () => FakeAndroidBuilder(),
+      Analytics: () => fakeAnalytics,
+      ProcessInfo: () => processInfo,
+    });
+
+    testUsingContext('deferred components', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>[
+          '--empty',
+          '--no-pub',
+          '--template=app',
+        ],
+      );
+
+      // Add deferred manifest.
+      final File pubspec = globals.localFileSystem
+        .directory(projectPath)
+        .childFile('pubspec.yaml');
+      final String modifiedContents = pubspec
+        .readAsStringSync()
+        .replaceAll('flutter:', 'flutter:\n  deferred-components:');
+      pubspec.writeAsStringSync(modifiedContents);
+      printOnFailure(pubspec.readAsStringSync());
+
+      final Directory oldCwd = globals.localFileSystem.currentDirectory;
+      try {
+        globals.localFileSystem.currentDirectory = globals.localFileSystem.directory(projectPath);
+        await runBuildAppBundleCommand(projectPath);
+      } finally {
+        globals.localFileSystem.currentDirectory = oldCwd;
+      }
+
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.flutterBuildInfo(
+            label: 'build-appbundle-deferred-components',
+            buildType: 'android',
+          ),
+        ),
+      );
+    }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
       Analytics: () => fakeAnalytics,
       ProcessInfo: () => processInfo,
