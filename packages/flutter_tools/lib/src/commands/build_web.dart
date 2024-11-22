@@ -140,7 +140,7 @@ class BuildWebCommand extends BuildSubCommand {
         ? int.parse(dart2jsOptimizationLevelValue.substring(1))
         : optimizationLevel;
 
-    final String? webRendererString = null; // stringArg(FlutterOptions.kWebRendererFlag);
+    const String? webRendererString = null; // stringArg(FlutterOptions.kWebRendererFlag);
     final WebRendererMode? webRenderer = webRendererString == null
         ? null
         : WebRendererMode.values.byName(webRendererString);

@@ -31,7 +31,6 @@ import '../preview_device.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../reporting/unified_analytics.dart';
-import '../web/compile.dart';
 import 'flutter_command_runner.dart';
 import 'target_devices.dart';
 
