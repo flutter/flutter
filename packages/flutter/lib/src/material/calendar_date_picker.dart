@@ -43,7 +43,7 @@ const double _subHeaderHeight = 52.0;
 const double _monthNavButtonsWidth = 108.0;
 
 // 3.0 is the maximum scale factor on mobile phones. As of 07/30/24, iOS goes up
-// to a max of 3.0 text sxale factor, and Android goes up to 2.0. This is the
+// to a max of 3.0 text scale factor, and Android goes up to 2.0. This is the
 // default used for non-range date pickers. This default is changed to a lower
 // value at different parts of the date pickers depending on content, and device
 // orientation.

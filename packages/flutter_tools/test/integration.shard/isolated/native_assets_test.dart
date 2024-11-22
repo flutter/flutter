@@ -469,7 +469,7 @@ void expectCCompilerIsConfigured(Directory appDirectory) {
   for (final Directory subDir in nativeAssetsBuilderDir.listSync().whereType<Directory>()) {
     // We only want to look at build/link hook invocation directories. The
     // `/shared/*` directory allows the individual hooks to store data that is
-    // reusable across different build/link confiurations.
+    // reusable across different build/link configurations.
     if (subDir.path.endsWith('shared')) {
       continue;
     }

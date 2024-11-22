@@ -80,7 +80,7 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
   required Uri projectUri,
   required FileSystem fileSystem,
 }) async {
-  final OS targetOS = getNativeOSFromTargetPlatfrorm(targetPlatform);
+  final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   final Directory buildDir = fileSystem.directory(buildUri);
 
@@ -121,7 +121,7 @@ Future<void> installCodeAssets({
   required FileSystem fileSystem,
   required Uri nativeAssetsFileUri,
 }) async {
-  final OS targetOS = getNativeOSFromTargetPlatfrorm(targetPlatform);
+  final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   final bool flutterTester = targetPlatform == build_info.TargetPlatform.tester;
   final build_info.BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
@@ -155,7 +155,7 @@ Future<Uri?> runFlutterSpecificDartDryRunOnPlatforms({
     final bool flutterTester =
         targetPlatform == build_info.TargetPlatform.tester;
 
-    final OS targetOS = getNativeOSFromTargetPlatfrorm(targetPlatform);
+    final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
     if (targetOS != OS.macOS &&
         targetOS != OS.windows &&
         targetOS != OS.linux &&
@@ -181,7 +181,7 @@ Future<Uri?> runFlutterSpecificDartDryRunOnPlatforms({
 
   final Uri buildUri = targetPlatforms.length == 1
       ? nativeAssetsBuildUri(
-          projectUri, getNativeOSFromTargetPlatfrorm(targetPlatforms.single))
+          projectUri, getNativeOSFromTargetPlatform(targetPlatforms.single))
       : _buildUriMultiple(projectUri);
   final Uri nativeAssetsYamlUri = buildUri.resolve('native_assets.yaml');
   await _writeNativeAssetsYaml(
@@ -971,7 +971,7 @@ Never _throwNativeAssetsLinkFailed() {
   );
 }
 
-OS getNativeOSFromTargetPlatfrorm(build_info.TargetPlatform platform) {
+OS getNativeOSFromTargetPlatform(build_info.TargetPlatform platform) {
   switch (platform) {
     case build_info.TargetPlatform.ios:
       return OS.iOS;
