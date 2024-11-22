@@ -149,7 +149,7 @@ void main() {
       ProcessInfo: () => processInfo,
     });
 
-    testUsingContext('deferred components', () async {
+    testUsingContext('use of the deferred components feature sends a build info event indicating so', () async {
       final String projectPath = await createProject(
         tempDir,
         arguments: <String>[
