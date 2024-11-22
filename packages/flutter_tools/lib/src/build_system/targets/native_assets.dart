@@ -125,11 +125,6 @@ class DartBuildForNative extends DartBuild {
 /// The build mode and target architecture can be changed from the
 /// native build project (Xcode etc.), so only `flutter assemble` has the
 /// information about build-mode and target architecture.
-/// Invocations of flutter_tools other than `flutter assemble` are dry runs.
-///
-/// This step needs to be consistent with the dry run invocations in `flutter
-/// run`s so that the kernel mapping of asset id to dylib lines up after hot
-/// restart.
 class InstallCodeAssets extends Target {
   const InstallCodeAssets();
 
