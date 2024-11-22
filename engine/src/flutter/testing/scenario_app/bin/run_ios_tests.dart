@@ -64,7 +64,6 @@ void main(List<String> args) async {
       osRuntime: results.option('os-runtime')!,
       osVersion: results.option('os-version')!,
       withImpeller: results.flag('with-impeller'),
-      withSkia: results.flag('with-skia'),
       dumpXcresultOnFailure: dumpXcresultOnFailurePath,
     );
     completer.complete();
@@ -110,7 +109,6 @@ Future<void> _run(
   required String osRuntime,
   required String osVersion,
   required bool withImpeller,
-  required bool withSkia,
   required String? dumpXcresultOnFailure,
 }) async {
   // Terminate early on SIGINT.
@@ -134,45 +132,6 @@ Future<void> _run(
   );
 
   cleanup.add(() => _deleteIfPresent(resultBundle));
-
-  if (withSkia) {
-    io.stderr.writeln('Running simulator tests with Skia');
-    io.stderr.writeln();
-    final process = await _runTests(
-      outScenariosPath: scenarioPath,
-      resultBundlePath: resultBundle.path,
-      osVersion: osVersion,
-      deviceName: deviceName,
-      iosEngineVariant: iosEngineVariant,
-      xcodeBuildExtraArgs: [
-        // Plist with `FTEEnableImpeller=NO`; all projects in the workspace require this file.
-        // For example, `FlutterAppExtensionTestHost` has a dummy file under the below directory.
-        r'INFOPLIST_FILE=$(TARGET_NAME)/Info_Skia.plist',
-      ],
-    );
-    cleanup.add(process.kill);
-
-    // Create a temporary directory, if needed.
-    var storePath = dumpXcresultOnFailure;
-    if (storePath == null) {
-      final dumpDir = io.Directory.systemTemp.createTempSync();
-      storePath = dumpDir.path;
-      cleanup.add(() => dumpDir.delete(recursive: true));
-    }
-
-    if (await process.exitCode != 0) {
-      final String outputPath = _zipAndStoreFailedTestResults(
-        iosEngineVariant: iosEngineVariant,
-        resultBundle: resultBundle,
-        storePath: storePath,
-      );
-      io.stderr.writeln('Failed test results are stored at $outputPath');
-      throw _ToolFailure('test failed.');
-    } else {
-      io.stderr.writeln('test succcess.');
-    }
-    _deleteIfPresent(resultBundle);
-  }
 
   if (withImpeller) {
     final process = await _runTests(
@@ -247,15 +206,7 @@ final _args = ArgParser()
   )
   ..addFlag(
     'with-impeller',
-    help: 'Whether to use the Impeller backend to run the tests.\n\nCan be '
-        'combined with --with-skia to run the test suite with both backends.',
-    defaultsTo: true,
-  )
-  ..addFlag(
-    'with-skia',
-    help:
-        'Whether to use the Skia backend to run the tests.\n\nCan be combined '
-        'with --with-impeller to run the test suite with both backends.',
+    help: 'Whether to use the Impeller backend to run the tests.',
     defaultsTo: true,
   )
   ..addOption(
