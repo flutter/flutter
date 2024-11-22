@@ -136,6 +136,7 @@ void main() {
     );
 
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
+    environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
     // sksl bundle
     fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
       <String, Object>{
@@ -173,6 +174,7 @@ void main() {
     );
 
     environment.buildDir.childFile('app.so').createSync(recursive: true);
+    environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
     await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)).build(environment);
     await const ProfileBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
@@ -200,6 +202,7 @@ void main() {
     );
 
     environment.buildDir.childFile('app.so').createSync(recursive: true);
+    environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
     await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)).build(environment);
     await const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);

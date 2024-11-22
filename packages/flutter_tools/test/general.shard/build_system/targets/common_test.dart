@@ -431,27 +431,6 @@ native-assets:
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  for (final bool empty in <bool>[true, false]) {
-    final String testName = empty ? 'empty' : 'non empty';
-    testWithoutContext('KernelSnapshot native assets $testName', () async {
-      const List<int> programDillBytes = <int>[1, 2, 3, 4];
-      androidEnvironment.buildDir.childFile('app.dill')
-        ..createSync(recursive: true)
-        ..writeAsBytesSync(programDillBytes);
-      final List<int> nativeAssetsDillBytes = empty ? <int>[] : <int>[5, 6, 7, 8];
-      androidEnvironment.buildDir.childFile('native_assets.dill')
-        ..createSync(recursive: true)
-        ..writeAsBytesSync(nativeAssetsDillBytes);
-
-      await const KernelSnapshot().build(androidEnvironment);
-
-      expect(
-        androidEnvironment.buildDir.childFile('app.dill').readAsBytesSync(),
-        equals(<int>[...programDillBytes, ...nativeAssetsDillBytes]),
-      );
-    });
-  }
-
   testUsingContext('AotElfProfile Produces correct output directory', () async {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
@@ -471,6 +450,7 @@ native-assets:
       ]),
     ]);
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
+    androidEnvironment.buildDir.childFile('native_assets.json').createSync();
 
     await const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment);
 
@@ -499,6 +479,7 @@ native-assets:
       ]),
     ]);
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
+    androidEnvironment.buildDir.childFile('native_assets.json').createSync();
 
     await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
