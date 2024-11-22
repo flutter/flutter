@@ -500,13 +500,13 @@ TEST_F(ShellTest,
         // vsync mechanism. We should have better DI in the tests.
         const auto vsync_clock = std::make_shared<ShellTestVsyncClock>();
         return ShellTestPlatformView::Create(
-            shell, shell.GetTaskRunners(), vsync_clock,
+            ShellTestPlatformView::DefaultBackendType(), shell,
+            shell.GetTaskRunners(), vsync_clock,
             [task_runners = shell.GetTaskRunners()]() {
               return static_cast<std::unique_ptr<VsyncWaiter>>(
                   std::make_unique<VsyncWaiterFallback>(task_runners));
             },
-            ShellTestPlatformView::BackendType::kDefaultBackend, nullptr,
-            shell.GetIsGpuDisabledSyncSwitch());
+            nullptr, shell.GetIsGpuDisabledSyncSwitch());
       },
       [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
   ASSERT_TRUE(ValidateShell(shell.get()));

@@ -20,40 +20,44 @@ namespace flutter {
 namespace testing {
 
 std::unique_ptr<ShellTestPlatformView> ShellTestPlatformView::Create(
+    BackendType backend,
     PlatformView::Delegate& delegate,
     const TaskRunners& task_runners,
     const std::shared_ptr<ShellTestVsyncClock>& vsync_clock,
     const CreateVsyncWaiter& create_vsync_waiter,
-    BackendType backend,
     const std::shared_ptr<ShellTestExternalViewEmbedder>&
         shell_test_external_view_embedder,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch) {
   // TODO(gw280): https://github.com/flutter/flutter/issues/50298
   // Make this fully runtime configurable
   switch (backend) {
-    case BackendType::kDefaultBackend:
-#ifdef SHELL_ENABLE_GL
     case BackendType::kGLBackend:
+#ifdef SHELL_ENABLE_GL
       return std::make_unique<ShellTestPlatformViewGL>(
           delegate, task_runners, vsync_clock, create_vsync_waiter,
           shell_test_external_view_embedder);
+#else
+      FML_LOG(FATAL) << "OpenGL not enabled in this build";
+      return nullptr;
 #endif  // SHELL_ENABLE_GL
-#ifdef SHELL_ENABLE_VULKAN
     case BackendType::kVulkanBackend:
+#ifdef SHELL_ENABLE_VULKAN
       return std::make_unique<ShellTestPlatformViewVulkan>(
           delegate, task_runners, vsync_clock, create_vsync_waiter,
           shell_test_external_view_embedder);
+#else
+      FML_LOG(FATAL) << "Vulkan not enabled in this build";
+      return nullptr;
 #endif  // SHELL_ENABLE_VULKAN
-#ifdef SHELL_ENABLE_METAL
     case BackendType::kMetalBackend:
+#ifdef SHELL_ENABLE_METAL
       return std::make_unique<ShellTestPlatformViewMetal>(
           delegate, task_runners, vsync_clock, create_vsync_waiter,
           shell_test_external_view_embedder, is_gpu_disabled_sync_switch);
-#endif  // SHELL_ENABLE_METAL
-
-    default:
-      FML_LOG(FATAL) << "No backends supported for ShellTestPlatformView";
+#else
+      FML_LOG(FATAL) << "Metal not enabled in this build";
       return nullptr;
+#endif  // SHELL_ENABLE_METAL
   }
 }
 
@@ -76,11 +80,11 @@ std::unique_ptr<PlatformView> ShellTestPlatformViewBuilder::operator()(
     }
   };
   return ShellTestPlatformView::Create(
+      config_.rendering_backend,                  //
       shell,                                      //
       task_runners,                               //
       vsync_clock,                                //
       create_vsync_waiter,                        //
-      config_.rendering_backend,                  //
       config_.shell_test_external_view_embedder,  //
       shell.GetIsGpuDisabledSyncSwitch()          //
   );
