@@ -173,7 +173,7 @@ String generateDateFormattingLogic(Message message, LocaleInfo locale) {
           throw L10nException(
             'Date format "$placeholderFormat" for placeholder '
             '${placeholder.name} contains at least one invalid date format. '
-            'Ensure all date formats joined with "+" character have '
+            'Ensure all date formats joined by a "+" character have '
             'a corresponding DateFormat constructor.\n Check the intl '
             "library's DateFormat class constructors for allowed date formats."
           );
