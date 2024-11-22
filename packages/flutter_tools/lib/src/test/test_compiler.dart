@@ -15,7 +15,6 @@ import '../bundle.dart';
 import '../compile.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
-import '../native_assets.dart';
 import '../project.dart';
 import 'test_time_recorder.dart';
 
@@ -49,7 +48,6 @@ class TestCompiler {
     this.flutterProject, {
     String? precompiledDillPath,
     this.testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
         flutterProject!.directory.path,
         getBuildDirectory(),
@@ -59,8 +57,7 @@ class TestCompiler {
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         )),
-       shouldCopyDillFile = precompiledDillPath == null,
-       _nativeAssetsBuilder = nativeAssetsBuilder {
+        shouldCopyDillFile = precompiledDillPath == null {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -81,8 +78,6 @@ class TestCompiler {
   final String testFilePath;
   final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
-  final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
-
 
   ResidentCompiler? compiler;
   late File outputDill;

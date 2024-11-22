@@ -419,8 +419,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       webUseWasm: useWasm,
     );
 
-    final Uri? nativeAssetsYaml = await nativeAssetsBuilder?.build(buildInfo);
-    final Uri? nativeAssetsJson = nativeAssetsYaml?.resolve('native_assets.json');
+    final Uri? nativeAssetsJson = await nativeAssetsBuilder?.build(buildInfo);
     String? testAssetDirectory;
     if (buildTestAssets) {
       await _buildTestAsset(

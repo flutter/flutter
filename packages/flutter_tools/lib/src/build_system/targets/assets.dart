@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:pool/pool.dart';
 
 import '../../artifacts.dart';
@@ -23,8 +21,8 @@ import '../tools/asset_transformer.dart';
 import '../tools/scene_importer.dart';
 import '../tools/shader_compiler.dart';
 import 'common.dart';
-import 'native_assets.dart';
 import 'icon_tree_shaker.dart';
+import 'native_assets.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.

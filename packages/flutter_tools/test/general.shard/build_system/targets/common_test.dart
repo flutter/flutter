@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
-import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/compile.dart';
 
 import '../../../src/common.dart';
@@ -71,26 +70,6 @@ void main() {
       const KernelSnapshot().build(androidEnvironment),
       throwsA(isA<MissingDefineException>()));
   });
-
-  const String emptyNativeAssets = '''
-format-version:
-  - 1
-  - 0
-  - 0
-native-assets: {}
-''';
-
-  const String nonEmptyNativeAssets = '''
-format-version:
-  - 1
-  - 0
-  - 0
-native-assets:
-  macos_arm64:
-    package:my_package/my_package_bindings_generated.dart:
-      - absolute
-      - my_package.framework/my_package
-''';
 
   testWithoutContext('KernelSnapshot handles null result from kernel compilation', () async {
     fileSystem.file('.dart_tool/package_config.json')
