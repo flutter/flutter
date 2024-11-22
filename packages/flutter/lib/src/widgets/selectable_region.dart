@@ -27,7 +27,6 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'inherited_notifier.dart';
 import 'magnifier.dart';
 import 'media_query.dart';
 import 'overlay.dart';
@@ -1790,7 +1789,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
-    Widget result = SelectableRegionScope._(
+    Widget result = SelectableRegionSelectionStatusScope._(
       selectionStatusNotifier: _selectionStatusNotifier,
       child: SelectionContainer(
         registrar: this,
@@ -3159,7 +3158,7 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
 /// The status of the selection under a [SelectableRegion].
 ///
 /// This value can be accessed for a [SelectableRegion] by using
-/// [SelectableRegionScope.maybeOf].
+/// [SelectableRegionSelectionStatusScope.maybeOf].
 ///
 /// This value under a [SelectableRegion] is updated frequently
 /// during selection gestures such as clicks and taps to select
@@ -3189,7 +3188,7 @@ enum SelectableRegionSelectionStatus {
 /// is changing or finalizes its selection.
 ///
 /// To access the [_SelectableRegionSelectionStatusNotifier] from the nearest [SelectableRegion]
-/// ancestor, use [SelectableRegionScope.maybeOf].
+/// ancestor, use [SelectableRegionSelectionStatusScope.maybeOf].
 final class _SelectableRegionSelectionStatusNotifier extends ChangeNotifier implements ValueListenable<SelectableRegionSelectionStatus> {
   _SelectableRegionSelectionStatusNotifier._();
 
@@ -3215,15 +3214,22 @@ final class _SelectableRegionSelectionStatusNotifier extends ChangeNotifier impl
 /// Notifies its listeners when the selection under a [SelectableRegion] or
 /// [SelectionArea] is being changed or finalized.
 ///
-/// Use [SelectableRegionScope.maybeOf], to access the [ValueListenable] of type
+/// Use [SelectableRegionSelectionStatusScope.maybeOf], to access the [ValueListenable] of type
 /// [SelectableRegionSelectionStatus] under a [SelectableRegion]. Its listeners
 /// will be called even when the value of the [SelectableRegionSelectionStatus]
 /// does not change.
-final class SelectableRegionScope extends InheritedNotifier<ValueListenable<SelectableRegionSelectionStatus>> {
-  const SelectableRegionScope._({
-    required ValueListenable<SelectableRegionSelectionStatus> selectionStatusNotifier,
+final class SelectableRegionSelectionStatusScope extends InheritedWidget {
+  const SelectableRegionSelectionStatusScope._({
+    required this.selectionStatusNotifier,
     required super.child,
-  }) : super(notifier: selectionStatusNotifier);
+  });
+
+  /// Tracks updates to the [SelectableRegionSelectionStatus] of the owning
+  /// [SelectableRegion].
+  ///
+  /// Listeners will be called even when the value of the [SelectableRegionSelectionStatus]
+  /// does not change. The selection under the [SelectableRegion] still may have changed.
+  final ValueListenable<SelectableRegionSelectionStatus> selectionStatusNotifier;
 
   /// The closest instance of this class that encloses the given context.
   ///
@@ -3231,14 +3237,14 @@ final class SelectableRegionScope extends InheritedNotifier<ValueListenable<Sele
   /// returned.
   ///
   /// Calling this method will create a dependency on the closest
-  /// [SelectableRegionScope] in the [context], if there is one.
+  /// [SelectableRegionSelectionStatusScope] in the [context], if there is one.
   static ValueListenable<SelectableRegionSelectionStatus>? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<SelectableRegionScope>()?.notifier;
+    return context.dependOnInheritedWidgetOfExactType<SelectableRegionSelectionStatusScope>()?.selectionStatusNotifier;
   }
 
   @override
-  bool updateShouldNotify(SelectableRegionScope oldWidget) {
-    return notifier != oldWidget.notifier;
+  bool updateShouldNotify(SelectableRegionSelectionStatusScope oldWidget) {
+    return selectionStatusNotifier != oldWidget.selectionStatusNotifier;
   }
 }
 
@@ -3302,7 +3308,7 @@ class _SelectionListenerState extends State<SelectionListener> {
   void didUpdateWidget(SelectionListener oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selectionNotifier != widget.selectionNotifier) {
-      _selectionDelegate.setNotifier(widget.selectionNotifier);
+      _selectionDelegate._setNotifier(widget.selectionNotifier);
     }
   }
 
@@ -3325,29 +3331,20 @@ final class _SelectionListenerDelegate extends StaticSelectionContainerDelegate 
   _SelectionListenerDelegate({
     required SelectionListenerNotifier selectionNotifier,
   }) : _selectionNotifier = selectionNotifier {
-    assert(
-      !_selectionNotifier.registered,
-      'The SelectionListenerNotifier provided is already attached to another SelectionListener. Try providing a new SelectionListenerNotifier.',
-    );
-    _selectionNotifier._selectionDelegate = this;
+    _selectionNotifier._registerSelectionListenerDelegate(this);
   }
 
   SelectionListenerNotifier _selectionNotifier;
-  void setNotifier(SelectionListenerNotifier newNotifier) {
+  void _setNotifier(SelectionListenerNotifier newNotifier) {
+    _selectionNotifier._unregisterSelectionListenerDelegate();
     _selectionNotifier = newNotifier;
-    _selectionNotifier._selectionDelegate = this;
+    _selectionNotifier._registerSelectionListenerDelegate(this);
   }
 
-  SelectionGeometry? _previousSelectionGeometry;
-
   @override
-  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
-    final SelectionResult result = super.dispatchSelectionEvent(event);
-    if (_previousSelectionGeometry != value) {
-      _selectionNotifier.notifyListeners();
-      _previousSelectionGeometry = value;
-    }
-    return result;
+  void notifyListeners() {
+    super.notifyListeners();
+    _selectionNotifier.notifyListeners();
   }
 
   @override
@@ -3397,6 +3394,14 @@ final class SelectionListenerNotifier extends ChangeNotifier {
 
   /// Whether this [SelectionListenerNotifier] has been registered to a [SelectionListener].
   bool get registered => _selectionDelegate != null;
+
+  void _registerSelectionListenerDelegate(_SelectionListenerDelegate selectionDelegate) {
+    assert(
+      !registered,
+      'This SelectionListenerNotifier is already registered to another SelectionListener. Try providing a new SelectionListenerNotifier.',
+    );
+    _selectionDelegate = selectionDelegate;
+  }
 
   void _unregisterSelectionListenerDelegate() {
     _selectionDelegate = null;

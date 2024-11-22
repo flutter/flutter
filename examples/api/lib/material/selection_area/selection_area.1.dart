@@ -115,7 +115,7 @@ class _MySelectableTextState extends State<MySelectableText> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _selectableRegionScope?.removeListener(_handleOnSelectableRegionChanged);
-    _selectableRegionScope = SelectableRegionScope.maybeOf(context);
+    _selectableRegionScope = SelectableRegionSelectionStatusScope.maybeOf(context);
     _selectableRegionScope?.addListener(_handleOnSelectableRegionChanged);
   }
 

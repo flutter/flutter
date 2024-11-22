@@ -376,7 +376,7 @@ class _MySelectableTextColumnState extends State<MySelectableTextColumn> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _selectableRegionScope?.removeListener(_handleOnSelectableRegionChanged);
-    _selectableRegionScope = SelectableRegionScope.maybeOf(context);
+    _selectableRegionScope = SelectableRegionSelectionStatusScope.maybeOf(context);
     _selectableRegionScope?.addListener(_handleOnSelectableRegionChanged);
   }
 
