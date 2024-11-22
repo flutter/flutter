@@ -82,7 +82,7 @@ TEST_F(GoldenTests, ConicalGradient) {
                                 flutter::DlColor::RGBA(0, 0, 1, 1)};
   Scalar stops[2] = {0, 1};
 
-  paint.setColorSource(flutter::DlConicalGradientColorSource::MakeConical(
+  paint.setColorSource(flutter::DlColorSource::MakeConical(
       /*start_center=*/{125, 125},               //
       /*start_radius=*/125, {180, 180},          //
       /*end_radius=*/0,                          //

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_EFFECTS_DL_BLUR_IMAGE_FILTER_H_
-#define FLUTTER_DISPLAY_LIST_EFFECTS_DL_BLUR_IMAGE_FILTER_H_
+#ifndef FLUTTER_DISPLAY_LIST_EFFECTS_IMAGE_FILTERS_DL_BLUR_IMAGE_FILTER_H_
+#define FLUTTER_DISPLAY_LIST_EFFECTS_IMAGE_FILTERS_DL_BLUR_IMAGE_FILTER_H_
 
 #include "flutter/display_list/effects/dl_image_filter.h"
 
@@ -63,4 +63,4 @@ class DlBlurImageFilter final : public DlImageFilter {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_EFFECTS_DL_BLUR_IMAGE_FILTER_H_
+#endif  // FLUTTER_DISPLAY_LIST_EFFECTS_IMAGE_FILTERS_DL_BLUR_IMAGE_FILTER_H_

@@ -5,8 +5,7 @@
 #include "flutter/flow/layers/image_filter_layer.h"
 
 #include "flutter/display_list/dl_tile_mode.h"
-#include "flutter/display_list/effects/dl_blur_image_filter.h"
-#include "flutter/display_list/effects/dl_matrix_image_filter.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/flow/testing/diff_context_test.h"
@@ -84,7 +83,7 @@ TEST_F(ImageFilterLayerTest, SimpleFilter) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
-  auto dl_image_filter = DlMatrixImageFilter::Make(
+  auto dl_image_filter = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({1.0, 2.0}), DlImageSampling::kMipmapLinear);
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ImageFilterLayer>(dl_image_filter);
@@ -125,7 +124,7 @@ TEST_F(ImageFilterLayerTest, SimpleFilterWithOffset) {
   const SkPath child_path = SkPath().addRect(child_bounds);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
   const SkPoint layer_offset = SkPoint::Make(5.5, 6.5);
-  auto dl_image_filter = DlMatrixImageFilter::Make(
+  auto dl_image_filter = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({1.0, 2.0}), DlImageSampling::kMipmapLinear);
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer =
@@ -177,7 +176,7 @@ TEST_F(ImageFilterLayerTest, SimpleFilterBounds) {
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
   const DlMatrix filter_transform = DlMatrix::MakeScale({2.0, 2.0, 1});
 
-  auto dl_image_filter = DlMatrixImageFilter::Make(
+  auto dl_image_filter = DlImageFilter::MakeMatrix(
       filter_transform, DlImageSampling::kMipmapLinear);
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ImageFilterLayer>(dl_image_filter);
@@ -218,7 +217,7 @@ TEST_F(ImageFilterLayerTest, MultipleChildren) {
       SkPath().addRect(child_bounds.makeOffset(3.0f, 0.0f));
   const DlPaint child_paint1 = DlPaint(DlColor::kYellow());
   const DlPaint child_paint2 = DlPaint(DlColor::kCyan());
-  auto dl_image_filter = DlMatrixImageFilter::Make(
+  auto dl_image_filter = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({1.0, 2.0}), DlImageSampling::kMipmapLinear);
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
@@ -272,9 +271,9 @@ TEST_F(ImageFilterLayerTest, Nested) {
       SkPath().addRect(child_bounds.makeOffset(3.0f, 0.0f));
   const DlPaint child_paint1 = DlPaint(DlColor::kYellow());
   const DlPaint child_paint2 = DlPaint(DlColor::kCyan());
-  auto dl_image_filter1 = DlMatrixImageFilter::Make(
+  auto dl_image_filter1 = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({1.0, 2.0}), DlImageSampling::kMipmapLinear);
-  auto dl_image_filter2 = DlMatrixImageFilter::Make(
+  auto dl_image_filter2 = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({3.0, 4.0}), DlImageSampling::kMipmapLinear);
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
@@ -345,7 +344,7 @@ TEST_F(ImageFilterLayerTest, Nested) {
 }
 
 TEST_F(ImageFilterLayerTest, Readback) {
-  auto dl_image_filter = DlMatrixImageFilter::Make(
+  auto dl_image_filter = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({1.0, 2.0}), DlImageSampling::kLinear);
 
   // ImageFilterLayer does not read from surface
@@ -364,7 +363,7 @@ TEST_F(ImageFilterLayerTest, Readback) {
 }
 
 TEST_F(ImageFilterLayerTest, CacheChild) {
-  auto dl_image_filter = DlMatrixImageFilter::Make(
+  auto dl_image_filter = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({1.0, 2.0}), DlImageSampling::kMipmapLinear);
   auto initial_transform = SkMatrix::Translate(50.0, 25.5);
   auto other_transform = SkMatrix::Scale(1.0, 2.0);
@@ -408,7 +407,7 @@ TEST_F(ImageFilterLayerTest, CacheChild) {
 }
 
 TEST_F(ImageFilterLayerTest, CacheChildren) {
-  auto dl_image_filter = DlMatrixImageFilter::Make(
+  auto dl_image_filter = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({1.0, 2.0}), DlImageSampling::kMipmapLinear);
   auto initial_transform = SkMatrix::Translate(50.0, 25.5);
   auto other_transform = SkMatrix::Scale(1.0, 2.0);
@@ -489,7 +488,7 @@ TEST_F(ImageFilterLayerTest, CacheChildren) {
 }
 
 TEST_F(ImageFilterLayerTest, CacheImageFilterLayerSelf) {
-  auto dl_image_filter = DlMatrixImageFilter::Make(
+  auto dl_image_filter = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({1.0, 2.0}), DlImageSampling::kMipmapLinear);
 
   auto initial_transform = SkMatrix::Translate(50.0, 25.5);
@@ -591,7 +590,7 @@ TEST_F(ImageFilterLayerTest, OpacityInheritance) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
-  auto dl_image_filter = DlMatrixImageFilter::Make(
+  auto dl_image_filter = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({1.0, 2.0}), DlImageSampling::kMipmapLinear);
 
   // The mock_layer child will not be compatible with opacity
@@ -644,7 +643,7 @@ TEST_F(ImageFilterLayerTest, OpacityInheritance) {
 using ImageFilterLayerDiffTest = DiffContextTest;
 
 TEST_F(ImageFilterLayerDiffTest, ImageFilterLayer) {
-  auto dl_blur_filter = DlBlurImageFilter::Make(10, 10, DlTileMode::kClamp);
+  auto dl_blur_filter = DlImageFilter::MakeBlur(10, 10, DlTileMode::kClamp);
   {
     // tests later assume 30px paint area, fail early if that's not the case
     DlIRect input_bounds;
@@ -690,7 +689,7 @@ TEST_F(ImageFilterLayerDiffTest, ImageFilterLayer) {
 }
 
 TEST_F(ImageFilterLayerDiffTest, ImageFilterLayerInflatestChildSize) {
-  auto dl_blur_filter = DlBlurImageFilter::Make(10, 10, DlTileMode::kClamp);
+  auto dl_blur_filter = DlImageFilter::MakeBlur(10, 10, DlTileMode::kClamp);
 
   {
     // tests later assume 30px paint area, fail early if that's not the case

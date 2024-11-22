@@ -514,7 +514,7 @@ TEST_F(DisplayListTest, BuildRestoresAttributes) {
   builder.Build();
   check_defaults(builder, cull_rect);
 
-  receiver.setColorSource(&kTestSource1);
+  receiver.setColorSource(kTestSource1.get());
   builder.Build();
   check_defaults(builder, cull_rect);
 
@@ -596,7 +596,7 @@ TEST_F(DisplayListTest, UnclippedSaveLayerContentAccountsForFilter) {
   SkRect cull_rect = SkRect::MakeLTRB(0.0f, 0.0f, 300.0f, 300.0f);
   SkRect clip_rect = SkRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
   SkRect draw_rect = SkRect::MakeLTRB(50.0f, 140.0f, 101.0f, 160.0f);
-  auto filter = DlBlurImageFilter::Make(10.0f, 10.0f, DlTileMode::kDecal);
+  auto filter = DlImageFilter::MakeBlur(10.0f, 10.0f, DlTileMode::kDecal);
   DlPaint layer_paint = DlPaint().setImageFilter(filter);
 
   ASSERT_TRUE(clip_rect.intersects(draw_rect));
@@ -629,7 +629,7 @@ TEST_F(DisplayListTest, ClippedSaveLayerContentAccountsForFilter) {
   SkRect cull_rect = SkRect::MakeLTRB(0.0f, 0.0f, 300.0f, 300.0f);
   SkRect clip_rect = SkRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
   SkRect draw_rect = SkRect::MakeLTRB(50.0f, 140.0f, 99.0f, 160.0f);
-  auto filter = DlBlurImageFilter::Make(10.0f, 10.0f, DlTileMode::kDecal);
+  auto filter = DlImageFilter::MakeBlur(10.0f, 10.0f, DlTileMode::kDecal);
   DlPaint layer_paint = DlPaint().setImageFilter(filter);
 
   ASSERT_FALSE(clip_rect.intersects(draw_rect));
@@ -661,7 +661,7 @@ TEST_F(DisplayListTest, ClippedSaveLayerContentAccountsForFilter) {
 TEST_F(DisplayListTest, OOBSaveLayerContentCulledWithBlurFilter) {
   DlRect cull_rect = DlRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
   DlRect draw_rect = DlRect::MakeLTRB(25.0f, 25.0f, 99.0f, 75.0f);
-  auto filter = DlBlurImageFilter::Make(10.0f, 10.0f, DlTileMode::kDecal);
+  auto filter = DlImageFilter::MakeBlur(10.0f, 10.0f, DlTileMode::kDecal);
   DlPaint layer_paint = DlPaint().setImageFilter(filter);
 
   // We want a draw rect that is outside the layer bounds even though its
@@ -690,7 +690,7 @@ TEST_F(DisplayListTest, OOBSaveLayerContentCulledWithBlurFilter) {
 TEST_F(DisplayListTest, OOBSaveLayerContentCulledWithMatrixFilter) {
   DlRect cull_rect = DlRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
   DlRect draw_rect = DlRect::MakeLTRB(25.0f, 125.0f, 75.0f, 175.0f);
-  auto filter = DlMatrixImageFilter::Make(
+  auto filter = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({100.0f, 0.0f}), DlImageSampling::kLinear);
   DlPaint layer_paint = DlPaint().setImageFilter(filter);
 
@@ -3762,7 +3762,7 @@ TEST_F(DisplayListTest, SaveLayerBoundsComputationOfMaskBlurredRect) {
 TEST_F(DisplayListTest, SaveLayerBoundsComputationOfImageBlurredRect) {
   SkRect rect = SkRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
   DlPaint draw_paint;
-  auto image_filter = DlBlurImageFilter::Make(2.0f, 3.0f, DlTileMode::kDecal);
+  auto image_filter = DlImageFilter::MakeBlur(2.0f, 3.0f, DlTileMode::kDecal);
   draw_paint.setImageFilter(image_filter);
 
   DisplayListBuilder builder;
@@ -4018,7 +4018,7 @@ TEST_F(DisplayListTest, SaveLayerBoundsComputationOfFloodingImageFilter) {
   auto color_filter =
       DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kSrc);
   ASSERT_TRUE(color_filter->modifies_transparent_black());
-  auto image_filter = DlColorFilterImageFilter::Make(color_filter);
+  auto image_filter = DlImageFilter::MakeColorFilter(color_filter);
   draw_paint.setImageFilter(image_filter);
   SkRect clip_rect = rect.makeOutset(100.0f, 100.0f);
   ASSERT_NE(clip_rect, rect);
@@ -4234,7 +4234,7 @@ TEST_F(DisplayListTest, FloodingFilteredLayerPushesRestoreOpIndex) {
   };
   // clang-format on
   auto color_filter = DlMatrixColorFilter::Make(matrix);
-  save_paint.setImageFilter(DlColorFilterImageFilter::Make(color_filter));
+  save_paint.setImageFilter(DlImageFilter::MakeColorFilter(color_filter));
   builder.SaveLayer(nullptr, &save_paint);
   int save_layer_id = DisplayListBuilderTestingLastOpIndex(builder);
 
@@ -4259,7 +4259,7 @@ TEST_F(DisplayListTest, TransformingFilterSaveLayerSimpleContentBounds) {
 
   DlPaint save_paint;
   auto image_filter =
-      DlMatrixImageFilter::Make(DlMatrix::MakeTranslation({100.0f, 100.0f}),
+      DlImageFilter::MakeMatrix(DlMatrix::MakeTranslation({100.0f, 100.0f}),
                                 DlImageSampling::kNearestNeighbor);
   save_paint.setImageFilter(image_filter);
   builder.SaveLayer(nullptr, &save_paint);
@@ -4278,7 +4278,7 @@ TEST_F(DisplayListTest, TransformingFilterSaveLayerFloodedContentBounds) {
 
   DlPaint save_paint;
   auto image_filter =
-      DlMatrixImageFilter::Make(DlMatrix::MakeTranslation({100.0f, 100.0f}),
+      DlImageFilter::MakeMatrix(DlMatrix::MakeTranslation({100.0f, 100.0f}),
                                 DlImageSampling::kNearestNeighbor);
   save_paint.setImageFilter(image_filter);
   builder.SaveLayer(nullptr, &save_paint);
@@ -5080,7 +5080,7 @@ TEST_F(DisplayListTest, RecordLargeVertices) {
   auto vertices = DlVertices::Make(DlVertexMode::kTriangleStrip, vertex_count,
                                    points.data(), points.data(), colors.data());
   ASSERT_GT(vertices->size(), 1u << 24);
-  auto backdrop = DlBlurImageFilter::Make(5.0f, 5.0f, DlTileMode::kDecal);
+  auto backdrop = DlImageFilter::MakeBlur(5.0f, 5.0f, DlTileMode::kDecal);
 
   for (int i = 0; i < 1000; i++) {
     DisplayListBuilder builder;
@@ -5820,7 +5820,7 @@ TEST_F(DisplayListTest, UnboundedRenderOpsAreReportedUnlessClipped) {
     auto unbounded_cf = DlMatrixColorFilter::Make(matrix);
     // ColorFilter must modify transparent black to be "unbounded"
     ASSERT_TRUE(unbounded_cf->modifies_transparent_black());
-    auto unbounded_if = DlColorFilterImageFilter::Make(unbounded_cf);
+    auto unbounded_if = DlImageFilter::MakeColorFilter(unbounded_cf);
     DlRect output_bounds;
     // ImageFilter returns null from bounds queries if it is "unbounded"
     ASSERT_EQ(unbounded_if->map_local_bounds(draw_rect, output_bounds),
@@ -5832,7 +5832,7 @@ TEST_F(DisplayListTest, UnboundedRenderOpsAreReportedUnlessClipped) {
   test_unbounded(
       "SaveLayerWithBackdropFilter",
       [](DlCanvas& builder) {
-        auto filter = DlBlurImageFilter::Make(3.0f, 3.0f, DlTileMode::kMirror);
+        auto filter = DlImageFilter::MakeBlur(3.0f, 3.0f, DlTileMode::kMirror);
         builder.SaveLayer(nullptr, nullptr, filter.get());
         builder.Restore();
       },
@@ -5847,7 +5847,7 @@ TEST_F(DisplayListTest, BackdropFilterCulledAlongsideClipAndTransform) {
   SkRect draw_rect1 = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
   SkRect draw_rect2 = SkRect::MakeLTRB(45.0f, 20.0f, 55.0f, 55.0f);
   SkRect cull_rect = SkRect::MakeLTRB(1.0f, 1.0f, 99.0f, 30.0f);
-  auto bdf_filter = DlBlurImageFilter::Make(5.0f, 5.0f, DlTileMode::kClamp);
+  auto bdf_filter = DlImageFilter::MakeBlur(5.0f, 5.0f, DlTileMode::kClamp);
 
   ASSERT_TRUE(frame_bounds.contains(clip_rect));
   ASSERT_TRUE(frame_bounds.contains(draw_rect1));

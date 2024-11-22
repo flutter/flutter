@@ -7,9 +7,8 @@
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/dl_vertices.h"
-#include "flutter/display_list/effects/dl_blur_image_filter.h"
-#include "flutter/display_list/effects/dl_color_source.h"
-#include "flutter/display_list/effects/dl_local_matrix_image_filter.h"
+#include "flutter/display_list/effects/dl_color_sources.h"
+#include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -20,7 +19,7 @@ namespace flutter {
 namespace testing {
 
 TEST(DisplayListImageFilter, LocalImageSkiaNull) {
-  auto blur_filter = DlBlurImageFilter::Make(0, 0, DlTileMode::kClamp);
+  auto blur_filter = DlImageFilter::MakeBlur(0, 0, DlTileMode::kClamp);
   DlLocalMatrixImageFilter dl_local_matrix_filter(
       DlMatrix::MakeRotationZ(DlDegrees(45)), blur_filter);
   // With sigmas set to zero on the blur filter, Skia will return a null filter.
@@ -231,15 +230,12 @@ TEST(DisplayListColorSource, ConvertRuntimeEffect) {
       SkRuntimeEffect::MakeForShader(
           SkString("vec4 main(vec2 p) { return vec4(1); }"))
           .effect);
-  std::shared_ptr<DlRuntimeEffectColorSource> source1 =
-      DlColorSource::MakeRuntimeEffect(
-          kTestRuntimeEffect1, {}, std::make_shared<std::vector<uint8_t>>());
-  std::shared_ptr<DlRuntimeEffectColorSource> source2 =
-      DlColorSource::MakeRuntimeEffect(
-          kTestRuntimeEffect2, {}, std::make_shared<std::vector<uint8_t>>());
-  std::shared_ptr<DlRuntimeEffectColorSource> source3 =
-      DlColorSource::MakeRuntimeEffect(
-          nullptr, {}, std::make_shared<std::vector<uint8_t>>());
+  std::shared_ptr<DlColorSource> source1 = DlColorSource::MakeRuntimeEffect(
+      kTestRuntimeEffect1, {}, std::make_shared<std::vector<uint8_t>>());
+  std::shared_ptr<DlColorSource> source2 = DlColorSource::MakeRuntimeEffect(
+      kTestRuntimeEffect2, {}, std::make_shared<std::vector<uint8_t>>());
+  std::shared_ptr<DlColorSource> source3 = DlColorSource::MakeRuntimeEffect(
+      nullptr, {}, std::make_shared<std::vector<uint8_t>>());
 
   ASSERT_NE(ToSk(source1), nullptr);
   ASSERT_NE(ToSk(source2), nullptr);
@@ -251,10 +247,8 @@ TEST(DisplayListColorSource, ConvertRuntimeEffectWithNullSampler) {
       SkRuntimeEffect::MakeForShader(
           SkString("vec4 main(vec2 p) { return vec4(0); }"))
           .effect);
-  std::shared_ptr<DlRuntimeEffectColorSource> source1 =
-      DlColorSource::MakeRuntimeEffect(
-          kTestRuntimeEffect1, {nullptr},
-          std::make_shared<std::vector<uint8_t>>());
+  std::shared_ptr<DlColorSource> source1 = DlColorSource::MakeRuntimeEffect(
+      kTestRuntimeEffect1, {nullptr}, std::make_shared<std::vector<uint8_t>>());
 
   ASSERT_EQ(ToSk(source1), nullptr);
 }
@@ -306,9 +300,8 @@ TEST(DisplayListSkConversions, ToSkDitheringEnabledForGradients) {
   DlPaint dl_paint;
 
   // Set the paint to be a gradient.
-  dl_paint.setColorSource(DlColorSource::MakeLinear(SkPoint::Make(0, 0),
-                                                    SkPoint::Make(100, 100), 0,
-                                                    0, 0, DlTileMode::kClamp));
+  dl_paint.setColorSource(DlColorSource::MakeLinear(
+      DlPoint(0, 0), DlPoint(100, 100), 0, 0, 0, DlTileMode::kClamp));
 
   {
     SkPaint sk_paint = ToSk(dl_paint);

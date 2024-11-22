@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/display_list/effects/dl_erode_image_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_erode_image_filter.h"
 
 namespace flutter {
 

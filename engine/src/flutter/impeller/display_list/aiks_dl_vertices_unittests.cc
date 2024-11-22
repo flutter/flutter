@@ -52,8 +52,8 @@ TEST_P(AiksTest, VerticesGeometryUVPositionData) {
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
   auto size = image->impeller_texture()->GetSize();
 
-  paint.setColorSource(std::make_shared<DlImageColorSource>(
-      image, DlTileMode::kClamp, DlTileMode::kClamp));
+  paint.setColorSource(
+      DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
 
   std::vector<SkPoint> vertex_coordinates = {SkPoint::Make(0, 0),
                                              SkPoint::Make(size.width, 0),
@@ -73,12 +73,10 @@ TEST_P(AiksTest, VerticesGeometryUVPositionDataWithTranslate) {
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
   auto size = image->impeller_texture()->GetSize();
 
-  SkMatrix matrix;
-  matrix.setTranslateX(100);
-  matrix.setTranslateY(100);
-  paint.setColorSource(std::make_shared<DlImageColorSource>(
-      image, DlTileMode::kClamp, DlTileMode::kClamp, DlImageSampling::kLinear,
-      &matrix));
+  DlMatrix matrix = DlMatrix::MakeTranslation({100, 100});
+  paint.setColorSource(
+      DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp,
+                               DlImageSampling::kLinear, &matrix));
 
   std::vector<SkPoint> positions = {SkPoint::Make(0, 0),
                                     SkPoint::Make(size.width, 0),
@@ -98,8 +96,8 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionData) {
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
   auto size = image->impeller_texture()->GetSize();
 
-  paint.setColorSource(std::make_shared<DlImageColorSource>(
-      image, DlTileMode::kClamp, DlTileMode::kClamp));
+  paint.setColorSource(
+      DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
 
   std::vector<SkPoint> positions = {
       SkPoint::Make(0, 0),           SkPoint::Make(size.width, 0),
@@ -126,8 +124,8 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlend) {
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
   auto size = image->impeller_texture()->GetSize();
 
-  paint.setColorSource(std::make_shared<DlImageColorSource>(
-      image, DlTileMode::kClamp, DlTileMode::kClamp));
+  paint.setColorSource(
+      DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
 
   std::vector<SkPoint> positions = {
       SkPoint::Make(0, 0),           SkPoint::Make(size.width, 0),
@@ -273,10 +271,10 @@ TEST_P(AiksTest, DrawVerticesImageSourceWithTextureCoordinates) {
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
 
-  auto image_source = flutter::DlImageColorSource(
+  auto image_source = flutter::DlColorSource::MakeImage(
       dl_image, flutter::DlTileMode::kRepeat, flutter::DlTileMode::kRepeat);
 
-  paint.setColorSource(&image_source);
+  paint.setColorSource(image_source);
   builder.DrawVertices(vertices, flutter::DlBlendMode::kSrcOver, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -302,10 +300,10 @@ TEST_P(AiksTest,
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
 
-  auto image_source = flutter::DlImageColorSource(
+  auto image_source = flutter::DlColorSource::MakeImage(
       dl_image, flutter::DlTileMode::kRepeat, flutter::DlTileMode::kRepeat);
 
-  paint.setColorSource(&image_source);
+  paint.setColorSource(image_source);
   builder.DrawVertices(vertices, flutter::DlBlendMode::kModulate, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));

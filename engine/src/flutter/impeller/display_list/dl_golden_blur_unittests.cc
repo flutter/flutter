@@ -5,7 +5,6 @@
 #include "impeller/display_list/dl_golden_unittests.h"
 
 #include "flutter/display_list/dl_builder.h"
-#include "flutter/display_list/effects/dl_blur_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
 #include "flutter/impeller/geometry/round_rect.h"
 #include "flutter/impeller/golden_tests/screenshot.h"
@@ -166,9 +165,9 @@ TEST_P(DlGoldenTest, ShimmerTest) {
                       DlImageSampling::kLinear, &paint);
 
     SkRect save_layer_bounds = SkRect::MakeLTRB(0, 0, 1024, 768);
-    DlBlurImageFilter blur(sigma, sigma, DlTileMode::kDecal);
+    auto blur = DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kDecal);
     canvas->ClipRect(SkRect::MakeLTRB(11.125, 10.3737, 911.25, 755.3333));
-    canvas->SaveLayer(&save_layer_bounds, /*paint=*/nullptr, &blur);
+    canvas->SaveLayer(&save_layer_bounds, /*paint=*/nullptr, blur.get());
     canvas->Restore();
   };
 

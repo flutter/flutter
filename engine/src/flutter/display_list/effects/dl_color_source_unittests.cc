@@ -7,7 +7,7 @@
 
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_sampling_options.h"
-#include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_runtime_effect.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/display_list/testing/dl_test_equality.h"
@@ -47,14 +47,16 @@ static const sk_sp<DlImage> kTestImage1 = MakeTestImage(10, 10, SK_ColorGREEN);
 static const sk_sp<DlImage> kTestAlphaImage1 =
     MakeTestImage(10, 10, SK_ColorTRANSPARENT);
 // clang-format off
-static const SkMatrix kTestMatrix1 =
-    SkMatrix::MakeAll(2, 0, 10,
-                      0, 3, 12,
-                      0, 0, 1);
-static const SkMatrix kTestMatrix2 =
-    SkMatrix::MakeAll(4, 0, 15,
-                      0, 7, 17,
-                      0, 0, 1);
+static const DlMatrix kTestMatrix1 =
+    DlMatrix::MakeRow(2, 0, 0, 10,
+                      0, 3, 0, 12,
+                      0, 0, 1, 0,
+                      0, 0, 0, 1);
+static const DlMatrix kTestMatrix2 =
+    DlMatrix::MakeRow(4, 0, 0, 15,
+                      0, 7, 0, 17,
+                      0, 0, 1, 0,
+                      0, 0, 0, 1);
 // clang-format on
 static constexpr int kTestStopCount = 3;
 static constexpr DlColor kTestColors[kTestStopCount] = {
@@ -77,13 +79,13 @@ static constexpr float kTestStops2[kTestStopCount] = {
     0.3f,
     1.0f,
 };
-static constexpr SkPoint kTestPoints[2] = {
-    SkPoint::Make(5, 15),
-    SkPoint::Make(7, 18),
+static constexpr DlPoint kTestPoints[2] = {
+    DlPoint(5, 15),
+    DlPoint(7, 18),
 };
-static constexpr SkPoint kTestPoints2[2] = {
-    SkPoint::Make(100, 115),
-    SkPoint::Make(107, 118),
+static constexpr DlPoint kTestPoints2[2] = {
+    DlPoint(100, 115),
+    DlPoint(107, 118),
 };
 
 TEST(DisplayListColorSource, ColorConstructor) {
@@ -729,15 +731,12 @@ TEST(DisplayListColorSource, SweepGradientNotEquals) {
 }
 
 TEST(DisplayListColorSource, RuntimeEffect) {
-  std::shared_ptr<DlRuntimeEffectColorSource> source1 =
-      DlColorSource::MakeRuntimeEffect(
-          kTestRuntimeEffect1, {}, std::make_shared<std::vector<uint8_t>>());
-  std::shared_ptr<DlRuntimeEffectColorSource> source2 =
-      DlColorSource::MakeRuntimeEffect(
-          kTestRuntimeEffect2, {}, std::make_shared<std::vector<uint8_t>>());
-  std::shared_ptr<DlRuntimeEffectColorSource> source3 =
-      DlColorSource::MakeRuntimeEffect(
-          nullptr, {}, std::make_shared<std::vector<uint8_t>>());
+  std::shared_ptr<DlColorSource> source1 = DlColorSource::MakeRuntimeEffect(
+      kTestRuntimeEffect1, {}, std::make_shared<std::vector<uint8_t>>());
+  std::shared_ptr<DlColorSource> source2 = DlColorSource::MakeRuntimeEffect(
+      kTestRuntimeEffect2, {}, std::make_shared<std::vector<uint8_t>>());
+  std::shared_ptr<DlColorSource> source3 = DlColorSource::MakeRuntimeEffect(
+      nullptr, {}, std::make_shared<std::vector<uint8_t>>());
 
   ASSERT_EQ(source1->type(), DlColorSourceType::kRuntimeEffect);
   ASSERT_EQ(source1->asRuntimeEffect(), source1.get());
