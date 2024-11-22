@@ -4752,21 +4752,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     // Parent data changes may result in node formation changes.
     markNeedsBuild();
     parentData = newParentData;
-
-    final Set<SemanticsTag>? tags = newParentData.tagsForChildren;
-    if (tags != null) {
-      assert(tags.isNotEmpty);
-      configProvider.updateConfig((SemanticsConfiguration config) {
-        tags.forEach(config.addTagForChildren);
-      });
-    }
-
-    final bool effectiveBlocksUserAction = newParentData.blocksUserActions || configProvider.original.isBlockingUserActions;
-    if (effectiveBlocksUserAction != configProvider.effective.isBlockingUserActions) {
-      configProvider.updateConfig((SemanticsConfiguration config) {
-        config.isBlockingUserActions = effectiveBlocksUserAction;
-      });
-    }
     updateChildren();
   }
 
@@ -4789,6 +4774,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final bool hasChildConfigurationsDelegate = childConfigurationsDelegate != null;
     final Map<SemanticsConfiguration, _SemanticsFragment> configToFragment = <SemanticsConfiguration, _SemanticsFragment>{};
     final List<_SemanticsFragment> children = <_SemanticsFragment>[];
+    final bool blocksUserAction = (parentData?.blocksUserActions ?? false) || configProvider.effective.isBlockingUserActions;
     siblingMergeGroups.clear();
     _childrenAndElevationAdjustments.clear();
     mergeUp.clear();
@@ -4796,7 +4782,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       assert(!childSemantics.renderObject._needsLayout);
       final _SemanticsParentData childParentData = _SemanticsParentData(
         mergeIntoParent: (parentData?.mergeIntoParent ?? false) || configProvider.effective.isMergingSemanticsOfDescendants,
-        blocksUserActions: (parentData?.blocksUserActions ?? false) || configProvider.effective.isBlockingUserActions,
+        blocksUserActions: blocksUserAction,
         explicitChildNodes: explicitChildNodesForChildren,
         tagsForChildren: tagsForChildren,
       );
@@ -4863,6 +4849,20 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
         }
       }
+    }
+
+    final Set<SemanticsTag>? tags = parentData?.tagsForChildren;
+    if (tags != null) {
+      assert(tags.isNotEmpty);
+      configProvider.updateConfig((SemanticsConfiguration config) {
+        tags.forEach(config.addTagForChildren);
+      });
+    }
+
+    if (blocksUserAction != configProvider.effective.isBlockingUserActions) {
+      configProvider.updateConfig((SemanticsConfiguration config) {
+        config.isBlockingUserActions = blocksUserAction;
+      });
     }
   }
 
