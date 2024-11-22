@@ -23,8 +23,20 @@
 #include "flutter/vulkan/swiftshader_path.h"
 #endif
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
+
+std::unique_ptr<ShellTestPlatformView> ShellTestPlatformView::CreateVulkan(
+    PlatformView::Delegate& delegate,
+    const TaskRunners& task_runners,
+    const std::shared_ptr<ShellTestVsyncClock>& vsync_clock,
+    const CreateVsyncWaiter& create_vsync_waiter,
+    const std::shared_ptr<ShellTestExternalViewEmbedder>&
+        shell_test_external_view_embedder,
+    const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch) {
+  return std::make_unique<ShellTestPlatformViewVulkan>(
+      delegate, task_runners, vsync_clock, create_vsync_waiter,
+      shell_test_external_view_embedder);
+}
 
 ShellTestPlatformViewVulkan::ShellTestPlatformViewVulkan(
     PlatformView::Delegate& delegate,
@@ -232,5 +244,4 @@ SkMatrix ShellTestPlatformViewVulkan::OffScreenSurface::GetRootTransformation()
   return matrix;
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
