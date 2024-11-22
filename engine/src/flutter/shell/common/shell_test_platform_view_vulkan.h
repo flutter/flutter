@@ -15,8 +15,7 @@
 #include "third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h"
 #include "third_party/skia/include/gpu/vk/VulkanTypes.h"
 
-namespace flutter {
-namespace testing {
+namespace flutter::testing {
 
 class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
  public:
@@ -93,7 +92,6 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
   FML_DISALLOW_COPY_AND_ASSIGN(ShellTestPlatformViewVulkan);
 };
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_SHELL_COMMON_SHELL_TEST_PLATFORM_VIEW_VULKAN_H_

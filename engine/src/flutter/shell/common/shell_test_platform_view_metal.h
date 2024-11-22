@@ -5,14 +5,16 @@
 #ifndef FLUTTER_SHELL_COMMON_SHELL_TEST_PLATFORM_VIEW_METAL_H_
 #define FLUTTER_SHELL_COMMON_SHELL_TEST_PLATFORM_VIEW_METAL_H_
 
-#include "flutter/fml/macros.h"
 #include "flutter/shell/common/shell_test_platform_view.h"
+
+#import <Metal/Metal.h>
+
+#include "flutter/fml/macros.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
+#include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.h"
+#include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 
-namespace flutter {
-namespace testing {
-
-struct DarwinContextMetal;
+namespace flutter::testing {
 
 class ShellTestPlatformViewMetal final : public ShellTestPlatformView,
                                          public GPUSurfaceMetalDelegate {
@@ -30,7 +32,9 @@ class ShellTestPlatformViewMetal final : public ShellTestPlatformView,
   virtual ~ShellTestPlatformViewMetal() override;
 
  private:
-  const std::unique_ptr<DarwinContextMetal> metal_context_;
+  FlutterDarwinContextMetalSkia* skia_context_;
+  FlutterDarwinContextMetalImpeller* impeller_context_;
+  id<MTLTexture> offscreen_texture_;
   const CreateVsyncWaiter create_vsync_waiter_;
   const std::shared_ptr<ShellTestVsyncClock> vsync_clock_;
   const std::shared_ptr<ShellTestExternalViewEmbedder>
@@ -70,7 +74,6 @@ class ShellTestPlatformViewMetal final : public ShellTestPlatformView,
   FML_DISALLOW_COPY_AND_ASSIGN(ShellTestPlatformViewMetal);
 };
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace flutter::testing
 
 #endif  // FLUTTER_SHELL_COMMON_SHELL_TEST_PLATFORM_VIEW_METAL_H_
