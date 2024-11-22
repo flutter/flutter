@@ -4814,6 +4814,33 @@ TEST_F(EmbedderTest, CanRenderWithImpellerOpenGL) {
   ASSERT_FALSE(present_called);
 }
 
+TEST_F(EmbedderTest, ImpellerOpenGLImageSnapshot) {
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
+
+  bool result = false;
+  fml::AutoResetWaitableEvent latch;
+  context.AddNativeCallback("NotifyBoolValue",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              result = tonic::DartConverter<bool>::FromDart(
+                                  Dart_GetNativeArgument(args, 0));
+                              latch.Signal();
+                            }));
+
+  EmbedderConfigBuilder builder(context);
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetDartEntrypoint("render_impeller_image_snapshot_test");
+  builder.SetSurface(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer);
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  ASSERT_TRUE(result);
+}
+
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLSurface) {
   auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 
