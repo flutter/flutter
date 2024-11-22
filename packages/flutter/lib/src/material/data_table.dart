@@ -1141,13 +1141,12 @@ class DataTable extends StatelessWidget {
       );
       if (column.columnWidth != null) {
         tableColumns[displayColumnIndex] = column.columnWidth!;
+      } else if (dataColumnIndex == _onlyTextColumn) {
+        tableColumns[displayColumnIndex] = const IntrinsicColumnWidth(flex: 1.0);
       } else {
-        if (dataColumnIndex == _onlyTextColumn) {
-          tableColumns[displayColumnIndex] = const IntrinsicColumnWidth(flex: 1.0);
-        } else {
-          tableColumns[displayColumnIndex] = const IntrinsicColumnWidth();
-        }
+        tableColumns[displayColumnIndex] = const IntrinsicColumnWidth();
       }
+
       final Set<MaterialState> headerStates = <MaterialState>{
         if (column.onSort == null)
           MaterialState.disabled,
