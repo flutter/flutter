@@ -81,4 +81,37 @@ void main() {
     context = tester.element(find.text('safe area!'));
     expect(MediaQuery.paddingOf(context), EdgeInsets.zero);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/159340.
+  testWidgets('App displays without layout issues', (WidgetTester tester) async {
+    // Set the app's size to to match the default DartPad demo screen.
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          width: 500.0,
+          height: 480.0,
+          child: example.Insets(),
+        ),
+      ),
+    );
+
+    double appScreenHeight() => tester.getRect(find.byType(example.Insets)).height;
+
+    expect(appScreenHeight(), 480);
+    expect(insetsState.insets, const EdgeInsets.fromLTRB(8.0, 25.0, 8.0, 12.0));
+
+    const List<Key> keys = <Key>[
+      ValueKey<example.Inset>(example.Inset.top),
+      ValueKey<example.Inset>(example.Inset.sides),
+      ValueKey<example.Inset>(example.Inset.bottom),
+    ];
+    for (final Key key in keys) {
+      await tester.drag(find.byKey(key), const Offset(500.0, 0.0));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
+
+    expect(appScreenHeight(), 480);
+    expect(insetsState.insets, const EdgeInsets.all(50));
+  });
 }
