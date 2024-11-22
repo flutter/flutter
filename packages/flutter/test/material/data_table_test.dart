@@ -2418,7 +2418,7 @@ void main() {
     expect(headerCenter.dx, equals(400));
   });
 
-  testWidgets('DataTable with custom columm widths - checkbox', (WidgetTester tester) async {
+  testWidgets('DataTable with custom column widths - checkbox', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -2462,7 +2462,7 @@ void main() {
     expect(table.columnWidths![3], const IntrinsicColumnWidth(flex: 1));
   });
 
-  testWidgets('DataTable with custom columm widths - no checkbox', (WidgetTester tester) async {
+  testWidgets('DataTable with custom column widths - no checkbox', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
