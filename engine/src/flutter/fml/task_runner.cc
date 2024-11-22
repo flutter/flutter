@@ -52,28 +52,11 @@ bool TaskRunner::RunsTasksOnCurrentThread() {
                                                 loop_queue_id);
 }
 
-// static
 void TaskRunner::RunNowOrPostTask(const fml::RefPtr<fml::TaskRunner>& runner,
                                   const fml::closure& task) {
   FML_DCHECK(runner);
   if (runner->RunsTasksOnCurrentThread()) {
     task();
-  } else {
-    runner->PostTask(task);
-  }
-}
-
-// static
-void TaskRunner::RunNowAndFlushMessages(
-    const fml::RefPtr<fml::TaskRunner>& runner,
-    const fml::closure& task) {
-  FML_DCHECK(runner);
-  if (runner->RunsTasksOnCurrentThread()) {
-    task();
-    // Post an empty task to make the UI message loop run its task observers.
-    // The observers will execute any Dart microtasks queued by the platform
-    // message handler.
-    runner->PostTask([] {});
   } else {
     runner->PostTask(task);
   }
