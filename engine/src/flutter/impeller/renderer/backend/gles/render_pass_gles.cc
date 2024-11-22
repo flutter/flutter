@@ -492,7 +492,8 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   }
 
   if (gl.DiscardFramebufferEXT.IsAvailable()) {
-    std::vector<GLenum> attachments;
+    std::array<GLenum, 3> attachments;
+    size_t attachment_count = 0;
 
     // TODO(130048): discarding stencil or depth on the default fbo causes Angle
     // to discard the entire render target. Until we know the reason, default to
@@ -500,21 +501,21 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     bool angle_safe = gl.GetCapabilities()->IsANGLE() ? !is_default_fbo : true;
 
     if (pass_data.discard_color_attachment) {
-      attachments.push_back(is_default_fbo ? GL_COLOR_EXT
-                                           : GL_COLOR_ATTACHMENT0);
+      attachments[attachment_count++] =
+          (is_default_fbo ? GL_COLOR_EXT : GL_COLOR_ATTACHMENT0);
     }
     if (pass_data.discard_depth_attachment && angle_safe) {
-      attachments.push_back(is_default_fbo ? GL_DEPTH_EXT
-                                           : GL_DEPTH_ATTACHMENT);
+      attachments[attachment_count++] =
+          (is_default_fbo ? GL_DEPTH_EXT : GL_DEPTH_ATTACHMENT);
     }
 
     if (pass_data.discard_stencil_attachment && angle_safe) {
-      attachments.push_back(is_default_fbo ? GL_STENCIL_EXT
-                                           : GL_STENCIL_ATTACHMENT);
+      attachments[attachment_count++] =
+          (is_default_fbo ? GL_STENCIL_EXT : GL_STENCIL_ATTACHMENT);
     }
-    gl.DiscardFramebufferEXT(GL_FRAMEBUFFER,      // target
-                             attachments.size(),  // attachments to discard
-                             attachments.data()   // size
+    gl.DiscardFramebufferEXT(GL_FRAMEBUFFER,     // target
+                             attachment_count,   // attachments to discard
+                             attachments.data()  // size
     );
   }
 
