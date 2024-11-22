@@ -392,6 +392,7 @@ targets:
 
   - name: Linux packages_autoroller
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/159316
     recipe: pub_autoroller/pub_autoroller
     # This takes a while because we need to fetch network dependencies and run
     # Gradle for every android app in the repo
