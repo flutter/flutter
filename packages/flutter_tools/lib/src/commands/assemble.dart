@@ -311,7 +311,7 @@ class AssembleCommand extends FlutterCommand {
       );
     }
     if (deferredTargets.isNotEmpty) {
-      // Record to analytics whether DeferredComponents is being used.
+      // Record to analytics that DeferredComponents is being used.
       globals.analytics.send(Event.flutterBuildInfo(
         label: 'assemble-deferred-components',
         buildType: 'android',
