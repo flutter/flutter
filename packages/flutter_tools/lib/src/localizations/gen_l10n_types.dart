@@ -19,7 +19,7 @@ import 'message_parser.dart';
 // DateFormat.yMMMMd("en_US").format(DateTime.utc(1996, 7, 10)) results
 // in the string "July 10, 1996".
 //
-// Since the code generates code that uses DateFormat's constructor and its
+// Since the tool generates code that uses DateFormat's constructor and its
 // add_* methods, it is necessary to verify that the constructor/method exists,
 // or the tool will generate code that may cause a compile-time error.
 //
