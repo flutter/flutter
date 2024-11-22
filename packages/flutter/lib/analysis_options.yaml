@@ -1,3 +1,6 @@
+analyzer:
+  errors:
+    non_constant_identifier_names: ignore
 include: ../analysis_options.yaml
 
 linter:

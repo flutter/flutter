@@ -1122,7 +1122,7 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     if (_debugLabel != null) {
-      properties.add(MessageProperty('debugLabel', _debugLabel));
+      properties.add(MessageProperty('debugLabel', _debugLabel!));
     }
     properties.add(createCupertinoColorProperty('color', color));
     if (_isPlatformBrightnessDependent) {

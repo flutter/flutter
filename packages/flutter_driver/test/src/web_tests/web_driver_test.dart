@@ -7,7 +7,6 @@ import 'package:flutter_driver/src/common/health.dart';
 import 'package:flutter_driver/src/driver/web_driver.dart';
 import 'package:webdriver/async_io.dart';
 
-import '../../common.dart';
 
 void main() {
   group('WebDriver', () {

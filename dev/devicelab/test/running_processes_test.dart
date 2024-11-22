@@ -9,7 +9,6 @@ import 'dart:io';
 import 'package:flutter_devicelab/framework/running_processes.dart';
 import 'package:process/process.dart';
 
-import 'common.dart';
 
 void main() {
   test('Parse PowerShell result', () {

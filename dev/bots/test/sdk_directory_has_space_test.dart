@@ -6,7 +6,6 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'common.dart';
 
 void main() {
   test('We are in a directory with a space in it', () async {

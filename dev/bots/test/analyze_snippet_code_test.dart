@@ -7,7 +7,6 @@
 
 import 'dart:io';
 
-import 'common.dart';
 
 const List<String> expectedMainErrors = <String>[
   'dev/bots/test/analyze-snippet-code-test-input/custom_imports_broken.dart:19:11: (statement) (undefined_identifier)',

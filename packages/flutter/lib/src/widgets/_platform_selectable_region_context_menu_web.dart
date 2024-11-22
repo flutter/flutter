@@ -116,7 +116,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
       // Create css style for _kClassName.
       final web.HTMLStyleElement styleElement = web.document.createElement('style') as web.HTMLStyleElement;
       web.document.head!.append(styleElement as JSAny);
-      final web.CSSStyleSheet sheet = styleElement.sheet!;
+      final web.CSSStyleSheet sheet = styleElement.sheet;
       sheet.insertRule(_kClassRule, 0);
       sheet.insertRule(_kClassSelectionRule, 1);
 

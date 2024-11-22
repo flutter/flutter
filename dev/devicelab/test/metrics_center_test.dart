@@ -5,7 +5,6 @@
 import 'package:flutter_devicelab/framework/metrics_center.dart';
 import 'package:metrics_center/metrics_center.dart';
 
-import 'common.dart';
 
 class FakeFlutterDestination implements FlutterDestination {
   /// Overrides the skia perf `update` function, which uploads new data to gcs if there

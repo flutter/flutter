@@ -4,7 +4,6 @@
 
 import 'package:flutter_driver/src/driver/timeline.dart';
 
-import '../../common.dart';
 
 void main() {
   group('Timeline', () {

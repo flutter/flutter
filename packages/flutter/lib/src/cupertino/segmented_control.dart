@@ -627,7 +627,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   @override
-  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline, dynamic BaselineOffset) {
     final Size childSize = _calculateChildSize(constraints);
     final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
 
@@ -729,4 +729,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     }
     return false;
   }
+}
+
+mixin BaselineOffset {
 }

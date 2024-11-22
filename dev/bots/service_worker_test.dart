@@ -10,7 +10,6 @@ import 'package:shelf/shelf.dart';
 
 import 'browser.dart';
 import 'run_command.dart';
-import 'test/common.dart';
 import 'utils.dart';
 
 final String _bat = Platform.isWindows ? '.bat' : '';

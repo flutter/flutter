@@ -7,7 +7,6 @@ import 'dart:io' as io;
 import '../run_command.dart';
 import '../utils.dart';
 
-import 'common.dart';
 
 void main() {
   // These tests only run on Linux. They test platform-agnostic code that is

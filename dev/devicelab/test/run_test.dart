@@ -9,7 +9,6 @@ import 'package:flutter_devicelab/framework/utils.dart' show rm;
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
-import 'common.dart';
 
 void main() {
   const ProcessManager processManager = LocalProcessManager();

@@ -9,12 +9,8 @@ import 'package:flutter/material.dart';
 
 import '../codeviewer/code_displayer.dart';
 import '../deferred_widget.dart';
-import '../demos/cupertino/cupertino_demos.dart'
-    deferred as cupertino_demos;
 import '../demos/cupertino/demo_types.dart';
 import '../demos/material/material_demo_types.dart';
-import '../demos/material/material_demos.dart'
-    deferred as material_demos;
 import '../demos/reference/colors_demo.dart'
     deferred as colors_demo;
 import '../demos/reference/motion_demo_container_transition.dart'

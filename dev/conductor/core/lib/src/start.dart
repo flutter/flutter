@@ -114,7 +114,7 @@ class StartCommand extends Command<void> {
 
   @override
   Future<void> run() async {
-    final ArgResults argumentResults = argResults!;
+    final ArgResults argumentResults = argResults;
     if (!platform.isMacOS && !platform.isLinux) {
       throw ConductorException(
         'Error! This tool is only supported on macOS and Linux',

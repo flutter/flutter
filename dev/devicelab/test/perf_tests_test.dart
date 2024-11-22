@@ -9,7 +9,6 @@ import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
-import 'common.dart';
 
 void main() {
 

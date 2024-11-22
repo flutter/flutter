@@ -5,7 +5,6 @@
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/driver/memory_summarizer.dart';
 
-import '../common.dart';
 
 TimelineEvent newGPUTraceEvent(double ms) => TimelineEvent(<String, dynamic>{
   'name': 'AllocatorVK',

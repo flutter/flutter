@@ -9,7 +9,6 @@ import 'package:platform/platform.dart';
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 import '../post_process_docs.dart';
-import 'common.dart';
 
 void main() async {
   group('getBranch', () {
