@@ -18,6 +18,7 @@
 namespace flutter {
 
 namespace {
+
 sk_sp<DlImage> DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
     SkISize size,
@@ -51,6 +52,27 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
                                      /*reset_host_buffer=*/false,
                                      /*generate_mips=*/true),
       DlImage::OwningContext::kRaster);
+}
+
+sk_sp<DlImage> DoMakeRasterSnapshot(
+    const sk_sp<DisplayList>& display_list,
+    SkISize size,
+    const SnapshotController::Delegate& delegate) {
+  // Ensure that the current thread has a rendering context.  This must be done
+  // before calling GetAiksContext because constructing the AiksContext may
+  // invoke graphics APIs.
+  std::unique_ptr<Surface> pbuffer_surface;
+  if (delegate.GetSurface()) {
+    delegate.GetSurface()->MakeRenderContextCurrent();
+  } else if (delegate.GetSnapshotSurfaceProducer()) {
+    pbuffer_surface =
+        delegate.GetSnapshotSurfaceProducer()->CreateSnapshotSurface();
+    if (pbuffer_surface) {
+      pbuffer_surface->MakeRenderContextCurrent();
+    }
+  }
+
+  return DoMakeRasterSnapshot(display_list, size, delegate.GetAiksContext());
 }
 
 sk_sp<DlImage> DoMakeRasterSnapshot(
@@ -112,16 +134,14 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
             }
 #endif
             callback(DoMakeRasterSnapshot(display_list, picture_size,
-                                          GetDelegate().GetAiksContext()));
+                                          GetDelegate()));
           }));
 }
 
 sk_sp<DlImage> SnapshotControllerImpeller::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
     SkISize picture_size) {
-  return DoMakeRasterSnapshot(display_list, picture_size,
-                              GetDelegate().GetIsGpuDisabledSyncSwitch(),
-                              GetDelegate().GetAiksContext());
+  return DoMakeRasterSnapshot(display_list, picture_size, GetDelegate());
 }
 
 void SnapshotControllerImpeller::CacheRuntimeStage(
