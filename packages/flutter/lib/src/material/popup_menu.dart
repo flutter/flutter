@@ -963,7 +963,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
         builder: (BuildContext context, BoxConstraints constraints) {
           return CustomSingleChildLayout(
             delegate: _PopupMenuRouteLayout(
-              positionBuilder?.call() ?? position!,
+              positionBuilder?.call(context, constraints) ?? position!,
               itemSizes,
               selectedItemIndex,
               Directionality.of(context),
@@ -1006,7 +1006,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///  * [RelativeRect.fromRect], which creates a [RelativeRect] from two [Rect]s,
 ///    one representing the size of the popup menu and one representing the size
 ///    of the overlay.
-typedef PopupMenuPositionBuilder = RelativeRect Function();
+typedef PopupMenuPositionBuilder = RelativeRect Function(
+  BuildContext context, BoxConstraints constraints);
 
 /// Shows a popup menu that contains the `items` at `position`.
 ///
@@ -1503,7 +1504,7 @@ class PopupMenuButton<T> extends StatefulWidget {
 /// of your button state.
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
-  RelativeRect _positionBuilder() {
+  RelativeRect _positionBuilder(BuildContext _, BoxConstraints constraints) {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(
