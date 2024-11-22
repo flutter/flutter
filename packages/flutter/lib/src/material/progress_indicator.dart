@@ -980,7 +980,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
       ?? indicatorTheme.circularTrackPadding
       ?? defaults.circularTrackPadding;
 
-    final Widget result = ConstrainedBox(
+    Widget result = ConstrainedBox(
       constraints: constraints,
       child: CustomPaint(
         painter: _CircularProgressIndicatorPainter(
@@ -1001,7 +1001,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     );
 
     if (effectivePadding != null) {
-      return Padding(
+      result = Padding(
         padding: effectivePadding,
         child: result,
       );
