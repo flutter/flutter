@@ -79,8 +79,9 @@ class DataColumn {
   /// determine the intrinsic size of the column.
   ///
   /// If this property is `null`, the table applies a default behavior:
-  /// - For columns with only text, it uses `IntrinsicColumnWidth(flex: 1.0)`.
-  /// - For other content, it defaults to `IntrinsicColumnWidth()`.
+  /// - If the table has exactly one column identified as the only text column
+  ///   (i.e., all the rest are numeric), that column uses `IntrinsicColumnWidth(flex: 1.0)`.
+  /// - All other columns use `IntrinsicColumnWidth()`.
   final TableColumnWidth? columnWidth;
 
   /// The column heading's tooltip.
