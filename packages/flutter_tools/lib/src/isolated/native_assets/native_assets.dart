@@ -348,6 +348,7 @@ String _toNativeAssetsJsonFile(List<KernelAsset> kernelAssets) {
     assetsPerTarget[asset.target] = assets;
   }
 
+  // See assets/native_assets.cc in the engine for the expected format.
   final Map<String, Object> jsonContents = <String, Object>{
     'format-version': <int>[1, 0, 0],
     'native-assets': <String, Map<String, List<String>>>{

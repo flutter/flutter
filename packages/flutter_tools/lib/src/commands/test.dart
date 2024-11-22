@@ -420,7 +420,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     );
 
     final Uri? nativeAssetsJson = await nativeAssetsBuilder?.build(buildInfo);
-    String? testAssetDirectory;
+    String? testAssetPath;
     if (buildTestAssets) {
       await _buildTestAsset(
         flavor: buildInfo.flavor,
@@ -430,17 +430,16 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
     if (buildTestAssets || nativeAssetsJson != null) {
-      testAssetDirectory = globals.fs.path.
-        join(flutterProject.directory.path, 'build', 'unit_test_assets');
+      testAssetPath = globals.fs.path
+          .join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
     if (nativeAssetsJson != null) {
-      final Directory testAssetDirectory2 =
-          globals.fs.directory(testAssetDirectory);
-      if (!await testAssetDirectory2.exists()) {
-        await testAssetDirectory2.create(recursive: true);
+      final Directory testAssetDirectory = globals.fs.directory(testAssetPath);
+      if (!await testAssetDirectory.exists()) {
+        await testAssetDirectory.create(recursive: true);
       }
       final File nativeAssetsManifest =
-          globals.fs.directory(testAssetDirectory).childFile('NativeAssetsManifest.json');
+          testAssetDirectory.childFile('NativeAssetsManifest.json');
       await globals.fs.file(nativeAssetsJson).copy(nativeAssetsManifest.path);
     }
 
@@ -598,7 +597,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         machine: machine,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
-        testAssetDirectory: testAssetDirectory,
+        testAssetDirectory: testAssetPath,
         flutterProject: flutterProject,
         randomSeed: stringArg('test-randomize-ordering-seed'),
         reporter: stringArg('reporter'),
@@ -625,7 +624,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         machine: machine,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
-        testAssetDirectory: testAssetDirectory,
+        testAssetDirectory: testAssetPath,
         flutterProject: flutterProject,
         web: isWeb,
         randomSeed: stringArg('test-randomize-ordering-seed'),

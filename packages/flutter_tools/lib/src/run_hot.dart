@@ -371,10 +371,9 @@ class HotRunner extends ResidentRunner {
   }) async {
     await _calculateTargetPlatform();
 
-    Uri? nativeAssetsYaml;
-    if (_nativeAssetsYamlFile != null) {
-      nativeAssetsYaml = globals.fs.path.toUri(_nativeAssetsYamlFile);
-    }
+    final Uri? nativeAssetsYaml = _nativeAssetsYamlFile != null
+        ? globals.fs.path.toUri(_nativeAssetsYamlFile)
+        : null;
 
     final Stopwatch appStartedTimer = Stopwatch()..start();
     final File mainFile = globals.fs.file(mainPath);
