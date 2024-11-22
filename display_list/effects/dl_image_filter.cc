@@ -4,9 +4,50 @@
 
 #include "flutter/display_list/effects/dl_image_filter.h"
 
-#include "flutter/display_list/effects/dl_local_matrix_image_filter.h"
+#include "flutter/display_list/effects/dl_image_filters.h"
 
 namespace flutter {
+
+std::shared_ptr<DlImageFilter> DlImageFilter::MakeBlur(DlScalar sigma_x,
+                                                       DlScalar sigma_y,
+                                                       DlTileMode tile_mode) {
+  return DlBlurImageFilter::Make(sigma_x, sigma_y, tile_mode);
+}
+
+std::shared_ptr<DlImageFilter> DlImageFilter::MakeDilate(DlScalar radius_x,
+                                                         DlScalar radius_y) {
+  return DlDilateImageFilter::Make(radius_x, radius_y);
+}
+
+std::shared_ptr<DlImageFilter> DlImageFilter::MakeErode(DlScalar radius_x,
+                                                        DlScalar radius_y) {
+  return DlErodeImageFilter::Make(radius_x, radius_y);
+}
+
+std::shared_ptr<DlImageFilter> DlImageFilter::MakeMatrix(
+    const DlMatrix& matrix,
+    DlImageSampling sampling) {
+  return DlMatrixImageFilter::Make(matrix, sampling);
+}
+
+std::shared_ptr<DlImageFilter> DlImageFilter::MakeRuntimeEffect(
+    sk_sp<DlRuntimeEffect> runtime_effect,
+    std::vector<std::shared_ptr<DlColorSource>> samplers,
+    std::shared_ptr<std::vector<uint8_t>> uniform_data) {
+  return DlRuntimeEffectImageFilter::Make(
+      std::move(runtime_effect), std::move(samplers), std::move(uniform_data));
+}
+
+std::shared_ptr<DlImageFilter> DlImageFilter::MakeColorFilter(
+    const std::shared_ptr<const DlColorFilter>& filter) {
+  return DlColorFilterImageFilter::Make(filter);
+}
+
+std::shared_ptr<DlImageFilter> DlImageFilter::MakeCompose(
+    const std::shared_ptr<DlImageFilter>& outer,
+    const std::shared_ptr<DlImageFilter>& inner) {
+  return DlComposeImageFilter::Make(outer, inner);
+}
 
 DlVector2 DlImageFilter::map_vectors_affine(const DlMatrix& ctm,
                                             DlScalar x,

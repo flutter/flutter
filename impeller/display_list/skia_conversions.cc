@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 #include "impeller/display_list/skia_conversions.h"
-#include "display_list/dl_color.h"
+#include "flutter/display_list/dl_blend_mode.h"
+#include "flutter/display_list/dl_color.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
 namespace impeller {

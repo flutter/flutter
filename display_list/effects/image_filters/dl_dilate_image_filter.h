@@ -2,35 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_EFFECTS_DL_ERODE_IMAGE_FILTER_H_
-#define FLUTTER_DISPLAY_LIST_EFFECTS_DL_ERODE_IMAGE_FILTER_H_
-
-#include <utility>
+#ifndef FLUTTER_DISPLAY_LIST_EFFECTS_IMAGE_FILTERS_DL_DILATE_IMAGE_FILTER_H_
+#define FLUTTER_DISPLAY_LIST_EFFECTS_IMAGE_FILTERS_DL_DILATE_IMAGE_FILTER_H_
 
 #include "display_list/effects/dl_image_filter.h"
 
 namespace flutter {
 
-class DlErodeImageFilter final : public DlImageFilter {
+class DlDilateImageFilter final : public DlImageFilter {
  public:
-  DlErodeImageFilter(DlScalar radius_x, DlScalar radius_y)
+  DlDilateImageFilter(DlScalar radius_x, DlScalar radius_y)
       : radius_x_(radius_x), radius_y_(radius_y) {}
-  explicit DlErodeImageFilter(const DlErodeImageFilter* filter)
-      : DlErodeImageFilter(filter->radius_x_, filter->radius_y_) {}
-  DlErodeImageFilter(const DlErodeImageFilter& filter)
-      : DlErodeImageFilter(&filter) {}
+  explicit DlDilateImageFilter(const DlDilateImageFilter* filter)
+      : DlDilateImageFilter(filter->radius_x_, filter->radius_y_) {}
+  DlDilateImageFilter(const DlDilateImageFilter& filter)
+      : DlDilateImageFilter(&filter) {}
 
   static std::shared_ptr<DlImageFilter> Make(DlScalar radius_x,
                                              DlScalar radius_y);
 
   std::shared_ptr<DlImageFilter> shared() const override {
-    return std::make_shared<DlErodeImageFilter>(this);
+    return std::make_shared<DlDilateImageFilter>(this);
   }
 
-  DlImageFilterType type() const override { return DlImageFilterType::kErode; }
+  DlImageFilterType type() const override { return DlImageFilterType::kDilate; }
   size_t size() const override { return sizeof(*this); }
 
-  const DlErodeImageFilter* asErode() const override { return this; }
+  const DlDilateImageFilter* asDilate() const override { return this; }
 
   bool modifies_transparent_black() const override { return false; }
 
@@ -58,4 +56,4 @@ class DlErodeImageFilter final : public DlImageFilter {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_EFFECTS_DL_ERODE_IMAGE_FILTER_H_
+#endif  // FLUTTER_DISPLAY_LIST_EFFECTS_IMAGE_FILTERS_DL_DILATE_IMAGE_FILTER_H_

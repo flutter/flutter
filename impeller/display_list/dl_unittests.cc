@@ -1163,9 +1163,9 @@ TEST_P(DisplayListTest, CanDrawPaintWithColorSource) {
   builder.Translate(500, 500);
   builder.ClipRect(clip_bounds, flutter::DlCanvas::ClipOp::kIntersect, false);
   auto texture = CreateTextureForFixture("table_mountain_nx.png");
-  auto image = std::make_shared<flutter::DlImageColorSource>(
-      DlImageImpeller::Make(texture), flutter::DlTileMode::kRepeat,
-      flutter::DlTileMode::kRepeat);
+  auto image = flutter::DlColorSource::MakeImage(DlImageImpeller::Make(texture),
+                                                 flutter::DlTileMode::kRepeat,
+                                                 flutter::DlTileMode::kRepeat);
   paint.setColorSource(image);
   builder.DrawPaint(paint);
   builder.Restore();
@@ -1263,9 +1263,9 @@ TEST_P(DisplayListTest, MaskBlursApplyCorrectlyToColorSources) {
                                             flutter::DlColor::kGreen()};
   std::array<float, 2> stops = {0, 1};
   std::array<std::shared_ptr<flutter::DlColorSource>, 2> color_sources = {
-      std::make_shared<flutter::DlColorColorSource>(flutter::DlColor::kWhite()),
+      flutter::DlColorSource::MakeColor(flutter::DlColor::kWhite()),
       flutter::DlColorSource::MakeLinear(
-          SkPoint::Make(0, 0), SkPoint::Make(100, 50), 2, colors.data(),
+          flutter::DlPoint(0, 0), flutter::DlPoint(100, 50), 2, colors.data(),
           stops.data(), flutter::DlTileMode::kClamp)};
 
   int offset = 100;

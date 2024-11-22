@@ -4,7 +4,7 @@
 
 #include "flutter/flow/layers/opacity_layer.h"
 
-#include "flutter/display_list/effects/dl_blur_image_filter.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/layers/image_filter_layer.h"
 #include "flutter/flow/layers/layer_tree.h"
@@ -543,7 +543,7 @@ TEST_F(OpacityLayerTest, OpacityInheritanceThroughImageFilter) {
   auto opacity_layer =
       std::make_shared<OpacityLayer>(128, SkPoint::Make(20, 20));
   auto filter_layer = std::make_shared<ImageFilterLayer>(
-      DlBlurImageFilter::Make(5.0, 5.0, DlTileMode::kClamp));
+      DlImageFilter::MakeBlur(5.0, 5.0, DlTileMode::kClamp));
   auto mock_layer = MockLayer::MakeOpacityCompatible(SkPath());
   filter_layer->Add(mock_layer);
   opacity_layer->Add(filter_layer);

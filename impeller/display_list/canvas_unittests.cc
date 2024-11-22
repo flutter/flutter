@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 #include "flutter/display_list/dl_tile_mode.h"
-#include "flutter/display_list/effects/dl_blur_image_filter.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
@@ -143,7 +143,7 @@ TEST_P(AiksTest, BackdropCountDownNormal) {
   canvas->SetBackdropData({}, 3);
 
   auto blur =
-      flutter::DlBlurImageFilter::Make(4, 4, flutter::DlTileMode::kClamp);
+      flutter::DlImageFilter::MakeBlur(4, 4, flutter::DlTileMode::kClamp);
   flutter::DlRect rect = flutter::DlRect::MakeLTRB(0, 0, 50, 50);
 
   EXPECT_TRUE(canvas->RequiresReadback());
@@ -180,7 +180,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropId) {
   canvas->SetBackdropData(data, 3);
 
   auto blur =
-      flutter::DlBlurImageFilter::Make(4, 4, flutter::DlTileMode::kClamp);
+      flutter::DlImageFilter::MakeBlur(4, 4, flutter::DlTileMode::kClamp);
 
   EXPECT_TRUE(canvas->RequiresReadback());
   canvas->DrawRect(flutter::DlRect::MakeLTRB(0, 0, 50, 50),
@@ -220,7 +220,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
   canvas->SetBackdropData(data, 3);
 
   auto blur =
-      flutter::DlBlurImageFilter::Make(4, 4, flutter::DlTileMode::kClamp);
+      flutter::DlImageFilter::MakeBlur(4, 4, flutter::DlTileMode::kClamp);
 
   EXPECT_TRUE(canvas->RequiresReadback());
   canvas->DrawRect(flutter::DlRect::MakeLTRB(0, 0, 50, 50),
@@ -255,7 +255,7 @@ TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
   canvas->SetBackdropData({}, 2);
 
   auto blur =
-      flutter::DlBlurImageFilter::Make(4, 4, flutter::DlTileMode::kClamp);
+      flutter::DlImageFilter::MakeBlur(4, 4, flutter::DlTileMode::kClamp);
 
   EXPECT_TRUE(canvas->RequiresReadback());
   canvas->DrawRect(flutter::DlRect::MakeLTRB(0, 0, 50, 50),

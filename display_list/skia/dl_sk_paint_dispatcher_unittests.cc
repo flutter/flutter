@@ -28,8 +28,8 @@ static const DlColor kTestColors[2] = {DlColor(0xFF000000),
                                        DlColor(0xFFFFFFFF)};
 static const float kTestStops[2] = {0.0f, 1.0f};
 static const auto kTestLinearGradient =
-    DlColorSource::MakeLinear(SkPoint::Make(0.0f, 0.0f),
-                              SkPoint::Make(100.0f, 100.0f),
+    DlColorSource::MakeLinear(DlPoint(0.0f, 0.0f),
+                              DlPoint(100.0f, 100.0f),
                               2,
                               kTestColors,
                               kTestStops,
@@ -69,7 +69,7 @@ TEST(DisplayListUtils, SetColorSourceDoesNotDitherIfNotGradient) {
   EXPECT_FALSE(helper.paint(true).isDither());
   EXPECT_FALSE(helper.paint(false).isDither());
 
-  helper.setColorSource(&kTestSource1);
+  helper.setColorSource(kTestSource1.get());
   EXPECT_FALSE(helper.paint(true).isDither());
   EXPECT_FALSE(helper.paint(false).isDither());
 }
@@ -105,7 +105,7 @@ TEST(DisplayListUtils, SkDispatcherSetColorSourceDoesNotDitherIfNotGradient) {
   EXPECT_FALSE(dispatcher.safe_paint(true)->isDither());
   // Calling safe_paint(false) returns a nullptr
 
-  dispatcher.setColorSource(&kTestSource1);
+  dispatcher.setColorSource(kTestSource1.get());
   EXPECT_FALSE(dispatcher.paint(true).isDither());
   EXPECT_FALSE(dispatcher.paint(false).isDither());
   EXPECT_FALSE(dispatcher.safe_paint(true)->isDither());

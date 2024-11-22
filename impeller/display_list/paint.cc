@@ -6,9 +6,9 @@
 
 #include <memory>
 
-#include "display_list/effects/dl_color_filter.h"
-#include "display_list/effects/dl_color_source.h"
-#include "display_list/geometry/dl_path.h"
+#include "flutter/display_list/effects/dl_color_filter.h"
+#include "flutter/display_list/effects/dl_color_sources.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "fml/logging.h"
 #include "impeller/display_list/color_filter.h"
 #include "impeller/display_list/skia_conversions.h"
@@ -46,14 +46,14 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
       const flutter::DlLinearGradientColorSource* linear =
           color_source->asLinearGradient();
       FML_DCHECK(linear);
-      auto start_point = skia_conversions::ToPoint(linear->start_point());
-      auto end_point = skia_conversions::ToPoint(linear->end_point());
+      auto start_point = linear->start_point();
+      auto end_point = linear->end_point();
       std::vector<Color> colors;
       std::vector<float> stops;
       skia_conversions::ConvertStops(linear, colors, stops);
 
       auto tile_mode = static_cast<Entity::TileMode>(linear->tile_mode());
-      auto effect_transform = skia_conversions::ToMatrix(linear->matrix());
+      auto effect_transform = linear->matrix();
 
       auto contents = std::make_shared<LinearGradientContents>();
       contents->SetOpacityFactor(color.alpha);
@@ -74,7 +74,7 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
       const flutter::DlRadialGradientColorSource* radialGradient =
           color_source->asRadialGradient();
       FML_DCHECK(radialGradient);
-      auto center = skia_conversions::ToPoint(radialGradient->center());
+      auto center = radialGradient->center();
       auto radius = radialGradient->radius();
       std::vector<Color> colors;
       std::vector<float> stops;
@@ -82,8 +82,7 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
 
       auto tile_mode =
           static_cast<Entity::TileMode>(radialGradient->tile_mode());
-      auto effect_transform =
-          skia_conversions::ToMatrix(radialGradient->matrix());
+      auto effect_transform = radialGradient->matrix();
 
       auto contents = std::make_shared<RadialGradientContents>();
       contents->SetOpacityFactor(color.alpha);
@@ -105,10 +104,9 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
       const flutter::DlConicalGradientColorSource* conical_gradient =
           color_source->asConicalGradient();
       FML_DCHECK(conical_gradient);
-      Point center = skia_conversions::ToPoint(conical_gradient->end_center());
+      Point center = conical_gradient->end_center();
       DlScalar radius = conical_gradient->end_radius();
-      Point focus_center =
-          skia_conversions::ToPoint(conical_gradient->start_center());
+      Point focus_center = conical_gradient->start_center();
       DlScalar focus_radius = conical_gradient->start_radius();
       std::vector<Color> colors;
       std::vector<float> stops;
@@ -116,8 +114,7 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
 
       auto tile_mode =
           static_cast<Entity::TileMode>(conical_gradient->tile_mode());
-      auto effect_transform =
-          skia_conversions::ToMatrix(conical_gradient->matrix());
+      auto effect_transform = conical_gradient->matrix();
 
       std::shared_ptr<ConicalGradientContents> contents =
           std::make_shared<ConicalGradientContents>();
@@ -142,7 +139,7 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
           color_source->asSweepGradient();
       FML_DCHECK(sweepGradient);
 
-      auto center = skia_conversions::ToPoint(sweepGradient->center());
+      auto center = sweepGradient->center();
       auto start_angle = Degrees(sweepGradient->start());
       auto end_angle = Degrees(sweepGradient->end());
       std::vector<Color> colors;
@@ -151,8 +148,7 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
 
       auto tile_mode =
           static_cast<Entity::TileMode>(sweepGradient->tile_mode());
-      auto effect_transform =
-          skia_conversions::ToMatrix(sweepGradient->matrix());
+      auto effect_transform = sweepGradient->matrix();
 
       auto contents = std::make_shared<SweepGradientContents>();
       contents->SetOpacityFactor(color.alpha);
@@ -176,8 +172,7 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
           image_color_source->vertical_tile_mode());
       auto sampler_descriptor =
           skia_conversions::ToSamplerDescriptor(image_color_source->sampling());
-      auto effect_transform =
-          skia_conversions::ToMatrix(image_color_source->matrix());
+      auto effect_transform = image_color_source->matrix();
 
       auto contents = std::make_shared<TiledTextureContents>();
       contents->SetOpacityFactor(color.alpha);
