@@ -463,8 +463,8 @@ TEST_P(AiksTest, TextForegroundShaderWithTransform) {
       1.0,
   };
   text_paint.setColorSource(DlColorSource::MakeLinear(
-      /*start_point=*/{0, 0},            //
-      /*end_point=*/{100, 100},          //
+      /*start_point=*/DlPoint(0, 0),     //
+      /*end_point=*/DlPoint(100, 100),   //
       /*stop_count=*/2,                  //
       /*colors=*/colors.data(),          //
       /*stops=*/stops.data(),            //

@@ -9,7 +9,6 @@
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/dl_tile_mode.h"
-#include "flutter/display_list/effects/dl_blur_image_filter.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
@@ -230,7 +229,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurInteractive) {
     DlPaint save_paint;
     save_paint.setBlendMode(DlBlendMode::kSrc);
 
-    auto backdrop_filter = DlBlurImageFilter::Make(20, 20, DlTileMode::kClamp);
+    auto backdrop_filter = DlImageFilter::MakeBlur(20, 20, DlTileMode::kClamp);
     builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get());
     builder.Restore();
 
@@ -262,7 +261,7 @@ TEST_P(AiksTest, CanRenderBackdropBlur) {
 
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kSrc);
-  auto backdrop_filter = DlBlurImageFilter::Make(30, 30, DlTileMode::kClamp);
+  auto backdrop_filter = DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
   builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get());
   builder.Restore();
 
@@ -285,7 +284,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurWithSingleBackdropId) {
 
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kSrc);
-  auto backdrop_filter = DlBlurImageFilter::Make(30, 30, DlTileMode::kClamp);
+  auto backdrop_filter = DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
   builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get(),
                     /*backdrop_id=*/1);
   builder.Restore();
@@ -311,7 +310,7 @@ TEST_P(AiksTest, CanRenderMultipleBackdropBlurWithSingleBackdropId) {
 
     DlPaint save_paint;
     save_paint.setBlendMode(DlBlendMode::kSrc);
-    auto backdrop_filter = DlBlurImageFilter::Make(30, 30, DlTileMode::kClamp);
+    auto backdrop_filter = DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
     builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get(),
                       /*backdrop_id=*/1);
     builder.Restore();
@@ -340,7 +339,7 @@ TEST_P(AiksTest,
     DlPaint save_paint;
     save_paint.setBlendMode(DlBlendMode::kSrc);
     auto backdrop_filter =
-        DlBlurImageFilter::Make(30 + i, 30, DlTileMode::kClamp);
+        DlImageFilter::MakeBlur(30 + i, 30, DlTileMode::kClamp);
     builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get(),
                       /*backdrop_id=*/1);
     builder.Restore();
@@ -361,7 +360,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurHugeSigma) {
   save_paint.setBlendMode(DlBlendMode::kSrc);
 
   auto backdrop_filter =
-      DlBlurImageFilter::Make(999999, 999999, DlTileMode::kClamp);
+      DlImageFilter::MakeBlur(999999, 999999, DlTileMode::kClamp);
   builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get());
   builder.Restore();
 
@@ -374,7 +373,7 @@ TEST_P(AiksTest, CanRenderClippedBlur) {
 
   DlPaint paint;
   paint.setColor(DlColor::kGreen());
-  paint.setImageFilter(DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal));
+  paint.setImageFilter(DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal));
   builder.DrawCircle(SkPoint{400, 400}, 200, paint);
   builder.Restore();
 
@@ -580,7 +579,7 @@ static const std::map<std::string, MaskBlurTestConfig> kPaintVariations = {
      {.style = DlBlurStyle::kSolid,
       .sigma = 8.0f,
       .alpha = 0.5f,
-      .image_filter = DlBlurImageFilter::Make(3, 3, DlTileMode::kClamp),
+      .image_filter = DlImageFilter::MakeBlur(3, 3, DlTileMode::kClamp),
       .invert_colors = true}},
     // 6. Solid style, translucent, exclusion blended.
     {"SolidTranslucentExclusionBlend",
@@ -596,7 +595,7 @@ static const std::map<std::string, MaskBlurTestConfig> kPaintVariations = {
      {.style = DlBlurStyle::kInner,
       .sigma = 8.0f,
       .alpha = 0.5f,
-      .image_filter = DlBlurImageFilter::Make(3, 3, DlTileMode::kClamp)}},
+      .image_filter = DlImageFilter::MakeBlur(3, 3, DlTileMode::kClamp)}},
     // 9. Outer style, translucent.
     {"OuterTranslucent",
      {.style = DlBlurStyle::kOuter, .sigma = 8.0f, .alpha = 0.5f}},
@@ -604,7 +603,7 @@ static const std::map<std::string, MaskBlurTestConfig> kPaintVariations = {
     {"OuterOpaqueWithBlurImageFilter",
      {.style = DlBlurStyle::kOuter,
       .sigma = 8.0f,
-      .image_filter = DlBlurImageFilter::Make(3, 3, DlTileMode::kClamp)}},
+      .image_filter = DlImageFilter::MakeBlur(3, 3, DlTileMode::kClamp)}},
 };
 
 #define MASK_BLUR_VARIANT_TEST(config)                              \
@@ -757,7 +756,7 @@ TEST_P(AiksTest, MaskBlurDoesntStretchContents) {
     builder.Transform(SkMatrix::Translate(100, 100) *
                       SkMatrix::Scale(0.5, 0.5));
 
-    paint.setColorSource(std::make_shared<DlImageColorSource>(
+    paint.setColorSource(DlColorSource::MakeImage(
         DlImageImpeller::Make(boston), DlTileMode::kRepeat, DlTileMode::kRepeat,
         DlImageSampling::kMipmapLinear));
     paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, sigma));
@@ -791,7 +790,7 @@ TEST_P(AiksTest, GaussianBlurAtPeripheryVertical) {
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kSrc);
 
-  auto backdrop_filter = DlBlurImageFilter::Make(20, 20, DlTileMode::kClamp);
+  auto backdrop_filter = DlImageFilter::MakeBlur(20, 20, DlTileMode::kClamp);
 
   builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get());
   builder.Restore();
@@ -821,7 +820,7 @@ TEST_P(AiksTest, GaussianBlurAtPeripheryHorizontal) {
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kSrc);
 
-  auto backdrop_filter = DlBlurImageFilter::Make(20, 20, DlTileMode::kClamp);
+  auto backdrop_filter = DlImageFilter::MakeBlur(20, 20, DlTileMode::kClamp);
   builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get());
 
   builder.Restore();
@@ -869,7 +868,7 @@ TEST_P(AiksTest, GaussianBlurAnimatedBackdrop) {
     paint.setBlendMode(DlBlendMode::kSrc);
 
     auto backdrop_filter =
-        DlBlurImageFilter::Make(sigma, sigma, DlTileMode::kClamp);
+        DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kClamp);
     builder.SaveLayer(nullptr, &paint, backdrop_filter.get());
     count += 1;
     return builder.Build();
@@ -995,7 +994,7 @@ TEST_P(AiksTest, GaussianBlurScaledAndClipped) {
   Vector2 image_center = Vector2(bounds.GetSize() / 2);
 
   DlPaint paint;
-  paint.setImageFilter(DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal));
+  paint.setImageFilter(DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal));
 
   Vector2 clip_size = {150, 75};
   Vector2 center = Vector2(1024, 768) / 2;
@@ -1047,7 +1046,7 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClippedInteractive) {
     Vector2 image_center = Vector2(bounds.GetSize() / 2);
     DlPaint paint;
     paint.setImageFilter(
-        DlBlurImageFilter::Make(20, 20, tile_modes[selected_tile_mode]));
+        DlImageFilter::MakeBlur(20, 20, tile_modes[selected_tile_mode]));
 
     static PlaygroundPoint point_a(Point(362, 309), 20, Color::Red());
     static PlaygroundPoint point_b(Point(662, 459), 20, Color::Red());
@@ -1087,7 +1086,7 @@ TEST_P(AiksTest, GaussianBlurOneDimension) {
   DlPaint paint;
   paint.setBlendMode(DlBlendMode::kSrc);
 
-  auto backdrop_filter = DlBlurImageFilter::Make(50, 0, DlTileMode::kClamp);
+  auto backdrop_filter = DlImageFilter::MakeBlur(50, 0, DlTileMode::kClamp);
   builder.SaveLayer(nullptr, &paint, backdrop_filter.get());
   builder.Restore();
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -1105,7 +1104,7 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClipped) {
       Rect::MakeXYWH(0, 0, boston->GetSize().width, boston->GetSize().height);
 
   DlPaint paint;
-  paint.setImageFilter(DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal));
+  paint.setImageFilter(DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal));
 
   Vector2 image_center = Vector2(bounds.GetSize() / 2);
   Vector2 clip_size = {150, 75};
@@ -1158,7 +1157,7 @@ TEST_P(AiksTest, GaussianBlurRotatedNonUniform) {
     DlPaint paint;
     paint.setColor(DlColor::kGreen());
     paint.setImageFilter(
-        DlBlurImageFilter::Make(50, 0, tile_modes[selected_tile_mode]));
+        DlImageFilter::MakeBlur(50, 0, tile_modes[selected_tile_mode]));
 
     Vector2 center = Vector2(1024, 768) / 2;
     builder.Scale(GetContentScale().x, GetContentScale().y);
@@ -1211,9 +1210,9 @@ TEST_P(AiksTest, BlurredRectangleWithShader) {
   auto texture =
       DisplayListToTexture(recorder_builder.Build(), {100, 100}, renderer);
 
-  auto image_source = std::make_shared<DlImageColorSource>(
+  auto image_source = DlColorSource::MakeImage(
       DlImageImpeller::Make(texture), DlTileMode::kRepeat, DlTileMode::kRepeat);
-  auto blur_filter = DlBlurImageFilter::Make(5, 5, DlTileMode::kDecal);
+  auto blur_filter = DlImageFilter::MakeBlur(5, 5, DlTileMode::kDecal);
 
   DlPaint paint;
   paint.setColor(DlColor::kDarkGreen());
@@ -1284,7 +1283,7 @@ TEST_P(AiksTest, GaussianBlurWithoutDecalSupport) {
   paint.setColor(DlColor::kBlack());
   builder.DrawPaint(paint);
 
-  auto blur_filter = DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal);
+  auto blur_filter = DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal);
   paint.setImageFilter(blur_filter);
   builder.DrawImage(texture, SkPoint::Make(200, 200), {}, &paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -1305,7 +1304,7 @@ TEST_P(AiksTest, GaussianBlurSolidColorTinyMipMap) {
 
     DlPaint paint;
     paint.setColor(DlColor::kChartreuse());
-    auto blur_filter = DlBlurImageFilter::Make(0.1, 0.1, DlTileMode::kClamp);
+    auto blur_filter = DlImageFilter::MakeBlur(0.1, 0.1, DlTileMode::kClamp);
     paint.setImageFilter(blur_filter);
 
     builder.DrawPath(path, paint);
@@ -1330,7 +1329,7 @@ TEST_P(AiksTest, GaussianBlurBackdropTinyMipMap) {
 
     DlPaint paint;
     paint.setColor(DlColor::kGreen());
-    auto blur_filter = DlBlurImageFilter::Make(0.1, 0.1, DlTileMode::kDecal);
+    auto blur_filter = DlImageFilter::MakeBlur(0.1, 0.1, DlTileMode::kDecal);
     paint.setImageFilter(blur_filter);
 
     builder.DrawCircle(SkPoint{400, 400}, 200, paint);
@@ -1364,7 +1363,7 @@ TEST_P(AiksTest,
 
     DlPaint save_paint;
     save_paint.setBlendMode(DlBlendMode::kSrc);
-    auto backdrop_filter = DlBlurImageFilter::Make(30, 30, DlTileMode::kClamp);
+    auto backdrop_filter = DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
     builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get(),
                       /*backdrop_id=*/1);
     builder.Restore();

@@ -7,7 +7,7 @@
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
-#include "flutter/display_list/effects/dl_blur_image_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_types.h"
 #include "flutter/fml/trace_event.h"

@@ -368,8 +368,8 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
                                                  DlTileMode::kMirror));
   draw(paint);
 
-  SkMatrix matrix = SkMatrix::Translate(-150, 75);
-  paint.setColorSource(std::make_shared<DlImageColorSource>(
+  DlMatrix matrix = DlMatrix::MakeTranslation({-150, 75});
+  paint.setColorSource(DlColorSource::MakeImage(
       texture, DlTileMode::kRepeat, DlTileMode::kRepeat,
       DlImageSampling::kMipmapLinear, &matrix));
   draw(paint);

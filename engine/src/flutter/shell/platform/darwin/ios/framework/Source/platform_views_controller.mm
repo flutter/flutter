@@ -4,7 +4,7 @@
 
 #import "shell/platform/darwin/ios/framework/Source/platform_views_controller.h"
 
-#include "flutter/display_list/effects/dl_blur_image_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
 #include "flutter/fml/make_copyable.h"

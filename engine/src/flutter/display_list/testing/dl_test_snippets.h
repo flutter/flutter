@@ -7,6 +7,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/testing/testing.h"
 
@@ -24,7 +25,7 @@ sk_sp<DisplayList> GetSampleNestedDisplayList();
 
 typedef const std::function<void(DlOpReceiver&)> DlInvoker;
 
-constexpr SkPoint kEndPoints[] = {
+constexpr DlPoint kEndPoints[] = {
     {0, 0},
     {100, 100},
 };
@@ -89,10 +90,11 @@ static auto TestImage1 = MakeTestImage(40, 40, 5);
 static auto TestImage2 = MakeTestImage(50, 50, 5);
 static auto TestSkImage = MakeTestImage(30, 30, 5)->skia_image();
 
-static const DlImageColorSource kTestSource1(TestImage1,
-                                             DlTileMode::kClamp,
-                                             DlTileMode::kMirror,
-                                             kLinearSampling);
+static const std::shared_ptr<DlColorSource> kTestSource1 =
+    DlColorSource::MakeImage(TestImage1,
+                             DlTileMode::kClamp,
+                             DlTileMode::kMirror,
+                             kLinearSampling);
 static const std::shared_ptr<DlColorSource> kTestSource2 =
     DlColorSource::MakeLinear(kEndPoints[0],
                               kEndPoints[1],

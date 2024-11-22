@@ -5,6 +5,7 @@
 #ifndef FLUTTER_DISPLAY_LIST_DL_CANVAS_H_
 #define FLUTTER_DISPLAY_LIST_DL_CANVAS_H_
 
+#include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/dl_vertices.h"

@@ -285,7 +285,7 @@ TEST_F(PainterTest, DrawTextWithGradientImpeller) {
   std::vector<DlColor> colors = {DlColor::kRed(), DlColor::kCyan()};
   std::vector<float> stops = {0.0, 1.0};
   foreground.setColorSource(DlColorSource::MakeLinear(
-      SkPoint::Make(0, 0), SkPoint::Make(100, 100), 2, colors.data(),
+      DlPoint(0, 0), DlPoint(100, 100), 2, colors.data(),
       stops.data(), DlTileMode::kClamp));
   style.foreground = foreground;
 
@@ -306,7 +306,7 @@ TEST_F(PainterTest, DrawEmojiTextWithGradientImpeller) {
   std::vector<DlColor> colors = {DlColor::kRed(), DlColor::kCyan()};
   std::vector<float> stops = {0.0, 1.0};
   foreground.setColorSource(DlColorSource::MakeLinear(
-      SkPoint::Make(0, 0), SkPoint::Make(100, 100), 2, colors.data(),
+      DlPoint(0, 0), DlPoint(100, 100), 2, colors.data(),
       stops.data(), DlTileMode::kClamp));
   style.foreground = foreground;
 

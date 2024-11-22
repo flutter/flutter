@@ -8,7 +8,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_flags.h"
 #include "flutter/display_list/dl_sampling_options.h"
-#include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
@@ -1765,9 +1765,13 @@ class CanvasCompareTester {
     }
 
     {
-      SkPoint end_points[] = {
+      SkPoint sk_end_points[] = {
           SkPoint::Make(kRenderBounds.fLeft, kRenderBounds.fTop),
           SkPoint::Make(kRenderBounds.fRight, kRenderBounds.fBottom),
+      };
+      DlPoint dl_end_points[] = {
+          DlPoint(kRenderBounds.fLeft, kRenderBounds.fTop),
+          DlPoint(kRenderBounds.fRight, kRenderBounds.fBottom),
       };
       DlColor dl_colors[] = {
           DlColor::kGreen(),
@@ -1785,10 +1789,10 @@ class CanvasCompareTester {
           1.0,
       };
       auto dl_gradient =
-          DlColorSource::MakeLinear(end_points[0], end_points[1], 3, dl_colors,
-                                    stops, DlTileMode::kMirror);
+          DlColorSource::MakeLinear(dl_end_points[0], dl_end_points[1], 3,
+                                    dl_colors, stops, DlTileMode::kMirror);
       auto sk_gradient = SkGradientShader::MakeLinear(
-          end_points, sk_colors, stops, 3, SkTileMode::kMirror, 0, nullptr);
+          sk_end_points, sk_colors, stops, 3, SkTileMode::kMirror, 0, nullptr);
       {
         RenderWith(testP, env, tolerance,
                    CaseParameters(
@@ -3898,7 +3902,7 @@ TEST_F(DisplayListRendering, SaveLayerClippedContentStillFilters) {
       },
       [=](const DlRenderContext& ctx) {
         auto layer_filter =
-            DlBlurImageFilter::Make(10.0f, 10.0f, DlTileMode::kDecal);
+            DlImageFilter::MakeBlur(10.0f, 10.0f, DlTileMode::kDecal);
         DlPaint layer_paint;
         layer_paint.setImageFilter(layer_filter);
         ctx.canvas->Save();
@@ -3959,10 +3963,10 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
       DlLinearToSrgbGammaColorFilter::kInstance,
   };
   std::vector<std::shared_ptr<DlImageFilter>> image_filters = {
-      DlBlurImageFilter::Make(5.0f, 5.0f, DlTileMode::kDecal),
-      DlDilateImageFilter::Make(5.0f, 5.0f),
-      DlErodeImageFilter::Make(5.0f, 5.0f),
-      DlMatrixImageFilter::Make(contract_matrix, DlImageSampling::kLinear),
+      DlImageFilter::MakeBlur(5.0f, 5.0f, DlTileMode::kDecal),
+      DlImageFilter::MakeDilate(5.0f, 5.0f),
+      DlImageFilter::MakeErode(5.0f, 5.0f),
+      DlImageFilter::MakeMatrix(contract_matrix, DlImageSampling::kLinear),
   };
 
   auto render_content = [](DisplayListBuilder& builder) {

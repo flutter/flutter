@@ -134,8 +134,8 @@ TEST(SkiaConversionsTest, GradientStopConversion) {
                                           flutter::DlColor::kGreen()};
   std::vector<float> stops = {0.0, 0.5, 1.0};
   const auto gradient =
-      flutter::DlColorSource::MakeLinear(SkPoint::Make(0, 0),          //
-                                         SkPoint::Make(1.0, 1.0),      //
+      flutter::DlColorSource::MakeLinear(flutter::DlPoint(0, 0),       //
+                                         flutter::DlPoint(1.0, 1.0),   //
                                          3,                            //
                                          colors.data(),                //
                                          stops.data(),                 //
@@ -145,7 +145,7 @@ TEST(SkiaConversionsTest, GradientStopConversion) {
 
   std::vector<Color> converted_colors;
   std::vector<Scalar> converted_stops;
-  skia_conversions::ConvertStops(gradient.get(), converted_colors,
+  skia_conversions::ConvertStops(gradient->asLinearGradient(), converted_colors,
                                  converted_stops);
 
   ASSERT_TRUE(ScalarNearlyEqual(converted_stops[0], 0.0f));
@@ -158,8 +158,8 @@ TEST(SkiaConversionsTest, GradientMissing0) {
                                           flutter::DlColor::kRed()};
   std::vector<float> stops = {0.5, 1.0};
   const auto gradient =
-      flutter::DlColorSource::MakeLinear(SkPoint::Make(0, 0),          //
-                                         SkPoint::Make(1.0, 1.0),      //
+      flutter::DlColorSource::MakeLinear(flutter::DlPoint(0, 0),       //
+                                         flutter::DlPoint(1.0, 1.0),   //
                                          2,                            //
                                          colors.data(),                //
                                          stops.data(),                 //
@@ -169,7 +169,7 @@ TEST(SkiaConversionsTest, GradientMissing0) {
 
   std::vector<Color> converted_colors;
   std::vector<Scalar> converted_stops;
-  skia_conversions::ConvertStops(gradient.get(), converted_colors,
+  skia_conversions::ConvertStops(gradient->asLinearGradient(), converted_colors,
                                  converted_stops);
 
   // First color is inserted as blue.
@@ -184,8 +184,8 @@ TEST(SkiaConversionsTest, GradientMissingLastValue) {
                                           flutter::DlColor::kRed()};
   std::vector<float> stops = {0.0, .5};
   const auto gradient =
-      flutter::DlColorSource::MakeLinear(SkPoint::Make(0, 0),          //
-                                         SkPoint::Make(1.0, 1.0),      //
+      flutter::DlColorSource::MakeLinear(flutter::DlPoint(0, 0),       //
+                                         flutter::DlPoint(1.0, 1.0),   //
                                          2,                            //
                                          colors.data(),                //
                                          stops.data(),                 //
@@ -195,7 +195,7 @@ TEST(SkiaConversionsTest, GradientMissingLastValue) {
 
   std::vector<Color> converted_colors;
   std::vector<Scalar> converted_stops;
-  skia_conversions::ConvertStops(gradient.get(), converted_colors,
+  skia_conversions::ConvertStops(gradient->asLinearGradient(), converted_colors,
                                  converted_stops);
 
   // Last color is inserted as red.
@@ -211,8 +211,8 @@ TEST(SkiaConversionsTest, GradientStopGreaterThan1) {
                                           flutter::DlColor::kRed()};
   std::vector<float> stops = {0.0, 100, 1.0};
   const auto gradient =
-      flutter::DlColorSource::MakeLinear(SkPoint::Make(0, 0),          //
-                                         SkPoint::Make(1.0, 1.0),      //
+      flutter::DlColorSource::MakeLinear(flutter::DlPoint(0, 0),       //
+                                         flutter::DlPoint(1.0, 1.0),   //
                                          3,                            //
                                          colors.data(),                //
                                          stops.data(),                 //
@@ -222,7 +222,7 @@ TEST(SkiaConversionsTest, GradientStopGreaterThan1) {
 
   std::vector<Color> converted_colors;
   std::vector<Scalar> converted_stops;
-  skia_conversions::ConvertStops(gradient.get(), converted_colors,
+  skia_conversions::ConvertStops(gradient->asLinearGradient(), converted_colors,
                                  converted_stops);
 
   // Value is clamped to 1.0
@@ -237,8 +237,8 @@ TEST(SkiaConversionsTest, GradientConversionNonMonotonic) {
       flutter::DlColor::kGreen(), flutter::DlColor::kRed()};
   std::vector<float> stops = {0.0, 0.5, 0.4, 1.0};
   const auto gradient =
-      flutter::DlColorSource::MakeLinear(SkPoint::Make(0, 0),          //
-                                         SkPoint::Make(1.0, 1.0),      //
+      flutter::DlColorSource::MakeLinear(flutter::DlPoint(0, 0),       //
+                                         flutter::DlPoint(1.0, 1.0),   //
                                          4,                            //
                                          colors.data(),                //
                                          stops.data(),                 //
@@ -248,7 +248,7 @@ TEST(SkiaConversionsTest, GradientConversionNonMonotonic) {
 
   std::vector<Color> converted_colors;
   std::vector<Scalar> converted_stops;
-  skia_conversions::ConvertStops(gradient.get(), converted_colors,
+  skia_conversions::ConvertStops(gradient->asLinearGradient(), converted_colors,
                                  converted_stops);
 
   // Value is clamped to 0.5

@@ -154,7 +154,7 @@ TEST_P(AiksTest, DrawAdvancedBlendPartlyOffscreen) {
   std::vector<Scalar> stops = {0.0, 1.0};
 
   DlPaint paint;
-  SkMatrix matrix = SkMatrix::Scale(0.3, 0.3);
+  DlMatrix matrix = DlMatrix::MakeScale({0.3, 0.3, 1.0});
   paint.setColorSource(DlColorSource::MakeLinear(
       /*start_point=*/{0, 0},             //
       /*end_point=*/{100, 100},           //

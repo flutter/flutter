@@ -9,7 +9,6 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_runtime_effect.h"
-#include "flutter/display_list/effects/dl_runtime_effect_image_filter.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "include/core/SkPath.h"
@@ -21,7 +20,7 @@ namespace testing {
 using namespace flutter;
 
 namespace {
-std::shared_ptr<DlRuntimeEffectColorSource> MakeRuntimeEffect(
+std::shared_ptr<DlColorSource> MakeRuntimeEffect(
     AiksTest* test,
     std::string_view name,
     const std::shared_ptr<std::vector<uint8_t>>& uniform_data = {},
@@ -34,8 +33,8 @@ std::shared_ptr<DlRuntimeEffectColorSource> MakeRuntimeEffect(
 
   auto dl_runtime_effect = DlRuntimeEffect::MakeImpeller(runtime_stage);
 
-  return std::make_shared<DlRuntimeEffectColorSource>(dl_runtime_effect,
-                                                      samplers, uniform_data);
+  return DlColorSource::MakeRuntimeEffect(dl_runtime_effect, samplers,
+                                          uniform_data);
 }
 }  // namespace
 
@@ -102,7 +101,7 @@ TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
 
   DlPaint paint;
   paint.setColor(DlColor::kAqua());
-  paint.setImageFilter(DlRuntimeEffectImageFilter::Make(
+  paint.setImageFilter(DlImageFilter::MakeRuntimeEffect(
       DlRuntimeEffect::MakeImpeller(runtime_stage), sampler_inputs,
       uniform_data));
 

@@ -4,6 +4,8 @@
 
 #include "flutter/shell/common/dl_op_spy.h"
 
+#include "flutter/display_list/effects/color_sources/dl_color_color_source.h"
+
 namespace flutter {
 
 bool DlOpSpy::did_draw() {

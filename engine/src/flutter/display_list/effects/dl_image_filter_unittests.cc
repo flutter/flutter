@@ -237,18 +237,18 @@ TEST(DisplayListImageFilter, BlurBounds) {
 
 TEST(DisplayListImageFilter, BlurZeroSigma) {
   std::shared_ptr<DlImageFilter> filter =
-      DlBlurImageFilter::Make(0, 0, DlTileMode::kMirror);
+      DlImageFilter::MakeBlur(0, 0, DlTileMode::kMirror);
   ASSERT_EQ(filter, nullptr);
-  filter = DlBlurImageFilter::Make(3, SK_ScalarNaN, DlTileMode::kMirror);
+  filter = DlImageFilter::MakeBlur(3, SK_ScalarNaN, DlTileMode::kMirror);
   ASSERT_EQ(filter, nullptr);
-  filter = DlBlurImageFilter::Make(SK_ScalarNaN, 3, DlTileMode::kMirror);
+  filter = DlImageFilter::MakeBlur(SK_ScalarNaN, 3, DlTileMode::kMirror);
   ASSERT_EQ(filter, nullptr);
   filter =
-      DlBlurImageFilter::Make(SK_ScalarNaN, SK_ScalarNaN, DlTileMode::kMirror);
+      DlImageFilter::MakeBlur(SK_ScalarNaN, SK_ScalarNaN, DlTileMode::kMirror);
   ASSERT_EQ(filter, nullptr);
-  filter = DlBlurImageFilter::Make(3, 0, DlTileMode::kMirror);
+  filter = DlImageFilter::MakeBlur(3, 0, DlTileMode::kMirror);
   ASSERT_NE(filter, nullptr);
-  filter = DlBlurImageFilter::Make(0, 3, DlTileMode::kMirror);
+  filter = DlImageFilter::MakeBlur(0, 3, DlTileMode::kMirror);
   ASSERT_NE(filter, nullptr);
 }
 
@@ -759,13 +759,13 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
 
   DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
   std::vector<std::shared_ptr<DlImageFilter>> dl_filters{
-      DlBlurImageFilter::Make(5.0, 6.0, DlTileMode::kRepeat),
-      DlColorFilterImageFilter::Make(dl_color_filter.shared()),
-      DlDilateImageFilter::Make(5, 10),
-      DlMatrixImageFilter::Make(filter_matrix, DlImageSampling::kLinear),
-      DlComposeImageFilter::Make(
-          DlBlurImageFilter::Make(5.0, 6.0, DlTileMode::kRepeat),
-          DlColorFilterImageFilter::Make(dl_color_filter.shared())),
+      DlImageFilter::MakeBlur(5.0, 6.0, DlTileMode::kRepeat),
+      DlImageFilter::MakeColorFilter(dl_color_filter.shared()),
+      DlImageFilter::MakeDilate(5, 10),
+      DlImageFilter::MakeMatrix(filter_matrix, DlImageSampling::kLinear),
+      DlImageFilter::MakeCompose(
+          DlImageFilter::MakeBlur(5.0, 6.0, DlTileMode::kRepeat),
+          DlImageFilter::MakeColorFilter(dl_color_filter.shared())),
   };
 
   auto persp = SkMatrix::I();
@@ -895,10 +895,10 @@ TEST(DisplayListImageFilter, RuntimeEffectEquality) {
 }
 
 TEST(DisplayListImageFilter, RuntimeEffectEqualityWithSamplers) {
-  auto image_a = std::make_shared<DlImageColorSource>(
-      nullptr, DlTileMode::kClamp, DlTileMode::kDecal);
-  auto image_b = std::make_shared<DlImageColorSource>(
-      nullptr, DlTileMode::kClamp, DlTileMode::kClamp);
+  auto image_a =
+      DlColorSource::MakeImage(nullptr, DlTileMode::kClamp, DlTileMode::kDecal);
+  auto image_b =
+      DlColorSource::MakeImage(nullptr, DlTileMode::kClamp, DlTileMode::kClamp);
 
   DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr, image_a},
                                       std::make_shared<std::vector<uint8_t>>());

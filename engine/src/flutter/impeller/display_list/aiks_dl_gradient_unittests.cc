@@ -676,23 +676,23 @@ TEST_P(AiksTest, CanRenderConicalGradient) {
       DlColor(Color::MakeRGBA8(0x4c, 0xAF, 0x50, 0xFF).ToARGB()),
       DlColor(Color::MakeRGBA8(0x21, 0x96, 0xF3, 0xFF).ToARGB())};
   std::vector<Scalar> stops = {0.0, 1.f / 3.f, 2.f / 3.f, 1.0};
-  std::array<std::tuple<SkPoint, float, SkPoint, float>, 8> array{
-      std::make_tuple(SkPoint::Make(size / 2.f, size / 2.f), 0.f,
-                      SkPoint::Make(size / 2.f, size / 2.f), size / 2.f),
-      std::make_tuple(SkPoint::Make(size / 2.f, size / 2.f), size / 4.f,
-                      SkPoint::Make(size / 2.f, size / 2.f), size / 2.f),
-      std::make_tuple(SkPoint::Make(size / 4.f, size / 4.f), 0.f,
-                      SkPoint::Make(size / 2.f, size / 2.f), size / 2.f),
-      std::make_tuple(SkPoint::Make(size / 4.f, size / 4.f), size / 2.f,
-                      SkPoint::Make(size / 2.f, size / 2.f), 0),
-      std::make_tuple(SkPoint::Make(size / 4.f, size / 4.f), size / 4.f,
-                      SkPoint::Make(size / 2.f, size / 2.f), size / 2.f),
-      std::make_tuple(SkPoint::Make(size / 4.f, size / 4.f), size / 16.f,
-                      SkPoint::Make(size / 2.f, size / 2.f), size / 8.f),
-      std::make_tuple(SkPoint::Make(size / 4.f, size / 4.f), size / 8.f,
-                      SkPoint::Make(size / 2.f, size / 2.f), size / 16.f),
-      std::make_tuple(SkPoint::Make(size / 8.f, size / 8.f), size / 8.f,
-                      SkPoint::Make(size / 2.f, size / 2.f), size / 8.f),
+  std::array<std::tuple<DlPoint, float, DlPoint, float>, 8> array{
+      std::make_tuple(DlPoint(size / 2.f, size / 2.f), 0.f,
+                      DlPoint(size / 2.f, size / 2.f), size / 2.f),
+      std::make_tuple(DlPoint(size / 2.f, size / 2.f), size / 4.f,
+                      DlPoint(size / 2.f, size / 2.f), size / 2.f),
+      std::make_tuple(DlPoint(size / 4.f, size / 4.f), 0.f,
+                      DlPoint(size / 2.f, size / 2.f), size / 2.f),
+      std::make_tuple(DlPoint(size / 4.f, size / 4.f), size / 2.f,
+                      DlPoint(size / 2.f, size / 2.f), 0),
+      std::make_tuple(DlPoint(size / 4.f, size / 4.f), size / 4.f,
+                      DlPoint(size / 2.f, size / 2.f), size / 2.f),
+      std::make_tuple(DlPoint(size / 4.f, size / 4.f), size / 16.f,
+                      DlPoint(size / 2.f, size / 2.f), size / 8.f),
+      std::make_tuple(DlPoint(size / 4.f, size / 4.f), size / 8.f,
+                      DlPoint(size / 2.f, size / 2.f), size / 16.f),
+      std::make_tuple(DlPoint(size / 8.f, size / 8.f), size / 8.f,
+                      DlPoint(size / 2.f, size / 2.f), size / 8.f),
   };
   for (int i = 0; i < 8; i++) {
     builder.Save();

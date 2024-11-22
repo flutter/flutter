@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/painting/image_shader.h"
 #include "flutter/lib/ui/painting/image_filter.h"
 
+#include "flutter/display_list/effects/color_sources/dl_image_color_source.h"
 #include "flutter/lib/ui/painting/display_list_image_gpu.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -35,23 +36,25 @@ Dart_Handle ImageShader::initWithImage(CanvasImage* image,
 
   image_ = image->image();
   tonic::Float64List matrix4(matrix_handle);
-  SkMatrix local_matrix = ToSkMatrix(matrix4);
+  DlMatrix local_matrix = ToDlMatrix(matrix4);
   matrix4.Release();
   sampling_is_locked_ = filter_quality_index >= 0;
   DlImageSampling sampling =
       sampling_is_locked_ ? ImageFilter::SamplingFromIndex(filter_quality_index)
                           : DlImageSampling::kLinear;
-  cached_shader_ = std::make_shared<DlImageColorSource>(
-      image_, tmx, tmy, sampling, &local_matrix);
+  cached_shader_ =
+      DlColorSource::MakeImage(image_, tmx, tmy, sampling, &local_matrix);
   FML_DCHECK(cached_shader_->isUIThreadSafe());
   return Dart_Null();
 }
 
 std::shared_ptr<DlColorSource> ImageShader::shader(DlImageSampling sampling) {
-  if (sampling_is_locked_ || sampling == cached_shader_->sampling()) {
+  const DlImageColorSource* image_shader = cached_shader_->asImage();
+  FML_DCHECK(image_shader);
+  if (sampling_is_locked_ || sampling == image_shader->sampling()) {
     return cached_shader_;
   }
-  return cached_shader_->with_sampling(sampling);
+  return image_shader->WithSampling(sampling);
 }
 
 int ImageShader::width() {

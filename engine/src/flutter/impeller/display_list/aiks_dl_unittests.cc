@@ -8,7 +8,7 @@
 #include "display_list/dl_tile_mode.h"
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
-#include "display_list/effects/dl_image_filters.h"
+#include "display_list/effects/dl_image_filter.h"
 #include "display_list/geometry/dl_geometry_types.h"
 #include "display_list/geometry/dl_path.h"
 #include "display_list/image/dl_image.h"
@@ -68,7 +68,7 @@ TEST_P(AiksTest, CollapsedDrawPaintInSubpassBackdropFilter) {
   paint.setBlendMode(DlBlendMode::kSrc);
   builder.DrawPaint(paint);
 
-  auto filter = DlBlurImageFilter::Make(20.0, 20.0, DlTileMode::kDecal);
+  auto filter = DlImageFilter::MakeBlur(20.0, 20.0, DlTileMode::kDecal);
   builder.SaveLayer(nullptr, nullptr, filter.get());
 
   DlPaint draw_paint;
@@ -186,7 +186,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithBlendImageFilterDrawsCorrectly) {
 
   DlPaint save_paint;
   save_paint.setColor(DlColor::kBlack().withAlpha(128));
-  save_paint.setImageFilter(DlColorFilterImageFilter::Make(
+  save_paint.setImageFilter(DlImageFilter::MakeColorFilter(
       DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kDstOver)));
 
   builder.SaveLayer(nullptr, &save_paint);
@@ -229,7 +229,7 @@ TEST_P(AiksTest, ImageFilteredUnboundedSaveLayerWithUnboundedContents) {
 
   DlPaint save_paint;
   save_paint.setImageFilter(
-      DlBlurImageFilter::Make(10.0, 10.0, DlTileMode::kDecal));
+      DlImageFilter::MakeBlur(10.0, 10.0, DlTileMode::kDecal));
   builder.SaveLayer(nullptr, &save_paint);
 
   {
@@ -323,7 +323,7 @@ TEST_P(AiksTest,
   DlPaint paint;
   paint.setColor(DlColor::kBlack().withAlpha(128));
   paint.setImageFilter(
-      DlColorFilterImageFilter::Make(DlMatrixColorFilter::Make(matrix)));
+      DlImageFilter::MakeColorFilter(DlMatrixColorFilter::Make(matrix)));
   paint.setColorFilter(
       DlBlendColorFilter::Make(DlColor::kGreen(), DlBlendMode::kModulate));
   builder.SaveLayer(nullptr, &paint);
@@ -454,8 +454,8 @@ TEST_P(AiksTest, CanDrawPointsWithTextureMap) {
       {52, 52},    //
   };
 
-  auto image_src = std::make_shared<DlImageColorSource>(
-      texture, DlTileMode::kClamp, DlTileMode::kClamp);
+  auto image_src =
+      DlColorSource::MakeImage(texture, DlTileMode::kClamp, DlTileMode::kClamp);
 
   DlPaint paint_round;
   paint_round.setStrokeCap(DlStrokeCap::kRound);
@@ -605,7 +605,7 @@ TEST_P(AiksTest, ReleasesTextureOnTeardown) {
     builder.Translate(100.0f, 100.0f);
 
     DlPaint paint;
-    paint.setColorSource(std::make_shared<DlImageColorSource>(
+    paint.setColorSource(DlColorSource::MakeImage(
         DlImageImpeller::Make(texture), DlTileMode::kClamp, DlTileMode::kClamp,
         DlImageSampling::kLinear, nullptr));
 
@@ -644,7 +644,7 @@ TEST_P(AiksTest, MatrixImageFilterMagnify) {
     DlMatrix matrix = DlMatrix::MakeScale({scale, scale, 1});
     DlPaint paint;
     paint.setImageFilter(
-        DlMatrixImageFilter::Make(matrix, DlImageSampling::kLinear));
+        DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear));
     builder.SaveLayer(nullptr, &paint);
 
     DlPaint rect_paint;
@@ -696,22 +696,22 @@ TEST_P(AiksTest, ImageFilteredSaveLayerWithUnboundedContents) {
     builder.Restore();
   };
 
-  test(DlBlurImageFilter::Make(10.0, 10.0, DlTileMode::kDecal));
+  test(DlImageFilter::MakeBlur(10.0, 10.0, DlTileMode::kDecal));
 
   builder.Translate(200.0, 0.0);
 
-  test(DlDilateImageFilter::Make(10.0, 10.0));
+  test(DlImageFilter::MakeDilate(10.0, 10.0));
 
   builder.Translate(200.0, 0.0);
 
-  test(DlErodeImageFilter::Make(10.0, 10.0));
+  test(DlImageFilter::MakeErode(10.0, 10.0));
 
   builder.Translate(-400.0, 200.0);
 
   DlMatrix matrix = DlMatrix::MakeRotationZ(DlDegrees(10));
 
   auto rotate_filter =
-      DlMatrixImageFilter::Make(matrix, DlImageSampling::kLinear);
+      DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear);
   test(rotate_filter);
 
   builder.Translate(200.0, 0.0);
@@ -723,28 +723,27 @@ TEST_P(AiksTest, ImageFilteredSaveLayerWithUnboundedContents) {
       0, 0, 0, 1, 0   //
   };
   auto rgb_swap_filter =
-      DlColorFilterImageFilter::Make(std::make_shared<DlMatrixColorFilter>(m));
+      DlImageFilter::MakeColorFilter(std::make_shared<DlMatrixColorFilter>(m));
   test(rgb_swap_filter);
 
   builder.Translate(200.0, 0.0);
 
-  test(DlComposeImageFilter::Make(rotate_filter, rgb_swap_filter));
+  test(DlImageFilter::MakeCompose(rotate_filter, rgb_swap_filter));
 
   builder.Translate(-400.0, 200.0);
 
-  test(DlLocalMatrixImageFilter::Make(DlMatrix::MakeTranslation({25.0, 25.0}),
-                                      rotate_filter));
+  test(rotate_filter->makeWithLocalMatrix(
+      DlMatrix::MakeTranslation({25.0, 25.0})));
 
   builder.Translate(200.0, 0.0);
 
-  test(DlLocalMatrixImageFilter::Make(DlMatrix::MakeTranslation({25.0, 25.0}),
-                                      rgb_swap_filter));
+  test(rgb_swap_filter->makeWithLocalMatrix(
+      DlMatrix::MakeTranslation({25.0, 25.0})));
 
   builder.Translate(200.0, 0.0);
 
-  test(DlLocalMatrixImageFilter::Make(
-      DlMatrix::MakeTranslation({25.0, 25.0}),
-      DlComposeImageFilter::Make(rotate_filter, rgb_swap_filter)));
+  test(DlImageFilter::MakeCompose(rotate_filter, rgb_swap_filter)
+           ->makeWithLocalMatrix(DlMatrix::MakeTranslation({25.0, 25.0})));
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -774,7 +773,7 @@ TEST_P(AiksTest, MatrixBackdropFilter) {
                       DlMatrix::MakeScale({0.5, 0.5, 1}) *
                       DlMatrix::MakeTranslation({-100, -100});
     auto backdrop_filter =
-        DlMatrixImageFilter::Make(matrix, DlImageSampling::kLinear);
+        DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear);
     builder.SaveLayer(nullptr, nullptr, backdrop_filter.get());
     builder.Restore();
   }
@@ -803,7 +802,7 @@ TEST_P(AiksTest, MatrixSaveLayerFilter) {
                       DlMatrix::MakeTranslation({-200, -200});
     DlPaint save_paint;
     save_paint.setImageFilter(
-        DlMatrixImageFilter::Make(matrix, DlImageSampling::kLinear));
+        DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear));
 
     builder.SaveLayer(nullptr, &save_paint);
 
@@ -923,7 +922,7 @@ TEST_P(AiksTest, BackdropRestoreUsesCorrectCoverageForFirstRestoredClip) {
     {
       // Create a save layer with a backdrop blur filter.
       auto backdrop_filter =
-          DlBlurImageFilter::Make(10.0, 10.0, DlTileMode::kDecal);
+          DlImageFilter::MakeBlur(10.0, 10.0, DlTileMode::kDecal);
       builder.SaveLayer(nullptr, nullptr, backdrop_filter.get());
     }
   }

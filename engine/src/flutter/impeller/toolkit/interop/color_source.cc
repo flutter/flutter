@@ -13,16 +13,14 @@ ScopedObject<ColorSource> ColorSource::MakeLinearGradient(
     const std::vector<Scalar>& stops,
     flutter::DlTileMode tile_mode,
     const Matrix& transformation) {
-  const auto sk_transformation = ToSkMatrix(transformation);
-  auto dl_filter =
-      flutter::DlColorSource::MakeLinear(ToSkiaType(start_point),  //
-                                         ToSkiaType(end_point),    //
-                                         stops.size(),             //
-                                         colors.data(),            //
-                                         stops.data(),             //
-                                         tile_mode,                //
-                                         &sk_transformation        //
-      );
+  auto dl_filter = flutter::DlColorSource::MakeLinear(start_point,     //
+                                                      end_point,       //
+                                                      stops.size(),    //
+                                                      colors.data(),   //
+                                                      stops.data(),    //
+                                                      tile_mode,       //
+                                                      &transformation  //
+  );
   if (!dl_filter) {
     return nullptr;
   }
@@ -36,14 +34,13 @@ ScopedObject<ColorSource> ColorSource::MakeRadialGradient(
     const std::vector<Scalar>& stops,
     flutter::DlTileMode tile_mode,
     const Matrix& transformation) {
-  const auto sk_transformation = ToSkMatrix(transformation);
-  auto dl_filter = flutter::DlColorSource::MakeRadial(ToSkiaType(center),  //
-                                                      radius,              //
-                                                      stops.size(),        //
-                                                      colors.data(),       //
-                                                      stops.data(),        //
-                                                      tile_mode,           //
-                                                      &sk_transformation   //
+  auto dl_filter = flutter::DlColorSource::MakeRadial(center,          //
+                                                      radius,          //
+                                                      stops.size(),    //
+                                                      colors.data(),   //
+                                                      stops.data(),    //
+                                                      tile_mode,       //
+                                                      &transformation  //
   );
   if (!dl_filter) {
     return nullptr;
@@ -60,18 +57,16 @@ ScopedObject<ColorSource> ColorSource::MakeConicalGradient(
     const std::vector<Scalar>& stops,
     flutter::DlTileMode tile_mode,
     const Matrix& transformation) {
-  const auto sk_transformation = ToSkMatrix(transformation);
-  auto dl_filter =
-      flutter::DlColorSource::MakeConical(ToSkiaType(start_center),  //
-                                          start_radius,              //
-                                          ToSkiaType(end_center),    //
-                                          end_radius,                //
-                                          stops.size(),              //
-                                          colors.data(),             //
-                                          stops.data(),              //
-                                          tile_mode,                 //
-                                          &sk_transformation         //
-      );
+  auto dl_filter = flutter::DlColorSource::MakeConical(start_center,    //
+                                                       start_radius,    //
+                                                       end_center,      //
+                                                       end_radius,      //
+                                                       stops.size(),    //
+                                                       colors.data(),   //
+                                                       stops.data(),    //
+                                                       tile_mode,       //
+                                                       &transformation  //
+  );
   if (!dl_filter) {
     return nullptr;
   }
@@ -86,15 +81,14 @@ ScopedObject<ColorSource> ColorSource::MakeSweepGradient(
     const std::vector<Scalar>& stops,
     flutter::DlTileMode tile_mode,
     const Matrix& transformation) {
-  const auto sk_transformation = ToSkMatrix(transformation);
-  auto dl_filter = flutter::DlColorSource::MakeSweep(ToSkiaType(center),  //
-                                                     start,               //
-                                                     end,                 //
-                                                     stops.size(),        //
-                                                     colors.data(),       //
-                                                     stops.data(),        //
-                                                     tile_mode,           //
-                                                     &sk_transformation   //
+  auto dl_filter = flutter::DlColorSource::MakeSweep(center,          //
+                                                     start,           //
+                                                     end,             //
+                                                     stops.size(),    //
+                                                     colors.data(),   //
+                                                     stops.data(),    //
+                                                     tile_mode,       //
+                                                     &transformation  //
   );
   if (!dl_filter) {
     return nullptr;
@@ -108,14 +102,12 @@ ScopedObject<ColorSource> ColorSource::MakeImage(
     flutter::DlTileMode vertical_tile_mode,
     flutter::DlImageSampling sampling,
     const Matrix& transformation) {
-  const auto sk_transformation = ToSkMatrix(transformation);
-  auto dl_filter =
-      std::make_shared<flutter::DlImageColorSource>(image.MakeImage(),     //
-                                                    horizontal_tile_mode,  //
-                                                    vertical_tile_mode,    //
-                                                    sampling,              //
-                                                    &sk_transformation     //
-      );
+  auto dl_filter = flutter::DlColorSource::MakeImage(image.MakeImage(),     //
+                                                     horizontal_tile_mode,  //
+                                                     vertical_tile_mode,    //
+                                                     sampling,              //
+                                                     &transformation        //
+  );
   return Create<ColorSource>(std::move(dl_filter));
 }
 

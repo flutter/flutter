@@ -6,6 +6,11 @@
 #define FLUTTER_DISPLAY_LIST_EFFECTS_DL_IMAGE_FILTER_H_
 
 #include "flutter/display_list/dl_attributes.h"
+#include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/dl_tile_mode.h"
+#include "flutter/display_list/effects/dl_color_filter.h"
+#include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/effects/dl_runtime_effect.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 
 namespace flutter {
@@ -23,20 +28,20 @@ enum class DlImageFilterType {
   kDilate,
   kErode,
   kMatrix,
-  kCompose,
-  kColorFilter,
-  kLocalMatrix,
   kRuntimeEffect,
+  kColorFilter,
+  kCompose,
+  kLocalMatrix,
 };
 
 class DlBlurImageFilter;
 class DlDilateImageFilter;
 class DlErodeImageFilter;
 class DlMatrixImageFilter;
-class DlLocalMatrixImageFilter;
-class DlComposeImageFilter;
-class DlColorFilterImageFilter;
 class DlRuntimeEffectImageFilter;
+class DlColorFilterImageFilter;
+class DlComposeImageFilter;
+class DlLocalMatrixImageFilter;
 
 class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
  public:
@@ -45,6 +50,31 @@ class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
     kScaleTranslate,
     kComplex,
   };
+
+  static std::shared_ptr<DlImageFilter> MakeBlur(DlScalar sigma_x,
+                                                 DlScalar sigma_y,
+                                                 DlTileMode tile_mode);
+
+  static std::shared_ptr<DlImageFilter> MakeDilate(DlScalar radius_x,
+                                                   DlScalar radius_y);
+
+  static std::shared_ptr<DlImageFilter> MakeErode(DlScalar radius_x,
+                                                  DlScalar radius_y);
+
+  static std::shared_ptr<DlImageFilter> MakeMatrix(const DlMatrix& matrix,
+                                                   DlImageSampling sampling);
+
+  static std::shared_ptr<DlImageFilter> MakeRuntimeEffect(
+      sk_sp<DlRuntimeEffect> runtime_effect,
+      std::vector<std::shared_ptr<DlColorSource>> samplers,
+      std::shared_ptr<std::vector<uint8_t>> uniform_data);
+
+  static std::shared_ptr<DlImageFilter> MakeColorFilter(
+      const std::shared_ptr<const DlColorFilter>& filter);
+
+  static std::shared_ptr<DlImageFilter> MakeCompose(
+      const std::shared_ptr<DlImageFilter>& outer,
+      const std::shared_ptr<DlImageFilter>& inner);
 
   // Return a DlBlurImageFilter pointer to this object iff it is a Blur
   // type of ImageFilter, otherwise return nullptr.

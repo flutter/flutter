@@ -777,8 +777,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
         static_cast<Entity::TileMode>(image_color_source->vertical_tile_mode());
     auto sampler_descriptor =
         skia_conversions::ToSamplerDescriptor(image_color_source->sampling());
-    auto effect_transform =
-        skia_conversions::ToMatrix(image_color_source->matrix());
+    auto effect_transform = image_color_source->matrix();
 
     auto contents = std::make_shared<VerticesSimpleBlendContents>();
     contents->SetBlendMode(blend_mode);

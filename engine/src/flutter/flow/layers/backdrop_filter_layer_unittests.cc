@@ -4,8 +4,7 @@
 
 #include "flutter/flow/layers/backdrop_filter_layer.h"
 
-#include "flutter/display_list/effects/dl_blur_image_filter.h"
-#include "flutter/display_list/effects/dl_matrix_image_filter.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/flow/testing/diff_context_test.h"
@@ -20,9 +19,9 @@ using BackdropFilterLayerTest = LayerTest;
 
 #ifndef NDEBUG
 TEST_F(BackdropFilterLayerTest, PaintingEmptyLayerDies) {
-  auto filter = DlBlurImageFilter(5, 5, DlTileMode::kClamp);
-  auto layer = std::make_shared<BackdropFilterLayer>(filter.shared(),
-                                                     DlBlendMode::kSrcOver);
+  auto filter = DlImageFilter::MakeBlur(5, 5, DlTileMode::kClamp);
+  auto layer =
+      std::make_shared<BackdropFilterLayer>(filter, DlBlendMode::kSrcOver);
   auto parent = std::make_shared<ClipRectLayer>(kEmptyRect, Clip::kHardEdge);
   parent->Add(layer);
 
@@ -39,9 +38,9 @@ TEST_F(BackdropFilterLayerTest, PaintBeforePrerollDies) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   auto mock_layer = std::make_shared<MockLayer>(child_path);
-  auto filter = DlBlurImageFilter(5, 5, DlTileMode::kClamp);
-  auto layer = std::make_shared<BackdropFilterLayer>(filter.shared(),
-                                                     DlBlendMode::kSrcOver);
+  auto filter = DlImageFilter::MakeBlur(5, 5, DlTileMode::kClamp);
+  auto layer =
+      std::make_shared<BackdropFilterLayer>(filter, DlBlendMode::kSrcOver);
   layer->Add(mock_layer);
 
   EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
@@ -101,7 +100,7 @@ TEST_F(BackdropFilterLayerTest, SimpleFilter) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
-  auto layer_filter = DlBlurImageFilter::Make(2.5, 3.2, DlTileMode::kClamp);
+  auto layer_filter = DlImageFilter::MakeBlur(2.5, 3.2, DlTileMode::kClamp);
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<BackdropFilterLayer>(layer_filter,
                                                      DlBlendMode::kSrcOver);
@@ -148,7 +147,7 @@ TEST_F(BackdropFilterLayerTest, NonSrcOverBlend) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
-  auto layer_filter = DlBlurImageFilter::Make(2.5, 3.2, DlTileMode::kClamp);
+  auto layer_filter = DlImageFilter::MakeBlur(2.5, 3.2, DlTileMode::kClamp);
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer =
       std::make_shared<BackdropFilterLayer>(layer_filter, DlBlendMode::kSrc);
@@ -204,7 +203,7 @@ TEST_F(BackdropFilterLayerTest, MultipleChildren) {
   const DlPaint child_paint2 = DlPaint(DlColor::kCyan());
   SkRect children_bounds = child_path1.getBounds();
   children_bounds.join(child_path2.getBounds());
-  auto layer_filter = DlBlurImageFilter::Make(2.5, 3.2, DlTileMode::kClamp);
+  auto layer_filter = DlImageFilter::MakeBlur(2.5, 3.2, DlTileMode::kClamp);
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
   auto layer = std::make_shared<BackdropFilterLayer>(layer_filter,
@@ -267,8 +266,8 @@ TEST_F(BackdropFilterLayerTest, Nested) {
   const DlPaint child_paint2 = DlPaint(DlColor::kCyan());
   SkRect children_bounds = child_path1.getBounds();
   children_bounds.join(child_path2.getBounds());
-  auto layer_filter1 = DlBlurImageFilter::Make(2.5, 3.2, DlTileMode::kClamp);
-  auto layer_filter2 = DlBlurImageFilter::Make(2.7, 3.1, DlTileMode::kDecal);
+  auto layer_filter1 = DlImageFilter::MakeBlur(2.5, 3.2, DlTileMode::kClamp);
+  auto layer_filter2 = DlImageFilter::MakeBlur(2.7, 3.1, DlTileMode::kDecal);
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
   auto layer1 = std::make_shared<BackdropFilterLayer>(layer_filter1,
@@ -339,11 +338,11 @@ TEST_F(BackdropFilterLayerTest, Nested) {
 
 TEST_F(BackdropFilterLayerTest, Readback) {
   std::shared_ptr<DlImageFilter> no_filter;
-  auto layer_filter = DlBlurImageFilter(5, 5, DlTileMode::kClamp);
+  auto layer_filter = DlImageFilter::MakeBlur(5, 5, DlTileMode::kClamp);
   auto initial_transform = SkMatrix();
 
   // BDF with filter always reads from surface
-  auto layer1 = std::make_shared<BackdropFilterLayer>(layer_filter.shared(),
+  auto layer1 = std::make_shared<BackdropFilterLayer>(layer_filter,
                                                       DlBlendMode::kSrcOver);
   preroll_context()->surface_needs_readback = false;
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
@@ -372,14 +371,14 @@ TEST_F(BackdropFilterLayerTest, Readback) {
 }
 
 TEST_F(BackdropFilterLayerTest, OpacityInheritance) {
-  auto backdrop_filter = DlBlurImageFilter(5, 5, DlTileMode::kClamp);
+  auto backdrop_filter = DlImageFilter::MakeBlur(5, 5, DlTileMode::kClamp);
   const SkPath mock_path = SkPath().addRect(SkRect::MakeLTRB(0, 0, 10, 10));
   const DlPaint mock_paint = DlPaint(DlColor::kRed());
   const SkRect clip_rect = SkRect::MakeLTRB(0, 0, 100, 100);
 
   auto clip = std::make_shared<ClipRectLayer>(clip_rect, Clip::kHardEdge);
   auto parent = std::make_shared<OpacityLayer>(128, SkPoint::Make(0, 0));
-  auto layer = std::make_shared<BackdropFilterLayer>(backdrop_filter.shared(),
+  auto layer = std::make_shared<BackdropFilterLayer>(backdrop_filter,
                                                      DlBlendMode::kSrcOver);
   auto child = std::make_shared<MockLayer>(mock_path, mock_paint);
   layer->Add(child);
@@ -400,7 +399,8 @@ TEST_F(BackdropFilterLayerTest, OpacityInheritance) {
         /* BackdropFilterLayer::Paint */ {
           DlPaint save_paint;
           save_paint.setAlpha(128);
-          expected_builder.SaveLayer(&clip_rect, &save_paint, &backdrop_filter);
+          expected_builder.SaveLayer(&clip_rect, &save_paint,
+                                     backdrop_filter.get());
           {
             /* MockLayer::Paint */ {
               DlPaint child_paint;
@@ -420,20 +420,20 @@ TEST_F(BackdropFilterLayerTest, OpacityInheritance) {
 using BackdropLayerDiffTest = DiffContextTest;
 
 TEST_F(BackdropLayerDiffTest, BackdropLayer) {
-  auto filter = DlBlurImageFilter(10, 10, DlTileMode::kClamp);
+  auto filter = DlImageFilter::MakeBlur(10, 10, DlTileMode::kClamp);
 
   {
     // tests later assume 30px readback area, fail early if that's not the case
     DlIRect readback;
-    EXPECT_EQ(filter.get_input_device_bounds(DlIRect::MakeWH(10, 10),
-                                             DlMatrix(), readback),
+    EXPECT_EQ(filter->get_input_device_bounds(DlIRect::MakeWH(10, 10),
+                                              DlMatrix(), readback),
               &readback);
     EXPECT_EQ(readback, DlIRect::MakeLTRB(-30, -30, 40, 40));
   }
 
   MockLayerTree l1(SkISize::Make(100, 100));
-  l1.root()->Add(std::make_shared<BackdropFilterLayer>(filter.shared(),
-                                                       DlBlendMode::kSrcOver));
+  l1.root()->Add(
+      std::make_shared<BackdropFilterLayer>(filter, DlBlendMode::kSrcOver));
 
   // no clip, effect over entire surface
   auto damage = DiffLayerTree(l1, MockLayerTree(SkISize::Make(100, 100)));
@@ -443,8 +443,8 @@ TEST_F(BackdropLayerDiffTest, BackdropLayer) {
 
   auto clip = std::make_shared<ClipRectLayer>(SkRect::MakeLTRB(20, 20, 60, 60),
                                               Clip::kHardEdge);
-  clip->Add(std::make_shared<BackdropFilterLayer>(filter.shared(),
-                                                  DlBlendMode::kSrcOver));
+  clip->Add(
+      std::make_shared<BackdropFilterLayer>(filter, DlBlendMode::kSrcOver));
   l2.root()->Add(clip);
   damage = DiffLayerTree(l2, MockLayerTree(SkISize::Make(100, 100)));
 
@@ -478,15 +478,15 @@ TEST_F(BackdropLayerDiffTest, BackdropLayer) {
 }
 
 TEST_F(BackdropLayerDiffTest, ReadbackOutsideOfPaintArea) {
-  auto filter = DlMatrixImageFilter(DlMatrix::MakeTranslation({50, 50}),
-                                    DlImageSampling::kLinear);
+  auto filter = DlImageFilter::MakeMatrix(DlMatrix::MakeTranslation({50, 50}),
+                                          DlImageSampling::kLinear);
 
   MockLayerTree l1(SkISize::Make(100, 100));
 
   auto clip = std::make_shared<ClipRectLayer>(SkRect::MakeLTRB(60, 60, 80, 80),
                                               Clip::kHardEdge);
-  clip->Add(std::make_shared<BackdropFilterLayer>(filter.shared(),
-                                                  DlBlendMode::kSrcOver));
+  clip->Add(
+      std::make_shared<BackdropFilterLayer>(filter, DlBlendMode::kSrcOver));
   l1.root()->Add(clip);
   auto damage = DiffLayerTree(l1, MockLayerTree(SkISize::Make(100, 100)));
 
@@ -503,13 +503,13 @@ TEST_F(BackdropLayerDiffTest, ReadbackOutsideOfPaintArea) {
 }
 
 TEST_F(BackdropLayerDiffTest, BackdropLayerInvalidTransform) {
-  auto filter = DlBlurImageFilter(10, 10, DlTileMode::kClamp);
+  auto filter = DlImageFilter::MakeBlur(10, 10, DlTileMode::kClamp);
 
   {
     // tests later assume 30px readback area, fail early if that's not the case
     DlIRect readback;
-    EXPECT_EQ(filter.get_input_device_bounds(DlIRect::MakeWH(10, 10),
-                                             DlMatrix(), readback),
+    EXPECT_EQ(filter->get_input_device_bounds(DlIRect::MakeWH(10, 10),
+                                              DlMatrix(), readback),
               &readback);
     EXPECT_EQ(readback, DlIRect::MakeLTRB(-30, -30, 40, 40));
   }
@@ -521,8 +521,8 @@ TEST_F(BackdropLayerDiffTest, BackdropLayerInvalidTransform) {
 
   auto transform_layer = std::make_shared<TransformLayer>(transform);
   l1.root()->Add(transform_layer);
-  transform_layer->Add(std::make_shared<BackdropFilterLayer>(
-      filter.shared(), DlBlendMode::kSrcOver));
+  transform_layer->Add(
+      std::make_shared<BackdropFilterLayer>(filter, DlBlendMode::kSrcOver));
 
   auto damage = DiffLayerTree(l1, MockLayerTree(SkISize::Make(100, 100)));
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeWH(100, 100));

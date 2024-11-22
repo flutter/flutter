@@ -9,7 +9,7 @@
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/display_list/dl_sampling_options.h"
-#include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/utils/dl_comparable.h"
 #include "flutter/fml/macros.h"
 
@@ -169,7 +169,7 @@ struct SetBlendModeOp final : DLOp {
 //      instance copied to the memory following the record
 //      yields a size and efficiency that has somewhere between
 //      4 and 8 bytes unused
-#define DEFINE_SET_CLEAR_DLATTR_OP(name, sk_name, field)                    \
+#define DEFINE_SET_CLEAR_DLATTR_OP(name, field)                             \
   struct Clear##name##Op final : DLOp {                                     \
     static constexpr auto kType = DisplayListOpType::kClear##name;          \
                                                                             \
@@ -189,14 +189,14 @@ struct SetBlendModeOp final : DLOp {
       receiver.set##name(filter);                                           \
     }                                                                       \
   };
-DEFINE_SET_CLEAR_DLATTR_OP(ColorFilter, ColorFilter, filter)
-DEFINE_SET_CLEAR_DLATTR_OP(ImageFilter, ImageFilter, filter)
-DEFINE_SET_CLEAR_DLATTR_OP(MaskFilter, MaskFilter, filter)
-DEFINE_SET_CLEAR_DLATTR_OP(ColorSource, Shader, source)
+DEFINE_SET_CLEAR_DLATTR_OP(ColorFilter, filter)
+DEFINE_SET_CLEAR_DLATTR_OP(ImageFilter, filter)
+DEFINE_SET_CLEAR_DLATTR_OP(MaskFilter, filter)
+DEFINE_SET_CLEAR_DLATTR_OP(ColorSource, source)
 #undef DEFINE_SET_CLEAR_DLATTR_OP
 
-// 4 byte header + 80 bytes for the embedded DlImageColorSource
-// uses 84 total bytes (4 bytes unused)
+// 4 byte header + 96 bytes for the embedded DlImageColorSource
+// uses 104 total bytes (4 bytes unused)
 struct SetImageColorSourceOp : DLOp {
   static constexpr auto kType = DisplayListOpType::kSetImageColorSource;
 
