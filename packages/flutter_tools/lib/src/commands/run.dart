@@ -39,7 +39,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
     usesFlavorOption();
-    usesWebRendererOption();
     usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
@@ -235,7 +234,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
   WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
-    stringArg(FlutterOptions.kWebRendererFlag),
+    null, // stringArg(FlutterOptions.kWebRendererFlag),
     useWasm: useWasm
   );
 

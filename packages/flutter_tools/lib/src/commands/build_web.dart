@@ -51,7 +51,6 @@ class BuildWebCommand extends BuildSubCommand {
       allowed: ServiceWorkerStrategy.values.map((ServiceWorkerStrategy e) => e.cliName),
       allowedHelp: CliEnum.allowedHelp(ServiceWorkerStrategy.values),
     );
-    usesWebRendererOption();
     usesWebResourcesCdnFlag();
 
     //
@@ -141,7 +140,7 @@ class BuildWebCommand extends BuildSubCommand {
         ? int.parse(dart2jsOptimizationLevelValue.substring(1))
         : optimizationLevel;
 
-    final String? webRendererString = stringArg(FlutterOptions.kWebRendererFlag);
+    final String? webRendererString = null; // stringArg(FlutterOptions.kWebRendererFlag);
     final WebRendererMode? webRenderer = webRendererString == null
         ? null
         : WebRendererMode.values.byName(webRendererString);

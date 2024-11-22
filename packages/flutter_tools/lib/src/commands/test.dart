@@ -76,7 +76,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesDartDefineOption();
-    usesWebRendererOption();
     usesDeviceUserOption();
     usesFlavorOption();
     addEnableImpellerFlag(verboseHelp: verboseHelp);
@@ -337,7 +336,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }
 
   WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
-    stringArg(FlutterOptions.kWebRendererFlag),
+    null, // stringArg(FlutterOptions.kWebRendererFlag),
     useWasm: useWasm
   );
 
