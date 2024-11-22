@@ -636,39 +636,6 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux firebase_abstract_method_smoke_test
-    presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/147335
-    recipe: firebaselab/firebaselab
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "open_jdk", "version": "version:17"}
-        ]
-      tags: >
-        ["firebaselab"]
-      task_name: abstract_method_smoke_test
-      physical_devices: >-
-        [
-          "--device", "model=shiba,version=34",
-          "--device", "model=panther,version=33",
-          "--device", "model=redfin,version=30"
-        ]
-      # TODO(flutter/flutter#123331): This device is flaking.
-      # "--device", "model=Nexus6P,version=25"
-      virtual_devices: >-
-        [
-          "--device", "model=Nexus5.gce_x86,version=21",
-          "--device", "model=Nexus5.gce_x86,version=22",
-          "--device", "model=Nexus5.gce_x86,version=23",
-          "--device", "model=Nexus6P,version=25",
-          "--device", "model=Nexus6P,version=26",
-          "--device", "model=Nexus6P,version=27",
-          "--device", "model=NexusLowRes,version=29"
-        ]
-
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
     bringup: true # https://github.com/flutter/flutter/issues/147335

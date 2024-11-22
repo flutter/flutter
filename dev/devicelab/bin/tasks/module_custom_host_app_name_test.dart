@@ -13,7 +13,6 @@ import 'package:path/path.dart' as path;
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
-final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
@@ -63,8 +62,8 @@ Future<void> main() async {
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
-        '$platformLineSep  # assets:$platformLineSep',
-        '$platformLineSep  assets:$platformLineSep    - assets/read-only.txt$platformLineSep',
+        '${Platform.lineTerminator}  # assets:${Platform.lineTerminator}',
+        '${Platform.lineTerminator}  assets:${Platform.lineTerminator}    - assets/read-only.txt${Platform.lineTerminator}',
       );
       await pubspec.writeAsString(content, flush: true);
 
@@ -72,8 +71,8 @@ Future<void> main() async {
 
       content = await pubspec.readAsString();
       content = content.replaceFirst(
-        '${platformLineSep}dependencies:$platformLineSep',
-        '${platformLineSep}dependencies:$platformLineSep',
+        '${Platform.lineTerminator}dependencies:${Platform.lineTerminator}',
+        '${Platform.lineTerminator}dependencies:${Platform.lineTerminator}',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {

@@ -524,7 +524,8 @@ void main() {
       ..remove(SemanticsAction.moveCursorForwardByWord)
       ..remove(SemanticsAction.moveCursorBackwardByWord)
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-      ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
+      ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
+      ..removeWhere((SemanticsAction action) => action.index == 1 << 23);
 
     const int expectedId = 1;
     final TestSemantics expectedSemantics = TestSemantics.root(
