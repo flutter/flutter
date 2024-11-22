@@ -3334,6 +3334,8 @@ final class _SelectionListenerDelegate extends StaticSelectionContainerDelegate 
     _selectionNotifier._registerSelectionListenerDelegate(this);
   }
 
+  SelectionGeometry? _initialSelectionGeometry;
+
   SelectionListenerNotifier _selectionNotifier;
   void _setNotifier(SelectionListenerNotifier newNotifier) {
     _selectionNotifier._unregisterSelectionListenerDelegate();
@@ -3344,12 +3346,18 @@ final class _SelectionListenerDelegate extends StaticSelectionContainerDelegate 
   @override
   void notifyListeners() {
     super.notifyListeners();
+    // Skip initial notification if selection is not valid.
+    if (_initialSelectionGeometry == null && !value.hasSelection) {
+      _initialSelectionGeometry = value;
+      return;
+    }
     _selectionNotifier.notifyListeners();
   }
 
   @override
   void dispose() {
     _selectionNotifier._unregisterSelectionListenerDelegate();
+    _initialSelectionGeometry = null;
     super.dispose();
   }
 

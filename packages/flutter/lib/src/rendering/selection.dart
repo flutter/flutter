@@ -835,7 +835,7 @@ class SelectionGeometry with Diagnosticable {
     properties.add(DiagnosticsProperty<SelectionPoint>('endSelectionPoint', endSelectionPoint));
     properties.add(IterableProperty<Rect>('selectionRects', selectionRects));
     properties.add(EnumProperty<SelectionStatus>('status', status));
-    properties.add(FlagProperty('hasContent', value: hasContent));
+    properties.add(DiagnosticsProperty<bool>('hasContent', hasContent));
   }
 }
 
