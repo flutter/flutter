@@ -62,14 +62,6 @@ class TaskRunner : public fml::RefCountedThreadSafe<TaskRunner>,
   static void RunNowOrPostTask(const fml::RefPtr<fml::TaskRunner>& runner,
                                const fml::closure& task);
 
-  /// Like RunNowOrPostTask, except that if the task can be immediately
-  /// executed, an empty task will still be posted to the runner afterwards.
-  ///
-  /// This is used to ensure that messages posted to Dart from the platform
-  /// thread always flush the Dart event loop.
-  static void RunNowAndFlushMessages(const fml::RefPtr<fml::TaskRunner>& runner,
-                                     const fml::closure& task);
-
  protected:
   explicit TaskRunner(fml::RefPtr<MessageLoopImpl> loop);
 
