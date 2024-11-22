@@ -370,12 +370,6 @@ void main() {
       expect(command.usage, contains(option));
     }
 
-    void expectHidden(String option) {
-      expect(command.argParser.options.keys, contains(option));
-      expect(command.argParser.options[option]!.hide, isTrue);
-      expect(command.usage, isNot(contains(option)));
-    }
-
     expectVisible('pwa-strategy');
     expectVisible('web-resources-cdn');
     expectVisible('optimization-level');
@@ -387,8 +381,6 @@ void main() {
     expectVisible('wasm');
     expectVisible('strip-wasm');
     expectVisible('base-href');
-
-    expectHidden('web-renderer');
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
