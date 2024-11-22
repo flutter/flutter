@@ -656,6 +656,54 @@ void main() {
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  testWidgets('test fullscreen routes do not transition previous route', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == '/') {
+            return PageRouteBuilder<void>(
+              pageBuilder: (_, __, ___) {
+                return Scaffold(
+                  appBar: AppBar(
+                    title: const Text('Page 1'),
+                  ),
+                  body: Container()
+                );
+              },
+            );
+          }
+          return MaterialPageRoute<void>(
+            builder: (_) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text('Page 2'),
+                ),
+                body: Container(),
+              );
+            },
+            fullscreenDialog: true,
+          );
+        },
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    final double pageTitleDX = tester.getTopLeft(find.text('Page 1')).dx;
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Second page transition has started.
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // First page has not moved.
+    expect(tester.getTopLeft(find.text('Page 1')).dx, equals(pageTitleDX));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
   testWidgets('test adaptable transitions switch during execution', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

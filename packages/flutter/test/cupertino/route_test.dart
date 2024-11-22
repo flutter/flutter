@@ -2691,6 +2691,54 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('fullscreen routes do not transition previous route', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == '/') {
+            return PageRouteBuilder<void>(
+              pageBuilder: (_, __, ___) {
+                return CupertinoPageScaffold(
+                  navigationBar: const CupertinoNavigationBar(
+                    middle: Text('Page 1'),
+                  ),
+                  child: Container()
+                );
+              },
+            );
+          }
+          return CupertinoPageRoute<void>(
+            builder: (_) {
+              return CupertinoPageScaffold(
+                navigationBar: const CupertinoNavigationBar(
+                  middle: Text('Page 2'),
+                ),
+                child: Container(),
+              );
+            },
+            fullscreenDialog: true,
+          );
+        },
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    final double pageTitleDX = tester.getTopLeft(find.text('Page 1')).dx;
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Second page transition has started.
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // First page has not moved.
+    expect(tester.getTopLeft(find.text('Page 1')).dx, equals(pageTitleDX));
+  });
+
   testWidgets('Setting CupertinoDialogRoute.requestFocus to false does not request focus on the dialog', (WidgetTester tester) async {
     late BuildContext savedContext;
     final FocusNode focusNode = FocusNode();
