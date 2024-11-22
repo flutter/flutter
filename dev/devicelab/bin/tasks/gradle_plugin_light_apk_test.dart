@@ -211,7 +211,7 @@ Future<void> main() async {
 
         section('Configure');
         project.addPlugin('plugin_under_test',
-            value: '$platformLineSep    path: ${pluginDir.path}');
+            value: '${Platform.lineTerminator}    path: ${pluginDir.path}');
         await project.addCustomBuildType('local', initWith: 'debug');
         await project.getPackages();
 
