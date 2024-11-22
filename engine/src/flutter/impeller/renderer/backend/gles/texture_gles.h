@@ -130,6 +130,15 @@ class TextureGLES final : public Texture,
   ///
   void SetFence(HandleGLES fence);
 
+  /// Store the FBO object for recycling in the 2D renderer.
+  ///
+  /// The color0 texture used by the 2D renderer will use this texture
+  /// object to store the associated FBO the first time it is used.
+  void SetCachedFBO(GLuint fbo);
+
+  /// Retrieve the cached FBO object, or GL_NONE if there is no object.
+  GLuint GetCachedFBO() const;
+
   // Visible for testing.
   std::optional<HandleGLES> GetSyncFence() const;
 
@@ -141,6 +150,7 @@ class TextureGLES final : public Texture,
   mutable std::bitset<6> slices_initialized_ = 0;
   const bool is_wrapped_;
   const std::optional<GLuint> wrapped_fbo_;
+  GLuint cached_fbo_ = GL_NONE;
   bool is_valid_ = false;
 
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,

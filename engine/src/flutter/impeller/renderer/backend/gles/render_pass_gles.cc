@@ -207,13 +207,6 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   }
 
   GLuint fbo = GL_NONE;
-  fml::ScopedCleanupClosure delete_fbo([&gl, &fbo]() {
-    if (fbo != GL_NONE) {
-      gl.BindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
-      gl.DeleteFramebuffers(1u, &fbo);
-    }
-  });
-
   TextureGLES& color_gles = TextureGLES::Cast(*pass_data.color_attachment);
   const bool is_default_fbo = color_gles.IsWrapped();
 
@@ -224,32 +217,40 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     }
   } else {
     // Create and bind an offscreen FBO.
-    gl.GenFramebuffers(1u, &fbo);
-    gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
+    auto cached_fbo = color_gles.GetCachedFBO();
+    if (cached_fbo != GL_NONE) {
+      fbo = cached_fbo;
+      gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
+    } else {
+      gl.GenFramebuffers(1u, &fbo);
+      color_gles.SetCachedFBO(fbo);
+      gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    if (!color_gles.SetAsFramebufferAttachment(
-            GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0)) {
-      return false;
-    }
-
-    if (auto depth = TextureGLES::Cast(pass_data.depth_attachment.get())) {
-      if (!depth->SetAsFramebufferAttachment(
-              GL_FRAMEBUFFER, TextureGLES::AttachmentType::kDepth)) {
+      if (!color_gles.SetAsFramebufferAttachment(
+              GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0)) {
         return false;
       }
-    }
-    if (auto stencil = TextureGLES::Cast(pass_data.stencil_attachment.get())) {
-      if (!stencil->SetAsFramebufferAttachment(
-              GL_FRAMEBUFFER, TextureGLES::AttachmentType::kStencil)) {
+
+      if (auto depth = TextureGLES::Cast(pass_data.depth_attachment.get())) {
+        if (!depth->SetAsFramebufferAttachment(
+                GL_FRAMEBUFFER, TextureGLES::AttachmentType::kDepth)) {
+          return false;
+        }
+      }
+      if (auto stencil =
+              TextureGLES::Cast(pass_data.stencil_attachment.get())) {
+        if (!stencil->SetAsFramebufferAttachment(
+                GL_FRAMEBUFFER, TextureGLES::AttachmentType::kStencil)) {
+          return false;
+        }
+      }
+
+      auto status = gl.CheckFramebufferStatus(GL_FRAMEBUFFER);
+      if (status != GL_FRAMEBUFFER_COMPLETE) {
+        VALIDATION_LOG << "Could not create a complete frambuffer: "
+                       << DebugToFramebufferError(status);
         return false;
       }
-    }
-
-    auto status = gl.CheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-      VALIDATION_LOG << "Could not create a complete frambuffer: "
-                     << DebugToFramebufferError(status);
-      return false;
     }
   }
 
