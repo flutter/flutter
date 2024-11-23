@@ -2465,16 +2465,16 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Before setting flutter view controller, events are not dispatched.
   NSSet* touches1 = [[NSSet alloc] init];
   id event1 = OCMClassMock([UIEvent class]);
-  id flutterViewContoller = OCMClassMock([FlutterViewController class]);
+  id flutterViewController = OCMClassMock([FlutterViewController class]);
   [forwardGectureRecognizer touchesBegan:touches1 withEvent:event1];
-  OCMReject([flutterViewContoller touchesBegan:touches1 withEvent:event1]);
+  OCMReject([flutterViewController touchesBegan:touches1 withEvent:event1]);
 
   // Set flutter view controller allows events to be dispatched.
   NSSet* touches2 = [[NSSet alloc] init];
   id event2 = OCMClassMock([UIEvent class]);
-  flutterPlatformViewsController->SetFlutterViewController(flutterViewContoller);
+  flutterPlatformViewsController->SetFlutterViewController(flutterViewController);
   [forwardGectureRecognizer touchesBegan:touches2 withEvent:event2];
-  OCMVerify([flutterViewContoller touchesBegan:touches2 withEvent:event2]);
+  OCMVerify([flutterViewController touchesBegan:touches2 withEvent:event2]);
 }
 
 - (void)testSetFlutterViewControllerInTheMiddleOfTouchEventShouldStillAllowGesturesToBeHandled {
@@ -2528,15 +2528,15 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       break;
     }
   }
-  id flutterViewContoller = OCMClassMock([FlutterViewController class]);
+  id flutterViewController = OCMClassMock([FlutterViewController class]);
   {
     // ***** Sequence 1, finishing touch event with touchEnded ***** //
-    flutterPlatformViewsController->SetFlutterViewController(flutterViewContoller);
+    flutterPlatformViewsController->SetFlutterViewController(flutterViewController);
 
     NSSet* touches1 = [[NSSet alloc] init];
     id event1 = OCMClassMock([UIEvent class]);
     [forwardGectureRecognizer touchesBegan:touches1 withEvent:event1];
-    OCMVerify([flutterViewContoller touchesBegan:touches1 withEvent:event1]);
+    OCMVerify([flutterViewController touchesBegan:touches1 withEvent:event1]);
 
     flutterPlatformViewsController->SetFlutterViewController(nil);
 
@@ -2544,33 +2544,33 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
     NSSet* touches2 = [[NSSet alloc] init];
     id event2 = OCMClassMock([UIEvent class]);
     [forwardGectureRecognizer touchesMoved:touches2 withEvent:event2];
-    OCMVerify([flutterViewContoller touchesMoved:touches2 withEvent:event2]);
+    OCMVerify([flutterViewController touchesMoved:touches2 withEvent:event2]);
 
     NSSet* touches3 = [[NSSet alloc] init];
     id event3 = OCMClassMock([UIEvent class]);
     [forwardGectureRecognizer touchesEnded:touches3 withEvent:event3];
-    OCMVerify([flutterViewContoller touchesEnded:touches3 withEvent:event3]);
+    OCMVerify([flutterViewController touchesEnded:touches3 withEvent:event3]);
 
     // Now the 2nd touch sequence should not be allowed.
     NSSet* touches4 = [[NSSet alloc] init];
     id event4 = OCMClassMock([UIEvent class]);
     [forwardGectureRecognizer touchesBegan:touches4 withEvent:event4];
-    OCMReject([flutterViewContoller touchesBegan:touches4 withEvent:event4]);
+    OCMReject([flutterViewController touchesBegan:touches4 withEvent:event4]);
 
     NSSet* touches5 = [[NSSet alloc] init];
     id event5 = OCMClassMock([UIEvent class]);
     [forwardGectureRecognizer touchesEnded:touches5 withEvent:event5];
-    OCMReject([flutterViewContoller touchesEnded:touches5 withEvent:event5]);
+    OCMReject([flutterViewController touchesEnded:touches5 withEvent:event5]);
   }
 
   {
     // ***** Sequence 2, finishing touch event with touchCancelled ***** //
-    flutterPlatformViewsController->SetFlutterViewController(flutterViewContoller);
+    flutterPlatformViewsController->SetFlutterViewController(flutterViewController);
 
     NSSet* touches1 = [[NSSet alloc] init];
     id event1 = OCMClassMock([UIEvent class]);
     [forwardGectureRecognizer touchesBegan:touches1 withEvent:event1];
-    OCMVerify([flutterViewContoller touchesBegan:touches1 withEvent:event1]);
+    OCMVerify([flutterViewController touchesBegan:touches1 withEvent:event1]);
 
     flutterPlatformViewsController->SetFlutterViewController(nil);
 
@@ -2578,23 +2578,23 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
     NSSet* touches2 = [[NSSet alloc] init];
     id event2 = OCMClassMock([UIEvent class]);
     [forwardGectureRecognizer touchesMoved:touches2 withEvent:event2];
-    OCMVerify([flutterViewContoller touchesMoved:touches2 withEvent:event2]);
+    OCMVerify([flutterViewController touchesMoved:touches2 withEvent:event2]);
 
     NSSet* touches3 = [[NSSet alloc] init];
     id event3 = OCMClassMock([UIEvent class]);
     [forwardGectureRecognizer touchesCancelled:touches3 withEvent:event3];
-    OCMVerify([flutterViewContoller forceTouchesCancelled:touches3]);
+    OCMVerify([flutterViewController forceTouchesCancelled:touches3]);
 
     // Now the 2nd touch sequence should not be allowed.
     NSSet* touches4 = [[NSSet alloc] init];
     id event4 = OCMClassMock([UIEvent class]);
     [forwardGectureRecognizer touchesBegan:touches4 withEvent:event4];
-    OCMReject([flutterViewContoller touchesBegan:touches4 withEvent:event4]);
+    OCMReject([flutterViewController touchesBegan:touches4 withEvent:event4]);
 
     NSSet* touches5 = [[NSSet alloc] init];
     id event5 = OCMClassMock([UIEvent class]);
     [forwardGectureRecognizer touchesEnded:touches5 withEvent:event5];
-    OCMReject([flutterViewContoller touchesEnded:touches5 withEvent:event5]);
+    OCMReject([flutterViewController touchesEnded:touches5 withEvent:event5]);
   }
 
   flutterPlatformViewsController->Reset();
@@ -2652,65 +2652,65 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       break;
     }
   }
-  id flutterViewContoller = OCMClassMock([FlutterViewController class]);
+  id flutterViewController = OCMClassMock([FlutterViewController class]);
 
-  flutterPlatformViewsController->SetFlutterViewController(flutterViewContoller);
+  flutterPlatformViewsController->SetFlutterViewController(flutterViewController);
 
   // The touches in this sequence requires 1 touch object, we always create the NSSet with one item.
   NSSet* touches1 = [NSSet setWithObject:@1];
   id event1 = OCMClassMock([UIEvent class]);
   [forwardGectureRecognizer touchesBegan:touches1 withEvent:event1];
-  OCMVerify([flutterViewContoller touchesBegan:touches1 withEvent:event1]);
+  OCMVerify([flutterViewController touchesBegan:touches1 withEvent:event1]);
 
-  FlutterViewController* flutterViewContoller2 = OCMClassMock([FlutterViewController class]);
-  flutterPlatformViewsController->SetFlutterViewController(flutterViewContoller2);
+  FlutterViewController* flutterViewController2 = OCMClassMock([FlutterViewController class]);
+  flutterPlatformViewsController->SetFlutterViewController(flutterViewController2);
 
   // Touch events should still send to the old FlutterViewController if FlutterViewController
   // is updated in between.
   NSSet* touches2 = [NSSet setWithObject:@1];
   id event2 = OCMClassMock([UIEvent class]);
   [forwardGectureRecognizer touchesBegan:touches2 withEvent:event2];
-  OCMVerify([flutterViewContoller touchesBegan:touches2 withEvent:event2]);
-  OCMReject([flutterViewContoller2 touchesBegan:touches2 withEvent:event2]);
+  OCMVerify([flutterViewController touchesBegan:touches2 withEvent:event2]);
+  OCMReject([flutterViewController2 touchesBegan:touches2 withEvent:event2]);
 
   NSSet* touches3 = [NSSet setWithObject:@1];
   id event3 = OCMClassMock([UIEvent class]);
   [forwardGectureRecognizer touchesMoved:touches3 withEvent:event3];
-  OCMVerify([flutterViewContoller touchesMoved:touches3 withEvent:event3]);
-  OCMReject([flutterViewContoller2 touchesMoved:touches3 withEvent:event3]);
+  OCMVerify([flutterViewController touchesMoved:touches3 withEvent:event3]);
+  OCMReject([flutterViewController2 touchesMoved:touches3 withEvent:event3]);
 
   NSSet* touches4 = [NSSet setWithObject:@1];
   id event4 = OCMClassMock([UIEvent class]);
   [forwardGectureRecognizer touchesEnded:touches4 withEvent:event4];
-  OCMVerify([flutterViewContoller touchesEnded:touches4 withEvent:event4]);
-  OCMReject([flutterViewContoller2 touchesEnded:touches4 withEvent:event4]);
+  OCMVerify([flutterViewController touchesEnded:touches4 withEvent:event4]);
+  OCMReject([flutterViewController2 touchesEnded:touches4 withEvent:event4]);
 
   NSSet* touches5 = [NSSet setWithObject:@1];
   id event5 = OCMClassMock([UIEvent class]);
   [forwardGectureRecognizer touchesEnded:touches5 withEvent:event5];
-  OCMVerify([flutterViewContoller touchesEnded:touches5 withEvent:event5]);
-  OCMReject([flutterViewContoller2 touchesEnded:touches5 withEvent:event5]);
+  OCMVerify([flutterViewController touchesEnded:touches5 withEvent:event5]);
+  OCMReject([flutterViewController2 touchesEnded:touches5 withEvent:event5]);
 
   // Now the 2nd touch sequence should go to the new FlutterViewController
 
   NSSet* touches6 = [NSSet setWithObject:@1];
   id event6 = OCMClassMock([UIEvent class]);
   [forwardGectureRecognizer touchesBegan:touches6 withEvent:event6];
-  OCMVerify([flutterViewContoller2 touchesBegan:touches6 withEvent:event6]);
-  OCMReject([flutterViewContoller touchesBegan:touches6 withEvent:event6]);
+  OCMVerify([flutterViewController2 touchesBegan:touches6 withEvent:event6]);
+  OCMReject([flutterViewController touchesBegan:touches6 withEvent:event6]);
 
   // Allow the touch events to finish
   NSSet* touches7 = [NSSet setWithObject:@1];
   id event7 = OCMClassMock([UIEvent class]);
   [forwardGectureRecognizer touchesMoved:touches7 withEvent:event7];
-  OCMVerify([flutterViewContoller2 touchesMoved:touches7 withEvent:event7]);
-  OCMReject([flutterViewContoller touchesMoved:touches7 withEvent:event7]);
+  OCMVerify([flutterViewController2 touchesMoved:touches7 withEvent:event7]);
+  OCMReject([flutterViewController touchesMoved:touches7 withEvent:event7]);
 
   NSSet* touches8 = [NSSet setWithObject:@1];
   id event8 = OCMClassMock([UIEvent class]);
   [forwardGectureRecognizer touchesEnded:touches8 withEvent:event8];
-  OCMVerify([flutterViewContoller2 touchesEnded:touches8 withEvent:event8]);
-  OCMReject([flutterViewContoller touchesEnded:touches8 withEvent:event8]);
+  OCMVerify([flutterViewController2 touchesEnded:touches8 withEvent:event8]);
+  OCMReject([flutterViewController touchesEnded:touches8 withEvent:event8]);
 
   flutterPlatformViewsController->Reset();
 }
@@ -2766,16 +2766,16 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       break;
     }
   }
-  id flutterViewContoller = OCMClassMock([FlutterViewController class]);
+  id flutterViewController = OCMClassMock([FlutterViewController class]);
 
-  flutterPlatformViewsController->SetFlutterViewController(flutterViewContoller);
+  flutterPlatformViewsController->SetFlutterViewController(flutterViewController);
 
   NSSet* touches1 = [NSSet setWithObject:@1];
   id event1 = OCMClassMock([UIEvent class]);
   [forwardGectureRecognizer touchesBegan:touches1 withEvent:event1];
 
   [forwardGectureRecognizer touchesCancelled:touches1 withEvent:event1];
-  OCMVerify([flutterViewContoller forceTouchesCancelled:touches1]);
+  OCMVerify([flutterViewController forceTouchesCancelled:touches1]);
 
   flutterPlatformViewsController->Reset();
 }
@@ -2831,9 +2831,9 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       break;
     }
   }
-  id flutterViewContoller = OCMClassMock([FlutterViewController class]);
+  id flutterViewController = OCMClassMock([FlutterViewController class]);
 
-  flutterPlatformViewsController->SetFlutterViewController(flutterViewContoller);
+  flutterPlatformViewsController->SetFlutterViewController(flutterViewController);
 
   NSSet* touches1 = [NSSet setWithObject:@1];
   id event1 = OCMClassMock([UIEvent class]);
