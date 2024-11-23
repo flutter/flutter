@@ -10,8 +10,6 @@
 // contain the native assets mapping.
 // When doing a hot reload, this mapping must stay in place.
 
-// TODO(matanlurey): Remove after debugging https://github.com/flutter/flutter/issues/159000.
-@Tags(<String>['flutter-build-apk'])
 @Timeout(Duration(minutes: 10))
 library;
 
