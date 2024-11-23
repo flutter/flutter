@@ -123,9 +123,11 @@ const String numberFormatNamedTemplate = '''
 ''';
 
 const String dateFormatTemplate = '''
-    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName);
+    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName)@(addedFormats);
     final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));
 ''';
+
+const String dateFormatAddFormatTemplate = '''.add_@(format)()''';
 
 const String dateFormatCustomTemplate = '''
     final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat(@(format), localeName);

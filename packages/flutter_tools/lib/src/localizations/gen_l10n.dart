@@ -169,6 +169,16 @@ String generateDateFormattingLogic(Message message, LocaleInfo locale) {
       final bool? isCustomDateFormat = placeholder.isCustomDateFormat;
       if (!placeholder.hasValidDateFormat
           && (isCustomDateFormat == null || !isCustomDateFormat)) {
+        if (placeholder.dateFormatParts.length > 1) {
+          throw L10nException(
+            'Date format "$placeholderFormat" for placeholder '
+            '${placeholder.name} contains at least one invalid date format. '
+            'Ensure all date formats joined by a "+" character have '
+            'a corresponding DateFormat constructor.\n Check the intl '
+            "library's DateFormat class constructors for allowed date formats."
+          );
+        }
+
         throw L10nException(
           'Date format "$placeholderFormat" for placeholder '
           '${placeholder.name} does not have a corresponding DateFormat '
@@ -178,9 +188,19 @@ String generateDateFormattingLogic(Message message, LocaleInfo locale) {
         );
       }
       if (placeholder.hasValidDateFormat) {
+        // The first format is the main format, and the rest are added formats.
+        final List<String> formatParts = placeholder.dateFormatParts;
+        final String mainFormat = formatParts.first;
+        final List<String> addedFormats = formatParts.skip(1).toList();
+
+        final String addedFormatsString = addedFormats.map((String addFormat) {
+          return dateFormatAddFormatTemplate.replaceAll('@(format)', addFormat);
+        }).join();
+
         return dateFormatTemplate
           .replaceAll('@(placeholder)', placeholder.name)
-          .replaceAll('@(format)', placeholderFormat);
+          .replaceAll('@(format)', mainFormat)
+          .replaceAll('@(addedFormats)', addedFormatsString);
       }
       return dateFormatCustomTemplate
         .replaceAll('@(placeholder)', placeholder.name)
