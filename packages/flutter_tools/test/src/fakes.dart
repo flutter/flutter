@@ -670,6 +670,7 @@ class FakeAndroidStudio extends Fake implements AndroidStudio {
 class FakeJava extends Fake implements Java {
   FakeJava({
     this.javaHome = '/android-studio/jbr',
+    this.javaSource = JavaSource.androidStudio,
     String binary = '/android-studio/jbr/bin/java',
     Version? version,
     bool canRun = true,
@@ -686,6 +687,9 @@ class FakeJava extends Fake implements Java {
 
   @override
   String binaryPath;
+
+  @override
+  JavaSource javaSource;
 
   final Map<String, String> _environment;
   final bool _canRun;
