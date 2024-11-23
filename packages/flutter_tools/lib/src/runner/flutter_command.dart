@@ -153,7 +153,6 @@ abstract final class FlutterOptions {
   static const String kFatalWarnings = 'fatal-warnings';
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
-  static const String kWebRendererFlag = 'web-renderer';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
   static const String kWebWasmFlag = 'wasm';
 }
