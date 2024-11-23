@@ -200,6 +200,22 @@ enum WebRendererMode implements CliEnum {
     return WebRendererMode.values.byName(webRendererString);
   }
 
+  factory WebRendererMode.fromDartDefines(List<String> defines, {
+    required bool useWasm,
+  }) {
+    if (defines.contains('FLUTTER_WEB_USE_SKIA=false')
+        && defines.contains('FLUTTER_WEB_USE_SKWASM=true')) {
+      return skwasm;
+    } else if (defines.contains('FLUTTER_WEB_USE_SKIA=true')
+        && defines.contains('FLUTTER_WEB_USE_SKWASM=false')) {
+      return canvaskit;
+    } else if (defines.contains('FLUTTER_WEB_USE_SKIA=false')
+        && defines.contains('FLUTTER_WEB_USE_SKWASM=false')) {
+      return html; // The horror!
+    }
+    return getDefault(useWasm: useWasm);
+  }
+
   static WebRendererMode getDefault({required bool useWasm}) {
     return useWasm ? defaultForWasm : defaultForJs;
   }
@@ -219,7 +235,7 @@ enum WebRendererMode implements CliEnum {
 
   /// Returns a consistent deprecation warning for the WebRendererMode.
   String get deprecationWarning =>
-      'The HTML Renderer is deprecated. Do not use "--web-renderer=$name".'
+      'The HTML Renderer is deprecated and will be removed. Please, stop using it.'
       '\nSee: https://docs.flutter.dev/to/web-html-renderer-deprecation';
 
   @override

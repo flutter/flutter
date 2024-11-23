@@ -233,10 +233,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
-  WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
-    null, // stringArg(FlutterOptions.kWebRendererFlag),
-    useWasm: useWasm
-  );
+  WebRendererMode get webRenderer {
+    final List<String> dartDefines = extractDartDefines(
+      defineConfigJsonMap: extractDartDefineConfigJsonMap()
+    );
+    return WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
+  }
 
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   @visibleForTesting
