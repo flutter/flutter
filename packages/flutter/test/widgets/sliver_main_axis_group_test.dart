@@ -855,6 +855,26 @@ void main() {
 
     expect(tester.getTopLeft(find.byKey(firstTextFieldKey)), const Offset(0, 60));
   });
+
+  testWidgets('SliverMainAxisGroup multiple PinnedHeaderSliver children', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        controller: controller,
+        viewportHeight: 300,
+        slivers: <Widget>[
+          const PinnedHeaderSliver(child: SizedBox(height: 30)),
+          const SliverToBoxAdapter(child: SizedBox(height: 30)),
+          const PinnedHeaderSliver(child: SizedBox(height: 30, child: Text('1'))),
+          const SliverToBoxAdapter(child: SizedBox(height: 1000)),
+        ]
+      )
+    );
+    controller.jumpTo(500);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('1')), const Offset(0, 30));
+  });
 }
 
 Widget _buildSliverList({
