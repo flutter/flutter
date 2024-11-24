@@ -142,27 +142,16 @@ class SampleChecker {
     // Get a list of the filenames that were not found in the source files.
     final List<String> missingFilenames = checkForMissingLinks(exampleFilenames, exampleLinks);
 
-    // Get a list of any tests that are missing, as well as any that used to be
-    // missing, but have been implemented.
-    final (List<File> missingTests, List<File> noLongerMissing) = checkForMissingTests(exampleFilenames);
+    // Get a list of any tests that are missing.
+    final List<File> missingTests = checkForMissingTests(exampleFilenames);
 
     // Remove any that we know are exceptions (examples that aren't expected to be
     // linked into any source files). These are typically template files used to
     // generate new examples.
     missingFilenames.removeWhere((String file) => _knownUnlinkedExamples.contains(file));
 
-    if (missingFilenames.isEmpty && missingTests.isEmpty && noLongerMissing.isEmpty && malformedLinks.isEmpty) {
+    if (missingFilenames.isEmpty && missingTests.isEmpty && malformedLinks.isEmpty) {
       return true;
-    }
-
-    if (noLongerMissing.isNotEmpty) {
-      final StringBuffer buffer = StringBuffer('The following tests have been implemented! Huzzah!:\n');
-      for (final File name in noLongerMissing) {
-        buffer.writeln('  ${getRelativePath(name)}');
-      }
-      buffer.writeln('However, they now need to be removed from the _knownMissingTests');
-      buffer.write('list in the script $_scriptLocation.');
-      foundError(buffer.toString().split('\n'));
     }
 
     if (missingTests.isNotEmpty) {
@@ -279,43 +268,14 @@ class SampleChecker {
     return '${path.join(testPath, path.basenameWithoutExtension(example.path))}_test.dart';
   }
 
-  (List<File>, List<File>) checkForMissingTests(List<File> exampleFilenames) {
+  List<File> checkForMissingTests(List<File> exampleFilenames) {
     final List<File> missingTests = <File>[];
-    final List<File> noLongerMissingTests = <File>[];
     for (final File example in exampleFilenames) {
       final File testFile = filesystem.file(getTestNameForExample(example, examples));
-      final String name = path.relative(testFile.absolute.path, from: flutterRoot.absolute.path);
       if (!testFile.existsSync()) {
         missingTests.add(testFile);
-      } else if (_knownMissingTests.contains(name.replaceAll(r'\', '/'))) {
-        noLongerMissingTests.add(testFile);
       }
     }
-    // Skip any that we know are missing.
-    missingTests.removeWhere(
-      (File test) {
-        final String name = path.relative(test.absolute.path, from: flutterRoot.absolute.path).replaceAll(r'\', '/');
-        return _knownMissingTests.contains(name);
-      },
-    );
-    return (missingTests, noLongerMissingTests);
+    return missingTests;
   }
 }
-
-// These tests are known to be missing. They should all eventually be
-// implemented, but until they are we allow them, so that we can catch any new
-// examples that are added without tests.
-//
-// TODO(gspencergoog): implement the missing tests.
-// See https://github.com/flutter/flutter/issues/130459
-final Set<String> _knownMissingTests = <String>{
-  'examples/api/test/material/color_scheme/dynamic_content_color.0_test.dart',
-  'examples/api/test/widgets/image/image.frame_builder.0_test.dart',
-  'examples/api/test/widgets/image/image.loading_builder.0_test.dart',
-  'examples/api/test/widgets/scrollbar/raw_scrollbar.1_test.dart',
-  'examples/api/test/widgets/scrollbar/raw_scrollbar.2_test.dart',
-  'examples/api/test/widgets/scrollbar/raw_scrollbar.desktop.0_test.dart',
-  'examples/api/test/widgets/scrollbar/raw_scrollbar.shape.0_test.dart',
-  'examples/api/test/widgets/scrollbar/raw_scrollbar.0_test.dart',
-  'examples/api/test/widgets/interactive_viewer/interactive_viewer.constrained.0_test.dart',
-};

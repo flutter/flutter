@@ -19,9 +19,9 @@ import 'message_parser.dart';
 // DateFormat.yMMMMd("en_US").format(DateTime.utc(1996, 7, 10)) results
 // in the string "July 10, 1996".
 //
-// Since the tool generates code that uses DateFormat's constructor, it is
-// necessary to verify that the constructor exists, or the
-// tool will generate code that may cause a compile-time error.
+// Since the tool generates code that uses DateFormat's constructor and its
+// add_* methods, it is necessary to verify that the constructor/method exists,
+// or the tool will generate code that may cause a compile-time error.
 //
 // See also:
 //
@@ -71,6 +71,8 @@ const Set<String> validDateFormats = <String>{
   'ms',
   's',
 };
+
+const String _dateFormatPartsDelimiter = '+';
 
 // The set of number formats that can be automatically localized.
 //
@@ -252,7 +254,9 @@ class Placeholder {
   bool get requiresNumFormatting => <String>['int', 'num', 'double'].contains(type) && format != null;
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
-  bool get hasValidDateFormat => validDateFormats.contains(format);
+  // 'format' can contain a number of date time formats separated by `dateFormatPartsDelimiter`.
+  List<String> get dateFormatParts => format?.split(_dateFormatPartsDelimiter) ?? <String>[];
+  bool get hasValidDateFormat => dateFormatParts.every(validDateFormats.contains);
 
   static String? _stringAttribute(
     String resourceId,
@@ -347,7 +351,8 @@ class Message {
   ) : assert(resourceId.isNotEmpty),
       value = _value(templateBundle.resources, resourceId),
       description = _description(templateBundle.resources, resourceId, isResourceAttributeRequired),
-      placeholders = _placeholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
+      templatePlaceholders = _placeholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
+      localePlaceholders = <LocaleInfo, Map<String, Placeholder>>{},
       messages = <LocaleInfo, String?>{},
       parsedMessages = <LocaleInfo, Node?>{} {
     // Filenames for error handling.
@@ -357,9 +362,14 @@ class Message {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
+
+      localePlaceholders[bundle.locale] = templateBundle.locale == bundle.locale
+        ? templatePlaceholders
+        : _placeholders(bundle.resources, resourceId, false);
+
       List<String>? validPlaceholders;
       if (useRelaxedSyntax) {
-        validPlaceholders = placeholders.entries.map((MapEntry<String, Placeholder> e) => e.key).toList();
+        validPlaceholders = templatePlaceholders.entries.map((MapEntry<String, Placeholder> e) => e.key).toList();
       }
       try {
         parsedMessages[bundle.locale] = translation == null ? null : Parser(
@@ -378,7 +388,7 @@ class Message {
       }
     }
     // Infer the placeholders
-    _inferPlaceholders(filenames);
+    _inferPlaceholders();
   }
 
   final String resourceId;
@@ -386,13 +396,21 @@ class Message {
   final String? description;
   late final Map<LocaleInfo, String?> messages;
   final Map<LocaleInfo, Node?> parsedMessages;
-  final Map<String, Placeholder> placeholders;
+  final Map<LocaleInfo, Map<String, Placeholder>> localePlaceholders;
+  final Map<String, Placeholder> templatePlaceholders;
   final bool useEscaping;
   final bool useRelaxedSyntax;
   final Logger? logger;
   bool hadErrors = false;
 
-  bool get placeholdersRequireFormatting => placeholders.values.any((Placeholder p) => p.requiresFormatting);
+  Iterable<Placeholder> getPlaceholders(LocaleInfo locale) {
+    final Map<String, Placeholder>? placeholders = localePlaceholders[locale];
+    if (placeholders == null) {
+      return templatePlaceholders.values;
+    }
+    return templatePlaceholders.values
+      .map((Placeholder templatePlaceholder) => placeholders[templatePlaceholder.name] ?? templatePlaceholder);
+  }
 
   static String _value(Map<String, Object?> bundle, String resourceId) {
     final Object? value = bundle[resourceId];
@@ -488,12 +506,15 @@ class Message {
 
   // Using parsed translations, attempt to infer types of placeholders used by plurals and selects.
   // For undeclared placeholders, create a new placeholder.
-  void _inferPlaceholders(Map<LocaleInfo, String> filenames) {
+  void _inferPlaceholders() {
     // We keep the undeclared placeholders separate so that we can sort them alphabetically afterwards.
     final Map<String, Placeholder> undeclaredPlaceholders = <String, Placeholder>{};
     // Helper for getting placeholder by name.
-    Placeholder? getPlaceholder(String name) => placeholders[name] ?? undeclaredPlaceholders[name];
     for (final LocaleInfo locale in parsedMessages.keys) {
+      Placeholder? getPlaceholder(String name) =>
+          localePlaceholders[locale]?[name] ??
+          templatePlaceholders[name] ??
+          undeclaredPlaceholders[name];
       if (parsedMessages[locale] == null) {
         continue;
       }
@@ -529,7 +550,7 @@ class Message {
         traversalStack.addAll(node.children);
       }
     }
-    placeholders.addEntries(
+    templatePlaceholders.addEntries(
       undeclaredPlaceholders.entries
         .toList()
         ..sort((MapEntry<String, Placeholder> p1, MapEntry<String, Placeholder> p2) => p1.key.compareTo(p2.key))
@@ -542,7 +563,7 @@ class Message {
         || !x && !y && !z;
     }
 
-    for (final Placeholder placeholder in placeholders.values) {
+    for (final Placeholder placeholder in templatePlaceholders.values) {
       if (!atMostOneOf(placeholder.isPlural, placeholder.isDateTime, placeholder.isSelect)) {
         throw L10nException('Placeholder is used as plural/select/datetime in certain languages.');
       } else if (placeholder.isPlural) {

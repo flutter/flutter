@@ -115,7 +115,7 @@ class RawMaterialButton extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// button.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.pressed].

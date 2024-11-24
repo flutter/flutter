@@ -13,8 +13,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide Target;
+import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -62,20 +61,22 @@ void main() {
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],
-        buildDryRunResult: FakeFlutterNativeAssetsBuilderResult(
-          assets: <AssetImpl>[
-            NativeCodeAssetImpl(
-              id: 'package:bar/bar.dart',
-              linkMode: DynamicLoadingBundledImpl(),
-              os: OSImpl.macOS,
-              architecture: ArchitectureImpl.arm64,
+        buildDryRunResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          codeAssets: <CodeAsset>[
+            CodeAsset(
+              package: 'bar',
+              name: 'bar.dart',
+              linkMode: DynamicLoadingBundled(),
+              os: OS.macOS,
+              architecture: Architecture.arm64,
               file: Uri.file('bar.dylib'),
             ),
-            NativeCodeAssetImpl(
-              id: 'package:bar/bar.dart',
-              linkMode: DynamicLoadingBundledImpl(),
-              os: OSImpl.macOS,
-              architecture: ArchitectureImpl.x64,
+            CodeAsset(
+              package: 'bar',
+              name: 'bar.dart',
+              linkMode: DynamicLoadingBundled(),
+              os: OS.macOS,
+              architecture: Architecture.x64,
               file: Uri.file('bar.dylib'),
             ),
           ],
@@ -89,7 +90,6 @@ void main() {
         devtoolsHandler: createNoOpHandler,
         nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
         analytics: fakeAnalytics,
-        useImplicitPubspecResolution: true,
       );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
       expect(result.isOk, true);
@@ -131,20 +131,22 @@ void main() {
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],
-        buildDryRunResult: FakeFlutterNativeAssetsBuilderResult(
-          assets: <AssetImpl>[
-            NativeCodeAssetImpl(
-              id: 'package:bar/bar.dart',
-              linkMode: DynamicLoadingBundledImpl(),
-              os: OSImpl.macOS,
-              architecture: ArchitectureImpl.arm64,
+        buildDryRunResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          codeAssets: <CodeAsset>[
+            CodeAsset(
+              package: 'bar',
+              name: 'bar.dart',
+              linkMode: DynamicLoadingBundled(),
+              os: OS.macOS,
+              architecture: Architecture.arm64,
               file: Uri.file('bar.dylib'),
             ),
-            NativeCodeAssetImpl(
-              id: 'package:bar/bar.dart',
-              linkMode: DynamicLoadingBundledImpl(),
-              os: OSImpl.macOS,
-              architecture: ArchitectureImpl.x64,
+            CodeAsset(
+              package: 'bar',
+              name: 'bar.dart',
+              linkMode: DynamicLoadingBundled(),
+              os: OS.macOS,
+              architecture: Architecture.x64,
               file: Uri.file('bar.dylib'),
             ),
           ],
@@ -158,7 +160,6 @@ void main() {
         devtoolsHandler: createNoOpHandler,
         nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
         analytics: fakeAnalytics,
-        useImplicitPubspecResolution: true,
       );
       expect(
         () => hotRunner.run(),

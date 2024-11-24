@@ -10,11 +10,12 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/code_assets_builder.dart' hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli_internal.dart' as native_assets_cli;
 import 'package:package_config/package_config_types.dart';
 
@@ -71,60 +72,75 @@ void main() {
         ProcessManager: () => FakeProcessManager.empty(),
       }, () async {
         final File packageConfig = environment.projectDir.childDirectory('.dart_tool').childFile('package_config.json');
-        final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
+        final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
         await packageConfig.parent.create();
         await packageConfig.create();
         final File dylibAfterCompiling = fileSystem.file('bar.dll');
         // The mock doesn't create the file, so create it here.
         await dylibAfterCompiling.create();
+
+        final List<CodeAsset> codeAssets = <CodeAsset>[
+          CodeAsset(
+            package: 'bar',
+            name: 'bar.dart',
+            linkMode: DynamicLoadingBundled(),
+            os: OS.windows,
+            architecture: Architecture.x64,
+            file: dylibAfterCompiling.uri,
+          ),
+        ];
         final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
-          buildResult: FakeFlutterNativeAssetsBuilderResult(
-            assets: <AssetImpl>[
-              NativeCodeAssetImpl(
-                id: 'package:bar/bar.dart',
-                linkMode: DynamicLoadingBundledImpl(),
-                os: OSImpl.windows,
-                architecture: ArchitectureImpl.x64,
-                file: dylibAfterCompiling.uri,
-              ),
-            ],
+          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+          linkResult: buildMode == BuildMode.debug
+              ? null
+              : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets,
           ),
         );
-        final (_, Uri nativeAssetsYaml) = await runFlutterSpecificDartBuild(
-          environmentDefines: <String, String>{
-            kBuildMode: buildMode.cliName,
-          },
-          targetPlatform: flutterTester
-              ? TargetPlatform.tester
-              : TargetPlatform.windows_x64,
+        final Map<String, String> environmentDefines = <String, String>{
+          kBuildMode: buildMode.cliName,
+        };
+        final TargetPlatform targetPlatform = flutterTester
+            ? TargetPlatform.tester
+            : TargetPlatform.windows_x64;
+        final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+          environmentDefines: environmentDefines,
+          targetPlatform: targetPlatform,
           projectUri: projectUri,
-          nativeAssetsYamlUri: flutterTester ? null : nonFlutterTesterAssetUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
         );
+        final String expectedDirectory = flutterTester
+            ? native_assets_cli.OS.current.toString()
+            : 'windows';
+        final Uri nativeAssetsFileUri = flutterTester
+            ? projectUri.resolve('build/native_assets/$expectedDirectory/${InstallCodeAssets.nativeAssetsFilename}')
+            : nonFlutterTesterAssetUri;
+        await installCodeAssets(
+          dartBuildResult: dartBuildResult,
+          environmentDefines: environmentDefines,
+          targetPlatform: targetPlatform,
+          projectUri: projectUri,
+          fileSystem: fileSystem,
+          nativeAssetsFileUri: nativeAssetsFileUri,
+        );
         final String expectedOS = flutterTester
-            ? native_assets_cli.Target.current.toString()
-            : 'windows_x64';
+            ? OS.current.toString()
+            : 'windows';
+        final String expectedArch = flutterTester
+            ? Architecture.current.toString()
+            : 'x64';
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for $expectedOS $buildMode.',
-            'Building native assets for $expectedOS $buildMode done.',
+            'Building native assets for $expectedOS $expectedArch $buildMode.',
+            'Building native assets for $expectedOS $expectedArch $buildMode done.',
           ]),
         );
-        final String expectedDirectory = flutterTester
-            ? native_assets_cli.OSImpl.current.toString()
-            : 'windows';
-        expect(nativeAssetsYaml,
-               flutterTester
-                   ? projectUri.resolve('build/native_assets/$expectedDirectory/native_assets.yaml')
-                   : nonFlutterTesterAssetUri
-        );
         expect(
-          await fileSystem.file(nativeAssetsYaml).readAsString(),
+          await fileSystem.file(nativeAssetsFileUri).readAsString(),
           stringContainsInOrder(<String>[
             'package:bar/bar.dart',
             if (flutterTester)
@@ -246,7 +262,7 @@ void main() {
       fileSystem,
       logger,
     );
-    final CCompilerConfigImpl result = await runner.cCompilerConfig;
+    final CCompilerConfig result = await runner.cCompilerConfig;
     expect(
       result.compiler?.toFilePath(),
       msvcBinDir.childFile('cl.exe').uri.toFilePath(),

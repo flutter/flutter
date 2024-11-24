@@ -30,16 +30,13 @@ class WebDriverService extends DriverService {
     required ProcessUtils processUtils,
     required String dartSdkPath,
     required Logger logger,
-    required bool useImplicitPubspecResolution,
   }) : _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
-       _logger = logger,
-       _useImplicitPubspecResolution = useImplicitPubspecResolution;
+       _logger = logger;
 
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
   final Logger _logger;
-  final bool _useImplicitPubspecResolution;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -81,6 +78,7 @@ class WebDriverService extends DriverService {
           hostname: debuggingOptions.hostname,
           webRenderer: debuggingOptions.webRenderer,
           webUseWasm: debuggingOptions.webUseWasm,
+          webHeaders: debuggingOptions.webHeaders,
         )
         : DebuggingOptions.enabled(
           buildInfo,
@@ -89,6 +87,7 @@ class WebDriverService extends DriverService {
           disablePortPublication: debuggingOptions.disablePortPublication,
           webRenderer: debuggingOptions.webRenderer,
           webUseWasm: debuggingOptions.webUseWasm,
+          webHeaders: debuggingOptions.webHeaders,
         ),
       stayResident: true,
       flutterProject: FlutterProject.current(),
@@ -97,7 +96,6 @@ class WebDriverService extends DriverService {
       analytics: globals.analytics,
       logger: _logger,
       systemClock: globals.systemClock,
-      useImplicitPubspecResolution: _useImplicitPubspecResolution,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(

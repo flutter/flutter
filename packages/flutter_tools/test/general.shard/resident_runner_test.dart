@@ -63,7 +63,6 @@ void main() {
         target: 'main.dart',
         analytics: fakeAnalytics,
         devtoolsHandler: createNoOpHandler,
-        useImplicitPubspecResolution: true,
       );
     }, overrides: <Type, Generator>{
       Analytics: () => FakeAnalytics(),
@@ -97,6 +96,12 @@ void main() {
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
   }));
 
+  testUsingContext('ResidentRunner reports whether detach() was used', () => testbed.run(() async {
+    expect(residentRunner.stopAppDuringCleanup, true);
+    await residentRunner.detach();
+    expect(residentRunner.stopAppDuringCleanup, false);
+  }));
+
   testUsingContext('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
@@ -115,7 +120,6 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: globals.analytics,
-      useImplicitPubspecResolution: true,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -140,7 +144,6 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: globals.analytics,
-      useImplicitPubspecResolution: true,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -162,7 +165,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      useImplicitPubspecResolution: true,
     );
     flutterDevice.runColdCode = 1;
 
@@ -184,7 +186,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      useImplicitPubspecResolution: true,
     );
     flutterDevice.runColdError = Exception('BAD STUFF');
 
@@ -213,7 +214,6 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: globals.analytics,
-      useImplicitPubspecResolution: true,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -274,7 +274,6 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: globals.analytics,
-      useImplicitPubspecResolution: true,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -416,7 +415,6 @@ void main() {
         enableDevTools: false,
       ),
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -481,7 +479,6 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -691,10 +688,6 @@ void main() {
   testUsingContext('ResidentRunner reports hot reload time details', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
-      FakeVmServiceRequest(
-        method: 'getVM',
-        jsonResponse: fakeVM.toJson(),
-      ),
       listViews,
       listViews,
       FakeVmServiceRequest(
@@ -746,7 +739,6 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     devFS.nextUpdateReport = UpdateFSReport(
       success: true,
@@ -1091,7 +1083,6 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
   }));
@@ -1205,7 +1196,6 @@ flutter:
         target: 'custom_main.dart',
         devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
-        useImplicitPubspecResolution: true,
       );
     await residentRunner.runSourceGenerators();
 
@@ -1266,7 +1256,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -1319,6 +1308,7 @@ flutter:
           commandHelp.M,
           commandHelp.g,
           commandHelp.hWithDetails,
+          commandHelp.d,
           commandHelp.c,
           commandHelp.q,
           '',
@@ -1348,6 +1338,7 @@ flutter:
           commandHelp.r,
           commandHelp.R,
           commandHelp.hWithoutDetails,
+          commandHelp.d,
           commandHelp.c,
           commandHelp.q,
           '',
@@ -1367,7 +1358,6 @@ flutter:
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      useImplicitPubspecResolution: true,
     );
     residentRunner.printHelp(details: true);
 
@@ -1403,7 +1393,6 @@ flutter:
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      useImplicitPubspecResolution: true,
     );
     residentRunner.printHelp(details: false);
 
@@ -1493,7 +1482,6 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile, vmserviceOutFile: 'foo', enableDevTools: false),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      useImplicitPubspecResolution: true,
     );
 
     final Future<int?> result = residentRunner.attach();
@@ -1539,7 +1527,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
 
     await residentRunner.run();
@@ -1570,7 +1557,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1602,7 +1588,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1635,7 +1620,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1660,7 +1644,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1686,7 +1669,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1716,7 +1698,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1740,7 +1721,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
 
     await residentRunner.run();
@@ -1762,7 +1742,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
 
     await residentRunner.run();
@@ -1786,7 +1765,6 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile, vmserviceOutFile: 'foo'),
       devtoolsHandler: createNoOpHandler,
       target: 'main.dart',
-      useImplicitPubspecResolution: true,
     );
 
     await residentRunner.run();
@@ -1955,43 +1933,6 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('FlutterDevice does not throw when unable to initiate log reader due to VM service disconnection', () async {
-    fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: 'getVM',
-          error: FakeRPCError(
-            code: RPCErrorCodes.kServerError,
-            error: 'Service connection disposed',
-          ),
-        ),
-      ],
-    );
-    final TestFlutterDevice flutterDevice = TestFlutterDevice(device);
-    flutterDevice.vmService = fakeVmServiceHost!.vmService;
-    await flutterDevice.tryInitLogReader();
-
-    final BufferLogger logger = globals.logger as BufferLogger;
-    expect(
-      logger.traceText,
-      contains(
-        'VmService.getVm call failed: getVM: (-32000) '
-        'Service connection disposed\n',
-      ),
-    );
-    // We should not print a warning since the device does not have a connected
-    // adb log reader.
-    // TODO(andrewkolos): This test is a bit fragile, and is something that
-    //  should be corrected in a follow-up PR (see
-    //  https://github.com/flutter/flutter/issues/155795).
-    expect(logger.errorText, isEmpty);
-  }, overrides: <Type, Generator>{
-    Logger: () => BufferLogger.test(),
-    Artifacts: () => Artifacts.test(),
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
   testUsingContext('Uses existing DDS URI from exception field', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
@@ -2088,65 +2029,6 @@ flutter:
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
-  testUsingContext('Failed DDS start outputs error message', () => testbed.run(() async {
-    // See https://github.com/flutter/flutter/issues/72385 for context.
-    final FakeDevice device = FakeDevice()
-      ..dds = DartDevelopmentService(logger: testLogger);
-    ddsLauncherCallback = ({
-        required Uri remoteVmServiceUri,
-        Uri? serviceUri,
-        bool enableAuthCodes = true,
-        bool serveDevTools = false,
-        Uri? devToolsServerAddress,
-        bool enableServicePortFallback = false,
-        List<String> cachedUserTags = const <String>[],
-        String? dartExecutable,
-        String? google3WorkspaceRoot,
-      }) {
-      expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
-      expect(enableAuthCodes, isTrue);
-      expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
-      expect(cachedUserTags, isEmpty);
-      throw FakeDartDevelopmentServiceException(message: 'No URI');
-    };
-    final TestFlutterDevice flutterDevice = TestFlutterDevice(
-      device,
-      vmServiceUris: Stream<Uri>.value(testUri),
-    );
-    bool caught = false;
-    final Completer<void>done = Completer<void>();
-    runZonedGuarded(() {
-      flutterDevice.connect(
-        allowExistingDdsInstance: true,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, enableDevTools: false),
-      ).then((_) => done.complete());
-    }, (Object e, StackTrace st) {
-      expect(e, isA<StateError>());
-      expect((e as StateError).message, contains('No URI'));
-      expect(testLogger.errorText, contains(
-        'DDS has failed to start and there is not an existing DDS instance',
-      ));
-      done.complete();
-      caught = true;
-    });
-    await done.future;
-    if (!caught) {
-      fail('Expected a StateError to be thrown.');
-    }
-  }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-      Device? device,
-      required Logger logger,
-    }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
-  }));
-
   testUsingContext('nextPlatform moves through expected platforms', () {
     expect(nextPlatform('android'), 'iOS');
     expect(nextPlatform('iOS'), 'windows');
@@ -2168,7 +2050,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     await residentRunner.cleanupAtFinish();
 
@@ -2190,7 +2071,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
 
     (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'asset'};
@@ -2216,7 +2096,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
 
     (flutterDevice.devFS! as FakeDevFS).shaderPathsToEvict = <String>{'foo.frag'};
@@ -2239,7 +2118,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
 
     expect(flutterDevice.devFS!.hasSetAssetDirectory, false);
@@ -2262,7 +2140,6 @@ flutter:
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
 
     (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'asset'};
@@ -2312,7 +2189,6 @@ flutter:
           devtoolsHandler: createNoOpHandler,
           analytics: globals.analytics,
           nativeAssetsYamlFile: 'foo.yaml',
-          useImplicitPubspecResolution: true,
         );
 
         final int? result = await residentRunner.run();

@@ -1192,7 +1192,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// individual tab widgets.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.selected].
@@ -1200,11 +1200,6 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If null, then the value of [TabBarThemeData.mouseCursor] is used. If
   /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
-  ///
-  /// See also:
-  ///
-  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -1777,11 +1772,9 @@ class _TabBarState extends State<TabBar> {
         wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation, _defaults);
       } else {
         // The user is dragging the TabBarView's PageView left or right.
-        if (_currentIndex! < widget.tabs.length) {
-          final int tabIndex = _currentIndex!;
-          final Animation<double> centerAnimation = _DragAnimation(_controller!, tabIndex);
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, _defaults);
-        }
+        final int tabIndex = _currentIndex!;
+        final Animation<double> centerAnimation = _DragAnimation(_controller!, tabIndex);
+        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, _defaults);
         if (_currentIndex! > 0) {
           final int tabIndex = _currentIndex! - 1;
           final Animation<double> previousAnimation = ReverseAnimation(_DragAnimation(_controller!, tabIndex));
