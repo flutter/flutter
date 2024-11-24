@@ -265,11 +265,11 @@ class _BottomSheetState extends State<BottomSheet> {
 
   bool get _dismissUnderway => widget.animationController!.status == AnimationStatus.reverse;
 
-  Set<WidgetState> dragHandleState = <WidgetState>{};
+  Set<WidgetState> dragHandleStates = <WidgetState>{};
 
   void _handleDragStart(DragStartDetails details) {
     setState(() {
-      dragHandleState.add(WidgetState.dragged);
+      dragHandleStates.add(WidgetState.dragged);
     });
     widget.onDragStart?.call(details);
   }
@@ -296,7 +296,7 @@ class _BottomSheetState extends State<BottomSheet> {
       return;
     }
     setState(() {
-      dragHandleState.remove(WidgetState.dragged);
+      dragHandleStates.remove(WidgetState.dragged);
     });
     bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
@@ -334,12 +334,12 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   void _handleDragHandleHover(bool hovering) {
-    if (hovering != dragHandleState.contains(WidgetState.hovered)) {
+    if (hovering != dragHandleStates.contains(WidgetState.hovered)) {
       setState(() {
         if (hovering){
-          dragHandleState.add(WidgetState.hovered);
+          dragHandleStates.add(WidgetState.hovered);
         } else {
-          dragHandleState.remove(WidgetState.hovered);
+          dragHandleStates.remove(WidgetState.hovered);
         }
       });
     }
@@ -364,7 +364,7 @@ class _BottomSheetState extends State<BottomSheet> {
       dragHandle = _DragHandle(
         onSemanticsTap: widget.onClosing,
         handleHover: _handleDragHandleHover,
-        state: dragHandleState,
+        states: dragHandleStates,
         dragHandleColor: widget.dragHandleColor,
         dragHandleSize: widget.dragHandleSize,
       );
@@ -430,20 +430,18 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // See scaffold.dart
 
-typedef _SizeChangeCallback = void Function(Size size);
-
 class _DragHandle extends StatelessWidget {
   const _DragHandle({
     required this.onSemanticsTap,
     required this.handleHover,
-    required this.state,
+    required this.states,
     this.dragHandleColor,
     this.dragHandleSize,
   });
 
   final VoidCallback? onSemanticsTap;
   final ValueChanged<bool> handleHover;
-  final Set<WidgetState> state;
+  final Set<WidgetState> states;
   final Color? dragHandleColor;
   final Size? dragHandleSize;
 
@@ -469,8 +467,8 @@ class _DragHandle extends StatelessWidget {
               width: handleSize.width,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(handleSize.height/2),
-                color: WidgetStateProperty.resolveAs<Color?>(dragHandleColor, state)
-                  ?? WidgetStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, state)
+                color: WidgetStateProperty.resolveAs<Color?>(dragHandleColor, states)
+                  ?? WidgetStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, states)
                   ?? m3Defaults.dragHandleColor,
               ),
             ),
@@ -490,7 +488,7 @@ class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
     super.child,
   });
 
-  final _SizeChangeCallback onChildSizeChanged;
+  final ValueChanged<Size> onChildSizeChanged;
   final double animationValue;
   final bool isScrollControlled;
   final double scrollControlDisabledMaxHeightRatio;
@@ -517,7 +515,7 @@ class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
 class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   _RenderBottomSheetLayoutWithSizeListener({
     RenderBox? child,
-    required _SizeChangeCallback onChildSizeChanged,
+    required ValueChanged<Size> onChildSizeChanged,
     required double animationValue,
     required bool isScrollControlled,
     required double scrollControlDisabledMaxHeightRatio,
@@ -529,9 +527,9 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
 
   Size _lastSize = Size.zero;
 
-  _SizeChangeCallback get onChildSizeChanged => _onChildSizeChanged;
-  _SizeChangeCallback _onChildSizeChanged;
-  set onChildSizeChanged(_SizeChangeCallback newCallback) {
+  ValueChanged<Size> get onChildSizeChanged => _onChildSizeChanged;
+  ValueChanged<Size> _onChildSizeChanged;
+  set onChildSizeChanged(ValueChanged<Size> newCallback) {
     if (_onChildSizeChanged == newCallback) {
       return;
     }
@@ -574,28 +572,16 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
-    final double width = BoxConstraints.tightForFinite(height: height).biggest.width;
-    return width.isFinite ? width : 0.0;
-  }
+  double computeMinIntrinsicWidth(double height) => 0;
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
-    final double width = BoxConstraints.tightForFinite(height: height).biggest.width;
-    return width.isFinite ? width : 0.0;
-  }
+  double computeMaxIntrinsicWidth(double height) => 0;
 
   @override
-  double computeMinIntrinsicHeight(double width) {
-    final double height = BoxConstraints.tightForFinite(width: width).biggest.height;
-    return height.isFinite ? height : 0.0;
-  }
+  double computeMinIntrinsicHeight(double width) => 0;
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
-    final double height = BoxConstraints.tightForFinite(width: width).biggest.height;
-    return height.isFinite ? height : 0.0;
-  }
+  double computeMaxIntrinsicHeight(double width) => 0;
 
   @override
   Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
