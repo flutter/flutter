@@ -242,15 +242,16 @@ GLint BufferBindingsGLES::ComputeTextureLocation(
 
 const std::vector<GLint>& BufferBindingsGLES::ComputeUniformLocations(
     const ShaderMetadata* metadata) {
-  auto location = binding_map_.find(metadata->name);
+  BindingMap::iterator location = binding_map_.find(metadata->name);
   if (location != binding_map_.end()) {
     return location->second;
   }
 
   // For each metadata member, look up the binding location and record
   // it in the binding map.
-  auto& locations = binding_map_[metadata->name] = {};
-  for (const auto& member : metadata->members) {
+  std::vector<GLint>& locations = binding_map_[metadata->name] = {};
+  locations.reserve(metadata->members.size());
+  for (const ShaderStructMemberMetadata& member : metadata->members) {
     if (member.type == ShaderType::kVoid) {
       // Void types are used for padding. We are obviously not going to find
       // mappings for these. Keep going.
@@ -259,9 +260,10 @@ const std::vector<GLint>& BufferBindingsGLES::ComputeUniformLocations(
     }
 
     size_t element_count = member.array_elements.value_or(1);
-    const auto member_key =
+    const std::string member_key =
         CreateUniformMemberKey(metadata->name, member.name, element_count > 1);
-    const auto computed_location = uniform_locations_.find(member_key);
+    const std::unordered_map<std::string, GLint>::iterator computed_location =
+        uniform_locations_.find(member_key);
     if (computed_location == uniform_locations_.end()) {
       // Uniform was not active.
       locations.push_back(-1);
@@ -275,13 +277,14 @@ const std::vector<GLint>& BufferBindingsGLES::ComputeUniformLocations(
 bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
                                            Allocator& transients_allocator,
                                            const BufferResource& buffer) {
-  const auto* metadata = buffer.GetMetadata();
-  auto device_buffer = buffer.resource.GetBuffer();
+  const ShaderMetadata* metadata = buffer.GetMetadata();
+  const DeviceBuffer* device_buffer = buffer.resource.GetBuffer();
   if (!device_buffer) {
     VALIDATION_LOG << "Device buffer not found.";
     return false;
   }
-  const auto& device_buffer_gles = DeviceBufferGLES::Cast(*device_buffer);
+  const DeviceBufferGLES& device_buffer_gles =
+      DeviceBufferGLES::Cast(*device_buffer);
   const uint8_t* buffer_ptr =
       device_buffer_gles.GetBufferData() + buffer.resource.GetRange().offset;
 
@@ -292,10 +295,10 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
     return false;
   }
 
-  const auto& locations = ComputeUniformLocations(metadata);
-  for (auto i = 0u; i < metadata->members.size(); i++) {
-    const auto& member = metadata->members[i];
-    auto location = locations[i];
+  const std::vector<GLint>& locations = ComputeUniformLocations(metadata);
+  for (size_t i = 0u; i < metadata->members.size(); i++) {
+    const ShaderStructMemberMetadata& member = metadata->members[i];
+    GLint location = locations[i];
     // Void type or inactive uniform.
     if (location == -1 || member.type == ShaderType::kVoid) {
       continue;
@@ -309,17 +312,17 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
     // When binding uniform arrays, the elements must be contiguous. Copy
     // the uniforms to a temp buffer to eliminate any padding needed by the
     // other backends if the array elements have padding.
-    std::vector<uint8_t> array_element_buffer_;
+    std::vector<uint8_t> array_element_buffer;
     if (element_count > 1 && element_stride != member.size) {
-      array_element_buffer_.resize(member.size * element_count);
+      array_element_buffer.resize(member.size * element_count);
       for (size_t element_i = 0; element_i < element_count; element_i++) {
-        std::memcpy(array_element_buffer_.data() + element_i * member.size,
+        std::memcpy(array_element_buffer.data() + element_i * member.size,
                     reinterpret_cast<const char*>(buffer_data) +
                         element_i * element_stride,
                     member.size);
       }
       buffer_data =
-          reinterpret_cast<const GLfloat*>(array_element_buffer_.data());
+          reinterpret_cast<const GLfloat*>(array_element_buffer.data());
     }
 
     switch (member.type) {
