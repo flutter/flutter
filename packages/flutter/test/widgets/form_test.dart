@@ -1497,4 +1497,54 @@ void main() {
     expect(find.text(errorText('foo')), findsOneWidget);
     expect(find.text(errorText('bar')), findsOneWidget);
   });
+
+  testWidgets('AutovalidateMode.onUnfocus should validate all fields manually with FormState', (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String errorText(String? value) => '$value/error';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(),
+        home: Center(
+          child: Form(
+            key: formKey,
+            autovalidateMode: AutovalidateMode.onUnfocus,
+            child: Material(
+              child: Column(
+                children: <Widget>[
+                  TextFormField(
+                    key: const Key('textFormField1'),
+                    initialValue: 'foo',
+                    validator: errorText,
+                  ),
+                  TextFormField(
+                    initialValue: 'bar',
+                    validator: errorText,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFormField1 = find.byKey(const Key('textFormField1'));
+
+    // Focus on textFormField1.
+    await tester.tap(textFormField1);
+    await tester.pumpAndSettle();
+
+    // Check no error messages are displayed initially.
+    expect(find.text('foo/error'), findsNothing);
+    expect(find.text('bar/error'), findsNothing);
+
+    // Validate all fields manually using FormState.
+    expect(formKey.currentState!.validate(), isFalse); // Validation should return false due to errors.
+    await tester.pumpAndSettle();
+
+    // Check error messages are displayed.
+    expect(find.text('foo/error'), findsOneWidget);
+    expect(find.text('bar/error'), findsOneWidget);
+  });
 }
