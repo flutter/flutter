@@ -115,7 +115,6 @@ class UserMessages {
       'No Java Development Kit (JDK) found; You must have the environment '
       'variable JAVA_HOME set and the java binary in your PATH. '
       'You can download the JDK from https://www.oracle.com/technetwork/java/javase/downloads/.';
-  String androidJdkLocation(String location) => 'Java binary at: $location';
   String get androidLicensesAll => 'All Android licenses accepted.';
   String get androidLicensesSome => 'Some Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
   String get androidLicensesNone => 'Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
