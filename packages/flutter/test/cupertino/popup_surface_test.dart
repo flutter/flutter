@@ -302,6 +302,40 @@ void main() {
     }
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/154887.
+  testWidgets("Applying a FadeTransition to the CupertinoPopupSurface doesn't cause transparency", (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller.dispose);
+    controller.forward();
+
+    await tester.pumpWidget(
+      _FilterTest(
+        FadeTransition(
+          opacity: controller,
+          child: const CupertinoPopupSurface(child: SizedBox()),
+        ),
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Golden should display a CupertinoPopupSurface with no transparency
+    // directly underneath the surface. A small amount of transparency should be
+    // present on the upper-left corner of the screen.
+    //
+    // If transparency (gray and white grid) is present underneath the surface,
+    // the blendmode is being incorrectly applied.
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('cupertinoPopupSurface.blendmode-fix.0.png'),
+    );
+
+    await tester.pumpAndSettle();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
   // Golden displays a CupertinoPopupSurface with all enabled features.
   //
   // CupertinoPopupSurface uses ImageFilter.compose, which applies an inner
