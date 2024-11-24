@@ -29,7 +29,8 @@ namespace impeller {
 #endif  // IMPELLER_DEBUG
 
 template <class T>
-struct Resource {
+class Resource {
+ public:
   using ResourceType = T;
   ResourceType resource;
 
@@ -40,7 +41,7 @@ struct Resource {
 
   Resource(const ShaderMetadata& metadata, ResourceType p_resource)
       : resource(p_resource),
-        dynamic_metadata_(std::make_shared<ShaderMetadata>(metadata)) {}
+        dynamic_metadata_(std::make_unique<ShaderMetadata>(metadata)) {}
 
   const ShaderMetadata* GetMetadata() const {
     return dynamic_metadata_ ? dynamic_metadata_.get() : metadata_;
@@ -51,7 +52,7 @@ struct Resource {
   const ShaderMetadata* metadata_ = nullptr;
 
   // Dynamically generated shader metadata.
-  std::shared_ptr<const ShaderMetadata> dynamic_metadata_ = nullptr;
+  std::unique_ptr<const ShaderMetadata> dynamic_metadata_ = nullptr;
 };
 
 using BufferResource = Resource<BufferView>;
