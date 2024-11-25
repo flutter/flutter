@@ -22,12 +22,12 @@ val engineVersion = Paths
     .trim()
 
 var engineRealm = Paths
-.get(
-flutterRoot.absolutePath,
-"bin",
-"internal",
-"engine.realm"
-)
+        .get(
+            flutterRoot.absolutePath,
+            "bin",
+            "internal",
+            "engine.realm"
+        )
     .toFile()
     .readText()
     .trim()
