@@ -773,6 +773,7 @@ class FlutterPlugin implements Plugin<Project> {
         project.android.buildTypes.each { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             if (flutterBuildMode != "release" || !pluginObject.dev_dependency) {
+                // Only add dependency on dev dependencies in non-release builds.
                 project.dependencies {
                     api(pluginProject)
                 }
@@ -791,8 +792,9 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
-                // This plugin will not be included in the build, so no need to add
-                // the embedding dependency to it.
+                // This plugin is a dev dependency and will not be included in
+                // the release build,  so no need to add the embedding
+                // dependency to it.
                 return
             }
             // Copy build types from the app to the plugin.
@@ -959,7 +961,8 @@ class FlutterPlugin implements Plugin<Project> {
         project.android.buildTypes.each { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
-                // This plugin will not be included in the build, so no need to add its dependencies.
+                // This plugin is a dev dependency will not be included in the
+                // release build, so no need to add its dependencies.
                 return
             }
             def dependencies = pluginObject.dependencies

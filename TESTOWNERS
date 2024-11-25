@@ -230,6 +230,7 @@
 
 ## Host only DeviceLab tests
 /dev/devicelab/bin/tasks/animated_complex_opacity_perf_macos__e2e_summary.dart @cbracken @flutter/desktop
+/dev/devicelab/bin/tasks/android_release_builds_exclude_dev_dependencies_test.dart @camsim99 @flutter/android
 /dev/devicelab/bin/tasks/basic_material_app_macos__compile.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/build_aar_module_test.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/build_ios_framework_module_test.dart @jmagman @flutter/tool
@@ -280,7 +281,6 @@
 /dev/devicelab/bin/tasks/plugin_test_linux.dart @stuartmorgan @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test_macos.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test_windows.dart @loic-sharma @flutter/desktop
-/dev/devicelab/bin/tasks/release_builds_exclude_dev_dependencies_test.dart @camsim99 @flutter/android
 /dev/devicelab/bin/tasks/run_debug_test_android.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/run_debug_test_android.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/run_debug_test_linux.dart @loic-sharma @flutter/tool

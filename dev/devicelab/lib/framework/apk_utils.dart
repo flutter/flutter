@@ -192,7 +192,7 @@ class ApkExtractor {
     _extracted = true;
   }
 
-  /// Returns true if APK contains classes from a given library.
+  /// Returns true if APK contains classes from library with given [libraryName].
   Future<bool> containsLibrary(String libraryName) async {
     await _extractDex();
     for (final String className in _classes) {
@@ -229,8 +229,8 @@ Future<String> getAndroidManifest(String apk) async {
   );
 }
 
-/// Checks that the APK includes any classes from a particularly library in the
-/// APK and returns true if so, false otherwise.
+/// Checks that the [apk] includes any classes from a particularly library with
+/// given [libraryName] in the [apk] and returns true if so, false otherwise.
 Future<bool> checkApkContainsMethodsFromLibrary(File apk, String libraryName) async {
   final ApkExtractor extractor = ApkExtractor(apk);
   final bool apkContainsMethodsFromLibrary = await extractor.containsLibrary(libraryName);
@@ -292,8 +292,12 @@ android {
 
   /// Adds a plugin to the pubspec.
   ///
-  /// [plugin] should include the version of the dependency desired if you wish. Include
-  /// other options for `flutter pub add` to [options].
+  /// If a particular version of the [plugin] is desired, it should be included
+  /// in the name as it would be in the  `flutter pub add` command, e.g.
+  /// `google_maps_flutter:^2.2.1`.
+  ///
+  /// Include all other desired options for running `flutter pub add` to
+  /// [options], e.g. ` <String>['--path', 'path/to/plugin']`.
   Future<void> addPlugin(String plugin, {List<String> options = const <String>[]}) async {
     await inDirectory(Directory(rootPath), () async {
       await flutter('pub', options: <String>['add', plugin, ...options]);

@@ -17,7 +17,7 @@ Future<void> main() async {
         section('APK does contain methods from dev dependency in debug mode');
 
         // Create dev_dependency plugin to use for test.
-        final Directory tempDir = Directory.systemTemp.createTempSync('release_builds_exclude_dev_dependencies_test.');
+        final Directory tempDir = Directory.systemTemp.createTempSync('android_release_builds_exclude_dev_dependencies_test.');
         const String devDependencyPluginOrg = 'com.example.dev_dependency_plugin';
         await FlutterPluginProject.create(tempDir, 'dev_dependency_plugin', options: <String>['--platforms=android', '--org=$devDependencyPluginOrg']);
 

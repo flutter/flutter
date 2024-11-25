@@ -1077,7 +1077,7 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: linux_desktop_impeller
 
-  - name: Linux release_builds_exclude_dev_dependencies_test
+  - name: Linux android_release_builds_exclude_dev_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
     bringup: true
@@ -1090,7 +1090,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
-      task_name: release_builds_exclude_dev_dependencies_test
+      task_name: android_release_builds_exclude_dev_dependencies_test
     runIf:
       - dev/**
       - bin/**
