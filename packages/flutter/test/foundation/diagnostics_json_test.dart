@@ -84,7 +84,6 @@ void main() {
     test('default', () {
       final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());
       expect(result.containsKey('properties'), isFalse);
-      print(result['children']);
       expect(result.containsKey('children'), isFalse);
 
       for (final String keyName in defaultDiagnosticKeys) {
