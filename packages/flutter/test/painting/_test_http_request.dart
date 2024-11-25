@@ -129,8 +129,8 @@ class TestImgElement {
   int naturalWidth = -1;
   int naturalHeight = -1;
 
-  JSFunction? _resolveFunc;
-  JSFunction? _rejectFunc;
+  late JSFunction _resolveFunc;
+  late JSFunction _rejectFunc;
 
   JSPromise<JSAny?> decode() {
     return JSPromise<JSAny?>((JSFunction resolveFunc, JSFunction rejectFunc) {
@@ -140,11 +140,11 @@ class TestImgElement {
   }
 
   void decodeSuccess() {
-    _resolveFunc!.callAsFunction();
+    _resolveFunc.callAsFunction();
   }
 
   void decodeFailure() {
-    _rejectFunc!.callAsFunction();
+    _rejectFunc.callAsFunction();
   }
 
   web.HTMLImageElement getMock() => _mock as web.HTMLImageElement;

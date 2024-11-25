@@ -1052,6 +1052,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
           informationCollector: informationCollector,
         );
 
+  /// Creates a [MultiFrameImageStreamCompleter] from an [ImageFrameIterator].
   MultiFrameImageStreamCompleter.fromIterator({
     required Future<ImageFrameIterator> iterator,
     required double scale,
