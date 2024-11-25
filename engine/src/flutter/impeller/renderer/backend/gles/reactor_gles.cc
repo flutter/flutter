@@ -219,6 +219,9 @@ HandleGLES ReactorGLES::CreateHandle(HandleType type, GLuint external_handle) {
 void ReactorGLES::CollectHandle(HandleGLES handle) {
   WriterLock handles_lock(handles_mutex_);
   if (auto found = handles_.find(handle); found != handles_.end()) {
+    if (!found->second.pending_collection) {
+      handles_to_collect_count_ += 1;
+    }
     found->second.pending_collection = true;
   }
 }
@@ -273,10 +276,12 @@ bool ReactorGLES::ConsolidateHandles() {
       handles_to_name;
   {
     WriterLock handles_lock(handles_mutex_);
+    handles_to_delete.reserve(handles_to_collect_count_);
+    handles_to_collect_count_ = 0;
     for (auto& handle : handles_) {
       // Collect dead handles.
       if (handle.second.pending_collection) {
-        handles_to_delete.push_back(
+        handles_to_delete.emplace_back(
             std::make_tuple(handle.first, handle.second.name));
         continue;
       }
@@ -292,7 +297,7 @@ bool ReactorGLES::ConsolidateHandles() {
       // Set pending debug labels.
       if (handle.second.pending_debug_label.has_value() &&
           handle.first.type != HandleType::kFence) {
-        handles_to_name.push_back(std::make_tuple(
+        handles_to_name.emplace_back(std::make_tuple(
             ToDebugResourceType(handle.first.type),
             handle.second.name.value().handle,
             std::move(handle.second.pending_debug_label.value())));
