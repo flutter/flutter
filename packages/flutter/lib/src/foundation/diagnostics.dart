@@ -1605,29 +1605,12 @@ abstract class DiagnosticsNode {
   ///    by this method and interactive tree views in the Flutter IntelliJ
   ///    plugin.
   @mustCallSuper
-  Map<String, Object?> toJsonMap(
-    DiagnosticsSerializationDelegate delegate, {
-    bool fullDetails = true,
-  }) {
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     Map<String, Object?> result = <String, Object?>{};
     assert(() {
       final bool hasChildren = getChildren().isNotEmpty;
-      final Map<String, Object?> essentialDetails = <String, Object?>{
+      result = <String, Object?>{
         'description': toDescription(),
-        'shouldIndent': style != DiagnosticsTreeStyle.flat &&
-            style != DiagnosticsTreeStyle.error,
-        ...delegate.additionalNodeProperties(this, fullDetails: fullDetails),
-        if (delegate.subtreeDepth > 0)
-          'children': toJsonList(
-            delegate.filterChildren(getChildren(), this),
-            this,
-            delegate,
-            fullDetails: fullDetails,
-          ),
-      };
-
-      result = !fullDetails ? essentialDetails : <String, Object?>{
-        ...essentialDetails,
         'type': runtimeType.toString(),
         if (name != null)
           'name': name,
@@ -1651,12 +1634,18 @@ abstract class DiagnosticsNode {
           'allowWrap': allowWrap,
         if (allowNameWrap)
           'allowNameWrap': allowNameWrap,
+        ...delegate.additionalNodeProperties(this, fullDetails: true),
         if (delegate.includeProperties)
           'properties': toJsonList(
             delegate.filterProperties(getProperties(), this),
             this,
             delegate,
-            fullDetails: fullDetails,
+          ),
+        if (delegate.subtreeDepth > 0)
+          'children': toJsonList(
+            delegate.filterChildren(getChildren(), this),
+            this,
+            delegate,
           ),
       };
       return true;
@@ -1672,9 +1661,8 @@ abstract class DiagnosticsNode {
   static List<Map<String, Object?>> toJsonList(
     List<DiagnosticsNode>? nodes,
     DiagnosticsNode? parent,
-    DiagnosticsSerializationDelegate delegate, {
-    bool fullDetails = true,
-  }) {
+    DiagnosticsSerializationDelegate delegate,
+  ) {
     bool truncated = false;
     if (nodes == null) {
       return const <Map<String, Object?>>[];
@@ -1686,10 +1674,7 @@ abstract class DiagnosticsNode {
       truncated = true;
     }
     final List<Map<String, Object?>> json = nodes.map<Map<String, Object?>>((DiagnosticsNode node) {
-      return node.toJsonMap(
-        delegate.delegateForNode(node),
-        fullDetails: fullDetails,
-      );
+      return node.toJsonMap(delegate.delegateForNode(node));
     }).toList();
     if (truncated) {
       json.last['truncated'] = true;
@@ -1872,17 +1857,8 @@ class StringProperty extends DiagnosticsProperty<String> {
   final bool quoted;
 
   @override
-  Map<String, Object?> toJsonMap(
-    DiagnosticsSerializationDelegate delegate, {
-    bool fullDetails = true,
-  }) {
-    final Map<String, Object?> json = super.toJsonMap(
-      delegate,
-      fullDetails: fullDetails,
-    );
-    if (!fullDetails) {
-      return json;
-    }
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object?> json = super.toJsonMap(delegate);
     json['quoted'] = quoted;
     return json;
   }
@@ -1937,18 +1913,8 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
   }) : super.lazy();
 
   @override
-  Map<String, Object?> toJsonMap(
-    DiagnosticsSerializationDelegate delegate, {
-    bool fullDetails = true,
-  }) {
-    final Map<String, Object?> json = super.toJsonMap(
-      delegate,
-      fullDetails: fullDetails,
-    );
-    if (!fullDetails) {
-      return json;
-    }
-
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object?> json = super.toJsonMap(delegate);
     if (unit != null) {
       json['unit'] = unit;
     }
@@ -2131,17 +2097,8 @@ class FlagProperty extends DiagnosticsProperty<bool> {
        );
 
   @override
-  Map<String, Object?> toJsonMap(
-    DiagnosticsSerializationDelegate delegate, {
-    bool fullDetails = true,
-  }) {
-    final Map<String, Object?> json = super.toJsonMap(
-      delegate,
-      fullDetails: fullDetails,
-    );
-    if (!fullDetails) {
-      return json;
-    }
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object?> json = super.toJsonMap(delegate);
     if (ifTrue != null) {
       json['ifTrue'] = ifTrue;
     }
@@ -2262,17 +2219,8 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   }
 
   @override
-  Map<String, Object?> toJsonMap(
-    DiagnosticsSerializationDelegate delegate, {
-    bool fullDetails = true,
-  }) {
-    final Map<String, Object?> json = super.toJsonMap(
-      delegate,
-      fullDetails: fullDetails,
-    );
-    if (!fullDetails) {
-      return json;
-    }
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object?> json = super.toJsonMap(delegate);
     if (value != null) {
       json['values'] = value!.map<String>((T value) => value.toString()).toList();
     }
@@ -2409,17 +2357,8 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   }
 
   @override
-  Map<String, Object?> toJsonMap(
-    DiagnosticsSerializationDelegate delegate, {
-    bool fullDetails = true,
-  }) {
-    final Map<String, Object?> json = super.toJsonMap(
-      delegate,
-      fullDetails: fullDetails,
-    );
-    if (!fullDetails) {
-      return json;
-    }
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object?> json = super.toJsonMap(delegate);
     if (ifPresent != null) {
       json['ifPresent'] = ifPresent;
     }
@@ -2496,17 +2435,8 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   }
 
   @override
-  Map<String, Object?> toJsonMap(
-    DiagnosticsSerializationDelegate delegate, {
-    bool fullDetails = true,
-  }) {
-    final Map<String, Object?> json = super.toJsonMap(
-      delegate,
-      fullDetails: fullDetails,
-    );
-    if (!fullDetails) {
-      return json;
-    }
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object?> json = super.toJsonMap(delegate);
     if (value.isNotEmpty) {
       json['values'] = _formattedValues().toList();
     }
@@ -2625,10 +2555,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   final bool allowNameWrap;
 
   @override
-  Map<String, Object?> toJsonMap(
-    DiagnosticsSerializationDelegate delegate, {
-    bool fullDetails = true,
-  }) {
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final T? v = value;
     List<Map<String, Object?>>? properties;
     if (delegate.expandPropertyValues && delegate.includeProperties && v is Diagnosticable && getProperties().isEmpty) {
@@ -2638,16 +2565,9 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
         delegate.filterProperties(v.toDiagnosticsNode().getProperties(), this),
         this,
         delegate,
-        fullDetails: fullDetails,
       );
     }
-    final Map<String, Object?> json = super.toJsonMap(
-      delegate,
-      fullDetails: fullDetails,
-    );
-    if (!fullDetails) {
-      return json;
-    }
+    final Map<String, Object?> json = super.toJsonMap(delegate);
     if (properties != null) {
       json['properties'] = properties;
     }

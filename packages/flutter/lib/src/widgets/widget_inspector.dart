@@ -1754,7 +1754,8 @@ mixin WidgetInspectorService {
     bool fullDetails = true,
   }
   ) {
-    return node?.toJsonMap(delegate, fullDetails: fullDetails);
+    // TODO: switch here.
+    return node?.toJsonMap(delegate);
   }
 
   bool _isValueCreatedByLocalProject(Object? value) {
@@ -1824,14 +1825,8 @@ mixin WidgetInspectorService {
     List<DiagnosticsNode> nodes,
     InspectorSerializationDelegate delegate, {
     required DiagnosticsNode? parent,
-    bool fullDetails = true,
   }) {
-    return DiagnosticsNode.toJsonList(
-      nodes,
-      parent,
-      delegate,
-      fullDetails: fullDetails,
-    );
+    return DiagnosticsNode.toJsonList(nodes, parent, delegate);
   }
 
   /// Returns a JSON representation of the properties of the [DiagnosticsNode]
