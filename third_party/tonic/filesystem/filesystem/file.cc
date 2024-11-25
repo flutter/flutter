@@ -5,6 +5,7 @@
 #include "tonic/filesystem/filesystem/file.h"
 
 #include <fcntl.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 
 #include <climits>
