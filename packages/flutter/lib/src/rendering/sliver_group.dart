@@ -268,9 +268,9 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
         constraints.copyWith(
           scrollOffset: math.max(0.0, constraints.scrollOffset - scrollOffset),
           cacheOrigin: math.min(0.0, constraints.cacheOrigin + scrollOffset),
-          overlap: math.max(0.0, _fixPrecisionErrorTolerance(paintOffset - beforeOffsetPaintExtent)),
-          remainingPaintExtent: _fixPrecisionErrorTolerance(constraints.remainingPaintExtent - beforeOffsetPaintExtent),
-          remainingCacheExtent: _fixPrecisionErrorTolerance(constraints.remainingCacheExtent - calculateCacheOffset(constraints, from: 0.0, to: scrollOffset)),
+          overlap: math.max(0.0, _fixPrecisionError(paintOffset - beforeOffsetPaintExtent)),
+          remainingPaintExtent: _fixPrecisionError(constraints.remainingPaintExtent - beforeOffsetPaintExtent),
+          remainingCacheExtent: _fixPrecisionError(constraints.remainingCacheExtent - calculateCacheOffset(constraints, from: 0.0, to: scrollOffset)),
           precedingScrollExtent: scrollOffset + constraints.precedingScrollExtent,
         ),
         parentUsesSize: true,
@@ -420,7 +420,7 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
     }
   }
 
-  static double _fixPrecisionErrorTolerance(double number) {
+  static double _fixPrecisionError(double number) {
     return number.abs() < precisionErrorTolerance ? 0.0 : number;
   }
 }
