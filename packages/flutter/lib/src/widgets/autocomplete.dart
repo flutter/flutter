@@ -6,6 +6,7 @@
 library;
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 
@@ -327,6 +328,14 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       onInvoke: _highlightNextOption,
       isEnabledCallback: () => _canShowOptionsView,
     ),
+    AutocompleteFirstOptionIntent: _AutocompleteCallbackAction<AutocompleteFirstOptionIntent>(
+      onInvoke: _highlightFirstOption,
+      isEnabledCallback: () => _canShowOptionsView,
+    ),
+    AutocompleteLastOptionIntent: _AutocompleteCallbackAction<AutocompleteLastOptionIntent>(
+      onInvoke: _highlightLastOption,
+      isEnabledCallback: () => _canShowOptionsView,
+    ),
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideOptions),
   };
 
@@ -340,6 +349,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.arrowUp): AutocompletePreviousOptionIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
+    // TODO(justinmc): meta for mac.
+    SingleActivator(LogicalKeyboardKey.arrowUp, control: true): AutocompleteFirstOptionIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown, control: true): AutocompleteLastOptionIntent(),
   };
 
   bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
@@ -411,17 +423,26 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   void _highlightPreviousOption(AutocompletePreviousOptionIntent intent) {
-    assert(_canShowOptionsView);
-    _updateOptionsViewVisibility();
-    assert(_optionsViewController.isShowing);
-    _updateHighlight(_highlightedOptionIndex.value - 1);
+    _highlightOption(_highlightedOptionIndex.value - 1);
   }
 
   void _highlightNextOption(AutocompleteNextOptionIntent intent) {
+    _highlightOption(_highlightedOptionIndex.value + 1);
+  }
+
+  void _highlightFirstOption(AutocompleteFirstOptionIntent intent) {
+    _highlightOption(0);
+  }
+
+  void _highlightLastOption(AutocompleteLastOptionIntent intent) {
+    _highlightOption(_options.length - 1);
+  }
+
+  void _highlightOption(int index) {
     assert(_canShowOptionsView);
     _updateOptionsViewVisibility();
     assert(_optionsViewController.isShowing);
-    _updateHighlight(_highlightedOptionIndex.value + 1);
+    _updateHighlight(index);
   }
 
   Object? _hideOptions(DismissIntent intent) {
@@ -555,6 +576,18 @@ class AutocompletePreviousOptionIntent extends Intent {
 class AutocompleteNextOptionIntent extends Intent {
   /// Creates an instance of AutocompleteNextOptionIntent.
   const AutocompleteNextOptionIntent();
+}
+
+/// An [Intent] to highlight the first option in the autocomplete list.
+class AutocompleteFirstOptionIntent extends Intent {
+  /// Creates an instance of AutocompleteFirstOptionIntent.
+  const AutocompleteFirstOptionIntent();
+}
+
+/// An [Intent] to highlight the last option in the autocomplete list.
+class AutocompleteLastOptionIntent extends Intent {
+  /// Creates an instance of AutocompleteLastOptionIntent.
+  const AutocompleteLastOptionIntent();
 }
 
 /// An inherited widget used to indicate which autocomplete option should be
