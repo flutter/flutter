@@ -342,6 +342,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       onInvoke: _highlightNextPageOption,
       isEnabledCallback: () => _canShowOptionsView,
     ),
+    AutocompletePreviousPageOptionIntent: _AutocompleteCallbackAction<AutocompletePreviousPageOptionIntent>(
+      onInvoke: _highlightPreviousPageOption,
+      isEnabledCallback: () => _canShowOptionsView,
+    ),
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideOptions),
   };
 
@@ -358,6 +362,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     // TODO(justinmc): meta for mac.
     SingleActivator(LogicalKeyboardKey.arrowUp, control: true): AutocompleteFirstOptionIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown, control: true): AutocompleteLastOptionIntent(),
+    SingleActivator(LogicalKeyboardKey.pageUp): AutocompletePreviousPageOptionIntent(),
     SingleActivator(LogicalKeyboardKey.pageDown): AutocompleteNextPageOptionIntent(),
   };
 
@@ -449,6 +454,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   void _highlightNextPageOption(AutocompleteNextPageOptionIntent intent) {
     _highlightOption(_highlightedOptionIndex.value + _pageSize);
+  }
+
+  void _highlightPreviousPageOption(AutocompletePreviousPageOptionIntent intent) {
+    _highlightOption(_highlightedOptionIndex.value - _pageSize);
   }
 
   void _highlightOption(int index) {
@@ -608,6 +617,13 @@ class AutocompleteLastOptionIntent extends Intent {
 class AutocompleteNextPageOptionIntent extends Intent {
   /// Creates an instance of AutocompleteNextPageOptionIntent.
   const AutocompleteNextPageOptionIntent();
+}
+
+/// An [Intent] to highlight the option one page before the currently
+/// highlighted option in the autocomplete list.
+class AutocompletePreviousPageOptionIntent extends Intent {
+  /// Creates an instance of AutocompletePreviousPageOptionIntent.
+  const AutocompletePreviousPageOptionIntent();
 }
 
 /// An inherited widget used to indicate which autocomplete option should be
