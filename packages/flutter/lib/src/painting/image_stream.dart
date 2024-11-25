@@ -911,6 +911,82 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 }
 
+/// An iterator which iterates over the frames of an image.
+abstract class ImageFrameIterator {
+  /// A default constructor to allow for subclasses.
+  ImageFrameIterator();
+
+  /// Creates an [ImageFrameIterator] from a [ui.Codec].
+  factory ImageFrameIterator.fromCodec(ui.Codec codec) = _CodecImageFrameIterator;
+
+  /// The number of frames in this image.
+  int get frameCount;
+
+  /// The number of times to repeat the animation.
+  ///
+  /// `0` means the animation should only be played once, `-1` means the
+  /// animation should repeat infinitely.
+  int get repetitionCount;
+
+  /// Returns a [Future] which resolves to the next frame in the animation.
+  Future<ImageFrame> getNextFrame();
+}
+
+/// A single frame of an image.
+abstract class ImageFrame {
+  /// The duration this frame should be shown.
+  Duration get duration;
+
+  /// Converts the frame into an [ImageInfo] object.
+  ImageInfo asImageInfo({required double scale, String? debugLabel});
+
+  /// Releases the image resource underlying this frame.
+  void dispose();
+}
+
+/// An [ImageFrame] backed by a [ui.FrameInfo].
+class _FrameInfoFrame extends ImageFrame {
+  _FrameInfoFrame(this.frameInfo);
+
+  final ui.FrameInfo frameInfo;
+
+  @override
+  ImageInfo asImageInfo({required double scale, String? debugLabel}) =>
+      ImageInfo(
+        image: frameInfo.image.clone(),
+        scale: scale,
+        debugLabel: debugLabel,
+      );
+
+  @override
+  Duration get duration => frameInfo.duration;
+
+  @override
+  void dispose() {
+    frameInfo.image.dispose();
+  }
+}
+
+/// An [ImageFrameIterator] backed by a [ui.Codec].
+class _CodecImageFrameIterator extends ImageFrameIterator {
+  _CodecImageFrameIterator(this.codec);
+
+  final ui.Codec codec;
+
+  @override
+  int get frameCount => codec.frameCount;
+
+  @override
+  int get repetitionCount => codec.repetitionCount;
+
+  @override
+  Future<ImageFrame> getNextFrame() => codec.getNextFrame().then(_convertToImageFrame);
+
+  ImageFrame _convertToImageFrame(ui.FrameInfo frameInfo) {
+    return _FrameInfoFrame(frameInfo);
+  }
+}
+
 /// Manages the decoding and scheduling of image frames.
 ///
 /// New frames will only be emitted while there are registered listeners to the
@@ -967,10 +1043,25 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     String? debugLabel,
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
+  }) : this.fromIterator(
+          iterator: codec.then<ImageFrameIterator>(
+              (ui.Codec codec) => ImageFrameIterator.fromCodec(codec)),
+          scale: scale,
+          debugLabel: debugLabel,
+          chunkEvents: chunkEvents,
+          informationCollector: informationCollector,
+        );
+
+  MultiFrameImageStreamCompleter.fromIterator({
+    required Future<ImageFrameIterator> iterator,
+    required double scale,
+    String? debugLabel,
+    Stream<ImageChunkEvent>? chunkEvents,
+    InformationCollector? informationCollector,
   }) : _informationCollector = informationCollector,
        _scale = scale {
     this.debugLabel = debugLabel;
-    codec.then<void>(_handleCodecReady, onError: (Object error, StackTrace stack) {
+    iterator.then<void>(_handleIteratorReady, onError: (Object error, StackTrace stack) {
       reportError(
         context: ErrorDescription('resolving an image codec'),
         exception: error,
@@ -995,10 +1086,10 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 
   StreamSubscription<ImageChunkEvent>? _chunkSubscription;
-  ui.Codec? _codec;
+  ImageFrameIterator? _iterator;
   final double _scale;
   final InformationCollector? _informationCollector;
-  ui.FrameInfo? _nextFrame;
+  ImageFrame? _nextFrame;
   // When the current was first shown.
   late Duration _shownTimestamp;
   // The requested duration for the current frame;
@@ -1010,9 +1101,9 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   // Used to guard against registering multiple _handleAppFrame callbacks for the same frame.
   bool _frameCallbackScheduled = false;
 
-  void _handleCodecReady(ui.Codec codec) {
-    _codec = codec;
-    assert(_codec != null);
+  void _handleIteratorReady(ImageFrameIterator iterator) {
+    _iterator = iterator;
+    assert(_iterator != null);
 
     if (hasListeners) {
       _decodeNextFrameAndSchedule();
@@ -1026,17 +1117,16 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     }
     assert(_nextFrame != null);
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
-      _emitFrame(ImageInfo(
-        image: _nextFrame!.image.clone(),
+      _emitFrame(_nextFrame!.asImageInfo(
         scale: _scale,
         debugLabel: debugLabel,
       ));
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame!.duration;
-      _nextFrame!.image.dispose();
+      _nextFrame!.dispose();
       _nextFrame = null;
-      final int completedCycles = _framesEmitted ~/ _codec!.frameCount;
-      if (_codec!.repetitionCount == -1 || completedCycles <= _codec!.repetitionCount) {
+      final int completedCycles = _framesEmitted ~/ _iterator!.frameCount;
+      if (_iterator!.repetitionCount == -1 || completedCycles <= _iterator!.repetitionCount) {
         _decodeNextFrameAndSchedule();
       }
       return;
@@ -1058,10 +1148,10 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   Future<void> _decodeNextFrameAndSchedule() async {
     // This will be null if we gave it away. If not, it's still ours and it
     // must be disposed of.
-    _nextFrame?.image.dispose();
+    _nextFrame?.dispose();
     _nextFrame = null;
     try {
-      _nextFrame = await _codec!.getNextFrame();
+      _nextFrame = await _iterator!.getNextFrame();
     } catch (exception, stack) {
       reportError(
         context: ErrorDescription('resolving an image frame'),
@@ -1072,7 +1162,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
       return;
     }
-    if (_codec!.frameCount == 1) {
+    if (_iterator!.frameCount == 1) {
       // ImageStreamCompleter listeners removed while waiting for next frame to
       // be decoded.
       // There's no reason to emit the frame without active listeners.
@@ -1081,12 +1171,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       }
       // This is not an animated image, just return it and don't schedule more
       // frames.
-      _emitFrame(ImageInfo(
-        image: _nextFrame!.image.clone(),
-        scale: _scale,
-        debugLabel: debugLabel,
-      ));
-      _nextFrame!.image.dispose();
+      _emitFrame(_nextFrame!.asImageInfo(scale: _scale, debugLabel: debugLabel,));
+      _nextFrame!.dispose();
       _nextFrame = null;
       return;
     }
@@ -1108,7 +1194,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 
   @override
   void addListener(ImageStreamListener listener) {
-    if (!hasListeners && _codec != null && (_currentImage == null || _codec!.frameCount > 1)) {
+    if (!hasListeners && _iterator != null && (_currentImage == null || _iterator!.frameCount > 1)) {
       _decodeNextFrameAndSchedule();
     }
     super.addListener(listener);

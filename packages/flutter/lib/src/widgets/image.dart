@@ -17,6 +17,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
+import '../painting/_web_image_info_io.dart' if (dart.library.js_util) '../painting/_web_image_info_web.dart';
+import '_web_image_io.dart' if (dart.library.js_util) '_web_image_web.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'disposable_build_context.dart';
@@ -1306,28 +1308,41 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       }
     }
 
-    Widget result = RawImage(
-      // Do not clone the image, because RawImage is a stateless wrapper.
-      // The image will be disposed by this state object when it is not needed
-      // anymore, such as when it is unmounted or when the image stream pushes
-      // a new image.
-      image: _imageInfo?.image,
-      debugImageLabel: _imageInfo?.debugLabel,
-      width: widget.width,
-      height: widget.height,
-      scale: _imageInfo?.scale ?? 1.0,
-      color: widget.color,
-      opacity: widget.opacity,
-      colorBlendMode: widget.colorBlendMode,
-      fit: widget.fit,
-      alignment: widget.alignment,
-      repeat: widget.repeat,
-      centerSlice: widget.centerSlice,
-      matchTextDirection: widget.matchTextDirection,
-      invertColors: _invertColors,
-      isAntiAlias: widget.isAntiAlias,
-      filterQuality: widget.filterQuality,
-    );
+    late Widget result;
+    if (_imageInfo is WebImageInfo) {
+      result = RawWebImage(
+        image: _imageInfo as WebImageInfo?,
+        debugImageLabel: _imageInfo?.debugLabel,
+        width: widget.width,
+        height: widget.height,
+        fit: widget.fit,
+        alignment: widget.alignment,
+        matchTextDirection: widget.matchTextDirection,
+      );
+    } else {
+      result = RawImage(
+        // Do not clone the image, because RawImage is a stateless wrapper.
+        // The image will be disposed by this state object when it is not needed
+        // anymore, such as when it is unmounted or when the image stream pushes
+        // a new image.
+        image: _imageInfo?.image,
+        debugImageLabel: _imageInfo?.debugLabel,
+        width: widget.width,
+        height: widget.height,
+        scale: _imageInfo?.scale ?? 1.0,
+        color: widget.color,
+        opacity: widget.opacity,
+        colorBlendMode: widget.colorBlendMode,
+        fit: widget.fit,
+        alignment: widget.alignment,
+        repeat: widget.repeat,
+        centerSlice: widget.centerSlice,
+        matchTextDirection: widget.matchTextDirection,
+        invertColors: _invertColors,
+        isAntiAlias: widget.isAntiAlias,
+        filterQuality: widget.filterQuality,
+      );
+    }
 
     if (!widget.excludeFromSemantics) {
       result = Semantics(

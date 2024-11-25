@@ -10,11 +10,16 @@ import 'dart:ui_web' as ui_web;
 import 'package:flutter/foundation.dart';
 
 import '../web.dart' as web;
+import '_web_image_info_web.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
 /// Creates a type for an overridable factory function for testing purposes.
 typedef HttpRequestFactory = web.XMLHttpRequest Function();
+
+/// Creates a type for an overridable factory function for creating <img>
+/// elements for testing purposes.
+typedef ImgElementFactory = web.HTMLImageElement Function();
 
 // Method signature for _loadAsync decode callbacks.
 typedef _SimpleDecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer);
@@ -30,6 +35,19 @@ HttpRequestFactory httpRequestFactory = _httpClient;
 /// Restores to the default HTTP request factory.
 void debugRestoreHttpRequestFactory() {
   httpRequestFactory = _httpClient;
+}
+
+/// Default <img> element factory.
+web.HTMLImageElement _imgElementFactory() {
+  return web.document.createElement('img') as web.HTMLImageElement;
+}
+
+/// Creates an overridable factory function to create an <img> element.
+ImgElementFactory imgElementFactory = _imgElementFactory;
+
+/// Restores to the default <img> element factory.
+void debugRestoreImgElementFactory() {
+  imgElementFactory = _imgElementFactory;
 }
 
 /// The web implementation of [image_provider.NetworkImage].
@@ -64,9 +82,9 @@ class NetworkImage
     final StreamController<ImageChunkEvent> chunkEvents =
         StreamController<ImageChunkEvent>();
 
-    return MultiFrameImageStreamCompleter(
+    return MultiFrameImageStreamCompleter.fromIterator(
       chunkEvents: chunkEvents.stream,
-      codec: _loadAsync(key as NetworkImage, decode, chunkEvents),
+      iterator: _loadAsync(key as NetworkImage, decode, chunkEvents),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
@@ -80,9 +98,9 @@ class NetworkImage
     // has been loaded or an error is thrown.
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
-    return MultiFrameImageStreamCompleter(
+    return MultiFrameImageStreamCompleter.fromIterator(
       chunkEvents: chunkEvents.stream,
-      codec: _loadAsync(key as NetworkImage, decode, chunkEvents),
+      iterator: _loadAsync(key as NetworkImage, decode, chunkEvents),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
@@ -104,7 +122,7 @@ class NetworkImage
   // Html renderer does not support decoding network images to a specified size. The decode parameter
   // here is ignored and `ui_web.createImageCodecFromUrl` will be used directly
   // in place of the typical `instantiateImageCodec` method.
-  Future<ui.Codec> _loadAsync(
+  Future<ImageFrameIterator> _loadAsync(
     NetworkImage key,
     _SimpleDecoderCallback decode,
     StreamController<ImageChunkEvent> chunkEvents,
@@ -117,51 +135,22 @@ class NetworkImage
 
     // We use a different method when headers are set because the
     // `ui_web.createImageCodecFromUrl` method is not capable of handling headers.
-    if (isSkiaWeb || containsNetworkImageHeaders) {
-      final Completer<web.XMLHttpRequest> completer =
-          Completer<web.XMLHttpRequest>();
-      final web.XMLHttpRequest request = httpRequestFactory();
-
-      request.open('GET', key.url, true);
-      request.responseType = 'arraybuffer';
+    if (isSkiaWeb) {
       if (containsNetworkImageHeaders) {
-        key.headers!.forEach((String header, String value) {
-          request.setRequestHeader(header, value);
-        });
+        // Don't even attempt to fall back to an <img> element if there are
+        // headers.
+        return _fetchImageBytes(key, decode);
       }
 
-      request.addEventListener('load', (web.Event e) {
-        final int status = request.status;
-        final bool accepted = status >= 200 && status < 300;
-        final bool fileUri = status == 0; // file:// URIs have status of 0.
-        final bool notModified = status == 304;
-        final bool unknownRedirect = status > 307 && status < 400;
-        final bool success =
-            accepted || fileUri || notModified || unknownRedirect;
-
-        if (success) {
-          completer.complete(request);
-        } else {
-          completer.completeError(e);
-          throw image_provider.NetworkImageLoadException(
-              statusCode: status, uri: resolved);
-        }
-      }.toJS);
-
-      request.addEventListener('error',
-          ((JSObject e) => completer.completeError(e)).toJS);
-
-      request.send();
-
-      await completer.future;
-
-      final Uint8List bytes = (request.response! as JSArrayBuffer).toDart.asUint8List();
-
-      if (bytes.lengthInBytes == 0) {
-        throw image_provider.NetworkImageLoadException(
-            statusCode: request.status, uri: resolved);
-      }
-      return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
+      return _fetchImageBytes(key, decode)
+          .catchError((Object error, StackTrace? stackTrace) async {
+        // If we failed to fetch the bytes, try to load the image in an <img>
+        // element instead.
+        final web.HTMLImageElement imageElement = imgElementFactory();
+        imageElement.src = key.url;
+        await imageElement.decode().toDart;
+        return _SingleWebImageFrameIterator(imageElement);
+      });
     } else {
       return ui_web.createImageCodecFromUrl(
         resolved,
@@ -169,8 +158,65 @@ class NetworkImage
           chunkEvents.add(ImageChunkEvent(
               cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
         },
-      );
+      ).then((ui.Codec codec) => ImageFrameIterator.fromCodec(codec));
     }
+  }
+
+  Future<ImageFrameIterator> _fetchImageBytes(
+    NetworkImage key,
+    _SimpleDecoderCallback decode,
+  ) async {
+    assert(key == this);
+
+    final Uri resolved = Uri.base.resolve(key.url);
+
+    final bool containsNetworkImageHeaders = key.headers?.isNotEmpty ?? false;
+
+    final Completer<web.XMLHttpRequest> completer =
+        Completer<web.XMLHttpRequest>();
+    final web.XMLHttpRequest request = httpRequestFactory();
+
+    request.open('GET', key.url, true);
+    request.responseType = 'arraybuffer';
+    if (containsNetworkImageHeaders) {
+      key.headers!.forEach((String header, String value) {
+        request.setRequestHeader(header, value);
+      });
+    }
+
+    request.addEventListener('load', (web.Event e) {
+      final int status = request.status;
+      final bool accepted = status >= 200 && status < 300;
+      final bool fileUri = status == 0; // file:// URIs have status of 0.
+      final bool notModified = status == 304;
+      final bool unknownRedirect = status > 307 && status < 400;
+      final bool success =
+          accepted || fileUri || notModified || unknownRedirect;
+
+      if (success) {
+        completer.complete(request);
+      } else {
+        completer.completeError(image_provider.NetworkImageLoadException(
+            statusCode: status, uri: resolved));
+      }
+    }.toJS);
+
+    request.addEventListener('error',
+        ((JSObject e) => completer.completeError(e)).toJS);
+
+    request.send();
+
+    await completer.future;
+
+    final Uint8List bytes = (request.response! as JSArrayBuffer).toDart.asUint8List();
+
+    if (bytes.lengthInBytes == 0) {
+      throw image_provider.NetworkImageLoadException(
+          statusCode: request.status, uri: resolved);
+    }
+
+    return decode(await ui.ImmutableBuffer.fromUint8List(bytes))
+        .then((ui.Codec codec) => ImageFrameIterator.fromCodec(codec));
   }
 
   @override
@@ -186,4 +232,41 @@ class NetworkImage
 
   @override
   String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)})';
+}
+
+class _SingleWebImageFrameIterator extends ImageFrameIterator {
+  _SingleWebImageFrameIterator(this.imageElement);
+
+  final web.HTMLImageElement imageElement;
+
+  @override
+  int get frameCount => 1;
+
+  @override
+  Future<ImageFrame> getNextFrame() {
+    return SynchronousFuture<ImageFrame>(_HtmlImageElementFrame(imageElement));
+  }
+
+  @override
+  int get repetitionCount => 0;
+}
+
+class _HtmlImageElementFrame extends ImageFrame {
+  _HtmlImageElementFrame(this.imageElement);
+
+  final web.HTMLImageElement imageElement;
+
+  @override
+  ImageInfo asImageInfo({required double scale, String? debugLabel}) {
+    return WebImageInfo(imageElement, debugLabel: debugLabel);
+  }
+
+  @override
+  void dispose() {
+    // Do nothing. The <img> element will be garbage collected when there are
+    // no more live references to it.
+  }
+
+  @override
+  Duration get duration => Duration.zero;
 }
