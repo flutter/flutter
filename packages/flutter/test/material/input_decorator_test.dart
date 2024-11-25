@@ -7652,6 +7652,53 @@ void main() {
     expect(textTop, lessThan(textFieldBottom));
   });
 
+  // Regression test for https://github.com/flutter/flutter/pull/66055.
+  testWidgets('A vertically constrained InputDecorator respects the constraint', (WidgetTester tester) async {
+    final UniqueKey keyWithIcon = UniqueKey();
+    final UniqueKey keyWithoutIcon = UniqueKey();
+    const double constrainedHeight = 48.0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: Column(
+            children: <Widget>[
+              InputDecorator(
+                key: keyWithoutIcon,
+                decoration: const InputDecoration(),
+                child: const SizedBox(
+                  height: constrainedHeight,
+                  child: Row(
+                    children: <Widget>[
+                      Text('Flutter', style: TextStyle(fontSize: 60)),
+                    ]
+                  ),
+                ),
+              ),
+              InputDecorator(
+                key: keyWithIcon,
+                decoration: const InputDecoration(),
+                child: const SizedBox(
+                  height: constrainedHeight,
+                  child: Row(
+                    children: <Widget>[
+                      Text('Flutter', style: TextStyle(fontSize: 60)),
+                      Icon(Icons.arrow_drop_down),
+                    ]
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    final double withIconHeight = tester.getSize(find.byKey(keyWithIcon)).height;
+    final double withoutIconHeight = tester.getSize(find.byKey(keyWithoutIcon)).height;
+    expect(withIconHeight, equals(withoutIconHeight));
+  });
+
   testWidgets('Visual density is included in the intrinsic height calculation', (WidgetTester tester) async {
     final UniqueKey key = UniqueKey();
     final UniqueKey intrinsicHeightKey = UniqueKey();

@@ -886,11 +886,16 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   static double _minHeight(RenderBox? box, double width) => box?.getMinIntrinsicHeight(width) ?? 0.0;
   static Size _boxSize(RenderBox? box) => box?.size ?? Size.zero;
   static double _getBaseline(RenderBox box, BoxConstraints boxConstraints) {
-    return ChildLayoutHelper.getBaseline(box, boxConstraints, TextBaseline.alphabetic) ?? box.size.height;
+    return math.min(
+      ChildLayoutHelper.getBaseline(box, boxConstraints, TextBaseline.alphabetic) ?? double.infinity,
+      box.size.height,
+    );
   }
   static double _getDryBaseline(RenderBox box, BoxConstraints boxConstraints) {
-    return ChildLayoutHelper.getDryBaseline(box, boxConstraints, TextBaseline.alphabetic)
-        ?? ChildLayoutHelper.dryLayoutChild(box, boxConstraints).height;
+    return math.min(
+      ChildLayoutHelper.getDryBaseline(box, boxConstraints, TextBaseline.alphabetic) ?? double.infinity,
+      ChildLayoutHelper.dryLayoutChild(box, boxConstraints).height,
+    );
   }
 
   static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
