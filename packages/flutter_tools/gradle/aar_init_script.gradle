@@ -87,7 +87,7 @@ static String getFlutterRoot(Project project) {
 void addAarTask(Project project, component) {
     String variantName = component.name.capitalize()
     String taskName = "assembleAar$variantName"
-    project.tasks.register(taskName) { task->
+    TaskProvider<Task> TaskProvider = project.tasks.register(taskName) { task->
         // This check is required to be able to configure the archives before `publish` runs.
         if (!project.gradle.startParameter.taskNames.contains(taskName)) {
             return
@@ -104,6 +104,7 @@ void addAarTask(Project project, component) {
         // Generate the Maven artifacts.
         task.finalizedBy("publish")
     }
+    TaskProvider.get()
 }
 
 // maven-publish has to be applied _before_ the project gets evaluated, but some of the code in
