@@ -176,8 +176,9 @@ projectsEvaluated {
             // the module's equivalent task depend on the plugin's task.
             String variantName = variant.name.capitalize()
             try {
-                moduleProject.tasks.named("assembleAar$variantName").get()
-                        .dependsOn(pluginProject.tasks.named("assembleAar$variantName").get())
+                Task mpt=moduleProject.tasks.named("assembleAar$variantName").get()
+                Task ppt=pluginProject.tasks.named("assembleAar$variantName").get()
+                mpt.dependsOn(ppt)
             }catch (UnknownTaskException ignored) {
 
             }
