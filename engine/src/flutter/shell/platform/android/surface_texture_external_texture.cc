@@ -52,7 +52,10 @@ void SurfaceTextureExternalTexture::Paint(PaintContext& context,
   if (should_process_frame) {
     ProcessFrame(context, bounds);
   }
-  FML_CHECK(state_ == AttachmentState::kAttached);
+  // If process frame failed, this may not be in attached state.
+  if (state_ != AttachmentState::kAttached) {
+    return;
+  }
 
   if (!dl_image_) {
     FML_LOG(WARNING)
