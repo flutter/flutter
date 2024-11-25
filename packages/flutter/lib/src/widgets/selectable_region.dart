@@ -899,7 +899,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.iOS:
             if (_isPrecisePointerDevice(details.kind)) {
               // Triple tap on static text is only supported on mobile
-              // platforms using a precise pointer device.
+              // platforms using a precise pointer device, so we should
+              // only update the SelectableRegionSelectionStatus in that case.
               _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
             }
           case TargetPlatform.macOS:
