@@ -84,8 +84,6 @@ FLUTTER_ASSERT_ARC
 }
 
 - (sk_sp<GrDirectContext>)createGrContext {
-  const auto contextOptions =
-      flutter::MakeDefaultContextOptions(flutter::ContextType::kRender, GrBackendApi::kMetal);
   id<MTLDevice> device = _device;
   id<MTLCommandQueue> commandQueue = _commandQueue;
   return [FlutterDarwinContextMetalSkia createGrContext:device commandQueue:commandQueue];
