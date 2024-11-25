@@ -9,14 +9,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
-import android.util.SparseArray;
-import android.view.InputDevice;
 import android.view.KeyEvent;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -25,7 +21,6 @@ import io.flutter.util.FakeKeyEvent;
 import java.nio.ByteBuffer;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,14 +28,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
-import org.robolectric.annotation.Resetter;
-import org.robolectric.shadow.api.Shadow;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
-@TargetApi(API_LEVELS.API_24)
+@TargetApi(API_LEVELS.API_35)
 public class KeyEventChannelTest {
 
   KeyEvent keyEvent;
@@ -66,20 +57,8 @@ public class KeyEventChannelTest {
     keyEventChannel = new KeyEventChannel(fakeMessenger);
   }
 
-  @After
-  public void tearDown() {
-    ShadowInputDevice.reset();
-  }
-
   @Test
-  @Config(shadows = {ShadowInputDevice.class})
   public void keyDownEventIsSentToFramework() throws JSONException {
-    final InputDevice device = mock(InputDevice.class);
-    when(device.isVirtual()).thenReturn(false);
-    when(device.getName()).thenReturn("keyboard");
-    ShadowInputDevice.sDeviceIds = new int[] {0};
-    ShadowInputDevice.addDevice(0, device);
-
     KeyEventChannel.FlutterKeyEvent flutterKeyEvent =
         new KeyEventChannel.FlutterKeyEvent(keyEvent, null);
     keyEventChannel.sendFlutterKeyEvent(
@@ -106,14 +85,7 @@ public class KeyEventChannelTest {
   }
 
   @Test
-  @Config(shadows = {ShadowInputDevice.class})
   public void keyUpEventIsSentToFramework() throws JSONException {
-    final InputDevice device = mock(InputDevice.class);
-    when(device.isVirtual()).thenReturn(false);
-    when(device.getName()).thenReturn("keyboard");
-    ShadowInputDevice.sDeviceIds = new int[] {0};
-    ShadowInputDevice.addDevice(0, device);
-
     keyEvent = new FakeKeyEvent(KeyEvent.ACTION_UP, 65);
     KeyEventChannel.FlutterKeyEvent flutterKeyEvent =
         new KeyEventChannel.FlutterKeyEvent(keyEvent, null);
@@ -138,49 +110,5 @@ public class KeyEventChannelTest {
     // Simulate a reply, and see that it is handled.
     sendReply(true, replyArgumentCaptor.getValue());
     assertTrue(handled[0]);
-  }
-
-  @Implements(InputDevice.class)
-  public static class ShadowInputDevice extends org.robolectric.shadows.ShadowInputDevice {
-    public static int[] sDeviceIds;
-    private static SparseArray<InputDevice> sDeviceMap = new SparseArray<>();
-
-    private int mDeviceId;
-
-    @Implementation
-    protected static int[] getDeviceIds() {
-      return sDeviceIds;
-    }
-
-    @Implementation
-    protected static InputDevice getDevice(int id) {
-      return sDeviceMap.get(id);
-    }
-
-    public static void addDevice(int id, InputDevice device) {
-      sDeviceMap.append(id, device);
-    }
-
-    @Resetter
-    public static void reset() {
-      sDeviceIds = null;
-      sDeviceMap.clear();
-    }
-
-    @Implementation
-    protected int getId() {
-      return mDeviceId;
-    }
-
-    public static InputDevice makeInputDevicebyId(int id) {
-      final InputDevice inputDevice = Shadow.newInstanceOf(InputDevice.class);
-      final ShadowInputDevice shadowInputDevice = Shadow.extract(inputDevice);
-      shadowInputDevice.setId(id);
-      return inputDevice;
-    }
-
-    public void setId(int id) {
-      mDeviceId = id;
-    }
   }
 }
