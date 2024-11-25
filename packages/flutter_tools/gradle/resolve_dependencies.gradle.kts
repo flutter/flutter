@@ -1,5 +1,4 @@
 import java.nio.file.Paths
-import org.gradle.api.tasks.TaskAction
 
 // This script is used to warm the Gradle cache by downloading the Flutter dependencies
 // used during the build. This script is invoked when `flutter precache` is run.
@@ -11,8 +10,12 @@ requireNotNull(flutterRoot) { "Flutter root directory not found!" }
 
 require(flutterRoot.isDirectory) { "Flutter root is not a valid directory!" }
 
-val engineVersion = Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.version")
-    .toFile()
+val engineVersion = Paths.get(
+    flutterRoot.absolutePath,
+    "bin",
+    "internal",
+    "engine.version"
+).toFile()
     .readText()
     .trim()
 
