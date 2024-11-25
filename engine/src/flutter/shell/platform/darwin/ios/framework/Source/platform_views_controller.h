@@ -295,13 +295,6 @@ class PlatformViewsController {
   /// This state is only modified on the raster thread.
   std::unordered_set<int64_t> views_to_recomposite_;
 
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-  /// A set to keep track of embedded views that do not have (0, 0) origin.
-  /// An insertion triggers a warning message about non-zero origin logged on the debug console.
-  /// See https://github.com/flutter/flutter/issues/109700 for details.
-  std::unordered_set<int64_t> non_zero_origin_views_;
-#endif
-
   /// @brief The composition order from the previous thread.
   ///
   /// Only accessed from the platform thread.
