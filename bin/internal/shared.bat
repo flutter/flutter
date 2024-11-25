@@ -66,9 +66,10 @@ GOTO :after_subroutine
     REM
     REM See https://github.com/flutter/flutter/issues/159018
     FOR /f %%r IN ('PUSHD %FLUTTER_ROOT% ^& $git rev-parse HEAD') DO (
-      SET compilekey="%%r%:%FLUTTER_TOOL_ARGS%"
+      SET revision=%%r
     )
   )
+  SET compilekey="%revision%:%FLUTTER_TOOL_ARGS%"
 
   REM Invalidate cache if:
   REM  * SNAPSHOT_PATH is not a file, or
