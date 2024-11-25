@@ -102,7 +102,7 @@ void addAarTask(Project project, component) {
         }
 
         // Generate the Maven artifacts.
-        finalizedBy("publish")
+        finalizedBy "publish"
     }
 }
 
