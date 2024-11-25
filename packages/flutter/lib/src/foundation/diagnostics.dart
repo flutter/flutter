@@ -1670,6 +1670,9 @@ abstract class DiagnosticsNode {
   /// This is only used when [WidgetInspectorServiceExtensions.getRootWidgetTree]
   /// is called with fullDetails=false. To get the full widget details, including
   /// any details provided by subclasses, [toJsonMap] should be used instead.
+  /// 
+  /// See https://github.com/flutter/devtools/issues/8553 for details about this
+  /// iterative approach.
   Map<String, Object?> toJsonMapIterative(
       DiagnosticsSerializationDelegate delegate) {
     final _NodesToJsonifyStack childrenToJsonify =
@@ -1687,65 +1690,6 @@ abstract class DiagnosticsNode {
       return true;
     }());
     return result;
-  }
-
-  void _jsonifyNextNodesInStack(
-    _NodesToJsonifyStack toJsonify, {
-    required DiagnosticsSerializationDelegate delegate,
-  }) {
-    while (toJsonify.isNotEmpty) {
-      final (
-        DiagnosticsNode nextNode,
-        void Function(_JsonDiagnosticsNode) callback
-      ) = toJsonify.removeAt(0);
-      final _JsonDiagnosticsNode nodeAsJson = nextNode._toJson(
-        delegate,
-        childrenToJsonify: toJsonify,
-      );
-      callback(nodeAsJson);
-    }
-  }
-
-  Map<String, Object?> _toJson(
-    DiagnosticsSerializationDelegate delegate, {
-    required _NodesToJsonifyStack childrenToJsonify,
-  }) {
-    final String description = toDescription();
-    final List<_JsonDiagnosticsNode> childrenJsonList =
-        <_JsonDiagnosticsNode>[];
-    final bool hasChildren = getChildren().isNotEmpty;
-
-    // Collect the children nodes to convert to JSON later:
-    bool truncated = false;
-    if (hasChildren && delegate.subtreeDepth > 0) {
-      List<DiagnosticsNode> childrenNodes =
-          delegate.filterChildren(getChildren(), this);
-      final int originalNodeCount = childrenNodes.length;
-      childrenNodes = delegate.truncateNodesList(childrenNodes, this);
-      if (childrenNodes.length != originalNodeCount) {
-        childrenNodes.add(DiagnosticsNode.message('...'));
-        truncated = true;
-      }
-
-      for (final DiagnosticsNode child in childrenNodes) {
-        childrenToJsonify.add((
-          child,
-          (_JsonDiagnosticsNode jsonChild) {
-            childrenJsonList.add(jsonChild);
-          }
-        ));
-      }
-    }
-
-    return <String, Object?>{
-      'description': description,
-      'shouldIndent': style != DiagnosticsTreeStyle.flat &&
-          style != DiagnosticsTreeStyle.error,
-      ...delegate.additionalNodeProperties(this, fullDetails: false),
-      'truncated': truncated,
-      'widgetRuntimeType': description.split('-').first,
-      if (hasChildren) 'children': childrenJsonList,
-    };
   }
 
   /// Serializes a [List] of [DiagnosticsNode]s to a JSON list according to
@@ -1882,6 +1826,71 @@ abstract class DiagnosticsNode {
       return true;
     }());
     return result;
+  }
+
+  void _jsonifyNextNodesInStack(
+    _NodesToJsonifyStack toJsonify, {
+    required DiagnosticsSerializationDelegate delegate,
+  }) {
+    while (toJsonify.isNotEmpty) {
+      final (
+        DiagnosticsNode nextNode,
+        void Function(_JsonDiagnosticsNode) callback
+      ) = toJsonify.removeAt(0);
+      final _JsonDiagnosticsNode nodeAsJson = nextNode._toJson(
+        delegate,
+        childrenToJsonify: toJsonify,
+      );
+      callback(nodeAsJson);
+    }
+  }
+
+  Map<String, Object?> _toJson(
+    DiagnosticsSerializationDelegate delegate, {
+    required _NodesToJsonifyStack childrenToJsonify,
+  }) {
+    final List<_JsonDiagnosticsNode> childrenJsonList =
+        <_JsonDiagnosticsNode>[];
+    final bool hasChildren = getChildren().isNotEmpty;
+
+    // Collect the children nodes to convert to JSON later:
+    bool truncated = false;
+    if (hasChildren && delegate.subtreeDepth > 0) {
+      List<DiagnosticsNode> childrenNodes =
+          delegate.filterChildren(getChildren(), this);
+      final int originalNodeCount = childrenNodes.length;
+      childrenNodes = delegate.truncateNodesList(childrenNodes, this);
+      if (childrenNodes.length != originalNodeCount) {
+        childrenNodes.add(DiagnosticsNode.message('...'));
+        truncated = true;
+      }
+      for (final DiagnosticsNode child in childrenNodes) {
+        childrenToJsonify.add((
+          child,
+          (_JsonDiagnosticsNode jsonChild) {
+            childrenJsonList.add(jsonChild);
+          }
+        ));
+      }
+    }
+
+    final String description = toDescription();
+    final String widgetRuntimeType =
+        description == '[root]' ? 'RootWidget' : description.split('-').first;
+    final bool shouldIndent = style != DiagnosticsTreeStyle.flat &&
+        style != DiagnosticsTreeStyle.error;
+
+    return <String, Object?>{
+      'description': description,
+      'shouldIndent': shouldIndent,
+      // TODO(https://github.com/flutter/devtools/issues/8556): This can be
+      // removed to reduce the JSON response even further once DevTools computes
+      // the widget runtime type from the description instead.
+      'widgetRuntimeType': widgetRuntimeType,
+      'truncated': truncated,
+      ...delegate.additionalNodeProperties(this, fullDetails: false),
+      if (hasChildren) 'children': childrenJsonList,
+    };
   }
 }
 

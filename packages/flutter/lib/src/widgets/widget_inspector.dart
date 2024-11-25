@@ -1759,7 +1759,8 @@ mixin WidgetInspectorService {
     } else {
       // If we don't need the full details fetched from all the subclasses, we
       // can iteratively build the JSON map. This prevents a stack overflow
-      // exception for particularly large widget trees.
+      // exception for particularly large widget trees. For details, see:
+      // https://github.com/flutter/devtools/issues/8553
       return node?.toJsonMapIterative(delegate);
     }
   }
