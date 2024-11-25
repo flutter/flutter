@@ -24,7 +24,7 @@ Future<void> main() async {
         // Add devDependencyPlugin as dependency of flutterProject.
         await flutterProject.addPlugin('dev_dependency_plugin', options: <String>['--path', '${tempDir.path}/dev_dependency_plugin']);
 
-        // Build APK in debug mode and check that devDependencyPlugin is represented in the APK. 
+        // Build APK in debug mode and check that devDependencyPlugin is represented in the APK.
         await inDirectory(flutterProject.rootPath, () async {
           await flutter('build', options: <String>[
             'apk',
@@ -42,7 +42,7 @@ Future<void> main() async {
 
           section('APK does contain methods from dev dependency in release mode');
 
-          // Build APK in release mode and check that devDependencyPlugin is not represented in the APK. 
+          // Build APK in release mode and check that devDependencyPlugin is not represented in the APK.
             await flutter('build', options: <String>[
               'apk',
               '--release',
