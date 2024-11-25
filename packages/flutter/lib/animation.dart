@@ -160,7 +160,7 @@
 ///    explicit [Animation] to animate their properties.
 ///
 /// @docImport 'package:flutter/material.dart';
-library animation;
+library;
 
 // AnimationController can throw TickerCanceled
 export 'package:flutter/scheduler.dart' show TickerCanceled;

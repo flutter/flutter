@@ -28,7 +28,7 @@
 /// @docImport 'src/rendering/binding.dart';
 /// @docImport 'src/rendering/box.dart';
 /// @docImport 'src/rendering/object.dart';
-library rendering;
+library;
 
 export 'package:flutter/foundation.dart' show
   DiagnosticLevel,

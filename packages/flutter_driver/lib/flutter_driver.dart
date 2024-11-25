@@ -9,7 +9,7 @@
 ///
 /// This is Flutter's version of Selenium WebDriver (generic web),
 /// Protractor (Angular), Espresso (Android) or Earl Gray (iOS).
-library flutter_driver;
+library;
 
 export 'src/common/deserialization_factory.dart';
 export 'src/common/diagnostics_tree.dart';

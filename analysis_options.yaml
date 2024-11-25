@@ -219,7 +219,7 @@ linter:
     # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
     - unnecessary_late
     - unnecessary_library_directive
-    # - unnecessary_library_name # blocked on https://github.com/dart-lang/dartdoc/issues/3882
+    - unnecessary_library_name
     - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_aware_operator_on_extension_on_nullable

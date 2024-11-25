@@ -4,7 +4,7 @@
 
 /// This library provides constants and matchers for testing the Android
 /// accessibility implementation in a flutter driver environment.
-library android_semantics_testing;
+library;
 
 export 'src/common.dart';
 export 'src/constants.dart';
