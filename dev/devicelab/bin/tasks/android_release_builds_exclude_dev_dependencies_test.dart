@@ -43,19 +43,19 @@ Future<void> main() async {
           section('APK does contain methods from dev dependency in release mode');
 
           // Build APK in release mode and check that devDependencyPlugin is not represented in the APK.
-            await flutter('build', options: <String>[
-              'apk',
-              '--release',
-              '--target-platform=android-arm',
-            ]);
-            apk = File('${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-release.apk');
-            if (!apk.existsSync()) {
-              throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't");
-            }
-            apkIncludesDevDependency = await checkApkContainsMethodsFromLibrary(apk, devDependencyPluginOrg);
-            if (apkIncludesDevDependency) {
-              return TaskResult.failure('Expected to not find dev_dependency_plugin in APK built with release mode but did.');
-            }
+          await flutter('build', options: <String>[
+            'apk',
+            '--release',
+            '--target-platform=android-arm',
+          ]);
+          apk = File('${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-release.apk');
+          if (!apk.existsSync()) {
+            throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't");
+          }
+          apkIncludesDevDependency = await checkApkContainsMethodsFromLibrary(apk, devDependencyPluginOrg);
+          if (apkIncludesDevDependency) {
+            return TaskResult.failure('Expected to not find dev_dependency_plugin in APK built with release mode but did.');
+          }
         });
       });
       return TaskResult.success(null);
