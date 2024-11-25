@@ -88,7 +88,7 @@ void addAarTask(Project project, component) {
     String variantName = component.name.capitalize()
     String taskName = "assembleAar$variantName"
     doLast{
-    project.tasks.create(name:taskName) {
+    project.tasks.register(taskName) {
         // This check is required to be able to configure the archives before `publish` runs.
         if (!project.gradle.startParameter.taskNames.contains(taskName)) {
             return
