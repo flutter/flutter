@@ -3188,7 +3188,7 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
 /// during selection gestures such as clicks and taps to select
 /// and keyboard shortcuts.
 enum SelectableRegionSelectionStatus {
-  /// Indicates the selection under a [SelectableRegion] is changing.
+  /// Indicates that the selection under a [SelectableRegion] is changing.
   ///
   /// A [SelectableRegion]s selection is changing when it is being
   /// updated by user through selection gestures and keyboard shortcuts.
@@ -3197,7 +3197,7 @@ enum SelectableRegionSelectionStatus {
   /// the user releases the click, then it will be considered finalized.
   changing,
 
-  /// Indicates the selection under a [SelectableRegion] is finalized.
+  /// Indicates that the selection under a [SelectableRegion] is finalized.
   ///
   /// A [SelectableRegion]s selection is finalized when it is no longer
   /// being updated by the user through selection gestures or keyboard
