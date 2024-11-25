@@ -284,6 +284,7 @@ class ReactorGLES {
                                          HandleGLES::Equal>;
   mutable RWMutex handles_mutex_;
   LiveHandles handles_ IPLR_GUARDED_BY(handles_mutex_);
+  int32_t handles_to_collect_count_ IPLR_GUARDED_BY(handles_mutex_) = 0;
 
   mutable Mutex workers_mutex_;
   mutable std::map<WorkerID, std::weak_ptr<Worker>> workers_ IPLR_GUARDED_BY(
