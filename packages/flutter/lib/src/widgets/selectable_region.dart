@@ -688,13 +688,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             if (isShiftPressedValid) {
               _selectEndTo(offset: details.globalPosition);
               _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
-              return;
+              break;
             }
             clearSelection();
             _collapseSelectionAt(offset: details.globalPosition);
             _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
         }
       case 2:
         switch (defaultTargetPlatform) {
@@ -706,7 +704,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             }
             _selectWordAt(offset: details.globalPosition);
             _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
             if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
               _showHandles();
             }
@@ -717,7 +714,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.windows:
             _selectWordAt(offset: details.globalPosition);
             _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
         }
       case 3:
         switch (defaultTargetPlatform) {
@@ -729,14 +725,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               // platforms using a precise pointer device.
               _selectParagraphAt(offset: details.globalPosition);
               _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
             }
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             _selectParagraphAt(offset: details.globalPosition);
             _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
         }
     }
     _updateSelectedContentIfNeeded();
@@ -780,8 +774,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               // until the drag has begun.
               _selectWordAt(offset: _doubleTapOffset!);
               _doubleTapOffset = null;
-              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
             }
             _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
             _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
@@ -803,11 +795,13 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             // a precise pointer device.
             if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
               _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.paragraph);
+              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
             }
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.paragraph);
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         }
     }
     _updateSelectedContentIfNeeded();
@@ -838,7 +832,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
-    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
   }
 
@@ -868,7 +861,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             // On desktop platforms the selection is set on tap down.
-            break;
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
         }
       case 2:
         final bool isPointerPrecise = _isPrecisePointerDevice(details.kind);
@@ -883,6 +876,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             }
           case TargetPlatform.iOS:
             if (!isPointerPrecise) {
+              if (kIsWeb) {
+                // Double tap on iOS web only triggers when a drag begins after the double tap.
+                return;
+              }
               // On iOS, a double tap will only show the selection toolbar after
               // the following tap up when the pointer device kind is not precise.
               _showToolbar();
@@ -893,6 +890,22 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               // The selection overlay is not shown on desktop platforms
               // on a double click.
               break;
+        }
+        _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+      case 3:
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+            if (_isPrecisePointerDevice(details.kind)) {
+              // Triple tap on static text is only supported on mobile
+              // platforms using a precise pointer device.
+              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+            }
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
         }
     }
     _updateSelectedContentIfNeeded();
