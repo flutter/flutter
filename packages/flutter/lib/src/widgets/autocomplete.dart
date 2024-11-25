@@ -8,6 +8,7 @@ library;
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
@@ -356,14 +357,33 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   String? _lastFieldText;
   final ValueNotifier<int> _highlightedOptionIndex = ValueNotifier<int>(0);
 
-  static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
-    SingleActivator(LogicalKeyboardKey.arrowUp): AutocompletePreviousOptionIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
-    // TODO(justinmc): meta for mac.
+  static const Map<ShortcutActivator, Intent> _appleShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): AutocompleteFirstOptionIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): AutocompleteLastOptionIntent(),
+  };
+
+  static const Map<ShortcutActivator, Intent> _nonAppleShortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.arrowUp, control: true): AutocompleteFirstOptionIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown, control: true): AutocompleteLastOptionIntent(),
+  };
+
+  static const Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowUp): AutocompletePreviousOptionIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
     SingleActivator(LogicalKeyboardKey.pageUp): AutocompletePreviousPageOptionIntent(),
     SingleActivator(LogicalKeyboardKey.pageDown): AutocompleteNextPageOptionIntent(),
+  };
+
+  static Map<ShortcutActivator, Intent> get _shortcuts => <ShortcutActivator, Intent>{
+    ..._commonShortcuts,
+    ...switch(defaultTargetPlatform) {
+      TargetPlatform.iOS => _appleShortcuts,
+      TargetPlatform.macOS => _appleShortcuts,
+      TargetPlatform.android => _nonAppleShortcuts,
+      TargetPlatform.linux => _nonAppleShortcuts,
+      TargetPlatform.windows => _nonAppleShortcuts,
+      TargetPlatform.fuchsia => _nonAppleShortcuts,
+    },
   };
 
   bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
