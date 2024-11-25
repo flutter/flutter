@@ -135,7 +135,7 @@ class NetworkImage
 
     // We use a different method when headers are set because the
     // `ui_web.createImageCodecFromUrl` method is not capable of handling headers.
-    if (isSkiaWeb) {
+    if (isSkiaWeb || containsNetworkImageHeaders) {
       if (containsNetworkImageHeaders) {
         // Don't even attempt to fall back to an <img> element if there are
         // headers.

@@ -138,7 +138,7 @@ void runTests() {
 
     final WebImageInfo webImageInfo = imageInfo! as WebImageInfo;
     expect(webImageInfo.htmlImage.src, equals('https://www.example.com/images/frame4.png'));
-  });
+  }, skip: !isSkiaWeb);
 
   testWidgets('emits an error if the image is cross-origin but fails to decode',
       (WidgetTester tester) async {
@@ -177,7 +177,7 @@ void runTests() {
     });
     expect(recordedError, isNotNull);
     expect(imageInfo, isNull);
-  });
+  }, skip: !isSkiaWeb);
 
   testWidgets('Image renders an image using a Platform View if the image info is WebImageInfo',
       (WidgetTester tester) async {
@@ -202,7 +202,7 @@ void runTests() {
     // After getting a WebImageInfo, the Image uses a Platform View to render.
     expect(find.byType(RawWebImage), findsOneWidget);
     expect(find.byType(PlatformViewLink), findsOneWidget);
-  });
+  }, skip: !isSkiaWeb);
 }
 
 class _TestImageProvider extends ImageProvider<Object> {
