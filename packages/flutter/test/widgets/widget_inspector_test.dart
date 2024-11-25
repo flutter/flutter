@@ -2516,40 +2516,39 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               ),
               isTrue,
             );
-
-            // expect(
-            //   allChildrenSatisfyCondition(rootJson,
-            //     condition: wasCreatedByLocalProject,
-            //   ),
-            //   isFalse,
-            // );
-            // expect(
-            //   oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
-            //     return hasDescription(child, description: 'Text') &&
-            //         wasCreatedByLocalProject(child) &&
-            //         !hasTextPreview(child, preview: 'a');
-            //     },
-            //   ),
-            //   isTrue,
-            // );
-            // expect(
-            //   oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
-            //     return hasDescription(child, description: 'Text') &&
-            //         wasCreatedByLocalProject(child) &&
-            //         !hasTextPreview(child, preview: 'b');
-            //     },
-            //   ),
-            //   isTrue,
-            // );
-            // expect(
-            //   oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
-            //     return hasDescription(child, description: 'Text') &&
-            //         wasCreatedByLocalProject(child) &&
-            //         !hasTextPreview(child, preview: 'c');
-            //     },
-            //   ),
-            //   isTrue,
-            // );
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: wasCreatedByLocalProject,
+              ),
+              isFalse,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    !hasTextPreview(child, preview: 'a');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    !hasTextPreview(child, preview: 'b');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    !hasTextPreview(child, preview: 'c');
+                },
+              ),
+              isTrue,
+            );
           });
 
           testWidgets(
