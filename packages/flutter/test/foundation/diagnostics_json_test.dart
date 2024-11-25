@@ -102,7 +102,7 @@ void main() {
       }
     });
 
-    test('iterative implemenation (without full details)', () {
+    test('iterative implementation (without full details)', () {
       final Map<String, Object?> result = testTree
         .toDiagnosticsNode()
           .toJsonMapIterative(const DiagnosticsSerializationDelegate()
