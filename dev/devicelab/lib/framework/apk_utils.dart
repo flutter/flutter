@@ -9,8 +9,6 @@ import 'package:path/path.dart' as path;
 import 'task_result.dart';
 import 'utils.dart';
 
-final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
-
 final List<String> flutterAssets = <String>[
   'assets/flutter_assets/AssetManifest.json',
   'assets/flutter_assets/NOTICES.Z',
@@ -352,7 +350,7 @@ android {
       path.join(parent.path, 'hello', 'pubspec.yaml')
     );
     final String contents = pubspec.readAsStringSync();
-    final String newContents = contents.replaceFirst('${platformLineSep}flutter:$platformLineSep', '''
+    final String newContents = contents.replaceFirst('${Platform.lineTerminator}flutter:${Platform.lineTerminator}', '''
 
 flutter:
   assets:

@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -59,9 +60,8 @@ void main() {
           FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
           ProcessManager: () => FakeProcessManager.empty(),
         }, () async {
-      final File packageConfig =
-          environment.projectDir.childFile('.dart_tool/package_config.json');
-      final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
+      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+      final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
       await packageConfig.parent.create();
       await packageConfig.create();
       final File dylibAfterCompiling = fileSystem.file('libbar.so');
@@ -89,29 +89,34 @@ void main() {
           codeAssets: codeAssets,
         ),
       );
-      await runFlutterSpecificDartBuild(
-        environmentDefines: <String, String>{
-          kBuildMode: buildMode.cliName,
-          kMinSdkVersion: minSdkVersion,
-        },
+      final Map<String, String> environmentDefines = <String, String>{
+        kBuildMode: buildMode.cliName,
+        kMinSdkVersion: minSdkVersion,
+      };
+      final DartBuildResult result = await runFlutterSpecificDartBuild(
+        environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.android_arm64,
         projectUri: projectUri,
-        nativeAssetsYamlUri: nonFlutterTesterAssetUri,
         fileSystem: fileSystem,
         buildRunner: buildRunner,
+      );
+      await installCodeAssets(
+        dartBuildResult: result,
+        environmentDefines: environmentDefines,
+        targetPlatform: TargetPlatform.android_arm64,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        nativeAssetsFileUri: nonFlutterTesterAssetUri,
       );
       expect(
         (globals.logger as BufferLogger).traceText,
         stringContainsInOrder(<String>[
-          'Building native assets for android_arm64 $buildMode.',
-          'Building native assets for android_arm64 $buildMode done.',
+          'Building native assets for android arm64 $buildMode.',
+          'Building native assets for android arm64 $buildMode done.',
         ]),
       );
 
-      expect(
-        environment.buildDir.childFile('native_assets.yaml'),
-        exists,
-      );
+      expect(environment.buildDir.childFile('native_assets.yaml'), exists);
       expect(buildRunner.buildInvocations, 1);
       expect(
         buildRunner.linkInvocations,
@@ -130,7 +135,6 @@ void main() {
       }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await packageConfig.create(recursive: true);
     await runFlutterSpecificDartBuild(
       environmentDefines: <String, String>{
@@ -138,7 +142,6 @@ void main() {
         kMinSdkVersion: minSdkVersion,
       },
       targetPlatform: TargetPlatform.android_x64,
-      nativeAssetsYamlUri: nonFlutterTesterAssetUri,
       projectUri: projectUri,
       fileSystem: fileSystem,
       buildRunner: _BuildRunnerWithoutNdk(),
@@ -155,7 +158,6 @@ void main() {
       }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
@@ -166,7 +168,6 @@ void main() {
         },
         targetPlatform: TargetPlatform.android_arm64,
         projectUri: projectUri,
-        nativeAssetsYamlUri: nonFlutterTesterAssetUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutNdk(
           packagesWithNativeAssetsResult: <Package>[

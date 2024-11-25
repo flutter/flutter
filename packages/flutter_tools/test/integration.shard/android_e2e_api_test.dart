@@ -20,7 +20,6 @@ void main() {
   });
 
   testWithoutContext('build succeeds with api 33 features', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',

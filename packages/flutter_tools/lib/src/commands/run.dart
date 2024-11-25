@@ -771,7 +771,7 @@ class RunCommand extends RunCommandBase {
         throwToolExit(error.toString());
       }
       final DateTime appStartedTime = globals.systemClock.now();
-      final int result = await app.runner!.waitForAppToFinish();
+      final int result = await app.runner.waitForAppToFinish();
       if (result != 0) {
         throwToolExit(null, exitCode: result);
       }

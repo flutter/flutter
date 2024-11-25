@@ -18,6 +18,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
+import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -35,6 +36,7 @@ import 'application_package.dart';
 import 'code_signing.dart';
 import 'migrations/host_app_info_plist_migration.dart';
 import 'migrations/ios_deployment_target_migration.dart';
+import 'migrations/metal_api_validation_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_bitcode_migration.dart';
@@ -166,17 +168,18 @@ Future<XcodeBuildResult> buildXcodeProject({
     RemoveBitcodeMigration(app.project, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, globals.logger),
     UIApplicationMainDeprecationMigration(app.project, globals.logger),
-    if (app.project.usesSwiftPackageManager && app.project.flutterPluginSwiftPackageManifest.existsSync())
-      SwiftPackageManagerIntegrationMigration(
-        app.project,
-        SupportedPlatform.ios,
-        buildInfo,
-        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-        logger: globals.logger,
-        fileSystem: globals.fs,
-        plistParser: globals.plistParser,
-      ),
-      SwiftPackageManagerGitignoreMigration(project, globals.logger),
+    SwiftPackageManagerIntegrationMigration(
+      app.project,
+      SupportedPlatform.ios,
+      buildInfo,
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+      logger: globals.logger,
+      fileSystem: globals.fs,
+      plistParser: globals.plistParser,
+      features: featureFlags,
+    ),
+    SwiftPackageManagerGitignoreMigration(project, globals.logger),
+    MetalAPIValidationMigrator.ios(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
