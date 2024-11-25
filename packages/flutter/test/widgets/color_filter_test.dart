@@ -30,8 +30,7 @@ void main() {
     );
   });
 
-  testWidgets('Color filter - sepia', (WidgetTester tester) async {
-
+  testWidgets('Material2 - Color filter - sepia', (WidgetTester tester) async {
     const ColorFilter sepia = ColorFilter.matrix(<double>[
       0.39,  0.769, 0.189, 0, 0, //
       0.349, 0.686, 0.168, 0, 0, //
@@ -65,7 +64,45 @@ void main() {
     );
     await expectLater(
       find.byType(ColorFiltered),
-      matchesGoldenFile('color_filter_sepia.png'),
+      matchesGoldenFile('color_filter_sepia_m2.png'),
+    );
+  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+
+  testWidgets('Color filter - sepia', (WidgetTester tester) async {
+    const ColorFilter sepia = ColorFilter.matrix(<double>[
+      0.39,  0.769, 0.189, 0, 0, //
+      0.349, 0.686, 0.168, 0, 0, //
+      0.272, 0.534, 0.131, 0, 0, //
+      0,     0,     0,     1, 0, //
+    ]);
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: ColorFiltered(
+          colorFilter: sepia,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
+            title: 'Flutter Demo',
+            theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue)),
+            home: Scaffold(
+              appBar: AppBar(
+                title: const Text('Sepia ColorFilter Test'),
+              ),
+              body: const Center(
+                child:Text('Hooray!'),
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () { },
+                tooltip: 'Increment',
+                child: const Icon(Icons.add),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(ColorFiltered),
+      matchesGoldenFile('color_filter_sepia_m3.png'),
     );
   }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
 
