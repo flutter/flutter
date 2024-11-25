@@ -20,6 +20,7 @@ import 'debug.dart';
 import 'divider.dart';
 import 'icon_button.dart';
 import 'icons.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
@@ -1056,7 +1057,7 @@ class _Day extends StatefulWidget {
   final bool isSelectedDay;
   final bool isToday;
   final ValueChanged<DateTime> onChanged;
-  final FocusNode? focusNode;
+  final FocusNode focusNode;
 
   @override
   State<_Day> createState() => _DayState();
@@ -1111,7 +1112,7 @@ class _DayState extends State<_Day> {
           shape: dayShape,
         );
 
-    Widget dayWidget = DecoratedBox(
+    Widget dayWidget = Ink(
       decoration: decoration,
       child: Center(
         child: Text(localizations.formatDecimal(widget.day.day), style: dayStyle?.apply(color: dayForegroundColor)),
