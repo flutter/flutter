@@ -10,8 +10,8 @@ requireNotNull(flutterRoot) { "Flutter root directory not found!" }
 
 require(flutterRoot.isDirectory) { "Flutter root is not a valid directory!" }
 
-val engineVersion = Paths
-    .get(
+val engineVersion = 
+    Paths.get(
         flutterRoot.absolutePath,
         "bin",
         "internal",
@@ -21,8 +21,8 @@ val engineVersion = Paths
     .readText()
     .trim()
 
-var engineRealm = Paths
-    .get(
+var engineRealm = 
+    Paths.get(
         flutterRoot.absolutePath,
         "bin",
         "internal",
