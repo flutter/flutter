@@ -1754,8 +1754,14 @@ mixin WidgetInspectorService {
     bool fullDetails = true,
   }
   ) {
-    // TODO: switch here.
-    return node?.toJsonMap(delegate);
+    if (fullDetails) {
+      return node?.toJsonMap(delegate);
+    } else {
+      // If we don't need the full details fetched from all the subclasses, we
+      // can iteratively build the JSON map. This prevents a stack overflow
+      // exception for particularly large widget trees.
+      return node?.toJsonMapIterative(delegate);
+    }
   }
 
   bool _isValueCreatedByLocalProject(Object? value) {

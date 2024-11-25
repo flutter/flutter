@@ -1421,6 +1421,17 @@ class TextTreeRenderer {
   }
 }
 
+/// The JSON representation of a [DiagnosticsNode].
+typedef _JsonDiagnosticsNode = Map<String, Object?>;
+
+/// Stack containing [DiagnosticNode]s to convert to JSON and the callback to
+/// call with the JSON.
+///
+/// Using a stack is required to process the widget tree iteratively instead of
+/// recursively.
+typedef _NodesToJsonifyStack
+    = List<(DiagnosticsNode, void Function(_JsonDiagnosticsNode))>;
+
 /// Defines diagnostics data for a [value].
 ///
 /// For debug and profile modes, [DiagnosticsNode] provides a high quality
@@ -1634,7 +1645,7 @@ abstract class DiagnosticsNode {
           'allowWrap': allowWrap,
         if (allowNameWrap)
           'allowNameWrap': allowNameWrap,
-        ...delegate.additionalNodeProperties(this, fullDetails: true),
+        ...delegate.additionalNodeProperties(this),
         if (delegate.includeProperties)
           'properties': toJsonList(
             delegate.filterProperties(getProperties(), this),
@@ -1651,6 +1662,90 @@ abstract class DiagnosticsNode {
       return true;
     }());
     return result;
+  }
+
+  /// Iteratively serialize the node to a JSON map according to the
+  /// configuration provided in the [DiagnosticsSerializationDelegate].
+  ///
+  /// This is only used when [WidgetInspectorServiceExtensions.getRootWidgetTree]
+  /// is called with fullDetails=false. To get the full widget details, including
+  /// any details provided by subclasses, [toJsonMap] should be used instead.
+  Map<String, Object?> toJsonMapIterative(
+      DiagnosticsSerializationDelegate delegate) {
+    final _NodesToJsonifyStack childrenToJsonify =
+        <(DiagnosticsNode, void Function(_JsonDiagnosticsNode))>[];
+    _JsonDiagnosticsNode result = <String, Object?>{};
+    assert(() {
+      result = _toJson(
+        delegate,
+        childrenToJsonify: childrenToJsonify,
+      );
+      _jsonifyNextNodesInStack(
+        childrenToJsonify,
+        delegate: delegate,
+      );
+      return true;
+    }());
+    return result;
+  }
+
+  void _jsonifyNextNodesInStack(
+    _NodesToJsonifyStack toJsonify, {
+    required DiagnosticsSerializationDelegate delegate,
+  }) {
+    while (toJsonify.isNotEmpty) {
+      final (
+        DiagnosticsNode nextNode,
+        void Function(_JsonDiagnosticsNode) callback
+      ) = toJsonify.removeAt(0);
+      final _JsonDiagnosticsNode nodeAsJson = nextNode._toJson(
+        delegate,
+        childrenToJsonify: toJsonify,
+      );
+      callback(nodeAsJson);
+    }
+  }
+
+  Map<String, Object?> _toJson(
+    DiagnosticsSerializationDelegate delegate, {
+    required _NodesToJsonifyStack childrenToJsonify,
+  }) {
+    final String description = toDescription();
+    final List<_JsonDiagnosticsNode> childrenJsonList =
+        <_JsonDiagnosticsNode>[];
+    final bool hasChildren = getChildren().isNotEmpty;
+
+    // Collect the children nodes to convert to JSON later:
+    bool truncated = false;
+    if (hasChildren && delegate.subtreeDepth > 0) {
+      List<DiagnosticsNode> childrenNodes =
+          delegate.filterChildren(getChildren(), this);
+      final int originalNodeCount = childrenNodes.length;
+      childrenNodes = delegate.truncateNodesList(childrenNodes, this);
+      if (childrenNodes.length != originalNodeCount) {
+        childrenNodes.add(DiagnosticsNode.message('...'));
+        truncated = true;
+      }
+
+      for (final DiagnosticsNode child in childrenNodes) {
+        childrenToJsonify.add((
+          child,
+          (_JsonDiagnosticsNode jsonChild) {
+            childrenJsonList.add(jsonChild);
+          }
+        ));
+      }
+    }
+
+    return <String, Object?>{
+      'description': description,
+      'shouldIndent': style != DiagnosticsTreeStyle.flat &&
+          style != DiagnosticsTreeStyle.error,
+      ...delegate.additionalNodeProperties(this, fullDetails: false),
+      'truncated': truncated,
+      'widgetRuntimeType': description.split('-').first,
+      if (hasChildren) 'children': childrenJsonList,
+    };
   }
 
   /// Serializes a [List] of [DiagnosticsNode]s to a JSON list according to
