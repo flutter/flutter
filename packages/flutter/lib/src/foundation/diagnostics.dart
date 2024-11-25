@@ -1851,11 +1851,12 @@ abstract class DiagnosticsNode {
   }) {
     final List<_JsonDiagnosticsNode> childrenJsonList =
         <_JsonDiagnosticsNode>[];
-    final bool hasChildren = getChildren().isNotEmpty;
+    final bool includeChildren =
+        getChildren().isNotEmpty && delegate.subtreeDepth > 0;
 
     // Collect the children nodes to convert to JSON later:
     bool truncated = false;
-    if (hasChildren && delegate.subtreeDepth > 0) {
+    if (includeChildren) {
       List<DiagnosticsNode> childrenNodes =
           delegate.filterChildren(getChildren(), this);
       final int originalNodeCount = childrenNodes.length;
@@ -1889,7 +1890,7 @@ abstract class DiagnosticsNode {
       'widgetRuntimeType': widgetRuntimeType,
       'truncated': truncated,
       ...delegate.additionalNodeProperties(this, fullDetails: false),
-      if (hasChildren) 'children': childrenJsonList,
+      if (includeChildren) 'children': childrenJsonList,
     };
   }
 }
