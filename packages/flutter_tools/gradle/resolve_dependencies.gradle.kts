@@ -11,12 +11,12 @@ requireNotNull(flutterRoot) { "Flutter root directory not found!" }
 require(flutterRoot.isDirectory) { "Flutter root is not a valid directory!" }
 
 val engineVersion = Paths
-.get(
-    flutterRoot.absolutePath,
-    "bin",
-    "internal",
-    "engine.version"
-)
+        .get(
+            flutterRoot.absolutePath,
+            "bin",
+            "internal",
+            "engine.version"
+        )
     .toFile()
     .readText()
     .trim()
