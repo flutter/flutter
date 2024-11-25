@@ -278,6 +278,19 @@ abstract interface class ChipAttributes {
   /// ** See code in examples/api/lib/material/chip/chip_attributes.chip_animation_style.0.dart **
   /// {@end-tool}
   ChipAnimationStyle? get chipAnimationStyle;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  ///
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
+  ///
+  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  MouseCursor? get mouseCursor;
 }
 
 /// An interface for Material Design chips that can be deleted.
@@ -704,6 +717,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
     this.chipAnimationStyle,
+    this.mouseCursor,
   }) : assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -756,6 +770,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final BoxConstraints? deleteIconBoxConstraints;
   @override
   final ChipAnimationStyle? chipAnimationStyle;
+  @override
+  final MouseCursor? mouseCursor;
 
   @override
   Widget build(BuildContext context) {
@@ -787,6 +803,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       avatarBoxConstraints: avatarBoxConstraints,
       deleteIconBoxConstraints: deleteIconBoxConstraints,
       chipAnimationStyle: chipAnimationStyle,
+      mouseCursor: mouseCursor,
     );
   }
 }
@@ -877,6 +894,7 @@ class RawChip extends StatefulWidget
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
     this.chipAnimationStyle,
+    this.mouseCursor,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon;
@@ -962,6 +980,8 @@ class RawChip extends StatefulWidget
   final BoxConstraints? deleteIconBoxConstraints;
   @override
   final ChipAnimationStyle? chipAnimationStyle;
+  @override
+  final MouseCursor? mouseCursor;
 
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.
@@ -1391,6 +1411,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       ?? chipDefaults.labelPadding
       ?? defaultLabelPadding;
 
+
     Widget result = Material(
       elevation: isTapping ? pressElevation : elevation,
       shadowColor: widget.selected ? selectedShadowColor : shadowColor,
@@ -1407,6 +1428,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         onTapDown: canTap ? _handleTapDown : null,
         onTapCancel: canTap ? _handleTapCancel : null,
         onHover: canTap ? updateMaterialState(MaterialState.hovered) : null,
+        mouseCursor: widget.mouseCursor,
         hoverColor: (widget.color ?? chipTheme.color) == null ? null : Colors.transparent,
         customBorder: resolvedShape,
         child: AnimatedBuilder(
