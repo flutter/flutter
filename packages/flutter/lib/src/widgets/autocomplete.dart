@@ -307,6 +307,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   final LayerLink _optionsLayerLink = LayerLink();
   final OverlayPortalController _optionsViewController = OverlayPortalController(debugLabel: '_RawAutocompleteState');
 
+  static const int _pageSize = 4;
+
   TextEditingController? _internalTextEditingController;
   TextEditingController get _textEditingController {
     return widget.textEditingController
@@ -336,6 +338,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       onInvoke: _highlightLastOption,
       isEnabledCallback: () => _canShowOptionsView,
     ),
+    AutocompleteNextPageOptionIntent: _AutocompleteCallbackAction<AutocompleteNextPageOptionIntent>(
+      onInvoke: _highlightNextPageOption,
+      isEnabledCallback: () => _canShowOptionsView,
+    ),
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideOptions),
   };
 
@@ -352,6 +358,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     // TODO(justinmc): meta for mac.
     SingleActivator(LogicalKeyboardKey.arrowUp, control: true): AutocompleteFirstOptionIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown, control: true): AutocompleteLastOptionIntent(),
+    SingleActivator(LogicalKeyboardKey.pageDown): AutocompleteNextPageOptionIntent(),
   };
 
   bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
@@ -418,8 +425,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _updateOptionsViewVisibility();
   }
 
-  void _updateHighlight(int newIndex) {
-    _highlightedOptionIndex.value = _options.isEmpty ? 0 : newIndex % _options.length;
+  void _updateHighlight(int nextIndex) {
+    _highlightedOptionIndex.value = _options.isEmpty
+        ? 0
+        : nextIndex.clamp(0, _options.length - 1);
   }
 
   void _highlightPreviousOption(AutocompletePreviousOptionIntent intent) {
@@ -436,6 +445,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   void _highlightLastOption(AutocompleteLastOptionIntent intent) {
     _highlightOption(_options.length - 1);
+  }
+
+  void _highlightNextPageOption(AutocompleteNextPageOptionIntent intent) {
+    _highlightOption(_highlightedOptionIndex.value + _pageSize);
   }
 
   void _highlightOption(int index) {
@@ -588,6 +601,13 @@ class AutocompleteFirstOptionIntent extends Intent {
 class AutocompleteLastOptionIntent extends Intent {
   /// Creates an instance of AutocompleteLastOptionIntent.
   const AutocompleteLastOptionIntent();
+}
+
+/// An [Intent] to highlight the option one page after the currently highlighted
+/// option in the autocomplete list.
+class AutocompleteNextPageOptionIntent extends Intent {
+  /// Creates an instance of AutocompleteNextPageOptionIntent.
+  const AutocompleteNextPageOptionIntent();
 }
 
 /// An inherited widget used to indicate which autocomplete option should be
