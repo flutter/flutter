@@ -82,12 +82,12 @@ void main() {
     );
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/101874
 
-  testWidgets('Material2 - Image filter - matrix', (WidgetTester tester) async {
+  testWidgets('Image filter - matrix', (WidgetTester tester) async {
     final ImageFilter matrix = ImageFilter.matrix(Float64List.fromList(<double>[
-      0.5, 0.0, 0.0, 0.0,
-      0.0, 0.5, 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0,
-      0.0, 0.0, 0.0, 1.0,
+      0.5, 0.0, 0.0, 0.0, //
+      0.0, 0.5, 0.0, 0.0, //
+      0.0, 0.0, 1.0, 0.0, //
+      0.0, 0.0, 0.0, 1.0, //
     ]));
     await tester.pumpWidget(
       RepaintBoundary(
@@ -116,49 +116,11 @@ void main() {
     );
     await expectLater(
       find.byType(ImageFiltered),
-      matchesGoldenFile('image_filter_matrix_m2.png'),
+      matchesGoldenFile('image_filter_matrix.png'),
     );
   });
 
-  testWidgets('Image filter - matrix', (WidgetTester tester) async {
-    final ImageFilter matrix = ImageFilter.matrix(Float64List.fromList(<double>[
-      0.5, 0.0, 0.0, 0.0,
-      0.0, 0.5, 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0,
-      0.0, 0.0, 0.0, 1.0,
-    ]));
-    await tester.pumpWidget(
-      RepaintBoundary(
-        child: ImageFiltered(
-          imageFilter: matrix,
-          child: MaterialApp(
-            title: 'Flutter Demo',
-            theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue)),
-            debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
-            home: Scaffold(
-              appBar: AppBar(
-                title: const Text('Matrix ImageFilter Test'),
-              ),
-              body: const Center(
-                child:Text('Hooray!'),
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () { },
-                tooltip: 'Increment',
-                child: const Icon(Icons.add),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await expectLater(
-      find.byType(ImageFiltered),
-      matchesGoldenFile('image_filter_matrix_m3.png'),
-    );
-  });
-
-  testWidgets('Material2 - Image filter - matrix with offset', (WidgetTester tester) async {
+  testWidgets('Image filter - matrix with offset', (WidgetTester tester) async {
     final Matrix4 matrix = Matrix4.rotationZ(pi / 18);
     final ImageFilter matrixFilter = ImageFilter.matrix(matrix.storage);
     final Key key = GlobalKey();
@@ -193,46 +155,7 @@ void main() {
     );
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('image_filter_matrix_offset_m2.png'),
-    );
-  });
-
-  testWidgets('Image filter - matrix with offset', (WidgetTester tester) async {
-    final Matrix4 matrix = Matrix4.rotationZ(pi / 18);
-    final ImageFilter matrixFilter = ImageFilter.matrix(matrix.storage);
-    final Key key = GlobalKey();
-    await tester.pumpWidget(
-      RepaintBoundary(
-        key: key,
-        child: Transform.translate(
-          offset: const Offset(50, 50),
-          child: ImageFiltered(
-            imageFilter: matrixFilter,
-            child: MaterialApp(
-              title: 'Flutter Demo',
-              theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue)),
-              debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
-              home: Scaffold(
-                appBar: AppBar(
-                  title: const Text('Matrix ImageFilter Test'),
-                ),
-                body: const Center(
-                  child:Text('Hooray!'),
-                ),
-                floatingActionButton: FloatingActionButton(
-                  onPressed: () { },
-                  tooltip: 'Increment',
-                  child: const Icon(Icons.add),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await expectLater(
-      find.byKey(key),
-      matchesGoldenFile('image_filter_matrix_offset_m3.png'),
+      matchesGoldenFile('image_filter_matrix_offset.png'),
     );
   });
 
