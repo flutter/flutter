@@ -33,6 +33,7 @@ class SemanticsAction {
   static const int _kMoveCursorBackwardByWordIndex = 1 << 20;
   static const int _kSetTextIndex = 1 << 21;
   static const int _kFocusIndex = 1 << 22;
+  static const int _kScrollToOffsetIndex = 1 << 23;
 
   static const SemanticsAction tap = SemanticsAction._(_kTapIndex, 'tap');
   static const SemanticsAction longPress = SemanticsAction._(_kLongPressIndex, 'longPress');
@@ -40,6 +41,7 @@ class SemanticsAction {
   static const SemanticsAction scrollRight = SemanticsAction._(_kScrollRightIndex, 'scrollRight');
   static const SemanticsAction scrollUp = SemanticsAction._(_kScrollUpIndex, 'scrollUp');
   static const SemanticsAction scrollDown = SemanticsAction._(_kScrollDownIndex, 'scrollDown');
+  static const SemanticsAction scrollToOffset = SemanticsAction._(_kScrollToOffsetIndex, 'scrollToOffset');
   static const SemanticsAction increase = SemanticsAction._(_kIncreaseIndex, 'increase');
   static const SemanticsAction decrease = SemanticsAction._(_kDecreaseIndex, 'decrease');
   static const SemanticsAction showOnScreen = SemanticsAction._(_kShowOnScreenIndex, 'showOnScreen');
@@ -65,6 +67,7 @@ class SemanticsAction {
     _kScrollRightIndex: scrollRight,
     _kScrollUpIndex: scrollUp,
     _kScrollDownIndex: scrollDown,
+    _kScrollToOffsetIndex: scrollToOffset,
     _kIncreaseIndex: increase,
     _kDecreaseIndex: decrease,
     _kShowOnScreenIndex: showOnScreen,
