@@ -2120,7 +2120,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     MOVE_CURSOR_FORWARD_BY_WORD(1 << 19),
     MOVE_CURSOR_BACKWARD_BY_WORD(1 << 20),
     SET_TEXT(1 << 21),
-    FOCUS(1 << 22);
+    FOCUS(1 << 22),
+    SCROLL_TO_OFFSET(1 << 23);
 
     public final int value;
 
