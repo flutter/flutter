@@ -4,7 +4,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "com.android.tools.build:gradle:8.5.0"
+    classpath "com.android.tools.build:gradle:8.7.2"
   }
 }
 
@@ -71,7 +71,7 @@ android {
     testImplementation "androidx.test:core:1.4.0"
     testImplementation "com.google.android.play:core:1.8.0"
     testImplementation "com.ibm.icu:icu4j:69.1"
-    testImplementation "org.robolectric:robolectric:4.12.1"
+    testImplementation "org.robolectric:robolectric:4.14.1"
     testImplementation "junit:junit:4.13.2"
     testImplementation "androidx.test.ext:junit:1.1.4-alpha07"
 
