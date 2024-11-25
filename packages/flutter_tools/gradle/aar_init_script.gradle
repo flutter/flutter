@@ -87,8 +87,7 @@ static String getFlutterRoot(Project project) {
 void addAarTask(Project project, component) {
     String variantName = component.name.capitalize()
     String taskName = "assembleAar$variantName"
-    doLast{
-    project.tasks.register(taskName) {
+    project.tasks.register(taskName) { task->
         // This check is required to be able to configure the archives before `publish` runs.
         if (!project.gradle.startParameter.taskNames.contains(taskName)) {
             return
@@ -103,8 +102,7 @@ void addAarTask(Project project, component) {
         }
 
         // Generate the Maven artifacts.
-        finalizedBy "publish"
-        }
+        task.finalizedBy("publish")
     }
 }
 
