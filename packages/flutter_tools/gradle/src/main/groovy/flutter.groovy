@@ -1237,13 +1237,11 @@ class FlutterPlugin implements Plugin<Project> {
             // `:flutter` is used as a subproject when these tasks exists and the build isn't building an AAR.
             Task packageAssets
             Task cleanPackageAssets
-
             try {
                 packageAssets = project.tasks.named("package${variant.name.capitalize()}Assets").get()
             } catch (UnknownTaskException ignored) {
                 packageAssets = null
             }
-
             try {
                 cleanPackageAssets = project.tasks.named("cleanPackage${variant.name.capitalize()}Assets").get()
             } catch (UnknownTaskException ignored) {
