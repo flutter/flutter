@@ -821,7 +821,6 @@ class Image extends StatefulWidget {
   /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/loading_progress_image.mp4}
   final ImageLoadingBuilder? loadingBuilder;
 
-  /// {@template flutter.widgets.Image.errorBuilder}
   /// A builder function that is called if an error occurs during image loading.
   ///
   /// If this builder is not provided, any exceptions will be reported to
@@ -834,10 +833,8 @@ class Image extends StatefulWidget {
   ///
   /// ** See code in examples/api/lib/widgets/image/image.error_builder.0.dart **
   /// {@end-tool}
-  /// {@endtemplate}
   final ImageErrorWidgetBuilder? errorBuilder;
 
-  /// {@template flutter.widgets.Image.width}
   /// If non-null, require the image to have this width (in logical pixels).
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
@@ -848,10 +845,8 @@ class Image extends StatefulWidget {
   /// layout constraints, so that the image does not change size as it loads.
   /// Consider using [fit] to adapt the image's rendering to fit the given width
   /// and height if the exact image dimensions are not known in advance.
-  /// {@endtemplate}
   final double? width;
 
-  /// {@template flutter.widgets.Image.height}
   /// If non-null, require the image to have this height (in logical pixels).
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
@@ -862,7 +857,6 @@ class Image extends StatefulWidget {
   /// layout constraints, so that the image does not change size as it loads.
   /// Consider using [fit] to adapt the image's rendering to fit the given width
   /// and height if the exact image dimensions are not known in advance.
-  /// {@endtemplate}
   final double? height;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
@@ -915,15 +909,12 @@ class Image extends StatefulWidget {
   final BlendMode? colorBlendMode;
 
 
-  /// {@template flutter.widgets.Image.fit}
   /// How to inscribe the image into the space allocated during layout.
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
-  /// {@endtemplate}
   final BoxFit? fit;
 
-  /// {@template flutter.widgets.Image.alignment}
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
@@ -949,7 +940,6 @@ class Image extends StatefulWidget {
   ///    specify an [AlignmentGeometry].
   ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
   ///    relative to text direction.
-  /// {@endtemplate}
   final AlignmentGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
@@ -964,7 +954,6 @@ class Image extends StatefulWidget {
   /// the center slice will be stretched only vertically.
   final Rect? centerSlice;
 
-  /// {@template flutter.widgets.Image.matchTextDirection}
   /// Whether to paint the image in the direction of the [TextDirection].
   ///
   /// If this is true, then in [TextDirection.ltr] contexts, the image will be
@@ -980,10 +969,8 @@ class Image extends StatefulWidget {
   ///
   /// If this is true, there must be an ambient [Directionality] widget in
   /// scope.
-  /// {@endtemplate}
   final bool matchTextDirection;
 
-  /// {@template flutter.widgets.Image.gaplessPlayback}
   /// Whether to continue showing the old image (true), or briefly show nothing
   /// (false), when the image provider changes. The default value is false.
   ///
@@ -1012,23 +999,18 @@ class Image extends StatefulWidget {
   /// old widget and adding a new one and not expecting them to have any
   /// relationship. With [gaplessPlayback] on you might accidentally break this
   /// expectation and re-use the old widget.
-  /// {@endtemplate}
   final bool gaplessPlayback;
 
-  /// {@template flutter.widgets.Image.semanticLabel}
   /// A Semantic description of the image.
   ///
   /// Used to provide a description of the image to TalkBack on Android, and
   /// VoiceOver on iOS.
-  /// {@endtemplate}
   final String? semanticLabel;
 
-  /// {@template flutter.widgets.Image.excludeFromSemantics}
   /// Whether to exclude this image from semantics.
   ///
   /// Useful for images which do not contribute meaningful information to an
   /// application.
-  /// {@endtemplate}
   final bool excludeFromSemantics;
 
   /// Whether to paint the image with anti-aliasing.
