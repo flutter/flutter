@@ -42,6 +42,11 @@ class RegularWindowController with ChangeNotifier {
   /// The current size of the window. This may differ from the requested size.
   Size get size => _size;
 
+  late int? _parentViewId;
+
+  /// The ID of the parent in which this rendered, if any.
+  int? get parentViewId => _parentViewId;
+
   /// Modifies this window with the provided properties.
   Future<void> modify({Size? size}) {
     throw UnimplementedError();
@@ -89,6 +94,10 @@ class _RegularWindowState extends State<RegularWindow> {
 
             if (properties.size != null) {
               widget.controller!._size = properties.size!;
+            }
+
+            if (properties.parentViewId != null) {
+              widget.controller!._parentViewId = properties.parentViewId;
             }
           },
           onDestroyed: widget.onDestroyed);
@@ -144,11 +153,22 @@ class WindowContext extends InheritedWidget {
   }
 }
 
-class RegularWindowMetadata {
-  RegularWindowMetadata({required this.view, required this.size});
+abstract class WindowMetadata {
+  WindowMetadata({required this.view, required this.size, this.parentViewId});
 
   final FlutterView view;
   final Size size;
+  final int? parentViewId;
+
+  WindowArchetype get type;
+}
+
+class RegularWindowMetadata extends WindowMetadata {
+  RegularWindowMetadata(
+      {required super.view, required super.size, super.parentViewId});
+
+  @override
+  WindowArchetype get type => WindowArchetype.regular;
 }
 
 class _WindowMetadata {

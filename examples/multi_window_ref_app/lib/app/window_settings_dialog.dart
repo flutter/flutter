@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:multi_window_ref_app/app/window_settings.dart';
 
 Future<WindowSettings?> windowSettingsDialog(
-  BuildContext context,
-  WindowSettings settings,
-  void Function(Window) onWindowOpened,
-  void Function(Window) onWindowClosed
-) async {
+    BuildContext context, WindowSettings settings) async {
   return await showDialog(
       barrierDismissible: true,
       context: context,
@@ -306,7 +302,8 @@ Future<WindowSettings?> windowSettingsDialog(
                                   alignment: Alignment.centerLeft,
                                   child: CheckboxListTile(
                                     title: const Text('Anchor to Window'),
-                                    subtitle: const Text("Use the parent's window frame as the anchor rectangle"),
+                                    subtitle: const Text(
+                                        "Use the parent's window frame as the anchor rectangle"),
                                     contentPadding: EdgeInsets.zero,
                                     value: anchorToWindow,
                                     onChanged: (bool? value) {
@@ -325,7 +322,10 @@ Future<WindowSettings?> windowSettingsDialog(
                                     style: TextStyle(
                                       color: anchorToWindow
                                           ? Theme.of(context).disabledColor
-                                          : Theme.of(context).textTheme.bodyMedium?.color,
+                                          : Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.color,
                                     ),
                                   ),
                                 ),
