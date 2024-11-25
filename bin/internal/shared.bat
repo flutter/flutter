@@ -52,19 +52,23 @@ GOTO :after_subroutine
     CALL "%bootstrap_path%"
   )
 
-  REM Check that git exists and get the revision
-  SET git_exists=false
-  2>NUL (
-    PUSHD "%flutter_root%"
-    FOR /f %%r IN ('git rev-parse HEAD') DO (
-      SET git_exists=true
-      SET revision=%%r
-    )
-    POPD
+  REM Check that git exists and get the revision.
+  WHERE git >NUL 2>&1
+  IF "%ERRORLEVEL%" NEQ "0" (
+    REM Could not find git. Exit without /B to avoid retrying.
+    ECHO Error: Unable to find git in your PATH. && EXIT 1
   )
-  REM If git didn't execute we don't have git. Exit without /B to avoid retrying.
-  if %git_exists% == false echo Error: Unable to find git in your PATH. && EXIT 1
-  SET compilekey="%revision%:%FLUTTER_TOOL_ARGS%"
+  2>NUL (
+    REM 'FOR /f' spawns a new terminal instance to run the command, so we need
+    REM to 'PUSHD %FLUTTER_ROOT%' before getting the git revision. If an
+    REM 'AutoRun' command is defined in the user's registry, we might not be in
+    REM the directory we expect to be in.
+    REM
+    REM See https://github.com/flutter/flutter/issues/159018
+    FOR /f %%r IN ('PUSHD %FLUTTER_ROOT% ^& $git rev-parse HEAD') DO (
+      SET compilekey="%%r:%FLUTTER_TOOL_ARGS%"
+    )
+  )
 
   REM Invalidate cache if:
   REM  * SNAPSHOT_PATH is not a file, or
