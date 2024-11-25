@@ -154,6 +154,8 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     _scrollView = [[FlutterSemanticsScrollView alloc] initWithSemanticsObject:self];
     [_scrollView setShowsHorizontalScrollIndicator:NO];
     [_scrollView setShowsVerticalScrollIndicator:NO];
+    [_scrollView setContentInset:UIEdgeInsetsZero];
+    [_scrollView setContentInsetAdjustmentBehavior:UIScrollViewContentInsetAdjustmentNever];
     [self.bridge->view() addSubview:_scrollView];
   }
   return self;
@@ -174,7 +176,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   // contentOffset is 0.0, only the scroll down action is available.
   self.scrollView.frame = self.accessibilityFrame;
   self.scrollView.contentSize = [self contentSizeInternal];
-  [self.scrollView setContentOffset:[self contentOffsetInternal] animated:NO];
+  // See the documentation on `isDoingSystemScrolling`.
+  if (!self.scrollView.isDoingSystemScrolling) {
+    [self.scrollView setContentOffset:self.contentOffsetInternal animated:NO];
+  }
 }
 
 - (id)nativeAccessibility {
