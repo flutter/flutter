@@ -21,6 +21,7 @@ import 'version.dart';
 
 const String kResultType = 'type';
 const String kResultTypeSuccess = 'Success';
+const String kError = 'error';
 
 const String kGetSkSLsMethod = '_flutter.getSkSLs';
 const String kSetAssetBundlePathMethod = '_flutter.setAssetBundlePath';
@@ -245,13 +246,29 @@ Future<vm_service.VmService> setUpVmService({
       final String? method = params['method'] as String?;
       final bool isStatic = _validateRpcBoolParam('compileExpression', params, 'isStatic');
 
-      final String kernelBytesBase64 = await compileExpression(isolateId,
-          expression, definitions, definitionTypes, typeDefinitions, typeBounds, typeDefaults,
-          libraryUri, klass, method, isStatic);
-      return <String, Object>{
-        kResultType: kResultTypeSuccess,
-        'result': <String, String>{'kernelBytes': kernelBytesBase64},
-      };
+      try {
+        final String kernelBytesBase64 = await compileExpression(isolateId,
+            expression, definitions, definitionTypes, typeDefinitions, typeBounds, typeDefaults,
+            libraryUri, klass, method, isStatic);
+        return <String, Object>{
+          kResultType: kResultTypeSuccess,
+          'result': <String, String>{'kernelBytes': kernelBytesBase64},
+        };
+      } on VmServiceExpressionCompilationException catch (e) {
+        // In most situations, we'd just let VmService catch this exception and
+        // build the error response. However, in this case we build the error
+        // response manually and return it to avoid including the stack trace
+        // from the tool in the response, instead returning the compilation
+        // error message in the 'details' property of the returned error object.
+        return <String, Object>{
+          kError: vm_service.RPCError.withDetails(
+            'compileExpression',
+            vm_service.RPCErrorKind.kExpressionCompilationError.code,
+            vm_service.RPCErrorKind.kExpressionCompilationError.message,
+            details: e.errorMessage,
+          ).toMap(),
+        };
+      }
     });
     registrationRequests.add(vmService.registerService(kCompileExpressionServiceName, kFlutterToolAlias));
   }
@@ -1071,6 +1088,14 @@ class FlutterVmService {
 
 /// Thrown when the VM Service disappears while calls are being made to it.
 class VmServiceDisappearedException implements Exception { }
+
+/// Thrown when the frontend service fails to compile an expression due to an
+/// error.
+class VmServiceExpressionCompilationException implements Exception {
+  const VmServiceExpressionCompilationException(this.errorMessage);
+
+  final String errorMessage;
+}
 
 /// Whether the event attached to an [Isolate.pauseEvent] should be considered
 /// a "pause" event.

@@ -61,7 +61,7 @@ class TargetModel {
 }
 
 class CompilerOutput {
-  const CompilerOutput(this.outputFilename, this.errorCount, this.sources, {this.expressionData});
+  const CompilerOutput(this.outputFilename, this.errorCount, this.sources, {this.expressionData, this.errorMessage});
 
   final String outputFilename;
   final int errorCount;
@@ -69,6 +69,9 @@ class CompilerOutput {
 
   /// This field is only non-null for expression compilation requests.
   final Uint8List? expressionData;
+
+  /// This field is only non-null when a compilation error was encountered.
+  final String? errorMessage;
 }
 
 enum StdoutState { CollectDiagnostic, CollectDependencies }
@@ -94,6 +97,7 @@ class StdoutHandler {
   bool _suppressCompilerMessages = false;
   bool _expectSources = true;
   bool _readFile = false;
+  StringBuffer _errorBuffer = StringBuffer();
 
   void handler(String message) {
     const String kResultPrefix = 'result ';
@@ -125,6 +129,7 @@ class StdoutHandler {
         errorCount,
         sources,
         expressionData: expressionData,
+        errorMessage: _errorBuffer.isNotEmpty ? _errorBuffer.toString() : null,
       );
       compilerOutput?.complete(output);
       return;
@@ -132,8 +137,10 @@ class StdoutHandler {
     switch (state) {
       case StdoutState.CollectDiagnostic when _suppressCompilerMessages:
         _logger.printTrace(message);
+        _errorBuffer.writeln(message);
       case StdoutState.CollectDiagnostic:
         _logger.printError(message);
+        _errorBuffer.writeln(message);
       case StdoutState.CollectDependencies:
         switch (message[0]) {
           case '+':
@@ -155,6 +162,7 @@ class StdoutHandler {
     _expectSources = expectSources;
     _readFile = readFile;
     state = StdoutState.CollectDiagnostic;
+    _errorBuffer = StringBuffer();
   }
 }
 

@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -19,6 +20,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../src/context.dart';
 import '../src/fake_devices.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 
 final vm_service.Isolate isolate = vm_service.Isolate(
   id: '1',
@@ -64,6 +66,7 @@ final Uri vmServiceUri = Uri.parse('http://localhost:1234');
 void main() {
   late FakeVmServiceHost fakeVmServiceHost;
   late TestDevice testDevice;
+  late DDSLauncherCallback originalDdsLauncher;
 
   setUp(() {
     testDevice = IntegrationTestTestDevice(
@@ -103,6 +106,25 @@ void main() {
         },
       ),
     ]);
+
+    originalDdsLauncher = ddsLauncherCallback;
+    ddsLauncherCallback = ({
+      required Uri remoteVmServiceUri,
+      Uri? serviceUri,
+      bool enableAuthCodes = true,
+      bool serveDevTools = false,
+      Uri? devToolsServerAddress,
+      bool enableServicePortFallback = false,
+      List<String> cachedUserTags = const <String>[],
+      String? dartExecutable,
+      String? google3WorkspaceRoot,
+    }) async {
+      return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
+    };
+  });
+
+  tearDown(() {
+    ddsLauncherCallback = originalDdsLauncher;
   });
 
   testUsingContext('will not start when package missing', () async {
