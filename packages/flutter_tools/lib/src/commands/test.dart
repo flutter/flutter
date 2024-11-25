@@ -435,7 +435,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
     if (nativeAssetsJson != null) {
       final Directory testAssetDirectory = globals.fs.directory(testAssetPath);
-      if (!await testAssetDirectory.exists()) {
+      if (!testAssetDirectory.existsSync()) {
         await testAssetDirectory.create(recursive: true);
       }
       final File nativeAssetsManifest =

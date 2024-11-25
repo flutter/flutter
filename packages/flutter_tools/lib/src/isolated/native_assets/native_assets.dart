@@ -343,14 +343,12 @@ Future<Uri> _writeNativeAssetsJson(
 String _toNativeAssetsJsonFile(List<KernelAsset> kernelAssets) {
   final Map<Target, List<KernelAsset>> assetsPerTarget = <Target, List<KernelAsset>>{};
   for (final KernelAsset asset in kernelAssets) {
-    final List<KernelAsset> assets = assetsPerTarget[asset.target] ?? <KernelAsset>[];
-    assets.add(asset);
-    assetsPerTarget[asset.target] = assets;
+    assetsPerTarget.putIfAbsent(asset.target, () => <KernelAsset>[]).add(asset);
   }
 
   // See assets/native_assets.cc in the engine for the expected format.
   final Map<String, Object> jsonContents = <String, Object>{
-    'format-version': <int>[1, 0, 0],
+    'format-version': const <int>[1, 0, 0],
     'native-assets': <String, Map<String, List<String>>>{
       for (final MapEntry<Target, List<KernelAsset>> entry in assetsPerTarget.entries)
         entry.key.toString(): <String, List<String>>{
