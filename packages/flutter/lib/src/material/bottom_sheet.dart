@@ -572,16 +572,16 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) => 0;
+  double computeMinIntrinsicWidth(double height) => 0.0;
 
   @override
-  double computeMaxIntrinsicWidth(double height) => 0;
+  double computeMaxIntrinsicWidth(double height) => 0.0;
 
   @override
-  double computeMinIntrinsicHeight(double width) => 0;
+  double computeMinIntrinsicHeight(double width) => 0.0;
 
   @override
-  double computeMaxIntrinsicHeight(double width) => 0;
+  double computeMaxIntrinsicHeight(double width) => 0.0;
 
   @override
   Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
