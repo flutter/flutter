@@ -8,7 +8,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.4.2"
+        classpath "com.android.tools.build:gradle:8.7.2"
     }
 }
 
@@ -20,6 +20,7 @@ repositories {
 apply plugin: "com.android.library"
 
 android {
+    namespace "io.flutter.embedding"
     compileSdk 35
 
     defaultConfig {
@@ -52,7 +53,7 @@ android {
         implementation "androidx.test:core:1.4.0"
         implementation "com.google.android.play:core:1.8.0"
         implementation "com.ibm.icu:icu4j:69.1"
-        implementation "org.robolectric:robolectric:4.12.1"
+        implementation "org.robolectric:robolectric:4.14.1"
         implementation "junit:junit:4.13.2"
         implementation "androidx.test.ext:junit:1.1.4-alpha07"
 
