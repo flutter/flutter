@@ -1,8 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:multi_window_ref_app/app/window_metadata_content.dart';
 
-import 'regular_window.dart';
+import 'regular_window_content.dart';
 import 'window_settings.dart';
 import 'window_settings_dialog.dart';
+
+class _WindowManagerModel extends ChangeNotifier {
+  final List<WindowMetadata> _windows = <WindowMetadata>[];
+  List<WindowMetadata> get windows => _windows;
+  int? _selectedViewId;
+  WindowMetadata? get selected {
+    if (_selectedViewId == null) {
+      return null;
+    }
+
+    for (final WindowMetadata window in _windows) {
+      if (window.view.viewId == _selectedViewId) {
+        return window;
+      }
+    }
+
+    return null;
+  }
+
+  void add(WindowMetadata window) {
+    _windows.add(window);
+    notifyListeners();
+  }
+
+  void remove(WindowMetadata window) {
+    _windows.remove(window);
+    notifyListeners();
+  }
+
+  void select(int? viewId) {
+    _selectedViewId = viewId;
+  }
+}
 
 class MainWindow extends StatefulWidget {
   const MainWindow({super.key});
@@ -12,20 +46,10 @@ class MainWindow extends StatefulWidget {
 }
 
 class _MainWindowState extends State<MainWindow> {
-  int selectedRowIndex = -1;
-  final List<Window> _managedWindows = <Window>[];
+  final _WindowManagerModel _windowManagerModel = _WindowManagerModel();
 
   @override
   Widget build(BuildContext context) {
-    List<Window> getWindowsInTree(List<Window> windows) {
-      return windows
-          .expand((window) => [window, ...getWindowsInTree(window.children)])
-          .toList();
-    }
-
-    final List<Window> windows =
-        getWindowsInTree(MultiWindowAppContext.of(context)!.windows);
-
     final widget = Scaffold(
       appBar: AppBar(
         title: const Text('Multi Window Reference App'),
@@ -37,12 +61,8 @@ class _MainWindowState extends State<MainWindow> {
             flex: 60,
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
-              child: _ActiveWindowsTable(
-                windows: windows,
-                selectedRowIndex: selectedRowIndex,
-                onSelectedRowIndexChanged: (int index) =>
-                    setState(() => selectedRowIndex = index),
-              ),
+              child:
+                  _ActiveWindowsTable(windowManagerModel: _windowManagerModel),
             ),
           ),
           Expanded(
@@ -50,13 +70,12 @@ class _MainWindowState extends State<MainWindow> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _WindowCreatorCard(
-                    selectedWindow: selectedRowIndex < 0 ||
-                            selectedRowIndex >= windows.length
-                        ? null
-                        : windows[selectedRowIndex],
-                    onDialogOpened: (window) => _managedWindows.add(window),
-                    onDialogClosed: (window) => _managedWindows.remove(window)),
+                ListenableBuilder(
+                    listenable: _windowManagerModel,
+                    builder: (BuildContext context, Widget? child) {
+                      return _WindowCreatorCard(
+                          selectedWindow: _windowManagerModel.selected);
+                    })
               ],
             ),
           ),
@@ -64,46 +83,26 @@ class _MainWindowState extends State<MainWindow> {
       ),
     );
 
-    final window = WindowContext.of(context)!.window;
     final List<Widget> childViews = <Widget>[];
-    for (final Window childWindow in window.children) {
-      if (!_shouldRenderWindow(childWindow)) {
-        continue;
-      }
-
-      childViews.add(View(
-        view: childWindow.view,
-        child: WindowContext(
-          window: childWindow,
-          child: childWindow.builder(context),
-        ),
-      ));
+    for (final WindowMetadata childWindow in _windowManagerModel.windows) {
+      childViews.add(WindowMetadataContent(childWindow: childWindow));
     }
 
     return ViewAnchor(view: ViewCollection(views: childViews), child: widget);
   }
-
-  bool _shouldRenderWindow(Window window) {
-    return !_managedWindows.contains(window);
-  }
 }
 
 class _ActiveWindowsTable extends StatelessWidget {
-  const _ActiveWindowsTable(
-      {required this.windows,
-      required this.selectedRowIndex,
-      required this.onSelectedRowIndexChanged});
+  const _ActiveWindowsTable({required this.windowManagerModel});
 
-  final List<Window> windows;
-  final int selectedRowIndex;
-  final void Function(int) onSelectedRowIndexChanged;
+  final _WindowManagerModel windowManagerModel;
 
   @override
   Widget build(BuildContext context) {
     return DataTable(
       showBottomBorder: true,
       onSelectAll: (selected) {
-        onSelectedRowIndexChanged(-1);
+        windowManagerModel.select(null);
       },
       columns: const [
         DataColumn(
@@ -135,13 +134,16 @@ class _ActiveWindowsTable extends StatelessWidget {
             ),
             numeric: true),
       ],
-      rows: windows.asMap().entries.map<DataRow>((indexedEntry) {
+      rows: windowManagerModel.windows
+          .asMap()
+          .entries
+          .map<DataRow>((indexedEntry) {
         final index = indexedEntry.key;
-        final Window entry = indexedEntry.value;
+        final WindowMetadata entry = indexedEntry.value;
         final window = entry;
         final viewId = window.view.viewId;
-        final archetype = window.archetype;
-        final isSelected = selectedRowIndex == index;
+        final archetype = window.type;
+        final isSelected = viewId == windowManagerModel._selectedViewId;
 
         return DataRow(
           color: WidgetStateColor.resolveWith((states) {
@@ -153,7 +155,7 @@ class _ActiveWindowsTable extends StatelessWidget {
           selected: isSelected,
           onSelectChanged: (selected) {
             if (selected != null) {
-              onSelectedRowIndexChanged(selected ? index : -1);
+              windowManagerModel.select(selected ? viewId : null);
             }
           },
           cells: [
@@ -167,7 +169,7 @@ class _ActiveWindowsTable extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.delete_outlined),
                 onPressed: () {
-                  destroyWindow(context, window);
+                  destroyWindow(viewId);
                 },
               ),
             ),
@@ -179,14 +181,9 @@ class _ActiveWindowsTable extends StatelessWidget {
 }
 
 class _WindowCreatorCard extends StatefulWidget {
-  const _WindowCreatorCard(
-      {required this.selectedWindow,
-      required this.onDialogOpened,
-      required this.onDialogClosed});
+  const _WindowCreatorCard({required this.selectedWindow});
 
-  final Window? selectedWindow;
-  final void Function(Window) onDialogOpened;
-  final void Function(Window) onDialogClosed;
+  final WindowMetadata? selectedWindow;
 
   @override
   State<StatefulWidget> createState() => _WindowCreatorCardState();
@@ -219,12 +216,7 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
               children: [
                 OutlinedButton(
                   onPressed: () async {
-                    await createRegular(
-                        context: context,
-                        size: _settings.regularSize,
-                        builder: (BuildContext context) {
-                          return const MaterialApp(home: RegularWindowContent());
-                        });
+                    await createRegular(size: _settings.regularSize);
                   },
                   child: const Text('Regular'),
                 ),
@@ -234,9 +226,7 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
                   child: TextButton(
                     child: const Text('SETTINGS'),
                     onPressed: () {
-                      windowSettingsDialog(context, _settings,
-                              widget.onDialogOpened, widget.onDialogClosed)
-                          .then(
+                      windowSettingsDialog(context, _settings).then(
                         (WindowSettings? settings) {
                           if (settings != null) {
                             _settings = settings;
