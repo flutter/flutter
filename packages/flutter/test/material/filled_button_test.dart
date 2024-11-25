@@ -2549,7 +2549,7 @@ void main() {
     expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
   });
 
-  testWidgets('FilledButton tonal icon alignment respects ButtonStyle.iconAlignment', (WidgetTester tester) async {
+  testWidgets('FilledButton tonal button icon alignment respects ButtonStyle.iconAlignment', (WidgetTester tester) async {
     Widget buildButton({ IconAlignment? iconAlignment }) {
       return MaterialApp(
         home: Center(

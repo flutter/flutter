@@ -228,7 +228,7 @@ void main() {
     });
   });
 
-  testWidgets('Material 3 - ElevatedButton repsects Theme shadowColor', (WidgetTester tester) async {
+  testWidgets('Material3 - ElevatedButton repsects Theme shadowColor', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
@@ -299,7 +299,7 @@ void main() {
     expect(material.shadowColor, shadowColor);
   });
 
-  testWidgets('Material 2 - ElevatedButton repsects Theme shadowColor', (WidgetTester tester) async {
+  testWidgets('Material2 - ElevatedButton repsects Theme shadowColor', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
@@ -369,7 +369,7 @@ void main() {
     expect(material.shadowColor, shadowColor);
   });
 
-  testWidgets('ElevatedButton icon respects ElevatedButtonTheme ButtonStyle.iconAlignment', (WidgetTester tester) async {
+  testWidgets('ElevatedButton.icon respects ElevatedButtonTheme ButtonStyle.iconAlignment', (WidgetTester tester) async {
     Widget buildButton({ IconAlignment? iconAlignment }) {
       return MaterialApp(
         theme: ThemeData(

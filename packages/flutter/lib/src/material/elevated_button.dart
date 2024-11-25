@@ -533,9 +533,9 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
     final double defaultFontSize = buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
     final double scale = clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
     final double gap = lerpDouble(8, 4, scale)!;
-    final ElevatedButtonThemeData textButtonTheme = ElevatedButtonTheme.of(context);
+    final ElevatedButtonThemeData elevatedButtonTheme = ElevatedButtonTheme.of(context);
     final IconAlignment effectiveIconAlignment = iconAlignment
-      ?? textButtonTheme.style?.iconAlignment
+      ?? elevatedButtonTheme.style?.iconAlignment
       ?? buttonStyle?.iconAlignment
       ?? IconAlignment.start;
     return Row(

@@ -283,6 +283,14 @@ class ButtonStyle with Diagnosticable {
 
   /// The alignment of the button's icon.
   ///
+  /// This property is supported for the following button types:
+  ///
+  ///  * [ElevatedButton.icon].
+  ///  * [FilledButton.icon].
+  ///  * [FilledButton.tonalIcon].
+  ///  * [OutlinedButton.icon].
+  ///  * [TextButton.icon].
+  ///
   /// See also:
   ///
   ///  * [IconAlignment], for more information about the different icon

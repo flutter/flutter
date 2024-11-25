@@ -235,7 +235,7 @@ void main() {
     });
   });
 
-  testWidgets('Material3: Theme shadowColor', (WidgetTester tester) async {
+  testWidgets('Material3 - OutlinedButton repsects Theme shadowColor', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
@@ -306,7 +306,7 @@ void main() {
     expect(material.shadowColor, shadowColor);
   });
 
-  testWidgets('Material2: Theme shadowColor', (WidgetTester tester) async {
+  testWidgets('Material2 - OutlinedButton repsects Theme shadowColor', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
@@ -376,7 +376,7 @@ void main() {
     expect(material.shadowColor, shadowColor);
   });
 
-  testWidgets('OutlinedButton icon alignment respects OutlinedButtonTheme ButtonStyle.iconAlignment', (WidgetTester tester) async {
+  testWidgets('OutlinedButton.icon alignment respects OutlinedButtonTheme ButtonStyle.iconAlignment', (WidgetTester tester) async {
     Widget buildButton({ IconAlignment? iconAlignment }) {
       return MaterialApp(
         theme: ThemeData(

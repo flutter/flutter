@@ -192,7 +192,7 @@ void main() {
     });
   });
 
-  testWidgets('Theme shadowColor', (WidgetTester tester) async {
+  testWidgets('FilledButton repsects Theme shadowColor', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
@@ -257,7 +257,7 @@ void main() {
     expect(material.shadowColor, shadowColor);
   });
 
-  testWidgets('FilledButton icon respects FilledButtonTheme ButtonStyle.iconAlignment', (WidgetTester tester) async {
+  testWidgets('FilledButton.icon respects FilledButtonTheme ButtonStyle.iconAlignment', (WidgetTester tester) async {
     Widget buildButton({ IconAlignment? iconAlignment }) {
       return MaterialApp(
         theme: ThemeData(
@@ -293,7 +293,7 @@ void main() {
     expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
   });
 
-  testWidgets('FilledButton tonal icon respects FilledButtonTheme ButtonStyle.iconAlignment', (WidgetTester tester) async {
+  testWidgets('Filled tonal button icon respects FilledButtonTheme ButtonStyle.iconAlignment', (WidgetTester tester) async {
     Widget buildButton({ IconAlignment? iconAlignment }) {
       return MaterialApp(
         theme: ThemeData(
