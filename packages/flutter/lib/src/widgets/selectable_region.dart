@@ -1125,6 +1125,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       _selectionDelegate.value.startSelectionPoint!,
     ));
     _updateSelectedContentIfNeeded();
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
   }
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
@@ -1152,6 +1153,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       _selectionDelegate.value.endSelectionPoint!,
     ));
     _updateSelectedContentIfNeeded();
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
   }
 
   MagnifierInfo _buildInfoForMagnifier(Offset globalGesturePosition, SelectionPoint selectionPoint) {
