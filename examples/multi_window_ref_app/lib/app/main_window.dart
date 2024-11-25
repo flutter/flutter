@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:multi_window_ref_app/app/window_metadata_content.dart';
 
-import 'regular_window_content.dart';
 import 'window_settings.dart';
 import 'window_settings_dialog.dart';
 
@@ -74,7 +73,8 @@ class _MainWindowState extends State<MainWindow> {
                     listenable: _windowManagerModel,
                     builder: (BuildContext context, Widget? child) {
                       return _WindowCreatorCard(
-                          selectedWindow: _windowManagerModel.selected);
+                          selectedWindow: _windowManagerModel.selected,
+                          windowManagerModel: _windowManagerModel);
                     })
               ],
             ),
@@ -83,12 +83,29 @@ class _MainWindowState extends State<MainWindow> {
       ),
     );
 
+    return ViewAnchor(
+        view: ListenableBuilder(
+            listenable: _windowManagerModel,
+            builder: (BuildContext context, Widget? widget) {
+              return _ViewCollection(windowManagerModel: _windowManagerModel);
+            }),
+        child: widget);
+  }
+}
+
+class _ViewCollection extends StatelessWidget {
+  _ViewCollection({required this.windowManagerModel});
+
+  _WindowManagerModel windowManagerModel;
+
+  @override
+  Widget build(BuildContext context) {
     final List<Widget> childViews = <Widget>[];
-    for (final WindowMetadata childWindow in _windowManagerModel.windows) {
+    for (final WindowMetadata childWindow in windowManagerModel.windows) {
       childViews.add(WindowMetadataContent(childWindow: childWindow));
     }
 
-    return ViewAnchor(view: ViewCollection(views: childViews), child: widget);
+    return ViewCollection(views: childViews);
   }
 }
 
@@ -181,9 +198,11 @@ class _ActiveWindowsTable extends StatelessWidget {
 }
 
 class _WindowCreatorCard extends StatefulWidget {
-  const _WindowCreatorCard({required this.selectedWindow});
+  const _WindowCreatorCard(
+      {required this.selectedWindow, required this.windowManagerModel});
 
   final WindowMetadata? selectedWindow;
+  final _WindowManagerModel windowManagerModel;
 
   @override
   State<StatefulWidget> createState() => _WindowCreatorCardState();
@@ -216,7 +235,9 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
               children: [
                 OutlinedButton(
                   onPressed: () async {
-                    await createRegular(size: _settings.regularSize);
+                    final WindowMetadata metadata =
+                        await createRegular(size: _settings.regularSize);
+                    widget.windowManagerModel.add(metadata);
                   },
                   child: const Text('Regular'),
                 ),

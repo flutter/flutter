@@ -5,6 +5,7 @@
 import 'dart:ui' show FlutterView;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 /// Defines the type of a [Window]
@@ -81,27 +82,34 @@ class _RegularWindowState extends State<RegularWindow> {
   @override
   void initState() {
     super.initState();
-    final _WindowingAppContext? windowingAppContext =
-        _WindowingAppContext.of(context);
     widget._future.then((RegularWindowMetadata metadata) async {
-      assert(windowingAppContext != null);
-      _listener = _WindowListener(
-          viewId: metadata.view.viewId,
-          onChanged: (_WindowChangeProperties properties) {
-            if (widget.controller == null) {
-              return;
-            }
+      if (widget.controller != null) {
+        widget.controller!._parentViewId = metadata.parentViewId;
+        widget.controller!._size = metadata.size;
+      }
 
-            if (properties.size != null) {
-              widget.controller!._size = properties.size!;
-            }
+      SchedulerBinding.instance.addPostFrameCallback((_) async {
+        final _WindowingAppContext? windowingAppContext =
+            _WindowingAppContext.of(context);
+        assert(windowingAppContext != null);
+        _listener = _WindowListener(
+            viewId: metadata.view.viewId,
+            onChanged: (_WindowChangeProperties properties) {
+              if (widget.controller == null) {
+                return;
+              }
 
-            if (properties.parentViewId != null) {
-              widget.controller!._parentViewId = properties.parentViewId;
-            }
-          },
-          onDestroyed: widget.onDestroyed);
-      windowingAppContext!.windowingApp._registerListener(_listener!);
+              if (properties.size != null) {
+                widget.controller!._size = properties.size!;
+              }
+
+              if (properties.parentViewId != null) {
+                widget.controller!._parentViewId = properties.parentViewId;
+              }
+            },
+            onDestroyed: widget.onDestroyed);
+        windowingAppContext!.windowingApp._registerListener(_listener!);
+      });
     });
   }
 
@@ -123,7 +131,8 @@ class _RegularWindowState extends State<RegularWindow> {
         builder: (BuildContext context,
             AsyncSnapshot<RegularWindowMetadata> metadata) {
           if (!metadata.hasData) {
-            return Container();
+            final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+            return binding.wrapWithDefaultView(Container());
           }
 
           return View(
@@ -202,6 +211,7 @@ Future<RegularWindowMetadata> createRegular({required Size size}) async {
 Future<_WindowMetadata> _createWindow(
     {required Future<Map<Object?, Object?>> Function(MethodChannel channel)
         viewBuilder}) async {
+  WidgetsFlutterBinding.ensureInitialized();
   final Map<Object?, Object?> creationData =
       await viewBuilder(SystemChannels.windowing);
   final int viewId = creationData['viewId']! as int;
@@ -260,6 +270,7 @@ class _WindowListener {
 /// The current [Window] can be looked up with [WindowContext.of].
 class WindowingApp extends StatelessWidget {
   WindowingApp({super.key, required this.children}) {
+    WidgetsFlutterBinding.ensureInitialized();
     SystemChannels.windowing.setMethodCallHandler(_methodCallHandler);
   }
 
