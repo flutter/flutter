@@ -346,10 +346,13 @@ String _toNativeAssetsJsonFile(List<KernelAsset> kernelAssets) {
     assetsPerTarget.putIfAbsent(asset.target, () => <KernelAsset>[]).add(asset);
   }
 
+  const String formatVersionKey = 'format-version';
+  const String nativeAssetsKey = 'native-assets';
+
   // See assets/native_assets.cc in the engine for the expected format.
   final Map<String, Object> jsonContents = <String, Object>{
-    'format-version': const <int>[1, 0, 0],
-    'native-assets': <String, Map<String, List<String>>>{
+    formatVersionKey: const <int>[1, 0, 0],
+    nativeAssetsKey: <String, Map<String, List<String>>>{
       for (final MapEntry<Target, List<KernelAsset>> entry in assetsPerTarget.entries)
         entry.key.toString(): <String, List<String>>{
           for (final KernelAsset e in entry.value) e.id: e.path.toJson(),
