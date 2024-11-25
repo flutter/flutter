@@ -110,7 +110,7 @@ FlPlatformChannelExitResponse get_exit_response(FlMethodResponse* response) {
   if (strcmp(response_string, kExitResponseCancel) == 0) {
     return FL_PLATFORM_CHANNEL_EXIT_RESPONSE_CANCEL;
   } else if (strcmp(response_string, kExitResponseExit) == 0) {
-    return FL_PLATFORM_CHANNEL_EXIT_RESPONSE_CANCEL;
+    return FL_PLATFORM_CHANNEL_EXIT_RESPONSE_EXIT;
   }
 
   // If something went wrong, then just exit.
