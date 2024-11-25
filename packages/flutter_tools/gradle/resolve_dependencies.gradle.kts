@@ -15,14 +15,21 @@ val engineVersion = Paths.get(
     "bin",
     "internal",
     "engine.version"
-).toFile()
-    .readText()
-    .trim()
-
-var engineRealm = Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.realm")
+)
     .toFile()
     .readText()
     .trim()
+
+var engineRealm = Paths.get(
+flutterRoot.absolutePath,
+"bin",
+"internal",
+"engine.realm"
+)
+    .toFile()
+    .readText()
+    .trim()
+
 if (engineRealm.isNotEmpty()) {
     engineRealm += "/"
 }
