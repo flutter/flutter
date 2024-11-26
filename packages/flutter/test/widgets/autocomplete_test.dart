@@ -929,6 +929,7 @@ void main() {
     late Iterable<String> lastOptions;
     late FocusNode focusNode;
     late TextEditingController textEditingController;
+    late int lastHighlighted;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -951,6 +952,7 @@ void main() {
               );
             },
             optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastHighlighted = AutocompleteHighlightedOption.of(context);
               lastOptions = options;
               return Container(key: optionsKey);
             },
@@ -996,41 +998,31 @@ void main() {
 
     // Selection does not wrap (going up).
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(lastHighlighted, 0);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsNothing);
-    expect(textEditingController.text, 'chameleon');
-
-    // Show the options again.
-    focusNode.requestFocus();
-    textEditingController.clear();
-    await tester.enterText(find.byKey(fieldKey), 'e');
-    await tester.pump();
-    expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsOneWidget);
-    expect(lastOptions.length, 6);
-    expect(lastOptions.elementAt(0), 'chameleon');
-    expect(lastOptions.elementAt(1), 'elephant');
-    expect(lastOptions.elementAt(2), 'goose');
-    expect(lastOptions.elementAt(3), 'lemur');
-    expect(lastOptions.elementAt(4), 'mouse');
-    expect(lastOptions.elementAt(5), 'northern white rhinoceros');
+    expect(lastHighlighted, 0);
 
     // Selection does not wrap (going down).
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsNothing);
-    expect(textEditingController.text, 'northern white rhinoceros');
+    expect(lastHighlighted, 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 2);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 3);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 4);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 5);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 5);
   });
 
   testWidgets('can jump to ends with keyboard', (WidgetTester tester) async {
@@ -1039,6 +1031,7 @@ void main() {
     late Iterable<String> lastOptions;
     late FocusNode focusNode;
     late TextEditingController textEditingController;
+    late int lastHighlighted;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1061,6 +1054,7 @@ void main() {
               );
             },
             optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastHighlighted = AutocompleteHighlightedOption.of(context);
               lastOptions = options;
               return Container(key: optionsKey);
             },
@@ -1088,39 +1082,29 @@ void main() {
     await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
-    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsNothing);
-    expect(textEditingController.text, 'northern white rhinoceros');
+    expect(lastHighlighted, 5);
 
-    // Show the options again.
-    focusNode.requestFocus();
-    textEditingController.clear();
-    await tester.enterText(find.byKey(fieldKey), 'e');
-    await tester.pump();
-    expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsOneWidget);
-    expect(lastOptions.length, 6);
-    expect(lastOptions.elementAt(0), 'chameleon');
-    expect(lastOptions.elementAt(1), 'elephant');
-    expect(lastOptions.elementAt(2), 'goose');
-    expect(lastOptions.elementAt(3), 'lemur');
-    expect(lastOptions.elementAt(4), 'mouse');
-    expect(lastOptions.elementAt(5), 'northern white rhinoceros');
-
-    // Jump to the top.
+    // Doesn't wrap down.
     await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await tester.pump();
+    expect(lastHighlighted, 5);
+
+    // Jump to the top.
     await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
-    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsNothing);
-    expect(textEditingController.text, 'chameleon');
+    expect(lastHighlighted, 0);
+
+    // Doesn't wrap up.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await tester.pump();
+    expect(lastHighlighted, 0);
   });
 
   testWidgets('can navigate with page up/down keys', (WidgetTester tester) async {
@@ -1129,6 +1113,7 @@ void main() {
     late Iterable<String> lastOptions;
     late FocusNode focusNode;
     late TextEditingController textEditingController;
+    late int lastHighlighted;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1151,6 +1136,7 @@ void main() {
               );
             },
             optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastHighlighted = AutocompleteHighlightedOption.of(context);
               lastOptions = options;
               return Container(key: optionsKey);
             },
@@ -1174,39 +1160,27 @@ void main() {
     expect(lastOptions.elementAt(4), 'mouse');
     expect(lastOptions.elementAt(5), 'northern white rhinoceros');
 
-    // Jump down a page.
+    // Jump down. Stops at the bottom and doesn't wrap.
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
-    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsNothing);
-    expect(textEditingController.text, 'mouse');
-
-    // Show the options again.
-    focusNode.requestFocus();
-    textEditingController.clear();
-    await tester.enterText(find.byKey(fieldKey), 'e');
+    expect(lastHighlighted, 4);
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pump();
-    expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsOneWidget);
-    expect(lastOptions.length, 6);
-    expect(lastOptions.elementAt(0), 'chameleon');
-    expect(lastOptions.elementAt(1), 'elephant');
-    expect(lastOptions.elementAt(2), 'goose');
-    expect(lastOptions.elementAt(3), 'lemur');
-    expect(lastOptions.elementAt(4), 'mouse');
-    expect(lastOptions.elementAt(5), 'northern white rhinoceros');
+    expect(lastHighlighted, 5);
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await tester.pump();
+    expect(lastHighlighted, 5);
 
     // Jump to the bottom and then jump up a page.
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
-    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsNothing);
-    expect(textEditingController.text, 'elephant');
+    expect(lastHighlighted, 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await tester.pump();
+    expect(lastHighlighted, 0);
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await tester.pump();
+    expect(lastHighlighted, 0);
   });
 
   testWidgets('can hide and show options with the keyboard', (WidgetTester tester) async {
