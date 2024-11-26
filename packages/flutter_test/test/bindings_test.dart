@@ -30,6 +30,11 @@ void main() {
       final Matrix4 matrix = TestViewConfiguration(size: Size.zero).toMatrix();
       expect(matrix.storage.every((double x) => x.isFinite), isTrue);
     });
+
+    test('sets the DPR to match the window', () {
+      final TestViewConfiguration configuration = TestViewConfiguration(size: const Size(1280.0, 800.0));
+      expect(configuration.devicePixelRatio, binding.window.devicePixelRatio);
+    });
   });
 
   group(AutomatedTestWidgetsFlutterBinding, () {

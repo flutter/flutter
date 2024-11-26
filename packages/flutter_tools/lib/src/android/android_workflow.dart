@@ -105,7 +105,12 @@ class AndroidValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(_userMessages.androidMissingJdk));
         return false;
       }
-      messages.add(ValidationMessage(_userMessages.androidJdkLocation(_java!.binaryPath)));
+      messages.add(ValidationMessage(
+        _androidJdkLocationMessage(
+          _java!.binaryPath,
+          _java.javaSource,
+        ),
+      ));
       if (!_java.canRun()) {
         messages.add(ValidationMessage.error(_userMessages.androidCantRunJavaBinary(_java.binaryPath)));
         return false;
@@ -453,4 +458,27 @@ class AndroidLicenseValidator extends DoctorValidator {
       _platform,
     );
   }
+}
+
+String _androidJdkLocationMessage(String location, JavaSource source) {
+  final String setWithConfigBreadcrumb = switch (source) {
+    JavaSource.androidStudio || JavaSource.path || JavaSource.javaHome =>
+      'To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.',
+    JavaSource.flutterConfig =>
+      'To change the current JDK, run: `flutter config --jdk-dir="path/to/jdk"`.'
+  };
+  final String sourceMessagePart = switch (source) {
+    JavaSource.androidStudio =>
+      'This is the JDK bundled with the latest Android Studio installation on this machine.',
+    JavaSource.javaHome =>
+      'This JDK is specified by the JAVA_HOME environment variable.',
+    JavaSource.path =>
+      'This JDK was found in the system PATH.',
+    JavaSource.flutterConfig =>
+      'This JDK is specified in your Flutter configuration.',
+  };
+
+  return 'Java binary at: $location\n'
+  '$sourceMessagePart\n'
+  '$setWithConfigBreadcrumb';
 }

@@ -19,9 +19,9 @@ import 'message_parser.dart';
 // DateFormat.yMMMMd("en_US").format(DateTime.utc(1996, 7, 10)) results
 // in the string "July 10, 1996".
 //
-// Since the tool generates code that uses DateFormat's constructor, it is
-// necessary to verify that the constructor exists, or the
-// tool will generate code that may cause a compile-time error.
+// Since the tool generates code that uses DateFormat's constructor and its
+// add_* methods, it is necessary to verify that the constructor/method exists,
+// or the tool will generate code that may cause a compile-time error.
 //
 // See also:
 //
@@ -71,6 +71,8 @@ const Set<String> validDateFormats = <String>{
   'ms',
   's',
 };
+
+const String _dateFormatPartsDelimiter = '+';
 
 // The set of number formats that can be automatically localized.
 //
@@ -252,7 +254,9 @@ class Placeholder {
   bool get requiresNumFormatting => <String>['int', 'num', 'double'].contains(type) && format != null;
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
-  bool get hasValidDateFormat => validDateFormats.contains(format);
+  // 'format' can contain a number of date time formats separated by `dateFormatPartsDelimiter`.
+  List<String> get dateFormatParts => format?.split(_dateFormatPartsDelimiter) ?? <String>[];
+  bool get hasValidDateFormat => dateFormatParts.every(validDateFormats.contains);
 
   static String? _stringAttribute(
     String resourceId,
@@ -635,7 +639,7 @@ class AppResourceBundle {
                 'The locale specified in @@locale and the arb filename do not match. \n'
                 'Please make sure that they match, since this prevents any confusion \n'
                 'with which locale to use. Otherwise, specify the locale in either the \n'
-                'filename of the @@locale key only.\n'
+                'filename or the @@locale key only.\n'
                 'Current @@locale value: $localeString\n'
                 'Current filename extension: $parserLocaleString'
               );
