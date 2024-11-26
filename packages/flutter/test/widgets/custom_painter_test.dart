@@ -356,6 +356,7 @@ void _defineTests() {
     final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
       ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
+      // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/159515.
       ..removeWhere((SemanticsAction action) => action.index == 1 << 23);
 
     const int expectedId = 2;
@@ -378,6 +379,8 @@ void _defineTests() {
     // Do the actions work?
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     int expectedLength = 1;
+    // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/159515.
+    // ignore: exhaustive_cases
     for (final SemanticsAction action in allActions) {
       switch (action) {
         case SemanticsAction.moveCursorBackwardByCharacter:
