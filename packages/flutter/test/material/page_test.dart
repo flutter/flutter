@@ -663,7 +663,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == '/') {
             return PageRouteBuilder<void>(
-              pageBuilder: (_, __, ___) {
+              pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
                 return Scaffold(
                   appBar: AppBar(
                     title: const Text('Page 1'),
@@ -674,7 +674,7 @@ void main() {
             );
           }
           return MaterialPageRoute<void>(
-            builder: (_) {
+            builder: (BuildContext context) {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Page 2'),

@@ -2698,7 +2698,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == '/') {
             return PageRouteBuilder<void>(
-              pageBuilder: (_, __, ___) {
+              pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
                 return CupertinoPageScaffold(
                   navigationBar: const CupertinoNavigationBar(
                     middle: Text('Page 1'),
@@ -2709,7 +2709,7 @@ void main() {
             );
           }
           return CupertinoPageRoute<void>(
-            builder: (_) {
+            builder: (BuildContext context) {
               return CupertinoPageScaffold(
                 navigationBar: const CupertinoNavigationBar(
                   middle: Text('Page 2'),
