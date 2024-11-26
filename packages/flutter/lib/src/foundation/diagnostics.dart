@@ -8,6 +8,7 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
+import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' show clampDouble;
 
@@ -1430,7 +1431,7 @@ typedef _JsonDiagnosticsNode = Map<String, Object?>;
 /// Using a stack is required to process the widget tree iteratively instead of
 /// recursively.
 typedef _NodesToJsonifyStack
-    = List<(DiagnosticsNode, void Function(_JsonDiagnosticsNode))>;
+    = ListQueue<(DiagnosticsNode, void Function(_JsonDiagnosticsNode))>;
 
 /// Defines diagnostics data for a [value].
 ///
@@ -1674,9 +1675,10 @@ abstract class DiagnosticsNode {
   /// See https://github.com/flutter/devtools/issues/8553 for details about this
   /// iterative approach.
   Map<String, Object?> toJsonMapIterative(
-      DiagnosticsSerializationDelegate delegate) {
+    DiagnosticsSerializationDelegate delegate,
+  ) {
     final _NodesToJsonifyStack childrenToJsonify =
-        <(DiagnosticsNode, void Function(_JsonDiagnosticsNode))>[];
+        ListQueue<(DiagnosticsNode, void Function(_JsonDiagnosticsNode))>();
     _JsonDiagnosticsNode result = <String, Object?>{};
     assert(() {
       result = _toJson(
@@ -1712,7 +1714,8 @@ abstract class DiagnosticsNode {
       nodes.add(DiagnosticsNode.message('...'));
       truncated = true;
     }
-    final List<Map<String, Object?>> json = nodes.map<Map<String, Object?>>((DiagnosticsNode node) {
+    final List<_JsonDiagnosticsNode> json =
+        nodes.map<_JsonDiagnosticsNode>((DiagnosticsNode node) {
       return node.toJsonMap(delegate.delegateForNode(node));
     }).toList();
     if (truncated) {
@@ -1836,7 +1839,7 @@ abstract class DiagnosticsNode {
       final (
         DiagnosticsNode nextNode,
         void Function(_JsonDiagnosticsNode) callback
-      ) = toJsonify.removeAt(0);
+      ) = toJsonify.removeFirst();
       final _JsonDiagnosticsNode nodeAsJson = nextNode._toJson(
         delegate,
         childrenToJsonify: toJsonify,
@@ -1854,7 +1857,7 @@ abstract class DiagnosticsNode {
     final bool includeChildren =
         getChildren().isNotEmpty && delegate.subtreeDepth > 0;
 
-    // Collect the children nodes to convert to JSON later:
+    // Collect the children nodes to convert to JSON later.
     bool truncated = false;
     if (includeChildren) {
       List<DiagnosticsNode> childrenNodes =
