@@ -908,7 +908,6 @@ class Image extends StatefulWidget {
   ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
   final BlendMode? colorBlendMode;
 
-
   /// How to inscribe the image into the space allocated during layout.
   ///
   /// The default varies based on the other fields. See the discussion at
@@ -1291,9 +1290,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     }
 
     late Widget result;
-    if (_imageInfo is WebImageInfo) {
+    if (_imageInfo case final WebImageInfo webImage) {
       result = RawWebImage(
-        image: _imageInfo as WebImageInfo?,
+        image: webImage,
         debugImageLabel: _imageInfo?.debugLabel,
         width: widget.width,
         height: widget.height,

@@ -20,8 +20,8 @@ class RawWebImage extends StatelessWidget {
     this.matchTextDirection = false,
   });
 
-  /// The underlying `<img>` tag to be displayed.
-  final WebImageInfo? image;
+  /// The underlying `<img>` element to be displayed.
+  final WebImageInfo image;
 
   /// A debug label explaining the image.
   final String? debugImageLabel;
@@ -43,6 +43,6 @@ class RawWebImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    throw StateError('It is impossible to instantiate a RawWebImage when not running on the web');
+    throw UnsupportedError('It is impossible to instantiate a RawWebImage when not running on the web');
   }
 }

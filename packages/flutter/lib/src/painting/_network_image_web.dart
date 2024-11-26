@@ -14,38 +14,44 @@ import '_web_image_info_web.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
-/// Creates a type for an overridable factory function for testing purposes.
+/// The type for an overridable factory function for creating an HTTP request,
+/// used for testing purposes.
 typedef HttpRequestFactory = web.XMLHttpRequest Function();
 
-/// Creates a type for an overridable factory function for creating <img>
-/// elements for testing purposes.
+/// The type for an overridable factory function for creating <img> elements,
+/// used for testing purposes.
 typedef ImgElementFactory = web.HTMLImageElement Function();
 
 // Method signature for _loadAsync decode callbacks.
 typedef _SimpleDecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer);
 
-/// Default HTTP client.
+/// The default HTTP client.
 web.XMLHttpRequest _httpClient() {
   return web.XMLHttpRequest();
 }
 
 /// Creates an overridable factory function.
+@visibleForTesting
 HttpRequestFactory httpRequestFactory = _httpClient;
 
-/// Restores to the default HTTP request factory.
+/// Restores the default HTTP request factory.
+@visibleForTesting
 void debugRestoreHttpRequestFactory() {
   httpRequestFactory = _httpClient;
 }
 
-/// Default <img> element factory.
+/// The default <img> element factory.
 web.HTMLImageElement _imgElementFactory() {
   return web.document.createElement('img') as web.HTMLImageElement;
 }
 
-/// Creates an overridable factory function to create an <img> element.
+/// The factory function that creates <img> elements, can be overridden for
+/// tests.
+@visibleForTesting
 ImgElementFactory imgElementFactory = _imgElementFactory;
 
-/// Restores to the default <img> element factory.
+/// Restores the default <img> element factory.
+@visibleForTesting
 void debugRestoreImgElementFactory() {
   imgElementFactory = _imgElementFactory;
 }
@@ -158,7 +164,7 @@ class NetworkImage
           chunkEvents.add(ImageChunkEvent(
               cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
         },
-      ).then((ui.Codec codec) => ImageFrameIterator.fromCodec(codec));
+      ).then(ImageFrameIterator.fromCodec);
     }
   }
 
@@ -201,8 +207,14 @@ class NetworkImage
       }
     }.toJS);
 
-    request.addEventListener('error',
-        ((JSObject e) => completer.completeError(e)).toJS);
+    request.addEventListener(
+      'error',
+      ((JSObject e) =>
+          completer.completeError(image_provider.NetworkImageLoadException(
+            statusCode: request.status,
+            uri: resolved,
+          ))).toJS,
+    );
 
     request.send();
 
@@ -216,7 +228,7 @@ class NetworkImage
     }
 
     return decode(await ui.ImmutableBuffer.fromUint8List(bytes))
-        .then((ui.Codec codec) => ImageFrameIterator.fromCodec(codec));
+        .then(ImageFrameIterator.fromCodec);
   }
 
   @override

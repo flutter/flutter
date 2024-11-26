@@ -69,7 +69,14 @@ void runTests() {
     );
 
     await tester.pumpWidget(image);
-    expect((tester.takeException() as web.ProgressEvent).type, 'test error');
+    expect(
+      tester.takeException(),
+      isA<NetworkImageLoadException>().having(
+        (NetworkImageLoadException e) => e.statusCode,
+        'status code',
+        404,
+      ),
+    );
   });
 
   testWidgets('loads an image from the network with empty response',

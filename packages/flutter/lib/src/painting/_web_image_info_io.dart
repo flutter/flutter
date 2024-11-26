@@ -11,33 +11,30 @@ import 'image_stream.dart';
 ///
 /// This occurs on the web when the image resource is from a different origin
 /// and is not configured for CORS. Since the image bytes cannot be directly
-/// fetched, Flutter cannot create a [ui.Image] for it. However, the image can
+/// fetched, [ui.Image]s cannot be created from it. However, the image can
 /// still be displayed if an <img> element is used.
 class WebImageInfo implements ImageInfo {
   @override
-  ImageInfo clone() {
+  ImageInfo clone() =>
     throw UnsupportedError(
         'WebImageInfo should never be instantiated in a non-web context.');
-  }
 
   @override
   String? get debugLabel => throw UnsupportedError(
       'WebImageInfo should never be instantiated in a non-web context.');
 
   @override
-  void dispose() {
+  void dispose() =>
     throw UnsupportedError(
         'WebImageInfo should never be instantiated in a non-web context.');
-  }
 
   @override
   ui.Image get image => throw UnsupportedError(
       'WebImageInfo should never be instantiated in a non-web context.');
 
   @override
-  bool isCloneOf(ImageInfo other) {
-    throw UnimplementedError();
-  }
+  bool isCloneOf(ImageInfo other) => throw UnsupportedError(
+      'WebImageInfo should never be instantiated in a non-web context.');
 
   @override
   double get scale => throw UnsupportedError(

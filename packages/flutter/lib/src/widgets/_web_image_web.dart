@@ -68,10 +68,10 @@ class RawWebImage extends SingleChildRenderObjectWidget {
     this.fit,
     this.alignment = Alignment.center,
     this.matchTextDirection = false,
-  }) : super(child: ImgElementPlatformView(image?.htmlImage.src));
+  }) : super(child: ImgElementPlatformView(image.htmlImage.src));
 
-  /// The underlying `<img>` tag to be displayed.
-  final WebImageInfo? image;
+  /// The underlying `<img>` element to be displayed.
+  final WebImageInfo image;
 
   /// A debug label explaining the image.
   final String? debugImageLabel;
@@ -94,7 +94,7 @@ class RawWebImage extends SingleChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderWebImage(
-      image: image?.htmlImage,
+      image: image.htmlImage,
       width: width,
       height: height,
       fit: fit,
@@ -109,7 +109,7 @@ class RawWebImage extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderWebImage renderObject) {
     renderObject
-      ..image = image?.htmlImage
+      ..image = image.htmlImage
       ..width = width
       ..height = height
       ..fit = fit
@@ -126,7 +126,7 @@ class RenderWebImage extends RenderShiftedBox {
   /// Creates a new [RenderWebImage].
   RenderWebImage({
     RenderBox? child,
-    required web.HTMLImageElement? image,
+    required web.HTMLImageElement image,
     double? width,
     double? height,
     BoxFit? fit,
@@ -200,19 +200,19 @@ class RenderWebImage extends RenderShiftedBox {
   }
 
   /// The image to display.
-  web.HTMLImageElement? get image => _image;
-  web.HTMLImageElement? _image;
-  set image(web.HTMLImageElement? value) {
+  web.HTMLImageElement get image => _image;
+  web.HTMLImageElement _image;
+  set image(web.HTMLImageElement value) {
     if (value == _image) {
       return;
     }
     // If we get a clone of our image, it's the same underlying native data -
     // return early.
-    if (value != null && _image != null && value.src == _image!.src) {
+    if (value.src == _image.src) {
       return;
     }
-    final bool sizeChanged = _image?.naturalWidth != value?.naturalWidth ||
-        _image?.naturalHeight != value?.naturalHeight;
+    final bool sizeChanged = _image.naturalWidth != value.naturalWidth ||
+        _image.naturalHeight != value.naturalHeight;
     _image = value;
     markNeedsPaint();
     if (sizeChanged && (_width == null || _height == null)) {
@@ -291,13 +291,9 @@ class RenderWebImage extends RenderShiftedBox {
       height: _height,
     ).enforce(constraints);
 
-    if (_image == null) {
-      return constraints.smallest;
-    }
-
     return constraints.constrainSizeAndAttemptToPreserveAspectRatio(Size(
-      _image!.naturalWidth.toDouble(),
-      _image!.naturalHeight.toDouble(),
+      _image.naturalWidth.toDouble(),
+      _image.naturalHeight.toDouble(),
     ));
   }
 
@@ -350,29 +346,28 @@ class RenderWebImage extends RenderShiftedBox {
     assert(_resolvedAlignment != null);
     assert(_flipHorizontally != null);
     size = _sizeForConstraints(constraints);
-    if (child != null) {
-      if (image != null) {
-        final Size inputSize =
-            Size(image!.naturalWidth.toDouble(), image!.naturalHeight.toDouble());
-        fit ??= BoxFit.scaleDown;
-        final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize, size);
-        final Size childSize = fittedSizes.destination;
-        child!.layout(BoxConstraints.tight(childSize));
-        final double halfWidthDelta = (size.width - childSize.width) / 2.0;
-        final double halfHeightDelta = (size.height - childSize.height) / 2.0;
-        final double dx = halfWidthDelta +
-            (_flipHorizontally!
-                    ? -_resolvedAlignment!.x
-                    : _resolvedAlignment!.x) *
-                halfWidthDelta;
-        final double dy =
-            halfHeightDelta + _resolvedAlignment!.y * halfHeightDelta;
-        final BoxParentData childParentData = child!.parentData! as BoxParentData;
-        childParentData.offset = Offset(dx, dy);
-      } else {
-        child!.layout(BoxConstraints.tight(size));
-      }
+
+    if (child == null) {
+      return;
     }
+
+    final Size inputSize =
+        Size(image.naturalWidth.toDouble(), image.naturalHeight.toDouble());
+    fit ??= BoxFit.scaleDown;
+    final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize, size);
+    final Size childSize = fittedSizes.destination;
+    child!.layout(BoxConstraints.tight(childSize));
+    final double halfWidthDelta = (size.width - childSize.width) / 2.0;
+    final double halfHeightDelta = (size.height - childSize.height) / 2.0;
+    final double dx = halfWidthDelta +
+        (_flipHorizontally!
+                ? -_resolvedAlignment!.x
+                : _resolvedAlignment!.x) *
+            halfWidthDelta;
+    final double dy =
+        halfHeightDelta + _resolvedAlignment!.y * halfHeightDelta;
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    childParentData.offset = Offset(dx, dy);
   }
 
   @override

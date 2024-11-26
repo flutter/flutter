@@ -914,7 +914,7 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
 /// An iterator which iterates over the frames of an image.
 abstract class ImageFrameIterator {
   /// A default constructor to allow for subclasses.
-  ImageFrameIterator();
+  const ImageFrameIterator();
 
   /// Creates an [ImageFrameIterator] from a [ui.Codec].
   factory ImageFrameIterator.fromCodec(ui.Codec codec) = _CodecImageFrameIterator;
@@ -935,12 +935,14 @@ abstract class ImageFrameIterator {
 /// A single frame of an image.
 abstract class ImageFrame {
   /// The duration this frame should be shown.
+  ///
+  /// A zero duration indicates that the frame should be shown indefinitely.
   Duration get duration;
 
   /// Converts the frame into an [ImageInfo] object.
   ImageInfo asImageInfo({required double scale, String? debugLabel});
 
-  /// Releases the image resource underlying this frame.
+  /// Releases the image resource for this frame.
   void dispose();
 }
 
@@ -980,11 +982,7 @@ class _CodecImageFrameIterator extends ImageFrameIterator {
   int get repetitionCount => codec.repetitionCount;
 
   @override
-  Future<ImageFrame> getNextFrame() => codec.getNextFrame().then(_convertToImageFrame);
-
-  ImageFrame _convertToImageFrame(ui.FrameInfo frameInfo) {
-    return _FrameInfoFrame(frameInfo);
-  }
+  Future<ImageFrame> getNextFrame() => codec.getNextFrame().then(_FrameInfoFrame.new);
 }
 
 /// Manages the decoding and scheduling of image frames.
@@ -1044,8 +1042,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
   }) : this.fromIterator(
-          iterator: codec.then<ImageFrameIterator>(
-              (ui.Codec codec) => ImageFrameIterator.fromCodec(codec)),
+          iterator: codec.then<ImageFrameIterator>(ImageFrameIterator.fromCodec),
           scale: scale,
           debugLabel: debugLabel,
           chunkEvents: chunkEvents,
@@ -1172,7 +1169,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       }
       // This is not an animated image, just return it and don't schedule more
       // frames.
-      _emitFrame(_nextFrame!.asImageInfo(scale: _scale, debugLabel: debugLabel,));
+      _emitFrame(_nextFrame!.asImageInfo(scale: _scale, debugLabel: debugLabel));
       _nextFrame!.dispose();
       _nextFrame = null;
       return;
