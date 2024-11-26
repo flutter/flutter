@@ -233,6 +233,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
+  // Keep in sync with the [TestCommand.webRenderer] getter.
   WebRendererMode get webRenderer {
     final List<String> dartDefines = extractDartDefines(
       defineConfigJsonMap: extractDartDefineConfigJsonMap()

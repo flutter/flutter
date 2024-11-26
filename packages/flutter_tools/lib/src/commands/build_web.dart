@@ -144,6 +144,7 @@ class BuildWebCommand extends BuildSubCommand {
       defineConfigJsonMap: extractDartDefineConfigJsonMap()
     );
     final bool useWasm = boolArg(FlutterOptions.kWebWasmFlag);
+    // See also: RunCommandBase.webRenderer and TestCommand.webRenderer.
     final WebRendererMode webRenderer = WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
 
     final bool sourceMaps = boolArg('source-maps');
