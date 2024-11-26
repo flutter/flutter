@@ -38,8 +38,8 @@ TEST_P(PipelineLibraryGLESTest, ProgramHandlesAreReused) {
   // The program handles should be live and equal.
   ASSERT_FALSE(pipeline_gles.GetProgramHandle().IsDead());
   ASSERT_FALSE(new_pipeline_gles.GetProgramHandle().IsDead());
-  ASSERT_EQ(pipeline_gles.GetProgramHandle().name.value(),
-            new_pipeline_gles.GetProgramHandle().name.value());
+  ASSERT_EQ(pipeline_gles.GetProgramHandle().GetName().value(),
+            new_pipeline_gles.GetProgramHandle().GetName().value());
 }
 
 TEST_P(PipelineLibraryGLESTest, ChangingSpecConstantsCausesNewProgramObject) {
@@ -63,8 +63,8 @@ TEST_P(PipelineLibraryGLESTest, ChangingSpecConstantsCausesNewProgramObject) {
   // The program handles should be live and equal.
   ASSERT_FALSE(pipeline_gles.GetProgramHandle().IsDead());
   ASSERT_FALSE(new_pipeline_gles.GetProgramHandle().IsDead());
-  ASSERT_FALSE(pipeline_gles.GetProgramHandle().name.value() ==
-               new_pipeline_gles.GetProgramHandle().name.value());
+  ASSERT_FALSE(pipeline_gles.GetProgramHandle().GetName().value() ==
+               new_pipeline_gles.GetProgramHandle().GetName().value());
 }
 // NOLINTEND(bugprone-unchecked-optional-access)
 

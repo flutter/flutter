@@ -84,7 +84,7 @@ ReactorGLES::~ReactorGLES() {
   if (CanReactOnCurrentThread()) {
     for (auto& handle : handles_) {
       if (handle.second.name.has_value()) {
-        CollectGLHandle(*proc_table_, handle.first.type,
+        CollectGLHandle(*proc_table_, handle.first.GetType(),
                         handle.second.name.value());
       }
     }
@@ -145,7 +145,7 @@ std::optional<ReactorGLES::GLStorage> ReactorGLES::GetHandle(
 }
 
 std::optional<GLuint> ReactorGLES::GetGLHandle(const HandleGLES& handle) const {
-  if (handle.type == HandleType::kFence) {
+  if (handle.GetType() == HandleType::kFence) {
     return std::nullopt;
   }
   std::optional<ReactorGLES::GLStorage> gl_handle = GetHandle(handle);
@@ -156,7 +156,7 @@ std::optional<GLuint> ReactorGLES::GetGLHandle(const HandleGLES& handle) const {
 }
 
 std::optional<GLsync> ReactorGLES::GetGLFence(const HandleGLES& handle) const {
-  if (handle.type != HandleType::kFence) {
+  if (handle.GetType() != HandleType::kFence) {
     return std::nullopt;
   }
   std::optional<ReactorGLES::GLStorage> gl_handle = GetHandle(handle);
@@ -287,7 +287,7 @@ bool ReactorGLES::ConsolidateHandles() {
       }
       // Create live handles.
       if (!handle.second.name.has_value()) {
-        auto gl_handle = CreateGLHandle(gl, handle.first.type);
+        auto gl_handle = CreateGLHandle(gl, handle.first.GetType());
         if (!gl_handle) {
           VALIDATION_LOG << "Could not create GL handle.";
           return false;
@@ -296,9 +296,9 @@ bool ReactorGLES::ConsolidateHandles() {
       }
       // Set pending debug labels.
       if (handle.second.pending_debug_label.has_value() &&
-          handle.first.type != HandleType::kFence) {
+          handle.first.GetType() != HandleType::kFence) {
         handles_to_name.emplace_back(std::make_tuple(
-            ToDebugResourceType(handle.first.type),
+            ToDebugResourceType(handle.first.GetType()),
             handle.second.name.value().handle,
             std::move(handle.second.pending_debug_label.value())));
         handle.second.pending_debug_label = std::nullopt;
@@ -318,7 +318,7 @@ bool ReactorGLES::ConsolidateHandles() {
     // This could be false if the handle was created and collected without
     // use. We still need to get rid of map entry.
     if (storage.has_value()) {
-      CollectGLHandle(gl, std::get<0>(handle).type, storage.value());
+      CollectGLHandle(gl, std::get<0>(handle).GetType(), storage.value());
     }
   }
 

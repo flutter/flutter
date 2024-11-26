@@ -278,7 +278,7 @@ class ReactorGLES {
 
   // Make sure the container is one where erasing items during iteration doesn't
   // invalidate other iterators.
-  using LiveHandles = std::unordered_map<HandleGLES,
+  using LiveHandles = std::unordered_map<const HandleGLES,
                                          LiveHandle,
                                          HandleGLES::Hash,
                                          HandleGLES::Equal>;

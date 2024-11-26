@@ -159,7 +159,7 @@ std::shared_ptr<TextureGLES> TextureGLES::WrapTexture(
     VALIDATION_LOG << "Cannot wrap a dead handle.";
     return nullptr;
   }
-  if (external_handle.type != HandleType::kTexture) {
+  if (external_handle.GetType() != HandleType::kTexture) {
     VALIDATION_LOG << "Cannot wrap a non-texture handle.";
     return nullptr;
   }
