@@ -29,7 +29,7 @@ void testMain() {
   });
 
   // This must match the number of actions in lib/ui/semantics.dart
-  const int numSemanticsActions = 24;
+  const int numSemanticsActions = 23;
   test('SemanticsAction.values refers to all actions.', () async {
     expect(SemanticsAction.values.length, equals(numSemanticsActions));
     for (int index = 0; index < numSemanticsActions; ++index) {

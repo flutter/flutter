@@ -164,9 +164,6 @@ typedef enum {
   kFlutterSemanticsActionSetText = 1 << 21,
   /// Request that the respective focusable widget gain input focus.
   kFlutterSemanticsActionFocus = 1 << 22,
-  /// Request that scrolls the current scrollable container to a given scroll
-  /// offset.
-  kFlutterSemanticsActionScrollToOffset = 1 << 23,
 } FlutterSemanticsAction;
 
 /// The set of properties that may be associated with a semantics node.
