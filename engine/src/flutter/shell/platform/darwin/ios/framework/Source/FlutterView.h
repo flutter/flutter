@@ -14,10 +14,11 @@
 @protocol FlutterViewEngineDelegate <NSObject>
 
 @property(nonatomic, readonly) BOOL isUsingImpeller;
-@property(nonatomic, readonly) FlutterPlatformViewsController* platformViewsController;
 
 - (flutter::Rasterizer::Screenshot)takeScreenshot:(flutter::Rasterizer::ScreenshotType)type
                                   asBase64Encoded:(BOOL)base64Encode;
+
+- (std::shared_ptr<flutter::PlatformViewsController>&)platformViewsController;
 
 /**
  * A callback that is called when iOS queries accessibility information of the Flutter view.

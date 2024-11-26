@@ -518,7 +518,8 @@ static BOOL _preparedOnce = NO;
 
 @implementation FlutterTouchInterceptingView
 - (instancetype)initWithEmbeddedView:(UIView*)embeddedView
-             platformViewsController:(FlutterPlatformViewsController*)platformViewsController
+             platformViewsController:
+                 (fml::WeakPtr<flutter::PlatformViewsController>)platformViewsController
     gestureRecognizersBlockingPolicy:
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)blockingPolicy {
   self = [super initWithFrame:embeddedView.frame];
@@ -666,7 +667,7 @@ static BOOL _preparedOnce = NO;
   // outlives the FlutterViewController. And ForwardingGestureRecognizer is owned by a subview of
   // FlutterView, so the ForwardingGestureRecognizer never out lives FlutterViewController.
   // Therefore, `_platformViewsController` should never be nullptr.
-  __weak FlutterPlatformViewsController* _platformViewsController;
+  fml::WeakPtr<flutter::PlatformViewsController> _platformViewsController;
   // Counting the pointers that has started in one touch sequence.
   NSInteger _currentTouchPointersCount;
   // We can't dispatch events to the framework without this back pointer.
@@ -677,12 +678,13 @@ static BOOL _preparedOnce = NO;
 }
 
 - (instancetype)initWithTarget:(id)target
-       platformViewsController:(FlutterPlatformViewsController*)platformViewsController {
+       platformViewsController:
+           (fml::WeakPtr<flutter::PlatformViewsController>)platformViewsController {
   self = [super initWithTarget:target action:nil];
   if (self) {
     self.delegate = self;
-    FML_DCHECK(platformViewsController);
-    _platformViewsController = platformViewsController;
+    FML_DCHECK(platformViewsController.get() != nullptr);
+    _platformViewsController = std::move(platformViewsController);
     _currentTouchPointersCount = 0;
   }
   return self;
@@ -690,7 +692,7 @@ static BOOL _preparedOnce = NO;
 
 - (ForwardingGestureRecognizer*)recreateRecognizerWithTarget:(id)target {
   return [[ForwardingGestureRecognizer alloc] initWithTarget:target
-                                     platformViewsController:_platformViewsController];
+                                     platformViewsController:std::move(_platformViewsController)];
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
@@ -699,7 +701,7 @@ static BOOL _preparedOnce = NO;
     // At the start of each gesture sequence, we reset the `_flutterViewController`,
     // so that all the touch events in the same sequence are forwarded to the same
     // `_flutterViewController`.
-    _flutterViewController = _platformViewsController.flutterViewController;
+    _flutterViewController = _platformViewsController->GetFlutterViewController();
   }
   [_flutterViewController touchesBegan:touches withEvent:event];
   _currentTouchPointersCount += touches.count;

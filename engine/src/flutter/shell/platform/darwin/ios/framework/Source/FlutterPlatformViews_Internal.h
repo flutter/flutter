@@ -6,20 +6,20 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
+#include "fml/task_runner.h"
+#include "impeller/base/thread_safety.h"
+#include "third_party/skia/include/core/SkRect.h"
 
 #include <Metal/Metal.h>
 
 #include "flutter/flow/surface.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/impeller/base/thread_safety.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
-#include "flutter/shell/platform/darwin/ios/ios_context.h"
-#include "third_party/skia/include/core/SkRect.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/platform_views_controller.h"
+#import "flutter/shell/platform/darwin/ios/ios_context.h"
 
 // A UIView that acts as a clipping mask for the |ChildClippingView|.
 //
@@ -134,7 +134,8 @@
 // 2. Dispatching all events that are hittested to the embedded view to the FlutterView.
 @interface FlutterTouchInterceptingView : UIView
 - (instancetype)initWithEmbeddedView:(UIView*)embeddedView
-             platformViewsController:(FlutterPlatformViewsController*)platformViewsController
+             platformViewsController:
+                 (fml::WeakPtr<flutter::PlatformViewsController>)platformViewsController
     gestureRecognizersBlockingPolicy:
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)blockingPolicy;
 
@@ -191,7 +192,8 @@
 // directly to the FlutterView.
 @interface ForwardingGestureRecognizer : UIGestureRecognizer <UIGestureRecognizerDelegate>
 - (instancetype)initWithTarget:(id)target
-       platformViewsController:(FlutterPlatformViewsController*)platformViewsController;
+       platformViewsController:
+           (fml::WeakPtr<flutter::PlatformViewsController>)platformViewsController;
 - (ForwardingGestureRecognizer*)recreateRecognizerWithTarget:(id)target;
 @end
 

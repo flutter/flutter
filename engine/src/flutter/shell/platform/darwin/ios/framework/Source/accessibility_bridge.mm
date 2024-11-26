@@ -42,11 +42,11 @@ class DefaultIosDelegate : public AccessibilityBridge::IosDelegate {
 AccessibilityBridge::AccessibilityBridge(
     FlutterViewController* view_controller,
     PlatformViewIOS* platform_view,
-    __weak FlutterPlatformViewsController* platform_views_controller,
+    std::shared_ptr<PlatformViewsController> platform_views_controller,
     std::unique_ptr<IosDelegate> ios_delegate)
     : view_controller_(view_controller),
       platform_view_(platform_view),
-      platform_views_controller_(platform_views_controller),
+      platform_views_controller_(std::move(platform_views_controller)),
       last_focused_semantics_object_id_(kSemanticObjectIdInvalid),
       objects_([[NSMutableDictionary alloc] init]),
       previous_routes_({}),
@@ -271,13 +271,11 @@ static SemanticsObject* CreateObject(const flutter::SemanticsNode& node,
   } else if (node.HasFlag(flutter::SemanticsFlags::kHasImplicitScrolling)) {
     return [[FlutterScrollableSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
   } else if (node.IsPlatformViewNode()) {
-    FlutterPlatformViewsController* platformViewsController =
-        weak_ptr->GetPlatformViewsController();
-    FlutterTouchInterceptingView* touchInterceptingView =
-        [platformViewsController flutterTouchInterceptingViewForId:node.platformViewId];
-    return [[FlutterPlatformViewSemanticsContainer alloc] initWithBridge:weak_ptr
-                                                                     uid:node.id
-                                                            platformView:touchInterceptingView];
+    return [[FlutterPlatformViewSemanticsContainer alloc]
+        initWithBridge:weak_ptr
+                   uid:node.id
+          platformView:weak_ptr->GetPlatformViewsController()->GetFlutterTouchInterceptingViewByID(
+                           node.platformViewId)];
   } else {
     return [[FlutterSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
   }
