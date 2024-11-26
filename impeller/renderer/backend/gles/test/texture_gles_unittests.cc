@@ -44,7 +44,7 @@ TEST_P(TextureGLESTest, CanSetSyncFence) {
   if (!sync_fence.has_value()) {
     return;
   }
-  EXPECT_EQ(sync_fence.value().type, HandleType::kFence);
+  EXPECT_EQ(sync_fence.value().GetType(), HandleType::kFence);
 
   std::optional<GLsync> sync =
       context_gles.GetReactor()->GetGLFence(sync_fence.value());
