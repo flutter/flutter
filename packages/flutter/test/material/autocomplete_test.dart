@@ -598,7 +598,7 @@ void main() {
 
     Finder optionFinder(int index) {
       return find.ancestor(matching: find.byType(Container), of: find.text(kOptions.elementAt(index)));
-    };
+    }
 
     expect(optionFinder(0), findsOneWidget);
     expect(optionFinder(kOptions.length - 1), findsNothing);
