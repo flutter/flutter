@@ -127,7 +127,6 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
 
     fml::TaskQueueId ui_task_queue_id =
         task_runners_.GetUITaskRunner()->GetTaskQueueId();
-
     task_runners_.GetUITaskRunner()->PostTask(
         [ui_task_queue_id, callback, flow_identifier, frame_start_time,
          frame_target_time, pause_secondary_tasks]() {
