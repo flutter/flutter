@@ -17253,7 +17253,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    skip: kIsWeb, // [intended]
+  );
 }
 
 class UnsettableController extends TextEditingController {

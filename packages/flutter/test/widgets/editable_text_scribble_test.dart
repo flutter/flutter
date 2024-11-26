@@ -736,5 +736,8 @@ void main() {
     expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
 
     await tester.testTextInput.finishScribbleInteraction();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    skip: kIsWeb, // [intended]
+  );
 }
