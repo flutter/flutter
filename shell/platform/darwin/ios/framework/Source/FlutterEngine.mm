@@ -105,6 +105,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 @property(nonatomic, readonly, assign) BOOL allowHeadlessExecution;
 @property(nonatomic, readonly, assign) BOOL restorationEnabled;
 
+@property(nonatomic, strong) FlutterPlatformViewsController* platformViewsController;
+
 // Maintains a dictionary of plugin names that have registered with the engine.  Used by
 // FlutterEngineRegistrar to implement a FlutterPluginRegistrar.
 @property(nonatomic, readonly) NSMutableDictionary* pluginPublications;
@@ -150,7 +152,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   std::shared_ptr<flutter::ThreadHost> _threadHost;
   std::unique_ptr<flutter::Shell> _shell;
 
-  std::shared_ptr<flutter::PlatformViewsController> _platformViewsController;
   flutter::IOSRenderingAPI _renderingApi;
   std::shared_ptr<flutter::SamplingProfiler> _profiler;
 
@@ -211,7 +212,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   _pluginPublications = [[NSMutableDictionary alloc] init];
   _registrars = [[NSMutableDictionary alloc] init];
-  [self recreatePlatformViewController];
+  [self recreatePlatformViewsController];
   _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _textureRegistry = [[FlutterTextureRegistryRelay alloc] initWithParent:self];
   _connections.reset(new flutter::ConnectionCollection());
@@ -262,9 +263,9 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                object:nil];
 }
 
-- (void)recreatePlatformViewController {
+- (void)recreatePlatformViewsController {
   _renderingApi = flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering);
-  _platformViewsController.reset(new flutter::PlatformViewsController());
+  _platformViewsController = [[FlutterPlatformViewsController alloc] init];
 }
 
 - (flutter::IOSRenderingAPI)platformViewsRenderingAPI {
@@ -452,11 +453,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _shell.reset();
   _profiler.reset();
   _threadHost.reset();
-  _platformViewsController.reset();
-}
-
-- (std::shared_ptr<flutter::PlatformViewsController>&)platformViewsController {
-  return _platformViewsController;
+  _platformViewsController = nil;
 }
 
 - (NSURL*)observatoryUrl {
@@ -635,7 +632,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     [self.platformViewsChannel
         setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
           if (weakSelf) {
-            weakSelf.platformViewsController->OnMethodCall(call, result);
+            [weakSelf.platformViewsController onMethodCall:call result:result];
           }
         }];
 
@@ -777,11 +774,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
         if (!strongSelf) {
           return std::unique_ptr<flutter::PlatformViewIOS>();
         }
-        [strongSelf recreatePlatformViewController];
-        strongSelf->_platformViewsController->SetTaskRunner(
-            shell.GetTaskRunners().GetPlatformTaskRunner());
+        [strongSelf recreatePlatformViewsController];
+        strongSelf.platformViewsController.taskRunner =
+            shell.GetTaskRunners().GetPlatformTaskRunner();
         return std::make_unique<flutter::PlatformViewIOS>(
-            shell, strongSelf->_renderingApi, strongSelf->_platformViewsController,
+            shell, strongSelf->_renderingApi, strongSelf.platformViewsController,
             shell.GetTaskRunners(), shell.GetConcurrentWorkerTaskRunner(),
             shell.GetIsGpuDisabledSyncSwitch());
       };
@@ -1103,7 +1100,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   // Have to check in the next run loop, because iOS requests the previous first responder to
   // resign before requesting the next view to become first responder.
   dispatch_async(dispatch_get_main_queue(), ^(void) {
-    long platform_view_id = self.platformViewsController->FindFirstResponderPlatformViewId();
+    long platform_view_id = [self.platformViewsController firstResponderPlatformViewId];
     if (platform_view_id == -1) {
       return;
     }
@@ -1400,11 +1397,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   // create call is synchronous.
   flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
       [result, context](flutter::Shell& shell) {
-        [result recreatePlatformViewController];
-        result->_platformViewsController->SetTaskRunner(
-            shell.GetTaskRunners().GetPlatformTaskRunner());
+        [result recreatePlatformViewsController];
+        result.platformViewsController.taskRunner = shell.GetTaskRunners().GetPlatformTaskRunner();
         return std::make_unique<flutter::PlatformViewIOS>(
-            shell, context, result->_platformViewsController, shell.GetTaskRunners());
+            shell, context, result.platformViewsController, shell.GetTaskRunners());
       };
 
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
@@ -1499,8 +1495,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                               withId:(NSString*)factoryId
     gestureRecognizersBlockingPolicy:
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizersBlockingPolicy {
-  [_flutterEngine platformViewsController]->RegisterViewFactory(factory, factoryId,
-                                                                gestureRecognizersBlockingPolicy);
+  [_flutterEngine.platformViewsController registerViewFactory:factory
+                                                       withId:factoryId
+                             gestureRecognizersBlockingPolicy:gestureRecognizersBlockingPolicy];
 }
 
 @end
