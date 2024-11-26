@@ -1225,7 +1225,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       previousPageTitle: widget.previousPageTitle,
       userMiddle: _animationController.isAnimating ? const Text('') : widget.middle,
       userTrailing: effectiveTrailing ?? widget.trailing,
-      userLargeTitle: FadeTransition(opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fadeController), child: widget.largeTitle),
+      userLargeTitle: atTop
+        ? FadeTransition(opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fadeController), child: widget.largeTitle)
+        : widget.largeTitle,
       padding: widget.padding,
       large: true,
       staticBar: false, // This one scrolls.
