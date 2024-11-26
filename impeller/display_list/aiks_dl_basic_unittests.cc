@@ -58,7 +58,7 @@ TEST_P(AiksTest, CanRenderInvertedImageWithColorFilter) {
   DlPaint paint;
   paint.setColor(DlColor::kRed());
   paint.setColorFilter(
-      DlBlendColorFilter::Make(DlColor::kYellow(), DlBlendMode::kSrcOver));
+      DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kSrcOver));
   paint.setInvertColors(true);
   auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
 
@@ -72,7 +72,7 @@ TEST_P(AiksTest, CanRenderColorFilterWithInvertColors) {
   DlPaint paint;
   paint.setColor(DlColor::kRed());
   paint.setColorFilter(
-      DlBlendColorFilter::Make(DlColor::kYellow(), DlBlendMode::kSrcOver));
+      DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kSrcOver));
   paint.setInvertColors(true);
 
   builder.DrawRect(SkRect::MakeLTRB(0, 0, 100, 100), paint);
@@ -84,7 +84,7 @@ TEST_P(AiksTest, CanRenderColorFilterWithInvertColorsDrawPaint) {
   DlPaint paint;
   paint.setColor(DlColor::kRed());
   paint.setColorFilter(
-      DlBlendColorFilter::Make(DlColor::kYellow(), DlBlendMode::kSrcOver));
+      DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kSrcOver));
   paint.setInvertColors(true);
 
   builder.DrawPaint(paint);
@@ -829,7 +829,7 @@ TEST_P(AiksTest, CanRenderClippedBackdropFilter) {
 
   DlPaint save_paint;
   auto backdrop_filter = DlImageFilter::MakeColorFilter(
-      DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kExclusion));
+      DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kExclusion));
   builder.SaveLayer(&clip_rect, &save_paint, backdrop_filter.get());
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -1513,7 +1513,7 @@ TEST_P(AiksTest, PipelineBlendSingleParameter) {
     paint.setColor(DlColor::kGreen());
     paint.setBlendMode(DlBlendMode::kSrcOver);
     paint.setImageFilter(DlImageFilter::MakeColorFilter(
-        DlBlendColorFilter::Make(DlColor::kWhite(), DlBlendMode::kDst)));
+        DlColorFilter::MakeBlend(DlColor::kWhite(), DlBlendMode::kDst)));
     builder.DrawCircle(SkPoint::Make(200, 200), 200, paint);
     builder.Restore();
   }

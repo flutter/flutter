@@ -94,7 +94,7 @@ TEST_P(AiksTest, CanRenderLinearGradientDecalWithColorFilter) {
   // Overlay the gradient with 25% green. This should appear as the entire
   // rectangle being drawn with 25% green, including the border area outside the
   // decal gradient.
-  paint.setColorFilter(DlBlendColorFilter::Make(DlColor::kGreen().withAlpha(64),
+  paint.setColorFilter(DlColorFilter::MakeBlend(DlColor::kGreen().withAlpha(64),
                                                 DlBlendMode::kSrcOver));
   paint.setColor(DlColor::kWhite());
   builder.DrawRect(SkRect::MakeXYWH(0, 0, 600, 600), paint);
