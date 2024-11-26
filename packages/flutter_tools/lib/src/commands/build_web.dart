@@ -155,8 +155,8 @@ class BuildWebCommand extends BuildSubCommand {
     }
 
     if (useWasm) {
-      if (webRenderer != WebRendererMode.getDefault(useWasm: useWasm)) {
-        throwToolExit('${webRenderer.cliName} web renderer cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');
+      if (webRenderer != WebRendererMode.getDefault(useWasm: true)) {
+        throwToolExit('Do not attempt to set a web renderer when using "--${FlutterOptions.kWebWasmFlag}"');
       }
       globals.logger.printBox(
         title: 'New feature',

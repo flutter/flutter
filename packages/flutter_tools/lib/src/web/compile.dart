@@ -11,7 +11,6 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
@@ -179,7 +178,7 @@ class WebBuilder {
 }
 
 /// Web rendering backend mode.
-enum WebRendererMode implements CliEnum {
+enum WebRendererMode {
   /// Auto detects which rendering backend to use.
   auto,
 
@@ -191,14 +190,6 @@ enum WebRendererMode implements CliEnum {
 
   /// Always use skwasm.
   skwasm;
-
-  factory WebRendererMode.fromCliOption(String? webRendererString,
-      {required bool useWasm}) {
-    if (webRendererString == null) {
-      return getDefault(useWasm: useWasm);
-    }
-    return WebRendererMode.values.byName(webRendererString);
-  }
 
   factory WebRendererMode.fromDartDefines(List<String> defines, {
     required bool useWasm,
@@ -238,10 +229,6 @@ enum WebRendererMode implements CliEnum {
       'The HTML Renderer is deprecated and will be removed. Please, stop using it.'
       '\nSee: https://docs.flutter.dev/to/web-html-renderer-deprecation';
 
-  @override
-  String get cliName => kebabCase(name);
-
-  @override
   String get helpText => switch (this) {
         auto =>
           'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',
