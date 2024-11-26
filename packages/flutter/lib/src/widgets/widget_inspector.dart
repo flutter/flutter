@@ -2958,6 +2958,9 @@ class _WidgetInspectorState extends State<WidgetInspector>
     final Rect bounds = (Offset.zero & (view.physicalSize / view.devicePixelRatio)).deflate(_kOffScreenMargin);
     if (!bounds.contains(_lastPointerLocation!)) {
       selection.clear();
+    } else {
+      // Otherwise notify DevTools of the current selection.
+      WidgetInspectorService.instance._sendInspectEvent(selection.current);
     }
   }
 
