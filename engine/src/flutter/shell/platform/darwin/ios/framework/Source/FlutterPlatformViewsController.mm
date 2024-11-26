@@ -538,10 +538,6 @@ BOOL canApplyBlurBackdrop = YES;
   return self.compositionOrder.size();
 }
 
-- (size_t)layerPoolSize {
-  return self.layerPool->size();
-}
-
 - (UIView*)platformViewForId:(int64_t)viewId {
   return [self flutterTouchInterceptingViewForId:viewId].embeddedView;
 }
