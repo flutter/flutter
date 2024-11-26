@@ -17,6 +17,7 @@ import 'base/utils.dart';
 import 'base/version.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
+import 'dart/package_map.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
@@ -226,8 +227,14 @@ class FlutterProject {
   /// The `.gitignore` file of this project.
   File get gitignoreFile => directory.childFile('.gitignore');
 
+  File get packageConfig => findPackageConfigFileOrDefault(directory);
+
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');
+
+  /// The location of the generated scaffolding project for hosting widget
+  /// previews from this project.
+  Directory get widgetPreviewScaffold => dartTool.childDirectory('widget_preview_scaffold');
 
   /// The directory containing the generated code for this project.
   Directory get generated => directory
@@ -247,6 +254,12 @@ class FlutterProject {
     _exampleDirectory(directory),
     _exampleManifest,
     FlutterManifest.empty(logger: globals.logger),
+  );
+
+  /// The generated scaffolding project for hosting widget previews from this
+  /// project.
+  FlutterProject get widgetPreviewScaffoldProject => FlutterProject.fromDirectory(
+    widgetPreviewScaffold,
   );
 
   /// True if this project is a Flutter module project.

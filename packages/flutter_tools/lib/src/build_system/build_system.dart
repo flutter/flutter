@@ -334,7 +334,7 @@ class Environment {
   /// [engineVersion] should be set to null for local engine builds.
   factory Environment({
     required Directory projectDir,
-    required String packageConfigPath,
+    required String? packageConfigPath,
     required Directory outputDir,
     required Directory cacheDir,
     required Directory flutterRootDir,
@@ -375,7 +375,7 @@ class Environment {
     return Environment._(
       outputDir: outputDir,
       projectDir: projectDir,
-      packageConfigPath: packageConfigPath,
+      packageConfigPath: packageConfigPath ?? '.dart_tool/package_config.json',
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
       cacheDir: cacheDir,
