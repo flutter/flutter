@@ -280,7 +280,7 @@ void main() {
         WidgetState.disabled:               Colors.blueGrey,
         ~WidgetState.disabled:              Colors.black,
       },
-    ).withObserver(observer); // ignore: invalid_use_of_do_not_submit_member
+    ).debugObserveWith(observer);
 
     // Adding the observer should not call its closure.
     expect(selectedConstraint ?? resolvedColor, isNull);

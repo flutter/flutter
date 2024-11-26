@@ -10,7 +10,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -992,8 +991,8 @@ class WidgetStateMapper<T> with Diagnosticable implements WidgetStateProperty<T>
 
   final WidgetStateMap<T> _map;
 
-  /// Returns a copy of this [WidgetStateMapper] that invokes the provided
-  /// [onResolve] callback during its [resolve] method.
+  /// In debug mode, returns a copy of this [WidgetStateMapper] that invokes
+  /// the provided [onResolve] callback during its [resolve] method.
   ///
   /// {@tool snippet}
   ///
@@ -1020,11 +1019,15 @@ class WidgetStateMapper<T> with Diagnosticable implements WidgetStateProperty<T>
   /// );
   /// ```
   /// {@end-tool}
-  @doNotSubmit
-  WidgetStateMapper<T> withObserver(
+  WidgetStateMapper<T> debugObserveWith(
     void Function(MapEntry<WidgetStatesConstraint?, T> entry) onResolve,
   ) {
-    return _WidgetStateMapObserver<T>(_map, onResolve);
+    WidgetStateMapper<T>? result;
+    assert(() {
+      result = _WidgetStateMapObserver<T>(_map, onResolve);
+      return true;
+    }());
+    return result ?? this;
   }
 
   @override
@@ -1090,7 +1093,6 @@ class WidgetStateMapper<T> with Diagnosticable implements WidgetStateProperty<T>
 }
 
 class _WidgetStateMapObserver<T> extends WidgetStateMapper<T> {
-  @doNotSubmit
   const _WidgetStateMapObserver(super.map, this.onResolve);
 
   final void Function(MapEntry<WidgetStatesConstraint?, T> entry) onResolve;
