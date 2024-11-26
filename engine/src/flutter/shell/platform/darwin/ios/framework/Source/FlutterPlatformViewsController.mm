@@ -11,22 +11,39 @@
 #include "flutter/fml/synchronization/count_down_latch.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
-
-namespace {
 
 // The number of frames the rasterizer task runner will continue
 // to run on the platform thread after no platform view is rendered.
 //
 // Note: this is an arbitrary number.
-static const int kDefaultMergedLeaseDuration = 10;
+static constexpr int kDefaultMergedLeaseDuration = 10;
 
 static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
+
+struct LayerData {
+  SkRect rect;
+  int64_t view_id;
+  int64_t overlay_id;
+  std::shared_ptr<flutter::OverlayLayer> layer;
+};
+using LayersMap = std::unordered_map<int64_t, LayerData>;
+
+/// Each of the following structs stores part of the platform view hierarchy according to its
+/// ID.
+///
+/// This data must only be accessed on the platform thread.
+struct PlatformViewData {
+  NSObject<FlutterPlatformView>* view;
+  FlutterTouchInterceptingView* touch_interceptor;
+  UIView* root_view;
+};
 
 // Converts a SkMatrix to CATransform3D.
 //
 // Certain fields are ignored in CATransform3D since SkMatrix is 3x3 and CATransform3D is 4x4.
-CATransform3D GetCATransform3DFromSkMatrix(const SkMatrix& matrix) {
+static CATransform3D GetCATransform3DFromSkMatrix(const SkMatrix& matrix) {
   // Skia only supports 2D transform so we don't map z.
   CATransform3D transform = CATransform3DIdentity;
   transform.m11 = matrix.getScaleX();
@@ -44,13 +61,13 @@ CATransform3D GetCATransform3DFromSkMatrix(const SkMatrix& matrix) {
 // Reset the anchor of `layer` to match the transform operation from flow.
 //
 // The position of the `layer` should be unchanged after resetting the anchor.
-void ResetAnchor(CALayer* layer) {
+static void ResetAnchor(CALayer* layer) {
   // Flow uses (0, 0) to apply transform matrix so we need to match that in Quartz.
   layer.anchorPoint = CGPointZero;
   layer.position = CGPointZero;
 }
 
-CGRect GetCGRectFromSkRect(const SkRect& clipSkRect) {
+static CGRect GetCGRectFromSkRect(const SkRect& clipSkRect) {
   return CGRectMake(clipSkRect.fLeft, clipSkRect.fTop, clipSkRect.fRight - clipSkRect.fLeft,
                     clipSkRect.fBottom - clipSkRect.fTop);
 }
@@ -63,9 +80,9 @@ CGRect GetCGRectFromSkRect(const SkRect& clipSkRect) {
 //
 // `platformview_boundingrect` is the final bounding rect of the PlatformView in the coordinate
 // space where the PlatformView is displayed.
-bool ClipRectContainsPlatformViewBoundingRect(const SkRect& clip_rect,
-                                              const SkRect& platformview_boundingrect,
-                                              const SkMatrix& transform_matrix) {
+static bool ClipRectContainsPlatformViewBoundingRect(const SkRect& clip_rect,
+                                                     const SkRect& platformview_boundingrect,
+                                                     const SkMatrix& transform_matrix) {
   SkRect transformed_rect = transform_matrix.mapRect(clip_rect);
   return transformed_rect.contains(platformview_boundingrect);
 }
@@ -78,9 +95,9 @@ bool ClipRectContainsPlatformViewBoundingRect(const SkRect& clip_rect,
 //
 // `platformview_boundingrect` is the final bounding rect of the PlatformView in the coordinate
 // space where the PlatformView is displayed.
-bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
-                                               const SkRect& platformview_boundingrect,
-                                               const SkMatrix& transform_matrix) {
+static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
+                                                      const SkRect& platformview_boundingrect,
+                                                      const SkMatrix& transform_matrix) {
   SkVector upper_left = clip_rrect.radii(SkRRect::Corner::kUpperLeft_Corner);
   SkVector upper_right = clip_rrect.radii(SkRRect::Corner::kUpperRight_Corner);
   SkVector lower_right = clip_rrect.radii(SkRRect::Corner::kLowerRight_Corner);
@@ -102,27 +119,6 @@ bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
   transformed_rrect.setRectRadii(transformed_clip_rect, corners);
   return transformed_rrect.contains(platformview_boundingrect);
 }
-
-struct LayerData {
-  SkRect rect;
-  int64_t view_id;
-  int64_t overlay_id;
-  std::shared_ptr<flutter::OverlayLayer> layer;
-};
-
-using LayersMap = std::unordered_map<int64_t, LayerData>;
-
-/// Each of the following structs stores part of the platform view hierarchy according to its
-/// ID.
-///
-/// This data must only be accessed on the platform thread.
-struct PlatformViewData {
-  NSObject<FlutterPlatformView>* view;
-  FlutterTouchInterceptingView* touch_interceptor;
-  UIView* root_view;
-};
-
-}  // namespace
 
 @interface FlutterPlatformViewsController ()
 
@@ -196,6 +192,11 @@ struct PlatformViewData {
 /// Only accessed from the raster thread.
 @property(nonatomic, assign) BOOL hadPlatformViews;
 
+/// Whether blurred backdrop filters can be applied.
+///
+/// Defaults to YES, but becomes NO if blurred backdrop filters cannot be applied.
+@property(nonatomic, assign) BOOL canApplyBlurBackdrop;
+
 /// Populate any missing overlay layers.
 ///
 /// This requires posting a task to the platform thread and blocking on its completion.
@@ -264,14 +265,6 @@ struct PlatformViewData {
 - (void)resetFrameState;
 @end
 
-namespace flutter {
-
-// TODO(cbracken): Eliminate the use of globals.
-// Becomes NO if Apple's API changes and blurred backdrop filters cannot be applied.
-BOOL canApplyBlurBackdrop = YES;
-
-}  // namespace flutter
-
 @implementation FlutterPlatformViewsController {
   // TODO(cbracken): Replace with Obj-C types and use @property declarations to automatically
   // synthesize the ivars.
@@ -301,6 +294,7 @@ BOOL canApplyBlurBackdrop = YES;
     _maskViewPool =
         [[FlutterClippingMaskViewPool alloc] initWithCapacity:kFlutterClippingMaskViewPoolCapacity];
     _hadPlatformViews = NO;
+    _canApplyBlurBackdrop = YES;
   }
   return self;
 }
@@ -630,7 +624,7 @@ BOOL canApplyBlurBackdrop = YES;
         break;
       case flutter::kBackdropFilter: {
         // Only support DlBlurImageFilter for BackdropFilter.
-        if (!flutter::canApplyBlurBackdrop || !(*iter)->GetFilterMutation().GetFilter().asBlur()) {
+        if (!self.canApplyBlurBackdrop || !(*iter)->GetFilterMutation().GetFilter().asBlur()) {
           break;
         }
         CGRect filterRect = GetCGRectFromSkRect((*iter)->GetFilterMutation().GetFilterRect());
@@ -656,7 +650,7 @@ BOOL canApplyBlurBackdrop = YES;
                                                                     blurRadius:blurRadius
                                                               visualEffectView:visualEffectView];
         if (!filter) {
-          flutter::canApplyBlurBackdrop = NO;
+          self.canApplyBlurBackdrop = NO;
         } else {
           [blurFilters addObject:filter];
         }
@@ -666,7 +660,7 @@ BOOL canApplyBlurBackdrop = YES;
     ++iter;
   }
 
-  if (flutter::canApplyBlurBackdrop) {
+  if (self.canApplyBlurBackdrop) {
     [clipView applyBlurBackdropFilters:blurFilters];
   }
 
