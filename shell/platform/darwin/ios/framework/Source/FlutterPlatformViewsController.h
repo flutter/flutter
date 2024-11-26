@@ -125,9 +125,6 @@
 
 - (size_t)embeddedViewCount;
 
-// TODO(cbracken): Delete. This is unused.
-- (size_t)layerPoolSize;
-
 // Returns the `FlutterPlatformView`'s `view` object associated with the view_id.
 //
 // If the `PlatformViewsController` does not contain any `FlutterPlatformView` object or
