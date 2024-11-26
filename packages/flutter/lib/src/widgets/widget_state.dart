@@ -1012,19 +1012,39 @@ class WidgetStateMapper<T> with Diagnosticable implements WidgetStateProperty<T>
   ///         WidgetState.pressed: 0.0,
   ///         WidgetState.any:     2.0,
   ///       },
-  ///     ).withObserver(print), // ignore: avoid_print, invalid_use_of_do_not_submit_member
+  ///     ).debugObserveWith(print),
   ///   ),
   ///   onPressed: () {},
   ///   child: const Text('button'),
   /// );
   /// ```
   /// {@end-tool}
-  WidgetStateMapper<T> debugObserveWith(
+  WidgetStateProperty<T> debugObserveWith(
     void Function(MapEntry<WidgetStatesConstraint?, T> entry) onResolve,
   ) {
-    WidgetStateMapper<T>? result;
+    WidgetStateProperty<T>? result;
     assert(() {
-      result = _WidgetStateMapObserver<T>(_map, onResolve);
+      result = _WidgetStatePropertyWith<T>((Set<WidgetState> states) {
+        for (final MapEntry<WidgetStatesConstraint, T> entry in _map.entries) {
+          if (entry.key.isSatisfiedBy(states)) {
+            onResolve(entry);
+            return entry.value;
+          }
+        }
+
+        try {
+          onResolve(MapEntry<WidgetState?, T>(null, null as T));
+          return null as T;
+        } on TypeError {
+          throw ArgumentError(
+            'The current set of WidgetStates is $states.\n'
+            'None of the provided map keys matched this set, '
+            'and the type "$T" is non-nullable.\n'
+            'Consider using "WidgetStateProperty<$T?>.fromMap()", '
+            'or adding the "WidgetState.any" key to this map.',
+          );
+        }
+      });
       return true;
     }());
     return result ?? this;
@@ -1089,35 +1109,6 @@ class WidgetStateMapper<T> with Diagnosticable implements WidgetStateProperty<T>
   void debugFillProperties(DiagnosticPropertiesBuilder properties, {String prefix = ''}) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<WidgetStateMap<T>>('map', _map));
-  }
-}
-
-class _WidgetStateMapObserver<T> extends WidgetStateMapper<T> {
-  const _WidgetStateMapObserver(super.map, this.onResolve);
-
-  final void Function(MapEntry<WidgetStatesConstraint?, T> entry) onResolve;
-
-  @override
-  T resolve(Set<WidgetState> states) {
-    for (final MapEntry<WidgetStatesConstraint, T> entry in _map.entries) {
-      if (entry.key.isSatisfiedBy(states)) {
-        onResolve(entry);
-        return entry.value;
-      }
-    }
-
-    try {
-      onResolve(MapEntry<WidgetState?, T>(null, null as T));
-      return null as T;
-    } on TypeError {
-      throw ArgumentError(
-        'The current set of material states is $states.\n'
-        'None of the provided map keys matched this set, '
-        'and the type "$T" is non-nullable.\n'
-        'Consider using "WidgetStateProperty<$T?>.fromMap()", '
-        'or adding the "WidgetState.any" key to this map.',
-      );
-    }
   }
 }
 
