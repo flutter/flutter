@@ -20,7 +20,7 @@ class ColorFilter final
 
   static ScopedObject<ColorFilter> MakeMatrix(const float matrix[20]);
 
-  explicit ColorFilter(std::shared_ptr<flutter::DlColorFilter> filter);
+  explicit ColorFilter(std::shared_ptr<const flutter::DlColorFilter> filter);
 
   ~ColorFilter() override;
 
@@ -28,10 +28,10 @@ class ColorFilter final
 
   ColorFilter& operator=(const ColorFilter&) = delete;
 
-  const std::shared_ptr<flutter::DlColorFilter>& GetColorFilter() const;
+  const std::shared_ptr<const flutter::DlColorFilter>& GetColorFilter() const;
 
  private:
-  std::shared_ptr<flutter::DlColorFilter> filter_;
+  std::shared_ptr<const flutter::DlColorFilter> filter_;
 };
 
 }  // namespace impeller::interop

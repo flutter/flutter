@@ -12,8 +12,8 @@
 namespace flutter {
 namespace testing {
 
-template <class T>
-static void TestEquals(T& source1, T& source2) {
+template <class T, class U>
+static void TestEquals(const T& source1, const U& source2) {
   ASSERT_TRUE(source1 == source2);
   ASSERT_TRUE(source2 == source1);
   ASSERT_FALSE(source1 != source2);
@@ -24,8 +24,8 @@ static void TestEquals(T& source1, T& source2) {
   ASSERT_TRUE(Equals(&source2, &source1));
 }
 
-template <class T>
-static void TestNotEquals(T& source1, T& source2, const std::string& label) {
+template <class T, class U>
+static void TestNotEquals(T& source1, U& source2, const std::string& label) {
   ASSERT_FALSE(source1 == source2) << label;
   ASSERT_FALSE(source2 == source1) << label;
   ASSERT_TRUE(source1 != source2) << label;

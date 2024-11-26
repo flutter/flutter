@@ -66,7 +66,7 @@ TEST_P(AiksTest, CanRenderAdvancedBlendColorFilterWithSaveLayer) {
   builder.ClipRect(layer_rect);
 
   DlPaint save_paint;
-  save_paint.setColorFilter(DlBlendColorFilter::Make(
+  save_paint.setColorFilter(DlColorFilter::MakeBlend(
       DlColor::RGBA(0, 1, 0, 0.5), DlBlendMode::kDifference));
   builder.SaveLayer(&layer_rect, &save_paint);
 
@@ -233,7 +233,7 @@ TEST_P(AiksTest, ColorFilterBlend) {
         srcPaint.setBlendMode(blend_modes[i]);
         if (has_color_filter) {
           std::shared_ptr<const DlColorFilter> color_filter =
-              DlBlendColorFilter::Make(DlColor::RGBA(0.9, 0.5, 0.0, 1.0),
+              DlColorFilter::MakeBlend(DlColor::RGBA(0.9, 0.5, 0.0, 1.0),
                                        DlBlendMode::kSrcIn);
           srcPaint.setColorFilter(color_filter);
         }
@@ -290,7 +290,7 @@ TEST_P(AiksTest, ColorFilterAdvancedBlend) {
         srcPaint.setBlendMode(blend_modes[i]);
         if (has_color_filter) {
           std::shared_ptr<const DlColorFilter> color_filter =
-              DlBlendColorFilter::Make(DlColor::RGBA(0.9, 0.5, 0.0, 1.0),
+              DlColorFilter::MakeBlend(DlColor::RGBA(0.9, 0.5, 0.0, 1.0),
                                        DlBlendMode::kSrcIn);
           srcPaint.setColorFilter(color_filter);
         }
@@ -382,7 +382,7 @@ TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
         srcPaint.setBlendMode(blend_modes[i]);
         if (has_color_filter) {
           std::shared_ptr<const DlColorFilter> color_filter =
-              DlBlendColorFilter::Make(DlColor::RGBA(0.9, 0.5, 0.0, 1.0),
+              DlColorFilter::MakeBlend(DlColor::RGBA(0.9, 0.5, 0.0, 1.0),
                                        DlBlendMode::kMultiply);
           srcPaint.setColorFilter(color_filter);
         }
@@ -445,7 +445,7 @@ TEST_P(AiksTest, BlendModePlusAlphaColorFilterWideGamut) {
 
   DlPaint save_paint;
   save_paint.setColorFilter(
-      DlBlendColorFilter::Make(DlColor::RGBA(1, 0, 0, 1), DlBlendMode::kPlus));
+      DlColorFilter::MakeBlend(DlColor::RGBA(1, 0, 0, 1), DlBlendMode::kPlus));
   builder.SaveLayer(nullptr, &save_paint);
 
   paint.setColor(DlColor::kRed());
@@ -471,7 +471,7 @@ TEST_P(AiksTest, ForegroundBlendSubpassCollapseOptimization) {
 
   DlPaint save_paint;
   save_paint.setColorFilter(
-      DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kColorDodge));
+      DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kColorDodge));
   builder.SaveLayer(nullptr, &save_paint);
 
   builder.Translate(500, 300);
@@ -721,7 +721,7 @@ TEST_P(AiksTest, ForegroundPipelineBlendAppliesTransformCorrectly) {
   builder.Rotate(30);
 
   DlPaint image_paint;
-  image_paint.setColorFilter(DlBlendColorFilter::Make(
+  image_paint.setColorFilter(DlColorFilter::MakeBlend(
       DlColor::RGBA(255.0f / 255.0f, 165.0f / 255.0f, 0.0f / 255.0f, 1.0f),
       DlBlendMode::kSrcIn));
 
@@ -739,7 +739,7 @@ TEST_P(AiksTest, ForegroundAdvancedBlendAppliesTransformCorrectly) {
   builder.Rotate(30);
 
   DlPaint image_paint;
-  image_paint.setColorFilter(DlBlendColorFilter::Make(
+  image_paint.setColorFilter(DlColorFilter::MakeBlend(
       DlColor::RGBA(255.0f / 255.0f, 165.0f / 255.0f, 0.0f / 255.0f, 1.0f),
       DlBlendMode::kColorDodge));
 
@@ -898,7 +898,7 @@ TEST_P(AiksTest, DestructiveBlendColorFilterFloodsClip) {
 
   DlPaint save_paint;
   save_paint.setColorFilter(
-      DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kSrc));
+      DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kSrc));
   builder.SaveLayer(nullptr, &save_paint);
   builder.Restore();
 
@@ -913,7 +913,7 @@ TEST_P(AiksTest, AdvancedBlendColorFilterWithDestinationOpacity) {
 
   DlPaint save_paint;
   save_paint.setOpacity(0.3);
-  save_paint.setColorFilter(DlBlendColorFilter::Make(DlColor::kTransparent(),
+  save_paint.setColorFilter(DlColorFilter::MakeBlend(DlColor::kTransparent(),
                                                      DlBlendMode::kSaturation));
   builder.SaveLayer(nullptr, &save_paint);
   builder.DrawRect(SkRect::MakeXYWH(100, 100, 300, 300),

@@ -7,7 +7,7 @@
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/dl_tile_mode.h"
-#include "flutter/display_list/effects/dl_color_filter.h"
+#include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/testing/dl_test_equality.h"
 #include "flutter/display_list/utils/dl_comparable.h"

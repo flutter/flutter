@@ -23,7 +23,7 @@ void ColorFilter::Create(Dart_Handle wrapper) {
 }
 
 void ColorFilter::initMode(int color, int blend_mode) {
-  filter_ = DlBlendColorFilter::Make(static_cast<DlColor>(color),
+  filter_ = DlColorFilter::MakeBlend(static_cast<DlColor>(color),
                                      static_cast<DlBlendMode>(blend_mode));
 }
 
@@ -39,15 +39,15 @@ void ColorFilter::initMatrix(const tonic::Float32List& color_matrix) {
   matrix[9] *= 1.0f / 255;
   matrix[14] *= 1.0f / 255;
   matrix[19] *= 1.0f / 255;
-  filter_ = DlMatrixColorFilter::Make(matrix);
+  filter_ = DlColorFilter::MakeMatrix(matrix);
 }
 
 void ColorFilter::initLinearToSrgbGamma() {
-  filter_ = DlLinearToSrgbGammaColorFilter::kInstance;
+  filter_ = DlColorFilter::MakeLinearToSrgbGamma();
 }
 
 void ColorFilter::initSrgbToLinearGamma() {
-  filter_ = DlSrgbToLinearGammaColorFilter::kInstance;
+  filter_ = DlColorFilter::MakeSrgbToLinearGamma();
 }
 
 ColorFilter::~ColorFilter() = default;

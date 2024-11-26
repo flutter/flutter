@@ -7,6 +7,7 @@
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/dl_vertices.h"
+#include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
@@ -158,7 +159,7 @@ TEST(DisplayListSkConversions, BlendColorFilterModifiesTransparency) {
     DlBlendColorFilter filter(color, mode);
     auto srgb = SkColorSpace::MakeSRGB();
     if (filter.modifies_transparent_black()) {
-      auto dl_filter = DlBlendColorFilter::Make(color, mode);
+      auto dl_filter = DlColorFilter::MakeBlend(color, mode);
       auto sk_filter = ToSk(filter);
       ASSERT_NE(dl_filter, nullptr) << desc;
       ASSERT_NE(sk_filter, nullptr) << desc;
@@ -167,7 +168,7 @@ TEST(DisplayListSkConversions, BlendColorFilterModifiesTransparency) {
                   SkColors::kTransparent)
           << desc;
     } else {
-      auto dl_filter = DlBlendColorFilter::Make(color, mode);
+      auto dl_filter = DlColorFilter::MakeBlend(color, mode);
       auto sk_filter = ToSk(filter);
       EXPECT_EQ(dl_filter == nullptr, sk_filter == nullptr) << desc;
       ASSERT_TRUE(sk_filter == nullptr ||
@@ -267,7 +268,7 @@ TEST(DisplayListSkConversions, MatrixColorFilterModifiesTransparency) {
         "matrix[" + std::to_string(element) + "] = " + std::to_string(value);
     matrix[element] = value;
     DlMatrixColorFilter filter(matrix);
-    auto dl_filter = DlMatrixColorFilter::Make(matrix);
+    auto dl_filter = DlColorFilter::MakeMatrix(matrix);
     auto sk_filter = ToSk(filter);
     auto srgb = SkColorSpace::MakeSRGB();
     EXPECT_EQ(dl_filter == nullptr, sk_filter == nullptr);

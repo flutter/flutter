@@ -8,6 +8,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_flags.h"
 #include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/effects/color_filters/dl_matrix_color_filter.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
@@ -1387,7 +1388,8 @@ class CanvasCompareTester {
           0, 0, 0, 0.5, 0,
       };
       // clang-format on
-      DlMatrixColorFilter dl_alpha_rotate_filter(rotate_alpha_color_matrix);
+      auto dl_alpha_rotate_filter =
+          DlColorFilter::MakeMatrix(rotate_alpha_color_matrix);
       auto sk_alpha_rotate_filter =
           SkColorFilters::Matrix(rotate_alpha_color_matrix);
       {
@@ -1402,7 +1404,7 @@ class CanvasCompareTester {
                        },
                        [=](const DlSetupContext& ctx) {
                          DlPaint save_p;
-                         save_p.setColorFilter(&dl_alpha_rotate_filter);
+                         save_p.setColorFilter(dl_alpha_rotate_filter);
                          ctx.canvas->SaveLayer(nullptr, &save_p);
                          ctx.paint.setStrokeWidth(5.0);
                        })
@@ -1420,7 +1422,7 @@ class CanvasCompareTester {
                        },
                        [=](const DlSetupContext& ctx) {
                          DlPaint save_p;
-                         save_p.setColorFilter(&dl_alpha_rotate_filter);
+                         save_p.setColorFilter(dl_alpha_rotate_filter);
                          ctx.canvas->SaveLayer(&kRenderBounds, &save_p);
                          ctx.paint.setStrokeWidth(5.0);
                        })
@@ -1437,8 +1439,8 @@ class CanvasCompareTester {
           0, 0, 0, 1, 0,
       };
       // clang-format on
-      DlMatrixColorFilter dl_color_filter(color_matrix);
-      DlColorFilterImageFilter dl_cf_image_filter(dl_color_filter);
+      auto dl_color_filter = DlColorFilter::MakeMatrix(color_matrix);
+      auto dl_cf_image_filter = DlImageFilter::MakeColorFilter(dl_color_filter);
       auto sk_cf_image_filter = SkImageFilters::ColorFilter(
           SkColorFilters::Matrix(color_matrix), nullptr);
       {
@@ -1453,7 +1455,7 @@ class CanvasCompareTester {
                        },
                        [=](const DlSetupContext& ctx) {
                          DlPaint save_p;
-                         save_p.setImageFilter(&dl_cf_image_filter);
+                         save_p.setImageFilter(dl_cf_image_filter);
                          ctx.canvas->SaveLayer(nullptr, &save_p);
                          ctx.paint.setStrokeWidth(5.0);
                        })
@@ -1471,7 +1473,7 @@ class CanvasCompareTester {
                        },
                        [=](const DlSetupContext& ctx) {
                          DlPaint save_p;
-                         save_p.setImageFilter(&dl_cf_image_filter);
+                         save_p.setImageFilter(dl_cf_image_filter);
                          ctx.canvas->SaveLayer(&kRenderBounds, &save_p);
                          ctx.paint.setStrokeWidth(5.0);
                        })
@@ -1709,7 +1711,7 @@ class CanvasCompareTester {
          1.0,  1.0,  1.0, 1.0,   0,
       };
       // clang-format on
-      DlMatrixColorFilter dl_color_filter(rotate_color_matrix);
+      auto dl_color_filter = DlColorFilter::MakeMatrix(rotate_color_matrix);
       auto sk_color_filter = SkColorFilters::Matrix(rotate_color_matrix);
       {
         DlColor bg = DlColor::kWhite();
@@ -1722,7 +1724,7 @@ class CanvasCompareTester {
                        },
                        [=](const DlSetupContext& ctx) {
                          ctx.paint.setColor(DlColor::kYellow());
-                         ctx.paint.setColorFilter(&dl_color_filter);
+                         ctx.paint.setColorFilter(dl_color_filter);
                        })
                        .with_bg(bg));
       }
@@ -3954,13 +3956,12 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
       0.5f,
       SK_Scalar1,
   };
-  std::vector<std::shared_ptr<DlColorFilter>> color_filters = {
-      std::make_shared<DlBlendColorFilter>(DlColor::kCyan(),
-                                           DlBlendMode::kSrcATop),
-      std::make_shared<DlMatrixColorFilter>(commutable_color_matrix),
-      std::make_shared<DlMatrixColorFilter>(non_commutable_color_matrix),
-      DlSrgbToLinearGammaColorFilter::kInstance,
-      DlLinearToSrgbGammaColorFilter::kInstance,
+  std::vector<std::shared_ptr<const DlColorFilter>> color_filters = {
+      DlColorFilter::MakeBlend(DlColor::kCyan(), DlBlendMode::kSrcATop),
+      DlColorFilter::MakeMatrix(commutable_color_matrix),
+      DlColorFilter::MakeMatrix(non_commutable_color_matrix),
+      DlColorFilter::MakeSrgbToLinearGamma(),
+      DlColorFilter::MakeLinearToSrgbGamma(),
   };
   std::vector<std::shared_ptr<DlImageFilter>> image_filters = {
       DlImageFilter::MakeBlur(5.0f, 5.0f, DlTileMode::kDecal),
@@ -4131,8 +4132,13 @@ TEST_F(DisplayListRendering, MatrixColorFilterModifyTransparencyCheck) {
         "matrix[" + std::to_string(element) + "] = " + std::to_string(value);
     float original_value = matrix[element];
     matrix[element] = value;
+    // Here we instantiate a DlMatrixColorFilter directly so that it is
+    // not affected by the "NOP" detection in the factory. We sould not
+    // need to do this if we tested by just rendering the filter color
+    // over the source color with the filter blend mode instead of
+    // rendering via a ColorFilter, but this test is more "black box".
     DlMatrixColorFilter filter(matrix);
-    auto dl_filter = DlMatrixColorFilter::Make(matrix);
+    auto dl_filter = DlColorFilter::MakeMatrix(matrix);
     bool is_identity = (dl_filter == nullptr || original_value == value);
 
     DlPaint paint(DlColor(0x7f7f7f7f));
@@ -4200,7 +4206,7 @@ TEST_F(DisplayListRendering, MatrixColorFilterOpacityCommuteCheck) {
     std::string desc =
         "matrix[" + std::to_string(element) + "] = " + std::to_string(value);
     matrix[element] = value;
-    auto filter = DlMatrixColorFilter::Make(matrix);
+    auto filter = DlColorFilter::MakeMatrix(matrix);
     EXPECT_EQ(std::isfinite(value), filter != nullptr);
 
     DlPaint paint(DlColor(0x80808080));
@@ -4308,7 +4314,7 @@ TEST_F(DisplayListRendering, BlendColorFilterModifyTransparencyCheck) {
     std::string desc = desc_str.str();
     DlBlendColorFilter filter(color, mode);
     if (filter.modifies_transparent_black()) {
-      ASSERT_NE(DlBlendColorFilter::Make(color, mode), nullptr) << desc;
+      ASSERT_NE(DlColorFilter::MakeBlend(color, mode), nullptr) << desc;
     }
 
     DlPaint paint(DlColor(0x7f7f7f7f));
@@ -4369,7 +4375,7 @@ TEST_F(DisplayListRendering, BlendColorFilterOpacityCommuteCheck) {
       // If it can commute with opacity, then it might also be a NOP,
       // so we won't necessarily get a non-null return from |::Make()|
     } else {
-      ASSERT_NE(DlBlendColorFilter::Make(color, mode), nullptr) << desc;
+      ASSERT_NE(DlColorFilter::MakeBlend(color, mode), nullptr) << desc;
     }
 
     DlPaint paint(DlColor(0x80808080));
@@ -4469,8 +4475,8 @@ class DisplayListNopTest : public DisplayListRendering {
         0.0001, 0.0001, 0.0001, 0.9997, 0.0,  //
         0.0001, 0.0001, 0.0001, 0.9997, 0.1,  //
     };
-    color_filter_nomtb = DlMatrixColorFilter::Make(color_filter_matrix_nomtb);
-    color_filter_mtb = DlMatrixColorFilter::Make(color_filter_matrix_mtb);
+    color_filter_nomtb = DlColorFilter::MakeMatrix(color_filter_matrix_nomtb);
+    color_filter_mtb = DlColorFilter::MakeMatrix(color_filter_matrix_mtb);
     EXPECT_FALSE(color_filter_nomtb->modifies_transparent_black());
     EXPECT_TRUE(color_filter_mtb->modifies_transparent_black());
 
@@ -4526,8 +4532,8 @@ class DisplayListNopTest : public DisplayListRendering {
   std::vector<DlColor> test_src_colors;
   std::vector<DlColor> test_dst_colors;
 
-  std::shared_ptr<DlColorFilter> color_filter_nomtb;
-  std::shared_ptr<DlColorFilter> color_filter_mtb;
+  std::shared_ptr<const DlColorFilter> color_filter_nomtb;
+  std::shared_ptr<const DlColorFilter> color_filter_mtb;
 
   // A 1-row image containing every color in test_dst_colors
   std::unique_ptr<RenderResult> test_data;
@@ -4682,7 +4688,7 @@ class DisplayListNopTest : public DisplayListRendering {
 
   void test_attributes_image(DlBlendMode mode,
                              DlColor color,
-                             DlColorFilter* color_filter,
+                             const DlColorFilter* color_filter,
                              DlImageFilter* image_filter) {
     // if (true) { return; }
     std::stringstream desc_stream;

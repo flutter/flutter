@@ -87,7 +87,7 @@ TEST_P(AiksTest, ColorMatrixFilterSubpassCollapseOptimization) {
       0,    0,    -1.0, 1.0, 0,  //
       1.0,  1.0,  1.0,  1.0, 0   //
   };
-  auto filter = DlMatrixColorFilter::Make(matrix);
+  auto filter = DlColorFilter::MakeMatrix(matrix);
 
   DlPaint paint;
   paint.setColorFilter(filter);
@@ -107,7 +107,7 @@ TEST_P(AiksTest, LinearToSrgbFilterSubpassCollapseOptimization) {
   DisplayListBuilder builder(GetCullRect(GetWindowSize()));
 
   DlPaint paint;
-  paint.setColorFilter(DlLinearToSrgbGammaColorFilter::kInstance);
+  paint.setColorFilter(DlColorFilter::MakeLinearToSrgbGamma());
   builder.SaveLayer(nullptr, &paint);
 
   builder.Translate(500, 300);
@@ -124,7 +124,7 @@ TEST_P(AiksTest, SrgbToLinearFilterSubpassCollapseOptimization) {
   DisplayListBuilder builder(GetCullRect(GetWindowSize()));
 
   DlPaint paint;
-  paint.setColorFilter(DlLinearToSrgbGammaColorFilter::kInstance);
+  paint.setColorFilter(DlColorFilter::MakeLinearToSrgbGamma());
   builder.SaveLayer(nullptr, &paint);
 
   builder.Translate(500, 300);
@@ -163,7 +163,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithBlendColorFilterDrawsCorrectly) {
   DlPaint save_paint;
   paint.setColor(DlColor::kBlack().withAlpha(128));
   paint.setColorFilter(
-      DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kDstOver));
+      DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kDstOver));
   builder.Save();
   builder.ClipRect(SkRect::MakeXYWH(100, 500, 300, 300));
   builder.SaveLayer(nullptr, &paint);
@@ -187,7 +187,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithBlendImageFilterDrawsCorrectly) {
   DlPaint save_paint;
   save_paint.setColor(DlColor::kBlack().withAlpha(128));
   save_paint.setImageFilter(DlImageFilter::MakeColorFilter(
-      DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kDstOver)));
+      DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kDstOver)));
 
   builder.SaveLayer(nullptr, &save_paint);
 
@@ -209,7 +209,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorAndImageFilterDrawsCorrectly) {
   DlPaint save_paint;
   save_paint.setColor(DlColor::kBlack().withAlpha(128));
   save_paint.setColorFilter(
-      DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kDstOver));
+      DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kDstOver));
   builder.Save();
   builder.ClipRect(SkRect::MakeXYWH(100, 500, 300, 300));
   builder.SaveLayer(nullptr, &save_paint);
@@ -277,7 +277,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorMatrixColorFilterDrawsCorrectly) {
   };
   DlPaint paint;
   paint.setColor(DlColor::kBlack().withAlpha(128));
-  paint.setColorFilter(DlMatrixColorFilter::Make(matrix));
+  paint.setColorFilter(DlColorFilter::MakeMatrix(matrix));
   builder.SaveLayer(nullptr, &paint);
   builder.DrawImage(image, SkPoint{100, 500}, {});
   builder.Restore();
@@ -299,7 +299,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorMatrixImageFilterDrawsCorrectly) {
   };
   DlPaint paint;
   paint.setColor(DlColor::kBlack().withAlpha(128));
-  paint.setColorFilter(DlMatrixColorFilter::Make(matrix));
+  paint.setColorFilter(DlColorFilter::MakeMatrix(matrix));
   builder.SaveLayer(nullptr, &paint);
   builder.DrawImage(image, SkPoint{100, 500}, {});
   builder.Restore();
@@ -323,9 +323,9 @@ TEST_P(AiksTest,
   DlPaint paint;
   paint.setColor(DlColor::kBlack().withAlpha(128));
   paint.setImageFilter(
-      DlImageFilter::MakeColorFilter(DlMatrixColorFilter::Make(matrix)));
+      DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix)));
   paint.setColorFilter(
-      DlBlendColorFilter::Make(DlColor::kGreen(), DlBlendMode::kModulate));
+      DlColorFilter::MakeBlend(DlColor::kGreen(), DlBlendMode::kModulate));
   builder.SaveLayer(nullptr, &paint);
   builder.DrawImage(image, SkPoint{100, 500}, {});
   builder.Restore();
@@ -723,7 +723,7 @@ TEST_P(AiksTest, ImageFilteredSaveLayerWithUnboundedContents) {
       0, 0, 0, 1, 0   //
   };
   auto rgb_swap_filter =
-      DlImageFilter::MakeColorFilter(std::make_shared<DlMatrixColorFilter>(m));
+      DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(m));
   test(rgb_swap_filter);
 
   builder.Translate(200.0, 0.0);

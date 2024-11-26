@@ -207,12 +207,10 @@ TEST(LayerStateStack, Opacity) {
 
 TEST(LayerStateStack, ColorFilter) {
   SkRect rect = {10, 10, 20, 20};
-  std::shared_ptr<DlBlendColorFilter> outer_filter =
-      std::make_shared<DlBlendColorFilter>(DlColor::kYellow(),
-                                           DlBlendMode::kColorBurn);
-  std::shared_ptr<DlBlendColorFilter> inner_filter =
-      std::make_shared<DlBlendColorFilter>(DlColor::kRed(),
-                                           DlBlendMode::kColorBurn);
+  auto outer_filter =
+      DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kColorBurn);
+  auto inner_filter =
+      DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kColorBurn);
 
   LayerStateStack state_stack;
   state_stack.set_preroll_delegate(SkRect::MakeLTRB(0, 0, 50, 50));
@@ -370,9 +368,8 @@ TEST(LayerStateStack, ImageFilter) {
 
 TEST(LayerStateStack, OpacityAndColorFilterInteraction) {
   SkRect rect = {10, 10, 20, 20};
-  std::shared_ptr<DlBlendColorFilter> color_filter =
-      std::make_shared<DlBlendColorFilter>(DlColor::kYellow(),
-                                           DlBlendMode::kColorBurn);
+  auto color_filter =
+      DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kColorBurn);
 
   DisplayListBuilder builder;
   LayerStateStack state_stack;
@@ -489,11 +486,9 @@ TEST(LayerStateStack, OpacityAndImageFilterInteraction) {
 
 TEST(LayerStateStack, ColorFilterAndImageFilterInteraction) {
   SkRect rect = {10, 10, 20, 20};
-  std::shared_ptr<DlBlendColorFilter> color_filter =
-      std::make_shared<DlBlendColorFilter>(DlColor::kYellow(),
-                                           DlBlendMode::kColorBurn);
-  std::shared_ptr<DlImageFilter> image_filter =
-      DlImageFilter::MakeBlur(2.0f, 2.0f, DlTileMode::kClamp);
+  auto color_filter =
+      DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kColorBurn);
+  auto image_filter = DlImageFilter::MakeBlur(2.0f, 2.0f, DlTileMode::kClamp);
 
   DisplayListBuilder builder;
   LayerStateStack state_stack;

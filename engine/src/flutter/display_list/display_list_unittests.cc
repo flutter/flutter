@@ -518,7 +518,7 @@ TEST_F(DisplayListTest, BuildRestoresAttributes) {
   builder.Build();
   check_defaults(builder, cull_rect);
 
-  receiver.setColorFilter(&kTestMatrixColorFilter1);
+  receiver.setColorFilter(kTestMatrixColorFilter1.get());
   builder.Build();
   check_defaults(builder, cull_rect);
 
@@ -940,7 +940,7 @@ TEST_F(DisplayListTest, DisplayListSaveLayerBoundsWithAlphaFilter) {
     0, 0, 0, 1, 0,
   };
   // clang-format on
-  DlMatrixColorFilter base_color_filter(color_matrix);
+  auto base_color_filter = DlColorFilter::MakeMatrix(color_matrix);
   // clang-format off
   const float alpha_matrix[] = {
     0, 0, 0, 0, 0,
@@ -949,7 +949,7 @@ TEST_F(DisplayListTest, DisplayListSaveLayerBoundsWithAlphaFilter) {
     0, 0, 0, 0, 1,
   };
   // clang-format on
-  DlMatrixColorFilter alpha_color_filter(alpha_matrix);
+  auto alpha_color_filter = DlColorFilter::MakeMatrix(alpha_matrix);
   sk_sp<SkColorFilter> sk_alpha_color_filter =
       SkColorFilters::Matrix(alpha_matrix);
 
@@ -967,7 +967,7 @@ TEST_F(DisplayListTest, DisplayListSaveLayerBoundsWithAlphaFilter) {
     // Now checking that a normal color filter still produces rect bounds
     DisplayListBuilder builder(build_bounds);
     DlPaint save_paint;
-    save_paint.setColorFilter(&base_color_filter);
+    save_paint.setColorFilter(base_color_filter);
     builder.SaveLayer(&save_bounds, &save_paint);
     builder.DrawRect(rect, DlPaint());
     builder.Restore();
@@ -999,7 +999,7 @@ TEST_F(DisplayListTest, DisplayListSaveLayerBoundsWithAlphaFilter) {
     // save layer that modifies an unbounded region
     DisplayListBuilder builder(build_bounds);
     DlPaint save_paint;
-    save_paint.setColorFilter(&alpha_color_filter);
+    save_paint.setColorFilter(alpha_color_filter);
     builder.SaveLayer(&save_bounds, &save_paint);
     builder.DrawRect(rect, DlPaint());
     builder.Restore();
@@ -1012,7 +1012,7 @@ TEST_F(DisplayListTest, DisplayListSaveLayerBoundsWithAlphaFilter) {
     // to the behavior in the previous example
     DisplayListBuilder builder(build_bounds);
     DlPaint save_paint;
-    save_paint.setColorFilter(&alpha_color_filter);
+    save_paint.setColorFilter(alpha_color_filter);
     builder.SaveLayer(nullptr, &save_paint);
     builder.DrawRect(rect, DlPaint());
     builder.Restore();
@@ -1668,7 +1668,7 @@ TEST_F(DisplayListTest, SaveLayerColorFilterDoesNotInheritOpacity) {
   DisplayListBuilder builder;
   DlPaint save_paint;
   save_paint.setColor(DlColor(SkColorSetARGB(127, 255, 255, 255)));
-  save_paint.setColorFilter(&kTestMatrixColorFilter1);
+  save_paint.setColorFilter(kTestMatrixColorFilter1);
   builder.SaveLayer(nullptr, &save_paint);
   builder.DrawRect(SkRect{10, 10, 20, 20}, DlPaint());
   builder.Restore();
@@ -1720,7 +1720,7 @@ TEST_F(DisplayListTest, SaveLayerColorFilterOnChildDoesNotInheritOpacity) {
   save_paint.setColor(DlColor(SkColorSetARGB(127, 255, 255, 255)));
   builder.SaveLayer(nullptr, &save_paint);
   DlPaint draw_paint = save_paint;
-  draw_paint.setColorFilter(&kTestMatrixColorFilter1);
+  draw_paint.setColorFilter(kTestMatrixColorFilter1);
   builder.DrawRect(SkRect{10, 10, 20, 20}, draw_paint);
   builder.Restore();
 
@@ -2671,7 +2671,7 @@ TEST_F(DisplayListTest, RemoveUnnecessarySaveRestorePairsInSetPaint) {
       0, 0, 0, 0, 1,
   };
   // clang-format on
-  DlMatrixColorFilter alpha_color_filter(alpha_matrix);
+  auto alpha_color_filter = DlColorFilter::MakeMatrix(alpha_matrix);
   // Making sure hiding a problematic ColorFilter as an ImageFilter
   // will generate the same behavior as setting it as a ColorFilter
 
@@ -3957,7 +3957,7 @@ TEST_F(DisplayListTest, FloodingSaveLayerBoundsComputationOfSimpleRect) {
   SkRect rect = SkRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
   DlPaint save_paint;
   auto color_filter =
-      DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kSrc);
+      DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kSrc);
   ASSERT_TRUE(color_filter->modifies_transparent_black());
   save_paint.setColorFilter(color_filter);
   SkRect clip_rect = rect.makeOutset(100.0f, 100.0f);
@@ -3983,7 +3983,7 @@ TEST_F(DisplayListTest, NestedFloodingSaveLayerBoundsComputationOfSimpleRect) {
   SkRect rect = SkRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
   DlPaint save_paint;
   auto color_filter =
-      DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kSrc);
+      DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kSrc);
   ASSERT_TRUE(color_filter->modifies_transparent_black());
   save_paint.setColorFilter(color_filter);
   SkRect clip_rect = rect.makeOutset(100.0f, 100.0f);
@@ -4016,7 +4016,7 @@ TEST_F(DisplayListTest, SaveLayerBoundsComputationOfFloodingImageFilter) {
   SkRect rect = SkRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
   DlPaint draw_paint;
   auto color_filter =
-      DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kSrc);
+      DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kSrc);
   ASSERT_TRUE(color_filter->modifies_transparent_black());
   auto image_filter = DlImageFilter::MakeColorFilter(color_filter);
   draw_paint.setImageFilter(image_filter);
@@ -4043,7 +4043,7 @@ TEST_F(DisplayListTest, SaveLayerBoundsComputationOfFloodingColorFilter) {
   SkRect rect = SkRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
   DlPaint draw_paint;
   auto color_filter =
-      DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kSrc);
+      DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kSrc);
   ASSERT_TRUE(color_filter->modifies_transparent_black());
   draw_paint.setColorFilter(color_filter);
   SkRect clip_rect = rect.makeOutset(100.0f, 100.0f);
@@ -4233,7 +4233,7 @@ TEST_F(DisplayListTest, FloodingFilteredLayerPushesRestoreOpIndex) {
     0.5f, 0.0f, 0.0f, 0.0f, 0.5f
   };
   // clang-format on
-  auto color_filter = DlMatrixColorFilter::Make(matrix);
+  auto color_filter = DlColorFilter::MakeMatrix(matrix);
   save_paint.setImageFilter(DlImageFilter::MakeColorFilter(color_filter));
   builder.SaveLayer(nullptr, &save_paint);
   int save_layer_id = DisplayListBuilderTestingLastOpIndex(builder);
@@ -5817,7 +5817,7 @@ TEST_F(DisplayListTest, UnboundedRenderOpsAreReportedUnlessClipped) {
       0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
     };
     // clang-format on
-    auto unbounded_cf = DlMatrixColorFilter::Make(matrix);
+    auto unbounded_cf = DlColorFilter::MakeMatrix(matrix);
     // ColorFilter must modify transparent black to be "unbounded"
     ASSERT_TRUE(unbounded_cf->modifies_transparent_black());
     auto unbounded_if = DlImageFilter::MakeColorFilter(unbounded_cf);

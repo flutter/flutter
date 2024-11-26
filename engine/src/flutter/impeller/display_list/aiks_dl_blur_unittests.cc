@@ -175,7 +175,7 @@ TEST_P(AiksTest, CanRenderForegroundBlendWithMaskBlur) {
   paint.setMaskFilter(
       DlBlurMaskFilter::Make(DlBlurStyle::kNormal, sigma.sigma));
   paint.setColorFilter(
-      DlBlendColorFilter::Make(DlColor::kGreen(), DlBlendMode::kSrc));
+      DlColorFilter::MakeBlend(DlColor::kGreen(), DlBlendMode::kSrc));
   builder.DrawCircle(SkPoint{400, 400}, 200, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -195,7 +195,7 @@ TEST_P(AiksTest, CanRenderForegroundAdvancedBlendWithMaskBlur) {
   paint.setMaskFilter(
       DlBlurMaskFilter::Make(DlBlurStyle::kNormal, sigma.sigma));
   paint.setColorFilter(
-      DlBlendColorFilter::Make(DlColor::kGreen(), DlBlendMode::kColor));
+      DlColorFilter::MakeBlend(DlColor::kGreen(), DlBlendMode::kColor));
   builder.DrawCircle(SkPoint{400, 400}, 200, paint);
   builder.Restore();
 

@@ -7,7 +7,7 @@
 namespace impeller::interop {
 
 ScopedObject<ColorFilter> ColorFilter::MakeBlend(Color color, BlendMode mode) {
-  auto filter = flutter::DlBlendColorFilter::Make(ToDisplayListType(color),
+  auto filter = flutter::DlColorFilter::MakeBlend(ToDisplayListType(color),
                                                   ToDisplayListType(mode));
   if (!filter) {
     return nullptr;
@@ -16,20 +16,20 @@ ScopedObject<ColorFilter> ColorFilter::MakeBlend(Color color, BlendMode mode) {
 }
 
 ScopedObject<ColorFilter> ColorFilter::MakeMatrix(const float matrix[20]) {
-  auto filter = flutter::DlMatrixColorFilter::Make(matrix);
+  auto filter = flutter::DlColorFilter::MakeMatrix(matrix);
   if (!filter) {
     return nullptr;
   }
   return Create<ColorFilter>(std::move(filter));
 }
 
-ColorFilter::ColorFilter(std::shared_ptr<flutter::DlColorFilter> filter)
+ColorFilter::ColorFilter(std::shared_ptr<const flutter::DlColorFilter> filter)
     : filter_(std::move(filter)) {}
 
 ColorFilter::~ColorFilter() = default;
 
-const std::shared_ptr<flutter::DlColorFilter>& ColorFilter::GetColorFilter()
-    const {
+const std::shared_ptr<const flutter::DlColorFilter>&
+ColorFilter::GetColorFilter() const {
   return filter_;
 }
 

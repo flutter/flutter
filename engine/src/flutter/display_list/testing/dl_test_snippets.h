@@ -7,6 +7,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/display_list/effects/color_filters/dl_blend_color_filter.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/testing/testing.h"
@@ -126,14 +127,18 @@ static const std::shared_ptr<DlColorSource> kTestSource5 =
                              kColors,
                              kStops,
                              DlTileMode::kDecal);
-static const DlBlendColorFilter kTestBlendColorFilter1(DlColor::kRed(),
-                                                       DlBlendMode::kDstATop);
-static const DlBlendColorFilter kTestBlendColorFilter2(DlColor::kBlue(),
-                                                       DlBlendMode::kDstATop);
-static const DlBlendColorFilter kTestBlendColorFilter3(DlColor::kRed(),
-                                                       DlBlendMode::kDstIn);
-static const DlMatrixColorFilter kTestMatrixColorFilter1(kRotateColorMatrix);
-static const DlMatrixColorFilter kTestMatrixColorFilter2(kInvertColorMatrix);
+
+static const auto kTestBlendColorFilter1 =
+    DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kDstATop);
+static const auto kTestBlendColorFilter2 =
+    DlColorFilter::MakeBlend(DlColor::kBlue(), DlBlendMode::kDstATop);
+static const auto kTestBlendColorFilter3 =
+    DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kDstOver);
+static const auto kTestMatrixColorFilter1 =
+    DlColorFilter::MakeMatrix(kRotateColorMatrix);
+static const auto kTestMatrixColorFilter2 =
+    DlColorFilter::MakeMatrix(kInvertColorMatrix);
+
 static const DlBlurImageFilter kTestBlurImageFilter1(5.0,
                                                      5.0,
                                                      DlTileMode::kClamp);

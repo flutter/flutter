@@ -522,18 +522,18 @@ TEST_P(DisplayListTest, CanDrawWithBlendColorFilter) {
 
   // Pipeline blended image.
   {
-    auto filter = flutter::DlBlendColorFilter(flutter::DlColor::kYellow(),
-                                              flutter::DlBlendMode::kModulate);
-    paint.setColorFilter(&filter);
+    auto filter = flutter::DlColorFilter::MakeBlend(
+        flutter::DlColor::kYellow(), flutter::DlBlendMode::kModulate);
+    paint.setColorFilter(filter);
     builder.DrawImage(DlImageImpeller::Make(texture), SkPoint::Make(100, 100),
                       flutter::DlImageSampling::kNearestNeighbor, &paint);
   }
 
   // Advanced blended image.
   {
-    auto filter = flutter::DlBlendColorFilter(flutter::DlColor::kRed(),
-                                              flutter::DlBlendMode::kScreen);
-    paint.setColorFilter(&filter);
+    auto filter = flutter::DlColorFilter::MakeBlend(
+        flutter::DlColor::kRed(), flutter::DlBlendMode::kScreen);
+    paint.setColorFilter(filter);
     builder.DrawImage(DlImageImpeller::Make(texture), SkPoint::Make(250, 250),
                       flutter::DlImageSampling::kNearestNeighbor, &paint);
   }
@@ -552,17 +552,15 @@ TEST_P(DisplayListTest, CanDrawWithColorFilterImageFilter) {
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
 
-  auto color_filter =
-      std::make_shared<flutter::DlMatrixColorFilter>(invert_color_matrix);
-  auto image_filter =
-      std::make_shared<flutter::DlColorFilterImageFilter>(color_filter);
+  auto color_filter = flutter::DlColorFilter::MakeMatrix(invert_color_matrix);
+  auto image_filter = flutter::DlImageFilter::MakeColorFilter(color_filter);
 
-  paint.setImageFilter(image_filter.get());
+  paint.setImageFilter(image_filter);
   builder.DrawImage(DlImageImpeller::Make(texture), SkPoint::Make(100, 100),
                     flutter::DlImageSampling::kNearestNeighbor, &paint);
 
   builder.Translate(0, 700);
-  paint.setColorFilter(color_filter.get());
+  paint.setColorFilter(color_filter);
   builder.DrawImage(DlImageImpeller::Make(texture), SkPoint::Make(100, 100),
                     flutter::DlImageSampling::kNearestNeighbor, &paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -628,13 +626,11 @@ TEST_P(DisplayListTest, CanClampTheResultingColorOfColorMatrixFilter) {
       0, 0, 0, 0.5, 0,  //
   };
   auto inner_color_filter =
-      std::make_shared<flutter::DlMatrixColorFilter>(inner_color_matrix);
+      flutter::DlColorFilter::MakeMatrix(inner_color_matrix);
   auto outer_color_filter =
-      std::make_shared<flutter::DlMatrixColorFilter>(outer_color_matrix);
-  auto inner =
-      std::make_shared<flutter::DlColorFilterImageFilter>(inner_color_filter);
-  auto outer =
-      std::make_shared<flutter::DlColorFilterImageFilter>(outer_color_filter);
+      flutter::DlColorFilter::MakeMatrix(outer_color_matrix);
+  auto inner = flutter::DlImageFilter::MakeColorFilter(inner_color_filter);
+  auto outer = flutter::DlImageFilter::MakeColorFilter(outer_color_filter);
   auto compose = std::make_shared<flutter::DlComposeImageFilter>(outer, inner);
 
   flutter::DisplayListBuilder builder;
@@ -1109,13 +1105,11 @@ TEST_P(DisplayListTest, CanDrawRectWithLinearToSrgbColorFilter) {
   flutter::DlPaint paint;
   paint.setColor(flutter::DlColor(0xFF2196F3).withAlpha(128));
   flutter::DisplayListBuilder builder;
-  paint.setColorFilter(
-      flutter::DlLinearToSrgbGammaColorFilter::kInstance.get());
+  paint.setColorFilter(flutter::DlColorFilter::MakeLinearToSrgbGamma());
   builder.DrawRect(SkRect::MakeXYWH(0, 0, 200, 200), paint);
   builder.Translate(0, 200);
 
-  paint.setColorFilter(
-      flutter::DlSrgbToLinearGammaColorFilter::kInstance.get());
+  paint.setColorFilter(flutter::DlColorFilter::MakeSrgbToLinearGamma());
   builder.DrawRect(SkRect::MakeXYWH(0, 0, 200, 200), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -1239,11 +1233,11 @@ TEST_P(DisplayListTest, CanDrawCorrectlyWithColorFilterAndImageFilter) {
       0, 0, 0, 1, 0,  //
   };
   auto green_color_filter =
-      std::make_shared<flutter::DlMatrixColorFilter>(green_color_matrix);
+      flutter::DlColorFilter::MakeMatrix(green_color_matrix);
   auto blue_color_filter =
-      std::make_shared<flutter::DlMatrixColorFilter>(blue_color_matrix);
+      flutter::DlColorFilter::MakeMatrix(blue_color_matrix);
   auto blue_image_filter =
-      std::make_shared<flutter::DlColorFilterImageFilter>(blue_color_filter);
+      flutter::DlImageFilter::MakeColorFilter(blue_color_filter);
 
   flutter::DlPaint paint;
   paint.setColor(flutter::DlColor::kRed());

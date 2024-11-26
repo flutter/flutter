@@ -8,6 +8,7 @@
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_op_flags.h"
 #include "flutter/display_list/dl_op_records.h"
+#include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/utils/dl_accumulation_rect.h"

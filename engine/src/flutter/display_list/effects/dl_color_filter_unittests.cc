@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/effects/dl_color_filter.h"
+
+#include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/testing/dl_test_equality.h"
 
 namespace flutter {
@@ -135,7 +137,7 @@ TEST(DisplayListColorFilter, SrgbToLinearEquals) {
   DlSrgbToLinearGammaColorFilter filter1;
   DlSrgbToLinearGammaColorFilter filter2;
   TestEquals(filter1, filter2);
-  TestEquals(filter1, *DlSrgbToLinearGammaColorFilter::kInstance);
+  TestEquals(filter1, *DlColorFilter::MakeSrgbToLinearGamma());
 }
 
 TEST(DisplayListColorFilter, LinearToSrgbConstructor) {
@@ -152,7 +154,7 @@ TEST(DisplayListColorFilter, LinearToSrgbEquals) {
   DlLinearToSrgbGammaColorFilter filter1;
   DlLinearToSrgbGammaColorFilter filter2;
   TestEquals(filter1, filter2);
-  TestEquals(filter1, *DlLinearToSrgbGammaColorFilter::kInstance);
+  TestEquals(filter1, *DlColorFilter::MakeLinearToSrgbGamma());
 }
 
 }  // namespace testing
