@@ -12,9 +12,9 @@
 #include "flutter/lib/ui/semantics/semantics_node.h"
 
 @class UIView;
-@class FlutterPlatformViewsController;
 
 namespace flutter {
+class PlatformViewsController;
 
 /// Interface that represents an accessibility bridge for iOS.
 class AccessibilityBridgeIos {
@@ -39,7 +39,7 @@ class AccessibilityBridgeIos {
    * The input id is the uid of the newly focused SemanticObject.
    */
   virtual void AccessibilityObjectDidLoseFocus(int32_t id) = 0;
-  virtual FlutterPlatformViewsController* GetPlatformViewsController() const = 0;
+  virtual std::shared_ptr<PlatformViewsController> GetPlatformViewsController() const = 0;
 };
 
 }  // namespace flutter
