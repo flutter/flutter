@@ -46,7 +46,10 @@ class WebImageInfo implements ImageInfo {
   }
 
   @override
-  Image get image => throw UnsupportedError('Cannot access a ui.Image from an image backed by an <img> element');
+  Image get image => throw UnsupportedError(
+      'Could not create image data for this image because access to it is '
+      'restricted by the Same-Origin Policy.\n'
+      'See https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy');
 
   @override
   bool isCloneOf(ImageInfo other) {

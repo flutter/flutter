@@ -15,32 +15,26 @@ import 'image_stream.dart';
 /// still be displayed if an <img> element is used.
 class WebImageInfo implements ImageInfo {
   @override
-  ImageInfo clone() =>
-    throw UnsupportedError(
-        'WebImageInfo should never be instantiated in a non-web context.');
+  ImageInfo clone() => _unsupported();
 
   @override
-  String? get debugLabel => throw UnsupportedError(
-      'WebImageInfo should never be instantiated in a non-web context.');
+  String? get debugLabel => _unsupported();
 
   @override
-  void dispose() =>
-    throw UnsupportedError(
-        'WebImageInfo should never be instantiated in a non-web context.');
+  void dispose() => _unsupported();
 
   @override
-  ui.Image get image => throw UnsupportedError(
-      'WebImageInfo should never be instantiated in a non-web context.');
+  ui.Image get image => _unsupported();
 
   @override
-  bool isCloneOf(ImageInfo other) => throw UnsupportedError(
-      'WebImageInfo should never be instantiated in a non-web context.');
+  bool isCloneOf(ImageInfo other) => _unsupported();
 
   @override
-  double get scale => throw UnsupportedError(
-      'WebImageInfo should never be instantiated in a non-web context.');
+  double get scale => _unsupported();
 
   @override
-  int get sizeBytes => throw UnsupportedError(
+  int get sizeBytes => _unsupported();
+
+  Never _unsupported() => throw UnsupportedError(
       'WebImageInfo should never be instantiated in a non-web context.');
 }
