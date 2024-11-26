@@ -87,8 +87,7 @@ https://docs.flutter.dev/testing/integration-tests
     });
 
     final TestExceptionReporter oldTestExceptionReporter = reportTestException;
-    reportTestException =
-        (FlutterErrorDetails details, String testDescription) {
+    reportTestException = (FlutterErrorDetails details, String testDescription) {
       results[testDescription] = Failure(testDescription, details.toString());
       oldTestExceptionReporter(details, testDescription);
     };
@@ -251,9 +250,13 @@ https://docs.flutter.dev/testing/integration-tests
   }) async {
     assert(!inTest);
     _inTest = true;
-    await testBody();
-    invariantTester();
-    results[description] ??= _success;
+    try {
+      await testBody();
+      invariantTester();
+      results[description] = _success;
+    } catch (e) {
+      results[description] = '$e';
+    }
   }
 
   @override
