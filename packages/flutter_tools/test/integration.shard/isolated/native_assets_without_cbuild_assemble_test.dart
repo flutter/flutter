@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(matanlurey): Remove after debugging https://github.com/flutter/flutter/issues/159000.
-@Tags(<String>['flutter-build-apk'])
-library;
-
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -143,9 +139,6 @@ void main(List<String> args) async {
         expect(await process.exitCode, 0);
       },);
     },
-    // TODO(matanlurey): Debug why flutter build apk often timesout.
-    // See https://github.com/flutter/flutter/issues/158560 for details.
-    skip: buildCommand == 'apk' ? 'flutter build apk times out' : false, // Temporary workaround for https://github.com/flutter/flutter/issues/158560.
     tags: <String>['flutter-build-apk'],
   );
 }

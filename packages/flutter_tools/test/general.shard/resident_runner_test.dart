@@ -96,6 +96,12 @@ void main() {
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
   }));
 
+  testUsingContext('ResidentRunner reports whether detach() was used', () => testbed.run(() async {
+    expect(residentRunner.stopAppDuringCleanup, true);
+    await residentRunner.detach();
+    expect(residentRunner.stopAppDuringCleanup, false);
+  }));
+
   testUsingContext('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
@@ -1302,6 +1308,7 @@ flutter:
           commandHelp.M,
           commandHelp.g,
           commandHelp.hWithDetails,
+          commandHelp.d,
           commandHelp.c,
           commandHelp.q,
           '',
@@ -1331,6 +1338,7 @@ flutter:
           commandHelp.r,
           commandHelp.R,
           commandHelp.hWithoutDetails,
+          commandHelp.d,
           commandHelp.c,
           commandHelp.q,
           '',
