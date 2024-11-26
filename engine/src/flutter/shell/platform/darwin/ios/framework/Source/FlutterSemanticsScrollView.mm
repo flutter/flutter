@@ -15,8 +15,6 @@ FLUTTER_ASSERT_ARC
   self = [super initWithFrame:CGRectZero];
   if (self) {
     _semanticsObject = semanticsObject;
-    _isDoingSystemScrolling = NO;
-    self.delegate = self;
   }
   return self;
 }
@@ -105,16 +103,6 @@ FLUTTER_ASSERT_ARC
 
 - (NSInteger)accessibilityElementCount {
   return self.semanticsObject.children.count;
-}
-
-- (void)scrollViewWillEndDragging:(UIScrollView*)scrollView
-                     withVelocity:(CGPoint)velocity
-              targetContentOffset:(inout CGPoint*)targetContentOffset {
-  _isDoingSystemScrolling = YES;
-}
-
-- (void)scrollViewDidEndDecelerating:(UIScrollView*)scrollView {
-  _isDoingSystemScrolling = NO;
 }
 
 @end

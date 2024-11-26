@@ -15,18 +15,10 @@ namespace testing {
 class SemanticsActionObservation {
  public:
   SemanticsActionObservation(int32_t observed_id, SemanticsAction observed_action)
-      : id(observed_id), action(observed_action), args({}) {}
-
-  SemanticsActionObservation(int32_t observed_id,
-                             SemanticsAction observed_action,
-                             fml::MallocMapping& args)
-      : id(observed_id),
-        action(observed_action),
-        args(args.GetMapping(), args.GetMapping() + args.GetSize()) {}
+      : id(observed_id), action(observed_action) {}
 
   int32_t id;
   SemanticsAction action;
-  std::vector<uint8_t> args;
 };
 
 class MockAccessibilityBridge : public AccessibilityBridgeIos {
@@ -46,7 +38,7 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   void DispatchSemanticsAction(int32_t id,
                                SemanticsAction action,
                                fml::MallocMapping args) override {
-    SemanticsActionObservation observation(id, action, args);
+    SemanticsActionObservation observation(id, action);
     observations.push_back(observation);
   }
   void AccessibilityObjectDidBecomeFocused(int32_t id) override {}
@@ -77,7 +69,7 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
   void DispatchSemanticsAction(int32_t id,
                                SemanticsAction action,
                                fml::MallocMapping args) override {
-    SemanticsActionObservation observation(id, action, args);
+    SemanticsActionObservation observation(id, action);
     observations.push_back(observation);
   }
   void AccessibilityObjectDidBecomeFocused(int32_t id) override {}

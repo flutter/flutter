@@ -161,9 +161,6 @@ std::string NodeActionsToString(const flutter::SemanticsNode& node) {
   if (node.HasAction(flutter::SemanticsAction::kScrollUp)) {
     output += "kScrollUp|";
   }
-  if (node.HasAction(flutter::SemanticsAction::kScrollToOffset)) {
-    output += "kScrollToOffset|";
-  }
   if (node.HasAction(flutter::SemanticsAction::kSetSelection)) {
     output += "kSetSelection|";
   }
