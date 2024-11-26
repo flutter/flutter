@@ -10,7 +10,6 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSemanticsScrollView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge_ios.h"
 
 constexpr int32_t kRootNodeId = 0;
@@ -187,7 +186,7 @@ constexpr float kScrollExtentMaxForInf = 1000;
 /// The semantics object for scrollable. This class creates an UIScrollView to interact with the
 /// iOS.
 @interface FlutterScrollableSemanticsObject : SemanticsObject
-@property(nonatomic, readonly) FlutterSemanticsScrollView* scrollView;
+
 @end
 
 /**
