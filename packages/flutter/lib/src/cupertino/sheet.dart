@@ -14,8 +14,9 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   end: const Offset(0.0, 0.08),
 );
 
-// When a sheet covers another sheet it needs to go slightly higher '0.0' to
-// to overtake the position the previous sheet, which was lower, started at.
+// Offset change for when a new sheet covers another sheet. '0.0' represents the
+// top of the space available for the new sheet, but because the previous sheet
+// was lowered slightly, the new sheet needs to go slightly higher than that.
 final Animatable<Offset> _kFullBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
   end: const Offset(0.0, -0.02),
@@ -41,8 +42,8 @@ const double _kSheetScaleFactor = 0.0835;
 
 final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kSheetScaleFactor);
 
-/// Slides a Cupertino sheet widget up from the bottom of the screen and stacks
-/// the previous route behind the new sheet.
+/// Shows a Cupertino style sheet widget that slides up from the bottom of the
+/// screen and stacks the previous route behind the new sheet.
 ///
 /// This is a convenience method for displaying [CupertinoSheetRoute] for common,
 /// straightforward use cases. The return of `pageBuilder` will be used to display
@@ -78,7 +79,12 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the sheet was closed.
 ///
-/// Sample code
+/// {@tool dartpad}
+/// This example shows how to navigate to use [showCupertinoSheet] to display a
+/// Cupertino sheet widget with nested navigation.
+///
+/// ** See code in examples/api/lib/cupertino/sheet/cupertino_sheet.2.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -277,7 +283,23 @@ class CupertinoSheetTransition extends StatelessWidget {
 /// The sheet will be dismissed by dragging downwards on the screen, or a call to
 /// [CupertinoSheetRoute.popSheet].
 ///
-/// Sample docs
+/// {@tool dartpad}
+/// This example shows how to navigate to [CupertinoSheetRoute] by using it the
+/// same as a regular route.
+///
+/// ** See code in examples/api/lib/cupertino/sheet/cupertino_sheet.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to setup a [CupertinoSheetRoute] with nested navigation.
+/// This allows for pushing to new routes that transition from within the sheet
+/// view.
+///
+/// This example can be acieved by calling [showCupertinoSheet], which sets up
+/// much of the same boilderplate by default.
+///
+/// ** See code in examples/api/lib/cupertino/sheet/cupertino_sheet.1.dart **
+/// {@end-tool}
 class CupertinoSheetRoute<T> extends PageRoute<T> with CupertinoSheetRouteTransitionMixin<T> {
   /// Creates a page route that displays an iOS styled sheet.
   CupertinoSheetRoute({
@@ -313,6 +335,8 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with CupertinoSheetRouteTransi
     }
   }
 
+  // Slightly darkens the sheet behind. Eyeballed from a simulator running iOS 18.0
+  // TODO(mitchgoodwin): Adjust with darkmode logic.
   @override
   Color? get barrierColor => const Color(0x20000000);
 
