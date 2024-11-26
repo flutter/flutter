@@ -745,6 +745,7 @@ class CircularProgressIndicator extends ProgressIndicator {
       'This feature was deprecated after v3.27.0-0.1.pre.'
     )
     this.year2023 = true,
+    this.padding,
   }) : _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
@@ -774,6 +775,7 @@ class CircularProgressIndicator extends ProgressIndicator {
       'This feature was deprecated after v3.27.0-0.2.pre.'
     )
     this.year2023 = true,
+    this.padding,
   }) : _indicatorType = _ActivityIndicatorType.adaptive;
 
   final _ActivityIndicatorType _indicatorType;
@@ -853,6 +855,13 @@ class CircularProgressIndicator extends ProgressIndicator {
     'This feature was deprecated after v3.27.0-0.2.pre.'
   )
   final bool year2023;
+
+  /// The padding around the indicator track.
+  ///
+  /// If null, then the [ProgressIndicatorThemeData.circularTrackPadding] will be
+  /// used. If that is null and [year2023] is false, then defaults to `EdgeInsets.all(4.0)`
+  /// padding. Otherwise, defaults to zero padding.
+  final EdgeInsetsGeometry? padding;
 
   /// The indicator stroke is drawn fully inside of the indicator path.
   ///
@@ -967,27 +976,40 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
       : widget.trackGap ??
         indicatorTheme.trackGap ??
         defaults.trackGap;
-    return widget._buildSemanticsWrapper(
-      context: context,
-      child: ConstrainedBox(
-        constraints: constraints,
-        child: CustomPaint(
-          painter: _CircularProgressIndicatorPainter(
-            trackColor: trackColor,
-            valueColor: widget._getValueColor(context, defaultColor: defaults.color),
-            value: widget.value, // may be null
-            headValue: headValue, // remaining arguments are ignored if widget.value is not null
-            tailValue: tailValue,
-            offsetValue: offsetValue,
-            rotationValue: rotationValue,
-            strokeWidth: strokeWidth,
-            strokeAlign: strokeAlign,
-            strokeCap: strokeCap,
-            trackGap: trackGap,
-            year2023: widget.year2023,
-          ),
+    final EdgeInsetsGeometry? effectivePadding = widget.padding
+      ?? indicatorTheme.circularTrackPadding
+      ?? defaults.circularTrackPadding;
+
+    Widget result = ConstrainedBox(
+      constraints: constraints,
+      child: CustomPaint(
+        painter: _CircularProgressIndicatorPainter(
+          trackColor: trackColor,
+          valueColor: widget._getValueColor(context, defaultColor: defaults.color),
+          value: widget.value, // may be null
+          headValue: headValue, // remaining arguments are ignored if widget.value is not null
+          tailValue: tailValue,
+          offsetValue: offsetValue,
+          rotationValue: rotationValue,
+          strokeWidth: strokeWidth,
+          strokeAlign: strokeAlign,
+          strokeCap: strokeCap,
+          trackGap: trackGap,
+          year2023: widget.year2023,
         ),
       ),
+    );
+
+    if (effectivePadding != null) {
+      result = Padding(
+        padding: effectivePadding,
+        child: result,
+      );
+    }
+
+    return widget._buildSemanticsWrapper(
+      context: context,
+      child: result,
     );
   }
 
@@ -1396,12 +1418,15 @@ class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
 
   @override
   BoxConstraints get constraints => const BoxConstraints(
-    minWidth: 48.0,
-    minHeight: 48.0,
+    minWidth: 40.0,
+    minHeight: 40.0,
   );
 
   @override
   double? get trackGap => 4.0;
+
+  @override
+  EdgeInsetsGeometry? get circularTrackPadding => const EdgeInsets.all(4.0);
 }
 
 class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {

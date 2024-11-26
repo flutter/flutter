@@ -49,9 +49,9 @@ void main() {
 class MissingFlutterSourcePathDeferredComponentsConfig
     extends BasicDeferredComponentsConfig {
   final String _flutterSourcePath = '''
-  flutter {
-      source '../..'
-  }
+flutter {
+    source '../..'
+}
 ''';
 
   @override
