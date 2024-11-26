@@ -5,6 +5,7 @@
 plugins {
     `java-gradle-plugin`
     groovy
+    kotlin("jvm") version "1.9.0" 
 }
 
 group = "dev.flutter.plugin"
