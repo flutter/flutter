@@ -379,9 +379,9 @@ void _defineTests() {
     // Do the actions work?
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     int expectedLength = 1;
-    // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/159515.
-    // ignore: exhaustive_cases
     for (final SemanticsAction action in allActions) {
+      // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/159515.
+      // ignore: exhaustive_cases
       switch (action) {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:
