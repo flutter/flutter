@@ -1670,7 +1670,7 @@ abstract class DiagnosticsNode {
   /// This is only used when [WidgetInspectorServiceExtensions.getRootWidgetTree]
   /// is called with fullDetails=false. To get the full widget details, including
   /// any details provided by subclasses, [toJsonMap] should be used instead.
-  /// 
+  ///
   /// See https://github.com/flutter/devtools/issues/8553 for details about this
   /// iterative approach.
   Map<String, Object?> toJsonMapIterative(
@@ -1884,9 +1884,10 @@ abstract class DiagnosticsNode {
     return <String, Object?>{
       'description': description,
       'shouldIndent': shouldIndent,
-      // TODO(https://github.com/flutter/devtools/issues/8556): This can be
-      // removed to reduce the JSON response even further once DevTools computes
-      // the widget runtime type from the description instead.
+      // TODO(elliette): This can be removed to reduce the JSON response even
+      // further once DevTools computes the widget runtime type from the
+      // description instead, see:
+      // https://github.com/flutter/devtools/issues/8556
       'widgetRuntimeType': widgetRuntimeType,
       'truncated': truncated,
       ...delegate.additionalNodeProperties(this, fullDetails: false),
