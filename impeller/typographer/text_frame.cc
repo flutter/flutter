@@ -3,10 +3,24 @@
 // found in the LICENSE file.
 
 #include "impeller/typographer/text_frame.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/font_glyph_pair.h"
 
 namespace impeller {
+
+namespace {
+static bool TextPropertiesEquals(const std::optional<GlyphProperties>& a,
+                                 const std::optional<GlyphProperties>& b) {
+  if (!a.has_value() && !b.has_value()) {
+    return true;
+  }
+  if (a.has_value() && b.has_value()) {
+    return GlyphProperties::Equal{}(a.value(), b.value());
+  }
+  return false;
+}
+}  // namespace
 
 TextFrame::TextFrame() = default;
 
@@ -37,7 +51,7 @@ bool TextFrame::HasColor() const {
 }
 
 // static
-Scalar TextFrame::RoundScaledFontSize(Scalar scale, Scalar point_size) {
+Scalar TextFrame::RoundScaledFontSize(Scalar scale) {
   // An arbitrarily chosen maximum text scale to ensure that regardless of the
   // CTM, a glyph will fit in the atlas. If we clamp significantly, this may
   // reduce fidelity but is preferable to the alternative of failing to render.
@@ -87,6 +101,12 @@ Point TextFrame::ComputeSubpixelPosition(
 void TextFrame::SetPerFrameData(Scalar scale,
                                 Point offset,
                                 std::optional<GlyphProperties> properties) {
+  if (!ScalarNearlyEqual(scale_, scale) ||
+      !ScalarNearlyEqual(offset_.x, offset.x) ||
+      !ScalarNearlyEqual(offset_.y, offset.y) ||
+      !TextPropertiesEquals(properties_, properties)) {
+    bound_values_.clear();
+  }
   scale_ = scale;
   offset_ = offset;
   properties_ = properties;
@@ -121,7 +141,15 @@ bool TextFrame::IsFrameComplete() const {
 }
 
 const FrameBounds& TextFrame::GetFrameBounds(size_t index) const {
-  return bound_values_.at(index);
+  return bound_values_[index];
+}
+
+size_t TextFrame::GetAtlasGeneration() const {
+  return generation_;
+}
+
+void TextFrame::SetAtlasGeneration(size_t value) {
+  generation_ = value;
 }
 
 }  // namespace impeller
