@@ -1754,7 +1754,15 @@ mixin WidgetInspectorService {
     bool fullDetails = true,
   }
   ) {
-    return node?.toJsonMap(delegate, fullDetails: fullDetails);
+    if (fullDetails) {
+      return node?.toJsonMap(delegate);
+    } else {
+      // If we don't need the full details fetched from all the subclasses, we
+      // can iteratively build the JSON map. This prevents a stack overflow
+      // exception for particularly large widget trees. For details, see:
+      // https://github.com/flutter/devtools/issues/8553
+      return node?.toJsonMapIterative(delegate);
+    }
   }
 
   bool _isValueCreatedByLocalProject(Object? value) {
@@ -1824,14 +1832,8 @@ mixin WidgetInspectorService {
     List<DiagnosticsNode> nodes,
     InspectorSerializationDelegate delegate, {
     required DiagnosticsNode? parent,
-    bool fullDetails = true,
   }) {
-    return DiagnosticsNode.toJsonList(
-      nodes,
-      parent,
-      delegate,
-      fullDetails: fullDetails,
-    );
+    return DiagnosticsNode.toJsonList(nodes, parent, delegate);
   }
 
   /// Returns a JSON representation of the properties of the [DiagnosticsNode]
