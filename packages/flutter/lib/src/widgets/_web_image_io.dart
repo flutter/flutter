@@ -9,7 +9,7 @@ import 'framework.dart';
 /// A [Widget] that displays an image that is backed by an <img> element.
 class RawWebImage extends StatelessWidget {
   /// Creates a [RawWebImage].
-  const RawWebImage({
+  RawWebImage({
     super.key,
     required this.image,
     this.debugImageLabel,
@@ -18,7 +18,9 @@ class RawWebImage extends StatelessWidget {
     this.fit,
     this.alignment = Alignment.center,
     this.matchTextDirection = false,
-  });
+  }) {
+    throw UnsupportedError('Cannot create a $RawWebImage when not running on the web');
+  }
 
   /// The underlying `<img>` element to be displayed.
   final WebImageInfo image;

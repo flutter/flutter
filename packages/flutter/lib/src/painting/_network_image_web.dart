@@ -141,14 +141,15 @@ class NetworkImage
 
     // We use a different method when headers are set because the
     // `ui_web.createImageCodecFromUrl` method is not capable of handling headers.
-    if (isSkiaWeb || containsNetworkImageHeaders) {
-      if (containsNetworkImageHeaders) {
-        // Don't even attempt to fall back to an <img> element if there are
-        // headers.
-        return _fetchImageBytes(key, decode);
-      }
-
-      return _fetchImageBytes(key, decode)
+    if (containsNetworkImageHeaders) {
+        // It is not possible to load an <img> element and pass the headers with
+        // the request to fetch the image. Since the user has provided headers,
+        // this function should assume the headers are required to resolve to
+        // the correct resource and should not attempt to load the image in an
+        // <img> tag without the headers.
+        return _fetchImageBytes(decode);
+    } else if (isSkiaWeb) {
+      return _fetchImageBytes(decode)
           .catchError((Object error, StackTrace? stackTrace) async {
         // If we failed to fetch the bytes, try to load the image in an <img>
         // element instead.
@@ -158,6 +159,10 @@ class NetworkImage
         return _SingleWebImageFrameIterator(imageElement);
       });
     } else {
+      // This branch is only hit by the HTML renderer, which is deprecated. The
+      // HTML renderer supports loading images with CORS restrictions, so we
+      // don't need to catch errors and try loading the image in an <img> tag
+      // in this case.
       return ui_web.createImageCodecFromUrl(
         resolved,
         chunkCallback: (int bytes, int total) {
@@ -169,23 +174,20 @@ class NetworkImage
   }
 
   Future<ImageFrameIterator> _fetchImageBytes(
-    NetworkImage key,
     _SimpleDecoderCallback decode,
   ) async {
-    assert(key == this);
+    final Uri resolved = Uri.base.resolve(url);
 
-    final Uri resolved = Uri.base.resolve(key.url);
-
-    final bool containsNetworkImageHeaders = key.headers?.isNotEmpty ?? false;
+    final bool containsNetworkImageHeaders = headers?.isNotEmpty ?? false;
 
     final Completer<web.XMLHttpRequest> completer =
         Completer<web.XMLHttpRequest>();
     final web.XMLHttpRequest request = httpRequestFactory();
 
-    request.open('GET', key.url, true);
+    request.open('GET', url, true);
     request.responseType = 'arraybuffer';
     if (containsNetworkImageHeaders) {
-      key.headers!.forEach((String header, String value) {
+      headers!.forEach((String header, String value) {
         request.setRequestHeader(header, value);
       });
     }
@@ -246,7 +248,7 @@ class NetworkImage
   String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)})';
 }
 
-class _SingleWebImageFrameIterator extends ImageFrameIterator {
+class _SingleWebImageFrameIterator implements ImageFrameIterator {
   _SingleWebImageFrameIterator(this.imageElement);
 
   final web.HTMLImageElement imageElement;
@@ -263,7 +265,7 @@ class _SingleWebImageFrameIterator extends ImageFrameIterator {
   int get repetitionCount => 0;
 }
 
-class _HtmlImageElementFrame extends ImageFrame {
+class _HtmlImageElementFrame implements ImageFrame {
   _HtmlImageElementFrame(this.imageElement);
 
   final web.HTMLImageElement imageElement;

@@ -911,11 +911,8 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 }
 
-/// An iterator which iterates over the frames of an image.
-abstract class ImageFrameIterator {
-  /// A default constructor to allow for subclasses.
-  const ImageFrameIterator();
-
+/// A class for asynchronously traversing an image's frames.
+abstract interface class ImageFrameIterator {
   /// Creates an [ImageFrameIterator] from a [ui.Codec].
   factory ImageFrameIterator.fromCodec(ui.Codec codec) = _CodecImageFrameIterator;
 
@@ -929,11 +926,13 @@ abstract class ImageFrameIterator {
   int get repetitionCount;
 
   /// Returns a [Future] which resolves to the next frame in the animation.
+  ///
+  /// Wraps back to the first frame after returning the last frame.
   Future<ImageFrame> getNextFrame();
 }
 
 /// A single frame of an image.
-abstract class ImageFrame {
+abstract interface class ImageFrame {
   /// The duration this frame should be shown.
   ///
   /// A zero duration indicates that the frame should be shown indefinitely.
@@ -947,7 +946,7 @@ abstract class ImageFrame {
 }
 
 /// An [ImageFrame] backed by a [ui.FrameInfo].
-class _FrameInfoFrame extends ImageFrame {
+class _FrameInfoFrame implements ImageFrame {
   _FrameInfoFrame(this.frameInfo);
 
   final ui.FrameInfo frameInfo;
@@ -970,7 +969,7 @@ class _FrameInfoFrame extends ImageFrame {
 }
 
 /// An [ImageFrameIterator] backed by a [ui.Codec].
-class _CodecImageFrameIterator extends ImageFrameIterator {
+class _CodecImageFrameIterator implements ImageFrameIterator {
   _CodecImageFrameIterator(this.codec);
 
   final ui.Codec codec;

@@ -41,7 +41,7 @@ class ImgElementPlatformView extends StatelessWidget {
     });
   }
 
-  /// The `src` url for the `<img>` tag.
+  /// The `src` URL for the `<img>` tag.
   final String? src;
 
   @override
@@ -360,9 +360,7 @@ class RenderWebImage extends RenderShiftedBox {
     final double halfWidthDelta = (size.width - childSize.width) / 2.0;
     final double halfHeightDelta = (size.height - childSize.height) / 2.0;
     final double dx = halfWidthDelta +
-        (_flipHorizontally!
-                ? -_resolvedAlignment!.x
-                : _resolvedAlignment!.x) *
+        (_flipHorizontally! ? -_resolvedAlignment!.x : _resolvedAlignment!.x) *
             halfWidthDelta;
     final double dy =
         halfHeightDelta + _resolvedAlignment!.y * halfHeightDelta;
