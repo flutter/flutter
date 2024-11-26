@@ -4,7 +4,7 @@
 
 #include "impeller/display_list/color_filter.h"
 
-#include "display_list/effects/dl_color_filter.h"
+#include "display_list/effects/dl_color_filters.h"
 #include "fml/logging.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"

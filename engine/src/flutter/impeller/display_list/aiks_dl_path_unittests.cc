@@ -38,7 +38,7 @@ TEST_P(AiksTest, RotateColorFilteredPath) {
   arrow_head.moveTo({50, 120}).lineTo({120, 190}).lineTo({190, 120});
 
   auto filter =
-      DlBlendColorFilter::Make(DlColor::kAliceBlue(), DlBlendMode::kSrcIn);
+      DlColorFilter::MakeBlend(DlColor::kAliceBlue(), DlBlendMode::kSrcIn);
 
   DlPaint paint;
   paint.setStrokeWidth(15.0);
