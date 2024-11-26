@@ -12,7 +12,7 @@ FLUTTER_ASSERT_ARC
 namespace flutter {
 
 IOSExternalViewEmbedder::IOSExternalViewEmbedder(
-    __weak FlutterPlatformViewsController* platform_views_controller,
+    const std::shared_ptr<PlatformViewsController>& platform_views_controller,
     const std::shared_ptr<IOSContext>& context)
     : platform_views_controller_(platform_views_controller), ios_context_(context) {
   FML_CHECK(ios_context_);
@@ -31,7 +31,7 @@ DlCanvas* IOSExternalViewEmbedder::GetRootCanvas() {
 void IOSExternalViewEmbedder::CancelFrame() {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::CancelFrame");
   FML_CHECK(platform_views_controller_);
-  [platform_views_controller_ cancelFrame];
+  platform_views_controller_->CancelFrame();
 }
 
 // |ExternalViewEmbedder|
@@ -42,7 +42,7 @@ void IOSExternalViewEmbedder::BeginFrame(
 // |ExternalViewEmbedder|
 void IOSExternalViewEmbedder::PrepareFlutterView(SkISize frame_size, double device_pixel_ratio) {
   FML_CHECK(platform_views_controller_);
-  [platform_views_controller_ beginFrameWithSize:frame_size];
+  platform_views_controller_->BeginFrame(frame_size);
 }
 
 // |ExternalViewEmbedder|
@@ -51,7 +51,7 @@ void IOSExternalViewEmbedder::PrerollCompositeEmbeddedView(
     std::unique_ptr<EmbeddedViewParams> params) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::PrerollCompositeEmbeddedView");
   FML_CHECK(platform_views_controller_);
-  [platform_views_controller_ prerollCompositeEmbeddedView:view_id withParams:std::move(params)];
+  platform_views_controller_->PrerollCompositeEmbeddedView(view_id, std::move(params));
 }
 
 // |ExternalViewEmbedder|
@@ -59,10 +59,8 @@ PostPrerollResult IOSExternalViewEmbedder::PostPrerollAction(
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::PostPrerollAction");
   FML_CHECK(platform_views_controller_);
-  BOOL impeller_enabled = ios_context_->GetBackend() != IOSRenderingBackend::kSkia;
-  PostPrerollResult result =
-      [platform_views_controller_ postPrerollActionWithThreadMerger:raster_thread_merger
-                                                    impellerEnabled:impeller_enabled];
+  PostPrerollResult result = platform_views_controller_->PostPrerollAction(
+      raster_thread_merger, ios_context_->GetBackend() != IOSRenderingBackend::kSkia);
   return result;
 }
 
@@ -70,7 +68,7 @@ PostPrerollResult IOSExternalViewEmbedder::PostPrerollAction(
 DlCanvas* IOSExternalViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::CompositeEmbeddedView");
   FML_CHECK(platform_views_controller_);
-  return [platform_views_controller_ compositeEmbeddedViewWithId:view_id];
+  return platform_views_controller_->CompositeEmbeddedView(view_id);
 }
 
 // |ExternalViewEmbedder|
@@ -85,9 +83,7 @@ void IOSExternalViewEmbedder::SubmitFlutterView(
   // Properly support multi-view in the future.
   FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
   FML_CHECK(platform_views_controller_);
-  [platform_views_controller_ submitFrame:std::move(frame)
-                           withIosContext:ios_context_
-                                grContext:context];
+  platform_views_controller_->SubmitFrame(context, ios_context_, std::move(frame));
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
 }
 
@@ -96,10 +92,8 @@ void IOSExternalViewEmbedder::EndFrame(
     bool should_resubmit_frame,
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::EndFrame");
-  BOOL impeller_enabled = ios_context_->GetBackend() != IOSRenderingBackend::kSkia;
-  [platform_views_controller_ endFrameWithResubmit:should_resubmit_frame
-                                      threadMerger:raster_thread_merger
-                                   impellerEnabled:impeller_enabled];
+  platform_views_controller_->EndFrame(should_resubmit_frame, raster_thread_merger,
+                                       ios_context_->GetBackend() != IOSRenderingBackend::kSkia);
 }
 
 // |ExternalViewEmbedder|
@@ -116,12 +110,12 @@ bool IOSExternalViewEmbedder::SupportsDynamicThreadMerging() {
 void IOSExternalViewEmbedder::PushFilterToVisitedPlatformViews(
     const std::shared_ptr<DlImageFilter>& filter,
     const SkRect& filter_rect) {
-  [platform_views_controller_ pushFilterToVisitedPlatformViews:filter withRect:filter_rect];
+  platform_views_controller_->PushFilterToVisitedPlatformViews(filter, filter_rect);
 }
 
 // |ExternalViewEmbedder|
 void IOSExternalViewEmbedder::PushVisitedPlatformView(int64_t view_id) {
-  [platform_views_controller_ pushVisitedPlatformViewId:view_id];
+  platform_views_controller_->PushVisitedPlatformView(view_id);
 }
 
 }  // namespace flutter

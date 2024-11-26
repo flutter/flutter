@@ -41,10 +41,11 @@ void PlatformViewIOS::AccessibilityBridgeManager::Clear() {
   accessibility_bridge_.reset();
 }
 
-PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
-                                 const std::shared_ptr<IOSContext>& context,
-                                 __weak FlutterPlatformViewsController* platform_views_controller,
-                                 const flutter::TaskRunners& task_runners)
+PlatformViewIOS::PlatformViewIOS(
+    PlatformView::Delegate& delegate,
+    const std::shared_ptr<IOSContext>& context,
+    const std::shared_ptr<PlatformViewsController>& platform_views_controller,
+    const flutter::TaskRunners& task_runners)
     : PlatformView(delegate, task_runners),
       ios_context_(context),
       platform_views_controller_(platform_views_controller),
@@ -55,7 +56,7 @@ PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
 PlatformViewIOS::PlatformViewIOS(
     PlatformView::Delegate& delegate,
     IOSRenderingAPI rendering_api,
-    __weak FlutterPlatformViewsController* platform_views_controller,
+    const std::shared_ptr<PlatformViewsController>& platform_views_controller,
     const flutter::TaskRunners& task_runners,
     const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
@@ -208,7 +209,7 @@ void PlatformViewIOS::OnPreEngineRestart() const {
   if (!owner_controller_) {
     return;
   }
-  [owner_controller_.platformViewsController reset];
+  owner_controller_.platformViewsController->Reset();
   [owner_controller_.restorationPlugin reset];
 }
 

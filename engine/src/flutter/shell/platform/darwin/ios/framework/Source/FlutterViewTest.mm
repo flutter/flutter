@@ -13,18 +13,23 @@ FLUTTER_ASSERT_ARC
 @property(nonatomic, assign) BOOL isUsingImpeller;
 @end
 
-@implementation FakeDelegate
-
-@synthesize platformViewsController = _platformViewsController;
+@implementation FakeDelegate {
+  std::shared_ptr<flutter::PlatformViewsController> _platformViewsController;
+}
 
 - (instancetype)init {
   _callbackCalled = NO;
+  _platformViewsController = std::shared_ptr<flutter::PlatformViewsController>(nullptr);
   return self;
 }
 
 - (flutter::Rasterizer::Screenshot)takeScreenshot:(flutter::Rasterizer::ScreenshotType)type
                                   asBase64Encoded:(BOOL)base64Encode {
   return {};
+}
+
+- (std::shared_ptr<flutter::PlatformViewsController>&)platformViewsController {
+  return _platformViewsController;
 }
 
 - (void)flutterViewAccessibilityDidCall {
