@@ -268,15 +268,18 @@ enum WebRendererMode {
         },
       };
 
+  /// Sets the dart defines for the currently selected WebRendererMode
   List<String> updateDartDefines(List<String> inputDefines) {
     final Set<String> dartDefinesSet = inputDefines.toSet();
-    if (!inputDefines
-            .any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT=')) &&
-        inputDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
-      dartDefinesSet
-          .removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
-    }
-    dartDefinesSet.addAll(dartDefines);
+
+    dartDefinesSet
+      ..removeWhere((String d) {
+        return d.startsWith('FLUTTER_WEB_AUTO_DETECT=') ||
+            d.startsWith('FLUTTER_WEB_USE_SKIA=') ||
+            d.startsWith('FLUTTER_WEB_USE_SKWASM=');
+      })
+      ..addAll(dartDefines);
+
     return dartDefinesSet.toList();
   }
 }
