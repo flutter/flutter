@@ -95,6 +95,7 @@ class NetworkImage
         chunkEvents,
       ),
       informationCollector: _imageStreamInformationCollector(key),
+      debugLabel: key.url,
     );
   }
 
@@ -112,6 +113,7 @@ class NetworkImage
         chunkEvents,
       ),
       informationCollector: _imageStreamInformationCollector(key),
+      debugLabel: key.url,
     );
   }
 
@@ -192,7 +194,7 @@ class NetworkImage
             ),
           ),
           informationCollector: _imageStreamInformationCollector(key),
-        );
+        )..debugLabel = key.url;
       }
     } else {
       // This branch is only hit by the HTML renderer, which is deprecated. The
@@ -299,7 +301,8 @@ class NetworkImage
 /// that is loaded asynchronously.
 class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
   _ForwardingImageStreamCompleter(this.task,
-      {InformationCollector? informationCollector}) {
+      {InformationCollector? informationCollector, String? debugLabel}) {
+    this.debugLabel = debugLabel;
     task.then((ImageStreamCompleter value) {
       resolved = true;
       if (disposed) {
