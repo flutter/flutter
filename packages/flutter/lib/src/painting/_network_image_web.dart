@@ -181,10 +181,16 @@ class NetworkImage
         // element instead.
         final web.HTMLImageElement imageElement = imgElementFactory();
         imageElement.src = key.url;
+        // Decode the <img> element before creating the ImageStreamCompleter
+        // to avoid double reporting the error.
+        await imageElement.decode().toDart;
         return OneFrameImageStreamCompleter(
-          imageElement.decode().toDart.then(
-                (_) => WebImageInfo(imageElement, debugLabel: key.url),
-              ),
+          Future<ImageInfo>.value(
+            WebImageInfo(
+              imageElement,
+              debugLabel: key.url,
+            ),
+          ),
           informationCollector: _imageStreamInformationCollector(key),
         );
       }
@@ -193,15 +199,21 @@ class NetworkImage
       // HTML renderer supports loading images with CORS restrictions, so we
       // don't need to catch errors and try loading the image in an <img> tag
       // in this case.
-      return MultiFrameImageStreamCompleter(
-        chunkEvents: chunkEvents.stream,
-        codec: ui_web.createImageCodecFromUrl(
+
+      // Resolve the Codec before passing it to
+      // [MultiFrameImageStreamCompleter] so any errors aren't reported
+      // twice (once from the MultiFrameImageStreamCompleter) and again
+      // from the wrapping [ForwardingImageStreamCompleter].
+      final ui.Codec codec = await ui_web.createImageCodecFromUrl(
           resolved,
           chunkCallback: (int bytes, int total) {
             chunkEvents.add(ImageChunkEvent(
                 cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
           },
-        ),
+        );
+      return MultiFrameImageStreamCompleter(
+        chunkEvents: chunkEvents.stream,
+        codec: Future<ui.Codec>.value(codec),
         scale: key.scale,
         debugLabel: key.url,
         informationCollector: _imageStreamInformationCollector(key),
