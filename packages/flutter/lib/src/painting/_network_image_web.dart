@@ -309,7 +309,7 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
       ));
     }, onError: (Object error, StackTrace stack) {
       reportError(
-        context: ErrorDescription('resolving a single-frame image stream'),
+        context: ErrorDescription('resolving an image stream completer'),
         exception: error,
         stack: stack,
         informationCollector: informationCollector,
