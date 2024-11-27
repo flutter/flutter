@@ -134,7 +134,7 @@ fml::Status ComputePassVK::Compute(const ISize& grid_size) {
 bool ComputePassVK::BindResource(ShaderStage stage,
                                  DescriptorType type,
                                  const ShaderUniformSlot& slot,
-                                 const ShaderMetadata& metadata,
+                                 const ShaderMetadata* metadata,
                                  BufferView view) {
   return BindResource(slot.binding, type, view);
 }
@@ -144,7 +144,7 @@ bool ComputePassVK::BindResource(
     ShaderStage stage,
     DescriptorType type,
     const SampledImageSlot& slot,
-    const ShaderMetadata& metadata,
+    const ShaderMetadata* metadata,
     std::shared_ptr<const Texture> texture,
     const std::unique_ptr<const Sampler>& sampler) {
   if (bound_image_offset_ >= kMaxBindings) {

@@ -181,24 +181,32 @@ class RenderPass : public ResourceBinder {
   virtual bool BindResource(ShaderStage stage,
                             DescriptorType type,
                             const ShaderUniformSlot& slot,
-                            const ShaderMetadata& metadata,
+                            const ShaderMetadata* metadata,
                             BufferView view) override;
-
-  virtual bool BindResource(
-      ShaderStage stage,
-      DescriptorType type,
-      const ShaderUniformSlot& slot,
-      const std::shared_ptr<const ShaderMetadata>& metadata,
-      BufferView view);
 
   // |ResourceBinder|
   virtual bool BindResource(
       ShaderStage stage,
       DescriptorType type,
       const SampledImageSlot& slot,
-      const ShaderMetadata& metadata,
+      const ShaderMetadata* metadata,
       std::shared_ptr<const Texture> texture,
       const std::unique_ptr<const Sampler>& sampler) override;
+
+  /// @brief Bind with dynamically generated shader metadata.
+  virtual bool BindDynamicResource(
+      ShaderStage stage,
+      DescriptorType type,
+      const SampledImageSlot& slot,
+      std::unique_ptr<ShaderMetadata> metadata,
+      std::shared_ptr<const Texture> texture,
+      const std::unique_ptr<const Sampler>& sampler);
+
+  virtual bool BindDynamicResource(ShaderStage stage,
+                                   DescriptorType type,
+                                   const ShaderUniformSlot& slot,
+                                   std::unique_ptr<ShaderMetadata> metadata,
+                                   BufferView view);
 
   //----------------------------------------------------------------------------
   /// @brief      Encode the recorded commands to the underlying command buffer.
