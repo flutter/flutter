@@ -1389,6 +1389,24 @@ dev_dependencies:
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('Passes web renderer into debugging options', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(<String>[
+        'test',
+        '--no-pub',
+        '--platform=chrome',
+        ...WebRendererMode.canvaskit.toCliDartDefines,
+      ]);
+      expect(testRunner.lastDebuggingOptionsValue.webRenderer, WebRendererMode.canvaskit);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('Web renderer defaults to Skwasm when using wasm', () async {
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
