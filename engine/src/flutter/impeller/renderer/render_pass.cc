@@ -216,29 +216,40 @@ fml::Status RenderPass::Draw() {
 bool RenderPass::BindResource(ShaderStage stage,
                               DescriptorType type,
                               const ShaderUniformSlot& slot,
-                              const ShaderMetadata& metadata,
+                              const ShaderMetadata* metadata,
                               BufferView view) {
   return pending_.BindResource(stage, type, slot, metadata, view);
-}
-
-bool RenderPass::BindResource(
-    ShaderStage stage,
-    DescriptorType type,
-    const ShaderUniformSlot& slot,
-    const std::shared_ptr<const ShaderMetadata>& metadata,
-    BufferView view) {
-  return pending_.BindResource(stage, type, slot, metadata, std::move(view));
 }
 
 // |ResourceBinder|
 bool RenderPass::BindResource(ShaderStage stage,
                               DescriptorType type,
                               const SampledImageSlot& slot,
-                              const ShaderMetadata& metadata,
+                              const ShaderMetadata* metadata,
                               std::shared_ptr<const Texture> texture,
                               const std::unique_ptr<const Sampler>& sampler) {
   return pending_.BindResource(stage, type, slot, metadata, std::move(texture),
                                sampler);
+}
+
+bool RenderPass::BindDynamicResource(ShaderStage stage,
+                                     DescriptorType type,
+                                     const ShaderUniformSlot& slot,
+                                     std::unique_ptr<ShaderMetadata> metadata,
+                                     BufferView view) {
+  return pending_.BindDynamicResource(stage, type, slot, std::move(metadata),
+                                      std::move(view));
+}
+
+bool RenderPass::BindDynamicResource(
+    ShaderStage stage,
+    DescriptorType type,
+    const SampledImageSlot& slot,
+    std::unique_ptr<ShaderMetadata> metadata,
+    std::shared_ptr<const Texture> texture,
+    const std::unique_ptr<const Sampler>& sampler) {
+  return pending_.BindDynamicResource(stage, type, slot, std::move(metadata),
+                                      std::move(texture), sampler);
 }
 
 }  // namespace impeller

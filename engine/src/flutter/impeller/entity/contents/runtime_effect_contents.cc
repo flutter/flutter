@@ -50,9 +50,9 @@ static ShaderType GetShaderType(RuntimeUniformType type) {
   }
 }
 
-static std::shared_ptr<ShaderMetadata> MakeShaderMetadata(
+static std::unique_ptr<ShaderMetadata> MakeShaderMetadata(
     const RuntimeUniformDescription& uniform) {
-  auto metadata = std::make_shared<ShaderMetadata>();
+  std::unique_ptr<ShaderMetadata> metadata = std::make_unique<ShaderMetadata>();
   metadata->name = uniform.name;
   metadata->members.emplace_back(ShaderStructMemberMetadata{
       .type = GetShaderType(uniform.type),
@@ -206,7 +206,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
     size_t buffer_offset = 0;
 
     for (const auto& uniform : runtime_stage_->GetUniforms()) {
-      std::shared_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
+      std::unique_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
       switch (uniform.type) {
         case kSampledImage: {
           // Sampler uniforms are ordered in the IPLR according to their
@@ -237,9 +237,9 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           ShaderUniformSlot uniform_slot;
           uniform_slot.name = uniform.name.c_str();
           uniform_slot.ext_res_0 = uniform.location;
-          pass.BindResource(ShaderStage::kFragment,
-                            DescriptorType::kUniformBuffer, uniform_slot,
-                            metadata, std::move(buffer_view));
+          pass.BindDynamicResource(ShaderStage::kFragment,
+                                   DescriptorType::kUniformBuffer, uniform_slot,
+                                   std::move(metadata), std::move(buffer_view));
           buffer_index++;
           buffer_offset += uniform.GetSize();
           break;
@@ -274,14 +274,14 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
               sizeof(float) * uniform_buffer.size(), alignment);
           pass.BindResource(ShaderStage::kFragment,
                             DescriptorType::kUniformBuffer, uniform_slot,
-                            ShaderMetadata{}, std::move(buffer_view));
+                            nullptr, std::move(buffer_view));
         }
       }
     }
 
     size_t sampler_index = 0;
     for (const auto& uniform : runtime_stage_->GetUniforms()) {
-      std::shared_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
+      std::unique_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
 
       switch (uniform.type) {
         case kSampledImage: {
@@ -296,9 +296,9 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           image_slot.name = uniform.name.c_str();
           image_slot.binding = uniform.binding;
           image_slot.texture_index = uniform.location - minimum_sampler_index;
-          pass.BindResource(ShaderStage::kFragment,
-                            DescriptorType::kSampledImage, image_slot,
-                            *metadata, input.texture, sampler);
+          pass.BindDynamicResource(ShaderStage::kFragment,
+                                   DescriptorType::kSampledImage, image_slot,
+                                   std::move(metadata), input.texture, sampler);
 
           sampler_index++;
           break;
