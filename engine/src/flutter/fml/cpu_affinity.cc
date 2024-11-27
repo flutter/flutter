@@ -5,6 +5,7 @@
 #include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/build_config.h"
 
+#include <cstdint>
 #include <fstream>
 #include <optional>
 #include <string>

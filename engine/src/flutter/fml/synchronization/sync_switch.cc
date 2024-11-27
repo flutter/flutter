@@ -5,6 +5,7 @@
 #include "flutter/fml/synchronization/sync_switch.h"
 
 #include <algorithm>
+#include <mutex>
 
 namespace fml {
 

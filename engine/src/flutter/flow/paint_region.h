@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FLOW_PAINT_REGION_H_
 #define FLUTTER_FLOW_PAINT_REGION_H_
 
+#include <memory>
 #include <utility>
 #include <vector>
 #include "flutter/fml/logging.h"

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FML_CPU_AFFINITY_H_
 #define FLUTTER_FML_CPU_AFFINITY_H_
 
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <vector>
