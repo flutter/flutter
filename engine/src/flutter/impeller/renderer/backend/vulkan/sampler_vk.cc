@@ -92,7 +92,7 @@ static vk::UniqueSampler CreateSampler(
   }
 
   if (!desc.label.empty()) {
-    ContextVK::SetDebugName(device, sampler.value.get(), desc.label.c_str());
+    ContextVK::SetDebugName(device, sampler.value.get(), desc.label.data());
   }
 
   return std::move(sampler.value);
