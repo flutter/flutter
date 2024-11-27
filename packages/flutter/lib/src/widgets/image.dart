@@ -1291,6 +1291,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
     late Widget result;
     if (_imageInfo case final WebImageInfo webImage) {
+      // TODO(harryterkelsen): Support the remaining properties that are
+      // supported by `RawImage` but not `RawWebImage`. See the following issue
+      // above for a discussion of the missing properties and suggestions for
+      // how they can be implemented, https://github.com/flutter/flutter/issues/159565.
       result = RawWebImage(
         image: webImage,
         debugImageLabel: _imageInfo?.debugLabel,

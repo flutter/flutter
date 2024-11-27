@@ -146,24 +146,24 @@ class NetworkImage
     // We use a different method when headers are set because the
     // `ui_web.createImageCodecFromUrl` method is not capable of handling headers.
     if (containsNetworkImageHeaders) {
-        // It is not possible to load an <img> element and pass the headers with
-        // the request to fetch the image. Since the user has provided headers,
-        // this function should assume the headers are required to resolve to
-        // the correct resource and should not attempt to load the image in an
-        // <img> tag without the headers.
+      // It is not possible to load an <img> element and pass the headers with
+      // the request to fetch the image. Since the user has provided headers,
+      // this function should assume the headers are required to resolve to
+      // the correct resource and should not attempt to load the image in an
+      // <img> tag without the headers.
 
-        // Resolve the Codec before passing it to
-        // [MultiFrameImageStreamCompleter] so any errors aren't reported
-        // twice (once from the MultiFrameImageStreamCompleter) and again
-        // from the wrapping [ForwardingImageStreamCompleter].
-        final ui.Codec codec = await _fetchImageBytes(decode);
-        return MultiFrameImageStreamCompleter(
-          chunkEvents: chunkEvents.stream,
-          codec: Future<ui.Codec>.value(codec),
-          scale: key.scale,
-          debugLabel: key.url,
-          informationCollector: _imageStreamInformationCollector(key),
-        );
+      // Resolve the Codec before passing it to
+      // [MultiFrameImageStreamCompleter] so any errors aren't reported
+      // twice (once from the MultiFrameImageStreamCompleter and again
+      // from the wrapping [ForwardingImageStreamCompleter]).
+      final ui.Codec codec = await _fetchImageBytes(decode);
+      return MultiFrameImageStreamCompleter(
+        chunkEvents: chunkEvents.stream,
+        codec: Future<ui.Codec>.value(codec),
+        scale: key.scale,
+        debugLabel: key.url,
+        informationCollector: _imageStreamInformationCollector(key),
+      );
     } else if (isSkiaWeb) {
       try {
         // Resolve the Codec before passing it to
@@ -299,6 +299,8 @@ class NetworkImage
 
 /// An [ImageStreamCompleter] that delegates to another [ImageStreamCompleter]
 /// that is loaded asynchronously.
+///
+/// This completer keeps its child completer alive until this completer is disposed.
 class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
   _ForwardingImageStreamCompleter(this.task,
       {InformationCollector? informationCollector, String? debugLabel}) {
@@ -306,6 +308,9 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
     task.then((ImageStreamCompleter value) {
       resolved = true;
       if (disposed) {
+        // Add a listener since the delegate completer won't dispose if it never
+        // had a listener.
+        value.addListener(ImageStreamListener((_, __) {}));
         value.maybeDispose();
         return;
       }
