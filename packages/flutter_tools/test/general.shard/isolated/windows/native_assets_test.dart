@@ -148,7 +148,7 @@ void main() {
               projectUri
                   .resolve('build/native_assets/$expectedDirectory/bar.dll')
                   .toFilePath()
-                  .replaceAll(r'\', r'\\')
+                  .replaceAll(r'\', r'\\') // Undo JSON string escaping.
             else
               // Apps are a bundle with the dylibs on their dlopen path.
               'bar.dll',
