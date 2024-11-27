@@ -2524,7 +2524,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [hide], which hides the menu shown by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
-  Future<void> show(Rect targetRect, [ List<dynamic>? itemsJson ]) {
+  Future<void> show(Rect targetRect, [ List<Map<String, dynamic>>? itemsJson ]) {
     assert(!_isDisposed);
     assert(
       TextInput._instance._currentConnection != null,
@@ -2600,18 +2600,13 @@ class SystemContextMenuController with SystemContextMenuClient {
   }
 }
 
+// TODO(justinmc): Is this still useful without toJson?
 /// Represents a single menu item in a system context menu.
 ///
 /// Can be sent to the engine to be displayed in a system context menu via the
 /// `ContextMenu.showSystemContextMenu` [MethodChannel] method with [toJson].
 sealed class SystemContextMenuItem {
   const SystemContextMenuItem();
-
-  /// Returns a representation of this item that can be sent to the engine.
-  ///
-  /// For example, this is used when calling the
-  /// `ContextMenu.showSystemContextMenu` [MethodChannel] method.
-  Map<String, dynamic> get json;
 }
 
 /// Represents a single menu item in a system context menu on iOS or macOS.
@@ -2623,7 +2618,6 @@ class AppleSystemContextMenuItem extends SystemContextMenuItem {
   const AppleSystemContextMenuItem({
     required this.action,
     required this.type,
-    // TODO(justinmc): Oh, where will I look up the title? Maybe it's not required here if I look it up in json below.
     this.title,
   });
 
@@ -2635,29 +2629,6 @@ class AppleSystemContextMenuItem extends SystemContextMenuItem {
 
   /// The type of this menu item.
   final SystemContextMenuType type;
-
-  @override
-  Map<String, dynamic> get json {
-    /*
-        assert(debugCheckHasMaterialLocalizations(context));
-        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-        return switch (buttonItem.type) {
-          ContextMenuButtonType.cut       => localizations.cutButtonLabel,
-
-    assert(debugCheckHasLocalizations(context));
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
-    return switch (buttonItem.type) {
-      ContextMenuButtonType.cut       => localizations.cutButtonLabel,
-      */
-
-    return <String, dynamic>{
-      'type': type.name,
-      'action': action.name,
-      // TODO(justinmc): I guess Flutter should always pass a title for the default actions. Encode that into the backend or no?
-      // TODO(justinmc): Localilze. As in (Cupertino)AdaptiveContextMenu.
-      'title': title,
-    };
-  }
 }
 
 /// The type of a [SystemContextMenuItem].

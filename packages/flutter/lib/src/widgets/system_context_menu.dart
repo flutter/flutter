@@ -108,14 +108,42 @@ class SystemContextMenu extends StatefulWidget {
 }
 
 class _SystemContextMenuState extends State<SystemContextMenu> {
+  bool isFirstBuild = true;
   late final SystemContextMenuController _systemContextMenuController;
 
   /// Convert the given items to the format required to be sent over
   /// [MethodChannel.invokeMethod].
-  static List<dynamic> _itemsToJson(List<SystemContextMenuItem> items) {
+  static List<Map<String, dynamic>> _itemsToJson(List<SystemContextMenuItem> items, WidgetsLocalizations localizations) {
     return items
-        .map<dynamic>((SystemContextMenuItem item) => item.json)
+        .map<Map<String, dynamic>>((SystemContextMenuItem item) => _itemToJson(item, localizations))
         .toList();
+  }
+
+  /// Convet the given single item to the format required to be sent over
+  /// [MethodChannel.invokeMethod].
+  static Map<String, dynamic> _itemToJson(SystemContextMenuItem item, WidgetsLocalizations localizations) {
+    return switch (item) {
+      AppleSystemContextMenuItem() => <String, dynamic>{
+        'type': item.type.name,
+        'action': item.action.name,
+        // TODO(justinmc): I guess Flutter should always pass a title for the default actions. Encode that into the backend or no?
+        // TODO(justinmc): Localilze. As in (Cupertino)AdaptiveContextMenu.
+        // TODO(justinmc): localize.
+        'title': item.title ?? _getTitleForAction(item.action, localizations),
+      },
+    };
+  }
+
+  static String _getTitleForAction(SystemContextMenuAction action, WidgetsLocalizations localizations) {
+    return switch (action) {
+      SystemContextMenuAction.copy => localizations.copyButtonLabel,
+      SystemContextMenuAction.cut => localizations.cutButtonLabel,
+      SystemContextMenuAction.lookUp => localizations.lookUpButtonLabel,
+      SystemContextMenuAction.paste => localizations.pasteButtonLabel,
+      SystemContextMenuAction.searchWeb => localizations.searchWebButtonLabel,
+      SystemContextMenuAction.selectAll => localizations.selectAllButtonLabel,
+      SystemContextMenuAction.share => localizations.shareButtonLabel,
+    };
   }
 
   @override
@@ -124,18 +152,17 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     _systemContextMenuController = SystemContextMenuController(
       onSystemHide: widget.onSystemHide,
     );
-    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    _systemContextMenuController.show(
-      widget.anchor,
-      widget.items == null ? null : _itemsToJson(widget.items!),
-    );
   }
 
   @override
   void didUpdateWidget(SystemContextMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.anchor != oldWidget.anchor) {
-      _systemContextMenuController.show(widget.anchor, widget.items);
+      final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+      _systemContextMenuController.show(
+        widget.anchor,
+        widget.items == null ? null : _itemsToJson(widget.items!, localizations),
+      );
     }
   }
 
@@ -148,6 +175,15 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   @override
   Widget build(BuildContext context) {
     assert(SystemContextMenu.isSupported(context));
+    if (isFirstBuild) {
+      isFirstBuild = false;
+      final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+      _systemContextMenuController.show(
+        widget.anchor,
+        widget.items == null ? null : _itemsToJson(widget.items!, localizations),
+      );
+    }
+
     return const SizedBox.shrink();
   }
 }
