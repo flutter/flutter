@@ -111,12 +111,12 @@ void main() {
       expect(
         (globals.logger as BufferLogger).traceText,
         stringContainsInOrder(<String>[
-          'Building native assets for android_arm64 $buildMode.',
-          'Building native assets for android_arm64 $buildMode done.',
+          'Building native assets for android arm64 $buildMode.',
+          'Building native assets for android arm64 $buildMode done.',
         ]),
       );
 
-      expect(environment.buildDir.childFile('native_assets.yaml'), exists);
+      expect(environment.buildDir.childFile('native_assets.json'), exists);
       expect(buildRunner.buildInvocations, 1);
       expect(
         buildRunner.linkInvocations,
