@@ -688,8 +688,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
   }
 
-  /// True if this [ImageStreamCompleter] is disposed.
-  bool get disposed => _disposed;
   bool _disposed = false;
 
   /// Called when this [ImageStreamCompleter] has actually been disposed.

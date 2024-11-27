@@ -168,8 +168,8 @@ class NetworkImage
       try {
         // Resolve the Codec before passing it to
         // [MultiFrameImageStreamCompleter] so any errors aren't reported
-        // twice (once from the MultiFrameImageStreamCompleter) and again
-        // from the wrapping [ForwardingImageStreamCompleter].
+        // twice (once from the MultiFrameImageStreamCompleter and again
+        // from the wrapping [ForwardingImageStreamCompleter]).
         final ui.Codec codec = await _fetchImageBytes(decode);
         return MultiFrameImageStreamCompleter(
           chunkEvents: chunkEvents.stream,
@@ -307,7 +307,7 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
     this.debugLabel = debugLabel;
     task.then((ImageStreamCompleter value) {
       resolved = true;
-      if (disposed) {
+      if (_disposed) {
         // Add a listener since the delegate completer won't dispose if it never
         // had a listener.
         value.addListener(ImageStreamListener((_, __) {}));
@@ -343,11 +343,14 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
   late final ImageStreamCompleter completer;
   late final ImageStreamCompleterHandle handle;
 
+  bool _disposed = false;
+
   @override
   void onDisposed() {
     if (resolved) {
       handle.dispose();
     }
+    _disposed = true;
     super.onDisposed();
   }
 }
