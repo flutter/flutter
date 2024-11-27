@@ -1256,30 +1256,41 @@ TEST_P(DisplayListTest, MaskBlursApplyCorrectlyToColorSources) {
   std::array<flutter::DlColor, 2> colors = {flutter::DlColor::kBlue(),
                                             flutter::DlColor::kGreen()};
   std::array<float, 2> stops = {0, 1};
+  auto texture = CreateTextureForFixture("airplane.jpg");
+  auto matrix = flutter::DlMatrix::MakeTranslation({-300, -110});
   std::array<std::shared_ptr<flutter::DlColorSource>, 2> color_sources = {
-      flutter::DlColorSource::MakeColor(flutter::DlColor::kWhite()),
+      flutter::DlColorSource::MakeImage(
+          DlImageImpeller::Make(texture), flutter::DlTileMode::kRepeat,
+          flutter::DlTileMode::kRepeat, flutter::DlImageSampling::kLinear,
+          &matrix),
       flutter::DlColorSource::MakeLinear(
           flutter::DlPoint(0, 0), flutter::DlPoint(100, 50), 2, colors.data(),
-          stops.data(), flutter::DlTileMode::kClamp)};
+          stops.data(), flutter::DlTileMode::kClamp),
+  };
 
-  int offset = 100;
+  builder.Save();
+  builder.Translate(0, 100);
   for (const auto& color_source : color_sources) {
     flutter::DlPaint paint;
     paint.setColorSource(color_source);
     paint.setMaskFilter(blur_filter);
 
+    builder.Save();
+    builder.Translate(100, 0);
     paint.setDrawStyle(flutter::DlDrawStyle::kFill);
-    builder.DrawRRect(
-        SkRRect::MakeRectXY(SkRect::MakeXYWH(100, offset, 100, 50), 30, 30),
-        paint);
+    builder.DrawRRect(SkRRect::MakeRectXY(SkRect::MakeWH(100, 50), 30, 30),
+                      paint);
+
     paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
     paint.setStrokeWidth(10);
-    builder.DrawRRect(
-        SkRRect::MakeRectXY(SkRect::MakeXYWH(300, offset, 100, 50), 30, 30),
-        paint);
+    builder.Translate(200, 0);
+    builder.DrawRRect(SkRRect::MakeRectXY(SkRect::MakeWH(100, 50), 30, 30),
+                      paint);
 
-    offset += 100;
+    builder.Restore();
+    builder.Translate(0, 100);
   }
+  builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

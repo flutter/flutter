@@ -222,11 +222,7 @@ void DlDispatcherBase::setStrokeJoin(flutter::DlStrokeJoin join) {
 void DlDispatcherBase::setColorSource(const flutter::DlColorSource* source) {
   AUTO_DEPTH_WATCHER(0u);
 
-  if (!source || source->type() == flutter::DlColorSourceType::kColor) {
-    paint_.color_source = nullptr;
-  } else {
-    paint_.color_source = source;
-  }
+  paint_.color_source = source;
 }
 
 // |flutter::DlOpReceiver|
