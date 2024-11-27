@@ -55,15 +55,36 @@ const TextStyle _errorTextStyle = TextStyle(
 
 /// Describes which theme will be used by [MaterialApp].
 enum ThemeMode {
+  /// {@template flutter.material.ThemeMode.themeMode.system}
   /// Use either the light or dark theme based on what the user has selected in
   /// the system settings.
+  /// {@endtemplate}
   system,
 
+  /// {@template flutter.material.ThemeMode.themeMode.light}
   /// Always use the light mode regardless of system preference.
+  /// {@endtemplate}
   light,
 
+  /// {@template flutter.material.ThemeMode.themeMode.dark}
   /// Always use the dark mode (if available) regardless of system preference.
-  dark,
+  /// {@endtemplate}
+  dark;
+
+  /// Checks if the themeMode is [ThemeMode.system].
+  ///
+  /// {@macro flutter.material.ThemeMode.themeMode.system}
+  bool get isSystem => this == ThemeMode.system;
+
+  /// Checks if the themeMode is [ThemeMode.light].
+  ///
+  /// {@macro flutter.material.ThemeMode.themeMode.light}
+  bool get isLight => this == ThemeMode.light;
+
+  /// Checks if the themeMode is [ThemeMode.dark].
+  ///
+  /// {@macro flutter.material.ThemeMode.themeMode.dark}
+  bool get isDark => this == ThemeMode.dark;
 }
 
 /// An application that uses Material Design.
