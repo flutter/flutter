@@ -104,7 +104,7 @@ void main() {
   for (final bool isNativeAssetsEnabled in <bool>[true, false]) {
     final String postFix = isNativeAssetsEnabled ? 'enabled' : 'disabled';
     testUsingContext(
-      'Successful native_assets.yaml and native_assets.d creation with feature $postFix',
+      'Successful native_assets.json and native_assets.d creation with feature $postFix',
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,

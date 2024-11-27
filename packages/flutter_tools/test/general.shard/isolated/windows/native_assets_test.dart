@@ -145,7 +145,10 @@ void main() {
             'package:bar/bar.dart',
             if (flutterTester)
               // Tests run on host system, so the have the full path on the system.
-              projectUri.resolve('build/native_assets/$expectedDirectory/bar.dll').toFilePath()
+              projectUri
+                  .resolve('build/native_assets/$expectedDirectory/bar.dll')
+                  .toFilePath()
+                  .replaceAll(r'\', r'\\') // Undo JSON string escaping.
             else
               // Apps are a bundle with the dylibs on their dlopen path.
               'bar.dll',

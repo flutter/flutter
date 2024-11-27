@@ -12,6 +12,7 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
+import '../../devfs.dart';
 import '../../globals.dart' as globals;
 import '../../ios/mac.dart';
 import '../../macos/xcode.dart';
@@ -24,6 +25,7 @@ import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'native_assets.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
 ///
@@ -464,6 +466,7 @@ abstract class IosAssetBundle extends Target {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
+    InstallCodeAssets(),
   ];
 
   @override
@@ -551,6 +554,10 @@ abstract class IosAssetBundle extends Target {
         flutterProject.ios.infoPlist,
         flutterProject.ios.appFrameworkInfoPlist,
       ],
+      additionalContent: <String, DevFSContent>{
+        'NativeAssetsManifest.json':
+            DevFSFileContent(environment.buildDir.childFile('native_assets.json')),
+      },
       flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
@@ -625,6 +632,7 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   @override
   List<Target> get dependencies => const <Target>[
     AotAssemblyProfile(),
+    InstallCodeAssets(),
   ];
 }
 
@@ -638,6 +646,7 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   @override
   List<Target> get dependencies => const <Target>[
     AotAssemblyRelease(),
+    InstallCodeAssets(),
   ];
 
   @override

@@ -10,6 +10,7 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
+import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../reporting/reporting.dart';
 import '../build_system.dart';
@@ -18,6 +19,7 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'native_assets.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'rsync'.
 ///
@@ -489,6 +491,10 @@ abstract class MacOSBundleFlutterAssets extends Target {
       targetPlatform: TargetPlatform.darwin,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
+      additionalContent: <String, DevFSContent>{
+        'NativeAssetsManifest.json':
+            DevFSFileContent(environment.buildDir.childFile('native_assets.json')),
+      },
     );
     environment.depFileService.writeToFile(
       assetDepfile,
@@ -591,6 +597,7 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     KernelSnapshot(),
     DebugMacOSFramework(),
     DebugUnpackMacOS(),
+    InstallCodeAssets(),
   ];
 
   @override
@@ -620,6 +627,7 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   @override
   List<Target> get dependencies => const <Target>[
     CompileMacOSFramework(),
+    InstallCodeAssets(),
     ProfileUnpackMacOS(),
   ];
 
@@ -647,6 +655,7 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   @override
   List<Target> get dependencies => const <Target>[
     CompileMacOSFramework(),
+    InstallCodeAssets(),
     ReleaseUnpackMacOS(),
   ];
 

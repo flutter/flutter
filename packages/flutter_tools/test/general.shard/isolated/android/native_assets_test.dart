@@ -116,7 +116,7 @@ void main() {
         ]),
       );
 
-      expect(environment.buildDir.childFile('native_assets.yaml'), exists);
+      expect(environment.buildDir.childFile('native_assets.json'), exists);
       expect(buildRunner.buildInvocations, 1);
       expect(
         buildRunner.linkInvocations,
