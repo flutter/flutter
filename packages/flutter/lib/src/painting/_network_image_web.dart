@@ -88,11 +88,12 @@ class NetworkImage
     final StreamController<ImageChunkEvent> chunkEvents =
         StreamController<ImageChunkEvent>();
 
-    return MultiFrameImageStreamCompleter.fromIterator(
-      chunkEvents: chunkEvents.stream,
-      iterator: _loadAsync(key as NetworkImage, decode, chunkEvents),
-      scale: key.scale,
-      debugLabel: key.url,
+    return _ForwardingImageStreamCompleter(
+      _loadAsync(
+        key as NetworkImage,
+        decode,
+        chunkEvents,
+      ),
       informationCollector: _imageStreamInformationCollector(key),
     );
   }
@@ -104,11 +105,12 @@ class NetworkImage
     // has been loaded or an error is thrown.
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
-    return MultiFrameImageStreamCompleter.fromIterator(
-      chunkEvents: chunkEvents.stream,
-      iterator: _loadAsync(key as NetworkImage, decode, chunkEvents),
-      scale: key.scale,
-      debugLabel: key.url,
+    return _ForwardingImageStreamCompleter(
+      _loadAsync(
+        key as NetworkImage,
+        decode,
+        chunkEvents,
+      ),
       informationCollector: _imageStreamInformationCollector(key),
     );
   }
@@ -125,10 +127,10 @@ class NetworkImage
     return collector;
   }
 
-  // Html renderer does not support decoding network images to a specified size. The decode parameter
+  // HTML renderer does not support decoding network images to a specified size. The decode parameter
   // here is ignored and `ui_web.createImageCodecFromUrl` will be used directly
   // in place of the typical `instantiateImageCodec` method.
-  Future<ImageFrameIterator> _loadAsync(
+  Future<ImageStreamCompleter> _loadAsync(
     NetworkImage key,
     _SimpleDecoderCallback decode,
     StreamController<ImageChunkEvent> chunkEvents,
@@ -147,33 +149,67 @@ class NetworkImage
         // this function should assume the headers are required to resolve to
         // the correct resource and should not attempt to load the image in an
         // <img> tag without the headers.
-        return _fetchImageBytes(decode);
+
+        // Resolve the Codec before passing it to
+        // [MultiFrameImageStreamCompleter] so any errors aren't reported
+        // twice (once from the MultiFrameImageStreamCompleter) and again
+        // from the wrapping [ForwardingImageStreamCompleter].
+        final ui.Codec codec = await _fetchImageBytes(decode);
+        return MultiFrameImageStreamCompleter(
+          chunkEvents: chunkEvents.stream,
+          codec: Future<ui.Codec>.value(codec),
+          scale: key.scale,
+          debugLabel: key.url,
+          informationCollector: _imageStreamInformationCollector(key),
+        );
     } else if (isSkiaWeb) {
-      return _fetchImageBytes(decode)
-          .catchError((Object error, StackTrace? stackTrace) async {
+      try {
+        // Resolve the Codec before passing it to
+        // [MultiFrameImageStreamCompleter] so any errors aren't reported
+        // twice (once from the MultiFrameImageStreamCompleter) and again
+        // from the wrapping [ForwardingImageStreamCompleter].
+        final ui.Codec codec = await _fetchImageBytes(decode);
+        return MultiFrameImageStreamCompleter(
+          chunkEvents: chunkEvents.stream,
+          codec: Future<ui.Codec>.value(codec),
+          scale: key.scale,
+          debugLabel: key.url,
+          informationCollector: _imageStreamInformationCollector(key),
+        );
+      } catch (e) {
         // If we failed to fetch the bytes, try to load the image in an <img>
         // element instead.
         final web.HTMLImageElement imageElement = imgElementFactory();
         imageElement.src = key.url;
-        await imageElement.decode().toDart;
-        return _SingleWebImageFrameIterator(imageElement);
-      });
+        return OneFrameImageStreamCompleter(
+          imageElement.decode().toDart.then(
+                (_) => WebImageInfo(imageElement, debugLabel: key.url),
+              ),
+          informationCollector: _imageStreamInformationCollector(key),
+        );
+      }
     } else {
       // This branch is only hit by the HTML renderer, which is deprecated. The
       // HTML renderer supports loading images with CORS restrictions, so we
       // don't need to catch errors and try loading the image in an <img> tag
       // in this case.
-      return ui_web.createImageCodecFromUrl(
-        resolved,
-        chunkCallback: (int bytes, int total) {
-          chunkEvents.add(ImageChunkEvent(
-              cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
-        },
-      ).then(ImageFrameIterator.fromCodec);
+      return MultiFrameImageStreamCompleter(
+        chunkEvents: chunkEvents.stream,
+        codec: ui_web.createImageCodecFromUrl(
+          resolved,
+          chunkCallback: (int bytes, int total) {
+            chunkEvents.add(ImageChunkEvent(
+                cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
+          },
+        ),
+        scale: key.scale,
+        debugLabel: key.url,
+        informationCollector: _imageStreamInformationCollector(key),
+      );
     }
   }
 
-  Future<ImageFrameIterator> _fetchImageBytes(
+  Future<ui.Codec> _fetchImageBytes(
     _SimpleDecoderCallback decode,
   ) async {
     final Uri resolved = Uri.base.resolve(url);
@@ -229,8 +265,7 @@ class NetworkImage
           statusCode: request.status, uri: resolved);
     }
 
-    return decode(await ui.ImmutableBuffer.fromUint8List(bytes))
-        .then(ImageFrameIterator.fromCodec);
+    return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
   }
 
   @override
@@ -248,39 +283,51 @@ class NetworkImage
   String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)})';
 }
 
-class _SingleWebImageFrameIterator implements ImageFrameIterator {
-  _SingleWebImageFrameIterator(this.imageElement);
-
-  final web.HTMLImageElement imageElement;
-
-  @override
-  int get frameCount => 1;
-
-  @override
-  Future<ImageFrame> getNextFrame() {
-    return SynchronousFuture<ImageFrame>(_HtmlImageElementFrame(imageElement));
+/// An [ImageStreamCompleter] that delegates to another [ImageStreamCompleter]
+/// that is loaded asynchronously.
+class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
+  _ForwardingImageStreamCompleter(this.task,
+      {InformationCollector? informationCollector}) {
+    task.then((ImageStreamCompleter value) {
+      resolved = true;
+      if (disposed) {
+        value.maybeDispose();
+        return;
+      }
+      completer = value;
+      handle = completer.keepAlive();
+      completer.addListener(ImageStreamListener(
+        (ImageInfo image, bool synchronousCall) {
+          setImage(image);
+        },
+        onChunk: (ImageChunkEvent event) {
+          reportImageChunkEvent(event);
+        },
+        onError:(Object exception, StackTrace? stackTrace) {
+          reportError(exception: exception, stack: stackTrace);
+        },
+      ));
+    }, onError: (Object error, StackTrace stack) {
+      reportError(
+        context: ErrorDescription('resolving a single-frame image stream'),
+        exception: error,
+        stack: stack,
+        informationCollector: informationCollector,
+        silent: true,
+      );
+    });
   }
 
-  @override
-  int get repetitionCount => 0;
-}
-
-class _HtmlImageElementFrame implements ImageFrame {
-  _HtmlImageElementFrame(this.imageElement);
-
-  final web.HTMLImageElement imageElement;
+  final Future<ImageStreamCompleter> task;
+  bool resolved = false;
+  late final ImageStreamCompleter completer;
+  late final ImageStreamCompleterHandle handle;
 
   @override
-  ImageInfo asImageInfo({required double scale, String? debugLabel}) {
-    return WebImageInfo(imageElement, debugLabel: debugLabel);
+  void onDisposed() {
+    if (resolved) {
+      handle.dispose();
+    }
+    super.onDisposed();
   }
-
-  @override
-  void dispose() {
-    // Do nothing. The <img> element will be garbage collected when there are
-    // no more live references to it.
-  }
-
-  @override
-  Duration get duration => Duration.zero;
 }
