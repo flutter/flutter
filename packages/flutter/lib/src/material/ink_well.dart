@@ -825,6 +825,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   static const Duration _activationDuration = Duration(milliseconds: 100);
   Timer? _activationTimer;
 
+  final Set<WidgetState> _nonHighlightableStates = <WidgetState>{};
+  Set<WidgetState> _pressed = <WidgetState>{WidgetState.pressed};
+  Set<WidgetState> _focused = <WidgetState>{WidgetState.focused};
+  Set<WidgetState> _hovered = <WidgetState>{WidgetState.hovered};
+
   @override
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
     final bool lastAnyPressed = _anyChildInkResponsePressed;
@@ -871,7 +876,17 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   void handleStatesControllerChange() {
     // Force a rebuild to resolve widget.overlayColor, widget.mouseCursor
-    setState(() { });
+    setState(() {
+      _nonHighlightableStates..clear()..addAll(statesController.value);
+      _nonHighlightableStates.remove(WidgetState.pressed);
+      _nonHighlightableStates.remove(WidgetState.hovered);
+      _nonHighlightableStates.remove(WidgetState.focused);
+      // Each highlightable state will be resolved separately to get the corresponding color.
+      // For this resolution to be correct, the non-highlightable states should be preserved.
+      _pressed = <WidgetState>{..._nonHighlightableStates, WidgetState.pressed};
+      _focused = <WidgetState>{..._nonHighlightableStates, WidgetState.focused};
+      _hovered = <WidgetState>{..._nonHighlightableStates, WidgetState.hovered};
+     });
   }
 
   MaterialStatesController get statesController => widget.statesController ?? internalStatesController!;
@@ -880,8 +895,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     if (widget.statesController == null) {
       internalStatesController = MaterialStatesController();
     }
-    statesController.update(MaterialState.disabled, !enabled);
+    statesController.update(WidgetState.disabled, !enabled);
     statesController.addListener(handleStatesControllerChange);
+    // Initialize states related fields based on the current statesController.value.
+    handleStatesControllerChange();
   }
 
   @override
@@ -1284,22 +1301,15 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final ThemeData theme = Theme.of(context);
-    const Set<MaterialState> highlightableStates = <MaterialState>{MaterialState.focused, MaterialState.hovered, MaterialState.pressed};
-    final Set<MaterialState> nonHighlightableStates = statesController.value.difference(highlightableStates);
-    // Each highlightable state will be resolved separately to get the corresponding color.
-    // For this resolution to be correct, the non-highlightable states should be preserved.
-    final Set<MaterialState> pressed = <MaterialState>{...nonHighlightableStates, MaterialState.pressed};
-    final Set<MaterialState> focused = <MaterialState>{...nonHighlightableStates, MaterialState.focused};
-    final Set<MaterialState> hovered = <MaterialState>{...nonHighlightableStates, MaterialState.hovered};
 
     Color getHighlightColorForType(_HighlightType type) {
       return switch (type) {
         // The pressed state triggers a ripple (ink splash), per the current
         // Material Design spec. A separate highlight is no longer used.
         // See https://material.io/design/interaction/states.html#pressed
-        _HighlightType.pressed => widget.overlayColor?.resolve(pressed) ?? widget.highlightColor ?? theme.highlightColor,
-        _HighlightType.focus   => widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? theme.focusColor,
-        _HighlightType.hover   => widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? theme.hoverColor,
+        _HighlightType.pressed => widget.overlayColor?.resolve(_pressed) ?? widget.highlightColor ?? theme.highlightColor,
+        _HighlightType.focus   => widget.overlayColor?.resolve(_focused) ?? widget.focusColor ?? theme.focusColor,
+        _HighlightType.hover   => widget.overlayColor?.resolve(_hovered) ?? widget.hoverColor ?? theme.hoverColor,
       };
     }
     for (final _HighlightType type in _highlights.keys) {
